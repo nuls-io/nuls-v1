@@ -181,4 +181,12 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
         params.put("endHeight", end);
         return this.getMapper().getBlockHashList(params);
     }
+
+    @Override
+    public List<BlockHeaderPo> getHeaderListByRound(long startRoundIndex, long endRoundIndex) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("startRoundIndex", startRoundIndex);
+        params.put("endRoundIndex", endRoundIndex);
+        return this.getMapper().getListByRound(params);
+    }
 }

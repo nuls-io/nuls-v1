@@ -28,6 +28,7 @@ import io.nuls.consensus.poc.protocol.model.Deposit;
 import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.PocJoinConsensusTransaction;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.DepositDataService;
 import io.nuls.db.dao.TxAccountRelationDataService;
 import io.nuls.db.entity.DepositPo;
@@ -41,6 +42,7 @@ import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.service.intf.TransactionService;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -102,15 +104,9 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
     }
 
     @Override
-    @DbSession
-    public void onApproval(CancelDepositTransaction tx, Block block) {
-//        Transaction joinTx = ledgerService.getTx(tx.getTxData());
-//        if (joinTx == null) {
-//            joinTx = TxCacheManager.TX_CACHE_MANAGER.getTx(tx.getTxData());
-//        }
-//        PocJoinConsensusTransaction realTx = (PocJoinConsensusTransaction) joinTx;
-//        this.ledgerService.unlockTxApprove(tx.getTxData().getDigestHex());
-//        manager.delDeposit(realTx.getTxData().getHexHash(), tx.getBlockHeight());
-
+    public ValidateResult conflictDetect(CancelDepositTransaction tx, List<Transaction> txList) {
+        // todo auto-generated method stub(niels)
+        return null;
     }
+
 }

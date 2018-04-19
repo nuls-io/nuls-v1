@@ -77,4 +77,6 @@ public interface BlockService {
     Block getBlockFromMyChain(String hash);
 
     Map<String,Object> getSumTxCount(String packingAddress, long startRoundIndex, long endRoundIndex);
+
+    List<BlockHeaderPo> getBlockHeaderListByRound(long startRoundIndex, long endRoundIndex);
 }

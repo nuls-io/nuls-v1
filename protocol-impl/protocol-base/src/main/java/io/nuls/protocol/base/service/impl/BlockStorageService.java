@@ -265,4 +265,7 @@ public class BlockStorageService {
         return header;
     }
 
+    public List<BlockHeaderPo> getBlockHeaderListByRound(long startRoundIndex, long endRoundIndex) {
+        return this.headerDao.getHeaderListByRound(startRoundIndex,endRoundIndex);
+    }
 }

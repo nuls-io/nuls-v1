@@ -30,13 +30,17 @@ import io.nuls.account.service.impl.AccountCacheService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.AccountAliasDataService;
 import io.nuls.db.entity.AliasPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.service.intf.TransactionService;
+
+import java.util.List;
 
 /**
  * @author Niels
@@ -81,14 +85,20 @@ public class AliasTxService implements TransactionService<AliasTransaction> {
     }
 
     @Override
-    @DbSession
-    public void onApproval(AliasTransaction tx, Block block) throws NulsException {
-        Alias alias = tx.getTxData();
-        AliasPo po = getAliasDataService().getAlias(alias.getAlias());
-        if (po != null) {
-            throw new NulsException(ErrorCode.ALIAS_EXIST);
-        }
+    public ValidateResult conflictDetect(AliasTransaction tx, List<Transaction> txList) {
+        // todo auto-generated method stub(niels)
+        return null;
     }
+
+//    @Override
+//    @DbSession
+//    public void onApproval(AliasTransaction tx, Block block) throws NulsException {
+//        Alias alias = tx.getTxData();
+//        AliasPo po = getAliasDataService().getAlias(alias.getAlias());
+//        if (po != null) {
+//            throw new NulsException(ErrorCode.ALIAS_EXIST);
+//        }
+//    }
 
     private AccountAliasDataService getAliasDataService() {
         if (aliasDataService == null) {

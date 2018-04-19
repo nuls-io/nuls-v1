@@ -89,6 +89,7 @@
 
 
 
+
         ]]>
     </select>
     <select id="getBlockHashList" resultMap="BaseResultMap" parameterType="java.util.Map">
@@ -96,6 +97,17 @@
         <![CDATA[
         where height >=#{startHeight,jdbcType=BIGINT}
         and height <= #{endHeight,jdbcType=BIGINT}
+        ORDER BY height ASC
+
+        ]]>
+    </select>
+    <select id="getListByRound" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        from block_header
+        <![CDATA[
+        where round_index >=#{startRoundIndex,jdbcType=BIGINT}
+        and round_index <= #{endRoundIndex,jdbcType=BIGINT}
         ORDER BY height ASC
         ]]>
     </select>
@@ -108,6 +120,7 @@
         where r.address=#{address ,jdbcType=VARCHAR }
          and b.round_index>=#{startRoundIndex,jdbcType=BIGINT}
          and b.round_index <=#{endRoundIndex,jdbcType=BIGINT}
+
 
 
 
