@@ -365,7 +365,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
             txDao.saveTxList(poList);
             if (localPoList.size() > 0) {
-                txDao.
                 txDao.saveLocalList(localPoList);
             }
         } catch (Exception e) {
@@ -473,7 +472,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public void conflictDetectTx(Transaction tx, List<Transaction> txList) throws NulsException {
     public ValidateResult conflictDetectTx(Transaction tx, List<Transaction> txList) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
         if (null == txList || txList.isEmpty()) {
