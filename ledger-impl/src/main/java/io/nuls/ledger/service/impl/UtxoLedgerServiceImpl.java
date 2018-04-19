@@ -456,14 +456,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public void approvalTx(Transaction tx, Block block) throws NulsException {
+    public void conflictDetectTx(Transaction tx,List<Transaction> txList) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
-        if (tx.getStatus() == TxStatusEnum.AGREED || tx.getStatus() == TxStatusEnum.CONFIRMED) {
-            return;
-        }
         List<TransactionService> serviceList = getServiceList(tx.getClass());
         for (TransactionService service : serviceList) {
-            service.onApproval(tx, block);
+            service.conflictDetect(tx, txList);
         }
         tx.setStatus(TxStatusEnum.AGREED);
     }

@@ -70,7 +70,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getLocalBestBlock() {
-         long height = this.blockStorageService.getBestHeight();
+        long height = this.blockStorageService.getBestHeight();
         try {
             return blockStorageService.getBlock(height);
         } catch (Exception e) {
@@ -121,42 +121,16 @@ public class BlockServiceImpl implements BlockService {
     @DbSession
     public boolean saveBlock(Block block) throws IOException {
         BlockLog.debug("save block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
-        ValidateResult result = block.verify();
-        boolean b = false;
-        if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_TX && ErrorCode.ORPHAN_BLOCK != result.getErrorCode()) {
-            throw new NulsRuntimeException(result.getErrorCode(), result.getMessage());
-        } else if (result.getErrorCode() == ErrorCode.ORPHAN_TX || ErrorCode.ORPHAN_BLOCK == result.getErrorCode()) {
-            b = true;
-        }
-        for (int x = 0; x < block.getHeader().getTxCount(); x++) {
-            Transaction tx = block.getTxs().get(x);
-            tx.setBlockHeight(block.getHeader().getHeight());
-            if (tx.getStatus() == null || tx.getStatus() == TxStatusEnum.CACHED) {
-                b = true;
-                try {
-                    ledgerService.approvalTx(tx, block);
-                } catch (Exception e) {
-                    Log.error(e);
-                    rollback(block.getTxs(), x);
-                    throw new NulsRuntimeException(e);
-                }
-            }
-        }
-        if (b) {
-            block.verifyWithException();
-        }
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setIndex(x);
             tx.setBlockHeight(block.getHeader().getHeight());
-            if (tx.getStatus() == TxStatusEnum.AGREED) {
-                try {
-                    ledgerService.commitTx(tx, block);
-                } catch (Exception e) {
-                    Log.error(e);
-                    rollback(block.getTxs(), x);
-                    throw new NulsRuntimeException(e);
-                }
+            try {
+                tx.verifyWithException();
+                ledgerService.commitTx(tx, block);
+            } catch (Exception e) {
+                Log.error(e);
+                throw new NulsRuntimeException(e);
             }
         }
         ledgerService.saveTxList(block.getTxs());
@@ -254,6 +228,6 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public List<BlockHeaderPo> getBlockHeaderListByRound(long startRoundIndex, long endRoundIndex) {
-        return this.blockStorageService.getBlockHeaderListByRound(startRoundIndex,endRoundIndex);
+        return this.blockStorageService.getBlockHeaderListByRound(startRoundIndex, endRoundIndex);
     }
 }

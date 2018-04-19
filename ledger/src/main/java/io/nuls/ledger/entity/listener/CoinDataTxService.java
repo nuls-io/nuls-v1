@@ -26,11 +26,15 @@ package io.nuls.ledger.entity.listener;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.service.intf.TransactionService;
+
+import java.util.List;
 
 /**
  * @author Niels
@@ -57,13 +61,9 @@ public class CoinDataTxService implements TransactionService<AbstractCoinTransac
     }
 
     @Override
-    @DbSession
-    public void onApproval(AbstractCoinTransaction tx, Block block) {
-        try {
-            tx.getCoinDataProvider().approve(tx.getCoinData(), tx);
-        } catch (NulsException e) {
-            Log.error(e);
-            throw new NulsRuntimeException(e);
-        }
+    public ValidateResult conflictDetect(AbstractCoinTransaction tx, List<Transaction> txList) {
+        // todo auto-generated method stub(niels)
+        return null;
     }
+
 }

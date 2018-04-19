@@ -91,7 +91,7 @@ public interface LedgerService {
 
     void commitTx(Transaction tx, Block block) throws NulsException;
 
-    void approvalTx(Transaction tx, Block block) throws NulsException;
+    void conflictDetectTx(Transaction tx, List<Transaction> txList) throws NulsException;
 
     void deleteTx(Transaction tx);
 

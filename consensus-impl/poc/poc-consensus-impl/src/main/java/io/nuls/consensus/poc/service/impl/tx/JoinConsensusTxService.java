@@ -29,6 +29,7 @@ import io.nuls.consensus.poc.protocol.model.Deposit;
 import io.nuls.consensus.poc.protocol.tx.PocJoinConsensusTransaction;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
 import io.nuls.db.entity.DepositPo;
@@ -38,7 +39,10 @@ import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.entity.Consensus;
 import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.service.intf.TransactionService;
+
+import java.util.List;
 
 /**
  * @author Niels
@@ -81,11 +85,9 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     }
 
     @Override
-    public void onApproval(PocJoinConsensusTransaction tx, Block block) {
-//        Consensus<Deposit> cd = tx.getTxData();
-//        cd.getExtend().setBlockHeight(tx.getBlockHeight());
-//        cd.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
-//        cd.getExtend().setTxHash(tx.getHash().getDigestHex());
-//        manager.putDeposit(cd);
+    public ValidateResult conflictDetect(PocJoinConsensusTransaction tx, List<Transaction> txList) {
+        // todo auto-generated method stub(niels)
+        return null;
     }
+
 }

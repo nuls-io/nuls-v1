@@ -28,6 +28,7 @@ import io.nuls.consensus.poc.protocol.event.notice.RegisterAgentNotice;
 import io.nuls.consensus.poc.protocol.model.Agent;
 import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
 import io.nuls.db.entity.AgentPo;
@@ -38,7 +39,10 @@ import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.entity.Consensus;
 import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.service.intf.TransactionService;
+
+import java.util.List;
 
 /**
  * @author Niels
@@ -77,8 +81,10 @@ public class RegisterAgentTxService implements TransactionService<RegisterAgentT
         NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
     }
 
-
     @Override
-    public void onApproval(RegisterAgentTransaction tx, Block block) {
+    public ValidateResult conflictDetect(RegisterAgentTransaction tx, List<Transaction> txList) {
+        // todo auto-generated method stub(niels)
+        return null;
     }
 }
+

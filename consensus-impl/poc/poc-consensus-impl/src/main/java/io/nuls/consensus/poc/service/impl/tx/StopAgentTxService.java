@@ -31,6 +31,7 @@ import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
 import io.nuls.consensus.poc.service.PocConsensusService;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
 import io.nuls.db.entity.AgentPo;
@@ -127,8 +128,9 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
     }
 
     @Override
-    @DbSession
-    public void onApproval(StopAgentTransaction tx, Block block) {
-
+    public ValidateResult conflictDetect(StopAgentTransaction tx, List<Transaction> txList) {
+        // todo auto-generated method stub(niels)
+        return null;
     }
+
 }

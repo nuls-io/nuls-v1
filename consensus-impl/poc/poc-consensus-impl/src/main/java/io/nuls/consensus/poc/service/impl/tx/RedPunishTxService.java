@@ -28,13 +28,17 @@ import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.tx.entity.RedPunishData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.PunishLogDataService;
 import io.nuls.db.entity.PunishLogPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.service.intf.TransactionService;
+
+import java.util.List;
 
 /**
  * @author Niels
@@ -65,7 +69,9 @@ public class RedPunishTxService implements TransactionService<RedPunishTransacti
     }
 
     @Override
-    public void onApproval(RedPunishTransaction tx, Block block) throws NulsException {
-
+    public ValidateResult conflictDetect(RedPunishTransaction tx, List<Transaction> txList) {
+        // todo auto-generated method stub(niels)
+        return null;
     }
+
 }
