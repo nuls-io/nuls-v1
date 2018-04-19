@@ -12,8 +12,10 @@ import org.iq80.leveldb.Options;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,23 +26,55 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class LevelDBManager {
 
+    public static final int MAX = 20;
+
     private static final ConcurrentHashMap<String, DB> AREAS = new ConcurrentHashMap<>();
 
+    private static final String BASE_DB_NAME = "leveldb";
+
+    private static volatile boolean isInit = false;
+
     private static String dataPath;
-    static {
-        URL resource = ClassLoader.getSystemClassLoader().getResource(".");
-        String classPath = resource.getPath();
-        File file = new File(classPath);
-        String parent = file.getParent();
-        dataPath = parent + "/data/kv";
-        File dir = new File(dataPath);
-        if(!dir.exists())
-            dir.mkdirs();
+
+    public static synchronized void init() throws UnsupportedEncodingException {
+        if(!isInit) {
+            isInit = true;
+            URL resource = ClassLoader.getSystemClassLoader().getResource(".");
+            String classPath = resource.getPath();
+            File file = new File(classPath);
+            String parent = file.getParent();
+            dataPath = parent + "/data/kv";
+            File _dir = new File(dataPath);
+            if(!_dir.exists())
+                _dir.mkdirs();
+
+            File dir = new File(dataPath);
+            File[] areaFiles = dir.listFiles();
+            DB db = null;
+            for(File areaFile : areaFiles) {
+                if(!areaFile.isDirectory())
+                    continue;
+                try {
+                    db = openDB(areaFile.getPath() + File.separator + BASE_DB_NAME, false);
+                    AREAS.put(areaFile.getName(), db);
+                } catch (Exception e) {
+                    Log.warn("load area failed, areaName: " + areaFile.getName(), e);
+                }
+
+            }
+
+
+            String area = "pierre-test";
+            String key = "testkey";
+            createArea(area);
+            String value = "testvalue_1";
+            put(area, key, value);
+        }
     }
 
     public static Result createArea(String areaName) {
         // prevent too many areas
-        if(AREAS.size() > 20) {
+        if(AREAS.size() > (MAX -1)) {
             return new Result(false, "KV_AREA_CREATE_ERROR");
         }
         if(StringUtils.isBlank(areaName)) {
@@ -59,11 +93,8 @@ public class LevelDBManager {
             if(!dir.exists()) {
                 dir.mkdir();
             }
-            String filePath = dataPath + File.separator + areaName + File.separator + "leveldb";
-            File file = new File(filePath);
-            Options options = new Options().createIfMissing(true);
-            DBFactory factory = Iq80DBFactory.factory;
-            DB db = factory.open(file, options);
+            String filePath = dataPath + File.separator + areaName + File.separator + BASE_DB_NAME;
+            DB db = openDB(filePath, true);
             AREAS.put(areaName, db);
             result = Result.getSuccess();
         } catch (Exception e) {
@@ -71,6 +102,24 @@ public class LevelDBManager {
             result = new Result(false, "KV_AREA_CREATE_ERROR");
         }
         return result;
+    }
+
+    public static void close() {
+        Collection<DB> dbs = AREAS.values();
+        for(DB db : dbs) {
+            try {
+                db.close();
+            } catch (IOException e) {
+                Log.warn("close leveldb error", e);
+            }
+        }
+    }
+
+    private static DB openDB(String dbPath, boolean createIfMissing) throws IOException {
+        File file = new File(dbPath);
+        Options options = new Options().createIfMissing(createIfMissing);
+        DBFactory factory = Iq80DBFactory.factory;
+        return factory.open(file, options);
     }
 
     private static boolean checkPathLegal(String areaName) {
@@ -187,4 +236,5 @@ public class LevelDBManager {
             return null;
         }
     }
+
 }
