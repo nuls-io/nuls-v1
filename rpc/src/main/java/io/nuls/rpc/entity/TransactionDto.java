@@ -11,42 +11,72 @@ import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.constant.TxStatusEnum;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Transaction;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+@ApiModel(value = "transactionJSON")
 public class TransactionDto {
 
+    @ApiModelProperty(name = "hash", value = "交易的hash值")
     private String hash;
 
+    @ApiModelProperty(name = "type",
+                        value = "交易类型 " +
+                                "1:共识奖励, " +
+                                "2:转账交易, " +
+                                "3:锁仓交易, " +
+                                "4:解锁交易, " +
+                                "5:零钱换整, " +
+                                "11:设置别名, " +
+                                "90:注册共识节点, " +
+                                "91:加入共识, " +
+                                "92:退出共识, " +
+                                "93:黄牌惩罚, " +
+                                "94:红牌惩罚, " +
+                                "95:删除共识节点")
     private Integer type;
 
+    @ApiModelProperty(name = "index", value = "所在打包区块里的索引")
     private Integer index;
 
+    @ApiModelProperty(name = "time", value = "交易发起时间")
     private Long time;
 
+    @ApiModelProperty(name = "blockHeight", value = "区块高度")
     private Long blockHeight;
 
+    @ApiModelProperty(name = "fee", value = "交易手续费")
     private Long fee;
 
+    @ApiModelProperty(name = "value", value = "交易金额")
     private Long value;
 
+    @ApiModelProperty(name = "inputs", value = "交易输入")
     private List<InputDto> inputs;
 
+    @ApiModelProperty(name = "outputs", value = "交易输出")
     private List<OutputDto> outputs;
 
-    // -1 transfer,  1 receiver
+    @ApiModelProperty(name = "transferType", value = "1:receiver(转入), -1:transfer(转出)")
     private Integer transferType;
 
+    @ApiModelProperty(name = "remark", value = "备注")
     private String remark;
 
+    @ApiModelProperty(name = "scriptSig", value = "签名")
     private String scriptSig;
-    // 0, unConfirm  1, confirm
+
+    @ApiModelProperty(name = "status", value = "交易状态 0:unConfirm(待确认), 1:confirm(已确认)")
     private Integer status;
 
+    @ApiModelProperty(name = "confirmCount", value = "确认次数")
     private Long confirmCount;
 
+    @ApiModelProperty(name = "size", value = "大小")
     private int size;
 
     public TransactionDto(Transaction tx) {

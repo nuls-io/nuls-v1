@@ -29,7 +29,9 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.impl.mybatis.*;
 import io.nuls.db.dao.impl.mybatis.session.SessionManager;
 import io.nuls.db.exception.DBException;
+import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.module.AbstractDBModule;
+import io.nuls.db.service.impl.LevelDBStorageServiceImpl;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -50,6 +52,7 @@ public class MybatisDbModuleBootstrap extends AbstractDBModule {
     public void init() {
         try {
             initSqlSessionFactory();
+            initLevelDBStorage();
         } catch (Exception e) {
             Log.error(e);
             throw new DBException(ErrorCode.DB_MODULE_START_FAIL);
@@ -60,6 +63,11 @@ public class MybatisDbModuleBootstrap extends AbstractDBModule {
 
     @Override
     public void start() {
+    }
+
+
+    private void initLevelDBStorage() throws Exception {
+        LevelDBManager.init();
     }
 
 
@@ -89,6 +97,7 @@ public class MybatisDbModuleBootstrap extends AbstractDBModule {
         this.registerService(SubChainDaoImpl.class);
         this.registerService(AccountTxDaoImpl.class);
         this.registerService(UtxoTransactionDaoImpl.class);
+        this.registerService(LevelDBStorageServiceImpl.class);
     }
 
     @Override

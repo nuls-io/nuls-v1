@@ -36,9 +36,10 @@ import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.BlockHeader;
 import io.nuls.protocol.model.Transaction;
+import io.nuls.rpc.entity.AssetDto;
 import io.nuls.rpc.entity.BlockDto;
 import io.nuls.rpc.entity.RpcResult;
-import io.swagger.annotations.Api;
+import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -64,7 +65,12 @@ public class BlockResource {
     @GET
     @Path("/header/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getHeaderByHeight(@PathParam("height") Integer height) throws NulsException, IOException {
+    @ApiOperation(value = "根据区块高度查询区块头 [3.2.2]", notes = "result.data: blockHeaderJson 返回对应的区块头信息")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = BlockDto.class)
+    })
+    public RpcResult getHeaderByHeight(@ApiParam(name="height", value="区块高度", required = true)
+                                           @PathParam("height") Integer height) throws NulsException, IOException {
         if (height < 0 || height > Integer.MAX_VALUE) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
@@ -99,7 +105,12 @@ public class BlockResource {
     @GET
     @Path("/header/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getHeader(@PathParam("hash") String hash) throws NulsException, IOException {
+    @ApiOperation(value = "根据区块hash查询区块头 [3.2.1]", notes = "result.data: blockHeaderJson 返回对应的区块头信息")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = BlockDto.class)
+    })
+    public RpcResult getHeader(@ApiParam(name="hash", value="区块hash", required = true)
+                                   @PathParam("hash") String hash) throws NulsException, IOException {
         hash = StringUtils.formatStringPara(hash);
         if (!StringUtils.validHash(hash)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -122,7 +133,12 @@ public class BlockResource {
     @GET
     @Path("/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult loadBlock(@PathParam("hash") String hash) {
+    @ApiOperation(value = "根据区块hash查询区块，包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用 [3.2.3]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = BlockDto.class)
+    })
+    public RpcResult loadBlock(@ApiParam(name="hash", value="区块hash", required = true)
+                                   @PathParam("hash") String hash) {
         RpcResult result;
         if (!StringUtils.validHash(hash)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -150,7 +166,12 @@ public class BlockResource {
     @GET
     @Path("/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getBlock(@PathParam("height") Long height) {
+    @ApiOperation(value = "根据区块高度查询区块，包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用 [3.2.4]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = BlockDto.class)
+    })
+    public RpcResult getBlock(@ApiParam(name="hash", value="区块hash", required = true)
+                                  @PathParam("height") Long height) {
         RpcResult result;
         if (height < 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -179,6 +200,10 @@ public class BlockResource {
     @GET
     @Path("/newest")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "查询最新区块头信息 [3.2.5]", notes = "result.data: blockHeaderJson 返回对应的区块头信息")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = BlockDto.class)
+    })
     public RpcResult getBestBlockHash() throws IOException {
         RpcResult result = RpcResult.getSuccess();
         result.setData(new BlockDto(NulsContext.getInstance().getBestBlock().getHeader(), 0, 0));
@@ -188,10 +213,19 @@ public class BlockResource {
     @GET
     @Path("/list/address")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getBlocksByAddress(@QueryParam("address") String address,
-                                        @QueryParam("type") int type,
-                                        @QueryParam("pageNumber") int pageNumber,
-                                        @QueryParam("pageSize") int pageSize) {
+    @ApiOperation(value = "查询共识节点的出块信息，块高度倒序排列 [3.2.6]",
+            notes = "result.data: Page<blockHeaderJson> 返回对应的区块头信息")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = BlockDto.class)
+    })
+    public RpcResult getBlocksByAddress(@ApiParam(name="address", value="节点账户地址", required = true)
+                                            @QueryParam("address") String address,
+                                        @ApiParam(name="type", value="1:委托节点, 2打包节点", required = true)
+                                            @QueryParam("type") int type,
+                                        @ApiParam(name="pageNumber", value="页码")
+                                            @QueryParam("pageNumber") int pageNumber,
+                                        @ApiParam(name="pageSize", value="每页条数")
+                                            @QueryParam("pageSize") int pageSize) {
 
         if (type < 1 || type > 2 || pageNumber < 0 || pageSize < 0 || !Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -218,8 +252,15 @@ public class BlockResource {
     @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getBlocks(@QueryParam("pageNumber") int pageNumber,
-                               @QueryParam("pageSize") int pageSize) {
+    @ApiOperation(value = "查询区块头列表信息，块高度倒序排列 [3.2.7]",
+            notes = "result.data: Page<blockHeaderJson> 返回对应的区块头信息")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = BlockDto.class)
+    })
+    public RpcResult getBlocks(@ApiParam(name="pageNumber", value="页码")
+                                   @QueryParam("pageNumber") int pageNumber,
+                               @ApiParam(name="pageSize", value="每页条数")
+                                    @QueryParam("pageSize") int pageSize) {
         if (pageNumber < 0 || pageSize < 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }

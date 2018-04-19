@@ -1,13 +1,19 @@
 package io.nuls.rpc.entity;
 
 import io.nuls.ledger.entity.Balance;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
+@ApiModel(value = "balanceJSON")
 public class BalanceDto {
 
+    @ApiModelProperty(name = "balance", value = "余额")
     private long balance;
 
+    @ApiModelProperty(name = "usable", value = "可用余额")
     private long usable;
 
+    @ApiModelProperty(name = "locked", value = "锁定余额")
     private long locked;
 
     public BalanceDto(Balance balance) {

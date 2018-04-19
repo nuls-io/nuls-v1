@@ -1,17 +1,25 @@
 package io.nuls.rpc.entity;
 
 import io.nuls.core.utils.date.DateUtil;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
+@ApiModel(value = "networkInfoJSON")
 public class InfoDto {
 
+    @ApiModelProperty(name = "localBestHeight", value = "本地最新区块高度")
     private Long localBestHeight;
 
+    @ApiModelProperty(name = "netBestHeight", value = "网络最新区块高度")
     private Long netBestHeight;
 
+    @ApiModelProperty(name = "timeOffset", value = "网络时间偏移值")
     private String timeOffset;
 
+    @ApiModelProperty(name = "inCount", value = "被动连接节点数量")
     private int inCount;
 
+    @ApiModelProperty(name = "outCount", value = "主动连接节点数量")
     private int outCount;
 
     public InfoDto() {
