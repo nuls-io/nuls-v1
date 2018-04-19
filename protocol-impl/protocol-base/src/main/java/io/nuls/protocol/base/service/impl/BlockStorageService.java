@@ -33,6 +33,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.BlockHeaderService;
 import io.nuls.db.entity.BlockHeaderPo;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.protocol.base.utils.BlockHeaderTool;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.BlockHeader;
@@ -119,7 +120,7 @@ public class BlockStorageService {
             for (BlockHeaderPo po : poList) {
                 BlockHeader header = null;
                 try {
-                    header = fromPojo(po);
+                    header = BlockHeaderTool.fromPojo(po);
                 } catch (NulsException e) {
                     throw e;
                 }
@@ -157,12 +158,12 @@ public class BlockStorageService {
 
     public BlockHeader getBlockHeader(long height) throws NulsException {
         BlockHeaderPo po = this.headerDao.getHeader(height);
-        return fromPojo(po);
+        return BlockHeaderTool.fromPojo(po);
     }
 
     public BlockHeader getBlockHeader(String hash) throws NulsException {
         BlockHeaderPo po = this.headerDao.getHeader(hash);
-        return fromPojo(po);
+        return BlockHeaderTool.fromPojo(po);
     }
 
     public long getBestHeight() {
@@ -173,7 +174,7 @@ public class BlockStorageService {
         BlockHeader header = block.getHeader();
         header.setSize(block.size());
         try {
-            int count = headerDao.save(toPojo(header));
+            int count = headerDao.save(BlockHeaderTool.toPojo(header));
             if (count == 0) {
                 Log.error("=======================");
                 throw new NulsRuntimeException(ErrorCode.FAILED, "保存出错，高度：" + header.getHeight());
@@ -217,53 +218,6 @@ public class BlockStorageService {
         return this.headerDao.getBlockHashList(start, end);
     }
 
-    public static final BlockHeaderPo toPojo(BlockHeader header) {
-        BlockHeaderPo po = new BlockHeaderPo();
-        po.setTxCount(header.getTxCount());
-        po.setPreHash(header.getPreHash().getDigestHex());
-        po.setMerkleHash(header.getMerkleHash().getDigestHex());
-        po.setHeight(header.getHeight());
-        po.setCreateTime(header.getTime());
-        po.setHash(header.getHash().getDigestHex());
-        po.setSize(header.getSize());
-        if (null != header.getScriptSig()) {
-            try {
-                po.setScriptSig(header.getScriptSig().serialize());
-            } catch (IOException e) {
-                Log.error(e);
-            }
-        }
-        po.setTxCount(header.getTxCount());
-        po.setConsensusAddress(Address.fromHashs(header.getPackingAddress()).getBase58());
-        po.setExtend(header.getExtend());
-        BlockRoundData data = new BlockRoundData();
-        try {
-            data.parse(header.getExtend());
-        } catch (NulsException e) {
-            Log.error(e);
-        }
-        po.setRoundIndex(data.getRoundIndex());
-        return po;
-    }
-
-
-    public static final BlockHeader fromPojo(BlockHeaderPo po) throws NulsException {
-        if (null == po) {
-            return null;
-        }
-        BlockHeader header = new BlockHeader();
-        header.setHash(NulsDigestData.fromDigestHex(po.getHash()));
-        header.setMerkleHash(NulsDigestData.fromDigestHex(po.getMerkleHash()));
-        header.setPackingAddress(Address.fromHashs(po.getConsensusAddress()).getHash());
-        header.setTxCount(po.getTxCount());
-        header.setPreHash(NulsDigestData.fromDigestHex(po.getPreHash()));
-        header.setTime(po.getCreateTime());
-        header.setHeight(po.getHeight());
-        header.setExtend(po.getExtend());
-        header.setSize(po.getSize());
-        header.setScriptSig((new NulsByteBuffer(po.getScriptSig()).readNulsData(new P2PKHScriptSig())));
-        return header;
-    }
 
     public List<BlockHeaderPo> getBlockHeaderListByRound(long startRoundIndex, long endRoundIndex) {
         return this.headerDao.getHeaderListByRound(startRoundIndex,endRoundIndex);
