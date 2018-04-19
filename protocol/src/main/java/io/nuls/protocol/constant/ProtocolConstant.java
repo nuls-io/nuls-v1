@@ -4,6 +4,7 @@ package io.nuls.protocol.constant;
  * @author: Niels Wang
  * @date: 2018/4/17
  */
+
 public interface ProtocolConstant {
     /**
      * unit:second

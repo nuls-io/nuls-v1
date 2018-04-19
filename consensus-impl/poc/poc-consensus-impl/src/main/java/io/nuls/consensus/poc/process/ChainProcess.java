@@ -271,8 +271,8 @@ public class ChainProcess {
                     isolatedChain.getChain().setPreChainId(chain.getPreChainId());
                     isolatedChain.getChain().setStartBlockHeader(chain.getStartBlockHeader());
 
-                    isolatedChain.getChain().getBlockHeaderList().addAll(0, blockHeaderList.subList(0, i));
-                    isolatedChain.getChain().getBlockList().addAll(0, chain.getBlockList().subList(0, i));
+                    isolatedChain.getChain().getBlockHeaderList().addAll(0, blockHeaderList.subList(0, i + 1));
+                    isolatedChain.getChain().getBlockList().addAll(0, chain.getBlockList().subList(0, i + 1));
 
                     chainManager.getChains().add(isolatedChain);
 
