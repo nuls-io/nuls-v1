@@ -33,7 +33,7 @@ import io.nuls.db.entity.NodePo;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeTransferTool;
-import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.entity.param.NetworkParam;
 import io.nuls.network.message.entity.GetNodeEvent;
 import io.nuls.network.message.entity.GetNodesIpEvent;
 import io.nuls.network.message.entity.GetVersionEvent;
@@ -48,7 +48,7 @@ import java.util.*;
  */
 public class NodeDiscoverHandler implements Runnable {
 
-    private AbstractNetworkParam network;
+    private NetworkParam network;
 
     private NodesManager nodesManager;
 
@@ -97,7 +97,7 @@ public class NodeDiscoverHandler implements Runnable {
             Node node = new Node();
             NodeTransferTool.toNode(node, po);
             node.setType(Node.OUT);
-            node.setMagicNumber(network.packetMagic());
+            node.setMagicNumber(network.getPacketMagic());
             nodes.add(node);
         }
         return nodes;
@@ -134,7 +134,7 @@ public class NodeDiscoverHandler implements Runnable {
             count++;
             Collection<Node> nodeList = nodesManager.getAvailableNodes();
             Block block = NulsContext.getInstance().getBestBlock();
-            GetVersionEvent event = new GetVersionEvent(network.port(), block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
+            GetVersionEvent event = new GetVersionEvent(network.getPort(), block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
             GetNodesIpEvent ipEvent = new GetNodesIpEvent();
             for (Node node : nodeList) {
                 if (node.getType() == Node.OUT) {
@@ -167,7 +167,7 @@ public class NodeDiscoverHandler implements Runnable {
         }
     }
 
-    public void setNetwork(AbstractNetworkParam network) {
+    public void setNetwork(NetworkParam network) {
         this.network = network;
     }
 

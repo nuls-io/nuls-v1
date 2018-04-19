@@ -81,7 +81,7 @@ public class CacheLoader {
         List<BlockHeaderPo> list = blockService.getBlockHeaderList(bestBlockHeight - size + 1, bestBlockHeight);
         for (BlockHeaderPo blockHeaderPo : list) {
             try {
-                blockHeaderList.add(0, ConsensusTool.fromPojo(blockHeaderPo));
+                blockHeaderList.add(ConsensusTool.fromPojo(blockHeaderPo));
             } catch (NulsException e) {
                 Log.error(e);
             }

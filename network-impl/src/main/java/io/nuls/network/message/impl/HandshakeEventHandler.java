@@ -64,7 +64,7 @@ public class HandshakeEventHandler implements NetWorkEventHandler {
 
         if (!isServer) {
             Block bestBlock = NulsContext.getInstance().getBestBlock();
-            handshakeEvent = new HandshakeEvent(NetworkConstant.HANDSHAKE_CLIENT_TYPE, getNetworkService().getNetworkParam().port(),
+            handshakeEvent = new HandshakeEvent(NetworkConstant.HANDSHAKE_CLIENT_TYPE, getNetworkService().getNetworkParam().getPort(),
                     bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash().getDigestHex());
             return new NetworkEventResult(true, handshakeEvent);
         }

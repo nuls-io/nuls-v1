@@ -51,13 +51,13 @@
     <include refid="Base_Column_List"/>
     from deposit where block_height &lt;= #{blockHeight,jdbcType=BIGINT} and (del_height = 0 or del_height &gt;= #{blockHeight,jdbcType=BIGINT})
         <if test="status != null">
-            and status = #{status,jdbcType=INTEGER},
+            and status = #{status,jdbcType=INTEGER}
         </if>
         <if test="agentHash != null">
-            and agent_id = #{agentHash,jdbcType=INTEGER},
+            and agent_id = #{agentHash,jdbcType=VARCHAR}
         </if>
         <if test="address != null">
-            and address = #{address,jdbcType=INTEGER},
+            and address = #{address,jdbcType=VARCHAR}
         </if>
 </select>
     <update id="deleteByPrimaryKey" parameterType="io.nuls.db.entity.DepositPo">

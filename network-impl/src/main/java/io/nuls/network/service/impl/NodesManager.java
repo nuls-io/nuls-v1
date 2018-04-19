@@ -37,7 +37,7 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.entity.NodeTransferTool;
-import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.entity.param.NetworkParam;
 import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.service.NetworkService;
 import io.nuls.network.service.impl.netty.NioChannelMap;
@@ -67,7 +67,7 @@ public class NodesManager implements Runnable {
 
     private ReentrantLock lock = new ReentrantLock();
 
-    private AbstractNetworkParam network;
+    private NetworkParam network;
 
     private NodeDiscoverHandler discoverHandler;
 
@@ -145,7 +145,7 @@ public class NodesManager implements Runnable {
                 return false;
             }
 
-            if(!checkFirstUnConnectedNode(node.getId())) {
+            if (!checkFirstUnConnectedNode(node.getId())) {
                 return false;
             }
 
@@ -215,10 +215,10 @@ public class NodesManager implements Runnable {
 //            throw new RuntimeException("group not found");
             return false;
         }
-        if (groupName.equals(NetworkConstant.NETWORK_NODE_IN_GROUP) && nodeGroup.size() >= network.maxInCount()) {
+        if (groupName.equals(NetworkConstant.NETWORK_NODE_IN_GROUP) && nodeGroup.size() >= network.getMaxInCount()) {
             return false;
         }
-        if (groupName.equals(NetworkConstant.NETWORK_NODE_OUT_GROUP) && nodeGroup.size() >= network.maxOutCount()) {
+        if (groupName.equals(NetworkConstant.NETWORK_NODE_OUT_GROUP) && nodeGroup.size() >= network.getMaxOutCount()) {
             return false;
         }
         node.addGroup(groupName);
@@ -254,9 +254,10 @@ public class NodesManager implements Runnable {
         List<Node> seedNodes = new ArrayList<>();
 
         Set<String> localIp = IpUtil.getIps();
-        for (String ip : network.getSeedIpList()) {
-            if (!localIp.contains(ip)) {
-                seedNodes.add(new Node(ip, 8003,8003, Node.OUT));
+        for (String seedIp : network.getSeedIpList()) {
+            String[] ipPort = seedIp.split(":");
+            if (!localIp.contains(ipPort[0])) {
+                seedNodes.add(new Node(ipPort[0], Integer.parseInt(ipPort[1]), Integer.parseInt(ipPort[1]), Node.OUT));
             }
         }
         return seedNodes;
@@ -400,10 +401,10 @@ public class NodesManager implements Runnable {
     private boolean checkFullHandShake(Node node) {
         if (node.getType() == Node.IN) {
             NodeGroup inGroup = getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
-            return inGroup.size() < network.maxInCount();
+            return inGroup.size() < network.getMaxInCount();
         } else {
             NodeGroup outGroup = getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-            return outGroup.size() < network.maxOutCount();
+            return outGroup.size() < network.getMaxOutCount();
         }
     }
 
@@ -477,11 +478,10 @@ public class NodesManager implements Runnable {
 //            Log.info("disConnectNodes:" + connectedNodes.size());
 //            Log.info("handShakeNodes:" + handShakeNodes.size());
             //for (Node node : handShakeNodes.values()) {
-               // Log.info(node.toString() + ",blockHeight:" + node.getVersionMessage().getBestBlockHeight());
+            // Log.info(node.toString() + ",blockHeight:" + node.getVersionMessage().getBestBlockHeight());
             //}
 
-            KVStorageService storageService = NulsContext.getServiceBean(KVStorageService.class);
-            if(firstUnConnectedNodes.size() > 20) {
+            if (firstUnConnectedNodes.size() > 20) {
                 firstUnConnectedNodes.clear();
             }
             try {
@@ -494,12 +494,12 @@ public class NodesManager implements Runnable {
                 for (Node node : seedNodes) {
                     addNode(node);
                 }
-            } else if (handShakeNodes.size() > network.maxOutCount()) {
+            } else if (handShakeNodes.size() > network.getMaxOutCount()) {
                 removeSeedNode();
             }
             NodeGroup outGroup = getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-            if (outGroup.size() < network.maxOutCount()) {
-                int size = network.maxOutCount() - handShakeNodes.size();
+            if (outGroup.size() < network.getMaxOutCount()) {
+                int size = network.getMaxOutCount() - handShakeNodes.size();
                 if (size > 0) {
                     getNodeFromDataBase(size);
                     getNodeFromOther(size);
@@ -524,7 +524,7 @@ public class NodesManager implements Runnable {
         return nodeGroups.get(groupName);
     }
 
-    public void setNetwork(AbstractNetworkParam network) {
+    public void setNetwork(NetworkParam network) {
         this.network = network;
     }
 
@@ -553,22 +553,23 @@ public class NodesManager implements Runnable {
 
     /**
      * those nodes that are not connected at once, reconnection 6 times
+     *
      * @param nodeId
      * @return
      */
     public void validateFirstUnConnectedNode(String nodeId) {
-        if(nodeId == null)
+        if (nodeId == null)
             return;
         Node node = getNode(nodeId);
-        if(node == null) {
+        if (node == null) {
             // seed nodes
             for (String ip : network.getSeedIpList()) {
-                if(nodeId.startsWith(ip)) {
+                if (nodeId.startsWith(ip)) {
                     return;
                 }
             }
             Integer count = firstUnConnectedNodes.get(nodeId);
-            if(count == null) {
+            if (count == null) {
                 firstUnConnectedNodes.put(nodeId, 1);
             } else {
                 firstUnConnectedNodes.put(nodeId, ++count);
@@ -580,17 +581,18 @@ public class NodesManager implements Runnable {
      * those nodes that are not connected at once, reconnection 6 times
      * and then start counting, reconnection: counter >= 60
      * [0,6] (6, 60) [60,]
+     *
      * @param nodeId
      * @return
      */
     private boolean checkFirstUnConnectedNode(String nodeId) {
         Integer count = firstUnConnectedNodes.get(nodeId);
-        if(count == null)
+        if (count == null)
             return true;
-        if(count <= NetworkConstant.FAIL_MAX_COUNT) {
+        if (count <= NetworkConstant.FAIL_MAX_COUNT) {
             // [0,6]
             return true;
-        } else if(count < (NetworkConstant.FAIL_MAX_COUNT * 10)){
+        } else if (count < (NetworkConstant.FAIL_MAX_COUNT * 10)) {
             // (6, 60)
             firstUnConnectedNodes.put(nodeId, ++count);
             return false;

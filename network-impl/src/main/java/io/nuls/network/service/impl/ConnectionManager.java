@@ -30,7 +30,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
-import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.entity.param.NetworkParam;
 import io.nuls.network.message.NetworkEventHandlerFactory;
 import io.nuls.network.message.NetworkEventResult;
 import io.nuls.network.message.filter.MessageFilterChain;
@@ -56,7 +56,7 @@ import java.util.List;
  */
 public class ConnectionManager {
 
-    private AbstractNetworkParam network;
+    private NetworkParam network;
     private NetworkService networkService;
     private NettyServer nettyServer;
     private EventBusService eventBusService;
@@ -72,7 +72,7 @@ public class ConnectionManager {
     }
 
     public void init() {
-        nettyServer = new NettyServer(network.port());
+        nettyServer = new NettyServer(network.getPort());
         nettyServer.init();
         eventBusService = NulsContext.getServiceBean(EventBusService.class);
         messageHandlerFactory = network.getMessageHandlerFactory();
@@ -215,7 +215,7 @@ public class ConnectionManager {
         return false;
     }
 
-    public void setNetwork(AbstractNetworkParam network) {
+    public void setNetwork(NetworkParam network) {
         this.network = network;
     }
 
