@@ -46,6 +46,7 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
+import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.service.NetworkService;
 import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.protocol.constant.ProtocolConstant;
@@ -74,6 +75,7 @@ public class ConsensusProcess {
     private BlockProcess blockProcess;
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
 
     private boolean hasPacking;
@@ -249,19 +251,7 @@ public class ConsensusProcess {
 
     private void broadcastSmallBlock(Block block) {
         SmallBlockEvent event = new SmallBlockEvent();
-        SmallBlock smallBlock = new SmallBlock();
-        smallBlock.setHeader(block.getHeader());
-        List<NulsDigestData> txHashList = new ArrayList<>();
-        for (Transaction tx : block.getTxs()) {
-            txHashList.add(tx.getHash());
-            if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE ||
-                    tx.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH ||
-                    tx.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
-                smallBlock.addConsensusTx(tx);
-            }
-        }
-        smallBlock.setTxHashList(txHashList);
-
+        SmallBlock smallBlock = ConsensusTool.getSmallBlock(block);
         event.setEventBody(smallBlock);
         List<String> nodeIdList = eventBroadcaster.broadcastAndCache(event);
         for (String nodeId : nodeIdList) {
@@ -319,6 +309,10 @@ public class ConsensusProcess {
                 break;
             }
             if(outHashList.contains(tx.getHash())) {
+                continue;
+            }
+            Transaction repeatTx = ledgerService.getTx(tx.getHash());
+            if(repeatTx != null) {
                 continue;
             }
             outHashList.add(tx.getHash());

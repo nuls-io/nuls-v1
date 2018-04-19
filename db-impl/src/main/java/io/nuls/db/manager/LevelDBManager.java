@@ -23,7 +23,6 @@
  */
 package io.nuls.db.manager;
 
-import com.alibaba.druid.filter.FilterManager;
 import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.model.Result;
@@ -85,13 +84,6 @@ public class LevelDBManager {
                 }
 
             }
-
-
-            String area = "pierre-test";
-            String key = "testkey";
-            createArea(area);
-            String value = "testvalue_1";
-            put(area, key, value);
         }
     }
 
@@ -106,7 +98,6 @@ public class LevelDBManager {
         if (AREAS.containsKey(areaName)) {
             return new Result(true, "KV_AREA_EXISTS");
         }
-        //TODO 特殊字符校验
         if(!checkPathLegal(areaName)) {
             return new Result(false, "KV_AREA_CREATE_ERROR");
         }
@@ -146,7 +137,11 @@ public class LevelDBManager {
     }
 
     private static boolean checkPathLegal(String areaName) {
-        return true;
+        if(StringUtils.isBlank(areaName)) {
+            return false;
+        }
+        String regex = "^[a-zA-Z0-9_\\-]+$";
+        return areaName.matches(regex);
     }
 
     private static boolean baseCheckArea(String areaName) {
