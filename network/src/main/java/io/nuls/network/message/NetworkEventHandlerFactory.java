@@ -32,6 +32,5 @@ import io.nuls.protocol.event.base.BaseEvent;
  */
 public abstract class NetworkEventHandlerFactory {
 
-
     public abstract NetWorkEventHandler getHandler(BaseEvent data) ;
 }

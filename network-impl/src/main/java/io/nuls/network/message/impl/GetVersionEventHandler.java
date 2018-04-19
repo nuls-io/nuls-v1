@@ -83,7 +83,7 @@ public class GetVersionEventHandler implements NetWorkEventHandler {
         node.setVersionMessage(versionEvent);
         checkVersion(event.getNulsVersion());
 
-        VersionEvent replyMessage = new VersionEvent(getNetworkService().getNetworkParam().port(),
+        VersionEvent replyMessage = new VersionEvent(getNetworkService().getNetworkParam().getPort(),
                 block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
 
         return new NetworkEventResult(true, replyMessage);

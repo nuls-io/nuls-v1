@@ -9,7 +9,7 @@ public interface ProtocolConstant {
     /**
      * unit:second
      */
-    long BLOCK_TIME_INTERVAL_SECOND = 2;
+    long BLOCK_TIME_INTERVAL_SECOND =5;
     /**
      * unit:millis
      */

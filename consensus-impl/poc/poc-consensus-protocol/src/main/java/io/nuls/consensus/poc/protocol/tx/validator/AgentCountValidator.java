@@ -72,10 +72,11 @@ public class AgentCountValidator implements NulsDataValidator<RegisterAgentTrans
                 if (agentName.equals(ca.getAgentName())) {
                     return ValidateResult.getFailedResult("AgentName repetition!");
                 }
-                if(ConsensusContext.getSeedNodeList().contains(tx.getTxData().getAddress())||ConsensusContext.getSeedNodeList().contains(agent.getPackingAddress())){
-                    return ValidateResult.getFailedResult("The address is a seed address");
-                }
             }
+        }
+
+        if(ConsensusContext.getSeedNodeList().contains(tx.getTxData().getAddress())||ConsensusContext.getSeedNodeList().contains(agent.getPackingAddress())){
+            return ValidateResult.getFailedResult("The address is a seed address");
         }
         return result;
     }
