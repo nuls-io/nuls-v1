@@ -54,10 +54,10 @@
             and status = #{status,jdbcType=INTEGER},
         </if>
         <if test="agentHash != null">
-            and agent_id = #{agentHash,jdbcType=INTEGER},
+            and agent_id = #{agentHash,jdbcType=VARCHAR},
         </if>
         <if test="address != null">
-            and address = #{address,jdbcType=INTEGER},
+            and address = #{address,jdbcType=VARCHAR},
         </if>
 </select>
     <update id="deleteByPrimaryKey" parameterType="io.nuls.db.entity.DepositPo">

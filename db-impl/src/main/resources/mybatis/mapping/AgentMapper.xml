@@ -59,7 +59,7 @@
             and status = #{status,jdbcType=INTEGER},
         </if>
         <if test="agentAddress != null">
-            and agent_address = #{agentAddress,jdbcType=INTEGER},
+            and agent_address = #{agentAddress,jdbcType=VARCHAR},
         </if>
     </select>
 
