@@ -38,6 +38,7 @@ import io.nuls.consensus.poc.protocol.model.block.BlockData;
 import io.nuls.consensus.poc.protocol.model.block.BlockRoundData;
 import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
+import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.DateUtil;
@@ -72,7 +73,7 @@ public class ConsensusProcess {
     private RoundManager roundManager;
     private TxMemoryPool txMemoryPool;
 
-    private BlockProcess blockProcess;
+    private BlockQueueProvider blockQueueProvider;
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
@@ -80,11 +81,11 @@ public class ConsensusProcess {
 
     private boolean hasPacking;
 
-    public ConsensusProcess(ChainManager chainManager, RoundManager roundManager, TxMemoryPool txMemoryPool, BlockProcess blockProcess) {
+    public ConsensusProcess(ChainManager chainManager, RoundManager roundManager, TxMemoryPool txMemoryPool, BlockQueueProvider blockQueueProvider) {
         this.chainManager = chainManager;
         this.roundManager = roundManager;
         this.txMemoryPool = txMemoryPool;
-        this.blockProcess = blockProcess;
+        this.blockQueueProvider = blockQueueProvider;
     }
 
     public void process() {
@@ -246,7 +247,7 @@ public class ConsensusProcess {
     }
 
     private boolean saveBlock(Block block) throws IOException {
-        return blockProcess.addBlock(new BlockContainer(block, BlockContainerStatus.RECEIVED));
+        return blockQueueProvider.put(new BlockContainer(block, BlockContainerStatus.RECEIVED), true);
     }
 
     private void broadcastSmallBlock(Block block) {

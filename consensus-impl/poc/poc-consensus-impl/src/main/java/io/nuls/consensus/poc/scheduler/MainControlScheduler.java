@@ -108,7 +108,7 @@ public class MainControlScheduler {
         DownloadBlockProcess downloadBlockProcess = new DownloadBlockProcess();
         DownloadBlockProvider downloadBlockProvider = new DownloadBlockProvider();
         isolatedBlocksProcess.setDownloadBlockProvider(downloadBlockProvider);
-        downloadBlockProcess.setBlockProcess(blockProcess);
+        downloadBlockProcess.setBlockQueueProvider(blockQueueProvider);
         threadPool.scheduleAtFixedRate(new DownloadBlockProcessTask(downloadBlockProcess, downloadBlockProvider), 1000L,1000L, TimeUnit.MILLISECONDS);
 
         initDatas();
