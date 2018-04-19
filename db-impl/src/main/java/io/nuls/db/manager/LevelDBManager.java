@@ -23,7 +23,6 @@
  */
 package io.nuls.db.manager;
 
-import com.alibaba.druid.filter.FilterManager;
 import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.model.Result;
@@ -41,8 +40,6 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @Desription:
