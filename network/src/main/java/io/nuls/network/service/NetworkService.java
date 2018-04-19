@@ -26,7 +26,7 @@ package io.nuls.network.service;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
-import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.entity.param.NetworkParam;
 import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.protocol.event.base.BaseEvent;
 
@@ -85,7 +85,7 @@ public interface NetworkService {
 
     NodeGroup getNodeGroup(String groupName);
 
-    AbstractNetworkParam getNetworkParam();
+    NetworkParam getNetworkParam();
 
     BroadcastResult sendToAllNode(BaseEvent event, boolean asyn);
 

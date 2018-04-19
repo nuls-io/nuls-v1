@@ -25,29 +25,28 @@ package io.nuls.network.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.protocol.context.NulsContext;
-import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.IpUtil;
 import io.nuls.network.NetworkContext;
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
-import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.entity.param.NetworkParam;
 import io.nuls.network.filter.impl.DefaultMessageFilter;
 import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.message.filter.NulsMessageFilter;
-import io.nuls.network.param.DevNetworkParam;
-import io.nuls.network.param.MainNetworkParam;
-import io.nuls.network.param.TestNetworkParam;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.BaseEvent;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author vivi
@@ -55,7 +54,7 @@ import java.util.*;
  */
 public class NetworkServiceImpl implements NetworkService {
 
-    private AbstractNetworkParam network;
+    private NetworkParam network;
 
     private ConnectionManager connectionManager;
 
@@ -66,9 +65,9 @@ public class NetworkServiceImpl implements NetworkService {
     public NetworkServiceImpl() {
         this.network = getNetworkInstance();
 
-        DefaultMessageFilter.getInstance().addMagicNum(network.packetMagic());
+        DefaultMessageFilter.getInstance().addMagicNum(network.getPacketMagic());
         MessageFilterChain.getInstance().addFilter(DefaultMessageFilter.getInstance());
-        NulsContext.setMagicNumber(network.packetMagic());
+        NulsContext.setMagicNumber(network.getPacketMagic());
 
         NulsMessageFilter messageFilter = DefaultMessageFilter.getInstance();
         network.setMessageFilter(messageFilter);
@@ -99,7 +98,7 @@ public class NetworkServiceImpl implements NetworkService {
             nodesManager.init();
             for (String ip : IpUtil.getIps()) {
                 if (isSeedNode(ip)) {
-                    network.setMaxInCount(network.maxInCount() * 3);
+                    network.setMaxInCount(network.getMaxInCount() * 2);
                     nodesManager.setSeed(true);
                 }
             }
@@ -230,7 +229,7 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public AbstractNetworkParam getNetworkParam() {
+    public NetworkParam getNetworkParam() {
         return network;
     }
 
@@ -270,22 +269,15 @@ public class NetworkServiceImpl implements NetworkService {
         nodesManager.reset();
     }
 
-    private AbstractNetworkParam getNetworkInstance() {
-        String networkType = NetworkContext.getNetworkConfig().getPropValue(NetworkConstant.NETWORK_TYPE, "dev");
-        if ("dev".equals(networkType)) {
-            return DevNetworkParam.get();
-        }
-        if ("test".equals(networkType)) {
-            return TestNetworkParam.get();
-        }
-
-        return MainNetworkParam.get();
-    }
-
-
     @Override
     public void validateFirstUnConnectedNode(String nodeId) {
         nodesManager.validateFirstUnConnectedNode(nodeId);
+    }
+
+    private NetworkParam getNetworkInstance() {
+        NetworkParam networkParam = NetworkParam.getInstance();
+
+        return null;
     }
 }
 
