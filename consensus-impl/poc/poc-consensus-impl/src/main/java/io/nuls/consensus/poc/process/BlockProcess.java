@@ -116,6 +116,9 @@ public class BlockProcess {
         if(blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING) {
             return;
         }
+        if(blockContainer.getNode() == null) {
+            return;
+        }
         SmallBlockEvent event = new SmallBlockEvent();
         SmallBlock smallBlock = ConsensusTool.getSmallBlock(blockContainer.getBlock());
         event.setEventBody(smallBlock);
