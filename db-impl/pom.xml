@@ -50,6 +50,12 @@
       <artifactId>pagehelper</artifactId>
       <version>5.1.2</version>
     </dependency>
+    <!-- level DB -->
+    <dependency>
+      <groupId>org.iq80.leveldb</groupId>
+      <artifactId>leveldb</artifactId>
+      <version>0.10</version>
+    </dependency>
     <dependency>
       <groupId>io.nuls</groupId>
       <artifactId>db</artifactId>
