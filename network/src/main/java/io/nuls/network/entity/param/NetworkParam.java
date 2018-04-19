@@ -23,10 +23,13 @@
  */
 package io.nuls.network.entity.param;
 
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.utils.network.IpUtil;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkEventHandlerFactory;
 import io.nuls.network.message.filter.NulsMessageFilter;
+import io.nuls.protocol.context.NulsContext;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -42,6 +45,17 @@ public class NetworkParam {
     private static NetworkParam instance = new NetworkParam();
 
     private NetworkParam() {
+        this.port = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SERVER_PORT, 8003);
+        this.packetMagic = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MAGIC, 123456789);
+        this.maxInCount = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_NODE_MAX_IN, 50);
+        this.maxOutCount = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_NODE_MAX_OUT, 10);
+
+        this.localIps = IpUtil.getIps();
+        this.seedIpList = new ArrayList<>();
+        String seedIp = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SEED_IP, "192.168.1.131:8003");
+        for (String str : seedIp.split(",")) {
+            this.seedIpList.add(str);
+        }
     }
 
     public static NetworkParam getInstance() {

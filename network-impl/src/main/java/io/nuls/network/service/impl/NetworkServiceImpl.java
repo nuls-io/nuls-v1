@@ -63,7 +63,7 @@ public class NetworkServiceImpl implements NetworkService {
     private BroadcastHandler broadcaster;
 
     public NetworkServiceImpl() {
-        this.network = getNetworkInstance();
+        this.network = NetworkParam.getInstance();
 
         DefaultMessageFilter.getInstance().addMagicNum(network.getPacketMagic());
         MessageFilterChain.getInstance().addFilter(DefaultMessageFilter.getInstance());
@@ -274,10 +274,5 @@ public class NetworkServiceImpl implements NetworkService {
         nodesManager.validateFirstUnConnectedNode(nodeId);
     }
 
-    private NetworkParam getNetworkInstance() {
-        NetworkParam networkParam = NetworkParam.getInstance();
-
-        return null;
-    }
 }
 

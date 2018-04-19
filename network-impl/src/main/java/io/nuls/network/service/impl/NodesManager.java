@@ -143,7 +143,7 @@ public class NodesManager implements Runnable {
                 return false;
             }
 
-            if(!checkFirstUnConnectedNode(node.getId())) {
+            if (!checkFirstUnConnectedNode(node.getId())) {
                 return false;
             }
 
@@ -252,9 +252,10 @@ public class NodesManager implements Runnable {
         List<Node> seedNodes = new ArrayList<>();
 
         Set<String> localIp = IpUtil.getIps();
-        for (String ip : network.getSeedIpList()) {
-            if (!localIp.contains(ip)) {
-                seedNodes.add(new Node(ip, 8003,8003, Node.OUT));
+        for (String seedIp : network.getSeedIpList()) {
+            String[] ipPort = seedIp.split(":");
+            if (!localIp.contains(ipPort[0])) {
+                seedNodes.add(new Node(ipPort[0], Integer.parseInt(ipPort[1]), Integer.parseInt(ipPort[1]), Node.OUT));
             }
         }
         return seedNodes;
@@ -475,10 +476,10 @@ public class NodesManager implements Runnable {
 //            Log.info("disConnectNodes:" + connectedNodes.size());
 //            Log.info("handShakeNodes:" + handShakeNodes.size());
             //for (Node node : handShakeNodes.values()) {
-               // Log.info(node.toString() + ",blockHeight:" + node.getVersionMessage().getBestBlockHeight());
+            // Log.info(node.toString() + ",blockHeight:" + node.getVersionMessage().getBestBlockHeight());
             //}
 
-            if(firstUnConnectedNodes.size() > 20) {
+            if (firstUnConnectedNodes.size() > 20) {
                 firstUnConnectedNodes.clear();
             }
             try {
@@ -550,22 +551,23 @@ public class NodesManager implements Runnable {
 
     /**
      * those nodes that are not connected at once, reconnection 6 times
+     *
      * @param nodeId
      * @return
      */
     public void validateFirstUnConnectedNode(String nodeId) {
-        if(nodeId == null)
+        if (nodeId == null)
             return;
         Node node = getNode(nodeId);
-        if(node == null) {
+        if (node == null) {
             // seed nodes
             for (String ip : network.getSeedIpList()) {
-                if(nodeId.startsWith(ip)) {
+                if (nodeId.startsWith(ip)) {
                     return;
                 }
             }
             Integer count = firstUnConnectedNodes.get(nodeId);
-            if(count == null) {
+            if (count == null) {
                 firstUnConnectedNodes.put(nodeId, 1);
             } else {
                 firstUnConnectedNodes.put(nodeId, ++count);
@@ -577,17 +579,18 @@ public class NodesManager implements Runnable {
      * those nodes that are not connected at once, reconnection 6 times
      * and then start counting, reconnection: counter >= 60
      * [0,6] (6, 60) [60,]
+     *
      * @param nodeId
      * @return
      */
     private boolean checkFirstUnConnectedNode(String nodeId) {
         Integer count = firstUnConnectedNodes.get(nodeId);
-        if(count == null)
+        if (count == null)
             return true;
-        if(count <= NetworkConstant.FAIL_MAX_COUNT) {
+        if (count <= NetworkConstant.FAIL_MAX_COUNT) {
             // [0,6]
             return true;
-        } else if(count < (NetworkConstant.FAIL_MAX_COUNT * 10)){
+        } else if (count < (NetworkConstant.FAIL_MAX_COUNT * 10)) {
             // (6, 60)
             firstUnConnectedNodes.put(nodeId, ++count);
             return false;
