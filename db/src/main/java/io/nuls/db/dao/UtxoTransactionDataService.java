@@ -51,7 +51,7 @@ public interface UtxoTransactionDataService {
 
     Long getTxsCount(Long blockHeight, String address, int type);
 
-    List<TransactionPo> getTxs(Long blockHeight, String address, int type, int start, int limit);
+    List<TransactionPo> getTxs(Long blockHeight, String address, int type, int pageNum, int pageSize);
 
     List<TransactionLocalPo> getLocalTxs(long blockHeight);
 
@@ -59,7 +59,7 @@ public interface UtxoTransactionDataService {
 
     List<TransactionLocalPo> getLocalTxs(long startHeight, long endHeight);
 
-    List<TransactionLocalPo> getLocalTxs(Long blockHeight, String address, int type, int start, int limit);
+    List<TransactionLocalPo> getLocalTxs(Long blockHeight, String address, int type, int pageNumber, int pageSize);
 
     Long getLocalTxsCount(Long blockHeight, String address, int type);
 

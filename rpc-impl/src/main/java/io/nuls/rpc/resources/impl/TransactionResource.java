@@ -94,12 +94,8 @@ public class TransactionResource {
             return RpcResult.getFailed(ErrorCode.NULL_PARAMETER);
         }
         try {
-            Transaction tx = ledgerService.getCacheTx(hash);
-            if (tx == null) {
-                tx = ledgerService.getTx(NulsDigestData.fromDigestHex(hash));
-            } else {
-                UtxoTransactionTool.getInstance().setTxhashToUtxo(tx);
-            }
+            Transaction tx = ledgerService.getTx(NulsDigestData.fromDigestHex(hash));
+
             if (tx == null) {
                 result = RpcResult.getFailed("not found");
             } else {
@@ -125,26 +121,7 @@ public class TransactionResource {
         if (StringUtils.isBlank(fromHash) || fromIndex < 0 || fromIndex > 500) {
             return RpcResult.getFailed(ErrorCode.NULL_PARAMETER);
         }
-        Transaction transaction = null;
-        List<Transaction> txList = ledgerService.getCacheTxList(0);
-        for (Transaction tx : txList) {
-            if (tx instanceof AbstractCoinTransaction) {
-                AbstractCoinTransaction atx = (AbstractCoinTransaction) tx;
-                UtxoData coinData = (UtxoData) atx.getCoinData();
-                for (UtxoInput input : coinData.getInputs()) {
-                    if (fromHash.equals(input.getFromHash().getDigestHex()) && fromIndex == input.getFromIndex()) {
-                        transaction = tx;
-                        break;
-                    }
-                }
-            }
-            if (transaction != null) {
-                break;
-            }
-        }
-        if (transaction == null) {
-            transaction = ledgerService.getTx(fromHash, fromIndex);
-        }
+        Transaction transaction = ledgerService.getTx(fromHash, fromIndex);
         if (transaction == null) {
             return RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
         }

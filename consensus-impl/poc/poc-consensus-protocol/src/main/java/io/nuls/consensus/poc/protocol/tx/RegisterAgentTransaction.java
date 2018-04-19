@@ -50,6 +50,7 @@ public class RegisterAgentTransaction extends LockNulsTransaction<Consensus<Agen
     }
 
     private void initValidator() {
+
         this.registerValidator(new RegisterAgentFieldValidator());
         this.registerValidator(new CommissionRateValidator());
         this.registerValidator(new AccountCreditValidator());

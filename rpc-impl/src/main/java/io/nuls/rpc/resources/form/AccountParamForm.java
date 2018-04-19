@@ -32,6 +32,7 @@ import io.nuls.core.utils.str.StringUtils;
  * @author Niels
  * @date 2018/3/7
  */
+@Deprecated
 public class AccountParamForm {
 
     private String address;

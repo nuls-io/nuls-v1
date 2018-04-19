@@ -24,6 +24,7 @@
 package io.nuls.consensus.poc.process;
 
 import io.nuls.account.entity.Account;
+import io.nuls.account.entity.Address;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
@@ -47,6 +48,7 @@ import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.network.service.NetworkService;
 import io.nuls.poc.constant.ConsensusStatus;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.SmallBlockEvent;
@@ -104,9 +106,9 @@ public class ConsensusProcess {
         }
 
         // check network status
-//        if(networkService.getAvailableNodes().size() == 0) {
-//            return false;
-//        }
+        if(networkService.getAvailableNodes().size() == 0) {
+            return false;
+        }
 
         return true;
     }
@@ -150,15 +152,94 @@ public class ConsensusProcess {
         }
     }
 
-    private void packing(MeetingMember member, MeetingRound round) throws IOException, NulsException {
+    private void packing(MeetingMember self, MeetingRound round) throws IOException, NulsException {
         Log.debug(round.toString());
 
-        Block block = doPacking(member, round);
+        boolean needCheckAgain = waitReceiveNewestBlock(self, round);
+
+        Block block = doPacking(self, round);
+
+        if (needCheckAgain && hasReceiveNewestBlock(self, round)) {
+            Block realBestBlock = chainManager.getBestBlock();
+            if (null != realBestBlock) {
+                List<NulsDigestData> txHashList = realBestBlock.getTxHashList();
+                for (Transaction transaction : block.getTxs()) {
+                    if (transaction.getType() == TransactionConstant.TX_TYPE_COIN_BASE || transaction.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH || transaction.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
+                        continue;
+                    }
+                    if (txHashList.contains(transaction.getHash())) {
+                        continue;
+                    }
+                    txMemoryPool.add(transaction, false);
+                }
+                block = doPacking(self, round);
+            }
+        }
+        if (null == block) {
+            Log.error("make a null block");
+            return;
+        }
+
         boolean success = saveBlock(block);
         if(success) {
             broadcastSmallBlock(block);
         } else {
             Log.error("make a block, but save block error");
+        }
+    }
+
+    private boolean waitReceiveNewestBlock(MeetingMember self, MeetingRound round) {
+
+        long time = TimeService.currentTimeMillis();
+        long timeout = ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS / 2;
+
+        boolean hasReceiveNewestBlock = false;
+
+        try {
+            while (!hasReceiveNewestBlock) {
+                hasReceiveNewestBlock = hasReceiveNewestBlock(self, round);
+                if (hasReceiveNewestBlock) {
+                    long sleepTime = time + timeout - TimeService.currentTimeMillis();
+                    if (sleepTime > 0) {
+                        Thread.sleep(sleepTime);
+                    }
+                    break;
+                }
+                Thread.sleep(500L);
+                if (TimeService.currentTimeMillis() - time >= timeout) {
+                    break;
+                }
+            }
+        } catch (InterruptedException e) {
+            Log.error(e);
+        }
+
+        return !hasReceiveNewestBlock;
+    }
+
+    private boolean hasReceiveNewestBlock(MeetingMember self, MeetingRound round) {
+        Block bestBlock = chainManager.getBestBlock();
+        String packingAddress = Address.fromHashs(bestBlock.getHeader().getPackingAddress()).getBase58();
+
+        int thisIndex = self.getPackingIndexOfRound();
+
+        String preBlockPackingAddress = null;
+
+        if (thisIndex == 1) {
+            MeetingRound preRound = round.getPreRound();
+            if (preRound == null) {
+                //FIXME
+                return true;
+            }
+            preBlockPackingAddress = preRound.getMember(preRound.getMemberCount()).getPackingAddress();
+        } else {
+            preBlockPackingAddress = round.getMember(self.getPackingIndexOfRound()).getPackingAddress();
+        }
+
+        if (packingAddress.equals(preBlockPackingAddress)) {
+            return true;
+        } else {
+            return false;
         }
     }
 

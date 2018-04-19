@@ -37,9 +37,8 @@ import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Na;
 import io.nuls.rpc.entity.RpcResult;
-import io.nuls.rpc.resources.form.AccountParamForm;
-import io.nuls.rpc.resources.form.TransferForm;
-import io.swagger.annotations.Api;
+import io.nuls.rpc.resources.form.*;
+import io.swagger.annotations.*;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -91,7 +90,12 @@ public class WalletResouce {
     @POST
     @Path("/reset")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult password(AccountParamForm form) {
+    @ApiOperation(value = "重置钱包密码 [3.4.2]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = RpcResult.class)
+    })
+    public RpcResult password(@ApiParam(name = "重置钱包密码表单数据", value = "JSONFormat", required = true)
+                                          WalletPasswordForm form) {
         Result result = this.accountService.changePassword(form.getPassword(), form.getNewPassword());
         if (result.isSuccess()) {
             NulsContext.setCachedPasswordOfWallet(form.getNewPassword());
@@ -115,7 +119,13 @@ public class WalletResouce {
     @POST
     @Path("/backup")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult backup(AccountParamForm form) {
+    @ApiOperation(value = "钱包备份，即备份账户私钥，默认备份所有账户，文件名为格式为 wallet-yyyy-mm-dd.nuls [3.4.5] ",
+                    notes = "账户地址address 为非必填项!")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = RpcResult.class)
+    })
+    public RpcResult backup(@ApiParam(name = "钱包备份表单数据", value = "JSONFormat")
+                                        AccountAPForm form) {
         if (StringUtils.isNotBlank(form.getAddress()) && !Address.validAddress(form.getAddress())) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
@@ -135,7 +145,12 @@ public class WalletResouce {
     @POST
     @Path("/import")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult importAccount(AccountParamForm form) {
+    @ApiOperation(value = "根据私钥导入账户 [3.4.7]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = RpcResult.class)
+    })
+    public RpcResult importAccount(@ApiParam(name = "导入账户表单数据", value = "JSONFormat", required = true)
+                                               AccountImportForm form) {
         if (!StringUtils.validPassword(form.getPassword()) ||
                 StringUtils.isBlank(form.getPrikey()) ||
                 form.getPrikey().length() > 100) {
@@ -238,7 +253,12 @@ public class WalletResouce {
     @POST
     @Path("/remove")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult removeAccount(AccountParamForm form) {
+    @ApiOperation(value = "钱包移除账户", notes = "Nuls_RPC_API文档[3.4.9]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = RpcResult.class)
+    })
+    public RpcResult removeAccount(@ApiParam(name = "钱包移除账户表单数据", value = "JSONFormat", required = true)
+                                               AccountAPForm form) {
         if (!StringUtils.validPassword(form.getPassword()) || !Address.validAddress(form.getAddress())) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }

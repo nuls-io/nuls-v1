@@ -49,7 +49,7 @@
     -->
     select
     <include refid="Base_Column_List"/>
-    from deposit where   block_height &gt;= #{blockHeight,jdbcType=BIGINT} and del_height &lt; #{blockHeight,jdbcType=BIGINT}
+    from deposit where block_height &lt;= #{blockHeight,jdbcType=BIGINT} and (del_height = 0 or del_height &gt;= #{blockHeight,jdbcType=BIGINT})
         <if test="status != null">
             and status = #{status,jdbcType=INTEGER},
         </if>

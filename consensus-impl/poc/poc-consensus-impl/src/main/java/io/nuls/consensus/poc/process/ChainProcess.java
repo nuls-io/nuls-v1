@@ -418,7 +418,7 @@ public class ChainProcess {
         if(changeSuccess) {
             chainManager.setMasterChain(newMasterChain);
             newMasterChain.getRoundList().clear();
-            newMasterChain.resetRound(false);
+            newMasterChain.initRound();
             NulsContext.getInstance().setBestBlock(newMasterChain.getBestBlock());
 
             if(oldChain.getChain().getBlockList().size() > 0) {

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -45,8 +45,6 @@ public interface LedgerService {
 
     Transaction getTx(String fromHash, int fromIndex);
 
-    Transaction getLocalTx(NulsDigestData hash);
-
     List<Transaction> getTxList(String address, int txType) throws Exception;
 
     long getTxCount(Long blockHeight, String address, int txType) throws Exception;
@@ -58,10 +56,6 @@ public interface LedgerService {
     List<Transaction> getTxList(long startHeight, long endHeight) throws Exception;
 
     List<Transaction> getTxList(long height) throws Exception;
-
-    List<Transaction> getCacheTxList(int type);
-
-    Transaction getCacheTx(String txHash);
 
     Page<Transaction> getTxList(Long height, int type, int pageNum, int pageSize) throws Exception;
 
@@ -79,7 +73,9 @@ public interface LedgerService {
      */
     Result lock(String address, String password, Na amount, long unlockTime, String remark);
 
-    boolean saveTxList(List<Transaction> txList) throws IOException;
+    void saveTxList(List<Transaction> txList) throws IOException;
+
+    boolean saveLocalTx(Transaction tx) throws IOException;
 
     void saveTxInLocal(String address);
 

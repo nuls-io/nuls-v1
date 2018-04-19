@@ -85,7 +85,7 @@ public class CacheManager {
 
         chainManager.setMasterChain(masterChainContainer);
 
-        chainManager.getMasterChain().resetRound(false);
+        chainManager.getMasterChain().initRound();
     }
 
     public void reload() throws NulsException {

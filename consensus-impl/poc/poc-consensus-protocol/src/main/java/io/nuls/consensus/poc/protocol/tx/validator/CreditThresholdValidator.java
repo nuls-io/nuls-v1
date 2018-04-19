@@ -23,11 +23,14 @@
  */
 package io.nuls.consensus.poc.protocol.tx.validator;
 
+import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.tx.PocJoinConsensusTransaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.dao.PunishLogDataService;
+import io.nuls.db.entity.PunishLogPo;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.context.NulsContext;
@@ -42,7 +45,7 @@ import java.util.List;
 public class CreditThresholdValidator implements NulsDataValidator<PocJoinConsensusTransaction> {
 
     private static final CreditThresholdValidator INSTANCE = new CreditThresholdValidator();
-    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private PunishLogDataService punishLogDataService = NulsContext.getInstance().getServiceBean(PunishLogDataService.class);
 
     private CreditThresholdValidator() {
     }
@@ -54,13 +57,13 @@ public class CreditThresholdValidator implements NulsDataValidator<PocJoinConsen
     @Override
     public ValidateResult validate(PocJoinConsensusTransaction data) {
         String address = data.getTxData().getAddress();
-        List<Transaction> list = null;
+        long count = 0;
         try {
-            list = ledgerService.getTxList(address, TransactionConstant.TX_TYPE_RED_PUNISH);
+            count = punishLogDataService.getCountByType(address, PunishType.RED.getCode());
         } catch (Exception e) {
             Log.error(e);
         }
-        if (null == list || list.isEmpty()) {
+        if (count == 0) {
             return ValidateResult.getSuccessResult();
         }
         return ValidateResult.getFailedResult(ErrorCode.LACK_OF_CREDIT);

@@ -23,11 +23,14 @@
  */
 package io.nuls.consensus.poc.protocol.tx.validator;
 
+import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.dao.PunishLogDataService;
+import io.nuls.db.entity.PunishLogPo;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.context.NulsContext;
@@ -41,17 +44,17 @@ import java.util.List;
  */
 public class AccountCreditValidator implements NulsDataValidator<RegisterAgentTransaction> {
 
-    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private PunishLogDataService punishLogDataService = NulsContext.getInstance().getServiceBean(PunishLogDataService.class);
 
     @Override
     public ValidateResult validate(RegisterAgentTransaction data) {
-        List<Transaction> list = null;
+        long count = 0;
         try {
-            list = ledgerService.getTxList(data.getTxData().getAddress(), TransactionConstant.TX_TYPE_RED_PUNISH);
+            count = punishLogDataService.getCountByType(data.getTxData().getAddress(), PunishType.RED.getCode());
         } catch (Exception e) {
             Log.error(e);
         }
-        if (null != list && !list.isEmpty()) {
+        if (count > 0) {
             return ValidateResult.getFailedResult(ErrorCode.LACK_OF_CREDIT);
         }
         return ValidateResult.getSuccessResult();

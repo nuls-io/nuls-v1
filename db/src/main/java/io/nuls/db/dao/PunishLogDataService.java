@@ -37,7 +37,8 @@ public interface PunishLogDataService extends BaseDataService<String, PunishLogP
 
     int deleteByHeight(long height);
 
-    long getCountByRounds(String agentAddress, long startRoundIndex, long endRoundIndex,long startHeight,int punishType);
+    long getCountByType(String agentAddress,int punishType);
 
     List<PunishLogPo> getListByType(int type);
+    List<PunishLogPo> getListByType(String address,int type);
 }

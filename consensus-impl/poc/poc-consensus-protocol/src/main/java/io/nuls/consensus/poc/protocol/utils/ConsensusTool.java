@@ -311,7 +311,7 @@ public class ConsensusTool {
 
     public static YellowPunishTransaction createYellowPunishTx(Block preBlock, MeetingMember self, MeetingRound round) throws NulsException, IOException {
         BlockRoundData preBlockRoundData = new BlockRoundData(preBlock.getHeader().getExtend());
-        if (self.getRoundIndex() - preBlockRoundData.getRoundIndex() >= 2) {
+        if (self.getRoundIndex() - preBlockRoundData.getRoundIndex() > 2) {
             return null;
         }
 
@@ -335,8 +335,7 @@ public class ConsensusTool {
                 addressList.add(Address.fromHashs(round.getMember(index).getAgentAddress()));
             } else {
                 MeetingRound preRound = round.getPreRound();
-                //TODO
-//                addressList.add(Address.fromHashs(preRound.getMember(index + preRound.getMemberCount()).getAgentAddress()));
+                addressList.add(Address.fromHashs(preRound.getMember(index + preRound.getMemberCount()).getAgentAddress()));
             }
         }
         if (addressList.isEmpty()) {
