@@ -24,7 +24,6 @@
 package io.nuls.ledger.module.impl;
 
 import io.nuls.core.thread.manager.TaskManager;
-import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.ledger.entity.listener.CoinDataTxService;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
@@ -33,13 +32,15 @@ import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 import io.nuls.ledger.entity.validator.CoinTransactionValidatorManager;
 import io.nuls.ledger.event.notice.BalanceChangeNotice;
 import io.nuls.ledger.module.AbstractLedgerModule;
-import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.impl.UtxoCoinDataProvider;
 import io.nuls.ledger.service.impl.UtxoCoinManager;
 import io.nuls.ledger.service.impl.UtxoLedgerServiceImpl;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.thread.SmallChangeThread;
-import io.nuls.ledger.validator.*;
+import io.nuls.ledger.validator.TxFieldValidator;
+import io.nuls.ledger.validator.TxSignValidator;
+import io.nuls.ledger.validator.UtxoTxInputsValidator;
+import io.nuls.ledger.validator.UtxoTxOutputsValidator;
 import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.manager.EventManager;
@@ -55,8 +56,6 @@ import io.nuls.protocol.utils.TransactionValidatorManager;
  */
 public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
-    private LedgerCacheService cacheService;
-
     private LedgerService ledgerService;
 
     private UtxoCoinManager coinManager;
@@ -66,10 +65,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
         EventManager.putEvent(BalanceChangeNotice.class);
         registerService();
         ledgerService = NulsContext.getServiceBean(LedgerService.class);
-        UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
-
         coinManager = UtxoCoinManager.getInstance();
-        cacheService = LedgerCacheService.getInstance();
         addNormalTxValidator();
     }
 
@@ -77,14 +73,11 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
      * there validators any kind of transaction will be used
      */
     private void addNormalTxValidator() {
-//        TransactionValidatorManager.addTxDefValidator(TxMaxSizeValidator.getInstance());
-//        TransactionValidatorManager.addTxDefValidator(TxRemarkValidator.getInstance());
         TransactionValidatorManager.addTxDefValidator(TxFieldValidator.getInstance());
         TransactionValidatorManager.addTxDefValidator(TxSignValidator.getInstance());
 
         CoinTransactionValidatorManager.addTxDefValidator(UtxoTxInputsValidator.getInstance());
         CoinTransactionValidatorManager.addTxDefValidator(UtxoTxOutputsValidator.getInstance());
-//        CoinTransactionValidatorManager.addTxDefValidator(TransferTxValidator.getInstance());
     }
 
     private void registerService() {
@@ -105,18 +98,16 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
     @Override
     public void start() {
         //cache the wallet's all accounts unSpend output
-        coinManager.cacheAllUnSpendUtxo();
+//        coinManager.cacheAllUnSpendUtxo();
         TaskManager.createAndRunThread(this.getModuleId(), SmallChangeThread.class.getSimpleName(), SmallChangeThread.getInstance());
     }
 
     @Override
     public void shutdown() {
-        cacheService.clear();
     }
 
     @Override
     public void destroy() {
-        this.cacheService.destroy();
     }
 
     @Override

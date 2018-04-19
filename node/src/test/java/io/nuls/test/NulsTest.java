@@ -25,6 +25,9 @@ package io.nuls.test;
 
 import org.junit.Test;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * @author vivi
  * @date 2017/12/23.
@@ -33,6 +36,10 @@ public class NulsTest {
 
     @Test
     public void testAlias() {
+        Date date = new Date();
+        date.setTime(1000000000000L);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+        System.out.println(sdf.format(date));
     }
 }

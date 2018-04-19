@@ -37,8 +37,6 @@ public interface CoinDataProvider {
 
     CoinData parse(NulsByteBuffer byteBuffer) throws NulsException;
 
-    void approve(CoinData coinData, Transaction tx) throws NulsException;
-
     void save(CoinData coinData, Transaction tx) throws NulsException;
 
     void rollback(CoinData coinData, Transaction tx);

@@ -24,6 +24,7 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -227,26 +228,55 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Balance getBalance(String address) {
-        if (StringUtils.isNotBlank(address)) {
-            Balance balance = ledgerCacheService.getBalance(address);
-            return balance;
-        } else {
-            Balance allBalance = new Balance();
-            long usable = 0;
-            long locked = 0;
-            for (String addr : NulsContext.LOCAL_ADDRESS_LIST) {
-                Balance balance = ledgerCacheService.getBalance(addr);
-                if (null != balance) {
-                    usable += balance.getUsable().getValue();
-                    locked += balance.getLocked().getValue();
+        List<UtxoOutputPo> poList = outputDataService.getAccountUnSpend(address);
+        Balance balance = new Balance();
+        long usable = 0;
+        long locked = 0;
+
+        for (UtxoOutputPo po : poList) {
+            long currentTime = TimeService.currentTimeMillis();
+            if (po.getStatus() == UtxoOutputPo.LOCKED) {
+                locked += po.getValue();
+            } else if (po.getLockTime() > 0) {
+                if (po.getLockTime() <= NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && po.getLockTime() >= NulsContext.getInstance().getBestHeight()) {
+                    locked += po.getValue();
+                } else if (po.getLockTime() > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && po.getLockTime() >= currentTime) {
+                    locked += po.getValue();
+                } else {
+                    usable += po.getValue();
                 }
+            } else {
+                usable += po.getValue();
             }
-            allBalance.setUsable(Na.valueOf(usable));
-            allBalance.setLocked(Na.valueOf(locked));
-            allBalance.setBalance(Na.valueOf(usable + locked));
-            return allBalance;
         }
+
+        balance.setUsable(Na.valueOf(usable));
+        balance.setLocked(Na.valueOf(locked));
+        balance.setBalance(Na.valueOf(usable + locked));
+        return balance;
     }
+
+//    public Balance getBalance(String address) {
+//        if (StringUtils.isNotBlank(address)) {
+//            Balance balance = ledgerCacheService.getBalance(address);
+//            return balance;
+//        } else {
+//            Balance allBalance = new Balance();
+//            long usable = 0;
+//            long locked = 0;
+//            for (String addr : NulsContext.LOCAL_ADDRESS_LIST) {
+//                Balance balance = ledgerCacheService.getBalance(addr);
+//                if (null != balance) {
+//                    usable += balance.getUsable().getValue();
+//                    locked += balance.getLocked().getValue();
+//                }
+//            }
+//            allBalance.setUsable(Na.valueOf(usable));
+//            allBalance.setLocked(Na.valueOf(locked));
+//            allBalance.setBalance(Na.valueOf(usable + locked));
+//            return allBalance;
+//        }
+//    }
 
     @Override
     public Na getTxFee(int txType) {
@@ -279,7 +309,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             if (result.isFailed()) {
                 throw new NulsException(result.getErrorCode());
             }
-
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             eventBroadcaster.publishToLocal(event);
@@ -295,7 +324,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         CoinTransferData coinData = new CoinTransferData(OperationType.TRANSFER, amount, addressList, toAddress, getTxFee(TransactionConstant.TX_TYPE_TRANSFER));
         return transfer(coinData, password, remark);
     }
-
 
     @Override
     public Result lock(String address, String password, Na amount, long unlockTime, String remark) {
