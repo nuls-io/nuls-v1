@@ -8,5 +8,9 @@ public interface ProtocolConstant {
     /**
      * unit:second
      */
-    int BLOCK_TIME_INTERVAL_SECOND = 10;
+    long BLOCK_TIME_INTERVAL_SECOND = 2;
+    /**
+     * unit:millis
+     */
+    long BLOCK_TIME_INTERVAL_MILLIS = BLOCK_TIME_INTERVAL_SECOND * 1000L;
 }
