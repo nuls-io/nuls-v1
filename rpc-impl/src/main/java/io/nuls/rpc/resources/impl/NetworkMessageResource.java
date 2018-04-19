@@ -88,7 +88,7 @@ public class NetworkMessageResource {
     @GET
     @Path("/info")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询网络最新信息 [3.7.1]")
+    @ApiOperation("查询网络最新信息 [3.7.1]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = InfoDto.class)
     })
@@ -122,7 +122,7 @@ public class NetworkMessageResource {
     @GET
     @Path("/nodes")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询节点IP [3.7.2]")
+    @ApiOperation("查询节点IP [3.7.2]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = String[].class)
     })

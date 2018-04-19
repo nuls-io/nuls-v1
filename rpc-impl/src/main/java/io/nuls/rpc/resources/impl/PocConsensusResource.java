@@ -24,25 +24,17 @@
 package io.nuls.rpc.resources.impl;
 
 import io.nuls.account.entity.Address;
-import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.poc.service.PocConsensusService;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.utils.date.DateUtil;
-import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.AgentDataService;
-import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.AgentPo;
-import io.nuls.db.entity.UtxoOutputPo;
-import io.nuls.ledger.service.intf.LedgerService;
-import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.context.NulsContext;
-import io.nuls.protocol.model.Na;
 import io.nuls.protocol.model.Transaction;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.resources.dto.WholeNetConsensusInfoDTO;
@@ -50,8 +42,7 @@ import io.nuls.rpc.resources.form.CreateAgentForm;
 import io.nuls.rpc.resources.form.DepositForm;
 import io.nuls.rpc.resources.form.StopAgentForm;
 import io.nuls.rpc.resources.form.WithdrawForm;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -77,7 +68,10 @@ public class PocConsensusResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("Get the whole network consensus infomation!")
+    @ApiOperation("Get the whole network consensus infomation! 查询全网共识总体信息 [3.6.1]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = WholeNetConsensusInfoDTO.class)
+    })
     public RpcResult getWholeInfo() {
         RpcResult result = RpcResult.getSuccess();
         WholeNetConsensusInfoDTO dto = new WholeNetConsensusInfoDTO();
@@ -95,6 +89,10 @@ public class PocConsensusResource {
     @GET
     @Path("/local")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("获取钱包内(本地)全部账户参与共识信息 [3.6.2b]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = Map.class)
+    })
     public RpcResult getInfo() {
         RpcResult result = RpcResult.getSuccess();
         Map<String, Object> dataMap = new HashMap<>();//todo consensusService.getConsensusInfo(null);
@@ -105,6 +103,10 @@ public class PocConsensusResource {
     @GET
     @Path("/address/{address}")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("获取钱包内某个账户参与共识信息 [3.6.2a]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = Map.class)
+    })
     public RpcResult getInfo(@PathParam("address") String address) {
 
         if (!Address.validAddress(StringUtils.formatStringPara(address))) {
@@ -120,7 +122,10 @@ public class PocConsensusResource {
     @POST
     @Path("/agent")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("Create an agent for consensus!")
+    @ApiOperation(value = "Create an agent for consensus! 创建共识(代理)节点 [3.6.3]", notes = "返回创建的节点成功的交易hash")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = String.class)
+    })
     public RpcResult createAgent(CreateAgentForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAgentAddress());
@@ -148,7 +153,10 @@ public class PocConsensusResource {
     @POST
     @Path("/deposit")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("deposit nuls to a bank!")
+    @ApiOperation(value = "deposit nuls to a bank! 申请参与共识 [3.6.4]", notes = "返回申请成功交易hash")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = String.class)
+    })
     public RpcResult depositToAgent(DepositForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
@@ -170,6 +178,10 @@ public class PocConsensusResource {
     @POST
     @Path("/agent/stop")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "删除共识节点 [3.6.5]", notes = "返回删除成功交易hash")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = String.class)
+    })
     public RpcResult stopAgent(StopAgentForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
@@ -218,8 +230,18 @@ public class PocConsensusResource {
     @GET
     @Path("/agent/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getAgentList(@QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize,
-                                  @QueryParam("keyword") String keyword, @QueryParam("sortType") String sortType) {
+    @ApiOperation(value = "查询共识节点列表信息 [3.6.6]", notes = "result.data: Page<Map<String, Object>>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = Page.class)
+    })
+    public RpcResult getAgentList(@ApiParam(name="pageNumber", value="页码")
+                                      @QueryParam("pageNumber") Integer pageNumber,
+                                  @ApiParam(name="pageSize", value="每页条数")
+                                    @QueryParam("pageSize") Integer pageSize,
+                                  @ApiParam(name="keyword", value="搜索关键字")
+                                    @QueryParam("keyword") String keyword,
+                                  @ApiParam(name="sortType", value="排序字段名")
+                                    @QueryParam("sortType") String sortType) {
         if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
@@ -229,7 +251,6 @@ public class PocConsensusResource {
         if (null == pageSize || pageSize == 0) {
             pageSize = 10;
         }
-
         RpcResult result = RpcResult.getSuccess();
         Page<Map<String, Object>> list = this.consensusService.getAgentList(keyword, null, null, sortType, pageNumber, pageSize);
         result.setData(list);
@@ -239,11 +260,15 @@ public class PocConsensusResource {
     @GET
     @Path("/agent/{agentAddress}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getAgentByAddress(@PathParam("agentAddress") String agentAddress) {
+    @ApiOperation(value = "查询共识节点详细信息 [3.6.7]", notes = "result.data: Map<String, Object>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = Map.class)
+    })
+    public RpcResult getAgentByAddress(@ApiParam(name="agentAddress", value="节点地址", required = true)
+                                           @PathParam("agentAddress") String agentAddress) {
         if (!Address.validAddress(agentAddress)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-
         RpcResult result = RpcResult.getSuccess();
         Map<String, Object> data = this.consensusService.getAgent(agentAddress);
         result.setData(data);
@@ -253,7 +278,16 @@ public class PocConsensusResource {
     @GET
     @Path("/agent/address/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getAgentListByDepositAddress(@QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize, @PathParam("address") String address) {
+    @ApiOperation(value = "根据地址查询其委托的节点列表 [3.6.12]", notes = "result.data: Page<Map<String, Object>>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = Page.class)
+    })
+    public RpcResult getAgentListByDepositAddress(@ApiParam(name="pageNumber", value="页码")
+                                                      @QueryParam("pageNumber") Integer pageNumber,
+                                                  @ApiParam(name="pageSize", value="每页条数")
+                                                    @QueryParam("pageSize") Integer pageSize,
+                                                  @ApiParam(name="address", value="账户地址", required = true)
+                                                    @PathParam("address") String address) {
         RpcResult result = RpcResult.getSuccess();
 
         if (null == pageNumber || pageNumber == 0) {
@@ -274,8 +308,19 @@ public class PocConsensusResource {
     @GET
     @Path("/deposit/address/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult getDepositListByAddress(@PathParam("address") String address,
-                                             @QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize, @QueryParam("agentAddress") String agentAddress) {
+    @ApiOperation(value = "查询指定地址参与的所有委托信息列表 [3.6.8]",
+                    notes = "result.data: Page<Map<String, Object>>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = Page.class)
+    })
+    public RpcResult getDepositListByAddress(@ApiParam(name="address", value="账户地址", required = true)
+                                                 @PathParam("address") String address,
+                                             @ApiParam(name="pageNumber", value="页码")
+                                                @QueryParam("pageNumber") Integer pageNumber,
+                                             @ApiParam(name="pageSize", value="每页条数")
+                                                @QueryParam("pageSize") Integer pageSize,
+                                             @ApiParam(name="agentAddress", value="指定代理节点地址(不传查所有)")
+                                                @QueryParam("agentAddress") String agentAddress) {
         AssertUtil.canNotEmpty(address);
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
@@ -296,8 +341,17 @@ public class PocConsensusResource {
     @GET
     @Path("/deposit/agent/{agentAddress}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult queryDepositListByAgentAddress(@PathParam("agentAddress") String agentAddress,
-                                                    @QueryParam("pageNumber") Integer pageNumber, @QueryParam("pageSize") Integer pageSize) {
+    @ApiOperation(value = "查询共识节点受托列表信息 [3.6.9]",
+            notes = "result.data: Page<Map<String, Object>>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = Page.class)
+    })
+    public RpcResult queryDepositListByAgentAddress(@ApiParam(name="agentAddress", value="指定代理节点地址", required = true)
+                                                        @PathParam("agentAddress") String agentAddress,
+                                                    @ApiParam(name="pageNumber", value="页码")
+                                                    @QueryParam("pageNumber") Integer pageNumber,
+                                                    @ApiParam(name="pageSize", value="每页条数")
+                                                    @QueryParam("pageSize") Integer pageSize) {
         AssertUtil.canNotEmpty(agentAddress);
 
         if (null == pageNumber || pageNumber == 0) {
@@ -319,6 +373,11 @@ public class PocConsensusResource {
     @GET
     @Path("/agent/status")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "查询所有共识信息状态 [3.6.10]",
+            notes = "result.data: Map<String, Object>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = Map.class)
+    })
     public RpcResult getAllAgentStatusList() {
         RpcResult rpcResult = RpcResult.getSuccess();
         List<AgentPo> poList = agentDataService.getList();
@@ -335,6 +394,11 @@ public class PocConsensusResource {
     @POST
     @Path("/withdraw")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "退出共识 [3.6.11]",
+            notes = "返回退出成功的交易hash")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = String.class)
+    })
     public RpcResult exitConsensus(WithdrawForm form) {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());

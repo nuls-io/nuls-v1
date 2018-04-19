@@ -36,7 +36,6 @@ import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.BlockHeader;
 import io.nuls.protocol.model.Transaction;
-import io.nuls.rpc.entity.AssetDto;
 import io.nuls.rpc.entity.BlockDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.swagger.annotations.*;
@@ -133,7 +132,7 @@ public class BlockResource {
     @GET
     @Path("/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "根据区块hash查询区块，包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用 [3.2.3]")
+    @ApiOperation("根据区块hash查询区块，包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用 [3.2.3]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = BlockDto.class)
     })
@@ -166,7 +165,7 @@ public class BlockResource {
     @GET
     @Path("/height/{height}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "根据区块高度查询区块，包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用 [3.2.4]")
+    @ApiOperation("根据区块高度查询区块，包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用 [3.2.4]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = BlockDto.class)
     })

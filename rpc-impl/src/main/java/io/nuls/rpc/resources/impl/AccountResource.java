@@ -82,7 +82,7 @@ public class AccountResource {
     @GET
     @Path("/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询账户信息 [3.3.2]")
+    @ApiOperation("查询账户信息 [3.3.2]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = AccountDto.class)
     })
@@ -114,7 +114,7 @@ public class AccountResource {
     @POST
     @Path("/alias")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "设置别名 [3.3.6]")
+    @ApiOperation("设置别名 [3.3.6]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = RpcResult.class)
     })
@@ -164,7 +164,7 @@ public class AccountResource {
     @GET
     @Path("/balance/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询账户余额 [3.3.3]")
+    @ApiOperation("查询账户余额 [3.3.3]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = BalanceDto.class)
     })
@@ -182,7 +182,7 @@ public class AccountResource {
     @GET
     @Path("/balances")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询当前钱包所有账户余额(合计) [3.3.9]")
+    @ApiOperation("查询当前钱包所有账户余额(合计) [3.3.9]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = BalanceDto.class)
     })
@@ -238,7 +238,7 @@ public class AccountResource {
     @POST
     @Path("/prikey")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询账户私钥，只能查询本地创建或导入的账户 [3.3.7]")
+    @ApiOperation("查询账户私钥，只能查询本地创建或导入的账户 [3.3.7]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = String.class)
     })
