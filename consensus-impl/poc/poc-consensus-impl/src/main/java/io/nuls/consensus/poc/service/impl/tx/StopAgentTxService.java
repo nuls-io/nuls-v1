@@ -117,7 +117,7 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
             if (depositConsensus.getExtend().getBlockHeight() > tx.getBlockHeight()) {
                 continue;
             }
-            if (depositConsensus.getDelHeight() < tx.getBlockHeight()) {
+            if (0!=depositConsensus.getDelHeight()&&depositConsensus.getDelHeight() < tx.getBlockHeight()) {
                 continue;
             }
             ledgerService.unlockTxSave(depositConsensus.getExtend().getTxHash());
