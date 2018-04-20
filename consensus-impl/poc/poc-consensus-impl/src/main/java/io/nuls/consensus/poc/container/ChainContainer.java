@@ -362,9 +362,7 @@ public class ChainContainer implements Cloneable {
         blockList.remove(rollbackBlock);
 
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
-        if (blockHeaderList.size() == 1) {
-            Log.error("=========");
-        }
+
         chain.setEndBlockHeader(blockHeaderList.get(blockHeaderList.size() - 2));
         BlockHeader rollbackBlockHeader = blockHeaderList.get(blockHeaderList.size() - 1);
         blockHeaderList.remove(rollbackBlockHeader);
@@ -466,9 +464,6 @@ public class ChainContainer implements Cloneable {
 
         List<Block> blockList = newChain.getBlockList();
         for (int i = blockList.size() - 1; i >= 0; i--) {
-            if (i == 1) {
-                Log.error("==============");
-            }
             Block block = blockList.get(i);
             if (pointBlockHeader.getPreHash().equals(block.getHeader().getHash())) {
                 break;
@@ -677,6 +672,8 @@ public class ChainContainer implements Cloneable {
             member.setAgentAddress(address);
             member.setPackingAddress(address);
             member.setCreditVal(1);
+            member.setRoundStartTime(round.getStartTime());
+
             memberList.add(member);
         }
         List<Consensus<Agent>> agentList = getAliveAgentList(startBlockHeader.getHeight());
@@ -688,6 +685,7 @@ public class ChainContainer implements Cloneable {
             member.setPackingAddress(ca.getExtend().getPackingAddress());
             member.setOwnDeposit(ca.getExtend().getDeposit());
             member.setCommissionRate(ca.getExtend().getCommissionRate());
+            member.setRoundStartTime(round.getStartTime());
 
             List<Consensus<Deposit>> cdlist = getDepositListByAgentId(ca.getHexHash(), startBlockHeader.getHeight());
             for (Consensus<Deposit> cd : cdlist) {
@@ -713,7 +711,6 @@ public class ChainContainer implements Cloneable {
         for (int i = 0; i < memberList.size(); i++) {
             MeetingMember member = memberList.get(i);
             member.setRoundIndex(round.getIndex());
-            member.setRoundStartTime(round.getStartTime());
             member.setPackingIndexOfRound(i + 1);
         }
 
