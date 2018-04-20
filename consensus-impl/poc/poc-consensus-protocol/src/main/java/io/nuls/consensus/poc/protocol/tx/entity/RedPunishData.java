@@ -43,7 +43,6 @@ public class RedPunishData extends BaseNulsData {
     private byte[] evidence;
 
     public RedPunishData(){
-//todo        this.registerValidator();
     }
     @Override
     public int size() {

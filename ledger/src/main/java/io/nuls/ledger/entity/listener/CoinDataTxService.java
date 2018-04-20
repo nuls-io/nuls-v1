@@ -63,7 +63,7 @@ public class CoinDataTxService implements TransactionService<AbstractCoinTransac
     @Override
     public ValidateResult conflictDetect(AbstractCoinTransaction tx, List<Transaction> txList) {
         // todo auto-generated method stub(niels)
-        return null;
+        return ValidateResult.getSuccessResult();
     }
 
 }

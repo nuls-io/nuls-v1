@@ -101,8 +101,8 @@ public class YellowPunishTxService implements TransactionService<YellowPunishTra
 
     @Override
     public ValidateResult conflictDetect(YellowPunishTransaction tx, List<Transaction> txList) {
-        // todo auto-generated method stub(niels)
-        return null;
+
+        return ValidateResult.getSuccessResult();
     }
 
 }

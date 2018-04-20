@@ -47,16 +47,12 @@ public interface PocConsensusService extends ConsensusService {
 
     void addProvider(QueueProvider blockQueueProvider, QueueProvider txQueueProvider);
 
-    //todo 更改参数类型
     Transaction startConsensus(String agentAddress, String password, Map<String, Object> paramsMap) throws NulsException;
 
-    //todo 更改参数类型
     Transaction stopConsensus(String address, String password, Map<String, Object> paramsMap) throws NulsException, IOException;
 
-    //todo 返回值类型
     Map<String, Object> getConsensusInfo();
 
-    //todo 返回值类型
     Map<String, Object> getConsensusInfo(String address);
 
     /**
@@ -70,12 +66,9 @@ public interface PocConsensusService extends ConsensusService {
 
     List<Consensus<Deposit>> getEffectiveDepositList(String address,String agentId,long height,Integer status);
 
-    //todo 返回值类型
     Page<Map<String, Object>> getAgentList(String keyword, String address, String agentAddress, String sortType, Integer pageNumber, Integer pageSize);
 
-    //todo 返回值类型
     Page<Map<String, Object>> getDepositList(String address, String agentAddress, Integer pageNumber, Integer pageSize);
 
-    //todo 返回值类型
     Map<String, Object> getAgent(String agentAddress);
 }

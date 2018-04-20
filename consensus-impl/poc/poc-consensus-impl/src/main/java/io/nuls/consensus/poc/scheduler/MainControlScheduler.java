@@ -142,7 +142,6 @@ public class MainControlScheduler {
 
         } catch (Exception e) {
             //TODO 缓存加载失败的处理
-            e.printStackTrace();
             Log.error(e);
         } finally {
             ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.WAIT_START);

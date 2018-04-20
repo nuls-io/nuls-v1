@@ -70,8 +70,7 @@ public class RedPunishTxService implements TransactionService<RedPunishTransacti
 
     @Override
     public ValidateResult conflictDetect(RedPunishTransaction tx, List<Transaction> txList) {
-        // todo auto-generated method stub(niels)
-        return null;
+        return ValidateResult.getSuccessResult();
     }
 
 }
