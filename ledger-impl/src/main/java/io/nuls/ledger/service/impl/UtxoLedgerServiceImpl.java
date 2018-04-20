@@ -221,16 +221,25 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Balance getBalance(String address) {
-        List<UtxoOutputPo> poList = outputDataService.getAccountUnSpend(address);
         Balance balance = new Balance();
         long usable = 0;
         long locked = 0;
 
+        List<UtxoOutputPo> poList = outputDataService.getAccountUnSpend(address);
+        List<UtxoOutput> outputList = new ArrayList<>();
+
         for (UtxoOutputPo po : poList) {
-            if (po.isLocked()) {
-                locked += po.getValue();
+            outputList.add(UtxoTransferTool.toOutput(po));
+        }
+
+        List<AbstractCoinTransaction> localTxs = UtxoCoinManager.getInstance().getLocalUnConfirmTxs();
+        UtxoCoinManager.getInstance().filterUtxoByLocalTxs(outputList, localTxs);
+
+        for (UtxoOutput output : outputList) {
+            if (output.isLocked()) {
+                locked += output.getValue();
             } else {
-                usable += po.getValue();
+                usable += output.getValue();
             }
         }
 

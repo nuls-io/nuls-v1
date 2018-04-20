@@ -30,6 +30,7 @@ import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoData;
+import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.util.UtxoTransactionTool;
@@ -99,38 +100,33 @@ public class UtxoCoinManager {
 
     public List<UtxoOutput> getAccountsUnSpend(List<String> addressList, Na value) {
         List<UtxoOutput> unSpends = new ArrayList<>();
-        List<UtxoOutput> localUnSpends = getUnSpendByLocalTx();
+
         try {
+            List<AbstractCoinTransaction> localTxs = getLocalUnConfirmTxs();
             //check use-able is enough , find unSpend utxo
             Na amount = Na.ZERO;
             boolean enough = false;
             for (String address : addressList) {
                 List<UtxoOutputPo> poList = outputDataService.getAccountUnSpend(address);
-
+                List<UtxoOutput> outputList = new ArrayList<>();
                 for (int i = 0; i < poList.size(); i++) {
                     UtxoOutputPo output = poList.get(i);
                     if (output.isLocked()) {
                         continue;
                     }
-                    unSpends.add(UtxoTransferTool.toOutput(output));
+                    outputList.add(UtxoTransferTool.toOutput(output));
+                }
+                filterUtxoByLocalTxs(unSpends, localTxs);
+                if (outputList.isEmpty()) {
+                    continue;
+                }
+                for (UtxoOutput output : outputList) {
                     amount = amount.add(Na.valueOf(output.getValue()));
                     if (amount.isGreaterOrEquals(value)) {
                         enough = true;
                         break;
                     }
                 }
-                for (int i = 0; i < localUnSpends.size(); i++) {
-                    UtxoOutput output = localUnSpends.get(i);
-                    if (!output.getAddress().equals(address) || !output.isUsable()) {
-                        continue;
-                    }
-                    amount = amount.add(Na.valueOf(output.getValue()));
-                    if (amount.isGreaterOrEquals(value)) {
-                        enough = true;
-                        break;
-                    }
-                }
-
                 if (enough) {
                     break;
                 }
@@ -145,8 +141,7 @@ public class UtxoCoinManager {
         return unSpends;
     }
 
-
-    private List<AbstractCoinTransaction> getLocalTxs() {
+    public List<AbstractCoinTransaction> getLocalUnConfirmTxs() {
         List<AbstractCoinTransaction> localTxs = new ArrayList<>();
         try {
             List<TransactionLocalPo> poList = localDataService.getUnConfirmTxs();
@@ -160,5 +155,31 @@ public class UtxoCoinManager {
         return localTxs;
     }
 
+    public void filterUtxoByLocalTxs(List<UtxoOutput> unSpends, List<AbstractCoinTransaction> localTxs) {
+        for (AbstractCoinTransaction tx : localTxs) {
+            UtxoData utxoData = (UtxoData) tx.getCoinData();
+            for (UtxoOutput output : utxoData.getOutputs()) {
+                unSpends.add(output);
+            }
+        }
 
+        boolean has;
+        for (int i = unSpends.size() - 1; i >= 0; i--) {
+            has = false;
+            UtxoOutput output = unSpends.get(i);
+            for (AbstractCoinTransaction tx : localTxs) {
+                UtxoData utxoData = (UtxoData) tx.getCoinData();
+                for (UtxoInput input : utxoData.getInputs()) {
+                    if (output.getTxHash().getDigestHex().equals(input.getFromHash().getDigestHex()) && output.getIndex() == input.getFromIndex()) {
+                        unSpends.remove(i);
+                        has = true;
+                        break;
+                    }
+                }
+                if (has) {
+                    break;
+                }
+            }
+        }
+    }
 }
