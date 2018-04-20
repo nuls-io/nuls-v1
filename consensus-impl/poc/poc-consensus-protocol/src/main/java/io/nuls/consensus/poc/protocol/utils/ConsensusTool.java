@@ -267,7 +267,7 @@ public class ConsensusTool {
 
     public static YellowPunishTransaction createYellowPunishTx(Block preBlock, MeetingMember self, MeetingRound round) throws NulsException, IOException {
         BlockRoundData preBlockRoundData = new BlockRoundData(preBlock.getHeader().getExtend());
-        if (self.getRoundIndex() - preBlockRoundData.getRoundIndex() > 2) {
+        if (self.getRoundIndex() - preBlockRoundData.getRoundIndex() > 1) {
             return null;
         }
 
