@@ -44,18 +44,6 @@ import java.util.Set;
  */
 public class ConsensusContext {
 
-    //todo impl
-
-    private static ConsensusStatus consensusStatus;
-
-    public static ConsensusStatus getConsensusStatus() {
-        return consensusStatus;
-    }
-
-    public static List<BaseNulsData> getMemoryTxs() {
-        return null;
-    }
-
     private static boolean partakePacking = false;
     private static List<String> seedNodeList;
 

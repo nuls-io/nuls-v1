@@ -56,14 +56,15 @@ public class IsolatedBlocksProcess {
         // 只处理本地误差100个块以内的孤块
 
         long bestBlockHeight = chainManager.getBestBlockHeight();
-//todo        if(Math.abs(bestBlockHeight - block.getHeader().getHeight()) > 100) {
-//            return;
-//        }
+
+        if (Math.abs(bestBlockHeight - block.getHeader().getHeight()) > 100) {
+            return;
+        }
 
         // Because it is not possible to ensure that there will be repeated reception, priority is given to
         // 因为不能确保是否会有重复收到的情况，所以在此优先去重
         boolean hasExist = checkHasExist(blockContainer);
-        if(hasExist) {
+        if (hasExist) {
             return;
         }
 
@@ -73,9 +74,9 @@ public class IsolatedBlocksProcess {
         // 检查当前孤立块是否和已经存在的孤立链连接
         boolean success = chainManager.checkIsBeforeIsolatedChainAndAdd(block);
 
-        ChainLog.debug("checkIsBeforeIsolatedChainAndAdd: {} , block {} - {}",success, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
+        ChainLog.debug("checkIsBeforeIsolatedChainAndAdd: {} , block {} - {}", success, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
 
-        if(success) {
+        if (success) {
             // Connect to the current isolated chain and continue to find the previous block
             // 和当前的孤立链连接，继续寻找上一区块
             foundPreviousBlock(blockContainer);
@@ -83,9 +84,9 @@ public class IsolatedBlocksProcess {
         }
         success = chainManager.checkIsAfterIsolatedChainAndAdd(block);
 
-        ChainLog.debug("checkIsAfterIsolatedChainAndAdd: {} , block {} - {}",success, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
+        ChainLog.debug("checkIsAfterIsolatedChainAndAdd: {} , block {} - {}", success, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
 
-        if(success) {
+        if (success) {
             // Successfully found and connected, no action required
             // 成功找到，并且连接上了，接下来不需要做任何操作
             return;
@@ -95,7 +96,7 @@ public class IsolatedBlocksProcess {
         // 没有找到，那么新建一条孤立链，接着寻找上一个区块
         chainManager.newIsolatedChain(block);
 
-        ChainLog.debug("new a isolated chain , block {} - {}",success, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
+        ChainLog.debug("new a isolated chain , block {} - {}", success, block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
 
         foundPreviousBlock(blockContainer);
 
@@ -113,17 +114,17 @@ public class IsolatedBlocksProcess {
     private boolean checkHasExist(BlockContainer blockContainer) {
         NulsDigestData hash = blockContainer.getBlock().getHeader().getHash();
 
-        for(ChainContainer chainContainer : chainManager.getIsolatedChains()) {
-            for(BlockHeader header : chainContainer.getChain().getBlockHeaderList()) {
-                if(header.getHash().equals(hash)) {
+        for (ChainContainer chainContainer : chainManager.getIsolatedChains()) {
+            for (BlockHeader header : chainContainer.getChain().getBlockHeaderList()) {
+                if (header.getHash().equals(hash)) {
                     return true;
                 }
             }
         }
 
-        for(ChainContainer chainContainer : chainManager.getChains()) {
-            for(BlockHeader header : chainContainer.getChain().getBlockHeaderList()) {
-                if(header.getHash().equals(hash)) {
+        for (ChainContainer chainContainer : chainManager.getChains()) {
+            for (BlockHeader header : chainContainer.getChain().getBlockHeaderList()) {
+                if (header.getHash().equals(hash)) {
                     return true;
                 }
             }

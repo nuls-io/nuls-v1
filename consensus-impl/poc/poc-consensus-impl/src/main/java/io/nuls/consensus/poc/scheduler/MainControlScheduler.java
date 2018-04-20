@@ -33,6 +33,7 @@ import io.nuls.consensus.poc.provider.*;
 import io.nuls.consensus.poc.service.PocConsensusService;
 import io.nuls.consensus.poc.task.*;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
@@ -141,8 +142,8 @@ public class MainControlScheduler {
             cacheManager.load();
 
         } catch (Exception e) {
-            //TODO 缓存加载失败的处理
             Log.error(e);
+            throw new NulsRuntimeException(e);
         } finally {
             ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.WAIT_START);
             Lockers.OUTER_LOCK.unlock();

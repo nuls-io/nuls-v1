@@ -161,8 +161,18 @@ public class PocConsensusServiceImpl implements PocConsensusService {
     }
 
     @Override
-    public BaseNulsData getAndRemoveOfMemoryTxs(String hash) {
+    public Transaction getAndRemoveOfMemoryTxs(String hash) {
         return mainControlScheduler.getTxMemoryPool().getAndRemove(hash);
+    }
+
+    @Override
+    public Transaction getTxFromMemory(String hash) {
+        return mainControlScheduler.getTxMemoryPool().get(hash);
+    }
+
+    @Override
+    public List<Transaction> getMemoryTxList() {
+        return mainControlScheduler.getTxMemoryPool().getAll();
     }
 
     @Override

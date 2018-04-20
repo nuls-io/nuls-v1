@@ -33,6 +33,7 @@ import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.poc.service.intf.ConsensusService;
 import io.nuls.protocol.event.entity.Consensus;
+import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.model.Transaction;
 
 import java.io.IOException;
@@ -59,12 +60,14 @@ public interface PocConsensusService extends ConsensusService {
      * for client Customized
      */
     List<Consensus<Agent>> getAllAgentList();
+
     Consensus<Agent> getAgentByAddress(String address);
+
     List<Consensus<Agent>> getEffectiveAgentList(String address, long height, Integer status);
 
     List<Consensus<Deposit>> getAllDepositList();
 
-    List<Consensus<Deposit>> getEffectiveDepositList(String address,String agentId,long height,Integer status);
+    List<Consensus<Deposit>> getEffectiveDepositList(String address, String agentId, long height, Integer status);
 
     Page<Map<String, Object>> getAgentList(String keyword, String address, String agentAddress, String sortType, Integer pageNumber, Integer pageSize);
 

@@ -130,7 +130,7 @@ public class BroadcastHandler {
 //     */
 //    private BroadcastResult broadcast(NulsMessage message, String excludeNodeId) {
 ////        List<Node> broadNodes = nodesManager.getAvailableNodes(excludeNodeId);
-////        //todo only one node connected can't send message
+////         only one node connected can't send message
 ////        if (broadNodes.size() < NetworkConstant.NETWORK_BROAD_SUCCESS_MIN_COUNT) {
 ////            return new BroadcastResult(false, "no node can be broadcast");
 ////        }
