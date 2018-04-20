@@ -677,7 +677,6 @@ public class ChainContainer implements Cloneable {
             member.setAgentAddress(address);
             member.setPackingAddress(address);
             member.setCreditVal(1);
-            member.setRoundStartTime(round.getStartTime());
             memberList.add(member);
         }
         List<Consensus<Agent>> agentList = getAliveAgentList(startBlockHeader.getHeight());
@@ -689,7 +688,6 @@ public class ChainContainer implements Cloneable {
             member.setPackingAddress(ca.getExtend().getPackingAddress());
             member.setOwnDeposit(ca.getExtend().getDeposit());
             member.setCommissionRate(ca.getExtend().getCommissionRate());
-            member.setRoundStartTime(round.getStartTime());
 
             List<Consensus<Deposit>> cdlist = getDepositListByAgentId(ca.getHexHash(), startBlockHeader.getHeight());
             for (Consensus<Deposit> cd : cdlist) {
@@ -714,6 +712,8 @@ public class ChainContainer implements Cloneable {
 
         for (int i = 0; i < memberList.size(); i++) {
             MeetingMember member = memberList.get(i);
+            member.setRoundIndex(round.getIndex());
+            member.setRoundStartTime(round.getStartTime());
             member.setPackingIndexOfRound(i + 1);
         }
 
