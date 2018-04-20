@@ -134,7 +134,7 @@ public class ChainContainer implements Cloneable {
                 while (it.hasNext()) {
                     Consensus<Deposit> tempDe = it.next();
                     Deposit deposit = tempDe.getExtend();
-                    if (deposit.getAgentHash().equals(registerAgentTx.getHash())) {
+                    if (deposit.getAgentHash().equals(registerAgentTx.getTxData().getHexHash())) {
                         tempDe.setDelHeight(height);
                     }
                 }
@@ -142,7 +142,7 @@ public class ChainContainer implements Cloneable {
                 Iterator<Consensus<Agent>> ita = agentList.iterator();
                 while (ita.hasNext()) {
                     Consensus<Agent> tempCa = ita.next();
-                    if (tempCa.getHash().equals(registerAgentTx.getHash())) {
+                    if (tempCa.getHash().equals(registerAgentTx.getTxData().getHash())) {
                         tempCa.setDelHeight(height);
                         break;
                     }
