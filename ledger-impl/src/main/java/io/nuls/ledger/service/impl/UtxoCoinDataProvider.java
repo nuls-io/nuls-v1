@@ -247,6 +247,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             if (outputPo == null) {
                 throw new NulsRuntimeException(ErrorCode.UTXO_NOT_FOUND);
             }
+            outputPo.setStatus(UtxoOutputPo.SPENT);
             spendPoList.add(outputPo);
             inputPoList.add(UtxoTransferTool.toInputPojo(input));
             addressSet.add(outputPo.getAddress());
