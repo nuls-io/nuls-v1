@@ -273,6 +273,7 @@ public class ConsensusProcess {
         BlockData bd = new BlockData();
         bd.setHeight(bestBlock.getHeader().getHeight() + 1);
         bd.setPreHash(bestBlock.getHeader().getHash());
+        bd.setTime(self.getPackEndTime());
         BlockRoundData roundData = new BlockRoundData();
         roundData.setRoundIndex(round.getIndex());
         roundData.setConsensusMemberCount(round.getMemberCount());

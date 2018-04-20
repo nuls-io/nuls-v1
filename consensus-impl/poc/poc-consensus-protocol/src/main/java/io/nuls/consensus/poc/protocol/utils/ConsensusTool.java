@@ -156,7 +156,7 @@ public class ConsensusTool {
             Log.error(e);
         }
         header.setHeight(blockData.getHeight());
-        header.setTime(TimeService.currentTimeMillis());
+        header.setTime(blockData.getTime());
         header.setPreHash(blockData.getPreHash());
         header.setTxCount(blockData.getTxList().size());
         List<NulsDigestData> txHashList = new ArrayList<>();

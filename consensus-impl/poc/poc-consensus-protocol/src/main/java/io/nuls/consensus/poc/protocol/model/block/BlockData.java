@@ -37,6 +37,7 @@ public class BlockData {
     private NulsDigestData preHash;
     private List<Transaction> txList;
     private BlockRoundData roundData;
+    private long time;
 
     public long getHeight() {
         return height;
@@ -68,5 +69,13 @@ public class BlockData {
 
     public void setRoundData(BlockRoundData roundData) {
         this.roundData = roundData;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 }
