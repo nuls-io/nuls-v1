@@ -181,8 +181,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     @Override
     @DbSession
     public void save(CoinData coinData, Transaction tx) throws NulsException {
-        UtxoData utxoData = (UtxoData) coinData;
+        UtxoTransactionTool.getInstance().setTxhashToUtxo(tx);
 
+        UtxoData utxoData = (UtxoData) coinData;
         List<UtxoInputPo> inputPoList = new ArrayList<>();
         List<UtxoOutputPo> spendPoList = new ArrayList<>();
         List<TxAccountRelationPo> txRelations = new ArrayList<>();
