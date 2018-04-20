@@ -132,7 +132,12 @@ public class BlockServiceImpl implements BlockService {
         }
         ledgerService.saveTxList(block.getTxs());
         blockStorageService.save(block);
-        List<Transaction> localTxList = this.ledgerService.getWaitingTxList();
+        List<Transaction> localTxList = null;
+        try {
+            localTxList = this.ledgerService.getWaitingTxList();
+        } catch (Exception e) {
+            Log.error(e);
+        }
         if (null != localTxList && !localTxList.isEmpty()) {
             for (Transaction tx : localTxList) {
                 try {

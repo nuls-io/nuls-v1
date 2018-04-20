@@ -41,6 +41,8 @@ public interface UtxoTransactionDataService {
 
     TransactionLocalPo getLocaltx(String hash);
 
+    List<TransactionLocalPo> getUnConfirmTxs();
+
     List<TransactionPo> getTxs(long blockHeight);
 
     Page<TransactionPo> getTxs(Long blockHeight, int type, int pageNum, int pageSize);

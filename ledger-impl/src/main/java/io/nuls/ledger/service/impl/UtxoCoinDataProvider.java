@@ -33,6 +33,7 @@ import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.TxAccountRelationDataService;
 import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
@@ -43,6 +44,7 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 import io.nuls.ledger.service.intf.CoinDataProvider;
@@ -548,5 +550,35 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 //            }
 //        }
 //        coinData.setTotalNa(totalNa);
+    }
+
+    @Override
+    public ValidateResult conflictDetect(Transaction tx, List<Transaction> txList) {
+        AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
+        UtxoData txUtxoData = (UtxoData) coinTx.getCoinData();
+        if(txUtxoData.getInputs()==null||txUtxoData.getInputs().isEmpty()){
+            return ValidateResult.getSuccessResult();
+        }
+        Set<String > outputSet = new HashSet<>();
+        for(Transaction transaction:txList){
+            if(!(transaction instanceof AbstractCoinTransaction)){
+                continue;
+            }
+            AbstractCoinTransaction coinTransaction = (AbstractCoinTransaction) transaction;
+            UtxoData utxoData = (UtxoData) coinTransaction.getCoinData();
+            if(null==utxoData.getInputs()||utxoData.getInputs().isEmpty()){
+                continue;
+            }
+            for(UtxoInput input :utxoData.getInputs()){
+                outputSet.add(input.getKey());
+            }
+        }
+        for(UtxoInput input :txUtxoData.getInputs()){
+            boolean result = outputSet.add(input.getKey());
+            if(!result){
+                return ValidateResult.getFailedResult(ErrorCode.FAILED,"input conflict!");
+            }
+        }
+        return ValidateResult.getSuccessResult();
     }
 }

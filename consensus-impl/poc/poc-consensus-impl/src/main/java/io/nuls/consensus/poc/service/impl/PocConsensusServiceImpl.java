@@ -207,6 +207,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
         tx.verifyWithException();
         event.setEventBody(tx);
+        this.ledgerService.saveLocalTx(tx);
         boolean b = eventBroadcaster.publishToLocal(event);
         if (!b) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "broadcast transaction failed!");
@@ -249,6 +250,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
         tx.verifyWithException();
         event.setEventBody(tx);
+        this.ledgerService.saveLocalTx(tx);
         boolean b = eventBroadcaster.publishToLocal(event);
         if (!b) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "broadcast transaction failed!");
@@ -308,6 +310,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
             tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
             tx.verifyWithException();
             event.setEventBody(tx);
+            this.ledgerService.saveLocalTx(tx);
             eventBroadcaster.publishToLocal(event);
 
             return tx;
@@ -327,6 +330,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
         tx.verifyWithException();
         event.setEventBody(tx);
+        this.ledgerService.saveLocalTx(tx);
         eventBroadcaster.publishToLocal(event);
         return tx;
     }

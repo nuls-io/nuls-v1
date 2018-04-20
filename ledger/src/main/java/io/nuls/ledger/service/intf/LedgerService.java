@@ -98,7 +98,7 @@ public interface LedgerService {
 
     ValidateResult conflictDetectTx(Transaction tx, List<Transaction> txList) throws NulsException;
 
-    List<Transaction> getWaitingTxList();
+    List<Transaction> getWaitingTxList() throws Exception;
 
     void deleteTx(Transaction tx);
 

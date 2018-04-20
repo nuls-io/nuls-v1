@@ -34,7 +34,9 @@ import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.service.intf.TransactionService;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Niels
@@ -62,8 +64,16 @@ public class CoinDataTxService implements TransactionService<AbstractCoinTransac
 
     @Override
     public ValidateResult conflictDetect(AbstractCoinTransaction tx, List<Transaction> txList) {
-        // todo auto-generated method stub(niels)
-        return ValidateResult.getSuccessResult();
+        if(null==txList||txList.isEmpty()){
+            return ValidateResult.getSuccessResult();
+        }
+
+
+
+
+
+
+        return tx.getCoinDataProvider().conflictDetect(tx,txList);
     }
 
 }
