@@ -103,12 +103,12 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         List<NulsDigestData> needHashList = new ArrayList<>();
         for (NulsDigestData hash : smallBlock.getTxHashList()) {
             String hashHex = hash.getDigestHex();
-            Transaction tx = null;
-            tx = txMap.get(hashHex);
+            Transaction tx = txMap.get(hashHex);
             if (null == tx) {
                 tx = consensusService.getTxFromMemory(hashHex);
                 if(tx!=null){
                     smallBlock.getSubTxList().add(tx);
+                    txMap.put(hashHex, tx);
                 }
             }
             if (null == tx) {
