@@ -91,16 +91,42 @@ public class UtxoCoinManager {
      */
     public List<UtxoOutput> getAccountUnSpend(String address, Na value) {
         List<UtxoOutput> unSpends = new ArrayList<>();
-        List<UtxoOutputPo> poList = outputDataService.getAccountUnSpend(address);
-        for (int i = 0; i < poList.size(); i++) {
+        try {
+            List<UtxoOutputPo> poList = outputDataService.getAccountUnSpend(address);
+            List<UtxoOutput> outputList = new ArrayList<>();
+            Na amount = Na.ZERO;
+            boolean enough = false;
 
+            for (int i = 0; i < poList.size(); i++) {
+                UtxoOutputPo output = poList.get(i);
+                if (output.isLocked()) {
+                    continue;
+                }
+                outputList.add(UtxoTransferTool.toOutput(output));
+            }
+            List<AbstractCoinTransaction> localTxs = getLocalUnConfirmTxs();
+            filterUtxoByLocalTxs(outputList, localTxs);
+
+            for (UtxoOutput output : outputList) {
+                unSpends.add(output);
+                amount = amount.add(Na.valueOf(output.getValue()));
+                if (amount.isGreaterOrEquals(value)) {
+                    enough = true;
+                    break;
+                }
+            }
+            if(!enough) {
+                unSpends = new ArrayList<>();
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            unSpends = new ArrayList<>();
         }
-        return null;
+        return unSpends;
     }
 
     public List<UtxoOutput> getAccountsUnSpend(List<String> addressList, Na value) {
         List<UtxoOutput> unSpends = new ArrayList<>();
-
         try {
             List<AbstractCoinTransaction> localTxs = getLocalUnConfirmTxs();
             //check use-able is enough , find unSpend utxo
@@ -116,11 +142,12 @@ public class UtxoCoinManager {
                     }
                     outputList.add(UtxoTransferTool.toOutput(output));
                 }
-                filterUtxoByLocalTxs(unSpends, localTxs);
+                filterUtxoByLocalTxs(outputList, localTxs);
                 if (outputList.isEmpty()) {
                     continue;
                 }
                 for (UtxoOutput output : outputList) {
+                    unSpends.add(output);
                     amount = amount.add(Na.valueOf(output.getValue()));
                     if (amount.isGreaterOrEquals(value)) {
                         enough = true;

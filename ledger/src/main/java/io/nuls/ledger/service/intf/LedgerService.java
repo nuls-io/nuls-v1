@@ -125,5 +125,7 @@ public interface LedgerService {
 
     Page getLockUtxo(String address, Integer pageNumber, Integer pageSize);
 
+    Balance getAccountUtxo(String address, Na amount);
+
     void resetLedgerCache();
 }

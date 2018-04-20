@@ -207,29 +207,16 @@ public class AccountResource {
         if (!Address.validAddress(address) || amount <= 0 || amount > Na.MAX_NA_VALUE) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
-        UtxoBalance balance = (UtxoBalance) ledgerService.getBalance(address);
-        if (balance == null || balance.getUnSpends() == null) {
-            return RpcResult.getFailed("balance not enough");
-        }
         amount += this.ledgerService.getTxFee(Integer.MAX_VALUE).getValue();
 
-        long usable = 0;
-        boolean enough = false;
-        List<OutputDto> dtoList = new ArrayList<>();
-        for (int i = 0; i < balance.getUnSpends().size(); i++) {
-            UtxoOutput output = balance.getUnSpends().get(i);
-            if (output.isUsable()) {
-                usable += output.getValue();
-                dtoList.add(new OutputDto(output));
-            }
-            if (usable > amount) {
-                enough = true;
-                break;
-            }
+        UtxoBalance balance = (UtxoBalance) ledgerService.getAccountUtxo(address, Na.valueOf(amount));
+        if (balance == null || balance.getUnSpends() == null || balance.getUnSpends().isEmpty()) {
+            return RpcResult.getFailed("balance not enough");
         }
 
-        if (!enough) {
-            return RpcResult.getFailed("balance not enough");
+        List<OutputDto> dtoList = new ArrayList<>();
+        for (int i = 0; i < balance.getUnSpends().size(); i++) {
+            dtoList.add(new OutputDto(balance.getUnSpends().get(i)));
         }
 
         return RpcResult.getSuccess().setData(dtoList);

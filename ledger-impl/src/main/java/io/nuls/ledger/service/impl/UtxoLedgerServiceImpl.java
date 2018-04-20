@@ -45,6 +45,7 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
@@ -637,6 +638,14 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         page.setTotal(count);
         page.setList(lockOutputs);
         return page;
+    }
+
+    @Override
+    public Balance getAccountUtxo(String address, Na amount) {
+        UtxoBalance balance = new UtxoBalance();
+        List<UtxoOutput> unSpends = UtxoCoinManager.getInstance().getAccountUnSpend(address, amount);
+        balance.setUnSpends(unSpends);
+        return balance;
     }
 
     public List<TransactionService> getServiceList(Class<? extends Transaction> txClass) {
