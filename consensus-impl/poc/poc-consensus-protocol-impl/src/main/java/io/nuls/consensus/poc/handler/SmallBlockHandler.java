@@ -24,6 +24,7 @@
 package io.nuls.consensus.poc.handler;
 
 import io.nuls.account.entity.Address;
+import io.nuls.consensus.poc.cache.manager.TemporaryCacheManager;
 import io.nuls.consensus.poc.protocol.event.notice.AssembledBlockNotice;
 import io.nuls.consensus.poc.protocol.service.DownloadService;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
@@ -56,7 +57,6 @@ import java.util.Map;
 public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
 
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
-    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
 
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
@@ -102,13 +102,24 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
         }
         List<NulsDigestData> needHashList = new ArrayList<>();
         for (NulsDigestData hash : smallBlock.getTxHashList()) {
+            String hashHex = hash.getDigestHex();
             Transaction tx = null;
-            if (null == tx && txMap.get(hash.getDigestHex()) == null) {
+            tx = txMap.get(hashHex);
+            if (null == tx) {
+                tx = consensusService.getTxFromMemory(hashHex);
+                if(tx!=null){
+                    smallBlock.getSubTxList().add(tx);
+                }
+            }
+            if (null == tx) {
                 needHashList.add(hash);
                 continue;
             }
         }
         if (!needHashList.isEmpty()) {
+
+            TemporaryCacheManager.getInstance().cacheSmallBlock(smallBlock);
+
             GetTxGroupRequest request = new GetTxGroupRequest();
             GetTxGroupParam param = new GetTxGroupParam();
             param.setBlockHash(header.getHash());

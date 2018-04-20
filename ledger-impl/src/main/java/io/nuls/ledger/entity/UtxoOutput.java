@@ -202,7 +202,8 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
     }
 
     public boolean isUsable() {
-        return OutPutStatusEnum.UTXO_UNSPENT == status;
+        //todo for @Vivi check the last Expression
+        return OutPutStatusEnum.UTXO_UNSPENT == status||null==status;
     }
 
     public boolean isSpend() {

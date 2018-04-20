@@ -189,23 +189,18 @@ public class UtxoCoinManager {
                 unSpends.add(output);
             }
         }
+        Set<String> inputKeySet = new HashSet<>();
+        for (AbstractCoinTransaction tx : localTxs) {
+            UtxoData utxoData = (UtxoData) tx.getCoinData();
+            for (UtxoInput input : utxoData.getInputs()) {
+                inputKeySet.add(input.getKey());
+            }
+        }
 
-        boolean has;
         for (int i = unSpends.size() - 1; i >= 0; i--) {
-            has = false;
             UtxoOutput output = unSpends.get(i);
-            for (AbstractCoinTransaction tx : localTxs) {
-                UtxoData utxoData = (UtxoData) tx.getCoinData();
-                for (UtxoInput input : utxoData.getInputs()) {
-                    if (output.getTxHash().getDigestHex().equals(input.getFromHash().getDigestHex()) && output.getIndex() == input.getFromIndex()) {
-                        unSpends.remove(i);
-                        has = true;
-                        break;
-                    }
-                }
-                if (has) {
-                    break;
-                }
+            if(inputKeySet.contains(output.getKey())){
+                unSpends.remove(i);
             }
         }
     }

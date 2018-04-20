@@ -70,17 +70,9 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         }
         List<NulsDigestData> needHashList = new ArrayList<>();
         for (NulsDigestData hash : smallBlock.getTxHashList()) {
-            Transaction tx = txGroup.getTx(hash.getDigestHex());
-//            if (null == tx) {
-//                tx = this.receivedTxCacheManager.getTx(hash);
-//            }
-//            if (null == tx) {
-//                tx = orphanTxCacheManager.getTx(hash);
-//            }
-//            if (null == tx) {
-//                tx = confirmingTxCacheManager.getTx(hash);
-//            }
-            if (null == tx && txMap.get(hash) == null) {
+            String hashHex = hash.getDigestHex();
+            Transaction tx = txGroup.getTx(hashHex);
+            if (null == tx ) {
                 needHashList.add(hash);
                 continue;
             }
