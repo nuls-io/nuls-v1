@@ -173,10 +173,10 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     @DbSession
     public void saveLocalList(List<TransactionLocalPo> poList) {
         for (TransactionLocalPo localPo : poList) {
+            localPo.setStatus(1);
             TransactionLocalPo po = getLocaltx(localPo.getHash());
             if (po != null) {
-                po.setStatus(1);
-                save(po);
+                txLocalDao.update(localPo);
             } else {
                 save(localPo);
             }
