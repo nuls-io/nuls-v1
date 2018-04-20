@@ -12,7 +12,7 @@
     tx_hash, in_index, from_hash, from_index
   </sql>
 
-  <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+  <select id="selectByPrimaryKey" parameterType="java.util.Map" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from utxo_input

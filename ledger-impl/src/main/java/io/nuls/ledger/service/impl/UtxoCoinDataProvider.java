@@ -238,8 +238,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         Map<String, Object> map = new HashMap<>();
         for (int i = 0; i < utxoData.getInputs().size(); i++) {
             UtxoInput input = utxoData.getInputs().get(i);
-            map.put("tx_hash", input.getFromHash());
-            map.put("out_index", input.getFromIndex());
+            map.put("txHash", input.getFromHash().getDigestHex());
+            map.put("outIndex", input.getFromIndex());
             UtxoOutputPo outputPo = outputDataService.get(map);
             if (outputPo == null) {
                 throw new NulsRuntimeException(ErrorCode.UTXO_NOT_FOUND);
