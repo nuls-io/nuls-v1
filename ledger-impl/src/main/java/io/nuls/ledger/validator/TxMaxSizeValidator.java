@@ -33,7 +33,7 @@ import io.nuls.protocol.model.Transaction;
  * @date 2017/12/19
  */
 public class TxMaxSizeValidator implements NulsDataValidator<Transaction> {
-    public static final int MAX_TX_SIZE = 100000;
+    public static final int MAX_TX_SIZE = 300*1024;
     private static final TxMaxSizeValidator INSTANCE = new TxMaxSizeValidator();
 
     private TxMaxSizeValidator() {
