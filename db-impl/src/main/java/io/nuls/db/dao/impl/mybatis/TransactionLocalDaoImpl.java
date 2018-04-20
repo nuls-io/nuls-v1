@@ -135,7 +135,7 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     @Override
     public List<TransactionLocalPo> getUnConfirmTxs() {
         Searchable searchable = new Searchable();
-        searchable.addCondition("status", SearchOperator.eq, TransactionLocalPo.UNCONFIRM);
+        searchable.addCondition("txStatus", SearchOperator.eq, TransactionLocalPo.UNCONFIRM);
         return getMapper().selectLocalTxs(searchable);
     } 
 }
