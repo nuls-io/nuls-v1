@@ -106,6 +106,7 @@ public class UtxoCoinManager {
             boolean enough = false;
             for (String address : addressList) {
                 List<UtxoOutputPo> poList = outputDataService.getAccountUnSpend(address);
+
                 for (int i = 0; i < poList.size(); i++) {
                     UtxoOutputPo output = poList.get(i);
                     if (output.isLocked()) {
@@ -145,19 +146,19 @@ public class UtxoCoinManager {
     }
 
 
-    private List<UtxoOutput> getUnSpendByLocalTx() {
-        List<UtxoOutput> outputs = new ArrayList<>();
+    private List<AbstractCoinTransaction> getLocalTxs() {
+        List<AbstractCoinTransaction> localTxs = new ArrayList<>();
         try {
             List<TransactionLocalPo> poList = localDataService.getUnConfirmTxs();
             for (TransactionLocalPo localPo : poList) {
                 AbstractCoinTransaction tx = (AbstractCoinTransaction) UtxoTransferTool.toTransaction(localPo);
-                UtxoData utxoData = (UtxoData) tx.getCoinData();
-                outputs.addAll(utxoData.getOutputs());
+                localTxs.add(tx);
             }
         } catch (Exception e) {
             Log.error(e);
         }
-        return outputs;
+        return localTxs;
     }
+
 
 }
