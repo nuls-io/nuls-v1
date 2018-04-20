@@ -35,7 +35,7 @@ import io.nuls.protocol.model.SmallBlock;
 public class TemporaryCacheManager {
     private static final TemporaryCacheManager INSTANCE = new TemporaryCacheManager();
 
-    private CacheMap<String, SmallBlock> smallBlockCacheMap;
+    private CacheMap<String, SmallBlock> smallBlockCacheMap = new CacheMap<>("temp-small-block-cache", 16, 1000, 0);
 
     private TemporaryCacheManager() {
     }
@@ -43,12 +43,6 @@ public class TemporaryCacheManager {
     public static TemporaryCacheManager getInstance() {
         return INSTANCE;
     }
-
-    public void init() {
-        //live time is 100 blocks time;
-        smallBlockCacheMap = new CacheMap<>("temp-small-block-cache" , 64, 1000, 0);
-    }
-
 
     public void cacheSmallBlock(SmallBlock newBlock) {
         smallBlockCacheMap.put(newBlock.getHeader().getHash().getDigestHex(), newBlock);
