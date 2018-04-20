@@ -31,6 +31,7 @@ import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.manager.RoundManager;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.protocol.context.ConsensusContext;
 import io.nuls.consensus.poc.protocol.event.notice.PackedBlockNotice;
 import io.nuls.consensus.poc.protocol.model.MeetingMember;
 import io.nuls.consensus.poc.protocol.model.MeetingRound;
@@ -101,7 +102,9 @@ public class ConsensusProcess {
 
     private boolean checkCanPackage() {
 
-        // TODO load config
+        if(!ConsensusContext.isPartakePacking()){
+            return false;
+        }
 
         // wait consensus ready running
         if (ConsensusSystemProvider.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_START.ordinal()) {
@@ -231,7 +234,6 @@ public class ConsensusProcess {
         if (thisIndex == 1) {
             MeetingRound preRound = round.getPreRound();
             if (preRound == null) {
-                //FIXME
                 return true;
             }
             preBlockPackingAddress = preRound.getMember(preRound.getMemberCount()).getPackingAddress();

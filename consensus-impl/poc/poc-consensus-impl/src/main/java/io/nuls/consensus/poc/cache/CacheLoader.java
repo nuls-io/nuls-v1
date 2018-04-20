@@ -81,7 +81,7 @@ public class CacheLoader {
 
 
         List<BlockHeader> blockHeaderList = new ArrayList<>();
-        //todo round
+
         List<BlockHeaderPo> list = blockService.getBlockHeaderListByRound(roundData.getRoundIndex() - size + 1, roundData.getRoundIndex());
         for (BlockHeaderPo blockHeaderPo : list) {
             try {
