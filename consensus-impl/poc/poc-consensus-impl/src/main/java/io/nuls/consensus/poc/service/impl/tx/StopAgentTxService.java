@@ -124,6 +124,8 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
         }
 
         this.agentDataService.deleteById(raTx.getTxData().getHexHash(), tx.getBlockHeight());
+
+
         DepositPo delPo = new DepositPo();
         delPo.setAgentHash(raTx.getTxData().getHexHash());
         delPo.setDelHeight(tx.getBlockHeight());

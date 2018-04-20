@@ -495,8 +495,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             String lockTxHash = map.get("lockedTxHash").toString();
             Long lockTime = (Long) map.get("lockTime");
             Map<String, Object> keyMap = new HashMap<>();
-            map.put("tx_hash", lockTxHash);
-            map.put("out_index", 0);
+            keyMap.put("txHash", lockTxHash);
+            keyMap.put("outIndex", 0);
             UtxoOutputPo outputPo = outputDataService.get(keyMap);
             if (outputPo == null) {
                 throw new NulsException(ErrorCode.UTXO_NOT_FOUND);
