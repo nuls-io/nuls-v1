@@ -83,15 +83,15 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
             if(result.isFailed()){
                 return;
             }
-        } catch (NulsException e) {
+        } catch (Exception e) {
             Log.error(e);
             return ;
         }
         boolean isMine = ledgerService.checkTxIsMySend(tx);
         try {
-            if (isMine) {
-                ledgerService.saveLocalTx(tx);
-            }
+//            if (isMine) {
+//                ledgerService.saveLocalTx(tx);
+//            }
             consensusService.newTx(tx);
             if (isMine) {
                 eventBroadcaster.broadcastAndCache(event);

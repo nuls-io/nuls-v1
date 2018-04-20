@@ -24,7 +24,6 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -306,6 +305,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             if (result.isFailed()) {
                 throw new NulsException(result.getErrorCode());
             }
+            this.saveLocalTx(tx);
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             eventBroadcaster.publishToLocal(event);
@@ -386,6 +386,15 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public boolean saveLocalTx(Transaction tx) throws IOException {
+        try {
+            ValidateResult validateResult = this.conflictDetectTx(tx, this.getWaitingTxList());
+            if (validateResult.isFailed()) {
+                return false;
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
         TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);
         txDao.save(localPo);
         return false;
@@ -641,9 +650,14 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public List<Transaction> getWaitingTxList() {
-        // todo auto-generated method stub(Vivi)
-        return null;
+    public List<Transaction> getWaitingTxList() throws Exception {
+        List<TransactionLocalPo> poList = this.txDao.getUnConfirmTxs();
+        List<Transaction> txList = new ArrayList<>();
+        for (TransactionLocalPo po : poList) {
+            Transaction tx = UtxoTransferTool.toTransaction(po);
+            txList.add(tx);
+        }
+        return txList;
     }
 
     @Override

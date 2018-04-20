@@ -98,6 +98,11 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     }
 
     @Override
+    public List<TransactionLocalPo> getUnConfirmTxs() {
+        return txLocalDao.getUnConfirmTxs();
+    }
+
+    @Override
     public List<TransactionLocalPo> getLocalTxs(long blockHeight) {
         return txLocalDao.getTxs(blockHeight);
     }
