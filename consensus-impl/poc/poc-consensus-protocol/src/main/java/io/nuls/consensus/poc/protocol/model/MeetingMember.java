@@ -39,6 +39,8 @@ import java.util.List;
 public class MeetingMember implements Comparable<MeetingMember> {
     private long roundIndex;
     private long roundStartTime;
+    private long packStartTime;
+    private long packEndTime;
     private String agentAddress;
     private String packingAddress;
     private String agentHash;
@@ -125,18 +127,17 @@ public class MeetingMember implements Comparable<MeetingMember> {
 
     public void setPackingIndexOfRound(int packingIndexOfRound) {
         this.packingIndexOfRound = packingIndexOfRound;
+        packStartTime = ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS * (this.getPackingIndexOfRound() - 1) + roundStartTime;
+        packEndTime = ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS * this.getPackingIndexOfRound() + roundStartTime;
     }
 
     public long getPackStartTime() {
-        long packTime = ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * (this.getPackingIndexOfRound() - 1) + roundStartTime;
-        return packTime;
+        return packStartTime;
     }
 
     public long getPackEndTime() {
-        long packTime = ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000 * this.getPackingIndexOfRound() + roundStartTime;
-        return packTime;
+        return packEndTime;
     }
-
 
     public long getRoundIndex() {
         return roundIndex;
@@ -177,5 +178,13 @@ public class MeetingMember implements Comparable<MeetingMember> {
 
     public void setCommissionRate(double commissionRate) {
         this.commissionRate = commissionRate;
+    }
+
+    public void setPackStartTime(long packStartTime) {
+        this.packStartTime = packStartTime;
+    }
+
+    public void setPackEndTime(long packEndTime) {
+        this.packEndTime = packEndTime;
     }
 }

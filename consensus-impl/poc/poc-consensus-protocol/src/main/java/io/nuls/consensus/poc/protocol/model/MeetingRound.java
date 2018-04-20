@@ -43,10 +43,11 @@ public class MeetingRound {
     private double totalWeight;
     private long index;
     private long startTime;
+    private long endTime;
     private int memberCount;
     private List<MeetingMember> memberList;
-    private Map<String, Integer> addressOrderMap = new HashMap<>();
     private MeetingRound preRound;
+    private MeetingMember myMember;
 
     public MeetingRound getPreRound() {
         return preRound;
@@ -64,8 +65,11 @@ public class MeetingRound {
         this.startTime = startTime;
     }
 
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
+    }
     public long getEndTime() {
-        return startTime + memberCount * ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L;
+        return endTime;
     }
 
     public int getMemberCount() {
@@ -88,34 +92,20 @@ public class MeetingRound {
 
     public void setMemberList(List<MeetingMember> memberList) {
         this.memberList = memberList;
-        if (null == memberList || memberList.isEmpty()) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "consensus member list is empty");
-        }
-        this.memberCount = memberList.size();
-        addressOrderMap.clear();
-        for (int i = 0; i < memberList.size(); i++) {
-            MeetingMember pmm = memberList.get(i);
-            pmm.setRoundIndex(this.getIndex());
-            pmm.setRoundStartTime(this.getStartTime());
-            pmm.setPackingIndexOfRound(i + 1);
-            addressOrderMap.put(pmm.getPackingAddress(), i + 1);
-        }
-    }
-
-    public Integer getOrder(String address) {
-        Integer val = addressOrderMap.get(address);
-        if (null == val) {
-            return null;
-        }
-        return val;
     }
 
     public MeetingMember getMember(String address) {
-        Integer order = getOrder(address);
-        if (null == order) {
+
+        if(address == null) {
             return null;
         }
-        return getMember(order);
+
+        for(MeetingMember meetingMember : memberList) {
+            if(address.equals(meetingMember.getPackingAddress())) {
+                return meetingMember;
+            }
+        }
+        return null;
     }
 
     public Account getLocalPacker() {
@@ -143,10 +133,20 @@ public class MeetingRound {
         return memberList;
     }
 
+    public MeetingMember getMyMember() {
+        return myMember;
+    }
+
+    public void setMyMember(MeetingMember myMember) {
+        this.myMember = myMember;
+    }
+
     public void calcLocalPacker(List<Account> accountList) {
         for (Account account : accountList) {
-            if (null != this.getOrder(account.getAddress().getBase58())) {
+            MeetingMember member = getMember(account.getAddress().getBase58());
+            if (null != member) {
                 this.localPacker = account;
+                this.myMember = member;
                 return;
             }
         }
