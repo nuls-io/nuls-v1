@@ -89,6 +89,7 @@ public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
     }
     @Override
     public void start() {
+        this.waitForDependencyRunning(NulsConstant.MODULE_ID_PROTOCOL);
         try {
             NulsContext.getServiceBean(PocConsensusServiceImpl.class).startup();
         } catch (Exception e) {
