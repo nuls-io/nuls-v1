@@ -180,9 +180,9 @@ public class UtxoTransferTool {
         }
 
         if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
-            po.setStatus(TransactionLocalPo.UNCONFIRM);
+            po.setTxStatus(TransactionLocalPo.UNCONFIRM);
         } else {
-            po.setStatus(TransactionLocalPo.CONFIRM);
+            po.setTxStatus(TransactionLocalPo.CONFIRM);
         }
 
         if (tx instanceof AbstractCoinTransaction) {
@@ -228,7 +228,7 @@ public class UtxoTransferTool {
         if (null != po.getTxData()) {
             tx.parseTxData(new NulsByteBuffer(po.getTxData()));
         }
-        if (po.getStatus() == TransactionLocalPo.UNCONFIRM) {
+        if (po.getTxStatus() == TransactionLocalPo.UNCONFIRM) {
             tx.setStatus(TxStatusEnum.UNCONFIRM);
             AbstractCoinTransaction transaction = (AbstractCoinTransaction) tx;
             transaction.parseCoinData(new NulsByteBuffer(po.getCoinData()));

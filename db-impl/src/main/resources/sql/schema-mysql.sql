@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `coinData` BLOB DEFAULT NULL,
   `scriptSig` varbinary(255) DEFAULT NULL,
   `size` int(9) DEFAULT NULL,
-  `status` tinyint(1) DEFAULT NULL,
+  `txStatus` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`hash`),
   KEY `block_height_id` (`block_height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

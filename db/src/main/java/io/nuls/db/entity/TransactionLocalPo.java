@@ -61,7 +61,7 @@ public class TransactionLocalPo {
 
     public static final int UNCONFIRM = 0;
     public static final int CONFIRM = 1;
-    private Integer status;
+    private Integer txStatus;
 
     public TransactionLocalPo() {
     }
@@ -185,13 +185,6 @@ public class TransactionLocalPo {
         this.size = size;
     }
 
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
 
     public byte[] getCoinData() {
         return coinData;
@@ -199,5 +192,13 @@ public class TransactionLocalPo {
 
     public void setCoinData(byte[] coinData) {
         this.coinData = coinData;
+    }
+
+    public Integer getTxStatus() {
+        return txStatus;
+    }
+
+    public void setTxStatus(Integer txStatus) {
+        this.txStatus = txStatus;
     }
 }
