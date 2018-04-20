@@ -39,6 +39,8 @@ import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.TransactionEvent;
 import io.nuls.protocol.model.Transaction;
 
+import java.util.List;
+
 /**
  * @author Niels
  * @date 2018/1/8
@@ -70,7 +72,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         }
 
         ValidateResult result = tx.verify();
-        if (result.isFailed()&&result.getErrorCode() != ErrorCode.ORPHAN_TX) {
+        if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
             if (result.getLevel() == SeverityLevelEnum.NORMAL_FOUL) {
                 networkService.removeNode(fromId);
             } else if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
@@ -79,13 +81,20 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
             return;
         }
         try {
-            result = ledgerService.conflictDetectTx(tx,ledgerService.getWaitingTxList());
-            if(result.isFailed()){
+            List<Transaction> waitingList = ledgerService.getWaitingTxList();
+            for (int i = 0; i < waitingList.size(); i++) {
+                if (waitingList.get(i).getHash().equals(tx.getHash())) {
+                    waitingList.remove(i);
+                    break;
+                }
+            }
+            result = ledgerService.conflictDetectTx(tx, waitingList);
+            if (result.isFailed()) {
                 return;
             }
         } catch (Exception e) {
             Log.error(e);
-            return ;
+            return;
         }
         boolean isMine = ledgerService.checkTxIsMySend(tx);
         try {
