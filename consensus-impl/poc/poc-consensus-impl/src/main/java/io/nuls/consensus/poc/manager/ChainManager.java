@@ -37,8 +37,6 @@ import java.util.List;
  */
 public class ChainManager {
 
-    //TODO 存在缓存过大问题
-
     private ChainContainer masterChain;
     private List<ChainContainer> chains;
     private List<ChainContainer> isolatedChains;

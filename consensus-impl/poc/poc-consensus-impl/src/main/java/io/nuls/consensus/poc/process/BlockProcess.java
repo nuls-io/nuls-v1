@@ -85,8 +85,8 @@ public class BlockProcess {
             } else {
                 chainManager.getMasterChain().rollback();
                 NulsContext.getInstance().setBestBlock(chainManager.getBestBlock());
-                // if save block fail, put in temporary cache
-                // TODO
+
+                Log.error("save block fail : " + block.getHeader().getHeight() + " , isDownload : " + isDownload);
             }
         } else {
             // Failed to block directly in the download

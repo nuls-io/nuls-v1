@@ -234,7 +234,6 @@ public class ConsensusProcess {
         if (thisIndex == 1) {
             MeetingRound preRound = round.getPreRound();
             if (preRound == null) {
-                //FIXME
                 return true;
             }
             preBlockPackingAddress = preRound.getMember(preRound.getMemberCount()).getPackingAddress();
