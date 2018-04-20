@@ -176,7 +176,7 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
             TransactionLocalPo po = getLocaltx(localPo.getHash());
             if (po != null) {
                 po.setStatus(1);
-                save(po);
+                txLocalDao.update(po);
             } else {
                 save(localPo);
             }
