@@ -107,11 +107,13 @@ public class MybatisDbModuleBootstrap extends AbstractDBModule {
             druidDataSource.close();
             sqlSessionFactory = null;
         }
+        LevelDBManager.close();
     }
 
     @Override
     public void destroy() {
         shutdown();
+        LevelDBManager.close();
 
     }
 
