@@ -29,6 +29,7 @@ import io.nuls.db.dao.*;
 import io.nuls.db.entity.*;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
+import org.apache.ibatis.exceptions.PersistenceException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -173,12 +174,11 @@ public class UtxoTransactionDaoImpl implements UtxoTransactionDataService {
     @DbSession
     public void saveLocalList(List<TransactionLocalPo> poList) {
         for (TransactionLocalPo localPo : poList) {
-            TransactionLocalPo po = getLocaltx(localPo.getHash());
-            if (po != null) {
-                po.setStatus(1);
-                txLocalDao.update(po);
-            } else {
+            try {
                 save(localPo);
+            } catch (Exception e) {
+                localPo.setStatus(1);
+                txLocalDao.update(localPo);
             }
         }
     }
