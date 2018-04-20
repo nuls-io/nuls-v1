@@ -37,8 +37,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -119,10 +120,11 @@ public class LevelDBManager {
     }
 
     public static void close() {
-        Collection<DB> dbs = AREAS.values();
-        for(DB db : dbs) {
+        Set<Map.Entry<String, DB>> entries = AREAS.entrySet();
+        for(Map.Entry<String, DB> entry : entries) {
             try {
-                db.close();
+                AREAS.remove(entry.getKey());
+                entry.getValue().close();
             } catch (IOException e) {
                 Log.warn("close leveldb error", e);
             }
