@@ -102,7 +102,7 @@ public class ConsensusProcess {
 
     private boolean checkCanPackage() {
 
-        if(!ConsensusContext.isPartakePacking()){
+        if (!ConsensusContext.isPartakePacking()) {
             return false;
         }
 
@@ -234,6 +234,7 @@ public class ConsensusProcess {
         if (thisIndex == 1) {
             MeetingRound preRound = round.getPreRound();
             if (preRound == null) {
+                //FIXME
                 return true;
             }
             preBlockPackingAddress = preRound.getMember(preRound.getMemberCount()).getPackingAddress();
@@ -315,7 +316,7 @@ public class ConsensusProcess {
                 continue;
             }
             Transaction repeatTx = ledgerService.getTx(tx.getHash());
-            if(repeatTx != null) {
+            if (repeatTx != null) {
                 continue;
             }
             outHashList.add(tx.getHash());
@@ -356,7 +357,7 @@ public class ConsensusProcess {
      */
     private void addConsensusTx(Block bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
         punishTx(bestBlock, txList, self, round);
-        CoinBaseTransaction coinBaseTransaction = ConsensusTool.createCoinBaseTx(self, txList, round);
+        CoinBaseTransaction coinBaseTransaction = ConsensusTool.createCoinBaseTx(self, txList, round, bestBlock.getHeader().getHeight() + 1 + PocConsensusConstant.COINBASE_UNLOCK_HEIGHT);
         txList.add(0, coinBaseTransaction);
     }
 
@@ -369,7 +370,7 @@ public class ConsensusProcess {
     }
 
     private void redPunishTx(Block bestBlock, List<Transaction> txList, MeetingRound round) throws NulsException, IOException {
-        //todo check it
+        //todo implement
     }
 
 }

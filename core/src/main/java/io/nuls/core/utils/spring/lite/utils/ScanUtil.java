@@ -23,7 +23,6 @@
  */
 package io.nuls.core.utils.spring.lite.utils;
 
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 
 import java.io.File;

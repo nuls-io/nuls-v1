@@ -148,7 +148,6 @@ public final class ConsensusLog {
                 logTrace.append(')');
             }
         }
-        //todo
         logTrace.append("\n");
         return logTrace.toString();
     }

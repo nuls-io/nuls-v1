@@ -74,10 +74,10 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 2) {
+            if (length != 2) {
                 return false;
             }
-            if(!CommandHelper.checkArgsIsNull(args)) {
+            if (!CommandHelper.checkArgsIsNull(args)) {
                 return false;
             }
             String newPwd = args[1];
@@ -120,10 +120,10 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 3) {
+            if (length != 3) {
                 return false;
             }
-            if(!CommandHelper.checkArgsIsNull(args)) {
+            if (!CommandHelper.checkArgsIsNull(args)) {
                 return false;
             }
             String newPwd = args[2];
@@ -133,7 +133,7 @@ public abstract class WalletProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            if(args[1].equals(args[2])) {
+            if (args[1].equals(args[2])) {
                 return CommandResult.getFailed("password no change.");
             }
             RpcClientResult result = walletService.resetPassword(args[1], args[2]);
@@ -182,7 +182,7 @@ public abstract class WalletProcessors implements CommandProcessor {
                     result = false;
                     break;
                 }
-                if(!CommandHelper.checkArgsIsNull(args)) {
+                if (!CommandHelper.checkArgsIsNull(args)) {
                     result = false;
                     break;
                 }
@@ -202,7 +202,7 @@ public abstract class WalletProcessors implements CommandProcessor {
             Long amount = null;
             try {
                 amount = CommandHelper.getLongAmount(args[3]);
-                if(amount != null) {
+                if (amount != null) {
                     form = new TransferForm();
                 } else {
                     return null;
@@ -265,13 +265,13 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length < 2) {
+            if (length < 2) {
                 return false;
             }
-            if(length > 3) {
+            if (length > 3) {
                 return false;
             }
-            if(!CommandHelper.checkArgsIsNull(args)) {
+            if (!CommandHelper.checkArgsIsNull(args)) {
                 return false;
             }
             return true;
@@ -281,7 +281,7 @@ public abstract class WalletProcessors implements CommandProcessor {
         public CommandResult execute(String[] args) {
             int length = args.length;
             String address = null;
-            if(length == 3) {
+            if (length == 3) {
                 address = args[2];
             }
             RpcClientResult result = walletService.backup(args[1], address);
@@ -305,7 +305,7 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public String getHelp() {
             CommandBulider builder = new CommandBulider();
-            //TODO 翻译
+
             builder.newLine(getCommandDescription())
                     .newLine("\t<privatekey> plain private key - Required")
                     .newLine("\t<password> password - Required");
@@ -320,10 +320,10 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 3) {
+            if (length != 3) {
                 return false;
             }
-            if(!CommandHelper.checkArgsIsNull(args)) {
+            if (!CommandHelper.checkArgsIsNull(args)) {
                 return false;
             }
             String pwd = args[2];
@@ -367,10 +367,10 @@ public abstract class WalletProcessors implements CommandProcessor {
         @Override
         public boolean argsValidate(String[] args) {
             int length = args.length;
-            if(length != 3) {
+            if (length != 3) {
                 return false;
             }
-            if(!CommandHelper.checkArgsIsNull(args)) {
+            if (!CommandHelper.checkArgsIsNull(args)) {
                 return false;
             }
             return true;
@@ -378,7 +378,7 @@ public abstract class WalletProcessors implements CommandProcessor {
 
         @Override
         public CommandResult execute(String[] args) {
-            RpcClientResult result = walletService.removeAccount(args[1],args[2]);
+            RpcClientResult result = walletService.removeAccount(args[1], args[2]);
             if (null == result) {
                 return CommandResult.getFailed("Failure to execute");
             }

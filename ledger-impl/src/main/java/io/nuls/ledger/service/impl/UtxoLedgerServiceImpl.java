@@ -672,6 +672,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public void deleteLocalTx(String txHash) {
         // todo auto-generated method stub(niels)
-        //删除本地未打包节点，如果一大包 ，则终止
+        //删除本地未打包交易，如果已打包 ，则终止
     }
 }

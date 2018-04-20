@@ -46,13 +46,13 @@ public final class TxMemoryPool {
     private QueueService<String> isolatedTxHashQueue;
 
     public TxMemoryPool() {
-        txHashQueue = new QueueService<String>();
+        txHashQueue = new QueueService<>();
         txHashQueue.createQueue(CACHE_NAME, (long) Integer.MAX_VALUE, false);
-        container = new CacheMap<String, Transaction>(CACHE_NAME, 64);
+        container = new CacheMap<>(CACHE_NAME, 64);
 
-        isolatedTxHashQueue = new QueueService<String>();
+        isolatedTxHashQueue = new QueueService<>();
         isolatedTxHashQueue.createQueue(CACHE_NAME_ISOLATED, (long) Integer.MAX_VALUE, false);
-        isolatedContainer = new CacheMap<String, Transaction>(CACHE_NAME_ISOLATED, 16);
+        isolatedContainer = new CacheMap< >(CACHE_NAME_ISOLATED, 16);
     }
 
     public boolean add(Transaction tx, boolean isIsolated) {

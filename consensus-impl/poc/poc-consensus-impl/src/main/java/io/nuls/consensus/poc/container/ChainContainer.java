@@ -275,6 +275,11 @@ public class ChainContainer implements Cloneable {
             return false;
         }
 
+        if(member.getPackEndTime()!=block.getHeader().getTime()){
+            Log.error("block height " + blockHeader.getHeight() + " time error!");
+            return false;
+        }
+
         boolean success = verifyBaseTx(block, currentRound, member);
         if (!success) {
             Log.error("block height " + blockHeader.getHeight() + " verify tx error!");
@@ -311,7 +316,7 @@ public class ChainContainer implements Cloneable {
             }
         }
 
-        CoinBaseTransaction coinBaseTransaction = ConsensusTool.createCoinBaseTx(member, block.getTxs(), currentRound);
+        CoinBaseTransaction coinBaseTransaction = ConsensusTool.createCoinBaseTx(member, block.getTxs(), currentRound,block.getHeader().getHeight()+PocConsensusConstant.COINBASE_UNLOCK_HEIGHT);
         if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
             Log.error("the coin base tx is wrong!");
             return false;
@@ -357,7 +362,7 @@ public class ChainContainer implements Cloneable {
         blockList.remove(rollbackBlock);
 
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
-        if(blockHeaderList.size() == 1) {
+        if (blockHeaderList.size() == 1) {
             Log.error("=========");
         }
         chain.setEndBlockHeader(blockHeaderList.get(blockHeaderList.size() - 2));
@@ -441,16 +446,16 @@ public class ChainContainer implements Cloneable {
         newChain.setBlockHeaderList(new ArrayList<>(chain.getBlockHeaderList()));
         newChain.setBlockList(new ArrayList<>(chain.getBlockList()));
 
-        if(chain.getAgentList() != null) {
+        if (chain.getAgentList() != null) {
             newChain.setAgentList(new ArrayList<>(chain.getAgentList()));
         }
-        if(chain.getDepositList() != null) {
+        if (chain.getDepositList() != null) {
             newChain.setDepositList(new ArrayList<>(chain.getDepositList()));
         }
-        if(chain.getYellowPunishList() != null) {
+        if (chain.getYellowPunishList() != null) {
             newChain.setYellowPunishList(new ArrayList<>(chain.getYellowPunishList()));
         }
-        if(chain.getRedPunishList() != null) {
+        if (chain.getRedPunishList() != null) {
             newChain.setRedPunishList(new ArrayList<>(chain.getRedPunishList()));
         }
         ChainContainer newChainContainer = new ChainContainer(newChain);
@@ -461,7 +466,7 @@ public class ChainContainer implements Cloneable {
 
         List<Block> blockList = newChain.getBlockList();
         for (int i = blockList.size() - 1; i >= 0; i--) {
-            if(i == 1) {
+            if (i == 1) {
                 Log.error("==============");
             }
             Block block = blockList.get(i);
@@ -531,17 +536,18 @@ public class ChainContainer implements Cloneable {
             Lockers.ROUND_LOCK.unlock();
         }
     }
+
     public MeetingRound initRound() {
         MeetingRound currentRound = resetRound(false);
 
-        if(currentRound.getPreRound() == null) {
+        if (currentRound.getPreRound() == null) {
 
             BlockRoundData roundData = null;
             List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
-            for(int i = blockHeaderList.size() - 1 ; i >= 0 ; i--) {
+            for (int i = blockHeaderList.size() - 1; i >= 0; i--) {
                 BlockHeader blockHeader = blockHeaderList.get(i);
                 roundData = new BlockRoundData(blockHeader.getExtend());
-                if(roundData.getRoundIndex() < currentRound.getIndex()) {
+                if (roundData.getRoundIndex() < currentRound.getIndex()) {
                     break;
                 }
             }

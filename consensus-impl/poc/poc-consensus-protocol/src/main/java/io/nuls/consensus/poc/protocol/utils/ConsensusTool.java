@@ -176,13 +176,14 @@ public class ConsensusTool {
     }
 
 
-    public static CoinBaseTransaction createCoinBaseTx(MeetingMember member, List<Transaction> txList, MeetingRound localRound) {
+    public static CoinBaseTransaction createCoinBaseTx(MeetingMember member, List<Transaction> txList, MeetingRound localRound,long unlockHeight) {
         CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE, Na.ZERO);
         List<ConsensusReward> rewardList = calcReward(txList, member, localRound);
         Na total = Na.ZERO;
         for (ConsensusReward reward : rewardList) {
             Coin coin = new Coin();
             coin.setNa(reward.getReward());
+            coin.setUnlockHeight(unlockHeight);
             data.addTo(reward.getAddress(), coin);
             total = total.add(reward.getReward());
         }

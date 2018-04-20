@@ -28,6 +28,7 @@ import io.nuls.network.entity.Node;
 import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.model.Transaction;
 
 import java.util.List;
@@ -81,11 +82,16 @@ public interface ConsensusService {
      *
      * @return BaseNulsData
      */
-    BaseNulsData getAndRemoveOfMemoryTxs(String hash);
+    Transaction getAndRemoveOfMemoryTxs(String hash);
 
     /**
      * 回滚最新区块，同时回滚共识服务内存中链的状态
      * @return boolean
      */
     boolean rollbackBlock() throws NulsException;
+
+
+    Transaction getTxFromMemory(String hash);
+
+    List<Transaction> getMemoryTxList();
 }
