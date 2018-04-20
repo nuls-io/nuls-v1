@@ -24,6 +24,7 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -238,6 +239,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         balance.setLocked(Na.valueOf(locked));
         balance.setBalance(Na.valueOf(usable + locked));
         return balance;
+    }
+
+    @Override
+    public Balance getBalances() {
+        Balance balances = new Balance();
+        for (String address : NulsContext.LOCAL_ADDRESS_LIST) {
+            Balance balance = getBalance(address);
+            balances.setLocked(balances.getLocked().add(balance.getLocked()));
+            balances.setUsable(balances.getUsable().add(balance.getUsable()));
+        }
+        balances.setBalance(balances.getLocked().add(balances.getUsable()));
+        return balances;
     }
 
 //    public Balance getBalance(String address) {

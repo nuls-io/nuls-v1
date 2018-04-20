@@ -1,18 +1,18 @@
 /**
  * MIT License
- **
+ * *
  * Copyright (c) 2017-2018 nuls.io
- **
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- **
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- **
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -67,10 +67,10 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "创建账户 [3.3.1]", notes = "result.data: Page<AccountDto>")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = ArrayList.class)
+            @ApiResponse(code = 200, message = "success", response = ArrayList.class)
     })
     public RpcResult create(@ApiParam(name = "form", value = "账户表单数据", required = true)
-                                        AccountCreateForm form) {
+                                    AccountCreateForm form) {
         Result<List<String>> accountResult = accountService.createAccount(form.getCount(), form.getPassword());
         RpcResult result = new RpcResult(accountResult);
         if (result.isSuccess()) {
@@ -84,10 +84,10 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("查询账户信息 [3.3.2]")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = AccountDto.class)
+            @ApiResponse(code = 200, message = "success", response = AccountDto.class)
     })
-    public RpcResult get(@ApiParam(name = "address", value = "账户地址 ，缺省时默认为所有账户",required = true)
-                             @PathParam("address") String address) {
+    public RpcResult get(@ApiParam(name = "address", value = "账户地址 ，缺省时默认为所有账户", required = true)
+                         @PathParam("address") String address) {
         RpcResult result;
         if (!Address.validAddress(address)) {
             result = RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
@@ -116,10 +116,10 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("设置别名 [3.3.6]")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = RpcResult.class)
+            @ApiResponse(code = 200, message = "success", response = RpcResult.class)
     })
     public RpcResult alias(@ApiParam(name = "form", value = "设置别名表单数据", required = true)
-                                       AccountAliasForm form) {
+                                   AccountAliasForm form) {
         if (!Address.validAddress(form.getAddress())) {
             return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }
@@ -133,11 +133,11 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "查询账户列表 [3.3.4]", notes = "result.data: Page<AccountDto>")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = AccountDto.class)
+            @ApiResponse(code = 200, message = "success", response = AccountDto.class)
     })
-    public RpcResult accountList(@ApiParam(name="pageNumber",value="页码")
-                                     @QueryParam("pageNumber") int pageNumber,
-                                 @ApiParam(name="pageSize",value="每页条数")
+    public RpcResult accountList(@ApiParam(name = "pageNumber", value = "页码")
+                                 @QueryParam("pageNumber") int pageNumber,
+                                 @ApiParam(name = "pageSize", value = "每页条数")
                                  @QueryParam("pageSize") int pageSize) {
         if (pageNumber < 0 || pageSize < 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -166,10 +166,10 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("查询账户余额 [3.3.3]")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = BalanceDto.class)
+            @ApiResponse(code = 200, message = "success", response = BalanceDto.class)
     })
-    public RpcResult getBalance(@ApiParam(name="address", value="账户地址", required = true)
-                                    @PathParam("address") String address) {
+    public RpcResult getBalance(@ApiParam(name = "address", value = "账户地址", required = true)
+                                @PathParam("address") String address) {
         if (!Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }
@@ -184,10 +184,10 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("查询当前钱包所有账户余额(合计) [3.3.9]")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = BalanceDto.class)
+            @ApiResponse(code = 200, message = "success", response = BalanceDto.class)
     })
     public RpcResult getBalance() {
-        Balance balance = ledgerService.getBalance(null);
+        Balance balance = ledgerService.getBalances();
         RpcResult result = RpcResult.getSuccess();
         result.setData(new BalanceDto(balance));
         return result;
@@ -198,11 +198,11 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "查询账户足够数量的未花费输出 [3.3.5]", notes = "result.data: List<OutputDto>")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = OutputDto.class)
+            @ApiResponse(code = 200, message = "success", response = OutputDto.class)
     })
-    public RpcResult getUtxo(@ApiParam(name="address", value="账户地址", required = true)
-                                 @QueryParam("address") String address,
-                             @ApiParam(name="amount", value="Nuls数量", required = true)
+    public RpcResult getUtxo(@ApiParam(name = "address", value = "账户地址", required = true)
+                             @QueryParam("address") String address,
+                             @ApiParam(name = "amount", value = "Nuls数量", required = true)
                              @QueryParam("amount") long amount) {
         if (!Address.validAddress(address) || amount <= 0 || amount > Na.MAX_NA_VALUE) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
@@ -240,7 +240,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("查询账户私钥，只能查询本地创建或导入的账户 [3.3.7]")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = String.class)
+            @ApiResponse(code = 200, message = "success", response = String.class)
     })
     public RpcResult getPrikey(@ApiParam(name = "form", value = "查询私钥表单数据", required = true)
                                        AccountAPForm form) {
@@ -257,10 +257,10 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "查询账户资产 [3.3.8]", notes = "result.data: List<AssetDto>")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = AssetDto.class)
+            @ApiResponse(code = 200, message = "success", response = AssetDto.class)
     })
-    public RpcResult getAssets(@ApiParam(name="address", value="账户地址", required = true)
-                                   @PathParam("address") String address) {
+    public RpcResult getAssets(@ApiParam(name = "address", value = "账户地址", required = true)
+                               @PathParam("address") String address) {
         if (!Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }
