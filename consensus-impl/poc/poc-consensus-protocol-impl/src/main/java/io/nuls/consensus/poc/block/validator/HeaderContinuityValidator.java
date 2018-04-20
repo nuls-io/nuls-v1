@@ -64,8 +64,8 @@ public class HeaderContinuityValidator implements NulsDataValidator<BlockHeader>
             try {
                 preHeader = NulsContext.getServiceBean(BlockService.class).getBlockHeader(header.getPreHash().getDigestHex());
             } catch (NulsException e) {
-                //todo
-               Log.error(e);
+                Log.error(e);
+                return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK);
             }
             if (null == preHeader) {
                 return ValidateResult.getFailedResult(ErrorCode.ORPHAN_BLOCK);
@@ -76,13 +76,12 @@ public class HeaderContinuityValidator implements NulsDataValidator<BlockHeader>
             } catch (NulsException e) {
                 Log.error(e);
             }
-            long shouldTime = roundData.getRoundStartTime() + roundData.getPackingIndexOfRound() * ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND*1000;
-            //todo 3 seconds error
+            long shouldTime = roundData.getRoundStartTime() + roundData.getPackingIndexOfRound() * ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000;
             long difference = header.getTime() - shouldTime;
-            long timeout = ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND*1000;
+            long timeout = ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000;
             failed = difference > timeout || difference < -timeout;
             if (failed) {
-                BlockLog.debug("header validate failed:"+header.getHeight()+" , time difference："+difference);
+                BlockLog.debug("header validate failed:" + header.getHeight() + " , time difference：" + difference);
                 break;
             }
         } while (false);
