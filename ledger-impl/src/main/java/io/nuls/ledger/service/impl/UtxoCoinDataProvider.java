@@ -217,8 +217,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 //                UtxoTransactionTool.getInstance().calcBalance(address, true);
 //            }
         }
-//        catch (Exception e) {
-        //rollback
+        catch (Exception e) {
+//        rollback
 //            Log.warn(e.getMessage(), e);
 //            for (UtxoOutput output : utxoData.getOutputs()) {
 //                ledgerCacheService.removeUtxo(output.getKey());
@@ -226,8 +226,10 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 //            for (UtxoOutput spend : spends) {
 //                ledgerCacheService.updateUtxoStatus(spend.getKey(), UtxoOutput.UTXO_CONFIRM_LOCK, UtxoOutput.UTXO_SPENT);
 //            }
-//            throw e;
-//        }
+            System.out.println("----------");
+            throw e;
+        }
+
         finally {
             lock.unlock();
         }

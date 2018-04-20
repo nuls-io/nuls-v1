@@ -10,8 +10,8 @@
         <result column="fee" jdbcType="BIGINT" property="fee" />
         <result column="transferType" jdbcType="INTEGER" property="transferType" />
         <result column="remark" jdbcType="VARCHAR" property="remark" />
-        <result column="txData" jdbcType="VARBINARY" property="txData" />
-        <result column="coinData" jdbcType="VARBINARY" property="coinData" />
+        <result column="txData" jdbcType="LONGVARBINARY" property="txData" />
+        <result column="coinData" jdbcType="LONGVARBINARY" property="coinData" />
         <result column="scriptSig" jdbcType="VARBINARY" property="scriptSig" />
         <result column="size" jdbcType="INTEGER" property="size" />
     </resultMap>
@@ -78,8 +78,8 @@
         )
         values (#{hash,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{txIndex,jdbcType=INTEGER},
             #{blockHeight,jdbcType=BIGINT}, #{createTime,jdbcType=BIGINT}, #{fee,jdbcType=BIGINT},
-            #{transferType,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, #{txData,jdbcType=VARBINARY},
-            #{coinData,jdbcType=VARBINARY}, #{scriptSig,jdbcType=VARBINARY}, #{size,jdbcType=INTEGER}
+            #{transferType,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, #{txData,jdbcType=LONGVARBINARY},
+            #{coinData,jdbcType=LONGVARBINARY}, #{scriptSig,jdbcType=VARBINARY}, #{size,jdbcType=INTEGER}
         )
     </insert>
 
@@ -92,8 +92,8 @@
         fee = #{fee,jdbcType=BIGINT},
         transferType = #{transferType,jdbcType=INTEGER},
         remark = #{remark,jdbcType=VARCHAR},
-        txData = #{txData,jdbcType=VARBINARY},
-        coinData = #{coinData,jdbcType=VARBINARY},
+        txData = #{txData,jdbcType=LONGVARBINARY},
+        coinData = #{coinData,jdbcType=LONGVARBINARY},
         scriptSig = #{scriptSig,jdbcType=VARBINARY},
         size = #{size,jdbcType=INTEGER}
         where hash = #{hash,jdbcType=VARCHAR}
@@ -108,8 +108,8 @@
         <foreach collection="list" item="item" index="index" separator=",">
             (#{item.hash,jdbcType=VARCHAR}, #{item.type,jdbcType=INTEGER}, #{item.txIndex,jdbcType=INTEGER},
             #{item.blockHeight,jdbcType=BIGINT}, #{item.createTime,jdbcType=BIGINT}, #{item.fee,jdbcType=BIGINT},
-            #{item.transferType,jdbcType=INTEGER}, #{item.remark,jdbcType=VARCHAR}, #{item.txData,jdbcType=VARBINARY},
-            #{item.coinData,jdbcType=VARBINARY}, #{item.scriptSig,jdbcType=VARBINARY}, #{item.size,jdbcType=INTEGER})
+            #{item.transferType,jdbcType=INTEGER}, #{item.remark,jdbcType=VARCHAR}, #{item.txData,jdbcType=LONGVARBINARY},
+            #{item.coinData,jdbcType=LONGVARBINARY}, #{item.scriptSig,jdbcType=VARBINARY}, #{item.size,jdbcType=INTEGER})
         </foreach>
     </insert>
 
