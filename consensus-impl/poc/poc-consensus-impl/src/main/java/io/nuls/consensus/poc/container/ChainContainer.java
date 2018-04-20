@@ -719,6 +719,7 @@ public class ChainContainer implements Cloneable {
 
         round.setMemberCount(memberList.size());
         round.setMemberList(memberList);
+        round.setEndTime(round.getStartTime() + memberList.size() * ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS);
         round.setTotalWeight(totalWeight);
     }
 

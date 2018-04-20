@@ -128,11 +128,10 @@ public class ConsensusProcess {
         }
 
         //check i am is a consensus node
-        Account myAccount = round.getLocalPacker();
-        if (myAccount == null) {
+        MeetingMember member = round.getMyMember();
+        if (member == null) {
             return;
         }
-        MeetingMember member = round.getMember(myAccount.getAddress().getBase58());
 
         if (!hasPacking && member.getPackStartTime() < TimeService.currentTimeMillis() && member.getPackEndTime() > TimeService.currentTimeMillis()) {
             hasPacking = true;
