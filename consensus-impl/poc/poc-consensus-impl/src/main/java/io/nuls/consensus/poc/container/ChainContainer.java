@@ -381,7 +381,7 @@ public class ChainContainer implements Cloneable {
             }
 
             if (agent.getBlockHeight() == height) {
-                depositList.remove(i);
+                agentList.remove(i);
             }
         }
 
