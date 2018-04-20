@@ -234,7 +234,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
 
         List<AbstractCoinTransaction> localTxs = UtxoCoinManager.getInstance().getLocalUnConfirmTxs();
-        UtxoCoinManager.getInstance().filterUtxoByLocalTxs(outputList, localTxs);
+        UtxoCoinManager.getInstance().filterUtxoByLocalTxs(address,outputList, localTxs);
 
         for (UtxoOutput output : outputList) {
             if (output.isLocked()) {

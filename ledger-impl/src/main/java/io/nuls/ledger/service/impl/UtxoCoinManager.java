@@ -23,6 +23,8 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.account.entity.Address;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.TransactionLocalDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
@@ -38,10 +40,7 @@ import io.nuls.ledger.util.UtxoTransferTool;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Na;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -84,10 +83,6 @@ public class UtxoCoinManager {
 
     /**
      * Utxo is used to ensure that each transaction will not double
-     *
-     * @param address
-     * @param value
-     * @return
      */
     public List<UtxoOutput> getAccountUnSpend(String address, Na value) {
         List<UtxoOutput> unSpends = new ArrayList<>();
@@ -105,7 +100,7 @@ public class UtxoCoinManager {
                 outputList.add(UtxoTransferTool.toOutput(output));
             }
             List<AbstractCoinTransaction> localTxs = getLocalUnConfirmTxs();
-            filterUtxoByLocalTxs(outputList, localTxs);
+            filterUtxoByLocalTxs(address, outputList, localTxs);
 
             for (UtxoOutput output : outputList) {
                 unSpends.add(output);
@@ -115,7 +110,7 @@ public class UtxoCoinManager {
                     break;
                 }
             }
-            if(!enough) {
+            if (!enough) {
                 unSpends = new ArrayList<>();
             }
         } catch (Exception e) {
@@ -142,7 +137,7 @@ public class UtxoCoinManager {
                     }
                     outputList.add(UtxoTransferTool.toOutput(output));
                 }
-                filterUtxoByLocalTxs(outputList, localTxs);
+                filterUtxoByLocalTxs(address, outputList, localTxs);
                 if (outputList.isEmpty()) {
                     continue;
                 }
@@ -182,11 +177,13 @@ public class UtxoCoinManager {
         return localTxs;
     }
 
-    public void filterUtxoByLocalTxs(List<UtxoOutput> unSpends, List<AbstractCoinTransaction> localTxs) {
+    public void filterUtxoByLocalTxs(String address, List<UtxoOutput> unSpends, List<AbstractCoinTransaction> localTxs) {
         for (AbstractCoinTransaction tx : localTxs) {
             UtxoData utxoData = (UtxoData) tx.getCoinData();
             for (UtxoOutput output : utxoData.getOutputs()) {
-                unSpends.add(output);
+                if (output.getAddress().equals(address)) {
+                    unSpends.add(output);
+                }
             }
         }
         Set<String> inputKeySet = new HashSet<>();
@@ -199,7 +196,7 @@ public class UtxoCoinManager {
 
         for (int i = unSpends.size() - 1; i >= 0; i--) {
             UtxoOutput output = unSpends.get(i);
-            if(inputKeySet.contains(output.getKey())){
+            if (inputKeySet.contains(output.getKey())) {
                 unSpends.remove(i);
             }
         }
