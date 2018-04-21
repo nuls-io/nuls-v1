@@ -283,7 +283,7 @@ public class ChainContainer implements Cloneable {
             return false;
         }
 
-        if(member.getPackEndTime()!=block.getHeader().getTime()){
+        if (member.getPackEndTime() != block.getHeader().getTime()) {
             Log.error("block height " + blockHeader.getHeight() + " time error!");
             return false;
         }
@@ -324,7 +324,7 @@ public class ChainContainer implements Cloneable {
             }
         }
 
-        CoinBaseTransaction coinBaseTransaction = ConsensusTool.createCoinBaseTx(member, block.getTxs(), currentRound,block.getHeader().getHeight()+PocConsensusConstant.COINBASE_UNLOCK_HEIGHT);
+        CoinBaseTransaction coinBaseTransaction = ConsensusTool.createCoinBaseTx(member, block.getTxs(), currentRound, block.getHeader().getHeight() + PocConsensusConstant.COINBASE_UNLOCK_HEIGHT);
         if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
             Log.error("the coin base tx is wrong!");
             return false;
@@ -770,7 +770,7 @@ public class ChainContainer implements Cloneable {
 
         BlockRoundData roundData = new BlockRoundData(blockHeader.getExtend());
 
-        long roundStart = roundData.getRoundIndex() - PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
+        long roundStart = roundData.getRoundIndex() - PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT + 1;
         if (roundStart < 0) {
             roundStart = 0;
         }
