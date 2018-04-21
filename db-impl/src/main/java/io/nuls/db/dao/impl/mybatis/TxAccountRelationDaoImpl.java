@@ -56,4 +56,10 @@ public class TxAccountRelationDaoImpl extends BaseDaoImpl<TxAccountRelationMappe
             getMapper().deleteRelation(po);
         }
     }
+
+    @Override
+    public void deleteRelation(String txHash) {
+        this.getMapper().deleteRelationByTxHash(txHash);
+
+    }
 }

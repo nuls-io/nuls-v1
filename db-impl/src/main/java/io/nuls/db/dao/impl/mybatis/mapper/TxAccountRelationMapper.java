@@ -34,4 +34,6 @@ import org.apache.ibatis.annotations.Param;
 public interface TxAccountRelationMapper  extends BaseMapper<String,TxAccountRelationPo> {
 
     void deleteRelation(TxAccountRelationPo po);
+
+    void deleteRelationByTxHash(String txHash);
 }

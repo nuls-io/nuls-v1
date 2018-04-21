@@ -285,7 +285,12 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             po.setTxHash(input.getFromHash().getDigestHex());
             po.setOutIndex(input.getFromIndex());
             outputDataService.updateStatus(po);
+
         }
+        String txHash = tx.getHash().getDigestHex();
+        inputDataService.deleteByHash(txHash);
+
+        relationDataService.deleteRelation(txHash);
     }
 
 //    public void rollback(CoinData coinData, Transaction tx) {
