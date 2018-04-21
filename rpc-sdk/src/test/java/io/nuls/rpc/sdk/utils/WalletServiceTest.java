@@ -53,7 +53,7 @@ public class WalletServiceTest {
     public void transfer() {
         int index = 0;
         while (index++ < 10000) {
-            RpcClientResult result = walletService.transfer("2CYj11bg7RCFS3tscnbayiBGqTLDvxQ", "2Ciw3E1fhMLZZg8v7MLKTWQ2XWEVka1", 1286L, "nuls123456", "test utxo");
+            RpcClientResult result = walletService.transfer("2Cg2Tz4mD3XmkGJUA9b49k3NSbQm5Ca", "2Ciw3E1fhMLZZg8v7MLKTWQ2XWEVka1", 1286L, "nuls123456", "test utxo");
             System.out.println(result.getMsg()+"===="+index);
             try {
                 Thread.sleep(100);

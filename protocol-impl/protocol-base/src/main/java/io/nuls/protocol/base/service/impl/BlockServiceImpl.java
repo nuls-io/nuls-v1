@@ -197,9 +197,6 @@ public class BlockServiceImpl implements BlockService {
         }
         for (; i >= 0; i--) {
             Transaction tx = txs.get(i);
-            if (tx.getStatus() == TxStatusEnum.UNCONFIRM || ledgerService.checkTxIsMySend(tx)) {
-                continue;
-            }
             try {
                 ledgerService.rollbackTx(tx, null);
             } catch (NulsException e) {
