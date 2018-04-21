@@ -541,12 +541,12 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             utxoData.getOutputs().get(0).setStatus(OutPutStatusEnum.UTXO_CONSENSUS_LOCK);
         }
 //        Na totalNa = Na.ZERO;
-//        if (null != utxoData.getOutputs()) {
-//            for (int i = 0; i < utxoData.getOutputs().size(); i++) {
-//                UtxoOutput output = utxoData.getOutputs().get(i);
-//                output.setTxHash(tx.getHash());
-//            }
-//        }
+        if (null != utxoData.getOutputs()) {
+            for (int i = 0; i < utxoData.getOutputs().size(); i++) {
+                UtxoOutput output = utxoData.getOutputs().get(i);
+                output.setTxHash(tx.getHash());
+            }
+        }
 //        coinData.setTotalNa(totalNa);
     }
 
