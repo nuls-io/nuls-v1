@@ -57,7 +57,6 @@ public interface BlockService {
     boolean saveBlock(Block block) throws IOException;
 
     boolean rollbackBlock(Block block) throws NulsException;
-    boolean rollbackBlock() throws NulsException;
 
     Page<BlockHeaderPo> getBlockHeaderList(String nodeAddress, int type, int pageNumber, int pageSize);
 

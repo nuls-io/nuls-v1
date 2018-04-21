@@ -378,7 +378,14 @@ public class ChainContainer implements Cloneable {
         return success;
     }
 
-    public boolean rollback() {
+    public boolean rollback(Block block) {
+
+        Block bestBlock = chain.getBestBlock();
+
+        if(block == null || !block.getHeader().getHash().equals(bestBlock.getHeader().getHash())) {
+            Log.warn("rollback block is not best block");
+            return false;
+        }
 
         List<Block> blockList = chain.getBlockList();
 
@@ -390,7 +397,7 @@ public class ChainContainer implements Cloneable {
         }
 
         Block rollbackBlock = blockList.get(blockList.size() - 1);
-        blockList.remove(rollbackBlock);
+        blockList.remove(blockList.size() - 1);
 
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
 
@@ -468,7 +475,7 @@ public class ChainContainer implements Cloneable {
     }
 
     private void addBlockInBlockList(List<Block> blockList) {
-        String firstHash = blockList.get(0).getHeader().getHash().getDigestHex();
+        String firstHash = blockList.get(0).getHeader().getPreHash().getDigestHex();
         Block block = blockService.getBlock(firstHash);
         blockList.add(0, block);
     }
@@ -515,7 +522,7 @@ public class ChainContainer implements Cloneable {
             if (pointBlockHeader.getPreHash().equals(block.getHeader().getHash())) {
                 break;
             }
-            newChainContainer.rollback();
+            newChainContainer.rollback(block);
         }
 
         newChainContainer.initRound();

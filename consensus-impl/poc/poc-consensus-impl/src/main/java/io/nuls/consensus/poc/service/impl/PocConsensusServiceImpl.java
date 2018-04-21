@@ -28,6 +28,8 @@ import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.container.BlockContainer;
+import io.nuls.consensus.poc.container.ChainContainer;
+import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.protocol.event.entity.JoinConsensusParam;
@@ -176,12 +178,22 @@ public class PocConsensusServiceImpl implements PocConsensusService {
     }
 
     @Override
-    public boolean rollbackBlock() throws NulsException {
-        boolean success = blockService.rollbackBlock();
-        if(success) {
-            success = mainControlScheduler.getChainManager().getMasterChain().rollback();
+    public boolean rollbackBlock(Block block) throws NulsException {
+        ChainManager chainManager = mainControlScheduler.getChainManager();
+        if(chainManager == null) {
+            return false;
         }
-        NulsContext.getInstance().setBestBlock(mainControlScheduler.getChainManager().getBestBlock());
+
+        ChainContainer masterChain = chainManager.getMasterChain();
+        if(masterChain == null) {
+            //throw new NulsException(ErrorCode.FAILED, "master chain has not init");
+            return false;
+        }
+        boolean success = blockService.rollbackBlock(block);
+        if(success) {
+            success = masterChain.rollback(block);
+        }
+        NulsContext.getInstance().setBestBlock(masterChain.getBestBlock());
         return success;
     }
 

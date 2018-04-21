@@ -88,7 +88,7 @@ public interface ConsensusService {
      * 回滚最新区块，同时回滚共识服务内存中链的状态
      * @return boolean
      */
-    boolean rollbackBlock() throws NulsException;
+    boolean rollbackBlock(Block block) throws NulsException;
 
 
     Transaction getTxFromMemory(String hash);

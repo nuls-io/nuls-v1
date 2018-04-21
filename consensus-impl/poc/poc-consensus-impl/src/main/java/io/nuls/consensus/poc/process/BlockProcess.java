@@ -83,7 +83,7 @@ public class BlockProcess {
                 forwardingBlock(blockContainer);
                 return true;
             } else {
-                chainManager.getMasterChain().rollback();
+                chainManager.getMasterChain().rollback(block);
                 NulsContext.getInstance().setBestBlock(chainManager.getBestBlock());
 
                 Log.error("save block fail : " + block.getHeader().getHeight() + " , isDownload : " + isDownload);

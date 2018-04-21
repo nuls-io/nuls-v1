@@ -220,7 +220,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         if(newestInfos.getNetBestHeight() < localBestBlock.getHeader().getHeight()) {
             if(DoubleUtils.div(newestInfos.getNodes().size(), networkService.getAvailableNodes().size(), 2) >= 0.8d && networkService.getAvailableNodes().size() >= networkService.getNetworkParam().getMaxOutCount()) {
                 for (long i = localBestBlock.getHeader().getHeight(); i <= newestInfos.getNetBestHeight(); i--) {
-                    consensusService.rollbackBlock();
+                    consensusService.rollbackBlock(localBestBlock);
                     localBestBlock = blockService.getBestBlock();
                 }
             } else {
@@ -252,7 +252,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         if(newestInfos.getNodes().size() >= PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
-            consensusService.rollbackBlock();
+            consensusService.rollbackBlock(localBestBlock);
         } else {
             resetNetwork("the number of available nodes is insufficient for rollback blocks");
             return;

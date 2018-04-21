@@ -25,6 +25,7 @@ package io.nuls.protocol.base.service.impl;
 
 import io.nuls.account.entity.Address;
 import io.nuls.consensus.poc.protocol.service.BlockService;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -153,15 +154,14 @@ public class BlockServiceImpl implements BlockService {
         return true;
     }
 
-    @Override
-    public boolean rollbackBlock() throws NulsException{
-        return rollbackBlock(getBestBlock());
-    }
-
     @DbSession
     public boolean rollbackBlock(Block block) throws NulsException {
         if (null == block) {
             return false;
+        }
+        Block bestBlock = getBestBlock();
+        if(!bestBlock.getHeader().getHash().equals(bestBlock.getHeader().getHash())) {
+            throw new NulsException(ErrorCode.FAILED, "blockService rollback block , the block is not best block!");
         }
         this.rollback(block.getTxs(), block.getTxs().size() - 1);
         this.ledgerService.deleteTx(block.getHeader().getHeight());
@@ -210,7 +210,6 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getBestBlock() {
-
         return this.getLocalBestBlock();
     }
 
