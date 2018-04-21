@@ -181,6 +181,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         if(success) {
             success = mainControlScheduler.getChainManager().getMasterChain().rollback();
         }
+        NulsContext.getInstance().setBestBlock(mainControlScheduler.getChainManager().getBestBlock());
         return success;
     }
 
