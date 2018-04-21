@@ -162,6 +162,7 @@ public class ConsensusTool {
         List<NulsDigestData> txHashList = new ArrayList<>();
         for (int i = 0; i < blockData.getTxList().size(); i++) {
             Transaction tx = blockData.getTxList().get(i);
+            tx.setBlockHeight(header.getHeight());
             txHashList.add(tx.getHash());
         }
         header.setPackingAddress(account.getAddress().getHash());
@@ -315,6 +316,7 @@ public class ConsensusTool {
         List<Transaction> txs = new ArrayList<>();
         for (NulsDigestData txHash : txHashList) {
             Transaction tx = txMap.get(txHash.getDigestHex());
+            tx.setBlockHeight(tx.getBlockHeight());
             if (null == tx) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
             }

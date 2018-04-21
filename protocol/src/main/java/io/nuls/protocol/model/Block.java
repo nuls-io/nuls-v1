@@ -85,6 +85,9 @@ public class Block extends BaseNulsData implements NulsCloneable {
         } catch (Exception e) {
             throw new NulsRuntimeException(ErrorCode.PARSE_OBJECT_ERROR,e.getMessage());
         }
+        for(Transaction tx:txs){
+            tx.setBlockHeight(header.getHeight());
+        }
     }
 
     public List<Transaction> getTxs() {
