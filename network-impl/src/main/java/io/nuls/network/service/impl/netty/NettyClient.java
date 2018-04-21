@@ -57,7 +57,7 @@ public class NettyClient {
                     if (future.isSuccess()) {
                         socketChannel = (SocketChannel) future.channel();
                     } else {
-                        Log.info("Client connect to host error: " + future.cause() + ", remove node: " + node.getId());
+//                        Log.info("Client connect to host error: " + future.cause() + ", remove node: " + node.getId());
                         getNetworkService().validateFirstUnConnectedNode(node.getId());
                         getNetworkService().removeNode(node.getId());
                     }

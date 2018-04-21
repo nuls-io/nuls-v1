@@ -95,6 +95,7 @@ public class ChainContainer implements Cloneable {
         List<Consensus<Agent>> agentList = chain.getAgentList();
         List<Consensus<Deposit>> depositList = chain.getDepositList();
         List<PunishLogPo> yellowList = chain.getYellowPunishList();
+        List<PunishLogPo> redList = chain.getRedPunishList();
 
         long height = block.getHeader().getHeight();
 
@@ -186,7 +187,7 @@ public class ChainContainer implements Cloneable {
                 punishLogPo.setTime(tx.getTime());
                 punishLogPo.setType(PunishType.RED.getCode());
 
-                yellowList.add(punishLogPo);
+                redList.add(punishLogPo);
             }
         }
 

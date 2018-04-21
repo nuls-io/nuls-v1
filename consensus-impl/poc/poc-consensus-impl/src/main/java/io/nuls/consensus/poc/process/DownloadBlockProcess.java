@@ -3,6 +3,7 @@ package io.nuls.consensus.poc.process;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
+import io.nuls.consensus.poc.provider.IsolatedBlocksProvider;
 import io.nuls.core.utils.log.ChainLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.Node;
@@ -18,7 +19,7 @@ import java.io.IOException;
  */
 public class DownloadBlockProcess {
 
-    private BlockQueueProvider blockQueueProvider;
+    private IsolatedBlocksProvider isolatedBlocksProvider;
 
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
 
@@ -58,10 +59,10 @@ public class DownloadBlockProcess {
     }
 
     private void addBlock(BlockContainer blockContainer) throws IOException {
-        blockQueueProvider.put(blockContainer, false);
+        isolatedBlocksProvider.addBlock(blockContainer);
     }
 
-    public void setBlockQueueProvider(BlockQueueProvider blockQueueProvider) {
-        this.blockQueueProvider = blockQueueProvider;
+    public void setIsolatedBlocksProvider(IsolatedBlocksProvider isolatedBlocksProvider) {
+        this.isolatedBlocksProvider = isolatedBlocksProvider;
     }
 }

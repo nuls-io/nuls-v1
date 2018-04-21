@@ -474,9 +474,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     public void rollbackTx(Transaction tx, Block block) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
-        if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
-            return;
-        }
         BlockLog.debug("rollback tx ==================================================", tx.getHash());
         List<TransactionService> serviceList = getServiceList(tx.getClass());
         for (TransactionService service : serviceList) {
