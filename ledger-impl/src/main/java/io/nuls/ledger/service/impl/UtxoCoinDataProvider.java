@@ -271,7 +271,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         Map<String, Object> keyMap = new HashMap<>();
         for (int i = utxoData.getOutputs().size() - 1; i >= 0; i--) {
             UtxoOutput output = utxoData.getOutputs().get(i);
-            keyMap.put("txJash", output.getTxHash().getDigestHex());
+            keyMap.put("txHash", output.getTxHash().getDigestHex());
             keyMap.put("outIndex", output.getIndex());
             outputDataService.delete(keyMap);
 
