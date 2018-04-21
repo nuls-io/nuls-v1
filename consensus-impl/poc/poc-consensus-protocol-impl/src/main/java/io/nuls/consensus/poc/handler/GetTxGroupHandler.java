@@ -52,7 +52,7 @@ private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.c
 
     @Override
     public void onEvent(GetTxGroupRequest event, String fromId) {
-        GetTxGroupParam eventBody = event.getEventBody();
+//        GetTxGroupParam eventBody = event.getEventBody();
 
         TxGroupEvent txGroupEvent = new TxGroupEvent();
         TxGroup txGroup = new TxGroup();
@@ -62,7 +62,9 @@ private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.c
         for(NulsDigestData hash:event.getEventBody().getTxHashList()){
 
             Transaction tx = ledgerService.getTx(hash);
-            txList.add(tx);
+            if(tx!=null){
+                txList.add(tx);
+            }
         }
 
         txGroup.setTxList(txList);
@@ -70,18 +72,18 @@ private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.c
         eventBroadcaster.sendToNode(txGroupEvent, fromId);
     }
 
-    private List<Transaction> getTxList(Block block, List<NulsDigestData> txHashList) {
-        List<Transaction> txList = new ArrayList<>();
-
-        for (Transaction tx : block.getTxs()) {
-            if (txHashList.contains(tx.getHash())) {
-                txList.add(tx);
-            }
-        }
-
-        if (txList.size() != txHashList.size()) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-        }
-        return txList;
-    }
+//    private List<Transaction> getTxList(Block block, List<NulsDigestData> txHashList) {
+//        List<Transaction> txList = new ArrayList<>();
+//
+//        for (Transaction tx : block.getTxs()) {
+//            if (txHashList.contains(tx.getHash())) {
+//                txList.add(tx);
+//            }
+//        }
+//
+//        if (txList.size() != txHashList.size()) {
+//            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+//        }
+//        return txList;
+//    }
 }
