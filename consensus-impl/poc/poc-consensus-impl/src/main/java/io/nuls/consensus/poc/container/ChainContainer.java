@@ -194,8 +194,6 @@ public class ChainContainer implements Cloneable {
         blockList.add(block);
         blockHeaderList.add(block.getHeader());
 
-        //TODO 是否需要重新计算轮次 ？
-
         return true;
     }
 
@@ -453,7 +451,18 @@ public class ChainContainer implements Cloneable {
             }
         }
 
-        //TODO 是否需要重新计算轮次 ？
+        // 判断是否需要重新计算轮次
+        if(roundList == null || roundList.size() == 0) {
+            initRound();
+        } else {
+            MeetingRound lastRound = roundList.get(roundList.size() - 1);
+            Block bestBlcok = getBestBlock();
+            BlockRoundData blockRoundData = new BlockRoundData(bestBlcok.getHeader().getExtend());
+            if(blockRoundData.getRoundIndex() < lastRound.getIndex()) {
+                roundList.clear();
+                initRound();
+            }
+        }
 
         return true;
     }
