@@ -226,7 +226,7 @@ public class UtxoTransferTool {
             tx.setRemark(po.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING));
         }
         if (null != po.getTxData()) {
-            tx.parseTxData(new NulsByteBuffer(po.getTxData()));
+          tx.setTxData(tx.parseTxData(new NulsByteBuffer(po.getTxData())));
         }
         if (po.getTxStatus() == TransactionLocalPo.UNCONFIRM) {
             tx.setStatus(TxStatusEnum.UNCONFIRM);
