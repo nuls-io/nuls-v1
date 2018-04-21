@@ -41,12 +41,14 @@ import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.network.service.NetworkService;
@@ -319,17 +321,21 @@ public class ConsensusProcess {
             if (repeatTx != null) {
                 continue;
             }
-            outHashList.add(tx.getHash());
             ValidateResult result = ledgerService.conflictDetectTx(tx, packingTxList);
             if (result.isFailed()) {
                 Log.debug(result.getMessage());
                 continue;
             }
             result = tx.verify();
+            if(result.isFailed()&&result.getErrorCode()== ErrorCode.ORPHAN_TX){
+                AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
+                result = coinTx.getCoinDataProvider().verifyCoinData(coinTx,packingTxList);
+            }
             if (result.isFailed()) {
                 Log.debug(result.getMessage());
                 continue;
             }
+            outHashList.add(tx.getHash());
 
             tx.setBlockHeight(bd.getHeight());
             packingTxList.add(tx);
