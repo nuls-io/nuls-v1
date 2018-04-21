@@ -170,7 +170,7 @@ public class DownloadProcessor extends Thread {
                 time = TimeService.currentTimeMillis();
             }
             try {
-                Thread.sleep(100l);
+                Thread.sleep(100L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
