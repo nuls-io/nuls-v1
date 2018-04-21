@@ -42,6 +42,7 @@ import io.nuls.consensus.poc.protocol.tx.entity.YellowPunishData;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
 import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.ConsensusLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.PunishLogPo;
@@ -218,7 +219,7 @@ public class ChainContainer implements Cloneable {
         String preHash = blockHeader.getPreHash().getDigestHex();
 
         if (!preHash.equals(chain.getEndBlockHeader().getHash().getDigestHex())) {
-            Log.error("block height " + blockHeader.getHeight() + " prehash is error! hash :" + blockHeader.getHash().getDigestHex());
+            BlockLog.debug("block height " + blockHeader.getHeight() + " prehash is error! hash :" + blockHeader.getHash().getDigestHex());
             return false;
         }
 
@@ -245,11 +246,11 @@ public class ChainContainer implements Cloneable {
 //        }
         if (roundData.getRoundIndex() > currentRound.getIndex()) {
             if (roundData.getRoundStartTime() > TimeService.currentTimeMillis()) {
-                Log.error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeader.getHash().getDigestHex());
+                BlockLog.debug("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeader.getHash().getDigestHex());
                 return false;
             }
             if (!isDownload && (roundData.getRoundStartTime() + roundData.getPackingIndexOfRound() * ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L) > TimeService.currentTimeMillis()) {
-                Log.error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash().getDigestHex());
+                BlockLog.debug("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash().getDigestHex());
                 return false;
             }
             MeetingRound tempRound = getNextRound(roundData, !isDownload);
@@ -265,14 +266,14 @@ public class ChainContainer implements Cloneable {
         }
 
         if (roundData.getRoundIndex() != currentRound.getIndex() || roundData.getRoundStartTime() != currentRound.getStartTime()) {
-            Log.error("block height " + blockHeader.getHeight() + " round startTime is error! hash :" + blockHeader.getHash().getDigestHex());
+            BlockLog.debug("block height " + blockHeader.getHeight() + " round startTime is error! hash :" + blockHeader.getHash().getDigestHex());
             return false;
         }
 
         Log.debug(currentRound.toString());
 
         if (roundData.getConsensusMemberCount() != currentRound.getMemberCount()) {
-            Log.error("block height " + blockHeader.getHeight() + " packager count is error! hash :" + blockHeader.getHash().getDigestHex());
+            BlockLog.debug("block height " + blockHeader.getHeight() + " packager count is error! hash :" + blockHeader.getHash().getDigestHex());
             return false;
         }
         // Verify that the packager is correct
@@ -280,18 +281,18 @@ public class ChainContainer implements Cloneable {
         MeetingMember member = currentRound.getMember(roundData.getPackingIndexOfRound());
         String packager = Address.fromHashs(blockHeader.getPackingAddress()).getBase58();
         if (!member.getPackingAddress().equals(packager)) {
-            Log.error("block height " + blockHeader.getHeight() + " packager is error! hash :" + blockHeader.getHash().getDigestHex());
+            BlockLog.debug("block height " + blockHeader.getHeight() + " packager is error! hash :" + blockHeader.getHash().getDigestHex());
             return false;
         }
 
         if (member.getPackEndTime() != block.getHeader().getTime()) {
-            Log.error("block height " + blockHeader.getHeight() + " time error! hash :" + blockHeader.getHash().getDigestHex());
+            BlockLog.debug("block height " + blockHeader.getHeight() + " time error! hash :" + blockHeader.getHash().getDigestHex());
             return false;
         }
 
         boolean success = verifyBaseTx(block, currentRound, member);
         if (!success) {
-            Log.error("block height " + blockHeader.getHeight() + " verify tx error! hash :" + blockHeader.getHash().getDigestHex());
+            BlockLog.debug("block height " + blockHeader.getHeight() + " verify tx error! hash :" + blockHeader.getHash().getDigestHex());
             return false;
         }
 
