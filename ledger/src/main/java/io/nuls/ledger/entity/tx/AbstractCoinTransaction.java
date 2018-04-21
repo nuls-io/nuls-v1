@@ -56,6 +56,7 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
     protected static CoinDataProvider coinDataProvider;
 
     protected CoinData coinData;
+    private boolean skipInputValidator;
 
     public AbstractCoinTransaction(int type) {
         super(type);
@@ -136,5 +137,13 @@ public abstract class AbstractCoinTransaction<T extends BaseNulsData> extends Tr
             return null;
         }
         throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "The transaction never provided the method:parseTxData");
+    }
+
+    public void setSkipInputValidator(boolean skipInputValidator) {
+        this.skipInputValidator = skipInputValidator;
+    }
+
+    public boolean isSkipInputValidator() {
+        return skipInputValidator;
     }
 }

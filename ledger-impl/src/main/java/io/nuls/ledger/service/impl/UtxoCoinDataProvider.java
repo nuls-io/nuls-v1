@@ -56,6 +56,7 @@ import io.nuls.protocol.model.Na;
 import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.script.P2PKHScript;
+import io.nuls.protocol.script.P2PKHScriptSig;
 import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 import java.util.*;
@@ -218,8 +219,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 //            for (String address : addressSet) {
 //                UtxoTransactionTool.getInstance().calcBalance(address, true);
 //            }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
 //        rollback
 //            Log.warn(e.getMessage(), e);
 //            for (UtxoOutput output : utxoData.getOutputs()) {
@@ -230,9 +230,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 //            }
             System.out.println("----------");
             throw e;
-        }
-
-        finally {
+        } finally {
             lock.unlock();
         }
     }
@@ -556,29 +554,117 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     public ValidateResult conflictDetect(Transaction tx, List<Transaction> txList) {
         AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
         UtxoData txUtxoData = (UtxoData) coinTx.getCoinData();
-        if(txUtxoData.getInputs()==null||txUtxoData.getInputs().isEmpty()){
+        if (txUtxoData.getInputs() == null || txUtxoData.getInputs().isEmpty()) {
             return ValidateResult.getSuccessResult();
         }
-        Set<String > outputSet = new HashSet<>();
-        for(Transaction transaction:txList){
-            if(!(transaction instanceof AbstractCoinTransaction)){
+        Set<String> outputSet = new HashSet<>();
+        for (Transaction transaction : txList) {
+            if (!(transaction instanceof AbstractCoinTransaction)) {
                 continue;
             }
             AbstractCoinTransaction coinTransaction = (AbstractCoinTransaction) transaction;
             UtxoData utxoData = (UtxoData) coinTransaction.getCoinData();
-            if(null==utxoData.getInputs()||utxoData.getInputs().isEmpty()){
+            if (null == utxoData.getInputs() || utxoData.getInputs().isEmpty()) {
                 continue;
             }
-            for(UtxoInput input :utxoData.getInputs()){
+            for (UtxoInput input : utxoData.getInputs()) {
                 outputSet.add(input.getKey());
             }
         }
-        for(UtxoInput input :txUtxoData.getInputs()){
+        for (UtxoInput input : txUtxoData.getInputs()) {
             boolean result = outputSet.add(input.getKey());
-            if(!result){
-                return ValidateResult.getFailedResult(ErrorCode.FAILED,"input conflict!");
+            if (!result) {
+                return ValidateResult.getFailedResult(ErrorCode.FAILED, "input conflict!");
             }
         }
         return ValidateResult.getSuccessResult();
+    }
+
+    @Override
+    public ValidateResult verifyCoinData(AbstractCoinTransaction tx, List<Transaction> txList) {
+
+        if(txList==null||txList.isEmpty()){
+            //It's all an orphan that can go here
+            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
+        }
+
+        UtxoData data = (UtxoData) tx.getCoinData();
+
+
+        Map<String, UtxoOutput> outputMap = getAllOutputMap(txList);
+
+
+        for (int i = 0; i < data.getInputs().size(); i++) {
+            UtxoInput input = data.getInputs().get(i);
+            UtxoOutput output = input.getFrom();
+
+            if (output == null && tx.getStatus() == TxStatusEnum.UNCONFIRM) {
+                output = outputMap.get(input.getKey());
+                if (null == output) {
+                    return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
+                }
+            } else if (output == null) {
+                return ValidateResult.getFailedResult(ErrorCode.UTXO_NOT_FOUND);
+            }
+
+            if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
+                if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
+                    if (output.getStatus() != OutPutStatusEnum.UTXO_CONSENSUS_LOCK) {
+                        return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
+                    }
+                } else if (!output.isUsable()) {
+                    return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
+                }
+            }
+//            else if (tx.getStatus() == TxStatusEnum.AGREED) {
+//                if (!output.isSpend()) {
+//                    return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
+//                }
+//            }
+
+            byte[] owner = output.getOwner();
+            P2PKHScriptSig p2PKHScriptSig = null;
+            try {
+                p2PKHScriptSig = P2PKHScriptSig.createFromBytes(tx.getScriptSig());
+            } catch (NulsException e) {
+                return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR);
+            }
+            byte[] user = p2PKHScriptSig.getSignerHash160();
+            if (!Arrays.equals(owner, user)) {
+                return ValidateResult.getFailedResult(ErrorCode.INVALID_INPUT);
+            }
+
+            return ValidateResult.getSuccessResult();
+        }
+        return ValidateResult.getSuccessResult();
+    }
+
+    private Map<String, UtxoOutput> getAllOutputMap(List<Transaction> txList) {
+        Map<String, UtxoOutput> map = new HashMap<>();
+        for (Transaction tx : txList) {
+            if (!(tx instanceof AbstractCoinTransaction)) {
+                continue;
+            }
+            List<UtxoOutput> outputs = ((UtxoData) ((AbstractCoinTransaction) tx).getCoinData()).getOutputs();
+            if (null == outputs) {
+                continue;
+            }
+            for (UtxoOutput output : outputs) {
+                map.put(output.getKey(), output);
+            }
+        }
+        for (Transaction tx : txList) {
+            if (!(tx instanceof AbstractCoinTransaction)) {
+                continue;
+            }
+            List<UtxoInput> inputs = ((UtxoData) ((AbstractCoinTransaction) tx).getCoinData()).getInputs();
+            if (null == inputs) {
+                continue;
+            }
+            for (UtxoInput input : inputs) {
+                map.remove(input.getKey());
+            }
+        }
+        return map;
     }
 }

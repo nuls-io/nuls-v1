@@ -56,6 +56,9 @@ public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTran
 
     @Override
     public ValidateResult validate(AbstractCoinTransaction tx) {
+        if(tx.isSkipInputValidator()){
+            return ValidateResult.getSuccessResult();
+        }
         UtxoData data = (UtxoData) tx.getCoinData();
         for (int i = 0; i < data.getInputs().size(); i++) {
             UtxoInput input = data.getInputs().get(i);
