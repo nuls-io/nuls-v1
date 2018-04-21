@@ -78,12 +78,13 @@
         select
         <include refid="Base_Column_List"/>
         from punish_log
-       where type = #{type,jdbcType=INTEGER}
+       where type = #{type,jdbcType=INTEGER} order by height ASC
     </select>
     <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from punish_log
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+        order by height ASC
     </select>
 </mapper>

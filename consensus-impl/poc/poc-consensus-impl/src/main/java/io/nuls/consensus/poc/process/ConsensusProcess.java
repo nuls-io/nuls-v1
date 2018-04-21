@@ -382,5 +382,4 @@ public class ConsensusProcess {
     private void redPunishTx(Block bestBlock, List<Transaction> txList, MeetingRound round) throws NulsException, IOException {
         //todo implement
     }
-
 }
