@@ -27,12 +27,14 @@ package io.nuls.consensus.poc.container;
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.consensus.poc.locker.Lockers;
-import io.nuls.consensus.poc.model.Chain;
+import io.nuls.consensus.poc.model.*;
 import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.context.ConsensusContext;
 import io.nuls.consensus.poc.protocol.model.*;
+import io.nuls.consensus.poc.protocol.model.MeetingMember;
+import io.nuls.consensus.poc.protocol.model.MeetingRound;
 import io.nuls.consensus.poc.protocol.model.block.BlockRoundData;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.consensus.poc.protocol.tx.entity.RedPunishData;
@@ -240,11 +242,6 @@ public class ChainContainer implements Cloneable {
 //            Log.error("block height " + blockHeader.getHeight() + " round index is error!");
 //            return false;
 //        }
-
-        if (roundData.getRoundIndex() == currentRound.getIndex() && roundData.getRoundStartTime() != currentRound.getStartTime()) {
-            Log.error("block height " + blockHeader.getHeight() + " round startTime is error!");
-            return false;
-        }
         if (roundData.getRoundIndex() > currentRound.getIndex()) {
             if (roundData.getRoundStartTime() > TimeService.currentTimeMillis()) {
                 Log.error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time!");
@@ -258,6 +255,17 @@ public class ChainContainer implements Cloneable {
             tempRound.setPreRound(currentRound);
             currentRound = tempRound;
             hasChangeRound = true;
+        } else if(roundData.getRoundIndex() < currentRound.getIndex()) {
+            while((currentRound = currentRound.getPreRound()) != null) {
+                if(roundData.getRoundIndex() == currentRound.getIndex()) {
+                    break;
+                }
+            }
+        }
+
+        if (roundData.getRoundIndex() != currentRound.getIndex() || roundData.getRoundStartTime() != currentRound.getStartTime()) {
+            Log.error("block height " + blockHeader.getHeight() + " round startTime is error!");
+            return false;
         }
 
         Log.debug(currentRound.toString());
