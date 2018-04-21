@@ -23,11 +23,11 @@
  */
 package io.nuls.consensus.poc.handler;
 
-import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
+import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.GetTxGroupRequest;
 import io.nuls.protocol.event.TxGroupEvent;
@@ -47,19 +47,24 @@ import java.util.List;
 public class GetTxGroupHandler extends AbstractEventHandler<GetTxGroupRequest> {
 
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
-    private BlockService blockService =NulsContext.getServiceBean(BlockService.class);
+//    private BlockService blockService =NulsContext.getServiceBean(BlockService.class);
+private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     @Override
     public void onEvent(GetTxGroupRequest event, String fromId) {
         GetTxGroupParam eventBody = event.getEventBody();
-        Block block = blockService.getBlock(eventBody.getBlockHash().getDigestHex());
-        if (null == block) {
-            return;
-        }
+
         TxGroupEvent txGroupEvent = new TxGroupEvent();
         TxGroup txGroup = new TxGroup();
-        txGroup.setBlockHash(block.getHeader().getHash());
-        List<Transaction> txList = getTxList(block,eventBody.getTxHashList());
+        txGroup.setBlockHash(event.getEventBody().getBlockHash());
+        List<Transaction> txList =new ArrayList<>();
+
+        for(NulsDigestData hash:event.getEventBody().getTxHashList()){
+
+            Transaction tx = ledgerService.getTx(hash);
+            txList.add(tx);
+        }
+
         txGroup.setTxList(txList);
         txGroupEvent.setEventBody(txGroup);
         eventBroadcaster.sendToNode(txGroupEvent, fromId);
