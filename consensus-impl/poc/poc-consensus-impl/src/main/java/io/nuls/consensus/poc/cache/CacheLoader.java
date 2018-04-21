@@ -46,6 +46,7 @@ import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.BlockHeader;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -70,6 +71,12 @@ public class CacheLoader {
         }
 
         List<Block> blockList = blockService.getBlockList(startHeight, bestBlockHeight);
+        blockList.sort(new Comparator<Block>() {
+            @Override
+            public int compare(Block o1, Block o2) {
+                return (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
+            }
+        });
 
         return blockList;
     }
