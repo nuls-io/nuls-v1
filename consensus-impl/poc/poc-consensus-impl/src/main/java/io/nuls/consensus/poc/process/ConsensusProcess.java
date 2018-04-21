@@ -330,6 +330,10 @@ public class ConsensusProcess {
             if(result.isFailed()&&result.getErrorCode()== ErrorCode.ORPHAN_TX){
                 AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
                 result = coinTx.getCoinDataProvider().verifyCoinData(coinTx,packingTxList);
+                if(result.isSuccess()){
+                    coinTx.setSkipInputValidator(true);
+                    result = coinTx.verify();
+                }
             }
             if (result.isFailed()) {
                 Log.debug(result.getMessage());
