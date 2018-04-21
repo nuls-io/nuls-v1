@@ -252,7 +252,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         if(newestInfos.getNodes().size() >= PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
-            blockService.rollbackBlock();
+            consensusService.rollbackBlock();
         } else {
             resetNetwork("the number of available nodes is insufficient for rollback blocks");
             return;
