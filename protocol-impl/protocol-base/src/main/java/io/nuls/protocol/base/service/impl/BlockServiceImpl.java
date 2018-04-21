@@ -166,7 +166,6 @@ public class BlockServiceImpl implements BlockService {
         this.rollback(block.getTxs(), block.getTxs().size() - 1);
         this.ledgerService.deleteTx(block.getHeader().getHeight());
         blockStorageService.delete(block.getHeader().getHash().getDigestHex());
-        NulsContext.getInstance().setBestBlock(this.getBestBlock());
         return true;
     }
 

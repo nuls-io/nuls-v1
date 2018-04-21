@@ -26,6 +26,10 @@ package io.nuls.consensus.poc.manager;
 
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.model.Chain;
+import io.nuls.consensus.poc.protocol.model.MeetingRound;
+import io.nuls.consensus.poc.protocol.model.block.BlockRoundData;
+import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
+import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.BlockHeader;
 
@@ -105,6 +109,20 @@ public class ChainManager {
         isolatedChains.clear();
     }
 
+    public void startConsensus() {
+        ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.RUNNING);
+        Block bestBlock = masterChain.getBestBlock();
+        BlockRoundData blockRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
+        List<MeetingRound> roundList = masterChain.getRoundList();
+        if(roundList == null || roundList.size() == 0) {
+            masterChain.initRound();
+        } else if(blockRoundData.getRoundIndex() != roundList.get(0).getIndex()) {
+            roundList.clear();
+            masterChain.initRound();
+        }
+
+    }
+
     public ChainContainer getMasterChain() {
         return masterChain;
     }
@@ -136,4 +154,5 @@ public class ChainManager {
     public Block getBestBlock() {
         return masterChain.getBestBlock();
     }
+
 }

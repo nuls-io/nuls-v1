@@ -27,6 +27,7 @@ package io.nuls.consensus.poc.task;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.locker.Lockers;
+import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.process.BlockProcess;
 import io.nuls.consensus.poc.protocol.service.DownloadService;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
@@ -45,12 +46,14 @@ public class BlockProcessTask implements Runnable {
 
     private BlockProcess blockProcess;
     private BlockQueueProvider blockQueueProvider;
+    private ChainManager chainManager;
 
     private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
 
-    public BlockProcessTask(BlockProcess blockProcess, BlockQueueProvider blockQueueProvider) {
+    public BlockProcessTask(BlockProcess blockProcess, BlockQueueProvider blockQueueProvider, ChainManager chainManager) {
         this.blockProcess = blockProcess;
         this.blockQueueProvider = blockQueueProvider;
+        this.chainManager = chainManager;
     }
 
     @Override
@@ -73,7 +76,7 @@ public class BlockProcessTask implements Runnable {
 
         //系统启动，本地高度和网络高度一致，不需要下载区块时，系统需要知道并设置共识状态为运行中
         if(downloadService.getStatus() == DownloadStatus.SUCCESS && ConsensusSystemProvider.getConsensusStatus() == ConsensusStatus.WAIT_START && blockQueueProvider.size() == 0L) {
-            ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.RUNNING);
+            chainManager.startConsensus();
         }
 
         BlockContainer blockContainer = null;
@@ -81,7 +84,7 @@ public class BlockProcessTask implements Runnable {
 
             if(downloadService.getStatus() == DownloadStatus.SUCCESS && ConsensusSystemProvider.getConsensusStatus() == ConsensusStatus.WAIT_START &&
                     blockContainer.getStatus() == BlockContainerStatus.RECEIVED) {
-                ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.RUNNING);
+                chainManager.startConsensus();
             }
 
             try {

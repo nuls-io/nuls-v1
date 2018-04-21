@@ -36,6 +36,7 @@ import io.nuls.consensus.poc.protocol.model.*;
 import io.nuls.consensus.poc.protocol.model.MeetingMember;
 import io.nuls.consensus.poc.protocol.model.MeetingRound;
 import io.nuls.consensus.poc.protocol.model.block.BlockRoundData;
+import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.consensus.poc.protocol.tx.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.entity.YellowPunishData;
@@ -70,6 +71,7 @@ public class ChainContainer implements Cloneable {
 
     private List<MeetingRound> roundList = new ArrayList<>();
 
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
 
@@ -261,10 +263,13 @@ public class ChainContainer implements Cloneable {
             currentRound = tempRound;
             hasChangeRound = true;
         } else if(roundData.getRoundIndex() < currentRound.getIndex()) {
-            while((currentRound = currentRound.getPreRound()) != null) {
-                if(roundData.getRoundIndex() == currentRound.getIndex()) {
+            MeetingRound preRound = currentRound.getPreRound();
+            while(preRound != null) {
+                if(roundData.getRoundIndex() == preRound.getIndex()) {
+                    currentRound = preRound;
                     break;
                 }
+                preRound = preRound.getPreRound();
             }
         }
 
@@ -382,6 +387,9 @@ public class ChainContainer implements Cloneable {
         if (blockList == null || blockList.size() == 0) {
             return false;
         }
+        if(blockList.size() <= 2) {
+            addBlockInBlockList(blockList);
+        }
 
         Block rollbackBlock = blockList.get(blockList.size() - 1);
         blockList.remove(rollbackBlock);
@@ -448,6 +456,12 @@ public class ChainContainer implements Cloneable {
         //TODO 是否需要重新计算轮次 ？
 
         return true;
+    }
+
+    private void addBlockInBlockList(List<Block> blockList) {
+        String firstHash = blockList.get(0).getHeader().getHash().getDigestHex();
+        Block block = blockService.getBlock(firstHash);
+        blockList.add(0, block);
     }
 
     /**
