@@ -30,15 +30,13 @@ import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.ledger.util.UtxoComparator;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Na;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -98,6 +96,9 @@ public class UtxoCoinManager {
             Na amount = Na.ZERO;
             boolean enough = false;
             for (UtxoOutput output : outputList) {
+                if (output.isLocked()) {
+                    continue;
+                }
                 unSpends.add(output);
                 amount = amount.add(Na.valueOf(output.getValue()));
                 if (amount.isGreaterOrEquals(value)) {
@@ -129,7 +130,7 @@ public class UtxoCoinManager {
                     continue;
                 }
                 for (UtxoOutput output : outputList) {
-                    if(output.isLocked()){
+                    if (output.isLocked()) {
                         continue;
                     }
                     unSpends.add(output);
@@ -169,6 +170,8 @@ public class UtxoCoinManager {
 
 
     public void filterUtxoByLocalTxs(String address, List<UtxoOutput> unSpends) {
+        Collections.sort(unSpends, UtxoComparator.getInstance());
+
         List<AbstractCoinTransaction> localTxs = getLocalUnConfirmTxs();
         if (localTxs.isEmpty()) {
             return;
@@ -178,10 +181,10 @@ public class UtxoCoinManager {
         for (AbstractCoinTransaction tx : localTxs) {
             UtxoData utxoData = (UtxoData) tx.getCoinData();
 
-            for(int i=0;i<utxoData.getOutputs().size();i++) {
+            for (int i = 0; i < utxoData.getOutputs().size(); i++) {
                 UtxoOutput output = utxoData.getOutputs().get(i);
                 if (output.getAddress().equals(address)) {
-                    if(!output.isLocked()) {
+                    if (!output.isLocked()) {
                         unSpends.add(output);
                     }
                 }
