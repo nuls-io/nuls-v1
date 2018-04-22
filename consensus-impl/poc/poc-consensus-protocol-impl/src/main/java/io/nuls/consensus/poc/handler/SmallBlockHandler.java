@@ -24,12 +24,10 @@
 package io.nuls.consensus.poc.handler;
 
 import io.nuls.account.entity.Address;
-import io.nuls.consensus.poc.cache.manager.TemporaryCacheManager;
+import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.consensus.poc.protocol.event.notice.AssembledBlockNotice;
-import io.nuls.consensus.poc.protocol.service.DownloadService;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
@@ -37,8 +35,6 @@ import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.network.service.NetworkService;
 import io.nuls.poc.service.intf.ConsensusService;
-import io.nuls.protocol.constant.DownloadStatus;
-import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.GetTxGroupRequest;
 import io.nuls.protocol.event.SmallBlockEvent;
@@ -60,6 +56,8 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
 
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
+
+    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
     @Override
     public void onEvent(SmallBlockEvent event, String fromId) {
@@ -105,7 +103,7 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
             String hashHex = hash.getDigestHex();
             Transaction tx = txMap.get(hashHex);
             if (null == tx) {
-                tx = consensusService.getTxFromMemory(hashHex);
+                tx = temporaryCacheManager.getTx(hashHex);
                 if(tx!=null){
                     smallBlock.getSubTxList().add(tx);
                     txMap.put(hashHex, tx);
