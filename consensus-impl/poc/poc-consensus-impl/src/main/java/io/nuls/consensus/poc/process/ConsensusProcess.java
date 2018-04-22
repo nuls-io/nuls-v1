@@ -148,7 +148,7 @@ public class ConsensusProcess {
 
             while (member.getPackEndTime() > TimeService.currentTimeMillis()) {
                 try {
-                    Thread.sleep(500l);
+                    Thread.sleep(500L);
                 } catch (InterruptedException e) {
                     Log.error(e);
                 }
