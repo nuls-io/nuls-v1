@@ -129,6 +129,9 @@ public class UtxoCoinManager {
                     continue;
                 }
                 for (UtxoOutput output : outputList) {
+                    if(output.isLocked()){
+                        continue;
+                    }
                     unSpends.add(output);
                     amount = amount.add(Na.valueOf(output.getValue()));
                     if (amount.isGreaterOrEquals(value)) {
