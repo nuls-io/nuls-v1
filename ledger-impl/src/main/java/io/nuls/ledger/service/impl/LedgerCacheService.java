@@ -86,6 +86,7 @@ public class LedgerCacheService {
     }
 
     public void putUtxo(String key, UtxoOutput output) {
+
         utxoCacheService.putElement(LedgerConstant.UTXO, key, output);
 
         String address = output.getAddress();
@@ -136,6 +137,7 @@ public class LedgerCacheService {
     }
 
     public void removeUtxo(String key) {
+
         UtxoOutput output = getUtxo(key);
         utxoCacheService.removeElement(LedgerConstant.UTXO, key);
         if (output != null) {

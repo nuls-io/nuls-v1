@@ -251,6 +251,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 //            UtxoOutputPo outputPo = outputDataService.get(map);
             UtxoOutput output = ledgerCacheService.getUtxo(input.getKey());
             if (output == null) {
+                System.out.println("---------------------output == null" + System.currentTimeMillis());
                 throw new NulsRuntimeException(ErrorCode.UTXO_NOT_FOUND);
             }
             output.setStatus(OutPutStatusEnum.UTXO_SPENT);
