@@ -86,9 +86,9 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
      */
     List<BlockHeaderPo> getHashList(long startHeight, long endHeight, long split);
 
-    Page<BlockHeaderPo> getBlockListByAddress(String nodeAddress, int type, int start, int limit);
+    Page<BlockHeaderPo> getBlockListByAddress(String nodeAddress, int type,int pageNumber, int pageSize);
 
-    Page<BlockHeaderPo> getBlockHeaderList(int start, int limit);
+    Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize);
 
     /**
      * calc count of roundIndex between start and end;
