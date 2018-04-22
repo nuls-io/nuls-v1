@@ -171,7 +171,10 @@ public abstract class BaseModuleBootstrap {
     private String checkItRunning(ModuleManager mm, short[] moduleIds) {
         for (short id : moduleIds) {
             BaseModuleBootstrap module = mm.getModule(id);
-            if (null == module || module.getStatus() != ModuleStatusEnum.RUNNING) {
+            if(null == module){
+                return "null";
+            }
+            if (module.getStatus() != ModuleStatusEnum.RUNNING) {
                 return module.getModuleName();
             }
         }
