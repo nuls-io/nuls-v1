@@ -729,7 +729,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
 
     @Override
     public MeetingRound getCurrentRound() {
-        return null;
+        return mainControlScheduler.getChainManager().getMasterChain().getCurrentRound();
     }
 
     private void filterAgentList(List<Consensus<Agent>> agentList,   String depositAddress, String keyword) {

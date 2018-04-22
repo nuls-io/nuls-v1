@@ -45,8 +45,6 @@ public class ChainManager {
     private List<ChainContainer> chains;
     private List<ChainContainer> isolatedChains;
 
-    private RoundManager roundManager;
-
     public ChainManager() {
         chains = new ArrayList<>();
         isolatedChains = new ArrayList<>();
@@ -111,16 +109,6 @@ public class ChainManager {
 
     public void startConsensus() {
         ConsensusSystemProvider.setConsensusStatus(ConsensusStatus.RUNNING);
-        Block bestBlock = masterChain.getBestBlock();
-        BlockRoundData blockRoundData = new BlockRoundData(bestBlock.getHeader().getExtend());
-        List<MeetingRound> roundList = masterChain.getRoundList();
-        if(roundList == null || roundList.size() == 0) {
-            masterChain.initRound();
-        } else if(blockRoundData.getRoundIndex() != roundList.get(0).getIndex()) {
-            roundList.clear();
-            masterChain.initRound();
-        }
-
     }
 
     public ChainContainer getMasterChain() {
@@ -139,16 +127,8 @@ public class ChainManager {
         this.chains = chains;
     }
 
-    public RoundManager getRoundManager() {
-        return roundManager;
-    }
-
     public List<ChainContainer> getIsolatedChains() {
         return isolatedChains;
-    }
-
-    public void setRoundManager(RoundManager roundManager) {
-        this.roundManager = roundManager;
     }
 
     public Block getBestBlock() {
