@@ -466,7 +466,7 @@ public class ChainContainer implements Cloneable {
     /**
      * Get the state of the complete chain after the combination of a chain and the current chain bifurcation point, that is, first obtain the bifurcation point between the bifurcation chain and the current chain.
      * Then create a brand new chain, copy all the states before the bifurcation point of the main chain to the brand new chain
-     * <p>
+     *
      * 获取一条链与当前链分叉点组合之后的完整链的状态，也就是，先获取到分叉链与当前链的分叉点，
      * 然后创建一条全新的链，把主链分叉点之前的所有状态复制到全新的链
      *
@@ -515,7 +515,7 @@ public class ChainContainer implements Cloneable {
 
     /**
      * Get the block information of the current chain and branch chain after the cross point and combine them into a new branch chain
-     * <p>
+     *
      * 获取当前链与分叉链对比分叉点之后的区块信息，组合成一个新的分叉链
      *
      * @return ChainContainer

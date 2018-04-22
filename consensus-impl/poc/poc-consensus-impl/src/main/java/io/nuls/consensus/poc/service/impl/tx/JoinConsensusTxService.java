@@ -39,10 +39,12 @@ import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
 import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
+import io.nuls.db.entity.UpdateDepositByAgentIdParam;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.poc.constant.ConsensusStatus;
 import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.entity.Consensus;
@@ -68,12 +70,28 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
     @DbSession
     public void onRollback(PocJoinConsensusTransaction tx, Block block) throws NulsException {
 
-//        manager.realDeleteDeposit(tx.getTxData().getHexHash());
-
         DepositPo delPo = new DepositPo();
         delPo.setId(tx.getTxData().getHexHash());
         delPo.setDelHeight(tx.getBlockHeight());
         depositDataService.realDeleteById(delPo);
+
+//        Consensus<Deposit> cd = tx.getTxData();
+//
+//        List<DepositPo> poList = depositDataService.getEffectiveList(null, block.getHeader().getHeight(),cd.getHexHash(), null);
+//        long total = 0L;
+//        for (DepositPo dpo : poList) {
+//            total += dpo.getDeposit();
+//            dpo.setStatus(ConsensusStatusEnum.WAITING.getCode());
+//        }
+//        if (total < PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT.getValue()) {
+//
+//            AgentPo agentPo = new AgentPo();
+//            agentPo.setId(cd.getExtend().getAgentHash());
+//            agentPo.setStatus(ConsensusStatusEnum.WAITING.getCode());
+//            this.agentDataService.updateSelective(agentPo);
+//
+//            depositDataService.update(poList);
+//        }
     }
 
     @Override
@@ -88,6 +106,24 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
         po.setBlockHeight(tx.getBlockHeight());
         po.setTime(tx.getTime());
         depositDataService.save(po);
+
+
+//        List<DepositPo> poList = depositDataService.getEffectiveList(null, block.getHeader().getHeight(), po.getAgentHash(), null);
+//        long total = 0L;
+//        for (DepositPo dpo : poList) {
+//            total += dpo.getDeposit();
+//            dpo.setStatus(ConsensusStatusEnum.IN.getCode());
+//        }
+//        if (total >= PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT.getValue()) {
+//
+//            AgentPo agentPo = new AgentPo();
+//            agentPo.setId(cd.getExtend().getAgentHash());
+//            agentPo.setStatus(ConsensusStatusEnum.IN.getCode());
+//            this.agentDataService.updateSelective(agentPo);
+//
+//            depositDataService.update(poList);
+//        }
+
 
         EntrustConsensusNotice notice = new EntrustConsensusNotice();
         notice.setEventBody(tx);
@@ -104,13 +140,13 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
             return ValidateResult.getFailedResult("the agent is not exist!");
         }
         RegisterAgentTransaction registerAgentTransaction = (RegisterAgentTransaction) this.ledgerService.getTx(NulsDigestData.fromDigestHex(agent.getTxHash()));
-        if(null==registerAgentTransaction){
-            return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR,"the agent's txHash is wrong!");
+        if (null == registerAgentTransaction) {
+            return ValidateResult.getFailedResult(ErrorCode.DATA_ERROR, "the agent's txHash is wrong!");
         }
         Long value = 0L;
         for (Transaction transaction : txList) {
-            if(transaction.getHash().equals(tx.getHash())){
-                return ValidateResult.getFailedResult(ErrorCode.FAILED,"transaction Duplication");
+            if (transaction.getHash().equals(tx.getHash())) {
+                return ValidateResult.getFailedResult(ErrorCode.FAILED, "transaction Duplication");
             }
             switch (transaction.getType()) {
                 case TransactionConstant.TX_TYPE_STOP_AGENT:
@@ -131,13 +167,13 @@ public class JoinConsensusTxService implements TransactionService<PocJoinConsens
                     break;
             }
         }
-        if(value>0L){
-            List<DepositPo> list = this.depositDataService.getEffectiveList(null,NulsContext.getInstance().getBestHeight(),agent.getId(),null);
+        if (value > 0L) {
+            List<DepositPo> list = this.depositDataService.getEffectiveList(null, NulsContext.getInstance().getBestHeight(), agent.getId(), null);
             Long allready = 0L;
-            for(DepositPo po :list){
+            for (DepositPo po : list) {
                 allready += po.getDeposit();
             }
-            if((allready+value+tx.getTxData().getExtend().getDeposit().getValue())> PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT.getValue()){
+            if ((allready + value + tx.getTxData().getExtend().getDeposit().getValue()) > PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT.getValue()) {
                 return ValidateResult.getFailedResult("there is too much deposit of the agent!");
             }
         }

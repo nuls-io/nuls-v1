@@ -24,14 +24,17 @@
 package io.nuls.consensus.poc.service.impl.tx;
 
 import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.protocol.model.Deposit;
 import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.PocJoinConsensusTransaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
 import io.nuls.db.dao.TxAccountRelationDataService;
+import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
 import io.nuls.db.entity.TxAccountRelationPo;
 import io.nuls.db.transactional.annotation.DbSession;
@@ -54,6 +57,7 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private DepositDataService depositDataService = NulsContext.getServiceBean(DepositDataService.class);
+    private AgentDataService agentDataService = NulsContext.getServiceBean(AgentDataService.class);
 
 //    private ConsensusCacheManager manager = ConsensusCacheManager.getInstance();
 
@@ -67,10 +71,10 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
         PocJoinConsensusTransaction pjcTx = (PocJoinConsensusTransaction) joinTx;
         Consensus<Deposit> cd = pjcTx.getTxData();
         cd.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
-        DepositPo dpo = new DepositPo();
-        dpo.setId(cd.getHexHash());
-        dpo.setDelHeight(0L);
-        this.depositDataService.updateSelective(dpo);
+        DepositPo dpo1 = new DepositPo();
+        dpo1.setId(cd.getHexHash());
+        dpo1.setDelHeight(0L);
+        this.depositDataService.updateSelective(dpo1);
 //        StopConsensusNotice notice = new StopConsensusNotice();
 //        notice.setEventBody(tx);
 //        NulsContext.getServiceBean(EventBroadcaster.class).publishToLocal(notice);
@@ -83,6 +87,24 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
         Set<String> set = new HashSet<>();
         set.add(cd.getAddress());
         relationDataService.deleteRelation(tx.getHash().getDigestHex(), set);
+
+//        List<DepositPo> poList = depositDataService.getEffectiveList(null, block.getHeader().getHeight(),cd.getExtend().getAgentHash(), null);
+//        long total = 0L;
+//        for (DepositPo dpo : poList) {
+//            total += dpo.getDeposit();
+//            dpo.setStatus(ConsensusStatusEnum.IN.getCode());
+//        }
+//        if (total >= PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT.getValue()) {
+//
+//            AgentPo agentPo = new AgentPo();
+//            agentPo.setId(cd.getExtend().getAgentHash());
+//            agentPo.setStatus(ConsensusStatusEnum.IN.getCode());
+//            this.agentDataService.updateSelective(agentPo);
+//
+//            depositDataService.update(poList);
+//        }
+
+
     }
 
     @Override
@@ -102,6 +124,23 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
         po.setAddress(pjcTx.getTxData().getAddress());
         po.setTxHash(tx.getHash().getDigestHex());
         relationDataService.save(po);
+
+
+//        List<DepositPo> poList = depositDataService.getEffectiveList(null, block.getHeader().getHeight(),cd.getHexHash(), null);
+//        long total = 0L;
+//        for (DepositPo dpo1 : poList) {
+//            total += dpo1.getDeposit();
+//            dpo1.setStatus(ConsensusStatusEnum.WAITING.getCode());
+//        }
+//        if (total < PocConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT.getValue()) {
+//
+//            AgentPo agentPo = new AgentPo();
+//            agentPo.setStatus(ConsensusStatusEnum.WAITING.getCode());
+//            agentPo.setId(cd.getExtend().getAgentHash());
+//            this.agentDataService.updateSelective(agentPo);
+//
+//            depositDataService.update(poList);
+//        }
     }
 
     @Override
