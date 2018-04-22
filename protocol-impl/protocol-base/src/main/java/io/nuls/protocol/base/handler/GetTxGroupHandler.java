@@ -23,8 +23,7 @@
  */
 package io.nuls.protocol.base.handler;
 
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -32,9 +31,7 @@ import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.GetTxGroupRequest;
 import io.nuls.protocol.event.TxGroupEvent;
-import io.nuls.protocol.event.entity.GetTxGroupParam;
 import io.nuls.protocol.event.entity.TxGroup;
-import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.model.Transaction;
 
@@ -48,7 +45,7 @@ import java.util.List;
 public class GetTxGroupHandler extends AbstractEventHandler<GetTxGroupRequest> {
 
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
-//    private BlockService blockService =NulsContext.getServiceBean(BlockService.class);
+    //    private BlockService blockService =NulsContext.getServiceBean(BlockService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
@@ -59,19 +56,21 @@ public class GetTxGroupHandler extends AbstractEventHandler<GetTxGroupRequest> {
         TxGroupEvent txGroupEvent = new TxGroupEvent();
         TxGroup txGroup = new TxGroup();
         txGroup.setBlockHash(event.getEventBody().getBlockHash());
-        List<Transaction> txList =new ArrayList<>();
+        List<Transaction> txList = new ArrayList<>();
 
-        for(NulsDigestData hash:event.getEventBody().getTxHashList()){
+        for (NulsDigestData hash : event.getEventBody().getTxHashList()) {
 
             Transaction tx = temporaryCacheManager.getTx(hash.getDigestHex());
-            if(tx == null) {
+            if (tx == null) {
                 tx = ledgerService.getTx(hash);
             }
-            if(tx!=null){
+            if (tx != null) {
                 txList.add(tx);
-            }else{
-                System.out.println();
             }
+        }
+        if (txList.isEmpty()) {
+            Log.error("ASK:{},{},{}", fromId, event.getEventBody().getBlockHash(), event.getEventBody().getTxHashList().get(0));
+            return;
         }
 
         txGroup.setTxList(txList);
