@@ -137,7 +137,7 @@ public class IsolatedBlocksProcess {
         if(size < 0) {
             size = 0;
         }
-        for (int i = masterChainBlockHeaderList.size() - 1 ; i > size ; i--) {
+        for (int i = masterChainBlockHeaderList.size() - 1 ; i >= size ; i--) {
             if(hash.equals(masterChainBlockHeaderList.get(i).getHash())) {
                 return true;
             }
