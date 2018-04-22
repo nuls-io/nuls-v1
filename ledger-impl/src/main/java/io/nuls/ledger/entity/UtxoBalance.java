@@ -40,6 +40,8 @@ public class UtxoBalance extends Balance {
 
     public UtxoBalance() {
         super();
+        this.unSpends = new CopyOnWriteArrayList<>();
+        this.utxoKeys = new CopyOnWriteArrayList<>();
     }
 
     public UtxoBalance(Na usable, Na locked) {
