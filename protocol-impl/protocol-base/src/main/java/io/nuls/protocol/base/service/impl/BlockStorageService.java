@@ -128,18 +128,6 @@ public class BlockStorageService {
                 blockList.add(fillBlock(header, txListGroup.get(header.getHeight())));
             }
         }
-        if ((endHeight - startHeight + 1) > blockList.size()) {
-            for (long i = startHeight; i <= endHeight; i++) {
-                if (heightList.contains(i)) {
-                    continue;
-                }
-                try {
-                    blockList.add(this.getBlock(i));
-                } catch (Exception e) {
-                    Log.error(e);
-                }
-            }
-        }
         return blockList;
     }
 
