@@ -64,6 +64,8 @@ private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.c
             Transaction tx = ledgerService.getTx(hash);
             if(tx!=null){
                 txList.add(tx);
+            }else{
+                System.out.println();
             }
         }
 
