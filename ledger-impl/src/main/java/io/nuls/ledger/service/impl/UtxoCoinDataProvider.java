@@ -670,6 +670,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 continue;
             }
             for (UtxoOutput output : outputs) {
+                if(output.getTxHash() == null) {
+                    output.setTxHash(tx.getHash());
+                }
                 map.put(output.getKey(), output);
             }
         }
