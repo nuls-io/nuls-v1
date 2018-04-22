@@ -378,12 +378,17 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             List<TransactionPo> poList = new ArrayList<>();
             List<TransactionLocalPo> localPoList = new ArrayList<>();
             for (int i = 0; i < txList.size(); i++) {
+                isMine = false;
                 Transaction tx = txList.get(i);
                 TransactionPo po = UtxoTransferTool.toTransactionPojo(tx);
-
                 poList.add(po);
                 if (tx.getType() == TransactionConstant.TX_TYPE_CANCEL_DEPOSIT) {
-                    isMine = tx.isMine();
+                    TransactionLocalPo localPo = localTxDao.get(tx.getHash().getDigestHex());
+                    if (localPo != null) {
+                        localPo.setTxStatus(TransactionLocalPo.CONFIRM);
+                        localTxDao.update(localPo);
+                        continue;
+                    }
                 } else {
                     isMine = this.checkTxIsMine(tx);
                 }
@@ -395,11 +400,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             }
             txDao.save(poList);
 
-            for(TransactionLocalPo localPo : localPoList) {
+            for (TransactionLocalPo localPo : localPoList) {
                 TransactionLocalPo po = localTxDao.get(localPo.getHash());
-                if(po != null) {
+                if (po != null) {
                     localTxDao.update(localPo);
-                }else {
+                } else {
                     localTxDao.save(localPo);
                 }
             }

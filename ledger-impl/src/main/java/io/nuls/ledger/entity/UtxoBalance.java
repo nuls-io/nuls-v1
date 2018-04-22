@@ -26,6 +26,8 @@ package io.nuls.ledger.entity;
 import io.nuls.protocol.model.Na;
 
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -36,18 +38,18 @@ public class UtxoBalance extends Balance {
 
     private List<UtxoOutput> unSpends;
 
-    private List<String> utxoKeys;
+    private Set<String> utxoKeys;
 
     public UtxoBalance() {
         super();
         this.unSpends = new CopyOnWriteArrayList<>();
-        this.utxoKeys = new CopyOnWriteArrayList<>();
+        this.utxoKeys = ConcurrentHashMap.newKeySet();
     }
 
     public UtxoBalance(Na usable, Na locked) {
         super(usable, locked);
         this.unSpends = new CopyOnWriteArrayList<>();
-        this.utxoKeys = new CopyOnWriteArrayList<>();
+        this.utxoKeys = ConcurrentHashMap.newKeySet();
     }
 
     public UtxoBalance(Na usable, Na locked, List<UtxoOutput> unSpends) {
@@ -89,11 +91,11 @@ public class UtxoBalance extends Balance {
         return utxoKeys.contains(key);
     }
 
-    public List<String> getUtxoKeys() {
+    public Set<String> getUtxoKeys() {
         return utxoKeys;
     }
 
-    public void setUtxoKeys(List<String> utxoKeys) {
+    public void setUtxoKeys(Set<String> utxoKeys) {
         this.utxoKeys = utxoKeys;
     }
 }
