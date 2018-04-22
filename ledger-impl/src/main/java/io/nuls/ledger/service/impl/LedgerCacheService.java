@@ -124,7 +124,6 @@ public class LedgerCacheService {
                 unSpends.add(output);
             }
         }
-        Collections.sort(unSpends, UtxoComparator.getInstance());
         return unSpends;
     }
 
