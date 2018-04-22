@@ -65,11 +65,18 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
 
     @Override
     public void onEvent(TransactionEvent event, String fromId) {
+
         Transaction tx = event.getEventBody();
+        Log.info("receive new tx {} from {}", tx.getHash().getDigestHex(), fromId);
         if (null == tx) {
             return;
         }
         if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE || tx.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == TransactionConstant.TX_TYPE_RED_PUNISH) {
+            return;
+        }
+
+        Transaction tempTx = temporaryCacheManager.getTx(tx.getHash().getDigestHex());
+        if(tempTx != null) {
             return;
         }
 
