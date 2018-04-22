@@ -389,6 +389,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 }
                 if (isMine) {
                     TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);
+                    localPo.setTxStatus(TransactionLocalPo.CONFIRM);
                     localPoList.add(localPo);
                 }
             }
