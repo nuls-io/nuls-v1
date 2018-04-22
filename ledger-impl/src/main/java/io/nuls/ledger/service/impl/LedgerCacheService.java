@@ -141,7 +141,7 @@ public class LedgerCacheService {
         if (output != null) {
             UtxoBalance balance = (UtxoBalance) getBalance(output.getAddress());
             if (balance != null) {
-                balance.getUnSpends().remove(output);
+                balance.getUtxoKeys().remove(output);
             }
         }
     }

@@ -769,10 +769,7 @@ public class AccountServiceImpl implements AccountService {
         AccountPo accountPo = accountDao.get(account.getAddress().getBase58());
         if (accountPo != null) {
             return Result.getFailed(ErrorCode.ACCOUNT_EXIST);
-        } else {
-            accountPo = new AccountPo();
         }
-
         Account defaultAcct = getDefaultAccount();
         if (defaultAcct != null) {
             try {
@@ -792,6 +789,7 @@ public class AccountServiceImpl implements AccountService {
         }
 
         // save db
+        accountPo = new AccountPo();
         AccountTool.toPojo(account, accountPo);
         AliasPo aliasPo = aliasDataService.getByAddress(accountPo.getAddress());
         if (aliasPo != null) {
@@ -804,7 +802,6 @@ public class AccountServiceImpl implements AccountService {
         // save cache
         accountCacheService.putAccount(account);
         NulsContext.LOCAL_ADDRESS_LIST.add(accountPo.getAddress());
-        ledgerService.getBalance(accountPo.getAddress());
         if (getDefaultAccount() == null) {
             setDefaultAccount(account.getAddress().getBase58());
         }
@@ -843,10 +840,9 @@ public class AccountServiceImpl implements AccountService {
             accountPo = accountDao.get(account.getAddress().getBase58());
             if (accountPo != null) {
                 continue;
-            } else {
-                accountPo = new AccountPo();
             }
             // save db
+            accountPo = new AccountPo();
             AccountTool.toPojo(account, accountPo);
             aliasPo = aliasDataService.getByAddress(accountPo.getAddress());
             if (aliasPo != null) {
@@ -859,7 +855,6 @@ public class AccountServiceImpl implements AccountService {
             // save cache
             accountCacheService.putAccount(account);
             NulsContext.LOCAL_ADDRESS_LIST.add(accountPo.getAddress());
-            ledgerService.getBalance(accountPo.getAddress());
         }
         return Result.getSuccess();
     }
