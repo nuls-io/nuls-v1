@@ -73,7 +73,6 @@ import java.util.List;
 public class ConsensusProcess {
 
     private ChainManager chainManager;
-    private RoundManager roundManager;
     private TxMemoryPool txMemoryPool;
 
     private BlockQueueProvider blockQueueProvider;
@@ -84,9 +83,8 @@ public class ConsensusProcess {
 
     private boolean hasPacking;
 
-    public ConsensusProcess(ChainManager chainManager, RoundManager roundManager, TxMemoryPool txMemoryPool, BlockQueueProvider blockQueueProvider) {
+    public ConsensusProcess(ChainManager chainManager, TxMemoryPool txMemoryPool, BlockQueueProvider blockQueueProvider) {
         this.chainManager = chainManager;
-        this.roundManager = roundManager;
         this.txMemoryPool = txMemoryPool;
         this.blockQueueProvider = blockQueueProvider;
     }
@@ -123,7 +121,7 @@ public class ConsensusProcess {
 
     private void doWork() {
 
-        MeetingRound round = chainManager.getMasterChain().resetRound(true);
+        MeetingRound round = chainManager.getMasterChain().getOrResetCurrentRound();
 
         if (round == null) {
             return;

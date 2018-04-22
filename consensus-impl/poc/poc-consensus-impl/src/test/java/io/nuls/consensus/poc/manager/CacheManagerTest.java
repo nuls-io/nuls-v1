@@ -45,12 +45,10 @@ public class CacheManagerTest extends BaseTestCase {
 
     private ChainManager chainManager;
     private CacheManager cacheManager;
-    private RoundManager roundManager;
 
     @Before
     public void init() {
         chainManager = new ChainManager();
-        roundManager = new RoundManager(chainManager);
         cacheManager = new CacheManager(chainManager);
 
         CacheLoader cacheLoader = new CacheLoader() {

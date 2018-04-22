@@ -427,7 +427,6 @@ public class ChainProcess {
 
         if(changeSuccess) {
             chainManager.setMasterChain(newMasterChain);
-            newMasterChain.getRoundList().clear();
             newMasterChain.initRound();
             NulsContext.getInstance().setBestBlock(newMasterChain.getBestBlock());
 
@@ -539,11 +538,6 @@ public class ChainProcess {
     }
 
     private void clearMasterChainRound() {
-        List<MeetingRound> roundList = chainManager.getMasterChain().getRoundList();
-        if(roundList.size() > ConsensusConstant.CLEAR_MASTER_CHAIN_ROUND_COUNT) {
-            roundList = roundList.subList(roundList.size() - ConsensusConstant.CLEAR_MASTER_CHAIN_ROUND_COUNT, roundList.size());
-            MeetingRound round = roundList.get(0);
-            round.setPreRound(null);
-        }
+        chainManager.getMasterChain().clearRound(ConsensusConstant.CLEAR_MASTER_CHAIN_ROUND_COUNT);
     }
 }

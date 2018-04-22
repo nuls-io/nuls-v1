@@ -55,7 +55,6 @@ public class MainControlScheduler {
     private BlockQueueProvider blockQueueProvider;
     private TxQueueProvider txQueueProvider;
     private ChainManager chainManager;
-    private RoundManager roundManager;
     private CacheManager cacheManager;
     private TxMemoryPool txMemoryPool;
 
@@ -84,7 +83,6 @@ public class MainControlScheduler {
                 new NulsThreadFactory(NulsConstant.MODULE_ID_CONSENSUS, "consensus-poll-control"));
 
         chainManager = new ChainManager();
-        roundManager = new RoundManager(chainManager);
         cacheManager = new CacheManager(chainManager);
         txMemoryPool = new TxMemoryPool();
 
@@ -102,7 +100,7 @@ public class MainControlScheduler {
         ChainProcess chainProcess = new ChainProcess(chainManager);
         threadPool.scheduleAtFixedRate(new ChainProcessTask(chainProcess), 1000L,500L, TimeUnit.MILLISECONDS);
 
-        ConsensusProcess consensusProcess = new ConsensusProcess(chainManager, roundManager, txMemoryPool, blockQueueProvider);
+        ConsensusProcess consensusProcess = new ConsensusProcess(chainManager, txMemoryPool, blockQueueProvider);
         threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L,1000L, TimeUnit.MILLISECONDS);
 
         DownloadBlockProcess downloadBlockProcess = new DownloadBlockProcess();
