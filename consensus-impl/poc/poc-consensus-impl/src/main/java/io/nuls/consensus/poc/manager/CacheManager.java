@@ -25,6 +25,7 @@
 package io.nuls.consensus.poc.manager;
 
 import io.nuls.consensus.poc.cache.CacheLoader;
+import io.nuls.consensus.poc.constant.ConsensusConstant;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.protocol.model.Agent;
@@ -57,8 +58,8 @@ public class CacheManager {
 
         //load storage data to memory
 
-        List<BlockHeader> blockHeaderList = cacheLoader.loadBlockHeaders(200);
-        List<Block> blockList = cacheLoader.loadBlocks(8);
+        List<BlockHeader> blockHeaderList = cacheLoader.loadBlockHeaders(ConsensusConstant.INIT_HEADERS_OF_ROUND_COUNT);
+        List<Block> blockList = cacheLoader.loadBlocks(ConsensusConstant.INIT_BLOCKS_COUNT);
 
         if(blockHeaderList == null || blockHeaderList.size() == 0 || blockList == null || blockList.size() == 0) {
             Log.error("load cache error ,not find the block info!");

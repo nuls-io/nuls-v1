@@ -33,10 +33,7 @@ import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.protocol.event.entity.JoinConsensusParam;
-import io.nuls.consensus.poc.protocol.model.Agent;
-import io.nuls.consensus.poc.protocol.model.ConsensusAgentImpl;
-import io.nuls.consensus.poc.protocol.model.ConsensusDepositImpl;
-import io.nuls.consensus.poc.protocol.model.Deposit;
+import io.nuls.consensus.poc.protocol.model.*;
 import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.PocJoinConsensusTransaction;
@@ -728,6 +725,11 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         map.put("totalDeposit", totalDeposit);
         map.put("memberCount", memberSet.size());
         return map;
+    }
+
+    @Override
+    public MeetingRound getCurrentRound() {
+        return null;
     }
 
     private void filterAgentList(List<Consensus<Agent>> agentList,   String depositAddress, String keyword) {

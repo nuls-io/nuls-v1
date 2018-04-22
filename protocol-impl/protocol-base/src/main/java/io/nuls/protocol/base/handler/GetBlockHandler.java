@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.poc.handler;
+package io.nuls.protocol.base.handler;
 
 import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.core.exception.NulsException;

@@ -42,14 +42,14 @@ import static org.junit.Assert.*;
  */
 public class WalletServiceTest {
 
-    @BeforeClass
+//    @BeforeClass
     public static void init() {
         RestFulUtils.getInstance().setServerUri("http://127.0.0.1:8001");
     }
 
     WalletService walletService = WalletService.WALLET_SERVICE;
 
-    @Test
+//    @Test
     public void transfer() {
         int index = 0;
         while (index++ < 10000) {

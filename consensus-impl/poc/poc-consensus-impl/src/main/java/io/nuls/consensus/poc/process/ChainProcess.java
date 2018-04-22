@@ -24,6 +24,7 @@
 
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.poc.constant.ConsensusConstant;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.Chain;
@@ -80,7 +81,7 @@ public class ChainProcess {
         // 监控孤立链的状态，如果有可连接的，则加入验证链里面
         monitorIsolatedChains();
 
-        long newestBlockHeight = chainManager.getBestBlockHeight() + 3;
+        long newestBlockHeight = chainManager.getBestBlockHeight() + ConsensusConstant.CHANGE_CHAIN_BLOCK_DIFF_COUNT;
 
         ChainContainer newChain = chainManager.getMasterChain();
 
@@ -244,7 +245,7 @@ public class ChainProcess {
 
         List<BlockHeader> blockHeaderList = chainManager.getMasterChain().getChain().getBlockHeaderList();
 
-        int count = blockHeaderList.size() > 100 ? 100 : blockHeaderList.size();
+        int count = blockHeaderList.size() > ConsensusConstant.MAX_ISOLATED_BLOCK_COUNT ? ConsensusConstant.MAX_ISOLATED_BLOCK_COUNT : blockHeaderList.size();
         for(int i = blockHeaderList.size() - 1 ; i >= blockHeaderList.size() - count ; i--) {
             BlockHeader header = blockHeaderList.get(i);
             if(startBlockHeader.getPreHash().equals(header.getHash()) && startBlockHeader.getHeight() == header.getHeight() + 1) {
@@ -451,7 +452,7 @@ public class ChainProcess {
 
     private void clearExpiredChain() {
 
-        if(TimeService.currentTimeMillis() - lastClearTime < 60 * 1000L) {
+        if(TimeService.currentTimeMillis() - lastClearTime < ConsensusConstant.CLEAR_INTERVAL_TIME) {
             return;
         }
         lastClearTime = TimeService.currentTimeMillis();
@@ -481,7 +482,7 @@ public class ChainProcess {
     }
 
     private boolean checkChainIsExpired(ChainContainer isolatedChain, long bestHeight) {
-        if(bestHeight - isolatedChain.getChain().getEndBlockHeader().getHeight() > 100) {
+        if(bestHeight - isolatedChain.getChain().getEndBlockHeader().getHeight() > ConsensusConstant.MAX_ISOLATED_BLOCK_COUNT) {
             return true;
         }
         return false;
@@ -502,8 +503,8 @@ public class ChainProcess {
         if(blockHeaderList.size() > 30000) {
             blockHeaderList = blockHeaderList.subList(blockHeaderList.size() - 30000, blockHeaderList.size());
         }
-        if(blockList.size() > 100) {
-            blockList = blockList.subList(blockList.size() - 100, blockList.size());
+        if(blockList.size() > ConsensusConstant.MAX_ISOLATED_BLOCK_COUNT) {
+            blockList = blockList.subList(blockList.size() - ConsensusConstant.MAX_ISOLATED_BLOCK_COUNT, blockList.size());
         }
 
         List<Consensus<Agent>> agentList = masterChain.getAgentList();
@@ -531,7 +532,7 @@ public class ChainProcess {
         Iterator<PunishLogPo> yit = yellowList.iterator();
         while(yit.hasNext()) {
             PunishLogPo punishLog = yit.next();
-            if(punishLog.getRoundIndex() < roundData.getPackingIndexOfRound() - 200){
+            if(punishLog.getRoundIndex() < roundData.getPackingIndexOfRound() - ConsensusConstant.INIT_HEADERS_OF_ROUND_COUNT){
                 yit.remove();
             }
         }
@@ -539,8 +540,8 @@ public class ChainProcess {
 
     private void clearMasterChainRound() {
         List<MeetingRound> roundList = chainManager.getMasterChain().getRoundList();
-        if(roundList.size() > 5) {
-            roundList = roundList.subList(roundList.size() - 5, roundList.size());
+        if(roundList.size() > ConsensusConstant.CLEAR_MASTER_CHAIN_ROUND_COUNT) {
+            roundList = roundList.subList(roundList.size() - ConsensusConstant.CLEAR_MASTER_CHAIN_ROUND_COUNT, roundList.size());
             MeetingRound round = roundList.get(0);
             round.setPreRound(null);
         }

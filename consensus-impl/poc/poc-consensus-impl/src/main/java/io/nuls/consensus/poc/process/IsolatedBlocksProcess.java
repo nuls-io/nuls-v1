@@ -24,6 +24,7 @@
 
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.poc.constant.ConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
@@ -34,6 +35,7 @@ import io.nuls.protocol.model.BlockHeader;
 import io.nuls.protocol.model.NulsDigestData;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by ln on 2018/4/14.
@@ -53,11 +55,11 @@ public class IsolatedBlocksProcess {
 
         Block block = blockContainer.getBlock();
 
-        // 只处理本地误差100个块以内的孤块
+        // 只处理本地误差配置的块个数以内的孤块
 
         long bestBlockHeight = chainManager.getBestBlockHeight();
 
-        if (Math.abs(bestBlockHeight - block.getHeader().getHeight()) > 100) {
+        if (Math.abs(bestBlockHeight - block.getHeader().getHeight()) > ConsensusConstant.MAX_ISOLATED_BLOCK_COUNT) {
             return;
         }
 
@@ -127,6 +129,13 @@ public class IsolatedBlocksProcess {
                 if (header.getHash().equals(hash)) {
                     return true;
                 }
+            }
+        }
+
+        List<BlockHeader> masterChainBlockHeaderList = chainManager.getMasterChain().getChain().getBlockHeaderList();
+        for (int i = masterChainBlockHeaderList.size() - 1 ; i > masterChainBlockHeaderList.size() - ConsensusConstant.MAX_ISOLATED_BLOCK_COUNT * 1.1 ; i--) {
+            if(hash.equals(masterChainBlockHeaderList.get(i).getHash())) {
+                return true;
             }
         }
 

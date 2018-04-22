@@ -26,27 +26,24 @@ package io.nuls.consensus.poc.module.impl;
 import io.nuls.consensus.poc.block.validator.PocBlockValidatorManager;
 import io.nuls.consensus.poc.handler.*;
 import io.nuls.consensus.poc.module.AbstractPocConsensusModule;
-import io.nuls.consensus.poc.protocol.context.ConsensusContext;
 import io.nuls.consensus.poc.protocol.event.notice.*;
-import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.consensus.poc.service.impl.PocConsensusServiceImpl;
 import io.nuls.consensus.poc.service.impl.tx.*;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.BaseThread;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.log.Log;
-import io.nuls.core.validate.ValidateResult;
 import io.nuls.event.bus.service.intf.EventBusService;
-import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.protocol.base.handler.GetBlockHandler;
+import io.nuls.protocol.base.handler.GetTxGroupHandler;
+import io.nuls.protocol.base.handler.NewTxEventHandler;
+import io.nuls.protocol.base.handler.TxGroupHandler;
 import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.*;
 import io.nuls.protocol.event.manager.EventManager;
-import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.service.intf.TransactionService;
 import io.nuls.protocol.utils.TransactionManager;
@@ -59,7 +56,7 @@ import java.util.List;
  */
 public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
 
-    private EventBusService eventBusService = NulsContext.getServiceBean(EventBusService.class);
+    private EventBusService eventBusService ;
 
     @Override
     public void init() {
@@ -70,6 +67,7 @@ public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
         EventManager.putEvent(RegisterAgentNotice.class);
         EventManager.putEvent(StopConsensusNotice.class);
 
+        this.waitForDependencyInited(NulsConstant.MODULE_ID_LEDGER);
         this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class, RegisterAgentTxService.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class, RedPunishTxService.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class, YellowPunishTxService.class);
@@ -89,7 +87,8 @@ public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
     }
     @Override
     public void start() {
-        this.waitForDependencyRunning(NulsConstant.MODULE_ID_PROTOCOL);
+        this.waitForDependencyRunning(NulsConstant.MODULE_ID_EVENT_BUS);
+        this.eventBusService = NulsContext.getServiceBean(EventBusService.class);
         try {
             NulsContext.getServiceBean(PocConsensusServiceImpl.class).startup();
         } catch (Exception e) {
