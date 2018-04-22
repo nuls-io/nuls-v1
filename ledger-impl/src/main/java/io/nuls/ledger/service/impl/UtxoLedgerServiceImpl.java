@@ -394,8 +394,14 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 }
             }
             txDao.save(poList);
-            if (localPoList.size() > 0) {
-                localTxDao.save(localPoList);
+
+            for(TransactionLocalPo localPo : localPoList) {
+                TransactionLocalPo po = localTxDao.get(localPo.getHash());
+                if(po != null) {
+                    localTxDao.update(localPo);
+                }else {
+                    localTxDao.save(localPo);
+                }
             }
         } catch (Exception e) {
             Log.error(e);
