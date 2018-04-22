@@ -133,7 +133,8 @@ public class BlockServiceImpl implements BlockService {
         BlockLog.debug("save block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
 
         BlockHeader bestBlockHeader = getLocalBestBlockHeader();
-        if(!bestBlockHeader.getHash().equals(block.getHeader().getPreHash())) {
+
+        if((bestBlockHeader == null && block.getHeader().getHeight() != 0L) || (bestBlockHeader != null && !bestBlockHeader.getHash().equals(block.getHeader().getPreHash()))) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "save blcok error , prehash is error , height: " + block.getHeader().getHeight() + " , hash: " + block.getHeader().getHash());
         }
 
