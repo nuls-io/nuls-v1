@@ -23,6 +23,7 @@
  */
 package io.nuls.ledger.module.impl;
 
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.ledger.entity.listener.CoinDataTxService;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
@@ -62,6 +63,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 
     @Override
     public void init() {
+        this.waitForDependencyInited(NulsConstant.MODULE_ID_DB);
         EventManager.putEvent(BalanceChangeNotice.class);
         registerService();
         ledgerService = NulsContext.getServiceBean(LedgerService.class);

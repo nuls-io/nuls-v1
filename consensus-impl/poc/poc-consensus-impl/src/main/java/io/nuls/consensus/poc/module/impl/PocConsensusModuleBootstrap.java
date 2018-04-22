@@ -59,7 +59,7 @@ import java.util.List;
  */
 public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
 
-    private EventBusService eventBusService = NulsContext.getServiceBean(EventBusService.class);
+    private EventBusService eventBusService ;
 
     @Override
     public void init() {
@@ -70,6 +70,7 @@ public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
         EventManager.putEvent(RegisterAgentNotice.class);
         EventManager.putEvent(StopConsensusNotice.class);
 
+        this.waitForDependencyInited(NulsConstant.MODULE_ID_LEDGER);
         this.registerTransaction(TransactionConstant.TX_TYPE_REGISTER_AGENT, RegisterAgentTransaction.class, RegisterAgentTxService.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_RED_PUNISH, RedPunishTransaction.class, RedPunishTxService.class);
         this.registerTransaction(TransactionConstant.TX_TYPE_YELLOW_PUNISH, YellowPunishTransaction.class, YellowPunishTxService.class);
@@ -89,7 +90,8 @@ public class PocConsensusModuleBootstrap extends AbstractPocConsensusModule {
     }
     @Override
     public void start() {
-        this.waitForDependencyRunning(NulsConstant.MODULE_ID_PROTOCOL);
+        this.waitForDependencyRunning(NulsConstant.MODULE_ID_EVENT_BUS);
+        this.eventBusService = NulsContext.getServiceBean(EventBusService.class);
         try {
             NulsContext.getServiceBean(PocConsensusServiceImpl.class).startup();
         } catch (Exception e) {

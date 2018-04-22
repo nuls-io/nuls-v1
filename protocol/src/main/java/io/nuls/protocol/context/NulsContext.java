@@ -132,7 +132,7 @@ public class NulsContext {
 
     private static <T> T getServiceBean(Class<T> tClass, long l) {
         try {
-            Thread.sleep(100L);
+            Thread.sleep(200L);
 //            System.out.println("获取service失败！"+tClass);
         } catch (InterruptedException e1) {
             Log.error(e1);

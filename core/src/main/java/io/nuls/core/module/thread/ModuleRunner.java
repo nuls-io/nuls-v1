@@ -26,6 +26,7 @@ package io.nuls.core.module.thread;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.module.manager.ModuleManager;
@@ -52,12 +53,16 @@ public class ModuleRunner implements Runnable {
     @Override
     public void run() {
         try {
+//            Log.error(moduleKey);
             module = this.loadModule();
+//            Log.error("loaded=============="+moduleKey);
             module.setStatus(ModuleStatusEnum.INITIALIZING);
             module.init();
+//            Log.error("inited=============="+moduleKey);
             module.setStatus(ModuleStatusEnum.INITIALIZED);
             module.setStatus(ModuleStatusEnum.STARTING);
             module.start();
+//            Log.error("started=============="+moduleKey);
             module.setStatus(ModuleStatusEnum.RUNNING);
         } catch (ClassNotFoundException e) {
             module.setStatus(ModuleStatusEnum.EXCEPTION);
@@ -71,6 +76,10 @@ public class ModuleRunner implements Runnable {
             module.setStatus(ModuleStatusEnum.EXCEPTION);
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.FAILED, e);
+        }catch (NulsRuntimeException e){
+            module.setStatus(ModuleStatusEnum.EXCEPTION);
+            Log.error(e);
+            throw e;
         }
     }
 

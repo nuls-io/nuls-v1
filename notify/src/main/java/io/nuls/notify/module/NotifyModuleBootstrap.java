@@ -61,6 +61,7 @@ public class NotifyModuleBootstrap extends BaseModuleBootstrap {
 
     @Override
     public void start() {
+        this.waitForDependencyRunning(NulsConstant.MODULE_ID_EVENT_BUS);
         Log.debug("Start");
         notificationController = new NotificationController();
 

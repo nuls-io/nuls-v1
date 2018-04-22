@@ -60,11 +60,11 @@ import java.io.IOException;
  */
 public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
 
-    private EventBusService eventBusService = NulsContext.getServiceBean(EventBusService.class);
+    private EventBusService eventBusService;
 
     @Override
     public void init() {
-        this.waitForDependencyInited(NulsConstant.MODULE_ID_CACHE,NulsConstant.MODULE_ID_DB,NulsConstant.MODULE_ID_EVENT_BUS);
+        this.waitForDependencyInited(NulsConstant.MODULE_ID_CACHE, NulsConstant.MODULE_ID_DB, NulsConstant.MODULE_ID_EVENT_BUS, NulsConstant.MODULE_ID_LEDGER);
         ConsensusContext.initConfiguration();
         this.registerService(BlockServiceImpl.class);
         Block bestBlock = null;
@@ -83,7 +83,9 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
 
     @Override
     public void start() {
+        this.waitForDependencyRunning(NulsConstant.MODULE_ID_EVENT_BUS);
         this.checkGenesisBlock();
+        eventBusService = NulsContext.getServiceBean(EventBusService.class);
         this.initHandlers();
         NulsContext.getServiceBean(DownloadService.class).start();
         Log.info("the protocol module is started!");
