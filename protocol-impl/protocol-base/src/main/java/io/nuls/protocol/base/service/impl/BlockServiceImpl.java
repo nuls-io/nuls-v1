@@ -43,6 +43,7 @@ import io.nuls.protocol.model.BlockHeader;
 import io.nuls.protocol.model.Transaction;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -119,15 +120,18 @@ public class BlockServiceImpl implements BlockService {
     @DbSession
     public boolean saveBlock(Block block) throws IOException {
         BlockLog.debug("save block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
+        List<Transaction> commitedList = new ArrayList<>();
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);
             tx.setIndex(x);
             tx.setBlockHeight(block.getHeader().getHeight());
             try {
                 tx.verifyWithException();
+                commitedList.add(tx);
                 ledgerService.commitTx(tx, block);
             } catch (Exception e) {
                 Log.error(e);
+                this.rollback(commitedList);
                 throw new NulsRuntimeException(e);
             }
         }
@@ -154,6 +158,7 @@ public class BlockServiceImpl implements BlockService {
         return true;
     }
 
+    @Override
     @DbSession
     public boolean rollbackBlock(Block block) throws NulsException {
         if (null == block) {
@@ -163,7 +168,7 @@ public class BlockServiceImpl implements BlockService {
         if(!bestBlock.getHeader().getHash().equals(bestBlock.getHeader().getHash())) {
             throw new NulsException(ErrorCode.FAILED, "blockService rollback block , the block is not best block!");
         }
-        this.rollback(block.getTxs(), block.getTxs().size() - 1);
+        this.rollback(block.getTxs() );
         this.ledgerService.deleteTx(block.getHeader().getHeight());
         blockStorageService.delete(block.getHeader().getHash().getDigestHex());
         return true;
@@ -190,12 +195,8 @@ public class BlockServiceImpl implements BlockService {
         return blockStorageService.getBlockCount(address, -1L, -1L, 0L);
     }
 
-    private void rollback(List<Transaction> txs, int max) {
-        int i = max;
-        if (max >= txs.size()) {
-            i = txs.size() - 1;
-        }
-        for (; i >= 0; i--) {
+    private void rollback(List<Transaction> txs ) {
+        for (int i = txs.size()-1; i >= 0; i--) {
             Transaction tx = txs.get(i);
             try {
                 ledgerService.rollbackTx(tx, null);

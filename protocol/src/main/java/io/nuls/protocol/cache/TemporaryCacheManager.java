@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.poc.cache.manager;
+package io.nuls.protocol.cache;
 
 import io.nuls.cache.util.CacheMap;
 import io.nuls.protocol.model.SmallBlock;
+import io.nuls.protocol.model.Transaction;
 
 /**
  * Used for sharing temporary data between multiple hander.
@@ -36,6 +37,7 @@ public class TemporaryCacheManager {
     private static final TemporaryCacheManager INSTANCE = new TemporaryCacheManager();
 
     private CacheMap<String, SmallBlock> smallBlockCacheMap = new CacheMap<>("temp-small-block-cache", 16, 1000, 0);
+    private CacheMap<String, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 64, 3600, 0);
 
     private TemporaryCacheManager() {
     }
@@ -53,6 +55,17 @@ public class TemporaryCacheManager {
             return null;
         }
         return smallBlockCacheMap.get(hash);
+    }
+
+    public void cacheTx(Transaction tx) {
+        txCacheMap.put(tx.getHash().getDigestHex(), tx);
+    }
+
+    public Transaction getTx(String hash) {
+        if (null == txCacheMap) {
+            return null;
+        }
+        return txCacheMap.get(hash);
     }
 
     public void remove(String hash) {

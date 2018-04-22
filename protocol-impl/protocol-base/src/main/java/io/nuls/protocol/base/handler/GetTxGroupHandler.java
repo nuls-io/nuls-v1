@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.consensus.poc.handler;
+package io.nuls.protocol.base.handler;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.GetTxGroupRequest;
 import io.nuls.protocol.event.TxGroupEvent;
@@ -48,7 +49,8 @@ public class GetTxGroupHandler extends AbstractEventHandler<GetTxGroupRequest> {
 
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 //    private BlockService blockService =NulsContext.getServiceBean(BlockService.class);
-private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
     @Override
     public void onEvent(GetTxGroupRequest event, String fromId) {
@@ -61,7 +63,10 @@ private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.c
 
         for(NulsDigestData hash:event.getEventBody().getTxHashList()){
 
-            Transaction tx = ledgerService.getTx(hash);
+            Transaction tx = temporaryCacheManager.getTx(hash.getDigestHex());
+            if(tx == null) {
+                tx = ledgerService.getTx(hash);
+            }
             if(tx!=null){
                 txList.add(tx);
             }else{
