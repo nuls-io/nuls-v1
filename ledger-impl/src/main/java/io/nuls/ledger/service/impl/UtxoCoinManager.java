@@ -87,7 +87,7 @@ public class UtxoCoinManager {
     public List<UtxoOutput> getAccountUnSpend(String address, Na value) {
         List<UtxoOutput> unSpends = new ArrayList<>();
         try {
-            UtxoBalance balance = (UtxoBalance) ledgerCacheService.getUnSpends(address);
+            UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(address);
             if (balance == null) {
                 return unSpends;
             }
@@ -174,11 +174,21 @@ public class UtxoCoinManager {
         Set<String> inputKeySet = new HashSet<>();
         for (AbstractCoinTransaction tx : localTxs) {
             UtxoData utxoData = (UtxoData) tx.getCoinData();
-            for (UtxoOutput output : utxoData.getOutputs()) {
+
+
+            for(int i=0;i<utxoData.getOutputs().size();i++) {
+                UtxoOutput output = utxoData.getOutputs().get(i);
                 if (output.getAddress().equals(address)) {
-                    unSpends.add(output);
+                    if(!output.isLocked()) {
+                        unSpends.add(output);
+                    }
                 }
             }
+//            for (UtxoOutput output : utxoData.getOutputs()) {
+//                if (output.getAddress().equals(address)) {
+//                    unSpends.add(output);
+//                }
+//            }
             for (UtxoInput input : utxoData.getInputs()) {
                 inputKeySet.add(input.getKey());
             }
