@@ -94,7 +94,7 @@ public class LedgerCacheService {
             balance = new UtxoBalance();
         }
         balance.addUtxo(key);
-
+        putBalance(address, balance);
 //        if (balance == null) {
 //            balance = new UtxoBalance();
 //            balance.addUtxo(key);

@@ -35,6 +35,7 @@ import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.dao.UtxoTransactionDataService;
 import io.nuls.db.entity.TransactionLocalPo;
@@ -45,6 +46,7 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.ledger.entity.OutPutStatusEnum;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.params.Coin;
@@ -69,7 +71,9 @@ import io.nuls.protocol.utils.TransactionManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -81,6 +85,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Autowired
     private UtxoTransactionDataService txDao;
+    @Autowired
+    private UtxoInputDataService inputDataService;
     @Autowired
     private UtxoOutputDataService outputDataService;
     @Autowired
@@ -254,6 +260,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         Balance balances = new Balance();
         for (String address : NulsContext.LOCAL_ADDRESS_LIST) {
             Balance balance = getBalance(address);
+            if (balance == null) {
+                continue;
+            }
             balances.setLocked(balances.getLocked().add(balance.getLocked()));
             balances.setUsable(balances.getUsable().add(balance.getUsable()));
         }
@@ -573,10 +582,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @DbSession
     public void unlockTxSave(String txHash) {
         Log.info("-------------- exit agent unlockTxSave  ------------------txHash:" + txHash);
-        txDao.unlockTxOutput(txHash);
-//        String key = txHash + "-" + 0;
-//        UtxoOutput output = ledgerCacheService.getUtxo(key);
-//        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+        outputDataService.unlockTxOutput(txHash);
+        String key = txHash + "-" + 0;
+        UtxoOutput output = ledgerCacheService.getUtxo(key);
+        output.setStatus(OutPutStatusEnum.UTXO_UNSPENT);
+        ledgerCacheService.putUtxo(key, output);
 //        UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
     }
 
@@ -584,25 +594,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @DbSession
     public void unlockTxRollback(String txHash) {
         Log.info("-------------- exit agent unlockTxRollback  ------------------txHash:" + txHash);
-        txDao.lockTxOutput(txHash);
-//        UtxoOutput output = ledgerCacheService.getUtxo(txHash + "-" + 0);
-//        if (output != null) {
-//            if (OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT == output.getStatus()) {
-//                output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK);
-//            }
-//            UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
-//        } else {
-//            Map<String, Object> keyMap = new HashMap<>();
-//            keyMap.put("tx_hash", txHash);
-//            keyMap.put("out_index", 0);
-//            UtxoOutputPo po = outputDataService.get(keyMap);
-//            if (po != null) {
-//                po.setStatus(UtxoOutputPo.LOCKED);
-//                outputDataService.update(po);
-//            }
-//            output = UtxoTransferTool.toOutput(po);
-//            ledgerCacheService.putUtxo(output.getKey(), output);
-//        }
+        outputDataService.lockTxOutput(txHash);
+        Map<String, Object> keyMap = new HashMap<>();
+
+        keyMap.put("tx_hash", txHash);
+        keyMap.put("out_index", 0);
+        UtxoOutputPo po = outputDataService.get(keyMap);
+        if (po != null) {
+            po.setStatus(UtxoOutputPo.LOCKED);
+            outputDataService.update(po);
+            UtxoOutput output = UtxoTransferTool.toOutput(po);
+            ledgerCacheService.putUtxo(output.getKey(), output);
+        }
     }
 
     @Override

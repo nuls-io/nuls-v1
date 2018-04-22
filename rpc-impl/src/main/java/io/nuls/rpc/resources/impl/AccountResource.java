@@ -174,6 +174,9 @@ public class AccountResource {
             return RpcResult.getFailed(ErrorCode.ADDRESS_ERROR);
         }
         Balance balance = ledgerService.getBalance(address);
+        if(balance == null) {
+            balance = new Balance();
+        }
         RpcResult result = RpcResult.getSuccess();
         result.setData(new BalanceDto(balance));
         return result;

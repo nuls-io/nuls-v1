@@ -222,18 +222,20 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 //            for (String address : addressSet) {
 //                UtxoTransactionTool.getInstance().calcBalance(address, true);
 //            }
-        } catch (Exception e) {
-//        rollback
-//            Log.warn(e.getMessage(), e);
-            for (UtxoOutput output : utxoData.getOutputs()) {
-                ledgerCacheService.removeUtxo(output.getKey());
-            }
-            for (UtxoOutput spend : spends) {
-                ledgerCacheService.updateUtxoStatus(spend.getKey(), OutPutStatusEnum.UTXO_UNSPENT, OutPutStatusEnum.UTXO_SPENT);
-            }
-            System.out.println("----------");
-            throw e;
-        } finally {
+        }
+//        catch (Exception e) {
+////        rollback
+////            Log.warn(e.getMessage(), e);
+//            for (UtxoOutput output : utxoData.getOutputs()) {
+//                ledgerCacheService.removeUtxo(output.getKey());
+//            }
+//            for (UtxoOutput spend : spends) {
+//                ledgerCacheService.updateUtxoStatus(spend.getKey(), OutPutStatusEnum.UTXO_UNSPENT, OutPutStatusEnum.UTXO_SPENT);
+//            }
+//            System.out.println("----------");
+//            throw e;
+//        }
+        finally {
             lock.unlock();
         }
     }
