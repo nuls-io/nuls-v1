@@ -24,10 +24,7 @@
 package io.nuls.consensus.poc.service;
 
 import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
-import io.nuls.consensus.poc.protocol.model.Agent;
-import io.nuls.consensus.poc.protocol.model.ConsensusAgentImpl;
-import io.nuls.consensus.poc.protocol.model.ConsensusDepositImpl;
-import io.nuls.consensus.poc.protocol.model.Deposit;
+import io.nuls.consensus.poc.protocol.model.*;
 import io.nuls.consensus.poc.provider.QueueProvider;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
@@ -74,4 +71,6 @@ public interface PocConsensusService extends ConsensusService {
     Page<Map<String, Object>> getDepositList(String address, String agentAddress, Integer pageNumber, Integer pageSize);
 
     Map<String, Object> getAgent(String agentAddress);
+
+    MeetingRound getCurrentRound();
 }

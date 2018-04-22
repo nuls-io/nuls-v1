@@ -26,6 +26,7 @@ package io.nuls.consensus.poc.process;
 
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
+import io.nuls.consensus.poc.constant.ConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
@@ -35,6 +36,7 @@ import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
 import io.nuls.consensus.poc.provider.ConsensusSystemProvider;
 import io.nuls.consensus.poc.provider.IsolatedBlocksProvider;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.ChainLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
@@ -67,6 +69,12 @@ public class BlockProcess {
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
         Block block = blockContainer.getBlock();
+
+        // Discard future blocks
+        // 丢弃掉未来时间的区块
+        if(TimeService.currentTimeMillis() + ConsensusConstant.DISCARD_FUTURE_BLOCKS_TIME < block.getHeader().getTime()) {
+            return false;
+        }
 
         if(chainManager.getMasterChain().verifyAndAddBlock(block, isDownload)) {
             boolean success = false;

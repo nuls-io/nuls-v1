@@ -88,7 +88,6 @@ public class MainControlScheduler {
         cacheManager = new CacheManager(chainManager);
         txMemoryPool = new TxMemoryPool();
 
-
         IsolatedBlocksProvider isolatedBlocksProvider = new IsolatedBlocksProvider();
         IsolatedBlocksProcess isolatedBlocksProcess = new IsolatedBlocksProcess(chainManager);
         threadPool.scheduleAtFixedRate(new IsolatedBlocksProcessTask(isolatedBlocksProcess, isolatedBlocksProvider), 1000L,1000L, TimeUnit.MILLISECONDS);
