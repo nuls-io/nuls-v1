@@ -333,6 +333,7 @@ public class ConsensusProcess {
                 if(result.isSuccess()){
                     coinTx.setSkipInputValidator(true);
                     result = coinTx.verify();
+                    coinTx.setSkipInputValidator(false);
                 }
             }
             if (result.isFailed()) {
