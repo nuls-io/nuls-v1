@@ -533,6 +533,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         for (TransactionPo tx : txList) {
             txDao.deleteTx(tx.getHash());
         }
+
     }
 
     @Override
