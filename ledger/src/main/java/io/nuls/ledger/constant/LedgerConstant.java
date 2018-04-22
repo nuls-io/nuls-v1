@@ -33,7 +33,7 @@ public interface LedgerConstant {
 
     int SMALL_CHANGE_COUNT = 500;
 
-    String STANDING_BOOK = "STANDING_BOOK";
+    String LEDGER_BOOK = "LEDGER_BOOK";
 
     String UTXO = "UTXO";
 

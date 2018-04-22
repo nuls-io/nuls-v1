@@ -23,24 +23,22 @@
  */
 package io.nuls.ledger.service.impl;
 
-import io.nuls.account.entity.Address;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.dao.TransactionLocalDataService;
 import io.nuls.db.dao.UtxoOutputDataService;
 import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.entity.UtxoOutputPo;
-import io.nuls.ledger.entity.UtxoBalance;
-import io.nuls.ledger.entity.UtxoData;
-import io.nuls.ledger.entity.UtxoInput;
-import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Na;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -63,23 +61,25 @@ public class UtxoCoinManager {
 
     private TransactionLocalDataService localDataService = NulsContext.getServiceBean(TransactionLocalDataService.class);
 
+    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
+
     private Lock lock = new ReentrantLock();
 
-//    public void cacheAllUnSpendUtxo() {
-//        List<UtxoOutputPo> utxoOutputPos = outputDataService.getAllUnSpend();
-//        Set<String> addressSet = new HashSet<>();
-//
-//        for (int i = 0; i < utxoOutputPos.size(); i++) {
-//            UtxoOutputPo po = utxoOutputPos.get(i);
-//            UtxoOutput output = UtxoTransferTool.toOutput(po);
-//            ledgerCacheService.putUtxo(output.getKey(), output);
-//            addressSet.add(po.getAddress());
-//        }
-//
+    public void cacheAllUnSpendUtxo() {
+        List<UtxoOutputPo> utxoOutputPos = outputDataService.getAllUnSpend();
+        Set<String> addressSet = new HashSet<>();
+
+        for (int i = 0; i < utxoOutputPos.size(); i++) {
+            UtxoOutputPo po = utxoOutputPos.get(i);
+            UtxoOutput output = UtxoTransferTool.toOutput(po);
+            ledgerCacheService.putUtxo(output.getKey(), output);
+            addressSet.add(po.getAddress());
+        }
+
 //        for (String str : addressSet) {
 //            UtxoTransactionTool.getInstance().calcBalance(str, false);
 //        }
-//    }
+    }
 
     /**
      * Utxo is used to ensure that each transaction will not double
@@ -87,21 +87,16 @@ public class UtxoCoinManager {
     public List<UtxoOutput> getAccountUnSpend(String address, Na value) {
         List<UtxoOutput> unSpends = new ArrayList<>();
         try {
-            List<UtxoOutputPo> poList = outputDataService.getAccountUnSpend(address);
-            List<UtxoOutput> outputList = new ArrayList<>();
+            UtxoBalance balance = (UtxoBalance) ledgerCacheService.getUnSpends(address);
+            if (balance == null) {
+                return unSpends;
+            }
+
+            List<UtxoOutput> outputList = ledgerCacheService.getUnSpends(address);
+            filterUtxoByLocalTxs(address, outputList);
+
             Na amount = Na.ZERO;
             boolean enough = false;
-
-            for (int i = 0; i < poList.size(); i++) {
-                UtxoOutputPo output = poList.get(i);
-                if (output.isLocked()) {
-                    continue;
-                }
-                outputList.add(UtxoTransferTool.toOutput(output));
-            }
-            List<AbstractCoinTransaction> localTxs = getLocalUnConfirmTxs();
-            filterUtxoByLocalTxs(address, outputList, localTxs);
-
             for (UtxoOutput output : outputList) {
                 unSpends.add(output);
                 amount = amount.add(Na.valueOf(output.getValue()));
@@ -123,21 +118,13 @@ public class UtxoCoinManager {
     public List<UtxoOutput> getAccountsUnSpend(List<String> addressList, Na value) {
         List<UtxoOutput> unSpends = new ArrayList<>();
         try {
-            List<AbstractCoinTransaction> localTxs = getLocalUnConfirmTxs();
             //check use-able is enough , find unSpend utxo
             Na amount = Na.ZERO;
             boolean enough = false;
             for (String address : addressList) {
-                List<UtxoOutputPo> poList = outputDataService.getAccountUnSpend(address);
-                List<UtxoOutput> outputList = new ArrayList<>();
-                for (int i = 0; i < poList.size(); i++) {
-                    UtxoOutputPo output = poList.get(i);
-                    if (output.isLocked()) {
-                        continue;
-                    }
-                    outputList.add(UtxoTransferTool.toOutput(output));
-                }
-                filterUtxoByLocalTxs(address, outputList, localTxs);
+                List<UtxoOutput> outputList = ledgerCacheService.getUnSpends(address);
+
+                filterUtxoByLocalTxs(address, outputList);
                 if (outputList.isEmpty()) {
                     continue;
                 }
@@ -177,7 +164,14 @@ public class UtxoCoinManager {
         return localTxs;
     }
 
-    public void filterUtxoByLocalTxs(String address, List<UtxoOutput> unSpends, List<AbstractCoinTransaction> localTxs) {
+
+    public void filterUtxoByLocalTxs(String address, List<UtxoOutput> unSpends) {
+        List<AbstractCoinTransaction> localTxs = getLocalUnConfirmTxs();
+        if (localTxs.isEmpty()) {
+            return;
+        }
+
+        Set<String> inputKeySet = new HashSet<>();
         for (AbstractCoinTransaction tx : localTxs) {
             UtxoData utxoData = (UtxoData) tx.getCoinData();
             for (UtxoOutput output : utxoData.getOutputs()) {
@@ -185,10 +179,6 @@ public class UtxoCoinManager {
                     unSpends.add(output);
                 }
             }
-        }
-        Set<String> inputKeySet = new HashSet<>();
-        for (AbstractCoinTransaction tx : localTxs) {
-            UtxoData utxoData = (UtxoData) tx.getCoinData();
             for (UtxoInput input : utxoData.getInputs()) {
                 inputKeySet.add(input.getKey());
             }

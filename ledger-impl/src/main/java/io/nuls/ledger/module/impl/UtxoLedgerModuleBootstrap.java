@@ -98,7 +98,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
     @Override
     public void start() {
         //cache the wallet's all accounts unSpend output
-//        coinManager.cacheAllUnSpendUtxo();
+        coinManager.cacheAllUnSpendUtxo();
         TaskManager.createAndRunThread(this.getModuleId(), SmallChangeThread.class.getSimpleName(), SmallChangeThread.getInstance());
     }
 

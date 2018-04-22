@@ -24,9 +24,11 @@
 package io.nuls.ledger.entity;
 
 import io.nuls.account.entity.Address;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.BaseNulsData;
@@ -40,7 +42,7 @@ import java.io.IOException;
 /**
  * Created by win10 on 2017/10/30.
  */
-public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
+public class UtxoOutput extends BaseNulsData {
 
     private NulsDigestData txHash;
 
@@ -191,19 +193,9 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         this.txType = txType;
     }
 
-    @Override
-    public int compareTo(UtxoOutput o) {
-        if (this.value < o.getValue()) {
-            return -1;
-        } else if (this.value > o.getValue()) {
-            return 1;
-        }
-        return 0;
-    }
-
     public boolean isUsable() {
         //todo for @Vivi check the last Expression
-        return OutPutStatusEnum.UTXO_UNSPENT == status||null==status;
+        return OutPutStatusEnum.UTXO_UNSPENT == status || null == status;
     }
 
     public boolean isSpend() {
@@ -211,8 +203,21 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
     }
 
     public boolean isLocked() {
-        return OutPutStatusEnum.UTXO_CONSENSUS_LOCK == status ||
-                OutPutStatusEnum.UTXO_TIME_LOCK == status;
+        if (OutPutStatusEnum.UTXO_CONSENSUS_LOCK == status) {
+            return true;
+        }
+        if (OutPutStatusEnum.UTXO_TIME_LOCK == status) {
+            long currentTime = TimeService.currentTimeMillis();
+            if (lockTime <= NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime >= NulsContext.getInstance().getBestHeight()) {
+                status = OutPutStatusEnum.UTXO_TIME_LOCK;
+                return true;
+            } else if (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime >= currentTime) {
+                status = OutPutStatusEnum.UTXO_TIME_LOCK;
+                return true;
+            }
+            status = OutPutStatusEnum.UTXO_UNSPENT;
+        }
+        return false;
     }
 
     public byte[] getOwner() {

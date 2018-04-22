@@ -86,6 +86,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Autowired
     private EventBroadcaster eventBroadcaster;
 
+    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
+
     private Lock lock = new ReentrantLock();
 
     @Override
@@ -222,21 +224,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Balance getBalance(String address) {
-        Balance balance = new Balance();
+        Balance balance = ledgerCacheService.getBalance(address);
+        if (balance == null) {
+            return null;
+        }
+
         long usable = 0;
         long locked = 0;
 
-        List<UtxoOutputPo> poList = outputDataService.getAccountUnSpend(address);
-        List<UtxoOutput> outputList = new ArrayList<>();
+        List<UtxoOutput> unSpends = ledgerCacheService.getUnSpends(address);
+        UtxoCoinManager.getInstance().filterUtxoByLocalTxs(address, unSpends);
 
-        for (UtxoOutputPo po : poList) {
-            outputList.add(UtxoTransferTool.toOutput(po));
-        }
-
-        List<AbstractCoinTransaction> localTxs = UtxoCoinManager.getInstance().getLocalUnConfirmTxs();
-        UtxoCoinManager.getInstance().filterUtxoByLocalTxs(address,outputList, localTxs);
-
-        for (UtxoOutput output : outputList) {
+        for (UtxoOutput output : unSpends) {
             if (output.isLocked()) {
                 locked += output.getValue();
             } else {

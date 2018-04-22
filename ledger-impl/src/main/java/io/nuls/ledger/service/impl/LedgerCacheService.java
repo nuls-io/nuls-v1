@@ -30,8 +30,10 @@ import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.OutPutStatusEnum;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.util.UtxoComparator;
 import io.nuls.protocol.context.NulsContext;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -41,55 +43,61 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author Niels
  * @date 2017/11/17
  */
-//public class LedgerCacheService {
-//    private static LedgerCacheService instance = new LedgerCacheService();
-//    private CacheService<String, Balance> cacheService;
-//    private CacheService<String, UtxoOutput> utxoCacheService;
-//
-//
-//    private LedgerCacheService() {
-//        cacheService = NulsContext.getServiceBean(CacheService.class);
-//        cacheService.createCache(LedgerConstant.STANDING_BOOK, 1024);
-//        utxoCacheService = NulsContext.getServiceBean(CacheService.class);
-//        utxoCacheService.createCache(LedgerConstant.UTXO, 1024);
-//    }
-//
-//    public static LedgerCacheService getInstance() {
-//        return instance;
-//    }
-//
-//    public void clear() {
-//        this.cacheService.clearCache(LedgerConstant.STANDING_BOOK);
-//        this.utxoCacheService.clearCache(LedgerConstant.UTXO);
-//    }
-//
-//    public void destroy() {
-//        this.cacheService.removeCache(LedgerConstant.STANDING_BOOK);
-//        this.utxoCacheService.removeCache(LedgerConstant.UTXO);
-//    }
-//
-//    public void putBalance(String address, Balance balance) {
-//        if (null == balance || StringUtils.isBlank(address)) {
-//            return;
-//        }
-//        cacheService.putElement(LedgerConstant.STANDING_BOOK, address, balance);
-//    }
-//
-//    public void removeBalance(String address) {
-//        cacheService.removeElement(LedgerConstant.STANDING_BOOK, address);
-//    }
-//
-//    public Balance getBalance(String address) {
-//        return cacheService.getElement(LedgerConstant.STANDING_BOOK, address);
-//    }
-//
-//    public void putUtxo(String key, UtxoOutput output) {
-//        utxoCacheService.putElement(LedgerConstant.UTXO, key, output);
-//
-//        String address = output.getAddress();
-//        UtxoBalance balance = (UtxoBalance) getBalance(address);
+public class LedgerCacheService {
+    private static LedgerCacheService instance = new LedgerCacheService();
+    private CacheService<String, Balance> cacheService;
+    private CacheService<String, UtxoOutput> utxoCacheService;
+
+
+    private LedgerCacheService() {
+        cacheService = NulsContext.getServiceBean(CacheService.class);
+        cacheService.createCache(LedgerConstant.LEDGER_BOOK, 1024);
+        utxoCacheService = NulsContext.getServiceBean(CacheService.class);
+        utxoCacheService.createCache(LedgerConstant.UTXO, 1024);
+    }
+
+    public static LedgerCacheService getInstance() {
+        return instance;
+    }
+
+    public void clear() {
+        this.cacheService.clearCache(LedgerConstant.LEDGER_BOOK);
+        this.utxoCacheService.clearCache(LedgerConstant.UTXO);
+    }
+
+    public void destroy() {
+        this.cacheService.removeCache(LedgerConstant.LEDGER_BOOK);
+        this.utxoCacheService.removeCache(LedgerConstant.UTXO);
+    }
+
+    public void putBalance(String address, Balance balance) {
+        if (null == balance || StringUtils.isBlank(address)) {
+            return;
+        }
+        cacheService.putElement(LedgerConstant.LEDGER_BOOK, address, balance);
+    }
+
+    public void removeBalance(String address) {
+        cacheService.removeElement(LedgerConstant.LEDGER_BOOK, address);
+    }
+
+    public Balance getBalance(String address) {
+        return cacheService.getElement(LedgerConstant.LEDGER_BOOK, address);
+    }
+
+    public void putUtxo(String key, UtxoOutput output) {
+        utxoCacheService.putElement(LedgerConstant.UTXO, key, output);
+
+        String address = output.getAddress();
+        UtxoBalance balance = (UtxoBalance) getBalance(address);
+        if (balance == null) {
+            balance = new UtxoBalance();
+        }
+        balance.addUtxo(key);
+
 //        if (balance == null) {
 //            balance = new UtxoBalance();
+//            balance.addUtxo(key);
 //            List<UtxoOutput> outputs = new CopyOnWriteArrayList<>();
 //            outputs.add(output);
 //            balance.setUnSpends(outputs);
@@ -100,36 +108,53 @@ import java.util.concurrent.CopyOnWriteArrayList;
 //                Collections.sort(balance.getUnSpends());
 //            }
 //        }
-//    }
-//
-//    public UtxoOutput getUtxo(String key) {
-//        return utxoCacheService.getElement(LedgerConstant.UTXO, key);
-//    }
-//
-//    public List<UtxoOutput> getUtxoList() {
-//        return utxoCacheService.getElementList(LedgerConstant.UTXO);
-//    }
-//
-//    public void removeUtxo(String key) {
-//        UtxoOutput output = getUtxo(key);
-//        utxoCacheService.removeElement(LedgerConstant.UTXO, key);
-//        if (output != null) {
-//            UtxoBalance balance = (UtxoBalance) getBalance(output.getAddress());
-//            if (balance != null) {
-//                balance.getUnSpends().remove(output);
-//            }
-//        }
-//    }
-//
-//    public boolean updateUtxoStatus(String key, OutPutStatusEnum newStatus, OutPutStatusEnum oldStatus) {
-//        if (!utxoCacheService.containsKey(LedgerConstant.UTXO, key)) {
-//            return false;
-//        }
-//        UtxoOutput output = utxoCacheService.getElement(LedgerConstant.UTXO, key);
-//        if (output.getStatus() != oldStatus) {
-//            return false;
-//        }
-//        output.setStatus(newStatus);
-//        return true;
-//    }
-//}
+    }
+
+    public List<UtxoOutput> getUnSpends(String address) {
+        List<UtxoOutput> unSpends = new ArrayList<>();
+        UtxoBalance balance = (UtxoBalance) getBalance(address);
+        if (balance == null) {
+            return unSpends;
+        }
+
+        for (String key : balance.getUtxoKeys()) {
+            UtxoOutput output = getUtxo(key);
+            if (output != null) {
+                unSpends.add(output);
+            }
+        }
+        Collections.sort(unSpends, UtxoComparator.getInstance());
+        return unSpends;
+    }
+
+    public UtxoOutput getUtxo(String key) {
+        return utxoCacheService.getElement(LedgerConstant.UTXO, key);
+    }
+
+    public List<UtxoOutput> getUtxoList() {
+        return utxoCacheService.getElementList(LedgerConstant.UTXO);
+    }
+
+    public void removeUtxo(String key) {
+        UtxoOutput output = getUtxo(key);
+        utxoCacheService.removeElement(LedgerConstant.UTXO, key);
+        if (output != null) {
+            UtxoBalance balance = (UtxoBalance) getBalance(output.getAddress());
+            if (balance != null) {
+                balance.getUnSpends().remove(output);
+            }
+        }
+    }
+
+    public boolean updateUtxoStatus(String key, OutPutStatusEnum newStatus, OutPutStatusEnum oldStatus) {
+        if (!utxoCacheService.containsKey(LedgerConstant.UTXO, key)) {
+            return false;
+        }
+        UtxoOutput output = utxoCacheService.getElement(LedgerConstant.UTXO, key);
+        if (output.getStatus() != oldStatus) {
+            return false;
+        }
+        output.setStatus(newStatus);
+        return true;
+    }
+}
