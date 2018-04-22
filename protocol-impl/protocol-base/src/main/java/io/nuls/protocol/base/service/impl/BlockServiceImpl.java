@@ -79,6 +79,17 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
+    public BlockHeader getLocalBestBlockHeader() {
+        long height = this.blockStorageService.getBestHeight();
+        try {
+            return blockStorageService.getBlockHeader(height);
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
+    }
+
+    @Override
     public BlockHeader getBlockHeader(long height) throws NulsException {
         return blockStorageService.getBlockHeader(height);
     }
@@ -120,6 +131,12 @@ public class BlockServiceImpl implements BlockService {
     @DbSession
     public boolean saveBlock(Block block) throws IOException {
         BlockLog.debug("save block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
+
+        BlockHeader bestBlockHeader = getLocalBestBlockHeader();
+        if(!bestBlockHeader.getHash().equals(block.getHeader().getPreHash())) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "save blcok error , prehash is error , height: " + block.getHeader().getHeight() + " , hash: " + block.getHeader().getHash());
+        }
+
         List<Transaction> commitedList = new ArrayList<>();
         for (int x = 0; x < block.getHeader().getTxCount(); x++) {
             Transaction tx = block.getTxs().get(x);

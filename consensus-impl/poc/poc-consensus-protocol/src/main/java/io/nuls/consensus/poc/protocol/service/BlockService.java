@@ -44,6 +44,8 @@ public interface BlockService {
 
     Block getLocalBestBlock();
 
+    BlockHeader getLocalBestBlockHeader();
+
     BlockHeader getBlockHeader(long height) throws NulsException;
 
     BlockHeader getBlockHeader(String hash) throws NulsException;
