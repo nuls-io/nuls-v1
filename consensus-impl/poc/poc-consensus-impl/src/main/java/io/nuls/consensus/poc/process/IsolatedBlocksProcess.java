@@ -133,7 +133,11 @@ public class IsolatedBlocksProcess {
         }
 
         List<BlockHeader> masterChainBlockHeaderList = chainManager.getMasterChain().getChain().getBlockHeaderList();
-        for (int i = masterChainBlockHeaderList.size() - 1 ; i > masterChainBlockHeaderList.size() - ConsensusConstant.MAX_ISOLATED_BLOCK_COUNT * 1.1 ; i--) {
+        int size = (int) (masterChainBlockHeaderList.size() - ConsensusConstant.MAX_ISOLATED_BLOCK_COUNT * 1.1);
+        if(size < 0) {
+            size = 0;
+        }
+        for (int i = masterChainBlockHeaderList.size() - 1 ; i >= size ; i--) {
             if(hash.equals(masterChainBlockHeaderList.get(i).getHash())) {
                 return true;
             }
