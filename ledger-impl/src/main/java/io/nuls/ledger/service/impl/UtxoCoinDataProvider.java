@@ -268,7 +268,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             ledgerCacheService.removeUtxo(spends.get(i).getKey());
         }
         for (UtxoOutput output : outputList) {
-            output.setStatus(OutPutStatusEnum.UTXO_UNSPENT);
             ledgerCacheService.putUtxo(output.getKey(), output);
         }
     }
