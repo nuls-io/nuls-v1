@@ -175,7 +175,6 @@ public class UtxoCoinManager {
         for (AbstractCoinTransaction tx : localTxs) {
             UtxoData utxoData = (UtxoData) tx.getCoinData();
 
-
             for(int i=0;i<utxoData.getOutputs().size();i++) {
                 UtxoOutput output = utxoData.getOutputs().get(i);
                 if (output.getAddress().equals(address)) {

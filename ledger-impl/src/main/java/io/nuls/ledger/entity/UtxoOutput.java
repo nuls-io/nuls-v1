@@ -194,7 +194,7 @@ public class UtxoOutput extends BaseNulsData {
     }
 
     public boolean isUsable() {
-        //todo for @Vivi check the last Expression
+        isLocked();
         return OutPutStatusEnum.UTXO_UNSPENT == status || null == status;
     }
 
