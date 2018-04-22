@@ -26,9 +26,13 @@ package io.nuls.consensus.poc.block.validator;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.Transaction;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Niels
@@ -51,9 +55,18 @@ public class BlockTxValidator implements NulsDataValidator<Block> {
             return ValidateResult.getFailedResult("txCount is wrong!");
         }
         int count = 0;
+        List<Transaction> txList = new ArrayList<>();
         for (Transaction tx : block.getTxs()) {
-
             ValidateResult result = tx.verify();
+            if(result.isFailed()&&result.getErrorCode()== ErrorCode.ORPHAN_TX){
+                AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
+                result = coinTx.getCoinDataProvider().verifyCoinData(coinTx,txList);
+                if(result.isSuccess()){
+                    coinTx.setSkipInputValidator(true);
+                    result = coinTx.verify();
+                    coinTx.setSkipInputValidator(false);
+                }
+            }
             if (null==result||result.isFailed()) {
                 if(result.getErrorCode()== ErrorCode.ORPHAN_TX){
                     return result;
@@ -63,6 +76,7 @@ public class BlockTxValidator implements NulsDataValidator<Block> {
             if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
                 count++;
             }
+            txList.add(tx);
         }
         if (count > 1) {
             return ValidateResult.getFailedResult("coinbase transaction must only one!");
