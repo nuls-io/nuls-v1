@@ -72,7 +72,7 @@ public class ChainContainer implements Cloneable {
 
     public ChainContainer(Chain chain) {
         this.chain = chain;
-        roundManager = new RoundManager(this);
+        roundManager = new RoundManager(chain);
     }
 
     public boolean addBlock(Block block) {

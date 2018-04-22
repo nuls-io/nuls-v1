@@ -26,7 +26,6 @@ package io.nuls.consensus.poc.manager;
 
 import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
@@ -64,8 +63,8 @@ public class RoundManager {
 
     private Chain chain;
 
-    public RoundManager(ChainContainer chainContainer) {
-        this.chain = chainContainer.getChain();
+    public RoundManager(Chain chain) {
+        this.chain = chain;
     }
 
     public MeetingRound getRoundByIndex(long roundIndex) {
