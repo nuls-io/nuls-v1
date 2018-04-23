@@ -24,6 +24,7 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.cache.service.intf.CacheService;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
@@ -133,7 +134,7 @@ public class LedgerCacheService {
     }
 
     public void removeUtxo(String key) {
-
+        Log.info("---------------------------------------removeUtxo:" + key);
         UtxoOutput output = getUtxo(key);
         utxoCacheService.removeElement(LedgerConstant.UTXO, key);
         if (output != null) {

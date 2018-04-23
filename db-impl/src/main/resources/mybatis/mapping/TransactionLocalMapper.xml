@@ -50,7 +50,7 @@
     </sql>
 
     <sql id="Utxo_Column_List">
-          a.hash, a.type, a.tx_index, a.block_height, a.create_time, a.fee, a.remark, a.txData, a.scriptSig, a.size,
+         a.hash, a.type, a.tx_index, a.block_height, a.create_time, a.fee, a.remark, a.txData, a.coinData, a.scriptSig, a.size, a.txStatus,
          b.tx_hash as in_tx_hash, b.in_index, b.from_hash, b.from_index,
          c.tx_hash as out_tx_hash, c.out_index, c.value, c.lock_time, c.status, c.address, c.script,
          d.out_index as from_out_index, d.value as from_value, d.lock_time as from_lock_time,

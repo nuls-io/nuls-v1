@@ -549,6 +549,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             txDao.delete(tx.getHash());
             TransactionLocalPo localPo = localTxDao.get(tx.getHash());
             if (localPo != null) {
+                if(localPo.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
+                    localTxDao.delete(localPo.getHash());
+                }
                 localPo.setTxStatus(TransactionLocalPo.UNCONFIRM);
                 localTxDao.update(localPo);
             }
