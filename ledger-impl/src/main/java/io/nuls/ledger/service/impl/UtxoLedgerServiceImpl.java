@@ -436,6 +436,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
             for (UtxoOutput output : utxoData.getOutputs()) {
                 if (output.isUsable() && NulsContext.LOCAL_ADDRESS_LIST.contains(output.getAddress())) {
+                    output.setTxHash(tx.getHash());
                     ledgerCacheService.putUtxo(output.getKey(), output, false);
                 }
             }
