@@ -198,6 +198,8 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         try {
             processDataInput(utxoData, spends, inputPoList, spendPoList, addressSet);
 
+            afterSaveDatabase(spends, utxoData.getOutputs());
+
             List<UtxoOutputPo> outputPoList = new ArrayList<>();
             for (int i = 0; i < utxoData.getOutputs().size(); i++) {
                 UtxoOutput output = utxoData.getOutputs().get(i);
@@ -216,8 +218,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             inputDataService.save(inputPoList);
             outputDataService.save(outputPoList);
             relationDataService.save(txRelations);
-
-            afterSaveDatabase(spends, utxoData.getOutputs());
 //
 //            for (String address : addressSet) {
 //                UtxoTransactionTool.getInstance().calcBalance(address, true);
@@ -260,8 +260,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             }
-            output.setStatus(OutPutStatusEnum.UTXO_SPENT);
-            ledgerCacheService.putUtxo(output.getKey(), output);
             spends.add(output);
             spendPoList.add(UtxoTransferTool.toOutputPojo(output));
             inputPoList.add(UtxoTransferTool.toInputPojo(input));
