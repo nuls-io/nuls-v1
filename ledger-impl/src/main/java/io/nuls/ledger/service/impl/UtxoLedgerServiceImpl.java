@@ -385,7 +385,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 if (tx.getType() == TransactionConstant.TX_TYPE_CANCEL_DEPOSIT) {
                     TransactionLocalPo localPo = localTxDao.get(tx.getHash().getDigestHex());
                     if (localPo != null) {
-                        localPo.setBlockHeight(po.getBlockHeight());
                         localPo.setTxStatus(TransactionLocalPo.CONFIRM);
                         localPo.setBlockHeight(tx.getBlockHeight());
                         localTxDao.update(localPo);
