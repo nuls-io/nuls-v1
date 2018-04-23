@@ -161,15 +161,9 @@ public class BlockStorageService {
     public void save(Block block) {
         BlockHeader header = block.getHeader();
         header.setSize(block.size());
-        try {
-            int count = headerDao.save(BlockHeaderTool.toPojo(header));
-            if (count == 0) {
-                Log.error("=======================");
-                throw new NulsRuntimeException(ErrorCode.FAILED, "保存出错，高度：" + header.getHeight());
-            }
-        } catch (Exception e) {
-            Log.error(e);
-            Log.error(e);
+        int count = headerDao.save(BlockHeaderTool.toPojo(header));
+        if (count == 0) {
+            throw new NulsRuntimeException(ErrorCode.FAILED, "保存出错，高度：" + header.getHeight());
         }
     }
 
