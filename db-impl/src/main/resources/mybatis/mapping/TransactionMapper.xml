@@ -22,7 +22,7 @@
             <result column="from_index" jdbcType="INTEGER" property="fromIndex" />
 
             <association property="fromOutPut" javaType="io.nuls.db.entity.UtxoOutputPo">
-                <id column="from_hash" jdbcType="VARCHAR" property="txHash" />
+                <id column="from_out_hash" jdbcType="VARCHAR" property="txHash" />
                 <id column="from_out_index" jdbcType="INTEGER" property="outIndex" />
                 <result column="from_value" jdbcType="BIGINT" property="value"/>
                 <result column="from_lock_time" jdbcType="BIGINT" property="lockTime"/>
@@ -51,7 +51,7 @@
          b.tx_hash as in_tx_hash, b.in_index, b.from_hash, b.from_index,
          c.tx_hash as out_tx_hash, c.out_index, c.value, c.lock_time, c.status, c.address, c.script,
          d.out_index as from_out_index, d.value as from_value, d.lock_time as from_lock_time,
-         d.address as from_address,d.status as from_status, d.script as from_script
+         d.tx_hash as from_out_hash, d.address as from_address, d.status as from_status, d.script as from_script
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="UtxoTxResultMap">
