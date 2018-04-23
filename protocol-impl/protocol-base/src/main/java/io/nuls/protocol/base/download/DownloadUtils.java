@@ -81,7 +81,7 @@ public class DownloadUtils {
         try {
             blocks = getBlocks(node, hash, hash, -1L, 1);
         } catch (Exception e) {
-            Log.error(e);
+            Log.error(e.getMessage());
         }
         if (blocks == null || blocks.size() == 0) {
             return null;
@@ -109,7 +109,7 @@ public class DownloadUtils {
                 }
             } catch (Exception e) {
                 Log.error(node.getId() + ",start:" + startHeight + " , size:" + size);
-                Log.error(e);
+                Log.error(e.getMessage());
                 throw e;
             }
         } else {
@@ -124,7 +124,7 @@ public class DownloadUtils {
                 response = hashesFuture.get(20L, TimeUnit.SECONDS);
             } catch (Exception e) {
                 Log.error(node.getId() + ",start:" + startHeight + " , size:" + size);
-                Log.error(e);
+                Log.error(e.getMessage());
                 throw e;
             }
             if (null == response || response.getHashList() == null || response.getHashList().size() != size) {
@@ -152,7 +152,7 @@ public class DownloadUtils {
                     }
                 } catch (Exception e) {
                     Log.error(node.getId() + ",start:" + startHeight + " , size:" + size);
-                    Log.error(e);
+                    Log.error(e.getMessage());
                     throw e;
                 }
             }
