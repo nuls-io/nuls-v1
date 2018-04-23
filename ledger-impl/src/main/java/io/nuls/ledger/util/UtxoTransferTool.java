@@ -159,10 +159,11 @@ public class UtxoTransferTool {
     }
 
     public static TransactionLocalPo toLocalTransactionPojo(Transaction tx) throws IOException {
-        TransactionLocalPo po = new TransactionLocalPo();
-        if (tx.getHash() != null) {
-            po.setHash(tx.getHash().getDigestHex());
+        if(tx == null || tx.getHash() == null) {
+            return null;
         }
+        TransactionLocalPo po = new TransactionLocalPo();
+        po.setHash(tx.getHash().getDigestHex());
         po.setType(tx.getType());
         po.setCreateTime(tx.getTime());
         po.setBlockHeight(tx.getBlockHeight());
