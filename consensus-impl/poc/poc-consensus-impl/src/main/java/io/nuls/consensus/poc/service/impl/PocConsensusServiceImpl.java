@@ -572,10 +572,13 @@ public class PocConsensusServiceImpl implements PocConsensusService {
             MeetingMember member = round.getMember(agent.getExtend().getPackingAddress());
             if (null == member) {
                 agent.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
+                //todo 重新计算未参与共识的部分的数据
                 agent.getExtend().setCreditVal(0);
+                agent.getExtend().setTotalDeposit(0L);
             } else {
                 agent.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
                 agent.getExtend().setCreditVal(member.getRealCreditVal());
+                agent.getExtend().setTotalDeposit(member.getTotalDeposit().getValue());
             }
         }
         page.setPageNumber(pageNumber);

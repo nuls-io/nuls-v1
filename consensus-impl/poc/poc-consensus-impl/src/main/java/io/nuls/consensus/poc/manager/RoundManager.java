@@ -83,13 +83,13 @@ public class RoundManager {
     }
 
     public void checkIsNeedReset() {
-        if(roundList == null || roundList.size() == 0) {
+        if (roundList == null || roundList.size() == 0) {
             initRound();
         } else {
             MeetingRound lastRound = roundList.get(roundList.size() - 1);
             Block bestBlcok = chain.getBestBlock();
             BlockRoundData blockRoundData = new BlockRoundData(bestBlcok.getHeader().getExtend());
-            if(blockRoundData.getRoundIndex() < lastRound.getIndex()) {
+            if (blockRoundData.getRoundIndex() < lastRound.getIndex()) {
                 roundList.clear();
                 initRound();
             }
@@ -97,7 +97,7 @@ public class RoundManager {
     }
 
     public boolean clearRound(int count) {
-        if(roundList.size() > count) {
+        if (roundList.size() > count) {
             roundList = roundList.subList(roundList.size() - count, roundList.size());
             MeetingRound round = roundList.get(0);
             round.setPreRound(null);
@@ -356,7 +356,7 @@ public class RoundManager {
             roundStart = 0;
         }
         long blockCount = getBlockCountByAddress(member.getPackingAddress(), roundStart, roundData.getRoundIndex());
-        long sumRoundVal = getPunishCountByAddress(member.getAgentAddress(), roundStart, roundData.getRoundIndex(), PunishType.YELLOW.getCode());
+        long sumRoundVal = getPunishCountByAddress(member.getAgentAddress(), roundStart, roundData.getRoundIndex(), blockHeader.getHeight(), PunishType.YELLOW.getCode());
         double ability = DoubleUtils.div(blockCount, PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT);
 
         double penalty = DoubleUtils.div(DoubleUtils.mul(PocConsensusConstant.CREDIT_MAGIC_NUM, sumRoundVal),
@@ -368,7 +368,7 @@ public class RoundManager {
         return ability - penalty;
     }
 
-    private long getPunishCountByAddress(String address, long roundStart, long roundEnd, int code) {
+    private long getPunishCountByAddress(String address, long roundStart, long roundEnd, long maxHeight, int code) {
         long count = 0;
         List<PunishLogPo> punishList = chain.getYellowPunishList();
 
@@ -385,7 +385,9 @@ public class RoundManager {
             if (punish.getRoundIndex() < roundStart) {
                 break;
             }
-
+            if (punish.getHeight() > maxHeight) {
+                continue;
+            }
             if (punish.getAddress().equals(address)) {
                 count++;
             }

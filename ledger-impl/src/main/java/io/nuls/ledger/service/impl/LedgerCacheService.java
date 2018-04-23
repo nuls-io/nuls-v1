@@ -30,13 +30,10 @@ import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.OutPutStatusEnum;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
-import io.nuls.ledger.util.UtxoComparator;
 import io.nuls.protocol.context.NulsContext;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
