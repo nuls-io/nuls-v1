@@ -49,7 +49,7 @@ import javax.ws.rs.core.MediaType;
 @Api(value = "/browse", description = "System")
 public class SystemResource {
 
-    @GET
+    @PUT
     @Path("/lang/{language}")
     @Produces(MediaType.APPLICATION_JSON)
     public RpcResult setLanguage(@PathParam("language") String language) {

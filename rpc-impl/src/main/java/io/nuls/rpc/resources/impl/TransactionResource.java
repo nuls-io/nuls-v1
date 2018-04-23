@@ -63,6 +63,7 @@ public class TransactionResource {
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     @POST
+    @Path("/transaction")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "发送交易数据包 [3.5.4]")
     @ApiResponses(value = {
