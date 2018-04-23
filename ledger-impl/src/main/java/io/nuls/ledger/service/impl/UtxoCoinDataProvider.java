@@ -256,6 +256,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     throw new NulsRuntimeException(ErrorCode.UTXO_NOT_FOUND);
                 }
                 output = UtxoTransferTool.toOutput(outputPo);
+                if (!output.isUsable()) {
+                    throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
+                }
             }
             output.setStatus(OutPutStatusEnum.UTXO_SPENT);
             ledgerCacheService.putUtxo(output.getKey(), output);
