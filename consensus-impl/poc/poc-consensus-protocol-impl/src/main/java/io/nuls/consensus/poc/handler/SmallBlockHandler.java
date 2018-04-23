@@ -126,9 +126,16 @@ public class SmallBlockHandler extends AbstractEventHandler<SmallBlockEvent> {
             }
             request.setEventBody(param);
             this.eventBroadcaster.sendToNode(request, fromId);
+
+            BlockLog.debug("receive and get tx group :" + smallBlock.getHeader().getHash() + ", from:" + fromId + " , tx count : " + smallBlock.getTxHashList().size() + " , get count : " + needHashList.size());
+            Log.debug("receive and get tx group :" + smallBlock.getHeader().getHash() + ", from:" + fromId + " , tx count : " + smallBlock.getTxHashList().size() + " , get count : " + needHashList.size());
+
             return;
         }
 
+
+        BlockLog.debug("receive a Block, not get tx group :" + smallBlock.getHeader().getHash() + ", from:" + fromId + " , tx count : " + smallBlock.getTxHashList().size());
+        Log.debug("receive a Block, not get tx group :" + smallBlock.getHeader().getHash() + ", from:" + fromId + " , tx count : " + smallBlock.getTxHashList().size());
 
         Block block = ConsensusTool.assemblyBlock(header, txMap, smallBlock.getTxHashList());
 //        boolean needForward = blockManager.addBlock(block, true, fromId);

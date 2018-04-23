@@ -67,7 +67,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
     public void onEvent(TransactionEvent event, String fromId) {
 
         Transaction tx = event.getEventBody();
-        Log.info("receive new tx {} from {}", tx.getHash().getDigestHex(), fromId);
+        //Log.info("receive new tx {} from {}", tx.getHash().getDigestHex(), fromId);
         if (null == tx) {
             return;
         }

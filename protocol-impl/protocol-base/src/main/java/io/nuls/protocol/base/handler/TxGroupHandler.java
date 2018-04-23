@@ -25,6 +25,9 @@ package io.nuls.protocol.base.handler;
 
 import io.nuls.consensus.poc.protocol.event.notice.AssembledBlockNotice;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.utils.log.BlockLog;
+import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.handler.AbstractEventHandler;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.network.service.NetworkService;
@@ -72,25 +75,21 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
         for (NulsDigestData hash : smallBlock.getTxHashList()) {
             String hashHex = hash.getDigestHex();
             Transaction tx = txGroup.getTx(hashHex);
-            if (null == tx ) {
-                needHashList.add(hash);
-                continue;
+            if (null == tx) {
+                tx = temporaryCacheManager.getTx(hashHex);
+            }
+            if (null == tx) {
+                Log.error("get tx not found : " + hashHex + ", from : " + fromId);
+                BlockLog.debug("get tx not found : " + hashHex + ", from : " + fromId);
+               return;
             }
             txMap.put(tx.getHash().getDigestHex(), tx);
         }
-        if (!needHashList.isEmpty()) {
-            GetTxGroupRequest request = new GetTxGroupRequest();
-            GetTxGroupParam param = new GetTxGroupParam();
-            param.setBlockHash(header.getHash());
-            for (NulsDigestData hash : needHashList) {
-                param.addHash(hash);
-            }
-            request.setEventBody(param);
-            this.eventBroadcaster.sendToNode(request, fromId);
-            return;
-        }
 
         Block block = ConsensusTool.assemblyBlock(header, txMap, smallBlock.getTxHashList());
+
+        BlockLog.debug("get tx complete of block : " + block.getHeader().getHeight() + " , " + block.getHeader().getHash() + ", from : " + fromId);
+        Log.debug("get tx complete of block : " + block.getHeader().getHeight() + " , " + block.getHeader().getHash() + ", from : " + fromId);
 
 //        boolean needForward = blockManager.addBlock(block, true, fromId);
        consensusService.newBlock(block, networkService.getNode(fromId));
