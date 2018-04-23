@@ -120,15 +120,10 @@ public abstract class BaseModuleBootstrap {
 
     protected void waitForDependencyInited(short... moduleIds) {
         ModuleManager mm = ModuleManager.getInstance();
-        long count = 0;
         String result = checkItInited(mm, moduleIds);
         while (result != null) {
             try {
                 Thread.sleep(100L);
-                if (count % 100 == 0) {
-                    Log.info("dependency:" + this.getModuleName() + " wait:" + result);
-                }
-                count++;
             } catch (InterruptedException e) {
                 Log.error(e);
             }
@@ -152,15 +147,10 @@ public abstract class BaseModuleBootstrap {
 
     protected void waitForDependencyRunning(short... moduleIds) {
         ModuleManager mm = ModuleManager.getInstance();
-        long count = 0;
         String result = checkItRunning(mm, moduleIds);
         while (result != null) {
             try {
                 Thread.sleep(100L);
-                if (count % 100 == 0) {
-                    Log.info("dependency:" + this.getModuleName() + " wait:" + result);
-                }
-                count++;
             } catch (InterruptedException e) {
                 Log.error(e);
             }

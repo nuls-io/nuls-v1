@@ -617,8 +617,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         outputDataService.lockTxOutput(txHash);
         Map<String, Object> keyMap = new HashMap<>();
 
-        keyMap.put("tx_hash", txHash);
-        keyMap.put("out_index", 0);
+        keyMap.put("txHash", txHash);
+        keyMap.put("outIndex", 0);
         UtxoOutputPo po = outputDataService.get(keyMap);
         if (po != null) {
             po.setStatus(UtxoOutputPo.LOCKED);
