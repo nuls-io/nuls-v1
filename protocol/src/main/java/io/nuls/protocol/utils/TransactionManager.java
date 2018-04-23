@@ -45,9 +45,9 @@ public class TransactionManager {
     private static final Map<Class<? extends Transaction>, Class> TX_SERVICE_MAP = new HashMap<>();
 
     public static final void putTx(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionService> txServiceClass) {
-        if (TX_MAP.containsKey(txType)) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "Transaction type repeating!");
-        }
+//        if (TX_MAP.containsKey(txType)) {
+//            throw new NulsRuntimeException(ErrorCode.FAILED, "Transaction type repeating!");
+//        }
         TX_MAP.put(txType, txClass);
         TX_SERVICE_MAP.put(txClass, txServiceClass);
     }

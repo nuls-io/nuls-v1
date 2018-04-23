@@ -75,6 +75,7 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
 
     @Override
     public void start() {
+        this.waitForDependencyRunning(NulsConstant.MODULE_ID_EVENT_BUS);
         networkService.init();
         networkService.start();
     }
