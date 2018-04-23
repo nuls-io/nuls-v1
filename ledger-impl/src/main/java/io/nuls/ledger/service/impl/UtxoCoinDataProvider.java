@@ -196,7 +196,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         Set<String> addressSet = new HashSet<>();
         lock.lock();
         try {
-            processDataInput(utxoData, inputPoList, spendPoList, addressSet);
+            processDataInput(utxoData, spends, inputPoList, spendPoList, addressSet);
+
+            afterSaveDatabase(spends, utxoData.getOutputs());
 
             List<UtxoOutputPo> outputPoList = new ArrayList<>();
             for (int i = 0; i < utxoData.getOutputs().size(); i++) {
@@ -216,35 +218,30 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             inputDataService.save(inputPoList);
             outputDataService.save(outputPoList);
             relationDataService.save(txRelations);
-
-            afterSaveDatabase(utxoData.getOutputs());
 //
 //            for (String address : addressSet) {
 //                UtxoTransactionTool.getInstance().calcBalance(address, true);
 //            }
         }
-        catch (Exception e) {
-//        rollback
-//            Log.warn(e.getMessage(), e);
+//        catch (Exception e) {
+////        rollback
+////            Log.warn(e.getMessage(), e);
 //            for (UtxoOutput output : utxoData.getOutputs()) {
 //                ledgerCacheService.removeUtxo(output.getKey());
-//            }
-//            for(UtxoInput input : utxoData.getInputs()) {
-//
 //            }
 //            for (UtxoOutput spend : spends) {
 //                ledgerCacheService.updateUtxoStatus(spend.getKey(), OutPutStatusEnum.UTXO_UNSPENT, OutPutStatusEnum.UTXO_SPENT);
 //            }
-            System.out.println("----------");
-            throw e;
-        }
+//            System.out.println("----------");
+//            throw e;
+//        }
         finally {
             lock.unlock();
         }
     }
 
     //Check if the input referenced output has been spent
-    private void processDataInput(UtxoData utxoData, List<UtxoInputPo> inputPoList,
+    private void processDataInput(UtxoData utxoData, List<UtxoOutput> spends, List<UtxoInputPo> inputPoList,
                                   List<UtxoOutputPo> spendPoList, Set<String> addressSet) {
         Map<String, Object> map = new HashMap<>();
         for (int i = 0; i < utxoData.getInputs().size(); i++) {
@@ -263,20 +260,17 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             }
-            output.setStatus(OutPutStatusEnum.UTXO_SPENT);
-//            ledgerCacheService.putUtxo(output.getKey(), output);
-            ledgerCacheService.removeUtxo(output.getKey());
-//            spends.add(output);
+            spends.add(output);
             spendPoList.add(UtxoTransferTool.toOutputPojo(output));
             inputPoList.add(UtxoTransferTool.toInputPojo(input));
             addressSet.add(output.getAddress());
         }
     }
 
-    private void afterSaveDatabase(List<UtxoOutput> outputList) {
-//        for (int i = 0; i < spends.size(); i++) {
-//            ledgerCacheService.removeUtxo(spends.get(i).getKey());
-//        }
+    private void afterSaveDatabase(List<UtxoOutput> spends, List<UtxoOutput> outputList) {
+        for (int i = 0; i < spends.size(); i++) {
+            ledgerCacheService.removeUtxo(spends.get(i).getKey());
+        }
         for (UtxoOutput output : outputList) {
             ledgerCacheService.putUtxo(output.getKey(), output);
         }

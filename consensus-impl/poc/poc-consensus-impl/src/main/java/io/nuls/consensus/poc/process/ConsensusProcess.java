@@ -37,6 +37,7 @@ import io.nuls.consensus.poc.protocol.model.MeetingMember;
 import io.nuls.consensus.poc.protocol.model.MeetingRound;
 import io.nuls.consensus.poc.protocol.model.block.BlockData;
 import io.nuls.consensus.poc.protocol.model.block.BlockRoundData;
+import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
 import io.nuls.consensus.poc.protocol.utils.ConsensusTool;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
@@ -57,10 +58,7 @@ import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.SmallBlockEvent;
-import io.nuls.protocol.model.Block;
-import io.nuls.protocol.model.NulsDigestData;
-import io.nuls.protocol.model.SmallBlock;
-import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.model.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,6 +77,7 @@ public class ConsensusProcess {
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
 
     private boolean hasPacking;
@@ -223,8 +222,8 @@ public class ConsensusProcess {
     }
 
     private boolean hasReceiveNewestBlock(MeetingMember self, MeetingRound round) {
-        Block bestBlock = chainManager.getBestBlock();
-        String packingAddress = Address.fromHashs(bestBlock.getHeader().getPackingAddress()).getBase58();
+        BlockHeader bestBlockHeader = blockService.getLocalBestBlockHeader();
+        String packingAddress = Address.fromHashs(bestBlockHeader.getPackingAddress()).getBase58();
 
         int thisIndex = self.getPackingIndexOfRound();
 
