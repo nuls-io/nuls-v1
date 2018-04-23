@@ -62,7 +62,6 @@ public class BlockServiceImpl implements BlockService {
             return blockStorageService.getBlock(0);
         } catch (Exception e) {
             Log.error(e);
-            Log.error(e);
         }
         return null;
     }
