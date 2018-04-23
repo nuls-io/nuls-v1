@@ -183,7 +183,7 @@ public class BlockServiceImpl implements BlockService {
             return false;
         }
         Block bestBlock = getBestBlock();
-        if(!bestBlock.getHeader().getHash().equals(bestBlock.getHeader().getHash())) {
+        if(!block.getHeader().getHash().equals(bestBlock.getHeader().getHash())) {
             throw new NulsException(ErrorCode.FAILED, "blockService rollback block , the block is not best block!");
         }
         this.rollback(block.getTxs() );
