@@ -243,16 +243,19 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     //Check if the input referenced output has been spent
     private void processDataInput(UtxoData utxoData, List<UtxoOutput> spends, List<UtxoInputPo> inputPoList,
                                   List<UtxoOutputPo> spendPoList, Set<String> addressSet) {
-//        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         for (int i = 0; i < utxoData.getInputs().size(); i++) {
             UtxoInput input = utxoData.getInputs().get(i);
-//            map.put("txHash", input.getFromHash().getDigestHex());
-//            map.put("outIndex", input.getFromIndex());
-//            UtxoOutputPo outputPo = outputDataService.get(map);
+
             UtxoOutput output = ledgerCacheService.getUtxo(input.getKey());
             if (output == null) {
-                System.out.println("---------------------output == null" + System.currentTimeMillis());
-                throw new NulsRuntimeException(ErrorCode.UTXO_NOT_FOUND);
+                map.put("txHash", input.getFromHash().getDigestHex());
+                map.put("outIndex", input.getFromIndex());
+                UtxoOutputPo outputPo = outputDataService.get(map);
+                if (outputPo == null) {
+                    throw new NulsRuntimeException(ErrorCode.UTXO_NOT_FOUND);
+                }
+                output = UtxoTransferTool.toOutput(outputPo);
             }
             output.setStatus(OutPutStatusEnum.UTXO_SPENT);
             ledgerCacheService.putUtxo(output.getKey(), output);
