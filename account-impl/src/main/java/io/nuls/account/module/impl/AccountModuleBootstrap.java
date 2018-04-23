@@ -53,7 +53,6 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
         this.registerService(AccountServiceImpl.class);
         accountService = NulsContext.getServiceBean(AccountService.class);
         this.registerService(AliasTxService.class);
-        TransactionManager.putTx(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class, CoinDataTxService.class);
         TransactionManager.putTx(TransactionConstant.TX_TYPE_SET_ALIAS, AliasTransaction.class, AliasTxService.class);
     }
 

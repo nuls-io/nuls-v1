@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -35,6 +35,7 @@ import io.nuls.db.dao.AccountAliasDataService;
 import io.nuls.db.entity.AliasPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
+import io.nuls.ledger.entity.listener.CoinDataTxService;
 import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Block;
@@ -50,7 +51,7 @@ import java.util.List;
 @DbSession(transactional = PROPAGATION.NONE)
 public class AliasTxService implements TransactionService<AliasTransaction> {
 
-
+    private CoinDataTxService coinDataTxService = NulsContext.getServiceBean(CoinDataTxService.class);
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
     public AliasTxService() {
@@ -63,6 +64,7 @@ public class AliasTxService implements TransactionService<AliasTransaction> {
     @Override
     @DbSession
     public void onRollback(AliasTransaction tx, Block block) throws NulsException {
+        coinDataTxService.onRollback(tx, block);
         AliasPo po = AccountTool.toAliasPojo(tx.getTxData());
         getAliasDataService().rollbackAlias(po);
         Account account = accountCacheService.getAccountByAddress(po.getAddress());
@@ -75,6 +77,7 @@ public class AliasTxService implements TransactionService<AliasTransaction> {
     @Override
     @DbSession
     public void onCommit(AliasTransaction tx, Block block) throws NulsException {
+        coinDataTxService.onCommit(tx, block);
         Alias alias = tx.getTxData();
         alias.setStatus(1);
         getAliasDataService().saveAlias(AccountTool.toAliasPojo(alias));
@@ -87,9 +90,16 @@ public class AliasTxService implements TransactionService<AliasTransaction> {
 
     @Override
     public ValidateResult conflictDetect(AliasTransaction tx, List<Transaction> txList) {
+
         if (null == txList || txList.isEmpty()) {
             return ValidateResult.getSuccessResult();
         }
+
+        ValidateResult result = coinDataTxService.conflictDetect(tx, txList);
+        if (result.isFailed()) {
+            return result;
+        }
+
         for (Transaction transaction : txList) {
             if (transaction.getType() != TransactionConstant.TX_TYPE_SET_ALIAS) {
                 continue;
