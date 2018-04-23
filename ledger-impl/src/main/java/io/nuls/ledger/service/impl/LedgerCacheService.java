@@ -83,10 +83,11 @@ public class LedgerCacheService {
         return cacheService.getElement(LedgerConstant.LEDGER_BOOK, address);
     }
 
-    public void putUtxo(String key, UtxoOutput output) {
-
+    public void putUtxo(String key, UtxoOutput output, boolean  cacheBalance) {
         utxoCacheService.putElement(LedgerConstant.UTXO, key, output);
-
+        if(!cacheBalance) {
+            return;
+        }
         String address = output.getAddress();
         UtxoBalance balance = (UtxoBalance) getBalance(address);
         if (balance == null) {

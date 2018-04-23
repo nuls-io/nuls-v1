@@ -70,7 +70,7 @@ public class UtxoCoinManager {
         for (int i = 0; i < utxoOutputPos.size(); i++) {
             UtxoOutputPo po = utxoOutputPos.get(i);
             UtxoOutput output = UtxoTransferTool.toOutput(po);
-            ledgerCacheService.putUtxo(output.getKey(), output);
+            ledgerCacheService.putUtxo(output.getKey(), output, true);
             addressSet.add(po.getAddress());
         }
 

@@ -40,10 +40,7 @@ import io.nuls.db.entity.*;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.entity.Balance;
-import io.nuls.ledger.entity.OutPutStatusEnum;
-import io.nuls.ledger.entity.UtxoBalance;
-import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.entity.*;
 import io.nuls.ledger.entity.params.Coin;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.params.OperationType;
@@ -400,7 +397,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 }
             }
             int successCount = txDao.save(poList);
-            if(successCount != poList.size()) {
+            if (successCount != poList.size()) {
                 throw new NulsRuntimeException(ErrorCode.FAILED, "save block txs fail , totalCount : " + poList.size() + " , successCount : " + successCount);
             }
 
@@ -433,6 +430,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
         TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);
         localTxDao.save(localPo);
+        if (tx instanceof AbstractCoinTransaction) {
+            AbstractCoinTransaction abstractTx = (AbstractCoinTransaction) tx;
+            UtxoData utxoData = (UtxoData) abstractTx.getCoinData();
+
+            for (UtxoOutput output : utxoData.getOutputs()) {
+                if (output.isUsable() && NulsContext.LOCAL_ADDRESS_LIST.contains(output.getAddress())) {
+                    ledgerCacheService.putUtxo(output.getKey(), output, false);
+                }
+            }
+        }
         return true;
     }
 
@@ -552,7 +559,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             txDao.delete(tx.getHash());
             TransactionLocalPo localPo = localTxDao.get(tx.getHash());
             if (localPo != null) {
-                if(localPo.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
+                if (localPo.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
                     localTxDao.delete(localPo.getHash());
                 }
                 localPo.setTxStatus(TransactionLocalPo.UNCONFIRM);
@@ -612,7 +619,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         String key = txHash + "-" + 0;
         UtxoOutput output = ledgerCacheService.getUtxo(key);
         output.setStatus(OutPutStatusEnum.UTXO_UNSPENT);
-        ledgerCacheService.putUtxo(key, output);
+        ledgerCacheService.putUtxo(key, output, true);
 //        UtxoTransactionTool.getInstance().calcBalance(output.getAddress(), false);
     }
 
@@ -630,7 +637,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             po.setStatus(UtxoOutputPo.LOCKED);
             outputDataService.update(po);
             UtxoOutput output = UtxoTransferTool.toOutput(po);
-            ledgerCacheService.putUtxo(output.getKey(), output);
+            ledgerCacheService.putUtxo(output.getKey(), output, true);
         }
     }
 

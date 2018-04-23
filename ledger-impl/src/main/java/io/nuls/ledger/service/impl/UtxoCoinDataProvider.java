@@ -271,7 +271,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             ledgerCacheService.removeUtxo(spends.get(i).getKey());
         }
         for (UtxoOutput output : outputList) {
-            ledgerCacheService.putUtxo(output.getKey(), output);
+            ledgerCacheService.putUtxo(output.getKey(), output, true);
         }
     }
 
@@ -307,7 +307,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
             outputDataService.updateStatus(po);
             UtxoOutput output = UtxoTransferTool.toOutput(po);
-            ledgerCacheService.putUtxo(output.getKey(), output);
+            ledgerCacheService.putUtxo(output.getKey(), output, true);
         }
 
         String txHash = tx.getHash().getDigestHex();
