@@ -76,7 +76,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         }
 
         Transaction tempTx = temporaryCacheManager.getTx(tx.getHash().getDigestHex());
-        if(tempTx != null) {
+        if (tempTx != null) {
             return;
         }
 
@@ -91,12 +91,13 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         }
         try {
             List<Transaction> waitingList = ledgerService.getWaitingTxList();
-            for (int i = 0; i < waitingList.size(); i++) {
+            for (int i = waitingList.size(); i >= 0; i--) {
                 if (waitingList.get(i).getHash().equals(tx.getHash())) {
                     waitingList.remove(i);
                     break;
                 }
             }
+
             result = ledgerService.conflictDetectTx(tx, waitingList);
             if (result.isFailed()) {
                 return;
