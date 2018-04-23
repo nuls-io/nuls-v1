@@ -288,7 +288,10 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             UtxoOutput output = utxoData.getOutputs().get(i);
             keyMap.put("txHash", output.getTxHash().getDigestHex());
             keyMap.put("outIndex", output.getIndex());
-            outputDataService.delete(keyMap);
+            int count = outputDataService.delete(keyMap);
+            if (count != 1) {
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"delete output failed!");
+            }
             ledgerCacheService.removeUtxo(output.getKey());
         }
 

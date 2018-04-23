@@ -134,7 +134,7 @@ public class BlockServiceImpl implements BlockService {
 
         BlockHeader bestBlockHeader = getLocalBestBlockHeader();
 
-        if((bestBlockHeader == null && block.getHeader().getHeight() != 0L) || (bestBlockHeader != null && !bestBlockHeader.getHash().equals(block.getHeader().getPreHash()))) {
+        if ((bestBlockHeader == null && block.getHeader().getHeight() != 0L) || (bestBlockHeader != null && !bestBlockHeader.getHash().equals(block.getHeader().getPreHash()))) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "save blcok error , prehash is error , height: " + block.getHeader().getHeight() + " , hash: " + block.getHeader().getHash());
         }
 
@@ -153,12 +153,17 @@ public class BlockServiceImpl implements BlockService {
                 throw new NulsRuntimeException(e);
             }
         }
-        ledgerService.saveTxList(block.getTxs());
-        blockStorageService.save(block);
+        try {
+            ledgerService.saveTxList(block.getTxs());
+            blockStorageService.save(block);
 
-        BlockLog.debug("save end block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash());
+            BlockLog.debug("save end block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash());
 
-
+        } catch (Exception e) {
+            Log.error(e);
+            this.rollback(block.getTxs());
+            throw new NulsRuntimeException(e);
+        }
         List<Transaction> localTxList = null;
         try {
             localTxList = this.ledgerService.getWaitingTxList();
@@ -189,10 +194,10 @@ public class BlockServiceImpl implements BlockService {
         BlockLog.debug("begin rollback block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
 
         Block bestBlock = getBestBlock();
-        if(!block.getHeader().getHash().equals(bestBlock.getHeader().getHash())) {
+        if (!block.getHeader().getHash().equals(bestBlock.getHeader().getHash())) {
             throw new NulsException(ErrorCode.FAILED, "blockService rollback block , the block is not best block!");
         }
-        this.rollback(block.getTxs() );
+        this.rollback(block.getTxs());
         this.ledgerService.deleteTx(block.getHeader().getHeight());
         blockStorageService.delete(block.getHeader().getHash().getDigestHex());
 
@@ -223,8 +228,8 @@ public class BlockServiceImpl implements BlockService {
         return blockStorageService.getBlockCount(address, -1L, -1L, 0L);
     }
 
-    private void rollback(List<Transaction> txs ) {
-        for (int i = txs.size()-1; i >= 0; i--) {
+    private void rollback(List<Transaction> txs) {
+        for (int i = txs.size() - 1; i >= 0; i--) {
             Transaction tx = txs.get(i);
             try {
                 ledgerService.rollbackTx(tx, null);
