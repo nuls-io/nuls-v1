@@ -130,7 +130,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     @DbSession
     public boolean saveBlock(Block block) throws IOException {
-        BlockLog.debug("save block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
+        BlockLog.debug("begin save block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
 
         BlockHeader bestBlockHeader = getLocalBestBlockHeader();
 
@@ -155,6 +155,10 @@ public class BlockServiceImpl implements BlockService {
         }
         ledgerService.saveTxList(block.getTxs());
         blockStorageService.save(block);
+
+        BlockLog.debug("save end block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash());
+
+
         List<Transaction> localTxList = null;
         try {
             localTxList = this.ledgerService.getWaitingTxList();
@@ -182,6 +186,8 @@ public class BlockServiceImpl implements BlockService {
         if (null == block) {
             return false;
         }
+        BlockLog.debug("begin rollback block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash() + ", address:" + Address.fromHashs(block.getHeader().getPackingAddress()));
+
         Block bestBlock = getBestBlock();
         if(!block.getHeader().getHash().equals(bestBlock.getHeader().getHash())) {
             throw new NulsException(ErrorCode.FAILED, "blockService rollback block , the block is not best block!");
@@ -189,6 +195,10 @@ public class BlockServiceImpl implements BlockService {
         this.rollback(block.getTxs() );
         this.ledgerService.deleteTx(block.getHeader().getHeight());
         blockStorageService.delete(block.getHeader().getHash().getDigestHex());
+
+        BlockLog.debug("rollback block end height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash());
+
+
         return true;
     }
 
