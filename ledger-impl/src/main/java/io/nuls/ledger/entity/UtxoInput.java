@@ -62,9 +62,6 @@ public class UtxoInput extends BaseNulsData {
     // key = fromHash + "-" + fromIndex, a key that will not be serialized, only used for caching
     private String key;
 
-    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
-
-
     public UtxoInput() {
 
     }
@@ -127,7 +124,7 @@ public class UtxoInput extends BaseNulsData {
 
     public UtxoOutput getFrom() {
         if (from == null && fromHash != null) {
-            UtxoOutput output = ledgerCacheService.getUtxo(getKey());
+            UtxoOutput output = LedgerCacheService.getInstance().getUtxo(getKey());
             if (output != null) {
                 from = output;
             } else {
