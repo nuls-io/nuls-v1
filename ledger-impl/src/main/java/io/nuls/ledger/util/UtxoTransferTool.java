@@ -226,14 +226,15 @@ public class UtxoTransferTool {
         if (StringUtils.isNotBlank(po.getRemark())) {
             tx.setRemark(po.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING));
         }
-        if (null != po.getTxData()) {
+        if (null != po.getTxData() && po.getTxData().length > 0) {
             tx.setTxData(tx.parseTxData(new NulsByteBuffer(po.getTxData())));
         }
         if (po.getTxStatus() == TransactionLocalPo.UNCONFIRM) {
             tx.setStatus(TxStatusEnum.UNCONFIRM);
             AbstractCoinTransaction transaction = (AbstractCoinTransaction) tx;
-            transaction.parseCoinData(new NulsByteBuffer(po.getCoinData()));
-
+            if (null != po.getCoinData() && po.getCoinData().length > 0) {
+                transaction.parseCoinData(new NulsByteBuffer(po.getCoinData()));
+            }
             if (po.getType() == TransactionConstant.TX_TYPE_REGISTER_AGENT ||
                     po.getType() == TransactionConstant.TX_TYPE_JOIN_CONSENSUS) {
                 UtxoData utxoData = (UtxoData) transaction.getCoinData();
