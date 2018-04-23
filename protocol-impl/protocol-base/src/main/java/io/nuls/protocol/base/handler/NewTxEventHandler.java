@@ -91,7 +91,7 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
         }
         try {
             List<Transaction> waitingList = ledgerService.getWaitingTxList();
-            for (int i = waitingList.size(); i >= 0; i--) {
+            for (int i = waitingList.size()-1; i >= 0; i--) {
                 if (waitingList.get(i).getHash().equals(tx.getHash())) {
                     waitingList.remove(i);
                     break;
