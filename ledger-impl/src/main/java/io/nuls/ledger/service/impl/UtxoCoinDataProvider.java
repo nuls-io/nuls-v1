@@ -625,7 +625,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
         for (int i = 0; i < data.getInputs().size(); i++) {
             UtxoInput input = data.getInputs().get(i);
-            UtxoOutput output = input.getFrom();
+            UtxoOutput output = ledgerCacheService.getUtxo(input.getKey());
 
             if (output == null && tx.getStatus() == TxStatusEnum.UNCONFIRM) {
                 output = outputMap.get(input.getKey());
