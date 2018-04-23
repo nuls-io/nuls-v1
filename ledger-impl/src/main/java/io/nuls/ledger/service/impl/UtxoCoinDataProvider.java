@@ -198,7 +198,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         try {
             processDataInput(utxoData, spends, inputPoList, spendPoList, addressSet);
 
-            afterSaveDatabase(spends, utxoData.getOutputs());
+            refreshCache(spends, utxoData.getOutputs());
 
             List<UtxoOutputPo> outputPoList = new ArrayList<>();
             for (int i = 0; i < utxoData.getOutputs().size(); i++) {
@@ -267,7 +267,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         }
     }
 
-    private void afterSaveDatabase(List<UtxoOutput> spends, List<UtxoOutput> outputList) {
+    private void refreshCache(List<UtxoOutput> spends, List<UtxoOutput> outputList) {
         for (int i = 0; i < spends.size(); i++) {
             ledgerCacheService.removeUtxo(spends.get(i).getKey());
         }
