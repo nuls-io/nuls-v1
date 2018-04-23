@@ -134,7 +134,6 @@ public class LedgerCacheService {
     }
 
     public void removeUtxo(String key) {
-        Log.info("---------------------------------------removeUtxo:" + key);
         UtxoOutput output = getUtxo(key);
         utxoCacheService.removeElement(LedgerConstant.UTXO, key);
         if (output != null) {
