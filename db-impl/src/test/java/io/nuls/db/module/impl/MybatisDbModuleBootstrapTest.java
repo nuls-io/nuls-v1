@@ -37,7 +37,7 @@ public class MybatisDbModuleBootstrapTest {
 
     @Before
     public void before() throws Exception {
-        //SpringLiteContext.init("io.nuls", new ModularServiceMethodInterceptor());
+        SpringLiteContext.init("io.nuls", new ModularServiceMethodInterceptor());
         //sysStart();
         db = new MybatisDbModuleBootstrap();
     } 
