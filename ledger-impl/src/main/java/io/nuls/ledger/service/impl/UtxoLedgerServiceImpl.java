@@ -399,7 +399,10 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     localPoList.add(localPo);
                 }
             }
-            txDao.save(poList);
+            int successCount = txDao.save(poList);
+            if(successCount != poList.size()) {
+                throw new NulsRuntimeException(ErrorCode.FAILED, "save block txs fail , totalCount : " + poList.size() + " , successCount : " + successCount);
+            }
 
             for (TransactionLocalPo localPo : localPoList) {
                 TransactionLocalPo po = localTxDao.get(localPo.getHash());
