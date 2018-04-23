@@ -150,7 +150,8 @@ public class TransactionResource {
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "查询单个账户交易列表 [3.5.2]",
-            notes = "result.data.page.list: List<TransactionDto>, pageNumber和pageSize要么同时缺省，要么都必须大于0，同时缺省时则返回查询到的所有结果")
+            notes = "result.data.page.list: List<TransactionDto>, pageNumber和pageSize要么同时缺省，" +
+                    "要么都必须大于0，同时缺省时则返回查询到的所有结果, blockHeight, address, type至少有一个必填")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = TransactionDto.class)
     })
