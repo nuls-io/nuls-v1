@@ -32,6 +32,7 @@ import io.nuls.ledger.entity.UtxoData;
 import io.nuls.ledger.entity.UtxoInput;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.constant.TxStatusEnum;
 import io.nuls.protocol.script.P2PKHScriptSig;
@@ -46,6 +47,7 @@ public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTran
 
     private static final UtxoTxInputsValidator INSTANCE = new UtxoTxInputsValidator();
 
+    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
     private UtxoTxInputsValidator() {
     }
@@ -62,7 +64,7 @@ public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTran
         UtxoData data = (UtxoData) tx.getCoinData();
         for (int i = 0; i < data.getInputs().size(); i++) {
             UtxoInput input = data.getInputs().get(i);
-            UtxoOutput output = input.getFrom();
+            UtxoOutput output = ledgerCacheService.getUtxo(input.getKey());
 
             if (output == null && tx.getStatus() == TxStatusEnum.UNCONFIRM) {
                 return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);

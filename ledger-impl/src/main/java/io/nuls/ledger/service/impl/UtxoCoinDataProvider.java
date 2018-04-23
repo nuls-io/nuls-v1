@@ -222,8 +222,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 //            for (String address : addressSet) {
 //                UtxoTransactionTool.getInstance().calcBalance(address, true);
 //            }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
 ////        rollback
 ////            Log.warn(e.getMessage(), e);
 //            for (UtxoOutput output : utxoData.getOutputs()) {
@@ -234,8 +233,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 //            }
             System.out.println("----------");
             throw e;
-        }
-        finally {
+        } finally {
             lock.unlock();
         }
     }
@@ -249,16 +247,17 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
             UtxoOutput output = ledgerCacheService.getUtxo(input.getKey());
             if (output == null) {
-                map.put("txHash", input.getFromHash().getDigestHex());
-                map.put("outIndex", input.getFromIndex());
-                UtxoOutputPo outputPo = outputDataService.get(map);
-                if (outputPo == null) {
-                    throw new NulsRuntimeException(ErrorCode.UTXO_NOT_FOUND);
-                }
-                output = UtxoTransferTool.toOutput(outputPo);
-                if (!output.isUsable()) {
-                    throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
-                }
+                throw new NulsRuntimeException(ErrorCode.UTXO_NOT_FOUND);
+            }
+//                map.put("txHash", input.getFromHash().getDigestHex());
+//                map.put("outIndex", input.getFromIndex());
+//                UtxoOutputPo outputPo = outputDataService.get(map);
+//                if (outputPo == null) {
+//                    throw new NulsRuntimeException(ErrorCode.UTXO_NOT_FOUND);
+//                }
+//                output = UtxoTransferTool.toOutput(outputPo);
+            if (!output.isUsable()) {
+                throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
             }
             spends.add(output);
             spendPoList.add(UtxoTransferTool.toOutputPojo(output));
@@ -290,7 +289,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             keyMap.put("outIndex", output.getIndex());
             int count = outputDataService.delete(keyMap);
             if (count != 1) {
-                throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"delete output failed!");
+                throw new NulsRuntimeException(ErrorCode.DATA_ERROR, "delete output failed!");
             }
             ledgerCacheService.removeUtxo(output.getKey());
         }
