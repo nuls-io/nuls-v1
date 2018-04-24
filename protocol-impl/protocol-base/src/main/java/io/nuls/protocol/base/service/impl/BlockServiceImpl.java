@@ -144,8 +144,8 @@ public class BlockServiceImpl implements BlockService {
             tx.setBlockHeight(block.getHeader().getHeight());
             try {
                 tx.verifyWithException();
-                commitedList.add(tx);
                 ledgerService.commitTx(tx, block);
+                commitedList.add(tx);
             } catch (Exception e) {
                 Log.error(e);
                 this.rollback(commitedList);
