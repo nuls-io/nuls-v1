@@ -56,13 +56,22 @@ public class EventCacheService {
         this.cacheService.putElement(CACHE_OF_SENDED, event.getHash().getDigestHex(), event);
     }
 
+    public void removeSendedEvent(BaseEvent event){
+        this.cacheService.removeElement(CACHE_OF_SENDED,event.getHash().getDigestHex());
+    }
+
     public void cacheRecievedEventHash(String hashHex) {
-        this.cacheService.putElement(CACHE_OF_SENDED, hashHex, 1);
+        this.cacheService.putElement(CACHE_OF_RECIEVED, hashHex, 1);
+    }
+
+    public void removeRecievedEventHash(String hashHex){
+        this.cacheService.removeElement(CACHE_OF_RECIEVED,hashHex);
     }
 
     public boolean isKnown(String hashHex) {
-        return this.cacheService.containsKey(CACHE_OF_RECIEVED, hashHex) ||
+        boolean b = this.cacheService.containsKey(CACHE_OF_RECIEVED, hashHex) ||
                 this.cacheService.containsKey(CACHE_OF_SENDED, hashHex);
+        return b;
     }
 
     public BaseEvent getEvent(String hashHex) {

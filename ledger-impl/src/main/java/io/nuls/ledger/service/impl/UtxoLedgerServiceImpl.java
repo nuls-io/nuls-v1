@@ -466,9 +466,10 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     break;
                 }
             }
-            localPoList.add(localPo);
+            localTxDao.save(localPo);
+            //localPoList.add(localPo);
         }
-        localTxDao.save(localPoList);
+        //localTxDao.save(localPoList);
     }
 
 

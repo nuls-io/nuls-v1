@@ -30,7 +30,6 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
-import io.nuls.core.utils.log.BlockLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.validate.ValidateResult;
@@ -223,15 +222,20 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 //                UtxoTransactionTool.getInstance().calcBalance(address, true);
 //            }
         } catch (Exception e) {
-////        rollback
-////            Log.warn(e.getMessage(), e);
-//            for (UtxoOutput output : utxoData.getOutputs()) {
-//                ledgerCacheService.removeUtxo(output.getKey());
-//            }
-//            for (UtxoOutput spend : spends) {
-//                ledgerCacheService.updateUtxoStatus(spend.getKey(), OutPutStatusEnum.UTXO_UNSPENT, OutPutStatusEnum.UTXO_SPENT);
-//            }
-            System.out.println("----------");
+//          rollback
+            Log.warn(e.getMessage(), e);
+            for (UtxoOutput output : utxoData.getOutputs()) {
+                ledgerCacheService.removeUtxo(output.getKey());
+            }
+            for (UtxoOutput spend : spends) {
+                if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
+                    spend.setLockTime(0L);
+                    spend.setStatus(OutPutStatusEnum.UTXO_CONSENSUS_LOCK);
+                } else {
+                    spend.setStatus(OutPutStatusEnum.UTXO_UNSPENT);
+                }
+                ledgerCacheService.putUtxo(spend.getKey(), spend, true);
+            }
             throw e;
         } finally {
             lock.unlock();
@@ -318,69 +322,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         relationDataService.deleteRelation(txHash);
     }
 
-//    public void rollback(CoinData coinData, Transaction tx) {
-//        UtxoData utxoData = (UtxoData) coinData;
-//        if (utxoData == null) {
-//            return;
-//        }
-//
-//        Set<String> addressSet = new HashSet<>();
-//        if (TxStatusEnum.AGREED.equals(tx.getStatus())) {
-//            for (UtxoInput input : utxoData.getInputs()) {
-//                UtxoOutput from = ledgerCacheService.getUtxo(input.getKey());
-//                if (from != null) {
-//                    if (from.getStatus() == OutPutStatusEnum.UTXO_SPENT) {
-//                        from.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
-//                    } else if (from.getStatus() == OutPutStatusEnum.UTXO_CONFIRMED_SPENT) {
-//                        if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
-//                            from.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_CONSENSUS_LOCK);
-//                        } else {
-//                            from.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
-//                        }
-//                    }
-//                    addressSet.add(from.getAddress());
-//                }
-//            }
-//            for (int i = utxoData.getOutputs().size() - 1; i >= 0; i--) {
-//                UtxoOutput output = utxoData.getOutputs().get(i);
-//                ledgerCacheService.removeUtxo(output.getKey());
-//                addressSet.add(output.getAddress());
-//            }
-//        } else if (tx.getStatus().equals(TxStatusEnum.CONFIRMED)) {
-//            //process output
-//            outputDataService.deleteByHash(tx.getHash().getDigestHex());
-//            for (int i = utxoData.getOutputs().size() - 1; i >= 0; i--) {
-//                UtxoOutput output = utxoData.getOutputs().get(i);
-//                ledgerCacheService.removeUtxo(output.getKey());
-//                addressSet.add(output.getAddress());
-//            }
-//
-//            //process input
-//            //1. delete input (database)
-//            //2. change input referenced output status (database)
-//            //3. cache and calc balance
-//            inputDataService.deleteByHash(tx.getHash().getDigestHex());
-//            Map<String, Object> keyMap = new HashMap<>();
-//            for (int i = utxoData.getInputs().size() - 1; i >= 0; i--) {
-//                UtxoInput input = utxoData.getInputs().get(i);
-//                keyMap.clear();
-//                keyMap.put("txHash", input.getFromHash().getDigestHex());
-//                keyMap.put("outIndex", input.getFromIndex());
-//                UtxoOutputPo outputPo = outputDataService.get(keyMap);
-//                outputPo.setStatus(UtxoOutputPo.USABLE);
-//                outputDataService.updateStatus(outputPo);
-//                addressSet.add(outputPo.getAddress());
-//
-//                UtxoOutput output = UtxoTransferTool.toOutput(outputPo);
-//                ledgerCacheService.putUtxo(output.getKey(), output);
-//            }
-//            relationDataService.deleteRelation(tx.getHash().getDigestHex(), addressSet);
-//        }
-//
-//        for (String address : addressSet) {
-//            UtxoTransactionTool.getInstance().calcBalance(address, false);
-//        }
-//    }
+    public void sarollback(CoinData coinData, Transaction tx) {
+
+    }
 
     @Override
     public CoinData createByTransferData(Transaction tx, CoinTransferData coinParam, String password) throws NulsException {
