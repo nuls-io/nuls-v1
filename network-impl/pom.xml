@@ -24,6 +24,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>io.nuls</groupId>
+            <artifactId>cache-impl</artifactId>
+            <version>0.8.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.nuls</groupId>
+            <artifactId>db-impl</artifactId>
+            <version>0.8.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.1.21.Final</version>
