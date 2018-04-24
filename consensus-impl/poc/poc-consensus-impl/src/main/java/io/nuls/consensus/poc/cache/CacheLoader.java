@@ -83,7 +83,9 @@ public class CacheLoader {
 
     public List<BlockHeader> loadBlockHeaders(int size) {
         Block block = blockService.getLocalBestBlock();
-
+        if (null == block) {
+            return new ArrayList<>();
+        }
         BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
 
 
