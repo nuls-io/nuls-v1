@@ -44,7 +44,7 @@ public class WalletServiceTest {
 
     @BeforeClass
     public static void init() {
-        RestFulUtils.getInstance().setServerUri("http://192.168.1.103:8001");
+        RestFulUtils.getInstance().setServerUri("http://127.0.0.1:8001");
     }
 
     WalletService walletService = WalletService.WALLET_SERVICE;
@@ -52,11 +52,11 @@ public class WalletServiceTest {
     @Test
     public void transfer() {
         int index = 0;
-        while (index++ < 10000) {
-            RpcClientResult result = walletService.transfer("2CYj11bg7RCFS3tscnbayiBGqTLDvxQ", "2CeURqzkwcwKB2MW5UDrKQGFFb3NgkN", 1286L, "nuls123456", "test utxo");
+        while (index++ < 100000000) {
+            RpcClientResult result = walletService.transfer("2Cc1AWqyB1Fj82S32AB2Tuvvrhsbmod", "2CeURqzkwcwKB2MW5UDrKQGFFb3NgkN", 1286L, "nuls123456", "test utxo");
             System.out.println(result.getMsg()+"===="+index);
             try {
-                Thread.sleep(10);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 Log.error(e);
             }
