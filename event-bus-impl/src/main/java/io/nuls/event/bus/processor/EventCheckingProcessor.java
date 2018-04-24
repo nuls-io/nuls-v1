@@ -3,6 +3,7 @@ package io.nuls.event.bus.processor;
 import com.lmax.disruptor.EventHandler;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.event.bus.constant.EventConstant;
+import io.nuls.event.bus.event.CommonDigestEvent;
 import io.nuls.event.bus.processor.manager.ProcessData;
 import io.nuls.event.bus.service.impl.EventCacheService;
 import io.nuls.event.bus.utils.disruptor.DisruptorEvent;
@@ -26,12 +27,10 @@ public class EventCheckingProcessor<E extends BaseEvent> implements EventHandler
                 event.getHeader().getModuleId() != NulsConstant.MODULE_ID_EVENT_BUS) {
             return;
         }
-        String eventHash = event.getHash().getDigestHex();
-        if (eventCacheService.kownTheEvent(eventHash)) {
-            processDataDisruptorEvent.setStoped(true);
-        } else {
-            eventCacheService.cacheRecievedEventHash(eventHash);
-        }
+        CommonDigestEvent commonDigestEvent = (CommonDigestEvent) event;
 
+        if (eventCacheService.kownTheEvent(commonDigestEvent.getEventBody().getDigestHex())) {
+            processDataDisruptorEvent.setStoped(true);
+        }
     }
 }
