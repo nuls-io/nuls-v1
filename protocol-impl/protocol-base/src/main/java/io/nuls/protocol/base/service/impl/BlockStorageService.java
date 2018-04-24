@@ -204,4 +204,8 @@ public class BlockStorageService {
     public List<BlockHeaderPo> getBlockHeaderListByRound(long startRoundIndex, long endRoundIndex) {
         return this.headerDao.getHeaderListByRound(startRoundIndex,endRoundIndex);
     }
+
+    public long getPackingCount(String packingAddress, long roundStart, long roundEnd) {
+        return this.headerDao.getPackingCount(packingAddress,roundStart,roundEnd);
+    }
 }

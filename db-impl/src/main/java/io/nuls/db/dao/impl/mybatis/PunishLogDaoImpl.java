@@ -88,4 +88,14 @@ public class PunishLogDaoImpl extends BaseDaoImpl<PunishLogMapper, String, Punis
         searchable.addCondition("type", SearchOperator.eq, type);
         return this.getMapper().selectList(searchable);
     }
+
+    @Override
+    public long getCountByType(String address, int type, long roundStart, long roundEnd) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("address", SearchOperator.eq, address);
+        searchable.addCondition("type", SearchOperator.eq, type);
+        searchable.addCondition("round_index", SearchOperator.gte, roundStart);
+        searchable.addCondition("round_index", SearchOperator.lte, roundEnd);
+        return this.getMapper().selectCount(searchable);
+    }
 }

@@ -269,4 +269,9 @@ public class BlockServiceImpl implements BlockService {
     public List<BlockHeaderPo> getBlockHeaderListByRound(long startRoundIndex, long endRoundIndex) {
         return this.blockStorageService.getBlockHeaderListByRound(startRoundIndex, endRoundIndex);
     }
+
+    @Override
+    public long getPackingCount(String packingAddress, long roundStart, long roundEnd) {
+        return this.blockStorageService.getPackingCount(packingAddress,roundStart,roundEnd);
+    }
 }
