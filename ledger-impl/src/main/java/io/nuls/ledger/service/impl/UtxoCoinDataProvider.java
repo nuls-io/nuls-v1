@@ -263,6 +263,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             if (!output.isUsable()) {
                 throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
             }
+            output.setStatus(OutPutStatusEnum.UTXO_SPENT);
             spends.add(output);
             spendPoList.add(UtxoTransferTool.toOutputPojo(output));
             inputPoList.add(UtxoTransferTool.toInputPojo(input));
