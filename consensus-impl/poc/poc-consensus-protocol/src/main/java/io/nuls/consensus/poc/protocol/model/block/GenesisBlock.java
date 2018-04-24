@@ -126,15 +126,8 @@ public final class GenesisBlock extends Block {
             Integer nuls = (Integer) map.get(CONFIG_FILED_NULS);
             AssertUtil.canNotEmpty(nuls, ErrorCode.NULL_PARAMETER);
             Integer height = (Integer) map.get(CONFIG_FILED_UNLOCK_HEIGHT);
-            Coin coin = new Coin();
-            coin.setNa(Na.parseNuls(nuls));
-            coin.setUnlockTime(0);
-            if (height == null) {
-                coin.setUnlockTime(0);
-            } else {
-                coin.setUnlockHeight(height.longValue());
-            }
-            data.addTo(address, coin);
+            Coin coin = new Coin(address,Na.parseNuls(nuls),0,height == null?0:height.longValue());
+            data.addTo( coin);
             total = total.add(coin.getNa());
         }
         data.setTotalNa(total);

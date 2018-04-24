@@ -345,7 +345,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         LockNulsTransaction tx = null;
         try {
             CoinTransferData coinData = new CoinTransferData(OperationType.LOCK, amount, address, getTxFee(TransactionConstant.TX_TYPE_LOCK));
-            coinData.addTo(address, new Coin(amount, unlockTime));
+            coinData.addTo( new Coin(address,amount, unlockTime,0));
             tx = UtxoTransactionTool.getInstance().createLockNulsTx(coinData, password, remark);
 
             tx.verify();

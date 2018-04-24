@@ -213,11 +213,8 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         CoinTransferData data = new CoinTransferData(OperationType.LOCK, this.ledgerService.getTxFee(TransactionConstant.TX_TYPE_REGISTER_AGENT));
         data.setTotalNa(agent.getDeposit());
         data.addFrom(account.getAddress().toString());
-        Coin coin = new Coin();
-        coin.setUnlockHeight(0);
-        coin.setUnlockTime(0);
-        coin.setNa(agent.getDeposit());
-        data.addTo(account.getAddress().toString(), coin);
+        Coin coin = new Coin(account.getAddress().toString(), agent.getDeposit(), 0, 0);
+        data.addTo(coin);
         RegisterAgentTransaction tx = null;
         try {
             tx = new RegisterAgentTransaction(data, password);
@@ -260,11 +257,8 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         CoinTransferData data = new CoinTransferData(OperationType.LOCK, this.ledgerService.getTxFee(TransactionConstant.TX_TYPE_JOIN_CONSENSUS));
         data.setTotalNa(deposit.getDeposit());
         data.addFrom(account.getAddress().toString());
-        Coin coin = new Coin();
-        coin.setUnlockHeight(0);
-        coin.setUnlockTime(0);
-        coin.setNa(deposit.getDeposit());
-        data.addTo(account.getAddress().toString(), coin);
+        Coin coin = new Coin(account.getAddress().toString(), deposit.getDeposit(), 0, 0);
+        data.addTo(coin);
         PocJoinConsensusTransaction tx = null;
         try {
             tx = new PocJoinConsensusTransaction(data, password);

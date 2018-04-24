@@ -397,37 +397,33 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             //create outputs
             int i = 0;
             long outputValue = 0;
-            for (Map.Entry<String, List<Coin>> entry : coinParam.getToMap().entrySet()) {
-                String address = entry.getKey();
-                List<Coin> coinList = entry.getValue();
-                for (Coin coin : coinList) {
-                    UtxoOutput output = new UtxoOutput();
-                    output.setAddress(address);
-                    output.setValue(coin.getNa().getValue());
-                    if (output.getLockTime() > 0) {
-                        output.setStatus(OutPutStatusEnum.UTXO_TIME_LOCK);
-                    } else if (tx instanceof LockNulsTransaction) {
-                        output.setStatus(OutPutStatusEnum.UTXO_CONSENSUS_LOCK);
-                    } else {
-                        output.setStatus(OutPutStatusEnum.UTXO_UNSPENT);
-                    }
-
-                    output.setIndex(i);
-                    P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, new Address(address).getHash160()));
-                    output.setP2PKHScript(p2PKHScript);
-                    if (coin.getUnlockHeight() > 0) {
-                        output.setLockTime(coin.getUnlockHeight());
-                    } else if (coin.getUnlockTime() > 0) {
-                        output.setLockTime(coin.getUnlockTime());
-                    } else {
-                        output.setLockTime(0L);
-                    }
-                    output.setTxHash(tx.getHash());
-                    outputValue += output.getValue();
-                    outputs.add(output);
-
-                    i++;
+            for (Coin coin : coinParam.getToCoinList()) {
+                UtxoOutput output = new UtxoOutput();
+                output.setAddress(coin.getAddress());
+                output.setValue(coin.getNa().getValue());
+                if (output.getLockTime() > 0) {
+                    output.setStatus(OutPutStatusEnum.UTXO_TIME_LOCK);
+                } else if (tx instanceof LockNulsTransaction) {
+                    output.setStatus(OutPutStatusEnum.UTXO_CONSENSUS_LOCK);
+                } else {
+                    output.setStatus(OutPutStatusEnum.UTXO_UNSPENT);
                 }
+
+                output.setIndex(i);
+                P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, new Address(coin.getAddress()).getHash160()));
+                output.setP2PKHScript(p2PKHScript);
+                if (coin.getUnlockHeight() > 0) {
+                    output.setLockTime(coin.getUnlockHeight());
+                } else if (coin.getUnlockTime() > 0) {
+                    output.setLockTime(coin.getUnlockTime());
+                } else {
+                    output.setLockTime(0L);
+                }
+                output.setTxHash(tx.getHash());
+                outputValue += output.getValue();
+                outputs.add(output);
+
+                i++;
             }
 
             //the balance leave to myself

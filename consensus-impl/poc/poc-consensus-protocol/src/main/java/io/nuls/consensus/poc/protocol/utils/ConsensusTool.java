@@ -64,7 +64,7 @@ import java.util.Map;
  * @date 2017/12/6
  */
 public class ConsensusTool {
-    private static  AccountService accountService = NulsContext.getServiceBean(AccountService.class);
+    private static AccountService accountService = NulsContext.getServiceBean(AccountService.class);
 
     public static Consensus<Agent> fromPojo(AgentPo po) {
         if (null == po) {
@@ -177,15 +177,13 @@ public class ConsensusTool {
     }
 
 
-    public static CoinBaseTransaction createCoinBaseTx(MeetingMember member, List<Transaction> txList, MeetingRound localRound,long unlockHeight) {
+    public static CoinBaseTransaction createCoinBaseTx(MeetingMember member, List<Transaction> txList, MeetingRound localRound, long unlockHeight) {
         CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE, Na.ZERO);
         List<ConsensusReward> rewardList = calcReward(txList, member, localRound);
         Na total = Na.ZERO;
         for (ConsensusReward reward : rewardList) {
-            Coin coin = new Coin();
-            coin.setNa(reward.getReward());
-            coin.setUnlockHeight(unlockHeight);
-            data.addTo(reward.getAddress(), coin);
+            Coin coin = new Coin(reward.getAddress(), reward.getReward(), 0, unlockHeight);
+            data.addTo(coin);
             total = total.add(reward.getReward());
         }
         data.setTotalNa(total);
@@ -231,21 +229,21 @@ public class ConsensusTool {
             blockReword = DoubleUtils.sum(blockReword, DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight())));
         }
 
-        if(blockReword == 0d) {
+        if (blockReword == 0d) {
             return rewardList;
         }
 
         ConsensusReward agentReword = new ConsensusReward();
         agentReword.setAddress(self.getAgentAddress());
 
-        long realTotalAllDeposit =  self.getOwnDeposit().getValue()+self.getTotalDeposit().getValue();
-        double caReward = DoubleUtils.mul(blockReword, DoubleUtils.div(self.getOwnDeposit().getValue(),realTotalAllDeposit));
+        long realTotalAllDeposit = self.getOwnDeposit().getValue() + self.getTotalDeposit().getValue();
+        double caReward = DoubleUtils.mul(blockReword, DoubleUtils.div(self.getOwnDeposit().getValue(), realTotalAllDeposit));
 
         Map<String, ConsensusReward> rewardMap = new HashMap<>();
         for (Consensus<Deposit> cd : self.getDepositList()) {
-            double weight = DoubleUtils.div(cd.getExtend().getDeposit().getValue(),realTotalAllDeposit);
+            double weight = DoubleUtils.div(cd.getExtend().getDeposit().getValue(), realTotalAllDeposit);
             if (cd.getAddress().equals(self.getAgentAddress())) {
-                caReward = caReward + DoubleUtils.mul(blockReword,weight );
+                caReward = caReward + DoubleUtils.mul(blockReword, weight);
             } else {
                 ConsensusReward depositReward = rewardMap.get(cd.getAddress());
                 if (null == depositReward) {
@@ -274,22 +272,22 @@ public class ConsensusTool {
         }
 
         int yellowCount = 0;
-        if(self.getRoundIndex() == preBlockRoundData.getRoundIndex() && self.getPackingIndexOfRound() != preBlockRoundData.getPackingIndexOfRound() + 1) {
+        if (self.getRoundIndex() == preBlockRoundData.getRoundIndex() && self.getPackingIndexOfRound() != preBlockRoundData.getPackingIndexOfRound() + 1) {
             yellowCount = self.getPackingIndexOfRound() - preBlockRoundData.getPackingIndexOfRound() - 1;
         }
 
-        if(self.getRoundIndex() != preBlockRoundData.getRoundIndex() && (self.getPackingIndexOfRound() != 1 || preBlockRoundData.getPackingIndexOfRound() != preBlockRoundData.getConsensusMemberCount())) {
-            yellowCount = self.getPackingIndexOfRound() + preBlockRoundData.getConsensusMemberCount() - preBlockRoundData.getPackingIndexOfRound() -1;
+        if (self.getRoundIndex() != preBlockRoundData.getRoundIndex() && (self.getPackingIndexOfRound() != 1 || preBlockRoundData.getPackingIndexOfRound() != preBlockRoundData.getConsensusMemberCount())) {
+            yellowCount = self.getPackingIndexOfRound() + preBlockRoundData.getConsensusMemberCount() - preBlockRoundData.getPackingIndexOfRound() - 1;
         }
 
-        if(yellowCount == 0) {
+        if (yellowCount == 0) {
             return null;
         }
 
         List<Address> addressList = new ArrayList<>();
-        for(int i = 1 ; i <= yellowCount ; i++) {
+        for (int i = 1; i <= yellowCount; i++) {
             int index = self.getPackingIndexOfRound() - i;
-            if(index > 0) {
+            if (index > 0) {
                 addressList.add(Address.fromHashs(round.getMember(index).getAgentAddress()));
             } else {
                 MeetingRound preRound = round.getPreRound();
@@ -310,7 +308,7 @@ public class ConsensusTool {
         return punishTx;
     }
 
-    public static Block assemblyBlock(BlockHeader header,Map<String,Transaction> txMap ,List<NulsDigestData> txHashList){
+    public static Block assemblyBlock(BlockHeader header, Map<String, Transaction> txMap, List<NulsDigestData> txHashList) {
         Block block = new Block();
         block.setHeader(header);
         List<Transaction> txs = new ArrayList<>();

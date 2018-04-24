@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -43,17 +43,17 @@ public class CoinTransferData {
 
     private List<String> from;
 
-    private Map<String, List<Coin>> toMap;
+    private List<Coin> toList = new ArrayList<>();
+
 
     private Na totalNa;
 
     private Na fee;
 
-    private Map<String,Object> specialData;
+    private Map<String, Object> specialData;
 
     public CoinTransferData() {
         this.from = new ArrayList();
-        this.toMap = new HashMap<>();
         this.totalNa = Na.ZERO;
         this.fee = Na.ZERO;
     }
@@ -77,7 +77,7 @@ public class CoinTransferData {
     public CoinTransferData(OperationType type, Na totalNa, String from, String to, Na fee) {
         this(type, totalNa, from, fee);
         if (StringUtils.isNotBlank(to)) {
-            this.addTo(to, new Coin(totalNa));
+            this.addTo(new Coin(to, totalNa, 0, 0));
         }
     }
 
@@ -89,7 +89,7 @@ public class CoinTransferData {
     public CoinTransferData(OperationType type, Na totalNa, List<String> from, String to, Na fee) {
         this(type, totalNa, from, fee);
         if (StringUtils.isNotBlank(to)) {
-            this.addTo(to, new Coin(totalNa));
+            this.addTo(new Coin(to, totalNa, 0, 0));
         }
     }
 
@@ -99,14 +99,6 @@ public class CoinTransferData {
 
     public List<String> getFrom() {
         return from;
-    }
-
-    public Map<String, List<Coin>> getToMap() {
-        return toMap;
-    }
-
-    public void setToMap(Map<String, List<Coin>> toMap) {
-        this.toMap = toMap;
     }
 
     public Na getTotalNa() {
@@ -129,13 +121,8 @@ public class CoinTransferData {
         this.from.add(address);
     }
 
-    public void addTo(String address, Coin coin) {
-        List<Coin> coinList = toMap.get(address);
-        if (null == coinList) {
-            coinList = new ArrayList<>();
-        }
-        coinList.add(coin);
-        this.toMap.put(address, coinList);
+    public void addTo(Coin coin) {
+        toList.add(coin);
     }
 
     public byte[] getPriKey() {
@@ -161,4 +148,9 @@ public class CoinTransferData {
     public void setSpecialData(Map<String, Object> specialData) {
         this.specialData = specialData;
     }
+
+    public List<Coin> getToCoinList() {
+        return toList;
+    }
+
 }
