@@ -349,7 +349,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
             throw new NulsRuntimeException(ErrorCode.HASH_ERROR, e);
         }
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
-        this.ledgerService.verifyTxWithException(tx,this.ledgerService.getWaitingTxList());
+        tx.verifyWithException();
         event.setEventBody(tx);
         this.ledgerService.saveLocalTx(tx);
         eventBroadcaster.publishToLocal(event);
