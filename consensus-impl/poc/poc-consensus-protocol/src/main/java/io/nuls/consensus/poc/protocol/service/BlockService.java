@@ -82,4 +82,5 @@ public interface BlockService {
 
     List<BlockHeaderPo> getBlockHeaderListByRound(long startRoundIndex, long endRoundIndex);
 
+    long getPackingCount(String packingAddress, long roundStart, long roundEnd);
 }

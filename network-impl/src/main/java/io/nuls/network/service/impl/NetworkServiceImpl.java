@@ -132,7 +132,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void removeNode(String nodeId, int type) {
-        System.out.println("----------removeHandshakeNode node------------");
+//        System.out.println("----------removeHandshakeNode node------------");
         nodesManager.removeHandshakeNode(nodeId);
     }
 

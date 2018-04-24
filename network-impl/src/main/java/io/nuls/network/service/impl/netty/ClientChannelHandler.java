@@ -90,7 +90,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         Node node = getNetworkService().getNode(nodeId);
         if (node != null) {
             if (node.getChannelId() == null || channelId.equals(node.getChannelId())) {
-                System.out.println(  "---------------client channelInactive remove node----------------" + nodeId);
+//                System.out.println(  "---------------client channelInactive remove node----------------" + nodeId);
                 getNetworkService().removeNode(node.getId());
             } else {
                 Log.debug("---------------- client channelId different----------------" + channelId + "," + node.getChannelId());

@@ -33,8 +33,10 @@ import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.manager.RoundManager;
 import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.event.entity.JoinConsensusParam;
 import io.nuls.consensus.poc.protocol.model.*;
+import io.nuls.consensus.poc.protocol.model.block.BlockRoundData;
 import io.nuls.consensus.poc.protocol.service.BlockService;
 import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.PocJoinConsensusTransaction;
@@ -51,6 +53,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
@@ -59,6 +62,7 @@ import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.AgentDataService;
 import io.nuls.db.dao.DepositDataService;
+import io.nuls.db.dao.PunishLogDataService;
 import io.nuls.db.entity.AgentPo;
 import io.nuls.db.entity.DepositPo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
@@ -101,6 +105,8 @@ public class PocConsensusServiceImpl implements PocConsensusService {
     private LedgerService ledgerService;
     @Autowired
     private BlockService blockService;
+    @Autowired
+    private PunishLogDataService punishLogDataService;
 
 
     private MainControlScheduler mainControlScheduler = MainControlScheduler.getInstance();
@@ -269,7 +275,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         tx.setTxData(ca);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
-        this.ledgerService.verifyTxWithException(tx,this.ledgerService.getWaitingTxList());
+        this.ledgerService.verifyTxWithException(tx, this.ledgerService.getWaitingTxList());
         event.setEventBody(tx);
         this.ledgerService.saveLocalTx(tx);
         boolean b = eventBroadcaster.publishToLocal(event);
@@ -329,7 +335,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
                 throw new NulsRuntimeException(ErrorCode.HASH_ERROR, e);
             }
             tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
-            this.ledgerService.verifyTxWithException(tx,this.ledgerService.getWaitingTxList());
+            this.ledgerService.verifyTxWithException(tx, this.ledgerService.getWaitingTxList());
             event.setEventBody(tx);
             this.ledgerService.saveLocalTx(tx);
             eventBroadcaster.publishToLocal(event);
@@ -349,7 +355,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
             throw new NulsRuntimeException(ErrorCode.HASH_ERROR, e);
         }
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
-        this.ledgerService.verifyTxWithException(tx,this.ledgerService.getWaitingTxList());
+        tx.verifyWithException();
         event.setEventBody(tx);
         this.ledgerService.saveLocalTx(tx);
         eventBroadcaster.publishToLocal(event);
@@ -459,7 +465,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         long rewardOfDay = ledgerService.getAccountReward(address, lastDayTime);
         Balance balance = ledgerService.getBalance(address);
         map.put("reward", reward);
-//        map.put("joinAccountCount", joinedAgent.size());
+        map.put("joinAgentCount", joinedAgent.size());
         if (null == balance || balance.getUsable() == null) {
             map.put("usableBalance", 0);
         } else {
@@ -519,6 +525,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
                     agentList.add(0, ca);
                 }
             }
+            fillConsensusInfo(agentList);
             page.setPageNumber(pageNumber);
             page.setPageSize(pageSize);
             page.setTotal(agentList.size());
@@ -567,20 +574,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
             }
         }
         List<Consensus<Agent>> sublist = agentList.subList(start, end);
-        MeetingRound round = this.getCurrentRound();
-        for (Consensus<Agent> agent : sublist) {
-            MeetingMember member = round.getMember(agent.getExtend().getPackingAddress());
-            if (null == member) {
-                agent.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
-                //todo 重新计算未参与共识的部分的数据
-                agent.getExtend().setCreditVal(0);
-                agent.getExtend().setTotalDeposit(0L);
-            } else {
-                agent.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
-                agent.getExtend().setCreditVal(member.getRealCreditVal());
-                agent.getExtend().setTotalDeposit(member.getTotalDeposit().getValue());
-            }
-        }
+        fillConsensusInfo(sublist);
         page.setPageNumber(pageNumber);
         page.setPageSize(pageSize);
         page.setTotal(agentList.size());
@@ -592,6 +586,56 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         List<Map<String, Object>> resultList = transList(sublist);
         page.setList(resultList);
         return page;
+    }
+
+    private void fillConsensusInfo(List<Consensus<Agent>> list) {
+        MeetingRound round = this.getCurrentRound();
+        for (Consensus<Agent> agent : list) {
+            fillConsensusInfo(agent, round);
+        }
+
+    }
+
+    private void fillConsensusInfo(Consensus<Agent> agent, MeetingRound round) {
+        MeetingMember member = round.getMember(agent.getExtend().getPackingAddress());
+        if (null == member) {
+            agent.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
+            agent.getExtend().setCreditVal(calcCreditVal(agent));
+            List<Consensus<Deposit>> depositList = this.getEffectiveDepositList(null, agent.getHexHash(), NulsContext.getInstance().getBestHeight(), null);
+            long totalDeposit = 0L;
+            for (Consensus<Deposit> cd : depositList) {
+                totalDeposit = cd.getExtend().getDeposit().getValue();
+            }
+            agent.getExtend().setTotalDeposit(totalDeposit);
+        } else {
+            agent.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
+            agent.getExtend().setCreditVal(member.getRealCreditVal());
+            agent.getExtend().setTotalDeposit(member.getTotalDeposit().getValue());
+        }
+    }
+
+    private double calcCreditVal(Consensus<Agent> agent) {
+        long count = this.punishLogDataService.getCountByType(agent.getAddress(), PunishType.RED.getCode());
+        if (count > 0) {
+            return -1;
+        }
+
+        BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
+        BlockRoundData roundData = new BlockRoundData(blockHeader.getExtend());
+
+        long roundStart = roundData.getRoundIndex() - PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT;
+        if (roundStart < 0) {
+            roundStart = 0;
+        }
+        long blockCount = this.blockService.getPackingCount(agent.getExtend().getPackingAddress(), roundStart, roundData.getRoundIndex() - 1);
+        long sumRoundVal =
+                punishLogDataService.getCountByType(agent.getAddress(), PunishType.YELLOW.getCode(), roundStart, roundData.getRoundIndex() - 1);
+
+        double ability = DoubleUtils.div(blockCount, PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT);
+
+        double penalty = DoubleUtils.div(DoubleUtils.mul(PocConsensusConstant.CREDIT_MAGIC_NUM, sumRoundVal),
+                DoubleUtils.mul(PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT, PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT));
+        return DoubleUtils.round(DoubleUtils.sub(ability, penalty), 4);
     }
 
     private List<Map<String, Object>> transList(List<Consensus<Agent>> agentList) {
@@ -723,6 +767,9 @@ public class PocConsensusServiceImpl implements PocConsensusService {
             return null;
         }
         Map<String, Object> map = new HashMap<>();
+
+        this.fillConsensusInfo(ca, this.getCurrentRound());
+
         map.put("agentId", ca.getHexHash());
         map.put("agentName", ca.getExtend().getAgentName());
         map.put("packingAddress", ca.getExtend().getPackingAddress());

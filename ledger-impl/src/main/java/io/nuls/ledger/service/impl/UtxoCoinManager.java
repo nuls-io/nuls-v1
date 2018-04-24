@@ -66,14 +66,14 @@ public class UtxoCoinManager {
     public void cacheAllUnSpendUtxo() {
         List<UtxoOutputPo> utxoOutputPos = outputDataService.getAllUnSpend();
         Set<String> addressSet = new HashSet<>();
-
+        List<UtxoOutput> outputList = new ArrayList<>();
         for (int i = 0; i < utxoOutputPos.size(); i++) {
             UtxoOutputPo po = utxoOutputPos.get(i);
             UtxoOutput output = UtxoTransferTool.toOutput(po);
-            ledgerCacheService.putUtxo(output.getKey(), output, true);
+            outputList.add(output);
             addressSet.add(po.getAddress());
         }
-
+        ledgerCacheService.putUtxoList(outputList);
 //        for (String str : addressSet) {
 //            UtxoTransactionTool.getInstance().calcBalance(str, false);
 //        }
