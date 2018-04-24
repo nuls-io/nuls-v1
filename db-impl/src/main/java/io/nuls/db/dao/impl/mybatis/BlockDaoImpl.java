@@ -189,4 +189,13 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
         params.put("endRoundIndex", endRoundIndex);
         return this.getMapper().getListByRound(params);
     }
+
+    @Override
+    public long getPackingCount(String packingAddress, long roundStart, long roundEnd) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("consensus_address", SearchOperator.eq, packingAddress);
+        searchable.addCondition("round_index", SearchOperator.gte, roundStart);
+        searchable.addCondition("round_index", SearchOperator.lte, roundEnd);
+        return this.getMapper().selectCount(searchable);
+    }
 }

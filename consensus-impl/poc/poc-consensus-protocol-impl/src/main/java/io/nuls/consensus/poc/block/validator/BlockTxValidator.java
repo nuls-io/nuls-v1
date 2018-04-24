@@ -27,7 +27,9 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.protocol.constant.TransactionConstant;
+import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.Transaction;
 
@@ -41,6 +43,8 @@ import java.util.List;
 public class BlockTxValidator implements NulsDataValidator<Block> {
     private static final String ERROR_MESSAGE = "";
     public static final BlockTxValidator INSTANCE = new BlockTxValidator();
+
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     private BlockTxValidator() {
     }
@@ -57,20 +61,8 @@ public class BlockTxValidator implements NulsDataValidator<Block> {
         int count = 0;
         List<Transaction> txList = new ArrayList<>();
         for (Transaction tx : block.getTxs()) {
-            ValidateResult result = tx.verify();
-            if(result.isFailed()&&result.getErrorCode()== ErrorCode.ORPHAN_TX){
-                AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
-                result = coinTx.getCoinDataProvider().verifyCoinData(coinTx,txList);
-                if(result.isSuccess()){
-                    coinTx.setSkipInputValidator(true);
-                    result = coinTx.verify();
-                    coinTx.setSkipInputValidator(false);
-                }
-            }
+            ValidateResult result = this.ledgerService.verifyTx(tx,txList);
             if (null==result||result.isFailed()) {
-                if(result.getErrorCode()== ErrorCode.ORPHAN_TX){
-                    return result;
-                }
                 return ValidateResult.getFailedResult("there is wrong transaction!msg:"+result.getMessage());
             }
             if (tx.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {

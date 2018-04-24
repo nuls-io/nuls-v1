@@ -52,11 +52,11 @@ public class WalletServiceTest {
     @Test
     public void transfer() {
         int index = 0;
-        while (index++ < 10000) {
+        while (index++ < 10000000) {
             RpcClientResult result = walletService.transfer("2CYj11bg7RCFS3tscnbayiBGqTLDvxQ", "2CeURqzkwcwKB2MW5UDrKQGFFb3NgkN", 1286L, "nuls123456", "test utxo");
             System.out.println(result.getMsg()+"===="+index);
             try {
-                Thread.sleep(10);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 Log.error(e);
             }

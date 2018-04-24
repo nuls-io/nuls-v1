@@ -244,7 +244,6 @@ public class TransactionResource {
         if (pageSize == 0) {
             pageSize = 10;
         }
-        //todo        ledgerService.getLockUtxo
         Page<UtxoOutput> page = ledgerService.getLockUtxo(address, pageNumber, pageSize);
 
         List<OutputDto> dtoList = new ArrayList<>();

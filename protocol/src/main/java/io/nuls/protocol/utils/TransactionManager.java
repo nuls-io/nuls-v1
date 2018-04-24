@@ -24,12 +24,15 @@
 package io.nuls.protocol.utils;
 
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.utils.log.Log;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.service.intf.TransactionService;
 import io.nuls.protocol.utils.io.NulsByteBuffer;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,12 +59,17 @@ public class TransactionManager {
         return TX_MAP.get(txType);
     }
 
-    public static Transaction getInstanceByType(int txType) throws Exception {
+    public static Transaction getInstanceByType(int txType) throws NulsException {
         Class<? extends Transaction> txClass = getTxClass(txType);
         if (null == txClass) {
             throw new NulsRuntimeException(ErrorCode.FAILED, "transaction type not exist!");
         }
-        Transaction tx = txClass.getConstructor().newInstance();
+        Transaction tx = null;
+        try {
+            tx = txClass.getConstructor().newInstance();
+        } catch (Exception e) {
+           throw new NulsException(e);
+        }
         return tx;
     }
 

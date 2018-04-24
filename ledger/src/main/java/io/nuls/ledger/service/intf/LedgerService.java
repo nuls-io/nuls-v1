@@ -98,7 +98,7 @@ public interface LedgerService {
 
     ValidateResult conflictDetectTx(Transaction tx, List<Transaction> txList) throws NulsException;
 
-    List<Transaction> getWaitingTxList() throws Exception;
+    List<Transaction> getWaitingTxList() throws NulsException;
 
     void deleteTx(Transaction tx);
 
@@ -128,4 +128,8 @@ public interface LedgerService {
     Balance getAccountUtxo(String address, Na amount);
 
     void resetLedgerCache();
+
+    ValidateResult verifyTx(Transaction tx,List<Transaction> txList);
+
+    void verifyTxWithException(Transaction tx, List<Transaction> txList);
 }

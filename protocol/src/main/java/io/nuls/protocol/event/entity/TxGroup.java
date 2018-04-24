@@ -116,4 +116,8 @@ public class TxGroup extends BaseNulsData {
     public Transaction getTx(String digestHex) {
         return txMap.get(digestHex);
     }
+
+    public Map<String,Transaction> getTxMap(){
+        return txMap;
+    }
 }

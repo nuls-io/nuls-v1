@@ -28,7 +28,6 @@ import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
-import io.nuls.ledger.entity.OutPutStatusEnum;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.protocol.context.NulsContext;
@@ -46,6 +45,7 @@ public class LedgerCacheService {
     private CacheService<String, Balance> cacheService;
     private CacheService<String, UtxoOutput> utxoCacheService;
 
+    private boolean initCache = true;
 
     private LedgerCacheService() {
         cacheService = NulsContext.getServiceBean(CacheService.class);
@@ -83,9 +83,9 @@ public class LedgerCacheService {
         return cacheService.getElement(LedgerConstant.LEDGER_BOOK, address);
     }
 
-    public void putUtxo(String key, UtxoOutput output, boolean  cacheBalance) {
+    public void putUtxo(String key, UtxoOutput output, boolean cacheBalance) {
         utxoCacheService.putElement(LedgerConstant.UTXO, key, output);
-        if(!cacheBalance) {
+        if (!cacheBalance) {
             return;
         }
         String address = output.getAddress();
@@ -95,19 +95,6 @@ public class LedgerCacheService {
         }
         balance.addUtxo(key);
         putBalance(address, balance);
-//        if (balance == null) {
-//            balance = new UtxoBalance();
-//            balance.addUtxo(key);
-//            List<UtxoOutput> outputs = new CopyOnWriteArrayList<>();
-//            outputs.add(output);
-//            balance.setUnSpends(outputs);
-//            putBalance(address, balance);
-//        } else {
-//            balance.getUnSpends().add(output);
-//            if (balance.getUnSpends().size() > 1) {
-//                Collections.sort(balance.getUnSpends());
-//            }
-//        }
     }
 
     public List<UtxoOutput> getUnSpends(String address) {
@@ -127,11 +114,14 @@ public class LedgerCacheService {
     }
 
     public UtxoOutput getUtxo(String key) {
+        while (initCache){
+            try {
+                Thread.sleep(100L);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
+        }
         return utxoCacheService.getElement(LedgerConstant.UTXO, key);
-    }
-
-    public List<UtxoOutput> getUtxoList() {
-        return utxoCacheService.getElementList(LedgerConstant.UTXO);
     }
 
     public void removeUtxo(String key) {
@@ -145,15 +135,10 @@ public class LedgerCacheService {
         }
     }
 
-    public boolean updateUtxoStatus(String key, OutPutStatusEnum newStatus, OutPutStatusEnum oldStatus) {
-        if (!utxoCacheService.containsKey(LedgerConstant.UTXO, key)) {
-            return false;
+    public void putUtxoList(List<UtxoOutput> outputList) {
+        for (UtxoOutput output : outputList) {
+            this.putUtxo(output.getKey(), output, true);
         }
-        UtxoOutput output = utxoCacheService.getElement(LedgerConstant.UTXO, key);
-        if (output.getStatus() != oldStatus) {
-            return false;
-        }
-        output.setStatus(newStatus);
-        return true;
+        initCache = false;
     }
 }

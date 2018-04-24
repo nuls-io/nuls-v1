@@ -42,9 +42,9 @@ public interface UtxoOutputDataService extends BaseDataService<Map<String, Objec
 
     List<UtxoOutputPo> getAllUnSpend();
 
-    long getLockUtxoCount(String address, Long beginTime, Long bestHeight, Long genesisTime);
+    long getLockUtxoCount(String address, Long beginTime, Long bestHeight);
 
-    List<UtxoOutputPo> getLockUtxo(String address, Long beginTime, Long bestHeight, Long genesisTime, Integer start, Integer limit);
+    List<UtxoOutputPo> getLockUtxo(String address, Long beginTime, Long bestHeight, Integer start, Integer limit);
 
     List<UtxoOutputPo> getAccountUnSpend(String address);
 

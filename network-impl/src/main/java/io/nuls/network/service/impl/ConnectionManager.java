@@ -131,7 +131,7 @@ public class ConnectionManager {
                     processMessage(event, node);
                 } else {
                     node.setStatus(Node.BAD);
-                    System.out.println("-------------------- receive message filter remove node ---------------------------");
+//                    System.out.println("-------------------- receive message filter remove node ---------------------------");
                     networkService.removeNode(node.getId());
                 }
             }

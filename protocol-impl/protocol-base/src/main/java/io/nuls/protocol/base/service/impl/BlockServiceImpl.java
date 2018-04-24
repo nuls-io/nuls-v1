@@ -144,8 +144,8 @@ public class BlockServiceImpl implements BlockService {
             tx.setBlockHeight(block.getHeader().getHeight());
             try {
                 tx.verifyWithException();
-                commitedList.add(tx);
                 ledgerService.commitTx(tx, block);
+                commitedList.add(tx);
             } catch (Exception e) {
                 Log.error(e);
                 this.rollback(commitedList);
@@ -268,5 +268,10 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public List<BlockHeaderPo> getBlockHeaderListByRound(long startRoundIndex, long endRoundIndex) {
         return this.blockStorageService.getBlockHeaderListByRound(startRoundIndex, endRoundIndex);
+    }
+
+    @Override
+    public long getPackingCount(String packingAddress, long roundStart, long roundEnd) {
+        return this.blockStorageService.getPackingCount(packingAddress,roundStart,roundEnd);
     }
 }
