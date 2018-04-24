@@ -79,8 +79,6 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
                 tx = temporaryCacheManager.getTx(hashHex);
             }
             if (null == tx) {
-                Log.error("get tx not found : " + hashHex + ", from : " + fromId);
-                BlockLog.debug("get tx not found : " + hashHex + ", from : " + fromId);
                return;
             }
             txMap.put(tx.getHash().getDigestHex(), tx);
@@ -88,10 +86,6 @@ public class TxGroupHandler extends AbstractEventHandler<TxGroupEvent> {
 
         Block block = ConsensusTool.assemblyBlock(header, txMap, smallBlock.getTxHashList());
 
-        BlockLog.debug("get tx complete of block : " + block.getHeader().getHeight() + " , " + block.getHeader().getHash() + ", from : " + fromId);
-        Log.debug("get tx complete of block : " + block.getHeader().getHeight() + " , " + block.getHeader().getHash() + ", from : " + fromId);
-
-//        boolean needForward = blockManager.addBlock(block, true, fromId);
        consensusService.newBlock(block, networkService.getNode(fromId));
 
         AssembledBlockNotice notice = new AssembledBlockNotice();

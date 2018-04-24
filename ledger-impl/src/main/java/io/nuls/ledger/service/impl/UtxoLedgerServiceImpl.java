@@ -524,8 +524,19 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 //            return;
 //        }
         List<TransactionService> serviceList = getServiceList(tx.getClass());
-        for (TransactionService service : serviceList) {
-            service.onCommit(tx, block);
+        List<TransactionService> commitedServiceList = new ArrayList<>();
+        try {
+            for (TransactionService service : serviceList) {
+                service.onCommit(tx, block);
+                commitedServiceList.add(service);
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            for (int i = commitedServiceList.size() - 1; i >= 0; i--) {
+                TransactionService service = commitedServiceList.get(i);
+                service.onRollback(tx, block);
+            }
+            throw e;
         }
         tx.setStatus(TxStatusEnum.CONFIRMED);
     }
@@ -538,12 +549,14 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
         List<TransactionService> serviceList = getServiceList(tx.getClass());
         ValidateResult result = null;
+
         for (TransactionService service : serviceList) {
             result = service.conflictDetect(tx, txList);
             if (result.isFailed()) {
                 break;
             }
         }
+
         return result;
     }
 
