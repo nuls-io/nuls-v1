@@ -117,7 +117,7 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
         PageHelper.orderBy("b.height desc");
         List<BlockHeaderPo> blockList = getMapper().getBlockByAddress(searchable);
         PageInfo<BlockHeaderPo> pageInfo = new PageInfo<>(blockList);
-        Page<BlockHeaderPo> page = new Page<>();
+        Page<BlockHeaderPo> page = new Page<>(pageNumber,pageSize);
         page.setTotal(pageInfo.getTotal());
         page.setList(blockList);
         return page;
@@ -130,8 +130,10 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
         List<BlockHeaderPo> blockList = getMapper().selectList(new Searchable());
         PageInfo<BlockHeaderPo> pageInfo = new PageInfo<>(blockList);
         Page<BlockHeaderPo> page = new Page<>();
-        page.setTotal(pageInfo.getTotal());
         page.setList(blockList);
+        page.setPageNumber(pageNumber);
+        page.setPageSize(pageSize);
+        page.setTotal(pageInfo.getTotal());
         return page;
     }
 
