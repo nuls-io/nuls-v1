@@ -56,7 +56,7 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
             return;
         }
         if(param.getSize()==1){
-           Block block = this.blockService.getBlockFromMyChain(param.getStartHash().getDigestHex());
+           Block block = this.blockService.getBlock(param.getStartHash().getDigestHex());
            if(null==block){
                sendNotFound(param.getStartHash(),fromId);
                return;
@@ -64,12 +64,12 @@ public class GetBlockHandler extends AbstractEventHandler<GetBlockRequest> {
            sendBlock(block,fromId);
            return;
         }
-        Block chainStartBlock = this.blockService.getBlockFromMyChain(param.getStartHash().getDigestHex());
+        Block chainStartBlock = this.blockService.getBlock(param.getStartHash().getDigestHex());
         if(null==chainStartBlock){
             sendNotFound(param.getStartHash(),fromId);
             return;
         }
-        Block chainEndBlock = this.blockService.getBlockFromMyChain(param.getEndHash().getDigestHex());
+        Block chainEndBlock = this.blockService.getBlock(param.getEndHash().getDigestHex());
         if(null==chainEndBlock){
             sendNotFound(param.getEndHash(),fromId);
             return;
