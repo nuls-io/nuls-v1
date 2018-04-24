@@ -1,7 +1,6 @@
-package java.io.nuls.network.module.impl;
+package io.nuls.network.module.base;
 
 import io.nuls.consensus.poc.protocol.service.DownloadService;
-import io.nuls.core.MicroKernelBootstrap;
 import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsException;
@@ -20,7 +19,14 @@ import java.util.Map;
  * @date: 2018/4/23
  */
 public class BootstrapDBCacheTest {
+
+
+
     public static void main(String[] args) {
+        start();
+    }
+
+    public static void start(){
         Thread.currentThread().setName("Nuls");
         try {
             sysStart();
@@ -29,30 +35,29 @@ public class BootstrapDBCacheTest {
             System.exit(1);
         }
     }
-
     private static void sysStart() throws Exception {
         do {
-            MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
-            mk.init();//读配置写死
+            MicroKernelBootstrapTest mk = MicroKernelBootstrapTest.getInstance();
+            mk.init();
             mk.start();
             initModules();
             Thread.sleep(3000);
         } while (false);
-        while (true) {
-            try {
-                //todo 后续启动一个系统监视线程
-                Thread.sleep(20000L);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
-            if (null != NulsContext.getInstance().getBestBlock()) {
-                Log.info("node: " + NulsContext.getServiceBean(NetworkService.class).getAvailableNodes().size()
-                                + "), height:{}, threadCount:{}, consensusStatus: {}, downloadStatus: {}",
-                        NulsContext.getInstance().getBestBlock().getHeader().getHeight(),
-                        Thread.activeCount(), NulsContext.getServiceBean(ConsensusService.class).getConsensusStatus(),
-                        NulsContext.getServiceBean(DownloadService.class).getStatus());
-            }
-        }
+//        while (true) {
+//            try {
+//                //todo 后续启动一个系统监视线程
+//                Thread.sleep(20000L);
+//            } catch (InterruptedException e) {
+//                Log.error(e);
+//            }
+//            if (null != NulsContext.getInstance().getBestBlock()) {
+//                Log.info("node: " + NulsContext.getServiceBean(NetworkService.class).getAvailableNodes().size()
+//                                + "), height:{}, threadCount:{}, consensusStatus: {}, downloadStatus: {}",
+//                        NulsContext.getInstance().getBestBlock().getHeader().getHeight(),
+//                        Thread.activeCount(), NulsContext.getServiceBean(ConsensusService.class).getConsensusStatus(),
+//                        NulsContext.getServiceBean(DownloadService.class).getStatus());
+//            }
+//        }
     }
 
     private static void initModules() {

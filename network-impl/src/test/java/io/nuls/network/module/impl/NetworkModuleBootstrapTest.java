@@ -1,20 +1,30 @@
 package io.nuls.network.module.impl; 
 
-import org.junit.Test; 
+import io.nuls.core.module.BaseModuleBootstrap;
+import io.nuls.network.module.base.BootstrapDBCacheTest;
+import org.junit.Test;
 import org.junit.Before; 
-import org.junit.After; 
+import org.junit.After;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /** 
  * NetworkModuleBootstrap Tester. 
  * 
  * @author Charlie
- * @since 04/23/2018
+ * @since 04/24/2018
  */ 
 public class NetworkModuleBootstrapTest { 
 
+    private NetworkModuleBootstrap networkModuleBootstrap;
     @Before
-    public void before() throws Exception { 
-    
+    public void before() throws Exception {
+        BootstrapDBCacheTest.start();
+        Class clazz = Class.forName("io.nuls.network.module.impl.NetworkModuleBootstrap");
+        BaseModuleBootstrap module = (BaseModuleBootstrap) clazz.newInstance();
+        module.setModuleName("network");
+        networkModuleBootstrap = (NetworkModuleBootstrap)module;
     } 
 
     @After
@@ -29,17 +39,16 @@ public class NetworkModuleBootstrapTest {
      * 
      */ 
     @Test
-    public void testInit() throws Exception { 
-        /*
+    public void testInit() throws Exception {
         try {
-           Method method = NetworkModuleBootstrap.getClass().getMethod("init");
+           Method method = networkModuleBootstrap.getClass().getMethod("init");
            method.setAccessible(true);
-           method.invoke(<Object>, <Parameters>);
+           method.invoke(networkModuleBootstrap);
         } catch(NoSuchMethodException e) {
         } catch(IllegalAccessException e) {
         } catch(InvocationTargetException e) {
         }
-        */
+
         
     }
         
