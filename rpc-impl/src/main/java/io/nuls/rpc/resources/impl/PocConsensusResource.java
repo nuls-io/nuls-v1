@@ -24,6 +24,8 @@
 package io.nuls.rpc.resources.impl;
 
 import io.nuls.account.entity.Address;
+import io.nuls.consensus.poc.protocol.constant.ConsensusStatusEnum;
+import io.nuls.consensus.poc.protocol.model.MeetingRound;
 import io.nuls.consensus.poc.service.PocConsensusService;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.dto.Page;
@@ -390,8 +392,13 @@ public class PocConsensusResource {
             return rpcResult;
         }
         Map<String, Object> statusMap = new HashMap<>();
+        MeetingRound round = this.consensusService.getCurrentRound();
         for (AgentPo po : poList) {
-            statusMap.put(po.getAgentAddress(), po.getStatus());
+            if(null!=round&&round.getMember(po.getAgentAddress())!=null){
+                statusMap.put(po.getAgentAddress(), ConsensusStatusEnum.IN.getCode());
+            }else {
+                statusMap.put(po.getAgentAddress(), ConsensusStatusEnum.WAITING.getCode());
+            }
         }
         return rpcResult.setData(statusMap);
     }

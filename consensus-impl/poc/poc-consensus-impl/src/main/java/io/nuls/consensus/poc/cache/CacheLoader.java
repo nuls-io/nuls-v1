@@ -63,6 +63,10 @@ public class CacheLoader {
 
         Block block = blockService.getLocalBestBlock();
 
+        if(null==block){
+            return new ArrayList<>();
+        }
+
         long bestBlockHeight = block.getHeader().getHeight();
 
         long startHeight = bestBlockHeight - size + 1;
