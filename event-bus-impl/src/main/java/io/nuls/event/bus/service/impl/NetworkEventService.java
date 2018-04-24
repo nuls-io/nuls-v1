@@ -39,7 +39,6 @@ import io.nuls.protocol.event.manager.EventManager;
 public class NetworkEventService {
 
     private static final NetworkEventService INSTANCE = new NetworkEventService();
-    private EventCacheService eventCacheService = EventCacheService.getInstance();
     private final ProcessorManager processorManager;
 
     private NetworkEventService() {
@@ -61,9 +60,7 @@ public class NetworkEventService {
     }
 
     public void publish(BaseEvent event, String nodeId) {
-        eventCacheService.cacheRecievedEventHash(event.getHash().getDigestHex());
         processorManager.offer(new ProcessData(event, nodeId));
-
     }
 
     public String registerEventHandler(Class<? extends BaseEvent> eventClass, AbstractEventHandler<? extends BaseEvent> handler) {

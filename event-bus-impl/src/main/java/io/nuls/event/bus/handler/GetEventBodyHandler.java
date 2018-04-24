@@ -41,7 +41,7 @@ public class GetEventBodyHandler extends AbstractEventHandler<GetEventBodyEvent>
 
     @Override
     public void onEvent(GetEventBodyEvent event, String fromId) {
-        BaseEvent eventBody = eventCacheService.getEvent(event.getEventBody().getDigestHex() );
+        BaseEvent eventBody = eventCacheService.getSendEvent(event.getEventBody().getDigestHex() );
         if (null == eventBody) {
             Log.warn("get event faild,node:" + fromId + ",event:" + event.getEventBody().getDigestHex());
             return;

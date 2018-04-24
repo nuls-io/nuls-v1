@@ -35,22 +35,12 @@ import io.nuls.protocol.context.NulsContext;
  */
 public class CommonDigestHandler extends AbstractEventHandler<CommonDigestEvent> {
 
-    private EventCacheService eventCacheService = EventCacheService.getInstance();
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     @Override
     public void onEvent(CommonDigestEvent event, String fromId) {
-        boolean exist = eventCacheService.isKnown(event.getEventBody().getDigestHex());
-        if (exist) {
-            return;
-        }
         GetEventBodyEvent getEventBodyEvent = new GetEventBodyEvent();
         getEventBodyEvent.setEventBody(event.getEventBody());
-        if (eventCacheService.isKnown(getEventBodyEvent.getHash().getDigestHex())) {
-            return;
-        }
-//        Log.info("get event:" + event.getEventBody() + ", " + fromId);
-        eventCacheService.cacheSendedEvent(getEventBodyEvent);
         eventBroadcaster.sendToNode(getEventBodyEvent, fromId);
     }
 }

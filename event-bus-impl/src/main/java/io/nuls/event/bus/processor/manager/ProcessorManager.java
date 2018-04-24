@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,15 +23,19 @@
  */
 package io.nuls.event.bus.processor.manager;
 
+import com.lmax.disruptor.EventHandler;
+import com.lmax.disruptor.WorkHandler;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.handler.intf.NulsEventHandler;
+import io.nuls.event.bus.processor.EventCheckingProcessor;
 import io.nuls.event.bus.processor.thread.EventDispatchThread;
 import io.nuls.event.bus.processor.thread.NulsEventCall;
 import io.nuls.event.bus.utils.disruptor.DisruptorEvent;
@@ -60,15 +64,17 @@ public class ProcessorManager<E extends io.nuls.protocol.event.base.BaseEvent, H
 
     public final void init() {
 
-        pool = TaskManager.createThreadPool(EventBusConstant.THREAD_COUNT,0,
+        pool = TaskManager.createThreadPool(EventBusConstant.THREAD_COUNT, 0,
                 new NulsThreadFactory(NulsConstant.MODULE_ID_EVENT_BUS, EventBusConstant.THREAD_POOL_NAME));
         disruptorService.createDisruptor(disruptorName, EventBusConstant.DEFAULT_RING_BUFFER_SIZE);
+
         List<EventDispatchThread> handlerList = new ArrayList<>();
         for (int i = 0; i < EventBusConstant.THREAD_COUNT; i++) {
             EventDispatchThread handler = new EventDispatchThread(this);
             handlerList.add(handler);
         }
-        disruptorService.handleEventsWithWorkerPool(disruptorName, handlerList.toArray(new EventDispatchThread[handlerList.size()]));
+        WorkHandler[] arrayHandler = handlerList.toArray(new EventDispatchThread[handlerList.size()]);
+        disruptorService.handleEventWith(disruptorName,new EventCheckingProcessor()).thenHandleEventsWithWorkerPool( arrayHandler);
         disruptorService.start(disruptorName);
     }
 
@@ -131,7 +137,7 @@ public class ProcessorManager<E extends io.nuls.protocol.event.base.BaseEvent, H
                 set.add(handler);
             }
         } while (false);
-        if (!clazz .equals(BaseEvent.class)) {
+        if (!clazz.equals(BaseEvent.class)) {
             set.addAll(getHandlerList((Class<E>) clazz.getSuperclass()));
         }
         return set;
