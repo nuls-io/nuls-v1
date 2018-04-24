@@ -659,9 +659,21 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public Page<UtxoOutput> getLockUtxo(String address, Integer pageNumber, Integer pageSize) {
         List<UtxoOutput> lockOutputs = new ArrayList<>();
+        long count = outputDataService.getLockUtxoCount(address, TimeService.currentTimeMillis(), NulsContext.getInstance().getBestHeight());
+        List<AbstractCoinTransaction> localTxs = UtxoCoinManager.getInstance().getLocalUnConfirmTxs();
+        for (int i = localTxs.size() - 1; i >= 0; i--) {
+            AbstractCoinTransaction tx = localTxs.get(i);
+            UtxoData utxoData = (UtxoData) tx.getCoinData();
+            for (int j = utxoData.getOutputs().size() - 1; j >= 0; j--) {
+                UtxoOutput output = utxoData.getOutputs().get(j);
+                if (output.isLocked() && NulsContext.LOCAL_ADDRESS_LIST.contains(output.getAddress())) {
+                    output.setCreateTime(tx.getTime());
+                    output.setTxType(tx.getType());
+                    lockOutputs.add(output);
+                }
+            }
+        }
 
-        long count = outputDataService.getLockUtxoCount(address, TimeService.currentTimeMillis(), NulsContext.getInstance().getBestHeight(),
-                NulsContext.getInstance().getGenesisBlock().getHeader().getTime());
         int start = (pageNumber - 1) * pageSize;
         if (lockOutputs.size() >= start + pageSize) {
             lockOutputs = lockOutputs.subList(start, start + pageSize);
@@ -676,8 +688,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         } else {
             start = start - lockOutputs.size();
         }
-        List<UtxoOutputPo> poList = outputDataService.getLockUtxo(address, TimeService.currentTimeMillis(), NulsContext.getInstance().getBestHeight(),
-                NulsContext.getInstance().getGenesisBlock().getHeader().getTime(), start, pageSize);
+        List<UtxoOutputPo> poList = outputDataService.getLockUtxo(address, TimeService.currentTimeMillis(), NulsContext.getInstance().getBestHeight(), start, pageSize);
         for (UtxoOutputPo po : poList) {
             lockOutputs.add(UtxoTransferTool.toOutput(po));
         }

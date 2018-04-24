@@ -161,7 +161,7 @@ public class UtxoTransferTool {
     }
 
     public static TransactionLocalPo toLocalTransactionPojo(Transaction tx) throws IOException {
-        if(tx == null || tx.getHash() == null) {
+        if (tx == null || tx.getHash() == null) {
             return null;
         }
         TransactionLocalPo po = new TransactionLocalPo();

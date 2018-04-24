@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,6 +25,7 @@ package io.nuls.db.dao.impl.mybatis;
 
 import com.github.pagehelper.PageHelper;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
@@ -96,15 +97,14 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     }
 
     @Override
-    public long getLockUtxoCount(String address, Long beginTime, Long bestHeight, Long genesisTime) {
+    public long getLockUtxoCount(String address, Long beginTime, Long bestHeight) {
         Searchable searchable = new Searchable();
-
         Condition condition;
         condition = new Condition("lock_time", SearchOperator.gt, bestHeight);
         condition.setPrefix("((");
         searchable.addCondition(condition);
 
-        condition = new Condition("lock_time", SearchOperator.lt, genesisTime);
+        condition = new Condition("lock_time", SearchOperator.lt, NulsConstant.BlOCKHEIGHT_TIME_DIVIDE);
         condition.setEndfix(")");
         searchable.addCondition(condition);
 
@@ -120,8 +120,7 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
     }
 
     @Override
-    public List<UtxoOutputPo> getLockUtxo(String address, Long beginTime,
-                                          Long bestHeight, Long genesisTime,
+    public List<UtxoOutputPo> getLockUtxo(String address, Long beginTime, Long bestHeight,
                                           Integer start, Integer limit) {
         Searchable searchable = new Searchable();
         Condition condition;
@@ -129,7 +128,7 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
         condition.setPrefix("((");
         searchable.addCondition(condition);
 
-        condition = new Condition("lock_time", SearchOperator.lt, genesisTime);
+        condition = new Condition("lock_time", SearchOperator.lt, NulsConstant.BlOCKHEIGHT_TIME_DIVIDE);
         condition.setEndfix(")");
         searchable.addCondition(condition);
 
