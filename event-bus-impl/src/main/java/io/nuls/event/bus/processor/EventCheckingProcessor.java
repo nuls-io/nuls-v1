@@ -23,14 +23,14 @@ public class EventCheckingProcessor<E extends BaseEvent> implements EventHandler
         if (null == event || event.getHeader() == null) {
             return;
         }
-        if (event.getHeader().getEventType() != EventConstant.EVENT_TYPE_COMMON_EVENT_HASH_EVENT ||
-                event.getHeader().getModuleId() != NulsConstant.MODULE_ID_EVENT_BUS) {
+        if (event.getHeader().getEventType() == EventConstant.EVENT_TYPE_COMMON_EVENT_HASH_EVENT &&
+                event.getHeader().getModuleId() == NulsConstant.MODULE_ID_EVENT_BUS) {
             return;
         }
-        CommonDigestEvent commonDigestEvent = (CommonDigestEvent) event;
-
-        if (eventCacheService.kownTheEvent(commonDigestEvent.getEventBody().getDigestHex())) {
+        String eventHash = event.getHash().getDigestHex();
+        if (eventCacheService.kownTheEvent(eventHash)) {
             processDataDisruptorEvent.setStoped(true);
         }
+        eventCacheService.cacheRecievedEventHash(eventHash);
     }
 }
