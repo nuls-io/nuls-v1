@@ -351,12 +351,12 @@ public class RoundManager {
 
         BlockRoundData roundData = new BlockRoundData(blockHeader.getExtend());
 
-        long roundStart = roundData.getRoundIndex() - PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT + 1;
+        long roundStart = roundData.getRoundIndex() - PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT ;
         if (roundStart < 0) {
             roundStart = 0;
         }
-        long blockCount = getBlockCountByAddress(member.getPackingAddress(), roundStart, roundData.getRoundIndex(),blockHeader.getHeight());
-        long sumRoundVal = getPunishCountByAddress(member.getAgentAddress(), roundStart, roundData.getRoundIndex(), blockHeader.getHeight(), PunishType.YELLOW.getCode());
+        long blockCount = getBlockCountByAddress(member.getPackingAddress(), roundStart, roundData.getRoundIndex()-1);
+        long sumRoundVal = getPunishCountByAddress(member.getAgentAddress(), roundStart, roundData.getRoundIndex()-1, PunishType.YELLOW.getCode());
         double ability = DoubleUtils.div(blockCount, PocConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT);
 
         double penalty = DoubleUtils.div(DoubleUtils.mul(PocConsensusConstant.CREDIT_MAGIC_NUM, sumRoundVal),
@@ -368,7 +368,7 @@ public class RoundManager {
         return ability - penalty;
     }
 
-    private long getPunishCountByAddress(String address, long roundStart, long roundEnd, long maxHeight, int code) {
+    private long getPunishCountByAddress(String address, long roundStart, long roundEnd, int code) {
         long count = 0;
         List<PunishLogPo> punishList = chain.getYellowPunishList();
 
@@ -385,9 +385,6 @@ public class RoundManager {
             if (punish.getRoundIndex() < roundStart) {
                 break;
             }
-            if (punish.getHeight() > maxHeight) {
-                continue;
-            }
             if (punish.getAddress().equals(address)) {
                 count++;
             }
@@ -395,7 +392,7 @@ public class RoundManager {
         return count;
     }
 
-    private long getBlockCountByAddress(String packingAddress, long roundStart, long roundEnd,long maxHeight) {
+    private long getBlockCountByAddress(String packingAddress, long roundStart, long roundEnd) {
         long count = 0;
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
 
@@ -408,9 +405,6 @@ public class RoundManager {
             }
             if (roundData.getRoundIndex() < roundStart) {
                 break;
-            }
-            if (blockHeader.getHeight() > maxHeight) {
-                continue;
             }
             if (Address.fromHashs(blockHeader.getPackingAddress()).getBase58().equals(packingAddress)) {
                 count++;
