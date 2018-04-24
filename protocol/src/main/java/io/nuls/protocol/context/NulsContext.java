@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Niels
@@ -64,7 +65,7 @@ public class NulsContext {
     private Block genesisBlock;
     private Long netBestBlockHeight = 0L;
 
-    public static Set<String> LOCAL_ADDRESS_LIST = new HashSet<>();
+    public static Set<String> LOCAL_ADDRESS_LIST = ConcurrentHashMap.newKeySet();
 
 
     public Block getGenesisBlock() {
