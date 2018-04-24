@@ -194,8 +194,8 @@ public class ConsensusProcess {
 
     private boolean waitReceiveNewestBlock(MeetingMember self, MeetingRound round) {
 
-        long time = TimeService.currentTimeMillis();
         long timeout = ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS / 2;
+        long endTime = self.getPackStartTime() + timeout;
 
         boolean hasReceiveNewestBlock = false;
 
@@ -203,14 +203,14 @@ public class ConsensusProcess {
             while (!hasReceiveNewestBlock) {
                 hasReceiveNewestBlock = hasReceiveNewestBlock(self, round);
                 if (hasReceiveNewestBlock) {
-                    long sleepTime = time + timeout - TimeService.currentTimeMillis();
+                    long sleepTime = endTime - TimeService.currentTimeMillis();
                     if (sleepTime > 0) {
                         Thread.sleep(sleepTime);
                     }
                     break;
                 }
                 Thread.sleep(500L);
-                if (TimeService.currentTimeMillis() - time >= timeout) {
+                if (TimeService.currentTimeMillis() >= endTime) {
                     break;
                 }
             }

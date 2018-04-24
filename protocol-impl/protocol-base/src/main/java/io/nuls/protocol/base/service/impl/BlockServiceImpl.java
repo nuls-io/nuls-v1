@@ -147,7 +147,6 @@ public class BlockServiceImpl implements BlockService {
                 ledgerService.commitTx(tx, block);
                 commitedList.add(tx);
             } catch (Exception e) {
-                Log.error(e);
                 this.rollback(commitedList);
                 throw new NulsRuntimeException(e);
             }

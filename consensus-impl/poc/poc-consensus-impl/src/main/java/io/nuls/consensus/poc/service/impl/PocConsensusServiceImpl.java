@@ -443,10 +443,8 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         Consensus<Agent> agent = this.getAgentByAddress(address);
         List<Consensus<Deposit>> depositList = new ArrayList<>();
         long totalDeposit = 0;
-        if (null != agent) {
-            depositList = this.getEffectiveDepositList(null, agent.getHexHash(), NulsContext.getInstance().getBestHeight(), null);
-            totalDeposit = agent.getExtend().getDeposit().getValue();
-        }
+        depositList = this.getEffectiveDepositList(address, null, NulsContext.getInstance().getBestHeight(), null);
+//        totalDeposit = agent.getExtend().getDeposit().getValue();
         Set<String> joinedAgent = new HashSet<>();
         for (Consensus<Deposit> cd : depositList) {
             totalDeposit += cd.getExtend().getDeposit().getValue();
