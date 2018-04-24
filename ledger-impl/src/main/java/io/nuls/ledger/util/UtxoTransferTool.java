@@ -24,6 +24,7 @@
 package io.nuls.ledger.util;
 
 import io.nuls.core.cfg.NulsConfig;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
@@ -46,6 +47,7 @@ import io.nuls.protocol.utils.TransactionManager;
 import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -214,7 +216,7 @@ public class UtxoTransferTool {
         return tx;
     }
 
-    public static Transaction toTransaction(TransactionLocalPo po) throws Exception {
+    public static Transaction toTransaction(TransactionLocalPo po) throws NulsException {
         Transaction tx = TransactionManager.getInstanceByType(po.getType());
         tx.setHash(new NulsDigestData(Hex.decode(po.getHash())));
         tx.setTime(po.getCreateTime());
@@ -225,7 +227,11 @@ public class UtxoTransferTool {
         tx.setSize(po.getSize());
         tx.setScriptSig(po.getScriptSig());
         if (StringUtils.isNotBlank(po.getRemark())) {
-            tx.setRemark(po.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING));
+            try {
+                tx.setRemark(po.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING));
+            } catch (UnsupportedEncodingException e) {
+                throw new NulsException(e);
+            }
         }
         if (null != po.getTxData() && po.getTxData().length > 0) {
             tx.setTxData(tx.parseTxData(new NulsByteBuffer(po.getTxData())));

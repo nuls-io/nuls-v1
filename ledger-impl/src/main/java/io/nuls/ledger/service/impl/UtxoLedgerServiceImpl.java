@@ -319,7 +319,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         TransferTransaction tx = null;
         try {
             tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
-            ValidateResult result = tx.verify();
+            ValidateResult result = this.verifyTx(tx, this.getWaitingTxList());
             if (result.isFailed()) {
                 throw new NulsException(result.getErrorCode());
             }
@@ -430,17 +430,17 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
         TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);
         localTxDao.save(localPo);
-        if (tx instanceof AbstractCoinTransaction) {
-            AbstractCoinTransaction abstractTx = (AbstractCoinTransaction) tx;
-            UtxoData utxoData = (UtxoData) abstractTx.getCoinData();
-
-            for (UtxoOutput output : utxoData.getOutputs()) {
-                if (output.isUsable() && NulsContext.LOCAL_ADDRESS_LIST.contains(output.getAddress())) {
-                    output.setTxHash(tx.getHash());
-                    ledgerCacheService.putUtxo(output.getKey(), output, false);
-                }
-            }
-        }
+//        if (tx instanceof AbstractCoinTransaction) {
+//            AbstractCoinTransaction abstractTx = (AbstractCoinTransaction) tx;
+//            UtxoData utxoData = (UtxoData) abstractTx.getCoinData();
+//
+//            for (UtxoOutput output : utxoData.getOutputs()) {
+//                if (output.isUsable() && NulsContext.LOCAL_ADDRESS_LIST.contains(output.getAddress())) {
+//                    output.setTxHash(tx.getHash());
+//                    ledgerCacheService.putUtxo(output.getKey(), output, false);
+//                }
+//            }
+//        }
         return true;
     }
 
@@ -714,7 +714,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public List<Transaction> getWaitingTxList() throws Exception {
+    public List<Transaction> getWaitingTxList() throws NulsException {
         List<TransactionLocalPo> poList = localTxDao.getUnConfirmTxs();
         List<Transaction> txList = new ArrayList<>();
         for (TransactionLocalPo po : poList) {
@@ -728,5 +728,28 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     public void deleteLocalTx(String txHash) {
         // todo auto-generated method stub(niels)
         //删除本地未打包交易，如果已打包 ，则终止
+    }
+
+    @Override
+    public ValidateResult verifyTx(Transaction tx, List<Transaction> txList) {
+        ValidateResult result = tx.verify();
+        if (result.isFailed() && result.getErrorCode() == ErrorCode.ORPHAN_TX) {
+            AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
+            result = coinTx.getCoinDataProvider().verifyCoinData(coinTx, txList);
+            if (result.isSuccess()) {
+                coinTx.setSkipInputValidator(true);
+                result = coinTx.verify();
+                coinTx.setSkipInputValidator(false);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void verifyTxWithException(Transaction tx, List<Transaction> txList) {
+        ValidateResult result = this.verifyTx(tx, txList);
+        if (result.isFailed()) {
+            throw new NulsRuntimeException(result.getErrorCode(), result.getMessage());
+        }
     }
 }

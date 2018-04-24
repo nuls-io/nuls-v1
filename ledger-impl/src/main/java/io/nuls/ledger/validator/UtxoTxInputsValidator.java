@@ -35,6 +35,7 @@ import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.constant.TxStatusEnum;
+import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.script.P2PKHScriptSig;
 
 import java.util.Arrays;

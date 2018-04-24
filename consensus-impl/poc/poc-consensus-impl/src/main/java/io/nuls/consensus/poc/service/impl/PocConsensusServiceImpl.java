@@ -226,7 +226,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         tx.setTxData(con);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
-        tx.verifyWithException();
+        this.ledgerService.verifyTxWithException(tx, this.ledgerService.getWaitingTxList());
         event.setEventBody(tx);
         this.ledgerService.saveLocalTx(tx);
         boolean b = eventBroadcaster.publishToLocal(event);
@@ -269,7 +269,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         tx.setTxData(ca);
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
-        tx.verifyWithException();
+        this.ledgerService.verifyTxWithException(tx,this.ledgerService.getWaitingTxList());
         event.setEventBody(tx);
         this.ledgerService.saveLocalTx(tx);
         boolean b = eventBroadcaster.publishToLocal(event);
@@ -329,7 +329,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
                 throw new NulsRuntimeException(ErrorCode.HASH_ERROR, e);
             }
             tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
-            tx.verifyWithException();
+            this.ledgerService.verifyTxWithException(tx,this.ledgerService.getWaitingTxList());
             event.setEventBody(tx);
             this.ledgerService.saveLocalTx(tx);
             eventBroadcaster.publishToLocal(event);
@@ -349,7 +349,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
             throw new NulsRuntimeException(ErrorCode.HASH_ERROR, e);
         }
         tx.setScriptSig(accountService.createP2PKHScriptSigFromDigest(tx.getHash(), account, password).serialize());
-        tx.verifyWithException();
+        this.ledgerService.verifyTxWithException(tx,this.ledgerService.getWaitingTxList());
         event.setEventBody(tx);
         this.ledgerService.saveLocalTx(tx);
         eventBroadcaster.publishToLocal(event);

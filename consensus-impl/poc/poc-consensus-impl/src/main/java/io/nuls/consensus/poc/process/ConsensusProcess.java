@@ -323,16 +323,7 @@ public class ConsensusProcess {
                 Log.debug(result.getMessage());
                 continue;
             }
-            result = tx.verify();
-            if(result.isFailed()&&result.getErrorCode()== ErrorCode.ORPHAN_TX){
-                AbstractCoinTransaction coinTx = (AbstractCoinTransaction) tx;
-                result = coinTx.getCoinDataProvider().verifyCoinData(coinTx,packingTxList);
-                if(result.isSuccess()){
-                    coinTx.setSkipInputValidator(true);
-                    result = coinTx.verify();
-                    coinTx.setSkipInputValidator(false);
-                }
-            }
+            result = this.ledgerService.verifyTx(tx,packingTxList);
             if (result.isFailed()) {
                 Log.debug(result.getMessage());
                 continue;

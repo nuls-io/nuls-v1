@@ -573,12 +573,13 @@ public class AccountServiceImpl implements AccountService {
             AliasTransaction aliasTx = new AliasTransaction(coinData, password, new Alias(address, alias));
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setScriptSig(createP2PKHScriptSigFromDigest(aliasTx.getHash(), account, password).serialize());
-            ValidateResult validate = aliasTx.verify();
+            ValidateResult validate = this.ledgerService.verifyTx(aliasTx,this.ledgerService.getWaitingTxList());
             if (validate.isFailed()) {
                 return new Result(false, validate.getMessage());
             }
 
             event.setEventBody(aliasTx);
+            this.ledgerService.saveLocalTx(aliasTx);
             boolean b  = eventBroadcaster.publishToLocal(event);
 //            if (nodeList.size() > 0) {
 //                SetAliasNotice notice = new SetAliasNotice();
