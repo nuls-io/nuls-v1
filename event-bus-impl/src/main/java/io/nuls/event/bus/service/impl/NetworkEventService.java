@@ -42,7 +42,7 @@ public class NetworkEventService {
     private final ProcessorManager processorManager;
 
     private NetworkEventService() {
-        this.processorManager = new ProcessorManager(EventBusConstant.DISRUPTOR_NAME_NETWORK);
+        this.processorManager = new ProcessorManager(EventBusConstant.DISRUPTOR_NAME_NETWORK,true);
     }
 
     public static NetworkEventService getInstance() {

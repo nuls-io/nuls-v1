@@ -23,14 +23,12 @@
  */
 package io.nuls.event.bus.processor.manager;
 
-import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.WorkHandler;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.thread.manager.NulsThreadFactory;
 import io.nuls.core.thread.manager.TaskManager;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.constant.EventBusConstant;
@@ -57,12 +55,12 @@ public class ProcessorManager<E extends io.nuls.protocol.event.base.BaseEvent, H
     private ExecutorService pool;
     private String disruptorName;
 
-    public ProcessorManager(String disruptorName) {
+    public ProcessorManager(String disruptorName, boolean eventChecking) {
         this.disruptorName = disruptorName;
-        this.init();
+        this.init(eventChecking);
     }
 
-    public final void init() {
+    public final void init(boolean eventChecking) {
 
         pool = TaskManager.createThreadPool(EventBusConstant.THREAD_COUNT, 0,
                 new NulsThreadFactory(NulsConstant.MODULE_ID_EVENT_BUS, EventBusConstant.THREAD_POOL_NAME));
@@ -74,7 +72,13 @@ public class ProcessorManager<E extends io.nuls.protocol.event.base.BaseEvent, H
             handlerList.add(handler);
         }
         WorkHandler[] arrayHandler = handlerList.toArray(new EventDispatchThread[handlerList.size()]);
-        disruptorService.handleEventWith(disruptorName,new EventCheckingProcessor()).thenHandleEventsWithWorkerPool( arrayHandler);
+        if (eventChecking) {
+            disruptorService.handleEventWith(disruptorName, new EventCheckingProcessor()).thenHandleEventsWithWorkerPool(arrayHandler);
+        } else {
+            disruptorService.handleEventsWithWorkerPool(disruptorName, arrayHandler);
+        }
+
+
         disruptorService.start(disruptorName);
     }
 

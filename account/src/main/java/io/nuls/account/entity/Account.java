@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,6 +29,7 @@ import io.nuls.core.crypto.*;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.intf.NulsCloneable;
 import io.nuls.core.utils.crypto.Hex;
+import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.protocol.model.BaseNulsData;
@@ -95,7 +96,7 @@ public class Account extends BaseNulsData implements NulsCloneable {
     }
 
     public boolean isEncrypted() {
-        if(getEncryptedPriKey()!=null && getEncryptedPriKey().length>0) {
+        if (getEncryptedPriKey() != null && getEncryptedPriKey().length > 0) {
             return true;
         }
         return false;
@@ -103,31 +104,31 @@ public class Account extends BaseNulsData implements NulsCloneable {
 
 
     public void lock() {
-        if(!isEncrypted()){
+        if (!isEncrypted()) {
             return;
         }
 
-        if(this.getEcKey().getEncryptedPrivateKey()!= null) {
+        if (this.getEcKey().getEncryptedPrivateKey() != null) {
             ECKey result = ECKey.fromEncrypted(getEcKey().getEncryptedPrivateKey(), getPubKey());
             this.setPriKey(new byte[0]);
             this.setEcKey(result);
         }
     }
 
-    public byte[] getHash160(){
+    public byte[] getHash160() {
         return this.getAddress().getHash160();
     }
 
     public boolean unlock(String password) throws NulsException {
         decrypt(password);
-        if(isLocked()){
+        if (isLocked()) {
             return false;
         }
         return true;
     }
 
-    public boolean isLocked(){
-        return (this.getPriKey()== null) || (this.getPriKey().length==0);
+    public boolean isLocked() {
+        return (this.getPriKey() == null) || (this.getPriKey().length == 0);
     }
 
     public boolean validatePassword(String password) {
@@ -137,22 +138,22 @@ public class Account extends BaseNulsData implements NulsCloneable {
     /**
      * @param password
      */
-    public void encrypt(String password) throws NulsException{
-        encrypt( password, false);
+    public void encrypt(String password) throws NulsException {
+        encrypt(password, false);
     }
 
     /**
      * @param password
      */
-    public void encrypt(String password,boolean isForce) throws NulsException{
-        if(this.isEncrypted() && !isForce){
-            if(!unlock(password)) {
+    public void encrypt(String password, boolean isForce) throws NulsException {
+        if (this.isEncrypted() && !isForce) {
+            if (!unlock(password)) {
                 throw new NulsException(ErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED);
             }
         }
         ECKey eckey = this.getEcKey();
-        byte [] privKeyBytes = eckey.getPrivKeyBytes();
-        EncryptedData encryptedPrivateKey = AESEncrypt.encrypt(privKeyBytes,EncryptedData.DEFAULT_IV,new KeyParameter(Sha256Hash.hash(password.getBytes())));
+        byte[] privKeyBytes = eckey.getPrivKeyBytes();
+        EncryptedData encryptedPrivateKey = AESEncrypt.encrypt(privKeyBytes, EncryptedData.DEFAULT_IV, new KeyParameter(Sha256Hash.hash(password.getBytes())));
         eckey.setEncryptedPrivateKey(encryptedPrivateKey);
         ECKey result = ECKey.fromEncrypted(encryptedPrivateKey, getPubKey());
         this.setPriKey(new byte[0]);
@@ -161,20 +162,20 @@ public class Account extends BaseNulsData implements NulsCloneable {
 
     }
 
-    public boolean decrypt(String password) throws NulsException{
+    public boolean decrypt(String password) throws NulsException {
         try {
-            byte[] unencryptedPrivateKey = AESEncrypt.decrypt(this.getEncryptedPriKey(),password);
+            byte[] unencryptedPrivateKey = AESEncrypt.decrypt(this.getEncryptedPriKey(), password);
             BigInteger newPriv = new BigInteger(1, unencryptedPrivateKey);
             ECKey key = ECKey.fromPrivate(newPriv);
 
-        //todo  pub key compress?
+            //todo  pub key compress?
             if (!Arrays.equals(key.getPubKey(), getPubKey())) {
                 return false;
             }
             key.setEncryptedPrivateKey(new EncryptedData(this.getEncryptedPriKey()));
             this.setPriKey(key.getPrivKeyBytes());
             this.setEcKey(key);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new NulsException(ErrorCode.PASSWORD_IS_WRONG);
         }
         return true;
@@ -182,55 +183,32 @@ public class Account extends BaseNulsData implements NulsCloneable {
 
     @Override
     public int size() {
-        int s = 0;
-
-        if (StringUtils.isNotBlank(alias)) {
-            try {
-                s += alias.getBytes(NulsConfig.DEFAULT_ENCODING).length + 1;
-            } catch (UnsupportedEncodingException e) {
-                Log.error(e);
-            }
-        } else {
-            s++;
-        }
-        try {
-            s += address.getBase58().getBytes(NulsConfig.DEFAULT_ENCODING).length;
-        } catch (UnsupportedEncodingException e) {
-            Log.error(e);
-        }
-        if (null != encryptedPriKey) {
-            s += encryptedPriKey.length + 1;
-        } else {
-            s++;
-        }
-        s += 1;//status
-
-        s += pubKey.length + 1;
-        if (null != extend) {
-            s += extend.length + 1;
-        } else {
-            s++;
-        }
+        int s = Utils.sizeOfBytes(address.getHash());
+        s += Utils.sizeOfString(alias);
+        s += Utils.sizeOfBytes(encryptedPriKey);
+        s += Utils.sizeOfBytes(pubKey);
+        s += 1;
+        s += Utils.sizeOfBytes(extend);
         return s;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(alias);
         stream.writeString(address.getBase58());
+        stream.writeString(alias);
         stream.writeBytesWithLength(encryptedPriKey);
         stream.writeBytesWithLength(pubKey);
-        stream.write(new VarInt(status).encode());
+        stream.write(status);
         stream.writeBytesWithLength(extend);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        address = Address.fromHashs(byteBuffer.readByLengthByte());
         alias = new String(byteBuffer.readByLengthByte());
-        address = new Address(new String(byteBuffer.readByLengthByte()));
         encryptedPriKey = byteBuffer.readByLengthByte();
         pubKey = byteBuffer.readByLengthByte();
-        status = (int)(byteBuffer.readVarInt());
+        status = (int) (byteBuffer.readByte());
         extend = byteBuffer.readByLengthByte();
     }
 
@@ -340,20 +318,20 @@ public class Account extends BaseNulsData implements NulsCloneable {
 //        System.out.println("hash160_1: "+ Hex.encode(Utils.sha256hash160(testAccount.getPubKey())));
 //    }
 
-    public static void  showAccount(Account account){
+    public static void showAccount(Account account) {
         System.out.println("---- account info ----");
-        System.out.println("Address： "+ account.getAddress().getBase58());
-        System.out.println("Public key： "+ Hex.encode(account.getPubKey()));
-        System.out.println("Private key："+ Hex.encode(account.getPriKey()));
-        System.out.println("Encrypted pri key： "+ Hex.encode(account.getEncryptedPriKey()));
+        System.out.println("Address： " + account.getAddress().getBase58());
+        System.out.println("Public key： " + Hex.encode(account.getPubKey()));
+        System.out.println("Private key：" + Hex.encode(account.getPriKey()));
+        System.out.println("Encrypted pri key： " + Hex.encode(account.getEncryptedPriKey()));
         System.out.println("key object：");
-        System.out.println("\tpublic key："+ account.getEcKey().getPublicKeyAsHex());
+        System.out.println("\tpublic key：" + account.getEcKey().getPublicKeyAsHex());
         try {
             System.out.println("\tprivate key：" + Hex.encode(account.getEcKey().getPrivKeyBytes()));
-        }catch (ECKey.MissingPrivateKeyException e){
-            System.out.println("\tprivate key：is NULL" );
+        } catch (ECKey.MissingPrivateKeyException e) {
+            System.out.println("\tprivate key：is NULL");
         }
-        System.out.println("\tencrypted pkey： "+ account.getEcKey().getEncryptedPrivateKey());
+        System.out.println("\tencrypted pkey： " + account.getEcKey().getEncryptedPrivateKey());
         System.out.println("---- account info end----");
     }
 }

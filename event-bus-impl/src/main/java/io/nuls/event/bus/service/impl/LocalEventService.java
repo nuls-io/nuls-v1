@@ -40,7 +40,7 @@ public class LocalEventService {
     private final ProcessorManager processorManager;
 
     private LocalEventService() {
-        this.processorManager = new ProcessorManager(EventBusConstant.DISRUPTOR_NAME_LOCAL);
+        this.processorManager = new ProcessorManager(EventBusConstant.DISRUPTOR_NAME_LOCAL,false);
     }
 
     public static LocalEventService getInstance() {
