@@ -49,6 +49,10 @@ public class EventDispatchThread extends BaseThread implements WorkHandler<Disru
             Log.debug("did sth ....");
             return;
         }
-        processorManager.executeHandlers(event.getData());
+        try {
+            processorManager.executeHandlers(event.getData());
+        } catch (Exception e) {
+            Log.error(e);
+        }
     }
 }
