@@ -152,6 +152,10 @@ public class DownloadProcessor extends Thread {
     }
 
     private boolean checkIsNewest(NetworkNewestBlockInfos downloadInfos) {
+
+        // TODO delete after test
+        if(1==1)return true;
+
         long downloadBestHeight = downloadInfos.getNetBestHeight();
         long time = TimeService.currentTimeMillis();
         long timeout = 60*1000L;
