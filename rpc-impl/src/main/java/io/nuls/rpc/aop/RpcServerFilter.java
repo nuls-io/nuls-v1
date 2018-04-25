@@ -98,6 +98,6 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
 //        Log.debug(request.getRemotePort());
 //        Log.debug(request.getRemoteUser());
         //todo 临时处理
-        return true;
+        return false;
     }
 }
