@@ -87,6 +87,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     private EventBroadcaster eventBroadcaster;
     @Autowired
     private BlockHeaderService blockHeaderDao;
+    @Autowired
+    private TxAccountRelationDataService relationDataService;
 
     private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
@@ -175,6 +177,28 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         List<TransactionLocalPo> poList = localTxDao.getTxs(blockHeight, address, txType, pageNumber, pageSize);
         for (TransactionLocalPo po : poList) {
             txList.add(UtxoTransferTool.toTransaction(po));
+        }
+
+        List<Transaction> localTx = getWaitingTxList();
+        Map<String, UtxoOutput> outputMap = new HashMap<>();
+        for (Transaction tx : localTx) {
+            AbstractCoinTransaction transaction = (AbstractCoinTransaction) tx;
+            UtxoData utxoData = (UtxoData) transaction.getCoinData();
+
+            for (UtxoOutput output : utxoData.getOutputs()) {
+                outputMap.put(output.getKey(), output);
+            }
+        }
+        for (Transaction tx : txList) {
+            AbstractCoinTransaction transaction = (AbstractCoinTransaction) tx;
+            UtxoData utxoData = (UtxoData) transaction.getCoinData();
+            for (UtxoInput input : utxoData.getInputs()) {
+                if (input.getFrom() == null) {
+                    if (outputMap.containsKey(input.getKey())) {
+                        input.setFrom(outputMap.get(input.getKey()));
+                    }
+                }
+            }
         }
         return txList;
     }
@@ -345,7 +369,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         LockNulsTransaction tx = null;
         try {
             CoinTransferData coinData = new CoinTransferData(OperationType.LOCK, amount, address, getTxFee(TransactionConstant.TX_TYPE_LOCK));
-            coinData.addTo( new Coin(address,amount, unlockTime,0));
+            coinData.addTo(new Coin(address, amount, unlockTime, 0));
             tx = UtxoTransactionTool.getInstance().createLockNulsTx(coinData, password, remark);
 
             tx.verify();
@@ -431,6 +455,19 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);
         localPo.setTxStatus(TransactionLocalPo.UNCONFIRM);
         localTxDao.save(localPo);
+        // save relation
+        if (tx instanceof AbstractCoinTransaction) {
+            AbstractCoinTransaction abstractTx = (AbstractCoinTransaction) tx;
+            UtxoData utxoData = (UtxoData) abstractTx.getCoinData();
+            if (utxoData.getInputs() != null && !utxoData.getInputs().isEmpty()) {
+                UtxoInput input = utxoData.getInputs().get(0);
+                UtxoOutput output = input.getFrom();
+                TxAccountRelationPo relationPo = new TxAccountRelationPo();
+                relationPo.setTxHash(tx.getHash().getDigestHex());
+                relationPo.setAddress(output.getAddress());
+                relationDataService.save(relationPo);
+            }
+        }
 //        if (tx instanceof AbstractCoinTransaction) {
 //            AbstractCoinTransaction abstractTx = (AbstractCoinTransaction) tx;
 //            UtxoData utxoData = (UtxoData) abstractTx.getCoinData();

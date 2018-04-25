@@ -36,4 +36,6 @@ public interface TxAccountRelationDataService extends BaseDataService<String,TxA
     void deleteRelation(String txHash, Set<String> addressSet);
 
     void deleteRelation(String txHash);
+
+    long getRelationCount(String txHash, String address);
 }

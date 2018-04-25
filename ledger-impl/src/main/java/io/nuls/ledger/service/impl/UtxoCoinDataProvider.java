@@ -58,6 +58,7 @@ import io.nuls.protocol.script.P2PKHScript;
 import io.nuls.protocol.script.P2PKHScriptSig;
 import io.nuls.protocol.utils.io.NulsByteBuffer;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -210,13 +211,17 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
             for (String address : addressSet) {
                 TxAccountRelationPo relationPo = new TxAccountRelationPo(tx.getHash().getDigestHex(), address);
-                txRelations.add(relationPo);
+                if (relationDataService.getRelationCount(relationPo.getTxHash(), address) == 0) {
+                    relationDataService.save(relationPo);
+                }
+//                txRelations.add(relationPo);
             }
 
             outputDataService.updateStatus(spendPoList);
             inputDataService.save(inputPoList);
             outputDataService.save(outputPoList);
-            relationDataService.save(txRelations);
+
+//            relationDataService.save(txRelations);
 //
 //            for (String address : addressSet) {
 //                UtxoTransactionTool.getInstance().calcBalance(address, true);
@@ -321,10 +326,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
         String txHash = tx.getHash().getDigestHex();
         inputDataService.deleteByHash(txHash);
         relationDataService.deleteRelation(txHash);
-    }
-
-    public void sarollback(CoinData coinData, Transaction tx) {
-
     }
 
     @Override

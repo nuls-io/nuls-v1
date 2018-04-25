@@ -37,6 +37,7 @@ import io.nuls.ledger.service.impl.UtxoCoinDataProvider;
 import io.nuls.ledger.service.impl.UtxoCoinManager;
 import io.nuls.ledger.service.impl.UtxoLedgerServiceImpl;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.ledger.thread.ReSendTxThread;
 import io.nuls.ledger.thread.SmallChangeThread;
 import io.nuls.ledger.validator.TxFieldValidator;
 import io.nuls.ledger.validator.TxSignValidator;
@@ -102,6 +103,7 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
         //cache the wallet's all accounts unSpend output
         coinManager.cacheAllUnSpendUtxo();
         TaskManager.createAndRunThread(this.getModuleId(), SmallChangeThread.class.getSimpleName(), SmallChangeThread.getInstance());
+        TaskManager.createAndRunThread(this.getModuleId(), ReSendTxThread.class.getSimpleName(), ReSendTxThread.getInstance());
     }
 
     @Override
