@@ -36,6 +36,8 @@ import io.nuls.db.entity.NodePo;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Niels
@@ -43,6 +45,7 @@ import java.util.*;
  */
 @DbSession(transactional = PROPAGATION.NONE)
 public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> implements NodeDataService {
+    private Lock lock = new ReentrantLock();
     public NodeDaoImpl() {
         super(NodeMapper.class);
     }
@@ -69,6 +72,7 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
     @Override
     @DbSession
     public void saveChange(NodePo po) {
+        lock.lock();
         try {
             Searchable searchable = new Searchable();
             searchable.addCondition("id", SearchOperator.eq, po.getId());
@@ -79,6 +83,8 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
             }
         } catch (Exception e) {
             Log.error(e);
+        } finally {
+            lock.unlock();
         }
     }
 
