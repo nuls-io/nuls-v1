@@ -194,7 +194,7 @@ public class Account extends BaseNulsData implements NulsCloneable {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(address.getBase58());
+        stream.writeBytesWithLength(address.getHash());
         stream.writeString(alias);
         stream.writeBytesWithLength(encryptedPriKey);
         stream.writeBytesWithLength(pubKey);
