@@ -649,13 +649,13 @@ public class PocConsensusServiceImpl implements PocConsensusService {
             long reward = ledgerService.getAgentReward(ca.getAddress(), 1);
             map.put("reward", reward);
             map.put("packedCount", blockService.getPackingCount(ca.getExtend().getPackingAddress()));
-//            List<Consensus<Deposit>> deposits = this.consensusCacheManager.getDepositListByAgentId(ca.getHexHash(), NulsContext.getInstance().getBestHeight());
+            List<Consensus<Deposit>> deposits = this.getEffectiveDepositList(null, ca.getHexHash(), NulsContext.getInstance().getBestHeight(), null);
             long totalDeposit = 0;
             Set<String> memberSet = new HashSet<>();
-//            for (Consensus<Deposit> cd : deposits) {
-//                totalDeposit += cd.getExtend().getDeposit().getValue();
-//                memberSet.add(cd.getAddress());
-//            }
+            for (Consensus<Deposit> cd : deposits) {
+                totalDeposit += cd.getExtend().getDeposit().getValue();
+                memberSet.add(cd.getAddress());
+            }
             map.put("totalDeposit", totalDeposit);
             map.put("memberCount", memberSet.size());
             resultList.add(map);
