@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.nuls.db.dao.impl.mybatis.mapper.BlockHeaderMapper">
+    <resultMap id="BaseResultMap" type="io.nuls.db.entity.BlockHeaderPo">
+        <id column="hash" jdbcType="VARCHAR" property="hash"/>
+        <result column="height" jdbcType="BIGINT" property="height"/>
+        <result column="pre_hash" jdbcType="VARCHAR" property="preHash"/>
+        <result column="merkle_hash" jdbcType="VARCHAR" property="merkleHash"/>
+        <result column="create_time" jdbcType="BIGINT" property="createTime"/>
+        <result column="consensus_address" jdbcType="VARCHAR" property="consensusAddress"/>
+        <result column="tx_count" jdbcType="BIGINT" property="txCount"/>
+        <result column="round_index" jdbcType="BIGINT" property="roundIndex"/>
+        <result column="scriptSig" jdbcType="VARBINARY" property="scriptSig"/>
+        <result column="extend" jdbcType="VARBINARY" property="extend"/>
+        <result column="size" jdbcType="INTEGER" property="size"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        hash, height, pre_hash, merkle_hash, create_time, consensus_address, tx_count, round_index, scriptSig, extend, size
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from block_header
+        where hash = #{hash,jdbcType=VARCHAR}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from block_header
+        where hash = #{hash,jdbcType=VARCHAR}
+    </delete>
+
+    <insert id="insert" parameterType="io.nuls.db.entity.BlockHeaderPo">
+        insert into block_header (hash, height, pre_hash,
+        merkle_hash, create_time, consensus_address,
+        tx_count, scriptSig, round_index, extend, size)
+        values (#{hash,jdbcType=VARCHAR}, #{height,jdbcType=BIGINT}, #{preHash,jdbcType=VARCHAR},
+        #{merkleHash,jdbcType=VARCHAR}, #{createTime,jdbcType=BIGINT},
+        #{consensusAddress,jdbcType=VARCHAR},#{txCount,jdbcType=BIGINT},
+        #{scriptSig,jdbcType=VARBINARY}, #{roundIndex,jdbcType=BIGINT},
+        #{extend,jdbcType=VARBINARY}, #{size,jdbcType=INTEGER})
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.BlockHeaderPo">
+        update block_header
+        set height = #{height,jdbcType=BIGINT},
+        pre_hash = #{preHash,jdbcType=VARCHAR},
+        merkle_hash = #{merkleHash,jdbcType=VARCHAR},
+        create_time = #{createTime,jdbcType=BIGINT},
+        consensus_address = #{consensusAddress,jdbcType=VARCHAR},
+        tx_count = #{txCount,jdbcType=BIGINT},
+        round_index = #{roundIndex,jdbcType=BIGINT},
+        extend = #{extend,jdbcType=VARBINARY},
+        scriptSig = #{scriptSig,jdbcType=VARBINARY},
+        size = #{size,jdbcType=INTEGER})
+        where hash = #{hash,jdbcType=VARCHAR}
+    </update>
+    <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from block_header
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
+    <select id="countAll" resultType="java.lang.Long">
+    select count(hash) from block_header
+  </select>
+
+    <select id="selectCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
+        select count(hash) from block_header
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
+    <select id="getSumTxCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.util.Map">
+        select count(1) as blockCount, sum(tx_count) as txCount
+        from block_header
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
+    <select id="getMaxHeight" resultType="long">
+        select max(height) from block_header
+    </select>
+    <select id="getSplitHashList" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT height, hash from block_header
+        <![CDATA[
+        where height >=#{startHeight,jdbcType=BIGINT}
+        and height <= #{endHeight,jdbcType=BIGINT}
+        and mod((height-#{startHeight,jdbcType=BIGINT}),#{split,jdbcType=BIGINT})=0
+
+
+
+
+        ]]>
+    </select>
+    <select id="getBlockHashList" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT height, hash from block_header
+        <![CDATA[
+        where height >=#{startHeight,jdbcType=BIGINT}
+        and height <= #{endHeight,jdbcType=BIGINT}
+        ORDER BY height ASC
+
+        ]]>
+    </select>
+    <select id="getListByRound" resultMap="BaseResultMap" parameterType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List"/>
+        from block_header
+        <![CDATA[
+        where round_index >=#{startRoundIndex,jdbcType=BIGINT}
+        and round_index <= #{endRoundIndex,jdbcType=BIGINT}
+        ORDER BY height ASC
+        ]]>
+    </select>
+    <select id="getSumOfRoundIndexOfYellowPunish" resultType="long" parameterType="java.util.Map">
+        select  b.round_index
+        from block_header b
+        INNER JOIN transaction t on t.block_height=b.height
+        INNER JOIN tx_account_relation r on r.tx_hash = t.hash
+        <![CDATA[
+        where r.address=#{address ,jdbcType=VARCHAR }
+         and b.round_index>=#{startRoundIndex,jdbcType=BIGINT}
+         and b.round_index <=#{endRoundIndex,jdbcType=BIGINT}
+
+
+
+
+        ]]>
+    </select>
+
+    <select id="getBlockByAddress" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable"
+            resultMap="BaseResultMap">
+        select b.*
+        from agent a
+        join block_header b on a.packing_address = b.consensus_address
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
+    <select id="getRoundFirstBlockHeight" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select min(height) from block_header where round_index = #{roundIndex,jdbcType=BIGINT}
+    </select>
+    <select id="getRoundLastBlockHeight" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select max(height) from block_header where round_index = #{roundIndex,jdbcType=BIGINT}
+    </select>
+
+</mapper>

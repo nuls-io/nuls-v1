@@ -9,7 +9,6 @@ import io.nuls.core.i18n.I18nUtils;
 import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.module.manager.VersionManager;
 import io.nuls.core.utils.cfg.ConfigLoader;
-import io.nuls.core.utils.cfg.IniEntity;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.queue.manager.QueueManager;
 import io.nuls.core.utils.spring.lite.core.ModularServiceMethodInterceptor;
@@ -22,22 +21,22 @@ import java.io.IOException;
  * @author: Charlie
  * @date: 2018/4/24
  */
-public class MicroKernelBootstrapTest extends BaseModuleBootstrap {
+public class MicroKernelBootstrap2Test extends BaseModuleBootstrap {
 
-    private static final MicroKernelBootstrapTest INSTANCE = new MicroKernelBootstrapTest();
+    private static final MicroKernelBootstrap2Test INSTANCE = new MicroKernelBootstrap2Test();
 
-    private MicroKernelBootstrapTest() {
+    private MicroKernelBootstrap2Test() {
         super(NulsConstant.MODULE_ID_MICROKERNEL);
     }
 
-    public static MicroKernelBootstrapTest getInstance() {
+    public static MicroKernelBootstrap2Test getInstance() {
         return INSTANCE;
     }
     @Override
     public void init() {
         try {
             NulsConfig.NULS_CONFIG = ConfigLoader.loadIni(NulsConstant.USER_CONFIG_FILE);
-            NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConstant.MODULES_CONFIG_FILE);
+            NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni("modules2.ini");
         } catch (IOException e) {
             Log.error("Client start failed", e);
             throw new NulsRuntimeException(ErrorCode.FAILED, "Client start failed");

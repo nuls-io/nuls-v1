@@ -2,6 +2,7 @@ package io.nuls.network.module.impl;
 
 import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.network.module.base.BootstrapDBCacheTest;
+import io.nuls.network.module.base.MicroKernelBootstrap1Test;
 import org.junit.Test;
 import org.junit.Before; 
 import org.junit.After;
@@ -20,7 +21,7 @@ public class NetworkModuleBootstrapTest {
     private NetworkModuleBootstrap networkModuleBootstrap;
     @Before
     public void before() throws Exception {
-        BootstrapDBCacheTest.start();
+        BootstrapDBCacheTest.start(MicroKernelBootstrap1Test.class);
         Class clazz = Class.forName("io.nuls.network.module.impl.NetworkModuleBootstrap");
         BaseModuleBootstrap module = (BaseModuleBootstrap) clazz.newInstance();
         module.setModuleName("network");
