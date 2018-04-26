@@ -1,2 +1,2 @@
 #!/bin/sh
-kill -9 `ps -ef| grep io.nuls.Bootstrap |awk '{print $2}'`
+kill -9 `ps -ef| grep io.nuls.Bootstrap | grep java | awk '{print $2}'`

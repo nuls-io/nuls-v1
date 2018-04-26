@@ -15,7 +15,7 @@ done
 CONF_PATH=$rootdir/conf
 
 #project class path
-export CLASSPATH=$CLASSPATH:$CONF_PATH:$PUB_LIB
+CLASSPATH=$CONF_PATH:$PUB_LIB
 if [ ! -d "$logdir" ]; then
   mkdir "$logdir"
 fi

@@ -64,7 +64,6 @@ public class LevelDBManager {
             isInit = true;
             URL resource = ClassLoader.getSystemClassLoader().getResource(".");
             String classPath = resource.getPath();
-            Log.info("=== LevelDBManager ClassPath is " + classPath + " ===");
             File file = new File(classPath);
             String parent = file.getParent();
             dataPath = parent + "/data/kv";
@@ -73,7 +72,6 @@ public class LevelDBManager {
                 _dir.mkdirs();
 
             File dir = new File(dataPath);
-            Log.info("=== LevelDBManager dataPath is " + dataPath + " ===");
             File[] areaFiles = dir.listFiles();
             DB db = null;
             for(File areaFile : areaFiles) {
