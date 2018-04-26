@@ -68,7 +68,7 @@ public class TimeService implements Runnable {
     private boolean running;
 
     public void start() {
-        Log.info("----------- network timeService start -------------");
+        Log.debug("----------- network timeService start -------------");
         syncWebTime();
         running = true;
         TaskManager.createAndRunThread((short) 1, "TimeService", this, true);

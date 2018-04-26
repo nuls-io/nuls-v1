@@ -172,8 +172,6 @@ public class ChainProcess {
             sb.append("\n");
         }
 
-        sb.append("=========================\n");
-
         ChainLog.debug(sb.toString());
     }
 

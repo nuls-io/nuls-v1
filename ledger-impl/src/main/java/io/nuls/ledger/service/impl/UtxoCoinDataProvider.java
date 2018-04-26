@@ -478,8 +478,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 throw new NulsException(ErrorCode.UTXO_NOT_FOUND);
             }
             if (outputPo.getStatus() != UtxoOutputPo.LOCKED) {
-                System.out.println("----------UtxoCoinDataProvider createBySpecialData------------" + outputPo.getTxHash());
-                System.out.println("----------UtxoCoinDataProvider createBySpecialData------------" + outputPo.getTxHash());
                 throw new NulsException(ErrorCode.UTXO_STATUS_CHANGE);
             }
             UtxoOutput output = UtxoTransferTool.toOutput(outputPo);
@@ -590,11 +588,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
                 if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
                     if (output.getStatus() != OutPutStatusEnum.UTXO_CONSENSUS_LOCK) {
-                        System.out.println("----------UtxoCoinDataProvider verifyCoinData1------------" + output.getKey());
                         return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                     }
                 } else if (!output.isUsable()) {
-                    System.out.println("----------UtxoCoinDataProvider verifyCoinData2------------" + output.getKey());
                     return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             }

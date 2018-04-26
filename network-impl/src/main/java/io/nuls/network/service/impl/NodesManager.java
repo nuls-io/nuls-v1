@@ -123,7 +123,7 @@ public class NodesManager implements Runnable {
     }
 
     public void reset() {
-        Log.info("------------------network nodeManager reset--------------------");
+        Log.debug("------------------network nodeManager reset--------------------");
         for (Node node : disConnectNodes.values()) {
             node.setFailCount(NetworkConstant.FAIL_MAX_COUNT);
         }

@@ -136,11 +136,9 @@ public class ConnectionManager {
                 }
             }
         } catch (NulsException e) {
-            //todo
-            Log.error("--------remoteAddress: " + node.getId());
+            Log.error("remoteAddress: " + node.getId());
             Log.error(e);
         } catch (Exception e) {
-            //todo
             Log.error(e);
             return;
         } finally {

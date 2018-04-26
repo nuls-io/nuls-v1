@@ -33,17 +33,12 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
-        if(node.getPort() == 0) {
-            Log.debug("port is zero!===============================================");
-        }
-
         String nodeId = node == null ? null : node.getId();
         Log.debug("---------------------- client channelRegistered -----------" + nodeId);
 
         Map<String, Node> nodes = getNetworkService().getNodes();
         // If a node with the same IP already in nodes, as a out node, can not add anymore
         for (Node n : nodes.values()) {
-            //Log.debug(n.toString());
             //both ip and port equals , it means the node is myself
             if (n.getIp().equals(node.getIp()) && n.getPort() != node.getSeverPort()) {
                 Log.debug("----------------------client: it already had a connection: " + n.getId() + " type:" + n.getType() + ", this connection: " + nodeId + "---------------------- ");
@@ -117,7 +112,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        Log.info("--------------- ClientChannelHandler exceptionCaught :" + cause.getMessage());
+        Log.debug("--------------- ClientChannelHandler exceptionCaught :" + cause.getMessage());
         ctx.channel().close();
     }
 

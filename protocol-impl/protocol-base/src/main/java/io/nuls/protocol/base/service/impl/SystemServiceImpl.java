@@ -45,8 +45,8 @@ public class SystemServiceImpl implements SystemService {
     @Override
     public boolean resetSystem(String reason) {
 
-        Log.info("---------------reset start----------------");
-        Log.info("Received a reset system request, reason: 【" + reason + "】");
+        Log.debug("---------------reset start----------------");
+        Log.debug("Received a reset system request, reason: 【" + reason + "】");
 
         NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
         networkService.reset();
@@ -60,7 +60,7 @@ public class SystemServiceImpl implements SystemService {
 
         NulsContext.getServiceBean(ConsensusService.class).restart();
 
-        Log.info("---------------reset end----------------");
+        Log.debug("---------------reset end----------------");
 
         return true;
     }

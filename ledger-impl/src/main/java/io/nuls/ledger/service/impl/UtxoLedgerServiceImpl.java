@@ -101,7 +101,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             return null;
         }
         try {
-            return UtxoTransferTool.toTransaction(po);
+            Transaction tx = UtxoTransferTool.toTransaction(po);
+            return tx;
         } catch (Exception e) {
             Log.error(e);
         }
@@ -190,6 +191,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             }
         }
         for (Transaction tx : txList) {
+            if (!(tx instanceof AbstractCoinTransaction)) {
+                continue;
+            }
             AbstractCoinTransaction transaction = (AbstractCoinTransaction) tx;
             UtxoData utxoData = (UtxoData) transaction.getCoinData();
             for (UtxoInput input : utxoData.getInputs()) {
@@ -548,7 +552,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     public void rollbackTx(Transaction tx, Block block) throws NulsException {
         AssertUtil.canNotEmpty(tx, ErrorCode.NULL_PARAMETER);
-        BlockLog.debug("rollback tx ==================================================", tx.getHash());
+        BlockLog.debug("rollback tx:{}", tx.getHash());
         List<TransactionService> serviceList = getServiceList(tx.getClass());
         for (TransactionService service : serviceList) {
             service.onRollback(tx, block);
@@ -668,7 +672,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     @DbSession
     public void unlockTxSave(String txHash) {
-        Log.info("-------------- exit agent unlockTxSave  ------------------txHash:" + txHash);
+        Log.debug("-------------- exit agent unlockTxSave  ------------------txHash:" + txHash);
         outputDataService.unlockTxOutput(txHash);
         String key = txHash + "-" + 0;
         UtxoOutput output = ledgerCacheService.getUtxo(key);
@@ -680,7 +684,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     @DbSession
     public void unlockTxRollback(String txHash) {
-        Log.info("-------------- exit agent unlockTxRollback  ------------------txHash:" + txHash);
+        Log.debug("-------------- exit agent unlockTxRollback  ------------------txHash:" + txHash);
         outputDataService.lockTxOutput(txHash);
         Map<String, Object> keyMap = new HashMap<>();
 

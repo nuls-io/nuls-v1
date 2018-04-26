@@ -53,16 +53,12 @@ public class ModuleRunner implements Runnable {
     @Override
     public void run() {
         try {
-//            Log.error(moduleKey);
             module = this.loadModule();
-//            Log.error("loaded=============="+moduleKey);
             module.setStatus(ModuleStatusEnum.INITIALIZING);
             module.init();
-//            Log.error("inited=============="+moduleKey);
             module.setStatus(ModuleStatusEnum.INITIALIZED);
             module.setStatus(ModuleStatusEnum.STARTING);
             module.start();
-//            Log.error("started=============="+moduleKey);
             module.setStatus(ModuleStatusEnum.RUNNING);
         } catch (ClassNotFoundException e) {
             module.setStatus(ModuleStatusEnum.EXCEPTION);

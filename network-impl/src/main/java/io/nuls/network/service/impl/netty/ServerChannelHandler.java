@@ -117,7 +117,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         InetSocketAddress remoteAddress = channel.remoteAddress();
         String local = IpUtil.getNodeId(localAddress);
         String remote = IpUtil.getNodeId(remoteAddress);
-        Log.info("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage()
+        Log.debug("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage()
                     + ", localInfo: " + local + ", remoteInfo: " + remote);
         ctx.channel().close();
     }

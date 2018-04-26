@@ -119,7 +119,7 @@ public class NulsContext {
             throw new NulsRuntimeException(ErrorCode.FAILED,"best block set to null!");
         }
         this.bestBlock = bestBlock;
-        Log.info("best height:"+bestBlock.getHeader().getHeight()+", hash:"+bestBlock.getHeader().getHash());
+//        Log.info("best height:"+bestBlock.getHeader().getHeight()+", hash:"+bestBlock.getHeader().getHash());
     }
 
     public static final <T> T getServiceBean(Class<T> tClass) {

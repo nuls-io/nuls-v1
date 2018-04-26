@@ -159,8 +159,6 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
         for (int i = 0; i < list.size(); i++) {
             int value = getMapper().updateStatus(list.get(i));
             if (value != 1) {
-                System.out.println("----------UtxoOutputDaoImpl updateStatus------------" + list.get(i).getTxHash());
-                System.out.println("----------UtxoOutputDaoImpl updateStatus------------" + list.get(i).getTxHash());
                 throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
             }
             result += value;

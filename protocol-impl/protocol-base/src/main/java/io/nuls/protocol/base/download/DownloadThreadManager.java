@@ -74,13 +74,6 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
-
-        System.out.println("============================");
-        System.out.println(newestInfos);
-        System.out.println("============================");
-
-//        if(1==1)return true;
-
         try {
             boolean isContinue = checkFirstBlock();
 
