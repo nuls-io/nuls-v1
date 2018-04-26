@@ -403,9 +403,9 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
 
             //create outputs
-            int i = 0;
             long outputValue = 0;
-            for (Coin coin : coinParam.getToCoinList()) {
+            for (int index=0;index<coinParam.getToCoinList().size();index++) {
+                Coin coin = coinParam.getToCoinList().get(index);
                 UtxoOutput output = new UtxoOutput();
                 output.setAddress(coin.getAddress());
                 output.setValue(coin.getNa().getValue());
@@ -417,7 +417,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     output.setStatus(OutPutStatusEnum.UTXO_UNSPENT);
                 }
 
-                output.setIndex(i);
+                output.setIndex(index);
                 P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, new Address(coin.getAddress()).getHash160()));
                 output.setP2PKHScript(p2PKHScript);
                 if (coin.getUnlockHeight() > 0) {
@@ -430,8 +430,6 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 output.setTxHash(tx.getHash());
                 outputValue += output.getValue();
                 outputs.add(output);
-
-                i++;
             }
 
             //the balance leave to myself
@@ -445,7 +443,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                 UtxoOutput output = new UtxoOutput();
                 output.setAddress(inputs.get(0).getFrom().getAddress());
                 output.setValue(balance);
-                output.setIndex(i);
+                output.setIndex(outputs.size());
                 output.setTxHash(tx.getHash());
                 output.setStatus(OutPutStatusEnum.UTXO_UNSPENT);
                 P2PKHScript p2PKHScript = new P2PKHScript(new NulsDigestData(NulsDigestData.DIGEST_ALG_SHA160, account.getHash160()));

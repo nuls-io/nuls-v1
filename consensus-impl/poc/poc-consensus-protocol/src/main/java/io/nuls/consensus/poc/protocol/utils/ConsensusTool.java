@@ -54,10 +54,7 @@ import io.nuls.protocol.script.P2PKHScriptSig;
 import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Niels
@@ -181,7 +178,8 @@ public class ConsensusTool {
         CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE, Na.ZERO);
         List<ConsensusReward> rewardList = calcReward(txList, member, localRound);
         Na total = Na.ZERO;
-        for (ConsensusReward reward : rewardList) {
+        for (int i=0;i<rewardList.size();i++) {
+            ConsensusReward reward = rewardList.get(i);
             Coin coin = new Coin(reward.getAddress(), reward.getReward(), 0, unlockHeight);
             data.addTo(coin);
             total = total.add(reward.getReward());
