@@ -85,11 +85,11 @@ public class CommandResult {
         if (StringUtils.isBlank(message)) {
             message = "";
         } else {
-            message += ";";
+            message += ";\n";
         }
         if (rpcResult.getData() != null) {
             try {
-                message += JSONUtils.obj2json(rpcResult.getData());
+                message += JSONUtils.obj2PrettyJson(rpcResult.getData());
             } catch (Exception e) {
                 Log.error(e);
             }

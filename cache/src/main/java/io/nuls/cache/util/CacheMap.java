@@ -25,7 +25,8 @@ package io.nuls.cache.util;
 
 import io.nuls.cache.listener.intf.NulsCacheListener;
 import io.nuls.cache.service.intf.CacheService;
-import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.spring.lite.core.SpringLiteContext;
 
 import java.util.List;
 import java.util.Set;
@@ -38,7 +39,7 @@ public class CacheMap<K, V> {
 
     private final String cacheName;
 
-    private CacheService cacheService = NulsContext.getServiceBean(CacheService.class);
+    private CacheService cacheService = getServiceBean(CacheService.class, 0L);
 
     public CacheMap(String cacheName, int heapMb) {
         this(cacheName, heapMb, 0, 0);
@@ -98,5 +99,22 @@ public class CacheMap<K, V> {
 
     public void destroy() {
         this.cacheService.removeCache(cacheName);
+    }
+
+    private static <T> T getServiceBean(Class<T> tClass, long l) {
+        try {
+            Thread.sleep(300L);
+        } catch (InterruptedException e1) {
+            Log.error(e1);
+        }
+        try {
+            return SpringLiteContext.getBean(tClass);
+        } catch (Exception e) {
+            if (l > 20000) {
+                Log.error(e);
+                return null;
+            }
+            return getServiceBean(tClass, l + 10L);
+        }
     }
 }

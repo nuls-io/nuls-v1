@@ -58,6 +58,14 @@ public class UtxoInputDaoImpl extends BaseDaoImpl<UtxoInputMapper, Map<String,Ob
     }
 
     @Override
+    public UtxoInputPo getByFromHash(String fromHash, int fromIndex) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("from_hash", SearchOperator.eq, fromHash);
+        searchable.addCondition("from_index", SearchOperator.eq, fromIndex);
+        return getMapper().selectBySearchable(searchable);
+    }
+
+    @Override
     public void deleteByHash(String txHash) {
         Searchable searchable = new Searchable();
         searchable.addCondition("tx_hash", SearchOperator.eq, txHash);

@@ -26,7 +26,6 @@ package io.nuls.cache.manager;
 import io.nuls.cache.constant.EhCacheConstant;
 import io.nuls.cache.listener.intf.NulsCacheListener;
 import io.nuls.cache.utils.EhcacheListener;
-import io.nuls.core.constant.NulsConstant;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
@@ -40,6 +39,7 @@ import org.ehcache.expiry.Expirations;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -48,8 +48,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class EhCacheManager {
     private static final EhCacheManager INSTANCE = new EhCacheManager();
-    private static final Map<String, Class> KEY_TYPE_MAP = new HashMap<>();
-    private static final Map<String, Class> VALUE_TYPE_MAP = new HashMap<>();
+    private static final Map<String, Class> KEY_TYPE_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, Class> VALUE_TYPE_MAP = new ConcurrentHashMap<>();
     private CacheManager cacheManager;
 
     private EhCacheManager() {

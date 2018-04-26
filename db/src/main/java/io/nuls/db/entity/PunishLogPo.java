@@ -36,6 +36,15 @@ public class PunishLogPo {
     private String address;
     private long time;
     private long height;
+    private long roundIndex;
+
+    public long getRoundIndex() {
+        return roundIndex;
+    }
+
+    public void setRoundIndex(long roundIndex) {
+        this.roundIndex = roundIndex;
+    }
 
     public String getId() {
         return id;

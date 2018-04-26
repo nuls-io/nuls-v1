@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `punish_log` (
   `address` varchar(40) NOT NULL,
   `type` int(1) NOT NULL,
   `height` bigint(14) NOT NULL,
+  `round_index` bigint(14) NOT NULL,
   `time` bigint(14) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -39,13 +40,16 @@ CREATE TABLE IF NOT EXISTS `block_header` (
 CREATE TABLE IF NOT EXISTS `agent` (
   `id` varchar(70) NOT NULL,
   `agent_address` varchar(40) NOT NULL,
-  `agent_name` varchar(20) NOT NULL,
+  `agent_name` varchar(50) NOT NULL,
+  `block_height` bigint(18) NOT NULL,
   `packing_address` varchar(40) NOT NULL,
   `deposit` bigint(18) NOT NULL,
   `remark` varchar(255) NOT NULL,
+  `del_height` bigint(18) DEFAULT 0,
   `status` INT DEFAULT 0,
   `start_time` bigint(14) NOT NULL,
-  `commission_rate` decimal(14) NOT NULL,
+   `tx_hash` varchar(70) NOT NULL,
+  `commission_rate` decimal(14,2) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -55,6 +59,7 @@ CREATE TABLE IF NOT EXISTS `deposit` (
   `agent_id` varchar(70) NOT NULL,
   `deposit` bigint(18) NOT NULL,
   `status` int(1) DEFAULT NULL,
+  `del_height` bigint(18) DEFAULT 0,
   `time` bigint(14) DEFAULT NULL,
   `block_height` bigint(14) DEFAULT NULL,
   `tx_hash` varchar(70) NOT NULL,
@@ -123,9 +128,11 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `remark` varchar(100) DEFAULT NULL,
   `fee` bigint(19) NOT NULL,
   `transferType` int(1) DEFAULT NULL,
-  `txData` varbinary(1024) DEFAULT NULL,
+  `txData` BLOB DEFAULT NULL,
+  `coinData` BLOB DEFAULT NULL,
   `scriptSig` varbinary(255) DEFAULT NULL,
   `size` int(9) DEFAULT NULL,
+  `txStatus` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`hash`),
   KEY `block_height_id` (`block_height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ **
  * Copyright (c) 2017-2018 nuls.io
- *
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,19 +26,19 @@ package io.nuls.network.service.impl;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.socket.SocketChannel;
-import io.nuls.core.event.BaseEvent;
-import io.nuls.core.mesasge.NulsMessage;
+import io.nuls.protocol.event.base.BaseEvent;
+import io.nuls.protocol.mesasge.NulsMessage;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
-import io.nuls.network.entity.param.AbstractNetworkParam;
+import io.nuls.network.entity.param.NetworkParam;
 import io.nuls.network.service.impl.netty.NioChannelMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author vivi
@@ -48,7 +48,7 @@ public class BroadcastHandler {
 
     private NodesManager nodesManager;
 
-    private AbstractNetworkParam network;
+    private NetworkParam network;
 
     private static BroadcastHandler instance = new BroadcastHandler();
 
@@ -60,14 +60,14 @@ public class BroadcastHandler {
     }
 
     public BroadcastResult broadcast(BaseEvent event, boolean asyn) {
-        if (nodesManager.getNodes().isEmpty()) {
+        if (nodesManager.getAvailableNodes().isEmpty()) {
             return new BroadcastResult(false, "no node can be broadcast");
         }
         return broadcastToList(nodesManager.getAvailableNodes(), event, null, asyn);
     }
 
     public BroadcastResult broadcast(BaseEvent event, String excludeNodeId, boolean asyn) {
-        if (nodesManager.getNodes().isEmpty()) {
+        if (nodesManager.getAvailableNodes().isEmpty()) {
             return new BroadcastResult(false, "no node can be broadcast");
         }
         return broadcastToList(nodesManager.getAvailableNodes(), event, excludeNodeId, asyn);
@@ -100,7 +100,7 @@ public class BroadcastHandler {
 
     public BroadcastResult broadcastToNode(BaseEvent event, String nodeId, boolean asyn) {
         try {
-            NulsMessage message = new NulsMessage(network.packetMagic(), event.serialize());
+            NulsMessage message = new NulsMessage(network.getPacketMagic(), event.serialize());
             Node node = nodesManager.getNode(nodeId);
             if (node == null) {
                 return new BroadcastResult(false, "node not found");
@@ -113,7 +113,7 @@ public class BroadcastHandler {
 
     public BroadcastResult broadcastToNode(BaseEvent event, Node node, boolean asyn) {
         try {
-            NulsMessage message = new NulsMessage(network.packetMagic(), event.serialize());
+            NulsMessage message = new NulsMessage(network.getPacketMagic(), event.serialize());
             return broadcast(message, node, asyn);
         } catch (IOException e) {
             return new BroadcastResult(false, "event.serialize() error");
@@ -130,7 +130,7 @@ public class BroadcastHandler {
 //     */
 //    private BroadcastResult broadcast(NulsMessage message, String excludeNodeId) {
 ////        List<Node> broadNodes = nodesManager.getAvailableNodes(excludeNodeId);
-////        //todo only one node connected can't send message
+////         only one node connected can't send message
 ////        if (broadNodes.size() < NetworkConstant.NETWORK_BROAD_SUCCESS_MIN_COUNT) {
 ////            return new BroadcastResult(false, "no node can be broadcast");
 ////        }
@@ -334,11 +334,11 @@ public class BroadcastHandler {
 //        return broadcastToGroup(event,null ,groupName, excludeNodeId);
 //    }
 
-    private BroadcastResult broadcastToList(List<Node> nodeList, BaseEvent event, String excludeNodeId, boolean asyn) {
+    private BroadcastResult broadcastToList(Collection<Node> nodeList, BaseEvent event, String excludeNodeId, boolean asyn) {
         NulsMessage message;
         BroadcastResult result = new BroadcastResult();
         try {
-            message = new NulsMessage(network.packetMagic(), event.serialize());
+            message = new NulsMessage(network.getPacketMagic(), event.serialize());
             int successCount = 0;
             for (Node node : nodeList) {
                 if (excludeNodeId != null && node.getId().equals(excludeNodeId)) {
@@ -363,7 +363,7 @@ public class BroadcastHandler {
 
     private BroadcastResult broadcast(NulsMessage message, Node node, boolean asyn) throws IOException {
         try {
-            if(!node.isAlive() && node.getChannelId() == null) {
+            if (!node.isAlive() && node.getChannelId() == null) {
                 return new BroadcastResult(false, "node not found");
             }
             SocketChannel channel = NioChannelMap.get(node.getChannelId());
@@ -387,7 +387,7 @@ public class BroadcastHandler {
         return new BroadcastResult(true, "OK");
     }
 
-    public void setNetwork(AbstractNetworkParam network) {
+    public void setNetwork(NetworkParam network) {
         this.network = network;
     }
 

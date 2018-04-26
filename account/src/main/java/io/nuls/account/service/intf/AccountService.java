@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ **
  * Copyright (c) 2017-2018 nuls.io
- *
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,11 +26,12 @@ package io.nuls.account.service.intf;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.entity.Alias;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.NulsSignData;
-import io.nuls.core.chain.entity.Result;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.script.P2PKHScriptSig;
+import io.nuls.core.model.Result;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.NulsSignData;
+import io.nuls.protocol.script.P2PKHScriptSig;
 
 import java.util.List;
 
@@ -45,7 +46,7 @@ public interface AccountService {
 
     void destroy();
 
-    Result<List<String>> createAccount(int count,String password);
+    Result<List<String>> createAccount(int count, String password);
 
     Result removeAccount(String address, String password);
 
@@ -56,6 +57,8 @@ public interface AccountService {
     boolean isMine(String address);
 
     List<Account> getAccountList();
+
+    Page<Account> getAccountList(int pageNumber, int pageSize);
 
     Address getAddress(String pubKey);
 
@@ -77,7 +80,7 @@ public interface AccountService {
 
     NulsSignData signDigest(NulsDigestData digestData, Account account, String password) throws NulsException;
 
-    NulsSignData signDigest(byte [] digestBytes, Account account, String password) throws NulsException;
+    NulsSignData signDigest(byte[] digestBytes, Account account, String password) throws NulsException;
 
     NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
 
@@ -89,7 +92,7 @@ public interface AccountService {
 
     Result verifySign(byte[] bytes, NulsSignData data, byte[] pubKey);
 
-    Result verifyDigestSign(NulsDigestData digestData, NulsSignData signData,byte[] pubKey);
+    Result verifyDigestSign(NulsDigestData digestData, NulsSignData signData, byte[] pubKey);
 
     Result exportAccount(String address, String password);
 

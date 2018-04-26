@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ **
  * Copyright (c) 2017-2018 nuls.io
- *
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,6 +30,7 @@ import io.nuls.db.entity.AgentPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -51,5 +52,36 @@ public class AgentDaoImpl extends BaseDaoImpl<AgentMapper, String, AgentPo> impl
     public int updateSelective(AgentPo po) {
         return getMapper().updateByPrimaryKeySelective(po);
     }
+
+    @Override
+    public List<AgentPo> getAllList() {
+        return this.getMapper().getAllList();
+    }
+
+    @Override
+    public List<AgentPo> getEffectiveList(String agentAddress, long blockHeight, Integer status) {
+        AgentPo po = new AgentPo();
+        po.setBlockHeight(blockHeight);
+        po.setAgentAddress(agentAddress);
+        po.setStatus(status);
+        return this.getMapper().getEffectiveList(po);
+    }
+
+    @Override
+    public int deleteById(String id, long blockHeight) {
+        AgentPo agentPo = new AgentPo();
+        agentPo.setId(id);
+        agentPo.setDelHeight(blockHeight);
+        return this.getMapper().deleteByPrimaryKey(agentPo);
+    }
+
+    @Override
+    public int realDeleteById(String id, long blockHeight) {
+        AgentPo agentPo = new AgentPo();
+        agentPo.setId(id);
+        agentPo.setDelHeight(blockHeight);
+        return getMapper().realDeleteByPrimaryKey(agentPo);
+    }
+
 
 }

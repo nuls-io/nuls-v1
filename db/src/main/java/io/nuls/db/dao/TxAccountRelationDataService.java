@@ -34,4 +34,8 @@ import java.util.Set;
 public interface TxAccountRelationDataService extends BaseDataService<String,TxAccountRelationPo> {
 
     void deleteRelation(String txHash, Set<String> addressSet);
+
+    void deleteRelation(String txHash);
+
+    long getRelationCount(String txHash, String address);
 }

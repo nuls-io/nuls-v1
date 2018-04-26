@@ -23,24 +23,26 @@
  */
 package io.nuls.rpc.resources.impl;
 
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.CommonStringEvent;
 import io.nuls.core.utils.date.TimeService;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.CommonStringEvent;
 import io.nuls.rpc.entity.InfoDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -63,7 +65,7 @@ public class NetworkMessageResource {
     public RpcResult broadcast(String message) {
         CommonStringEvent event = new CommonStringEvent();
         event.setMessage(message);
-        eventBroadcaster.broadcastAndCacheAysn(event, false);
+        eventBroadcaster.broadcastAndCacheAysn(event);
         return RpcResult.getSuccess();
     }
 
@@ -86,6 +88,10 @@ public class NetworkMessageResource {
     @GET
     @Path("/info")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("查询网络最新信息 [3.7.1]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = InfoDto.class)
+    })
     public RpcResult getInfo() {
         RpcResult result = RpcResult.getSuccess();
         InfoDto info = new InfoDto(NulsContext.getInstance().getBestBlock().getHeader().getHeight(),
@@ -116,6 +122,10 @@ public class NetworkMessageResource {
     @GET
     @Path("/nodes")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("查询节点IP [3.7.2]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = String[].class)
+    })
     public RpcResult getNode() {
         Set<String> ipSet = networkService.getNodesIp();
         RpcResult result = RpcResult.getSuccess().setData(ipSet);

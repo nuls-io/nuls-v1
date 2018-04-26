@@ -1,14 +1,17 @@
 package io.nuls.rpc.entity;
 
-import io.nuls.core.chain.entity.Block;
-import io.nuls.core.chain.entity.BlockHeader;
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.context.NulsContext;
+import io.nuls.account.entity.Address;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Hex;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.log.Log;
 import io.nuls.db.entity.BlockHeaderPo;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.BlockHeader;
+import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,40 +20,58 @@ import java.util.List;
 /**
  * @author Vive
  */
+@ApiModel(value = "blockJSON 区块信息(包含区块头信息, 交易信息), 只返回对应的部分数据")
 public class BlockDto {
 
+    @ApiModelProperty(name = "hash", value = "区块的hash值")
     private String hash;
 
+    @ApiModelProperty(name = "preHash", value = "上一个区块的hash值")
     private String preHash;
 
+    @ApiModelProperty(name = "merkleHash", value = "梅克尔hash")
     private String merkleHash;
 
+    @ApiModelProperty(name = "time", value = "区块生成时间")
     private Long time;
 
+    @ApiModelProperty(name = "height", value = "区块高度")
     private Long height;
 
+    @ApiModelProperty(name = "txCount", value = "区块打包交易数量")
     private Long txCount;
 
+    @ApiModelProperty(name = "packingAddress", value = "打包地址")
     private String packingAddress;
 
+    @ApiModelProperty(name = "scriptSign", value = "签名Hex.encode(byte[])")
     private String scriptSign;
 
+    @ApiModelProperty(name = "roundIndex", value = "共识轮次")
     private Long roundIndex;
 
+    @ApiModelProperty(name = "consensusMemberCount", value = "参与共识成员数量")
     private Integer consensusMemberCount;
 
+    @ApiModelProperty(name = "roundStartTime", value = "当前共识轮开始时间")
     private Long roundStartTime;
 
+    @ApiModelProperty(name = "packingIndexOfRound", value = "当前轮次打包出块的名次")
     private Integer packingIndexOfRound;
 
+    @ApiModelProperty(name = "reward", value = "共识奖励")
     private Long reward;
 
+    @ApiModelProperty(name = "fee", value = "获取的打包手续费")
     private Long fee;
 
+    @ApiModelProperty(name = "confirmCount", value = "确认次数")
     private Long confirmCount;
 
+    @ApiModelProperty(name = "size", value = "大小")
     private int size;
 
+    @ApiModelProperty(name = "txList", value = "transactionsJSON")
     private List<TransactionDto> txList;
 
     public BlockDto(Block block, long reward, long fee) throws IOException {
@@ -70,7 +91,7 @@ public class BlockDto {
         this.time = header.getTime();
         this.height = header.getHeight();
         this.txCount = header.getTxCount();
-        this.packingAddress = header.getPackingAddress();
+        this.packingAddress = Address.fromHashs(header.getPackingAddress()).getBase58();
         this.scriptSign = Hex.encode(header.getScriptSig().serialize());
         this.reward = reward;
         this.fee = fee;

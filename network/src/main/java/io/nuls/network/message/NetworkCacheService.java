@@ -24,8 +24,8 @@
 package io.nuls.network.message;
 
 import io.nuls.cache.service.intf.CacheService;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseEvent;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.BaseEvent;
 
 /**
  * @author vivi
@@ -42,7 +42,7 @@ public class NetworkCacheService {
     private static final NetworkCacheService INSTANCE = new NetworkCacheService();
 
     private NetworkCacheService() {
-        this.cacheService = NulsContext .getServiceBean(CacheService.class);
+        this.cacheService = NulsContext.getServiceBean(CacheService.class);
         this.cacheService.createCache(PING_EVENT_CACHE,5, 4, 0);
         this.cacheService.createCache(NETWORK_EVENT_CACHE,10, 4, 0);
     }

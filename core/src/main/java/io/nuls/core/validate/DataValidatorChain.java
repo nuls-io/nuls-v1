@@ -23,7 +23,7 @@
  */
 package io.nuls.core.validate;
 
-import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.model.intf.NulsData;
 import io.nuls.core.utils.log.Log;
 
 import java.util.ArrayList;
@@ -37,11 +37,11 @@ import java.util.Set;
  */
 public class DataValidatorChain {
 
-    private List<NulsDataValidator<BaseNulsData>> list = new ArrayList<>();
+    private List<NulsDataValidator<NulsData>> list = new ArrayList<>();
     private Set<Class> classSet = new HashSet<>();
     private ThreadLocal<Integer> index = new ThreadLocal<>();
 
-    public ValidateResult startDoValidator(BaseNulsData data) {
+    public ValidateResult startDoValidator(NulsData data) {
         if (list.isEmpty()) {
             return ValidateResult.getSuccessResult();
         }
@@ -55,20 +55,18 @@ public class DataValidatorChain {
         }
         boolean b = index.get() == list.size();
         index.remove();
-        if (b) {
-            return ValidateResult.getSuccessResult();
-        } else if (!b && result.isSuccess()) {
+        if (!b && result.isSuccess()) {
             return ValidateResult.getFailedResult("The Validators not fully executed`");
         }
         return result;
     }
 
-    private ValidateResult doValidate(BaseNulsData data) {
+    private ValidateResult doValidate(NulsData data) {
         index.set(1 + index.get());
         if (index.get() == list.size()) {
             return ValidateResult.getSuccessResult();
         }
-        NulsDataValidator<BaseNulsData> validator = list.get(index.get());
+        NulsDataValidator validator = list.get(index.get());
         ValidateResult result = validator.validate(data);
         if (null == result) {
             Log.error(validator.getClass() + " has null result!");

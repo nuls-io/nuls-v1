@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,7 +23,7 @@
  */
 package io.nuls.ledger.entity.params;
 
-import io.nuls.core.chain.entity.Na;
+import io.nuls.protocol.model.Na;
 
 /**
  * @author Niels
@@ -31,23 +31,14 @@ import io.nuls.core.chain.entity.Na;
  */
 public class Coin {
 
-    public Coin() {
-
-    }
-
-    public Coin(Na na) {
-        this.na = na;
-    }
-
-    public Coin(Na na, long unlockTime) {
-        this(na);
+    public Coin(String address, Na na, long unlockTime, long unlockHeight) {
         this.unlockTime = unlockTime;
-    }
-
-    public Coin(Na na, int unlockHeight) {
-        this(na);
+        this.address = address;
+        this.na = na;
         this.unlockHeight = unlockHeight;
     }
+
+    private String address;
 
     private Na na;
 
@@ -59,24 +50,15 @@ public class Coin {
         return na;
     }
 
-    public void setNa(Na na) {
-        this.na = na;
-    }
-
     public long getUnlockTime() {
         return unlockTime;
-    }
-
-    public void setUnlockTime(long unlockTime) {
-        this.unlockTime = unlockTime;
     }
 
     public long getUnlockHeight() {
         return unlockHeight;
     }
 
-    public void setUnlockHeight(long unlockHeight) {
-        this.unlockHeight = unlockHeight;
+    public String getAddress() {
+        return address;
     }
-
 }

@@ -3,17 +3,25 @@ package io.nuls.rpc.entity;
 import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.core.utils.crypto.Hex;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
+@ApiModel(value = "accountJSON")
 public class AccountDto {
 
+    @ApiModelProperty(name = "address", value = "账户地址")
     private String address;
 
+    @ApiModelProperty(name = "alias", value = "别名")
     private String alias;
 
+    @ApiModelProperty(name = "pubKey", value = "公钥Hex.encode(byte[])")
     private String pubKey;
 
+    @ApiModelProperty(name = "extend", value = "其他信息Hex.encode(byte[])")
     private String extend;
 
+    @ApiModelProperty(name = "createTime", value = "创建时间")
     private Long createTime;
 
     public AccountDto() {

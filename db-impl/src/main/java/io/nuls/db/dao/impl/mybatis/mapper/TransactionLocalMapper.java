@@ -41,4 +41,6 @@ public interface TransactionLocalMapper extends BaseMapper<String, TransactionLo
     List<String> selectTxHashList(Searchable searchable);
 
     List<String> selectTxHashListRelation(Searchable searchable);
+
+    List<TransactionLocalPo> selectLocalTxs(Searchable searchable);
 }

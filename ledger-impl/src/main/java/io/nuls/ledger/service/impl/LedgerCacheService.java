@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * *
  * Copyright (c) 2017-2018 nuls.io
- *
+ * *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,34 +24,32 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.cache.service.intf.CacheService;
-import io.nuls.core.context.NulsContext;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.entity.Balance;
-import io.nuls.ledger.entity.OutPutStatusEnum;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.protocol.context.NulsContext;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
  * @author Niels
  * @date 2017/11/17
  */
-public class
-LedgerCacheService {
+public class LedgerCacheService {
     private static LedgerCacheService instance = new LedgerCacheService();
     private CacheService<String, Balance> cacheService;
     private CacheService<String, UtxoOutput> utxoCacheService;
 
+    private boolean initCache = true;
 
     private LedgerCacheService() {
         cacheService = NulsContext.getServiceBean(CacheService.class);
-        cacheService.createCache(LedgerConstant.STANDING_BOOK, 1024);
+        cacheService.createCache(LedgerConstant.LEDGER_BOOK, 1024);
         utxoCacheService = NulsContext.getServiceBean(CacheService.class);
         utxoCacheService.createCache(LedgerConstant.UTXO, 1024);
     }
@@ -61,12 +59,12 @@ LedgerCacheService {
     }
 
     public void clear() {
-        this.cacheService.clearCache(LedgerConstant.STANDING_BOOK);
+        this.cacheService.clearCache(LedgerConstant.LEDGER_BOOK);
         this.utxoCacheService.clearCache(LedgerConstant.UTXO);
     }
 
     public void destroy() {
-        this.cacheService.removeCache(LedgerConstant.STANDING_BOOK);
+        this.cacheService.removeCache(LedgerConstant.LEDGER_BOOK);
         this.utxoCacheService.removeCache(LedgerConstant.UTXO);
     }
 
@@ -74,37 +72,55 @@ LedgerCacheService {
         if (null == balance || StringUtils.isBlank(address)) {
             return;
         }
-        cacheService.putElement(LedgerConstant.STANDING_BOOK, address, balance);
+        cacheService.putElement(LedgerConstant.LEDGER_BOOK, address, balance);
     }
 
     public void removeBalance(String address) {
-        cacheService.removeElement(LedgerConstant.STANDING_BOOK, address);
+        cacheService.removeElement(LedgerConstant.LEDGER_BOOK, address);
     }
 
     public Balance getBalance(String address) {
-        return cacheService.getElement(LedgerConstant.STANDING_BOOK, address);
+        return cacheService.getElement(LedgerConstant.LEDGER_BOOK, address);
     }
 
-    public void putUtxo(String key, UtxoOutput output) {
+    public void putUtxo(String key, UtxoOutput output, boolean cacheBalance) {
         utxoCacheService.putElement(LedgerConstant.UTXO, key, output);
-
+        if (!cacheBalance) {
+            return;
+        }
         String address = output.getAddress();
         UtxoBalance balance = (UtxoBalance) getBalance(address);
         if (balance == null) {
             balance = new UtxoBalance();
-            List<UtxoOutput> outputs = new CopyOnWriteArrayList<>();
-            outputs.add(output);
-            balance.setUnSpends(outputs);
-            putBalance(address, balance);
-        } else {
-            balance.getUnSpends().add(output);
-            if (balance.getUnSpends().size() > 1) {
-                Collections.sort(balance.getUnSpends());
+        }
+        balance.addUtxo(key);
+        putBalance(address, balance);
+    }
+
+    public List<UtxoOutput> getUnSpends(String address) {
+        List<UtxoOutput> unSpends = new ArrayList<>();
+        UtxoBalance balance = (UtxoBalance) getBalance(address);
+        if (balance == null) {
+            return unSpends;
+        }
+
+        for (String key : balance.getUtxoKeys()) {
+            UtxoOutput output = getUtxo(key);
+            if (output != null) {
+                unSpends.add(output);
             }
         }
+        return unSpends;
     }
 
     public UtxoOutput getUtxo(String key) {
+        while (initCache){
+            try {
+                Thread.sleep(100L);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
+        }
         return utxoCacheService.getElement(LedgerConstant.UTXO, key);
     }
 
@@ -114,20 +130,15 @@ LedgerCacheService {
         if (output != null) {
             UtxoBalance balance = (UtxoBalance) getBalance(output.getAddress());
             if (balance != null) {
-                balance.getUnSpends().remove(output);
+                balance.getUtxoKeys().remove(output);
             }
         }
     }
 
-    public boolean updateUtxoStatus(String key, OutPutStatusEnum newStatus, OutPutStatusEnum oldStatus) {
-        if (!utxoCacheService.containsKey(LedgerConstant.UTXO, key)) {
-            return false;
+    public void putUtxoList(List<UtxoOutput> outputList) {
+        for (UtxoOutput output : outputList) {
+            this.putUtxo(output.getKey(), output, true);
         }
-        UtxoOutput output = utxoCacheService.getElement(LedgerConstant.UTXO, key);
-        if (output.getStatus() != oldStatus) {
-            return false;
-        }
-        output.setStatus(newStatus);
-        return true;
+        initCache = false;
     }
 }

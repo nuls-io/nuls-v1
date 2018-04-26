@@ -23,10 +23,10 @@
  */
 package io.nuls.ledger.entity.tx;
 
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.ledger.entity.params.CoinTransferData;
+import io.nuls.protocol.constant.TransactionConstant;
+import io.nuls.protocol.model.BaseNulsData;
 
 /**
  * @author Niels

@@ -23,12 +23,15 @@
  */
 package io.nuls.ledger.service.intf;
 
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.CoinData;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
+
+import java.util.List;
 
 /**
  * @author Niels
@@ -38,8 +41,6 @@ public interface CoinDataProvider {
 
     CoinData parse(NulsByteBuffer byteBuffer) throws NulsException;
 
-    void approve(CoinData coinData, Transaction tx) throws NulsException;
-
     void save(CoinData coinData, Transaction tx) throws NulsException;
 
     void rollback(CoinData coinData, Transaction tx);
@@ -47,4 +48,8 @@ public interface CoinDataProvider {
     CoinData createByTransferData(Transaction tx, CoinTransferData coinParam, String password) throws NulsException;
 
      void afterParse(CoinData coinData, Transaction tx);
+
+    ValidateResult conflictDetect( Transaction tx, List<Transaction> txList);
+
+    ValidateResult verifyCoinData(AbstractCoinTransaction coinTx, List<Transaction> packingTxList);
 }

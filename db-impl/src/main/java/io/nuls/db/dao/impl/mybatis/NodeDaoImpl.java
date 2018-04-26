@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ **
  * Copyright (c) 2017-2018 nuls.io
- *
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -36,6 +36,8 @@ import io.nuls.db.entity.NodePo;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Niels
@@ -43,6 +45,7 @@ import java.util.*;
  */
 @DbSession(transactional = PROPAGATION.NONE)
 public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> implements NodeDataService {
+    private Lock lock = new ReentrantLock();
     public NodeDaoImpl() {
         super(NodeMapper.class);
     }
@@ -53,13 +56,13 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
     }
 
     @Override
-    public List<NodePo> getNodePoList(int size, Set<String> keys) {
+    public List<NodePo> getNodePoList(int size, Set<String> ipSet) {
         Searchable searchable = new Searchable();
         PageHelper.startPage(1, size);
         PageHelper.orderBy("last_fail_time asc");
-        if (!keys.isEmpty()) {
-            List<String> keyList = new ArrayList<>(keys);
-            searchable.addCondition("id", SearchOperator.notIn, keyList);
+        if (ipSet != null && !ipSet.isEmpty()) {
+            List<String> keyList = new ArrayList<>(ipSet);
+            searchable.addCondition("ip", SearchOperator.notIn, keyList);
         }
         searchable.addCondition("status", SearchOperator.eq, 0);
         List<NodePo> list = getMapper().selectList(searchable);
@@ -69,6 +72,7 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
     @Override
     @DbSession
     public void saveChange(NodePo po) {
+        lock.lock();
         try {
             Searchable searchable = new Searchable();
             searchable.addCondition("id", SearchOperator.eq, po.getId());
@@ -79,6 +83,8 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
             }
         } catch (Exception e) {
             Log.error(e);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -86,7 +92,7 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
     @DbSession
     public void removeNode(NodePo po) {
         NodePo nodePo = getMapper().selectByPrimaryKey(po.getId());
-        if(nodePo != null && nodePo.getStatus() == NodePo.BLACK) {
+        if (nodePo != null && nodePo.getStatus() == NodePo.BLACK) {
             return;
         }
         if (nodePo != null) {
@@ -96,5 +102,11 @@ public class NodeDaoImpl extends BaseDaoImpl<NodeMapper, String, NodePo> impleme
                 getMapper().deleteByPrimaryKey(po.getId());
             }
         }
+    }
+
+    @Override
+    @DbSession
+    public void removeNode(String nodeId) {
+        getMapper().deleteByPrimaryKey(nodeId);
     }
 }

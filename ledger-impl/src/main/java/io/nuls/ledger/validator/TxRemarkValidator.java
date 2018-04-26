@@ -23,18 +23,17 @@
  */
 package io.nuls.ledger.validator;
 
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.SeverityLevelEnum;
 import io.nuls.core.validate.NulsDataValidator;
 import io.nuls.core.validate.ValidateResult;
+import io.nuls.protocol.model.Transaction;
 
 /**
  * @author Niels
  * @date 2017/12/19
  */
 public class TxRemarkValidator implements NulsDataValidator<Transaction> {
-    public final static int MAX_REMARK_LEN = 256;
+    public final static int MAX_REMARK_LEN = 100;
     private static final TxRemarkValidator INSTANCE = new TxRemarkValidator();
 
     private TxRemarkValidator() {

@@ -23,9 +23,9 @@
  */
 package io.nuls.db.dao.impl.mybatis;
 
-import io.nuls.core.chain.entity.Result;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.model.Result;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.db.dao.AccountDataService;
 import io.nuls.db.dao.AccountAliasDataService;

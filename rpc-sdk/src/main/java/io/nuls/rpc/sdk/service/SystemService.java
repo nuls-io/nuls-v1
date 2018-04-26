@@ -11,13 +11,8 @@ import java.util.Map;
  * @author Niels
  * @date 2018-03-07
  */
-public class SystemService {
-
-    private static SystemService instance = new SystemService();
-
-    public static SystemService getInstance() {
-        return instance;
-    }
+public enum SystemService {
+    SYSTEM_SERVICE;
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
@@ -29,7 +24,8 @@ public class SystemService {
     public RpcClientResult getVersion() {
         RpcClientResult result = restFul.get("/sys/version", null);
         if (result.isSuccess()) {
-            result.setData(new VersionDto((Map<String, Object>) result.getData()));
+            if(result.getData() != null)
+                result.setData(new VersionDto((Map<String, Object>) result.getData()));
         }
         return result;
     }
@@ -48,7 +44,8 @@ public class SystemService {
         params.put("moduleClass", moduleClass);
         RpcClientResult result = restFul.get("/sys/module/load", params);
         if (result.isSuccess()) {
-            result.setData(new VersionDto((Map<String, Object>) result.getData()));
+            if(result.getData() != null)
+                result.setData(new VersionDto((Map<String, Object>) result.getData()));
         }
         return result;
     }

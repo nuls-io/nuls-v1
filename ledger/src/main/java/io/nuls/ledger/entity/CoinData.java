@@ -23,10 +23,9 @@
  */
 package io.nuls.ledger.entity;
 
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.constant.TxStatusEnum;
+import io.nuls.core.exception.NulsException;
+import io.nuls.protocol.model.BaseNulsData;
+import io.nuls.protocol.model.Na;
 
 /**
  * @author Niels
@@ -36,7 +35,7 @@ public abstract class CoinData extends BaseNulsData {
 
     protected Na totalNa;
 
-    public abstract Na getTotalNa();
+    public abstract Na getTotalNa() throws NulsException;
 
     public void setTotalNa(Na totalNa) {
         this.totalNa = totalNa;

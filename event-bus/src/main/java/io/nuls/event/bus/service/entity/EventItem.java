@@ -26,7 +26,8 @@
 
 package io.nuls.event.bus.service.entity;
 
-import io.nuls.core.event.BaseEvent;
+
+import io.nuls.protocol.event.base.BaseEvent;
 
 /**
  * @author Niels

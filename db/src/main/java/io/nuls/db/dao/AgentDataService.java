@@ -25,14 +25,22 @@ package io.nuls.db.dao;
 
 import io.nuls.db.entity.AgentPo;
 
+import java.util.List;
+
 /**
  *
  * @author Niels
  * @date 2017/11/20
  */
-public interface AgentDataService extends BaseDataService< String,AgentPo> {
+public interface AgentDataService extends BaseDataService<String, AgentPo> {
 
     int updateSelective(AgentPo po);
 
+    List<AgentPo> getAllList();
 
+    List<AgentPo> getEffectiveList(String address, long blockHeight, Integer status);
+
+    int deleteById(String id, long blockHeight);
+
+    int realDeleteById(String id, long blockHeight);
 }

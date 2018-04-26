@@ -31,7 +31,7 @@ import io.nuls.event.bus.processor.manager.ProcessData;
  * @author Niels
  * @date 2017/11/6
  */
-public class NulsEventCall<T extends io.nuls.core.event.BaseEvent> implements Runnable {
+public class NulsEventCall<T extends io.nuls.protocol.event.base.BaseEvent> implements Runnable {
     private final ProcessData<T> data;
     private final NulsEventHandler<T> handler;
 

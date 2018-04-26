@@ -42,7 +42,26 @@ public class AgentPo {
 
     private Long startTime;
     private Double commissionRate;
-    private int status;
+    private Integer status;
+    private long blockHeight;
+    private long delHeight;
+    private String txHash;
+
+    public long getDelHeight() {
+        return delHeight;
+    }
+
+    public void setDelHeight(long delHeight) {
+        this.delHeight = delHeight;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
 
     public String getId() {
         return id;
@@ -100,11 +119,11 @@ public class AgentPo {
         this.commissionRate = commissionRate;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
 
-    public int getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
@@ -114,5 +133,13 @@ public class AgentPo {
 
     public void setAgentName(String agentName) {
         this.agentName = agentName;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
     }
 }

@@ -26,18 +26,22 @@
 
 package io.nuls.rpc.resources.form;
 
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.chain.manager.TransactionManager;
 import io.nuls.core.utils.crypto.Hex;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.utils.TransactionManager;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author Niels
  * @date 2018/3/22
  */
+@ApiModel(value = "交易数据")
 public class TxForm {
 
+    @ApiModelProperty(name = "data", value = "交易数据", required = true)
     private String data;
 
     public String getData() {
@@ -45,7 +49,7 @@ public class TxForm {
     }
 
     public void setData(String data) {
-        this.data = data;
+        this.data = StringUtils.formatStringPara(data);
     }
 
     public Transaction getTx() throws Exception {

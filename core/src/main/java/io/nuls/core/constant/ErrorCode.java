@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ **
  * Copyright (c) 2017-2018 nuls.io
- *
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -58,6 +58,7 @@ public enum ErrorCode {
     DATA_NOT_FOUND("SYS019", 10019),
     FILE_BROKEN("SYS020", 20020),
     SIGNATURE_ERROR("SYS021", 20021),
+    CHAIN_ID_ERROR("SYS022", 20022),
     /**
      * ----------  Consensus Network code   ---------
      */
@@ -69,17 +70,16 @@ public enum ErrorCode {
     NET_MESSAGE_ERROR("NET002", 40002),
     NET_MESSAGE_XOR_ERROR("NET003", 40003),
     NET_MESSAGE_LENGTH_ERROR("NET004", 40004),
-    NET_P2P_UNKOWN_EXCEPTION("NET005", 40005),
     NET_NODE_GROUP_ALREADY_EXISTS("NET006", 40006),
     NET_NODE_AREA_ALREADY_EXISTS("NET007", 40007),
     NET_NODE_GROUP_NOT_FOUND("NET008", 40008),
     NET_NODE_AREA_NOT_FOUND("NET009", 40009),
     NET_NODE_NOT_FOUND("NET010", 40010),
-
+    NET_BROADCAST_FAIL("NET011", 40011),
     /**
      * ---- direct Exception code---
      **/
-    VERIFICATION_FAILD("SYS000", 11000),
+    VERIFICATION_FAILD("DATA004", 11000),
     DATA_PARSE_ERROR("DATA001", 11001),
     DATA_OVER_SIZE_ERROR("DATA002", 11002),
     INPUT_VALUE_ERROR("DATA003", 11003),
@@ -92,6 +92,8 @@ public enum ErrorCode {
     ACCOUNT_EXIST("ACT003", 45003),
     ADDRESS_ERROR("ACT004", 45004),
     ALIAS_EXIST("ACT005", 45005),
+    ALIAS_ERROR("ACT006", 40006),
+    ACCOUNT_ALREADY_SET_ALIAS("ACT007", 40007),
 
     /**
      * ----------  DB Exception code   ---------
@@ -106,10 +108,6 @@ public enum ErrorCode {
     DB_SAVE_ERROR("DB006", 20006),
     DB_UPDATE_ERROR("DB007", 20007),
     DB_ROLLBACK_ERROR("DB008", 20008),
-    /**
-     * ----------  MQ Exception code   ---------
-     */
-    QUEUE_NAME_ERROR("MQ001", 70001),
 
     /**
      * ----------  RPC Exception code   ---------
@@ -135,9 +133,11 @@ public enum ErrorCode {
     UTXO_UNUSABLE("LED001", 70001),
     UTXO_STATUS_CHANGE("LED002", 70002),
     BALANCE_NOT_ENOUGH("LED003", 70003),
-    INVALID_OUTPUT("LED004", 70004),
+    INVALID_INPUT("LED004", 70004),
     INVALID_AMOUNT("LED005", 70005),
     ORPHAN_TX("LED006", 70006),
+    ORPHAN_BLOCK("LED007", 70007),
+    UTXO_NOT_FOUND("LED008", 70008),
     /**
      * messages
      */

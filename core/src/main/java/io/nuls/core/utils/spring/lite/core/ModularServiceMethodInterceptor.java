@@ -29,11 +29,8 @@ package io.nuls.core.utils.spring.lite.core;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.module.manager.ServiceManager;
-import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.spring.lite.core.interceptor.BeanMethodInterceptorManager;
 import io.nuls.core.utils.spring.lite.exception.BeanStatusException;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -53,7 +50,7 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
 
     @Override
     public Object intercept(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
-        Log.debug(method.toString());
+//        Log.debug(method.toString());
         threadLocal.set(0);
         Throwable throwable = null;
         while (threadLocal.get() < 100) {
@@ -77,12 +74,12 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
             fillAnnotationList(annotationList, clazz, method);
             BaseModuleBootstrap module = ServiceManager.getInstance().getModule(clazz);
             if (module == null) {
-                throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
+                throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!["+className+"]" + method.toString());
             }
             if (module.getModuleId() != NulsConstant.MODULE_ID_MICROKERNEL &&
                     module.getStatus() != ModuleStatusEnum.STARTING &&
                     module.getStatus() != ModuleStatusEnum.RUNNING) {
-                throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!" + method.toString());
+                throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module!["+module.getModuleName()+"]"  + method.toString());
             }
             boolean isOk = SpringLiteContext.checkBeanOk(obj);
             if (!isOk) {

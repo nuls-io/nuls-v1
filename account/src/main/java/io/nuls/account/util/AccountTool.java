@@ -27,13 +27,10 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.entity.Alias;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.EncryptedData;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 import io.nuls.core.utils.date.TimeService;
@@ -42,6 +39,7 @@ import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.entity.AccountPo;
 import io.nuls.db.entity.AliasPo;
+import io.nuls.protocol.context.NulsContext;
 
 import java.math.BigInteger;
 
@@ -62,7 +60,7 @@ public final class AccountTool {
     }
 
     public static Address newAddress(byte[] publicKey) throws NulsException {
-        return new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(publicKey));
+        return new Address(NulsContext.DEFAULT_CHAIN_ID, Utils.sha256hash160(publicKey));
     }
 
     public static Account createAccount(String prikey) throws NulsException {
@@ -76,7 +74,7 @@ public final class AccountTool {
                 throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
             }
         }
-        Address address = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), Utils.sha256hash160(key.getPubKey()));
+        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, Utils.sha256hash160(key.getPubKey()));
         Account account = new Account();
         account.setEncryptedPriKey(new byte[0]);
         account.setAddress(address);

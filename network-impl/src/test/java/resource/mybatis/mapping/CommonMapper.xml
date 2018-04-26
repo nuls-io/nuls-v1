@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.db.dao.impl.mybatis.common.CommonMapper">
+    <!-- 以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 -->
+    <!--<cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>-->
+    <!--<cache type="org.mybatis.caches.ehcache.EhcacheCache"/>-->
+    <sql id="Search_Where">
+        <if test="operators != null and operators.size > 0">
+            <where>
+                <foreach collection="operators" index="index" item="item">
+                    ${item.sqlSeparator}${item.prefix}
+                    <choose>
+                        <when test="item.operator.symbol == null">
+                            ${item.value}
+                        </when>
+                        <when test="item.operator.symbol == 'is null' or item.operator.symbol == 'is not null'">
+                            ${item.key} ${item.operator.symbol}
+                        </when>
+                        <when test="item.operator.symbol == 'in' or item.operator.symbol == 'not in' ">
+                            ${item.key} ${item.operator.symbol}
+                            <foreach collection="item.value" item="inItem" open=" (" close=") " separator=", ">#{inItem}</foreach>
+                        </when>
+                        <otherwise>
+                            ${item.key} ${item.operator.symbol} #{item.value}
+                        </otherwise>
+                    </choose>
+                    ${item.endfix}
+                </foreach>
+            </where>
+        </if>
+    </sql>
+</mapper>

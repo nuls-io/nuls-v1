@@ -26,6 +26,7 @@ package io.nuls.core.module.thread;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ModuleStatusEnum;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.module.manager.ModuleManager;
@@ -71,6 +72,10 @@ public class ModuleRunner implements Runnable {
             module.setStatus(ModuleStatusEnum.EXCEPTION);
             Log.error(e);
             throw new NulsRuntimeException(ErrorCode.FAILED, e);
+        }catch (NulsRuntimeException e){
+            module.setStatus(ModuleStatusEnum.EXCEPTION);
+            Log.error(e);
+            throw e;
         }
     }
 
@@ -84,7 +89,7 @@ public class ModuleRunner implements Runnable {
             Class clazz = Class.forName(moduleClass);
             module = (BaseModuleBootstrap) clazz.newInstance();
             module.setModuleName(this.moduleKey);
-            Log.info("load module:" + module.getInfo());
+            Log.debug("load module:" + module.getInfo());
         } while (false);
         ModuleManager.getInstance().regModule(module);
 

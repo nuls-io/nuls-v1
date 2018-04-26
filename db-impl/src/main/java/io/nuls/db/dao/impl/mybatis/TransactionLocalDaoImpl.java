@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,6 +33,7 @@ import io.nuls.db.entity.TransactionLocalPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +71,7 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     }
 
     @Override
-    public List<TransactionLocalPo> getTxs(Long blockHeight, String address, int type, int start, int limit) {
+    public List<TransactionLocalPo> getTxs(Long blockHeight, String address, int type, int pageNumber, int pageSize) {
         Searchable searchable = new Searchable();
 //        Condition condition = Condition.custom("(e.address = c.address or e.address = d.address)");
 //        searchable.addCondition(condition);
@@ -84,14 +85,18 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
             searchable.addCondition("e.address", SearchOperator.eq, address);
         }
 
-        if (start == 0 & limit == 0) {
+        if (pageNumber == 0 & pageSize == 0) {
             PageHelper.orderBy("a.create_time desc, b.in_index asc, c.out_index asc");
             return getMapper().selectByAddress(searchable);
         }
 
-        PageHelper.offsetPage(start, limit);
+        PageHelper.startPage(pageNumber, pageSize);
         PageHelper.orderBy("a.create_time desc");
         List<String> txHashList = getMapper().selectTxHashListRelation(searchable);
+        if (txHashList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         searchable = new Searchable();
         searchable.addCondition("a.hash", SearchOperator.in, txHashList);
         PageHelper.orderBy("a.create_time desc, b.in_index asc, c.out_index asc");
@@ -126,4 +131,12 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
         searchable.addCondition("e.address", SearchOperator.eq, address);
         return getMapper().selectCountByAddress(searchable);
     }
+
+    @Override
+    public List<TransactionLocalPo> getUnConfirmTxs() {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("txStatus", SearchOperator.eq, TransactionLocalPo.UNCONFIRM);
+        PageHelper.orderBy("create_time asc");
+        return getMapper().selectLocalTxs(searchable);
+    } 
 }

@@ -27,6 +27,7 @@ import io.nuls.core.dto.Page;
 import io.nuls.db.entity.BlockHeaderPo;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -85,7 +86,7 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
      */
     List<BlockHeaderPo> getHashList(long startHeight, long endHeight, long split);
 
-    Page<BlockHeaderPo> getBlockListByAddress(String nodeAddress, int type, int pageNumber, int pageSize);
+    Page<BlockHeaderPo> getBlockListByAddress(String nodeAddress, int type,int pageNumber, int pageSize);
 
     Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize);
 
@@ -97,14 +98,16 @@ public interface BlockHeaderService extends BaseDataService<String, BlockHeaderP
      * @param roundEnd
      * @return
      */
-    long getCount(String address, long roundStart, long roundEnd);
+    long getCount(String address, long roundStart, long roundEnd,long startHeight);
 
-    /**
-     * use for POC consensus
-     *
-     * @param address
-     * @param endRoundIndex
-     * @return
-     */
-    List<Long> getListOfRoundIndexOfYellowPunish(String address, long startRoundIndex, long endRoundIndex);
+    Map<String,Object> getSumTxCount(String address, long roundStart, long roundEnd);
+
+    Long getRoundFirstBlockHeight(long roundIndex);
+    Long getRoundLastBlockHeight(long roundIndex);
+
+    List<BlockHeaderPo> getBlockHashList(long start, long end);
+
+    List<BlockHeaderPo> getHeaderListByRound(long startRoundIndex, long endRoundIndex);
+
+    long getPackingCount(String packingAddress, long roundStart, long roundEnd);
 }

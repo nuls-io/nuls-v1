@@ -1,19 +1,25 @@
 package io.nuls.rpc.entity;
 
-import io.nuls.account.entity.Address;
-import io.nuls.core.chain.entity.Na;
 import io.nuls.ledger.entity.UtxoInput;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
+@ApiModel(value = "inputJSON")
 public class InputDto {
 
+    @ApiModelProperty(name = "index", value = "输入索引")
     private Integer index;
 
+    @ApiModelProperty(name = "fromHash", value = "来源output的txHash")
     private String fromHash;
 
+    @ApiModelProperty(name = "fromIndex", value = "来源output的outIndex")
     private Integer fromIndex;
 
+    @ApiModelProperty(name = "address", value = "转入地址")
     private String address;
 
+    @ApiModelProperty(name = "value", value = "转入金额")
     private Long value;
 
     public InputDto(UtxoInput input) {

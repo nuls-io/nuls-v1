@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,26 +24,28 @@
 package io.nuls.rpc.resources.impl;
 
 import io.nuls.account.entity.Address;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.core.validate.ValidateResult;
-import io.nuls.db.dao.UtxoOutputDataService;
-import io.nuls.db.entity.UtxoOutputPo;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
-import io.nuls.ledger.event.TransactionEvent;
+import io.nuls.ledger.entity.UtxoData;
+import io.nuls.ledger.entity.UtxoInput;
+import io.nuls.ledger.entity.UtxoOutput;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
 import io.nuls.ledger.service.intf.LedgerService;
+import io.nuls.ledger.util.UtxoTransactionTool;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.TransactionEvent;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.Transaction;
 import io.nuls.rpc.entity.OutputDto;
 import io.nuls.rpc.entity.RpcResult;
 import io.nuls.rpc.entity.TransactionDto;
 import io.nuls.rpc.resources.form.TxForm;
-import io.swagger.annotations.Api;
+import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -58,13 +60,16 @@ import java.util.List;
 @Api(value = "/browse", description = "Transaction")
 public class TransactionResource {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-    private UtxoOutputDataService outputDataService = NulsContext.getServiceBean(UtxoOutputDataService.class);
-
     private EventBroadcaster eventBroadcaster = NulsContext.getServiceBean(EventBroadcaster.class);
 
     @POST
+    @Path("/transaction")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult forwardTransaction(TxForm form) {
+    @ApiOperation(value = "发送交易数据包 [3.5.4]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = Boolean.class)
+    })
+    public RpcResult forwardTransaction(@ApiParam(name = "form", value = "交易数据", required = true)  TxForm form) {
         Transaction tx = null;
         try {
             tx = form.getTx();
@@ -80,21 +85,27 @@ public class TransactionResource {
         }
         TransactionEvent event = new TransactionEvent();
         event.setEventBody(tx);
-        List<String> list = eventBroadcaster.broadcastAndCache(event, true);
-        return RpcResult.getSuccess().setData(list);
+        boolean b = eventBroadcaster.publishToLocal(event);
+        return RpcResult.getSuccess().setData(b);
 
     }
 
     @GET
     @Path("/hash/{hash}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult load(@PathParam("hash") String hash) {
+    @ApiOperation(value = "根据hash查询交易 [3.5.1]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = TransactionDto.class)
+    })
+    public RpcResult load(@ApiParam(name="hash", value="交易hash", required = true)
+                              @PathParam("hash") String hash) {
         RpcResult result = null;
         if (StringUtils.isBlank(hash)) {
             return RpcResult.getFailed(ErrorCode.NULL_PARAMETER);
         }
         try {
             Transaction tx = ledgerService.getTx(NulsDigestData.fromDigestHex(hash));
+
             if (tx == null) {
                 result = RpcResult.getFailed("not found");
             } else {
@@ -113,12 +124,48 @@ public class TransactionResource {
     }
 
     @GET
+    @Path("/bySpent/{fromHash}/{fromIndex}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "根据已花费UTXO获取交易 [3.5.5]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = TransactionDto.class)
+    })
+    public RpcResult load(@ApiParam(name="fromHash", value="交易hash", required = true)
+                              @PathParam("fromHash") String fromHash,
+                          @ApiParam(name="fromIndex", value="索引", required = true)
+                                @PathParam("fromIndex") int fromIndex) {
+        RpcResult result = null;
+        if (StringUtils.isBlank(fromHash) || fromIndex < 0 || fromIndex > 500) {
+            return RpcResult.getFailed(ErrorCode.NULL_PARAMETER);
+        }
+        Transaction transaction = ledgerService.getTx(fromHash, fromIndex);
+        if (transaction == null) {
+            return RpcResult.getFailed(ErrorCode.DATA_NOT_FOUND);
+        }
+        TransactionDto dto = new TransactionDto(transaction);
+        return RpcResult.getSuccess().setData(dto);
+    }
+
+    @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@QueryParam("blockHeight") Long blockHeight,
-                          @QueryParam("address") String address, @QueryParam("type") int type,
-                          @QueryParam("pageNumber") int pageNumber, @QueryParam("pageSize") int pageSize) {
-        if (blockHeight == null && StringUtils.isBlank(address) && type == 0) {
+    @ApiOperation(value = "查询单个账户交易列表 [3.5.2]",
+            notes = "result.data.page.list: List<TransactionDto>, pageNumber和pageSize要么同时缺省，" +
+                    "要么都必须大于0，同时缺省时则返回查询到的所有结果, blockHeight, address, type至少有一个必填")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = TransactionDto.class)
+    })
+    public RpcResult list(@ApiParam(name="blockHeight", value="交易所在的区块高度，缺省时为所有区块")
+                              @QueryParam("blockHeight") Long blockHeight,
+                          @ApiParam(name="address", value="账户地址，缺省时为所有账户")
+                                @QueryParam("address") String address,
+                          @ApiParam(name="type", value="交易类型，缺省时默认为所有类型")
+                              @QueryParam("type") int type,
+                          @ApiParam(name="pageNumber", value="页码")
+                              @QueryParam("pageNumber") int pageNumber,
+                          @ApiParam(name="pageSize", value="每页条数")
+                              @QueryParam("pageSize") int pageSize) {
+        if (blockHeight == null && StringUtils.isBlank(address) && type == 0 && pageNumber == 0 && pageSize == 0) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
         if ((blockHeight != null && blockHeight < 0) || type < 0 || pageNumber < 0 || pageSize < 0) {
@@ -174,9 +221,17 @@ public class TransactionResource {
     @GET
     @Path("/locked")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcResult list(@QueryParam("address") String address,
-                          @QueryParam("pageNumber") int pageNumber,
-                          @QueryParam("pageSize") int pageSize) {
+    @ApiOperation(value = "查询我的锁定金额列表 [3.5.3]",
+            notes = "result.data.page.list: List<OutputDto>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = OutputDto.class)
+    })
+    public RpcResult list(@ApiParam(name="address", value="账户地址")
+                              @QueryParam("address") String address,
+                          @ApiParam(name="pageNumber", value="页码")
+                                @QueryParam("pageNumber") int pageNumber,
+                          @ApiParam(name="pageSize", value="每页条数")
+                                @QueryParam("pageSize") int pageSize) {
         if (!Address.validAddress(address)) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
@@ -189,14 +244,17 @@ public class TransactionResource {
         if (pageSize == 0) {
             pageSize = 10;
         }
-        //todo        ledgerService.getLockUtxo
-        List<UtxoOutputPo> poList = outputDataService.getLockUtxo(address, TimeService.currentTimeMillis(), pageNumber, pageSize);
+        Page<UtxoOutput> page = ledgerService.getLockUtxo(address, pageNumber, pageSize);
+
         List<OutputDto> dtoList = new ArrayList<>();
-        for (UtxoOutputPo po : poList) {
+        for (UtxoOutput po : page.getList()) {
             dtoList.add(new OutputDto(po));
         }
         RpcResult result = RpcResult.getSuccess();
-        result.setData(dtoList);
+
+        Page dtoPage = new Page(page);
+        dtoPage.setList(dtoList);
+        result.setData(dtoPage);
         return result;
     }
 

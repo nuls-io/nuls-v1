@@ -23,7 +23,7 @@
  */
 package io.nuls.account.constant;
 
-import io.nuls.core.chain.entity.Na;
+import io.nuls.protocol.model.Na;
 
 /**
  *

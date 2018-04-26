@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ **
  * Copyright (c) 2017-2018 nuls.io
- *
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,24 +32,23 @@ import io.nuls.db.entity.NodePo;
  */
 public class NodeTransferTool {
 
-
     public static void toNode(Node node, NodePo po) {
         node.setId(po.getId());
-        node.setFailCount(po.getFailCount());
+        node.setFailCount(0);
         node.setIp(po.getIp());
         node.setPort(po.getPort());
+        node.setSeverPort(po.getPort());
         node.setLastTime(po.getLastTime());
         node.setMagicNumber(po.getMagicNum());
-        node.setFailCount(po.getFailCount());
     }
 
 
     public static NodePo toPojo(Node node) {
         NodePo po = new NodePo();
-        po.setId(node.getId());
+        po.setId(node.getIp() + ":" + node.getSeverPort());
         po.setFailCount(node.getFailCount());
         po.setIp(node.getIp());
-        po.setPort(node.getPort());
+        po.setPort(node.getSeverPort());
         po.setLastTime(node.getLastTime());
         po.setMagicNum(node.getMagicNumber());
         po.setStatus(0);
@@ -57,7 +56,7 @@ public class NodeTransferTool {
         if (po.getLastTime() == null) {
             po.setLastTime(TimeService.currentTimeMillis());
         }
-        if(po.getFailCount() == null) {
+        if (po.getFailCount() == null) {
             po.setFailCount(0);
         }
         return po;

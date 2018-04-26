@@ -23,8 +23,6 @@
  */
 package io.nuls.core.constant;
 
-import io.nuls.core.context.NulsContext;
-
 /**
  * SYSTEM CONSTANT
  *
@@ -32,13 +30,13 @@ import io.nuls.core.context.NulsContext;
  * @date 2017/9/26
  */
 public interface NulsConstant {
-    byte[] PLACE_HOLDER = new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF}; //NulsContext.getMagicNumber();
+    byte[] PLACE_HOLDER = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF}; //NulsContext.getMagicNumber();
 
     String USER_CONFIG_FILE = "nuls.ini";
     String MODULES_CONFIG_FILE = "modules.ini";
     String MODULE_BOOTSTRAP_KEY = "bootstrap";
     long MODULE_LOAD_WAIT_TIME = 120000L;
-
+    long BlOCKHEIGHT_TIME_DIVIDE = 1000000000000L;
     int INT48_VALUE_LENGTH1 = 6;
 
     /**
@@ -70,4 +68,6 @@ public interface NulsConstant {
     short MODULE_ID_CONSENSUS = 7;
     short MODULE_ID_LEDGER = 8;
     short MODULE_ID_RPC = 9;
+    short MODULE_ID_PROTOCOL = 10;
+    short MODULE_ID_NOTIFY = 11;
 }

@@ -23,7 +23,7 @@
  */
 package io.nuls.event.bus.filter;
 
-import io.nuls.core.event.BaseEvent;
+import io.nuls.protocol.event.base.BaseEvent;
 
 import java.util.ArrayList;
 import java.util.List;

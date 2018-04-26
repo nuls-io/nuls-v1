@@ -25,14 +25,11 @@ package io.nuls.ledger.util;
 
 import io.nuls.account.entity.Account;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.*;
@@ -42,7 +39,10 @@ import io.nuls.ledger.entity.tx.LockNulsTransaction;
 import io.nuls.ledger.entity.tx.TransferTransaction;
 import io.nuls.ledger.event.notice.BalanceChangeData;
 import io.nuls.ledger.event.notice.BalanceChangeNotice;
-import io.nuls.ledger.service.impl.LedgerCacheService;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Na;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.Transaction;
 
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -57,12 +57,6 @@ public class UtxoTransactionTool {
 
     private Lock lock = new ReentrantLock();
 
-    public static final int APPROVE = 1;
-
-    public static final int COMMIT = 2;
-
-    public static final int ROLLBACK = 3;
-
     private UtxoTransactionTool() {
 
     }
@@ -73,7 +67,6 @@ public class UtxoTransactionTool {
 
     private AccountService accountService;
     private EventBroadcaster eventBroadcaster;
-    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
     public TransferTransaction createTransferTx(CoinTransferData transferData, String password, String remark) throws Exception {
         if (transferData.getFrom().isEmpty()) {
@@ -81,7 +74,7 @@ public class UtxoTransactionTool {
         }
         TransferTransaction tx = new TransferTransaction(transferData, password);
         if (StringUtils.isNotBlank(remark)) {
-            tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
+            tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
         }
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         AccountService accountService = getAccountService();
@@ -93,7 +86,7 @@ public class UtxoTransactionTool {
     public LockNulsTransaction createLockNulsTx(CoinTransferData transferData, String password, String remark) throws Exception {
         LockNulsTransaction tx = new LockNulsTransaction(transferData, password);
         if (StringUtils.isNotBlank(remark)) {
-            tx.setRemark(remark.getBytes(NulsContext.DEFAULT_ENCODING));
+            tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
         }
         tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
         AccountService accountService = getAccountService();
@@ -112,7 +105,7 @@ public class UtxoTransactionTool {
      * @param tx
      * @return
      */
-    public boolean isMine(AbstractCoinTransaction tx) throws NulsException {
+    public boolean isMine(AbstractCoinTransaction tx) {
         if (NulsContext.LOCAL_ADDRESS_LIST.isEmpty()) {
             return false;
         }
@@ -150,7 +143,7 @@ public class UtxoTransactionTool {
      * @param tx
      * @return
      */
-    public boolean isMine(AbstractCoinTransaction tx, String address) throws NulsException {
+    public boolean isMine(AbstractCoinTransaction tx, String address) {
 
         UtxoData coinData = (UtxoData) tx.getCoinData();
         //check input
@@ -177,49 +170,90 @@ public class UtxoTransactionTool {
         return false;
     }
 
-    public void calcBalance(String address, boolean sendNotice) {
-        lock.lock();
-        try {
-            UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(address);
-            if (balance == null) {
-                return;
-            }
-            checkUtxoTimeLock(balance.getUnSpends());
+    public boolean isMySend(AbstractCoinTransaction tx) {
+        if (NulsContext.LOCAL_ADDRESS_LIST.isEmpty()) {
+            return false;
+        }
 
-            long usable = 0;
-            long lock = 0;
-            for (UtxoOutput output : balance.getUnSpends()) {
-                if (output.isUsable()) {
-                    usable += output.getValue();
-                } else if (output.isLocked()) {
-                    lock += output.getValue();
+        UtxoData coinData = (UtxoData) tx.getCoinData();
+        //check input
+        if (coinData.getInputs() != null && !coinData.getInputs().isEmpty()) {
+            for (UtxoInput input : coinData.getInputs()) {
+                if (input.getFrom() == null) {
+                    continue;
+                }
+                if (NulsContext.LOCAL_ADDRESS_LIST.contains(input.getFrom().getAddress())) {
+                    tx.setTransferType(Transaction.TRANSFER_SEND);
+                    return true;
                 }
             }
-
-            Balance oldBalance = new Balance(balance.getUsable(), balance.getLocked());
-
-            balance.setLocked(Na.valueOf(lock));
-            balance.setUsable(Na.valueOf(usable));
-            balance.setBalance(balance.getUsable().add(balance.getLocked()));
-
-            //check exchange
-            if (oldBalance.getBalance().getValue() == balance.getBalance().getValue() &&
-                    oldBalance.getUsable().getValue() == balance.getUsable().getValue() &&
-                    oldBalance.getLocked().getValue() == balance.getLocked().getValue()) {
-                return;
-            }
-
-            if (sendNotice) {
-                sendNotice(oldBalance, balance, address);
-            }
-
-            if (balance.getUnSpends().isEmpty()) {
-                ledgerCacheService.removeBalance(address);
-            }
-        } finally {
-            lock.unlock();
         }
+        return false;
     }
+
+    public boolean isMySend(AbstractCoinTransaction tx, String address) {
+
+        UtxoData coinData = (UtxoData) tx.getCoinData();
+        //check input
+        if (coinData.getInputs() != null && !coinData.getInputs().isEmpty()) {
+            for (UtxoInput input : coinData.getInputs()) {
+                if (input.getFrom() == null) {
+                    continue;
+                }
+                if (input.getFrom().getAddress().equals(address)) {
+                    tx.setTransferType(Transaction.TRANSFER_SEND);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+//    public void calcBalance(String address, boolean sendNotice) {
+//        lock.lock();
+//        try {
+//            UtxoBalance balance = (UtxoBalance) ledgerCacheService.getBalance(address);
+//            if (balance == null) {
+//                return;
+//            }
+//            checkUtxoTimeLock(balance.getUnSpends());
+//
+//            long usable = 0;
+//            long lock = 0;
+//            for (UtxoOutput output : balance.getUnSpends()) {
+//                if (output.isUsable()) {
+//                    usable += output.getValue();
+//                } else if (output.isLocked()) {
+//                    lock += output.getValue();
+//                }
+//            }
+//
+//            Balance oldBalance = new Balance(balance.getUsable(), balance.getLocked());
+//
+//            balance.setLocked(Na.valueOf(lock));
+//            balance.setUsable(Na.valueOf(usable));
+//            balance.setBalance(balance.getUsable().add(balance.getLocked()));
+//
+//            //check exchange
+//            if (oldBalance.getBalance().getValue() == balance.getBalance().getValue() &&
+//                    oldBalance.getUsable().getValue() == balance.getUsable().getValue() &&
+//                    oldBalance.getLocked().getValue() == balance.getLocked().getValue()) {
+//                return;
+//            }
+//
+//            if (sendNotice) {
+//                sendNotice(oldBalance, balance, address);
+//            }
+//
+//            if (balance.getUnSpends().isEmpty()) {
+//                ledgerCacheService.removeBalance(address);
+//            }
+//        } catch (Exception e) {
+//            Log.error(e);
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
 
     private void sendNotice(Balance oldBalance, Balance balance, String address) {
         long oldNa = oldBalance.getBalance().getValue();
@@ -248,28 +282,38 @@ public class UtxoTransactionTool {
         }
     }
 
-    public void checkUtxoTimeLock(List<UtxoOutput> outputList) {
-        long currentTime = TimeService.currentTimeMillis();
-        long genesisTime = NulsContext.getInstance().getGenesisBlock().getHeader().getTime();
-        long bestHeight = NulsContext.getInstance().getNetBestBlockHeight();
-        for (UtxoOutput output : outputList) {
-            if (output.isLocked()) {
-                // check lock by time
-                if (output.getLockTime() >= genesisTime && output.getLockTime() <= currentTime) {
-                    if (OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK.equals(output.getStatus())) {
-                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
-                    } else if (OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK.equals(output.getStatus())) {
-                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
-                    }
-                }
-                // check lock by height
-                else if (output.getLockTime() < genesisTime && output.getLockTime() >= bestHeight) {
-                    if (OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK.equals(output.getStatus())) {
-                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRM_UNSPEND);
-                    } else if (OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK.equals(output.getStatus())) {
-                        output.setStatus(OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND);
-                    }
-                }
+//    public void checkUtxoTimeLock(List<UtxoOutput> outputList) {
+//        long currentTime = TimeService.currentTimeMillis();
+//        long genesisTime = NulsContext.getInstance().getGenesisBlock().getHeader().getTime();
+//        long bestHeight = NulsContext.getInstance().getNetBestBlockHeight();
+//        for (UtxoOutput output : outputList) {
+//            if (output.isLocked()) {
+//                // check lock by time
+//                if (output.getLockTime() >= genesisTime && output.getLockTime() <= currentTime) {
+//                    if (OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK.equals(output.getStatus())) {
+//                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+//                    }
+//                }
+//                // check lock by height
+//                else if (output.getLockTime() < genesisTime && output.getLockTime() >= bestHeight) {
+//                    if (OutPutStatusEnum.UTXO_CONFIRMED_TIME_LOCK.equals(output.getStatus())) {
+//                        output.setStatus(OutPutStatusEnum.UTXO_CONFIRMED_UNSPENT);
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+    public void setTxhashToUtxo(Transaction tx) {
+        if (tx instanceof AbstractCoinTransaction) {
+            AbstractCoinTransaction atx = (AbstractCoinTransaction) tx;
+            UtxoData utxoData = (UtxoData) atx.getCoinData();
+
+            for (UtxoInput input : utxoData.getInputs()) {
+                input.setTxHash(tx.getHash());
+            }
+            for (UtxoOutput output : utxoData.getOutputs()) {
+                output.setTxHash(tx.getHash());
             }
         }
     }

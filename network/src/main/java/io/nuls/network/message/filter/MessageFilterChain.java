@@ -24,7 +24,9 @@
 package io.nuls.network.message.filter;
 
 
-import io.nuls.core.mesasge.NulsMessage;
+
+
+import io.nuls.protocol.mesasge.NulsMessage;
 
 import java.util.ArrayList;
 import java.util.List;

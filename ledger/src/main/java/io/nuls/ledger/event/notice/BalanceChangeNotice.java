@@ -28,11 +28,11 @@ package io.nuls.ledger.event.notice;
 
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.event.BaseEvent;
-import io.nuls.core.event.NoticeData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.protocol.event.base.BaseEvent;
+import io.nuls.protocol.event.base.NoticeData;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels

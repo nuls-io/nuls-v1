@@ -34,6 +34,16 @@ public class DisruptorEvent<T> {
 
     private T data;
 
+    private boolean stoped = false;
+
+    public boolean isStoped() {
+        return stoped;
+    }
+
+    public void setStoped(boolean stoped) {
+        this.stoped = stoped;
+    }
+
     public String getName() {
         return name;
     }

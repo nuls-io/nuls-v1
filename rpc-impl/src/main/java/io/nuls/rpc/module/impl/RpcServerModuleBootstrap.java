@@ -23,8 +23,8 @@
  */
 package io.nuls.rpc.module.impl;
 
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.protocol.context.NulsContext;
 import io.nuls.rpc.constant.RpcConstant;
 import io.nuls.rpc.module.AbstractRpcServerModule;
 import io.nuls.rpc.service.impl.RpcServerServiceImpl;

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,26 +24,25 @@
 package io.nuls.ledger.entity;
 
 import io.nuls.account.entity.Address;
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.context.NulsContext;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.script.P2PKHScript;
 import io.nuls.core.utils.crypto.Utils;
-import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.core.utils.io.NulsOutputStreamBuffer;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.str.StringUtils;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.BaseNulsData;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.script.P2PKHScript;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
+import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by win10 on 2017/10/30.
  */
-public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
+public class UtxoOutput extends BaseNulsData {
 
     private NulsDigestData txHash;
 
@@ -105,7 +104,7 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         lockTime = byteBuffer.readInt48();
         p2PKHScript = byteBuffer.readNulsData(new P2PKHScript());
 
-        Address addressObj = new Address(NulsContext.getInstance().getChainId(NulsContext.CHAIN_ID), this.getOwner());
+        Address addressObj = new Address(NulsContext.DEFAULT_CHAIN_ID, this.getOwner());
 
         this.address = addressObj.toString();
     }
@@ -194,36 +193,29 @@ public class UtxoOutput extends BaseNulsData implements Comparable<UtxoOutput> {
         this.txType = txType;
     }
 
-    @Override
-    public int compareTo(UtxoOutput o) {
-        if (this.value < o.getValue()) {
-            return -1;
-        } else if (this.value > o.getValue()) {
-            return 1;
-        }
-        return 0;
-    }
-
     public boolean isUsable() {
-        return OutPutStatusEnum.UTXO_CONFIRM_UNSPEND == status || OutPutStatusEnum.UTXO_UNCONFIRM_UNSPEND == status;
+        isLocked();
+        return OutPutStatusEnum.UTXO_UNSPENT == status || null == status;
     }
 
     public boolean isSpend() {
-        return OutPutStatusEnum.UTXO_CONFIRM_SPEND == status || OutPutStatusEnum.UTXO_UNCONFIRM_SPEND == status;
+        return OutPutStatusEnum.UTXO_SPENT == status;
     }
 
     public boolean isLocked() {
-        return OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == status ||
-                OutPutStatusEnum.UTXO_UNCONFIRM_CONSENSUS_LOCK == status ||
-                OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK == status ||
-                OutPutStatusEnum.UTXO_UNCONFIRM_TIME_LOCK == status;
-    }
-
-    public boolean isConfirm() {
-        return OutPutStatusEnum.UTXO_CONFIRM_UNSPEND == status ||
-                OutPutStatusEnum.UTXO_CONFIRM_TIME_LOCK == status ||
-                OutPutStatusEnum.UTXO_CONFIRM_SPEND == status ||
-                OutPutStatusEnum.UTXO_CONFIRM_CONSENSUS_LOCK == status;
+        if (OutPutStatusEnum.UTXO_CONSENSUS_LOCK == status) {
+            return true;
+        }
+        long currentTime = TimeService.currentTimeMillis();
+        if (lockTime <= NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime >= NulsContext.getInstance().getBestHeight()) {
+            status = OutPutStatusEnum.UTXO_TIME_LOCK;
+            return true;
+        } else if (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime >= currentTime) {
+            status = OutPutStatusEnum.UTXO_TIME_LOCK;
+            return true;
+        }
+        status = OutPutStatusEnum.UTXO_UNSPENT;
+        return false;
     }
 
     public byte[] getOwner() {

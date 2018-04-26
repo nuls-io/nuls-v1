@@ -23,13 +23,13 @@
  */
 package io.nuls.core.utils.crypto;
 
-import io.nuls.core.chain.entity.BaseNulsData;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.crypto.VarInt;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.model.intf.NulsData;
 import io.nuls.core.utils.log.Log;
 import org.spongycastle.crypto.digests.RIPEMD160Digest;
 
@@ -48,7 +48,7 @@ public class Utils {
     /**
      * @auther somebody
      */
-    public static final Charset CHARSET = Charset.forName(NulsContext.DEFAULT_ENCODING);
+    public static final Charset CHARSET = Charset.forName(NulsConfig.DEFAULT_ENCODING);
     private static final int MAGIC_8 = 8;
     private static final int MAGIC_0X80 = 0x80;
     /**
@@ -470,12 +470,12 @@ public class Utils {
     }
 
     public static int sizeOfString(String val) {
-        if(null==val){
+        if (null == val) {
             return 1;
         }
         byte[] bytes;
         try {
-            bytes = val.getBytes(NulsContext.DEFAULT_ENCODING);
+            bytes = val.getBytes(NulsConfig.DEFAULT_ENCODING);
         } catch (UnsupportedEncodingException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -483,7 +483,7 @@ public class Utils {
         return sizeOfBytes(bytes);
     }
 
-    public static int sizeOfLong(Long val) {
+    public static int sizeOfVarInt(Long val) {
         return VarInt.sizeOf(val);
     }
 
@@ -491,12 +491,8 @@ public class Utils {
         return NulsConstant.INT48_VALUE_LENGTH1;
     }
 
-    public static int sizeOfInt(Integer val) {
+    public static int sizeOfVarInt(Integer val) {
         return VarInt.sizeOf(val);
-    }
-
-    public static int sizeOfShort(Short val) {
-        return 2;
     }
 
     public static int sizeOfBoolean(Boolean val) {
@@ -510,7 +506,7 @@ public class Utils {
         return VarInt.sizeOf((val).length) + (val).length;
     }
 
-    public static int sizeOfNulsData(BaseNulsData val) {
+    public static int sizeOfNulsData(NulsData val) {
         if (null == val) {
             return NulsConstant.PLACE_HOLDER.length;
         }

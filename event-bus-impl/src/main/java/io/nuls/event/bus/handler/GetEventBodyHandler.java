@@ -23,13 +23,12 @@
  */
 package io.nuls.event.bus.handler;
 
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseEvent;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.event.GetEventBodyEvent;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.event.bus.service.impl.EventCacheService;
-import io.nuls.event.bus.service.impl.EventBroadcasterImpl;
 
 /**
  * @author Niels
@@ -42,7 +41,7 @@ public class GetEventBodyHandler extends AbstractEventHandler<GetEventBodyEvent>
 
     @Override
     public void onEvent(GetEventBodyEvent event, String fromId) {
-        BaseEvent eventBody = eventCacheService.getEvent(event.getEventBody().getDigestHex() );
+        BaseEvent eventBody = eventCacheService.getSendEvent(event.getEventBody().getDigestHex() );
         if (null == eventBody) {
             Log.warn("get event faild,node:" + fromId + ",event:" + event.getEventBody().getDigestHex());
             return;

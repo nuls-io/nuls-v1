@@ -78,7 +78,7 @@ public class NotificationController implements WebSocketDelegate, NulsEventDeleg
         try {
             webSocketHandler.stop();
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+           Log.error(e);
         }
 
         webSocketHandler = null;

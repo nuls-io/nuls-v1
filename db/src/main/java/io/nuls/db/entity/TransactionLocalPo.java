@@ -23,8 +23,6 @@
  */
 package io.nuls.db.entity;
 
-import io.nuls.core.chain.entity.Transaction;
-
 import java.util.List;
 
 /**
@@ -53,23 +51,29 @@ public class TransactionLocalPo {
 
     private byte[] txData;
 
+    private byte[] coinData;
+
     private byte[] scriptSig;
 
     private List<UtxoInputPo> inputs;
 
     private List<UtxoOutputPo> outputs;
 
+    public static final int UNCONFIRM = 0;
+    public static final int CONFIRM = 1;
+    private Integer txStatus;
+
     public TransactionLocalPo() {
     }
 
-    public TransactionLocalPo(TransactionPo tx) {
+    public TransactionLocalPo(TransactionPo tx, int transferType) {
         this.hash = tx.getHash();
         this.type = tx.getType();
         this.txIndex = tx.getTxIndex();
         this.blockHeight = tx.getBlockHeight();
         this.createTime = tx.getCreateTime();
         this.fee = tx.getFee();
-        this.transferType = Transaction.TRANSFER_RECEIVE;
+        this.transferType = transferType;
         this.remark = tx.getRemark();
         this.txData = tx.getTxData();
         this.scriptSig = tx.getScriptSig();
@@ -179,5 +183,22 @@ public class TransactionLocalPo {
 
     public void setSize(Integer size) {
         this.size = size;
+    }
+
+
+    public byte[] getCoinData() {
+        return coinData;
+    }
+
+    public void setCoinData(byte[] coinData) {
+        this.coinData = coinData;
+    }
+
+    public Integer getTxStatus() {
+        return txStatus;
+    }
+
+    public void setTxStatus(Integer txStatus) {
+        this.txStatus = txStatus;
     }
 }

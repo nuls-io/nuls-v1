@@ -23,13 +23,15 @@
  */
 package io.nuls.ledger.service.intf;
 
-import io.nuls.core.chain.entity.Na;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.Result;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.Result;
+import io.nuls.core.validate.ValidateResult;
 import io.nuls.ledger.entity.Balance;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.Na;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.Transaction;
 
 import java.io.IOException;
 import java.util.List;
@@ -42,7 +44,7 @@ public interface LedgerService {
 
     Transaction getTx(NulsDigestData hash);
 
-    Transaction getLocalTx(NulsDigestData hash);
+    Transaction getTx(String fromHash, int fromIndex);
 
     List<Transaction> getTxList(String address, int txType) throws Exception;
 
@@ -60,6 +62,8 @@ public interface LedgerService {
 
     Balance getBalance(String address);
 
+    Balance getBalances();
+
     Na getTxFee(int txType);
 
     Result transfer(String address, String password, String toAddress, Na amount, String remark);
@@ -72,19 +76,29 @@ public interface LedgerService {
      */
     Result lock(String address, String password, Na amount, long unlockTime, String remark);
 
-    boolean saveTxList(List<Transaction> txList) throws IOException;
+    void saveTxList(List<Transaction> txList) throws IOException;
+
+    boolean saveLocalTx(Transaction tx) throws IOException;
+
+    void deleteLocalTx(String txHash);
 
     void saveTxInLocal(String address);
 
-    boolean checkTxIsMine(Transaction tx) throws NulsException;
+    boolean checkTxIsMine(Transaction tx);
 
-    boolean checkTxIsMine(Transaction tx, String address) throws NulsException;
+    boolean checkTxIsMine(Transaction tx, String address);
 
-    void rollbackTx(Transaction tx) throws NulsException;
+    boolean checkTxIsMySend(Transaction tx);
 
-    void commitTx(Transaction tx) throws NulsException;
+    boolean checkTxIsMySend(Transaction tx, String address);
 
-    void approvalTx(Transaction tx) throws NulsException;
+    void rollbackTx(Transaction tx, Block block) throws NulsException;
+
+    void commitTx(Transaction tx, Block block) throws NulsException;
+
+    ValidateResult conflictDetectTx(Transaction tx, List<Transaction> txList) throws NulsException;
+
+    List<Transaction> getWaitingTxList() throws NulsException;
 
     void deleteTx(Transaction tx);
 
@@ -92,11 +106,10 @@ public interface LedgerService {
 
     long getBlockReward(long blockHeight);
 
-    long getBlockFee(Long blockHeight);
+    Long getBlockFee(Long blockHeight);
 
     /**
      * get the last 24 hours coinbase transaction reward
-     * @return
      */
     long getLastDayTimeReward();
 
@@ -109,4 +122,14 @@ public interface LedgerService {
     void unlockTxSave(String txHash);
 
     void unlockTxRollback(String txHash);
+
+    Page getLockUtxo(String address, Integer pageNumber, Integer pageSize);
+
+    Balance getAccountUtxo(String address, Na amount);
+
+    void resetLedgerCache();
+
+    ValidateResult verifyTx(Transaction tx,List<Transaction> txList);
+
+    void verifyTxWithException(Transaction tx, List<Transaction> txList);
 }

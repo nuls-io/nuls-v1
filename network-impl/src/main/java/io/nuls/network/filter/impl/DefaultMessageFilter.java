@@ -23,13 +23,12 @@
  */
 package io.nuls.network.filter.impl;
 
-import io.nuls.core.mesasge.NulsMessage;
-import io.nuls.core.mesasge.NulsMessageHeader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.message.filter.NulsMessageFilter;
+import io.nuls.protocol.mesasge.NulsMessage;
+import io.nuls.protocol.mesasge.NulsMessageHeader;
 
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**

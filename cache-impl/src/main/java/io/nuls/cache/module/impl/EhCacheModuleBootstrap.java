@@ -23,11 +23,9 @@
  */
 package io.nuls.cache.module.impl;
 
-import io.nuls.cache.constant.EhCacheConstant;
 import io.nuls.cache.manager.EhCacheManager;
 import io.nuls.cache.module.AbstractCacheModule;
 import io.nuls.cache.service.impl.EhCacheServiceImpl;
-import io.nuls.cache.service.intf.CacheService;
 
 /**
  *

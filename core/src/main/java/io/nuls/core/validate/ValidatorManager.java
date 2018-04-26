@@ -26,10 +26,9 @@
 
 package io.nuls.core.validate;
 
-import io.nuls.core.chain.entity.BaseNulsData;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.model.intf.NulsData;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,7 +41,7 @@ public class ValidatorManager {
     private static Map<Class, DataValidatorChain> chainMap = new ConcurrentHashMap<>();
 
 
-    public static void addValidator(Class<? extends BaseNulsData> clazz, NulsDataValidator<? extends BaseNulsData> validator) {
+    public static void addValidator(Class<? extends NulsData> clazz, NulsDataValidator<? extends NulsData> validator) {
         DataValidatorChain chain = chainMap.get(clazz);
         if (null == chain) {
             chain = new DataValidatorChain();
@@ -51,7 +50,7 @@ public class ValidatorManager {
         chain.addValidator(validator);
     }
 
-    public static ValidateResult startDoValidator(BaseNulsData data) {
+    public static ValidateResult startDoValidator(NulsData data) {
         if (data == null) {
             return ValidateResult.getFailedResult(ErrorCode.NULL_PARAMETER);
         }

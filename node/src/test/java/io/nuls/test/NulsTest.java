@@ -23,12 +23,10 @@
  */
 package io.nuls.test;
 
-import io.nuls.account.entity.Address;
-import io.nuls.account.entity.Alias;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.crypto.ECKey;
-import io.nuls.core.utils.crypto.Utils;
 import org.junit.Test;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * @author vivi
@@ -38,6 +36,10 @@ public class NulsTest {
 
     @Test
     public void testAlias() {
+        Date date = new Date();
+        date.setTime(1000000000000L);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+        System.out.println(sdf.format(date));
     }
 }

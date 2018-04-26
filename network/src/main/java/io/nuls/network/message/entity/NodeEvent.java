@@ -24,12 +24,12 @@
 package io.nuls.network.message.entity;
 
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.event.BaseEvent;
-import io.nuls.core.event.NoticeData;
+import io.nuls.protocol.event.base.BaseEvent;
+import io.nuls.protocol.event.base.NoticeData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 import java.util.List;
 

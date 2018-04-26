@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ **
  * Copyright (c) 2017-2018 nuls.io
- *
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,8 +23,6 @@
  */
 package io.nuls.network.message.impl;
 
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseEvent;
 import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkCacheService;
 import io.nuls.network.message.NetworkEventResult;
@@ -32,10 +30,10 @@ import io.nuls.network.message.entity.GetNodeEvent;
 import io.nuls.network.message.entity.NodeEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.BaseEvent;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author vivi
@@ -68,24 +66,32 @@ public class GetNodeEventHandler implements NetWorkEventHandler {
 //        }
 //        cacheService.putEvent(key, event, false);
 
-        List<Node> list = getAvailableNodes(getNodeEvent.getLength(), node.getId());
+        List<Node> list = getAvailableNodes(getNodeEvent.getLength(), node.getIp());
         NodeEvent replyEvent = new NodeEvent(list);
         return new NetworkEventResult(true, replyEvent);
     }
 
-
-    private List<Node> getAvailableNodes(int length, String nodeId) {
+    private List<Node> getAvailableNodes(int length, String nodeIp) {
         List<Node> nodes = new ArrayList<>();
-        int count = 0;
-        List<Node> availableNodes = getNetworkService().getAvailableNodes();
+        Collection<Node> _availableNodes = getNetworkService().getAvailableNodes();
+        List<Node> availableNodes = new ArrayList<>(_availableNodes);
         Collections.shuffle(availableNodes);
+        Set<String> ipSet = new HashSet<>();
+        ipSet.add(nodeIp);
         for (Node node : availableNodes) {
-            if (node.getId().equals(nodeId)) {
+            if (ipSet.contains(node.getIp())) {
                 continue;
             }
-            nodes.add(node);
-            count++;
-            if (count == length || count > 20) {
+            if (node.getSeverPort() == null || node.getSeverPort() == 0) {
+                continue;
+            }
+            Node newNode = new Node();
+            newNode.setIp(node.getIp());
+            newNode.setPort(node.getSeverPort());
+            newNode.setSeverPort(node.getSeverPort());
+            ipSet.add(node.getIp());
+            nodes.add(newNode);
+            if (nodes.size() == length) {
                 break;
             }
         }

@@ -23,13 +23,10 @@
  */
 package io.nuls.ledger.script;
 
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.crypto.Sha256Hash;
-import io.nuls.core.script.P2PKHScript;
-import io.nuls.core.script.P2PKHScriptSig;
 import io.nuls.core.utils.crypto.Utils;
+import io.nuls.protocol.script.P2PKHScript;
+import io.nuls.protocol.script.P2PKHScriptSig;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
 /**

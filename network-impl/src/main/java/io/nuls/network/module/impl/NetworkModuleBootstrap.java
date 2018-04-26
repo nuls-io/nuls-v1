@@ -24,19 +24,19 @@
 package io.nuls.network.module.impl;
 
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.EventManager;
+import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.cfg.ConfigLoader;
 import io.nuls.core.utils.log.Log;
 import io.nuls.network.NetworkContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.message.entity.*;
-import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.service.NetworkService;
 import io.nuls.network.service.impl.NetworkServiceImpl;
 import io.nuls.network.service.impl.netty.NettyClient;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.manager.EventManager;
 
 import java.io.IOException;
 
@@ -50,6 +50,7 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
 
     @Override
     public void init() {
+        this.waitForDependencyInited(NulsConstant.MODULE_ID_DB, NulsConstant.MODULE_ID_CACHE);
         this.registerEvent();
         try {
             NetworkContext.setNetworkConfig(ConfigLoader.loadProperties(NetworkConstant.NETWORK_PROPERTIES));
@@ -69,10 +70,12 @@ public class NetworkModuleBootstrap extends AbstractNetworkModule {
         EventManager.putEvent(NodeEvent.class);
         EventManager.putEvent(GetNodesIpEvent.class);
         EventManager.putEvent(NodesIpEvent.class);
+        EventManager.putEvent(HandshakeEvent.class);
     }
 
     @Override
     public void start() {
+        this.waitForDependencyRunning(NulsConstant.MODULE_ID_EVENT_BUS);
         networkService.init();
         networkService.start();
     }

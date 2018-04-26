@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ **
  * Copyright (c) 2017-2018 nuls.io
- *
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,19 +25,17 @@ package io.nuls.db.dao.impl.mybatis;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.nuls.core.constant.TransactionConstant;
 import io.nuls.core.dto.Page;
+import io.nuls.core.utils.str.StringUtils;
 import io.nuls.db.dao.BlockHeaderService;
 import io.nuls.db.dao.impl.mybatis.mapper.BlockHeaderMapper;
 import io.nuls.db.dao.impl.mybatis.params.BlockSearchParams;
 import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.BlockHeaderPo;
-import io.nuls.db.entity.TransactionPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +105,7 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
     }
 
     @Override
-    public Page<BlockHeaderPo> getBlockListByAddress(String nodeAddress, int type, int pageNumber, int pageSize) {
+    public Page<BlockHeaderPo> getBlockListByAddress(String nodeAddress, int type,int pageNumber, int pageSize) {
         Searchable searchable = new Searchable();
         if (type == 1) {
             searchable.addCondition("a.agent_address", SearchOperator.eq, nodeAddress);
@@ -115,36 +113,32 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
             searchable.addCondition("a.packing_address", SearchOperator.eq, nodeAddress);
         }
 
-        PageHelper.startPage(pageNumber, pageSize);
+        PageHelper.startPage(pageNumber,pageSize);
         PageHelper.orderBy("b.height desc");
         List<BlockHeaderPo> blockList = getMapper().getBlockByAddress(searchable);
         PageInfo<BlockHeaderPo> pageInfo = new PageInfo<>(blockList);
-        Page<BlockHeaderPo> page = new Page<>();
+        Page<BlockHeaderPo> page = new Page<>(pageNumber,pageSize);
         page.setTotal(pageInfo.getTotal());
-        page.setPageNumber(pageNumber);
-        page.setPageSize(pageSize);
-        page.setPages(pageInfo.getPages());
         page.setList(blockList);
         return page;
     }
 
     @Override
-    public Page<BlockHeaderPo> getBlockHeaderList(int pageNumber, int pageSize) {
-        PageHelper.startPage(pageNumber, pageSize);
+    public Page<BlockHeaderPo> getBlockHeaderList(int pageNumber,int pageSize) {
+        PageHelper.startPage(pageNumber,pageSize);
         PageHelper.orderBy("height desc");
         List<BlockHeaderPo> blockList = getMapper().selectList(new Searchable());
         PageInfo<BlockHeaderPo> pageInfo = new PageInfo<>(blockList);
         Page<BlockHeaderPo> page = new Page<>();
-        page.setTotal(pageInfo.getTotal());
+        page.setList(blockList);
         page.setPageNumber(pageNumber);
         page.setPageSize(pageSize);
-        page.setPages(pageInfo.getPages());
-        page.setList(blockList);
+        page.setTotal(pageInfo.getTotal());
         return page;
     }
 
     @Override
-    public long getCount(String address, long roundStart, long roundEnd) {
+    public long getCount(String address, long roundStart, long roundEnd,long endHeight) {
         Map<String, Object> map = new HashMap<>();
         map.put(BlockSearchParams.SEARCH_FIELD_ADDRESS, address);
         if (roundEnd >= 0) {
@@ -153,17 +147,57 @@ public class BlockDaoImpl extends BaseDaoImpl<BlockHeaderMapper, String, BlockHe
         if (roundStart >= 0) {
             map.put(BlockSearchParams.SEARCH_FIELD_ROUND_END, roundEnd);
         }
+        map.put(BlockSearchParams.SEARCH_FIELD_HEIGHT_END,endHeight);
         return getCount(map);
     }
 
     @Override
-    public List<Long> getListOfRoundIndexOfYellowPunish(String address, long startRoundIndex, long endRoundIndex) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("address", address);
-        params.put("startRoundIndex", startRoundIndex);
-        params.put("endRoundIndex", endRoundIndex);
-        params.put("txType", TransactionConstant.TX_TYPE_YELLOW_PUNISH);
-        return this.getMapper().getSumOfRoundIndexOfYellowPunish(params);
+    public Map<String, Object> getSumTxCount(String address, long roundStart, long roundEnd) {
+        Searchable searchable = new Searchable();
+        if (StringUtils.isNotBlank(address)) {
+            searchable.addCondition("consensus_address", SearchOperator.eq, address);
+        }
+        if (roundStart > 0) {
+            searchable.addCondition("round_index", SearchOperator.gte, roundStart);
+        }
+        if (roundEnd > 0) {
+            searchable.addCondition("round_index", SearchOperator.lte, roundEnd);
+        }
+        return getMapper().getSumTxCount(searchable);
     }
 
+    @Override
+    public Long getRoundFirstBlockHeight(long roundIndex) {
+        return this.getMapper().getRoundFirstBlockHeight(roundIndex);
+    }
+
+    @Override
+    public Long getRoundLastBlockHeight(long roundIndex) {
+        return this.getMapper().getRoundLastBlockHeight(roundIndex);
+    }
+
+    @Override
+    public List<BlockHeaderPo> getBlockHashList(long start, long end) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("startHeight", start);
+        params.put("endHeight", end);
+        return this.getMapper().getBlockHashList(params);
+    }
+
+    @Override
+    public List<BlockHeaderPo> getHeaderListByRound(long startRoundIndex, long endRoundIndex) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("startRoundIndex", startRoundIndex);
+        params.put("endRoundIndex", endRoundIndex);
+        return this.getMapper().getListByRound(params);
+    }
+
+    @Override
+    public long getPackingCount(String packingAddress, long roundStart, long roundEnd) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("consensus_address", SearchOperator.eq, packingAddress);
+        searchable.addCondition("round_index", SearchOperator.gte, roundStart);
+        searchable.addCondition("round_index", SearchOperator.lte, roundEnd);
+        return this.getMapper().selectCount(searchable);
+    }
 }

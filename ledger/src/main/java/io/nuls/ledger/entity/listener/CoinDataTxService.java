@@ -25,27 +25,35 @@ package io.nuls.ledger.entity.listener;
 
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.transactional.annotation.DbSession;
+import io.nuls.db.transactional.annotation.PROPAGATION;
 import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.protocol.model.Block;
+import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.service.intf.TransactionService;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Niels
  * @date 2017/12/21
  */
+@DbSession(transactional = PROPAGATION.NONE)
 public class CoinDataTxService implements TransactionService<AbstractCoinTransaction> {
-    private static final CoinDataTxService INSTANCE = new CoinDataTxService();
-
-    private CoinDataTxService() {
-    }
 
     @Override
-    public void onRollback(AbstractCoinTransaction tx) {
+    @DbSession
+    public void onRollback(AbstractCoinTransaction tx, Block block) {
         tx.getCoinDataProvider().rollback(tx.getCoinData(), tx);
     }
 
     @Override
-    public void onCommit(AbstractCoinTransaction tx) {
+    @DbSession
+    public void onCommit(AbstractCoinTransaction tx, Block block) {
         try {
             tx.getCoinDataProvider().save(tx.getCoinData(), tx);
         } catch (NulsException e) {
@@ -55,16 +63,17 @@ public class CoinDataTxService implements TransactionService<AbstractCoinTransac
     }
 
     @Override
-    public void onApproval(AbstractCoinTransaction tx) {
-        try {
-            tx.getCoinDataProvider().approve(tx.getCoinData(), tx);
-        } catch (NulsException e) {
-            Log.error(e);
-            throw new NulsRuntimeException(e);
+    public ValidateResult conflictDetect(AbstractCoinTransaction tx, List<Transaction> txList) {
+        if(null==txList||txList.isEmpty()){
+            return ValidateResult.getSuccessResult();
         }
+
+
+
+
+
+
+        return tx.getCoinDataProvider().conflictDetect(tx,txList);
     }
 
-    public static CoinDataTxService getInstance() {
-        return INSTANCE;
-    }
 }

@@ -23,13 +23,11 @@
  */
 package io.nuls.core.module;
 
-import io.nuls.core.chain.entity.Transaction;
-import io.nuls.core.chain.manager.TransactionManager;
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ModuleStatusEnum;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.module.manager.ModuleManager;
 import io.nuls.core.module.manager.ServiceManager;
-import io.nuls.core.tx.serivce.TransactionService;
 import io.nuls.core.utils.log.Log;
 
 /**
@@ -71,15 +69,11 @@ public abstract class BaseModuleBootstrap {
 
     /**
      * get all info of the module
-     *
-     * @return
      */
     public abstract String getInfo();
 
     /**
      * get the status of the module
-     *
-     * @return
      */
     public final ModuleStatusEnum getStatus() {
         return this.status;
@@ -96,7 +90,7 @@ public abstract class BaseModuleBootstrap {
 
     protected final String getModuleCfgProperty(String section, String property) {
         try {
-            return NulsContext.MODULES_CONFIG.getCfgValue(section, property);
+            return NulsConfig.MODULES_CONFIG.getCfgValue(section, property);
         } catch (NulsException e) {
             Log.error(e);
             return null;
@@ -107,9 +101,10 @@ public abstract class BaseModuleBootstrap {
         ServiceManager.getInstance().regService(this.moduleId, serviceClass);
     }
 
-    protected final void registerTransaction(int txType, Class<? extends Transaction> txClass, TransactionService txService) {
-        TransactionManager.putTx(txType, txClass, txService);
-    }
+//    protected final void registerTransaction(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionService> txServiceClass) {
+//        this.registerService(txServiceClass);
+//        TransactionManager.putTx(txType, txClass, txServiceClass);
+//    }
 
     public Class<? extends BaseModuleBootstrap> getModuleClass() {
         return this.getClass();
@@ -121,5 +116,58 @@ public abstract class BaseModuleBootstrap {
 
     public void setModuleName(String moduleName) {
         this.moduleName = moduleName;
+    }
+
+    protected void waitForDependencyInited(short... moduleIds) {
+        ModuleManager mm = ModuleManager.getInstance();
+        String result = checkItInited(mm, moduleIds);
+        while (result != null) {
+            try {
+                Thread.sleep(100L);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
+            result = checkItInited(mm, moduleIds);
+        }
+    }
+
+    private String checkItInited(ModuleManager mm, short[] moduleIds) {
+        for (short id : moduleIds) {
+            BaseModuleBootstrap module = mm.getModule(id);
+            if(null==module){
+                return id+"";
+            }
+            if (null == module || module.getStatus() == ModuleStatusEnum.UNINITIALIZED || module.getStatus() == ModuleStatusEnum.INITIALIZING || module.getStatus() == ModuleStatusEnum.EXCEPTION) {
+                return module.getModuleName();
+            }
+        }
+        return null;
+    }
+
+
+    protected void waitForDependencyRunning(short... moduleIds) {
+        ModuleManager mm = ModuleManager.getInstance();
+        String result = checkItRunning(mm, moduleIds);
+        while (result != null) {
+            try {
+                Thread.sleep(100L);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
+            result = checkItRunning(mm, moduleIds);
+        }
+    }
+
+    private String checkItRunning(ModuleManager mm, short[] moduleIds) {
+        for (short id : moduleIds) {
+            BaseModuleBootstrap module = mm.getModule(id);
+            if(null == module){
+                return "null";
+            }
+            if (module.getStatus() != ModuleStatusEnum.RUNNING) {
+                return module.getModuleName();
+            }
+        }
+        return null;
     }
 }

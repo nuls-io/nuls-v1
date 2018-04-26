@@ -26,20 +26,30 @@
 
 package io.nuls.rpc.resources.form;
 
+import io.nuls.core.utils.str.StringUtils;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author Niels
  * @date 2018/3/9
  */
+@ApiModel(value = "转账交易表单数据")
 public class TransferForm {
 
+    @ApiModelProperty(name = "address", value = "转账账户地址", required = true)
     private String address;
 
+    @ApiModelProperty(name = "password", value = "钱包密码，未设置或者已解锁时可为空")
     private String password;
 
+    @ApiModelProperty(name = "toAddress", value = "接收人地址", required = true)
     private String toAddress;
 
+    @ApiModelProperty(name = "amount", value = "转账金额", required = true)
     private Long amount;
 
+    @ApiModelProperty(name = "remark", value = "交易备注")
     private String remark;
 
     public String getAddress() {
@@ -47,7 +57,7 @@ public class TransferForm {
     }
 
     public void setAddress(String address) {
-        this.address = address;
+        this.address = StringUtils.formatStringPara(address);
     }
 
     public String getPassword() {
@@ -55,7 +65,7 @@ public class TransferForm {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = StringUtils.formatStringPara(password);
     }
 
     public String getToAddress() {
@@ -63,7 +73,7 @@ public class TransferForm {
     }
 
     public void setToAddress(String toAddress) {
-        this.toAddress = toAddress;
+        this.toAddress = StringUtils.formatStringPara(toAddress);
     }
 
     public Long getAmount() {
@@ -79,6 +89,6 @@ public class TransferForm {
     }
 
     public void setRemark(String remark) {
-        this.remark = remark;
+        this.remark = StringUtils.formatStringPara(remark);
     }
 }

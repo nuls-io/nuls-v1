@@ -23,9 +23,9 @@
  */
 package io.nuls.core;
 
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.i18n.I18nUtils;
@@ -57,16 +57,16 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
     @Override
     public void init() {
         try {
-            NulsContext.NULS_CONFIG = ConfigLoader.loadIni(NulsConstant.USER_CONFIG_FILE);
-            NulsContext.MODULES_CONFIG = ConfigLoader.loadIni(NulsConstant.MODULES_CONFIG_FILE);
+            NulsConfig.NULS_CONFIG = ConfigLoader.loadIni(NulsConstant.USER_CONFIG_FILE);
+            NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConstant.MODULES_CONFIG_FILE);
         } catch (IOException e) {
             Log.error("Client start failed", e);
             throw new NulsRuntimeException(ErrorCode.FAILED, "Client start failed");
         }
         //set system language
         try {
-            NulsContext.DEFAULT_ENCODING = NulsContext.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_DEFAULT_ENCODING);
-            String language = NulsContext.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_LANGUAGE);
+            NulsConfig.DEFAULT_ENCODING = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_DEFAULT_ENCODING);
+            String language = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_LANGUAGE);
             I18nUtils.setLanguage(language);
         } catch (NulsException e) {
             Log.error(e);

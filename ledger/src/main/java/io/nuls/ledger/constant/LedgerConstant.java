@@ -23,7 +23,7 @@
  */
 package io.nuls.ledger.constant;
 
-import io.nuls.core.chain.entity.Na;
+import io.nuls.protocol.model.Na;
 
 /**
  * @author Niels
@@ -33,7 +33,7 @@ public interface LedgerConstant {
 
     int SMALL_CHANGE_COUNT = 500;
 
-    String STANDING_BOOK = "STANDING_BOOK";
+    String LEDGER_BOOK = "LEDGER_BOOK";
 
     String UTXO = "UTXO";
 

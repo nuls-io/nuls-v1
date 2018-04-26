@@ -25,8 +25,9 @@
 
 package io.nuls.notify.module;
 
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.event.BaseEvent;
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.core.module.BaseModuleBootstrap;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBusService;
@@ -41,7 +42,7 @@ public class NotifyModuleBootstrap extends BaseModuleBootstrap {
     short port;
 
     public NotifyModuleBootstrap() {
-        super((short) 10);
+        super((short) NulsConstant.MODULE_ID_NOTIFY);
     }
 
     @Override
@@ -60,6 +61,7 @@ public class NotifyModuleBootstrap extends BaseModuleBootstrap {
 
     @Override
     public void start() {
+        this.waitForDependencyRunning(NulsConstant.MODULE_ID_EVENT_BUS);
         Log.debug("Start");
         notificationController = new NotificationController();
 

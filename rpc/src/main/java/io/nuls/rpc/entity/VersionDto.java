@@ -1,9 +1,15 @@
 package io.nuls.rpc.entity;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel(value = "versionJSON")
 public class VersionDto {
 
+    @ApiModelProperty(name = "myVersion", value = "当前版本号")
     private String myVersion;
 
+    @ApiModelProperty(name = "newestVersion", value = "可更新的最新版本号")
     private String newestVersion;
 
     public String getMyVersion() {

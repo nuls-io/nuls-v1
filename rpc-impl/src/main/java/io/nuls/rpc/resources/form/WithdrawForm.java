@@ -26,13 +26,24 @@
 
 package io.nuls.rpc.resources.form;
 
+import io.nuls.core.utils.str.StringUtils;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * @author Niels
  * @date 2018/3/14
  */
+@ApiModel(value = "退出共识表单数据")
 public class WithdrawForm {
+
+    @ApiModelProperty(name = "address", value = "节点地址", required = true)
     private String address;
+
+    @ApiModelProperty(name = "txHash", value = "加入共识时的交易hash", required = true)
     private String txHash;
+
+    @ApiModelProperty(name = "password", value = "密码", required = true)
     private String password;
 
     public String getAddress() {
@@ -40,7 +51,7 @@ public class WithdrawForm {
     }
 
     public void setAddress(String address) {
-        this.address = address;
+        this.address = (address==null)?null:address.trim();
     }
 
     public String getPassword() {
@@ -48,7 +59,7 @@ public class WithdrawForm {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = StringUtils.formatStringPara(password);
     }
 
     public String getTxHash() {
@@ -56,6 +67,6 @@ public class WithdrawForm {
     }
 
     public void setTxHash(String txHash) {
-        this.txHash = txHash;
+        this.txHash = StringUtils.formatStringPara(txHash);
     }
 }

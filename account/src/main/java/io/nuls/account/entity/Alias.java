@@ -23,16 +23,13 @@
  */
 package io.nuls.account.entity;
 
-import io.nuls.core.chain.entity.BaseNulsData;
-import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
-import io.nuls.core.utils.io.NulsOutputStreamBuffer;
-import io.nuls.core.utils.log.Log;
+import io.nuls.core.utils.crypto.Utils;
+import io.nuls.protocol.model.BaseNulsData;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
+import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 /**
  * @author vivi
@@ -44,11 +41,8 @@ public class Alias extends BaseNulsData {
 
     private String alias;
 
-    // 0: locked   1:confirm
     private int status;
 
-    public static final int LOCKED = 0;
-    public static final int CONFIRM = 1;
     public Alias() {
 
     }
@@ -65,12 +59,8 @@ public class Alias extends BaseNulsData {
     @Override
     public int size() {
         int s = 0;
-        try {
-            s += address.getBytes(NulsContext.DEFAULT_ENCODING).length + 1;
-            s += alias.getBytes(NulsContext.DEFAULT_ENCODING).length + 1;
-        } catch (UnsupportedEncodingException e) {
-            Log.error(e);
-        }
+        s += Utils.sizeOfString(address);
+        s += Utils.sizeOfString(alias);
         return s;
     }
 
@@ -82,13 +72,8 @@ public class Alias extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        try {
-            this.address = new String(byteBuffer.readByLengthByte(), NulsContext.DEFAULT_ENCODING);
-            this.alias = new String(byteBuffer.readByLengthByte(), NulsContext.DEFAULT_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            Log.error(e);
-            throw new NulsException(ErrorCode.DATA_ERROR);
-        }
+        this.address = byteBuffer.readString();
+        this.alias = byteBuffer.readString();
     }
 
     public String getAddress() {

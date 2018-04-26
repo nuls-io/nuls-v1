@@ -5,17 +5,20 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.network.IpUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
-import io.nuls.network.entity.NodeGroup;
+import io.nuls.network.message.entity.HandshakeEvent;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Block;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 /**
  * @author Vive
@@ -28,67 +31,103 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        String remoteIP = socketChannel.remoteAddress().getHostString();
-        Node node = getNetworkService().getNode(remoteIP);
-        if (node != null) {
-            if (node.getStatus() == Node.CONNECT) {
-                ctx.channel().close();
-                return;
-            }
-            //When nodes try to connect to each other but not connected, select one of the smaller IP addresses as the server
-            if (node.getType() == Node.OUT) {
-                String localIP = InetAddress.getLocalHost().getHostAddress();
-                boolean isLocalServer = IpUtil.judgeIsLocalServer(localIP, remoteIP);
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+        Log.debug("---------------------- server channelRegistered ------------------------- " + nodeId);
 
-                if (!isLocalServer) {
-                    ctx.channel().close();
-                    return;
-                } else {
-                    getNetworkService().removeNode(remoteIP);
+        String remoteIP = channel.remoteAddress().getHostString();
+        Map<String, Node> nodeMap = getNetworkService().getNodes();
+        for (Node node : nodeMap.values()) {
+            if (node.getIp().equals(remoteIP)) {
+                if (node.getType() == Node.OUT) {
+                    String localIP = InetAddress.getLocalHost().getHostAddress();
+                    boolean isLocalServer = IpUtil.judgeIsLocalServer(localIP, remoteIP);
+                    if (!isLocalServer) {
+                        ctx.channel().close();
+                        return;
+                    } else {
+//                        System.out.println("----------------sever client register each other remove node-----------------" + node.getId());
+                        getNetworkService().removeNode(node.getId());
+                    }
                 }
             }
         }
-        NodeGroup group = getNetworkService().getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
-        if (group.size() > getNetworkService().getNetworkParam().maxInCount()) {
-            ctx.channel().close();
-            return;
+
+        // if has a node with same ip, and it's a out node, close this channel
+        // if More than 10 in nodes of the same IP, close this channel
+        int count = 0;
+        for (Node n : nodeMap.values()) {
+            if (n.getIp().equals(remoteIP)) {
+                count++;
+                if (count >= NetworkConstant.SAME_IP_MAX_COUNT) {
+                    ctx.channel().close();
+                    return;
+                }
+            }
         }
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        Log.debug("----------------------server channelActive ------------------------- ");
-        String channelId = ctx.channel().id().asLongText();
         SocketChannel channel = (SocketChannel) ctx.channel();
+        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+        Log.debug("---------------------- server channelActive ------------------------- " + nodeId);
+
+        String channelId = ctx.channel().id().asLongText();
         NioChannelMap.add(channelId, channel);
-        Node node = new Node(getNetworkService().getNetworkParam(), Node.IN, channel.remoteAddress().getHostString(), channel.remoteAddress().getPort(), channelId);
+        Node node = new Node(channel.remoteAddress().getHostString(), channel.remoteAddress().getPort(), Node.IN);
+        node.setChannelId(channelId);
         node.setStatus(Node.CONNECT);
-        getNetworkService().addNodeToGroup(NetworkConstant.NETWORK_NODE_IN_GROUP, node);
+        boolean success = getNetworkService().addConnNode(node);
+        if (!success) {
+            ctx.channel().close();
+            return;
+        }
+        Block bestBlock = NulsContext.getInstance().getBestBlock();
+        HandshakeEvent event = new HandshakeEvent(NetworkConstant.HANDSHAKE_SEVER_TYPE, getNetworkService().getNetworkParam().getPort(),
+                bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash().getDigestHex());
+        getNetworkService().sendToNode(event, nodeId, false);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        Log.debug("----------------------server channelInactive ------------------------- ");
         SocketChannel channel = (SocketChannel) ctx.channel();
+        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+        Log.debug(" ---------------------- server channelInactive ------------------------- " + nodeId);
+
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
-        Node node = getNetworkService().getNode(channel.remoteAddress().getHostString());
-        if (node != null && channelId.equals(node.getChannelId())) {
-            getNetworkService().removeNode(channel.remoteAddress().getHostString());
+        Node node = getNetworkService().getNode(nodeId);
+        if (node != null) {
+            if (channelId.equals(node.getChannelId())) {
+//                System.out.println("------------ sever channelInactive remove node-------------" + node.getId());
+                getNetworkService().removeNode(nodeId);
+            } else {
+                Log.debug("--------------channel id different----------------------");
+                Log.debug(node.getChannelId());
+                Log.debug(channelId);
+            }
         }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        Log.debug("---------------ServerChannelHandler exceptionCaught :" + cause.getMessage());
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        InetSocketAddress localAddress = channel.localAddress();
+        InetSocketAddress remoteAddress = channel.remoteAddress();
+        String local = IpUtil.getNodeId(localAddress);
+        String remote = IpUtil.getNodeId(remoteAddress);
+        Log.debug("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage()
+                    + ", localInfo: " + local + ", remoteInfo: " + remote);
         ctx.channel().close();
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
-        Node node = getNetworkService().getNode(channel.remoteAddress().getHostString());
+        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+//        Log.debug(" ---------------------- server channelRead ------------------------- " + nodeId);
+        Node node = getNetworkService().getNode(nodeId);
         if (node != null && node.isAlive()) {
             ByteBuf buf = (ByteBuf) msg;
             byte[] bytes = new byte[buf.readableBytes()];

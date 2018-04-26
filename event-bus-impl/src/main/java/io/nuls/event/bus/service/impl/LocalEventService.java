@@ -23,7 +23,7 @@
  */
 package io.nuls.event.bus.service.impl;
 
-import io.nuls.core.event.BaseEvent;
+import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.constant.EventBusConstant;
 import io.nuls.event.bus.handler.AbstractEventHandler;
@@ -40,7 +40,7 @@ public class LocalEventService {
     private final ProcessorManager processorManager;
 
     private LocalEventService() {
-        this.processorManager = new ProcessorManager(EventBusConstant.DISRUPTOR_NAME_LOCAL);
+        this.processorManager = new ProcessorManager(EventBusConstant.DISRUPTOR_NAME_LOCAL,false);
     }
 
     public static LocalEventService getInstance() {

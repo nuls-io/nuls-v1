@@ -40,7 +40,6 @@
 package io.nuls.core.crypto;
 
 
-import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.crypto.Utils;
 
 /**

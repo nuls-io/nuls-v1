@@ -24,9 +24,7 @@
 package io.nuls.network.module;
 
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.module.BaseModuleBootstrap;
-import io.nuls.network.constant.NetworkConstant;
 
 /**
  * @author vivi

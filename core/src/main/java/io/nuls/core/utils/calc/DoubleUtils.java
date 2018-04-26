@@ -10,13 +10,10 @@ import java.text.DecimalFormat;
  */
 public class DoubleUtils {
 
-    public static final  int DEFAULT_SCALE = 8;
+    public static final int DEFAULT_SCALE = 8;
 
     /**
      * 创建BigDecimal对象
-     *
-     * @param value
-     * @return
      */
     public static BigDecimal createBigDecimal(double value) {
         return BigDecimal.valueOf(value);
@@ -24,11 +21,6 @@ public class DoubleUtils {
 
     /**
      * 保留scale位小数
-     *
-     * @param value
-     * @param scale
-     * @param roundingMode
-     * @return
      *
      * @author Niels
      * @version 2017年5月19日 下午3:45:32
@@ -41,10 +33,6 @@ public class DoubleUtils {
 
     /**
      * 四舍五入保留scale位小数
-     *
-     * @param value
-     * @param scale
-     * @return
      */
     public static double round(double value, int scale) {
         return round(value, scale, BigDecimal.ROUND_HALF_UP);
@@ -52,9 +40,6 @@ public class DoubleUtils {
 
     /**
      * 四舍五入保留8位小数
-     *
-     * @param value
-     * @return
      */
     public static double round(double value) {
         return round(value, DEFAULT_SCALE);
@@ -63,11 +48,7 @@ public class DoubleUtils {
     /**
      * 返回保留两位小数的字符串
      *
-     * @param value
-     * @param hasThousands
-     *            是否每千位用“,”分隔的字符串
-     * @return
-     *
+     * @param hasThousands 是否每千位用“,”分隔的字符串
      * @author Niels
      * @version 2017年5月19日 下午3:48:26
      */
@@ -93,10 +74,6 @@ public class DoubleUtils {
     /**
      * 返回保留scale位小数的字符串
      *
-     * @param value
-     * @param scale
-     * @return
-     *
      * @author Niels
      * @version 2017年5月19日 下午3:48:52
      */
@@ -107,9 +84,6 @@ public class DoubleUtils {
     /**
      * 返回保留2位小数的字符串
      *
-     * @param value
-     * @return
-     *
      * @author Niels
      * @version 2017年5月19日 下午3:48:52
      */
@@ -119,9 +93,6 @@ public class DoubleUtils {
 
     /**
      * 字符串转Double类型
-     *
-     * @param value
-     * @return
      *
      * @author Niels
      * @version 2017年5月19日 下午3:50:04
@@ -136,7 +107,6 @@ public class DoubleUtils {
     /**
      * 字符串转Double类型，保留两位小数
      *
-     * @param value
      * @return String
      */
     public static Double parseDouble(String value, int scale) {
@@ -148,32 +118,20 @@ public class DoubleUtils {
 
     /**
      * double 加法
-     *
-     * @param d1
-     * @param d2
-     * @return
      */
     public static double sum(double d1, double d2) {
-        return sum(createBigDecimal(d1), createBigDecimal(d2)).doubleValue();
+        return round(sum(createBigDecimal(d1), createBigDecimal(d2)).doubleValue());
     }
 
     /**
      * double 减法
-     *
-     * @param d1
-     * @param d2
-     * @return
      */
     public static double sub(double d1, double d2) {
-        return sub(createBigDecimal(d1), createBigDecimal(d2)).doubleValue();
+        return round(sub(createBigDecimal(d1), createBigDecimal(d2)).doubleValue());
     }
 
     /**
      * double 乘法
-     *
-     * @param d1
-     * @param d2
-     * @return
      */
     public static double mul(double d1, double d2) {
         return mul(createBigDecimal(d1), createBigDecimal(d2)).doubleValue();
@@ -181,10 +139,6 @@ public class DoubleUtils {
 
     /**
      * double 乘法，结果保留scale位小数
-     *
-     * @param d1
-     * @param d2
-     * @param scale
      */
     public static double mul(double d1, double d2, int scale) {
         return round(mul(createBigDecimal(d1), createBigDecimal(d2)).doubleValue(), scale);
@@ -192,11 +146,6 @@ public class DoubleUtils {
 
     /**
      * 除法，结果保留scale位小数
-     *
-     * @param d1
-     * @param d2
-     * @param scale
-     * @return
      *
      * @author Niels
      * @version 2017年5月19日 下午3:52:05
@@ -207,10 +156,6 @@ public class DoubleUtils {
 
     /**
      * double 除法，结果保留两位小数
-     *
-     * @param d1
-     * @param d2
-     * @return
      */
     public static double div(double d1, double d2) {
         return div(d1, d2, DEFAULT_SCALE);
@@ -218,10 +163,6 @@ public class DoubleUtils {
 
     /**
      * BigDecimal 加法
-     *
-     * @param bd1
-     * @param bd2
-     * @return
      */
     public static BigDecimal sum(BigDecimal bd1, BigDecimal bd2) {
         return bd1.add(bd2);
@@ -229,10 +170,6 @@ public class DoubleUtils {
 
     /**
      * BigDecimal 减法
-     *
-     * @param bd1
-     * @param bd2
-     * @return
      */
     public static BigDecimal sub(BigDecimal bd1, BigDecimal bd2) {
         return bd1.subtract(bd2);
@@ -240,10 +177,6 @@ public class DoubleUtils {
 
     /**
      * BigDecimal 乘法
-     *
-     * @param bd1
-     * @param bd2
-     * @return
      */
     public static BigDecimal mul(BigDecimal bd1, BigDecimal bd2) {
         return bd1.multiply(bd2);
@@ -251,10 +184,6 @@ public class DoubleUtils {
 
     /**
      * BigDecimal 除法
-     *
-     * @param bd1
-     * @param bd2
-     * @return
      */
     public static BigDecimal div(BigDecimal bd1, BigDecimal bd2) {
         if (bd2.equals(BigDecimal.ZERO)) {
@@ -265,10 +194,6 @@ public class DoubleUtils {
 
     /**
      * BigDecimal 加 double
-     *
-     * @param bd1
-     * @param d2
-     * @return
      */
     public static BigDecimal sum(BigDecimal bd1, double d2) {
         return sum(bd1, createBigDecimal(d2));
@@ -276,10 +201,6 @@ public class DoubleUtils {
 
     /**
      * BigDecimal 减 double
-     *
-     * @param bd1
-     * @param d2
-     * @return
      */
     public static BigDecimal sub(BigDecimal bd1, double d2) {
         return sub(bd1, createBigDecimal(d2));
@@ -287,10 +208,6 @@ public class DoubleUtils {
 
     /**
      * BigDecimal 乘以 double
-     *
-     * @param bd1
-     * @param d2
-     * @return
      */
     public static BigDecimal mul(BigDecimal bd1, double d2) {
         return mul(bd1, createBigDecimal(d2));
@@ -298,10 +215,6 @@ public class DoubleUtils {
 
     /**
      * BigDecimal 除以 double
-     *
-     * @param bd1
-     * @param d2
-     * @return
      */
     public static BigDecimal div(BigDecimal bd1, double d2) {
         return div(bd1, createBigDecimal(d2));
@@ -310,11 +223,13 @@ public class DoubleUtils {
     /**
      * 求绝对值
      *
-     * @param d1
      * @return double
      */
     public static double abs(double d1) {
         return Math.abs(d1);
     }
 
+    public static long longValue(double val) {
+        return createBigDecimal(val).longValue();
+    }
 }

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,6 +25,7 @@ package io.nuls.event.bus.utils.disruptor;
 
 import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
+import com.lmax.disruptor.dsl.EventHandlerGroup;
 import com.lmax.disruptor.dsl.ProducerType;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -137,10 +138,21 @@ public class DisruptorUtil<T extends DisruptorEvent> {
      * @param name
      * @param handler
      */
-    public void handleEventsWithWorkerPool(String name, WorkHandler<DisruptorEvent<ProcessData>>... handler) {
+    public EventHandlerGroup<T> handleEventsWithWorkerPool(String name, WorkHandler<DisruptorEvent<ProcessData>>... handler) {
         Disruptor disruptor = DISRUPTOR_MAP.get(name);
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
-        disruptor.handleEventsWithWorkerPool(handler);
+        return disruptor.handleEventsWithWorkerPool(handler);
     }
 
+    public EventHandlerGroup<T> handleEventWith(String name, EventHandler<T> eventHandler) {
+        Disruptor disruptor = DISRUPTOR_MAP.get(name);
+        AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
+        return disruptor.handleEventsWith(eventHandler);
+    }
+
+    public EventHandlerGroup<T> after(String name, EventHandler<T> eventHandler) {
+        Disruptor disruptor = DISRUPTOR_MAP.get(name);
+        AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
+        return disruptor.after(eventHandler);
+    }
 }

@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ **
  * Copyright (c) 2017-2018 nuls.io
- *
+ **
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ **
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ **
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,23 +28,22 @@ import io.nuls.account.entity.Account;
 import io.nuls.account.entity.Address;
 import io.nuls.account.entity.Alias;
 import io.nuls.account.entity.tx.AliasTransaction;
-import io.nuls.account.entity.validator.AliasValidator;
-import io.nuls.account.event.*;
+import io.nuls.account.event.AccountCreateNotice;
+import io.nuls.account.event.AccountImportedNotice;
+import io.nuls.account.event.DefaultAccountChangeNotice;
+import io.nuls.account.event.PasswordChangeNotice;
 import io.nuls.account.service.intf.AccountService;
-import io.nuls.account.service.tx.AliasTxService;
 import io.nuls.account.util.AccountTool;
-import io.nuls.core.chain.entity.NulsDigestData;
-import io.nuls.core.chain.entity.NulsSignData;
-import io.nuls.core.chain.entity.Result;
-import io.nuls.core.chain.entity.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.constant.TransactionConstant;
-import io.nuls.core.context.NulsContext;
-import io.nuls.core.crypto.*;
+import io.nuls.core.crypto.AESEncrypt;
+import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.MD5Util;
+import io.nuls.core.crypto.VarInt;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.script.P2PKHScriptSig;
+import io.nuls.core.model.Result;
 import io.nuls.core.thread.manager.TaskManager;
 import io.nuls.core.utils.crypto.Hex;
 import io.nuls.core.utils.date.DateUtil;
@@ -65,9 +64,15 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.params.OperationType;
-import io.nuls.ledger.event.TransactionEvent;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.util.UtxoTransferTool;
+import io.nuls.protocol.constant.TransactionConstant;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.TransactionEvent;
+import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.NulsSignData;
+import io.nuls.protocol.model.Transaction;
+import io.nuls.protocol.script.P2PKHScriptSig;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -250,6 +255,29 @@ public class AccountServiceImpl implements AccountService {
         this.accountCacheService.putAccountList(list);
         NulsContext.LOCAL_ADDRESS_LIST = addressList;
         return list;
+    }
+
+    @Override
+    public Page<Account> getAccountList(int pageNumber, int pageSize) {
+        List<Account> list = this.accountCacheService.getAccountList();
+        if (list.isEmpty()) {
+            return new Page();
+        }
+
+        Page<Account> page = new Page<>(pageNumber, pageSize);
+        page.setTotal(list.size());
+        int start = (pageNumber - 1) * pageSize;
+        if (start >= list.size()) {
+            return page;
+        }
+
+        int end = pageNumber * pageSize;
+        if (end > list.size()) {
+            end = list.size();
+        }
+        list = list.subList(start, end);
+        page.setList(list);
+        return page;
     }
 
     @Override
@@ -545,21 +573,35 @@ public class AccountServiceImpl implements AccountService {
             AliasTransaction aliasTx = new AliasTransaction(coinData, password, new Alias(address, alias));
             aliasTx.setHash(NulsDigestData.calcDigestData(aliasTx.serialize()));
             aliasTx.setScriptSig(createP2PKHScriptSigFromDigest(aliasTx.getHash(), account, password).serialize());
-            ValidateResult validate = aliasTx.verify();
+            ValidateResult validate = this.ledgerService.verifyTx(aliasTx,this.ledgerService.getWaitingTxList());
             if (validate.isFailed()) {
                 return new Result(false, validate.getMessage());
             }
 
             event.setEventBody(aliasTx);
-            eventBroadcaster.broadcastAndCache(event, true);
-            SetAliasNotice notice = new SetAliasNotice();
-            notice.setEventBody(aliasTx);
-            eventBroadcaster.publishToLocal(notice);
+            this.ledgerService.saveLocalTx(aliasTx);
+            boolean b  = eventBroadcaster.publishToLocal(event);
+//            if (nodeList.size() > 0) {
+//                SetAliasNotice notice = new SetAliasNotice();
+//                notice.setEventBody(aliasTx);
+//                eventBroadcaster.publishToLocal(notice);
+//                Result result = Result.getSuccess();
+//                result.setObject(aliasTx.getHash().getDigestHex());
+//                return result;
+//            } else {
+//                Result result = Result.getFailed(ErrorCode.NET_BROADCAST_FAIL);
+//                return result;
+//            }
+            if(b){
+                return Result.getSuccess();
+            }else{
+                return Result.getFailed("publish failed!");
+            }
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());
         }
-        return new Result(true, "OK");
+
     }
 
     //    @Override
@@ -728,10 +770,7 @@ public class AccountServiceImpl implements AccountService {
         AccountPo accountPo = accountDao.get(account.getAddress().getBase58());
         if (accountPo != null) {
             return Result.getFailed(ErrorCode.ACCOUNT_EXIST);
-        } else {
-            accountPo = new AccountPo();
         }
-
         Account defaultAcct = getDefaultAccount();
         if (defaultAcct != null) {
             try {
@@ -740,17 +779,18 @@ public class AccountServiceImpl implements AccountService {
                 }
                 defaultAcct.lock();
             } catch (NulsException e) {
-                e.printStackTrace();
+               Log.error(e);
                 return Result.getFailed("ErrorCode.PASSWORD_IS_WRONG");
             }
         }
         try {
             account.encrypt(password);
         } catch (NulsException e) {
-            e.printStackTrace();
+           Log.error(e);
         }
 
         // save db
+        accountPo = new AccountPo();
         AccountTool.toPojo(account, accountPo);
         AliasPo aliasPo = aliasDataService.getByAddress(accountPo.getAddress());
         if (aliasPo != null) {
@@ -763,7 +803,6 @@ public class AccountServiceImpl implements AccountService {
         // save cache
         accountCacheService.putAccount(account);
         NulsContext.LOCAL_ADDRESS_LIST.add(accountPo.getAddress());
-        ledgerService.getBalance(accountPo.getAddress());
         if (getDefaultAccount() == null) {
             setDefaultAccount(account.getAddress().getBase58());
         }
@@ -802,10 +841,9 @@ public class AccountServiceImpl implements AccountService {
             accountPo = accountDao.get(account.getAddress().getBase58());
             if (accountPo != null) {
                 continue;
-            } else {
-                accountPo = new AccountPo();
             }
             // save db
+            accountPo = new AccountPo();
             AccountTool.toPojo(account, accountPo);
             aliasPo = aliasDataService.getByAddress(accountPo.getAddress());
             if (aliasPo != null) {
@@ -818,7 +856,6 @@ public class AccountServiceImpl implements AccountService {
             // save cache
             accountCacheService.putAccount(account);
             NulsContext.LOCAL_ADDRESS_LIST.add(accountPo.getAddress());
-            ledgerService.getBalance(accountPo.getAddress());
         }
         return Result.getSuccess();
     }

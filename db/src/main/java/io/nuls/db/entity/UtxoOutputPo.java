@@ -23,6 +23,10 @@
  */
 package io.nuls.db.entity;
 
+import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.utils.date.TimeService;
+import io.nuls.protocol.context.NulsContext;
+
 /**
  * @author Niels
  * @date 2017/11/20
@@ -47,7 +51,9 @@ public class UtxoOutputPo {
 
     private byte[] script;
 
-    /** ------ redundancy ------  */
+    /**
+     * ------ redundancy ------
+     */
 
     //tx.create_time
     private Long createTime;
@@ -124,5 +130,29 @@ public class UtxoOutputPo {
 
     public void setTxType(Integer txType) {
         this.txType = txType;
+    }
+
+    public boolean isLocked() {
+        if (status == LOCKED) {
+            return true;
+        } else if (isTimeLocked()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isTimeLocked() {
+        if (lockTime > 0) {
+            long currentTime = TimeService.currentTimeMillis();
+            if (lockTime <= NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime >= NulsContext.getInstance().getBestHeight()) {
+                return true;
+            } else if (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime >= currentTime) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return false;
     }
 }

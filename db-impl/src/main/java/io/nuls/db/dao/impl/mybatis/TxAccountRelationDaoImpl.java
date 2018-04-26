@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,11 +25,13 @@ package io.nuls.db.dao.impl.mybatis;
 
 import io.nuls.db.dao.TxAccountRelationDataService;
 import io.nuls.db.dao.impl.mybatis.mapper.TxAccountRelationMapper;
+import io.nuls.db.dao.impl.mybatis.util.SearchOperator;
 import io.nuls.db.dao.impl.mybatis.util.Searchable;
 import io.nuls.db.entity.TxAccountRelationPo;
 import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,5 +57,19 @@ public class TxAccountRelationDaoImpl extends BaseDaoImpl<TxAccountRelationMappe
             TxAccountRelationPo po = new TxAccountRelationPo(txHash, address);
             getMapper().deleteRelation(po);
         }
+    }
+
+    @Override
+    public void deleteRelation(String txHash) {
+        this.getMapper().deleteRelationByTxHash(txHash);
+
+    }
+
+    @Override
+    public long getRelationCount(String txHash, String address) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
+        searchable.addCondition("address", SearchOperator.eq, address);
+        return getMapper().selectCount(searchable);
     }
 }

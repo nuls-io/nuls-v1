@@ -29,11 +29,9 @@ package io.nuls.account.event;
 import io.nuls.account.constant.EventType;
 import io.nuls.account.entity.Account;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.constant.NulsConstant;
-import io.nuls.core.event.BaseEvent;
-import io.nuls.core.event.NoticeData;
+import io.nuls.protocol.event.base.NoticeData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.utils.io.NulsByteBuffer;
+import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels
@@ -53,7 +51,9 @@ public class PasswordChangeNotice extends AccountNotice<Account> {
     @Override
     public NoticeData getNotice() {
         NoticeData data = new NoticeData();
-        data.setData(this.getEventBody().getAddress());
+        if(null!=this.getEventBody()){
+            data.setData(this.getEventBody().getAddress());
+        }
         data.setMessage(ErrorCode.WALLET_PASSWORD_CHANGED);
         return data;
     }

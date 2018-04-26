@@ -277,7 +277,6 @@ public final class Log {
                 logTrace.append(')');
             }
         }
-
         return logTrace.toString();
     }
 

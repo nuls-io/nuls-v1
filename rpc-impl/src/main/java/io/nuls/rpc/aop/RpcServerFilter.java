@@ -23,8 +23,8 @@
  */
 package io.nuls.rpc.aop;
 
+import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.context.NulsContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.log.Log;
@@ -65,13 +65,13 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
-        Log.info("url:{},IP:{},useTime:{}, params:{},result:{}", requestContext.getUriInfo().getRequestUri().getPath() + "?" + requestContext.getUriInfo().getRequestUri().getQuery(), grizzlyRequestProvider.get().getRemoteAddr()
-                , (System.currentTimeMillis() - Long.parseLong(requestContext.getProperty("start").toString())), null, responseContext.getEntity());
+//        Log.info("url:{},IP:{},useTime:{}, params:{},result:{}", requestContext.getUriInfo().getRequestUri().getPath() + "?" + requestContext.getUriInfo().getRequestUri().getQuery(), grizzlyRequestProvider.get().getRemoteAddr()
+//                , (System.currentTimeMillis() - Long.parseLong(requestContext.getProperty("start").toString())), null, responseContext.getEntity());
     }
 
     @Override
     public Response toResponse(Exception e) {
-        e.printStackTrace();
+       Log.error(e);
         RpcResult result = RpcResult.getFailed().setData(e.getMessage());
         return Response.ok(result, MediaType.APPLICATION_JSON).build();
     }
@@ -79,7 +79,7 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
     private boolean whiteSheetVerifier(Request request) {
         String ips = null;
         try {
-            ips = NulsContext.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_REQUEST_WHITE_SHEET);
+            ips = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_REQUEST_WHITE_SHEET);
         } catch (NulsException e) {
             Log.error(e);
         }
@@ -98,6 +98,6 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
 //        Log.debug(request.getRemotePort());
 //        Log.debug(request.getRemoteUser());
         //todo 临时处理
-        return true;
+        return false;
     }
 }
