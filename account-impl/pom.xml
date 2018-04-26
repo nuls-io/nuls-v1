@@ -4,7 +4,7 @@
 
     <groupId>io.nuls</groupId>
     <artifactId>account-impl</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.9.0</version>
     <packaging>jar</packaging>
 
     <name>account-impl</name>
@@ -27,27 +27,27 @@
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>core</artifactId>
-            <version>0.8.0-SNAPSHOT</version>
+            <version>0.9.0</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>account</artifactId>
-            <version>0.8.0-SNAPSHOT</version>
+            <version>0.9.0</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>cache</artifactId>
-            <version>0.8.0-SNAPSHOT</version>
+            <version>0.9.0</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>network</artifactId>
-            <version>0.8.0-SNAPSHOT</version>
+            <version>0.9.0</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>ledger-impl</artifactId>
-            <version>0.8.0-SNAPSHOT</version>
+            <version>0.9.0</version>
         </dependency>
     </dependencies>
     <build>
