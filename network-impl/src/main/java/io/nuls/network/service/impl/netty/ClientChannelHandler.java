@@ -40,7 +40,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         // If a node with the same IP already in nodes, as a out node, can not add anymore
         for (Node n : nodes.values()) {
             //both ip and port equals , it means the node is myself
-            if (n.getIp().equals(node.getIp()) && n.getPort() != node.getSeverPort()) {
+            if (n.getIp().equals(node.getIp()) && !n.getPort().equals(node.getSeverPort())) {
                 Log.debug("----------------------client: it already had a connection: " + n.getId() + " type:" + n.getType() + ", this connection: " + nodeId + "---------------------- ");
                 ctx.channel().close();
                 return;
