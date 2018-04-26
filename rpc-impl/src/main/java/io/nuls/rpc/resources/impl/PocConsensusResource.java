@@ -394,7 +394,7 @@ public class PocConsensusResource {
         Map<String, Object> statusMap = new HashMap<>();
         MeetingRound round = this.consensusService.getCurrentRound();
         for (AgentPo po : poList) {
-            if(null!=round&&round.getMember(po.getAgentAddress())!=null){
+            if(null!=round&&round.getMember(po.getPackingAddress())!=null){
                 statusMap.put(po.getAgentAddress(), ConsensusStatusEnum.IN.getCode());
             }else {
                 statusMap.put(po.getAgentAddress(), ConsensusStatusEnum.WAITING.getCode());

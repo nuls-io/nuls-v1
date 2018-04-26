@@ -23,18 +23,17 @@
  */
 package io.nuls;
 
-import io.nuls.consensus.poc.protocol.service.BlockService;
-import io.nuls.consensus.poc.protocol.service.DownloadService;
 import io.nuls.core.MicroKernelBootstrap;
 import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.module.service.ModuleService;
 import io.nuls.core.utils.log.Log;
+import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
-import io.nuls.poc.service.intf.ConsensusService;
 import io.nuls.protocol.context.NulsContext;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +72,12 @@ public class Bootstrap {
             }
             if (null != NulsContext.getInstance().getBestBlock()) {
 //                Log.info("node: " + NulsContext.getServiceBean(NetworkService.class).getAvailableNodes().size()  + "), height:{}, threadCount:{}, consensusStatus: {}, downloadStatus: {}", NulsContext.getInstance().getBestBlock().getHeader().getHeight(), Thread.activeCount(), NulsContext.getServiceBean(ConsensusService.class).getConsensusStatus(), NulsContext.getServiceBean(DownloadService.class).getStatus());
+               Collection<Node> nodes =  NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
+               for(Node node:nodes){
+
+                   Log.info(node.getVersionMessage().getBestBlockHeight()+", "+node.getId()+", "+node.getVersionMessage().getBestBlockHash());
+
+               }
             }
         }
     }
