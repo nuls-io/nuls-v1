@@ -238,7 +238,7 @@ public class ConsensusTool {
 
         long realTotalAllDeposit = self.getOwnDeposit().getValue() + self.getTotalDeposit().getValue();
         double caReward = DoubleUtils.mul(blockReword, DoubleUtils.div(self.getOwnDeposit().getValue(), realTotalAllDeposit));
-
+        List<String> addressList = new ArrayList<>();
         Map<String, ConsensusReward> rewardMap = new HashMap<>();
         for (Consensus<Deposit> cd : self.getDepositList()) {
             double weight = DoubleUtils.div(cd.getExtend().getDeposit().getValue(), realTotalAllDeposit);
@@ -250,6 +250,7 @@ public class ConsensusTool {
                     depositReward = new ConsensusReward();
                     depositReward.setAddress(cd.getAddress());
                     rewardMap.put(cd.getAddress(), depositReward);
+                    addressList.add(cd.getAddress());
                 }
                 double reward = DoubleUtils.mul(blockReword, weight);
                 double fee = DoubleUtils.mul(reward, commissionRate);
@@ -259,8 +260,10 @@ public class ConsensusTool {
             }
         }
         agentReword.setReward(Na.valueOf(DoubleUtils.longValue(caReward)));
-        rewardMap.put(self.getAgentAddress(), agentReword);
-        rewardList.addAll(rewardMap.values());
+        rewardList.add(agentReword);
+        for (String address : addressList) {
+            rewardList.add(rewardMap.get(address));
+        }
         return rewardList;
     }
 
