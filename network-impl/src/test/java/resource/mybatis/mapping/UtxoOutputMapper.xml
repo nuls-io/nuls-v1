@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="io.nuls.db.dao.impl.mybatis.mapper.UtxoOutputMapper">
+    <resultMap id="BaseResultMap" type="io.nuls.db.entity.UtxoOutputPo">
+        <id column="tx_hash" jdbcType="VARCHAR" property="txHash"/>
+        <id column="out_index" jdbcType="INTEGER" property="outIndex"/>
+        <result column="value" jdbcType="BIGINT" property="value"/>
+        <result column="lock_time" jdbcType="BIGINT" property="lockTime"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="script" jdbcType="VARBINARY" property="script"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        tx_hash, out_index, value, lock_time, status, address, script
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.util.Map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from utxo_output
+        where tx_hash = #{txHash,jdbcType=VARCHAR}
+        and out_index = #{outIndex,jdbcType=INTEGER}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="map">
+        delete from utxo_output
+        where tx_hash = #{txHash,jdbcType=VARCHAR}
+        and out_index = #{outIndex,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="insert" parameterType="io.nuls.db.entity.UtxoOutputPo">
+        insert into utxo_output (tx_hash, out_index, value,
+        lock_time, status, address, script)
+        values (#{txHash,jdbcType=VARCHAR}, #{outIndex,jdbcType=INTEGER}, #{value,jdbcType=BIGINT},
+        #{lockTime,jdbcType=BIGINT}, #{status,jdbcType=TINYINT}, #{address,jdbcType=VARCHAR},
+        #{script,jdbcType=VARBINARY})
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.UtxoOutputPo">
+     update utxo_output
+        set value = #{value,jdbcType=BIGINT},
+        lock_time = #{lockTime,jdbcType=BIGINT},
+        status = #{status,jdbcType=TINYINT},
+        address = #{address,jdbcType=VARCHAR},
+        script = #{script,jdbcType=VARBINARY}
+        where tx_hash = #{txHash,jdbcType=VARCHAR}
+        and out_index = #{outIndex,jdbcType=INTEGER}
+  </update>
+
+    <update id="updateStatus" parameterType="io.nuls.db.entity.UtxoOutputPo">
+      update utxo_output
+      set status = #{status,jdbcType=TINYINT}
+      where tx_hash = #{txHash,jdbcType=VARCHAR}
+      and out_index = #{outIndex,jdbcType=INTEGER}
+    </update>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into utxo_output (tx_hash, out_index, value,
+        lock_time, status, address, script)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.txHash,jdbcType=VARCHAR}, #{item.outIndex,jdbcType=INTEGER}, #{item.value,jdbcType=BIGINT},
+            #{item.lockTime,jdbcType=BIGINT}, #{item.status,jdbcType=TINYINT}, #{item.address,jdbcType=VARCHAR},
+            #{item.script,jdbcType=VARBINARY})
+        </foreach>
+    </insert>
+    <select id="countAll" resultType="java.lang.Long">
+        select count(1) from utxo_output
+    </select>
+    <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from utxo_output
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+    <select id="selectCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
+        select count(1) from utxo_output
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
+    <select id="selectAccountOutput" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
+        select a.type as txType, a.create_time as createTime,
+        b.*
+        from transaction a
+        join utxo_output b on a.`hash` = b.tx_hash
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
+    <delete id="deleteBySearchable" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable">
+        delete from utxo_input
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </delete>
+
+    <update id="unlockTxOutput" >
+        update utxo_output
+        set status = 0
+        where status = 1 and tx_hash = #{txHash,jdbcType=VARCHAR}
+    </update>
+
+    <update id="lockTxOutput" parameterType="java.lang.String">
+        update utxo_output
+        set status = 1
+        where out_index = 0 and tx_hash = #{txHash,jdbcType=VARCHAR}
+    </update>
+
+    <select id="getCoinBaseReward" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
+        SELECT IFNULL(sum(b.`value`),0) as totalreward
+        from `transaction` a
+        join utxo_output b on a.`hash` = b.tx_hash
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
+
+    <select id="getAgentReward" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
+        SELECT IFNULL(sum(d.`value`),0) as totalreward
+        from agent a
+        left join block_header b on a.packing_address = b.consensus_address
+        left join `transaction` c on b.height = c.block_height
+        left join utxo_output d on c.`hash` = d.tx_hash
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </select>
+
+</mapper>

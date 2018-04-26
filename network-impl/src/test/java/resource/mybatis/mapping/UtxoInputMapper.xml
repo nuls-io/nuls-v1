@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.nuls.db.dao.impl.mybatis.mapper.UtxoInputMapper">
+  <resultMap id="BaseResultMap" type="io.nuls.db.entity.UtxoInputPo">
+    <id column="tx_hash" jdbcType="VARCHAR" property="txHash" />
+    <id column="in_index" jdbcType="INTEGER" property="inIndex" />
+    <result column="from_hash" jdbcType="VARCHAR" property="fromHash" />
+    <result column="from_index" jdbcType="INTEGER" property="fromIndex" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    tx_hash, in_index, from_hash, from_index
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from utxo_input
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+    and in_index = #{inIndex,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="map">
+    delete from utxo_input
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+    and in_index = #{inIndex,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="io.nuls.db.entity.UtxoInputPo">
+    insert into utxo_input (tx_hash, in_index, from_hash, from_index)
+    values (#{txHash,jdbcType=VARCHAR}, #{inIndex,jdbcType=INTEGER}, #{fromHash,jdbcType=VARCHAR}, #{fromIndex,jdbcType=INTEGER})
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="io.nuls.db.entity.UtxoInputPo">
+    update utxo_input
+    set from_hash = #{fromHash,jdbcType=VARCHAR},
+    set from_index = #{inIndex,jdbcType=INTEGER},
+    where tx_hash = #{txHash,jdbcType=VARCHAR}
+    and in_index = #{inIndex,jdbcType=INTEGER}
+  </update>
+
+  <insert id="batchInsert" parameterType="java.util.List">
+    insert into utxo_input (tx_hash, in_index, from_hash, from_index)
+    values
+    <foreach collection="list" item="item" index="index" separator="," >
+      ( #{item.txHash,jdbcType=VARCHAR}, #{item.inIndex,jdbcType=INTEGER},#{item.fromHash,jdbcType=VARCHAR}, #{item.fromIndex,jdbcType=INTEGER})
+    </foreach>
+  </insert>
+
+  <select id="countAll"  resultType="java.lang.Long">
+    select count(txHash) from utxo_input
+  </select>
+
+  <select id="selectList" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from utxo_input
+    <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+  </select>
+  <select id="selectCount" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultType="java.lang.Long">
+    select count(txHash) from utxo_input
+    <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+  </select>
+
+  <delete id="deleteBySearchable" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable">
+    delete from utxo_input
+    <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+  </delete>
+
+  <select id="selectBySearchable" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from utxo_input
+    <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+  </select>
+</mapper>
