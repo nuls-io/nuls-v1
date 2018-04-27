@@ -41,6 +41,7 @@ import io.nuls.core.utils.log.ChainLog;
 import io.nuls.core.utils.log.Log;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.poc.constant.ConsensusStatus;
+import io.nuls.protocol.base.service.impl.BlockStorageService;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.SmallBlockEvent;
 import io.nuls.protocol.model.*;
@@ -79,11 +80,25 @@ public class BlockProcess {
         if(chainManager.getMasterChain().verifyAndAddBlock(block, isDownload)) {
             boolean success = false;
             try {
+                if(block.getHeader().getTxCount() != block.getTxs().size()) {
+                    Log.error("begin save block tx count is error block : " + block.getHeader().getHash());
+                }
                 success = blockService.saveBlock(block);
             } catch(Exception e) {
                 Log.error("save block error : " + e.getMessage(), e);
             }
             if(success) {
+                //check
+
+                try {
+                    Block tempBlock = NulsContext.getServiceBean(BlockStorageService.class).getBlock(block.getHeader().getHash().getDigestHex());
+                    if(tempBlock.getHeader().getTxCount() != tempBlock.getTxs().size()) {
+                        Log.error("end save block tx count is error block : " + block.getHeader().getHash());
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 NulsContext.getInstance().setBestBlock(block);
                 //remove tx from memory pool
                 removeTxFromMemoryPool(block);
