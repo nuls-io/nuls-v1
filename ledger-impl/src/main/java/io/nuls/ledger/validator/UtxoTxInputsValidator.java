@@ -99,8 +99,6 @@ public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTran
             if (!Arrays.equals(owner, user)) {
                 return ValidateResult.getFailedResult(ErrorCode.INVALID_INPUT);
             }
-
-            return ValidateResult.getSuccessResult();
         }
         return ValidateResult.getSuccessResult();
     }
