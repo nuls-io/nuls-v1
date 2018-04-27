@@ -193,8 +193,8 @@ public class UtxoOutput extends BaseNulsData {
         this.txType = txType;
     }
 
-    public boolean isUsable() {
-        isLocked();
+    public boolean isUsable(long height) {
+        isLocked(height);
         return OutPutStatusEnum.UTXO_UNSPENT == status || null == status;
     }
 
@@ -202,12 +202,12 @@ public class UtxoOutput extends BaseNulsData {
         return OutPutStatusEnum.UTXO_SPENT == status;
     }
 
-    public boolean isLocked() {
+    public boolean isLocked(long height) {
         if (OutPutStatusEnum.UTXO_CONSENSUS_LOCK == status) {
             return true;
         }
         long currentTime = TimeService.currentTimeMillis();
-        if (lockTime <= NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime >= NulsContext.getInstance().getBestHeight()) {
+        if (lockTime <= NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime >= height) {
             status = OutPutStatusEnum.UTXO_TIME_LOCK;
             return true;
         } else if (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime >= currentTime) {

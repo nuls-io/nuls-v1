@@ -73,12 +73,17 @@ public class UtxoTxInputsValidator implements NulsDataValidator<AbstractCoinTran
                 return ValidateResult.getFailedResult(ErrorCode.UTXO_NOT_FOUND);
             }
 
+            long blockHeight = tx.getBlockHeight();
+            if(blockHeight<0){
+                blockHeight  = NulsContext.getInstance().getBestHeight();
+            }
+
             if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
                 if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
                     if (output.getStatus() != OutPutStatusEnum.UTXO_CONSENSUS_LOCK) {
                         return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                     }
-                } else if (!output.isUsable()) {
+                } else if (!output.isUsable(blockHeight)) {
                     return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             }

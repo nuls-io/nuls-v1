@@ -178,7 +178,7 @@ public class ConsensusTool {
         CoinTransferData data = new CoinTransferData(OperationType.COIN_BASE, Na.ZERO);
         List<ConsensusReward> rewardList = calcReward(txList, member, localRound);
         Na total = Na.ZERO;
-        for (int i=0;i<rewardList.size();i++) {
+        for (int i = 0; i < rewardList.size(); i++) {
             ConsensusReward reward = rewardList.get(i);
             Coin coin = new Coin(reward.getAddress(), reward.getReward(), 0, unlockHeight);
             data.addTo(coin);
@@ -259,6 +259,7 @@ public class ConsensusTool {
         }
         agentReword.setReward(Na.valueOf(DoubleUtils.longValue(caReward)));
         rewardList.add(agentReword);
+        Collections.sort(addressList);
         for (String address : addressList) {
             rewardList.add(rewardMap.get(address));
         }

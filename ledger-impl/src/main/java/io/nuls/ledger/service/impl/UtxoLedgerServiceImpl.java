@@ -270,7 +270,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         UtxoCoinManager.getInstance().filterUtxoByLocalTxs(address, unSpends);
 
         for (UtxoOutput output : unSpends) {
-            if (output.isLocked()) {
+            if (output.isLocked(NulsContext.getInstance().getBestHeight())) {
                 locked += output.getValue();
             } else {
                 usable += output.getValue();
@@ -709,7 +709,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             UtxoData utxoData = (UtxoData) tx.getCoinData();
             for (int j = utxoData.getOutputs().size() - 1; j >= 0; j--) {
                 UtxoOutput output = utxoData.getOutputs().get(j);
-                if (output.isLocked() && NulsContext.LOCAL_ADDRESS_LIST.contains(output.getAddress())) {
+                if (output.isLocked(NulsContext.getInstance().getBestHeight()) && NulsContext.LOCAL_ADDRESS_LIST.contains(output.getAddress())) {
                     output.setCreateTime(tx.getTime());
                     output.setTxType(tx.getType());
                     lockOutputs.add(output);

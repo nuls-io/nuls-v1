@@ -96,7 +96,7 @@ public class UtxoCoinManager {
             Na amount = Na.ZERO;
             boolean enough = false;
             for (UtxoOutput output : outputList) {
-                if (output.isLocked()) {
+                if (output.isLocked(NulsContext.getInstance().getBestHeight())) {
                     continue;
                 }
                 unSpends.add(output);
@@ -130,7 +130,7 @@ public class UtxoCoinManager {
                     continue;
                 }
                 for (UtxoOutput output : outputList) {
-                    if (output.isLocked()) {
+                    if (output.isLocked(NulsContext.getInstance().getBestHeight())) {
                         continue;
                     }
                     unSpends.add(output);
@@ -184,7 +184,7 @@ public class UtxoCoinManager {
             for (int i = 0; i < utxoData.getOutputs().size(); i++) {
                 UtxoOutput output = utxoData.getOutputs().get(i);
                 if (output.getAddress().equals(address)) {
-                    if (!output.isLocked()) {
+                    if (!output.isLocked(NulsContext.getInstance().getBestHeight())) {
                         unSpends.add(output);
                     }
                 }

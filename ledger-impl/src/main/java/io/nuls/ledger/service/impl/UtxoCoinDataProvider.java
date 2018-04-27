@@ -270,7 +270,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             } else {
-                if (!output.isUsable()) {
+                if (output.getStatus() != OutPutStatusEnum.UTXO_UNSPENT) {
                     throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             }
@@ -588,7 +588,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     if (output.getStatus() != OutPutStatusEnum.UTXO_CONSENSUS_LOCK) {
                         return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                     }
-                } else if (!output.isUsable()) {
+                } else if (output.getStatus() != OutPutStatusEnum.UTXO_UNSPENT) {
                     return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             }

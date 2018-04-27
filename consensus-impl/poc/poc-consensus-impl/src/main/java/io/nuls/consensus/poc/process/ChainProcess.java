@@ -387,6 +387,7 @@ public class ChainProcess {
                         Log.error("Rollback failed, failed to save block during recovery", ex);
                         break;
                     }
+
                 }
                 Log.error("Rollback failed during switch chain, skip this chain", e);
                 return false;
