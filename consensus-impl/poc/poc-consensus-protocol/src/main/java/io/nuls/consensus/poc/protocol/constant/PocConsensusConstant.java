@@ -30,7 +30,7 @@ import io.nuls.protocol.model.Na;
  */
 public interface PocConsensusConstant {
 
-    int ALIVE_MIN_NODE_COUNT = 2;
+    int ALIVE_MIN_NODE_COUNT = 1;
 
     String CFG_CONSENSUS_SECTION = "consensus";
     String PROPERTY_PARTAKE_PACKING = "partake.packing";

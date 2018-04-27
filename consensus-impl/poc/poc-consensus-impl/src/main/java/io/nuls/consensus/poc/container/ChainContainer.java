@@ -100,10 +100,12 @@ public class ChainContainer implements Cloneable {
                 // 注册代理交易
                 RegisterAgentTransaction registerAgentTx = (RegisterAgentTransaction) tx;
                 Consensus<Agent> ca = registerAgentTx.getTxData();
+                ca.getExtend().setBlockHeight(height);
                 agentList.add(ca);
             } else if (txType == TransactionConstant.TX_TYPE_JOIN_CONSENSUS) {
                 PocJoinConsensusTransaction joinConsensusTx = (PocJoinConsensusTransaction) tx;
                 Consensus<Deposit> cDeposit = joinConsensusTx.getTxData();
+                cDeposit.getExtend().setBlockHeight(height);
                 depositList.add(cDeposit);
             } else if (txType == TransactionConstant.TX_TYPE_CANCEL_DEPOSIT) {
 
