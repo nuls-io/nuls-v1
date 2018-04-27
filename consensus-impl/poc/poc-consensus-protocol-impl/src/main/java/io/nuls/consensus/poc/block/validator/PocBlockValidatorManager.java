@@ -65,7 +65,7 @@ public class PocBlockValidatorManager {
 
         BlockValidatorManager.addBlockDefValitor(BlockFieldValidator.getInstance());
 
-        BlockValidatorManager.addBlockDefValitor(BlockTxValidator.getInstance());
+//        BlockValidatorManager.addBlockDefValitor(BlockTxValidator.getInstance());
 
         BlockValidatorManager.addBlockDefValitor(BlockMerkleValidator.getInstance());
 

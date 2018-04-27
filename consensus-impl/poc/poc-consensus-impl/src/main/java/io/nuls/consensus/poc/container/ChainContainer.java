@@ -220,6 +220,8 @@ public class ChainContainer implements Cloneable {
             return false;
         }
 
+        block.verifyWithException();
+
         // Verify that the block is properly connected
         // 验证区块是否正确连接
         String preHash = blockHeader.getPreHash().getDigestHex();
