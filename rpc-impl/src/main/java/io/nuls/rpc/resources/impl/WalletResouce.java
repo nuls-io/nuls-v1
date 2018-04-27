@@ -125,7 +125,9 @@ public class WalletResouce {
     })
     public RpcResult transfer(@ApiParam(name = "form", value = "转账交易表单数据", required = true)
                                           TransferForm form) {
-        AssertUtil.canNotEmpty(form.getToAddress());
+        if(!Address.validAddress(form.getAddress()) || !Address.validAddress(form.getToAddress())) {
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
         AssertUtil.canNotEmpty(form.getAmount());
 
         Result result = this.ledgerService.transfer(form.getAddress(), form.getPassword(),
