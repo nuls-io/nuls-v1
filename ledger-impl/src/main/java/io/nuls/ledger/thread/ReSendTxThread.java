@@ -75,6 +75,7 @@ public class ReSendTxThread implements Runnable {
     private void reSendLocalTx() throws NulsException {
         List<Transaction> txList = getLedgerService().getWaitingTxList();
         for (Transaction tx : txList) {
+            System.out.println("------------reSendLocalTx:" + tx.getHash().getDigestHex());
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             getEventBroadcaster().broadcastAndCacheAysn(event);
