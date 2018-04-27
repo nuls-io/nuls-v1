@@ -316,7 +316,7 @@ public class ConsensusTool {
         List<Transaction> txs = new ArrayList<>();
         for (NulsDigestData txHash : txHashList) {
             Transaction tx = txMap.get(txHash.getDigestHex());
-            tx.setBlockHeight(tx.getBlockHeight());
+            tx.setBlockHeight(header.getHeight());
             if (null == tx) {
                 throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
             }

@@ -137,14 +137,14 @@ public class UtxoTransferTool {
         return po;
     }
 
-    public static TransactionPo toTransactionPojo(Transaction tx) throws IOException {
+    public static TransactionPo toTransactionPojo(Transaction tx, long blockHeight) throws IOException {
         TransactionPo po = new TransactionPo();
         if (tx.getHash() != null) {
             po.setHash(tx.getHash().getDigestHex());
         }
         po.setType(tx.getType());
         po.setCreateTime(tx.getTime());
-        po.setBlockHeight(tx.getBlockHeight());
+        po.setBlockHeight(blockHeight);
         po.setTxIndex(tx.getIndex());
         po.setSize(tx.getSize());
         po.setScriptSig(tx.getScriptSig());
@@ -161,6 +161,7 @@ public class UtxoTransferTool {
     }
 
     public static TransactionLocalPo toLocalTransactionPojo(Transaction tx) throws IOException {
+        //TODO block height has thread sale problem
         if (tx == null || tx.getHash() == null) {
             return null;
         }
