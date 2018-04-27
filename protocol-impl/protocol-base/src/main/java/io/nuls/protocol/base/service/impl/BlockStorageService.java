@@ -108,7 +108,6 @@ public class BlockStorageService {
     public List<Block> getBlockList(long startHeight, long endHeight) throws NulsException {
         List<Block> blockList = new ArrayList<>();
         List<BlockHeaderPo> poList = headerDao.getHeaderList(startHeight, endHeight);
-        List<Long> heightList = new ArrayList<>();
         if (!poList.isEmpty()) {
             List<Transaction> txList = null;
             try {
@@ -124,11 +123,12 @@ public class BlockStorageService {
                 } catch (NulsException e) {
                     throw e;
                 }
-                heightList.add(header.getHeight());
+
                 Block block = fillBlock(header,txListGroup.get(header.getHeight()));
                 blockList.add(block);
                 if(header.getTxCount()!=block.getTxs().size()){
-                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"shit");
+                    System.out.println();
+                    //throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"shit");
                 }
             }
         }

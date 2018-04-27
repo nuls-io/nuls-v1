@@ -152,7 +152,7 @@ public class BlockServiceImpl implements BlockService {
             }
         }
         try {
-            ledgerService.saveTxList(block.getTxs());
+            ledgerService.saveTxList(block.getTxs(), block.getHeader().getHeight());
             blockStorageService.save(block);
 
             BlockLog.debug("save end block height:" + block.getHeader().getHeight() + ", preHash:" + block.getHeader().getPreHash() + " , hash:" + block.getHeader().getHash());
