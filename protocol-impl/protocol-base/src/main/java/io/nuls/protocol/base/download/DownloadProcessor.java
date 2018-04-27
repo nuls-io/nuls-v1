@@ -74,7 +74,7 @@ public class DownloadProcessor extends Thread {
 
         boolean isContinue = checkNetworkAndStatus();
 
-        if(!isContinue) {
+        if (!isContinue) {
             return;
         }
 
@@ -93,7 +93,7 @@ public class DownloadProcessor extends Thread {
      */
     private void doSynchronize() {
 
-        if(downloadStatus != DownloadStatus.READY) {
+        if (downloadStatus != DownloadStatus.READY) {
             return;
         }
 
@@ -103,12 +103,12 @@ public class DownloadProcessor extends Thread {
         //Finding the highest block hash consistent with most nodes in the network
         NetworkNewestBlockInfos newestInfos = getNetworkNewestBlockInfos();
 
-        if(newestInfos.getNodes().size() < 1) {
+        if (newestInfos.getNodes().size() < 1) {
             //TODO
             downloadStatus = DownloadStatus.WAIT;
             return;
         }
-
+        NulsContext.getInstance().setNetBestBlockHeight(newestInfos.getNetBestHeight());
         QueueService<Block> blockQueue = new QueueService<Block>();
 
         String queueName = "synchronize-block-queue";
@@ -138,9 +138,9 @@ public class DownloadProcessor extends Thread {
 
             boolean success = downResult != null && downResult.booleanValue() && storageResult != null && storageResult.booleanValue();
 
-            if(success && checkIsNewest(newestInfos)) {
+            if (success && checkIsNewest(newestInfos)) {
                 downloadStatus = DownloadStatus.SUCCESS;
-            } else if(downloadStatus != DownloadStatus.WAIT){
+            } else if (downloadStatus != DownloadStatus.WAIT) {
                 downloadStatus = DownloadStatus.FAILED;
             }
         } catch (Exception e) {
@@ -154,22 +154,22 @@ public class DownloadProcessor extends Thread {
     private boolean checkIsNewest(NetworkNewestBlockInfos downloadInfos) {
 
         // TODO delete after test
-        if(1==1)return true;
+        if (1 == 1) return true;
 
         long downloadBestHeight = downloadInfos.getNetBestHeight();
         long time = TimeService.currentTimeMillis();
-        long timeout = 60*1000L;
+        long timeout = 60 * 1000L;
         long localBestHeight = 0L;
 
-        while(true) {
-            if(TimeService.currentTimeMillis() - time > timeout) {
+        while (true) {
+            if (TimeService.currentTimeMillis() - time > timeout) {
                 break;
             }
             // TODO 只需要最新的区块头信息
             long bestHeight = blockService.getBestBlock().getHeader().getHeight();
-            if(bestHeight >= downloadBestHeight) {
+            if (bestHeight >= downloadBestHeight) {
                 break;
-            } else if(bestHeight != localBestHeight) {
+            } else if (bestHeight != localBestHeight) {
                 localBestHeight = bestHeight;
                 time = TimeService.currentTimeMillis();
             }
@@ -181,7 +181,7 @@ public class DownloadProcessor extends Thread {
         }
 
         NetworkNewestBlockInfos newestInfos = getNetworkNewestBlockInfos();
-        if(newestInfos.getNetBestHeight() > blockService.getLocalBestBlock().getHeader().getHeight()) {
+        if (newestInfos.getNetBestHeight() > blockService.getLocalBestBlock().getHeader().getHeight()) {
             downloadStatus = DownloadStatus.WAIT;
             return false;
         }
@@ -191,6 +191,7 @@ public class DownloadProcessor extends Thread {
     /**
      * 获取网络中对等节点的最新区块信息
      * Get latest block information of peer nodes in the network
+     *
      * @return NetworkNewestBlockInfos
      */
     private NetworkNewestBlockInfos getNetworkNewestBlockInfos() {
@@ -207,22 +208,22 @@ public class DownloadProcessor extends Thread {
         Map<String, Integer> statisticsMaps = new HashMap<>();
         Map<String, List<Node>> nodeMaps = new HashMap<>();
 
-        for(Node node : nodeList) {
+        for (Node node : nodeList) {
             System.out.println("--------------");
-            System.out.println(node.getId()+" : " + node.getVersionMessage().getBestBlockHeight() + " : " + node.getVersionMessage().getBestBlockHash());
+            System.out.println(node.getId() + " : " + node.getVersionMessage().getBestBlockHeight() + " : " + node.getVersionMessage().getBestBlockHash());
             System.out.println("--------------");
             String hash = node.getVersionMessage().getBestBlockHash();
 
             Integer statistics = statisticsMaps.get(hash);
 
-            if(statistics == null) {
+            if (statistics == null) {
                 statisticsMaps.put(hash, 0);
             }
 
             statisticsMaps.put(hash, statisticsMaps.get(hash) + 1);
 
             List<Node> nodes = nodeMaps.get(hash);
-            if(nodes == null) {
+            if (nodes == null) {
                 nodes = new ArrayList<>();
                 nodeMaps.put(hash, nodes);
             }
@@ -242,7 +243,7 @@ public class DownloadProcessor extends Thread {
             List<Node> tempNodes = nodeMaps.get(hash);
             long height = tempNodes.get(0).getVersionMessage().getBestBlockHeight();
 
-            if(count > max || (count == max && bestHeight < height)) {
+            if (count > max || (count == max && bestHeight < height)) {
                 max = count;
                 bestHash = hash;
                 bestHeight = height;
@@ -250,7 +251,7 @@ public class DownloadProcessor extends Thread {
             }
         }
 
-        if(nodes == null || nodes.size() == 0) {
+        if (nodes == null || nodes.size() == 0) {
             throw new NulsRuntimeException(ErrorCode.NET_NODE_NOT_FOUND);
         }
 
@@ -265,14 +266,14 @@ public class DownloadProcessor extends Thread {
 
         long now = TimeService.currentTimeMillis();
         long timeout = 10000L;
-        while(true) {
+        while (true) {
             int newNodeSize = networkService.getAvailableNodes().size();
-            if(newNodeSize > nodeSize) {
+            if (newNodeSize > nodeSize) {
                 now = TimeService.currentTimeMillis();
                 nodeSize = newNodeSize;
             }
 
-            if(TimeService.currentTimeMillis() - now >= timeout) {
+            if (TimeService.currentTimeMillis() - now >= timeout) {
                 break;
             }
             try {
@@ -284,7 +285,7 @@ public class DownloadProcessor extends Thread {
 
         //check node size again
         nodeSize = networkService.getAvailableNodes().size();
-        if(nodeSize < PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
+        if (nodeSize < PocConsensusConstant.ALIVE_MIN_NODE_COUNT) {
             downloadStatus = DownloadStatus.WAIT;
             return;
         }
@@ -300,11 +301,11 @@ public class DownloadProcessor extends Thread {
         }
 
         //if failed , retry
-        if(downloadStatus == DownloadStatus.FAILED && TimeService.currentTimeMillis() > failedTime + FAIL_RETRY_TIME) {
+        if (downloadStatus == DownloadStatus.FAILED && TimeService.currentTimeMillis() > failedTime + FAIL_RETRY_TIME) {
             downloadStatus = DownloadStatus.WAIT;
             return false;
         }
-        if(downloadStatus != DownloadStatus.WAIT) {
+        if (downloadStatus != DownloadStatus.WAIT) {
             return false;
         }
         return true;
@@ -313,7 +314,7 @@ public class DownloadProcessor extends Thread {
     public boolean startup() {
         threadPool = TaskManager.createScheduledThreadPool(1,
                 new NulsThreadFactory(NulsConstant.MODULE_ID_CONSENSUS, "data-synchronize"));
-        threadPool.scheduleAtFixedRate(INSTANCE, 0,1, TimeUnit.SECONDS);
+        threadPool.scheduleAtFixedRate(INSTANCE, 0, 1, TimeUnit.SECONDS);
         return true;
     }
 
