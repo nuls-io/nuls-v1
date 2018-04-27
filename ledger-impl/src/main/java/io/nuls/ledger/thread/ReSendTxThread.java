@@ -26,6 +26,9 @@ package io.nuls.ledger.thread;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.log.Log;
+import io.nuls.core.validate.ValidateResult;
+import io.nuls.db.dao.TransactionLocalDataService;
+import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.event.bus.service.intf.EventBusService;
 import io.nuls.ledger.service.intf.LedgerService;
@@ -33,7 +36,9 @@ import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.TransactionEvent;
 import io.nuls.protocol.model.Transaction;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -53,11 +58,13 @@ public class ReSendTxThread implements Runnable {
 
     private LedgerService ledgerService;
 
+    private TransactionLocalDataService localDataService;
+
     private boolean stop;
 
     @Override
     public void run() {
-        stop = true;
+        stop = false;
         while (!stop) {
             try {
                 Thread.sleep(5 * DateUtil.MINUTE_TIME);
@@ -76,6 +83,10 @@ public class ReSendTxThread implements Runnable {
         List<Transaction> txList = getLedgerService().getWaitingTxList();
         for (Transaction tx : txList) {
             System.out.println("------------reSendLocalTx:" + tx.getHash().getDigestHex());
+            if (tx.verify().isFailed()) {
+                localDataService.deleteUnCofirmTx(tx.getHash().getDigestHex());
+                continue;
+            }
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             getEventBroadcaster().broadcastAndCacheAysn(event);
@@ -98,5 +109,12 @@ public class ReSendTxThread implements Runnable {
             ledgerService = NulsContext.getServiceBean(LedgerService.class);
         }
         return ledgerService;
+    }
+
+    public TransactionLocalDataService getLocalDataService() {
+        if (localDataService == null) {
+            localDataService = NulsContext.getServiceBean(TransactionLocalDataService.class);
+        }
+        return localDataService;
     }
 }

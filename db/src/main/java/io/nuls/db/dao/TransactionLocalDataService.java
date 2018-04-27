@@ -46,4 +46,6 @@ public interface TransactionLocalDataService extends BaseDataService<String, Tra
 
     List<TransactionLocalPo> getUnConfirmTxs();
 
+    void deleteUnCofirmTx(String txHash);
+
 }

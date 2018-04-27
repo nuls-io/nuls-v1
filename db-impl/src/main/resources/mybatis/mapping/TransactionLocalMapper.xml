@@ -174,4 +174,9 @@
         from transaction_local
         <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
     </select>
+
+    <delete id="deleteBySearchable" parameterType="io.nuls.db.dao.impl.mybatis.util.Searchable">
+        DELETE  from transaction_local
+        <include refid="io.nuls.db.dao.impl.mybatis.common.CommonMapper.Search_Where"/>
+    </delete>
 </mapper>
