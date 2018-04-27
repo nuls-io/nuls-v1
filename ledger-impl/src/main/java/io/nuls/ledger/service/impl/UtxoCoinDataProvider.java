@@ -341,6 +341,17 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
 
     @Override
     public CoinData createByTransferData(Transaction tx, CoinTransferData coinParam, String password) throws NulsException {
+        for (String address : coinParam.getFrom()) {
+            if(!Address.validAddress(address)) {
+                throw new NulsException(ErrorCode.ADDRESS_ERROR);
+            }
+        }
+        for(Coin coin :coinParam.getToCoinList()) {
+            if(!Address.validAddress(coin.getAddress())) {
+                throw new NulsException(ErrorCode.ADDRESS_ERROR);
+            }
+        }
+
         lock.lock();
         try {
             if (coinParam.getSpecialData() != null) {
