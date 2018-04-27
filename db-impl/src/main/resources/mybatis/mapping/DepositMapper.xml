@@ -40,7 +40,7 @@
         -->
         select
         <include refid="Base_Column_List"/>
-        from deposit
+        from deposit order by block_height,time
     </select>
     <select id="getEffectiveList" parameterType="io.nuls.db.entity.DepositPo" resultMap="BaseResultMap">
     <!--
