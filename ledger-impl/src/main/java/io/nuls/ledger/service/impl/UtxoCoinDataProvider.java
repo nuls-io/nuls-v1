@@ -271,7 +271,11 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             } else {
-                if (!output.isUsable(NulsContext.getInstance().getBestHeight())) {
+                long height = tx.getBlockHeight();
+                if (height < 0) {
+                    height = NulsContext.getInstance().getBestHeight();
+                }
+                if (!output.isUsable(height)) {
                     throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             }
@@ -585,11 +589,15 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             }
 
             if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
+                long height = tx.getBlockHeight();
+                if (height < 0) {
+                    height = NulsContext.getInstance().getBestHeight();
+                }
                 if (tx.getType() == TransactionConstant.TX_TYPE_STOP_AGENT) {
                     if (output.getStatus() != OutPutStatusEnum.UTXO_CONSENSUS_LOCK) {
                         return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                     }
-                } else if (!output.isUsable(NulsContext.getInstance().getBestHeight())) {
+                } else if (!output.isUsable(height)) {
                     return ValidateResult.getFailedResult(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             }
