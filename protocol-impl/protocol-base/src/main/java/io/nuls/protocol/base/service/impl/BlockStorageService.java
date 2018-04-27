@@ -127,9 +127,6 @@ public class BlockStorageService {
                 heightList.add(header.getHeight());
                 Block block = fillBlock(header,txListGroup.get(header.getHeight()));
                 blockList.add(block);
-                if(header.getTxCount()!=block.getTxs().size()){
-                    throw new NulsRuntimeException(ErrorCode.DATA_ERROR,"shit");
-                }
             }
         }
         return blockList;
