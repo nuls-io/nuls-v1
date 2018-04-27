@@ -75,6 +75,7 @@ public class DisruptorUtil<T extends DisruptorEvent> {
         Disruptor<DisruptorEvent> disruptor = new Disruptor<DisruptorEvent>(EVENT_FACTORY,
                 ringBufferSize, new NulsThreadFactory(ModuleService.getInstance().getModuleId(EventBusModuleBootstrap.class), name), ProducerType.SINGLE,
                 new BlockingWaitStrategy());
+        disruptor.setDefaultExceptionHandler(new IgnoreExceptionHandler());
         //SleepingWaitStrategy
 //        disruptor.handleEventsWith(new EventHandler<DisruptorEvent>() {
 //            @Override
