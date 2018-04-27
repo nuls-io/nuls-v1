@@ -91,7 +91,7 @@ public class BlockProcess {
                 //check
 
                 try {
-                    Block tempBlock = NulsContext.getServiceBean(BlockStorageService.class).getBlock(block.getHeader().getHash().getDigestHex());
+                    Block tempBlock = blockService.getBlock(block.getHeader().getHash().getDigestHex());
                     if(tempBlock.getHeader().getTxCount() != tempBlock.getTxs().size()) {
                         Log.error("end save block tx count is error block : " + block.getHeader().getHash());
                     }
