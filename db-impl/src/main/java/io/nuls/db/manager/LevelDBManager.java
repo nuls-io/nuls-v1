@@ -28,6 +28,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.model.Result;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.str.StringUtils;
+import org.apache.ibatis.io.Resources;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.Options;
@@ -39,6 +40,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,7 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class LevelDBManager {
 
-    public static final int MAX = 20;
+    private static int max;
 
     private static final ConcurrentHashMap<String, DB> AREAS = new ConcurrentHashMap<>();
 
@@ -59,24 +61,22 @@ public class LevelDBManager {
 
     private static String dataPath;
 
-    public static synchronized void init() throws UnsupportedEncodingException {
+    public static int getMax() {
+        return max;
+    }
+
+    public static synchronized void init() throws Exception {
         if(!isInit) {
             isInit = true;
-            URL resource = ClassLoader.getSystemClassLoader().getResource(".");
-            String classPath = resource.getPath();
-            File file = new File(classPath);
-            String parent = file.getParent();
-            dataPath = parent + "/data/kv";
-            File _dir = new File(dataPath);
-            if(!_dir.exists())
-                _dir.mkdirs();
-
-            File dir = new File(dataPath);
+            File dir = loadDataPath();
+            dataPath = dir.getPath();
+            Log.info("LevelDBManager dataPath is " + dataPath);
             File[] areaFiles = dir.listFiles();
             DB db = null;
             for(File areaFile : areaFiles) {
-                if(!areaFile.isDirectory())
+                if(!areaFile.isDirectory()) {
                     continue;
+                }
                 try {
                     db = openDB(areaFile.getPath() + File.separator + BASE_DB_NAME, false);
                     AREAS.put(areaFile.getName(), db);
@@ -88,9 +88,72 @@ public class LevelDBManager {
         }
     }
 
+    private static File loadDataPath() throws Exception {
+        Properties properties = Resources.getResourceAsProperties("db_config.properties");
+        String path = properties.getProperty("leveldb.datapath", "./data/kv");
+        String max_str = properties.getProperty("leveldb.area.max", "20");
+        try {
+            max = Integer.parseInt(max_str);
+        } catch (Exception e) {
+            //skip it
+            max = 20;
+        }
+        File dir = null;
+        String pathSeparator = System.getProperty ("path.separator");
+        String unixPathSeparator = ":";
+        String rootPath;
+        if(unixPathSeparator.equals(pathSeparator)) {
+            rootPath = "/";
+            if(path.startsWith(rootPath)) {
+                dir = new File(path);
+            } else {
+                dir = new File(genAbsolutePath(path));
+            }
+        } else {
+            rootPath = "^[c-zC-Z]:.*";
+            if(path.matches(rootPath)) {
+                dir = new File(path);
+            } else {
+                dir = new File(genAbsolutePath(path));
+            }
+        }
+
+        if(!dir.exists()) {
+            dir.mkdirs();
+        }
+        return dir;
+    }
+
+    private static String genAbsolutePath(String path) {
+        String[] paths = path.split("/|\\\\");
+        URL resource = ClassLoader.getSystemClassLoader().getResource(".");
+        String classPath = resource.getPath();
+        File file = new File(classPath);
+        String resultPath = null;
+        boolean isFileName = false;
+        for(String p : paths) {
+            if(StringUtils.isBlank(p)) {
+                continue;
+            }
+            if(!isFileName) {
+                if("..".equals(p)) {
+                    file = file.getParentFile();
+                } else if(".".equals(p)) {
+                    continue;
+                } else {
+                    isFileName = true;
+                    resultPath = file.getPath() + File.separator + p;
+                }
+            } else {
+                resultPath += File.separator + p;
+            }
+        }
+        return resultPath;
+    }
+
     public static Result createArea(String areaName) {
         // prevent too many areas
-        if(AREAS.size() > (MAX -1)) {
+        if(AREAS.size() > (max -1)) {
             return new Result(false, "KV_AREA_CREATE_ERROR");
         }
         if(StringUtils.isBlank(areaName)) {
@@ -99,7 +162,7 @@ public class LevelDBManager {
         if (AREAS.containsKey(areaName)) {
             return new Result(true, "KV_AREA_EXISTS");
         }
-        if(!checkPathLegal(areaName)) {
+        if(StringUtils.isBlank(dataPath) || !checkPathLegal(areaName)) {
             return new Result(false, "KV_AREA_CREATE_ERROR");
         }
         Result result;
@@ -154,8 +217,9 @@ public class LevelDBManager {
     }
 
     private static byte[] str2bytes(String str) {
-        if(StringUtils.isBlank(str))
+        if(StringUtils.isBlank(str)) {
             return null;
+        }
         try {
             return str.getBytes(NulsConfig.DEFAULT_ENCODING);
         } catch (UnsupportedEncodingException e) {
@@ -172,8 +236,9 @@ public class LevelDBManager {
         while (keys.hasMoreElements()) {
             areas[i++] = keys.nextElement();
             // thread safe, prevent java.lang.ArrayIndexOutOfBoundsException
-            if(i == length)
+            if(i == length) {
                 break;
+            }
         }
         return areas;
     }

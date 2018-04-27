@@ -44,7 +44,8 @@ public class LevelDBManagerTest {
     private String area;
     private String key;
     @Before
-    public void before() {
+    public void before() throws Exception {
+        init();
         area = "pierre-test";
         key = "testkey";
         createArea(area);
@@ -62,10 +63,10 @@ public class LevelDBManagerTest {
     }
 
     public void testFullCreateArea() {
-        for(int i = 0; i < 30; i++) {
+        for(int i = 0, length = getMax() + 10; i < length; i++) {
             createArea(area + "-" + i);
         }
-        Assert.assertEquals(MAX, listArea().length);
+        Assert.assertEquals(getMax(), listArea().length);
     }
 
     public void testPut_1() throws UnsupportedEncodingException {
@@ -102,7 +103,7 @@ public class LevelDBManagerTest {
 
     public void testListArea() throws UnsupportedEncodingException {
         String[] areas = listArea();
-        if(areas.length < MAX) {
+        if(areas.length < getMax()) {
             String testArea = "testListArea";
             createArea(testArea);
             areas = listArea();
