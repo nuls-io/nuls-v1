@@ -325,7 +325,7 @@ public class ChainContainer implements Cloneable {
         Transaction tx = txs.get(0);
         if (tx.getType() != TransactionConstant.TX_TYPE_COIN_BASE) {
             BlockLog.debug("Coinbase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
-            Log.error("Coinbase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
+//            Log.error("Coinbase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
             return false;
         }
         YellowPunishTransaction yellowPunishTx = null;
@@ -333,14 +333,14 @@ public class ChainContainer implements Cloneable {
             Transaction transaction = txs.get(i);
             if (transaction.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
                 BlockLog.debug("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
-                Log.error("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
+//                Log.error("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
                 return false;
             }
             if (null == yellowPunishTx && transaction.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH) {
                 yellowPunishTx = (YellowPunishTransaction) transaction;
             } else if (null != yellowPunishTx && transaction.getType() == TransactionConstant.TX_TYPE_YELLOW_PUNISH) {
                 BlockLog.debug("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
-                Log.error("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
+//                Log.error("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
                 return false;
             }
         }
