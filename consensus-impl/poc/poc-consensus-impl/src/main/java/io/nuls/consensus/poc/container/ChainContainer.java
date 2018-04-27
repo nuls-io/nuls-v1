@@ -107,6 +107,16 @@ public class ChainContainer implements Cloneable {
                 Consensus<Deposit> cDeposit = joinConsensusTx.getTxData();
                 cDeposit.getExtend().setBlockHeight(height);
                 depositList.add(cDeposit);
+                long blockHeight = 0;
+                for (int i = 0; i < depositList.size(); i++) {
+                    Consensus<Deposit> conDe = depositList.get(i);
+                    if (blockHeight <= conDe.getExtend().getBlockHeight()) {
+                        blockHeight = conDe.getExtend().getBlockHeight();
+                    } else {
+                        System.out.println("-----------------乱序了-------------");
+                    }
+                }
+
             } else if (txType == TransactionConstant.TX_TYPE_CANCEL_DEPOSIT) {
 
                 CancelDepositTransaction cancelDepositTx = (CancelDepositTransaction) tx;
@@ -227,7 +237,7 @@ public class ChainContainer implements Cloneable {
         if (isDownload && currentRound.getIndex() > roundData.getRoundIndex()) {
 
             MeetingRound round = roundManager.getRoundByIndex(roundData.getRoundIndex());
-            if(round != null) {
+            if (round != null) {
                 currentRound = round;
             }
         }
@@ -246,7 +256,7 @@ public class ChainContainer implements Cloneable {
 //                Log.error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeader.getHash().getDigestHex());
                 return false;
             }
-            if (!isDownload && (roundData.getRoundStartTime() + (roundData.getPackingIndexOfRound()-1) * ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L) > TimeService.currentTimeMillis()) {
+            if (!isDownload && (roundData.getRoundStartTime() + (roundData.getPackingIndexOfRound() - 1) * ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L) > TimeService.currentTimeMillis()) {
                 BlockLog.debug("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash().getDigestHex());
 //                Log.error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash().getDigestHex());
                 return false;
@@ -255,10 +265,10 @@ public class ChainContainer implements Cloneable {
             tempRound.setPreRound(currentRound);
             currentRound = tempRound;
             hasChangeRound = true;
-        } else if(roundData.getRoundIndex() < currentRound.getIndex()) {
+        } else if (roundData.getRoundIndex() < currentRound.getIndex()) {
             MeetingRound preRound = currentRound.getPreRound();
-            while(preRound != null) {
-                if(roundData.getRoundIndex() == preRound.getIndex()) {
+            while (preRound != null) {
+                if (roundData.getRoundIndex() == preRound.getIndex()) {
                     currentRound = preRound;
                     break;
                 }
@@ -377,7 +387,7 @@ public class ChainContainer implements Cloneable {
 
         Block bestBlock = chain.getBestBlock();
 
-        if(block == null || !block.getHeader().getHash().equals(bestBlock.getHeader().getHash())) {
+        if (block == null || !block.getHeader().getHash().equals(bestBlock.getHeader().getHash())) {
             Log.warn("rollback block is not best block");
             return false;
         }
@@ -387,7 +397,7 @@ public class ChainContainer implements Cloneable {
         if (blockList == null || blockList.size() == 0) {
             return false;
         }
-        if(blockList.size() <= 2) {
+        if (blockList.size() <= 2) {
             addBlockInBlockList(blockList);
         }
 
@@ -431,6 +441,16 @@ public class ChainContainer implements Cloneable {
             if (deposit.getBlockHeight() == height) {
                 depositList.remove(i);
             }
+
+            long blockHeight = 0;
+            for (int j = 0; j < depositList.size(); j++) {
+                Consensus<Deposit> conDe = depositList.get(j);
+                if (blockHeight <= conDe.getExtend().getBlockHeight()) {
+                    blockHeight = conDe.getExtend().getBlockHeight();
+                } else {
+                    System.out.println("-----------------乱序了-------------");
+                }
+            }
         }
 
         for (int i = yellowList.size() - 1; i >= 0; i--) {
@@ -468,7 +488,7 @@ public class ChainContainer implements Cloneable {
     /**
      * Get the state of the complete chain after the combination of a chain and the current chain bifurcation point, that is, first obtain the bifurcation point between the bifurcation chain and the current chain.
      * Then create a brand new chain, copy all the states before the bifurcation point of the main chain to the brand new chain
-     *
+     * <p>
      * 获取一条链与当前链分叉点组合之后的完整链的状态，也就是，先获取到分叉链与当前链的分叉点，
      * 然后创建一条全新的链，把主链分叉点之前的所有状态复制到全新的链
      *
@@ -517,7 +537,7 @@ public class ChainContainer implements Cloneable {
 
     /**
      * Get the block information of the current chain and branch chain after the cross point and combine them into a new branch chain
-     *
+     * <p>
      * 获取当前链与分叉链对比分叉点之后的区块信息，组合成一个新的分叉链
      *
      * @return ChainContainer

@@ -51,6 +51,7 @@ import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.util.UtxoTransferTool;
 import io.nuls.protocol.constant.TransactionConstant;
 import io.nuls.protocol.constant.TxStatusEnum;
+import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Na;
 import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.model.Transaction;
@@ -270,7 +271,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
                     throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             } else {
-                if (output.getStatus() != OutPutStatusEnum.UTXO_UNSPENT) {
+                if (output.isUsable(NulsContext.getInstance().getBestHeight())) {
                     throw new NulsRuntimeException(ErrorCode.UTXO_STATUS_CHANGE);
                 }
             }

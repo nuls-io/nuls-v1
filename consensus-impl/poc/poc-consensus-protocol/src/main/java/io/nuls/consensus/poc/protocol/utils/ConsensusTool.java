@@ -259,7 +259,7 @@ public class ConsensusTool {
         }
         agentReword.setReward(Na.valueOf(DoubleUtils.longValue(caReward)));
         rewardList.add(agentReword);
-        Collections.sort(addressList);
+//        Collections.sort(addressList);
         for (String address : addressList) {
             rewardList.add(rewardMap.get(address));
         }
