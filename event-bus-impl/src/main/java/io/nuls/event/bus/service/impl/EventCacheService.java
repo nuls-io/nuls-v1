@@ -35,7 +35,7 @@ public class EventCacheService {
     private static EventCacheService INSTANCE = new EventCacheService();
     private static final String CACHE_OF_SENDED = "event-cache-sended";
     private static final String CACHE_OF_RECIEVED = "event-cache-recieved";
-    private static final int TIME_OF_IDLE_SECONDS = 120;
+    private static final int TIME_OF_IDLE_SECONDS = 600;
     private CacheService cacheService;
 
     private EventCacheService() {
