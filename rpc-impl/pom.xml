@@ -4,7 +4,7 @@
 
     <groupId>io.nuls</groupId>
     <artifactId>rpc-impl</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.1</version>
     <packaging>jar</packaging>
 
     <name>rpc-impl</name>
@@ -27,7 +27,7 @@
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>rpc</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
@@ -63,42 +63,42 @@
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>core</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>event-bus</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>account</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>protocol</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>ledger</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>network</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>poc-consensus-protocol</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>poc-consensus</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
     </dependencies>
     <build>
