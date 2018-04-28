@@ -100,22 +100,19 @@ public class ChainContainer implements Cloneable {
                 // 注册代理交易
                 RegisterAgentTransaction registerAgentTx = (RegisterAgentTransaction) tx;
                 Consensus<Agent> ca = registerAgentTx.getTxData();
-                ca.getExtend().setBlockHeight(height);
-                agentList.add(ca);
+
+                Consensus<Agent> caAgent = ConsensusTool.copyConsensusAgent(ca);
+                caAgent.setDelHeight(0L);
+                caAgent.getExtend().setBlockHeight(height);
+                agentList.add(caAgent);
             } else if (txType == TransactionConstant.TX_TYPE_JOIN_CONSENSUS) {
                 PocJoinConsensusTransaction joinConsensusTx = (PocJoinConsensusTransaction) tx;
                 Consensus<Deposit> cDeposit = joinConsensusTx.getTxData();
-                cDeposit.getExtend().setBlockHeight(height);
-                depositList.add(cDeposit);
-                long blockHeight = 0;
-                for (int i = 0; i < depositList.size(); i++) {
-                    Consensus<Deposit> conDe = depositList.get(i);
-                    if (blockHeight <= conDe.getExtend().getBlockHeight()) {
-                        blockHeight = conDe.getExtend().getBlockHeight();
-                    } else {
-                        System.out.println("-----------------乱序了-------------");
-                    }
-                }
+
+                Consensus<Deposit> caDeposit = ConsensusTool.copyConsensusDeposit(cDeposit);
+                caDeposit.setDelHeight(0L);
+                caDeposit.getExtend().setBlockHeight(height);
+                depositList.add(caDeposit);
 
             } else if (txType == TransactionConstant.TX_TYPE_CANCEL_DEPOSIT) {
 
@@ -403,7 +400,6 @@ public class ChainContainer implements Cloneable {
             addBlockInBlockList(blockList);
         }
 
-        Block rollbackBlock = blockList.get(blockList.size() - 1);
         blockList.remove(blockList.size() - 1);
 
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
@@ -424,7 +420,7 @@ public class ChainContainer implements Cloneable {
             Agent agent = agentConsensus.getExtend();
 
             if (agentConsensus.getDelHeight() == height) {
-                agentConsensus.setDelHeight(0);
+                agentConsensus.setDelHeight(0L);
             }
 
             if (agent.getBlockHeight() == height) {
@@ -437,21 +433,11 @@ public class ChainContainer implements Cloneable {
             Deposit deposit = tempDe.getExtend();
 
             if (tempDe.getDelHeight() == height) {
-                tempDe.setDelHeight(0);
+                tempDe.setDelHeight(0L);
             }
 
             if (deposit.getBlockHeight() == height) {
                 depositList.remove(i);
-            }
-
-            long blockHeight = 0;
-            for (int j = 0; j < depositList.size(); j++) {
-                Consensus<Deposit> conDe = depositList.get(j);
-                if (blockHeight <= conDe.getExtend().getBlockHeight()) {
-                    blockHeight = conDe.getExtend().getBlockHeight();
-                } else {
-                    System.out.println("-----------------乱序了-------------");
-                }
             }
         }
 
@@ -506,10 +492,22 @@ public class ChainContainer implements Cloneable {
         newChain.setBlockList(new ArrayList<>(chain.getBlockList()));
 
         if (chain.getAgentList() != null) {
-            newChain.setAgentList(new ArrayList<>(chain.getAgentList()));
+            List<Consensus<Agent>> agentList = new ArrayList<>();
+
+            for(Consensus<Agent> agentConsensus : chain.getAgentList()) {
+                agentList.add(ConsensusTool.copyConsensusAgent(agentConsensus));
+            }
+
+            newChain.setAgentList(agentList);
         }
         if (chain.getDepositList() != null) {
-            newChain.setDepositList(new ArrayList<>(chain.getDepositList()));
+            List<Consensus<Deposit>> depositList = new ArrayList<>();
+
+            for(Consensus<Deposit> depositConsensus : chain.getDepositList()) {
+                depositList.add(ConsensusTool.copyConsensusDeposit(depositConsensus));
+            }
+
+            newChain.setDepositList(depositList);
         }
         if (chain.getYellowPunishList() != null) {
             newChain.setYellowPunishList(new ArrayList<>(chain.getYellowPunishList()));
