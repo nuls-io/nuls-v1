@@ -54,9 +54,9 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 //        if (needToSelf) {
 //            eventBusService.publishLocalEvent(event);
 //        }
-        if (!result.isSuccess()) {
-            eventCacheService.removeSendedEvent(event);
-        }
+//        if (!result.isSuccess()) {
+//            eventCacheService.removeSendedEvent(event);
+//        }
         return getNodeIdList(result);
     }
 
@@ -67,9 +67,9 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 //        if (needToSelf) {
 //            eventBusService.publishLocalEvent(event);
 //        }
-        if (!result.isSuccess()) {
-            eventCacheService.removeSendedEvent(event);
-        }
+//        if (!result.isSuccess()) {
+//            eventCacheService.removeSendedEvent(event);
+//        }
         return getNodeIdList(result);
     }
 
@@ -92,9 +92,9 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 //        if (needToSelf) {
 //            eventBusService.publishLocalEvent(event);
 //        }
-        if (!result.isSuccess()) {
-            eventCacheService.removeSendedEvent(event);
-        }
+//        if (!result.isSuccess()) {
+//            eventCacheService.removeSendedEvent(event);
+//        }
         return getNodeIdList(result);
     }
 
@@ -102,9 +102,9 @@ public class EventBroadcasterImpl implements EventBroadcaster {
     public List<String> broadcastAndCache(BaseEvent event) {
         eventCacheService.cacheSendedEvent(event);
         BroadcastResult result = networkService.sendToAllNode(event, false);
-        if (!result.isSuccess()) {
-            eventCacheService.removeSendedEvent(event);
-        }
+//        if (!result.isSuccess()) {
+//            eventCacheService.removeSendedEvent(event);
+//        }
         return getNodeIdList(result);
     }
 
@@ -124,9 +124,9 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 //        if (needToSelf) {
 //            eventBusService.publishLocalEvent(event);
 //        }
-        if (!result.isSuccess()) {
-            eventCacheService.removeSendedEvent(event);
-        }
+//        if (!result.isSuccess()) {
+//            eventCacheService.removeSendedEvent(event);
+//        }
         return result.isSuccess();
     }
 
@@ -137,9 +137,9 @@ public class EventBroadcasterImpl implements EventBroadcaster {
 //        if (needToSelf) {
 //            eventBusService.publishLocalEvent(event);
 //        }
-        if (!result.isSuccess()) {
-            eventCacheService.removeSendedEvent(event);
-        }
+//        if (!result.isSuccess()) {
+//            eventCacheService.removeSendedEvent(event);
+//        }
         return result.isSuccess();
     }
 
