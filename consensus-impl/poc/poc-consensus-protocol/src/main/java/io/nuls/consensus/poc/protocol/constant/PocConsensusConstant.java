@@ -45,7 +45,7 @@ public interface PocConsensusConstant {
     short NOTICE_JOIN_CONSENSUS = 25;
     short NOTICE_EXIT_CONSENSUS = 26;
     short NOTICE_CANCEL_CONSENSUS = 27;
-    int COINBASE_UNLOCK_HEIGHT = 20;
+    int COINBASE_UNLOCK_HEIGHT = 1000;
 
 
     /**
