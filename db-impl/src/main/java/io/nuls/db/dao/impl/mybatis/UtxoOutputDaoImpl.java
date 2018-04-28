@@ -26,6 +26,7 @@ package io.nuls.db.dao.impl.mybatis;
 import com.github.pagehelper.PageHelper;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
@@ -140,7 +141,7 @@ public class UtxoOutputDaoImpl extends BaseDaoImpl<UtxoOutputMapper, Map<String,
         searchable.addCondition(condition);
         searchable.addCondition("b.address", SearchOperator.eq, address);
         PageHelper.offsetPage(start, limit);
-
+        PageHelper.orderBy("a.create_time desc");
         return getMapper().selectAccountOutput(searchable);
     }
 

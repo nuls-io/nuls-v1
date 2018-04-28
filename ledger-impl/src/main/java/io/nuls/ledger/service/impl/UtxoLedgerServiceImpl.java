@@ -62,10 +62,7 @@ import io.nuls.protocol.service.intf.TransactionService;
 import io.nuls.protocol.utils.TransactionManager;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -731,6 +728,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         } else {
             start = start - lockOutputs.size();
         }
+
+        Collections.reverse(lockOutputs);
         List<UtxoOutputPo> poList = outputDataService.getLockUtxo(address, TimeService.currentTimeMillis(), NulsContext.getInstance().getBestHeight(), start, pageSize);
         for (UtxoOutputPo po : poList) {
             lockOutputs.add(UtxoTransferTool.toOutput(po));
