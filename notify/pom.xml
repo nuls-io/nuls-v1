@@ -6,7 +6,7 @@
 
     <groupId>io.nuls</groupId>
     <artifactId>notify</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.1</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -20,13 +20,13 @@
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>core</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
 
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>event-bus-impl</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
 
         <dependency>
@@ -38,12 +38,12 @@
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>ledger</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>event-bus</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
     </dependencies>
     <build>

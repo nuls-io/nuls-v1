@@ -6,7 +6,7 @@
 
     <groupId>io.nuls</groupId>
     <artifactId>network-impl</artifactId>
-    <version>0.9.0</version>
+    <version>0.9.1</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -26,19 +26,19 @@
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>cache-impl</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>db-impl</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>event-bus-impl</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -49,22 +49,22 @@
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>network</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>core</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>db</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>protocol-base</artifactId>
-            <version>0.9.0</version>
+            <version>0.9.1</version>
         </dependency>
     </dependencies>
     <build>
