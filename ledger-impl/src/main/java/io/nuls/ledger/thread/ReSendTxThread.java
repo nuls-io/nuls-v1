@@ -25,6 +25,7 @@ package io.nuls.ledger.thread;
 
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.date.DateUtil;
+import io.nuls.core.utils.date.TimeService;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.validate.ValidateResult;
 import io.nuls.db.dao.TransactionLocalDataService;
@@ -87,6 +88,8 @@ public class ReSendTxThread implements Runnable {
                 getLocalDataService().deleteUnCofirmTx(tx.getHash().getDigestHex());
                 continue;
             }
+
+            if(TimeService.currentTimeMillis() - tx.getTime() > DateUtil.MINUTE_TIME * 2);
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             getEventBroadcaster().broadcastAndCacheAysn(event);
