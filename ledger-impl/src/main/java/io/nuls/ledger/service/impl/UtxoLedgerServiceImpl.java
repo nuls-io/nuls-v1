@@ -93,6 +93,15 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Transaction getTx(NulsDigestData hash) {
+        TransactionLocalPo localPo = localTxDao.get(hash.getDigestHex());
+        if(localPo != null) {
+            try {
+                Transaction tx = UtxoTransferTool.toTransaction(localPo);
+                return tx;
+            } catch (Exception e) {
+                Log.error(e);
+            }
+        }
         TransactionPo po = txDao.get(hash.getDigestHex());
         if (null == po) {
             return null;
