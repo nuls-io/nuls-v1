@@ -63,6 +63,17 @@ import java.util.*;
 public class ConsensusTool {
     private static AccountService accountService = NulsContext.getServiceBean(AccountService.class);
 
+    public static Consensus<Agent> copyConsensusAgent(Consensus<Agent> ca) {
+        //todo implement
+        return ca;
+    }
+
+    public static Consensus<Deposit> copyConsensusDeposit(Consensus<Deposit> cd) {
+        //todo implement
+        return cd;
+
+    }
+
     public static Consensus<Agent> fromPojo(AgentPo po) {
         if (null == po) {
             return null;
