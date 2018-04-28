@@ -70,8 +70,6 @@ public class UtxoData extends CoinData {
         this.outputs = outputs;
     }
 
-    private UtxoCoinManager coinManager = UtxoCoinManager.getInstance();
-
     @Override
     public int size() {
         int size = 0;
@@ -136,7 +134,7 @@ public class UtxoData extends CoinData {
                 for (UtxoInput input : this.getInputs()) {
                     b = false;
                     if (input.getFrom() == null) {
-                        List<AbstractCoinTransaction> localTxs = coinManager.getLocalUnConfirmTxs();
+                        List<AbstractCoinTransaction> localTxs = UtxoCoinManager.getInstance().getLocalUnConfirmTxs();
                         for (AbstractCoinTransaction tx : localTxs) {
                             UtxoData utxoData = (UtxoData) tx.getCoinData();
                             for (UtxoOutput output : utxoData.getOutputs()) {
