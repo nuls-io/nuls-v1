@@ -26,8 +26,11 @@ package io.nuls.ledger.entity;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.utils.crypto.Utils;
+import io.nuls.ledger.entity.tx.AbstractCoinTransaction;
+import io.nuls.ledger.service.impl.UtxoCoinManager;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.Na;
+import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.utils.io.NulsByteBuffer;
 import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
@@ -66,6 +69,8 @@ public class UtxoData extends CoinData {
     public void setOutputs(List<UtxoOutput> outputs) {
         this.outputs = outputs;
     }
+
+    private UtxoCoinManager coinManager = UtxoCoinManager.getInstance();
 
     @Override
     public int size() {
@@ -127,9 +132,27 @@ public class UtxoData extends CoinData {
         if (null == this.totalNa) {
             Set<String> addressSet = new HashSet<>();
             if (null != this.getInputs()) {
+                boolean b = false;
                 for (UtxoInput input : this.getInputs()) {
+                    b = false;
                     if (input.getFrom() == null) {
-                        throw new NulsException(ErrorCode.ORPHAN_TX);
+                        List<AbstractCoinTransaction> localTxs = coinManager.getLocalUnConfirmTxs();
+                        for (AbstractCoinTransaction tx : localTxs) {
+                            UtxoData utxoData = (UtxoData) tx.getCoinData();
+                            for (UtxoOutput output : utxoData.getOutputs()) {
+                                if (input.getKey().equals(output.getKey())) {
+                                    input.setFrom(output);
+                                    b = true;
+                                    break;
+                                }
+                            }
+                            if (b) {
+                                break;
+                            }
+                        }
+                        if (!b) {
+                            throw new NulsException(ErrorCode.ORPHAN_TX);
+                        }
                     }
                     addressSet.add(input.getFrom().getAddress());
                 }
