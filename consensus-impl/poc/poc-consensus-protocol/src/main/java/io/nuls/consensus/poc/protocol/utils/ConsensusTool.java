@@ -63,14 +63,55 @@ import java.util.*;
 public class ConsensusTool {
     private static AccountService accountService = NulsContext.getServiceBean(AccountService.class);
 
+    /**
+     * Deep clone proxy node objects
+     * 深度克隆代理节点对象
+     *
+     * @param ca the agent ocbject
+     * @return the object cloned
+     */
     public static Consensus<Agent> copyConsensusAgent(Consensus<Agent> ca) {
-        //todo implement
-        return ca;
+        ConsensusAgentImpl consensusAgent = new ConsensusAgentImpl();
+        consensusAgent.setDelHeight(ca.getDelHeight());
+        consensusAgent.setAddress(ca.getAddress());
+        consensusAgent.setHash(ca.getHash());
+        Agent agent = new Agent();
+        agent.setCreditVal(ca.getExtend().getCreditVal());
+        agent.setStatus(ca.getExtend().getStatus());
+        agent.setTxHash(ca.getExtend().getTxHash());
+        agent.setBlockHeight(ca.getExtend().getBlockHeight());
+        agent.setTotalDeposit(ca.getExtend().getTotalDeposit());
+        agent.setAgentName(ca.getExtend().getAgentName());
+        agent.setCommissionRate(ca.getExtend().getCommissionRate());
+        agent.setDeposit(ca.getExtend().getDeposit());
+        agent.setIntroduction(ca.getExtend().getIntroduction());
+        agent.setPackingAddress(ca.getExtend().getPackingAddress());
+        agent.setStartTime(ca.getExtend().getStartTime());
+        consensusAgent.setExtend(agent);
+        return consensusAgent;
     }
 
+    /**
+     * Deep clone consensus deposit objects
+     * 深度克隆委托对象
+     *
+     * @param cd the deposit ocbject
+     * @return the object cloned
+     */
     public static Consensus<Deposit> copyConsensusDeposit(Consensus<Deposit> cd) {
-        //todo implement
-        return cd;
+        ConsensusDepositImpl consensusDeposit = new ConsensusDepositImpl();
+        consensusDeposit.setDelHeight(cd.getDelHeight());
+        consensusDeposit.setAddress(cd.getAddress());
+        consensusDeposit.setHash(cd.getHash());
+        Deposit deposit = new Deposit();
+        deposit.setBlockHeight(cd.getExtend().getBlockHeight());
+        deposit.setAgentHash(cd.getExtend().getAgentHash());
+        deposit.setDeposit(cd.getExtend().getDeposit());
+        deposit.setStartTime(cd.getExtend().getStartTime());
+        deposit.setStatus(cd.getExtend().getStatus());
+        deposit.setTxHash(cd.getExtend().getTxHash());
+        consensusDeposit.setExtend(deposit);
+        return consensusDeposit;
 
     }
 

@@ -23,8 +23,6 @@
  */
 package io.nuls.protocol.base.service.impl;
 
-import io.nuls.account.entity.Address;
-import io.nuls.consensus.poc.protocol.model.block.BlockRoundData;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.dto.Page;
 import io.nuls.core.exception.NulsException;
@@ -37,12 +35,8 @@ import io.nuls.protocol.base.utils.BlockHeaderTool;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.BlockHeader;
-import io.nuls.protocol.model.NulsDigestData;
 import io.nuls.protocol.model.Transaction;
-import io.nuls.protocol.script.P2PKHScriptSig;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
