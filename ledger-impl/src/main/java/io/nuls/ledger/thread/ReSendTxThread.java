@@ -84,7 +84,7 @@ public class ReSendTxThread implements Runnable {
         for (Transaction tx : txList) {
             System.out.println("------------reSendLocalTx:" + tx.getHash().getDigestHex());
             if (tx.verify().isFailed()) {
-                localDataService.deleteUnCofirmTx(tx.getHash().getDigestHex());
+                getLocalDataService().deleteUnCofirmTx(tx.getHash().getDigestHex());
                 continue;
             }
             TransactionEvent event = new TransactionEvent();
