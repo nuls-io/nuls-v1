@@ -492,6 +492,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    @DbSession
     public void removeLocalTxs(String address) {
         List<TxAccountRelationPo> relationList = relationDataService.selectByAddress(address);
         for (TxAccountRelationPo po : relationList) {
