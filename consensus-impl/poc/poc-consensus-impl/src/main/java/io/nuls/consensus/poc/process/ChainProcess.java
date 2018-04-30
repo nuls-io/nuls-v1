@@ -46,7 +46,6 @@ import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.BlockHeader;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -141,6 +140,7 @@ public class ChainProcess {
     }
 
     private void printLog() {
+        // TODO  remove log
         time = System.currentTimeMillis();
 
         StringBuilder sb = new StringBuilder();
@@ -499,10 +499,10 @@ public class ChainProcess {
         List<Block> blockList = masterChain.getBlockList();
 
         if(blockHeaderList.size() > 30000) {
-            blockHeaderList = blockHeaderList.subList(blockHeaderList.size() - 30000, blockHeaderList.size());
+            masterChain.setBlockHeaderList(blockHeaderList.subList(blockHeaderList.size() - 30000, blockHeaderList.size()));
         }
         if(blockList.size() > ConsensusConstant.MAX_ISOLATED_BLOCK_COUNT) {
-            blockList = blockList.subList(blockList.size() - ConsensusConstant.MAX_ISOLATED_BLOCK_COUNT, blockList.size());
+            masterChain.setBlockList(blockList.subList(blockList.size() - ConsensusConstant.MAX_ISOLATED_BLOCK_COUNT, blockList.size()));
         }
 
         List<Consensus<Agent>> agentList = masterChain.getAgentList();
@@ -511,7 +511,7 @@ public class ChainProcess {
         Iterator<Consensus<Agent>> ait = agentList.iterator();
         while(ait.hasNext()) {
             Consensus<Agent> agent = ait.next();
-            if(agent.getDelHeight() > 0L && (bestHeight - 1000) > agent.getDelHeight() ) {
+            if(agent.getDelHeight() > 0L && (bestHeight - 1000) > agent.getDelHeight()) {
                 ait.remove();
             }
         }
@@ -519,7 +519,7 @@ public class ChainProcess {
         Iterator<Consensus<Deposit>> dit = depositList.iterator();
         while(dit.hasNext()) {
             Consensus<Deposit> deposit = dit.next();
-            if(deposit.getDelHeight() > 0L && (bestHeight - 1000) > deposit.getDelHeight() ) {
+            if(deposit.getDelHeight() > 0L && (bestHeight - 1000) > deposit.getDelHeight()) {
                 dit.remove();
             }
         }
