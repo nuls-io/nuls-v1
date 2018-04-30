@@ -504,7 +504,6 @@ public class NodesManager implements Runnable {
                 }
             }
 
-
             for (Node node : disConnectNodes.values()) {
                 if (node.getType() == Node.OUT && node.getStatus() == Node.CLOSE) {
                     /*if (node.getLastFailTime() <= TimeService.currentTimeMillis()) {
@@ -513,7 +512,6 @@ public class NodesManager implements Runnable {
                     connectionManager.connectionNode(node);
                 }
             }
-
         }
     }
 

@@ -81,6 +81,7 @@ import io.nuls.protocol.event.entity.Consensus;
 import io.nuls.protocol.model.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -358,27 +359,31 @@ public class PocConsensusServiceImpl implements PocConsensusService {
 
     @Override
     public Map<String, Object> getConsensusInfo() {
-        List<Consensus<Agent>> agentList = this.getEffectiveAgentList(null, NulsContext.getInstance().getBestHeight(), null);
-        List<Consensus<Deposit>> depositList = this.getEffectiveDepositList(null, null, NulsContext.getInstance().getBestHeight(), null);
+       // List<Consensus<Agent>> agentList = this.getEffectiveAgentList(null, NulsContext.getInstance().getBestHeight(), null);
+       // List<Consensus<Deposit>> depositList = this.getEffectiveDepositList(null, null, NulsContext.getInstance().getBestHeight(), null);
 
-        long totalDeposit = 0L;
-        Set<String> memberSet = new HashSet<>();
-        for (Consensus<Agent> agent : agentList) {
-            totalDeposit += agent.getExtend().getDeposit().getValue();
-            memberSet.add(agent.getAddress());
-        }
-        for (Consensus<Deposit> deposit : depositList) {
-            totalDeposit += deposit.getExtend().getDeposit().getValue();
-            memberSet.add(deposit.getAddress());
-        }
+        Map<String,Object> valueMap = agentDataService.getAgentCount(NulsContext.getInstance().getBestHeight());
+        long sumDeposit = depositDataService.getSumDeposit(NulsContext.getInstance().getBestHeight());
+//        long totalDeposit = 0L;
+//        for (Consensus<Agent> agent : agentList) {
+//            totalDeposit += agent.getExtend().getDeposit().getValue();
+//        }
+//        for (Consensus<Deposit> deposit : depositList) {
+//            totalDeposit += deposit.getExtend().getDeposit().getValue();
+//        }
+        BigDecimal sumAgentDeposit = (BigDecimal) valueMap.get("deposit");
         //calc last 24h reward
         long rewardOfDay = ledgerService.getLastDayTimeReward();
 //
         Map<String, Object> map = new HashMap<>();
-        map.put("agentCount", agentList.size());
+        map.put("agentCount", (Integer)valueMap.get("getCount"));
         map.put("rewardOfDay", rewardOfDay);
-        map.put("totalDeposit", totalDeposit);
-        map.put("memberCount", memberSet.size());
+        map.put("totalDeposit", sumDeposit + sumAgentDeposit.longValue());
+        if (null == this.getCurrentRound()) {
+            map.put("memberCount", 0);
+        } else {
+            map.put("memberCount", this.getCurrentRound().getMemberCount());
+        }
         return map;
     }
 
@@ -876,7 +881,6 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         }
         return agentList.get(0);
     }
-
 
     private Consensus<Agent> getAgentById(String agentHash) {
         AgentPo po = this.agentDataService.get(agentHash);

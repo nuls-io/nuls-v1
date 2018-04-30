@@ -140,13 +140,13 @@ public class NodeDiscoverHandler implements Runnable {
                 if (node.getType() == Node.OUT) {
                     broadcaster.broadcastToNode(event, node, true);
                 }
-                if (count == 10) {
+                if (count == 3) {
                     broadcaster.broadcastToNode(ipEvent, node, true);
                 }
             }
 
             long now = TimeService.currentTimeMillis();
-            if (count == 10) {
+            if (count == 3) {
                 count = 0;
                 List<String> list = new ArrayList<>();
                 for (Map.Entry<String, Long> entry : NetworkContext.ipMap.entrySet()) {

@@ -26,6 +26,7 @@ package io.nuls.db.dao;
 import io.nuls.db.entity.AgentPo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -43,4 +44,6 @@ public interface AgentDataService extends BaseDataService<String, AgentPo> {
     int deleteById(String id, long blockHeight);
 
     int realDeleteById(String id, long blockHeight);
+
+    Map<String,Object> getAgentCount(long blockHeight);
 }

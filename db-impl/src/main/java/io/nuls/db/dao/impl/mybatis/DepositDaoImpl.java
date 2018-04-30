@@ -94,4 +94,9 @@ public class DepositDaoImpl extends BaseDaoImpl<DepositMapper, String, DepositPo
         po.setStatus(status);
         return this.getMapper().getEffectiveList(po);
     }
+
+    @Override
+    public long getSumDeposit(long blockHeight) {
+        return getMapper().getSumDeposit(blockHeight);
+    }
 }

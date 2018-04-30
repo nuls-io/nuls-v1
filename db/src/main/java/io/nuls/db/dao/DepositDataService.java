@@ -50,4 +50,6 @@ public interface DepositDataService extends BaseDataService<String, DepositPo> {
     List<DepositPo> getAllList();
 
     List<DepositPo> getEffectiveList(String address, long blockHeight, String agentId, Integer status);
+
+    long getSumDeposit(long blockHeight);
 }

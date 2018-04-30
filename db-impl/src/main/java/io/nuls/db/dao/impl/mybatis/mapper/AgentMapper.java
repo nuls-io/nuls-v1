@@ -25,8 +25,10 @@ package io.nuls.db.dao.impl.mybatis.mapper;
 
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
 import io.nuls.db.entity.AgentPo;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -35,9 +37,12 @@ import java.util.List;
 public interface AgentMapper extends BaseMapper<String, AgentPo> {
 
     int deleteByPrimaryKey(AgentPo po);
+
     int realDeleteByPrimaryKey(AgentPo po);
 
     List<AgentPo> getAllList();
 
     List<AgentPo> getEffectiveList(AgentPo agentPo);
+
+    Map<String,Object> getAgentCount(@Param("blockHeight") long blockHeight);
 }

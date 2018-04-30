@@ -26,6 +26,7 @@ package io.nuls.db.dao.impl.mybatis.mapper;
 import io.nuls.db.dao.impl.mybatis.common.BaseMapper;
 import io.nuls.db.entity.DepositPo;
 import io.nuls.db.entity.UpdateDepositByAgentIdParam;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -47,4 +48,6 @@ public interface DepositMapper extends BaseMapper<String,DepositPo> {
     List<DepositPo> getAllList();
 
     List<DepositPo> getEffectiveList(DepositPo po);
+
+    long getSumDeposit(@Param("blockHeight") long blockHeight);
 }
