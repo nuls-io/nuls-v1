@@ -105,6 +105,9 @@ public class TransactionResource {
         }
         try {
             Transaction tx = ledgerService.getTx(NulsDigestData.fromDigestHex(hash));
+            if(tx == null) {
+                tx = ledgerService.getLocalTx(NulsDigestData.fromDigestHex(hash));
+            }
 
             if (tx == null) {
                 result = RpcResult.getFailed("not found");

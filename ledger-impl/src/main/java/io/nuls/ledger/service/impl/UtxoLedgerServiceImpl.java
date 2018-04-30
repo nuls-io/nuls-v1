@@ -93,24 +93,14 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Transaction getTx(NulsDigestData hash) {
-        TransactionLocalPo localPo = localTxDao.get(hash.getDigestHex());
-        if (localPo != null) {
+        TransactionPo po = txDao.get(hash.getDigestHex());
+        if (null != po) {
             try {
-                Transaction tx = UtxoTransferTool.toTransaction(localPo);
+                Transaction tx = UtxoTransferTool.toTransaction(po);
                 return tx;
             } catch (Exception e) {
                 Log.error(e);
             }
-        }
-        TransactionPo po = txDao.get(hash.getDigestHex());
-        if (null == po) {
-            return null;
-        }
-        try {
-            Transaction tx = UtxoTransferTool.toTransaction(po);
-            return tx;
-        } catch (Exception e) {
-            Log.error(e);
         }
         return null;
     }
@@ -126,6 +116,20 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             return UtxoTransferTool.toTransaction(po);
         } catch (Exception e) {
             Log.error(e);
+        }
+        return null;
+    }
+
+    @Override
+    public Transaction getLocalTx(NulsDigestData hash) {
+        TransactionLocalPo localPo = localTxDao.get(hash.getDigestHex());
+        if (localPo != null) {
+            try {
+                Transaction tx = UtxoTransferTool.toTransaction(localPo);
+                return tx;
+            } catch (Exception e) {
+                Log.error(e);
+            }
         }
         return null;
     }
