@@ -83,7 +83,7 @@ public class ReSendTxThread implements Runnable {
     private void reSendLocalTx() throws NulsException {
         List<Transaction> txList = getLedgerService().getWaitingTxList();
         for (Transaction tx : txList) {
-            System.out.println("------------reSendLocalTx:" + tx.getHash().getDigestHex());
+            Log.info("------------reSendLocalTx:" + tx.getHash().getDigestHex());
             if (tx.verify().isFailed()) {
                 getLocalDataService().deleteUnCofirmTx(tx.getHash().getDigestHex());
                 continue;
@@ -94,10 +94,11 @@ public class ReSendTxThread implements Runnable {
                 continue;
             }
 
-            if(TimeService.currentTimeMillis() - tx.getTime() > DateUtil.MINUTE_TIME * 2);
-            TransactionEvent event = new TransactionEvent();
-            event.setEventBody(tx);
-            getEventBroadcaster().broadcastAndCacheAysn(event);
+            if(TimeService.currentTimeMillis() - tx.getTime() > DateUtil.MINUTE_TIME * 2) {
+                TransactionEvent event = new TransactionEvent();
+                event.setEventBody(tx);
+                getEventBroadcaster().broadcastAndCacheAysn(event);
+            }
         }
     }
 
