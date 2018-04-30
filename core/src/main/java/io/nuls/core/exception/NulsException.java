@@ -32,6 +32,7 @@ import io.nuls.core.constant.ErrorCode;
  */
 public class NulsException extends Exception {
 
+    private ErrorCode errorCode;
     private String code;
     private String message;
 
@@ -45,6 +46,7 @@ public class NulsException extends Exception {
      */
     public NulsException(ErrorCode message) {
         super(message.getMsg());
+        this.errorCode = message;
         this.code = message.getCode();
         this.message = message.getMsg();
     }
@@ -56,6 +58,7 @@ public class NulsException extends Exception {
      */
     public NulsException(ErrorCode errorCode,String msg) {
         super(msg);
+        this.errorCode = errorCode;
         this.code = errorCode.getCode();
         this.message = msg;
     }
@@ -75,6 +78,7 @@ public class NulsException extends Exception {
      */
     public NulsException(ErrorCode message, Throwable cause) {
         super( cause);
+        this.errorCode = message;
         this.code = message.getCode();
         this.message = message.getMsg();
     }
@@ -115,7 +119,12 @@ public class NulsException extends Exception {
                                    boolean enableSuppression,
                                    boolean writableStackTrace) {
         super(message.getMsg(), cause, enableSuppression, writableStackTrace);
+        this.errorCode = message;
         this.code = message.getCode();
         this.message = message.getMsg();
+    }
+
+    public ErrorCode getErrorCode() {
+        return errorCode;
     }
 }

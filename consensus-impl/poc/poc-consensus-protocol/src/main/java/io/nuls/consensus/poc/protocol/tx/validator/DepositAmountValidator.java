@@ -81,7 +81,7 @@ public class DepositAmountValidator implements NulsDataValidator<PocJoinConsensu
             }
         } catch (NulsException e) {
             Log.error(e);
-            return ValidateResult.getFailedResult(e.getMessage());
+            return ValidateResult.getFailedResult(e.getErrorCode(),e.getMessage());
         }
 
         return ValidateResult.getSuccessResult();
