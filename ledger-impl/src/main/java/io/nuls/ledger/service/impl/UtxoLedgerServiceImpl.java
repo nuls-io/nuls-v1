@@ -455,11 +455,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         try {
             ValidateResult validateResult = this.conflictDetectTx(tx, this.getWaitingTxList());
             if (validateResult.isFailed()) {
-                return false;
+                throw new NulsRuntimeException(validateResult.getErrorCode(),validateResult.getMessage());
             }
         } catch (Exception e) {
             Log.error(e);
-            return false;
+            throw new NulsRuntimeException(e);
         }
         TransactionLocalPo localPo = UtxoTransferTool.toLocalTransactionPojo(tx);
         localPo.setTxStatus(TransactionLocalPo.UNCONFIRM);
