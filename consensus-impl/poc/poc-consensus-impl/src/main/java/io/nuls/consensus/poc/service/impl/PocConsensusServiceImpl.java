@@ -288,10 +288,13 @@ public class PocConsensusServiceImpl implements PocConsensusService {
             joinTx = tx;
         } else {
             try {
-                List<Transaction> txlist = this.ledgerService.getTxList(address, TransactionConstant.TX_TYPE_REGISTER_AGENT);
-                if (null != txlist || !txlist.isEmpty()) {
-                    joinTx = (AbstractCoinTransaction) txlist.get(0);
-                }
+               Consensus<Agent> agentConsensus = this.getAgentByAddress(address);
+               if(null==agentConsensus){
+                   throw new NulsRuntimeException(ErrorCode.FAILED,"the agent is not exist!");
+               }
+
+                    joinTx = (AbstractCoinTransaction)this.ledgerService.getTx(NulsDigestData.fromDigestHex(agentConsensus.getExtend().getTxHash()));
+
             } catch (Exception e) {
                 Log.error(e);
             }
