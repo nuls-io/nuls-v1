@@ -192,7 +192,7 @@
                 tx_hash = #{txHash,jdbcType=VARCHAR},
             </if>
             <if test="delHeight != null">
-                del_height = #{delHeight,jdbcType=INTEGER},
+                del_height = #{delHeight,jdbcType=BIGINT},
             </if>
         </set>
         where id = #{id,jdbcType=VARCHAR}
@@ -205,7 +205,7 @@
         update deposit
         <set>
             <if test="newDelHeight != null">
-                del_height = #{newDelHeight,jdbcType=INTEGER},
+                del_height = #{newDelHeight,jdbcType=BIGINT},
             </if>
         </set>
         where agent_id = #{agentId,jdbcType=VARCHAR} and del_height = #{oldDelHeight,jdbcType=BIGINT}
@@ -223,7 +223,7 @@
         time = #{time,jdbcType=BIGINT},
         block_height = #{blockHeight,jdbcType=BIGINT}
         tx_hash = #{txHash,jdbcType=VARCHAR},
-        del_height = #{delHeight,jdbcType=INTEGER},
+        del_height = #{delHeight,jdbcType=BIGINT},
         where id = #{id,jdbcType=VARCHAR}
     </update>
 

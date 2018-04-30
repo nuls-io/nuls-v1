@@ -81,7 +81,7 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
 
         UpdateDepositByAgentIdParam dpo = new UpdateDepositByAgentIdParam();
         dpo.setAgentId(ca.getHexHash());
-        dpo.setOldDelHeight(joinTx.getBlockHeight());
+        dpo.setOldDelHeight(block.getHeader().getHeight());
         dpo.setNewDelHeight(0L);
         this.depositDataService.updateSelectiveByAgentHash(dpo);
 
@@ -117,18 +117,18 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
             if (depositConsensus.getExtend().getBlockHeight() > tx.getBlockHeight()) {
                 continue;
             }
-            if (0!=depositConsensus.getDelHeight()&&depositConsensus.getDelHeight() < tx.getBlockHeight()) {
+            if (0 != depositConsensus.getDelHeight() && depositConsensus.getDelHeight() < tx.getBlockHeight()) {
                 continue;
             }
             ledgerService.unlockTxSave(depositConsensus.getExtend().getTxHash());
         }
 
-        this.agentDataService.deleteById(raTx.getTxData().getHexHash(), tx.getBlockHeight());
+        this.agentDataService.deleteById(raTx.getTxData().getHexHash(), block.getHeader().getHeight());
 
 
         DepositPo delPo = new DepositPo();
         delPo.setAgentHash(raTx.getTxData().getHexHash());
-        delPo.setDelHeight(tx.getBlockHeight());
+        delPo.setDelHeight(block.getHeader().getHeight());
         this.depositDataService.deleteByAgentHash(delPo);
 
     }
@@ -138,6 +138,9 @@ public class StopAgentTxService implements TransactionService<StopAgentTransacti
         for (Transaction transaction : txList) {
             if (transaction.getHash().equals(tx.getHash())) {
                 return ValidateResult.getFailedResult(ErrorCode.FAILED, "transaction Duplication");
+            }
+            if (tx.getTxData().equals(transaction.getTxData())) {
+                return ValidateResult.getFailedResult(ErrorCode.FAILED, "stop agent transaction Duplication");
             }
         }
         return ValidateResult.getSuccessResult();

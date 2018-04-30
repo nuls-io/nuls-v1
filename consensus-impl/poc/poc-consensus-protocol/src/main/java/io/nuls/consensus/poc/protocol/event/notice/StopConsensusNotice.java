@@ -25,7 +25,7 @@
 package io.nuls.consensus.poc.protocol.event.notice;
 
 import io.nuls.consensus.poc.protocol.constant.PocConsensusConstant;
-import io.nuls.consensus.poc.protocol.tx.PocExitConsensusTransaction;
+import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.NulsConstant;
 import io.nuls.core.exception.NulsException;
@@ -37,13 +37,13 @@ import io.nuls.protocol.utils.io.NulsByteBuffer;
  * @author Niels
  * @date 2018/3/8
  */
-public class StopConsensusNotice extends BaseEvent<PocExitConsensusTransaction> {
+public class StopConsensusNotice extends BaseEvent<StopAgentTransaction> {
     public StopConsensusNotice() {
         super(NulsConstant.MODULE_ID_CONSENSUS, PocConsensusConstant.NOTICE_EXIT_CONSENSUS);
     }
 
     @Override
-    protected PocExitConsensusTransaction parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
+    protected StopAgentTransaction parseEventBody(NulsByteBuffer byteBuffer) throws NulsException {
         return null;
     }
 

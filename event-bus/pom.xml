@@ -4,7 +4,7 @@
 
     <groupId>io.nuls</groupId>
     <artifactId>event-bus</artifactId>
-    <version>0.9.1</version>
+    <version>0.9.2</version>
     <packaging>jar</packaging>
 
     <name>event-bus</name>
@@ -27,12 +27,12 @@
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>core</artifactId>
-            <version>0.9.1</version>
+            <version>0.9.2</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>protocol</artifactId>
-            <version>0.9.1</version>
+            <version>0.9.2</version>
         </dependency>
     </dependencies>
     <build>
