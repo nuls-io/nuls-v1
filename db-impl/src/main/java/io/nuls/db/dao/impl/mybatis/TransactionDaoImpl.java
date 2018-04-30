@@ -92,7 +92,7 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
 
         searchable = new Searchable();
         searchable.addCondition("a.hash", SearchOperator.in, txHashList);
-        PageHelper.orderBy("a.block_height desc, a.index desc,b.in_index asc,c.out_index asc");
+        PageHelper.orderBy("a.block_height desc, a.tx_index desc,b.in_index asc,c.out_index asc");
         List<TransactionPo> poList = getMapper().selectList(searchable);
         Page<TransactionPo> page = new Page<>();
 
@@ -133,7 +133,7 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
             searchable.addCondition("e.address", SearchOperator.eq, address);
         }
         if (pageNumber == 0 & pageSize == 0) {
-            PageHelper.orderBy("a.block_height desc, a.index desc, b.in_index asc, c.out_index asc");
+            PageHelper.orderBy("a.block_height desc, a.tx_index desc, b.in_index asc, c.out_index asc");
             return getMapper().selectByAddress(searchable);
         }
         PageHelper.startPage(pageNumber, pageSize);
@@ -145,7 +145,7 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
 
         searchable = new Searchable();
         searchable.addCondition("a.hash", SearchOperator.in, txHashList);
-        PageHelper.orderBy("a.block_height desc, a.index desc, b.in_index asc, c.out_index asc");
+        PageHelper.orderBy("a.block_height desc, a.tx_index desc, b.in_index asc, c.out_index asc");
         List<TransactionPo> txList = getMapper().selectByAddress(searchable);
         return txList;
     }
