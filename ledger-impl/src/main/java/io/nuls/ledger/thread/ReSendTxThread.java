@@ -83,7 +83,6 @@ public class ReSendTxThread implements Runnable {
     private void reSendLocalTx() throws NulsException {
         List<Transaction> txList = getLedgerService().getWaitingTxList();
         for (Transaction tx : txList) {
-            Log.info("------------reSendLocalTx:" + tx.getHash().getDigestHex());
             if (tx.verify().isFailed()) {
                 getLocalDataService().deleteUnCofirmTx(tx.getHash().getDigestHex());
                 continue;
