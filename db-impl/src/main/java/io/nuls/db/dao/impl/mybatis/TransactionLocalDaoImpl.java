@@ -141,6 +141,7 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
     }
 
     @Override
+    @DbSession
     public void deleteUnCofirmTx(String txHash) {
         Searchable searchable = new Searchable();
         searchable.addCondition("txStatus", SearchOperator.eq, TransactionLocalPo.UNCONFIRM);
