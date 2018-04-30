@@ -27,6 +27,7 @@ import io.nuls.account.entity.Address;
 import io.nuls.account.service.intf.AccountService;
 import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.MD5Util;
 import io.nuls.core.model.Result;
 import io.nuls.core.utils.json.JSONUtils;
@@ -175,6 +176,11 @@ public class WalletResouce {
                 form.getPrikey().length() > 100) {
             return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
         }
+
+        if(!ECKey.isValidPrivteHex(form.getPrikey())){
+            return RpcResult.getFailed(ErrorCode.PARAMETER_ERROR);
+        }
+
         NulsContext.setCachedPasswordOfWallet(form.getPassword());
 
         Result result = null;
