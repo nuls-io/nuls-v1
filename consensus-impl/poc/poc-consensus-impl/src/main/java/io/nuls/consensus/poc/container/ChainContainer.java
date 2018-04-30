@@ -320,6 +320,9 @@ public class ChainContainer implements Cloneable {
     // Verify conbase transactions and penalties
     // 验证conbase交易和处罚交易
     private boolean verifyBaseTx(Block block, MeetingRound currentRound, MeetingMember member) {
+        if(5176 == block.getHeader().getHeight()) {
+            System.out.println("in the bug");
+        }
         List<Transaction> txs = block.getTxs();
         Transaction tx = txs.get(0);
         if (tx.getType() != TransactionConstant.TX_TYPE_COIN_BASE) {
@@ -348,6 +351,7 @@ public class ChainContainer implements Cloneable {
         if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
             BlockLog.debug("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
             Log.error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
+            Log.error("Pierre-error-test: tx is <" + tx.toString() + ">, coinBaseTransaction is <" + coinBaseTransaction.toString() + ">");
             return false;
         }
 
