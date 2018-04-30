@@ -376,7 +376,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         long rewardOfDay = ledgerService.getLastDayTimeReward();
 //
         Map<String, Object> map = new HashMap<>();
-        map.put("agentCount", (Integer)valueMap.get("getCount"));
+        map.put("agentCount", ((Long)valueMap.get("getCount")).intValue());
         map.put("rewardOfDay", rewardOfDay);
         map.put("totalDeposit", sumDeposit + sumAgentDeposit.longValue());
         if (null == this.getCurrentRound()) {
