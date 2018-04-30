@@ -94,7 +94,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public Transaction getTx(NulsDigestData hash) {
         TransactionLocalPo localPo = localTxDao.get(hash.getDigestHex());
-        if(localPo != null) {
+        if (localPo != null) {
             try {
                 Transaction tx = UtxoTransferTool.toTransaction(localPo);
                 return tx;
@@ -455,7 +455,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         try {
             ValidateResult validateResult = this.conflictDetectTx(tx, this.getWaitingTxList());
             if (validateResult.isFailed()) {
-                throw new NulsRuntimeException(validateResult.getErrorCode(),validateResult.getMessage());
+                throw new NulsRuntimeException(validateResult.getErrorCode(), validateResult.getMessage());
             }
         } catch (Exception e) {
             Log.error(e);
@@ -494,7 +494,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     @Override
     public void removeLocalTxs(String address) {
         List<TxAccountRelationPo> relationList = relationDataService.selectByAddress(address);
-        for(TxAccountRelationPo po : relationList) {
+        for (TxAccountRelationPo po : relationList) {
             localTxDao.delete(po.getTxHash());
         }
     }
@@ -795,9 +795,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
+    @DbSession
     public void deleteLocalTx(String txHash) {
-        // todo auto-generated method stub(niels)
-        //删除本地未打包交易，如果已打包 ，则终止
+        this.localTxDao.delete(txHash);
     }
 
     @Override
