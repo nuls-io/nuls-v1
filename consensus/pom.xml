@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.nuls</groupId>
     <artifactId>consensus</artifactId>
-    <version>0.9.1</version>
+    <version>0.9.2</version>
     <packaging>jar</packaging>
 
     <name>consensus</name>
@@ -27,17 +27,17 @@
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>core</artifactId>
-            <version>0.9.1</version>
+            <version>0.9.2</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>account</artifactId>
-            <version>0.9.1</version>
+            <version>0.9.2</version>
         </dependency>
         <dependency>
             <groupId>io.nuls</groupId>
             <artifactId>network</artifactId>
-            <version>0.9.1</version>
+            <version>0.9.2</version>
         </dependency>
     </dependencies>
     <build>

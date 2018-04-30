@@ -882,6 +882,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         return agentList.get(0);
     }
 
+
     private Consensus<Agent> getAgentById(String agentHash) {
         AgentPo po = this.agentDataService.get(agentHash);
         return ConsensusTool.fromPojo(po);

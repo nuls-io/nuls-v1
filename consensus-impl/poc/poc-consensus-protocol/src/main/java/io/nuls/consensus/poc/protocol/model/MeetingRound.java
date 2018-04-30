@@ -159,14 +159,16 @@ public class MeetingRound {
             str.append(" ,order:" + member.getPackingIndexOfRound());
             str.append(",packTime:" + new Date(member.getPackEndTime()));
             str.append(",creditVal:" + member.getRealCreditVal());
+            str.append(",own:"+member.getOwnDeposit());
+            str.append(",totalDeposit:"+member.getTotalDeposit());
             str.append("\n");
         }
         if (null == this.getPreRound()) {
             return ("round:index:" + this.getIndex() + " , start:" + new Date(this.getStartTime())
-                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
+                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , totalWeight: " + totalWeight + " ,members:\n :" + str);
         } else {
             return ("round:index:" + this.getIndex() + " ,preIndex:" + this.getPreRound().getIndex() + " , start:" + new Date(this.getStartTime())
-                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
+                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , totalWeight: " + totalWeight + " ,members:\n :" + str);
         }
     }
 }

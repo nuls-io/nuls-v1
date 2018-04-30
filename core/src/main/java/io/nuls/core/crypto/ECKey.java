@@ -450,15 +450,15 @@ public class ECKey {
         this.encryptedPrivateKey = encryptedPrivateKey;
     }
 
-    public static boolean isValidPrivteHex(String privateHex){
+    public static boolean isValidPrivteHex(String privateHex) {
         byte[] privateKey;
-        try{
+        try {
             privateKey = Hex.decode(privateHex);
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
 
-        if(privateKey.length<32 || privateKey.length>34){
+        if (privateKey.length < 32 || privateKey.length > 34) {
             return false;
         }
 

@@ -50,6 +50,7 @@ import io.nuls.protocol.model.BlockHeader;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -248,11 +249,15 @@ public class RoundManager {
 
         round.calcLocalPacker(accountService.getAccountList());
 
-        ConsensusLog.debug("calculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString(), index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
+        ConsensusLog.debug("calculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n" + sb.toString(), index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
     }
 
+    StringBuilder sb = null;
+
     private void setMemberList(MeetingRound round, BlockHeader startBlockHeader) {
+
+        sb = new StringBuilder();
 
         List<MeetingMember> memberList = new ArrayList<>();
         double totalWeight = 0;
@@ -265,6 +270,10 @@ public class RoundManager {
 
             memberList.add(member);
         }
+
+        // TODO remove the test code in future
+        List<Consensus<Deposit>> depositTempList = new ArrayList<>();
+
         List<Consensus<Agent>> agentList = getAliveAgentList(startBlockHeader.getHeight());
         for (Consensus<Agent> ca : agentList) {
             MeetingMember member = new MeetingMember();
@@ -279,6 +288,9 @@ public class RoundManager {
             List<Consensus<Deposit>> cdlist = getDepositListByAgentId(ca.getHexHash(), startBlockHeader.getHeight());
             for (Consensus<Deposit> cd : cdlist) {
                 member.setTotalDeposit(member.getTotalDeposit().add(cd.getExtend().getDeposit()));
+
+                depositTempList.add(cd);
+
             }
             member.setDepositList(cdlist);
             member.setCreditVal(calcCreditVal(member, startBlockHeader));
@@ -289,6 +301,7 @@ public class RoundManager {
                 ca.getExtend().setStatus(ConsensusStatusEnum.IN.getCode());
                 totalWeight = DoubleUtils.sum(totalWeight, DoubleUtils.mul(ca.getExtend().getDeposit().getValue(), member.getCalcCreditVal()));
                 totalWeight = DoubleUtils.sum(totalWeight, DoubleUtils.mul(member.getTotalDeposit().getValue(), member.getCalcCreditVal()));
+
                 memberList.add(member);
             } else {
                 ca.getExtend().setStatus(ConsensusStatusEnum.WAITING.getCode());
@@ -307,6 +320,24 @@ public class RoundManager {
         round.setMemberList(memberList);
         round.setEndTime(round.getStartTime() + memberList.size() * ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS);
         round.setTotalWeight(totalWeight);
+
+
+        Collections.sort(depositTempList, new Comparator<Consensus<Deposit>>() {
+            @Override
+            public int compare(Consensus<Deposit> o1, Consensus<Deposit> o2) {
+                return o1.getHash().getDigestHex().compareTo(o2.getHash().getDigestHex());
+            }
+        });
+
+        for(Consensus<Deposit> cd : depositTempList) {
+            sb.append("------------------------ agent hash : " + cd.getExtend().getAgentHash());
+            sb.append("dep address : " + cd.getAddress());
+            sb.append(" , amount : " + cd.getExtend().getDeposit());
+            sb.append(" , hash : " + cd.getHexHash());
+            sb.append(" , height : " + cd.getExtend().getBlockHeight());
+            sb.append(" , del height : " + cd.getDelHeight());
+            sb.append("\n");
+        }
     }
 
     private List<Consensus<Deposit>> getDepositListByAgentId(String agentId, long startBlockHeight) {
@@ -316,11 +347,11 @@ public class RoundManager {
 
         for (int i = depositList.size() - 1; i >= 0; i--) {
             Consensus<Deposit> cd = depositList.get(i);
-            if (cd.getDelHeight() != 0 && cd.getDelHeight() <= startBlockHeight) {
+            if (cd.getDelHeight() != 0L && cd.getDelHeight() <= startBlockHeight) {
                 continue;
             }
             Deposit deposit = cd.getExtend();
-            if (deposit.getBlockHeight() >= startBlockHeight || deposit.getBlockHeight() < 0) {
+            if (deposit.getBlockHeight() >= startBlockHeight || deposit.getBlockHeight() < 0L) {
                 continue;
             }
             if (!deposit.getAgentHash().equals(agentId)) {
@@ -336,10 +367,10 @@ public class RoundManager {
         List<Consensus<Agent>> resultList = new ArrayList<>();
         for (int i = chain.getAgentList().size() - 1; i >= 0; i--) {
             Consensus<Agent> ca = chain.getAgentList().get(i);
-            if (ca.getDelHeight() != 0 && ca.getDelHeight() <= startBlockHeight) {
+            if (ca.getDelHeight() != 0L && ca.getDelHeight() <= startBlockHeight) {
                 continue;
             }
-            if (ca.getExtend().getBlockHeight() >= startBlockHeight || ca.getExtend().getBlockHeight() < 0) {
+            if (ca.getExtend().getBlockHeight() >= startBlockHeight || ca.getExtend().getBlockHeight() < 0L) {
                 continue;
             }
             resultList.add(ca);
