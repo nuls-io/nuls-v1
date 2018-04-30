@@ -342,12 +342,12 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
     @Override
     public CoinData createByTransferData(Transaction tx, CoinTransferData coinParam, String password) throws NulsException {
         for (String address : coinParam.getFrom()) {
-            if(!Address.validAddress(address)) {
+            if (!Address.validAddress(address)) {
                 throw new NulsException(ErrorCode.ADDRESS_ERROR);
             }
         }
-        for(Coin coin :coinParam.getToCoinList()) {
-            if(!Address.validAddress(coin.getAddress())) {
+        for (Coin coin : coinParam.getToCoinList()) {
+            if (!Address.validAddress(coin.getAddress())) {
                 throw new NulsException(ErrorCode.ADDRESS_ERROR);
             }
         }
@@ -598,7 +598,7 @@ public class UtxoCoinDataProvider implements CoinDataProvider {
             } else if (output == null) {
                 return ValidateResult.getFailedResult(ErrorCode.UTXO_NOT_FOUND);
             }
-
+            input.setFrom(output);
             if (tx.getStatus() == TxStatusEnum.UNCONFIRM) {
                 long height = tx.getBlockHeight();
                 if (height < 0) {
