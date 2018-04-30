@@ -45,6 +45,7 @@ import io.nuls.protocol.model.Block;
 import io.nuls.protocol.model.Transaction;
 import io.nuls.protocol.service.intf.TransactionService;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -149,6 +150,11 @@ public class CancelDepositTxService implements TransactionService<CancelDepositT
             if (transaction.getHash().equals(tx.getHash())) {
                 return ValidateResult.getFailedResult(ErrorCode.FAILED, "transaction Duplication");
             }
+
+            if(tx.getTxData().equals(transaction.getTxData())){
+                return ValidateResult.getFailedResult(ErrorCode.FAILED, "Cancel deposit transaction Duplication");
+            }
+
         }
         return ValidateResult.getSuccessResult();
     }

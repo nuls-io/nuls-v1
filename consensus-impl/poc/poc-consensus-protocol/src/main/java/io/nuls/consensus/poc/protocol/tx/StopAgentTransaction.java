@@ -23,6 +23,7 @@
  */
 package io.nuls.consensus.poc.protocol.tx;
 
+import io.nuls.consensus.poc.protocol.tx.validator.StopAgentValidator;
 import io.nuls.core.exception.NulsException;
 import io.nuls.ledger.entity.params.CoinTransferData;
 import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
@@ -38,10 +39,12 @@ public class StopAgentTransaction extends UnlockNulsTransaction<NulsDigestData> 
 
     public StopAgentTransaction() {
         super(TransactionConstant.TX_TYPE_STOP_AGENT);
+        this.registerValidator(StopAgentValidator.getInstance());
     }
 
     public StopAgentTransaction(CoinTransferData params, String password) throws NulsException {
         super(TransactionConstant.TX_TYPE_STOP_AGENT, params, password);
+        this.registerValidator(StopAgentValidator.getInstance());
     }
 
     @Override

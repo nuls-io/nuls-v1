@@ -378,7 +378,11 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         map.put("agentCount", agentList.size());
         map.put("rewardOfDay", rewardOfDay);
         map.put("totalDeposit", totalDeposit);
-        map.put("memberCount", memberSet.size());
+        if (null == this.getCurrentRound()) {
+            map.put("memberCount", 0);
+        } else {
+            map.put("memberCount", this.getCurrentRound().getMemberCount());
+        }
         return map;
     }
 
