@@ -126,7 +126,9 @@ public class ChainContainer implements Cloneable {
                 while (it.hasNext()) {
                     Consensus<Deposit> tempDe = it.next();
                     if (tempDe.getHash().equals(cDeposit.getHash())) {
-                        tempDe.setDelHeight(height);
+                        if(tempDe.getDelHeight() == 0L) {
+                            tempDe.setDelHeight(height);
+                        }
                         break;
                     }
                 }
@@ -223,13 +225,24 @@ public class ChainContainer implements Cloneable {
         // 验证区块是否正确连接
         String preHash = blockHeader.getPreHash().getDigestHex();
 
-        if (!preHash.equals(chain.getEndBlockHeader().getHash().getDigestHex())) {
+        BlockHeader bestBlockHeader = chain.getEndBlockHeader();
+
+        if (!preHash.equals(bestBlockHeader.getHash().getDigestHex())) {
             BlockLog.debug("block height " + blockHeader.getHeight() + " prehash is error! hash :" + blockHeader.getHash().getDigestHex());
 //            Log.error("block height " + blockHeader.getHeight() + " prehash is error! hash :" + blockHeader.getHash().getDigestHex());
             return false;
         }
 
+        BlockRoundData bestBlcokRoundData = new BlockRoundData(bestBlockHeader.getExtend());
+
         BlockRoundData roundData = new BlockRoundData(blockHeader.getExtend());
+
+        if(roundData.getRoundIndex() < bestBlcokRoundData.getRoundIndex() ||
+                (roundData.getRoundIndex() == bestBlcokRoundData.getRoundIndex() && roundData.getPackingIndexOfRound() <= bestBlcokRoundData.getPackingIndexOfRound())) {
+            BlockLog.debug("new block rounddata error, block height : " + blockHeader.getHeight() + " , hash :" + blockHeader.getHash().getDigestHex());
+//            Log.error("new block rounddata error, block height : " + blockHeader.getHeight() + " , hash :" + blockHeader.getHash().getDigestHex());
+            return false;
+        }
 
         MeetingRound currentRound = roundManager.getCurrentRound();
 
