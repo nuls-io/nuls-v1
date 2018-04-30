@@ -449,4 +449,19 @@ public class ECKey {
     public void setEncryptedPrivateKey(EncryptedData encryptedPrivateKey) {
         this.encryptedPrivateKey = encryptedPrivateKey;
     }
+
+    public static boolean isValidPrivteHex(String privateHex) {
+        byte[] privateKey;
+        try {
+            privateKey = Hex.decode(privateHex);
+        } catch (Exception e) {
+            return false;
+        }
+
+        if (privateKey.length < 32 || privateKey.length > 34) {
+            return false;
+        }
+
+        return true;
+    }
 }

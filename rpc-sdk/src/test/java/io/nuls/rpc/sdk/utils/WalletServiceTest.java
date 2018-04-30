@@ -56,7 +56,7 @@ public class WalletServiceTest {
             RpcClientResult result = walletService.transfer("2CjzG5atBtD3kk2MatNpHCVDLzg7zNb", "2CeURqzkwcwKB2MW5UDrKQGFFb3NgkN", 1286L, "nuls123456", "test utxo");
             System.out.println(result.getMsg()+"===="+index);
             try {
-                Thread.sleep(10);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 Log.error(e);
             }

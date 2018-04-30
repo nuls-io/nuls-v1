@@ -166,9 +166,10 @@ public class MeetingRound {
         if (null == this.getPreRound()) {
             return ("round:index:" + this.getIndex() + " , start:" + new Date(this.getStartTime())
                     + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString()+", totalWeight:"+this.getTotalWeight() + ") , members:\n :" + str);
+                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , totalWeight: " + totalWeight + " ,members:\n :" + str);
         } else {
             return ("round:index:" + this.getIndex() + " ,preIndex:" + this.getPreRound().getIndex() + " , start:" + new Date(this.getStartTime())
-                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , members:\n :" + str);
+                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , totalWeight: " + totalWeight + " ,members:\n :" + str);
         }
     }
 }
