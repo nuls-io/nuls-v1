@@ -86,7 +86,7 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
         }
 
         if (pageNumber == 0 & pageSize == 0) {
-            PageHelper.orderBy("a.block height desc, a.index desc, b.in_index asc, c.out_index asc");
+            PageHelper.orderBy("a.block_height desc, a.index desc, b.in_index asc, c.out_index asc");
             return getMapper().selectByAddress(searchable);
         }
 
@@ -99,7 +99,7 @@ public class TransactionLocalDaoImpl extends BaseDaoImpl<TransactionLocalMapper,
 
         searchable = new Searchable();
         searchable.addCondition("a.hash", SearchOperator.in, txHashList);
-        PageHelper.orderBy("a.block height desc, a.index desc, b.in_index asc, c.out_index asc");
+        PageHelper.orderBy("a.block_height desc, a.index desc, b.in_index asc, c.out_index asc");
         List<TransactionLocalPo> localPoList = getMapper().selectByAddress(searchable);
         return localPoList;
     }
