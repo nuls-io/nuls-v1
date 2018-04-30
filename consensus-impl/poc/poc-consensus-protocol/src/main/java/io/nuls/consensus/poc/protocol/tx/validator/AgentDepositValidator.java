@@ -53,7 +53,7 @@ public class AgentDepositValidator implements NulsDataValidator<RegisterAgentTra
                 return ValidateResult.getFailedResult(SeverityLevelEnum.FLAGRANT_FOUL, ErrorCode.DEPOSIT_ERROR);
             }
         } catch (NulsException e) {
-            return ValidateResult.getFailedResult(ErrorCode.ORPHAN_TX);
+            return ValidateResult.getFailedResult(e.getErrorCode(),e.getMessage());
         }
         return result;
     }
