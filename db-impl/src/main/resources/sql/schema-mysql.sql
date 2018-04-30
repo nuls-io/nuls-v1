@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS `transaction_local` (
   `size` int(9) DEFAULT NULL,
   `txStatus` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`hash`),
-  KEY `block_height_id` (`block_height`)
+  KEY `status_idx` (`txStatus`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `tx_account_relation` (

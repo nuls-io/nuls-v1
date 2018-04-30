@@ -170,5 +170,5 @@ CREATE TABLE IF NOT EXISTS `alias` (
 ) ;
 
 create index IF NOT EXISTS block_height_idx on transaction(block_height);
-create index IF NOT EXISTS block_height_idx on transaction_local(block_height);
+create index IF NOT EXISTS status_idx on transaction_local(txStatus);
 create index IF NOT EXISTS addres_idx on utxo_output(address);
