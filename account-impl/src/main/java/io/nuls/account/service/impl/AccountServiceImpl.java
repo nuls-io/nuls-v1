@@ -203,6 +203,8 @@ public class AccountServiceImpl implements AccountService {
         if (NulsContext.DEFAULT_ACCOUNT_ID != null && NulsContext.DEFAULT_ACCOUNT_ID.equals(address)) {
             NulsContext.DEFAULT_ACCOUNT_ID = null;
         }
+
+        ledgerService.removeLocalTxs(address);
         return Result.getSuccess();
     }
 

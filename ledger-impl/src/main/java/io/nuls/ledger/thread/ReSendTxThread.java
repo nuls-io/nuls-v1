@@ -88,6 +88,11 @@ public class ReSendTxThread implements Runnable {
                 getLocalDataService().deleteUnCofirmTx(tx.getHash().getDigestHex());
                 continue;
             }
+            Transaction transaction = getLedgerService().getTx(tx.getHash());
+            if(transaction != null) {
+                getLocalDataService().deleteUnCofirmTx(tx.getHash().getDigestHex());
+                continue;
+            }
 
             if(TimeService.currentTimeMillis() - tx.getTime() > DateUtil.MINUTE_TIME * 2);
             TransactionEvent event = new TransactionEvent();

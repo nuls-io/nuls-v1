@@ -268,7 +268,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         if (balance == null) {
             return null;
         }
-
         long usable = 0;
         long locked = 0;
 
@@ -490,6 +489,14 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 //            }
 //        }
         return true;
+    }
+
+    @Override
+    public void removeLocalTxs(String address) {
+        List<TxAccountRelationPo> relationList = relationDataService.selectByAddress(address);
+        for(TxAccountRelationPo po : relationList) {
+            localTxDao.delete(po.getTxHash());
+        }
     }
 
     @Override
