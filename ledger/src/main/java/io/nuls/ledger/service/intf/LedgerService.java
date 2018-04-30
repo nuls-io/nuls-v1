@@ -80,6 +80,8 @@ public interface LedgerService {
 
     boolean saveLocalTx(Transaction tx) throws IOException;
 
+    void removeLocalTxs(String address) ;
+
     void deleteLocalTx(String txHash);
 
     void saveTxInLocal(String address);

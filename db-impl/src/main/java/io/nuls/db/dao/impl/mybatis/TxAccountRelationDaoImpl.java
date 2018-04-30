@@ -32,6 +32,7 @@ import io.nuls.db.transactional.annotation.DbSession;
 import io.nuls.db.transactional.annotation.PROPAGATION;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,5 +72,12 @@ public class TxAccountRelationDaoImpl extends BaseDaoImpl<TxAccountRelationMappe
         searchable.addCondition("tx_hash", SearchOperator.eq, txHash);
         searchable.addCondition("address", SearchOperator.eq, address);
         return getMapper().selectCount(searchable);
+    }
+
+    @Override
+    public List<TxAccountRelationPo> selectByAddress(String address) {
+        Searchable searchable = new Searchable();
+        searchable.addCondition("address", SearchOperator.eq, address);
+        return getMapper().selectList(searchable);
     }
 }
