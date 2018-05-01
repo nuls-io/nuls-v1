@@ -75,11 +75,6 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
             return;
         }
 
-        Transaction tempTx = temporaryCacheManager.getTx(tx.getHash().getDigestHex());
-        if (tempTx != null) {
-            return;
-        }
-
         ValidateResult result = tx.verify();
         if (result.isFailed() && result.getErrorCode() != ErrorCode.ORPHAN_TX) {
             if (result.getLevel() == SeverityLevelEnum.NORMAL_FOUL) {
@@ -106,7 +101,11 @@ public class NewTxEventHandler extends AbstractEventHandler<TransactionEvent> {
             Log.error(e);
             return;
         }
-
+        Transaction tempTx = temporaryCacheManager.getTx(tx.getHash().getDigestHex());
+        if (tempTx != null) {
+            consensusService.newTx(tx);
+            return;
+        }
         temporaryCacheManager.cacheTx(tx);
 
         boolean isMine = ledgerService.checkTxIsMySend(tx);
