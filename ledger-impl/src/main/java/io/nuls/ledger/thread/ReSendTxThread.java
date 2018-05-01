@@ -37,6 +37,7 @@ import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.TransactionEvent;
 import io.nuls.protocol.model.Transaction;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,8 +83,10 @@ public class ReSendTxThread implements Runnable {
 
     private void reSendLocalTx() throws NulsException {
         List<Transaction> txList = getLedgerService().getWaitingTxList();
+        List<Transaction> helpList = new ArrayList<>();
         for (Transaction tx : txList) {
-            if (tx.verify().isFailed()) {
+            ValidateResult result = ledgerService.verifyTx(tx,helpList);
+            if (result.isFailed()) {
                 getLocalDataService().deleteUnCofirmTx(tx.getHash().getDigestHex());
                 continue;
             }
@@ -92,7 +95,7 @@ public class ReSendTxThread implements Runnable {
                 getLocalDataService().deleteUnCofirmTx(tx.getHash().getDigestHex());
                 continue;
             }
-
+            helpList.add(tx);
             if(TimeService.currentTimeMillis() - tx.getTime() > DateUtil.MINUTE_TIME * 2) {
                 TransactionEvent event = new TransactionEvent();
                 event.setEventBody(tx);
