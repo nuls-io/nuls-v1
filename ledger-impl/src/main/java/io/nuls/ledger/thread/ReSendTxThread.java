@@ -69,7 +69,7 @@ public class ReSendTxThread implements Runnable {
         stop = false;
         while (!stop) {
             try {
-                Thread.sleep(5 * DateUtil.MINUTE_TIME);
+                Thread.sleep(2 * DateUtil.MINUTE_TIME);
             } catch (InterruptedException e) {
                 Log.error(e);
             }
@@ -99,7 +99,7 @@ public class ReSendTxThread implements Runnable {
             if(TimeService.currentTimeMillis() - tx.getTime() > DateUtil.MINUTE_TIME * 2) {
                 TransactionEvent event = new TransactionEvent();
                 event.setEventBody(tx);
-                getEventBroadcaster().broadcastAndCacheAysn(event);
+                getEventBroadcaster().publishToLocal(event);
             }
         }
     }

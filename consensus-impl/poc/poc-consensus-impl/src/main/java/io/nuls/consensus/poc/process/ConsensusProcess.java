@@ -325,6 +325,9 @@ public class ConsensusProcess {
             }
             result = this.ledgerService.verifyTx(tx,packingTxList);
             if (result.isFailed()) {
+                if(result.getErrorCode()==ErrorCode.ORPHAN_TX){
+                    txMemoryPool.add(tx, true);
+                }
                 Log.debug(result.getMessage());
                 continue;
             }
