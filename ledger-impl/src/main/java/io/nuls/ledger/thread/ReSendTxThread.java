@@ -85,22 +85,23 @@ public class ReSendTxThread implements Runnable {
         List<Transaction> txList = getLedgerService().getWaitingTxList();
         List<Transaction> helpList = new ArrayList<>();
         for (Transaction tx : txList) {
-            ValidateResult result = ledgerService.verifyTx(tx,helpList);
+            if (TimeService.currentTimeMillis() - tx.getTime() < DateUtil.MINUTE_TIME * 2) {
+                continue;
+            }
+            ValidateResult result = ledgerService.verifyTx(tx, helpList);
             if (result.isFailed()) {
                 getLocalDataService().deleteUnCofirmTx(tx.getHash().getDigestHex());
                 continue;
             }
             Transaction transaction = getLedgerService().getTx(tx.getHash());
-            if(transaction != null) {
+            if (transaction != null) {
                 getLocalDataService().deleteUnCofirmTx(tx.getHash().getDigestHex());
                 continue;
             }
             helpList.add(tx);
-            if(TimeService.currentTimeMillis() - tx.getTime() > DateUtil.MINUTE_TIME * 2) {
-                TransactionEvent event = new TransactionEvent();
-                event.setEventBody(tx);
-                getEventBroadcaster().publishToLocal(event);
-            }
+            TransactionEvent event = new TransactionEvent();
+            event.setEventBody(tx);
+            getEventBroadcaster().publishToLocal(event);
         }
     }
 
