@@ -355,12 +355,22 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     private Result transfer(CoinTransferData coinData, String password, String remark) {
         TransferTransaction tx = null;
         try {
+            long time1 = System.currentTimeMillis();
             tx = UtxoTransactionTool.getInstance().createTransferTx(coinData, password, remark);
+
+            long time2 = System.currentTimeMillis();
+            System.out.println("----------------time1:" + (time2 - time1));
+
             ValidateResult result = this.verifyTx(tx, this.getWaitingTxList());
+            long time3 = System.currentTimeMillis();
+            System.out.println("----------------time2:" + (time3 - time2));
+
             if (result.isFailed()) {
                 throw new NulsException(result.getErrorCode());
             }
             this.saveLocalTx(tx);
+            long time4 = System.currentTimeMillis();
+            System.out.println("----------------time3:" + (time4 - time3));
             TransactionEvent event = new TransactionEvent();
             event.setEventBody(tx);
             eventBroadcaster.publishToLocal(event);

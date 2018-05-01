@@ -81,7 +81,7 @@ public class TransactionDaoImpl extends BaseDaoImpl<TransactionMapper, String, T
             return new Page<>(pageNum, pageSize);
         }
 
-        PageHelper.orderBy("a.block_height desc, a.index desc");
+        PageHelper.orderBy("a.block_height desc, a.tx_index desc");
         if (pageNum > 0 && pageSize > 0) {
             PageHelper.startPage(pageNum, pageSize);
         }
