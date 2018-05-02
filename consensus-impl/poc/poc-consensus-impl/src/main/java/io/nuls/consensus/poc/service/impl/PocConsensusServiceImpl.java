@@ -519,6 +519,7 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         Page<Map<String, Object>> page = new Page<>();
         int start = pageNumber * pageSize - pageSize;
 
+
         if (agentList.isEmpty() || start >= agentList.size()) {
             if (StringUtils.isNotBlank(depositAddress)) {
                 Consensus<Agent> ca = this.getAgentByAddress(depositAddress);
@@ -526,7 +527,12 @@ public class PocConsensusServiceImpl implements PocConsensusService {
                     agentList.add(0, ca);
                 }
             }
+            int end = pageNumber * pageSize;
+            if (end > agentList.size()) {
+                end = agentList.size();
+            }
             fillConsensusInfo(agentList);
+            List<Consensus<Agent>> sublist = agentList.subList(start, end);
             page.setPageNumber(pageNumber);
             page.setPageSize(pageSize);
             page.setTotal(agentList.size());
@@ -534,14 +540,9 @@ public class PocConsensusServiceImpl implements PocConsensusService {
             if (page.getTotal() % pageSize > 0) {
                 sum = 1;
             }
-            page.setList(transList(agentList));
+            page.setList(transList(sublist));
             page.setPages((int) ((page.getTotal() / pageSize) + sum));
             return page;
-        }
-
-        int end = pageNumber * pageSize;
-        if (end > agentList.size()) {
-            end = agentList.size();
         }
 
         int type = AgentComparator.COMMISSION_RATE;
@@ -572,8 +573,12 @@ public class PocConsensusServiceImpl implements PocConsensusService {
                 }
             }
         }
+        int end = pageNumber * pageSize;
+        if (end > agentList.size()) {
+            end = agentList.size();
+        }
+        fillConsensusInfo(agentList);
         List<Consensus<Agent>> sublist = agentList.subList(start, end);
-        fillConsensusInfo(sublist);
         page.setPageNumber(pageNumber);
         page.setPageSize(pageSize);
         page.setTotal(agentList.size());
