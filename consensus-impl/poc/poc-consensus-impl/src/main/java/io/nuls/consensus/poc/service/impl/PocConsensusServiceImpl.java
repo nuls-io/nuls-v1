@@ -56,6 +56,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.utils.calc.DoubleUtils;
 import io.nuls.core.utils.date.DateUtil;
 import io.nuls.core.utils.date.TimeService;
+import io.nuls.core.utils.json.JSONUtils;
 import io.nuls.core.utils.log.Log;
 import io.nuls.core.utils.param.AssertUtil;
 import io.nuls.core.utils.spring.lite.annotation.Autowired;
@@ -553,8 +554,6 @@ public class PocConsensusServiceImpl implements PocConsensusService {
         } else if ("totalDeposit".equals(sortType)) {
             type = AgentComparator.DEPOSITABLE;
         }
-        Collections.sort(agentList, AgentComparator.getInstance(type));
-
         if (StringUtils.isNotBlank(depositAddress)) {
             boolean b = true;
             for (int i = 0; i < agentList.size(); i++) {
@@ -583,7 +582,11 @@ public class PocConsensusServiceImpl implements PocConsensusService {
             sum = 1;
         }
         page.setPages((int) ((page.getTotal() / pageSize) + sum));
+
+        Collections.sort(sublist, AgentComparator.getInstance(type));
+
         List<Map<String, Object>> resultList = transList(sublist);
+
         page.setList(resultList);
         return page;
     }
