@@ -69,4 +69,9 @@ public class LevelDBStorageServiceImpl implements KVStorageService {
     public byte[] get(String area, String key) {
         return LevelDBManager.get(area, key);
     }
+
+    @Override
+    public byte[] get(String area, byte[] key) {
+        return LevelDBManager.get(area, key);
+    }
 }
