@@ -322,4 +322,19 @@ public class LevelDBManager {
         }
     }
 
+    public static byte[] get(String area, byte[] key) {
+        if(!baseCheckArea(area)) {
+            return null;
+        }
+        if(key == null) {
+            return null;
+        }
+        try {
+            DB db = AREAS.get(area);
+            return db.get(key);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }

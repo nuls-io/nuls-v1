@@ -73,7 +73,7 @@ public class TxSignValidator implements NulsDataValidator<Transaction> {
         P2PKHScriptSig p2PKHScriptSig = null;
         try {
             p2PKHScriptSig = new NulsByteBuffer(scriptSig).readNulsData(new P2PKHScriptSig());
-        } catch (NulsException e) {
+        } catch (Exception e) {
             return ValidateResult.getFailedResult(ErrorCode.SIGNATURE_ERROR);
         }
         return p2PKHScriptSig.verifySign(tx.getHash());

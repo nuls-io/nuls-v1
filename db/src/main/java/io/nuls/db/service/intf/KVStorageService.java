@@ -46,4 +46,6 @@ public interface KVStorageService {
 
     byte[] get(String area, String key);
 
+    byte[] get(String area, byte[] key);
+
 }
