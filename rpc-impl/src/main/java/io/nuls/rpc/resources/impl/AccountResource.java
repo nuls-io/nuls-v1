@@ -146,7 +146,7 @@ public class AccountResource {
             pageNumber = 1;
         }
         if (pageSize == 0) {
-            pageSize = 10;
+            pageSize = 1000;
         }
         Page<Account> page = accountService.getAccountList(pageNumber, pageSize);
         List<AccountDto> dtoList = new ArrayList<>();
