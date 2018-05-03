@@ -104,6 +104,8 @@ public interface LedgerService {
 
     List<Transaction> getWaitingTxList() throws NulsException;
 
+    List<Transaction> getLocalUnConfirmTxList() throws NulsException;
+
     void deleteTx(Transaction tx);
 
     void deleteTx(long blockHeight);

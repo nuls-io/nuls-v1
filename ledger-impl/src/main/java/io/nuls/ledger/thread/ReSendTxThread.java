@@ -32,6 +32,7 @@ import io.nuls.db.dao.TransactionLocalDataService;
 import io.nuls.db.dao.UtxoInputDataService;
 import io.nuls.event.bus.service.intf.EventBroadcaster;
 import io.nuls.event.bus.service.intf.EventBusService;
+import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.protocol.context.NulsContext;
 import io.nuls.protocol.event.TransactionEvent;
@@ -60,6 +61,8 @@ public class ReSendTxThread implements Runnable {
 
     private LedgerService ledgerService;
 
+    private LedgerCacheService ledgerCacheService;
+
     private TransactionLocalDataService localDataService;
 
     private boolean stop;
@@ -82,20 +85,22 @@ public class ReSendTxThread implements Runnable {
     }
 
     private void reSendLocalTx() throws NulsException {
-        List<Transaction> txList = getLedgerService().getWaitingTxList();
+        List<Transaction> txList = getLedgerCacheService().getUnconfirmTxList();
         List<Transaction> helpList = new ArrayList<>();
         for (Transaction tx : txList) {
             if (TimeService.currentTimeMillis() - tx.getTime() < DateUtil.MINUTE_TIME * 2) {
                 continue;
             }
-            ValidateResult result = ledgerService.verifyTx(tx, helpList);
+            ValidateResult result = getLedgerService().verifyTx(tx, helpList);
             if (result.isFailed()) {
                 getLocalDataService().deleteUnCofirmTx(tx.getHash().getDigestHex());
+                ledgerCacheService.removeLocalTx(tx.getHash().getDigestHex());
                 continue;
             }
             Transaction transaction = getLedgerService().getTx(tx.getHash());
             if (transaction != null) {
                 getLocalDataService().deleteUnCofirmTx(tx.getHash().getDigestHex());
+                ledgerCacheService.removeLocalTx(tx.getHash().getDigestHex());
                 continue;
             }
             helpList.add(tx);
@@ -121,6 +126,13 @@ public class ReSendTxThread implements Runnable {
             ledgerService = NulsContext.getServiceBean(LedgerService.class);
         }
         return ledgerService;
+    }
+
+    public LedgerCacheService getLedgerCacheService() {
+        if (ledgerCacheService == null) {
+            ledgerCacheService = NulsContext.getServiceBean(LedgerCacheService.class);
+        }
+        return ledgerCacheService;
     }
 
     public TransactionLocalDataService getLocalDataService() {
