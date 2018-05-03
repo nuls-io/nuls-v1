@@ -31,6 +31,7 @@ import io.nuls.ledger.entity.Balance;
 import io.nuls.ledger.entity.UtxoBalance;
 import io.nuls.ledger.entity.UtxoOutput;
 import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.model.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,7 @@ public class LedgerCacheService {
     private static LedgerCacheService instance = new LedgerCacheService();
     private CacheService<String, Balance> cacheService;
     private CacheService<String, UtxoOutput> utxoCacheService;
+    private CacheService<String, Transaction> localTxCacheService;
 
     private boolean initCache = true;
 
@@ -52,6 +54,8 @@ public class LedgerCacheService {
         cacheService.createCache(LedgerConstant.LEDGER_BOOK, 1024);
         utxoCacheService = NulsContext.getServiceBean(CacheService.class);
         utxoCacheService.createCache(LedgerConstant.UTXO, 1024);
+        localTxCacheService = NulsContext.getServiceBean(CacheService.class);
+        localTxCacheService.createCache(LedgerConstant.LOCAL_UNCONFIRM_TX, 16);
     }
 
     public static LedgerCacheService getInstance() {
