@@ -43,15 +43,15 @@ import java.util.List;
  */
 public class LedgerCacheService {
     private static LedgerCacheService instance = new LedgerCacheService();
-    private CacheService<String, Balance> cacheService;
+    private CacheService<String, Balance> balanceCacheService;
     private CacheService<String, UtxoOutput> utxoCacheService;
     private CacheService<String, Transaction> localTxCacheService;
 
     private boolean initCache = true;
 
     private LedgerCacheService() {
-        cacheService = NulsContext.getServiceBean(CacheService.class);
-        cacheService.createCache(LedgerConstant.LEDGER_BOOK, 1024);
+        balanceCacheService = NulsContext.getServiceBean(CacheService.class);
+        balanceCacheService.createCache(LedgerConstant.LEDGER_BOOK, 1024);
         utxoCacheService = NulsContext.getServiceBean(CacheService.class);
         utxoCacheService.createCache(LedgerConstant.UTXO, 1024);
         localTxCacheService = NulsContext.getServiceBean(CacheService.class);
@@ -63,28 +63,30 @@ public class LedgerCacheService {
     }
 
     public void clear() {
-        this.cacheService.clearCache(LedgerConstant.LEDGER_BOOK);
+        this.balanceCacheService.clearCache(LedgerConstant.LEDGER_BOOK);
         this.utxoCacheService.clearCache(LedgerConstant.UTXO);
+        this.localTxCacheService.clearCache(LedgerConstant.LOCAL_UNCONFIRM_TX);
     }
 
     public void destroy() {
-        this.cacheService.removeCache(LedgerConstant.LEDGER_BOOK);
+        this.balanceCacheService.removeCache(LedgerConstant.LEDGER_BOOK);
         this.utxoCacheService.removeCache(LedgerConstant.UTXO);
+        this.localTxCacheService.removeCache(LedgerConstant.LOCAL_UNCONFIRM_TX);
     }
 
     public void putBalance(String address, Balance balance) {
         if (null == balance || StringUtils.isBlank(address)) {
             return;
         }
-        cacheService.putElement(LedgerConstant.LEDGER_BOOK, address, balance);
+        balanceCacheService.putElement(LedgerConstant.LEDGER_BOOK, address, balance);
     }
 
     public void removeBalance(String address) {
-        cacheService.removeElement(LedgerConstant.LEDGER_BOOK, address);
+        balanceCacheService.removeElement(LedgerConstant.LEDGER_BOOK, address);
     }
 
     public Balance getBalance(String address) {
-        return cacheService.getElement(LedgerConstant.LEDGER_BOOK, address);
+        return balanceCacheService.getElement(LedgerConstant.LEDGER_BOOK, address);
     }
 
     public void putUtxo(String key, UtxoOutput output, boolean cacheBalance) {
@@ -118,7 +120,7 @@ public class LedgerCacheService {
     }
 
     public UtxoOutput getUtxo(String key) {
-        while (initCache){
+        while (initCache) {
             try {
                 Thread.sleep(100L);
             } catch (InterruptedException e) {
@@ -144,5 +146,21 @@ public class LedgerCacheService {
             this.putUtxo(output.getKey(), output, true);
         }
         initCache = false;
+    }
+
+    public void putLocalTx(Transaction tx) {
+        localTxCacheService.putElement(LedgerConstant.LOCAL_UNCONFIRM_TX, tx.getHash().getDigestHex(), tx);
+    }
+
+    public void removeLocalTx(String hash) {
+        localTxCacheService.removeElement(LedgerConstant.LOCAL_UNCONFIRM_TX, hash);
+    }
+
+    public List<Transaction> getUnconfirmTxList() {
+        List<Transaction> txList = localTxCacheService.getElementList(LedgerConstant.LOCAL_UNCONFIRM_TX);
+        if (txList == null) {
+            txList = new ArrayList<>();
+        }
+        return txList;
     }
 }

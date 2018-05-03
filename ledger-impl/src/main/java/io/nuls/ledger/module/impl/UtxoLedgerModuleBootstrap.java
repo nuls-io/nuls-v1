@@ -24,7 +24,10 @@
 package io.nuls.ledger.module.impl;
 
 import io.nuls.core.constant.NulsConstant;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.thread.manager.TaskManager;
+import io.nuls.core.utils.log.Log;
+import io.nuls.db.entity.TxAccountRelationPo;
 import io.nuls.ledger.entity.listener.CoinDataTxService;
 import io.nuls.ledger.entity.tx.CoinBaseTransaction;
 import io.nuls.ledger.entity.tx.LockNulsTransaction;
@@ -33,12 +36,14 @@ import io.nuls.ledger.entity.tx.UnlockNulsTransaction;
 import io.nuls.ledger.entity.validator.CoinTransactionValidatorManager;
 import io.nuls.ledger.event.notice.BalanceChangeNotice;
 import io.nuls.ledger.module.AbstractLedgerModule;
+import io.nuls.ledger.service.impl.LedgerCacheService;
 import io.nuls.ledger.service.impl.UtxoCoinDataProvider;
 import io.nuls.ledger.service.impl.UtxoCoinManager;
 import io.nuls.ledger.service.impl.UtxoLedgerServiceImpl;
 import io.nuls.ledger.service.intf.LedgerService;
 import io.nuls.ledger.thread.ReSendTxThread;
 import io.nuls.ledger.thread.SmallChangeThread;
+import io.nuls.ledger.util.UtxoTransactionTool;
 import io.nuls.ledger.validator.TxFieldValidator;
 import io.nuls.ledger.validator.TxSignValidator;
 import io.nuls.ledger.validator.UtxoTxInputsValidator;
@@ -51,6 +56,8 @@ import io.nuls.protocol.service.intf.TransactionService;
 import io.nuls.protocol.utils.TransactionManager;
 import io.nuls.protocol.utils.TransactionValidatorManager;
 
+import java.util.List;
+
 
 /**
  * @author Niels
@@ -61,6 +68,8 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
     private LedgerService ledgerService;
 
     private UtxoCoinManager coinManager;
+
+    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
     @Override
     public void init() {
@@ -102,6 +111,14 @@ public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
     public void start() {
         //cache the wallet's all accounts unSpend output
         coinManager.cacheAllUnSpendUtxo();
+        try {
+            List<Transaction> localTxList = ledgerService.getLocalUnConfirmTxList();
+            for(Transaction tx : localTxList) {
+                ledgerCacheService.putLocalTx(tx);
+            }
+        } catch (NulsException e) {
+            Log.error(e);
+        }
         TaskManager.createAndRunThread(this.getModuleId(), SmallChangeThread.class.getSimpleName(), SmallChangeThread.getInstance());
         TaskManager.createAndRunThread(this.getModuleId(), ReSendTxThread.class.getSimpleName(), ReSendTxThread.getInstance());
     }
