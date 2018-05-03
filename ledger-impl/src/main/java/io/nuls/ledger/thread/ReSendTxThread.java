@@ -61,7 +61,7 @@ public class ReSendTxThread implements Runnable {
 
     private LedgerService ledgerService;
 
-    private LedgerCacheService ledgerCacheService;
+    private LedgerCacheService ledgerCacheService = LedgerCacheService.getInstance();
 
     private TransactionLocalDataService localDataService;
 
@@ -85,7 +85,7 @@ public class ReSendTxThread implements Runnable {
     }
 
     private void reSendLocalTx() throws NulsException {
-        List<Transaction> txList = getLedgerCacheService().getUnconfirmTxList();
+        List<Transaction> txList = ledgerCacheService.getUnconfirmTxList();
         List<Transaction> helpList = new ArrayList<>();
         for (Transaction tx : txList) {
             if (TimeService.currentTimeMillis() - tx.getTime() < DateUtil.MINUTE_TIME * 2) {
@@ -126,13 +126,6 @@ public class ReSendTxThread implements Runnable {
             ledgerService = NulsContext.getServiceBean(LedgerService.class);
         }
         return ledgerService;
-    }
-
-    public LedgerCacheService getLedgerCacheService() {
-        if (ledgerCacheService == null) {
-            ledgerCacheService = NulsContext.getServiceBean(LedgerCacheService.class);
-        }
-        return ledgerCacheService;
     }
 
     public TransactionLocalDataService getLocalDataService() {
