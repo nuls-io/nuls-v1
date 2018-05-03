@@ -34,12 +34,11 @@ public interface LedgerConstant {
     int SMALL_CHANGE_COUNT = 500;
 
     String LEDGER_BOOK = "LEDGER_BOOK";
-
+    String LOCAL_UNCONFIRM_TX = "LOCAL_UNCONFIRM_TX";
     String UTXO = "UTXO";
 
     short EVENT_TYPE_TRANSACTION = 1;
     short NOTICE_BALANCE_CHANGE = 2;
-
 
     long BLOCK_COUNT_OF_YEAR = 3153600;
     Na TRANSACTION_FEE = Na.CENT;
