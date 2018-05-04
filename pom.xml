@@ -17,12 +17,15 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     <modules>
-
         <module>core/kernel</module>
+        <module>core/kernel-rpc</module>
+        <module>core/kernel-sdk</module>
         <module>protocol/protocol</module>
         <module>tools/tools</module>
-        <module>core/kernel</module>
-        <module>protocol/protocol</module>
+        <module>protocol/base/protocol-base</module>
+        <module>protocol/base/protocol-storage</module>
+        <module>protocol/base/protocol-rpc</module>
+        <module>protocol/base/protocol-sdk</module>
     </modules>
     <build>
         <finalName>nuls</finalName>

@@ -12,11 +12,7 @@
 
     <artifactId>protocol-base</artifactId>
     <packaging>pom</packaging>
-    <modules>
-        <module>../protocol-storage</module>
-        <module>../protocol-rpc</module>
-        <module>../protocol-sdk</module>
-    </modules>
+
 
 
 </project>
