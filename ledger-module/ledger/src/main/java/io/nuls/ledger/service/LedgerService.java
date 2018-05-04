@@ -1,4 +1,4 @@
-/*
+/**
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -21,11 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-package io.nuls.consensus;
+package io.nuls.ledger.service;
 
 /**
  * Created by ln on 2018/5/4.
  */
-public class ConsensusService {
+public interface LedgerService {
+
+
+
 }
