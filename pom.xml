@@ -18,6 +18,11 @@
     </properties>
     <modules>
 
+        <module>core/kernel</module>
+        <module>protocol/protocol</module>
+        <module>tools/tools</module>
+        <module>core/kernel</module>
+        <module>protocol/protocol</module>
     </modules>
     <build>
         <finalName>nuls</finalName>
