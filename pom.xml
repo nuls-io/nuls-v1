@@ -20,9 +20,7 @@
         <module>core</module>
         <module>protocol</module>
         <module>tools</module>
-        <module>tools/tools</module>
-        <module>protocol</module>
-        <module>tools</module>
+        <module>account</module>
     </modules>
     <build>
         <finalName>nuls</finalName>
