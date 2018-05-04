@@ -24,13 +24,28 @@
  *
  */
 
-package io.nuls.core.tools.model;
+package io.nuls.account.service;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author: Niels Wang
  * @date: 2018/5/4
  */
-public class Result<T> {
+public class AccountServiceTest {
+    @Before
+    public void beforeTest(){
 
-    //todo implement
+    }
+
+    @Test
+    public void createAccount() {
+    }
+
+    @Test
+    public void deleteAccount() {
+    }
 }

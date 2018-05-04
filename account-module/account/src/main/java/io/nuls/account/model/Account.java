@@ -24,13 +24,12 @@
  *
  */
 
-package io.nuls.core.tools.model;
+package io.nuls.account.model;
 
 /**
  * @author: Niels Wang
  * @date: 2018/5/4
  */
-public class Result<T> {
-
+public class Account {
     //todo implement
 }
