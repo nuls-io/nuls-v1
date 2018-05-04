@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.nuls.network</groupId>
+    <groupId>io.nuls.network-module</groupId>
     <artifactId>network</artifactId>
 
 
