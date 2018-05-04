@@ -39,6 +39,11 @@
     <version>2.0.0</version>
     <modules>
         <module>consensus</module>
+        <module>poc/consensus-poc-base</module>
+        <module>poc/consensus-poc-protocol</module>
+        <module>poc/consensus-poc-storage</module>
+        <module>poc/consensus-poc-rpc</module>
+        <module>poc/consensus-poc-sdk</module>
     </modules>
 
 
