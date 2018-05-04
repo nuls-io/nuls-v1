@@ -12,9 +12,6 @@
     <groupId>io.nuls.protocol</groupId>
     <artifactId>protocol</artifactId>
     <packaging>pom</packaging>
-    <modules>
-        <module>../base/protocol-base</module>
-    </modules>
 
 
 </project>
