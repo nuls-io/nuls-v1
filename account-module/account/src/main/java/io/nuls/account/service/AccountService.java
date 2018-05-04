@@ -44,18 +44,16 @@ public interface AccountService {
      *
      * @param count 想要创建的账户个数
      * @param count the account count you want to create
-     *
      * @return the result of the opration
      */
     Result<List<Account>> createAccount(int count);
 
     /**
      * 根据账户标识删除对应的账户
-     *
+     * <p>
      * Delete the corresponding account according to the account id.
      *
      * @param accountId the id of the account you want to delete;
-     *
      * @return the result of the opration
      */
     Result<Boolean> deleteAccount(String accountId);
