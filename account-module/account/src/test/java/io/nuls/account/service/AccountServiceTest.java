@@ -25,7 +25,7 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.Account;
-import io.nuls.core.tools.model.Result;
+import io.nuls.kernel.model.Result;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -96,6 +96,6 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void deleteAccount() {
+    public void removeAccount() {
     }
 }

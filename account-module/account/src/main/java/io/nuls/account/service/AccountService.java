@@ -25,7 +25,8 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.Account;
-import io.nuls.core.tools.model.Result;
+import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Result;
 
 import java.util.List;
 
@@ -53,13 +54,13 @@ public interface AccountService {
     /**
      * 根据账户标识删除对应的账户
      * <p>
-     * Delete the corresponding account according to the account id.
+     * remove the corresponding account according to the account id.
      *
      * @param accountId the id of the account you want to delete;
      * @param password  the password of the wallet;
      * @return the result of the opration
      */
-    Result<Boolean> deleteAccount(String accountId, String password);
+    Result<Boolean> removeAccount(String accountId, String password);
 
     /**
      * 根据账户标识获取完成的账户信息
@@ -71,5 +72,15 @@ public interface AccountService {
      */
     Result<Account> getAccount(String accountId);
 
+    Result<Address> getAddress(String pubKey);
 
+    Result<Boolean> verifyAddressFormat(String address);
+
+    Result<List<Account>> getAccountList();
+
+    Result encryptAccounts(String password);
+
+    Result changePassword(String oldPassword, String newPassword);
+
+//    NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
 }
