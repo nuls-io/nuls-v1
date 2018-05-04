@@ -22,8 +22,8 @@
         <module>consensus</module>
         <module>ledger</module>
         <module>account-module</module>
-        <module>cache</module>
-        <module>db</module>
+        <module>cache-module</module>
+        <module>db-module</module>
     </modules>
     <dependencies>
         <dependency>

@@ -10,11 +10,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls</groupId>
-    <artifactId>db</artifactId>
+    <artifactId>cache-module</artifactId>
     <packaging>pom</packaging>
+    <version>2.0.0</version>
+
     <modules>
-        <module>db</module>
-        <module>leveldb/db-leveldb</module>
+        <module>cache</module>
+        <module>eh/cache-eh-base</module>
     </modules>
 
 
