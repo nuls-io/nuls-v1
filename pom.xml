@@ -18,11 +18,10 @@
     </properties>
     <modules>
         <module>core</module>
-        <module>protocol</module>
         <module>tools</module>
-        <module>tools/tools</module>
         <module>protocol</module>
-        <module>tools</module>
+        <module>consensus</module>
+        <module>ledger</module>
     </modules>
     <build>
         <finalName>nuls</finalName>
