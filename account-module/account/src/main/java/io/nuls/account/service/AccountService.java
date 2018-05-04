@@ -23,7 +23,10 @@
  */
 package io.nuls.account.service;
 
+import io.nuls.account.model.Account;
 import io.nuls.core.tools.model.Result;
+
+import java.util.List;
 
 /**
  * 账户模块提供给外部的服务接口定义
@@ -44,7 +47,7 @@ public interface AccountService {
      *
      * @return the result of the opration
      */
-    Result createAccount(int count);
+    Result<List<Account>> createAccount(int count);
 
     /**
      * 根据账户标识删除对应的账户
@@ -55,6 +58,6 @@ public interface AccountService {
      *
      * @return the result of the opration
      */
-    Result deleteAccount(String accountId);
+    Result<Boolean> deleteAccount(String accountId);
 
 }
