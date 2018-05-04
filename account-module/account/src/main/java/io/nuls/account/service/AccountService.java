@@ -26,12 +26,35 @@ package io.nuls.account.service;
 import io.nuls.core.tools.model.Result;
 
 /**
+ * 账户模块提供给外部的服务接口定义
+ * <p>
+ * The account module provides the definition of the external service interface
+ *
  * @author: Niels Wang
  * @date: 2018/5/4
  */
 public interface AccountService {
-
+    /**
+     * 创建指定个数的账户（包含地址）
+     * <p>
+     * Create a specified number of accounts (including addresses)
+     *
+     * @param count 想要创建的账户个数
+     * @param count the account count you want to create
+     *
+     * @return the result of the opration
+     */
     Result createAccount(int count);
 
+    /**
+     * 根据账户标识删除对应的账户
+     *
+     * Delete the corresponding account according to the account id.
+     *
+     * @param accountId the id of the account you want to delete;
+     *
+     * @return the result of the opration
+     */
+    Result deleteAccount(String accountId);
 
 }
