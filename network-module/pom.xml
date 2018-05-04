@@ -3,13 +3,22 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>core-module</artifactId>
+        <artifactId>nuls</artifactId>
         <groupId>io.nuls</groupId>
         <version>2.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.nuls.core-module</groupId>
-    <artifactId>kernel-sdk</artifactId>
+
+    <artifactId>network-module</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>network</module>
+        <module>base/network-base</module>
+        <module>base/network-protocol</module>
+        <module>base/network-storage</module>
+        <module>base/network-rpc</module>
+        <module>base/network-sdk</module>
+    </modules>
 
 
 </project>

@@ -9,13 +9,13 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.nuls.account</groupId>
+    <groupId>io.nuls.account-module</groupId>
     <artifactId>account</artifactId>
     <packaging>pom</packaging>
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>io.nuls</groupId>
+                <groupId>io.nuls.core-module</groupId>
                 <artifactId>tools</artifactId>
             </dependency>
         </dependencies>

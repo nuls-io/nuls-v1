@@ -10,7 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.nuls</groupId>
+    <groupId>io.nuls.event-bus</groupId>
     <artifactId>event-bus-base</artifactId>
 
 
