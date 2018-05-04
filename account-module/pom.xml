@@ -9,16 +9,21 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.nuls</groupId>
-    <artifactId>protocol</artifactId>
+    <artifactId>account-module</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>protocol</module>
-        <module>base/protocol-sdk</module>
-        <module>base/protocol-rpc</module>
-        <module>base/protocol-storage</module>
-        <module>base/protocol-base</module>
+        <module>account</module>
+        <module>base/account-tx</module>
+        <module>base/account-storage</module>
+        <module>base/account-rpc</module>
+        <module>base/account-sdk</module>
     </modules>
-
+    <dependencies>
+        <dependency>
+            <groupId>io.nuls.core</groupId>
+            <artifactId>tools</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+    </dependencies>
 
 </project>

@@ -10,14 +10,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls</groupId>
-    <artifactId>account</artifactId>
+    <artifactId>protocol-module</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>account</module>
-        <module>base/account-tx</module>
-        <module>base/account-storage</module>
-        <module>base/account-rpc</module>
-        <module>base/account-sdk</module>
+        <module>protocol</module>
+        <module>base/protocol-sdk</module>
+        <module>base/protocol-rpc</module>
+        <module>base/protocol-storage</module>
+        <module>base/protocol-base</module>
     </modules>
 
 
