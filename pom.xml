@@ -22,6 +22,8 @@
         <module>protocol</module>
         <module>consensus</module>
         <module>ledger</module>
+        <module>cache</module>
+        <module>db</module>
     </modules>
     <build>
         <finalName>nuls</finalName>
