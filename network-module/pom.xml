@@ -3,15 +3,22 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>event-bus-module</artifactId>
+        <artifactId>nuls</artifactId>
         <groupId>io.nuls</groupId>
         <version>2.0.0</version>
-        <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.nuls.event-bus</groupId>
-    <artifactId>event-bus-base</artifactId>
+    <artifactId>network-module</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>network</module>
+        <module>base/network-base</module>
+        <module>base/network-protocol</module>
+        <module>base/network-storage</module>
+        <module>base/network-rpc</module>
+        <module>base/network-sdk</module>
+    </modules>
 
 
 </project>
