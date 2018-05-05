@@ -26,9 +26,15 @@
 
 package io.nuls.consensus.poc.service;
 
+import io.nuls.consensus.poc.entity.TestTransaction;
+import io.nuls.consensus.service.ConsensusServiceIntf;
+import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.Transaction;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -36,8 +42,12 @@ import static org.junit.Assert.*;
  * Created by ln on 2018/5/5.
  */
 public class ConsensusPocServiceTest {
+
+    private ConsensusServiceIntf service = new ConsensusPocService();
+
     @Before
     public void setUp() throws Exception {
+
     }
 
     @After
@@ -46,14 +56,26 @@ public class ConsensusPocServiceTest {
 
     @Test
     public void newTx() throws Exception {
+
+        assertNotNull(service);
+
+        // new a tx
+        Transaction tx = new TestTransaction();
+        tx.setTime(0l);
+
+        assertNotNull(tx);
+        assertNotNull(tx.getHash());
+        assertEquals(tx.getHash().getDigestHex(), "0800122099a2986481ecb269ee9bf8780130502d19505a563165745e65314b455d6bc976");
+
+        Result result = service.newTx(tx);
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertFalse(result.isFailed());
+
     }
 
     @Test
     public void newBlock() throws Exception {
-    }
-
-    @Test
-    public void newBlock1() throws Exception {
     }
 
     @Test
@@ -65,19 +87,26 @@ public class ConsensusPocServiceTest {
     }
 
     @Test
-    public void getAndRemoveOfMemoryTxs() throws Exception {
-    }
-
-    @Test
-    public void getTxFromMemory() throws Exception {
-    }
-
-    @Test
     public void getMemoryTxs() throws Exception {
+
+        assertNotNull(service);
+
+        newTx();
+
+        List<Transaction> memoryTxs = service.getMemoryTxs();
+        assertNotNull(memoryTxs);
+
+        assertEquals(1, memoryTxs.size());
+
+        Transaction tx = memoryTxs.get(0);
+        assertNotNull(tx);
+        assertEquals(tx.getHash().getDigestHex(), "0800122099a2986481ecb269ee9bf8780130502d19505a563165745e65314b455d6bc976");
     }
 
     @Test
     public void reset() throws Exception {
+
+        service.reset();
     }
 
 }
