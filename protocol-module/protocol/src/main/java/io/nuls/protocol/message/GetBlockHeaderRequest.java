@@ -22,11 +22,11 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.event;
+package io.nuls.protocol.message;
 
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
+import io.nuls.protocol.message.base.NoticeData;
 import io.nuls.protocol.model.GetBlockDataParam;
 
 /**
@@ -35,7 +35,7 @@ import io.nuls.protocol.model.GetBlockDataParam;
  * @author Niels
  * @date 2017/11/13
  */
-public class GetBlockHeaderRequest extends BaseProtocolEvent<GetBlockDataParam> {
+public class GetBlockHeaderRequest extends BaseProtocolMessage<GetBlockDataParam> {
 
     public GetBlockHeaderRequest() {
         super(ProtocolEventType.GET_BLOCK_HEADER);
@@ -46,7 +46,7 @@ public class GetBlockHeaderRequest extends BaseProtocolEvent<GetBlockDataParam> 
         GetBlockDataParam param = new GetBlockDataParam();
         param.setSize(size);
         param.setStart(start);
-        this.setEventBody(param);
+        this.setMsgBody(param);
     }
 
     public GetBlockHeaderRequest(long start, long size, NulsDigestData startHash, NulsDigestData endHash) {
@@ -56,7 +56,7 @@ public class GetBlockHeaderRequest extends BaseProtocolEvent<GetBlockDataParam> 
         param.setStart(start);
         param.setStartHash(startHash);
         param.setEndHash(endHash);
-        this.setEventBody(param);
+        this.setMsgBody(param);
     }
 
     @Override
@@ -65,32 +65,32 @@ public class GetBlockHeaderRequest extends BaseProtocolEvent<GetBlockDataParam> 
     }
 
     public long getStart() {
-        if (null == this.getEventBody()) {
+        if (null == this.getMsgBody()) {
             return -1;
         }
-        return this.getEventBody().getStart();
+        return this.getMsgBody().getStart();
     }
 
     public long getSize() {
-        if (null == this.getEventBody()) {
+        if (null == this.getMsgBody()) {
             return -1;
         }
-        return this.getEventBody().getSize();
+        return this.getMsgBody().getSize();
     }
 
 
     public NulsDigestData getStartHash() {
-        if (null == this.getEventBody()) {
+        if (null == this.getMsgBody()) {
             return null;
         }
-        return this.getEventBody().getStartHash();
+        return this.getMsgBody().getStartHash();
     }
 
     public NulsDigestData getEndHash() {
-        if (null == this.getEventBody()) {
+        if (null == this.getMsgBody()) {
             return null;
         }
-        return this.getEventBody().getEndHash();
+        return this.getMsgBody().getEndHash();
     }
 
 }

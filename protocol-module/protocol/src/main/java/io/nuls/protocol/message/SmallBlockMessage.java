@@ -20,31 +20,39 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
-package io.nuls.protocol.mesasge.validator;
+package io.nuls.protocol.message;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.validate.ValidateResult;
-import io.nuls.protocol.mesasge.NulsMessage;
+import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.message.base.NoticeData;
+import io.nuls.protocol.model.SmallBlock;
 
 /**
  * @author Niels
- * @date 2017/12/4
+ * @date 2017/11/13
  */
-public class NulsMessageValidator {
-    public ValidateResult validate(NulsMessage data) {
-        if (data.getHeader() == null || data.getData() == null) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NET_MESSAGE_ERROR);
-        }
-
-        if (data.getHeader().getLength() != data.getData().size()) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NET_MESSAGE_LENGTH_ERROR);
-        }
-
-        if (data.getHeader().getXor() != data.caculateXor()) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NET_MESSAGE_XOR_ERROR);
-        }
-        return ValidateResult.getSuccessResult();
+public class SmallBlockMessage extends BaseProtocolMessage<SmallBlock> {
+    public SmallBlockMessage() {
+        super(ProtocolEventType.NEW_BLOCK);
     }
+
+    public SmallBlockMessage(SmallBlock newBlock) {
+        this();
+        this.setMsgBody(newBlock);
+    }
+
+    @Override
+    public NoticeData getNotice() {
+        if (null == this.getMsgBody()) {
+            Log.warn("recieved a null SmallBlock!");
+            return null;
+        }
+        NoticeData data = new NoticeData();
+        data.setMessage(KernelErrorCode.NEW_BLOCK_HEADER_RECIEVED);
+        data.setData(this.getMsgBody().getHeader().getHash());
+        return data;
+    }
+
 }

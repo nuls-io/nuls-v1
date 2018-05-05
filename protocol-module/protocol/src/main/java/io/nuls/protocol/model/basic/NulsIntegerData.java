@@ -22,29 +22,21 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.event;
 
-import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.model.Transaction;
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
+package io.nuls.protocol.model.basic;
+
+import io.nuls.protocol.model.BasicTypeData;
 
 /**
  * @author Niels
- * @date 2017/11/8
+ * @date 2018/3/12
  */
-public class TransactionEvent extends BaseProtocolEvent<Transaction> {
-
-    public TransactionEvent() {
-        super(ProtocolEventType.NEW_TX_EVENT);
+public class NulsIntegerData extends BasicTypeData<Integer> {
+    public NulsIntegerData() {
+        this(null);
     }
 
-    @Override
-    public NoticeData getNotice() {
-        NoticeData data = new NoticeData();
-        data.setMessage(KernelErrorCode.NEW_TX_RECIEVED);
-        data.setData(this.getEventBody().getHash().getDigestHex());
-        return data;
+    public NulsIntegerData(Integer val) {
+        super(val);
     }
-
 }

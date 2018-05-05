@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.event.base;
+package io.nuls.protocol.message.base;
 
 import io.nuls.kernel.model.BaseNulsData;
 
@@ -30,26 +30,34 @@ import io.nuls.kernel.model.BaseNulsData;
  * @author Niels
  * @date 2017/11/7
  */
-public class EventHeader extends BaseNulsData {
+public class MessageHeader extends BaseNulsData {
     public static final transient int EVENT_HEADER_LENGTH = 4;
     private short moduleId;
-    private short eventType;
+    private short msgType;
+    private int magicNumber;
 
-    public EventHeader() {
+    // the messageBody length
+    private int length;
+
+    private byte xor;
+
+    private byte arithmetic;
+
+    public MessageHeader() {
 
     }
 
-    public EventHeader(short moduleId, short eventType) {
+    public MessageHeader(short moduleId, short msgType) {
         this.moduleId = moduleId;
-        this.eventType = eventType;
+        this.msgType = msgType;
     }
 
-    public short getEventType() {
-        return eventType;
+    public short getMsgType() {
+        return msgType;
     }
 
-    public void setEventType(short eventType) {
-        this.eventType = eventType;
+    public void setMsgType(short msgType) {
+        this.msgType = msgType;
     }
 
     public short getModuleId() {
@@ -60,4 +68,35 @@ public class EventHeader extends BaseNulsData {
         this.moduleId = moduleId;
     }
 
+    public int getMagicNumber() {
+        return magicNumber;
+    }
+
+    public void setMagicNumber(int magicNumber) {
+        this.magicNumber = magicNumber;
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
+
+    public byte getXor() {
+        return xor;
+    }
+
+    public void setXor(byte xor) {
+        this.xor = xor;
+    }
+
+    public byte getArithmetic() {
+        return arithmetic;
+    }
+
+    public void setArithmetic(byte arithmetic) {
+        this.arithmetic = arithmetic;
+    }
 }

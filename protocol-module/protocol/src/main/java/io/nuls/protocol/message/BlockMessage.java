@@ -21,39 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.protocol.event;
+package io.nuls.protocol.message;
 
-import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.ErrorCode;
-import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.model.Block;
 import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.SmallBlock;
+import io.nuls.protocol.message.base.NoticeData;
 
 /**
  * @author Niels
  * @date 2017/11/13
  */
-public class SmallBlockEvent extends BaseProtocolEvent<SmallBlock> {
-    public SmallBlockEvent() {
-        super(ProtocolEventType.NEW_BLOCK);
-    }
-
-    public SmallBlockEvent(SmallBlock newBlock) {
-        this();
-        this.setEventBody(newBlock);
+public class BlockMessage extends BaseProtocolMessage<Block> {
+    public BlockMessage() {
+        super(ProtocolEventType.BLOCK);
     }
 
     @Override
     public NoticeData getNotice() {
-        if (null == this.getEventBody()) {
-            Log.warn("recieved a null SmallBlock!");
+        if (this.getMsgBody() == null) {
             return null;
         }
         NoticeData data = new NoticeData();
-        data.setMessage(KernelErrorCode.NEW_BLOCK_HEADER_RECIEVED);
-        data.setData(this.getEventBody().getHeader().getHash());
+        data.setData(this.getMsgBody().getHeader().getHeight());
         return data;
     }
-
 }

@@ -114,7 +114,7 @@ public class AESEncrypt {
         try {
             ParametersWithIV keyWithIv = new ParametersWithIV(new KeyParameter(aesKey.getKey()), dataToDecrypt.getInitialisationVector());
 
-            // Decrypt the message.
+            // Decrypt the validator.
             BufferedBlockCipher cipher = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESFastEngine()));
             cipher.init(false, keyWithIv);
 

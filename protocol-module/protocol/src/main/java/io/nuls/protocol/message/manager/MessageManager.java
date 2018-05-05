@@ -22,12 +22,10 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.event.manager;
+package io.nuls.protocol.message.manager;
 
-import io.nuls.kernel.constant.ErrorCode;
-import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.core.tools.log.Log;
-import io.nuls.protocol.event.base.BaseEvent;
+import io.nuls.protocol.message.base.BaseMessage;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -38,67 +36,67 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Niels
  * @date 2017/11/7
  */
-public class EventManager {
+public class MessageManager {
     public static final String KEY_SPLIT = "_";
-    private static final Map<String, Class<? extends BaseEvent>> EVENT_MAP = new ConcurrentHashMap<>();
-    private static final Set<Class<? extends BaseEvent>> EVENT_CLASSES = new HashSet<>();
+    private static final Map<String, Class<? extends BaseMessage>> EVENT_MAP = new ConcurrentHashMap<>();
+    private static final Set<Class<? extends BaseMessage>> EVENT_CLASSES = new HashSet<>();
 
-    public static void care(Class<? extends BaseEvent> busDataClass) {
+    public static void care(Class<? extends BaseMessage> busDataClass) {
         boolean b = EVENT_CLASSES.contains(busDataClass);
         if (!b) {
             throw new RuntimeException( "EventClass is not legal:" + busDataClass.getName());
         }
     }
 
-    public static void putEvent(Class<? extends BaseEvent> clazz) {
+    public static void putEvent(Class<? extends BaseMessage> clazz) {
         try {
-            BaseEvent event = clazz.newInstance();
-            putEvent(event.getHeader().getModuleId(), event.getHeader().getEventType(), clazz);
+            BaseMessage event = clazz.newInstance();
+            putEvent(event.getHeader().getModuleId(), event.getHeader().getMsgType(), clazz);
         } catch (Exception e) {
             Log.warn(e.getMessage());
         }
     }
 
-    private static void putEvent(short moduleId, short type, Class<? extends BaseEvent> clazz) {
+    private static void putEvent(short moduleId, short type, Class<? extends BaseMessage> clazz) {
         if (type == 0) {
-            throw new RuntimeException( "the event type cannot be 0!,module:" + moduleId + ",eventType:" + type);
+            throw new RuntimeException( "the validator type cannot be 0!,module:" + moduleId + ",eventType:" + type);
         }
         EVENT_MAP.put(moduleId + "_" + type, clazz);
         cacheDataClass(clazz);
     }
 
-    private static void cacheDataClass(Class<? extends BaseEvent> clazz) {
+    private static void cacheDataClass(Class<? extends BaseMessage> clazz) {
         EVENT_CLASSES.add(clazz);
-        if (!clazz.getSuperclass().equals(BaseEvent.class)) {
-            cacheDataClass((Class<? extends BaseEvent>) clazz.getSuperclass());
+        if (!clazz.getSuperclass().equals(BaseMessage.class)) {
+            cacheDataClass((Class<? extends BaseMessage>) clazz.getSuperclass());
         }
     }
 
-//    public static BaseEvent getInstance(byte[] bytes) throws NulsException {
-//        EventHeader header = new EventHeader();
+//    public static BaseMessage getInstance(byte[] bytes) throws NulsException {
+//        MessageHeader header = new MessageHeader();
 //
 //        header.parse(new NulsByteBuffer(bytes));
-//        Class<? extends BaseEvent> clazz = EVENT_MAP.get(header.getModuleId() + "_" + header.getEventType());
+//        Class<? extends BaseMessage> clazz = EVENT_MAP.get(header.getModuleId() + "_" + header.getMsgType());
 //        if (null == clazz) {
 //            return null;
 //        }
-//        BaseEvent event;
+//        BaseMessage validator;
 //        try {
-//            event = clazz.newInstance();
+//            validator = clazz.newInstance();
 //        } catch (Exception e) {
 //            Log.error(e);
 //            throw new NulsException(ErrorCode.DATA_PARSE_ERROR);
 //        }
 //        try {
-//            event.parse(bytes);
+//            validator.parse(bytes);
 //        } catch (Exception e) {
 //            Log.error(Arrays.toString(bytes), e);
 //            throw e;
 //        }
-//        return event;
+//        return validator;
 //    }
 
-    public static Map<String, Class<? extends BaseEvent>> getEventMap() {
+    public static Map<String, Class<? extends BaseMessage>> getEventMap() {
         return EVENT_MAP;
     }
 }

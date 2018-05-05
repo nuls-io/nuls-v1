@@ -22,26 +22,22 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.event;
 
-import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.BaseEvent;
-import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.BlockHashResponse;
+package io.nuls.protocol.model.basic;
+
+import io.nuls.protocol.model.BasicTypeData;
 
 /**
  * @author Niels
- * @date 2018/1/15
+ * @date 2018/3/12
  */
-public class BlocksHashEvent extends BaseEvent<BlockHashResponse> {
+public class NulsDoubleData extends BasicTypeData<Double> {
 
-    public BlocksHashEvent() {
-        super(NulsConstant.MODULE_ID_CONSENSUS, ProtocolEventType.EVENT_TYPE_BLOCKS_HASH);
+    public NulsDoubleData() {
+        this(null);
     }
 
-    @Override
-    public NoticeData getNotice() {
-        return null;
+    public NulsDoubleData(Double val) {
+        super(val);
     }
 }

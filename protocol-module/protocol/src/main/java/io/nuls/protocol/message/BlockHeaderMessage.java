@@ -22,24 +22,28 @@
  * SOFTWARE.
  *
  */
+package io.nuls.protocol.message;
 
-package io.nuls.protocol.event;
-
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.NotFound;
+import io.nuls.protocol.message.base.NoticeData;
 
 /**
- * @author: Niels Wang
- * @date: 2018/4/9
+ * @author Niels
+ * @date 2017/11/13
  */
-public class NotFoundEvent extends BaseProtocolEvent<NotFound> {
-    public NotFoundEvent() {
-        super(ProtocolEventType.NOT_FOUND_EVENT);
+public class BlockHeaderMessage extends BaseProtocolMessage<BlockHeader> {
+    public BlockHeaderMessage() {
+        super(ProtocolEventType.BLOCK_HEADER);
     }
 
     @Override
     public NoticeData getNotice() {
-        return null;
+        if (this.getMsgBody() == null) {
+            return null;
+        }
+        NoticeData data = new NoticeData();
+        data.setData(this.getMsgBody().getHeight());
+        return data;
     }
 }

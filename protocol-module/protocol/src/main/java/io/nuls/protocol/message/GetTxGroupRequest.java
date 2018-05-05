@@ -22,31 +22,23 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.event;
+package io.nuls.protocol.message;
 
-import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.BaseEvent;
-import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.GetBlocksHashParam;
+import io.nuls.protocol.message.base.NoticeData;
+import io.nuls.protocol.model.GetTxGroupParam;
 
 /**
+ * get block by height.
+ *
  * @author Niels
- * @date 2018/1/15
+ * @date 2017/11/13
  */
-public class GetBlocksHashRequest extends BaseEvent<GetBlocksHashParam> {
+public class GetTxGroupRequest extends BaseProtocolMessage<GetTxGroupParam> {
 
 
-    public GetBlocksHashRequest() {
-        super(NulsConstant.MODULE_ID_CONSENSUS, ProtocolEventType.EVENT_TYPE_GET_BLOCKS_HASH);
-    }
-
-    public GetBlocksHashRequest(long start, long size) {
-        this();
-        GetBlocksHashParam param = new GetBlocksHashParam();
-        param.setStart(start);
-        param.setSize(size);
-        this.setEventBody(param);
+    public GetTxGroupRequest() {
+        super(ProtocolEventType.GET_TX_GROUP);
     }
 
     @Override

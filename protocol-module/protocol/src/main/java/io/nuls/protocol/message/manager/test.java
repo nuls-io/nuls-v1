@@ -1,4 +1,4 @@
-package io.nuls.protocol.event.manager;
+package io.nuls.protocol.message.manager;
 
 /**
  * @author: Niels Wang

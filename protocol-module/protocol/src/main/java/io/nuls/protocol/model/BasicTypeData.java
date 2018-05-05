@@ -20,29 +20,29 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.protocol.event;
+package io.nuls.protocol.model;
 
-import io.nuls.kernel.model.Block;
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
+import io.nuls.kernel.model.BaseNulsData;
 
 /**
  * @author Niels
- * @date 2017/11/13
+ * @date 2017/12/7
  */
-public class BlockEvent extends BaseProtocolEvent<Block> {
-    public BlockEvent() {
-        super(ProtocolEventType.BLOCK);
+public abstract class BasicTypeData<T> extends BaseNulsData {
+
+    private T val;
+
+    public BasicTypeData(T data) {
+        this.val = data;
     }
 
-    @Override
-    public NoticeData getNotice() {
-        if (this.getEventBody() == null) {
-            return null;
-        }
-        NoticeData data = new NoticeData();
-        data.setData(this.getEventBody().getHeader().getHeight());
-        return data;
+    public T getVal() {
+        return val;
+    }
+
+    public void setVal(T val) {
+        this.val = val;
     }
 }

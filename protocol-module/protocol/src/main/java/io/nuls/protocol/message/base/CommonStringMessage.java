@@ -22,23 +22,21 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.event;
 
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.GetTxGroupParam;
+package io.nuls.protocol.message.base;
+
+import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.protocol.model.basic.NulsStringData;
 
 /**
- * get block by height.
- *
  * @author Niels
- * @date 2017/11/13
+ * @date 2018/1/22
  */
-public class GetTxGroupRequest extends BaseProtocolEvent<GetTxGroupParam> {
+public class CommonStringMessage extends BaseMessage<NulsStringData> {
 
-
-    public GetTxGroupRequest() {
-        super(ProtocolEventType.GET_TX_GROUP);
+    public CommonStringMessage() {
+        super(NulsConstant.MODULE_ID_MICROKERNEL, (short) 1);
     }
 
     @Override
@@ -46,4 +44,18 @@ public class GetTxGroupRequest extends BaseProtocolEvent<GetTxGroupParam> {
         return null;
     }
 
+    public void setMessage(String message) {
+        if (StringUtils.isBlank(message)) {
+            return;
+        }
+        this.setMsgBody(new NulsStringData(message));
+    }
+
+    public String getMessage() {
+        NulsStringData data = this.getMsgBody();
+        if (null == data) {
+            return null;
+        }
+        return data.getVal();
+    }
 }

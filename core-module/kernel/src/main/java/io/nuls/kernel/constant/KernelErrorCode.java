@@ -122,7 +122,7 @@ public interface KernelErrorCode {
     ErrorCode ORPHAN_BLOCK = ErrorCode.init("LED007", 70007);
     ErrorCode UTXO_NOT_FOUND = ErrorCode.init("LED008", 70008);
     /*
-     * message
+     * validator
      */
     ErrorCode NEW_TX_RECIEVED = ErrorCode.init("MSG001", 80001);
     ErrorCode NEW_BLOCK_HEADER_RECIEVED = ErrorCode.init("MSG002", 80002);

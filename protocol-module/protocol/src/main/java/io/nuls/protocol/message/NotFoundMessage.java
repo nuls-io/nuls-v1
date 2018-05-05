@@ -22,30 +22,24 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.event;
 
-import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.kernel.model.BaseNulsData;
-import io.nuls.protocol.event.base.BaseEvent;
+package io.nuls.protocol.message;
+
+import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.message.base.NoticeData;
+import io.nuls.protocol.model.NotFound;
 
 /**
- * @author Niels
- * @date 2017/11/7
+ * @author: Niels Wang
+ * @date: 2018/4/9
  */
-public abstract class BaseProtocolEvent<T extends BaseNulsData> extends BaseEvent<T> {
-
-    public BaseProtocolEvent(short eventType) {
-        super(NulsConstant.MODULE_ID_PROTOCOL, eventType);
+public class NotFoundMessage extends BaseProtocolMessage<NotFound> {
+    public NotFoundMessage() {
+        super(ProtocolEventType.NOT_FOUND_EVENT);
     }
 
     @Override
-    public Object copy() {
-        try {
-            return this.clone();
-        } catch (CloneNotSupportedException e) {
-            Log.error(e);
-            return null;
-        }
+    public NoticeData getNotice() {
+        return null;
     }
 }
