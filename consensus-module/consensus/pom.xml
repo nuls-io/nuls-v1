@@ -35,6 +35,18 @@
 
     <groupId>io.nuls.consensus-module</groupId>
     <artifactId>consensus</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>io.nuls.protocol-module</groupId>
+            <artifactId>protocol</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nuls.network-module</groupId>
+            <artifactId>network</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+    </dependencies>
 
 
 </project>

@@ -103,7 +103,7 @@ public class Result<T> {
         StringBuffer buffer = new StringBuffer();
         buffer.append("result:{");
         buffer.append("success: " + success + ",");
-        buffer.append("message: " + message + ",");
+        buffer.append("validator: " + message + ",");
         if (errorCode == null) {
             buffer.append("errorCode: ");
         } else {

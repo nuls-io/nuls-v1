@@ -24,13 +24,7 @@
 package io.nuls.contract.entity.txdata;
 
 
-import io.nuls.core.tools.crypto.Utils;
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.protocol.model.BaseNulsData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
-
-import java.io.IOException;
+import io.nuls.kernel.model.BaseNulsData;
 
 /**
  * @Desription:
