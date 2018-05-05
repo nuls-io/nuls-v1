@@ -23,23 +23,42 @@
  *
  */
 
-package io.nuls.protocol.event;
+package io.nuls.protocol.model;
 
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.NotFound;
+import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.protocol.constant.NotFoundType;
 
 /**
  * @author: Niels Wang
  * @date: 2018/4/9
  */
-public class NotFoundEvent extends BaseProtocolEvent<NotFound> {
-    public NotFoundEvent() {
-        super(ProtocolEventType.NOT_FOUND_EVENT);
+public class NotFound extends BaseNulsData {
+
+    private NotFoundType type;
+    private NulsDigestData hash;
+
+    public NotFound() {
     }
 
-    @Override
-    public NoticeData getNotice() {
-        return null;
+    public NotFound(NotFoundType type, NulsDigestData hash) {
+        this.type = type;
+        this.hash = hash;
+    }
+
+    public NotFoundType getType() {
+        return type;
+    }
+
+    public void setType(NotFoundType type) {
+        this.type = type;
+    }
+
+    public NulsDigestData getHash() {
+        return hash;
+    }
+
+    public void setHash(NulsDigestData hash) {
+        this.hash = hash;
     }
 }

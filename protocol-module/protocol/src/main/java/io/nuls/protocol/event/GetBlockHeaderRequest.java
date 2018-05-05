@@ -24,10 +24,10 @@
  */
 package io.nuls.protocol.event;
 
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.protocol.constant.ProtocolEventType;
 import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.event.entity.GetBlockDataParam;
-import io.nuls.protocol.model.NulsDigestData;
+import io.nuls.protocol.model.GetBlockDataParam;
 
 /**
  * get block by height.

@@ -28,13 +28,8 @@ import io.nuls.core.tools.crypto.Utils;
 import io.nuls.core.tools.crypto.VarInt;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.cfg.NulsConfig;
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.exception.NulsRuntimeException;
-import io.nuls.protocol.model.NulsDigestData;
-import io.nuls.protocol.model.Transaction;
-import io.nuls.protocol.utils.TransactionManager;
 
 import java.io.UnsupportedEncodingException;
 

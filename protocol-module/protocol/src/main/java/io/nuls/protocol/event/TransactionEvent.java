@@ -25,9 +25,9 @@
 package io.nuls.protocol.event;
 
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.constant.ProtocolEventType;
 import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.Transaction;
 
 /**
  * @author Niels

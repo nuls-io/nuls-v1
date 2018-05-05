@@ -26,7 +26,7 @@ package io.nuls.protocol.event;
 
 import io.nuls.protocol.constant.ProtocolEventType;
 import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.event.entity.GetTxGroupParam;
+import io.nuls.protocol.model.GetTxGroupParam;
 
 /**
  * get block by height.

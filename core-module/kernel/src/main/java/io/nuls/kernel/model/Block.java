@@ -22,30 +22,69 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.event;
+package io.nuls.kernel.model;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.kernel.model.BaseNulsData;
-import io.nuls.protocol.event.base.BaseEvent;
+import io.nuls.kernel.utils.BlockValidatorManager;
+import io.nuls.kernel.validate.NulsDataValidator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author Niels
- * @date 2017/11/7
+ * @author win10
+ * @date 2017/10/30
  */
-public abstract class BaseProtocolEvent<T extends BaseNulsData> extends BaseEvent<T> {
+public class Block extends BaseNulsData implements NulsCloneable {
 
-    public BaseProtocolEvent(short eventType) {
-        super(NulsConstant.MODULE_ID_PROTOCOL, eventType);
+    private BlockHeader header;
+
+    private List<Transaction> txs;
+
+    public Block() {
+        initValidators();
     }
+
+    private void initValidators() {
+        List<NulsDataValidator> list = BlockValidatorManager.getValidators();
+        for (NulsDataValidator<Block> validator : list) {
+            this.registerValidator(validator);
+        }
+    }
+
+    public List<Transaction> getTxs() {
+        return txs;
+    }
+
+    public void setTxs(List<Transaction> txs) {
+        this.txs = txs;
+    }
+
+    public BlockHeader getHeader() {
+        return header;
+    }
+
+    public void setHeader(BlockHeader header) {
+        this.header = header;
+    }
+
 
     @Override
     public Object copy() {
+        //Temporary non realization
         try {
             return this.clone();
         } catch (CloneNotSupportedException e) {
             Log.error(e);
             return null;
         }
+    }
+
+    public List<NulsDigestData> getTxHashList() {
+        List<NulsDigestData> list = new ArrayList<>();
+        for (Transaction tx : txs) {
+            list.add(tx.getHash());
+        }
+        return list;
     }
 }

@@ -25,7 +25,7 @@ package io.nuls.protocol.event;
 
 import io.nuls.protocol.constant.ProtocolEventType;
 import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.event.entity.TxGroup;
+import io.nuls.protocol.model.TxGroup;
 
 /**
  * @author Niels

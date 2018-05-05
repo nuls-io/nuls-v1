@@ -22,24 +22,32 @@
  * SOFTWARE.
  *
  */
+package io.nuls.kernel.utils;
 
-package io.nuls.protocol.event;
+import io.nuls.kernel.validate.NulsDataValidator;
 
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.NotFound;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author: Niels Wang
- * @date: 2018/4/9
+ * @author Niels
+ * @date 2017/12/7
  */
-public class NotFoundEvent extends BaseProtocolEvent<NotFound> {
-    public NotFoundEvent() {
-        super(ProtocolEventType.NOT_FOUND_EVENT);
+public class BlockHeaderValidatorManager {
+
+    private static final List<NulsDataValidator > ALL_LIST = new ArrayList<>();
+
+    /**
+     * the validator fit Block instance
+     * @param validator
+     */
+    public static void addBlockDefValitor(NulsDataValidator validator) {
+        ALL_LIST.add(validator);
     }
 
-    @Override
-    public NoticeData getNotice() {
-        return null;
+    public static final List<NulsDataValidator> getValidators() {
+        List<NulsDataValidator> list = new ArrayList<>();
+        list.addAll(ALL_LIST);
+        return list;
     }
 }

@@ -22,24 +22,21 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.protocol.event;
-
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.NotFound;
+package io.nuls.kernel.constant;
 
 /**
- * @author: Niels Wang
- * @date: 2018/4/9
+ * @author Niels
  */
-public class NotFoundEvent extends BaseProtocolEvent<NotFound> {
-    public NotFoundEvent() {
-        super(ProtocolEventType.NOT_FOUND_EVENT);
-    }
+public enum TxStatusEnum {
 
-    @Override
-    public NoticeData getNotice() {
-        return null;
-    }
+    /**
+     * not packaged
+     */
+    UNCONFIRM,
+    /**
+     * six block confirmed
+     */
+    CONFIRMED
+
+
 }

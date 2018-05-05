@@ -1,18 +1,18 @@
-/**
+/*
  * MIT License
- * *
+ *
  * Copyright (c) 2017-2018 nuls.io
- * *
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * *
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * *
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,59 +20,63 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.protocol.event.base;
+package io.nuls.protocol.model;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.model.BaseNulsData;
-import io.nuls.kernel.model.NulsCloneable;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Transaction;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
- * @date 2017/11/7
+ * @date 2018/1/3
  */
-public abstract class BaseEvent<T> extends BaseNulsData implements NulsCloneable {
-    private transient NulsDigestData hash;
-    private EventHeader header;
-    private T eventBody;
+public class TxGroup extends BaseNulsData {
 
-    public BaseEvent(short moduleId, short eventType) {
-        this.header = new EventHeader(moduleId, eventType);
-    }
+    private NulsDigestData blockHash;
+    private List<Transaction> txList;
+    private Map<String, Transaction> txMap;
 
-    @Override
-    public Object copy() {
-        try {
-            return this.clone();
-        } catch (CloneNotSupportedException e) {
-            Log.error(e);
-            return null;
+    private synchronized void initTxMap() {
+        if (null != txMap) {
+            return;
+        }
+        this.txMap = new HashMap<>();
+        for (Transaction tx : txList) {
+            txMap.put(tx.getHash().getDigestHex(), tx);
         }
     }
 
-    public T getEventBody() {
-        return eventBody;
+    public NulsDigestData getBlockHash() {
+        return blockHash;
     }
 
-    public void setEventBody(T eventBody) {
-        this.eventBody = eventBody;
+    public void setBlockHash(NulsDigestData blockHash) {
+        this.blockHash = blockHash;
     }
 
-    public EventHeader getHeader() {
-        return header;
+    public List<Transaction> getTxList() {
+        return txList;
     }
 
-    public void setHeader(EventHeader header) {
-        this.header = header;
+    public void setTxList(List<Transaction> txList) {
+        this.txList = txList;
+        initTxMap();
     }
 
-    public NulsDigestData getHash() {
-        if (hash == null) {
-            this.hash = NulsDigestData.calcDigestData(this.serialize());
+    public Transaction getTx(String digestHex) {
+        return txMap.get(digestHex);
+    }
+
+    public Map<String, Transaction> getTxMap() {
+        if (null == txMap) {
+            initTxMap();
         }
-        return hash;
+        return txMap;
     }
-
-    public abstract NoticeData getNotice();
 }

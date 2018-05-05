@@ -25,17 +25,14 @@
 
 package io.nuls.protocol.event.base;
 
-import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.protocol.model.basic.NulsStringData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
+import io.nuls.kernel.constant.NulsConstant;
 
 /**
  * @author Niels
  * @date 2018/1/22
  */
-public class CommonStringEvent extends BaseEvent<NulsStringData> {
+public class CommonStringEvent extends BaseEvent<String> {
 
     public CommonStringEvent() {
         super(NulsConstant.MODULE_ID_MICROKERNEL, (short) 1);
@@ -50,15 +47,10 @@ public class CommonStringEvent extends BaseEvent<NulsStringData> {
         if (StringUtils.isBlank(message)) {
             return;
         }
-        NulsStringData val = new NulsStringData(message);
-        this.setEventBody(val);
+        this.setEventBody(message);
     }
 
     public String getMessage() {
-        NulsStringData val = this.getEventBody();
-        if (null == val) {
-            return null;
-        }
-        return val.getVal();
+       return this.getEventBody();
     }
 }

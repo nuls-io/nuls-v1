@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,7 +27,6 @@ import io.nuls.core.tools.cfg.ConfigLoader;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Result;
 import org.iq80.leveldb.DB;
@@ -67,15 +66,15 @@ public class LevelDBManager {
     }
 
     public static synchronized void init() throws Exception {
-        if(!isInit) {
+        if (!isInit) {
             isInit = true;
             File dir = loadDataPath();
             dataPath = dir.getPath();
             Log.info("LevelDBManager dataPath is " + dataPath);
             File[] areaFiles = dir.listFiles();
             DB db = null;
-            for(File areaFile : areaFiles) {
-                if(!areaFile.isDirectory()) {
+            for (File areaFile : areaFiles) {
+                if (!areaFile.isDirectory()) {
                     continue;
                 }
                 try {
@@ -100,26 +99,26 @@ public class LevelDBManager {
             max = 20;
         }
         File dir = null;
-        String pathSeparator = System.getProperty ("path.separator");
+        String pathSeparator = System.getProperty("path.separator");
         String unixPathSeparator = ":";
         String rootPath;
-        if(unixPathSeparator.equals(pathSeparator)) {
+        if (unixPathSeparator.equals(pathSeparator)) {
             rootPath = "/";
-            if(path.startsWith(rootPath)) {
+            if (path.startsWith(rootPath)) {
                 dir = new File(path);
             } else {
                 dir = new File(genAbsolutePath(path));
             }
         } else {
             rootPath = "^[c-zC-Z]:.*";
-            if(path.matches(rootPath)) {
+            if (path.matches(rootPath)) {
                 dir = new File(path);
             } else {
                 dir = new File(genAbsolutePath(path));
             }
         }
 
-        if(!dir.exists()) {
+        if (!dir.exists()) {
             dir.mkdirs();
         }
         return dir;
@@ -132,14 +131,14 @@ public class LevelDBManager {
         File file = new File(classPath);
         String resultPath = null;
         boolean isFileName = false;
-        for(String p : paths) {
-            if(StringUtils.isBlank(p)) {
+        for (String p : paths) {
+            if (StringUtils.isBlank(p)) {
                 continue;
             }
-            if(!isFileName) {
-                if("..".equals(p)) {
+            if (!isFileName) {
+                if ("..".equals(p)) {
                     file = file.getParentFile();
-                } else if(".".equals(p)) {
+                } else if (".".equals(p)) {
                     continue;
                 } else {
                     isFileName = true;
@@ -154,22 +153,22 @@ public class LevelDBManager {
 
     public static Result createArea(String areaName) {
         // prevent too many areas
-        if(AREAS.size() > (max -1)) {
+        if (AREAS.size() > (max - 1)) {
             return new Result(false, "KV_AREA_CREATE_ERROR");
         }
-        if(StringUtils.isBlank(areaName)) {
+        if (StringUtils.isBlank(areaName)) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         if (AREAS.containsKey(areaName)) {
             return new Result(true, "KV_AREA_EXISTS");
         }
-        if(StringUtils.isBlank(dataPath) || !checkPathLegal(areaName)) {
+        if (StringUtils.isBlank(dataPath) || !checkPathLegal(areaName)) {
             return new Result(false, "KV_AREA_CREATE_ERROR");
         }
         Result result;
         try {
             File dir = new File(dataPath + File.separator + areaName);
-            if(!dir.exists()) {
+            if (!dir.exists()) {
                 dir.mkdir();
             }
             String filePath = dataPath + File.separator + areaName + File.separator + BASE_DB_NAME;
@@ -185,7 +184,7 @@ public class LevelDBManager {
 
     public static void close() {
         Set<Map.Entry<String, DB>> entries = AREAS.entrySet();
-        for(Map.Entry<String, DB> entry : entries) {
+        for (Map.Entry<String, DB> entry : entries) {
             try {
                 AREAS.remove(entry.getKey());
                 entry.getValue().close();
@@ -203,7 +202,7 @@ public class LevelDBManager {
     }
 
     private static boolean checkPathLegal(String areaName) {
-        if(StringUtils.isBlank(areaName)) {
+        if (StringUtils.isBlank(areaName)) {
             return false;
         }
         String regex = "^[a-zA-Z0-9_\\-]+$";
@@ -211,14 +210,14 @@ public class LevelDBManager {
     }
 
     private static boolean baseCheckArea(String areaName) {
-        if(StringUtils.isBlank(areaName) || !AREAS.containsKey(areaName)) {
+        if (StringUtils.isBlank(areaName) || !AREAS.containsKey(areaName)) {
             return false;
         }
         return true;
     }
 
     private static byte[] str2bytes(String str) {
-        if(StringUtils.isBlank(str)) {
+        if (StringUtils.isBlank(str)) {
             return null;
         }
         try {
@@ -237,7 +236,7 @@ public class LevelDBManager {
         while (keys.hasMoreElements()) {
             areas[i++] = keys.nextElement();
             // thread safe, prevent java.lang.ArrayIndexOutOfBoundsException
-            if(i == length) {
+            if (i == length) {
                 break;
             }
         }
@@ -245,10 +244,10 @@ public class LevelDBManager {
     }
 
     public static Result put(String area, byte[] key, byte[] value) {
-        if(!baseCheckArea(area)) {
+        if (!baseCheckArea(area)) {
             return new Result(true, "KV_AREA_NOT_EXISTS");
         }
-        if(key == null || value == null) {
+        if (key == null || value == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
@@ -261,10 +260,10 @@ public class LevelDBManager {
     }
 
     public static Result put(String area, String key, String value) {
-        if(!baseCheckArea(area)) {
+        if (!baseCheckArea(area)) {
             return new Result(true, "KV_AREA_NOT_EXISTS");
         }
-        if(StringUtils.isBlank(key) || StringUtils.isBlank(value)) {
+        if (StringUtils.isBlank(key) || StringUtils.isBlank(value)) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
@@ -277,10 +276,10 @@ public class LevelDBManager {
     }
 
     public static Result put(String area, byte[] key, String value) {
-        if(!baseCheckArea(area)) {
+        if (!baseCheckArea(area)) {
             return new Result(true, "KV_AREA_NOT_EXISTS");
         }
-        if(key == null || StringUtils.isBlank(value)) {
+        if (key == null || StringUtils.isBlank(value)) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
@@ -293,10 +292,10 @@ public class LevelDBManager {
     }
 
     public static Result delete(String area, String key) {
-        if(!baseCheckArea(area)) {
+        if (!baseCheckArea(area)) {
             return new Result(true, "KV_AREA_NOT_EXISTS");
         }
-        if(StringUtils.isBlank(key)) {
+        if (StringUtils.isBlank(key)) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
@@ -309,10 +308,10 @@ public class LevelDBManager {
     }
 
     public static byte[] get(String area, String key) {
-        if(!baseCheckArea(area)) {
+        if (!baseCheckArea(area)) {
             return null;
         }
-        if(StringUtils.isBlank(key)) {
+        if (StringUtils.isBlank(key)) {
             return null;
         }
         try {
@@ -324,10 +323,10 @@ public class LevelDBManager {
     }
 
     public static byte[] get(String area, byte[] key) {
-        if(!baseCheckArea(area)) {
+        if (!baseCheckArea(area)) {
             return null;
         }
-        if(key == null) {
+        if (key == null) {
             return null;
         }
         try {

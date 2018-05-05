@@ -23,9 +23,9 @@
  */
 package io.nuls.protocol.event;
 
+import io.nuls.kernel.model.Block;
 import io.nuls.protocol.constant.ProtocolEventType;
 import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.Block;
 
 /**
  * @author Niels

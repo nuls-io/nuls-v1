@@ -22,24 +22,45 @@
  * SOFTWARE.
  *
  */
+package io.nuls.kernel.script;
 
-package io.nuls.protocol.event;
-
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.NotFound;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.NulsDigestData;
 
 /**
- * @author: Niels Wang
- * @date: 2018/4/9
+ * author Facjas
+ * date 2018/3/8.
  */
-public class NotFoundEvent extends BaseProtocolEvent<NotFound> {
-    public NotFoundEvent() {
-        super(ProtocolEventType.NOT_FOUND_EVENT);
+public class P2PKHScript extends Script {
+
+    private NulsDigestData publicKeyDigest;
+
+    public P2PKHScript() {
+    }
+
+    public P2PKHScript(byte[] bytes) throws NulsException {
+        this();
+        NulsDigestData nulsDigestData = new NulsDigestData();
+        nulsDigestData.parse(bytes);
+        this.publicKeyDigest = nulsDigestData;
+    }
+
+    public P2PKHScript(NulsDigestData publicKeyDigest) {
+        this.publicKeyDigest = publicKeyDigest;
     }
 
     @Override
-    public NoticeData getNotice() {
-        return null;
+    public byte[] getBytes() {
+        return publicKeyDigest.serialize();
     }
+
+    public NulsDigestData getPublicKeyDigest() {
+        return publicKeyDigest;
+    }
+
+    public void setPublicKeyDigest(NulsDigestData publicKeyDigest) {
+        this.publicKeyDigest = publicKeyDigest;
+    }
+
+    //todo  not finished
 }

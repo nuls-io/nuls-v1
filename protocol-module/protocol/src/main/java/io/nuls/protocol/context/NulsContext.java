@@ -26,10 +26,8 @@ package io.nuls.protocol.context;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.pass.PackingPasswordUtils;
-import io.nuls.kernel.constant.ErrorCode;
-import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
-import io.nuls.protocol.model.Block;
+import io.nuls.kernel.model.Block;
 
 import java.util.List;
 import java.util.Set;
@@ -112,7 +110,7 @@ public class NulsContext {
 
     public void setBestBlock(Block bestBlock) {
         if (bestBlock == null) {
-            throw new RuntimeException( "best block set to null!");
+            throw new RuntimeException("best block set to null!");
         }
         this.bestBlock = bestBlock;
 //        Log.info("best height:"+bestBlock.getHeader().getHeight()+", hash:"+bestBlock.getHeader().getHash());
