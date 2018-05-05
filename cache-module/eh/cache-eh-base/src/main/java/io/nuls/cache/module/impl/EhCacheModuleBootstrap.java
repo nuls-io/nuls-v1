@@ -21,31 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.service;
+package io.nuls.cache.module.impl;
 
-
-import io.nuls.kernel.model.Result;
+import io.nuls.cache.manager.EhCacheManager;
+import io.nuls.cache.module.AbstractCacheModule;
+import io.nuls.cache.service.impl.EhCacheServiceImpl;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/4
+ *
+ * @author Niels
+ * @date 2017/10/27
+ *
  */
-public interface DBService {
+public class EhCacheModuleBootstrap extends AbstractCacheModule {
 
-    Result createArea(String areaName);
+    private EhCacheManager cacheManager = EhCacheManager.getInstance();
 
-    String[] listArea();
+    @Override
+    public void init() {
+    }
 
-    Result put(String area, byte[] key, byte[] value);
+    @Override
+    public void start() {
+        this.registerService(EhCacheServiceImpl.class);
+    }
 
-    Result put(String area, String key, String value);
+    @Override
+    public void shutdown() {
+        cacheManager.close();
+    }
 
-    Result put(String area, byte[] key, String value);
+    @Override
+    public void destroy() {
+        cacheManager.close();
+    }
 
-    Result delete(String area, String key);
+    @Override
+    public String getInfo() {
+        return null;
+    }
 
-    byte[] get(String area, String key);
-
-    byte[] get(String area, byte[] key);
 }

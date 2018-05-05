@@ -21,31 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.service;
-
-
-import io.nuls.kernel.model.Result;
+package io.nuls.cache.constant;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/4
+ *
+ * @author Niels
+ * @date 2017/10/27
+ *
  */
-public interface DBService {
+public interface EhCacheConstant {
+    //version
+    int CACHE_MODULE_VERSION = 1111;
+    //Minimum version supported
+    int MINIMUM_VERSION_SUPPORTED = 0;
 
-    Result createArea(String areaName);
+    long MAX_SIZE_OF_CACHE_OBJ_GRAPH =  1024*1024*5;
 
-    String[] listArea();
-
-    Result put(String area, byte[] key, byte[] value);
-
-    Result put(String area, String key, String value);
-
-    Result put(String area, byte[] key, String value);
-
-    Result delete(String area, String key);
-
-    byte[] get(String area, String key);
-
-    byte[] get(String area, byte[] key);
+    String KEY_TYPE_FIELD="keyType";
+    String VALUE_TYPE_FIELD="valueType";
+    String POOL_HEAP_FIELD = "heap";
+    String POOL_OFF_HEAP_FIELD = "offheap";
+    String POOL_DISK_FIELD = "disk";
+    String POOL_TIME_OF_LIVE_SECONDS = "timeToLiveSeconds";
+    String POOL_TIME_OF_IDLE_SECONDS = "timeToIdleSeconds";
+    int DEFAULT_MAX_SIZE = 16;
 }

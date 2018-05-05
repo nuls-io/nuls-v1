@@ -1,4 +1,4 @@
-/*
+/**
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,11 +20,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package io.nuls.cache.util;
 
-import io.nuls.cache.intf.NulsCacheListener;
+import io.nuls.cache.listener.intf.NulsCacheListener;
 import io.nuls.cache.service.CacheService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.core.SpringLiteContext;

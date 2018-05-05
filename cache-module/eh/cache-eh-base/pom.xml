@@ -17,4 +17,17 @@
 
     <name>cache-eh-base</name>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.nuls.cache-module</groupId>
+            <artifactId>cache</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.ehcache/ehcache -->
+        <dependency>
+            <groupId>org.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+    </dependencies>
 </project>

@@ -1,4 +1,4 @@
-/*
+/**
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,7 +20,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 package io.nuls.cache.module;
 
@@ -31,6 +30,7 @@ import io.nuls.kernel.module.BaseModuleBootstrap;
 /**
  * @author Niels
  * @date 2017/10/18
+ *
  */
 public abstract class AbstractCacheModule extends BaseModuleBootstrap {
     public AbstractCacheModule() {
