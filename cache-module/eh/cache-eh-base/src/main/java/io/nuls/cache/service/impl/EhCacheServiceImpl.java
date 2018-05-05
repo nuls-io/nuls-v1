@@ -29,6 +29,7 @@ import io.nuls.cache.manager.EhCacheManager;
 import io.nuls.cache.model.CacheElement;
 import io.nuls.cache.service.CacheService;
 import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.NulsCloneable;
 import org.ehcache.Cache;
@@ -97,7 +98,7 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
             valueObj = ((NulsCloneable) value).copy();
         }
         if (null == cacheManager.getCache(cacheTitle)) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "Cache not exist!2");
+            throw new NulsRuntimeException(KernelErrorCode.FAILED, "Cache not exist!2");
         }
         cacheManager.getCache(cacheTitle).put(key, valueObj);
     }
@@ -105,7 +106,7 @@ public class EhCacheServiceImpl<K, T> implements CacheService<K, T> {
     @Override
     public void putElement(CacheElement element) {
         if (null == cacheManager.getCache(element.getCacheTitle())) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "Cache not exist!1");
+            throw new NulsRuntimeException(KernelErrorCode.FAILED, "Cache not exist!1");
         }
         cacheManager.getCache(element.getCacheTitle()).put(element.getKey(), element.getValue().copy());
     }

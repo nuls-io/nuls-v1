@@ -28,6 +28,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Result;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBFactory;
@@ -157,7 +158,7 @@ public class LevelDBManager {
             return new Result(false, "KV_AREA_CREATE_ERROR");
         }
         if(StringUtils.isBlank(areaName)) {
-            return Result.getFailed(ErrorCode.NULL_PARAMETER);
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         if (AREAS.containsKey(areaName)) {
             return new Result(true, "KV_AREA_EXISTS");
@@ -248,7 +249,7 @@ public class LevelDBManager {
             return new Result(true, "KV_AREA_NOT_EXISTS");
         }
         if(key == null || value == null) {
-            return Result.getFailed(ErrorCode.NULL_PARAMETER);
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
             DB db = AREAS.get(area);
@@ -264,7 +265,7 @@ public class LevelDBManager {
             return new Result(true, "KV_AREA_NOT_EXISTS");
         }
         if(StringUtils.isBlank(key) || StringUtils.isBlank(value)) {
-            return Result.getFailed(ErrorCode.NULL_PARAMETER);
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
             DB db = AREAS.get(area);
@@ -280,7 +281,7 @@ public class LevelDBManager {
             return new Result(true, "KV_AREA_NOT_EXISTS");
         }
         if(key == null || StringUtils.isBlank(value)) {
-            return Result.getFailed(ErrorCode.NULL_PARAMETER);
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
             DB db = AREAS.get(area);
@@ -296,7 +297,7 @@ public class LevelDBManager {
             return new Result(true, "KV_AREA_NOT_EXISTS");
         }
         if(StringUtils.isBlank(key)) {
-            return Result.getFailed(ErrorCode.NULL_PARAMETER);
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
             DB db = AREAS.get(area);
