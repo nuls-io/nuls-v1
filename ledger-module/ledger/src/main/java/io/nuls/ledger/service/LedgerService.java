@@ -23,12 +23,9 @@
  */
 package io.nuls.ledger.service;
 
-import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
-
-import java.util.List;
 
 /**
  * Created by ln on 2018/5/4.
@@ -71,7 +68,12 @@ public interface LedgerService {
      */
     boolean verifyCoinData(CoinData coinData);
 
-    CoinData assemblyCoinData(List<Coin> from , List<Coin> to);
-
-
+    /**
+     * To unlock the coindata of a transaction, when certain business scenarios need to lock a certain amount of funds, and an action is unlocked at a certain time in the future, the method is called, and the locked state is changed to the available state. The specific operation is to set lockTime from - 1 to 0
+     *
+     * 解锁一笔交易的coindata，当某些业务场景需要锁定一定数量的资金，在未来某个时刻某个动作解锁时，调用该方法，由锁定状态变为可用状态，具体操作的是把lockTime由-1改为0
+     * @param tx
+     * @return boolean
+     */
+    boolean unlockTxCoinData(Transaction tx);
 }
