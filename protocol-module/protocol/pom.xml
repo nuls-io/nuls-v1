@@ -6,12 +6,20 @@
         <artifactId>protocol-module</artifactId>
         <groupId>io.nuls</groupId>
         <version>2.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.protocol-module</groupId>
     <artifactId>protocol</artifactId>
     <packaging>pom</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>io.nuls.cache-module</groupId>
+            <artifactId>cache</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+    </dependencies>
 
 
 </project>
