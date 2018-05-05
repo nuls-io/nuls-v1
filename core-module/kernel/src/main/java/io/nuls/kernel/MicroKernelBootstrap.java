@@ -27,10 +27,9 @@ package io.nuls.kernel;
 import io.nuls.core.tools.cfg.ConfigLoader;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.cfg.NulsConfig;
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.i18n.I18nUtils;
+import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.ModularServiceMethodInterceptor;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.module.BaseModuleBootstrap;
@@ -42,6 +41,7 @@ import java.io.IOException;
  * @author Niels
  * @date 2018/1/5
  */
+@Component("kernel")
 public class MicroKernelBootstrap extends BaseModuleBootstrap {
     private static final MicroKernelBootstrap INSTANCE = new MicroKernelBootstrap();
 

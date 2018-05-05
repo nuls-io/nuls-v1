@@ -75,8 +75,9 @@ public class Result<T> {
         return !success;
     }
 
-    public void setSuccess(boolean success) {
+    public Result<T> setSuccess(boolean success) {
         this.success = success;
+        return this;
     }
 
     public String getMessage() {
@@ -86,8 +87,9 @@ public class Result<T> {
         return message;
     }
 
-    public void setMessage(String message) {
+    public Result<T> setMessage(String message) {
         this.message = message;
+        return this;
     }
 
     public ErrorCode getErrorCode() {
@@ -129,7 +131,8 @@ public class Result<T> {
         return data;
     }
 
-    public void setData(T data) {
+    public Result<T> setData(T data) {
         this.data = data;
+        return this;
     }
 }

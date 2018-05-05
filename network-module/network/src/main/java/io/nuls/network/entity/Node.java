@@ -26,9 +26,7 @@
 package io.nuls.network.entity;
 
 import io.nuls.core.tools.crypto.VarInt;
-import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.protocol.model.BaseNulsData;
@@ -36,7 +34,6 @@ import io.nuls.protocol.utils.io.NulsByteBuffer;
 import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 

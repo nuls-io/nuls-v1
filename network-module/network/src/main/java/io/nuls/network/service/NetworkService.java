@@ -38,19 +38,9 @@ import java.util.Map;
  */
 public interface NetworkService {
 
-    boolean addNode(Node node);
-
-    boolean addConnNode(Node node);
-
     void removeNode(String nodeId);
 
-    void removeNode(String nodeId, int type);
-
-    void deleteNode(String nodeId);
-
     Node getNode(String nodeId);
-
-    Map<String, Node> getNodes();
 
     Collection<Node> getAvailableNodes();
 

@@ -36,8 +36,8 @@ import java.lang.annotation.*;
 @Documented
 public @interface Component {
     /**
-     * the type of the Annotation on a method
+     * the name of the bean
      * @return
      */
-    Class value() ;
+    String value() default "";
 }

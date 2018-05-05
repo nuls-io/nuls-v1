@@ -23,9 +23,10 @@
  */
 package io.nuls.ledger.service;
 
-import io.nuls.kernel.model.CoinData;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.*;
+import io.nuls.kernel.validate.ValidateResult;
+
+import java.util.List;
 
 /**
  * Created by ln on 2018/5/4.
@@ -39,7 +40,7 @@ public interface LedgerService {
      * @param tx
      * @return boolean
      */
-    boolean saveTx(Transaction tx);
+    Result saveTx(Transaction tx);
 
     /**
      * Roll back transactions while rolling back coindata data
@@ -48,7 +49,7 @@ public interface LedgerService {
      * @param tx
      * @return boolean
      */
-    boolean rollbackTx(Transaction tx);
+    Result rollbackTx(Transaction tx);
 
     /**
      * get a transaction
@@ -66,7 +67,11 @@ public interface LedgerService {
      * @param coinData
      * @return
      */
-    boolean verifyCoinData(CoinData coinData);
+    ValidateResult verifyCoinData(CoinData coinData);
+    ValidateResult verifyCoinData(CoinData coinData, List<Transaction> txList);
+
+    ValidateResult verifyDoubleSpend(Block block);
+    ValidateResult verifyDoubleSpend(List<Transaction> txList);
 
     /**
      * To unlock the coindata of a transaction, when certain business scenarios need to lock a certain amount of funds, and an action is unlocked at a certain time in the future, the method is called, and the locked state is changed to the available state. The specific operation is to set lockTime from - 1 to 0
@@ -75,5 +80,5 @@ public interface LedgerService {
      * @param tx
      * @return boolean
      */
-    boolean unlockTxCoinData(Transaction tx);
+    Result unlockTxCoinData(Transaction tx);
 }

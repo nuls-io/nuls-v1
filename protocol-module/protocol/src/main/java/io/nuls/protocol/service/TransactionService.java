@@ -22,22 +22,24 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.lite.annotation;
 
-import java.lang.annotation.*;
+package io.nuls.protocol.service;
+
+import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.validate.ValidateResult;
+
+import java.util.List;
 
 /**
- * author: Niels Wang
- * date: 2018/1/30
+ * @author: Niels Wang
+ * @date: 2018/5/5
  */
+public interface TransactionService {
 
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Service {
-    /**
-     * the name of the bean
-     * @return
-     */
-    String value() default "";
+    Result commitTx(Transaction tx);
+
+    Result rollback(Transaction tx);
+
+    ValidateResult conflictDetect(List<Transaction> txList);
 }

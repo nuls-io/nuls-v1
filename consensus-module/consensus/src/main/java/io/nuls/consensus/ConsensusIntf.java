@@ -84,6 +84,7 @@ public interface ConsensusIntf {
      *
      * @return Transaction
      */
+    //todo 内部
     Transaction getAndRemoveOfMemoryTxs(NulsDigestData hash);
 
     /**
@@ -93,6 +94,7 @@ public interface ConsensusIntf {
      * @param hash
      * @return Transaction
      */
+    //todo 内部
     Transaction getTxFromMemory(NulsDigestData hash);
 
     /**
@@ -109,6 +111,7 @@ public interface ConsensusIntf {
      * 重置共识模块，会重新启动，加载内存数据，重新初始化所有状态
      * @return boolean
      */
+    //todo 内部
     boolean reset();
 
 }

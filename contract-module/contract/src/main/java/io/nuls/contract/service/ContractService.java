@@ -45,5 +45,7 @@ public interface ContractService {
 
     Result<ContractResult> updateContract(ContractUpdate update);
 
-    Object getContractInfo(String address);
+    Result<Object> getContractInfo(String address);
+
+    Result<Object> getVmStatus();
 }

@@ -26,7 +26,6 @@ package io.nuls.kernel.module.thread;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.ModuleStatusEnum;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.module.BaseModuleBootstrap;

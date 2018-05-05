@@ -22,22 +22,38 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.lite.annotation;
+package io.nuls.protocol.service;
 
-import java.lang.annotation.*;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.NulsDigestData;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
- * author: Niels Wang
- * date: 2018/1/30
+ * @author Niels
+ * @date 2017/11/10
  */
+public interface BlockService {
 
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Service {
-    /**
-     * the name of the bean
-     * @return
-     */
-    String value() default "";
+    Block getGengsisBlock();
+
+    Block getBestBlock();
+
+    BlockHeader getBestBlockHeader();
+
+    BlockHeader getBlockHeader(long height) throws NulsException;
+
+    BlockHeader getBlockHeader(NulsDigestData hash) throws NulsException;
+
+    Block getBlock(NulsDigestData hash);
+
+    Block getBlock(long height);
+
+    boolean saveBlock(Block block) throws NulsException;
+
+    boolean rollbackBlock(Block block) throws NulsException;
 }

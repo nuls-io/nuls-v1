@@ -9,8 +9,10 @@ public class ContractBase {
     private String sender;
     private long naLimit;
     private int price;
-    private String password;
+    private transient String password;
     private String remark;
+
+    //todo world status
 
     public String getSender() {
         return sender;

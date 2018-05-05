@@ -22,22 +22,35 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.lite.annotation;
 
-import java.lang.annotation.*;
+package io.nuls.account.service;
+
+import io.nuls.account.model.Account;
+import io.nuls.kernel.model.*;
+
+import java.util.List;
 
 /**
- * author: Niels Wang
- * date: 2018/1/30
+ * @author: Niels Wang
+ * @date: 2018/5/5
  */
+public interface AccountTxService {
 
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Service {
+    Result<Transaction> saveAccountTx(Transaction tx);
+
     /**
-     * the name of the bean
+     * 先检查是否跟自己相关，相关的情况才保存
+     * @param tx
      * @return
      */
-    String value() default "";
+    Result<Transaction> checkAndSaveAccountTx(Transaction tx);
+
+    Result removeAccountTx(NulsDigestData txHash);
+
+    Result<Transaction> updateAccountTx(Transaction tx);
+
+    Result<List<Transaction>> getUnconfirmAccountTxList(Account account);
+    Result<List<Transaction>> getUnconfirmAccountTxList();
+
+    Result<List<Coin>> getUseableCoinList(Account account,Na na);
 }

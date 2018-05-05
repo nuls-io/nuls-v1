@@ -24,7 +24,6 @@
  */
 package io.nuls.core.tools.crypto;
 
-import io.nuls.core.tools.log.Log;
 import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 
 import java.io.ByteArrayOutputStream;

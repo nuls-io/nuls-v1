@@ -27,7 +27,6 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.module.AbstractDBModule;
 import io.nuls.db.service.impl.LevelDBServiceImpl;
-import io.nuls.kernel.constant.ErrorCode;
 import org.iq80.leveldb.DBException;
 
 /**

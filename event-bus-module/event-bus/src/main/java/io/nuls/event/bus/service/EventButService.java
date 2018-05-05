@@ -2,7 +2,7 @@ package io.nuls.event.bus.service;
 
 import io.nuls.event.bus.handler.intf.NulsEventHandler;
 import io.nuls.event.bus.model.EventItem;
-import io.nuls.protocol.event.base.BaseEvent;
+import io.nuls.protocol.message.base.BaseMessage;
 
 import java.util.List;
 
@@ -14,23 +14,10 @@ import java.util.List;
  */
 public interface EventButService {
 
-
-    String subscribeEvent(Class<? extends BaseEvent> eventClass);
-
-    String subscribeEvent(Class<? extends BaseEvent> eventClass, NulsEventHandler<? extends BaseEvent> eventHandler);
+    String subscribeEvent(Class<? extends BaseMessage> eventClass, NulsEventHandler<? extends BaseMessage> eventHandler);
 
     void unsubscribeEvent(String subcribeId);
 
-   /* void publishEvent(EventCategoryEnum category, byte[] bytes, String fromId) throws IllegalAccessException, NulsException, InstantiationException;
-
-    void publishEvent(EventCategoryEnum category, BaseEvent event, String fromId);*/
-
-    void publishNetworkEvent(byte[] bytes, String fromId);
-
-    void publishNetworkEvent(BaseEvent event, String fromId);
-
-    void publishLocalEvent(BaseEvent event);
-
-    List<EventItem> getEventList();
+    void receiveMessage(BaseMessage message, String fromId);
 
 }

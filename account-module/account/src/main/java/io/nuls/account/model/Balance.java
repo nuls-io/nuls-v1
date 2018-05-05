@@ -22,22 +22,12 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.lite.annotation;
 
-import java.lang.annotation.*;
+package io.nuls.account.model;
 
 /**
- * author: Niels Wang
- * date: 2018/1/30
+ * @author: Niels Wang
+ * @date: 2018/5/5
  */
-
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Service {
-    /**
-     * the name of the bean
-     * @return
-     */
-    String value() default "";
+public class Balance {
 }

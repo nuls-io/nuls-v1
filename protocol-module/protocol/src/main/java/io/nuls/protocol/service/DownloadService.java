@@ -22,22 +22,31 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.lite.annotation;
 
-import java.lang.annotation.*;
+package io.nuls.protocol.service;
+
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Result;
+import io.nuls.network.entity.Node;
+import io.nuls.protocol.model.TxGroup;
+
+import java.util.List;
 
 /**
- * author: Niels Wang
- * date: 2018/1/30
+ * Created by ln on 2018/4/8.
  */
+public interface DownloadService {
 
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Service {
-    /**
-     * the name of the bean
-     * @return
-     */
-    String value() default "";
+    Result<Block> downloadBlock(NulsDigestData hash);
+
+    Result<Block> downloadBlock(NulsDigestData hash, Node node);
+
+    Result<TxGroup> downloadTxGroup(List<NulsDigestData> txHashList);
+    Result<TxGroup> downloadTxGroup(List<NulsDigestData> txHashList,Node node);
+
+    Result<Boolean> isDownloadSuccess();
+
+    Result reset();
+
 }

@@ -26,6 +26,9 @@ package io.nuls.account.service;
 
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
+import io.nuls.account.model.Balance;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
 
 import java.util.List;
@@ -67,20 +70,34 @@ public interface AccountService {
      * <p>
      * Obtain the completed account information according to the account id.
      *
-     * @param accountId the id of the account you want ;
+     * @param address the address of the account you want ;
      * @return the operation result and the account entity
      */
-    Result<Account> getAccount(String accountId);
+    Result<Account> getAccount(String address);
+
+    Result<Account> getAccount(Address address);
 
     Result<Address> getAddress(String pubKey);
+    Result<Address> getAddress(byte[] pubKey);
 
-    Result<Boolean> verifyAddressFormat(String address);
+    Result<Boolean> isEncrypted(Account account);
+    Result<Boolean> isEncrypted(Address address);
+    Result<Boolean> isEncrypted(String address);
+
+    Result verifyAddressFormat(String address);
 
     Result<List<Account>> getAccountList();
 
-    Result encryptAccounts(String password);
+    Result<Account> getDefaultAccount();
 
-    Result changePassword(String oldPassword, String newPassword);
+    NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
 
-//    NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
+    NulsSignData signData(byte[] data, Account account) throws NulsException;
+
+    Result verifySignData(byte[] data, NulsSignData signData, byte[] pubKey);
+
+    Result<Balance> getBalance();
+    Result<Balance> getBalance(Account account);
+    Result<Balance> getBalance(Address address);
+    Result<Balance> getBalance(String address);
 }

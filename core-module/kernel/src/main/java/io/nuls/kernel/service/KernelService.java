@@ -22,22 +22,27 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.lite.annotation;
 
-import java.lang.annotation.*;
+package io.nuls.kernel.service;
+
+import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.lite.annotation.Service;
+import io.nuls.kernel.model.NulsVersion;
+import io.nuls.kernel.model.Result;
 
 /**
- * author: Niels Wang
- * date: 2018/1/30
+ * @author: Niels Wang
+ * @date: 2018/5/5
  */
+@Service
+public class KernelService {
 
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Service {
-    /**
-     * the name of the bean
-     * @return
-     */
-    String value() default "";
+    public Result<NulsVersion> getVersion() {
+        return Result.getSuccess().setData(NulsConfig.VERSION);
+    }
+
+    public Result<Boolean> setLanguage(String lang) {
+        //todo
+        return Result.getSuccess();
+    }
 }
