@@ -17,6 +17,11 @@
         <module>base/event-bus-base</module>
     </modules>
     <dependencies>
+        <!--<dependency>
+            <groupId>io.nuls.core-module</groupId>
+            <artifactId>kernel</artifactId>
+            <version>2.0.0</version>
+        </dependency>-->
         <dependency>
             <groupId>io.nuls.protocol-module</groupId>
             <artifactId>protocol</artifactId>
