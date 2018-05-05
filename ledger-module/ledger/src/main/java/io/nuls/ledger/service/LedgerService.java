@@ -23,11 +23,55 @@
  */
 package io.nuls.ledger.service;
 
+import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.model.CoinData;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Transaction;
+
+import java.util.List;
+
 /**
  * Created by ln on 2018/5/4.
  */
 public interface LedgerService {
 
+    /**
+     * Save transactions, automatically handle transactional coin data
+     *
+     * 保存交易，自动处理交易自带的coindata
+     * @param tx
+     * @return boolean
+     */
+    boolean saveTx(Transaction tx);
+
+    /**
+     * Roll back transactions while rolling back coindata data
+     *
+     * 回滚交易，同时回滚coindata数据
+     * @param tx
+     * @return boolean
+     */
+    boolean rollbackTx(Transaction tx);
+
+    /**
+     * get a transaction
+     *
+     * 获取一笔交易
+     * @param hash
+     * @return
+     */
+    Transaction getTx(NulsDigestData hash);
+
+    /**
+     * Verify that a coindata is valid, verify 2 points, the first verification owner is legal (whether it can be used), the second verification amount is correct (output can not be greater than the input)
+     *
+     * 验证一笔coindata是否合法，验证2点，第一验证拥有者是否合法（是否可动用），第二验证金额是否正确（输出不能大于输入）
+     * @param coinData
+     * @return
+     */
+    boolean verifyCoinData(CoinData coinData);
+
+    CoinData assemblyCoinData(List<Coin> from , List<Coin> to);
 
 
 }

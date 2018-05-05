@@ -45,13 +45,13 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
 
     protected long time;
 
-    protected Na fee;
-
     protected byte[] remark;
 
     private byte[] scriptSig;
 
     protected T txData;
+
+    protected CoinData coinData;
 
     protected transient NulsDigestData hash;
 
@@ -165,14 +165,6 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         this.txData = txData;
     }
 
-    public Na getFee() {
-        return fee;
-    }
-
-    public void setFee(Na fee) {
-        this.fee = fee;
-    }
-
     public long getBlockHeight() {
         return blockHeight;
     }
@@ -203,6 +195,14 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
 
     public void setTransferType(int transferType) {
         this.transferType = transferType;
+    }
+
+    public CoinData getCoinData() {
+        return coinData;
+    }
+
+    public void setCoinData(CoinData coinData) {
+        this.coinData = coinData;
     }
 
     public int getSize() {
