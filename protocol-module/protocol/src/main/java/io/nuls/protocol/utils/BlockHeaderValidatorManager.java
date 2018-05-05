@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,54 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.cache.service;
+package io.nuls.protocol.utils;
 
-import io.nuls.cache.intf.NulsCacheListener;
+import io.nuls.kernel.validate.NulsDataValidator;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/4
+ * @author Niels
+ * @date 2017/12/7
  */
-public interface CacheService<K, V> {
+public class BlockHeaderValidatorManager {
+
+    private static final List<NulsDataValidator > ALL_LIST = new ArrayList<>();
 
     /**
-     * remove a cache by title
+     * the validator fit Block instance
+     * @param validator
      */
-    void removeCache(String title);
+    public static void addBlockDefValitor(NulsDataValidator validator) {
+        ALL_LIST.add(validator);
+    }
 
-    /**
-     * put data to a cache
-     */
-    void putElement(String cacheTitle, K key, Object value);
-
-
-    /**
-     * get data from the cache named cacheTitle
-     */
-    V getElement(String cacheTitle, K key);
-
-    List<V> getElementList(String cacheTitle);
-
-    /**
-     * remove an element from the cache named cacheTitle
-     */
-    void removeElement(String cacheTitle, K key);
-
-    /**
-     * @param title
-     */
-    void clearCache(String title);
-
-    List<String> getCacheTitleList();
-
-
-    boolean containsKey(String cacheTitle, K key);
-
-    Set<K> keySet(String cacheTitle);
-
-    void createCache(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener);
+    public static final List<NulsDataValidator> getValidators() {
+        List<NulsDataValidator> list = new ArrayList<>();
+        list.addAll(ALL_LIST);
+        return list;
+    }
 }

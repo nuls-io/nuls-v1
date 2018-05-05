@@ -1,18 +1,19 @@
-/**
+/*
+ *
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,55 +21,40 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.cache.service;
 
-import io.nuls.cache.intf.NulsCacheListener;
+package io.nuls.protocol.event.base;
 
-import java.util.List;
-import java.util.Set;
+import io.nuls.kernel.constant.ErrorCode;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/4
+ * @author Niels
+ * @date 2018/3/8
  */
-public interface CacheService<K, V> {
+public class NoticeData{
 
-    /**
-     * remove a cache by title
-     */
-    void removeCache(String title);
+    private String message;
 
-    /**
-     * put data to a cache
-     */
-    void putElement(String cacheTitle, K key, Object value);
+    private Object data;
 
+    public String getMessage() {
+        return message;
+    }
 
-    /**
-     * get data from the cache named cacheTitle
-     */
-    V getElement(String cacheTitle, K key);
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
-    List<V> getElementList(String cacheTitle);
+    public Object getData() {
+        return data;
+    }
 
-    /**
-     * remove an element from the cache named cacheTitle
-     */
-    void removeElement(String cacheTitle, K key);
+    public void setData(Object data) {
+        this.data = data;
+    }
 
-    /**
-     * @param title
-     */
-    void clearCache(String title);
-
-    List<String> getCacheTitleList();
-
-
-    boolean containsKey(String cacheTitle, K key);
-
-    Set<K> keySet(String cacheTitle);
-
-    void createCache(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener);
+    public void setMessage(ErrorCode code) {
+        this.message = code.getMsg();
+    }
 }

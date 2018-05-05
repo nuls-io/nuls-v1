@@ -1,18 +1,18 @@
-/**
+/*
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,55 +20,46 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.cache.service;
+package io.nuls.protocol.event.entity;
 
-import io.nuls.cache.intf.NulsCacheListener;
+import io.nuls.protocol.model.BaseNulsData;
+import io.nuls.protocol.model.NulsDigestData;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/4
+ * @author Niels
+ * @date 2017/12/18
  */
-public interface CacheService<K, V> {
+public class GetTxGroupParam extends BaseNulsData {
 
-    /**
-     * remove a cache by title
-     */
-    void removeCache(String title);
+    private NulsDigestData blockHash;
 
-    /**
-     * put data to a cache
-     */
-    void putElement(String cacheTitle, K key, Object value);
+    private List<NulsDigestData> txHashList = new ArrayList<>();
 
+    public GetTxGroupParam() {
+    }
 
-    /**
-     * get data from the cache named cacheTitle
-     */
-    V getElement(String cacheTitle, K key);
+    public NulsDigestData getBlockHash() {
+        return blockHash;
+    }
 
-    List<V> getElementList(String cacheTitle);
+    public void setBlockHash(NulsDigestData blockHash) {
+        this.blockHash = blockHash;
+    }
 
-    /**
-     * remove an element from the cache named cacheTitle
-     */
-    void removeElement(String cacheTitle, K key);
+    public List<NulsDigestData> getTxHashList() {
+        return txHashList;
+    }
 
-    /**
-     * @param title
-     */
-    void clearCache(String title);
+    public void addHash(NulsDigestData hash) {
+        this.txHashList.add(hash);
+    }
 
-    List<String> getCacheTitleList();
-
-
-    boolean containsKey(String cacheTitle, K key);
-
-    Set<K> keySet(String cacheTitle);
-
-    void createCache(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener);
+    public void setTxHashList(List<NulsDigestData> txHashList) {
+        this.txHashList = txHashList;
+    }
 }

@@ -1,18 +1,18 @@
-/**
+/*
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,55 +20,53 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.cache.service;
+package io.nuls.cache.entity;
 
-import io.nuls.cache.intf.NulsCacheListener;
 
-import java.util.List;
-import java.util.Set;
+import io.nuls.kernel.model.NulsCloneable;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/4
+ *
+ * @author Niels
+ * @date 2017/10/18
+ *
  */
-public interface CacheService<K, V> {
+public class CacheElement<T extends NulsCloneable> {
+    private String cacheTitle;
+    private String key;
+    private T value;
 
-    /**
-     * remove a cache by title
-     */
-    void removeCache(String title);
+    public CacheElement() {
+    }
 
-    /**
-     * put data to a cache
-     */
-    void putElement(String cacheTitle, K key, Object value);
+    public CacheElement(String key, T value) {
+        this.key = key;
+        this.value = value;
+    }
 
+    public String getCacheTitle() {
+        return cacheTitle;
+    }
 
-    /**
-     * get data from the cache named cacheTitle
-     */
-    V getElement(String cacheTitle, K key);
+    public void setCacheTitle(String cacheTitle) {
+        this.cacheTitle = cacheTitle;
+    }
 
-    List<V> getElementList(String cacheTitle);
+    public String getKey() {
+        return key;
+    }
 
-    /**
-     * remove an element from the cache named cacheTitle
-     */
-    void removeElement(String cacheTitle, K key);
+    public void setKey(String key) {
+        this.key = key;
+    }
 
-    /**
-     * @param title
-     */
-    void clearCache(String title);
+    public T getValue() {
+        return value;
+    }
 
-    List<String> getCacheTitleList();
-
-
-    boolean containsKey(String cacheTitle, K key);
-
-    Set<K> keySet(String cacheTitle);
-
-    void createCache(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener);
+    public void setValue(T value) {
+        this.value = value;
+    }
 }

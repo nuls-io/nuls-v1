@@ -21,54 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.cache.service;
+package io.nuls.protocol.script;
 
-import io.nuls.cache.intf.NulsCacheListener;
-
-import java.util.List;
-import java.util.Set;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.protocol.model.NulsDigestData;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/4
+ * author Facjas
+ * date 2018/3/8.
  */
-public interface CacheService<K, V> {
+public class P2PKHScript extends Script {
 
-    /**
-     * remove a cache by title
-     */
-    void removeCache(String title);
+    private NulsDigestData publicKeyDigest;
 
-    /**
-     * put data to a cache
-     */
-    void putElement(String cacheTitle, K key, Object value);
+    public P2PKHScript() {
+    }
 
+    public P2PKHScript(byte[] bytes) throws NulsException {
+        this();
+        NulsDigestData nulsDigestData = new NulsDigestData();
+        nulsDigestData.parse(bytes);
+        this.publicKeyDigest = nulsDigestData;
+    }
 
-    /**
-     * get data from the cache named cacheTitle
-     */
-    V getElement(String cacheTitle, K key);
+    public P2PKHScript(NulsDigestData publicKeyDigest) {
+        this.publicKeyDigest = publicKeyDigest;
+    }
 
-    List<V> getElementList(String cacheTitle);
+    @Override
+    public byte[] getBytes() {
+        return publicKeyDigest.serialize();
+    }
 
-    /**
-     * remove an element from the cache named cacheTitle
-     */
-    void removeElement(String cacheTitle, K key);
+    public NulsDigestData getPublicKeyDigest() {
+        return publicKeyDigest;
+    }
 
-    /**
-     * @param title
-     */
-    void clearCache(String title);
+    public void setPublicKeyDigest(NulsDigestData publicKeyDigest) {
+        this.publicKeyDigest = publicKeyDigest;
+    }
 
-    List<String> getCacheTitleList();
-
-
-    boolean containsKey(String cacheTitle, K key);
-
-    Set<K> keySet(String cacheTitle);
-
-    void createCache(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener);
+    //todo  not finished
 }

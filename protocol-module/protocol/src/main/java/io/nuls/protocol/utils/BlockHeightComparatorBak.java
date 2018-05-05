@@ -1,18 +1,18 @@
-/**
+/*
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,55 +20,44 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.cache.service;
+package io.nuls.protocol.utils;
 
-import io.nuls.cache.intf.NulsCacheListener;
+import io.nuls.protocol.model.Block;
 
-import java.util.List;
-import java.util.Set;
+import java.util.Comparator;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/4
+ * @author Niels
+ * @date 2017/12/26
  */
-public interface CacheService<K, V> {
+//todo
+public class BlockHeightComparatorBak implements Comparator<Block> {
 
-    /**
-     * remove a cache by title
-     */
-    void removeCache(String title);
+    private static final BlockHeightComparatorBak INSTANCE = new BlockHeightComparatorBak();
 
-    /**
-     * put data to a cache
-     */
-    void putElement(String cacheTitle, K key, Object value);
+    private BlockHeightComparatorBak() {
+    }
 
+    public static BlockHeightComparatorBak getInstance() {
+        return INSTANCE;
+    }
 
-    /**
-     * get data from the cache named cacheTitle
-     */
-    V getElement(String cacheTitle, K key);
-
-    List<V> getElementList(String cacheTitle);
-
-    /**
-     * remove an element from the cache named cacheTitle
-     */
-    void removeElement(String cacheTitle, K key);
-
-    /**
-     * @param title
-     */
-    void clearCache(String title);
-
-    List<String> getCacheTitleList();
-
-
-    boolean containsKey(String cacheTitle, K key);
-
-    Set<K> keySet(String cacheTitle);
-
-    void createCache(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener);
+    @Override
+    public int compare(Block o1, Block o2) {
+        if (o1 == null || o1.getHeader() == null) {
+            return 1;
+        } else if (o2 == null || o2.getHeader() == null) {
+            return -1;
+        }
+        long key = o1.getHeader().getHeight() - o2.getHeader().getHeight();
+        int val = 0;
+        if (key > 0) {
+            return 1;
+        } else if (key < 0) {
+            return -1;
+        }
+        return val;
+    }
 }

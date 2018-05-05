@@ -1,18 +1,18 @@
-/**
+/*
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,55 +20,54 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.cache.service;
+package io.nuls.protocol.model;
 
-import io.nuls.cache.intf.NulsCacheListener;
+import io.nuls.kernel.validate.NulsDataValidator;
+import io.nuls.protocol.utils.SmallBlockValidatorManager;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/4
+ * @author Niels
+ * @date 2018/1/2
  */
-public interface CacheService<K, V> {
+public class SmallBlock extends BaseNulsData {
+    private BlockHeader header;
+    private List<NulsDigestData> txHashList;
+    private List<Transaction> subTxList = new ArrayList<>();
 
-    /**
-     * remove a cache by title
-     */
-    void removeCache(String title);
+    public SmallBlock() {
+        List<NulsDataValidator> list = SmallBlockValidatorManager.getValidators();
+        for (NulsDataValidator validator : list) {
+            this.registerValidator(validator);
+        }
+    }
 
-    /**
-     * put data to a cache
-     */
-    void putElement(String cacheTitle, K key, Object value);
+    public BlockHeader getHeader() {
+        return header;
+    }
 
+    public void setHeader(BlockHeader header) {
+        this.header = header;
+    }
 
-    /**
-     * get data from the cache named cacheTitle
-     */
-    V getElement(String cacheTitle, K key);
+    public List<NulsDigestData> getTxHashList() {
+        return txHashList;
+    }
 
-    List<V> getElementList(String cacheTitle);
+    public void setTxHashList(List<NulsDigestData> txHashList) {
+        this.txHashList = txHashList;
+    }
 
-    /**
-     * remove an element from the cache named cacheTitle
-     */
-    void removeElement(String cacheTitle, K key);
+    public List<Transaction> getSubTxList() {
+        return subTxList;
+    }
 
-    /**
-     * @param title
-     */
-    void clearCache(String title);
+    public void addConsensusTx(Transaction tx) {
+        this.subTxList.add(tx);
+    }
 
-    List<String> getCacheTitleList();
-
-
-    boolean containsKey(String cacheTitle, K key);
-
-    Set<K> keySet(String cacheTitle);
-
-    void createCache(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener);
 }
