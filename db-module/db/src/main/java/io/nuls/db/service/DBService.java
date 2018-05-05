@@ -26,6 +26,9 @@ package io.nuls.db.service;
 
 import io.nuls.kernel.model.Result;
 
+import java.util.Map;
+import java.util.Set;
+
 /**
  * @Desription:
  * @Author: PierreLuo
@@ -48,4 +51,9 @@ public interface DBService {
     byte[] get(String area, String key);
 
     byte[] get(String area, byte[] key);
+
+    Set<String> keySet(String area);
+
+    Set<Map.Entry<String, String>> entrySet(String area);
+
 }

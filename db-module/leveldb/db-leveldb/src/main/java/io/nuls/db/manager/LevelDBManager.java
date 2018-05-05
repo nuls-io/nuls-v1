@@ -31,6 +31,7 @@ import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Result;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBFactory;
+import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 
@@ -38,11 +39,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static org.iq80.leveldb.impl.Iq80DBFactory.asString;
+import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 
 /**
  * @Desription:
@@ -216,12 +217,24 @@ public class LevelDBManager {
         return true;
     }
 
-    private static byte[] str2bytes(String str) {
+    private static byte[] bytes_(String str) {
         if (StringUtils.isBlank(str)) {
             return null;
         }
         try {
             return str.getBytes(NulsConfig.DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException e) {
+            Log.error(e);
+            return null;
+        }
+    }
+
+    private static String asString_(byte[] bytes) {
+        if (bytes == null) {
+            return null;
+        }
+        try {
+            return new String(bytes, NulsConfig.DEFAULT_ENCODING);
         } catch (UnsupportedEncodingException e) {
             Log.error(e);
             return null;
@@ -268,7 +281,7 @@ public class LevelDBManager {
         }
         try {
             DB db = AREAS.get(area);
-            db.put(str2bytes(key), str2bytes(value));
+            db.put(bytes(key), bytes(value));
             return Result.getSuccess();
         } catch (Exception e) {
             return Result.getFailed(e.getMessage());
@@ -284,7 +297,7 @@ public class LevelDBManager {
         }
         try {
             DB db = AREAS.get(area);
-            db.put(key, str2bytes(value));
+            db.put(key, bytes(value));
             return Result.getSuccess();
         } catch (Exception e) {
             return Result.getFailed(e.getMessage());
@@ -300,7 +313,7 @@ public class LevelDBManager {
         }
         try {
             DB db = AREAS.get(area);
-            db.delete(str2bytes(key));
+            db.delete(bytes(key));
             return Result.getSuccess();
         } catch (Exception e) {
             return Result.getFailed(e.getMessage());
@@ -316,7 +329,7 @@ public class LevelDBManager {
         }
         try {
             DB db = AREAS.get(area);
-            return db.get(str2bytes(key));
+            return db.get(bytes(key));
         } catch (Exception e) {
             return null;
         }
@@ -337,4 +350,64 @@ public class LevelDBManager {
         }
     }
 
+    public static Set<String> keySet(String area) {
+        if (!baseCheckArea(area)) {
+            return null;
+        }
+        DBIterator iterator = null;
+        Set<String> keySet = null;
+        try {
+            DB db = AREAS.get(area);
+            keySet = new HashSet<>();
+            iterator = db.iterator();
+            for(iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                keySet.add(asString(iterator.peekNext().getKey()));
+            }
+            return keySet;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        } finally {
+            // Make sure you close the iterator to avoid resource leaks.
+            if(iterator != null) {
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
+            }
+        }
+    }
+
+    public static Set<Map.Entry<String,String>> entrySet(String area) {
+        if (!baseCheckArea(area)) {
+            return null;
+        }
+        DBIterator iterator = null;
+        Set<Map.Entry<String,String>> entrySet = null;
+        try {
+            DB db = AREAS.get(area);
+            iterator = db.iterator();
+            for(iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                String key = asString(iterator.peekNext().getKey());
+                String value = asString(iterator.peekNext().getValue());
+                System.out.println(key+" = "+value);
+            }
+
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        } finally {
+            // Make sure you close the iterator to avoid resource leaks.
+            if(iterator != null) {
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
+            }
+        }
+        //TODO
+        return null;
+    }
 }

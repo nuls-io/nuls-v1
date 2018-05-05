@@ -27,6 +27,9 @@ import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.model.Result;
 
+import java.util.Map;
+import java.util.Set;
+
 /**
  * @Desription:
  * @Author: PierreLuo
@@ -73,5 +76,15 @@ public class LevelDBServiceImpl implements DBService {
     @Override
     public byte[] get(String area, byte[] key) {
         return LevelDBManager.get(area, key);
+    }
+
+    @Override
+    public Set<String> keySet(String area) {
+        return LevelDBManager.keySet(area);
+    }
+
+    @Override
+    public Set<Map.Entry<String, String>> entrySet(String area) {
+        return LevelDBManager.entrySet(area);
     }
 }
