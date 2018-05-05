@@ -23,36 +23,27 @@
  *  * SOFTWARE.
  *
  */
+package io.nuls.network.constant;
 
-package io.nuls.network.service;
 
-import io.nuls.kernel.model.BaseNulsData;
-import io.nuls.network.entity.BroadcastResult;
-import io.nuls.network.entity.Node;
-
-import java.util.Collection;
+import io.nuls.kernel.constant.ErrorCode;
 
 /**
- * Created by ln on 2018/5/5.
+ * Created by Niels on 2017/9/27.
  */
-public interface NetworkService {
-
-    void removeNode(String nodeId);
-
-    Node getNode(String nodeId);
-
-    Collection<Node> getAvailableNodes();
-
-    BroadcastResult sendToAllNode(BaseNulsData event, boolean asyn);
-
-    BroadcastResult sendToAllNode(BaseNulsData event, String excludeNodeId, boolean asyn);
-
-    BroadcastResult sendToNode(BaseNulsData event, String nodeId, boolean asyn);
-
-    BroadcastResult sendToGroup(BaseNulsData event, String groupName, boolean asyn);
-
-    BroadcastResult sendToGroup(BaseNulsData event, String groupName, String excludeNodeId, boolean asyn);
-
-    boolean reset();
+public interface NetworkErrorCode {
+    /*
+     * ----------  Network Exception code   --------
+     */
+    ErrorCode NET_SERVER_START_ERROR = ErrorCode.init("NET001", 40001);
+    ErrorCode NET_MESSAGE_ERROR = ErrorCode.init("NET002", 40002);
+    ErrorCode NET_MESSAGE_XOR_ERROR = ErrorCode.init("NET003", 40003);
+    ErrorCode NET_MESSAGE_LENGTH_ERROR = ErrorCode.init("NET004", 40004);
+    ErrorCode NET_NODE_GROUP_ALREADY_EXISTS = ErrorCode.init("NET006", 40006);
+    ErrorCode NET_NODE_AREA_ALREADY_EXISTS = ErrorCode.init("NET007", 40007);
+    ErrorCode NET_NODE_GROUP_NOT_FOUND = ErrorCode.init("NET008", 40008);
+    ErrorCode NET_NODE_AREA_NOT_FOUND = ErrorCode.init("NET009", 40009);
+    ErrorCode NET_NODE_NOT_FOUND = ErrorCode.init("NET010", 40010);
+    ErrorCode NET_BROADCAST_FAIL = ErrorCode.init("NET011", 40011);
 
 }

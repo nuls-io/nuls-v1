@@ -28,6 +28,7 @@ package io.nuls.network.entity;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.network.constant.NetworkErrorCode;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -81,7 +82,7 @@ public class NodeArea {
     public void addGroup(String groupName, NodeGroup nodeGroup){
         if(!StringUtils.isNull(groupName) && nodeGroup !=null){
             if(nodegroups.containsKey(groupName)){
-                throw new NulsRuntimeException(ErrorCode.NET_NODE_AREA_ALREADY_EXISTS);
+                throw new NulsRuntimeException(NetworkErrorCode.NET_NODE_AREA_ALREADY_EXISTS);
             }
             nodegroups.put(groupName,nodeGroup);
             nodeGroup.addtoArea(this);

@@ -12,7 +12,6 @@
 
     <groupId>io.nuls.protocol-module</groupId>
     <artifactId>protocol</artifactId>
-    <packaging>pom</packaging>
     <dependencies>
         <dependency>
             <groupId>io.nuls.cache-module</groupId>

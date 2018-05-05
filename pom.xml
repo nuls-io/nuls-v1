@@ -27,8 +27,6 @@
         <module>event-bus-module</module>
         <module>network-module</module>
         <module>contract-module</module>
-        <module>client</module>
-        <module>clientmodule</module>
         <module>client-module</module>
         <module>tools-module</module>
     </modules>

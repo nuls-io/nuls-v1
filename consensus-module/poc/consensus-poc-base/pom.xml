@@ -36,6 +36,13 @@
 
     <groupId>io.nuls.consensus-module</groupId>
     <artifactId>consensus-poc-base</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>io.nuls.consensus-module</groupId>
+            <artifactId>consensus</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+    </dependencies>
 
 
 </project>

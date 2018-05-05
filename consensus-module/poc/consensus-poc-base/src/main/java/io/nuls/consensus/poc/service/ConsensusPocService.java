@@ -24,35 +24,64 @@
  *
  */
 
-package io.nuls.network.service;
+package io.nuls.consensus.poc.service;
 
+import io.nuls.consensus.service.ConsensusServiceIntf;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
-import io.nuls.network.entity.BroadcastResult;
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Transaction;
 import io.nuls.network.entity.Node;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by ln on 2018/5/5.
  */
-public interface NetworkService {
+public class ConsensusPocService implements ConsensusServiceIntf {
+    @Override
+    public boolean newTx(Transaction<? extends BaseNulsData> tx) {
+        return false;
+    }
 
-    void removeNode(String nodeId);
+    @Override
+    public boolean newBlock(Block block) {
+        return false;
+    }
 
-    Node getNode(String nodeId);
+    @Override
+    public boolean newBlock(Block block, Node node) {
+        return false;
+    }
 
-    Collection<Node> getAvailableNodes();
+    @Override
+    public boolean addBlock(Block block) {
+        return false;
+    }
 
-    BroadcastResult sendToAllNode(BaseNulsData event, boolean asyn);
+    @Override
+    public boolean rollbackBlock(Block block) throws NulsException {
+        return false;
+    }
 
-    BroadcastResult sendToAllNode(BaseNulsData event, String excludeNodeId, boolean asyn);
+    @Override
+    public Transaction getAndRemoveOfMemoryTxs(NulsDigestData hash) {
+        return null;
+    }
 
-    BroadcastResult sendToNode(BaseNulsData event, String nodeId, boolean asyn);
+    @Override
+    public Transaction getTxFromMemory(NulsDigestData hash) {
+        return null;
+    }
 
-    BroadcastResult sendToGroup(BaseNulsData event, String groupName, boolean asyn);
+    @Override
+    public List<BaseNulsData> getMemoryTxs() {
+        return null;
+    }
 
-    BroadcastResult sendToGroup(BaseNulsData event, String groupName, String excludeNodeId, boolean asyn);
-
-    boolean reset();
-
+    @Override
+    public boolean reset() {
+        return false;
+    }
 }

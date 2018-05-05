@@ -24,35 +24,60 @@
  *
  */
 
-package io.nuls.network.service;
+package io.nuls.consensus.poc.service;
 
-import io.nuls.kernel.model.BaseNulsData;
-import io.nuls.network.entity.BroadcastResult;
-import io.nuls.network.entity.Node;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.util.Collection;
+import static org.junit.Assert.*;
 
 /**
  * Created by ln on 2018/5/5.
  */
-public interface NetworkService {
+public class ConsensusPocServiceTest {
+    @Before
+    public void setUp() throws Exception {
+    }
 
-    void removeNode(String nodeId);
+    @After
+    public void tearDown() throws Exception {
+    }
 
-    Node getNode(String nodeId);
+    @Test
+    public void newTx() throws Exception {
+    }
 
-    Collection<Node> getAvailableNodes();
+    @Test
+    public void newBlock() throws Exception {
+    }
 
-    BroadcastResult sendToAllNode(BaseNulsData event, boolean asyn);
+    @Test
+    public void newBlock1() throws Exception {
+    }
 
-    BroadcastResult sendToAllNode(BaseNulsData event, String excludeNodeId, boolean asyn);
+    @Test
+    public void addBlock() throws Exception {
+    }
 
-    BroadcastResult sendToNode(BaseNulsData event, String nodeId, boolean asyn);
+    @Test
+    public void rollbackBlock() throws Exception {
+    }
 
-    BroadcastResult sendToGroup(BaseNulsData event, String groupName, boolean asyn);
+    @Test
+    public void getAndRemoveOfMemoryTxs() throws Exception {
+    }
 
-    BroadcastResult sendToGroup(BaseNulsData event, String groupName, String excludeNodeId, boolean asyn);
+    @Test
+    public void getTxFromMemory() throws Exception {
+    }
 
-    boolean reset();
+    @Test
+    public void getMemoryTxs() throws Exception {
+    }
+
+    @Test
+    public void reset() throws Exception {
+    }
 
 }
