@@ -1,5 +1,4 @@
 /*
- *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -24,37 +23,21 @@
  *
  */
 
-package io.nuls.protocol.event.base;
+package io.nuls.protocol.model.basic;
 
-import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.protocol.model.BasicTypeData;
 
 /**
  * @author Niels
- * @date 2018/3/8
+ * @date 2018/3/12
  */
-public class NoticeData{
+public class NulsStringData extends BasicTypeData<String> {
 
-    private String message;
-
-    private Object data;
-
-    public String getMessage() {
-        return message;
+    public NulsStringData() {
+        this(null);
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(Object data) {
-        this.data = data;
-    }
-
-    public void setMessage(ErrorCode code) {
-        this.message = code.getMsg();
+    public NulsStringData(String val) {
+        super(val);
     }
 }

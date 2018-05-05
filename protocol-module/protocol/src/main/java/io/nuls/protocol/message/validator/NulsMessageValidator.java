@@ -20,27 +20,31 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.protocol.event;
+package io.nuls.protocol.message.validator;
 
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.TxGroup;
+import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.protocol.message.base.BaseMessage;
 
 /**
  * @author Niels
- * @date 2017/11/13
+ * @date 2017/12/4
  */
-public class TxGroupEvent extends BaseProtocolEvent<TxGroup> {
+public class NulsMessageValidator {
+    public ValidateResult validate(BaseMessage data) {
+        if (data.getHeader() == null || data.getMsgBody() == null) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NET_MESSAGE_ERROR);
+        }
 
-    public TxGroupEvent() {
-        super(ProtocolEventType.TX_GROUP);
+        if (data.getHeader().getLength() != data.getMsgBody().size()) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NET_MESSAGE_LENGTH_ERROR);
+        }
+
+        if (data.getHeader().getXor() != data.caculateXor()) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NET_MESSAGE_XOR_ERROR);
+        }
+        return ValidateResult.getSuccessResult();
     }
-
-    @Override
-    public NoticeData getNotice() {
-        return null;
-    }
-
-
 }

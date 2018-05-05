@@ -126,9 +126,9 @@ public class Utils {
     }
 
     /**
-     * Given a textual message, returns a byte buffer formatted as follows:</p>
+     * Given a textual validator, returns a byte buffer formatted as follows:</p>
      * <p>
-     * <tt>[24] "Bitcoin Signed Message:\n" [message.length as a varint] message</p></tt>
+     * <tt>[24] "Bitcoin Signed Message:\n" [validator.length as a varint] validator</p></tt>
      */
     public static byte[] formatMessageForSigning(String message) {
         try {

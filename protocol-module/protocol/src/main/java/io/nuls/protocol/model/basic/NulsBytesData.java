@@ -23,34 +23,21 @@
  *
  */
 
-package io.nuls.protocol.event.base;
+package io.nuls.protocol.model.basic;
 
-import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.protocol.model.BasicTypeData;
 
 /**
  * @author Niels
- * @date 2018/1/22
+ * @date 2018/3/12
  */
-public class CommonStringEvent extends BaseEvent<String> {
+public class NulsBytesData extends BasicTypeData<byte[]> {
 
-    public CommonStringEvent() {
-        super(NulsConstant.MODULE_ID_MICROKERNEL, (short) 1);
+    public NulsBytesData() {
+        this(null);
     }
 
-    @Override
-    public NoticeData getNotice() {
-        return null;
-    }
-
-    public void setMessage(String message) {
-        if (StringUtils.isBlank(message)) {
-            return;
-        }
-        this.setEventBody(message);
-    }
-
-    public String getMessage() {
-       return this.getEventBody();
+    public NulsBytesData(byte[] val) {
+        super(val);
     }
 }

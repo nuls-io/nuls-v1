@@ -20,35 +20,26 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
-package io.nuls.protocol.mesasge.constant;
+package io.nuls.protocol.message;
+
+import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.message.base.NoticeData;
+import io.nuls.protocol.model.TxGroup;
 
 /**
  * @author Niels
- * @date 2017/11/7
+ * @date 2017/11/13
  */
-public enum MessageTypeEnum {
-    NETWORK(1), EVENT(2);
-    private int code;
+public class TxGroupMessage extends BaseProtocolMessage<TxGroup> {
 
-     MessageTypeEnum(int code) {
-        this.code = code;
+    public TxGroupMessage() {
+        super(ProtocolEventType.TX_GROUP);
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public static MessageTypeEnum getMessageTypeEnum(int code) {
-        switch (code) {
-            case 1:
-                return MessageTypeEnum.NETWORK;
-            case 2:
-                return MessageTypeEnum.EVENT;
-            default:
-                return null;
-        }
+    @Override
+    public NoticeData getNotice() {
+        return null;
     }
 
 
