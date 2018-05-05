@@ -22,24 +22,22 @@
  * SOFTWARE.
  *
  */
+package io.nuls.kernel.lite.annotation;
 
-package io.nuls.protocol.event;
-
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.NotFound;
+import java.lang.annotation.*;
 
 /**
- * @author: Niels Wang
- * @date: 2018/4/9
+ * author: Niels Wang
+ * date: 2018/1/30
  */
-public class NotFoundEvent extends BaseProtocolEvent<NotFound> {
-    public NotFoundEvent() {
-        super(ProtocolEventType.NOT_FOUND_EVENT);
-    }
 
-    @Override
-    public NoticeData getNotice() {
-        return null;
-    }
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Service {
+    /**
+     * the type of the Annotation on a method
+     * @return
+     */
+    Class value() ;
 }

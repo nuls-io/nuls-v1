@@ -24,7 +24,7 @@
  */
 package io.nuls.protocol.utils;
 
-import io.nuls.protocol.model.Block;
+import io.nuls.kernel.model.Block;
 
 import java.util.Comparator;
 

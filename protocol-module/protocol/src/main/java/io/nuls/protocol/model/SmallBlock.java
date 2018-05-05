@@ -24,6 +24,10 @@
  */
 package io.nuls.protocol.model;
 
+import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.protocol.utils.SmallBlockValidatorManager;
 

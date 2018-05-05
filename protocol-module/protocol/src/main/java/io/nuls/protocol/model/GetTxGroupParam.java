@@ -22,24 +22,44 @@
  * SOFTWARE.
  *
  */
+package io.nuls.protocol.model;
 
-package io.nuls.protocol.event;
+import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.model.NulsDigestData;
 
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.NotFound;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author: Niels Wang
- * @date: 2018/4/9
+ * @author Niels
+ * @date 2017/12/18
  */
-public class NotFoundEvent extends BaseProtocolEvent<NotFound> {
-    public NotFoundEvent() {
-        super(ProtocolEventType.NOT_FOUND_EVENT);
+public class GetTxGroupParam extends BaseNulsData {
+
+    private NulsDigestData blockHash;
+
+    private List<NulsDigestData> txHashList = new ArrayList<>();
+
+    public GetTxGroupParam() {
     }
 
-    @Override
-    public NoticeData getNotice() {
-        return null;
+    public NulsDigestData getBlockHash() {
+        return blockHash;
+    }
+
+    public void setBlockHash(NulsDigestData blockHash) {
+        this.blockHash = blockHash;
+    }
+
+    public List<NulsDigestData> getTxHashList() {
+        return txHashList;
+    }
+
+    public void addHash(NulsDigestData hash) {
+        this.txHashList.add(hash);
+    }
+
+    public void setTxHashList(List<NulsDigestData> txHashList) {
+        this.txHashList = txHashList;
     }
 }

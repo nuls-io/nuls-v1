@@ -25,9 +25,7 @@
 package io.nuls.kernel.lite.core;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.lite.annotation.Autowired;
-import io.nuls.kernel.lite.annotation.Interceptor;
-import io.nuls.kernel.lite.annotation.MavenInfo;
+import io.nuls.kernel.lite.annotation.*;
 import io.nuls.kernel.lite.core.interceptor.BeanMethodInterceptor;
 import io.nuls.kernel.lite.core.interceptor.BeanMethodInterceptorManager;
 import io.nuls.kernel.lite.utils.ScanUtil;
@@ -142,12 +140,20 @@ public class SpringLiteContext {
         }
         Annotation ann = getFromArray(anns, MavenInfo.class);
         String beanName = null;
+        boolean aopProxy = false;
+        if (null == ann) {
+            ann = getFromArray(anns, Component.class);
+        }
+        if (null == ann) {
+            ann = getFromArray(anns, Service.class);
+            aopProxy = true;
+        }
         if (ann != null) {
             beanName = ((MavenInfo) ann).value();
             if (beanName == null || beanName.trim().length() == 0) {
                 beanName = getBeanName(clazz);
             }
-            loadBean(beanName, clazz, false);
+            loadBean(beanName, clazz, aopProxy);
         }
         Annotation interceptorAnn = getFromArray(anns, Interceptor.class);
         if (null != interceptorAnn) {

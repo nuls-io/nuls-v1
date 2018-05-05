@@ -25,8 +25,8 @@
 package io.nuls.protocol.cache;
 
 import io.nuls.cache.util.CacheMap;
+import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.model.SmallBlock;
-import io.nuls.protocol.model.Transaction;
 
 /**
  * Used for sharing temporary data between multiple hander.

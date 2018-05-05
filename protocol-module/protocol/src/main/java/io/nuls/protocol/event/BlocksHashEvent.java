@@ -28,7 +28,7 @@ import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.protocol.constant.ProtocolEventType;
 import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.event.entity.BlockHashResponse;
+import io.nuls.protocol.model.BlockHashResponse;
 
 /**
  * @author Niels

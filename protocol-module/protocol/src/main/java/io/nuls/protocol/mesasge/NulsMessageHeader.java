@@ -24,7 +24,7 @@
 package io.nuls.protocol.mesasge;
 
 import io.nuls.core.tools.crypto.Hex;
-import io.nuls.protocol.model.BaseNulsData;
+import io.nuls.kernel.model.BaseNulsData;
 
 /**
  * @author vivi

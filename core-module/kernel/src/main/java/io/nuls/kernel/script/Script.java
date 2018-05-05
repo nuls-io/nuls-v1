@@ -22,24 +22,21 @@
  * SOFTWARE.
  *
  */
+package io.nuls.kernel.script;
 
-package io.nuls.protocol.event;
 
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.NotFound;
+import io.nuls.kernel.model.BaseNulsData;
 
 /**
- * @author: Niels Wang
- * @date: 2018/4/9
+ * author Facjas
+ * date 2018/3/8.
  */
-public class NotFoundEvent extends BaseProtocolEvent<NotFound> {
-    public NotFoundEvent() {
-        super(ProtocolEventType.NOT_FOUND_EVENT);
-    }
+public abstract class Script extends BaseNulsData {
 
-    @Override
-    public NoticeData getNotice() {
-        return null;
-    }
+    protected long creationTimeSeconds;
+
+    public static final long MAX_SCRIPT_ELEMENT_SIZE = 520;  // bytes
+    public static final int SIG_SIZE = 75;
+
+    abstract public byte[] getBytes();
 }

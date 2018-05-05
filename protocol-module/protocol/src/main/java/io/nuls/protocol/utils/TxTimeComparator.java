@@ -24,7 +24,7 @@
  */
 package io.nuls.protocol.utils;
 
-import io.nuls.protocol.model.Transaction;
+import io.nuls.kernel.model.Transaction;
 
 import java.util.Comparator;
 

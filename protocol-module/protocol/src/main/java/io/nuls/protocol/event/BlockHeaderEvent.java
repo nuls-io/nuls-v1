@@ -24,11 +24,9 @@
  */
 package io.nuls.protocol.event;
 
-import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.protocol.constant.ProtocolEventType;
 import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.BlockHeader;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels

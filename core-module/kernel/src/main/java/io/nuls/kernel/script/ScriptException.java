@@ -22,24 +22,18 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.protocol.event;
-
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.event.base.NoticeData;
-import io.nuls.protocol.model.NotFound;
+package io.nuls.kernel.script;
 
 /**
- * @author: Niels Wang
- * @date: 2018/4/9
+ * Created by win10 on 2017/10/30.
  */
-public class NotFoundEvent extends BaseProtocolEvent<NotFound> {
-    public NotFoundEvent() {
-        super(ProtocolEventType.NOT_FOUND_EVENT);
+public class ScriptException extends RuntimeException{
+
+    public ScriptException(String msg) {
+        super(msg);
     }
 
-    @Override
-    public NoticeData getNotice() {
-        return null;
+    public ScriptException(String msg, Exception e) {
+        super(msg, e);
     }
 }

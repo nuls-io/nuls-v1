@@ -24,7 +24,7 @@
  */
 package io.nuls.protocol.event.base;
 
-import io.nuls.protocol.model.BaseNulsData;
+import io.nuls.kernel.model.BaseNulsData;
 
 /**
  * @author Niels

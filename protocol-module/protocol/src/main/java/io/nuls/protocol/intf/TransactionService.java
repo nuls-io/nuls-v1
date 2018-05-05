@@ -25,9 +25,9 @@
 package io.nuls.protocol.intf;
 
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.validate.ValidateResult;
-import io.nuls.protocol.model.Block;
-import io.nuls.protocol.model.Transaction;
 
 import java.util.List;
 
