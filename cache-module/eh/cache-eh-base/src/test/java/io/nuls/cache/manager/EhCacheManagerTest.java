@@ -1,7 +1,7 @@
 package io.nuls.cache.manager;
 
+import io.nuls.cache.service.CacheService;
 import io.nuls.cache.service.impl.EhCacheServiceImpl;
-import io.nuls.cache.service.intf.CacheService;
 import org.junit.Test;
 
 /**

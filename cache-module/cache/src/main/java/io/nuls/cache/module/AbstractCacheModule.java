@@ -24,6 +24,8 @@
 package io.nuls.cache.module;
 
 
+import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.module.BaseModuleBootstrap;
 
 /**
  * @author Niels

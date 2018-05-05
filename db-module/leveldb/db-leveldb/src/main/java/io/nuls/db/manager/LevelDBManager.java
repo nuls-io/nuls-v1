@@ -23,7 +23,12 @@
  */
 package io.nuls.db.manager;
 
-import io.nuls.core.tools.model.Result;
+import io.nuls.core.tools.cfg.ConfigLoader;
+import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.model.Result;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBFactory;
 import org.iq80.leveldb.Options;
@@ -84,7 +89,7 @@ public class LevelDBManager {
     }
 
     private static File loadDataPath() throws Exception {
-        Properties properties = Resources.getResourceAsProperties("db_config.properties");
+        Properties properties = ConfigLoader.loadProperties("db_config.properties");
         String path = properties.getProperty("leveldb.datapath", "./data/kv");
         String max_str = properties.getProperty("leveldb.area.max", "20");
         try {

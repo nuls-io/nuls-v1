@@ -23,9 +23,9 @@
  */
 package io.nuls.db.service.impl;
 
-import io.nuls.core.tools.model.Result;
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.service.DBService;
+import io.nuls.kernel.model.Result;
 
 /**
  * @Desription:

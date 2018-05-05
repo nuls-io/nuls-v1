@@ -25,6 +25,8 @@ package io.nuls.cache.util;
 
 import io.nuls.cache.listener.intf.NulsCacheListener;
 import io.nuls.cache.service.CacheService;
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.lite.core.SpringLiteContext;
 
 import java.util.List;
 import java.util.Set;

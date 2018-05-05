@@ -24,6 +24,7 @@
 package io.nuls.cache.model;
 
 
+import io.nuls.kernel.model.NulsCloneable;
 
 /**
  *

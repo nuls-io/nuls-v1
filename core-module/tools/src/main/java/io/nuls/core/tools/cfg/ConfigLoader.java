@@ -42,6 +42,7 @@ public class ConfigLoader {
         InputStream is = ConfigLoader.class.getClassLoader().getResourceAsStream(fileName);
         Properties prop = new Properties();
         prop.load(is);
+        is.close();
         return prop;
     }
 

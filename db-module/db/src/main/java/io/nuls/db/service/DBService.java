@@ -23,7 +23,8 @@
  */
 package io.nuls.db.service;
 
-import io.nuls.core.tools.model.Result;
+
+import io.nuls.kernel.model.Result;
 
 /**
  * @Desription:
