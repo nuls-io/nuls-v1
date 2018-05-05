@@ -23,6 +23,7 @@
  */
 package io.nuls.db.manager;
 
+import io.nuls.kernel.cfg.NulsConfig;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

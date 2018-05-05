@@ -55,4 +55,5 @@ public interface NulsConstant {
     short MODULE_ID_CONSENSUS = 7;
     short MODULE_ID_LEDGER = 8;
     short MODULE_ID_PROTOCOL = 9;
+    short MODULE_ID_CONTRACT = 10;
 }

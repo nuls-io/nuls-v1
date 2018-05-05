@@ -37,6 +37,7 @@ import io.protostuff.runtime.RuntimeSchema;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Niels
@@ -44,7 +45,7 @@ import java.util.Map;
  */
 public abstract class BaseNulsData implements NulsData, Serializable, Cloneable {
 
-    protected transient static Map<Class<? extends BaseNulsData>, RuntimeSchema<? extends BaseNulsData>> SCHEMA_MAP = new HashMap<>();
+    protected transient static Map<Class<? extends BaseNulsData>, RuntimeSchema<? extends BaseNulsData>> SCHEMA_MAP = new ConcurrentHashMap<>();
 
     protected transient NulsDataType dataType;
 

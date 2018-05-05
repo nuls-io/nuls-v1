@@ -10,20 +10,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls</groupId>
-    <artifactId>cache-module</artifactId>
+    <artifactId>contract-module</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.0</version>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-
     <modules>
-        <module>cache</module>
-        <module>eh/cache-eh-base</module>
+        <module>contract</module>
+        <module>base/contract-base</module>
+        <module>base/contract-vm</module>
+        <module>base/contract-storage</module>
+        <module>base/contract-sdk</module>
     </modules>
 
     <dependencies>
@@ -37,6 +31,10 @@
             <artifactId>kernel</artifactId>
             <version>2.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>io.nuls.protocol-module</groupId>
+            <artifactId>protocol</artifactId>
+            <version>2.0.0</version>
+        </dependency>
     </dependencies>
-
 </project>

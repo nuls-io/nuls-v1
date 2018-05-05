@@ -26,6 +26,7 @@
         <module>db-module</module>
         <module>event-bus-module</module>
         <module>network-module</module>
+        <module>contract-module</module>
     </modules>
     <dependencies>
         <dependency>

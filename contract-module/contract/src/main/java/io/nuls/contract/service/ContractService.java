@@ -21,41 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.protocol.constant;
+package io.nuls.contract.service;
+
+import io.nuls.contract.dto.ContractResult;
+import io.nuls.contract.entity.form.ContractCall;
+import io.nuls.contract.entity.form.ContractCreate;
+import io.nuls.contract.entity.form.ContractDelete;
+import io.nuls.contract.entity.form.ContractUpdate;
+import io.nuls.kernel.model.Result;
 
 /**
- * @author Niels
- * @date 2017/10/30
+ * @Desription:
+ * @Author: PierreLuo
+ * @Date: 2018/5/5
  */
-public interface TransactionConstant {
+public interface ContractService {
 
-    int TX_TYPE_COIN_BASE = 1;
-    int TX_TYPE_TRANSFER = 2;
-    int TX_TYPE_LOCK = 3;
-    int TX_TYPE_UNLOCK = 4;
-    int TX_TYPE_SMALL_CHANGE = 5;
-    /**
-     * Account
-     */
-    int TX_TYPE_SET_ALIAS = 11;
-    int TX_TYPE_CHANGE_ALIAS = 12;
+    Result<ContractResult> createContract(ContractCreate create);
 
-    /**
-     * CONSENSUS
-     */
-    int TX_TYPE_REGISTER_AGENT = 90;
-    int TX_TYPE_JOIN_CONSENSUS = 91;
-    int TX_TYPE_CANCEL_DEPOSIT = 92;
-    int TX_TYPE_STOP_AGENT = 95;
-    int TX_TYPE_YELLOW_PUNISH = 93;
-    int TX_TYPE_RED_PUNISH = 94;
+    Result<ContractResult> callContract(ContractCall call);
 
-    /**
-     * CONTRACT
-     */
-    int TX_TYPE_CREATE_CONTRACT = 60;
-    int TX_TYPE_CALL_CONTRACT = 61;
-    int TX_TYPE_DELETE_CONTRACT = 62;
+    Result<ContractResult> deleteContract(ContractDelete delete);
 
-    String TX_LIST = "TX_LIST";
+    Result<ContractResult> updateContract(ContractUpdate update);
+
+    Object getContractInfo(String address);
 }
