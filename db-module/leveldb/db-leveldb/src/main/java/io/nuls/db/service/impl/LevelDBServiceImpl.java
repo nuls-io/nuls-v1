@@ -21,30 +21,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.service;
+package io.nuls.db.service.impl;
 
 import io.nuls.core.tools.model.Result;
+import io.nuls.db.manager.LevelDBManager;
+import io.nuls.db.service.DBService;
 
 /**
  * @Desription:
  * @Author: PierreLuo
- * @Date: 2018/5/4
+ * @Date: 2018/4/18
  */
-public interface DBService {
+public class LevelDBServiceImpl implements DBService {
 
-    Result createArea(String areaName);
 
-    String[] listArea();
+    @Override
+    public Result createArea(String areaName) {
+        return LevelDBManager.createArea(areaName);
+    }
 
-    Result put(String area, byte[] key, byte[] value);
+    @Override
+    public String[] listArea() {
+        return LevelDBManager.listArea();
+    }
 
-    Result put(String area, String key, String value);
+    @Override
+    public Result put(String area, byte[] key, byte[] value) {
+        return LevelDBManager.put(area, key, value);
+    }
 
-    Result put(String area, byte[] key, String value);
+    @Override
+    public Result put(String area, String key, String value) {
+        return LevelDBManager.put(area, key, value);
+    }
 
-    Result delete(String area, String key);
+    @Override
+    public Result put(String area, byte[] key, String value) {
+        return LevelDBManager.put(area, key, value);
+    }
 
-    byte[] get(String area, String key);
+    @Override
+    public Result delete(String area, String key) {
+        return LevelDBManager.delete(area, key);
+    }
 
-    byte[] get(String area, byte[] key);
+    @Override
+    public byte[] get(String area, String key) {
+        return LevelDBManager.get(area, key);
+    }
+
+    @Override
+    public byte[] get(String area, byte[] key) {
+        return LevelDBManager.get(area, key);
+    }
 }

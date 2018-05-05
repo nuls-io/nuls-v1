@@ -21,30 +21,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.service;
+package io.nuls.cache.model;
 
-import io.nuls.core.tools.model.Result;
+
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/4
+ *
+ * @author Niels
+ * @date 2017/10/18
+ *
  */
-public interface DBService {
+public class CacheElement<T extends NulsCloneable> {
+    private String cacheTitle;
+    private String key;
+    private T value;
 
-    Result createArea(String areaName);
+    public CacheElement() {
+    }
 
-    String[] listArea();
+    public CacheElement(String key, T value) {
+        this.key = key;
+        this.value = value;
+    }
 
-    Result put(String area, byte[] key, byte[] value);
+    public String getCacheTitle() {
+        return cacheTitle;
+    }
 
-    Result put(String area, String key, String value);
+    public void setCacheTitle(String cacheTitle) {
+        this.cacheTitle = cacheTitle;
+    }
 
-    Result put(String area, byte[] key, String value);
+    public String getKey() {
+        return key;
+    }
 
-    Result delete(String area, String key);
+    public void setKey(String key) {
+        this.key = key;
+    }
 
-    byte[] get(String area, String key);
+    public T getValue() {
+        return value;
+    }
 
-    byte[] get(String area, byte[] key);
+    public void setValue(T value) {
+        this.value = value;
+    }
 }

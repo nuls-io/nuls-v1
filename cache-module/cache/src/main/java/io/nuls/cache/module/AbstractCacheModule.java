@@ -21,30 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.service;
+package io.nuls.cache.module;
 
-import io.nuls.core.tools.model.Result;
+
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/4
+ * @author Niels
+ * @date 2017/10/18
+ *
  */
-public interface DBService {
-
-    Result createArea(String areaName);
-
-    String[] listArea();
-
-    Result put(String area, byte[] key, byte[] value);
-
-    Result put(String area, String key, String value);
-
-    Result put(String area, byte[] key, String value);
-
-    Result delete(String area, String key);
-
-    byte[] get(String area, String key);
-
-    byte[] get(String area, byte[] key);
+public abstract class AbstractCacheModule extends BaseModuleBootstrap {
+    public AbstractCacheModule() {
+        super(NulsConstant.MODULE_ID_CACHE);
+    }
 }
