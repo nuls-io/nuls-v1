@@ -24,7 +24,7 @@
  */
 package io.nuls.protocol.event;
 
-import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.protocol.constant.ProtocolEventType;
 import io.nuls.protocol.event.base.NoticeData;
 import io.nuls.protocol.model.Transaction;
@@ -42,7 +42,7 @@ public class TransactionEvent extends BaseProtocolEvent<Transaction> {
     @Override
     public NoticeData getNotice() {
         NoticeData data = new NoticeData();
-        data.setMessage(ErrorCode.NEW_TX_RECIEVED);
+        data.setMessage(KernelErrorCode.NEW_TX_RECIEVED);
         data.setData(this.getEventBody().getHash().getDigestHex());
         return data;
     }

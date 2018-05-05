@@ -29,6 +29,7 @@ import io.nuls.core.tools.crypto.VarInt;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.protocol.model.NulsDigestData;
@@ -53,7 +54,7 @@ public class NulsByteBuffer {
 
     public NulsByteBuffer(byte[] bytes, int cursor) {
         if (null == bytes || bytes.length == 0 || cursor < 0) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "create byte buffer faild!");
+            throw new RuntimeException( "create byte buffer faild!");
         }
         this.payload = bytes;
         this.cursor = cursor;
@@ -65,7 +66,7 @@ public class NulsByteBuffer {
             cursor += 4;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
@@ -75,7 +76,7 @@ public class NulsByteBuffer {
             cursor += 2;
             return s;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
@@ -85,7 +86,7 @@ public class NulsByteBuffer {
             cursor += 4;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
@@ -99,7 +100,7 @@ public class NulsByteBuffer {
             cursor += 8;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
@@ -114,7 +115,7 @@ public class NulsByteBuffer {
             cursor += offset + varint.getOriginalSizeInBytes();
             return varint.value;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
@@ -124,7 +125,7 @@ public class NulsByteBuffer {
             cursor += 1;
             return b;
         } catch (IndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
@@ -135,7 +136,7 @@ public class NulsByteBuffer {
             cursor += length;
             return b;
         } catch (IndexOutOfBoundsException e) {
-            throw new NulsException(ErrorCode.DATA_PARSE_ERROR, e);
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 

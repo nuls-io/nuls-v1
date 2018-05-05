@@ -23,45 +23,14 @@
  *
  */
 
-package io.nuls.kernel.constant;
+package io.nuls.account.model;
 
-import io.nuls.kernel.i18n.I18nUtils;
+import static org.junit.Assert.*;
 
 /**
  * @author: Niels Wang
  * @date: 2018/5/5
  */
-public class ErrorCode {
-    private final int msg;
-    private final String code;
+public class AddressTest {
 
-    protected ErrorCode(String code, int msg) {
-        this.code = code;
-        this.msg = msg;
-        if (null == code) {
-            throw new RuntimeException("the errorcode code cann't be null!");
-        }
-    }
-
-    public String getMsg() {
-        return I18nUtils.get(msg);
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public static final ErrorCode init(String code, int msg) {
-        return new ErrorCode(code, msg);
-    }
-
-    public boolean equals(Object obj) {
-        if (null == obj) {
-            return false;
-        }
-        if (!(obj instanceof ErrorCode)) {
-            return false;
-        }
-        return code.equals(((ErrorCode) obj).getCode());
-    }
 }

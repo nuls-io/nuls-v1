@@ -48,7 +48,7 @@ public class TransactionManager {
 
     public static final void putTx(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionService> txServiceClass) {
         if (TX_MAP.containsKey(txType)) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "Transaction type repeating!");
+            throw new RuntimeException( "Transaction type repeating!");
         }
         TX_MAP.put(txType, txClass);
         TX_SERVICE_MAP.put(txClass, txServiceClass);
@@ -61,7 +61,7 @@ public class TransactionManager {
     public static Transaction getInstanceByType(int txType) throws NulsException {
         Class<? extends Transaction> txClass = getTxClass(txType);
         if (null == txClass) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "transaction type not exist!");
+            throw new RuntimeException( "transaction type not exist!");
         }
         Transaction tx = null;
         try {
@@ -84,7 +84,7 @@ public class TransactionManager {
 //        int txType = (int) new NulsByteBuffer(byteBuffer.getPayloadByCursor()).readVarInt();
 //        Class<? extends Transaction> txClass = getTxClass(txType);
 //        if (null == txClass) {
-//            throw new NulsRuntimeException(ErrorCode.FAILED, "transaction type not exist!");
+//            throw new RuntimeException( "transaction type not exist!");
 //        }
 //        Transaction tx = byteBuffer.readNulsData(txClass.getConstructor().newInstance());
 //        return tx;

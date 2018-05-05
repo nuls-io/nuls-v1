@@ -25,6 +25,7 @@
 package io.nuls.kernel.exception;
 
 import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 
 /**
  * Created by facjas on 2017/10/31.
@@ -32,7 +33,7 @@ import io.nuls.kernel.constant.ErrorCode;
 public class NulsVerificationException extends NulsRuntimeException {
 
     public NulsVerificationException(String msg) {
-        super(ErrorCode.VERIFICATION_FAILD, msg);
+        super(KernelErrorCode.VERIFICATION_FAILD, msg);
     }
 
     public NulsVerificationException(ErrorCode errorCode) {

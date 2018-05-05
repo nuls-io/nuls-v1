@@ -27,6 +27,7 @@ package io.nuls.kernel.module.manager;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.ModuleStatusEnum;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.module.BaseModuleBootstrap;
@@ -99,7 +100,7 @@ public class ModuleManager {
     public void regModule(BaseModuleBootstrap module) {
         short moduleId = module.getModuleId();
         if (MODULE_MAP.keySet().contains(moduleId)) {
-            throw new NulsRuntimeException(ErrorCode.THREAD_REPETITION, "the id of Module is already exist(" + module.getModuleName() + ")");
+            throw new NulsRuntimeException(KernelErrorCode.THREAD_REPETITION, "the id of Module is already exist(" + module.getModuleName() + ")");
         }
         MODULE_MAP.put(moduleId, module);
     }

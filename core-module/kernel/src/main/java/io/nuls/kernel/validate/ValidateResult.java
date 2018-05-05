@@ -25,6 +25,7 @@
 package io.nuls.kernel.validate;
 
 import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.model.Result;
 
@@ -45,7 +46,7 @@ public class ValidateResult<T> extends Result<T> {
     public static ValidateResult getFailedResult(String className, SeverityLevelEnum level, String msg) {
         ValidateResult result = new ValidateResult();
         result.setSuccess(false);
-        result.setErrorCode(ErrorCode.VERIFICATION_FAILD);
+        result.setErrorCode(KernelErrorCode.VERIFICATION_FAILD);
         result.setMessage(msg);
         result.setLevel(level);
         result.setClassName(className);

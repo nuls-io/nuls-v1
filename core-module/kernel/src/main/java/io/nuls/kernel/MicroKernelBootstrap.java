@@ -60,7 +60,7 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
             NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConstant.MODULES_CONFIG_FILE);
         } catch (IOException e) {
             Log.error("Client start failed", e);
-            throw new NulsRuntimeException(ErrorCode.FAILED, "Client start failed");
+            throw new RuntimeException( "Client start failed");
         }
         //set system language
         try {

@@ -26,7 +26,7 @@ package io.nuls.protocol.script;
 
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Utils;
-import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.protocol.model.NulsDigestData;
@@ -76,7 +76,7 @@ public class P2PKHScriptSig extends Script {
         if (b) {
             return ValidateResult.getSuccessResult();
         } else {
-            return ValidateResult.getFailedResult(this.getClass().getName(), ErrorCode.SIGNATURE_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
         }
     }
 

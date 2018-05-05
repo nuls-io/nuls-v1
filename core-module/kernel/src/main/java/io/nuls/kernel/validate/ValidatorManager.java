@@ -25,7 +25,7 @@
 
 package io.nuls.kernel.validate;
 
-import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.NulsData;
 
 import java.util.Map;
@@ -51,7 +51,7 @@ public class ValidatorManager {
 
     public static ValidateResult startDoValidator(NulsData data) {
         if (data == null) {
-            return ValidateResult.getFailedResult(ValidatorManager.class.getName(), ErrorCode.NULL_PARAMETER);
+            return ValidateResult.getFailedResult(ValidatorManager.class.getName(), KernelErrorCode.NULL_PARAMETER);
         }
         DataValidatorChain chain = chainMap.get(data.getClass());
         if (null == chain) {

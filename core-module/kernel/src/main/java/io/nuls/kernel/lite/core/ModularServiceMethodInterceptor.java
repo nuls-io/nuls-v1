@@ -25,7 +25,7 @@
 
 package io.nuls.kernel.lite.core;
 
-import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.ModuleStatusEnum;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.lite.core.interceptor.BeanMethodInterceptorManager;
@@ -76,16 +76,16 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
             fillAnnotationList(annotationList, clazz, method);
             BaseModuleBootstrap module = ServiceManager.getInstance().getModule(clazz);
             if (module == null) {
-                throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module![" + className + "]" + method.toString());
+                throw new BeanStatusException(KernelErrorCode.DATA_ERROR, "Access to a service of an un start module![" + className + "]" + method.toString());
             }
             if (module.getModuleId() != NulsConstant.MODULE_ID_MICROKERNEL &&
                     module.getStatus() != ModuleStatusEnum.STARTING &&
                     module.getStatus() != ModuleStatusEnum.RUNNING) {
-                throw new BeanStatusException(ErrorCode.DATA_ERROR, "Access to a service of an un start module![" + module.getModuleName() + "]" + method.toString());
+                throw new BeanStatusException(KernelErrorCode.DATA_ERROR, "Access to a service of an un start module![" + module.getModuleName() + "]" + method.toString());
             }
             boolean isOk = SpringLiteContext.checkBeanOk(obj);
             if (!isOk) {
-                throw new BeanStatusException(ErrorCode.DATA_ERROR, "Service has not autowired");
+                throw new BeanStatusException(KernelErrorCode.DATA_ERROR, "Service has not autowired");
             }
         }
         if (annotationList.isEmpty()) {

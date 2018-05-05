@@ -26,6 +26,7 @@ package io.nuls.protocol.mesasge;
 
 
 import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsVerificationException;
 import io.nuls.protocol.event.base.BaseEvent;
@@ -116,15 +117,15 @@ public class NulsMessage<T extends BaseEvent> {
 
     public void verify() throws NulsVerificationException {
         if (this.header == null || this.data == null) {
-            throw new NulsVerificationException(ErrorCode.NET_MESSAGE_ERROR);
+            throw new NulsVerificationException(KernelErrorCode.NET_MESSAGE_ERROR);
         }
 
         if (header.getLength() != data.size()) {
-            throw new NulsVerificationException(ErrorCode.NET_MESSAGE_LENGTH_ERROR);
+            throw new NulsVerificationException(KernelErrorCode.NET_MESSAGE_LENGTH_ERROR);
         }
 
         if (header.getXor() != caculateXor()) {
-            throw new NulsVerificationException(ErrorCode.NET_MESSAGE_XOR_ERROR);
+            throw new NulsVerificationException(KernelErrorCode.NET_MESSAGE_XOR_ERROR);
         }
     }
 

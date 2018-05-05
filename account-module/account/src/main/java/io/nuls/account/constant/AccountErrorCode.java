@@ -23,45 +23,22 @@
  *
  */
 
-package io.nuls.kernel.constant;
+package io.nuls.account.constant;
 
-import io.nuls.kernel.i18n.I18nUtils;
+import io.nuls.kernel.constant.ErrorCode;
 
 /**
  * @author: Niels Wang
  * @date: 2018/5/5
  */
-public class ErrorCode {
-    private final int msg;
-    private final String code;
+public interface AccountErrorCode {
 
-    protected ErrorCode(String code, int msg) {
-        this.code = code;
-        this.msg = msg;
-        if (null == code) {
-            throw new RuntimeException("the errorcode code cann't be null!");
-        }
-    }
-
-    public String getMsg() {
-        return I18nUtils.get(msg);
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public static final ErrorCode init(String code, int msg) {
-        return new ErrorCode(code, msg);
-    }
-
-    public boolean equals(Object obj) {
-        if (null == obj) {
-            return false;
-        }
-        if (!(obj instanceof ErrorCode)) {
-            return false;
-        }
-        return code.equals(((ErrorCode) obj).getCode());
-    }
+    ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("ACT000", 45000);
+    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("ACT001", 45001);
+    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED = ErrorCode.init("ACT002", 45002);
+    ErrorCode ACCOUNT_EXIST = ErrorCode.init("ACT003", 45003);
+    ErrorCode ADDRESS_ERROR = ErrorCode.init("ACT004", 45004);
+    ErrorCode ALIAS_EXIST = ErrorCode.init("ACT005", 45005);
+    ErrorCode ALIAS_ERROR = ErrorCode.init("ACT006", 40006);
+    ErrorCode ACCOUNT_ALREADY_SET_ALIAS = ErrorCode.init("ACT007", 40007);
 }

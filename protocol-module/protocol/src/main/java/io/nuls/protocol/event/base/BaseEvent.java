@@ -23,12 +23,10 @@
  */
 package io.nuls.protocol.event.base;
 
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.NulsCloneable;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.model.NulsCloneable;
 import io.nuls.protocol.model.BaseNulsData;
 import io.nuls.protocol.model.NulsDigestData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels

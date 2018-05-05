@@ -27,7 +27,7 @@ package io.nuls.kernel.i18n;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
-import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 
 import java.io.*;
@@ -75,7 +75,7 @@ public class I18nUtils {
 
     public static void setLanguage(String lang) throws NulsException {
         if (StringUtils.isBlank(lang)) {
-            throw new NulsException(ErrorCode.LANGUAGE_CANNOT_SET_NULL);
+            throw new NulsException(KernelErrorCode.LANGUAGE_CANNOT_SET_NULL);
         }
         key = lang;
         nowMapping = ALL_MAPPING.get(lang);

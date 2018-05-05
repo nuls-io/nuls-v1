@@ -30,7 +30,7 @@ import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.VersionUtils;
 import io.nuls.kernel.cfg.NulsConfig;
-import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.NulsVersion;
@@ -96,7 +96,7 @@ public class VersionManager {
 //            map = JSONUtils.json2map(jsonStr);
 //        } catch (Exception e) {
 //            Log.error(e);
-//            throw new NulsException(ErrorCode.FAILED, "Parse version json faild!");
+//            throw new NulsException(KernelErrorCode.FAILED, "Parse version json faild!");
 //        }
 //        String version = (String) map.get("version");
 //        String sign = (String) map.get("sign");
@@ -121,14 +121,14 @@ public class VersionManager {
             jsonStr = new String(HttpDownloadUtils.download(VERDION_JSON_URL), NulsConfig.DEFAULT_ENCODING);
         } catch (IOException e) {
             Log.error(e);
-            throw new NulsException(ErrorCode.FAILED, "Download version json faild!");
+            throw new NulsException(KernelErrorCode.FAILED, "Download version json faild!");
         }
         Map<String, Object> map = null;
         try {
             map = JSONUtils.json2map(jsonStr);
         } catch (Exception e) {
             Log.error(e);
-            throw new NulsException(ErrorCode.FAILED, "Parse version json faild!");
+            throw new NulsException(KernelErrorCode.FAILED, "Parse version json faild!");
         }
         String version = (String) map.get("version");
         String sign = (String) map.get("sign");
@@ -176,7 +176,7 @@ public class VersionManager {
                 File jar = new File(jarMap.get(key));
                 boolean b = jar.renameTo(new File(bakFolder.getPath() + "/" + key));
                 if (!b) {
-                    throw new NulsException(ErrorCode.FAILED, "move the file fiald:" + key);
+                    throw new NulsException(KernelErrorCode.FAILED, "move the file fiald:" + key);
                 }
                 removeList.add(jar.getName());
             }
@@ -200,7 +200,7 @@ public class VersionManager {
             for (File file : files) {
                 boolean b = file.renameTo(new File(libsUrl.getPath() + "/" + file.getName()));
                 if (!b) {
-                    throw new NulsException(ErrorCode.FAILED, "move the file fiald:" + file.getPath());
+                    throw new NulsException(KernelErrorCode.FAILED, "move the file fiald:" + file.getPath());
                 }
                 moved.add(file.getName());
             }
@@ -231,7 +231,7 @@ public class VersionManager {
                 str.append(fileName);
                 str.append(";");
             }
-            throw new NulsException(ErrorCode.FAILED, "move the file fiald:" + str.toString());
+            throw new NulsException(KernelErrorCode.FAILED, "move the file fiald:" + str.toString());
         }
     }
 

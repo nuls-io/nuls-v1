@@ -26,6 +26,7 @@ package io.nuls.kernel.model;
 
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 
 /**
  * @author vivi
@@ -49,11 +50,11 @@ public class Result<T> {
     }
 
     public Result() {
-        this(false, "", ErrorCode.SUCCESS, null);
+        this(false, "", KernelErrorCode.SUCCESS, null);
     }
 
     public Result(boolean success, String message) {
-        this(success, message, ErrorCode.SUCCESS, null);
+        this(success, message, KernelErrorCode.SUCCESS, null);
     }
 
     public Result(boolean success, ErrorCode errorCode, T data) {
@@ -63,7 +64,7 @@ public class Result<T> {
     }
 
     public Result(boolean success, String message, T t) {
-        this(success, message, ErrorCode.SUCCESS, t);
+        this(success, message, KernelErrorCode.SUCCESS, t);
     }
 
     public boolean isSuccess() {

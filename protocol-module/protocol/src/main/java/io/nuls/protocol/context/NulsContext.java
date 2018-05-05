@@ -112,7 +112,7 @@ public class NulsContext {
 
     public void setBestBlock(Block bestBlock) {
         if (bestBlock == null) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "best block set to null!");
+            throw new RuntimeException( "best block set to null!");
         }
         this.bestBlock = bestBlock;
 //        Log.info("best height:"+bestBlock.getHeader().getHeight()+", hash:"+bestBlock.getHeader().getHash());

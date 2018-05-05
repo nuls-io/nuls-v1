@@ -25,7 +25,7 @@
 package io.nuls.kernel.model;
 
 
-import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 
 import java.io.Serializable;
@@ -89,7 +89,7 @@ public final class Na implements Comparable<Na>, Serializable {
 
     public static Na valueOf(final long na) {
         if (MAX_NA_VALUE < na) {
-            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
         return new Na(na);
     }

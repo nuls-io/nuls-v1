@@ -29,11 +29,15 @@ package io.nuls.kernel.cfg;
 import io.nuls.core.tools.cfg.IniEntity;
 
 /**
+ * 用来管理系统配置项和系统版本信息
+ * <p>
+ * Used to manage system configuration items and system version information.
+ *
  * @author: Niels Wang
  * @date: 2018/4/17
  */
 public class NulsConfig {
-    public static   String VERSION = "1.0.0";
+    public static String VERSION = "1.0.0";
     public static String DEFAULT_ENCODING = "UTF-8";
     public static IniEntity NULS_CONFIG;
     public static IniEntity MODULES_CONFIG;

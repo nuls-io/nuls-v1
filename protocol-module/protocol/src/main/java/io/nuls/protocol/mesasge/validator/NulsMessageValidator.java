@@ -24,8 +24,7 @@
  */
 package io.nuls.protocol.mesasge.validator;
 
-import io.nuls.kernel.constant.ErrorCode;
-import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.protocol.mesasge.NulsMessage;
 
@@ -36,15 +35,15 @@ import io.nuls.protocol.mesasge.NulsMessage;
 public class NulsMessageValidator {
     public ValidateResult validate(NulsMessage data) {
         if (data.getHeader() == null || data.getData() == null) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), ErrorCode.NET_MESSAGE_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NET_MESSAGE_ERROR);
         }
 
         if (data.getHeader().getLength() != data.getData().size()) {
-            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.NET_MESSAGE_LENGTH_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NET_MESSAGE_LENGTH_ERROR);
         }
 
         if (data.getHeader().getXor() != data.caculateXor()) {
-            return ValidateResult.getFailedResult(this.getClass().getName(),ErrorCode.NET_MESSAGE_XOR_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NET_MESSAGE_XOR_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }

@@ -46,7 +46,7 @@ public class EventManager {
     public static void care(Class<? extends BaseEvent> busDataClass) {
         boolean b = EVENT_CLASSES.contains(busDataClass);
         if (!b) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "EventClass is not legal:" + busDataClass.getName());
+            throw new RuntimeException( "EventClass is not legal:" + busDataClass.getName());
         }
     }
 
@@ -61,7 +61,7 @@ public class EventManager {
 
     private static void putEvent(short moduleId, short type, Class<? extends BaseEvent> clazz) {
         if (type == 0) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "the event type cannot be 0!,module:" + moduleId + ",eventType:" + type);
+            throw new RuntimeException( "the event type cannot be 0!,module:" + moduleId + ",eventType:" + type);
         }
         EVENT_MAP.put(moduleId + "_" + type, clazz);
         cacheDataClass(clazz);

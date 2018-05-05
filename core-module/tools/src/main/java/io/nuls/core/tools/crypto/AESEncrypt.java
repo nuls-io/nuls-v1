@@ -40,6 +40,7 @@ import java.util.Arrays;
  *
  * @author ln
  */
+//todo 需要重构一下，使之更优雅，完整
 public class AESEncrypt {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();

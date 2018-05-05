@@ -71,6 +71,11 @@
             <artifactId>cglib</artifactId>
             <version>3.2.5</version>
         </dependency>
+        <dependency>
+            <groupId>com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+            <version>3.4.1</version>
+        </dependency>
     </dependencies>
 
 

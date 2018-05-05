@@ -22,46 +22,42 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.kernel.constant;
-
-import io.nuls.kernel.i18n.I18nUtils;
+package io.nuls.core.tools.disruptor;
 
 /**
- * @author: Niels Wang
- * @date: 2018/5/5
+ *
+ * @author Niels
+ * @date 2017/11/6
  */
-public class ErrorCode {
-    private final int msg;
-    private final String code;
+public class DisruptorData<T> {
 
-    protected ErrorCode(String code, int msg) {
-        this.code = code;
-        this.msg = msg;
-        if (null == code) {
-            throw new RuntimeException("the errorcode code cann't be null!");
-        }
+    private String name;
+
+    private T data;
+
+    private boolean stoped = false;
+
+    public boolean isStoped() {
+        return stoped;
     }
 
-    public String getMsg() {
-        return I18nUtils.get(msg);
+    public void setStoped(boolean stoped) {
+        this.stoped = stoped;
     }
 
-    public String getCode() {
-        return code;
+    public String getName() {
+        return name;
     }
 
-    public static final ErrorCode init(String code, int msg) {
-        return new ErrorCode(code, msg);
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public boolean equals(Object obj) {
-        if (null == obj) {
-            return false;
-        }
-        if (!(obj instanceof ErrorCode)) {
-            return false;
-        }
-        return code.equals(((ErrorCode) obj).getCode());
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
     }
 }

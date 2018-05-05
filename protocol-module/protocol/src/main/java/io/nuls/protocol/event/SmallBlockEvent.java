@@ -25,6 +25,7 @@ package io.nuls.protocol.event;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.protocol.constant.ProtocolEventType;
 import io.nuls.protocol.event.base.NoticeData;
 import io.nuls.protocol.model.SmallBlock;
@@ -50,7 +51,7 @@ public class SmallBlockEvent extends BaseProtocolEvent<SmallBlock> {
             return null;
         }
         NoticeData data = new NoticeData();
-        data.setMessage(ErrorCode.NEW_BLOCK_HEADER_RECIEVED);
+        data.setMessage(KernelErrorCode.NEW_BLOCK_HEADER_RECIEVED);
         data.setData(this.getEventBody().getHeader().getHash());
         return data;
     }

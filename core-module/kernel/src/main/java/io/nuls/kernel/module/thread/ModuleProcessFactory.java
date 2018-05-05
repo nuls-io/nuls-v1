@@ -40,10 +40,10 @@ public class ModuleProcessFactory implements ThreadFactory {
     @Override
     public ModuleProcess newThread(Runnable r) {
         if (null == r) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "runnable cannot be null!");
+            throw new RuntimeException( "runnable cannot be null!");
         }
         if (!(r instanceof ModuleRunner)) {
-            throw new NulsRuntimeException(ErrorCode.FAILED, "unkown runnable!");
+            throw new RuntimeException( "unkown runnable!");
         }
         ModuleProcess process = new ModuleProcess((ModuleRunner) r);
         process.setModuleId((short) 0);
