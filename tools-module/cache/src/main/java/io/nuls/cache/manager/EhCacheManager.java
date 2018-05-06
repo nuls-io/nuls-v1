@@ -81,23 +81,9 @@ public class EhCacheManager {
         AssertUtil.canNotEmpty(params.getHeapMb());
         AssertUtil.canNotEmpty(params.getKeyType());
         AssertUtil.canNotEmpty(params.getValueType());
-
-
-
         CacheConfigurationBuilder builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(params.getKeyType(), params.getValueType(),
                 ResourcePoolsBuilder.newResourcePoolsBuilder().heap(params.getHeapMb(), MemoryUnit.MB)
         );
-        builder = builder.withSizeOfMaxObjectGraph(MAX_SIZE_OF_CACHE_OBJ_GRAPH);
-        if (params.getTimeToLiveSeconds() > 0) {
-            builder = builder.withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(params.getTimeToLiveSeconds())));
-        }
-        if (params.getTimeToIdleSeconds() > 0) {
-            builder = builder.withExpiry(ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofSeconds(params.getTimeToIdleSeconds())));
-        }
-        if (null != params.getValueCopier()) {
-            builder = builder.withValueCopier( params.getValueCopier());
-        }
-        builder = builder.withValueSerializer(new CacheObjectSerializer(params.getKeyType())).withKeySerializer(new CacheObjectSerializer(params.getValueType()));
         if (params.getListener() != null) {
             Set<EventType> types = new HashSet<>();
             types.add(EventType.CREATED);
@@ -109,6 +95,17 @@ public class EhCacheManager {
                     .newEventListenerConfiguration(new EhcacheListener(params.getListener()), types)
                     .unordered().asynchronous();
             builder = builder.add(cacheEventListenerConfiguration);
+        }
+        builder = builder.withSizeOfMaxObjectGraph(MAX_SIZE_OF_CACHE_OBJ_GRAPH);
+//        builder = builder.withValueSerializer(new CacheObjectSerializer(params.getValueType())).withKeySerializer(new CacheObjectSerializer(params.getKeyType()));
+        if (params.getTimeToLiveSeconds() > 0) {
+            builder = builder.withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(params.getTimeToLiveSeconds())));
+        }
+        if (params.getTimeToIdleSeconds() > 0) {
+            builder = builder.withExpiry(ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofSeconds(params.getTimeToIdleSeconds())));
+        }
+        if (null != params.getValueCopier()) {
+            builder = builder.withValueCopier( params.getValueCopier());
         }
         cacheManager.createCache(title, builder.build());
         KEY_TYPE_MAP.put(title, params.getKeyType());
