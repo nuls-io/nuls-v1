@@ -31,6 +31,7 @@ import io.nuls.kernel.utils.TransactionValidatorManager;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
+import io.protostuff.Tag;
 import io.protostuff.runtime.RuntimeSchema;
 
 import java.util.List;
@@ -41,17 +42,18 @@ import java.util.List;
  */
 public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData implements Cloneable {
 
+    @Tag(1)
     protected int type;
-
-    protected long time;
-
-    protected byte[] remark;
-
-    private byte[] scriptSig;
-
-    protected T txData;
-
+    @Tag(2)
     protected CoinData coinData;
+    @Tag(3)
+    protected T txData;
+    @Tag(4)
+    protected long time;
+    @Tag(5)
+    private byte[] scriptSig;
+    @Tag(6)
+    protected byte[] remark;
 
     protected transient NulsDigestData hash;
 
@@ -106,10 +108,6 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         for (NulsDataValidator<Transaction> validator : list) {
             this.registerValidator(validator);
         }
-    }
-
-    public void afterParse() {
-        calcHash();
     }
 
     public abstract T parseTxData(byte[] bytes);

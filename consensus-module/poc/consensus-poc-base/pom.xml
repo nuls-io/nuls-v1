@@ -42,6 +42,21 @@
             <artifactId>consensus</artifactId>
             <version>2.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>io.nuls.consensus-module</groupId>
+            <artifactId>consensus-poc-protocol</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nuls.consensus-module</groupId>
+            <artifactId>consensus-poc-storage</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nuls.ledger-module</groupId>
+            <artifactId>ledger</artifactId>
+            <version>2.0.0</version>
+        </dependency>
     </dependencies>
 
 

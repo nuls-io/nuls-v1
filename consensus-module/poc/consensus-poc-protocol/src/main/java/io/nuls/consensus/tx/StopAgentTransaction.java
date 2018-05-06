@@ -23,23 +23,30 @@
  *  * SOFTWARE.
  *
  */
+package io.nuls.consensus.tx;
 
-package io.nuls.consensus.poc.entity;
-
-import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.consensus.constant.ConsensusTransactionConstant;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.CoinData;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 
 /**
- * Created by ln on 2018/5/5.
+ * @author Niels
+ * @date 2017/12/4
  */
-public class TestTransaction extends Transaction {
+public class StopAgentTransaction extends Transaction<NulsDigestData> {
 
-    public TestTransaction() {
-        super(0);
+    public StopAgentTransaction() {
+        super(ConsensusTransactionConstant.TX_TYPE_STOP_AGENT);
+    }
+
+    public StopAgentTransaction(CoinData coinData) throws NulsException {
+        super(ConsensusTransactionConstant.TX_TYPE_STOP_AGENT);
     }
 
     @Override
-    public BaseNulsData parseTxData(byte[] bytes) {
-        return null;
+    public NulsDigestData parseTxData(byte[] bytes) {
+        return new NulsDigestData(bytes);
     }
 }

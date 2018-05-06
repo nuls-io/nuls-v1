@@ -87,4 +87,22 @@ public class BlockMemoryPoolTest {
         assertEquals(0, blockMemoryPool.size());
 
     }
+
+    @Test
+    public void testSizeAndClear() {
+        assertNotNull(blockMemoryPool);
+
+        assertEquals(0, blockMemoryPool.size());
+
+        Block block = new Block();
+        boolean result = blockMemoryPool.put(new BlockContainer(block, BlockContainerStatus.RECEIVED));
+        assertTrue(result);
+
+        assertEquals(1, blockMemoryPool.size());
+
+        blockMemoryPool.clear();
+
+        assertEquals(0, blockMemoryPool.size());
+
+    }
 }

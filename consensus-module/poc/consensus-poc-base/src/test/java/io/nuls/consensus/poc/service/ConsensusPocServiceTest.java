@@ -26,10 +26,15 @@
 
 package io.nuls.consensus.poc.service;
 
-import io.nuls.consensus.poc.entity.TestTransaction;
+import io.nuls.consensus.poc.cache.TxMemoryPool;
+import io.nuls.consensus.poc.model.TestTransaction;
 import io.nuls.consensus.service.ConsensusServiceIntf;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.TransactionValidatorManager;
+import io.nuls.kernel.validate.NulsDataValidator;
+import io.nuls.kernel.validate.ValidateResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +52,7 @@ public class ConsensusPocServiceTest {
 
     @Before
     public void setUp() throws Exception {
-
+        TxMemoryPool.getInstance().clear();
     }
 
     @After
@@ -61,16 +66,44 @@ public class ConsensusPocServiceTest {
 
         // new a tx
         Transaction tx = new TestTransaction();
-        tx.setTime(0l);
+        tx.setTime(1l);
 
         assertNotNull(tx);
         assertNotNull(tx.getHash());
-        assertEquals(tx.getHash().getDigestHex(), "0800122099a2986481ecb269ee9bf8780130502d19505a563165745e65314b455d6bc976");
+        assertEquals(tx.getHash().getDigestHex(), "0800122077b35f4a04e6d3e49521ef7fc4d80515bde810114a0f714f3b6d5b357bda0a0d");
 
         Result result = service.newTx(tx);
         assertNotNull(result);
         assertTrue(result.isSuccess());
         assertFalse(result.isFailed());
+
+        //test orphan
+        NulsDataValidator<TestTransaction> testValidator = new NulsDataValidator<TestTransaction>() {
+            @Override
+            public ValidateResult validate(TestTransaction data) {
+                if(data.getHash().getDigestHex().equals("0800122077b35f4a04e6d3e49521ef7fc4d80515bde810114a0f714f3b6d5b357bda0a0d")) {
+                    return ValidateResult.getFailedResult("test.transaction", TransactionErrorCode.ORPHAN_TX);
+                } else {
+                    return ValidateResult.getSuccessResult();
+                }
+            }
+        };
+        TransactionValidatorManager.addTxDefValidator(testValidator);
+
+        tx = new TestTransaction();
+        tx.setTime(1l);
+        result = service.newTx(tx);
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertFalse(result.isFailed());
+
+        List<Transaction> list = TxMemoryPool.getInstance().getAll();
+        assertNotNull(list);
+        assertEquals(list.size(), 1);
+
+        List<Transaction> orphanList = TxMemoryPool.getInstance().getAllOrphan();
+        assertNotNull(orphanList);
+        assertEquals(orphanList.size(), 1);
 
     }
 
@@ -91,16 +124,24 @@ public class ConsensusPocServiceTest {
 
         assertNotNull(service);
 
-        newTx();
+        Transaction tx = new TestTransaction();
+        tx.setTime(0l);
+
+        assertEquals(tx.getHash().getDigestHex(), "08001220d194faf5b314f54c3a299ca9ea086f3f8856c75dc44a1e0c43bcc4d80b47909c");
+
+        Result result = service.newTx(tx);
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertFalse(result.isFailed());
 
         List<Transaction> memoryTxs = service.getMemoryTxs();
         assertNotNull(memoryTxs);
 
         assertEquals(1, memoryTxs.size());
 
-        Transaction tx = memoryTxs.get(0);
+        tx = memoryTxs.get(0);
         assertNotNull(tx);
-        assertEquals(tx.getHash().getDigestHex(), "0800122099a2986481ecb269ee9bf8780130502d19505a563165745e65314b455d6bc976");
+        assertEquals(tx.getHash().getDigestHex(), "08001220d194faf5b314f54c3a299ca9ea086f3f8856c75dc44a1e0c43bcc4d80b47909c");
     }
 
     @Test

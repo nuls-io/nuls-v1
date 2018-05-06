@@ -55,7 +55,7 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
         }
     }
 
-    public final int size() {
+    public int size() {
         return this.serialize().length;
     }
 
