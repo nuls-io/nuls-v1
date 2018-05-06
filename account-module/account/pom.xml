@@ -17,7 +17,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.nuls.core-module</groupId>
-                <artifactId>tools</artifactId>
+                <artifactId>io.nuls.core.tools</artifactId>
             </dependency>
         </dependencies>
     </dependencyManagement>

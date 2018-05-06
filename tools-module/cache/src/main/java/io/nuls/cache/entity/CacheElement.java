@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,29 +20,49 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.cache.constant;
+package io.nuls.cache.entity;
+
 
 /**
- *
  * @author Niels
- * @date 2017/10/27
- *
+ * @date 2017/10/18
  */
-public interface EhCacheConstant {
-    //version
-    int CACHE_MODULE_VERSION = 1111;
-    //Minimum version supported
-    int MINIMUM_VERSION_SUPPORTED = 0;
+public class CacheElement<T> {
+    private String cacheTitle;
+    private String key;
+    private T value;
 
-    long MAX_SIZE_OF_CACHE_OBJ_GRAPH =  1024*1024*5;
+    public CacheElement() {
+    }
 
-    String KEY_TYPE_FIELD="keyType";
-    String VALUE_TYPE_FIELD="valueType";
-    String POOL_HEAP_FIELD = "heap";
-    String POOL_OFF_HEAP_FIELD = "offheap";
-    String POOL_DISK_FIELD = "disk";
-    String POOL_TIME_OF_LIVE_SECONDS = "timeToLiveSeconds";
-    String POOL_TIME_OF_IDLE_SECONDS = "timeToIdleSeconds";
-    int DEFAULT_MAX_SIZE = 16;
+    public CacheElement(String key, T value) {
+        this.key = key;
+        this.value = value;
+    }
+
+    public String getCacheTitle() {
+        return cacheTitle;
+    }
+
+    public void setCacheTitle(String cacheTitle) {
+        this.cacheTitle = cacheTitle;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public T getValue() {
+        return value;
+    }
+
+    public void setValue(T value) {
+        this.value = value;
+    }
 }

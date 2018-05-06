@@ -21,7 +21,7 @@
     </modules>
     <dependencies>
         <dependency>
-            <groupId>io.nuls.core-module</groupId>
+            <groupId>io.nuls.tools-module</groupId>
             <artifactId>tools</artifactId>
             <version>2.0.0</version>
         </dependency>

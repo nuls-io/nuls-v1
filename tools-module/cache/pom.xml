@@ -4,23 +4,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.nuls</groupId>
-        <artifactId>cache-module</artifactId>
+        <artifactId>tools-module</artifactId>
         <version>2.0.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.nuls.cache-module</groupId>
+    <groupId>io.nuls.tools-module</groupId>
     <artifactId>cache</artifactId>
-    <version>2.0.0</version>
     <dependencies>
         <dependency>
-            <groupId>io.nuls.core-module</groupId>
-            <artifactId>kernel</artifactId>
+            <groupId>io.nuls.tools-module</groupId>
+            <artifactId>tools</artifactId>
             <version>2.0.0</version>
-        </dependency>
-    </dependencies>
-    <packaging>jar</packaging>
-
-    <name>cache</name>
+        </dependency></dependencies>
 
 </project>

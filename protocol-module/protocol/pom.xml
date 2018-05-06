@@ -14,7 +14,7 @@
     <artifactId>protocol</artifactId>
     <dependencies>
         <dependency>
-            <groupId>io.nuls.cache-module</groupId>
+            <groupId>io.nuls.tools-module</groupId>
             <artifactId>cache</artifactId>
             <version>2.0.0</version>
         </dependency>
