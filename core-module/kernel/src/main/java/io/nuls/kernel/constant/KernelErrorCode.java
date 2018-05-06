@@ -110,17 +110,7 @@ public interface KernelErrorCode {
     ErrorCode LACK_OF_CREDIT = ErrorCode.init("cs006", 60006);
     ErrorCode DEPOSIT_OVER_COUNT = ErrorCode.init("cs007", 60007);
     ErrorCode DEPOSIT_TOO_MUCH = ErrorCode.init("cs008", 60008);
-    /*
-     * ------------  Ledger Exception code   -------------
-     */
-    ErrorCode UTXO_UNUSABLE = ErrorCode.init("LED001", 70001);
-    ErrorCode UTXO_STATUS_CHANGE = ErrorCode.init("LED002", 70002);
-    ErrorCode BALANCE_NOT_ENOUGH = ErrorCode.init("LED003", 70003);
-    ErrorCode INVALID_INPUT = ErrorCode.init("LED004", 70004);
-    ErrorCode INVALID_AMOUNT = ErrorCode.init("LED005", 70005);
-    ErrorCode ORPHAN_TX = ErrorCode.init("LED006", 70006);
-    ErrorCode ORPHAN_BLOCK = ErrorCode.init("LED007", 70007);
-    ErrorCode UTXO_NOT_FOUND = ErrorCode.init("LED008", 70008);
+
     /*
      * validator
      */

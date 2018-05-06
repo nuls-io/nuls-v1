@@ -1,0 +1,47 @@
+/*
+ * *
+ *  * MIT License
+ *  *
+ *  * Copyright (c) 2017-2018 nuls.io
+ *  *
+ *  * Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  * of this software and associated documentation files (the "Software"), to deal
+ *  * in the Software without restriction, including without limitation the rights
+ *  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  * copies of the Software, and to permit persons to whom the Software is
+ *  * furnished to do so, subject to the following conditions:
+ *  *
+ *  * The above copyright notice and this permission notice shall be included in all
+ *  * copies or substantial portions of the Software.
+ *  *
+ *  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  * SOFTWARE.
+ *
+ */
+
+package io.nuls.kernel.constant;
+
+/**
+ * Created by ln on 2018/5/6.
+ */
+public interface TransactionErrorCode {
+
+    /*
+     * ------------  transaction Exception code   -------------
+     */
+    ErrorCode UTXO_UNUSABLE = ErrorCode.init("LED001", 70001);
+    ErrorCode UTXO_STATUS_CHANGE = ErrorCode.init("LED002", 70002);
+    ErrorCode BALANCE_NOT_ENOUGH = ErrorCode.init("LED003", 70003);
+    ErrorCode INVALID_INPUT = ErrorCode.init("LED004", 70004);
+    ErrorCode INVALID_AMOUNT = ErrorCode.init("LED005", 70005);
+    ErrorCode ORPHAN_TX = ErrorCode.init("LED006", 70006);
+    ErrorCode ORPHAN_BLOCK = ErrorCode.init("LED007", 70007);
+    ErrorCode UTXO_NOT_FOUND = ErrorCode.init("LED008", 70008);
+
+
+}
