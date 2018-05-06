@@ -42,7 +42,7 @@ import static org.junit.Assert.*;
  * @date: 2018/5/6
  */
 public class CacheMapTest {
-    private CacheMap cacheMap;
+    private CacheMap<String, ValueData> cacheMap;
     private NulsCacheListener<String, ValueData> listener;
     private Copier<ValueData> valueCopier;
     protected Map<String, Boolean> map = new HashMap<>();
@@ -53,33 +53,40 @@ public class CacheMapTest {
             @Override
             public void onCreate(CacheListenerItem<String, ValueData> item) {
                 map.put(item.getKey() + "_create", true);
+                System.out.println("create");
             }
 
             @Override
             public void onEvict(CacheListenerItem<String, ValueData> item) {
                 map.put(item.getKey() + "_evict", true);
+                System.out.println("evict");
+
 
             }
 
             @Override
             public void onRemove(CacheListenerItem<String, ValueData> item) {
                 map.put(item.getKey() + "_remove", true);
+                System.out.println("remove");
             }
 
             @Override
             public void onUpdate(CacheListenerItem<String, ValueData> item) {
                 map.put(item.getKey() + "_update", true);
+                System.out.println("update");
             }
 
             @Override
             public void onExpire(CacheListenerItem<String, ValueData> item) {
                 map.put(item.getKey() + "_expire", true);
+                System.out.println("expire");
             }
         };
         valueCopier = new Copier<ValueData>() {
             @Override
             public ValueData copyForRead(ValueData valueData) {
-                return valueData.copy();
+//                return valueData.copy();
+                return valueData;
             }
 
             @Override
@@ -87,31 +94,82 @@ public class CacheMapTest {
                 return valueData.copy();
             }
         };
-        this.cacheMap = new CacheMap("test-cache", 1, 60, 60, listener, valueCopier);
+        this.cacheMap = new CacheMap("test-cache", 1, String.class, ValueData.class, 10, 10, listener, valueCopier);
     }
 
     @Test
-    public void testPut() {
+    public void test() {
         ValueData data1 = new ValueData();
         data1.setTime(1000L);
         data1.setName("test1");
         data1.setCode(1);
         cacheMap.put(data1.getName(), data1);
+        ValueData data_get = cacheMap.get(data1.getName());
+        assertNotNull(data_get);
+        assertNotEquals(data1, data_get);
+        long start = System.currentTimeMillis();
+        while (null == map.get(data1.getName() + "_create")) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("create late:" + (System.currentTimeMillis() - start));
 
-        assertNotNull(cacheMap.get(data1.getName()));
+        assertTrue(map.get(data1.getName() + "_create"));
+
+
+        data1.setTime(10001L);
+        cacheMap.put(data1.getName(), data1);
+//        assertTrue(map.get(data1.getName() + "_update"));
 
         try {
-            Thread.sleep(600000L);
+            Thread.sleep(12000L);
         } catch (InterruptedException e) {
             e.printStackTrace();
             assertTrue(false);
         }
         assertNull(cacheMap.get(data1.getName()));
 
+        start = System.currentTimeMillis();
+        while (null == map.get(data1.getName() + "_expire")) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("expire late:" + (System.currentTimeMillis() - start));
+        assertTrue(map.get(data1.getName() + "_expire"));
+
+        cacheMap.put(data1.getName(), data1);
+        cacheMap.remove(data1.getName());
+        start = System.currentTimeMillis();
+        while (null == map.get(data1.getName() + "_remove")) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("remove late:" + (System.currentTimeMillis() - start));
+        assertTrue(map.get(data1.getName() + "_remove"));
+
+
+        for (int i = 0; i < 100000; i++) {
+            ValueData data = new ValueData();
+            data.setTime(1000L);
+            data.setName("test" + i);
+            data.setCode(i);
+            cacheMap.put(data.getName(), data);
+            System.out.println(i + "=====size=" + cacheMap.size());
+        }
+
 
     }
 
-    static class ValueData implements Serializable{
+    static class ValueData implements Serializable {
         private int code;
         private String name;
         private long time;

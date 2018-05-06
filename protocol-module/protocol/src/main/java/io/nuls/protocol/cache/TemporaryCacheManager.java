@@ -37,8 +37,8 @@ import io.nuls.protocol.model.SmallBlock;
 public class TemporaryCacheManager {
     private static final TemporaryCacheManager INSTANCE = new TemporaryCacheManager();
 
-    private CacheMap<String, SmallBlock> smallBlockCacheMap = new CacheMap<>("temp-small-block-cache", 16, 1000, 0, null);
-    private CacheMap<String, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 64, 3600, 0, null);
+    private CacheMap<String, SmallBlock> smallBlockCacheMap = new CacheMap<>("temp-small-block-cache", 16,String.class,SmallBlock.class, 1000, 0, null);
+    private CacheMap<String, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 64,String.class,Transaction.class, 3600, 0, null);
 
     private TemporaryCacheManager() {
     }
