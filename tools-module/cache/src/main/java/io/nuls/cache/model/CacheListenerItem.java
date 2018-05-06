@@ -10,7 +10,7 @@ public class CacheListenerItem<K, V> {
     }
 
     public CacheListenerItem(K k, V newValue, V oldValue) {
-        this.key = key;
+        this.key = k;
         this.newValue = newValue;
         this.oldValue = oldValue;
     }
