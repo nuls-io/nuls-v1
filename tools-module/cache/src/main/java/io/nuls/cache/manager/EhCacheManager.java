@@ -24,7 +24,6 @@
  */
 package io.nuls.cache.manager;
 
-import io.nuls.cache.constant.EhCacheConstant;
 import io.nuls.cache.listener.intf.NulsCacheListener;
 import io.nuls.cache.utils.EhcacheListener;
 import org.ehcache.Cache;
@@ -39,6 +38,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+
 /**
  * @author Niels
  * @date 2017/10/27
@@ -47,6 +47,8 @@ public class EhCacheManager {
     private static final EhCacheManager INSTANCE = new EhCacheManager();
     private static final Map<String, Class> KEY_TYPE_MAP = new ConcurrentHashMap<>();
     private static final Map<String, Class> VALUE_TYPE_MAP = new ConcurrentHashMap<>();
+    private static final long MAX_SIZE_OF_CACHE_OBJ_GRAPH = 5 * 1024 * 1024;
+
     private CacheManager cacheManager;
 
     private EhCacheManager() {
@@ -57,15 +59,32 @@ public class EhCacheManager {
         return INSTANCE;
     }
 
+    /**
+     * 初始化方法，创建ehcache的管理器
+     * Initialize method, to create the ehcache manager.
+     */
     private void init() {
         cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build(true);
     }
 
+    /**
+     * 创建一个缓存容器
+     * Create a cache container.
+     *
+     * @param title 容器标识，cache name
+     * @param keyType 索引类型, the type of Key
+     * @param valueType 对象类型 the type of value
+     * @param heapMb 最大使用空间,Maximum usable space
+     * @param timeToLiveSeconds 最长存活时间，为0时不超时,Maximum survival time, no timeout at 0.
+     * @param timeToIdleSeconds 最长空闲时间，为0时不超时,Maximum idle time, no timeout at 0.
+     * @param listener 缓存监听器, cacheListener
+     * @param valueCopier 对象复制器, value object copier
+     */
     public void createCache(String title, Class keyType, Class<? extends Serializable> valueType, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener, Copier valueCopier) {
         CacheConfigurationBuilder builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(keyType, valueType,
                 ResourcePoolsBuilder.newResourcePoolsBuilder().heap(heapMb, MemoryUnit.MB)
         );
-        builder = builder.withSizeOfMaxObjectGraph(EhCacheConstant.MAX_SIZE_OF_CACHE_OBJ_GRAPH);
+        builder = builder.withSizeOfMaxObjectGraph(MAX_SIZE_OF_CACHE_OBJ_GRAPH);
         if (timeToLiveSeconds > 0) {
             builder = builder.withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(timeToLiveSeconds)));
 //            builder = builder.withExpiry(Expirations.timeToLiveExpiration(Duration.of(timeToLiveSeconds, TimeUnit.SECONDS)));
@@ -94,6 +113,11 @@ public class EhCacheManager {
         VALUE_TYPE_MAP.put(title, valueType);
     }
 
+    /**
+     * 获取原始的ehcache的cache
+     * @param title 缓存标识，cache name
+     * @return
+     */
     public Cache getCache(String title) {
         Class keyType = KEY_TYPE_MAP.get(title);
         Class valueType = VALUE_TYPE_MAP.get(title);

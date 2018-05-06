@@ -46,8 +46,16 @@ public class CacheMap<K, V> {
         this(cacheName, heapMb, 0, 0, valueCopier);
     }
 
+    public CacheMap(String cacheName, int heapMb) {
+        this(cacheName, heapMb, 0, 0, null);
+    }
+
     public CacheMap(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, Copier<V> valueCopier) {
-        this(cacheName, heapMb, timeToLiveSeconds, timeToIdleSeconds, null,valueCopier);
+        this(cacheName, heapMb, timeToLiveSeconds, timeToIdleSeconds, null, valueCopier);
+    }
+
+    public CacheMap(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds) {
+        this(cacheName, heapMb, timeToLiveSeconds, timeToIdleSeconds, null, null);
     }
 
     public CacheMap(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener, Copier<V> valueCopier) {
