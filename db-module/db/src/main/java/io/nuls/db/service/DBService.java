@@ -26,6 +26,7 @@ package io.nuls.db.service;
 
 import io.nuls.kernel.model.Result;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,6 +38,9 @@ import java.util.Set;
 public interface DBService {
 
     Result createArea(String areaName);
+    Result createArea(String areaName, Long cacheSize);
+    Result createArea(String areaName, Comparator comparator);
+    Result createArea(String areaName, Long cacheSize, Comparator comparator);
 
     String[] listArea();
 
@@ -47,6 +51,8 @@ public interface DBService {
     Result put(String area, byte[] key, String value);
 
     Result delete(String area, String key);
+
+    Result delete(String area, byte[] key);
 
     byte[] get(String area, String key);
 

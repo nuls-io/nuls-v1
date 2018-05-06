@@ -27,6 +27,7 @@ import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.model.Result;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,10 +38,32 @@ import java.util.Set;
  */
 public class LevelDBServiceImpl implements DBService {
 
+    public LevelDBServiceImpl() {
+        try {
+            LevelDBManager.init();
+        } catch (Exception e) {
+            //skip it
+        }
+    }
 
     @Override
     public Result createArea(String areaName) {
         return LevelDBManager.createArea(areaName);
+    }
+
+    @Override
+    public Result createArea(String areaName, Long cacheSize) {
+        return LevelDBManager.createArea(areaName, cacheSize);
+    }
+
+    @Override
+    public Result createArea(String areaName, Comparator comparator) {
+        return LevelDBManager.createArea(areaName, comparator);
+    }
+
+    @Override
+    public Result createArea(String areaName, Long cacheSize, Comparator comparator) {
+        return LevelDBManager.createArea(areaName, cacheSize, comparator);
     }
 
     @Override
@@ -65,6 +88,11 @@ public class LevelDBServiceImpl implements DBService {
 
     @Override
     public Result delete(String area, String key) {
+        return LevelDBManager.delete(area, key);
+    }
+
+    @Override
+    public Result delete(String area, byte[] key) {
         return LevelDBManager.delete(area, key);
     }
 
