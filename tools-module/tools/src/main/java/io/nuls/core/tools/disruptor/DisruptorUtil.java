@@ -63,7 +63,7 @@ public class DisruptorUtil<T extends DisruptorData> {
      * @param name           The title of the disruptor
      * @param ringBufferSize The size of ringBuffer
      */
-    public void createDisruptor(String name, int ringBufferSize, ThreadFactory factory) {
+    public Disruptor<DisruptorData> createDisruptor(String name, int ringBufferSize, ThreadFactory factory) {
         if (DISRUPTOR_MAP.keySet().contains(name)) {
             throw new RuntimeException("create disruptor faild,the name is repetitive!");
         }
@@ -80,6 +80,8 @@ public class DisruptorUtil<T extends DisruptorData> {
 //            }
 //        });
         DISRUPTOR_MAP.put(name, disruptor);
+
+        return disruptor;
     }
 
     /**

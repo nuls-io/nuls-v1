@@ -25,7 +25,10 @@
 package io.nuls.cache.manager;
 
 import io.nuls.cache.listener.intf.NulsCacheListener;
+import io.nuls.cache.model.CacheMapParams;
+import io.nuls.cache.utils.CacheObjectSerializer;
 import io.nuls.cache.utils.EhcacheListener;
+import io.nuls.core.tools.param.AssertUtil;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.*;
@@ -71,32 +74,17 @@ public class EhCacheManager {
      * 创建一个缓存容器
      * Create a cache container.
      *
-     * @param title 容器标识，cache name
-     * @param keyType 索引类型, the type of Key
-     * @param valueType 对象类型 the type of value
-     * @param heapMb 最大使用空间,Maximum usable space
-     * @param timeToLiveSeconds 最长存活时间，为0时不超时,Maximum survival time, no timeout at 0.
-     * @param timeToIdleSeconds 最长空闲时间，为0时不超时,Maximum idle time, no timeout at 0.
-     * @param listener 缓存监听器, cacheListener
-     * @param valueCopier 对象复制器, value object copier
+     * @param title    容器标识,cache name
+     * @param params   初始化参数,init parameters
      */
-    public void createCache(String title, Class keyType, Class<? extends Serializable> valueType, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener, Copier valueCopier) {
-        CacheConfigurationBuilder builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(keyType, valueType,
-                ResourcePoolsBuilder.newResourcePoolsBuilder().heap(heapMb, MemoryUnit.MB)
+    public void createCache(String title, CacheMapParams params) {
+        AssertUtil.canNotEmpty(params.getHeapMb());
+        AssertUtil.canNotEmpty(params.getKeyType());
+        AssertUtil.canNotEmpty(params.getValueType());
+        CacheConfigurationBuilder builder = CacheConfigurationBuilder.newCacheConfigurationBuilder(params.getKeyType(), params.getValueType(),
+                ResourcePoolsBuilder.newResourcePoolsBuilder().heap(params.getHeapMb(), MemoryUnit.MB)
         );
-        builder = builder.withSizeOfMaxObjectGraph(MAX_SIZE_OF_CACHE_OBJ_GRAPH);
-        if (timeToLiveSeconds > 0) {
-            builder = builder.withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(timeToLiveSeconds)));
-//            builder = builder.withExpiry(Expirations.timeToLiveExpiration(Duration.of(timeToLiveSeconds, TimeUnit.SECONDS)));
-        }
-        if (timeToIdleSeconds > 0) {
-            builder = builder.withExpiry(ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofSeconds(timeToIdleSeconds)));
-//            builder = builder.withExpiry(Expirations.timeToIdleExpiration(Duration.of(timeToIdleSeconds, TimeUnit.SECONDS)));
-        }
-        if (null != valueCopier) {
-            builder = builder.withValueCopier(valueCopier);
-        }
-        if (listener != null) {
+        if (params.getListener() != null) {
             Set<EventType> types = new HashSet<>();
             types.add(EventType.CREATED);
             types.add(EventType.UPDATED);
@@ -104,19 +92,30 @@ public class EhCacheManager {
             types.add(EventType.EXPIRED);
             types.add(EventType.REMOVED);
             CacheEventListenerConfigurationBuilder cacheEventListenerConfiguration = CacheEventListenerConfigurationBuilder
-                    .newEventListenerConfiguration(new EhcacheListener(listener), types)
+                    .newEventListenerConfiguration(new EhcacheListener(params.getListener()), types)
                     .unordered().asynchronous();
             builder = builder.add(cacheEventListenerConfiguration);
         }
+        builder = builder.withSizeOfMaxObjectGraph(MAX_SIZE_OF_CACHE_OBJ_GRAPH);
+//        builder = builder.withValueSerializer(new CacheObjectSerializer(params.getValueType())).withKeySerializer(new CacheObjectSerializer(params.getKeyType()));
+        if (params.getTimeToLiveSeconds() > 0) {
+            builder = builder.withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(params.getTimeToLiveSeconds())));
+        }
+        if (params.getTimeToIdleSeconds() > 0) {
+            builder = builder.withExpiry(ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofSeconds(params.getTimeToIdleSeconds())));
+        }
+        if (null != params.getValueCopier()) {
+            builder = builder.withValueCopier( params.getValueCopier());
+        }
         cacheManager.createCache(title, builder.build());
-        KEY_TYPE_MAP.put(title, keyType);
-        VALUE_TYPE_MAP.put(title, valueType);
+        KEY_TYPE_MAP.put(title, params.getKeyType());
+        VALUE_TYPE_MAP.put(title, params.getValueType());
     }
 
     /**
      * 获取原始的ehcache的cache
+     *
      * @param title 缓存标识，cache name
-     * @return
      */
     public Cache getCache(String title) {
         Class keyType = KEY_TYPE_MAP.get(title);

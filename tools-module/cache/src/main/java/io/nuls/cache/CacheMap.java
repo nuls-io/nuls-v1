@@ -26,6 +26,7 @@ package io.nuls.cache;
 
 import io.nuls.cache.listener.intf.NulsCacheListener;
 import io.nuls.cache.manager.EhCacheManager;
+import io.nuls.cache.model.CacheMapParams;
 import org.ehcache.Cache;
 import org.ehcache.spi.copy.Copier;
 
@@ -42,25 +43,29 @@ public class CacheMap<K, V> {
 
     private final String cacheName;
 
-    public CacheMap(String cacheName, int heapMb, Copier<V> valueCopier) {
-        this(cacheName, heapMb, 0, 0, valueCopier);
+    public CacheMap(String cacheName, int heapMb, Class keyType, Class<? extends Serializable> valueType, Copier<V> valueCopier) {
+        this(cacheName, heapMb, keyType, valueType, 0, 0, valueCopier);
     }
 
-    public CacheMap(String cacheName, int heapMb) {
-        this(cacheName, heapMb, 0, 0, null);
+    public CacheMap(String cacheName, int heapMb, Class keyType, Class<? extends Serializable> valueType) {
+        this(cacheName, heapMb, keyType, valueType, 0, 0, null);
     }
 
-    public CacheMap(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, Copier<V> valueCopier) {
-        this(cacheName, heapMb, timeToLiveSeconds, timeToIdleSeconds, null, valueCopier);
+    public CacheMap(String cacheName, int heapMb, Class keyType, Class<? extends Serializable> valueType, int timeToLiveSeconds, int timeToIdleSeconds, Copier<V> valueCopier) {
+        this(cacheName, heapMb, keyType, valueType, timeToLiveSeconds, timeToIdleSeconds, null, valueCopier);
     }
 
-    public CacheMap(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds) {
-        this(cacheName, heapMb, timeToLiveSeconds, timeToIdleSeconds, null, null);
+    public CacheMap(String cacheName, int heapMb, Class keyType, Class<? extends Serializable> valueType, int timeToLiveSeconds, int timeToIdleSeconds) {
+        this(cacheName, heapMb, keyType, valueType, timeToLiveSeconds, timeToIdleSeconds, null, null);
     }
 
-    public CacheMap(String cacheName, int heapMb, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener, Copier<V> valueCopier) {
-        this.cacheManager.createCache(cacheName, String.class, Serializable.class, heapMb, timeToLiveSeconds, timeToIdleSeconds, listener, valueCopier);
+    public CacheMap(String cacheName, int heapMb, Class keyType, Class<? extends Serializable> valueType, int timeToLiveSeconds, int timeToIdleSeconds, NulsCacheListener listener, Copier<V> valueCopier) {
+        this(cacheName, new CacheMapParams(heapMb, keyType, valueType, timeToLiveSeconds, timeToIdleSeconds, listener, valueCopier));
+    }
+
+    public CacheMap(String cacheName, CacheMapParams params) {
         this.cacheName = cacheName;
+        this.cacheManager.createCache(cacheName, params);
     }
 
     public int size() {
