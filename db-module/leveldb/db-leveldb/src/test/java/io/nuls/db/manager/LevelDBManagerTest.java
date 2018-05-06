@@ -73,6 +73,7 @@ public class LevelDBManagerTest {
         for(int i = 0, length = getMax() + 10; i < length; i++) {
             destroyArea(area + "-" + i);
         }
+        Assert.assertTrue(listArea().length < getMax());
     }
 
     public void testPut_1() throws UnsupportedEncodingException {

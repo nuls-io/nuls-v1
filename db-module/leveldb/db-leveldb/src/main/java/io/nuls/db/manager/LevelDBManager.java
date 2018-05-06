@@ -77,7 +77,9 @@ public class LevelDBManager {
                 }
                 try {
                     db = openDB(areaFile.getPath() + File.separator + BASE_DB_NAME, false);
-                    AREAS.put(areaFile.getName(), db);
+                    if (db != null) {
+                        AREAS.put(areaFile.getName(), db);
+                    }
                 } catch (Exception e) {
                     Log.warn("load area failed, areaName: " + areaFile.getName(), e);
                 }
@@ -247,6 +249,9 @@ public class LevelDBManager {
      */
     private static DB openDB(String dbPath, boolean createIfMissing) throws IOException {
         File file = new File(dbPath);
+        if (!createIfMissing && !file.exists()) {
+            return null;
+        }
         Options options = new Options().createIfMissing(createIfMissing);
         DBFactory factory = Iq80DBFactory.factory;
         return factory.open(file, options);
@@ -263,20 +268,23 @@ public class LevelDBManager {
     private static DB openDB(String dbPath, boolean createIfMissing, Long cacheSize, Comparator comparator) throws IOException {
         File file = new File(dbPath);
         Options options = new Options().createIfMissing(createIfMissing);
-        if(cacheSize != null) {
+        if (cacheSize != null) {
             options.cacheSize(cacheSize);
         }
-        if(comparator != null) {
-            DBComparator dbComparator = new DBComparator(){
+        if (comparator != null) {
+            DBComparator dbComparator = new DBComparator() {
                 public int compare(byte[] key1, byte[] key2) {
                     return comparator.compare(key1, key2);
                 }
+
                 public String name() {
                     return "key-comparator";
                 }
+
                 public byte[] findShortestSeparator(byte[] start, byte[] limit) {
                     return start;
                 }
+
                 public byte[] findShortSuccessor(byte[] key) {
                     return key;
                 }
@@ -463,7 +471,7 @@ public class LevelDBManager {
             DB db = AREAS.get(area);
             keySet = new HashSet<>();
             iterator = db.iterator();
-            for(iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 keySet.add(asString(iterator.peekNext().getKey()));
             }
             return keySet;
@@ -472,7 +480,7 @@ public class LevelDBManager {
             return null;
         } finally {
             // Make sure you close the iterator to avoid resource leaks.
-            if(iterator != null) {
+            if (iterator != null) {
                 try {
                     iterator.close();
                 } catch (IOException e) {
@@ -482,19 +490,19 @@ public class LevelDBManager {
         }
     }
 
-    public static Set<Map.Entry<String,String>> entrySet(String area) {
+    public static Set<Map.Entry<String, String>> entrySet(String area) {
         if (!baseCheckArea(area)) {
             return null;
         }
         DBIterator iterator = null;
-        Set<Map.Entry<String,String>> entrySet = null;
+        Set<Map.Entry<String, String>> entrySet = null;
         try {
             DB db = AREAS.get(area);
             iterator = db.iterator();
-            for(iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 String key = asString(iterator.peekNext().getKey());
                 String value = asString(iterator.peekNext().getValue());
-                System.out.println(key+" = "+value);
+                System.out.println(key + " = " + value);
             }
 
         } catch (Exception e) {
@@ -502,7 +510,7 @@ public class LevelDBManager {
             return null;
         } finally {
             // Make sure you close the iterator to avoid resource leaks.
-            if(iterator != null) {
+            if (iterator != null) {
                 try {
                     iterator.close();
                 } catch (IOException e) {
