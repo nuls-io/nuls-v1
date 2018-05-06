@@ -84,9 +84,11 @@ public interface LedgerService {
     /* 在这个list中找是否有重复 */
 
     /**
-     * To unlock the coindata of a transaction, when certain business scenarios need to lock a certain amount of funds, and an action is unlocked at a certain time in the future, the method is called, and the locked state is changed to the available state. The specific operation is to set lockTime from - 1 to 0
+     * Unlock the coindata of a transaction. When certain business scenarios require a certain amount of funds to be locked, an action is unlocked at some point in the future, the method is called, and the lock state changes to the spent state.
+     * The specific operation is to determine whether the from data in the coindata is -1, if it is not then return failure, if it is deleted, and then write the new to the input pool does not spend
      *
-     * 解锁一笔交易的coindata，当某些业务场景需要锁定一定数量的资金，在未来某个时刻某个动作解锁时，调用该方法，由锁定状态变为可用状态，具体操作的是把lockTime由-1改为0
+     * 解锁一笔交易的coindata，当某些业务场景需要锁定一定数量的资金，在未来某个时刻某个动作解锁时，调用该方法，由锁定状态变为已花费状态
+     * 具体操作的是先判断coindata里面的from是否为-1，如果不是则返回失败，如果是则删除，然后把新的to写入未花费的输入池
      * @param tx
      * @return boolean
      */

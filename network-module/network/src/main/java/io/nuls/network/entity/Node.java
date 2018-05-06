@@ -29,9 +29,7 @@ import io.nuls.core.tools.crypto.VarInt;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
-import io.nuls.protocol.model.BaseNulsData;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
-import io.nuls.protocol.utils.io.NulsOutputStreamBuffer;
+import io.nuls.kernel.model.BaseNulsData;
 
 import java.io.IOException;
 import java.util.Set;
@@ -126,19 +124,19 @@ public class Node extends BaseNulsData {
 //        return s;
 //    }
 
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(new VarInt(magicNumber).encode());
-        stream.write(new VarInt(getSeverPort()).encode());
-        stream.writeString(ip);
-    }
-
-    public void parse(NulsByteBuffer buffer) throws NulsException {
-        magicNumber = (int) buffer.readVarInt();
-        severPort = (int) buffer.readVarInt();
-        port = severPort;
-        ip = new String(buffer.readByLengthByte());
-        this.groupSet = ConcurrentHashMap.newKeySet();
-    }
+//    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+//        stream.write(new VarInt(magicNumber).encode());
+//        stream.write(new VarInt(getSeverPort()).encode());
+//        stream.writeString(ip);
+//    }
+//
+//    public void parse(NulsByteBuffer buffer) throws NulsException {
+//        magicNumber = (int) buffer.readVarInt();
+//        severPort = (int) buffer.readVarInt();
+//        port = severPort;
+//        ip = new String(buffer.readByLengthByte());
+//        this.groupSet = ConcurrentHashMap.newKeySet();
+//    }
 
     public boolean isHandShake() {
         return this.status == Node.HANDSHAKE;

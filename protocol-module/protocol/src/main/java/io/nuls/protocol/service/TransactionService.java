@@ -28,6 +28,7 @@ package io.nuls.protocol.service;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.network.entity.Node;
 
 import java.util.List;
 
@@ -40,6 +41,10 @@ public interface TransactionService {
     Result commitTx(Transaction tx);
 
     Result rollback(Transaction tx);
+
+    Result forwardTx(Transaction tx, Node includeNode);
+
+    Result broadcastTx(Transaction tx, Node includeNode);
 
     ValidateResult conflictDetect(List<Transaction> txList);
 }

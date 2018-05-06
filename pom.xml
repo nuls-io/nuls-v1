@@ -22,15 +22,12 @@
         <module>consensus-module</module>
         <module>ledger-module</module>
         <module>account-module</module>
-        <module>cache-module</module>
         <module>db-module</module>
-        <module>event-bus-module</module>
         <module>network-module</module>
         <module>contract-module</module>
-        <module>client</module>
-        <module>clientmodule</module>
         <module>client-module</module>
         <module>tools-module</module>
+        <module>message-bus-module</module>
     </modules>
     <dependencies>
         <dependency>

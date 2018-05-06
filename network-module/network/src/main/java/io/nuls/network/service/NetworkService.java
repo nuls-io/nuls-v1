@@ -26,12 +26,11 @@
 
 package io.nuls.network.service;
 
+import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
-import io.nuls.protocol.event.base.BaseEvent;
 
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * Created by ln on 2018/5/5.
@@ -44,15 +43,15 @@ public interface NetworkService {
 
     Collection<Node> getAvailableNodes();
 
-    BroadcastResult sendToAllNode(BaseEvent event, boolean asyn);
+    BroadcastResult sendToAllNode(BaseNulsData event, boolean asyn);
 
-    BroadcastResult sendToAllNode(BaseEvent event, String excludeNodeId, boolean asyn);
+    BroadcastResult sendToAllNode(BaseNulsData event, String excludeNodeId, boolean asyn);
 
-    BroadcastResult sendToNode(BaseEvent event, String nodeId, boolean asyn);
+    BroadcastResult sendToNode(BaseNulsData event, String nodeId, boolean asyn);
 
-    BroadcastResult sendToGroup(BaseEvent event, String groupName, boolean asyn);
+    BroadcastResult sendToGroup(BaseNulsData event, String groupName, boolean asyn);
 
-    BroadcastResult sendToGroup(BaseEvent event, String groupName, String excludeNodeId, boolean asyn);
+    BroadcastResult sendToGroup(BaseNulsData event, String groupName, String excludeNodeId, boolean asyn);
 
     boolean reset();
 
