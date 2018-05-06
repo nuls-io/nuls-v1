@@ -9,23 +9,19 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>event-bus-module</artifactId>
+    <artifactId>message-bus-module</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>event-bus</module>
-        <module>base/event-bus-base</module>
+        <module>message-bus</module>
+        <module>base/message-bus-base</module>
     </modules>
     <dependencies>
-        <!--<dependency>
-            <groupId>io.nuls.core-module</groupId>
-            <artifactId>kernel</artifactId>
-            <version>2.0.0</version>
-        </dependency>-->
-        <dependency>
-            <groupId>io.nuls.protocol-module</groupId>
-            <artifactId>protocol</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-    </dependencies>
+    <dependency>
+        <groupId>io.nuls.protocol-module</groupId>
+        <artifactId>protocol</artifactId>
+        <version>2.0.0</version>
+    </dependency>
+</dependencies>
+
 </project>
