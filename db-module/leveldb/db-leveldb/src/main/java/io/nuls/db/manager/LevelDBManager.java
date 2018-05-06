@@ -29,10 +29,7 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Result;
-import org.iq80.leveldb.DB;
-import org.iq80.leveldb.DBFactory;
-import org.iq80.leveldb.DBIterator;
-import org.iq80.leveldb.Options;
+import org.iq80.leveldb.*;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 
 import java.io.File;
@@ -80,7 +77,9 @@ public class LevelDBManager {
                 }
                 try {
                     db = openDB(areaFile.getPath() + File.separator + BASE_DB_NAME, false);
-                    AREAS.put(areaFile.getName(), db);
+                    if (db != null) {
+                        AREAS.put(areaFile.getName(), db);
+                    }
                 } catch (Exception e) {
                     Log.warn("load area failed, areaName: " + areaFile.getName(), e);
                 }
@@ -153,6 +152,18 @@ public class LevelDBManager {
     }
 
     public static Result createArea(String areaName) {
+        return createArea(areaName, null, null);
+    }
+
+    public static Result createArea(String areaName, Long cacheSize) {
+        return createArea(areaName, cacheSize, null);
+    }
+
+    public static Result createArea(String areaName, Comparator comparator) {
+        return createArea(areaName, null, comparator);
+    }
+
+    public static Result createArea(String areaName, Long cacheSize, Comparator comparator) {
         // prevent too many areas
         if (AREAS.size() > (max - 1)) {
             return new Result(false, "KV_AREA_CREATE_ERROR");
@@ -173,7 +184,7 @@ public class LevelDBManager {
                 dir.mkdir();
             }
             String filePath = dataPath + File.separator + areaName + File.separator + BASE_DB_NAME;
-            DB db = openDB(filePath, true);
+            DB db = openDB(filePath, true, cacheSize, comparator);
             AREAS.put(areaName, db);
             result = Result.getSuccess();
         } catch (Exception e) {
@@ -183,6 +194,41 @@ public class LevelDBManager {
         return result;
     }
 
+    public static Result destroyArea(String areaName) {
+        if (!baseCheckArea(areaName)) {
+            return new Result(false, "KV_AREA_NOT_EXISTS");
+        }
+        if (StringUtils.isBlank(dataPath) || !checkPathLegal(areaName)) {
+            return new Result(false, "KV_AREA_PATH_ERROR");
+        }
+        Result result;
+        try {
+            File dir = new File(dataPath + File.separator + areaName);
+            if (!dir.exists()) {
+                return new Result(false, "KV_AREA_NOT_EXISTS");
+            }
+            String filePath = dataPath + File.separator + areaName + File.separator + BASE_DB_NAME;
+            destroyDB(filePath);
+            AREAS.remove(areaName);
+            result = Result.getSuccess();
+        } catch (Exception e) {
+            Log.error("error destroy area: " + areaName, e);
+            result = new Result(false, "KV_AREA_DESTROY_ERROR");
+        }
+        return result;
+    }
+
+    private static void destroyDB(String dbPath) throws IOException {
+        File file = new File(dbPath);
+        Options options = new Options();
+        DBFactory factory = Iq80DBFactory.factory;
+        factory.destroy(file, options);
+    }
+
+    /**
+     * close all area
+     * 关闭所有数据区域
+     */
     public static void close() {
         Set<Map.Entry<String, DB>> entries = AREAS.entrySet();
         for (Map.Entry<String, DB> entry : entries) {
@@ -195,9 +241,56 @@ public class LevelDBManager {
         }
     }
 
+    /**
+     * @param dbPath
+     * @param createIfMissing
+     * @return
+     * @throws IOException
+     */
     private static DB openDB(String dbPath, boolean createIfMissing) throws IOException {
         File file = new File(dbPath);
+        if (!createIfMissing && !file.exists()) {
+            return null;
+        }
         Options options = new Options().createIfMissing(createIfMissing);
+        DBFactory factory = Iq80DBFactory.factory;
+        return factory.open(file, options);
+    }
+
+    /**
+     * @param dbPath
+     * @param createIfMissing
+     * @param cacheSize
+     * @param comparator
+     * @return
+     * @throws IOException
+     */
+    private static DB openDB(String dbPath, boolean createIfMissing, Long cacheSize, Comparator comparator) throws IOException {
+        File file = new File(dbPath);
+        Options options = new Options().createIfMissing(createIfMissing);
+        if (cacheSize != null) {
+            options.cacheSize(cacheSize);
+        }
+        if (comparator != null) {
+            DBComparator dbComparator = new DBComparator() {
+                public int compare(byte[] key1, byte[] key2) {
+                    return comparator.compare(key1, key2);
+                }
+
+                public String name() {
+                    return "key-comparator";
+                }
+
+                public byte[] findShortestSeparator(byte[] start, byte[] limit) {
+                    return start;
+                }
+
+                public byte[] findShortSuccessor(byte[] key) {
+                    return key;
+                }
+            };
+            options.comparator(dbComparator);
+        }
         DBFactory factory = Iq80DBFactory.factory;
         return factory.open(file, options);
     }
@@ -217,6 +310,7 @@ public class LevelDBManager {
         return true;
     }
 
+    @Deprecated
     private static byte[] bytes_(String str) {
         if (StringUtils.isBlank(str)) {
             return null;
@@ -229,6 +323,7 @@ public class LevelDBManager {
         }
     }
 
+    @Deprecated
     private static String asString_(byte[] bytes) {
         if (bytes == null) {
             return null;
@@ -320,6 +415,22 @@ public class LevelDBManager {
         }
     }
 
+    public static Result delete(String area, byte[] key) {
+        if (!baseCheckArea(area)) {
+            return new Result(true, "KV_AREA_NOT_EXISTS");
+        }
+        if (key == null) {
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+        }
+        try {
+            DB db = AREAS.get(area);
+            db.delete(key);
+            return Result.getSuccess();
+        } catch (Exception e) {
+            return Result.getFailed(e.getMessage());
+        }
+    }
+
     public static byte[] get(String area, String key) {
         if (!baseCheckArea(area)) {
             return null;
@@ -360,7 +471,7 @@ public class LevelDBManager {
             DB db = AREAS.get(area);
             keySet = new HashSet<>();
             iterator = db.iterator();
-            for(iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 keySet.add(asString(iterator.peekNext().getKey()));
             }
             return keySet;
@@ -369,7 +480,7 @@ public class LevelDBManager {
             return null;
         } finally {
             // Make sure you close the iterator to avoid resource leaks.
-            if(iterator != null) {
+            if (iterator != null) {
                 try {
                     iterator.close();
                 } catch (IOException e) {
@@ -379,19 +490,19 @@ public class LevelDBManager {
         }
     }
 
-    public static Set<Map.Entry<String,String>> entrySet(String area) {
+    public static Set<Map.Entry<String, String>> entrySet(String area) {
         if (!baseCheckArea(area)) {
             return null;
         }
         DBIterator iterator = null;
-        Set<Map.Entry<String,String>> entrySet = null;
+        Set<Map.Entry<String, String>> entrySet = null;
         try {
             DB db = AREAS.get(area);
             iterator = db.iterator();
-            for(iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 String key = asString(iterator.peekNext().getKey());
                 String value = asString(iterator.peekNext().getValue());
-                System.out.println(key+" = "+value);
+                System.out.println(key + " = " + value);
             }
 
         } catch (Exception e) {
@@ -399,7 +510,7 @@ public class LevelDBManager {
             return null;
         } finally {
             // Make sure you close the iterator to avoid resource leaks.
-            if(iterator != null) {
+            if (iterator != null) {
                 try {
                     iterator.close();
                 } catch (IOException e) {

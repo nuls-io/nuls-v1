@@ -59,6 +59,7 @@ public class LevelDBManagerTest {
         testDelete();
         testListArea();
         testFullCreateArea();
+        testDestroyArea();
     }
 
     public void testFullCreateArea() {
@@ -66,6 +67,13 @@ public class LevelDBManagerTest {
             createArea(area + "-" + i);
         }
         Assert.assertEquals(getMax(), listArea().length);
+    }
+
+    public void testDestroyArea() {
+        for(int i = 0, length = getMax() + 10; i < length; i++) {
+            destroyArea(area + "-" + i);
+        }
+        Assert.assertTrue(listArea().length < getMax());
     }
 
     public void testPut_1() throws UnsupportedEncodingException {
@@ -124,4 +132,5 @@ public class LevelDBManagerTest {
     public void after() {
         close();
     }
+
 }

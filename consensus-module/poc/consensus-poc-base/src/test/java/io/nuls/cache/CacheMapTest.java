@@ -32,7 +32,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -155,18 +157,47 @@ public class CacheMapTest {
         }
         System.out.println("remove late:" + (System.currentTimeMillis() - start));
         assertTrue(map.get(data1.getName() + "_remove"));
-
-
-        for (int i = 0; i < 100000; i++) {
+    }
+    @Test
+    public void testSpeed(){
+        CacheMap<String,ValueData> cacheMap = new CacheMap("test-cache-speed", 1024, String.class, ValueData.class, 0, 0, null, null);
+        Map<String,ValueData> map = new HashMap<>();
+        List<ValueData> list = new ArrayList<>();
+        for (int i = 0; i < 1000000; i++) {
             ValueData data = new ValueData();
             data.setTime(1000L);
             data.setName("test" + i);
             data.setCode(i);
-            cacheMap.put(data.getName(), data);
-            System.out.println(i + "=====size=" + cacheMap.size());
+            list.add(data);
         }
+        long start = System.currentTimeMillis();
+        for(int i=0;i<1000000;i++){
+            ValueData valueData =list.get(i);
+            cacheMap.put(valueData.getName(),valueData);
+        }
+        System.out.println("cache put use:"+(System.currentTimeMillis()-start));
+        start = System.currentTimeMillis();
+        for(int i=0;i<1000000;i++){
+            ValueData valueData =cacheMap.get("test"+i);
+        }
+        System.out.println("cache get use:"+(System.currentTimeMillis()-start));
 
 
+//========================================================================
+
+
+        start = System.currentTimeMillis();
+        for(int i=0;i<1000000;i++){
+            ValueData valueData = list.get(i);
+            map.put(valueData.getName(),valueData);
+        }
+        System.out.println("map put use:"+(System.currentTimeMillis()-start));
+        start = System.currentTimeMillis();
+        for(int i=0;i<1000000;i++){
+            ValueData valueData =map.get("test"+i);
+        }
+        System.out.println("map get use:"+(System.currentTimeMillis()-start));
+        System.out.println();
     }
 
     static class ValueData implements Serializable {
@@ -203,7 +234,6 @@ public class CacheMapTest {
             data.setCode(code);
             data.setName(name);
             data.setTime(time);
-            System.out.println("copy run...");
             return data;
         }
     }

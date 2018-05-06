@@ -44,18 +44,22 @@ public class CacheObjectSerializer<T> implements Serializer<T> {
     private final Class clazz;
 
     public CacheObjectSerializer(Class clazz) {
+        System.out.println("init++++" + clazz);
         schema = RuntimeSchema.createFrom(clazz);
         this.clazz = clazz;
     }
 
     @Override
     public ByteBuffer serialize(T o) throws SerializerException {
+        System.out.println("serialize+++" + o);
         byte[] bytes = ProtostuffIOUtil.toByteArray(o, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
+        System.out.println("hahaha===========" + bytes.length);
         return ByteBuffer.wrap(bytes);
     }
 
     @Override
     public T read(ByteBuffer byteBuffer) throws SerializerException {
+        System.out.println("read+++" + byteBuffer);
         T t = null;
         try {
             t = (T) clazz.newInstance();
@@ -71,8 +75,9 @@ public class CacheObjectSerializer<T> implements Serializer<T> {
     }
 
     @Override
-    public boolean equals(T o, ByteBuffer byteBuffer) throws ClassNotFoundException, SerializerException {
-        if(o==null){
+    public boolean equals(T o, ByteBuffer byteBuffer) throws SerializerException {
+        System.out.println("equals+++" + byteBuffer);
+        if (o == null) {
             return false;
         }
         return o.equals(this.read(byteBuffer));

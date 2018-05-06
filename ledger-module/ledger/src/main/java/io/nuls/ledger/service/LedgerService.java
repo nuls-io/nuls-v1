@@ -41,6 +41,14 @@ public interface LedgerService {
      * @return boolean
      */
     Result saveTx(Transaction tx);
+    /*
+        保存tx
+    */
+
+    /*
+        tx的coinData的from状态改为已花费(key为hash+index, value为对象序列化)，from的owner是34字节数组
+        在utxo池中加入to(key为hash+index, value为对象序列化)
+    */
 
     /**
      * Roll back transactions while rolling back coindata data
@@ -69,9 +77,11 @@ public interface LedgerService {
      */
     ValidateResult verifyCoinData(CoinData coinData);
     ValidateResult verifyCoinData(CoinData coinData, List<Transaction> txList);
+    /* 对比coinData，是否存在于list中，存在则抛异常 */
 
     ValidateResult verifyDoubleSpend(Block block);
     ValidateResult verifyDoubleSpend(List<Transaction> txList);
+    /* 在这个list中找是否有重复 */
 
     /**
      * Unlock the coindata of a transaction. When certain business scenarios require a certain amount of funds to be locked, an action is unlocked at some point in the future, the method is called, and the lock state changes to the spent state.
@@ -83,4 +93,5 @@ public interface LedgerService {
      * @return boolean
      */
     Result unlockTxCoinData(Transaction tx);
+    /* 在tx的CoinData的from中找到状态为-1的utxo，在系统UTXO池中删掉，在to中找到对应的UTXO，加入系统UTXO池中 */
 }
