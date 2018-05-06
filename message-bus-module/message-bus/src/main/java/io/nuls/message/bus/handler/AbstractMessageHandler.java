@@ -11,7 +11,7 @@ import io.nuls.protocol.message.base.BaseMessage;
  * @author: Charlie
  * @date: 2018/5/6
  */
-public abstract class AbstractMessageBusModule<T extends BaseMessage> implements NulsMessageHandler<T> {
+public abstract class AbstractMessageHandler<T extends BaseMessage> implements NulsMessageHandler<T> {
 
     private NulsMessageFilterChain filterChain = new NulsMessageFilterChain();
 
