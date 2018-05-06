@@ -47,11 +47,6 @@ public class LevelDBServiceTest {
 
     @Before
     public void init() {
-        try {
-            LevelDBManager.init();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         dbService = new LevelDBServiceImpl();
         dbService.createArea(areaName);
     }
