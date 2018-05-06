@@ -22,25 +22,28 @@
  * SOFTWARE.
  *
  */
+package io.nuls.protocol.intf;
 
-package io.nuls.cache.intf;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.validate.ValidateResult;
 
-import io.nuls.cache.entity.CacheListenerItem;
+import java.util.List;
 
 /**
  * @author Niels
- * @date 2018/1/23
+ * @date 2017/12/14
  */
-public interface NulsCacheListener<K, V> {
+public interface TransactionProcessor<T extends Transaction> {
 
-    void onCreate(CacheListenerItem<K, V> item);
+    void onRollback(T tx, Block block) throws NulsException;
 
-    void onEvict(CacheListenerItem<K, V> item);
+    void onCommit(T tx, Block block) throws NulsException;
 
-    void onRemove(CacheListenerItem<K, V> item);
+//    void onApproval(T tx, Block block) throws NulsException;
 
-    void onUpdate(CacheListenerItem<K, V> item);
+    ValidateResult conflictDetect(T tx, List<Transaction> txList);
 
-    void onExpire(CacheListenerItem<K, V> item);
 
 }

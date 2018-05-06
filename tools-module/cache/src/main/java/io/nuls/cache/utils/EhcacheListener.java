@@ -22,47 +22,47 @@
  * SOFTWARE.
  *
  */
-package io.nuls.cache.entity;
 
+package io.nuls.cache.utils;
+
+import io.nuls.cache.listener.intf.NulsCacheListener;
+import io.nuls.cache.model.CacheListenerItem;
+import org.ehcache.event.CacheEvent;
+import org.ehcache.event.CacheEventListener;
 
 /**
  * @author Niels
- * @date 2017/10/18
+ * @date 2018/1/23
  */
-public class CacheElement<T> {
-    private String cacheTitle;
-    private String key;
-    private T value;
+public class EhcacheListener implements CacheEventListener {
 
-    public CacheElement() {
+    private final NulsCacheListener listener;
+
+    public EhcacheListener(NulsCacheListener listener) {
+        this.listener = listener;
     }
 
-    public CacheElement(String key, T value) {
-        this.key = key;
-        this.value = value;
-    }
-
-    public String getCacheTitle() {
-        return cacheTitle;
-    }
-
-    public void setCacheTitle(String cacheTitle) {
-        this.cacheTitle = cacheTitle;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public T getValue() {
-        return value;
-    }
-
-    public void setValue(T value) {
-        this.value = value;
+    @Override
+    public void onEvent(CacheEvent event) {
+        CacheListenerItem item = new CacheListenerItem(event.getKey(), event.getNewValue(), event.getOldValue());
+        switch (event.getType()) {
+            case CREATED:
+                listener.onCreate(item);
+                break;
+            case EVICTED:
+                listener.onEvict(item);
+                break;
+            case EXPIRED:
+                listener.onExpire(item);
+                break;
+            case REMOVED:
+                listener.onRemove(item);
+                break;
+            case UPDATED:
+                listener.onUpdate(item);
+                break;
+            default:
+                return;
+        }
     }
 }

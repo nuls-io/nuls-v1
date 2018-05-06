@@ -26,7 +26,6 @@
 
 package io.nuls.consensus.poc.cache;
 
-import io.nuls.cache.util.CacheMap;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 

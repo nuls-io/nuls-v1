@@ -24,7 +24,7 @@
  */
 package io.nuls.protocol.cache;
 
-import io.nuls.cache.util.CacheMap;
+import io.nuls.cache.CacheMap;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.model.SmallBlock;
 

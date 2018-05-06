@@ -22,28 +22,24 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.intf;
-
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.validate.ValidateResult;
-
-import java.util.List;
+package io.nuls.cache.constant;
 
 /**
+ *
  * @author Niels
- * @date 2017/12/14
+ * @date 2017/10/27
+ *
  */
-public interface TransactionService<T extends Transaction> {
+public interface EhCacheConstant {
 
-    void onRollback(T tx, Block block) throws NulsException;
+    long MAX_SIZE_OF_CACHE_OBJ_GRAPH =  1024*1024*5;
 
-    void onCommit(T tx, Block block) throws NulsException;
-
-//    void onApproval(T tx, Block block) throws NulsException;
-
-    ValidateResult conflictDetect(T tx, List<Transaction> txList);
-
-
+    String KEY_TYPE_FIELD="keyType";
+    String VALUE_TYPE_FIELD="valueType";
+    String POOL_HEAP_FIELD = "heap";
+    String POOL_OFF_HEAP_FIELD = "offheap";
+    String POOL_DISK_FIELD = "disk";
+    String POOL_TIME_OF_LIVE_SECONDS = "timeToLiveSeconds";
+    String POOL_TIME_OF_IDLE_SECONDS = "timeToIdleSeconds";
+    int DEFAULT_MAX_SIZE = 16;
 }

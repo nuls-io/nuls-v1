@@ -14,9 +14,10 @@
     <artifactId>cache</artifactId>
     <dependencies>
         <dependency>
-            <groupId>io.nuls.tools-module</groupId>
-            <artifactId>tools</artifactId>
-            <version>2.0.0</version>
-        </dependency></dependencies>
+            <groupId>org.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+    </dependencies>
 
 </project>

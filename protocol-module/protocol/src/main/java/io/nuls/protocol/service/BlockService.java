@@ -28,10 +28,8 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import io.nuls.kernel.model.Result;
+import io.nuls.network.entity.Node;
 
 /**
  * @author Niels
@@ -56,4 +54,8 @@ public interface BlockService {
     boolean saveBlock(Block block) throws NulsException;
 
     boolean rollbackBlock(Block block) throws NulsException;
+
+    Result forwardBlock(Block block, Node excludeNode);
+
+    Result broadcastBlock(Block block, Node excludeNode);
 }
