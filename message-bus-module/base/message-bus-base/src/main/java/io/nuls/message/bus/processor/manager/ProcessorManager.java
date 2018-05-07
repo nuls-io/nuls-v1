@@ -17,7 +17,6 @@ import io.nuls.message.bus.processor.MessageCheckingProcessor;
 import io.nuls.message.bus.processor.thread.MessageDispatchThread;
 import io.nuls.message.bus.processor.thread.NulsMessageCall;
 import io.nuls.protocol.message.base.BaseMessage;
-import io.nuls.protocol.message.manager.MessageManager;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -67,12 +66,10 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
     }
 
     public void offer(ProcessData<M> data) {
-        MessageManager.care(data.getData().getClass());
         disruptorService.offer(disruptorName, data);
     }
 
     public String registerEventHandler(String handlerId, Class<M> messageClass, H handler) {
-        MessageManager.putEvent(messageClass);
         AssertUtil.canNotEmpty(messageClass, "registerEventHandler faild");
         AssertUtil.canNotEmpty(handler, "registerEventHandler faild");
         if (StringUtils.isBlank(handlerId)) {

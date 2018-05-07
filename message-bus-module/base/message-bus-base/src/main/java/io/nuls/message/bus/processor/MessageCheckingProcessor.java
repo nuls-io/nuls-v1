@@ -29,9 +29,9 @@ public class MessageCheckingProcessor<E extends BaseMessage> implements EventHan
 
             boolean commonDigestTx = message.getHeader().getMsgType() == MessageBusConstant.MSG_TYPE_COMMON_MSG_HASH_MSG &&
                     message.getHeader().getModuleId() == MessageBusConstant.MODULE_ID_MESSAGE_BUS;
-            boolean specialTx = commonDigestTx || (message.getHeader().getMsgType() == ProtocolConstant.NEW_TX_MESSAGE &&
+            boolean specialTx = commonDigestTx || (message.getHeader().getMsgType() == ProtocolConstant.MESSAGE_TYPE_NEW_TX &&
                     message.getHeader().getModuleId() == ProtocolConstant.MODULE_ID_PROTOCOL);
-            specialTx = specialTx || (message.getHeader().getMsgType() == ProtocolConstant.NEW_BLOCK &&
+            specialTx = specialTx || (message.getHeader().getMsgType() == ProtocolConstant.MESSAGE_TYPE_NEW_BLOCK &&
                     message.getHeader().getModuleId() == ProtocolConstant.MODULE_ID_PROTOCOL);
             if (!specialTx) {
                 messageCacheService.cacheRecievedMessageHash(eventHash);
