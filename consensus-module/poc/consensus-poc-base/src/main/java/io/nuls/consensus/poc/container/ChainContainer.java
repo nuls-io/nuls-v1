@@ -464,13 +464,7 @@ public class ChainContainer implements Cloneable {
 
             for(Transaction<Agent> tx : chain.getAgentList()) {
                 RegisterAgentTransaction agentTx = (RegisterAgentTransaction) tx;
-                RegisterAgentTransaction newAgentTx = agentTx.clone();
-
-                newAgentTx.setBlockHeight(tx.getBlockHeight());
-                newAgentTx.getTxData().setBlockHeight(tx.getTxData().getBlockHeight());
-                newAgentTx.getTxData().setDelHeight(tx.getTxData().getDelHeight());
-
-                agentList.add(newAgentTx);
+                agentList.add(agentTx.clone());
             }
 
             newChain.setAgentList(agentList);
@@ -480,13 +474,7 @@ public class ChainContainer implements Cloneable {
 
             for(Transaction<Deposit> tx : chain.getDepositList()) {
                 JoinConsensusTransaction depositTx = (JoinConsensusTransaction) tx;
-                JoinConsensusTransaction newDepositTx = depositTx.clone();
-
-                newDepositTx.setBlockHeight(tx.getBlockHeight());
-                newDepositTx.getTxData().setBlockHeight(tx.getTxData().getBlockHeight());
-                newDepositTx.getTxData().setDelHeight(tx.getTxData().getDelHeight());
-
-                depositList.add(newDepositTx);
+                depositList.add(depositTx.clone());
             }
 
             newChain.setDepositList(depositList);

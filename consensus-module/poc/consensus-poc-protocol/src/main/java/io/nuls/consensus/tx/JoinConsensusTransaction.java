@@ -47,6 +47,21 @@ public class JoinConsensusTransaction extends Transaction<Deposit> {
     public JoinConsensusTransaction clone() {
         JoinConsensusTransaction tx = new JoinConsensusTransaction();
         tx.parse(serialize());
+        tx.setBlockHeight(blockHeight);
+        tx.setIndex(index);
+        tx.setStatus(status);
+        tx.setHash(hash);
+        tx.setTransferType(transferType);
+        tx.setSize(size);
+        tx.setMine(isMine);
+
+        Deposit deposit = tx.getTxData();
+        deposit.setBlockHeight(txData.getBlockHeight());
+        deposit.setDelHeight(txData.getDelHeight());
+        deposit.setTime(txData.getTime());
+        deposit.setTxHash(txData.getTxHash());
+        deposit.setStatus(txData.getStatus());
+
         return tx;
     }
 }
