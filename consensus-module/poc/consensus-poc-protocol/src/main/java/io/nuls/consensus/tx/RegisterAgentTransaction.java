@@ -27,6 +27,7 @@ package io.nuls.consensus.tx;
 
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.entity.Agent;
+import io.nuls.consensus.entity.Deposit;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Transaction;
@@ -55,6 +56,23 @@ public class RegisterAgentTransaction extends Transaction<Agent> {
     public RegisterAgentTransaction clone() {
         RegisterAgentTransaction tx = new RegisterAgentTransaction();
         tx.parse(serialize());
+        tx.setBlockHeight(blockHeight);
+        tx.setIndex(index);
+        tx.setStatus(status);
+        tx.setHash(hash);
+        tx.setTransferType(transferType);
+        tx.setSize(size);
+        tx.setMine(isMine);
+
+        Agent agent = tx.getTxData();
+        agent.setBlockHeight(txData.getBlockHeight());
+        agent.setDelHeight(txData.getDelHeight());
+        agent.setTime(txData.getTime());
+        agent.setTxHash(txData.getTxHash());
+        agent.setStatus(txData.getStatus());
+        agent.setTotalDeposit(txData.getTotalDeposit());
+        agent.setCreditVal(txData.getCreditVal());
+
         return tx;
     }
 }

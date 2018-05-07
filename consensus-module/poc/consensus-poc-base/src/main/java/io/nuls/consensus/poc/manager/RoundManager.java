@@ -161,6 +161,9 @@ public class RoundManager {
         }
 
         MeetingRound nextRound = getNextRound(null, false);
+        if(round != null && nextRound.getIndex() <= round.getIndex()) {
+            return nextRound;
+        }
         nextRound.setPreRound(round);
         roundList.add(nextRound);
         return nextRound;
@@ -216,6 +219,8 @@ public class RoundManager {
     private MeetingRound getNextRoundByNotRealTime() {
         BlockHeader bestBlockHeader = chain.getEndBlockHeader();
         BlockRoundData roundData = new BlockRoundData(bestBlockHeader.getExtend());
+        roundData.setRoundStartTime(roundData.getRoundEndTime());
+        roundData.setRoundIndex(roundData.getRoundIndex() + 1);
         return getNextRoundByExpectedRound(roundData);
     }
 
@@ -347,7 +352,7 @@ public class RoundManager {
             if (deposit.getDelHeight() != -1L && deposit.getDelHeight() <= startBlockHeight) {
                 continue;
             }
-            if (deposit.getBlockHeight() >= startBlockHeight || deposit.getBlockHeight() < 0L) {
+            if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
                 continue;
             }
             if (!deposit.getAgentHash().equals(agentHash)) {
@@ -367,7 +372,7 @@ public class RoundManager {
             if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
                 continue;
             }
-            if (agent.getBlockHeight() >= startBlockHeight || agent.getBlockHeight() < 0L) {
+            if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
                 continue;
             }
             resultList.add(tx);

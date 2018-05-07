@@ -35,6 +35,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -94,7 +95,12 @@ public class ConsensusAccountServiceImpl implements AccountService {
 
     @Override
     public Result<List<Account>> getAccountList() {
-        return null;
+        Result<List<Account>> result = new Result<>();
+
+        List<Account> accountList = new ArrayList<>();
+
+        result.setData(accountList);
+        return result;
     }
 
     @Override
