@@ -32,7 +32,7 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
     private static final ProcessorManager INSTANCE = new ProcessorManager();
 
     private final Map<String, H> handlerMap = new HashMap<>();
-    private final Map<Class, Set<String>> eventHandlerMapping = new HashMap<>();
+    private final Map<Class, Set<String>> messageHandlerMapping = new HashMap<>();
     private DisruptorUtil<DisruptorData<ProcessData<M>>> disruptorService = DisruptorUtil.getInstance();
     private ExecutorService pool;
     private String disruptorName = MessageBusConstant.DISRUPTOR_NAME;
@@ -86,13 +86,13 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
 
     private void cacheHandlerMapping(Class<M> eventClass, String handlerId) {
 
-        Set<String> ids = eventHandlerMapping.get(eventClass);
+        Set<String> ids = messageHandlerMapping.get(eventClass);
         if (null == ids) {
             ids = new HashSet<>();
         }
 //        boolean b =
         ids.add(handlerId);
-        eventHandlerMapping.put(eventClass, ids);
+        messageHandlerMapping.put(eventClass, ids);
 //        if (!b) {
 //            throw new NulsRuntimeException(ErrorCode.FAILED, "registerEventHandler faild");
 //        }
@@ -104,7 +104,7 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
     }
 
     private Set<NulsMessageHandler> getHandlerList(Class<M> clazz) {
-        Set<String> ids = eventHandlerMapping.get(clazz);
+        Set<String> ids = messageHandlerMapping.get(clazz);
         Set<NulsMessageHandler> set = new HashSet<>();
         do {
             if (null == ids || ids.isEmpty()) {
