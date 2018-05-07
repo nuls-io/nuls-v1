@@ -124,7 +124,13 @@ public class Result<T> {
     }
 
     public static Result getFailed(ErrorCode errorCode) {
-        return new Result(false, errorCode.getMsg());
+        return getFailed(errorCode,errorCode.getMsg());
+    }
+
+    public static Result getFailed(ErrorCode errorCode,String msg) {
+        Result result = new Result(false, msg);
+        result.setErrorCode(errorCode);
+        return result;
     }
 
     public T getData() {

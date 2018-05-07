@@ -24,7 +24,6 @@
  */
 package io.nuls.kernel.utils;
 
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Transaction;
 import org.omg.IOP.TransactionService;
@@ -49,41 +48,6 @@ public class TransactionManager {
         TX_SERVICE_MAP.put(txClass, txServiceClass);
     }
 
-    public static final Class<? extends Transaction> getTxClass(int txType) {
-        return TX_MAP.get(txType);
-    }
-
-    public static Transaction getInstanceByType(int txType) throws NulsException {
-        Class<? extends Transaction> txClass = getTxClass(txType);
-        if (null == txClass) {
-            throw new RuntimeException( "transaction type not exist!");
-        }
-        Transaction tx = null;
-        try {
-            tx = txClass.getConstructor().newInstance();
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-        return tx;
-    }
-
-//    public static List<Transaction> getInstances(NulsByteBuffer byteBuffer, long txCount) throws Exception {
-//        List<Transaction> list = new ArrayList<>();
-//        for (int i = 0; i < txCount; i++) {
-//            list.add(getInstance(byteBuffer));
-//        }
-//        return list;
-//    }
-//
-//    public static Transaction getInstance(NulsByteBuffer byteBuffer) throws Exception {
-//        int txType = (int) new NulsByteBuffer(byteBuffer.getPayloadByCursor()).readVarInt();
-//        Class<? extends Transaction> txClass = getTxClass(txType);
-//        if (null == txClass) {
-//            throw new RuntimeException( "transaction type not exist!");
-//        }
-//        Transaction tx = byteBuffer.readNulsData(txClass.getConstructor().newInstance());
-//        return tx;
-//    }
 
     public static TransactionService getService(Class<? extends Transaction> txClass) {
         Class<? extends TransactionService> txServiceClass = TX_SERVICE_MAP.get(txClass);
