@@ -44,8 +44,4 @@ public class CancelDepositTransaction extends Transaction<NulsDigestData> {
         super(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
     }
 
-    @Override
-    public NulsDigestData parseTxData(byte[] bytes) {
-        return new NulsDigestData(bytes);
-    }
 }

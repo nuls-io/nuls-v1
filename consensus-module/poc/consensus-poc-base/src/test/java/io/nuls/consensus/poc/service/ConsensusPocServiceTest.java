@@ -30,14 +30,15 @@ import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.TestTransaction;
 import io.nuls.consensus.service.ConsensusServiceIntf;
 import io.nuls.kernel.constant.TransactionErrorCode;
-import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.kernel.validate.ValidatorManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -65,11 +66,16 @@ public class ConsensusPocServiceTest {
 
         // new a tx
         Transaction tx = new TestTransaction();
+        CoinData coinData = new CoinData();
+        List<Coin> fromList = new ArrayList<>();
+        fromList.add(new Coin(new byte[20], Na.NA, 0L));
+        coinData.setFrom(fromList);
+        tx.setCoinData(coinData);
         tx.setTime(1l);
 
         assertNotNull(tx);
         assertNotNull(tx.getHash());
-        assertEquals(tx.getHash().getDigestHex(), "0800122077b35f4a04e6d3e49521ef7fc4d80515bde810114a0f714f3b6d5b357bda0a0d");
+        assertEquals(tx.getHash().getDigestHex(), "08001220b9ab6a1e5ab8e2b09758d6143bb9b66b8fe0c2c4bf49f2bfb74709ef2bf1d02f");
 
         Result result = service.newTx(tx);
         assertNotNull(result);
@@ -80,17 +86,17 @@ public class ConsensusPocServiceTest {
         NulsDataValidator<TestTransaction> testValidator = new NulsDataValidator<TestTransaction>() {
             @Override
             public ValidateResult validate(TestTransaction data) {
-                if(data.getHash().getDigestHex().equals("0800122077b35f4a04e6d3e49521ef7fc4d80515bde810114a0f714f3b6d5b357bda0a0d")) {
+                if(data.getHash().getDigestHex().equals("08001220328876d03b50feba0ac58d3fcb4638a2fb95847315a88c8de7105408d931999a")) {
                     return ValidateResult.getFailedResult("test.transaction", TransactionErrorCode.ORPHAN_TX);
                 } else {
                     return ValidateResult.getSuccessResult();
                 }
             }
         };
-//        TransactionValidatorManager.addTxDefValidator(testValidator);
+        ValidatorManager.addValidator(TestTransaction.class, testValidator);
 
         tx = new TestTransaction();
-        tx.setTime(1l);
+        tx.setTime(2l);
         result = service.newTx(tx);
         assertNotNull(result);
         assertTrue(result.isSuccess());

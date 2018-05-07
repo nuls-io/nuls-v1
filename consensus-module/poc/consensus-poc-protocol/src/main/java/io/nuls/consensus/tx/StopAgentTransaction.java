@@ -45,8 +45,4 @@ public class StopAgentTransaction extends Transaction<NulsDigestData> {
         super(ConsensusConstant.TX_TYPE_STOP_AGENT);
     }
 
-    @Override
-    public NulsDigestData parseTxData(byte[] bytes) {
-        return new NulsDigestData(bytes);
-    }
 }

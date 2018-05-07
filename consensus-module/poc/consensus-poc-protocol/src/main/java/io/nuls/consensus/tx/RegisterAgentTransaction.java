@@ -52,13 +52,6 @@ public class RegisterAgentTransaction extends Transaction<Agent> {
 
     }
 
-    @Override
-    public Agent parseTxData(byte[] bytes) {
-        Agent agent = new Agent();
-        agent.parse(bytes);
-        return agent;
-    }
-
     public RegisterAgentTransaction clone() {
         RegisterAgentTransaction tx = new RegisterAgentTransaction();
         tx.parse(serialize());

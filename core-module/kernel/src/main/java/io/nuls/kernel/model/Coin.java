@@ -26,13 +26,17 @@
 
 package io.nuls.kernel.model;
 
+import io.protostuff.Tag;
+
 /**
  * Created by ln on 2018/5/5.
  */
 public class Coin extends BaseNulsData {
-
+    @Tag(1)
     private byte[] owner;
+    @Tag(2)
     private Na na;
+    @Tag(3)
     private long lockTime;
 
     public Coin(byte[] owner, Na na, long lockTime) {
