@@ -23,6 +23,7 @@
  *
  */
 package io.nuls.kernel.func;
+
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.RequestUtil;
@@ -31,6 +32,9 @@ import io.nuls.kernel.thread.manager.TaskManager;
 import java.util.Map;
 
 /**
+ * 时间服务类：用于同步网络标准时间
+ * Time service class:Used to synchronize network standard time.
+ *
  * @author vivi
  * @date 2017/11/21
  */
@@ -38,6 +42,11 @@ public class TimeService implements Runnable {
 
     private static TimeService INSTANCE = new TimeService();
 
+    /**
+     * 初始化时间服务器列表
+     * Initialize the time server list.
+     */
+    //todo
     private TimeService() {
         webTimeUrl = "http://time.inchain.org/now";
         start();
@@ -47,33 +56,49 @@ public class TimeService implements Runnable {
         return INSTANCE;
     }
 
+    /**
+     * 选择的时间服务器访问地址
+     * Select the time server to access the address.
+     */
     private String webTimeUrl;
 
     /**
      * 时间偏移差距触发点，超过该值会导致本地时间重设，单位毫秒
+     * Time migration gap trigger point, which can cause local time reset, unit milliseconds.
      **/
     public static final long TIME_OFFSET_BOUNDARY = 3000L;
 
+    /**
+     * 重新同步时间间隔
+     * Resynchronize the interval.
+     */
     private static final long NET_REFRESH_TIME = 10 * 60 * 1000L;   // 10 minutes;
-
-    public static final long ONE_HOUR = 3600 * 1000L;
 
     /**
      * 网络时间偏移值
      */
     private static long netTimeOffset;
 
+    /**
+     * 上次同步时间点
+     * The last synchronization point.
+     */
     private static long lastSyncTime;
 
-    private boolean running;
-
+    /**
+     * 启动时间同步线程
+     * Start the time synchronization thread.
+     */
     public void start() {
         Log.debug("----------- network timeService start -------------");
         syncWebTime();
-        running = true;
         TaskManager.createAndRunThread((short) 1, "TimeService", this, true);
     }
 
+    /**
+     * 同步网络时间
+     * Synchronous network time
+     */
     private void syncWebTime() {
         try {
             long localBeforeTime = System.currentTimeMillis();
@@ -94,6 +119,10 @@ public class TimeService implements Runnable {
         }
     }
 
+    /**
+     * 循环调用同步网络时间方法
+     * Loop call synchronous network time method.
+     */
     @Override
     public void run() {
         long lastTime = System.currentTimeMillis();
@@ -117,20 +146,39 @@ public class TimeService implements Runnable {
         }
     }
 
+    /**
+     * 获取当前网络时间毫秒数
+     * Gets the current network time in milliseconds.
+     * @return
+     */
     public static long currentTimeMillis() {
         return System.currentTimeMillis() + netTimeOffset;
     }
-
+    /**
+     * 获取当前网络时间秒数
+     * Gets the current network time in seconds.
+     * @return
+     */
     public static long currentTimeSeconds() {
         return currentTimeMillis() / 1000;
     }
 
+    /**
+     * 获取网络时间偏移值
+     * Gets the network time offset.
+     * @return
+     */
     public static long getNetTimeOffset() {
         return netTimeOffset;
     }
 
+
+    /**
+     * 停止同步网络时间、并且停止服务
+     * Stop synchronizing network time and stop service.
+     */
     public void shutdown() {
-        this.running = false;
+       //todo
     }
 
 }

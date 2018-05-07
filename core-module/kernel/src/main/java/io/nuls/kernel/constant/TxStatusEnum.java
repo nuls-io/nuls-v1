@@ -34,11 +34,13 @@ package io.nuls.kernel.constant;
 public enum TxStatusEnum {
 
     /**
+     * 未确认状态
      * not packaged
      */
     UNCONFIRM,
     /**
-     * six block confirmed
+     * 已确认状态
+     * packaged and saved
      */
     CONFIRMED
 

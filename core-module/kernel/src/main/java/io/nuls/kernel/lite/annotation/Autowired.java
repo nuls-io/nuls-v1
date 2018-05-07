@@ -27,6 +27,10 @@ package io.nuls.kernel.lite.annotation;
 import java.lang.annotation.*;
 
 /**
+ * 用来标记bean的属性，标记了该注解之后，系统在初始化阶段会对该字段自动赋值
+ * After the annotation is marked with the attributes used to mark the bean,
+ * the system is automatically assigned to the field during the initialization phase.
+ *
  * @author Niels Wang
  * @date 2018/1/30
  */
@@ -34,5 +38,12 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Autowired {
+
+    /**
+     * 依赖的bean名称，可以为空，默认为空
+     * Depending on the bean name, it can be empty and the default is empty.
+     *
+     * @return 对象名称/bean name
+     */
     String value() default "";
 }

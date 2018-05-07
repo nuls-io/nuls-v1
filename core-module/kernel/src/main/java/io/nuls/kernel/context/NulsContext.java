@@ -40,20 +40,35 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class NulsContext {
 
+    /**
+     * 默认链id（nuls主链）,链id会影响地址的生成，当前地址以“Ns”开头
+     * The default chain id (nuls main chain), the chain id affects the generation of the address,
+     * and the current address begins with "Ns".
+     */
     public static short DEFAULT_CHAIN_ID = -3068;
-
-    public static String DEFAULT_ACCOUNT_ID;
 
     /**
      * cache the best block
      */
     private Block bestBlock;
+
+    /**
+     * cache the genesis block
+     */
     private Block genesisBlock;
+
+    /**
+     * 网络最新区块高度
+     * Network latest block height.
+     */
     private Long netBestBlockHeight = 0L;
 
-    public static Set<String> LOCAL_ADDRESS_LIST = ConcurrentHashMap.newKeySet();
-
-
+    /**
+     * 获取创世块
+     * get the block height is 0
+     *
+     * @return block
+     */
     public Block getGenesisBlock() {
         while (genesisBlock == null) {
             try {
@@ -75,6 +90,12 @@ public class NulsContext {
         return bestBlock;
     }
 
+    /**
+     * 获取本地最新高度
+     * Get the latest local height.
+     *
+     * @return long height
+     */
     public long getBestHeight() {
         if (bestBlock == null) {
             bestBlock = getGenesisBlock();
@@ -103,6 +124,14 @@ public class NulsContext {
 //        Log.info("best height:"+bestBlock.getHeader().getHeight()+", hash:"+bestBlock.getHeader().getHash());
     }
 
+    /**
+     * 根据服务类型获取实例
+     * Gets an instance based on the service type.
+     *
+     * @param tClass 服务类型
+     * @param <T>    泛型
+     * @return 实例对象
+     */
     public static final <T> T getServiceBean(Class<T> tClass) {
         try {
 
@@ -130,6 +159,13 @@ public class NulsContext {
         }
     }
 
+    /**
+     * 获取网络最新高度，当缓存的网络最新高度为空或者小于本地高度时，返回本地最新高度
+     * To get the latest height of the network, return to the local latest height
+     * when the cached network's latest height is empty or less than the local height.
+     *
+     * @return long best height
+     */
     public Long getNetBestBlockHeight() {
         if (null != bestBlock && netBestBlockHeight < bestBlock.getHeader().getHeight()) {
             return bestBlock.getHeader().getHeight();
@@ -140,6 +176,10 @@ public class NulsContext {
         return netBestBlockHeight;
     }
 
+    /**
+     * 获取缓存的网络最新高度
+     * Gets the latest height of the cached network.
+     */
     public Long getNetBestBlockHeightWithNull() {
         return netBestBlockHeight;
     }
@@ -148,6 +188,14 @@ public class NulsContext {
         this.netBestBlockHeight = netBestBlockHeight;
     }
 
+    /**
+     * 根据服务类型获取该类型所有实例
+     * Gets all instances of this type according to the service type.
+     *
+     * @param tClass 服务类型
+     * @param <T>    泛型
+     * @return 实例列表
+     */
     public static <T> List<T> getServiceBeanList(Class<T> tClass) {
         try {
             return SpringLiteContext.getBeanList(tClass);
