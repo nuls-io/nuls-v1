@@ -28,11 +28,24 @@ package io.nuls.kernel.constant;
 import io.nuls.kernel.i18n.I18nUtils;
 
 /**
+ * 系统所有返回编码的管理工具，所有的常量都应该用该类实现。该类整合了国际化操作，所有需要国际化的信息都应该使用该类
+ * All of the system's return code management tools, all of the constants should be implemented using this class.
+ * This class integrates internationalization operations, and all information that needs internationalization should be used.
+ *
  * @author: Niels Wang
  * @date: 2018/5/5
  */
 public class ErrorCode {
+    /**
+     * 消息内容的国际化编码
+     * Internationalized encoding of message content.
+     */
     private final int msg;
+
+    /**
+     * 返回码，用于标记唯一的结果
+     * The return code is used to mark the unique result.
+     */
     private final String code;
 
     protected ErrorCode(String code, int msg) {
@@ -43,6 +56,10 @@ public class ErrorCode {
         }
     }
 
+    /**
+     * 根据系统语言设置，返回国际化编码对应的字符串
+     * According to the system language Settings, return the string corresponding to the internationalization encoding.
+     */
     public String getMsg() {
         return I18nUtils.get(msg);
     }
