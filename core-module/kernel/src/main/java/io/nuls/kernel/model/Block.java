@@ -27,6 +27,7 @@ package io.nuls.kernel.model;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.utils.BlockValidatorManager;
 import io.nuls.kernel.validate.NulsDataValidator;
+import io.protostuff.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +38,9 @@ import java.util.List;
  */
 public class Block extends BaseNulsData implements NulsCloneable {
 
+    @Tag(1)
     private BlockHeader header;
-
+    @Tag(2)
     private List<Transaction> txs;
 
     public Block() {

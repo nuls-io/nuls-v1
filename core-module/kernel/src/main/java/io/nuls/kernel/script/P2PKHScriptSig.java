@@ -31,6 +31,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.validate.ValidateResult;
+import io.protostuff.Tag;
 
 /**
  * author Facjas
@@ -38,7 +39,9 @@ import io.nuls.kernel.validate.ValidateResult;
  */
 public class P2PKHScriptSig extends Script {
 
+    @Tag(1)
     private NulsSignData signData;
+    @Tag(2)
     private byte[] publicKey;
 
     public P2PKHScriptSig() {
