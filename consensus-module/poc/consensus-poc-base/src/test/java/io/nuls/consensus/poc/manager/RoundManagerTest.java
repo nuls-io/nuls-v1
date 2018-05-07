@@ -26,40 +26,25 @@
 
 package io.nuls.consensus.poc.manager;
 
-import io.nuls.consensus.entity.Agent;
-import io.nuls.consensus.poc.customer.ConsensusAccountServiceImpl;
-import io.nuls.consensus.poc.model.BlockRoundData;
+import io.nuls.consensus.poc.BaseChainTest;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingRound;
-import io.nuls.kernel.lite.core.SpringLiteContext;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Transaction;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
 /**
  * Created by ln on 2018/5/7.
  */
-public class RoundManagerTest {
+public class RoundManagerTest extends BaseChainTest {
 
     private RoundManager roundManager;
 
-    @BeforeClass
-    public static void init() {
-        SpringLiteContext.putBean(ConsensusAccountServiceImpl.class,false);
-    }
-
     @Before
     public void initData() {
-        Chain chain = new Chain();
+        initChain();
+
         roundManager = new RoundManager(chain);
     }
 
@@ -147,44 +132,25 @@ public class RoundManagerTest {
 
         Chain chain = roundManager.getChain();
 
-        initChain(chain);
-
         assertNotNull(chain.getEndBlockHeader());
         assert(chain.getBlockList().size() > 0);
 
         MeetingRound round = roundManager.initRound();
 
         assertNotNull(round);
-    }
 
-    private void initChain(Chain chain) {
-        // new a block
-        BlockHeader blockHeader = new BlockHeader();
-        blockHeader.setHeight(0);
-        blockHeader.setPreHash(NulsDigestData.calcDigestData("00000000000".getBytes()));
-        blockHeader.setTime(1L);
-        blockHeader.setTxCount(0);
+        assertEquals(round.getIndex(), 1L);
+        assertEquals(round.getStartTime(), 1L);
 
-        BlockRoundData roundData = new BlockRoundData();
-        roundData.setConsensusMemberCount(1);
-        roundData.setPackingIndexOfRound(1);
-        roundData.setRoundIndex(1);
-        roundData.setRoundStartTime(1L);
-        blockHeader.setExtend(roundData.serialize());
+        MeetingRound round2 = roundManager.getNextRound(null, false);
+        assertNotNull(round2);
+        assertEquals(round.getIndex(), round2.getIndex());
+        assertEquals(round.getStartTime(), round2.getStartTime());
 
-        chain.setEndBlockHeader(blockHeader);
-
-        Block block = new Block();
-        block.setHeader(blockHeader);
-
-        chain.getBlockList().add(block);
-
-        List<Transaction<Agent>> agentList = new ArrayList<>();
-
-        chain.setAgentList(agentList);
-
-        chain.setDepositList(new ArrayList<>());
-        chain.setYellowPunishList(new ArrayList<>());
-        chain.setRedPunishList(new ArrayList<>());
+        round2 = roundManager.getNextRound(null, true);
+        assertNotNull(round2);
+        assert(round.getIndex() < round2.getIndex());
+        assert(round.getStartTime() < round2.getStartTime());
+        assertEquals("", 0d, round2.getTotalWeight(), 2200000d);
     }
 }

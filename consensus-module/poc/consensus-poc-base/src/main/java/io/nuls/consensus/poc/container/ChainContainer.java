@@ -60,11 +60,9 @@ public class ChainContainer implements Cloneable {
     private Chain chain;
     private RoundManager roundManager;
 
-    public ChainContainer() {
-    }
-
     public ChainContainer(Chain chain) {
         this.chain = chain;
+        roundManager = new RoundManager(chain);
     }
 
     public boolean addBlock(Block block) {
@@ -183,11 +181,11 @@ public class ChainContainer implements Cloneable {
 
         // Verify that the block is properly connected
         // 验证区块是否正确连接
-        String preHash = blockHeader.getPreHash().getDigestHex();
+        NulsDigestData preHash = blockHeader.getPreHash();
 
         BlockHeader bestBlockHeader = chain.getEndBlockHeader();
 
-        if (!preHash.equals(bestBlockHeader.getHash().getDigestHex())) {
+        if (!preHash.equals(bestBlockHeader.getHash())) {
             Log.error("block height " + blockHeader.getHeight() + " prehash is error! hash :" + blockHeader.getHash().getDigestHex());
             return false;
         }
@@ -229,10 +227,16 @@ public class ChainContainer implements Cloneable {
                 Log.error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash().getDigestHex());
                 return false;
             }
+            if (roundData.getRoundStartTime() < currentRound.getEndTime()) {
+                Log.error("block height " + blockHeader.getHeight() + " round index and start time not match! hash :" + blockHeader.getHash().getDigestHex());
+                return false;
+            }
             MeetingRound tempRound = roundManager.getNextRound(roundData, !isDownload);
-            tempRound.setPreRound(currentRound);
+            if(tempRound.getIndex() > currentRound.getIndex()) {
+                tempRound.setPreRound(currentRound);
+                hasChangeRound = true;
+            }
             currentRound = tempRound;
-            hasChangeRound = true;
         } else if (roundData.getRoundIndex() < currentRound.getIndex()) {
             MeetingRound preRound = currentRound.getPreRound();
             while (preRound != null) {
@@ -259,7 +263,7 @@ public class ChainContainer implements Cloneable {
         // 验证打包人是否正确
         MeetingMember member = currentRound.getMember(roundData.getPackingIndexOfRound());
         if (!Arrays.equals(member.getPackingAddress(), blockHeader.getPackingAddress())) {
-            Log.error("block height " + blockHeader.getHeight() + " time error! hash :" + blockHeader.getHash().getDigestHex());
+            Log.error("block height " + blockHeader.getHeight() + " packager error! hash :" + blockHeader.getHash().getDigestHex());
             return false;
         }
 
@@ -460,7 +464,13 @@ public class ChainContainer implements Cloneable {
 
             for(Transaction<Agent> tx : chain.getAgentList()) {
                 RegisterAgentTransaction agentTx = (RegisterAgentTransaction) tx;
-                agentList.add(agentTx.clone());
+                RegisterAgentTransaction newAgentTx = agentTx.clone();
+
+                newAgentTx.setBlockHeight(tx.getBlockHeight());
+                newAgentTx.getTxData().setBlockHeight(tx.getTxData().getBlockHeight());
+                newAgentTx.getTxData().setDelHeight(tx.getTxData().getDelHeight());
+
+                agentList.add(newAgentTx);
             }
 
             newChain.setAgentList(agentList);
@@ -470,7 +480,13 @@ public class ChainContainer implements Cloneable {
 
             for(Transaction<Deposit> tx : chain.getDepositList()) {
                 JoinConsensusTransaction depositTx = (JoinConsensusTransaction) tx;
-                depositList.add(depositTx.clone());
+                JoinConsensusTransaction newDepositTx = depositTx.clone();
+
+                newDepositTx.setBlockHeight(tx.getBlockHeight());
+                newDepositTx.getTxData().setBlockHeight(tx.getTxData().getBlockHeight());
+                newDepositTx.getTxData().setDelHeight(tx.getTxData().getDelHeight());
+
+                depositList.add(newDepositTx);
             }
 
             newChain.setDepositList(depositList);
@@ -547,6 +563,10 @@ public class ChainContainer implements Cloneable {
 
     public MeetingRound getOrResetCurrentRound() {
         return roundManager.resetRound(true);
+    }
+
+    protected MeetingRound getOrResetCurrentRound(boolean isRealTime) {
+        return roundManager.resetRound(isRealTime);
     }
 
     public MeetingRound initRound() {
