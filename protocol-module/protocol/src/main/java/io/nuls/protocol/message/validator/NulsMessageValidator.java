@@ -25,14 +25,28 @@
 package io.nuls.protocol.message.validator;
 
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**
+ * 网络消息验证器
+ * network message validator
+ *
  * @author Niels
  * @date 2017/12/4
  */
-public class NulsMessageValidator {
+@Component
+public class NulsMessageValidator implements NulsDataValidator<BaseMessage> {
+
+    /**
+     * 验证消息体不为空，消息体长度正确，校验值正确
+     * Verify that the message body is not empty, the message body length is correct, and the check value is correct.
+     *
+     * @param data 网络消息实体，network message entity
+     * @return 验证结果
+     */
     public ValidateResult validate(BaseMessage data) {
         if (data.getHeader() == null || data.getMsgBody() == null) {
             return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NET_MESSAGE_ERROR);

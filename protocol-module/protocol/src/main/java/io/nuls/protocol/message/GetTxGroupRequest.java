@@ -24,26 +24,19 @@
  */
 package io.nuls.protocol.message;
 
-import io.nuls.protocol.constant.ProtocolMessageType;
-import io.nuls.protocol.message.base.NoticeData;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.GetTxGroupParam;
 
 /**
- * get block by height.
- *
+ * 从对等节点处获取交易列表的消息
+ * The message of gets the transaction list from the peer node.
  * @author Niels
  * @date 2017/11/13
  */
 public class GetTxGroupRequest extends BaseProtocolMessage<GetTxGroupParam> {
 
-
     public GetTxGroupRequest() {
-        super(ProtocolMessageType.GET_TX_GROUP);
-    }
-
-    @Override
-    public NoticeData getNotice() {
-        return null;
+        super(ProtocolConstant.MESSAGE_TYPE_GET_TX_GROUP);
     }
 
 }

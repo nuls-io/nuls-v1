@@ -26,18 +26,38 @@
 package io.nuls.protocol.model;
 
 import io.nuls.kernel.model.BaseNulsData;
+import io.protostuff.Tag;
 
 /**
+ * 请求区块摘要的数据封装
+ * Request block hashes data encapsulation.
+ *
  * @author Niels
  * @date 2018/2/8
  */
 public class GetBlocksHashParam extends BaseNulsData {
+
+    /**
+     * 请求的起始高度，即需要返回的第一个高度
+     * The starting height of the request is the first height to be returned.
+     */
+    @Tag(1)
     private long start;
+
+    /**
+     * 请求的区块数量
+     * the count of the blocks request
+     */
+    @Tag(2)
     private long size;
 
     public GetBlocksHashParam() {
     }
 
+    /**
+     * 请求的起始高度，即需要返回的第一个高度
+     * The starting height of the request is the first height to be returned.
+     */
     public long getStart() {
         return start;
     }
@@ -46,6 +66,10 @@ public class GetBlocksHashParam extends BaseNulsData {
         this.start = start;
     }
 
+    /**
+     * 请求的区块数量
+     * the count of the blocks request
+     */
     public long getSize() {
         return size;
     }

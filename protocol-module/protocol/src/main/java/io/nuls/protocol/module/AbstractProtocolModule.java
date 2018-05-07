@@ -23,16 +23,19 @@
  */
 package io.nuls.protocol.module;
 
-import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.module.BaseModuleBootstrap;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 /**
+ * 协议模块启动器的抽象类,用于绑定模块id
+ * An abstract class of the protocol module launcher used to bind module id.
+ *
  * @author Niels
  * @date 2017/11/7
  */
 public abstract class AbstractProtocolModule extends BaseModuleBootstrap {
     public AbstractProtocolModule() {
-        super(NulsConstant.MODULE_ID_PROTOCOL);
+        super(ProtocolConstant.MODULE_ID_PROTOCOL);
     }
 
 }

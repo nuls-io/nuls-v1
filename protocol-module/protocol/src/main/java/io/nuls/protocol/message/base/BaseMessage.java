@@ -54,6 +54,7 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
      * 计算msgBody的验证值，通过简单的异或得出结果，将结果放入消息头中
      * The verification value of msgBody is calculated,
      * and the result is put into the message header through a simple difference or result.
+     *
      * @return 验证值（计算结果）,Verification value (calculation result)
      */
     public byte caculateXor() {
@@ -91,6 +92,4 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
         }
         return hash;
     }
-
-    public abstract NoticeData getNotice();
 }

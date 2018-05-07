@@ -23,13 +23,13 @@
  */
 package io.nuls.protocol.message;
 
-import io.nuls.protocol.constant.ProtocolMessageType;
-import io.nuls.protocol.message.base.NoticeData;
-import io.nuls.protocol.model.GetBlockDataParam;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.model.GetBlockDataParam;
 
 /**
- * get block by height.
+ * 获取区块的消息
+ * The message for get block or blocks
  *
  * @author Niels
  * @date 2017/11/13
@@ -37,7 +37,7 @@ import io.nuls.kernel.model.NulsDigestData;
 public class GetBlockRequest extends BaseProtocolMessage<GetBlockDataParam> {
 
     public GetBlockRequest() {
-        super(ProtocolMessageType.GET_BLOCK);
+        super(ProtocolConstant.MESSAGE_TYPE_GET_BLOCK);
     }
 
     public GetBlockRequest(long start, long size) {
@@ -56,11 +56,6 @@ public class GetBlockRequest extends BaseProtocolMessage<GetBlockDataParam> {
         param.setStartHash(startHash);
         param.setEndHash(endHash);
         this.setMsgBody(param);
-    }
-
-    @Override
-    public NoticeData getNotice() {
-        return null;
     }
 
     public long getStart() {

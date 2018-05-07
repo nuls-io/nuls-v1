@@ -25,23 +25,38 @@
 package io.nuls.protocol.model;
 
 import io.nuls.kernel.model.BaseNulsData;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
+import io.protostuff.Tag;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
+ * 用于返回对等节点请求的交易列表的封装
+ * The encapsulation of the transaction list used to return a peer request.
+ *
  * @author Niels
  * @date 2018/1/3
  */
 public class TxGroup extends BaseNulsData {
-
-    private NulsDigestData blockHash;
+    /**
+     * 应答的交易列表
+     * transaction list for response
+     */
+    @Tag(1)
     private List<Transaction> txList;
-    private Map<String, Transaction> txMap;
 
+    /**
+     * 交易整理到hashmap中
+     * The transaction is sorted into a hashmap.
+     */
+    private transient Map<String, Transaction> txMap;
+
+    /**
+     * 交易整理到hashmap中
+     * The transaction is sorted into a hashmap.
+     */
     private synchronized void initTxMap() {
         if (null != txMap) {
             return;
@@ -52,14 +67,10 @@ public class TxGroup extends BaseNulsData {
         }
     }
 
-    public NulsDigestData getBlockHash() {
-        return blockHash;
-    }
-
-    public void setBlockHash(NulsDigestData blockHash) {
-        this.blockHash = blockHash;
-    }
-
+    /**
+     * 应答的交易列表
+     * transaction list for response
+     */
     public List<Transaction> getTxList() {
         return txList;
     }
@@ -73,6 +84,10 @@ public class TxGroup extends BaseNulsData {
         return txMap.get(digestHex);
     }
 
+    /**
+     * 交易整理的hashmap
+     * The transaction is sorted into a hashmap.
+     */
     public Map<String, Transaction> getTxMap() {
         if (null == txMap) {
             initTxMap();

@@ -24,27 +24,19 @@
  */
 package io.nuls.protocol.message;
 
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.protocol.constant.ProtocolMessageType;
-import io.nuls.protocol.message.base.NoticeData;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 /**
+ * 发送新交易的消息
+ * The message for send a new transaction
+ *
  * @author Niels
  * @date 2017/11/8
  */
 public class TransactionMessage extends BaseProtocolMessage<Transaction> {
 
     public TransactionMessage() {
-        super(ProtocolMessageType.NEW_TX_MESSAGE);
+        super(ProtocolConstant.MESSAGE_TYPE_NEW_TX);
     }
-
-    @Override
-    public NoticeData getNotice() {
-        NoticeData data = new NoticeData();
-        data.setMessage(KernelErrorCode.NEW_TX_RECIEVED);
-        data.setData(this.getMsgBody().getHash().getDigestHex());
-        return data;
-    }
-
 }

@@ -24,25 +24,16 @@
 package io.nuls.protocol.message;
 
 import io.nuls.kernel.model.Block;
-import io.nuls.protocol.constant.ProtocolMessageType;
-import io.nuls.protocol.message.base.NoticeData;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 /**
+ * 区块在网络消息中的承载类
+ * The host class of the block in the network message.
  * @author Niels
  * @date 2017/11/13
  */
 public class BlockMessage extends BaseProtocolMessage<Block> {
     public BlockMessage() {
-        super(ProtocolMessageType.BLOCK);
-    }
-
-    @Override
-    public NoticeData getNotice() {
-        if (this.getMsgBody() == null) {
-            return null;
-        }
-        NoticeData data = new NoticeData();
-        data.setData(this.getMsgBody().getHeader().getHeight());
-        return data;
+        super(ProtocolConstant.MESSAGE_TYPE_BLOCK);
     }
 }

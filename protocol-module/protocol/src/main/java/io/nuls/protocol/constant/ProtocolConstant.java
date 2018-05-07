@@ -35,55 +35,60 @@ public interface ProtocolConstant extends NulsConstant {
      * "数据找不到应"答消息的类型
      * The data cannot find the type of answer.
      */
-    short NOT_FOUND_MESSAGE = 1;
+    short MESSAGE_TYPE_NOT_FOUND = 1;
     /**
      * 新交易发送及转发的消息类型
      * The type of message that the new transaction sends and forwards.
      */
-    short NEW_TX_MESSAGE = 2;
+    short MESSAGE_TYPE_NEW_TX = 2;
     /**
      * 获取区块的消息的类型
      * Gets the type of message for the block.
      */
-    short GET_BLOCK = 3;
+    short MESSAGE_TYPE_GET_BLOCK = 3;
     /**
      * 发送区块的消息的类型
      * The type of message to send the block.
      */
-    short BLOCK = 4;
+    short MESSAGE_TYPE_BLOCK = 4;
     /**
      * 获取区块头的消息的类型
      * Gets the type of message for the block-header.
      */
-    short GET_BLOCK_HEADER = 5;
+    short MESSAGE_TYPE_GET_BLOCK_HEADER = 5;
     /**
      * 发送区块头的消息的类型
      * The type of message to send the block-header.
      */
-    short BLOCK_HEADER = 6;
+    short MESSAGE_TYPE_BLOCK_HEADER = 6;
     /**
      * 获取交易或交易列表的消息的类型
      * Gets the type of message for the transactions.
      */
-    short GET_TX_GROUP = 7;
+    short MESSAGE_TYPE_GET_TX_GROUP = 7;
     /**
      * 发送区块头的消息的类型
      * The type of message to send the transactions.
      */
-    short TX_GROUP = 8;
+    short MESSAGE_TYPE_TX_GROUP = 8;
     /**
      * 新区块发送及转发的消息类型
      * The type of message that the new SmallBlock sends and forwards.
      */
-    short NEW_BLOCK = 9;
+    short MESSAGE_TYPE_NEW_BLOCK = 9;
     /**
      * 获取区块hash或hash列表的消息的类型
      * Gets the type of message for the Blocks hashes.
      */
-    short GET_BLOCKS_HASH = 10;
+    short MESSAGE_TYPE_GET_BLOCKS_HASH = 10;
     /**
      * 发送区块hash的消息的类型
      * The type of message to send the Blocks hashes.
      */
-    short BLOCKS_HASH = 11;
+    short MESSAGE_TYPE_BLOCKS_HASH = 11;
+    /**
+     * 发送字符串给对等节点的消息的类型
+     * The type of message that is sent to a peer.
+     */
+    short MESSAGE_TYPE_STRING = 12;
 }
