@@ -24,7 +24,7 @@
 package io.nuls.protocol.message;
 
 import io.nuls.kernel.model.Block;
-import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.constant.ProtocolMessageType;
 import io.nuls.protocol.message.base.NoticeData;
 
 /**
@@ -33,7 +33,7 @@ import io.nuls.protocol.message.base.NoticeData;
  */
 public class BlockMessage extends BaseProtocolMessage<Block> {
     public BlockMessage() {
-        super(ProtocolEventType.BLOCK);
+        super(ProtocolMessageType.BLOCK);
     }
 
     @Override

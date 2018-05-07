@@ -25,7 +25,7 @@
 package io.nuls.protocol.message;
 
 import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.constant.ProtocolMessageType;
 import io.nuls.protocol.message.base.BaseMessage;
 import io.nuls.protocol.message.base.NoticeData;
 import io.nuls.protocol.model.BlockHashResponse;
@@ -37,7 +37,7 @@ import io.nuls.protocol.model.BlockHashResponse;
 public class BlocksHashMessage extends BaseMessage<BlockHashResponse> {
 
     public BlocksHashMessage() {
-        super(NulsConstant.MODULE_ID_CONSENSUS, ProtocolEventType.EVENT_TYPE_BLOCKS_HASH);
+        super(NulsConstant.MODULE_ID_CONSENSUS, ProtocolMessageType.BLOCKS_HASH);
     }
 
     @Override

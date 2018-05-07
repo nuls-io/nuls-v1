@@ -35,7 +35,7 @@ import io.nuls.kernel.module.BaseModuleBootstrap;
 public abstract class AbstractDBModule extends BaseModuleBootstrap {
 
     protected AbstractDBModule() {
-        super(NulsConstant.MODULE_ID_DB);
+        super(Protocolcon.MODULE_ID_DB);
     }
 
 }

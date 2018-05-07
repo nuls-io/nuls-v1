@@ -47,13 +47,8 @@ public interface NulsConstant {
      * ----[ Module Id] ----
      */
     short MODULE_ID_MICROKERNEL = 1;
-    short MODULE_ID_DB = 2;
-    short MODULE_ID_CACHE = 3;
-    short MODULE_ID_NETWORK = 4;
-    short MODULE_ID_ACCOUNT = 5;
-    short MODULE_ID_EVENT_BUS = 6;
-    short MODULE_ID_CONSENSUS = 7;
-    short MODULE_ID_LEDGER = 8;
-    short MODULE_ID_PROTOCOL = 9;
-    short MODULE_ID_CONTRACT = 10;
+
+    int TX_TYPE_COINBASE = 1;
+    int TX_TYPE_TRANSFER = 2;
+
 }

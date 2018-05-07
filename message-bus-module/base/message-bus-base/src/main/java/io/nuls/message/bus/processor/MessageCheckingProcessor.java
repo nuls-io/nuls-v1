@@ -8,7 +8,7 @@ import io.nuls.message.bus.constant.MessageConstant;
 import io.nuls.message.bus.message.CommonDigestMessage;
 import io.nuls.message.bus.processor.manager.ProcessData;
 import io.nuls.message.bus.service.impl.MessageCacheService;
-import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.constant.ProtocolMessageType;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**
@@ -30,9 +30,9 @@ public class MessageCheckingProcessor<E extends BaseMessage> implements EventHan
 
             boolean commonDigestTx = message.getHeader().getMsgType() == MessageConstant.MSG_TYPE_COMMON_MSG_HASH_MSG &&
                     message.getHeader().getModuleId() == NulsConstant.MODULE_ID_EVENT_BUS;
-            boolean specialTx = commonDigestTx || (message.getHeader().getMsgType() == ProtocolEventType.NEW_TX_EVENT &&
+            boolean specialTx = commonDigestTx || (message.getHeader().getMsgType() == ProtocolMessageType.NEW_TX_MESSAGE &&
                     message.getHeader().getModuleId() == NulsConstant.MODULE_ID_PROTOCOL);
-            specialTx = specialTx || (message.getHeader().getMsgType() == ProtocolEventType.NEW_BLOCK &&
+            specialTx = specialTx || (message.getHeader().getMsgType() == ProtocolMessageType.NEW_BLOCK &&
                     message.getHeader().getModuleId() == NulsConstant.MODULE_ID_PROTOCOL);
             if (!specialTx) {
                 messageCacheService.cacheRecievedMessageHash(eventHash);

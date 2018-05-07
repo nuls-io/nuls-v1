@@ -25,7 +25,7 @@ package io.nuls.protocol.message;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.constant.ProtocolMessageType;
 import io.nuls.protocol.message.base.NoticeData;
 import io.nuls.protocol.model.SmallBlock;
 
@@ -35,7 +35,7 @@ import io.nuls.protocol.model.SmallBlock;
  */
 public class SmallBlockMessage extends BaseProtocolMessage<SmallBlock> {
     public SmallBlockMessage() {
-        super(ProtocolEventType.NEW_BLOCK);
+        super(ProtocolMessageType.NEW_BLOCK);
     }
 
     public SmallBlockMessage(SmallBlock newBlock) {

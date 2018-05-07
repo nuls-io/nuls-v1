@@ -28,6 +28,7 @@ package io.nuls.protocol.model;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.protocol.constant.NotFoundType;
+import io.protostuff.Tag;
 
 /**
  * @author: Niels Wang
@@ -35,7 +36,9 @@ import io.nuls.protocol.constant.NotFoundType;
  */
 public class NotFound extends BaseNulsData {
 
+    @Tag(1)
     private NotFoundType type;
+    @Tag(2)
     private NulsDigestData hash;
 
     public NotFound() {

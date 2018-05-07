@@ -23,7 +23,7 @@
  */
 package io.nuls.protocol.message;
 
-import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.constant.ProtocolMessageType;
 import io.nuls.protocol.message.base.NoticeData;
 import io.nuls.protocol.model.TxGroup;
 
@@ -34,7 +34,7 @@ import io.nuls.protocol.model.TxGroup;
 public class TxGroupMessage extends BaseProtocolMessage<TxGroup> {
 
     public TxGroupMessage() {
-        super(ProtocolEventType.TX_GROUP);
+        super(ProtocolMessageType.TX_GROUP);
     }
 
     @Override

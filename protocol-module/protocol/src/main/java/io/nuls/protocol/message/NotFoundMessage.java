@@ -25,7 +25,7 @@
 
 package io.nuls.protocol.message;
 
-import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.constant.ProtocolMessageType;
 import io.nuls.protocol.message.base.NoticeData;
 import io.nuls.protocol.model.NotFound;
 
@@ -35,7 +35,7 @@ import io.nuls.protocol.model.NotFound;
  */
 public class NotFoundMessage extends BaseProtocolMessage<NotFound> {
     public NotFoundMessage() {
-        super(ProtocolEventType.NOT_FOUND_EVENT);
+        super(ProtocolMessageType.NOT_FOUND_MESSAGE);
     }
 
     @Override

@@ -24,15 +24,30 @@
 package io.nuls.protocol.constant;
 
 /**
+ * 验证器验证不通过时，需要判断错误的严重程度，目前将验证结果的严重级别定义在该枚举类中
+ * <p>
+ * The validator validates the out-of-date and needs to determine the severity of the error,
+ * and the severity of the result is currently defined in the enumeration class.
+ *
  * @author Niels
  */
 public enum SeverityLevelEnum {
 
+    /**
+     * 正常范围内的错误，可能是字段不全，时间不对等等不需要进行惩罚的级别
+     * Errors in the normal range, such as incomplete fields, incorrect time, etc., do not require penalties.
+     */
     WRONG,
 
-    NORMAL_FOUL,
     /**
-     * Flagrant Foul
+     * 犯规，但不构成惩罚
+     * A foul, but not a punishment.
+     */
+    NORMAL_FOUL,
+
+    /**
+     * 恶意犯规，需要进行惩罚
+     * A flagrant foul must be punished.
      */
     FLAGRANT_FOUL;
 }

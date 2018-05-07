@@ -26,7 +26,7 @@ package io.nuls.protocol.message;
 
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.constant.ProtocolMessageType;
 import io.nuls.protocol.message.base.NoticeData;
 
 /**
@@ -36,7 +36,7 @@ import io.nuls.protocol.message.base.NoticeData;
 public class TransactionMessage extends BaseProtocolMessage<Transaction> {
 
     public TransactionMessage() {
-        super(ProtocolEventType.NEW_TX_EVENT);
+        super(ProtocolMessageType.NEW_TX_MESSAGE);
     }
 
     @Override

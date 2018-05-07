@@ -25,7 +25,7 @@
 package io.nuls.protocol.message;
 
 import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.constant.ProtocolMessageType;
 import io.nuls.protocol.message.base.BaseMessage;
 import io.nuls.protocol.message.base.NoticeData;
 import io.nuls.protocol.model.GetBlocksHashParam;
@@ -38,7 +38,7 @@ public class GetBlocksHashRequest extends BaseMessage<GetBlocksHashParam> {
 
 
     public GetBlocksHashRequest() {
-        super(NulsConstant.MODULE_ID_CONSENSUS, ProtocolEventType.EVENT_TYPE_GET_BLOCKS_HASH);
+        super(NulsConstant.MODULE_ID_CONSENSUS, ProtocolMessageType.GET_BLOCKS_HASH);
     }
 
     public GetBlocksHashRequest(long start, long size) {

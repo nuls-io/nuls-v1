@@ -25,7 +25,7 @@
 package io.nuls.protocol.message;
 
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.protocol.constant.ProtocolEventType;
+import io.nuls.protocol.constant.ProtocolMessageType;
 import io.nuls.protocol.message.base.NoticeData;
 import io.nuls.protocol.model.GetBlockDataParam;
 
@@ -38,7 +38,7 @@ import io.nuls.protocol.model.GetBlockDataParam;
 public class GetBlockHeaderRequest extends BaseProtocolMessage<GetBlockDataParam> {
 
     public GetBlockHeaderRequest() {
-        super(ProtocolEventType.GET_BLOCK_HEADER);
+        super(ProtocolMessageType.GET_BLOCK_HEADER);
     }
 
     public GetBlockHeaderRequest(long start, long size) {
