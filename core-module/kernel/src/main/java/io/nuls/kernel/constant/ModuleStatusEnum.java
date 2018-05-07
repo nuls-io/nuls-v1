@@ -25,23 +25,77 @@
 package io.nuls.kernel.constant;
 
 /**
- * @author Niels
+ * 模块运行状态枚举
+ * The module runs state enumeration.
+ *
+ * @author: Niels Wang
+ * @date: 2018/5/5
  */
 public enum ModuleStatusEnum {
-
-    NOT_FOUND,
-    UNINITIALIZED,
     /**
+     * 未找到该模块
+     * module not found
+     */
+    NOT_FOUND,
+
+    /**
+     * 未初始化
+     * uninitialized
+     */
+    UNINITIALIZED,
+
+    /**
+     * 初始化完成
      * initialized
      */
     INITIALIZED,
+
+    /**
+     * 正在初始化
+     * initializing
+     */
     INITIALIZING,
+
+    /**
+     * 启动中
+     * starting
+     */
     STARTING,
+
+    /**
+     * 运行中
+     * running
+     */
     RUNNING,
+
+    /**
+     * 已停止
+     * stoped
+     */
     STOPED,
+
+    /**
+     * 正在停止
+     * stopping
+     */
     STOPPING,
+
+    /**
+     * 已销毁
+     * destoryed
+     */
     DESTROYED,
+
+    /**
+     * 正在销毁
+     * destorying
+     */
     DESTROYING,
+
+    /**
+     * 运行出现异常
+     * Running exception
+     */
     EXCEPTION,;
 
     @Override

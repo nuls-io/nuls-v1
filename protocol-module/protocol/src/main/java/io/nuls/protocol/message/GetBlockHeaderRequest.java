@@ -25,12 +25,12 @@
 package io.nuls.protocol.message;
 
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.message.base.NoticeData;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.GetBlockDataParam;
 
 /**
- * get block by height.
+ * 获取区块头的消息
+ * The message for get block-header of block-headers
  *
  * @author Niels
  * @date 2017/11/13
@@ -38,7 +38,7 @@ import io.nuls.protocol.model.GetBlockDataParam;
 public class GetBlockHeaderRequest extends BaseProtocolMessage<GetBlockDataParam> {
 
     public GetBlockHeaderRequest() {
-        super(ProtocolEventType.GET_BLOCK_HEADER);
+        super(ProtocolConstant.MESSAGE_TYPE_GET_BLOCK_HEADER);
     }
 
     public GetBlockHeaderRequest(long start, long size) {
@@ -57,11 +57,6 @@ public class GetBlockHeaderRequest extends BaseProtocolMessage<GetBlockDataParam
         param.setStartHash(startHash);
         param.setEndHash(endHash);
         this.setMsgBody(param);
-    }
-
-    @Override
-    public NoticeData getNotice() {
-        return null;
     }
 
     public long getStart() {

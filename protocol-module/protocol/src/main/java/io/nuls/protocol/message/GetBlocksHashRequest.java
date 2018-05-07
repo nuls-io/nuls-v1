@@ -24,21 +24,19 @@
  */
 package io.nuls.protocol.message;
 
-import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.message.base.BaseMessage;
-import io.nuls.protocol.message.base.NoticeData;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.GetBlocksHashParam;
 
 /**
+ * 从对等节点处获取区块头摘要列表的消息
+ * The message of gets the block header summary list from the peer node.
  * @author Niels
  * @date 2018/1/15
  */
-public class GetBlocksHashRequest extends BaseMessage<GetBlocksHashParam> {
-
+public class GetBlocksHashRequest extends BaseProtocolMessage<GetBlocksHashParam> {
 
     public GetBlocksHashRequest() {
-        super(NulsConstant.MODULE_ID_CONSENSUS, ProtocolEventType.EVENT_TYPE_GET_BLOCKS_HASH);
+        super(ProtocolConstant.MESSAGE_TYPE_GET_BLOCKS_HASH);
     }
 
     public GetBlocksHashRequest(long start, long size) {
@@ -48,10 +46,4 @@ public class GetBlocksHashRequest extends BaseMessage<GetBlocksHashParam> {
         param.setSize(size);
         this.setMsgBody(param);
     }
-
-    @Override
-    public NoticeData getNotice() {
-        return null;
-    }
-
 }

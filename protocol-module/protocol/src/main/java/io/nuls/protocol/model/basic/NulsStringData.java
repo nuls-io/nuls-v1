@@ -28,6 +28,9 @@ package io.nuls.protocol.model.basic;
 import io.nuls.protocol.model.BasicTypeData;
 
 /**
+ * 受控的、字符串类型封装
+ * Controlled, string type encapsulation.
+ *
  * @author Niels
  * @date 2018/3/12
  */

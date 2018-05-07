@@ -25,6 +25,7 @@
 package io.nuls.kernel.constant;
 
 /**
+ * 系统常量集合
  * SYSTEM CONSTANT
  *
  * @author Niels
@@ -32,28 +33,61 @@ package io.nuls.kernel.constant;
  */
 public interface NulsConstant {
 
+    /**
+     * 系统配置文件名称
+     * System configuration file name.
+     */
     String USER_CONFIG_FILE = "nuls.ini";
+
+    /**
+     * 模块配置文件名称
+     * Module configuration file name.
+     */
     String MODULES_CONFIG_FILE = "modules.ini";
+
+    /**
+     * 模块启动类的配置项名称
+     * The name of the configuration item for the module startup class.
+     */
     String MODULE_BOOTSTRAP_KEY = "bootstrap";
 
     /**
      * ----[ System] ----
      */
+    /**
+     * 系统配置项section名称
+     * The configuration item section name of the kernel module.
+     */
     String CFG_SYSTEM_SECTION = "System";
+
+    /**
+     * 系统配置中语言设置的字段名
+     * The field name of the language set in the system configuration.
+     */
     String CFG_SYSTEM_LANGUAGE = "language";
+
+    /**
+     * 系统配置中编码设置的字段名
+     * The field name of the code setting in the system configuration.
+     */
     String CFG_SYSTEM_DEFAULT_ENCODING = "encoding";
 
     /**
-     * ----[ Module Id] ----
+     * 内核模块的模块id
+     * The module id of micro kernel module
      */
     short MODULE_ID_MICROKERNEL = 1;
-    short MODULE_ID_DB = 2;
-    short MODULE_ID_CACHE = 3;
-    short MODULE_ID_NETWORK = 4;
-    short MODULE_ID_ACCOUNT = 5;
-    short MODULE_ID_EVENT_BUS = 6;
-    short MODULE_ID_CONSENSUS = 7;
-    short MODULE_ID_LEDGER = 8;
-    short MODULE_ID_PROTOCOL = 9;
-    short MODULE_ID_CONTRACT = 10;
+
+    /**
+     * 共识奖励交易的类型
+     * A consensus award for the type of trade.
+     */
+    int TX_TYPE_COINBASE = 1;
+
+    /**
+     * 转账交易的类型
+     * the type of the transfer transaction
+     */
+    int TX_TYPE_TRANSFER = 2;
+
 }

@@ -37,9 +37,34 @@ import io.nuls.core.tools.cfg.IniEntity;
  * @date: 2018/4/17
  */
 public class NulsConfig {
+
+    /**
+     * nuls底层代码的版本号
+     * The version number of the underlying code for nuls.
+     */
     public static String VERSION = "1.0.0";
+
+    /**
+     * 系统使用的编码方式
+     * The encoding used by the nuls system.
+     */
     public static String DEFAULT_ENCODING = "UTF-8";
+
+    /**
+     * nuls系统配置文件中加载的配置项
+     * The configuration items loaded in the nuls system configuration file.
+     */
     public static IniEntity NULS_CONFIG;
+
+    /**
+     * 模块配置文件中加载的所有配置项
+     * All the configuration items that are loaded in the module configuration file.
+     */
     public static IniEntity MODULES_CONFIG;
+
+    /**
+     * 从网络中获取的当前软件的最新版本号
+     * The latest version of the current software obtained from the network.
+     */
     public static String NEWEST_VERSION;
 }

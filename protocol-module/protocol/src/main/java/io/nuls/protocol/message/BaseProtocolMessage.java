@@ -24,28 +24,27 @@
  */
 package io.nuls.protocol.message;
 
-import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**
+ * 协议模块消息基类，用于规范本模块的所有消息
+ * The protocol module message base class is used to normalize all messages for this module.
+ *
  * @author Niels
  * @date 2017/11/7
  */
 public abstract class BaseProtocolMessage<T extends BaseNulsData> extends BaseMessage<T> {
 
-    public BaseProtocolMessage(short eventType) {
-        super(NulsConstant.MODULE_ID_PROTOCOL, eventType);
+    /**
+     * 构造方法默认了模块id，实现者只需要关注自己的消息类型
+     * The constructor defaults to the module id, and the implementer only needs to focus on the message type.
+     *
+     * @param messageType 消息类型
+     */
+    public BaseProtocolMessage(short messageType) {
+        super(ProtocolConstant.MODULE_ID_PROTOCOL, messageType);
     }
 
-    @Override
-    public Object copy() {
-        try {
-            return this.clone();
-        } catch (CloneNotSupportedException e) {
-            Log.error(e);
-            return null;
-        }
-    }
 }

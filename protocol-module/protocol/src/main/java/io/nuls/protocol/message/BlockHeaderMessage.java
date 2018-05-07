@@ -25,25 +25,17 @@
 package io.nuls.protocol.message;
 
 import io.nuls.kernel.model.BlockHeader;
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.message.base.NoticeData;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 /**
+ * 区块头在网络消息中的承载类
+ * The host class of the block header in the network message.
+ *
  * @author Niels
  * @date 2017/11/13
  */
 public class BlockHeaderMessage extends BaseProtocolMessage<BlockHeader> {
     public BlockHeaderMessage() {
-        super(ProtocolEventType.BLOCK_HEADER);
-    }
-
-    @Override
-    public NoticeData getNotice() {
-        if (this.getMsgBody() == null) {
-            return null;
-        }
-        NoticeData data = new NoticeData();
-        data.setData(this.getMsgBody().getHeight());
-        return data;
+        super(ProtocolConstant.MESSAGE_TYPE_BLOCK_HEADER);
     }
 }

@@ -26,35 +26,42 @@ package io.nuls.protocol.model;
 
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
+import io.protostuff.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 请求交易列表的数据封装
+ * Request transaction list data encapsulation.
+ *
  * @author Niels
  * @date 2017/12/18
  */
 public class GetTxGroupParam extends BaseNulsData {
 
-    private NulsDigestData blockHash;
-
+    /**
+     * 请求的交易摘要列表
+     * the list of transaction digest data
+     */
+    @Tag(1)
     private List<NulsDigestData> txHashList = new ArrayList<>();
 
     public GetTxGroupParam() {
     }
 
-    public NulsDigestData getBlockHash() {
-        return blockHash;
-    }
-
-    public void setBlockHash(NulsDigestData blockHash) {
-        this.blockHash = blockHash;
-    }
-
+    /**
+     * 请求的交易摘要列表
+     * the list of transaction digest data
+     */
     public List<NulsDigestData> getTxHashList() {
         return txHashList;
     }
 
+    /**
+     * 添加一个交易摘要到请求列表中
+     * add a tx hash to ask list
+     */
     public void addHash(NulsDigestData hash) {
         this.txHashList.add(hash);
     }

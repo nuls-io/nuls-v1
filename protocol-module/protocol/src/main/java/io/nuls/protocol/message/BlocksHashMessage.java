@@ -24,24 +24,16 @@
  */
 package io.nuls.protocol.message;
 
-import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.message.base.BaseMessage;
-import io.nuls.protocol.message.base.NoticeData;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.BlockHashResponse;
 
 /**
  * @author Niels
  * @date 2018/1/15
  */
-public class BlocksHashMessage extends BaseMessage<BlockHashResponse> {
+public class BlocksHashMessage extends BaseProtocolMessage<BlockHashResponse> {
 
     public BlocksHashMessage() {
-        super(NulsConstant.MODULE_ID_CONSENSUS, ProtocolEventType.EVENT_TYPE_BLOCKS_HASH);
-    }
-
-    @Override
-    public NoticeData getNotice() {
-        return null;
+        super(ProtocolConstant.MESSAGE_TYPE_BLOCKS_HASH);
     }
 }

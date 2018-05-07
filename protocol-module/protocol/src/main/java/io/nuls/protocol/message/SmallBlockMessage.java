@@ -23,19 +23,19 @@
  */
 package io.nuls.protocol.message;
 
-import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.message.base.NoticeData;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.SmallBlock;
 
 /**
+ * 发送新的小区块的消息
+ * The message for send new SmallBlock;
+ *
  * @author Niels
  * @date 2017/11/13
  */
 public class SmallBlockMessage extends BaseProtocolMessage<SmallBlock> {
     public SmallBlockMessage() {
-        super(ProtocolEventType.NEW_BLOCK);
+        super(ProtocolConstant.MESSAGE_TYPE_NEW_BLOCK);
     }
 
     public SmallBlockMessage(SmallBlock newBlock) {
@@ -43,16 +43,5 @@ public class SmallBlockMessage extends BaseProtocolMessage<SmallBlock> {
         this.setMsgBody(newBlock);
     }
 
-    @Override
-    public NoticeData getNotice() {
-        if (null == this.getMsgBody()) {
-            Log.warn("recieved a null SmallBlock!");
-            return null;
-        }
-        NoticeData data = new NoticeData();
-        data.setMessage(KernelErrorCode.NEW_BLOCK_HEADER_RECIEVED);
-        data.setData(this.getMsgBody().getHeader().getHash());
-        return data;
-    }
 
 }

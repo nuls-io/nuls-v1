@@ -26,27 +26,53 @@ package io.nuls.protocol.model;
 
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
+import io.protostuff.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 区块hash列表应答数据的封装
+ * Block hash table reply data encapsulation.
+ *
  * @author Niels
  * @date 2018/1/15
  */
 public class BlockHashResponse extends BaseNulsData {
-
-    private NulsDigestData requestEventHash;
-
+    /**
+     * 请求消息的hash值
+     * the digest data of the request message
+     */
+    @Tag(1)
+    private NulsDigestData requestMessageHash;
+    /**
+     * 返回的高度列表
+     * Returns a list of heights.
+     */
+    @Tag(2)
     private List<Long> heightList = new ArrayList<>();
-
+    /**
+     * 返回的hash列表
+     * Returns a list of hashes.
+     */
+    @Tag(3)
     private List<NulsDigestData> hashList = new ArrayList<>();
 
 
+    /**
+     * 返回的高度列表
+     * Returns a list of heights.
+     * @return
+     */
     public List<Long> getHeightList() {
         return heightList;
     }
 
+    /**
+     * 返回的hash列表
+     * Returns a list of hashes.
+     * @return
+     */
     public List<NulsDigestData> getHashList() {
         return hashList;
     }
@@ -60,12 +86,12 @@ public class BlockHashResponse extends BaseNulsData {
         hashList.add(hash);
     }
 
-    public NulsDigestData getRequestEventHash() {
-        return requestEventHash;
+    public NulsDigestData getRequestMessageHash() {
+        return requestMessageHash;
     }
 
-    public void setRequestEventHash(NulsDigestData requestEventHash) {
-        this.requestEventHash = requestEventHash;
+    public void setRequestMessageHash(NulsDigestData requestMessageHash) {
+        this.requestMessageHash = requestMessageHash;
     }
 
     public void merge(BlockHashResponse response) {

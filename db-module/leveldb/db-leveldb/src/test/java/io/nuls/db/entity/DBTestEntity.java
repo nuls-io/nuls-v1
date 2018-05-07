@@ -26,7 +26,6 @@
 
 package io.nuls.db.entity;
 
-import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Transaction;
 
 /**
@@ -36,10 +35,5 @@ public class DBTestEntity extends Transaction {
 
     public DBTestEntity() {
         super(0);
-    }
-
-    @Override
-    public BaseNulsData parseTxData(byte[] bytes) {
-        return null;
     }
 }

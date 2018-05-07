@@ -28,14 +28,25 @@ package io.nuls.protocol.model;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.protocol.constant.NotFoundType;
+import io.protostuff.Tag;
 
 /**
  * @author: Niels Wang
  * @date: 2018/4/9
  */
 public class NotFound extends BaseNulsData {
-
+    /**
+     * 数据类型 {@link NotFoundType}
+     * data type
+     */
+    @Tag(1)
     private NotFoundType type;
+
+    /**
+     * 数据摘要
+     * request hash
+     */
+    @Tag(2)
     private NulsDigestData hash;
 
     public NotFound() {
@@ -46,6 +57,10 @@ public class NotFound extends BaseNulsData {
         this.hash = hash;
     }
 
+    /**
+     * 数据类型 {@link NotFoundType}
+     * data type
+     */
     public NotFoundType getType() {
         return type;
     }
@@ -54,6 +69,10 @@ public class NotFound extends BaseNulsData {
         this.type = type;
     }
 
+    /**
+     * 数据摘要
+     * request hash
+     */
     public NulsDigestData getHash() {
         return hash;
     }

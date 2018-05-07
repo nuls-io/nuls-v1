@@ -24,6 +24,7 @@
 package io.nuls.contract.module;
 
 
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.module.BaseModuleBootstrap;
 
@@ -34,6 +35,6 @@ import io.nuls.kernel.module.BaseModuleBootstrap;
  */
 public abstract class AbstractContractModule extends BaseModuleBootstrap {
     public AbstractContractModule() {
-        super(NulsConstant.MODULE_ID_CONTRACT);
+        super(ContractConstant.MODULE_ID_CONTRACT);
     }
 }

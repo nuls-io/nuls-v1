@@ -25,21 +25,17 @@
 
 package io.nuls.protocol.message;
 
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.message.base.NoticeData;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.NotFound;
 
 /**
+ * "找不到"反馈在网络消息中的承载类
+ * "Unable to find" feedback on the host class in the network message.
  * @author: Niels Wang
  * @date: 2018/4/9
  */
 public class NotFoundMessage extends BaseProtocolMessage<NotFound> {
     public NotFoundMessage() {
-        super(ProtocolEventType.NOT_FOUND_EVENT);
-    }
-
-    @Override
-    public NoticeData getNotice() {
-        return null;
+        super(ProtocolConstant.MESSAGE_TYPE_NOT_FOUND);
     }
 }

@@ -23,24 +23,20 @@
  */
 package io.nuls.protocol.message;
 
-import io.nuls.protocol.constant.ProtocolEventType;
-import io.nuls.protocol.message.base.NoticeData;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.TxGroup;
 
 /**
+ * 对等节点请求交易后，进行应答的消息，内容是一个或者多个交易
+ * When a peer requests a transaction, the message is answered, and the content is one or more transactions.
+ *
  * @author Niels
  * @date 2017/11/13
  */
 public class TxGroupMessage extends BaseProtocolMessage<TxGroup> {
 
     public TxGroupMessage() {
-        super(ProtocolEventType.TX_GROUP);
+        super(ProtocolConstant.MESSAGE_TYPE_TX_GROUP);
     }
-
-    @Override
-    public NoticeData getNotice() {
-        return null;
-    }
-
 
 }

@@ -25,13 +25,17 @@
 package io.nuls.protocol.model;
 
 import io.nuls.kernel.model.BaseNulsData;
+import io.protostuff.Tag;
 
 /**
+ * 受控的、基础类型封装
+ * Controlled, Basic type encapsulation.
+ *
  * @author Niels
  * @date 2017/12/7
  */
 public abstract class BasicTypeData<T> extends BaseNulsData {
-
+    @Tag(1)
     private T val;
 
     public BasicTypeData(T data) {

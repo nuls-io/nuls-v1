@@ -25,8 +25,6 @@
  */
 package io.nuls.network.entity;
 
-import io.nuls.kernel.model.NulsCloneable;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +32,7 @@ import java.util.List;
  * @author vivi
  * @Date 2017.11.01
  */
-public class BroadcastResult implements NulsCloneable {
+public class BroadcastResult implements Cloneable {
 
     private boolean success;
 
@@ -117,7 +115,7 @@ public class BroadcastResult implements NulsCloneable {
     }
 
     @Override
-    public Object copy() {
+    public Object clone() {
         BroadcastResult result = new BroadcastResult();
         result.setHash(this.hash);
         result.setSuccess(this.success);

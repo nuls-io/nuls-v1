@@ -27,21 +27,20 @@ package io.nuls.protocol.message.base;
 
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.message.BaseProtocolMessage;
 import io.nuls.protocol.model.basic.NulsStringData;
 
 /**
+ * 消息体只有字符串的消息类
+ * The message body has only a string of message classes.
  * @author Niels
  * @date 2018/1/22
  */
-public class CommonStringMessage extends BaseMessage<NulsStringData> {
+public class CommonStringMessage extends BaseProtocolMessage<NulsStringData> {
 
     public CommonStringMessage() {
-        super(NulsConstant.MODULE_ID_MICROKERNEL, (short) 1);
-    }
-
-    @Override
-    public NoticeData getNotice() {
-        return null;
+        super(ProtocolConstant.MESSAGE_TYPE_STRING);
     }
 
     public void setMessage(String message) {

@@ -26,10 +26,12 @@ package io.nuls.kernel.constant;
 
 
 /**
- * Created by Niels on 2017/9/27.
+ * 内核模块的所有错误码常量定义
+ * @author: Niels Wang
+ * @date: 2018/5/5
  */
 public interface KernelErrorCode {
-   
+
     /**
      * ----------  System Exception code   ---------
      */

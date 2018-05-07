@@ -1,10 +1,8 @@
 package io.nuls.message.bus.message;
 
-import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.message.bus.constant.MessageConstant;
+import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.protocol.message.base.BaseMessage;
-import io.nuls.protocol.message.base.NoticeData;
 
 /**
  * @author: Charlie
@@ -13,12 +11,7 @@ import io.nuls.protocol.message.base.NoticeData;
 public class GetMessageBodyMessage extends BaseMessage<NulsDigestData> {
 
     public GetMessageBodyMessage() {
-        super(NulsConstant.MODULE_ID_EVENT_BUS, MessageConstant.MSG_TYPE_GET_MSG_BODY_MSG);
-    }
-
-    @Override
-    public NoticeData getNotice() {
-        return null;
+        super(MessageBusConstant.MODULE_ID_MESSAGE_BUS, MessageBusConstant.MSG_TYPE_GET_MSG_BODY_MSG);
     }
 
 }

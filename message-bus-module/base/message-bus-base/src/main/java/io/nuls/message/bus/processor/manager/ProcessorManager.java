@@ -6,7 +6,6 @@ import io.nuls.core.tools.disruptor.DisruptorUtil;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.module.service.ModuleService;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
@@ -18,7 +17,6 @@ import io.nuls.message.bus.processor.MessageCheckingProcessor;
 import io.nuls.message.bus.processor.thread.MessageDispatchThread;
 import io.nuls.message.bus.processor.thread.NulsMessageCall;
 import io.nuls.protocol.message.base.BaseMessage;
-import io.nuls.protocol.message.manager.MessageManager;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -32,7 +30,7 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
     private static final ProcessorManager INSTANCE = new ProcessorManager();
 
     private final Map<String, H> handlerMap = new HashMap<>();
-    private final Map<Class, Set<String>> eventHandlerMapping = new HashMap<>();
+    private final Map<Class, Set<String>> messageHandlerMapping = new HashMap<>();
     private DisruptorUtil<DisruptorData<ProcessData<M>>> disruptorService = DisruptorUtil.getInstance();
     private ExecutorService pool;
     private String disruptorName = MessageBusConstant.DISRUPTOR_NAME;
@@ -47,7 +45,7 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
     public final void init(boolean eventChecking) {
 
         pool = TaskManager.createThreadPool(MessageBusConstant.THREAD_COUNT, 0,
-                new NulsThreadFactory(NulsConstant.MODULE_ID_EVENT_BUS, MessageBusConstant.THREAD_POOL_NAME));
+                new NulsThreadFactory(MessageBusConstant.MODULE_ID_MESSAGE_BUS, MessageBusConstant.THREAD_POOL_NAME));
         NulsThreadFactory nulsThreadFactory = new NulsThreadFactory(ModuleService.getInstance().getModuleId(MessageBusModuleBootstrap.class), disruptorName);
         disruptorService.createDisruptor(disruptorName, MessageBusConstant.DEFAULT_RING_BUFFER_SIZE, nulsThreadFactory);
 
@@ -68,12 +66,10 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
     }
 
     public void offer(ProcessData<M> data) {
-        MessageManager.care(data.getData().getClass());
         disruptorService.offer(disruptorName, data);
     }
 
     public String registerEventHandler(String handlerId, Class<M> messageClass, H handler) {
-        MessageManager.putEvent(messageClass);
         AssertUtil.canNotEmpty(messageClass, "registerEventHandler faild");
         AssertUtil.canNotEmpty(handler, "registerEventHandler faild");
         if (StringUtils.isBlank(handlerId)) {
@@ -86,13 +82,13 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
 
     private void cacheHandlerMapping(Class<M> eventClass, String handlerId) {
 
-        Set<String> ids = eventHandlerMapping.get(eventClass);
+        Set<String> ids = messageHandlerMapping.get(eventClass);
         if (null == ids) {
             ids = new HashSet<>();
         }
 //        boolean b =
         ids.add(handlerId);
-        eventHandlerMapping.put(eventClass, ids);
+        messageHandlerMapping.put(eventClass, ids);
 //        if (!b) {
 //            throw new NulsRuntimeException(ErrorCode.FAILED, "registerEventHandler faild");
 //        }
@@ -104,7 +100,7 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
     }
 
     private Set<NulsMessageHandler> getHandlerList(Class<M> clazz) {
-        Set<String> ids = eventHandlerMapping.get(clazz);
+        Set<String> ids = messageHandlerMapping.get(clazz);
         Set<NulsMessageHandler> set = new HashSet<>();
         do {
             if (null == ids || ids.isEmpty()) {
