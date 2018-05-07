@@ -209,4 +209,5 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     public void setMine(boolean mine) {
         isMine = mine;
     }
+
 }

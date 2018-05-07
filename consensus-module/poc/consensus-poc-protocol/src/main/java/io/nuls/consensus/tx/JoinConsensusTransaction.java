@@ -50,4 +50,10 @@ public class JoinConsensusTransaction extends Transaction<Deposit> {
         deposit.parse(bytes);
         return deposit;
     }
+
+    public JoinConsensusTransaction clone() {
+        JoinConsensusTransaction tx = new JoinConsensusTransaction();
+        tx.parse(serialize());
+        return tx;
+    }
 }

@@ -81,7 +81,6 @@ public class Agent extends BaseNulsData {
         this.status = status;
     }
 
-
     public double getCommissionRate() {
         return commissionRate;
     }
@@ -160,5 +159,28 @@ public class Agent extends BaseNulsData {
 
     public void setAgentAddress(byte[] agentAddress) {
         this.agentAddress = agentAddress;
+    }
+
+    @Override
+    public Agent clone() throws CloneNotSupportedException {
+//        Agent agent = new Agent();
+//
+//        agent.setAgentAddress(getAgentAddress());
+//        agent.setAgentName(getAgentName());
+//        agent.setBlockHeight(getBlockHeight());
+//        agent.setCommissionRate(getCommissionRate());
+//        agent.setCreditVal(getCreditVal());
+//        agent.setDelHeight(getDelHeight());
+//        agent.setDeposit(getDeposit());
+//        agent.setIntroduction(getIntroduction());
+//        agent.setStatus(getStatus());
+//        agent.setTime(getTime());
+//        agent.setPackingAddress(getPackingAddress());
+//        agent.setTotalDeposit(getTotalDeposit());
+//        agent.setTxHash(getTxHash());
+//
+//        return agent;
+
+        return (Agent) super.clone();
     }
 }
