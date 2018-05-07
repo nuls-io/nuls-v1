@@ -26,6 +26,8 @@
 
 package io.nuls.kernel.model;
 
+import io.protostuff.Tag;
+
 import java.util.List;
 
 /**
@@ -33,7 +35,9 @@ import java.util.List;
  */
 public class CoinData extends BaseNulsData {
 
+    @Tag(1)
     private List<Coin> from;
+    @Tag(2)
     private List<Coin> to;
 
     public List<Coin> getFrom() {

@@ -271,7 +271,7 @@ public class RoundManager {
 //            memberList.add(member);
 //        }
 
-        // TODO remove the test code in future
+        // TODO removeSmallBlock the test code in future
         List<Transaction<Deposit>> depositTempList = new ArrayList<>();
 
         List<Transaction<Agent>> agentList = getAliveAgentList(startBlockHeader.getHeight());

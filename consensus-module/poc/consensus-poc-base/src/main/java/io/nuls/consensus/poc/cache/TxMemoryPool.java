@@ -78,7 +78,7 @@ public final class TxMemoryPool {
     }
 
     /**
-     * Get a transaction through hash, do not remove the memory pool after obtaining
+     * Get a transaction through hash, do not removeSmallBlock the memory pool after obtaining
      *
      * 通过hash获取某笔交易，获取之后不移除内存池
      * @param hash

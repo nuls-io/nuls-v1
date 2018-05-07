@@ -25,9 +25,8 @@
 
 package io.nuls.protocol.cache;
 
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.NulsDataType;
-import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.cache.manager.EhCacheManager;
+import io.nuls.kernel.model.*;
 import io.nuls.protocol.model.SmallBlock;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,35 +51,65 @@ public class TemporaryCacheManagerTest {
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setDataType(NulsDataType.TRANSACTION);
         BlockHeader header = new BlockHeader();
-        header.setHash(NulsDigestData.calcDigestData("abcdefg".getBytes()));
+        NulsDigestData hash = NulsDigestData.calcDigestData("abcdefg".getBytes());
+        header.setHash(hash);
         smallBlock.setHeader(header);
         manager.cacheSmallBlock(smallBlock);
+        assertTrue(true);
 
-        SmallBlock sb = manager.getSmallBlock(NulsDigestData.calcDigestData("abcdefg".getBytes()));
-        assertEquals(sb.getDataType(),smallBlock.getDataType());
+        this.getSmallBlock(hash, smallBlock);
+
+        this.removeSmallBlock(hash);
+
+        manager.cacheSmallBlock(smallBlock);
+
+        this.clear();
     }
 
-    @Test
-    public void getSmallBlock() {
+    private void getSmallBlock(NulsDigestData hash, SmallBlock smallBlock) {
+        SmallBlock sb = manager.getSmallBlock(NulsDigestData.calcDigestData("abcdefg".getBytes()));
+        assertEquals(sb.getDataType(), smallBlock.getDataType());
     }
 
     @Test
     public void cacheTx() {
+        Transaction tx = new Transaction(1286) {
+        };
+        tx.setTime(1234567654L);
+        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        manager.cacheTx(tx);
+        assertTrue(true);
+
+        getTx(tx.getHash(), tx);
     }
 
-    @Test
-    public void getTx() {
+    private void getTx(NulsDigestData hash, Transaction tx) {
+        Transaction txGoted = manager.getTx(hash);
+        assertNotNull(tx);
+        assertEquals(tx.getTime(), txGoted.getTime());
     }
 
-    @Test
-    public void remove() {
+
+    public void removeSmallBlock(NulsDigestData hash) {
+        SmallBlock smallBlock = manager.getSmallBlock(hash);
+        assertNotNull(smallBlock);
+
+        manager.removeSmallBlock(hash);
+        smallBlock = manager.getSmallBlock(hash);
+        assertNull(smallBlock);
     }
 
-    @Test
+
     public void clear() {
+        manager.clear();
+        assertEquals(manager.getSmallBlockCount(), 0);
+        assertEquals(manager.getTxCount(), 0);
     }
 
     @Test
     public void destroy() {
+        manager.destroy();
+        assertNull(EhCacheManager.getInstance().getCache("temp-small-block-cache"));
+        assertNull(EhCacheManager.getInstance().getCache("temp-tx-cache"));
     }
 }
