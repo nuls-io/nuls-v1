@@ -69,7 +69,7 @@ public class ValidatorManager {
         return success;
     }
 
-    private static void addValidator(Class<? extends NulsData> clazz, NulsDataValidator<? extends NulsData> validator) {
+    public static void addValidator(Class<? extends NulsData> clazz, NulsDataValidator<? extends NulsData> validator) {
         DataValidatorChain chain = chainMap.get(clazz);
         if (null == chain) {
             chain = new DataValidatorChain();

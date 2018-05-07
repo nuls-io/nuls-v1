@@ -73,8 +73,7 @@ public class TemporaryCacheManagerTest {
 
     @Test
     public void cacheTx() {
-        Transaction tx = new Transaction(1286) {
-        };
+        Transaction tx = new CacheTestTx();
         tx.setTime(1234567654L);
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         manager.cacheTx(tx);
