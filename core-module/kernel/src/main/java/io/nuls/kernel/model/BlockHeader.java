@@ -27,6 +27,7 @@ package io.nuls.kernel.model;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.BlockHeaderValidatorManager;
 import io.nuls.kernel.validate.NulsDataValidator;
+import io.protostuff.Tag;
 
 import java.util.List;
 
@@ -37,6 +38,7 @@ import java.util.List;
 public class BlockHeader extends BaseNulsData {
 
     private transient NulsDigestData hash;
+
     private NulsDigestData preHash;
     private NulsDigestData merkleHash;
 
@@ -55,7 +57,7 @@ public class BlockHeader extends BaseNulsData {
     private transient int size;
 
     public BlockHeader() {
-        initValidators();
+
     }
 
     protected synchronized void calcHash() {
@@ -70,13 +72,6 @@ public class BlockHeader extends BaseNulsData {
         this.scriptSign = null;
         this.hash = NulsDigestData.calcDigestData(this.serialize());
         this.scriptSign = tempSign;
-    }
-
-    private void initValidators() {
-        List<NulsDataValidator> list = BlockHeaderValidatorManager.getValidators();
-        for (NulsDataValidator validator : list) {
-            this.registerValidator(validator);
-        }
     }
 
     public NulsDigestData getHash() {

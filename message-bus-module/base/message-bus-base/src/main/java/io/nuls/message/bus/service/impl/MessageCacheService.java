@@ -1,6 +1,6 @@
 package io.nuls.message.bus.service.impl;
 
-import io.nuls.protocol.context.NulsContext;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**

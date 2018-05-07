@@ -26,8 +26,11 @@
 package io.nuls.kernel.validate;
 
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.NulsData;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,8 +42,19 @@ public class ValidatorManager {
 
     private static Map<Class, DataValidatorChain> chainMap = new ConcurrentHashMap<>();
 
+    public static void init() {
+        List<NulsDataValidator> validatorList = null;
+        try {
+            validatorList = SpringLiteContext.getBeanList(NulsDataValidator.class);
+        } catch (Exception e) {
+            throw new NulsRuntimeException(e);
+        }
+        for(NulsDataValidator validator:validatorList){
+//            todo
+        }
+    }
 
-    public static void addValidator(Class<? extends NulsData> clazz, NulsDataValidator<? extends NulsData> validator) {
+    private static void addValidator(Class<? extends NulsData> clazz, NulsDataValidator<? extends NulsData> validator) {
         DataValidatorChain chain = chainMap.get(clazz);
         if (null == chain) {
             chain = new DataValidatorChain();
@@ -59,5 +73,6 @@ public class ValidatorManager {
         }
         return chain.startDoValidator(data);
     }
+
 }
 

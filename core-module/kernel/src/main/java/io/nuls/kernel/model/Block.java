@@ -42,14 +42,6 @@ public class Block extends BaseNulsData implements NulsCloneable {
     private List<Transaction> txs;
 
     public Block() {
-        initValidators();
-    }
-
-    private void initValidators() {
-        List<NulsDataValidator> list = BlockValidatorManager.getValidators();
-        for (NulsDataValidator<Block> validator : list) {
-            this.registerValidator(validator);
-        }
     }
 
     public List<Transaction> getTxs() {

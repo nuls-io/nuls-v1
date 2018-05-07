@@ -22,10 +22,9 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.context;
+package io.nuls.kernel.context;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.core.tools.pass.PackingPasswordUtils;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Block;
 
@@ -38,20 +37,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class NulsContext {
 
-    public static short DEFAULT_CHAIN_ID = 1;
+    public static short DEFAULT_CHAIN_ID = -3068;
 
-    private static String CACHED_PASSWORD_OF_WALLET;
     public static String DEFAULT_ACCOUNT_ID;
 
-    public static int getMagicNumber() {
-        return MAGIC_NUMBER;
-    }
-
-    public static void setMagicNumber(int magicNumber) {
-        MAGIC_NUMBER = magicNumber;
-    }
-
-    public static int MAGIC_NUMBER;
     /**
      * cache the best block
      */
@@ -76,10 +65,6 @@ public class NulsContext {
         this.genesisBlock = block;
     }
 
-    public String getModuleVersion(String module) {
-        return "";
-    }
-
     public Block getBestBlock() {
         if (bestBlock == null) {
             bestBlock = getGenesisBlock();
@@ -95,7 +80,6 @@ public class NulsContext {
     }
 
     private NulsContext() {
-
     }
 
     private static final NulsContext NC = new NulsContext();
@@ -170,19 +154,4 @@ public class NulsContext {
         return null;
     }
 
-    public static String getCachedPasswordOfWallet() {
-        if (null == CACHED_PASSWORD_OF_WALLET) {
-            CACHED_PASSWORD_OF_WALLET = PackingPasswordUtils.read();
-        }
-        if (null == CACHED_PASSWORD_OF_WALLET) {
-            CACHED_PASSWORD_OF_WALLET = "nuls123456";
-        }
-        return CACHED_PASSWORD_OF_WALLET;
-    }
-
-    public static void setCachedPasswordOfWallet(String cachedPasswordOfWallet) {
-        CACHED_PASSWORD_OF_WALLET = cachedPasswordOfWallet;
-        //todo A temporary solution;
-        PackingPasswordUtils.write(cachedPasswordOfWallet);
-    }
 }
