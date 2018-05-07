@@ -38,26 +38,27 @@ import java.util.List;
 public class BlockHeader extends BaseNulsData {
 
     private transient NulsDigestData hash;
-
+    @Tag(1)
     private NulsDigestData preHash;
+    @Tag(2)
     private NulsDigestData merkleHash;
-
+    @Tag(3)
     private long time;
-
+    @Tag(4)
     private long height;
-
+    @Tag(5)
     private long txCount;
-
+    @Tag(6)
     private byte[] packingAddress;
-
+    @Tag(7)
     private P2PKHScriptSig scriptSign;
-
+    @Tag(8)
     private byte[] extend;
 
     private transient int size;
 
     public BlockHeader() {
-
+        initValidators();
     }
 
     protected synchronized void calcHash() {
@@ -72,6 +73,13 @@ public class BlockHeader extends BaseNulsData {
         this.scriptSign = null;
         this.hash = NulsDigestData.calcDigestData(this.serialize());
         this.scriptSign = tempSign;
+    }
+
+    private void initValidators() {
+        List<NulsDataValidator> list = BlockHeaderValidatorManager.getValidators();
+        for (NulsDataValidator validator : list) {
+            this.registerValidator(validator);
+        }
     }
 
     public NulsDigestData getHash() {
