@@ -33,6 +33,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 系统上下文，提供核心数据共享、服务访问等功能
+ * System context provides core data sharing, service access and other functions.
+ *
  * @author Niels
  */
 public class NulsContext {
