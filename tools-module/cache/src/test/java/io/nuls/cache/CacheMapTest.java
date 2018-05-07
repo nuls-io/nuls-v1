@@ -22,7 +22,6 @@
  * SOFTWARE.
  *
  */
-
 package io.nuls.cache;
 
 import io.nuls.cache.listener.intf.NulsCacheListener;
@@ -62,8 +61,6 @@ public class CacheMapTest {
             public void onEvict(CacheListenerItem<String, ValueData> item) {
                 map.put(item.getKey() + "_evict", true);
                 System.out.println("evict");
-
-
             }
 
             @Override

@@ -30,6 +30,7 @@ import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.NulsData;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,6 +43,8 @@ public class ValidatorManager {
 
     private static Map<Class, DataValidatorChain> chainMap = new ConcurrentHashMap<>();
 
+    private static boolean success;
+
     public static void init() {
         List<NulsDataValidator> validatorList = null;
         try {
@@ -49,9 +52,21 @@ public class ValidatorManager {
         } catch (Exception e) {
             throw new NulsRuntimeException(e);
         }
-        for(NulsDataValidator validator:validatorList){
-//            todo
+        for (NulsDataValidator validator : validatorList) {
+            Method[] methods = validator.getClass().getDeclaredMethods();
+            for (Method method : methods) {
+                if (method.getName().equals("validate")) {
+                    Class paramType = method.getParameterTypes()[0];
+                    addValidator(paramType, validator);
+                    break;
+                }
+            }
         }
+        success = true;
+    }
+
+    public static boolean isInitSuccess() {
+        return success;
     }
 
     private static void addValidator(Class<? extends NulsData> clazz, NulsDataValidator<? extends NulsData> validator) {

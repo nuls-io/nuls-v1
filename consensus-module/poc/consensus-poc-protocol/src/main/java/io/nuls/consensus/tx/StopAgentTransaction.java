@@ -25,7 +25,7 @@
  */
 package io.nuls.consensus.tx;
 
-import io.nuls.consensus.constant.ConsensusTransactionConstant;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.NulsDigestData;
@@ -38,11 +38,11 @@ import io.nuls.kernel.model.Transaction;
 public class StopAgentTransaction extends Transaction<NulsDigestData> {
 
     public StopAgentTransaction() {
-        super(ConsensusTransactionConstant.TX_TYPE_STOP_AGENT);
+        super(ConsensusConstant.TX_TYPE_STOP_AGENT);
     }
 
     public StopAgentTransaction(CoinData coinData) throws NulsException {
-        super(ConsensusTransactionConstant.TX_TYPE_STOP_AGENT);
+        super(ConsensusConstant.TX_TYPE_STOP_AGENT);
     }
 
     @Override

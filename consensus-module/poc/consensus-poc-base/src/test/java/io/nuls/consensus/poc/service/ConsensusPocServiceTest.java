@@ -27,12 +27,11 @@
 package io.nuls.consensus.poc.service;
 
 import io.nuls.consensus.poc.cache.TxMemoryPool;
-import io.nuls.consensus.poc.model.TestTransaction;
+import io.nuls.consensus.poc.TestTransaction;
 import io.nuls.consensus.service.ConsensusServiceIntf;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.utils.TransactionValidatorManager;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 import org.junit.After;
@@ -88,7 +87,7 @@ public class ConsensusPocServiceTest {
                 }
             }
         };
-        TransactionValidatorManager.addTxDefValidator(testValidator);
+//        TransactionValidatorManager.addTxDefValidator(testValidator);
 
         tx = new TestTransaction();
         tx.setTime(1l);

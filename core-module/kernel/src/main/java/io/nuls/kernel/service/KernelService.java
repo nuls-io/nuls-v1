@@ -26,6 +26,8 @@
 package io.nuls.kernel.service;
 
 import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.i18n.I18nUtils;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.NulsVersion;
 import io.nuls.kernel.model.Result;
@@ -42,7 +44,11 @@ public class KernelService {
     }
 
     public Result<Boolean> setLanguage(String lang) {
-        //todo
+        try {
+            I18nUtils.setLanguage(lang);
+        } catch (NulsException e) {
+            Result.getFailed(e.getErrorCode(),e.getMessage());
+        }
         return Result.getSuccess();
     }
 }

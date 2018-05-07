@@ -24,10 +24,9 @@
  */
 package io.nuls.kernel.utils;
 
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Transaction;
-import org.omg.IOP.TransactionService;
+import io.nuls.kernel.processor.TransactionProcessor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,55 +40,20 @@ public class TransactionManager {
     private static final Map<Integer, Class<? extends Transaction>> TX_MAP = new HashMap<>();
     private static final Map<Class<? extends Transaction>, Class> TX_SERVICE_MAP = new HashMap<>();
 
-    public static final void putTx(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionService> txServiceClass) {
+    public static final void putTx(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionProcessor> txProcessorClass) {
         if (TX_MAP.containsKey(txType)) {
-            throw new RuntimeException( "Transaction type repeating!");
+            throw new RuntimeException("Transaction type repeating!");
         }
         TX_MAP.put(txType, txClass);
-        TX_SERVICE_MAP.put(txClass, txServiceClass);
+        TX_SERVICE_MAP.put(txClass, txProcessorClass);
     }
 
-    public static final Class<? extends Transaction> getTxClass(int txType) {
-        return TX_MAP.get(txType);
-    }
 
-    public static Transaction getInstanceByType(int txType) throws NulsException {
-        Class<? extends Transaction> txClass = getTxClass(txType);
-        if (null == txClass) {
-            throw new RuntimeException( "transaction type not exist!");
-        }
-        Transaction tx = null;
-        try {
-            tx = txClass.getConstructor().newInstance();
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-        return tx;
-    }
-
-//    public static List<Transaction> getInstances(NulsByteBuffer byteBuffer, long txCount) throws Exception {
-//        List<Transaction> list = new ArrayList<>();
-//        for (int i = 0; i < txCount; i++) {
-//            list.add(getInstance(byteBuffer));
-//        }
-//        return list;
-//    }
-//
-//    public static Transaction getInstance(NulsByteBuffer byteBuffer) throws Exception {
-//        int txType = (int) new NulsByteBuffer(byteBuffer.getPayloadByCursor()).readVarInt();
-//        Class<? extends Transaction> txClass = getTxClass(txType);
-//        if (null == txClass) {
-//            throw new RuntimeException( "transaction type not exist!");
-//        }
-//        Transaction tx = byteBuffer.readNulsData(txClass.getConstructor().newInstance());
-//        return tx;
-//    }
-
-    public static TransactionService getService(Class<? extends Transaction> txClass) {
-        Class<? extends TransactionService> txServiceClass = TX_SERVICE_MAP.get(txClass);
-        if (null == txServiceClass) {
+    public static TransactionProcessor getProcessor(Class<? extends Transaction> txClass) {
+        Class<? extends TransactionProcessor> txProcessorClass = TX_SERVICE_MAP.get(txClass);
+        if (null == txProcessorClass) {
             return null;
         }
-        return SpringLiteContext.getBean(txServiceClass);
+        return SpringLiteContext.getBean(txProcessorClass);
     }
 }

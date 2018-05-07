@@ -25,7 +25,7 @@
  */
 package io.nuls.consensus.tx;
 
-import io.nuls.consensus.constant.ConsensusTransactionConstant;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
@@ -37,11 +37,11 @@ import io.nuls.kernel.model.Transaction;
 public class CancelDepositTransaction extends Transaction<NulsDigestData> {
 
     public CancelDepositTransaction() {
-        super(ConsensusTransactionConstant.TX_TYPE_CANCEL_DEPOSIT);
+        super(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
     }
 
     public CancelDepositTransaction(CoinData coinData) {
-        super(ConsensusTransactionConstant.TX_TYPE_CANCEL_DEPOSIT);
+        super(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
     }
 
     @Override

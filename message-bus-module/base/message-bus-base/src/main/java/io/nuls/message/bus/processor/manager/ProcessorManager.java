@@ -29,15 +29,19 @@ import java.util.concurrent.ExecutorService;
  */
 public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandler<? extends BaseMessage>> {
 
+    private static final ProcessorManager INSTANCE = new ProcessorManager();
+
     private final Map<String, H> handlerMap = new HashMap<>();
     private final Map<Class, Set<String>> eventHandlerMapping = new HashMap<>();
     private DisruptorUtil<DisruptorData<ProcessData<M>>> disruptorService = DisruptorUtil.getInstance();
     private ExecutorService pool;
-    private String disruptorName;
+    private String disruptorName = MessageBusConstant.DISRUPTOR_NAME;
 
-    public ProcessorManager(String disruptorName, boolean eventChecking) {
-        this.disruptorName = disruptorName;
-        this.init(eventChecking);
+    public static ProcessorManager getInstance() {
+        return INSTANCE;
+    }
+
+    private ProcessorManager() {
     }
 
     public final void init(boolean eventChecking) {
@@ -53,12 +57,7 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
             handlerList.add(handler);
         }
         WorkHandler[] arrayHandler = handlerList.toArray(new MessageDispatchThread[handlerList.size()]);
-        if (eventChecking) {
-            disruptorService.handleEventWith(disruptorName, new MessageCheckingProcessor()).thenHandleEventsWithWorkerPool(arrayHandler);
-        } else {
-            disruptorService.handleEventsWithWorkerPool(disruptorName, arrayHandler);
-        }
-
+        disruptorService.handleEventWith(disruptorName, new MessageCheckingProcessor()).thenHandleEventsWithWorkerPool(arrayHandler);
 
         disruptorService.start(disruptorName);
     }

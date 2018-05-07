@@ -22,33 +22,25 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.utils;
 
-import io.nuls.kernel.validate.NulsDataValidator;
+package io.nuls.kernel.processor;
 
-import java.util.ArrayList;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.validate.ValidateResult;
+
 import java.util.List;
 
 /**
- * @author Niels
- * @date 2017/12/7
+ * @author: Niels Wang
+ * @date: 2018/5/7
  */
-public class BlockValidatorManager {
+public interface TransactionProcessor<T> {
 
-    private static final List<NulsDataValidator> ALL_LIST = new ArrayList<>();
+    void onRollback(T tx, Block block) throws NulsException;
 
-    /**
-     * the validator fit Block instance
-     *
-     * @param validator
-     */
-    public static void addBlockDefValitor(NulsDataValidator validator) {
-        ALL_LIST.add(validator);
-    }
+    void onCommit(T tx, Block block) throws NulsException;
 
-    public static final List<NulsDataValidator> getValidators() {
-        List<NulsDataValidator> list = new ArrayList<>();
-        list.addAll(ALL_LIST);
-        return list;
-    }
+    ValidateResult conflictDetect(T tx, List<Transaction> txList);
 }

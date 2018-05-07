@@ -56,7 +56,6 @@ public class VersionManager {
     private static final String VERDION_JSON_URL = ROOT_URL + "version.json";
     private static final String DOWNLOAD_FILE_FOLDER_URL = ROOT_URL + "libs/";
 
-
     public static void start() throws NulsException {
         List<NulsVersion> versionList = null;
         try {

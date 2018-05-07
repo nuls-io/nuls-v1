@@ -25,8 +25,6 @@
 package io.nuls.kernel.model;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.utils.BlockValidatorManager;
-import io.nuls.kernel.validate.NulsDataValidator;
 import io.protostuff.Tag;
 
 import java.util.ArrayList;

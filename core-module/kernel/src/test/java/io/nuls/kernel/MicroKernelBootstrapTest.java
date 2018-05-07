@@ -22,32 +22,58 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.utils;
 
-import io.nuls.kernel.validate.NulsDataValidator;
+package io.nuls.kernel;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.lite.core.SpringLiteContext;
+import io.nuls.kernel.validate.ValidatorManager;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
- * @author Niels
- * @date 2017/12/7
+ * @author: Niels Wang
+ * @date: 2018/5/7
  */
-public class TransactionValidatorManager {
+public class MicroKernelBootstrapTest {
 
-    private static final List<NulsDataValidator> ALL_LIST = new ArrayList<>();
+    private MicroKernelBootstrap bootstrap = MicroKernelBootstrap.getInstance();
 
-    /**
-     * the validator fit all transaction instances
-     * @param validator
-     */
-    public static void addTxDefValidator(NulsDataValidator validator) {
-        ALL_LIST.add(validator);
+    @Test
+    public void init() {
+        bootstrap.init();
+        assertNotNull(NulsConfig.MODULES_CONFIG);
+        assertNotNull(NulsConfig.NULS_CONFIG);
+        assertTrue(SpringLiteContext.isInitSuccess());
+        assertNotNull(NulsConfig.VERSION);
+        assertNotNull(ValidatorManager.isInitSuccess());
     }
 
-    public static final List<NulsDataValidator> getValidators() {
-        List<NulsDataValidator> list = new ArrayList<>();
-        list.addAll(ALL_LIST);
-        return list;
+    @Test
+    public void getInfo() {
+        this.init();
+        String info = bootstrap.getInfo();
+        System.out.println(info);
+        assertTrue(true);
     }
+
+    @Test
+    public void start() {
+        bootstrap.start();
+        assertTrue(true);
+    }
+
+    @Test
+    public void shutdown() {
+        bootstrap.shutdown();
+        assertTrue(true);
+    }
+
+    @Test
+    public void destroy() {
+        bootstrap.destroy();
+        assertTrue(true);
+    }
+
 }

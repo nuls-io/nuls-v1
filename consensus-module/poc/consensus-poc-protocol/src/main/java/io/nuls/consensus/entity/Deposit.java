@@ -40,11 +40,14 @@ public class Deposit extends BaseNulsData {
     private Na deposit;
     @Tag(2)
     private NulsDigestData agentHash;
+    @Tag(3)
+    private byte[] address;
 
     private transient long time;
     private transient int status;
     private transient NulsDigestData txHash;
     private transient long blockHeight = -1L;
+    private transient long delHeight = -1L;
 
     public Na getDeposit() {
         return deposit;
@@ -92,5 +95,21 @@ public class Deposit extends BaseNulsData {
 
     public void setBlockHeight(long blockHeight) {
         this.blockHeight = blockHeight;
+    }
+
+    public long getDelHeight() {
+        return delHeight;
+    }
+
+    public void setDelHeight(long delHeight) {
+        this.delHeight = delHeight;
+    }
+
+    public byte[] getAddress() {
+        return address;
+    }
+
+    public void setAddress(byte[] address) {
+        this.address = address;
     }
 }

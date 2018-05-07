@@ -71,7 +71,7 @@ public interface AccountService {
      * Obtain the completed account information according to the account id.
      *
      * @param address the address of the account you want ;
-     * @return the operation result and the account entity
+     * @return the operation result and the account model
      */
     Result<Account> getAccount(String address);
 

@@ -23,21 +23,12 @@
  *  * SOFTWARE.
  *
  */
-package io.nuls.consensus.constant;
+
+package io.nuls.consensus.poc.container;
 
 /**
- * @author Niels
- * @date 2017/10/30
+ * Created by ln on 2018/5/7.
  */
-public interface ConsensusTransactionConstant {
-    /**
-     * CONSENSUS
-     */
-    int TX_TYPE_REGISTER_AGENT = 90;
-    int TX_TYPE_JOIN_CONSENSUS = 91;
-    int TX_TYPE_CANCEL_DEPOSIT = 92;
-    int TX_TYPE_STOP_AGENT = 95;
-    int TX_TYPE_YELLOW_PUNISH = 93;
-    int TX_TYPE_RED_PUNISH = 94;
+public class ChainContainerTest {
 
 }

@@ -27,14 +27,10 @@ package io.nuls.kernel.model;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TxStatusEnum;
 import io.nuls.kernel.func.TimeService;
-import io.nuls.kernel.utils.TransactionValidatorManager;
-import io.nuls.kernel.validate.NulsDataValidator;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Tag;
 import io.protostuff.runtime.RuntimeSchema;
-
-import java.util.List;
 
 /**
  * @author Niels
@@ -213,4 +209,5 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
     public void setMine(boolean mine) {
         isMine = mine;
     }
+
 }

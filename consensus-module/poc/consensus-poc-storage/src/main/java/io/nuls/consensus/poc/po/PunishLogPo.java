@@ -33,7 +33,7 @@ package io.nuls.consensus.poc.po;
 public class PunishLogPo {
     private String id;
     private int type;
-    private String address;
+    private byte[] address;
     private long time;
     private long height;
     private long roundIndex;
@@ -62,11 +62,11 @@ public class PunishLogPo {
         this.type = type;
     }
 
-    public String getAddress() {
+    public byte[] getAddress() {
         return address;
     }
 
-    public void setAddress(String address) {
+    public void setAddress(byte[] address) {
         this.address = address;
     }
 

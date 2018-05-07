@@ -22,32 +22,34 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.utils;
 
-import io.nuls.kernel.validate.NulsDataValidator;
+package io.nuls.module.version;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.nuls.kernel.model.NulsVersion;
+import io.nuls.kernel.lite.annotation.Component;
 
 /**
- * @author Niels
- * @date 2017/12/7
+ * @author: Niels Wang
+ * @date: 2018/3/1
  */
-public class BlockHeaderValidatorManager {
+@Component
+public class KernelMavenInfo implements NulsVersion {
 
-    private static final List<NulsDataValidator > ALL_LIST = new ArrayList<>();
+    public static final String VERSION = "${project.version}";
+    public static final String GROUP_ID = "${project.groupId}";
+    public static final String ARTIFACT_ID = "${project.artifactId}";
 
-    /**
-     * the validator fit Block instance
-     * @param validator
-     */
-    public static void addBlockDefValitor(NulsDataValidator validator) {
-        ALL_LIST.add(validator);
+    public String getVersion() {
+        return VERSION;
     }
 
-    public static final List<NulsDataValidator> getValidators() {
-        List<NulsDataValidator> list = new ArrayList<>();
-        list.addAll(ALL_LIST);
-        return list;
+    public String getArtifactId() {
+        return ARTIFACT_ID;
     }
+
+    public String getGroupId() {
+        return GROUP_ID;
+    }
+
+
 }
