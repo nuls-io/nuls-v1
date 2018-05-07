@@ -25,11 +25,9 @@
  */
 package io.nuls.consensus.tx;
 
-import io.nuls.consensus.constant.ConsensusTransactionConstant;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.entity.Deposit;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.protocol.utils.io.NulsByteBuffer;
 
 /**
  * @author Niels
@@ -38,7 +36,7 @@ import io.nuls.protocol.utils.io.NulsByteBuffer;
 public class JoinConsensusTransaction extends Transaction<Deposit> {
 
     public JoinConsensusTransaction() {
-        super(ConsensusTransactionConstant.TX_TYPE_JOIN_CONSENSUS);
+        super(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
         this.initValidator();
     }
 

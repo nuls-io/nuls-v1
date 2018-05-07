@@ -24,17 +24,35 @@
  *
  */
 
-package io.nuls.consensus.poc;
+package io.nuls.consensus.poc.model;
 
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.BlockHeader;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 /**
- * Created by ln on 2018/5/5.
+ * Created by ln on 2018/5/7.
  */
 public class ChainTest {
 
     @Test
     public void test() {
-        assert(true);
+        Chain chain = new Chain();
+
+        assertNotNull(chain.getId());
+
+        assertNull(chain.getBestBlock());
+
+        Block block = new Block();
+        BlockHeader blockHeader = new BlockHeader();
+        blockHeader.setHeight(100l);
+        block.setHeader(blockHeader);
+        chain.getBlockList().add(block);
+
+        Block bestBlock = chain.getBestBlock();
+        assertNotNull(bestBlock);
+        assertEquals(bestBlock.getHeader().getHeight(), 100l);
     }
 }
