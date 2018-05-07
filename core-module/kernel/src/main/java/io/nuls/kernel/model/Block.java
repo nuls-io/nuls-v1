@@ -24,7 +24,6 @@
  */
 package io.nuls.kernel.model;
 
-import io.nuls.core.tools.log.Log;
 import io.protostuff.Tag;
 
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ import java.util.List;
  * @author win10
  * @date 2017/10/30
  */
-public class Block extends BaseNulsData implements NulsCloneable {
+public class Block extends BaseNulsData implements Cloneable {
 
     @Tag(1)
     private BlockHeader header;
@@ -60,18 +59,10 @@ public class Block extends BaseNulsData implements NulsCloneable {
         this.header = header;
     }
 
-
-    @Override
-    public Object copy() {
-        //Temporary non realization
-        try {
-            return this.clone();
-        } catch (CloneNotSupportedException e) {
-            Log.error(e);
-            return null;
-        }
-    }
-
+    /**
+     * 从交易列表中循环取出所有的交易hash，顺序和交易列表保持一致
+     * Loop through the list of trades to remove all of the trading hash, in the same order as the list of transactions.
+     */
     public List<NulsDigestData> getTxHashList() {
         List<NulsDigestData> list = new ArrayList<>();
         for (Transaction tx : txs) {

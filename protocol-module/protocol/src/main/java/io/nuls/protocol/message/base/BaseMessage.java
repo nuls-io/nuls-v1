@@ -23,32 +23,50 @@
  */
 package io.nuls.protocol.message.base;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.model.BaseNulsData;
-import io.nuls.kernel.model.NulsCloneable;
 import io.nuls.kernel.model.NulsDigestData;
+import io.protostuff.Tag;
 
 /**
+ * 所有网络上传输的消息的基类，定义了网络消息的基本格式
+ * The base class for all messages transmitted over the network defines the basic format of the network message.
+ *
  * @author Niels
  * @date 2017/11/7
  */
-public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData implements NulsCloneable {
+public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
     private transient NulsDigestData hash;
+
+    @Tag(1)
     private MessageHeader header;
+
+    @Tag(2)
     private T msgBody;
 
+    /**
+     * 初始化基础消息的消息头
+     */
     public BaseMessage(short moduleId, short eventType) {
         this.header = new MessageHeader(moduleId, eventType);
     }
 
-    @Override
-    public Object copy() {
-        try {
-            return this.clone();
-        } catch (CloneNotSupportedException e) {
-            Log.error(e);
-            return null;
+    /**
+     * 计算msgBody的验证值，通过简单的异或得出结果，将结果放入消息头中
+     * The verification value of msgBody is calculated,
+     * and the result is put into the message header through a simple difference or result.
+     * @return 验证值（计算结果）,Verification value (calculation result)
+     */
+    public byte caculateXor() {
+        if (header == null || msgBody == null) {
+            return 0x00;
         }
+        byte xor = 0x00;
+        byte[] data = msgBody.serialize();
+        for (int i = 0; i < data.length; i++) {
+            xor ^= data[i];
+        }
+        header.setXor(xor);
+        return xor;
     }
 
     public T getMsgBody() {
@@ -75,9 +93,4 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData i
     }
 
     public abstract NoticeData getNotice();
-
-    public byte caculateXor() {
-        // todo auto-generated method stub(Niels)
-        return 0;
-    }
 }

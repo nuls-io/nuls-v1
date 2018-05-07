@@ -30,6 +30,8 @@ import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.protocol.model.basic.NulsStringData;
 
 /**
+ * 消息体只有字符串的消息类
+ * The message body has only a string of message classes.
  * @author Niels
  * @date 2018/1/22
  */
