@@ -23,11 +23,13 @@
  *
  */
 
-package io.nuls.kernel;
+package io.nuls.protocol.cache;
 
-import io.nuls.kernel.cfg.NulsConfig;
-import io.nuls.kernel.lite.core.SpringLiteContext;
-import io.nuls.kernel.validate.ValidatorManager;
+import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.NulsDataType;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.protocol.model.SmallBlock;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -36,44 +38,49 @@ import static org.junit.Assert.*;
  * @author: Niels Wang
  * @date: 2018/5/7
  */
-public class MicroKernelBootstrapTest {
+public class TemporaryCacheManagerTest {
 
-    private MicroKernelBootstrap bootstrap = MicroKernelBootstrap.getInstance();
+    private TemporaryCacheManager manager;
 
-    @Test
+    @Before
     public void init() {
-        bootstrap.init();
-        assertNotNull(NulsConfig.MODULES_CONFIG);
-        assertNotNull(NulsConfig.NULS_CONFIG);
-        assertTrue(SpringLiteContext.isInitSuccess());
-        assertNotNull(NulsConfig.VERSION);
-        assertNotNull(ValidatorManager.isInitSuccess());
+        manager = TemporaryCacheManager.getInstance();
     }
 
     @Test
-    public void getInfo() {
-        this.init();
-        String info = bootstrap.getInfo();
-        System.out.println(info);
-        assertTrue(true);
+    public void cacheSmallBlock() {
+        SmallBlock smallBlock = new SmallBlock();
+        smallBlock.setDataType(NulsDataType.TRANSACTION);
+        BlockHeader header = new BlockHeader();
+        header.setHash(NulsDigestData.calcDigestData("abcdefg".getBytes()));
+        smallBlock.setHeader(header);
+        manager.cacheSmallBlock(smallBlock);
+
+        SmallBlock sb = manager.getSmallBlock(NulsDigestData.calcDigestData("abcdefg".getBytes()));
+        assertEquals(sb.getDataType(),smallBlock.getDataType());
     }
 
     @Test
-    public void start() {
-        bootstrap.start();
-        assertTrue(true);
+    public void getSmallBlock() {
     }
 
     @Test
-    public void shutdown() {
-        bootstrap.shutdown();
-        assertTrue(true);
+    public void cacheTx() {
+    }
+
+    @Test
+    public void getTx() {
+    }
+
+    @Test
+    public void remove() {
+    }
+
+    @Test
+    public void clear() {
     }
 
     @Test
     public void destroy() {
-        bootstrap.destroy();
-        assertTrue(true);
     }
-
 }

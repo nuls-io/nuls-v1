@@ -371,6 +371,10 @@ public class SpringLiteContext {
         loadBean(getBeanName(clazz), clazz, true);
         autowireFields();
     }
+    public static void putBean(Class clazz, boolean proxy) {
+        loadBean(getBeanName(clazz), clazz, proxy);
+        autowireFields();
+    }
 
     /**
      * 从上下文中删除一个类型的所有实例，请谨慎调用

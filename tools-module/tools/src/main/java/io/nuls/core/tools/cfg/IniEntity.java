@@ -101,4 +101,9 @@ public class IniEntity {
         }
         return list;
     }
+
+    @Override
+    public String toString() {
+        return ini.toString();
+    }
 }

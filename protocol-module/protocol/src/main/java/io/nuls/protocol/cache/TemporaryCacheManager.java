@@ -25,20 +25,21 @@
 package io.nuls.protocol.cache;
 
 import io.nuls.cache.CacheMap;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.model.SmallBlock;
 
 /**
  * Used for sharing temporary data between multiple hander.
- *
+ * 用于不同的handler之间共享交易数据，交易缓存池中的数据已经放入，直到自动销毁前，不做清理
  * @author Niels
  * @date 2017/12/12
  */
 public class TemporaryCacheManager {
     private static final TemporaryCacheManager INSTANCE = new TemporaryCacheManager();
 
-    private CacheMap<String, SmallBlock> smallBlockCacheMap = new CacheMap<>("temp-small-block-cache", 16,String.class,SmallBlock.class, 1000, 0, null);
-    private CacheMap<String, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 64,String.class,Transaction.class, 3600, 0, null);
+    private CacheMap<NulsDigestData, SmallBlock> smallBlockCacheMap = new CacheMap<>("temp-small-block-cache", 16,NulsDigestData.class,SmallBlock.class, 1000, 0, null);
+    private CacheMap<NulsDigestData, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 64,NulsDigestData.class,Transaction.class, 3600, 0, null);
 
     private TemporaryCacheManager() {
     }
@@ -48,10 +49,10 @@ public class TemporaryCacheManager {
     }
 
     public void cacheSmallBlock(SmallBlock newBlock) {
-        smallBlockCacheMap.put(newBlock.getHeader().getHash().getDigestHex(), newBlock);
+        smallBlockCacheMap.put(newBlock.getHeader().getHash(), newBlock);
     }
 
-    public SmallBlock getSmallBlock(String hash) {
+    public SmallBlock getSmallBlock(NulsDigestData hash) {
         if (null == smallBlockCacheMap) {
             return null;
         }
@@ -59,17 +60,17 @@ public class TemporaryCacheManager {
     }
 
     public void cacheTx(Transaction tx) {
-        txCacheMap.put(tx.getHash().getDigestHex(), tx);
+        txCacheMap.put(tx.getHash(), tx);
     }
 
-    public Transaction getTx(String hash) {
+    public Transaction getTx(NulsDigestData hash) {
         if (null == txCacheMap) {
             return null;
         }
         return txCacheMap.get(hash);
     }
 
-    public void remove(String hash) {
+    public void remove(NulsDigestData hash) {
         if (null == smallBlockCacheMap) {
             return;
         }

@@ -35,6 +35,7 @@ import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.module.BaseModuleBootstrap;
 import io.nuls.kernel.module.manager.VersionManager;
 import io.nuls.kernel.validate.ValidatorManager;
+import io.nuls.module.version.KernelMavenInfo;
 
 import java.io.IOException;
 
@@ -55,7 +56,7 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
 
     /**
      * 微内核模块的初始化方法，进行的操作有：加载配置文件信息到内存中，设置默认编码方式和语言，启动spring-lite容器，启动版本管理器和验证器管理器
-     *
+     * <p>
      * Micro kernel module initialization method, for the operation are: load profile information into memory,
      * set the default encoding and language, start the spring - lite container, and start the version manager and validator manager
      */
@@ -88,12 +89,10 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
 
     @Override
     public void start() {
-
     }
 
     @Override
     public void shutdown() {
-
     }
 
     @Override
@@ -105,26 +104,16 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
         StringBuilder info = new StringBuilder();
         info.append("kernel module:\n");
         info.append("module-version:");
-        info.append("");
-        info.append("");
-        info.append("");
-        info.append("");
-        info.append("");
-        info.append("");
-        info.append("");
-        info.append("");
-        info.append("");
-        info.append("");
-        info.append("");
-
-
-
-
-
-
-
-
-        return null;
+        info.append(KernelMavenInfo.VERSION);
+        info.append("\nDEFAULT_ENCODING:");
+        info.append(NulsConfig.DEFAULT_ENCODING);
+        info.append("\nLanguage：");
+        info.append(I18nUtils.getLanguage());
+        info.append("\nNuls-Config:");
+        info.append(NulsConfig.NULS_CONFIG);
+        info.append("\nModule-Config:");
+        info.append(NulsConfig.MODULES_CONFIG);
+        return info.toString();
     }
 
 }

@@ -45,7 +45,7 @@ public class RoundManagerTest {
 
     @BeforeClass
     public static void init() {
-        SpringLiteContext.putBean(ConsensusAccountServiceImpl.class);
+        SpringLiteContext.putBean(ConsensusAccountServiceImpl.class,false);
     }
 
     @Before

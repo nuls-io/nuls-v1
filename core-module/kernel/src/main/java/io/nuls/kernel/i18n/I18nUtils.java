@@ -91,4 +91,8 @@ public class I18nUtils {
     public static boolean hasLanguage(String lang) {
         return ALL_MAPPING.containsKey(lang);
     }
+
+    public static String getLanguage() {
+        return key;
+    }
 }
