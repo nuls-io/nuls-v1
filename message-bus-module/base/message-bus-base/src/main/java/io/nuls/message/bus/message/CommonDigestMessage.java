@@ -3,7 +3,6 @@ package io.nuls.message.bus.message;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.protocol.message.base.BaseMessage;
-import io.nuls.protocol.message.base.NoticeData;
 
 /**
  * @author: Charlie
@@ -17,17 +16,5 @@ public class CommonDigestMessage extends BaseMessage<NulsDigestData> {
     public CommonDigestMessage(NulsDigestData hash) {
         this();
         this.setMsgBody(hash);
-    }
-
-    @Override
-    public NoticeData getNotice() {
-        return null;
-    }
-
-    @Override
-    public Object copy() {
-        NulsDigestData data = new NulsDigestData(this.getMsgBody().getWholeBytes());
-        CommonDigestMessage event = new CommonDigestMessage(data);
-        return event;
     }
 }
