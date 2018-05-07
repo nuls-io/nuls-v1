@@ -31,6 +31,7 @@ import io.nuls.consensus.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.constant.PunishType;
 import io.nuls.consensus.entity.Agent;
 import io.nuls.consensus.entity.Deposit;
+import io.nuls.consensus.poc.context.ConsensusContext;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
@@ -42,6 +43,7 @@ import io.nuls.core.tools.log.ConsensusLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
+import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
@@ -463,5 +465,13 @@ public class RoundManager {
             Log.warn("the first block of pre round not found");
         }
         return firstBlockHeader;
+    }
+
+    public Chain getChain() {
+        return chain;
+    }
+
+    public List<MeetingRound> getRoundList() {
+        return roundList;
     }
 }
