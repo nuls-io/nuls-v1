@@ -25,8 +25,6 @@ package io.nuls.network.message.impl;
 
 import io.nuls.core.cfg.NulsConfig;
 import io.nuls.core.utils.str.VersionUtils;
-import io.nuls.protocol.context.NulsContext;
-import io.nuls.protocol.event.base.BaseEvent;
 import io.nuls.db.dao.NodeDataService;
 import io.nuls.network.entity.Node;
 import io.nuls.network.message.NetworkCacheService;
@@ -34,7 +32,8 @@ import io.nuls.network.message.NetworkEventResult;
 import io.nuls.network.message.entity.VersionEvent;
 import io.nuls.network.message.handler.NetWorkEventHandler;
 import io.nuls.network.service.NetworkService;
-import sun.misc.Version;
+import io.nuls.protocol.context.NulsContext;
+import io.nuls.protocol.event.base.BaseEvent;
 
 /**
  * @author vivi
