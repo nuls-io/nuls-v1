@@ -26,6 +26,9 @@
 
 package io.nuls.consensus.poc;
 
+import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.model.Account;
+import io.nuls.account.service.AccountService;
 import io.nuls.consensus.entity.Agent;
 import io.nuls.consensus.entity.Deposit;
 import io.nuls.consensus.poc.customer.ConsensusAccountServiceImpl;
@@ -49,7 +52,11 @@ public class BaseChainTest {
 
     @BeforeClass
     public static void init() {
-        SpringLiteContext.putBean(ConsensusAccountServiceImpl.class,false);
+        try {
+            AccountService accountService = SpringLiteContext.getBean(AccountService.class);
+        } catch (Exception e) {
+            SpringLiteContext.putBean(ConsensusAccountServiceImpl.class, false);
+        }
     }
 
     protected void initChain() {
