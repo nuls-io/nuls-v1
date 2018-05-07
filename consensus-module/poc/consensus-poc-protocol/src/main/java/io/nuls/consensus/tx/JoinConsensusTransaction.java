@@ -44,13 +44,6 @@ public class JoinConsensusTransaction extends Transaction<Deposit> {
         // TODO
     }
 
-    @Override
-    public Deposit parseTxData(byte[] bytes) {
-        Deposit deposit = new Deposit();
-        deposit.parse(bytes);
-        return deposit;
-    }
-
     public JoinConsensusTransaction clone() {
         JoinConsensusTransaction tx = new JoinConsensusTransaction();
         tx.parse(serialize());

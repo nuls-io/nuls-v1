@@ -38,8 +38,4 @@ public class TestTransaction extends Transaction {
         super(0);
     }
 
-    @Override
-    public BaseNulsData parseTxData(byte[] bytes) {
-        return null;
-    }
 }
