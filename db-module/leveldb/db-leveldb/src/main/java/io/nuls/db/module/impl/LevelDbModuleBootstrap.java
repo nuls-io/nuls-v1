@@ -40,7 +40,6 @@ public class LevelDbModuleBootstrap extends AbstractDBModule {
     public void init() {
         try {
             initLevelDBStorage();
-            initService();
         } catch (Exception e) {
             Log.error(e);
             throw new DBException(e);
@@ -49,10 +48,6 @@ public class LevelDbModuleBootstrap extends AbstractDBModule {
 
     private void initLevelDBStorage() throws Exception {
         LevelDBManager.init();
-    }
-
-    private void initService() {
-        this.registerService(LevelDBServiceImpl.class);
     }
 
     @Override

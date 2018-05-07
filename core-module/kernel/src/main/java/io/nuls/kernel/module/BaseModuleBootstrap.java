@@ -97,10 +97,6 @@ public abstract class BaseModuleBootstrap {
         }
     }
 
-    protected final void registerService(Class serviceClass) {
-        ServiceManager.getInstance().regService(this.moduleId, serviceClass);
-    }
-
 //    protected final void registerTransaction(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionService> txServiceClass) {
 //        this.registerService(txServiceClass);
 //        TransactionManager.putTx(txType, txClass, txServiceClass);

@@ -28,8 +28,6 @@ import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.validate.NulsDataValidator;
-import io.nuls.protocol.utils.SmallBlockValidatorManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,10 +42,6 @@ public class SmallBlock extends BaseNulsData {
     private List<Transaction> subTxList = new ArrayList<>();
 
     public SmallBlock() {
-        List<NulsDataValidator> list = SmallBlockValidatorManager.getValidators();
-        for (NulsDataValidator validator : list) {
-            this.registerValidator(validator);
-        }
     }
 
     public BlockHeader getHeader() {

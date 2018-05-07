@@ -75,10 +75,6 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
         ProtostuffIOUtil.mergeFrom(bytes, this, schema);
     }
 
-    protected void registerValidator(NulsDataValidator<? extends BaseNulsData> validator) {
-        ValidatorManager.addValidator(this.getClass(), validator);
-    }
-
     /**
      * @throws NulsException
      */
