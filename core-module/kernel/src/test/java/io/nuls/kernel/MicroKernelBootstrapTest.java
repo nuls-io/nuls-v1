@@ -22,61 +22,36 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.model;
 
-import io.nuls.core.tools.log.Log;
-import io.protostuff.Tag;
+package io.nuls.kernel;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
- * @author win10
- * @date 2017/10/30
+ * @author: Niels Wang
+ * @date: 2018/5/7
  */
-public class Block extends BaseNulsData implements NulsCloneable {
+public class MicroKernelBootstrapTest {
 
-    @Tag(1)
-    private BlockHeader header;
-    @Tag(2)
-    private List<Transaction> txs;
-
-    public Block() {
+    @Test
+    public void init() {
     }
 
-    public List<Transaction> getTxs() {
-        return txs;
+    @Test
+    public void start() {
     }
 
-    public void setTxs(List<Transaction> txs) {
-        this.txs = txs;
+    @Test
+    public void shutdown() {
     }
 
-    public BlockHeader getHeader() {
-        return header;
+    @Test
+    public void destroy() {
     }
 
-    public void setHeader(BlockHeader header) {
-        this.header = header;
-    }
-
-
-    @Override
-    public Object copy() {
-        //Temporary non realization
-        try {
-            return this.clone();
-        } catch (CloneNotSupportedException e) {
-            Log.error(e);
-            return null;
-        }
-    }
-
-    public List<NulsDigestData> getTxHashList() {
-        List<NulsDigestData> list = new ArrayList<>();
-        for (Transaction tx : txs) {
-            list.add(tx.getHash());
-        }
-        return list;
+    @Test
+    public void getInfo() {
     }
 }
