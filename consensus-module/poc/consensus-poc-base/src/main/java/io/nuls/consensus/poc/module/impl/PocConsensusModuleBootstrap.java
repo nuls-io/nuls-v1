@@ -47,9 +47,6 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     }
 
-    protected final void registerTransaction(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionService> txServiceClass) {
-        this.registerService(txServiceClass);
-    }
     @Override
     public void start() {
         this.registerHandlers();

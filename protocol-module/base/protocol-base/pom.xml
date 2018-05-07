@@ -12,5 +12,4 @@
 
     <groupId>io.nuls.protocol-module</groupId>
     <artifactId>protocol-base</artifactId>
-    <packaging>pom</packaging>
 </project>

@@ -23,54 +23,33 @@
  *
  */
 
-package io.nuls.kernel;
+package io.nuls.module.version;
 
-import io.nuls.kernel.cfg.NulsConfig;
-import io.nuls.kernel.lite.core.SpringLiteContext;
-import io.nuls.kernel.validate.ValidatorManager;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import io.nuls.kernel.model.NulsVersion;
+import io.nuls.kernel.lite.annotation.Component;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/7
+ * @date: 2018/3/1
  */
-public class MicroKernelBootstrapTest {
+@Component
+public class KernelMavenInfo implements NulsVersion {
 
-    private MicroKernelBootstrap bootstrap = MicroKernelBootstrap.getInstance();
+    public static final String VERSION = "${project.version}";
+    public static final String GROUP_ID = "${project.groupId}";
+    public static final String ARTIFACT_ID = "${project.artifactId}";
 
-    @Test
-    public void init() {
-        bootstrap.init();
-        assertNotNull(NulsConfig.MODULES_CONFIG);
-        assertNotNull(NulsConfig.NULS_CONFIG);
-        assertTrue(SpringLiteContext.isInitSuccess());
-        assertNotNull(NulsConfig.VERSION);
-        assertNotNull(ValidatorManager.isInitSuccess());
+    public String getVersion() {
+        return VERSION;
     }
 
-    @Test
-    public void start() {
-        bootstrap.start();
-        assertTrue(true);
+    public String getArtifactId() {
+        return ARTIFACT_ID;
     }
 
-    @Test
-    public void shutdown() {
-        bootstrap.shutdown();
-        assertTrue(true);
+    public String getGroupId() {
+        return GROUP_ID;
     }
 
-    @Test
-    public void destroy() {
-        bootstrap.destroy();
-        assertTrue(true);
-    }
 
-    @Test
-    public void getInfo() {
-        bootstrap.getInfo();
-        assertTrue(true);
-    }
 }

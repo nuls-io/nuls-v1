@@ -42,7 +42,6 @@ import java.io.IOException;
  * @author Niels
  * @date 2018/1/5
  */
-@Component("kernel")
 public class MicroKernelBootstrap extends BaseModuleBootstrap {
     private static final MicroKernelBootstrap INSTANCE = new MicroKernelBootstrap();
 
@@ -54,6 +53,12 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
         return INSTANCE;
     }
 
+    /**
+     * 微内核模块的初始化方法，进行的操作有：加载配置文件信息到内存中，设置默认编码方式和语言，启动spring-lite容器，启动版本管理器和验证器管理器
+     *
+     * Micro kernel module initialization method, for the operation are: load profile information into memory,
+     * set the default encoding and language, start the spring - lite container, and start the version manager and validator manager
+     */
     @Override
     public void init() {
         try {
@@ -61,7 +66,7 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
             NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConstant.MODULES_CONFIG_FILE);
         } catch (IOException e) {
             Log.error("Client start failed", e);
-            throw new RuntimeException( "Client start failed");
+            throw new RuntimeException("Client start failed");
         }
         //set system language
         try {
@@ -97,6 +102,28 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
 
     @Override
     public String getInfo() {
+        StringBuilder info = new StringBuilder();
+        info.append("kernel module:\n");
+        info.append("module-version:");
+        info.append("");
+        info.append("");
+        info.append("");
+        info.append("");
+        info.append("");
+        info.append("");
+        info.append("");
+        info.append("");
+        info.append("");
+        info.append("");
+        info.append("");
+
+
+
+
+
+
+
+
         return null;
     }
 

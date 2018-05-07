@@ -43,6 +43,8 @@ public class ValidatorManager {
 
     private static Map<Class, DataValidatorChain> chainMap = new ConcurrentHashMap<>();
 
+    private static boolean success;
+
     public static void init() {
         List<NulsDataValidator> validatorList = null;
         try {
@@ -60,6 +62,11 @@ public class ValidatorManager {
                 }
             }
         }
+        success = true;
+    }
+
+    public static boolean isInitSuccess() {
+        return success;
     }
 
     private static void addValidator(Class<? extends NulsData> clazz, NulsDataValidator<? extends NulsData> validator) {

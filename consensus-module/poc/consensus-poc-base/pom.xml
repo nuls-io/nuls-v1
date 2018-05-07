@@ -62,11 +62,6 @@
             <artifactId>account</artifactId>
             <version>2.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>io.nuls.account-module</groupId>
-            <artifactId>account</artifactId>
-            <version>2.0.0</version>
-        </dependency>
     </dependencies>
 
 
