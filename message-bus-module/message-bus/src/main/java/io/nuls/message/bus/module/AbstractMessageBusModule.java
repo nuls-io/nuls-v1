@@ -2,6 +2,7 @@ package io.nuls.message.bus.module;
 
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.module.BaseModuleBootstrap;
+import io.nuls.message.bus.constant.MessageBusConstant;
 
 /**
  * @author: Charlie
@@ -10,6 +11,6 @@ import io.nuls.kernel.module.BaseModuleBootstrap;
 public abstract class AbstractMessageBusModule extends BaseModuleBootstrap {
 
     public AbstractMessageBusModule(){
-        super(NulsConstant.MODULE_ID_EVENT_BUS);
+        super(MessageBusConstant.MODULE_ID_MESSAGE_BUS);
     }
 }

@@ -1,9 +1,11 @@
 package io.nuls.message.bus.service.impl;
 
 import TestHandler.BlockMessageHandler;
+import io.nuls.kernel.model.Block;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.processor.manager.ProcessorManager;
 import io.nuls.message.bus.service.MessageBusService;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.BlockMessage;
 import org.junit.Assert;
 import org.junit.Before;
@@ -85,7 +87,10 @@ public class MessageBusServiceImplTest {
 
     @Test
     public void receiveMessage() {
-
+        BlockMessage blockMessage = new BlockMessage();
+        String nodeId = "192.168.1.90:8003";
+        messageBusService.receiveMessage(blockMessage, nodeId);
+        Assert.fail();
     }
 
 
