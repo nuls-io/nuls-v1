@@ -25,10 +25,12 @@ package io.nuls.db.service;
 
 
 import io.nuls.db.model.Entry;
+import io.nuls.db.model.ModelWrapper;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Result;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -51,7 +53,9 @@ public interface DBService {
 
     Result put(String area, byte[] key, String value);
 
-    <T extends BaseNulsData> Result put(String area, String key, T value);
+    <T> Result putModel(String area, String key, ModelWrapper<T> value);
+
+    <T> Result putModel(String area, byte[] key, ModelWrapper<T> value);
 
     Result delete(String area, String key);
 
@@ -61,11 +65,16 @@ public interface DBService {
 
     byte[] get(String area, byte[] key);
 
-    <T extends BaseNulsData> T get(String area, String key, Class<T> clazz);
+    <T> ModelWrapper<T> getModel(String area, String key);
+
+    <T> ModelWrapper<T> getModel(String area, byte[] key);
 
     Set<String> keySet(String area);
 
-    <V extends BaseNulsData> Set<Entry<String, V>> entrySet(String area, Class<V> clazz);
+    List<String> keyList(String area);
 
     Set<Entry<String, byte[]>> entrySet(String area);
+
+    List<Entry<String, byte[]>> entryList(String area);
+
 }
