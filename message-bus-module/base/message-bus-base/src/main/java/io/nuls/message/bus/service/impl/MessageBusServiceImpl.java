@@ -18,12 +18,12 @@ public class MessageBusServiceImpl implements MessageBusService {
     @Override
     public String subscribeMessage(Class<? extends BaseMessage> messageClass, NulsMessageHandler<? extends BaseMessage> messageHandler) {
 
-        return processorManager.registerEventHandler(null, messageClass, messageHandler);
+        return processorManager.registerMessageHandler(null, messageClass, messageHandler);
     }
 
     @Override
     public void unsubscribeMessage(String subscribeId) {
-        this.processorManager.removeEventHandler(subscribeId);
+        this.processorManager.removeMessageHandler(subscribeId);
     }
 
     @Override

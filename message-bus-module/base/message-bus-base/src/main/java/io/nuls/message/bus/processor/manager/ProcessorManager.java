@@ -42,7 +42,7 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
     private ProcessorManager() {
     }
 
-    public final void init(boolean eventChecking) {
+    public final void init(boolean messageChecking) {
 
         pool = TaskManager.createThreadPool(MessageBusConstant.THREAD_COUNT, 0,
                 new NulsThreadFactory(MessageBusConstant.MODULE_ID_MESSAGE_BUS, MessageBusConstant.THREAD_POOL_NAME));
@@ -69,9 +69,9 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
         disruptorService.offer(disruptorName, data);
     }
 
-    public String registerEventHandler(String handlerId, Class<M> messageClass, H handler) {
-        AssertUtil.canNotEmpty(messageClass, "registerEventHandler faild");
-        AssertUtil.canNotEmpty(handler, "registerEventHandler faild");
+    public String registerMessageHandler(String handlerId, Class<M> messageClass, H handler) {
+        AssertUtil.canNotEmpty(messageClass, "registerMessageHandler faild");
+        AssertUtil.canNotEmpty(handler, "registerMessageHandler faild");
         if (StringUtils.isBlank(handlerId)) {
             handlerId = StringUtils.getNewUUID();
         }
@@ -80,22 +80,17 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
         return handlerId;
     }
 
-    private void cacheHandlerMapping(Class<M> eventClass, String handlerId) {
+    private void cacheHandlerMapping(Class<M> messageClass, String handlerId) {
 
-        Set<String> ids = messageHandlerMapping.get(eventClass);
+        Set<String> ids = messageHandlerMapping.get(messageClass);
         if (null == ids) {
             ids = new HashSet<>();
         }
-//        boolean b =
         ids.add(handlerId);
-        messageHandlerMapping.put(eventClass, ids);
-//        if (!b) {
-//            throw new NulsRuntimeException(ErrorCode.FAILED, "registerEventHandler faild");
-//        }
-//        cacheHandlerMapping((Class<E>) eventClass.getSuperclass(), handlerId);
+        messageHandlerMapping.put(messageClass, ids);
     }
 
-    public void removeEventHandler(String handlerId) {
+    public void removeMessageHandler(String handlerId) {
         handlerMap.remove(handlerId);
     }
 
@@ -126,7 +121,7 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
 
     public void executeHandlers(ProcessData<M> data) throws InterruptedException {
         if (null == data) {
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "execute event handler faild,the event is null!");
+            throw new NulsRuntimeException(KernelErrorCode.FAILED, "execute message handler faild,the message is null!");
         }
         Set<NulsMessageHandler> handlerSet = this.getHandlerList((Class<M>) data.getData().getClass());
         for (NulsMessageHandler handler : handlerSet) {
