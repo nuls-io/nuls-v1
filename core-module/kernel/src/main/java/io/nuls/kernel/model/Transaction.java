@@ -98,8 +98,6 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         this.type = type;
     }
 
-    public abstract T parseTxData(byte[] bytes);
-
     public long getTime() {
         return time;
     }

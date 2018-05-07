@@ -29,6 +29,7 @@ import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.crypto.Sha256Hash;
 import io.nuls.core.tools.crypto.Utils;
 import io.nuls.core.tools.log.Log;
+import io.protostuff.Tag;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -40,11 +41,13 @@ import java.util.List;
  */
 public class NulsDigestData extends BaseNulsData {
 
+    @Tag(1)
     protected short digestAlgType = DIGEST_ALG_SHA256;
+    @Tag(2)
     protected byte[] digestBytes;
 
-    public transient static short DIGEST_ALG_SHA256 = 0;
-    public transient static short DIGEST_ALG_SHA160 = 1;
+    public static short DIGEST_ALG_SHA256 = 0;
+    public static short DIGEST_ALG_SHA160 = 1;
 
     public NulsDigestData() {
     }
