@@ -51,7 +51,7 @@ public interface DBService {
 
     Result put(String area, byte[] key, String value);
 
-    <T extends BaseNulsData> Result put(String area, String key, T value, Class<T> clazz);
+    <T extends BaseNulsData> Result put(String area, String key, T value);
 
     Result delete(String area, String key);
 

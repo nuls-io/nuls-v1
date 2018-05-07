@@ -401,7 +401,7 @@ public class LevelDBManager {
         }
     }
 
-    public static <T extends BaseNulsData> Result put(String area, String key, T value, Class<T> clazz) {
+    public static <T extends BaseNulsData> Result put(String area, String key, T value) {
         if (!baseCheckArea(area)) {
             return new Result(true, "KV_AREA_NOT_EXISTS");
         }

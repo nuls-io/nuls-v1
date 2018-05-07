@@ -90,8 +90,8 @@ public class LevelDBServiceImpl implements DBService {
     }
 
     @Override
-    public <T extends BaseNulsData> Result put(String area, String key, T value, Class<T> clazz) {
-        return LevelDBManager.put(area, key, value, clazz);
+    public <T extends BaseNulsData> Result put(String area, String key, T value) {
+        return LevelDBManager.put(area, key, value);
     }
 
     @Override
