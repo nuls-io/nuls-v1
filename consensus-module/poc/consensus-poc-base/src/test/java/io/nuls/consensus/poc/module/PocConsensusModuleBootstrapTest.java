@@ -24,65 +24,21 @@
  *
  */
 
-package io.nuls.consensus.poc.po;
+package io.nuls.consensus.poc.module;
+
+import io.nuls.consensus.poc.module.impl.PocConsensusModuleBootstrap;
+import org.junit.Test;
 
 /**
- * @author Niels
- * @date 2018/3/22
+ * Created by ln on 2018/5/7.
  */
-public class PunishLogPo {
-    private String id;
-    private int type;
-    private byte[] address;
-    private long time;
-    private long height;
-    private long roundIndex;
+public class PocConsensusModuleBootstrapTest {
 
-    public long getRoundIndex() {
-        return roundIndex;
-    }
+    private PocConsensusModuleBootstrap bootstrap = new PocConsensusModuleBootstrap();
 
-    public void setRoundIndex(long roundIndex) {
-        this.roundIndex = roundIndex;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public byte[] getAddress() {
-        return address;
-    }
-
-    public void setAddress(byte[] address) {
-        this.address = address;
-    }
-
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
-    }
-
-    public long getHeight() {
-        return height;
-    }
-
-    public void setHeight(long height) {
-        this.height = height;
+    @Test
+    public void testStartModule() {
+        bootstrap.init();
+        bootstrap.start();
     }
 }

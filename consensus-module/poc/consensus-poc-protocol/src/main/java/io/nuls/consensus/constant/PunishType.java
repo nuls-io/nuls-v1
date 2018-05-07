@@ -24,22 +24,23 @@
  *
  */
 
-package io.nuls.consensus.poc.model;
-
-import io.nuls.kernel.model.BaseNulsData;
-import io.nuls.kernel.model.Transaction;
+package io.nuls.consensus.constant;
 
 /**
- * Created by ln on 2018/5/5.
+ * @author Niels
+ * @date 2018/3/22
  */
-public class TestTransaction extends Transaction {
+public enum PunishType {
 
-    public TestTransaction() {
-        super(0);
+    YELLOW(0), RED(1);
+
+    private final int code;
+
+    PunishType(int code) {
+        this.code = code;
     }
 
-    @Override
-    public BaseNulsData parseTxData(byte[] bytes) {
-        return null;
+    public int getCode() {
+        return code;
     }
 }

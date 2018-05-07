@@ -26,7 +26,7 @@
 
 package io.nuls.consensus.poc.cache;
 
-import io.nuls.consensus.poc.model.TestTransaction;
+import io.nuls.consensus.poc.TestTransaction;
 import io.nuls.kernel.model.Transaction;
 import org.junit.Test;
 

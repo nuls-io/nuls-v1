@@ -26,6 +26,7 @@
 
 package io.nuls.consensus.poc.container;
 
+import io.nuls.consensus.poc.manager.RoundManager;
 import io.nuls.consensus.poc.model.Chain;
 
 /**
@@ -34,6 +35,7 @@ import io.nuls.consensus.poc.model.Chain;
 public class ChainContainer implements Cloneable {
 
     private Chain chain;
+    private RoundManager roundManager;
 
     public ChainContainer() {
     }

@@ -12,7 +12,7 @@ import io.nuls.protocol.message.base.BaseMessage;
  */
 public class MessageBusServiceImpl implements MessageBusService {
 
-    private static final  ProcessorManager processorManager =  new ProcessorManager(MessageBusConstant.DISRUPTOR_NAME,true);
+    private ProcessorManager processorManager = ProcessorManager.getInstance();
 
     @Override
     public String subscribeMessage(Class<? extends BaseMessage> messageClass, NulsMessageHandler<? extends BaseMessage> messageHandler) {

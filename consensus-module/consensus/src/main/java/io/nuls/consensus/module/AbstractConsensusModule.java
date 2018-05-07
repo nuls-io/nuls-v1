@@ -23,21 +23,21 @@
  *  * SOFTWARE.
  *
  */
-package io.nuls.consensus.constant;
+package io.nuls.consensus.module;
+
+import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.kernel.module.BaseModuleBootstrap;
 
 /**
  * @author Niels
- * @date 2017/10/30
+ * @date 2017/10/18
+ *
  */
-public interface ConsensusTransactionConstant {
-    /**
-     * CONSENSUS
-     */
-    int TX_TYPE_REGISTER_AGENT = 90;
-    int TX_TYPE_JOIN_CONSENSUS = 91;
-    int TX_TYPE_CANCEL_DEPOSIT = 92;
-    int TX_TYPE_STOP_AGENT = 95;
-    int TX_TYPE_YELLOW_PUNISH = 93;
-    int TX_TYPE_RED_PUNISH = 94;
-
+public abstract class AbstractConsensusModule extends BaseModuleBootstrap {
+    public AbstractConsensusModule() {
+        super(ConsensusConstant.MODULE_ID_CONSENSUS);
+    }
+    public AbstractConsensusModule(short moduleId) {
+        super(moduleId);
+    }
 }

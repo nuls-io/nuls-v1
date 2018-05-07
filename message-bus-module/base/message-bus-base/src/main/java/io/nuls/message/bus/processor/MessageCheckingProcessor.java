@@ -35,15 +35,15 @@ public class MessageCheckingProcessor<E extends BaseMessage> implements EventHan
             specialTx = specialTx || (message.getHeader().getMsgType() == ProtocolEventType.NEW_BLOCK &&
                     message.getHeader().getModuleId() == NulsConstant.MODULE_ID_PROTOCOL);
             if (!specialTx) {
-                MessageCacheService.cacheRecievedEventHash(eventHash);
+                messageCacheService.cacheRecievedMessageHash(eventHash);
                 return;
             }
-            if (commonDigestTx && MessageCacheService.kownTheEvent(((CommonDigestMessage) message).getMsgBody().getDigestHex())) {
+            if (commonDigestTx && messageCacheService.kownTheMessage(((CommonDigestMessage) message).getMsgBody().getDigestHex())) {
                 processDataDisruptorMessage.setStoped(true);
-            } else if (MessageCacheService.kownTheEvent(eventHash)) {
+            } else if (messageCacheService.kownTheMessage(eventHash)) {
                 processDataDisruptorMessage.setStoped(true);
             } else {
-                MessageCacheService.cacheRecievedEventHash(eventHash);
+                messageCacheService.cacheRecievedMessageHash(eventHash);
             }
         } catch (Exception e) {
             Log.error(e);

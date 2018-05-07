@@ -24,65 +24,31 @@
  *
  */
 
-package io.nuls.consensus.poc.po;
+package io.nuls.consensus.poc.model;
+
+import org.junit.Test;
 
 /**
- * @author Niels
- * @date 2018/3/22
+ * Created by ln on 2018/5/7.
  */
-public class PunishLogPo {
-    private String id;
-    private int type;
-    private byte[] address;
-    private long time;
-    private long height;
-    private long roundIndex;
+public class MeetingMemberTest {
 
-    public long getRoundIndex() {
-        return roundIndex;
-    }
 
-    public void setRoundIndex(long roundIndex) {
-        this.roundIndex = roundIndex;
-    }
+    @Test
+    public void testSort() {
+        MeetingMember member = new MeetingMember();
+        member.setRoundStartTime(0l);
+        member.setPackingAddress(new byte[20]);
 
-    public String getId() {
-        return id;
-    }
+        MeetingMember member2 = new MeetingMember();
+        member2.setRoundStartTime(0l);
+        member2.setPackingAddress(new byte[24]);
 
-    public void setId(String id) {
-        this.id = id;
-    }
+        assert(member.compareTo(member2) > 0);
 
-    public int getType() {
-        return type;
-    }
+        member.setRoundStartTime(1003l);
+        member2.setRoundStartTime(1003l);
 
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public byte[] getAddress() {
-        return address;
-    }
-
-    public void setAddress(byte[] address) {
-        this.address = address;
-    }
-
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
-    }
-
-    public long getHeight() {
-        return height;
-    }
-
-    public void setHeight(long height) {
-        this.height = height;
+        assert(member.compareTo(member2) < 0);
     }
 }

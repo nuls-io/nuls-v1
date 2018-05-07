@@ -25,12 +25,11 @@
  */
 package io.nuls.consensus.tx;
 
-import io.nuls.consensus.constant.ConsensusTransactionConstant;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.entity.Agent;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.protocol.constant.TransactionConstant;
 
 /**
  * @author Niels
@@ -39,12 +38,12 @@ import io.nuls.protocol.constant.TransactionConstant;
 public class RegisterAgentTransaction extends Transaction<Agent> {
 
     public RegisterAgentTransaction() {
-        super(TransactionConstant.TX_TYPE_REGISTER_AGENT);
+        super(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
         this.initValidator();
     }
 
     public RegisterAgentTransaction(CoinData coinData) throws NulsException {
-        super(ConsensusTransactionConstant.TX_TYPE_REGISTER_AGENT);
+        super(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
         this.initValidator();
         this.setCoinData(coinData);
     }

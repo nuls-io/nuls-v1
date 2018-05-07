@@ -24,65 +24,36 @@
  *
  */
 
-package io.nuls.consensus.poc.po;
+package io.nuls.consensus.constant;
 
 /**
- * @author Niels
- * @date 2018/3/22
+ * Created by ln on 2018/5/7.
  */
-public class PunishLogPo {
-    private String id;
-    private int type;
-    private byte[] address;
-    private long time;
-    private long height;
-    private long roundIndex;
+public interface ConsensusConstant {
 
-    public long getRoundIndex() {
-        return roundIndex;
-    }
+    /**
+     * consensus module id
+     */
+    short MODULE_ID_CONSENSUS = 7;
 
-    public void setRoundIndex(long roundIndex) {
-        this.roundIndex = roundIndex;
-    }
+    /**
+     * unit:second
+     */
+    long BLOCK_TIME_INTERVAL_SECOND = 10;
+    /**
+     * unit:millis
+     */
+    long BLOCK_TIME_INTERVAL_MILLIS = BLOCK_TIME_INTERVAL_SECOND * 1000L;
 
-    public String getId() {
-        return id;
-    }
+    /**
+     * consensus transaction types
+     */
+    int TX_TYPE_REGISTER_AGENT = 90;
+    int TX_TYPE_JOIN_CONSENSUS = 91;
+    int TX_TYPE_CANCEL_DEPOSIT = 92;
+    int TX_TYPE_STOP_AGENT = 95;
+    int TX_TYPE_YELLOW_PUNISH = 93;
+    int TX_TYPE_RED_PUNISH = 94;
 
-    public void setId(String id) {
-        this.id = id;
-    }
 
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public byte[] getAddress() {
-        return address;
-    }
-
-    public void setAddress(byte[] address) {
-        this.address = address;
-    }
-
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
-    }
-
-    public long getHeight() {
-        return height;
-    }
-
-    public void setHeight(long height) {
-        this.height = height;
-    }
 }

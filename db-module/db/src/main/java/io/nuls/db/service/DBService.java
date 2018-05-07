@@ -24,10 +24,11 @@
 package io.nuls.db.service;
 
 
+import io.nuls.db.model.Entry;
+import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Result;
 
 import java.util.Comparator;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -39,8 +40,8 @@ public interface DBService {
 
     Result createArea(String areaName);
     Result createArea(String areaName, Long cacheSize);
-    Result createArea(String areaName, Comparator comparator);
-    Result createArea(String areaName, Long cacheSize, Comparator comparator);
+    Result createArea(String areaName, Comparator<byte[]> comparator);
+    Result createArea(String areaName, Long cacheSize, Comparator<byte[]> comparator);
 
     String[] listArea();
 
@@ -50,6 +51,8 @@ public interface DBService {
 
     Result put(String area, byte[] key, String value);
 
+    <T extends BaseNulsData> Result put(String area, String key, T value, Class<T> clazz);
+
     Result delete(String area, String key);
 
     Result delete(String area, byte[] key);
@@ -58,8 +61,11 @@ public interface DBService {
 
     byte[] get(String area, byte[] key);
 
+    <T extends BaseNulsData> T get(String area, String key, Class<T> clazz);
+
     Set<String> keySet(String area);
 
-    Set<Map.Entry<String, String>> entrySet(String area);
+    <V extends BaseNulsData> Set<Entry<String, V>> entrySet(String area, Class<V> clazz);
 
+    Set<Entry<String, byte[]>> entrySet(String area);
 }
