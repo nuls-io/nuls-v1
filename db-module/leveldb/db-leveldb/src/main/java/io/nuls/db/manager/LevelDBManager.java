@@ -26,8 +26,10 @@ package io.nuls.db.manager;
 import io.nuls.core.tools.cfg.ConfigLoader;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.db.model.Entry;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Result;
 import org.iq80.leveldb.*;
 import org.iq80.leveldb.impl.Iq80DBFactory;
@@ -159,11 +161,11 @@ public class LevelDBManager {
         return createArea(areaName, cacheSize, null);
     }
 
-    public static Result createArea(String areaName, Comparator comparator) {
+    public static Result createArea(String areaName, Comparator<byte[]> comparator) {
         return createArea(areaName, null, comparator);
     }
 
-    public static Result createArea(String areaName, Long cacheSize, Comparator comparator) {
+    public static Result createArea(String areaName, Long cacheSize, Comparator<byte[]> comparator) {
         // prevent too many areas
         if (AREAS.size() > (max - 1)) {
             return new Result(false, "KV_AREA_CREATE_ERROR");
@@ -265,7 +267,7 @@ public class LevelDBManager {
      * @return
      * @throws IOException
      */
-    private static DB openDB(String dbPath, boolean createIfMissing, Long cacheSize, Comparator comparator) throws IOException {
+    private static DB openDB(String dbPath, boolean createIfMissing, Long cacheSize, Comparator<byte[]> comparator) throws IOException {
         File file = new File(dbPath);
         Options options = new Options().createIfMissing(createIfMissing);
         if (cacheSize != null) {
@@ -399,6 +401,22 @@ public class LevelDBManager {
         }
     }
 
+    public static <T extends BaseNulsData> Result put(String area, String key, T value, Class<T> clazz) {
+        if (!baseCheckArea(area)) {
+            return new Result(true, "KV_AREA_NOT_EXISTS");
+        }
+        if (key == null || value == null) {
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+        }
+        try {
+            DB db = AREAS.get(area);
+            db.put(bytes(key), value.serialize());
+            return Result.getSuccess();
+        } catch (Exception e) {
+            return Result.getFailed(e.getMessage());
+        }
+    }
+
     public static Result delete(String area, String key) {
         if (!baseCheckArea(area)) {
             return new Result(true, "KV_AREA_NOT_EXISTS");
@@ -441,6 +459,24 @@ public class LevelDBManager {
         try {
             DB db = AREAS.get(area);
             return db.get(bytes(key));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static <T extends BaseNulsData> T get(String area, String key, Class<T> clazz) {
+        if (!baseCheckArea(area)) {
+            return null;
+        }
+        if (StringUtils.isBlank(key)) {
+            return null;
+        }
+        try {
+            DB db = AREAS.get(area);
+            byte[] bytes = db.get(bytes(key));
+            T value = clazz.newInstance();
+            value.parse(bytes);
+            return value;
         } catch (Exception e) {
             return null;
         }
@@ -490,19 +526,23 @@ public class LevelDBManager {
         }
     }
 
-    public static Set<Map.Entry<String, String>> entrySet(String area) {
+    public static <V extends BaseNulsData> Set<Entry<String, V>> entrySet(String area, Class<V> clazz) {
         if (!baseCheckArea(area)) {
             return null;
         }
         DBIterator iterator = null;
-        Set<Map.Entry<String, String>> entrySet = null;
+        Set<Entry<String, V>> entrySet = null;
         try {
             DB db = AREAS.get(area);
+            entrySet = new HashSet<>();
             iterator = db.iterator();
+            V value;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 String key = asString(iterator.peekNext().getKey());
-                String value = asString(iterator.peekNext().getValue());
-                System.out.println(key + " = " + value);
+                byte[] bytes = iterator.peekNext().getValue();
+                value = clazz.newInstance();
+                value.parse(bytes);
+                entrySet.add(new Entry<String, V>(key, value));
             }
 
         } catch (Exception e) {
@@ -518,7 +558,41 @@ public class LevelDBManager {
                 }
             }
         }
-        //TODO
-        return null;
+        return entrySet;
+    }
+
+
+    public static Set<Entry<String, byte[]>> entrySet(String area) {
+        if (!baseCheckArea(area)) {
+            return null;
+        }
+        DBIterator iterator = null;
+        Set<Entry<String, byte[]>> entrySet = null;
+        try {
+            DB db = AREAS.get(area);
+            entrySet = new HashSet<>();
+            iterator = db.iterator();
+            String key;
+            byte[] bytes;
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                key = asString(iterator.peekNext().getKey());
+                bytes = iterator.peekNext().getValue();
+                entrySet.add(new Entry<String, byte[]>(key, bytes));
+            }
+
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        } finally {
+            // Make sure you close the iterator to avoid resource leaks.
+            if (iterator != null) {
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
+            }
+        }
+        return entrySet;
     }
 }

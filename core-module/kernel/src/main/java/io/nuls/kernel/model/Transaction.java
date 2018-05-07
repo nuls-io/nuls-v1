@@ -100,14 +100,6 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         this.dataType = NulsDataType.TRANSACTION;
         this.time = TimeService.currentTimeMillis();
         this.type = type;
-        this.initValidators();
-    }
-
-    private void initValidators() {
-        List<NulsDataValidator> list = TransactionValidatorManager.getValidators();
-        for (NulsDataValidator<Transaction> validator : list) {
-            this.registerValidator(validator);
-        }
     }
 
     public abstract T parseTxData(byte[] bytes);

@@ -25,7 +25,10 @@
 package io.nuls.kernel.lite.core;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.lite.annotation.*;
+import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.lite.annotation.Interceptor;
+import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.lite.core.interceptor.BeanMethodInterceptor;
 import io.nuls.kernel.lite.core.interceptor.BeanMethodInterceptorManager;
 import io.nuls.kernel.lite.utils.ScanUtil;
@@ -138,18 +141,15 @@ public class SpringLiteContext {
         if (anns == null || anns.length == 0) {
             return;
         }
-        Annotation ann = getFromArray(anns, MavenInfo.class);
-        String beanName = null;
+        Annotation ann = getFromArray(anns, Service.class);
+        String beanName = ((Service) ann).value();
+        ;
         boolean aopProxy = false;
         if (null == ann) {
             ann = getFromArray(anns, Component.class);
-        }
-        if (null == ann) {
-            ann = getFromArray(anns, Service.class);
-            aopProxy = true;
+            beanName = ((Component) ann).value();
         }
         if (ann != null) {
-            beanName = ((MavenInfo) ann).value();
             if (beanName == null || beanName.trim().length() == 0) {
                 beanName = getBeanName(clazz);
             }
@@ -188,10 +188,14 @@ public class SpringLiteContext {
         return null;
     }
 
-    private static void loadBean(String beanName, Class clazz, boolean proxy) {
-        if (BEAN_OK_MAP.containsKey(beanName) || BEAN_TEMP_MAP.containsKey(beanName)) {
+    private static Object loadBean(String beanName, Class clazz, boolean proxy) {
+        if (BEAN_OK_MAP.containsKey(beanName)) {
             Log.error("bean name repetition (" + beanName + "):" + clazz.getName());
-            return;
+            return BEAN_OK_MAP.get(beanName);
+        }
+        if (BEAN_TEMP_MAP.containsKey(beanName)) {
+            Log.error("bean name repetition (" + beanName + "):" + clazz.getName());
+            return BEAN_TEMP_MAP.get(beanName);
         }
         Object bean = null;
         if (proxy) {
@@ -208,6 +212,7 @@ public class SpringLiteContext {
         BEAN_TEMP_MAP.put(beanName, bean);
         BEAN_TYPE_MAP.put(beanName, clazz);
         addClassNameMap(clazz, beanName);
+        return bean;
     }
 
     private static Object createProxy(Class clazz, MethodInterceptor interceptor) {

@@ -34,6 +34,9 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
+ * 缓存使用的键值对存储结构，提供一些基本的方法
+ * The key values used by the cache provide some basic methods for storing the structure.
+ *
  * @author Niels
  * @date 2017/12/20
  */

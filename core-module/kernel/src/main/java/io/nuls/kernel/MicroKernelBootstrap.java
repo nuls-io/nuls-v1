@@ -34,6 +34,7 @@ import io.nuls.kernel.lite.core.ModularServiceMethodInterceptor;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.module.BaseModuleBootstrap;
 import io.nuls.kernel.module.manager.VersionManager;
+import io.nuls.kernel.validate.ValidatorManager;
 
 import java.io.IOException;
 
@@ -72,6 +73,7 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
         }
         SpringLiteContext.init("io.nuls", new ModularServiceMethodInterceptor());
         try {
+            ValidatorManager.init();
             VersionManager.start();
         } catch (Exception e) {
             Log.error(e);

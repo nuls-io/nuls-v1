@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,11 +24,13 @@
 package io.nuls.db.service.impl;
 
 import io.nuls.db.manager.LevelDBManager;
+import io.nuls.db.model.Entry;
 import io.nuls.db.service.DBService;
+import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
 
 import java.util.Comparator;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -36,6 +38,7 @@ import java.util.Set;
  * @Author: PierreLuo
  * @Date: 2018/4/18
  */
+@Service
 public class LevelDBServiceImpl implements DBService {
 
     public LevelDBServiceImpl() {
@@ -57,12 +60,12 @@ public class LevelDBServiceImpl implements DBService {
     }
 
     @Override
-    public Result createArea(String areaName, Comparator comparator) {
+    public Result createArea(String areaName, Comparator<byte[]> comparator) {
         return LevelDBManager.createArea(areaName, comparator);
     }
 
     @Override
-    public Result createArea(String areaName, Long cacheSize, Comparator comparator) {
+    public Result createArea(String areaName, Long cacheSize, Comparator<byte[]> comparator) {
         return LevelDBManager.createArea(areaName, cacheSize, comparator);
     }
 
@@ -87,6 +90,11 @@ public class LevelDBServiceImpl implements DBService {
     }
 
     @Override
+    public <T extends BaseNulsData> Result put(String area, String key, T value, Class<T> clazz) {
+        return LevelDBManager.put(area, key, value, clazz);
+    }
+
+    @Override
     public Result delete(String area, String key) {
         return LevelDBManager.delete(area, key);
     }
@@ -107,12 +115,22 @@ public class LevelDBServiceImpl implements DBService {
     }
 
     @Override
+    public <T extends BaseNulsData> T get(String area, String key, Class<T> clazz) {
+        return LevelDBManager.get(area, key, clazz);
+    }
+
+    @Override
     public Set<String> keySet(String area) {
         return LevelDBManager.keySet(area);
     }
 
     @Override
-    public Set<Map.Entry<String, String>> entrySet(String area) {
+    public <V extends BaseNulsData> Set<Entry<String, V>> entrySet(String area, Class<V> clazz) {
+        return LevelDBManager.entrySet(area, clazz);
+    }
+
+    @Override
+    public Set<Entry<String, byte[]>> entrySet(String area) {
         return LevelDBManager.entrySet(area);
     }
 }
