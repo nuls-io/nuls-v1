@@ -6,7 +6,6 @@ import io.nuls.core.tools.disruptor.DisruptorUtil;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.module.service.ModuleService;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
@@ -47,7 +46,7 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
     public final void init(boolean eventChecking) {
 
         pool = TaskManager.createThreadPool(MessageBusConstant.THREAD_COUNT, 0,
-                new NulsThreadFactory(NulsConstant.MODULE_ID_EVENT_BUS, MessageBusConstant.THREAD_POOL_NAME));
+                new NulsThreadFactory(MessageBusConstant.MODULE_ID_MESSAGE_BUS, MessageBusConstant.THREAD_POOL_NAME));
         NulsThreadFactory nulsThreadFactory = new NulsThreadFactory(ModuleService.getInstance().getModuleId(MessageBusModuleBootstrap.class), disruptorName);
         disruptorService.createDisruptor(disruptorName, MessageBusConstant.DEFAULT_RING_BUFFER_SIZE, nulsThreadFactory);
 
