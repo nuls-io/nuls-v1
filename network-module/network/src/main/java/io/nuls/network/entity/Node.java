@@ -28,6 +28,7 @@ package io.nuls.network.entity;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.model.NulsDigestData;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -309,5 +310,13 @@ public class Node extends BaseNulsData {
 
     public void setCanConnect(boolean canConnect) {
         this.canConnect = canConnect;
+    }
+
+    public long getBlockHeight() {
+        return 0;
+    }
+
+    public NulsDigestData getBlockHash() {
+        return null;
     }
 }
