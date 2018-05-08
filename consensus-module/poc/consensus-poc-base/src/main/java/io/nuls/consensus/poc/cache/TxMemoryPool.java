@@ -37,7 +37,7 @@ public final class TxMemoryPool {
 
     private final static String CACHE_NAME = "tx-memory-pool";
 
-    public final static TxMemoryPool INSTANCE = new TxMemoryPool();
+    private final static TxMemoryPool INSTANCE = new TxMemoryPool();
 
     private Map<NulsDigestData, Transaction> container;
     private Queue<NulsDigestData> txHashQueue;

@@ -141,32 +141,37 @@ public class RoundManager {
     }
 
     public MeetingRound resetRound(boolean isRealTime) {
+        Lockers.ROUND_LOCK.lock();
+        try {
 
-        MeetingRound round = getCurrentRound();
+            MeetingRound round = getCurrentRound();
 
-        if (isRealTime) {
-            if (round == null || round.getEndTime() < TimeService.currentTimeMillis()) {
-                MeetingRound nextRound = getNextRound(null, true);
-                nextRound.setPreRound(round);
-                roundList.add(nextRound);
-                round = nextRound;
+            if (isRealTime) {
+                if (round == null || round.getEndTime() < TimeService.currentTimeMillis()) {
+                    MeetingRound nextRound = getNextRound(null, true);
+                    nextRound.setPreRound(round);
+                    roundList.add(nextRound);
+                    round = nextRound;
+                }
+                return round;
             }
-            return round;
-        }
 
-        BlockRoundData roundData = new BlockRoundData(chain.getEndBlockHeader().getExtend());
+            BlockRoundData roundData = new BlockRoundData(chain.getEndBlockHeader().getExtend());
 
-        if (round != null && roundData.getRoundIndex() == round.getIndex() && roundData.getPackingIndexOfRound() != roundData.getConsensusMemberCount()) {
-            return round;
-        }
+            if (round != null && roundData.getRoundIndex() == round.getIndex() && roundData.getPackingIndexOfRound() != roundData.getConsensusMemberCount()) {
+                return round;
+            }
 
-        MeetingRound nextRound = getNextRound(null, false);
-        if(round != null && nextRound.getIndex() <= round.getIndex()) {
+            MeetingRound nextRound = getNextRound(null, false);
+            if (round != null && nextRound.getIndex() <= round.getIndex()) {
+                return nextRound;
+            }
+            nextRound.setPreRound(round);
+            roundList.add(nextRound);
             return nextRound;
+        } finally {
+            Lockers.ROUND_LOCK.unlock();
         }
-        nextRound.setPreRound(round);
-        roundList.add(nextRound);
-        return nextRound;
     }
 
     public MeetingRound getNextRound(BlockRoundData roundData, boolean isRealTime) {
