@@ -1,5 +1,6 @@
 package io.nuls.message.bus.service;
 
+import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.network.entity.Node;
 import io.nuls.protocol.message.base.BaseMessage;
@@ -50,24 +51,19 @@ public interface MessageBusService {
 
     /**
      * broadcast a message that need to be passed
-     *
-     * @return
      */
-    List<String> broadcastHashAndCache(BaseMessage message, Node excludeNode,boolean aysn);
+    Result<List<String>> broadcastHashAndCache(BaseMessage message, Node excludeNode, boolean aysn);
 
     /**
      * broadcast to nodes except "excludeNodeId"
-     *
-     * @return
      */
-    List<String> broadcastAndCache(BaseMessage message, Node excludeNode,boolean aysn);
+    Result<List<String>> broadcastAndCache(BaseMessage message, Node excludeNode, boolean aysn);
 
 
     /**
      * send msg to one node
-     * @param nodeId
      */
-    boolean sendToNode(BaseMessage message, String nodeId,boolean aysn);
+    Result sendToNode(BaseMessage message, String nodeId, boolean aysn);
 
 
 }
