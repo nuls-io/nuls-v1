@@ -34,6 +34,7 @@ import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.process.BlockProcess;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.kernel.lite.core.SpringLiteContext;
+import io.nuls.protocol.service.DownloadService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,6 +46,7 @@ import static org.junit.Assert.*;
 public class BlockProcessTaskTest extends BaseTest {
 
     private BlockProcessTask blockProcessTask;
+    private ConsensusDownloadServiceImpl downloadService;
 
     @Before
     public void init() {
@@ -53,11 +55,17 @@ public class BlockProcessTaskTest extends BaseTest {
 
         BlockProcess blockProcess = new BlockProcess(chainManager, orphanBlockProvider);
         blockProcessTask = new BlockProcessTask(blockProcess);
+
+        downloadService = SpringLiteContext.getBean(ConsensusDownloadServiceImpl.class);
     }
 
     @Test
     public void testRun() {
         assertNotNull(blockProcessTask);
+
+        if(downloadService.isDownloadSuccess().isSuccess()) {
+            downloadService.setDownloadSuccess(false);
+        }
 
         ConsensusStatusContext.setConsensusStatus(ConsensusStatus.WAIT_START);
 
@@ -65,7 +73,6 @@ public class BlockProcessTaskTest extends BaseTest {
 
         assert(!ConsensusStatusContext.isRunning());
 
-        ConsensusDownloadServiceImpl downloadService = SpringLiteContext.getBean(ConsensusDownloadServiceImpl.class);
         downloadService.setDownloadSuccess(true);
 
         blockProcessTask.run();
