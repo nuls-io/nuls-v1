@@ -85,6 +85,10 @@ public class BlockHashResponse extends BaseNulsData {
         heightList.add(height);
         hashList.add(hash);
     }
+    public void putFront(long height, NulsDigestData hash) {
+        heightList.add(0,height);
+        hashList.add(0,hash);
+    }
 
     public NulsDigestData getRequestMessageHash() {
         return requestMessageHash;

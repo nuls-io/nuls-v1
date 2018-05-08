@@ -26,6 +26,7 @@
 package io.nuls.protocol.base.service;
 
 import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.TransactionProcessor;
@@ -45,6 +46,7 @@ import java.util.List;
  * @author: Niels Wang
  * @date: 2018/5/8
  */
+@Service
 public class TransactionServiceImpl implements TransactionService {
 
     @Autowired

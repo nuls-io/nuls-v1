@@ -42,12 +42,8 @@ import io.nuls.protocol.module.AbstractProtocolModule;
 public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
 
 
-    /**
-     * 加载创世块、加载最新块、检查数据完整性
-     */
     @Override
     public void init() {
-
     }
 
     @Override
@@ -66,6 +62,7 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         messageBusService.subscribeMessage(GetTxGroupRequest.class, new GetTxGroupHandler());
         messageBusService.subscribeMessage(TxGroupMessage.class, new TxGroupHandler());
         messageBusService.subscribeMessage(TransactionMessage.class, new NewTxMessageHandler());
+        messageBusService.subscribeMessage(SmallBlockMessage.class, new SmallBlockHandler());
     }
 
 

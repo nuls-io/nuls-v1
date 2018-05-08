@@ -25,14 +25,21 @@
 package io.nuls.protocol.base.handler;
 
 import io.nuls.core.tools.log.BlockLog;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.entity.Node;
+import io.nuls.protocol.constant.NotFoundType;
 import io.nuls.protocol.message.BlocksHashMessage;
 import io.nuls.protocol.message.GetBlocksHashRequest;
+import io.nuls.protocol.message.NotFoundMessage;
 import io.nuls.protocol.model.BlockHashResponse;
+import io.nuls.protocol.model.GetBlocksHashParam;
+import io.nuls.protocol.model.NotFound;
 import io.nuls.protocol.service.BlockService;
 
 /**
@@ -47,7 +54,34 @@ public class GetBlocksHashHandler extends AbstractMessageHandler<GetBlocksHashRe
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
     @Override
-    public void onMessage(GetBlocksHashRequest event, Node fromNode) {
+    public void onMessage(GetBlocksHashRequest message, Node fromNode) {
+        GetBlocksHashParam param = message.getMsgBody();
+        if (param.getSize() > MAX_SIZE) {
+            return;
+        }
+        BlockHeader endHeader = blockService.getBlockHeader(param.getStart() + param.getSize()).getData();
+        if (null == endHeader) {
+            sendNotFound(fromNode, message.getHash());
+            return;
+        }
+        BlockHashResponse response = new BlockHashResponse();
+        response.setRequestMessageHash(message.getHash());
+        BlockHeader header = endHeader;
+        while (header.getHeight() > param.getStart()) {
+            response.putFront(header.getHeight(), header.getHash());
+            header = blockService.getBlockHeader(header.getPreHash()).getData();
+        }
+        sendResponse(response, fromNode);
+    }
+
+    private void sendNotFound(Node node, NulsDigestData hash) {
+        NotFoundMessage event = new NotFoundMessage();
+        NotFound data = new NotFound(NotFoundType.HASHES, hash);
+        event.setMsgBody(data);
+        Result result = this.messageBusService.sendToNode(event, node, true);
+        if (result.isFailed()) {
+            Log.warn("send not found failed:" + node.getId() + ", hash:" + hash.getDigestHex());
+        }
     }
 
     private void sendResponse(BlockHashResponse response, Node fromNode) {

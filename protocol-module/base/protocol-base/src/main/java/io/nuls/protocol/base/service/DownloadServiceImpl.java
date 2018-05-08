@@ -26,6 +26,7 @@
 package io.nuls.protocol.base.service;
 
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
@@ -41,6 +42,7 @@ import java.util.List;
 /**
  * Created by ln on 2018/4/8.
  */
+@Service
 public class DownloadServiceImpl implements DownloadService {
 
     private DownloadProcessor processor = DownloadProcessor.getInstance();

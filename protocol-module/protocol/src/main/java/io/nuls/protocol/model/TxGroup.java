@@ -84,8 +84,8 @@ public class TxGroup extends BaseNulsData {
         initTxMap();
     }
 
-    public Transaction getTx(String digestHex) {
-        return txMap.get(digestHex);
+    public Transaction getTx(NulsDigestData hash) {
+        return txMap.get(hash);
     }
 
     /**
