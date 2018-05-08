@@ -82,7 +82,7 @@ public interface MessageBusService {
      * @param aysn    是否异步 Asynchronous execution
      * @return Return whether sent successfully
      */
-    Result sendToNode(BaseMessage message, String nodeId, boolean aysn);
+    Result sendToNode(BaseMessage message, Node Node, boolean aysn);
 
 
 }
