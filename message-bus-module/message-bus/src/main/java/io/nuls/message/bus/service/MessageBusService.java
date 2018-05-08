@@ -1,7 +1,10 @@
 package io.nuls.message.bus.service;
 
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
+import io.nuls.network.entity.Node;
 import io.nuls.protocol.message.base.BaseMessage;
+
+import java.util.List;
 
 /**
  * 消息总线模块提供给外部的服务接口定义
@@ -44,5 +47,27 @@ public interface MessageBusService {
      * @param fromId  The node's id, The message comes as to which node.
      */
     void receiveMessage(BaseMessage message, String fromId);
+
+    /**
+     * broadcast a message that need to be passed
+     *
+     * @return
+     */
+    List<String> broadcastHashAndCache(BaseMessage message, Node excludeNode,boolean aysn);
+
+    /**
+     * broadcast to nodes except "excludeNodeId"
+     *
+     * @return
+     */
+    List<String> broadcastAndCache(BaseMessage message, Node excludeNode,boolean aysn);
+
+
+    /**
+     * send msg to one node
+     * @param nodeId
+     */
+    boolean sendToNode(BaseMessage message, String nodeId,boolean aysn);
+
 
 }
