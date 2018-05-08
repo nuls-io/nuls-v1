@@ -32,6 +32,7 @@ import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.network.entity.Node;
+import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
 
 /**
@@ -84,12 +85,13 @@ public class ConsensusBlockServiceImpl implements BlockService {
     }
 
     @Override
-    public Result forwardBlock(Block block, Node excludeNode) {
+    public Result forwardBlock(SmallBlock block, Node excludeNode) {
         return null;
     }
 
     @Override
-    public Result broadcastBlock(Block block) {
+    public Result broadcastBlock(SmallBlock block) {
         return null;
     }
+
 }

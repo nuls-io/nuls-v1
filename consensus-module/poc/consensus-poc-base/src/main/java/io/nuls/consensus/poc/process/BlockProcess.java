@@ -35,11 +35,13 @@ import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
+import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
+import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
 
 import java.io.IOException;
@@ -176,7 +178,8 @@ public class BlockProcess {
         if(blockContainer.getNode() == null) {
             return;
         }
-        Result result = blockService.forwardBlock(blockContainer.getBlock(), blockContainer.getNode());
+        SmallBlock smallBlock = ConsensusTool.getSmallBlock(blockContainer.getBlock());
+        Result result = blockService.forwardBlock(smallBlock, blockContainer.getNode());
         if(!result.isSuccess()) {
             Log.warn("forward the block failed, block height: " + blockContainer.getBlock().getHeader().getHeight() + " , hash : " + blockContainer.getBlock().getHeader().getHash());
         }
