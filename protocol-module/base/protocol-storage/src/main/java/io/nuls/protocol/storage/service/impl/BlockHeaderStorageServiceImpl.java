@@ -127,7 +127,7 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService 
             this.removeBlockHerader(hashBytes);
             return result;
         }
-        dbService.put(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX, new VarInt(-1L).encode(), hashBytes);
+        dbService.put(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX, new VarInt(ProtocolStorageConstant.BEST_BLOCK_HASH_INDEX).encode(), hashBytes);
         return Result.getSuccess();
     }
 
@@ -148,12 +148,12 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService 
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         dbService.delete(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX, new VarInt(po.getHeight()).encode());
-        dbService.put(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX, new VarInt(-1L).encode(), po.getPreHash().serialize());
+        dbService.put(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX, new VarInt(ProtocolStorageConstant.BEST_BLOCK_HASH_INDEX).encode(), po.getPreHash().serialize());
         return removeBlockHerader(po.getHash().serialize());
     }
 
     @Override
     public BlockHeaderPo getBestBlockHeaderPo() {
-        return getBlockHeaderPo(-1L);
+        return getBlockHeaderPo(ProtocolStorageConstant.BEST_BLOCK_HASH_INDEX);
     }
 }
