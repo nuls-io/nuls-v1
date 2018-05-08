@@ -29,6 +29,7 @@ import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.TransactionProcessor;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,11 +65,25 @@ public class TransactionManager {
         TX_SERVICE_MAP.put(txClass, txProcessorClass);
     }
 
-    public static TransactionProcessor getProcessor(Class<? extends Transaction> txClass) {
+    private static TransactionProcessor getProcessor(Class<? extends Transaction> txClass) {
         Class<? extends TransactionProcessor> txProcessorClass = TX_SERVICE_MAP.get(txClass);
         if (null == txProcessorClass) {
             return null;
         }
         return SpringLiteContext.getBean(txProcessorClass);
     }
+
+    public static List<TransactionProcessor> getProcessorList(Class<? extends Transaction> txClass) {
+        List<TransactionProcessor> list = new ArrayList<>();
+        Class clazz = txClass;
+        while (!clazz.equals(Transaction.class)) {
+            TransactionProcessor txService = TransactionManager.getProcessor(clazz);
+            if (null != txService) {
+                list.add(0, txService);
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return list;
+    }
+
 }
