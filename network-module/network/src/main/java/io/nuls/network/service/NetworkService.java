@@ -27,6 +27,7 @@
 package io.nuls.network.service;
 
 import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 
@@ -55,4 +56,5 @@ public interface NetworkService {
 
     boolean reset();
 
+    NetworkParam getNetworkParam();
 }

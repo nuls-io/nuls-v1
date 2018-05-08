@@ -2,7 +2,7 @@ package io.nuls.network.manager;
 
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.network.base.NetworkParam;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.protocol.message.base.BaseMessage;

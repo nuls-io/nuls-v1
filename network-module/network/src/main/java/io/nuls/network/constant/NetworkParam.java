@@ -1,4 +1,4 @@
-package io.nuls.network.base;
+package io.nuls.network.constant;
 
 import java.util.List;
 import java.util.Set;

@@ -3,7 +3,7 @@ package io.nuls.network.module.impl;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.lite.annotation.Autowired;
-import io.nuls.network.base.NetworkParam;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;

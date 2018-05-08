@@ -7,7 +7,7 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.thread.manager.TaskManager;
-import io.nuls.network.base.NetworkParam;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;

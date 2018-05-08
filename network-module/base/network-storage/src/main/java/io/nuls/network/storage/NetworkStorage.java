@@ -24,7 +24,7 @@ public class NetworkStorage {
 
     public List<Node> getLocalNodeList(int size) {
         List<Node> nodeList = new ArrayList<>();
-//        dbService.e
+
         return nodeList;
     }
 
