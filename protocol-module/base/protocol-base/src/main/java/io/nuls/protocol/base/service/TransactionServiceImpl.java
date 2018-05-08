@@ -25,13 +25,20 @@
 
 package io.nuls.protocol.base.service;
 
+import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.processor.TransactionProcessor;
 import io.nuls.kernel.utils.TransactionManager;
 import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.ledger.service.LedgerService;
+import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.entity.Node;
+import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.message.TransactionMessage;
 import io.nuls.protocol.service.TransactionService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,6 +46,13 @@ import java.util.List;
  * @date: 2018/5/8
  */
 public class TransactionServiceImpl implements TransactionService {
+
+    @Autowired
+    private MessageBusService messageBusService;
+
+    @Autowired
+    private LedgerService ledgerService;
+
     /**
      * 确认交易时调用的方法，对交易相关的业务进行提交操作
      * Identify the method that is invoked during the transaction and submit the transaction related business.
@@ -49,8 +63,21 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Result commitTx(Transaction tx, Object secondaryData) {
-        TransactionManager.getProcessorList(tx.getClass());
-        return null;
+        List<TransactionProcessor> processorList = TransactionManager.getProcessorList(tx.getClass());
+        List<TransactionProcessor> commitedProcessorList = new ArrayList<>();
+        for (TransactionProcessor processor : processorList) {
+            Result result = processor.onCommit(tx, secondaryData);
+            if (result.isSuccess()) {
+                commitedProcessorList.add(processor);
+            } else {
+                for (int i = commitedProcessorList.size() - 1; i >= 0; i--) {
+                    TransactionProcessor processor1 = commitedProcessorList.get(i);
+                    processor1.onRollback(tx, secondaryData);
+                }
+                return result;
+            }
+        }
+        return Result.getSuccess();
     }
 
     /**
@@ -63,8 +90,21 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Result rollback(Transaction tx, Object secondaryData) {
-        // todo auto-generated method stub(Niels)
-        return null;
+        List<TransactionProcessor> processorList = TransactionManager.getProcessorList(tx.getClass());
+        List<TransactionProcessor> rollbackedList = new ArrayList<>();
+        for (TransactionProcessor processor : processorList) {
+            Result result = processor.onRollback(tx, secondaryData);
+            if (result.isSuccess()) {
+                rollbackedList.add(processor);
+            } else {
+                for (int i = rollbackedList.size() - 1; i >= 0; i--) {
+                    TransactionProcessor processor1 = rollbackedList.get(i);
+                    processor1.onCommit(tx, secondaryData);
+                }
+                return result;
+            }
+        }
+        return Result.getSuccess();
     }
 
     /**
@@ -77,8 +117,9 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Result forwardTx(Transaction tx, Node excludeNode) {
-        // todo auto-generated method stub(Niels)
-        return null;
+        TransactionMessage message = new TransactionMessage();
+        message.setMsgBody(tx);
+        return messageBusService.broadcastHashAndCache(message, excludeNode, true);
     }
 
     /**
@@ -90,8 +131,9 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Result broadcastTx(Transaction tx) {
-        // todo auto-generated method stub(Niels)
-        return null;
+        TransactionMessage message = new TransactionMessage();
+        message.setMsgBody(tx);
+        return messageBusService.broadcastHashAndCache(message, null, false);
     }
 
     /**
@@ -106,7 +148,24 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public ValidateResult conflictDetect(List<Transaction> txList) {
-        // todo auto-generated method stub(Niels)
-        return null;
+        ValidateResult result = ledgerService.verifyDoubleSpend(txList);
+        if (result.isFailed()) {
+            return result;
+        }
+        List<Transaction> newTxList = new ArrayList<>();
+        for (Transaction tx : txList) {
+            if (tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ProtocolConstant.TX_TYPE_TRANSFER) {
+                continue;
+            }
+            newTxList.add(tx);
+        }
+        List<TransactionProcessor> processorList = TransactionManager.getAllProcessorList();
+        for (TransactionProcessor processor : processorList) {
+            result = processor.conflictDetect(newTxList);
+            if (result.isFailed()) {
+                break;
+            }
+        }
+        return result;
     }
 }

@@ -276,7 +276,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public Result broadcastBlock(SmallBlock smallBlock) {
         SmallBlockMessage message = fillSmallBlockMessage(smallBlock);
-        return messageBusService.broadcastHashAndCache(message, null, true);
+        return messageBusService.broadcastHashAndCache(message, null, false);
     }
 
     /**

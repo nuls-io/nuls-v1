@@ -24,6 +24,7 @@
  */
 package io.nuls.kernel.utils;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.TransactionProcessor;
@@ -86,4 +87,12 @@ public class TransactionManager {
         return list;
     }
 
+    public static List<TransactionProcessor> getAllProcessorList() {
+        try {
+            return SpringLiteContext.getBeanList(TransactionProcessor.class);
+        } catch (Exception e) {
+            Log.error(e);
+            return new ArrayList<>();
+        }
+    }
 }
