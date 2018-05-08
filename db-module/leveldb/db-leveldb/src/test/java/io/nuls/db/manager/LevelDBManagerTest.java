@@ -64,6 +64,7 @@ public class LevelDBManagerTest {
     public void test() throws UnsupportedEncodingException {
         testPutModel();
         testGetModel();
+        testGetModelByClass();
         testPut_1();
         testPut_2();
         testPut_3();
@@ -73,9 +74,13 @@ public class LevelDBManagerTest {
         testFullCreateArea();
         testDestroyArea();
         testKeySet();
-        testKeyListAndOrderCreateArea();
+        testKeyList();
+        testComparator();
+        testCacheSize();
         testEntrySet();
-        testEntryListAndOrderCreateArea();
+        testEntryList();
+        testEntryListByClass();
+
     }
 
     public void testFullCreateArea() {
@@ -146,15 +151,19 @@ public class LevelDBManagerTest {
 
     public void testPutModel() {
         DBTestEntity entity = new DBTestEntity();
-        ModelWrapper model = new ModelWrapper(entity);
-        putModel(area, key, model);
-        ModelWrapper modelResult = getModel(area, key);
-        Assert.assertEquals(model.getT().getClass().getName(), modelResult.getT().getClass().getName());
+        putModel(area, key, entity);
+        Object object = getModel(area, key);
+        Assert.assertEquals(entity.getClass().getName(), object.getClass().getName());
     }
 
     public void testGetModel() {
-        ModelWrapper modelResult = getModel(area, key);
-        Assert.assertEquals(DBTestEntity.class.getName(), modelResult.getT().getClass().getName());
+        Object object = getModel(area, key);
+        Assert.assertEquals(DBTestEntity.class.getName(), object.getClass().getName());
+    }
+
+    public void testGetModelByClass() {
+        DBTestEntity object = getModel(area, key, DBTestEntity.class);
+        Assert.assertEquals(DBTestEntity.class.getName(), object.getClass().getName());
     }
 
     public void testKeySet() {
@@ -171,14 +180,9 @@ public class LevelDBManagerTest {
         destroyArea(area);
     }
 
-    public void testKeyListAndOrderCreateArea() {
+    public void testKeyList() {
         String area = "testKeyList";
-        createArea(area, new Comparator<byte[]>() {
-            @Override
-            public int compare(byte[] o1, byte[] o2) {
-                return asString(o1).compareTo(asString(o2));
-            }
-        });
+        createArea(area);
         put(area, "set05", "set05value");
         put(area, "set06", "set06value");
         put(area, "set02", "set02value");
@@ -194,7 +198,37 @@ public class LevelDBManagerTest {
         destroyArea(area);
     }
 
-    //TODO 补testcase 保存自定义比较器的testcase
+    public void testComparator() {
+        String area = "testComparator";
+        createArea(area, new Comparator<byte[]>() {
+            @Override
+            public int compare(byte[] o1, byte[] o2) {
+                String s1 = asString(o1);
+                String s2 = asString(o2);
+                if("set03".equals(s1)) {
+                    return Math.abs(s1.compareTo(s2));
+                }
+                return s1.compareTo(s2);
+            }
+        });
+        put(area, "set05", "set05value");
+        put(area, "set06", "set06value");
+        put(area, "set02", "set02value");
+        put(area, "set01", "set01value");
+        put(area, "set04", "set04value");
+        put(area, "set03", "set03value");
+        List<String> keys = keyList(area);
+        Assert.assertEquals(6, keys.size());
+        int i = 0;
+        String contactAllKeys = "";
+        for(String key : keys) {
+            contactAllKeys += key;
+        }
+
+        Assert.assertEquals("set01set02set04set05set06set03", contactAllKeys);
+        destroyArea(area);
+    }
+
 
     public void testEntrySet() {
         String area = "testEntrySet";
@@ -212,9 +246,9 @@ public class LevelDBManagerTest {
         destroyArea(area);
     }
 
-    public void testEntryListAndOrderCreateArea() {
-        String area = "testEntryList";
-        createArea(area, new Comparator<byte[]>() {
+    public void testCacheSize() {
+        String area = "testCacheSize";
+        createArea(area, 100 * 1024 * 1024l, new Comparator<byte[]>() {
             @Override
             public int compare(byte[] o1, byte[] o2) {
                 return asString(o1).compareTo(asString(o2));
@@ -235,6 +269,45 @@ public class LevelDBManagerTest {
             Assert.assertEquals("set" + i + "value", asString(entry.getValue()));
             i++;
         }
+        destroyArea(area);
+    }
+
+    public void testEntryList() {
+        String area = "testEntryList";
+        createArea(area);
+        put(area, "set5", "set5value");
+        put(area, "set6", "set6value");
+        put(area, "set2", "set2value");
+        put(area, "set1", "set1value");
+        put(area, "set4", "set4value");
+        put(area, "set3", "set3value");
+        List<Entry<String, byte[]>> entries = entryList(area);
+        Assert.assertEquals(6, entries.size());
+
+        int i = 1;
+        for(Entry<String, byte[]> entry : entries) {
+            Assert.assertEquals("set" + i, entry.getKey());
+            Assert.assertEquals("set" + i + "value", asString(entry.getValue()));
+            i++;
+        }
+        destroyArea(area);
+    }
+
+    public void testEntryListByClass() {
+        String area = "testEntryListByClass";
+        createArea(area);
+        DBTestEntity entity = new DBTestEntity();
+        putModel(area, "entity1", entity);
+        entity = new DBTestEntity();
+        putModel(area, "entity2", entity);
+        entity = new DBTestEntity();
+        putModel(area, "entity3", entity);
+        entity = new DBTestEntity();
+        putModel(area, "entity4", entity);
+        entity = new DBTestEntity();
+        putModel(area, "entity5", entity);
+        List<Entry<String, DBTestEntity>> list = entryList(area, DBTestEntity.class);
+        Assert.assertEquals(5, list.size());
         destroyArea(area);
     }
 

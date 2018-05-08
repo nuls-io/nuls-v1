@@ -92,12 +92,12 @@ public class LevelDBServiceImpl implements DBService {
     }
 
     @Override
-    public <T> Result putModel(String area, String key, ModelWrapper<T> value) {
+    public <T> Result putModel(String area, String key, T value) {
         return LevelDBManager.putModel(area, key, value);
     }
 
     @Override
-    public <T> Result putModel(String area, byte[] key, ModelWrapper<T> value) {
+    public <T> Result putModel(String area, byte[] key, T value) {
         return LevelDBManager.putModel(area, key, value);
     }
 
@@ -122,12 +122,22 @@ public class LevelDBServiceImpl implements DBService {
     }
 
     @Override
-    public <T> ModelWrapper<T> getModel(String area, String key) {
+    public <T> T getModel(String area, String key, Class<T> clazz) {
+        return LevelDBManager.getModel(area, key, clazz);
+    }
+
+    @Override
+    public <T> T getModel(String area, byte[] key, Class<T> clazz) {
+        return LevelDBManager.getModel(area, key, clazz);
+    }
+
+    @Override
+    public Object getModel(String area, String key) {
         return LevelDBManager.getModel(area, key);
     }
 
     @Override
-    public <T> ModelWrapper<T> getModel(String area, byte[] key) {
+    public Object getModel(String area, byte[] key) {
         return LevelDBManager.getModel(area, key);
     }
 
@@ -149,5 +159,10 @@ public class LevelDBServiceImpl implements DBService {
     @Override
     public List<Entry<String, byte[]>> entryList(String area) {
         return LevelDBManager.entryList(area);
+    }
+
+    @Override
+    public <T> List<Entry<String, T>> entryList(String area, Class<T> clazz) {
+        return LevelDBManager.entryList(area, clazz);
     }
 }

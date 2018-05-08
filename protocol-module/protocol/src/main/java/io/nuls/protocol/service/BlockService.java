@@ -30,6 +30,7 @@ import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.network.entity.Node;
+import io.nuls.protocol.model.SmallBlock;
 
 /**
  * 区块处理服务接口
@@ -121,7 +122,7 @@ public interface BlockService {
      * @param excludeNode 需要排除的节点，一般是因为从该节点处接收的本区块/The nodes that need to be excluded are generally due to the block received from the node.
      * @return 转发结果/forward results
      */
-    Result forwardBlock(Block block, Node excludeNode);
+    Result forwardBlock(SmallBlock block, Node excludeNode);
 
     /**
      * 广播区块给连接的其他对等节点
@@ -130,5 +131,5 @@ public interface BlockService {
      * @param block 完整区块/the whole block
      * @return 广播结果/Broadcast the results
      */
-    Result broadcastBlock(Block block);
+    Result broadcastBlock(SmallBlock block);
 }

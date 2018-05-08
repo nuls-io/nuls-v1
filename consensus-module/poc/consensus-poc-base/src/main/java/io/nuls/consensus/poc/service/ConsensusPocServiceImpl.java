@@ -26,17 +26,20 @@
 
 package io.nuls.consensus.poc.service;
 
-import io.nuls.consensus.poc.cache.BlockMemoryPool;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
+import io.nuls.consensus.poc.context.PocConsensusContext;
+import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.service.ConsensusServiceIntf;
 import io.nuls.kernel.constant.TransactionErrorCode;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.network.entity.Node;
+import io.nuls.protocol.service.BlockService;
 
 import java.util.List;
 
@@ -44,10 +47,12 @@ import java.util.List;
  * Created by ln on 2018/5/5.
  */
 @Service
-public class ConsensusPocService implements ConsensusServiceIntf {
+public class ConsensusPocServiceImpl implements ConsensusServiceIntf {
 
     private TxMemoryPool txMemoryPool = TxMemoryPool.getInstance();
-    private BlockMemoryPool blockMemoryPool = new BlockMemoryPool();
+    private BlockQueueProvider blockQueueProvider = BlockQueueProvider.getInstance();
+
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
     @Override
     public Result newTx(Transaction<? extends BaseNulsData> tx) {
@@ -72,20 +77,29 @@ public class ConsensusPocService implements ConsensusServiceIntf {
     @Override
     public Result newBlock(Block block, Node node) {
         BlockContainer blockContainer = new BlockContainer(block, node, BlockContainerStatus.RECEIVED);
-        boolean success = blockMemoryPool.put(blockContainer);
+        boolean success = blockQueueProvider.put(blockContainer);
         return new Result(success, null);
     }
 
     @Override
     public Result addBlock(Block block) {
         BlockContainer blockContainer = new BlockContainer(block, BlockContainerStatus.DOWNLOADING);
-        boolean success = blockMemoryPool.put(blockContainer);
+        boolean success = blockQueueProvider.put(blockContainer);
         return new Result(success, null);
     }
 
     @Override
     public Result rollbackBlock(Block block) throws NulsException {
-        return null;
+
+        boolean success = PocConsensusContext.getChainManager().getMasterChain().rollback(block);
+
+        if(success) {
+            success = blockService.rollbackBlock(block).isSuccess();
+            if(!success) {
+                PocConsensusContext.getChainManager().getMasterChain().addBlock(block);
+            }
+        }
+        return new Result(success, null);
     }
 
     @Override

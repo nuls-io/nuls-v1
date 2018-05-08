@@ -24,11 +24,15 @@
  */
 package io.nuls.kernel.utils;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.TransactionProcessor;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,23 +41,58 @@ import java.util.Map;
  */
 public class TransactionManager {
 
-    private static final Map<Integer, Class<? extends Transaction>> TX_MAP = new HashMap<>();
     private static final Map<Class<? extends Transaction>, Class> TX_SERVICE_MAP = new HashMap<>();
 
-    public static final void putTx(int txType, Class<? extends Transaction> txClass, Class<? extends TransactionProcessor> txProcessorClass) {
-        if (TX_MAP.containsKey(txType)) {
-            throw new RuntimeException("Transaction type repeating!");
+    public static void init() throws Exception {
+        List<TransactionProcessor> beanList = SpringLiteContext.getBeanList(TransactionProcessor.class);
+        for (TransactionProcessor processor : beanList) {
+            registerProcessor(processor);
         }
-        TX_MAP.put(txType, txClass);
+    }
+
+    private static void registerProcessor(TransactionProcessor processor) {
+        Method[] methods = processor.getClass().getDeclaredMethods();
+        for (Method method : methods) {
+            if (!method.getName().equals("onCommit")) {
+                continue;
+            }
+            Class paramType = method.getParameterTypes()[0];
+            putTx(paramType, processor.getClass());
+            break;
+        }
+    }
+
+    public static final void putTx(Class<? extends Transaction> txClass, Class<? extends TransactionProcessor> txProcessorClass) {
         TX_SERVICE_MAP.put(txClass, txProcessorClass);
     }
 
-
-    public static TransactionProcessor getProcessor(Class<? extends Transaction> txClass) {
+    private static TransactionProcessor getProcessor(Class<? extends Transaction> txClass) {
         Class<? extends TransactionProcessor> txProcessorClass = TX_SERVICE_MAP.get(txClass);
         if (null == txProcessorClass) {
             return null;
         }
         return SpringLiteContext.getBean(txProcessorClass);
+    }
+
+    public static List<TransactionProcessor> getProcessorList(Class<? extends Transaction> txClass) {
+        List<TransactionProcessor> list = new ArrayList<>();
+        Class clazz = txClass;
+        while (!clazz.equals(Transaction.class)) {
+            TransactionProcessor txService = TransactionManager.getProcessor(clazz);
+            if (null != txService) {
+                list.add(0, txService);
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return list;
+    }
+
+    public static List<TransactionProcessor> getAllProcessorList() {
+        try {
+            return SpringLiteContext.getBeanList(TransactionProcessor.class);
+        } catch (Exception e) {
+            Log.error(e);
+            return new ArrayList<>();
+        }
     }
 }

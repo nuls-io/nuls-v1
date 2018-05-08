@@ -26,6 +26,7 @@
 
 package io.nuls.consensus.poc.service;
 
+import io.nuls.consensus.poc.BaseTest;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.TestTransaction;
 import io.nuls.consensus.service.ConsensusServiceIntf;
@@ -46,9 +47,9 @@ import static org.junit.Assert.*;
 /**
  * Created by ln on 2018/5/5.
  */
-public class ConsensusPocServiceTest {
+public class ConsensusPocServiceTest extends BaseTest {
 
-    private ConsensusServiceIntf service = new ConsensusPocService();
+    private ConsensusServiceIntf service = new ConsensusPocServiceImpl();
 
     @Before
     public void setUp() throws Exception {

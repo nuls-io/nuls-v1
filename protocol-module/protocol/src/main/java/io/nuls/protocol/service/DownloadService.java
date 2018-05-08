@@ -83,7 +83,7 @@ public interface DownloadService {
      * 返回下载是否完成的结果
      * Returns the results of the download.
      */
-    Result<Boolean> isDownloadSuccess();
+    Result isDownloadSuccess();
 
     /**
      * 重新检查当前状态是否需要重新同步区块，如果需要则下载

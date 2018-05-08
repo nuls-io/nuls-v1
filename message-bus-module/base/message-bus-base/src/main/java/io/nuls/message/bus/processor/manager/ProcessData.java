@@ -1,5 +1,6 @@
 package io.nuls.message.bus.processor.manager;
 
+import io.nuls.network.entity.Node;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**
@@ -10,26 +11,26 @@ public class ProcessData<T extends BaseMessage> {
 
     private final T data;
 
-    private String nodeId;
+    private Node node;
 
     public ProcessData(T data){
         this.data = data;
     }
 
-    public ProcessData(T data, String nodeId){
+    public ProcessData(T data,  Node node){
         this.data = data;
-        this.nodeId = nodeId;
+        this.node = node;
     }
 
     public T getData(){
         return data;
     }
 
-    public String getNodeId() {
-        return nodeId;
+    public Node getNode() {
+        return node;
     }
 
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
+    public void setNode(Node node) {
+        this.node = node;
     }
 }
