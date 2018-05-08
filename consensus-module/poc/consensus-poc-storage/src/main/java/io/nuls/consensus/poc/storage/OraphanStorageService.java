@@ -24,35 +24,20 @@
  *
  */
 
-package io.nuls.consensus.poc.task;
+package io.nuls.consensus.poc.storage;
 
-import io.nuls.consensus.poc.process.ForkChainProcess;
-import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.exception.NulsException;
-
-import java.io.IOException;
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.NulsDigestData;
 
 /**
  * Created by ln on 2018/5/8.
  */
-public class ForkChainProcessTask implements Runnable {
+public interface OraphanStorageService {
 
-    private ForkChainProcess forkChainProcess;
+    boolean save(Block block);
 
-    public ForkChainProcessTask(ForkChainProcess forkChainProcess) {
-        this.forkChainProcess = forkChainProcess;
-    }
+    Block get(NulsDigestData key);
 
-    @Override
-    public void run() {
-        try {
-            doTask();
-        } catch (Exception e) {
-            Log.error(e);
-        }
-    }
+    boolean delete(NulsDigestData key);
 
-    private void doTask() throws IOException, NulsException {
-        forkChainProcess.doProcess();
-    }
 }

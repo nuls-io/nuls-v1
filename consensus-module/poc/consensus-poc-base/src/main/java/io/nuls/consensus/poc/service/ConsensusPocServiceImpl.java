@@ -30,7 +30,9 @@ import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.context.PocConsensusContext;
+import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
+import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
 import io.nuls.consensus.service.ConsensusServiceIntf;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
@@ -91,8 +93,13 @@ public class ConsensusPocServiceImpl implements ConsensusServiceIntf {
     @Override
     public Result rollbackBlock(Block block) throws NulsException {
 
-        boolean success = PocConsensusContext.getChainManager().getMasterChain().rollback(block);
-
+        boolean success;
+        Lockers.CHAIN_LOCK.lock();
+        try {
+            success = PocConsensusContext.getChainManager().getMasterChain().rollback(block);
+        } finally {
+            Lockers.CHAIN_LOCK.unlock();
+        }
         if(success) {
             success = blockService.rollbackBlock(block).isSuccess();
             if(!success) {
@@ -109,7 +116,7 @@ public class ConsensusPocServiceImpl implements ConsensusServiceIntf {
 
     @Override
     public Result reset() {
-        //TODO
-        return null;
+        boolean success = ConsensusScheduler.getInstance().restart();
+        return new Result(success, null);
     }
 }

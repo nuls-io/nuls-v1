@@ -43,31 +43,31 @@ public class ChainManager {
 
     private ChainContainer masterChain;
     private List<ChainContainer> chains;
-    private List<ChainContainer> isolatedChains;
+    private List<ChainContainer> orphanChains;
 
     public ChainManager() {
         chains = new ArrayList<>();
-        isolatedChains = new ArrayList<>();
+        orphanChains = new ArrayList<>();
     }
 
-    public void newIsolatedChain(Block block) {
+    public void newOrphanChain(Block block) {
         BlockHeader header = block.getHeader();
 
-        Chain isolatedChain = new Chain();
-        isolatedChain.setStartBlockHeader(header);
-        isolatedChain.setEndBlockHeader(header);
-        isolatedChain.getBlockHeaderList().add(header);
-        isolatedChain.getBlockList().add(block);
+        Chain orphanChain = new Chain();
+        orphanChain.setStartBlockHeader(header);
+        orphanChain.setEndBlockHeader(header);
+        orphanChain.getBlockHeaderList().add(header);
+        orphanChain.getBlockList().add(block);
 
-        ChainContainer isolatedChainContainer = new ChainContainer(isolatedChain);
-        isolatedChains.add(isolatedChainContainer);
+        ChainContainer orphanChainContainer = new ChainContainer(orphanChain);
+        orphanChains.add(orphanChainContainer);
     }
 
-    public boolean checkIsBeforeIsolatedChainAndAdd(Block block) {
+    public boolean checkIsBeforeOrphanChainAndAdd(Block block) {
         BlockHeader header = block.getHeader();
 
         boolean success = false;
-        for(ChainContainer chainContainer : isolatedChains) {
+        for(ChainContainer chainContainer : orphanChains) {
             Chain chain = chainContainer.getChain();
             if(header.getHash().equals(chain.getStartBlockHeader().getPreHash())) {
                 success = true;
@@ -79,10 +79,10 @@ public class ChainManager {
         return success;
     }
 
-    public boolean checkIsAfterIsolatedChainAndAdd(Block block) {
+    public boolean checkIsAfterOrphanChainAndAdd(Block block) {
         BlockHeader header = block.getHeader();
 
-        for(ChainContainer chainContainer : isolatedChains) {
+        for(ChainContainer chainContainer : orphanChains) {
             Chain chain = chainContainer.getChain();
             if(header.getPreHash().equals(chain.getEndBlockHeader().getHash())) {
                 chain.setEndBlockHeader(header);
@@ -104,11 +104,7 @@ public class ChainManager {
     public void clear() {
         masterChain = null;
         chains.clear();
-        isolatedChains.clear();
-    }
-
-    public void startConsensus() {
-        ConsensusStatusContext.setConsensusStatus(ConsensusStatus.RUNNING);
+        orphanChains.clear();
     }
 
     public ChainContainer getMasterChain() {
@@ -123,16 +119,11 @@ public class ChainManager {
         return chains;
     }
 
-    public void setChains(List<ChainContainer> chains) {
-        this.chains = chains;
-    }
-
-    public List<ChainContainer> getIsolatedChains() {
-        return isolatedChains;
-    }
-
     public Block getBestBlock() {
         return masterChain.getBestBlock();
     }
 
+    public List<ChainContainer> getOrphanChains() {
+        return orphanChains;
+    }
 }

@@ -41,7 +41,7 @@ public class PocConsensusConstant {
      * Maximum height difference handled by furcation blocks , Blocks that exceed this difference will be discarded directly
      * 分叉块处理的最大高度差值，超过这个差值的区块，会直接丢弃掉
      */
-    public final static int MAX_ISOLATED_BLOCK_COUNT = 100;
+    public final static int MAX_ISOLATED_BLOCK_COUNT = 1000;
 
     /**
      * How long does the current network time exceed the number of blocks that are discarded directly, in milliseconds
