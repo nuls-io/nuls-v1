@@ -1,15 +1,19 @@
 package io.nuls.message.bus.service.impl;
 
 import TestHandler.BlockMessageHandler;
+import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.processor.manager.ProcessorManager;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.entity.Node;
+import io.nuls.network.service.NetworkService;
+import io.nuls.network.service.impl.NetworkServiceImpl;
 import io.nuls.protocol.message.BlockMessage;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,13 +30,22 @@ public class MessageBusServiceImplTest {
     private Class block = null;
 
     @Before
-    public void before() {
+    public void before() throws Exception{
         subscribe();
+
+        // 向MessageBusModuleBootstrap 注入实例化MessageBusService对象
+        NetworkService networkService = new NetworkServiceImpl();
+        Field networkServiceField = messageBusService.getClass().getDeclaredField("networkService");
+        networkServiceField.setAccessible(true);
+        assertNull(networkServiceField.get(messageBusService));
+        networkServiceField.set(messageBusService, networkService);
+        assertNotNull(networkServiceField.get(messageBusService));
+
     }
 
     private void subscribe(){
         block = BlockMessage.class;
-        NulsMessageHandler messageHandler = new BlockMessageHandler();
+        messageHandler = new BlockMessageHandler();
         handlerId = messageBusService.subscribeMessage(block, messageHandler);
     }
 
@@ -68,6 +81,12 @@ public class MessageBusServiceImplTest {
         assertTrue(messageHandlerMapping.get(block).contains(handlerId));
     }
 
+    /**
+     *
+     * 验证取消订阅后handlerMap中的值
+     * Verify the value in handlerMap after unsubscribing
+     * @throws Exception
+     */
     @Test
     public void unsubscribeMessage() throws Exception {
         messageBusService.unsubscribeMessage(handlerId);
@@ -92,5 +111,42 @@ public class MessageBusServiceImplTest {
         messageBusService.receiveMessage(blockMessage, node);
     }
 
+    /**
+     * 广播消息hash缓存
+     * broadcast a message hash and cache that need to be passed
+     */
+    @Test
+    public void broadcastHashAndCache() {
+        BlockMessage blockMessage = new BlockMessage();
+        Node node = new Node("192.168.1.90",8003,1);
+        boolean aysn = true;
+        Result<List<String>> result =  messageBusService.broadcastHashAndCache(blockMessage, node, aysn);
+        assertTrue(result.isSuccess());
+        assertTrue(result.getData().size()>0);
+    }
 
+    /**
+     * 广播消息
+     * broadcast to nodes except "excludeNode"
+     */
+    @Test
+    public void broadcastAndCache() {
+        BlockMessage blockMessage = new BlockMessage();
+        Node node = new Node("192.168.1.90",8003,1);
+        boolean aysn = true;
+        Result<List<String>> result =  messageBusService.broadcastAndCache(blockMessage, node, aysn);
+        assertTrue(result.isSuccess());
+        assertTrue(result.getData().size()>0);
+    }
+
+    /**
+     * send msg to one node
+     */
+    @Test
+    public void sendToNode() {
+        BlockMessage blockMessage = new BlockMessage();
+        Node node = new Node("192.168.1.90",8003,1);
+        boolean aysn = true;
+        assertTrue(messageBusService.sendToNode(blockMessage, node, aysn).isSuccess());
+    }
 }
