@@ -80,6 +80,7 @@ public class LevelDBManagerTest {
         testEntrySet();
         testEntryList();
         testEntryListByClass();
+        testValuesByClass();
 
     }
 
@@ -307,6 +308,24 @@ public class LevelDBManagerTest {
         entity = new DBTestEntity();
         putModel(area, "entity5", entity);
         List<Entry<String, DBTestEntity>> list = entryList(area, DBTestEntity.class);
+        Assert.assertEquals(5, list.size());
+        destroyArea(area);
+    }
+
+    public void testValuesByClass() {
+        String area = "testValuesByClass";
+        createArea(area);
+        DBTestEntity entity = new DBTestEntity();
+        putModel(area, "entity1", entity);
+        entity = new DBTestEntity();
+        putModel(area, "entity2", entity);
+        entity = new DBTestEntity();
+        putModel(area, "entity3", entity);
+        entity = new DBTestEntity();
+        putModel(area, "entity4", entity);
+        entity = new DBTestEntity();
+        putModel(area, "entity5", entity);
+        List<DBTestEntity> list = values(area, DBTestEntity.class);
         Assert.assertEquals(5, list.size());
         destroyArea(area);
     }

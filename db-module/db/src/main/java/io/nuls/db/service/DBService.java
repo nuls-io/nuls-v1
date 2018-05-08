@@ -83,4 +83,6 @@ public interface DBService {
 
     <T> List<Entry<String, T>> entryList(String area, Class<T> clazz);
 
+    <T> List<T> values(String area, Class<T> clazz);
+
 }

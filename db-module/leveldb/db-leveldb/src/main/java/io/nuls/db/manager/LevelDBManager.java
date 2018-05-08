@@ -286,11 +286,26 @@ public class LevelDBManager {
             try {
                 AREAS.remove(entry.getKey());
                 entry.getValue().close();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.warn("close leveldb error", e);
             }
         }
     }
+
+    /**
+     * close a area
+     * 关闭所有数据区域
+     */
+    public static void closeArea(String area) {
+        try {
+            DB db = AREAS.remove(area);
+            db.close();
+        } catch (IOException e) {
+            Log.warn("close leveldb area error:" + area, e);
+        }
+    }
+
+
 
     /**
      * @param dbPath
@@ -372,8 +387,8 @@ public class LevelDBManager {
     }
 
     private static String getAreaNameFromDbPath(String dbPath) {
-        int end = dbPath.lastIndexOf("/");
-        int start = dbPath.lastIndexOf("/", end - 1) + 1;
+        int end = dbPath.lastIndexOf(File.separator);
+        int start = dbPath.lastIndexOf(File.separator, end - 1) + 1;
         return dbPath.substring(start, end);
     }
 
@@ -798,5 +813,47 @@ public class LevelDBManager {
             }
         }
         return entryList;
+    }
+
+    public static <T> List<T> values(String area, Class<T> clazz) {
+        if (!baseCheckArea(area)) {
+            return null;
+        }
+        DBIterator iterator = null;
+        List<T> list = null;
+        try {
+            DB db = AREAS.get(area);
+            list = new ArrayList<>();
+            iterator = db.iterator();
+            Set<String> keySet = new HashSet<>();
+            String key;
+            byte[] bytes;
+            Map.Entry<byte[], byte[]> entry;
+            T t = null;
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                t = null;
+                entry = iterator.peekNext();
+                key = asString(entry.getKey());
+                if(keySet.add(key)) {
+                    t = getModel(area, entry.getKey(), clazz);
+                    list.add(t);
+                }
+            }
+            keySet.clear();
+            keySet = null;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        } finally {
+            // Make sure you close the iterator to avoid resource leaks.
+            if (iterator != null) {
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
+            }
+        }
+        return list;
     }
 }
