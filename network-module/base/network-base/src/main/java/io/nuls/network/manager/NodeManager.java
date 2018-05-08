@@ -322,25 +322,25 @@ public class NodeManager implements Runnable {
     }
 
 
-    public boolean handshakeNode(String groupName, Node node, VersionEvent versionEvent) {
-        lock.lock();
-        try {
-            if (!checkFullHandShake(node)) {
-                return false;
-            }
-            if (!connectedNodes.containsKey(node.getId())) {
-                return false;
-            }
-            node.setStatus(Node.HANDSHAKE);
-            node.setVersionMessage(versionEvent);
-
-            connectedNodes.remove(node.getId());
-            handShakeNodes.put(node.getId(), node);
-            return addNodeToGroup(groupName, node);
-        } finally {
-            lock.unlock();
-        }
-    }
+//    public boolean handshakeNode(String groupName, Node node, VersionEvent versionEvent) {
+//        lock.lock();
+//        try {
+//            if (!checkFullHandShake(node)) {
+//                return false;
+//            }
+//            if (!connectedNodes.containsKey(node.getId())) {
+//                return false;
+//            }
+//            node.setStatus(Node.HANDSHAKE);
+//            node.setVersionMessage(versionEvent);
+//
+//            connectedNodes.remove(node.getId());
+//            handShakeNodes.put(node.getId(), node);
+//            return addNodeToGroup(groupName, node);
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
 
     private boolean checkFullHandShake(Node node) {
         if (node.getType() == Node.IN) {
@@ -422,25 +422,6 @@ public class NodeManager implements Runnable {
 
     public void setConnectionManager(ConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
-    }
-
-    public void setDiscoverHandler(NodeDiscoverHandler discoverHandler) {
-        this.discoverHandler = discoverHandler;
-    }
-
-    private NodeDataService getNodeDao() {
-        if (nodeDao == null) {
-            nodeDao = NulsContext.getServiceBean(NodeDataService.class);
-        }
-        return nodeDao;
-    }
-
-    public boolean isSeed() {
-        return isSeed;
-    }
-
-    public void setSeed(boolean seed) {
-        isSeed = seed;
     }
 
     /**

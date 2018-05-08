@@ -27,6 +27,11 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.base.NetworkParam;
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.entity.Node;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author vivi
@@ -39,11 +44,32 @@ public class NodeDiscoverHandler implements Runnable {
     @Autowired
     private NodeManager nodesManager;
 
+    @Autowired
+    private BroadcastHandler broadcastHandler;
+
     private boolean running = false;
 
     public void start() {
         running = true;
         TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "NetworkNodeDiscover", this);
+    }
+
+    /**
+     * Inquire more of the other nodes to the connected nodes
+     *
+     * @param size
+     */
+    public void findOtherNode(int size) {
+       // GetNodeEvent event = new GetNodeEvent(size);
+        List<Node> nodeList = new ArrayList<>(nodesManager.getAvailableNodes());
+        Collections.shuffle(nodeList);
+        for (int i = 0; i < nodeList.size(); i++) {
+            if (i == 2) {
+                break;
+            }
+            Node node = nodeList.get(i);
+            broadcastHandler.broadcastToNode(null, node, true);
+        }
     }
 
     @Override
