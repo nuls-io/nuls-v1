@@ -32,6 +32,7 @@ import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Created by ln on 2018/5/5.
@@ -42,13 +43,15 @@ public interface NetworkService {
 
     Node getNode(String nodeId);
 
+    Map<String, Node> getNodes();
+
     Collection<Node> getAvailableNodes();
 
     BroadcastResult sendToAllNode(BaseNulsData event, boolean asyn);
 
-    BroadcastResult sendToAllNode(BaseNulsData event, String excludeNodeId, boolean asyn);
+    BroadcastResult sendToAllNode(BaseNulsData event, Node excludeNode, boolean asyn);
 
-    BroadcastResult sendToNode(BaseNulsData event, String nodeId, boolean asyn);
+    BroadcastResult sendToNode(BaseNulsData event, Node node, boolean asyn);
 
     BroadcastResult sendToGroup(BaseNulsData event, String groupName, boolean asyn);
 

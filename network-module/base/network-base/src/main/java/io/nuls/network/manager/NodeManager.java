@@ -25,7 +25,7 @@ public class NodeManager implements Runnable {
 
     private Map<String, NodeGroup> nodeGroups = new ConcurrentHashMap<>();
 
-    private Map<String, Integer> firstUnConnectedNodes = new ConcurrentHashMap<>();
+    private Map<String, Integer> unConnectedNodes = new ConcurrentHashMap<>();
 
     private Map<String, Node> disConnectNodes = new ConcurrentHashMap<>();
 
@@ -79,11 +79,12 @@ public class NodeManager implements Runnable {
 
 
     public boolean addNode(Node node) {
-        if (IpUtil.getIps().contains(node.getIp())) {
+        if (network.getLocalIps().contains(node.getIp())) {
             return false;
         }
         lock.lock();
         try {
+
             if (outNodeIdSet.contains(node.getId())) {
                 return false;
             }
@@ -92,20 +93,15 @@ public class NodeManager implements Runnable {
                 return false;
             }
 
-            if (!disConnectNodes.containsKey(node.getId()) &&
-                    !connectedNodes.containsKey(node.getId()) &&
-                    !handShakeNodes.containsKey(node.getId())) {
-                Map<String, Node> nodeMap = getNodes();
-                for (Node n : nodeMap.values()) {
-                    if (n.getIp().equals(node.getIp())) {
-                        return false;
-                    }
+            Map<String, Node> nodeMap = getNodes();
+            for (Node n : nodeMap.values()) {
+                if (n.getIp().equals(node.getIp())) {
+                    return false;
                 }
-                outNodeIdSet.add(node.getId());
-                connectionManager.connectionNode(node);
-                return true;
             }
-            return false;
+            outNodeIdSet.add(node.getId());
+            connectionManager.connectionNode(node);
+            return true;
         } finally {
             lock.unlock();
         }
@@ -114,10 +110,9 @@ public class NodeManager implements Runnable {
     public boolean addConnNode(Node node) {
         lock.lock();
         try {
-
             if (!connectedNodes.containsKey(node.getId()) && !handShakeNodes.containsKey(node.getId())) {
                 // those nodes that are not connected at once, remove it when connected +
-                firstUnConnectedNodes.remove(node.getId());
+                unConnectedNodes.remove(node.getId());
                 // those nodes that are not connected at once, remove it when connected -
                 disConnectNodes.remove(node.getId());
                 connectedNodes.put(node.getId(), node);
@@ -129,27 +124,6 @@ public class NodeManager implements Runnable {
         }
     }
 
-    public void addFailNode(Node node) {
-        if (IpUtil.getIps().contains(node.getIp())) {
-            return;
-        }
-        lock.lock();
-        try {
-            node.destroy();
-            if (!disConnectNodes.containsKey(node.getId()) &&
-                    !connectedNodes.containsKey(node.getId())) {
-                Map<String, Node> nodeMap = getNodes();
-                for (Node n : nodeMap.values()) {
-                    if (n.getIp().equals(node.getIp())) {
-                        return;
-                    }
-                }
-                removeNodeHandler(node);
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
 
     public boolean addNodeToGroup(String groupName, Node node) {
         NodeGroup nodeGroup = nodeGroups.get(groupName);
@@ -441,11 +415,11 @@ public class NodeManager implements Runnable {
                     return;
                 }
             }
-            Integer count = firstUnConnectedNodes.get(nodeId);
+            Integer count = unConnectedNodes.get(nodeId);
             if (count == null) {
-                firstUnConnectedNodes.put(nodeId, 1);
+                unConnectedNodes.put(nodeId, 1);
             } else {
-                firstUnConnectedNodes.put(nodeId, ++count);
+                unConnectedNodes.put(nodeId, ++count);
             }
         }
     }
@@ -459,7 +433,7 @@ public class NodeManager implements Runnable {
      * @return
      */
     private boolean checkFirstUnConnectedNode(String nodeId) {
-        Integer count = firstUnConnectedNodes.get(nodeId);
+        Integer count = unConnectedNodes.get(nodeId);
         if (count == null)
             return true;
         if (count <= NetworkConstant.CONEECT_FAIL_MAX_COUNT) {
@@ -467,11 +441,11 @@ public class NodeManager implements Runnable {
             return true;
         } else if (count < (NetworkConstant.CONEECT_FAIL_MAX_COUNT * 10)) {
             // (6, 60)
-            firstUnConnectedNodes.put(nodeId, ++count);
+            unConnectedNodes.put(nodeId, ++count);
             return false;
         } else {
             // [60, ~]
-            firstUnConnectedNodes.remove(nodeId);
+            unConnectedNodes.remove(nodeId);
             return true;
         }
     }

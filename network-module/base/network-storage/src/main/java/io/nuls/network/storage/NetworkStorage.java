@@ -23,20 +23,33 @@ public class NetworkStorage {
     }
 
     public List<Node> getLocalNodeList(int size) {
-        List<Node> nodeList = new ArrayList<>();
-
-        return nodeList;
+        List<Node> nodeList = dbService.values(NetworkConstant.NODE_DB_AREA, Node.class);
+        if (size > nodeList.size()) {
+            size = nodeList.size();
+        }
+        return nodeList.subList(0, size);
     }
 
     public List<Node> getLocalNodeList(int size, Set<String> ipSet) {
         List<Node> nodeList = new ArrayList<>();
-//        dbService.e
+        List<Node> localList = dbService.values(NetworkConstant.NODE_DB_AREA, Node.class);
+        int count = 0;
+        for (int i = localList.size() - 1; i >= 0; i--) {
+            Node node = localList.get(i);
+            if (ipSet.contains(node.getIp())) {
+                continue;
+            }
+            nodeList.add(node);
+            count++;
+            if (count >= size) {
+                break;
+            }
+        }
         return nodeList;
     }
 
     public void saveNode(Node node) {
-
-//        dbService.putModel(NetworkConstant.NODE_DB_AREA, node.getId(), node);
+        dbService.putModel(NetworkConstant.NODE_DB_AREA, node.getId(), node);
     }
 
     public void deleteNode(Node node) {

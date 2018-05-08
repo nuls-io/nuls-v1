@@ -42,9 +42,7 @@ public class ConnectionManager {
     }
 
     public void connectionNode(Node node) {
-        if (network.getLocalIps().contains(node.getIp())) {
-            return;
-        }
+
         TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "node connection", new Runnable() {
             @Override
             public void run() {
