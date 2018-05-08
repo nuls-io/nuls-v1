@@ -64,6 +64,7 @@ public class LevelDBManagerTest {
     public void test() throws UnsupportedEncodingException {
         testPutModel();
         testGetModel();
+        testGetModelByClass();
         testPut_1();
         testPut_2();
         testPut_3();
@@ -78,6 +79,7 @@ public class LevelDBManagerTest {
         testCacheSize();
         testEntrySet();
         testEntryList();
+        testEntryListByClass();
 
     }
 
@@ -149,15 +151,19 @@ public class LevelDBManagerTest {
 
     public void testPutModel() {
         DBTestEntity entity = new DBTestEntity();
-        ModelWrapper model = new ModelWrapper(entity);
-        putModel(area, key, model);
-        ModelWrapper modelResult = getModel(area, key);
-        Assert.assertEquals(model.getT().getClass().getName(), modelResult.getT().getClass().getName());
+        putModel(area, key, entity);
+        Object object = getModel(area, key);
+        Assert.assertEquals(entity.getClass().getName(), object.getClass().getName());
     }
 
     public void testGetModel() {
-        ModelWrapper modelResult = getModel(area, key);
-        Assert.assertEquals(DBTestEntity.class.getName(), modelResult.getT().getClass().getName());
+        Object object = getModel(area, key);
+        Assert.assertEquals(DBTestEntity.class.getName(), object.getClass().getName());
+    }
+
+    public void testGetModelByClass() {
+        DBTestEntity object = getModel(area, key, DBTestEntity.class);
+        Assert.assertEquals(DBTestEntity.class.getName(), object.getClass().getName());
     }
 
     public void testKeySet() {
@@ -211,14 +217,6 @@ public class LevelDBManagerTest {
         put(area, "set01", "set01value");
         put(area, "set04", "set04value");
         put(area, "set03", "set03value");
-        /*List<Entry<String, byte[]>> entriesList = entryList(area);
-        Set<Entry<String, byte[]>> entriesSet = entrySet(area);
-        System.out.println(asString(get(area, "set01")));
-        System.out.println(asString(get(area, "set02")));
-        System.out.println(asString(get(area, "set03")));
-        System.out.println(asString(get(area, "set04")));
-        System.out.println(asString(get(area, "set05")));
-        System.out.println(asString(get(area, "set06")));*/
         List<String> keys = keyList(area);
         Assert.assertEquals(6, keys.size());
         int i = 0;
@@ -292,6 +290,24 @@ public class LevelDBManagerTest {
             Assert.assertEquals("set" + i + "value", asString(entry.getValue()));
             i++;
         }
+        destroyArea(area);
+    }
+
+    public void testEntryListByClass() {
+        String area = "testEntryListByClass";
+        createArea(area);
+        DBTestEntity entity = new DBTestEntity();
+        putModel(area, "entity1", entity);
+        entity = new DBTestEntity();
+        putModel(area, "entity2", entity);
+        entity = new DBTestEntity();
+        putModel(area, "entity3", entity);
+        entity = new DBTestEntity();
+        putModel(area, "entity4", entity);
+        entity = new DBTestEntity();
+        putModel(area, "entity5", entity);
+        List<Entry<String, DBTestEntity>> list = entryList(area, DBTestEntity.class);
+        Assert.assertEquals(5, list.size());
         destroyArea(area);
     }
 

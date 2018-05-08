@@ -312,19 +312,13 @@ public class LevelDBManager {
          * the custom cacheSize of the Area will be retrieved and loaded on the database is started, otherwise, the previous cacheSize setting will be lost when the existing Area is started.
          */
         String areaName = getAreaNameFromDbPath(dbPath);
-        ModelWrapper dbComparatorWrapper = getModel(BASE_AREA_NAME, areaName + "-comparator");
-        if (dbComparatorWrapper != null) {
-            DBComparator dbComparator = (DBComparator) dbComparatorWrapper.getT();
-            if (dbComparator != null) {
-                options.comparator(dbComparator);
-            }
+        DBComparator dbComparator = getModel(BASE_AREA_NAME, areaName + "-comparator", DBComparator.class);
+        if (dbComparator != null) {
+            options.comparator(dbComparator);
         }
-        ModelWrapper cacheSizeWrapper = getModel(BASE_AREA_NAME, areaName + "-cacheSize");
-        if (cacheSizeWrapper != null) {
-            Long cacheSize = (Long) cacheSizeWrapper.getT();
-            if (cacheSize != null) {
-                options.cacheSize(cacheSize);
-            }
+        Long cacheSize = getModel(BASE_AREA_NAME, areaName + "-cacheSize", Long.class);
+        if (cacheSize != null) {
+            options.cacheSize(cacheSize);
         }
         DBFactory factory = Iq80DBFactory.factory;
         return factory.open(file, options);
@@ -349,8 +343,7 @@ public class LevelDBManager {
         String areaName = getAreaNameFromDbPath(dbPath);
         Options options = new Options().createIfMissing(createIfMissing);
         if (cacheSize != null) {
-            ModelWrapper cacheSizeWrapper = new ModelWrapper(cacheSize);
-            putModel(BASE_AREA_NAME, areaName + "-cacheSize", cacheSizeWrapper);
+            putModel(BASE_AREA_NAME, areaName + "-cacheSize", cacheSize);
             options.cacheSize(cacheSize);
         }
         if (comparator != null) {
@@ -371,8 +364,7 @@ public class LevelDBManager {
                     return key;
                 }
             };
-            ModelWrapper dbComparatorWrapper = new ModelWrapper(dbComparator);
-            putModel(BASE_AREA_NAME, areaName + "-comparator", dbComparatorWrapper);
+            putModel(BASE_AREA_NAME, areaName + "-comparator", dbComparator);
             options.comparator(dbComparator);
         }
         DBFactory factory = Iq80DBFactory.factory;
@@ -492,11 +484,11 @@ public class LevelDBManager {
         }
     }
 
-    public static <T> Result putModel(String area, String key, ModelWrapper<T> value) {
+    public static <T> Result putModel(String area, String key, T value) {
         return putModel(area, bytes(key), value);
     }
 
-    public static <T> Result putModel(String area, byte[] key, ModelWrapper<T> value) {
+    public static <T> Result putModel(String area, byte[] key, T value) {
         if (!baseCheckArea(area)) {
             return new Result(true, "KV_AREA_NOT_EXISTS");
         }
@@ -509,7 +501,8 @@ public class LevelDBManager {
                 SCHEMA_MAP.put(ModelWrapper.class, schema);
             }
             RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
-            byte[] bytes = ProtostuffIOUtil.toByteArray(value, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
+            ModelWrapper modelWrapper = new ModelWrapper(value);
+            byte[] bytes = ProtostuffIOUtil.toByteArray(modelWrapper, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
             DB db = AREAS.get(area);
             db.put(key, bytes);
             return Result.getSuccess();
@@ -583,11 +576,19 @@ public class LevelDBManager {
         }
     }
 
-    public static <T> ModelWrapper<T> getModel(String area, String key) {
+    public static Object getModel(String area, String key) {
         return getModel(area, bytes(key));
     }
 
-    public static <T> ModelWrapper<T> getModel(String area, byte[] key) {
+    public static Object getModel(String area, byte[] key) {
+        return getModel(area, key, null);
+    }
+
+    public static <T> T getModel(String area, String key, Class<T> clazz) {
+        return getModel(area, bytes(key), clazz);
+    }
+
+    public static <T> T getModel(String area, byte[] key, Class<T> clazz) {
         if (!baseCheckArea(area)) {
             return null;
         }
@@ -597,10 +598,16 @@ public class LevelDBManager {
         try {
             DB db = AREAS.get(area);
             byte[] bytes = db.get(key);
+            if(bytes == null) {
+                return null;
+            }
             RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
             ModelWrapper model = new ModelWrapper();
             ProtostuffIOUtil.mergeFrom(bytes, model, schema);
-            return model;
+            if(clazz != null && model.getT() != null) {
+                return clazz.cast(model.getT());
+            }
+            return (T) model.getT();
         } catch (Exception e) {
             return null;
         }
@@ -731,6 +738,48 @@ public class LevelDBManager {
                 if(keySet.add(key)) {
                     bytes = entry.getValue();
                     entryList.add(new Entry<String, byte[]>(key, bytes));
+                }
+            }
+            keySet.clear();
+            keySet = null;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        } finally {
+            // Make sure you close the iterator to avoid resource leaks.
+            if (iterator != null) {
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
+            }
+        }
+        return entryList;
+    }
+
+    public static <T> List<Entry<String,T>> entryList(String area, Class<T> clazz) {
+        if (!baseCheckArea(area)) {
+            return null;
+        }
+        DBIterator iterator = null;
+        List<Entry<String, T>> entryList = null;
+        try {
+            DB db = AREAS.get(area);
+            entryList = new ArrayList<>();
+            iterator = db.iterator();
+            Set<String> keySet = new HashSet<>();
+            String key;
+            byte[] bytes;
+            Map.Entry<byte[], byte[]> entry;
+            T t = null;
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                t = null;
+                entry = iterator.peekNext();
+                key = asString(entry.getKey());
+                if(keySet.add(key)) {
+                    t = getModel(area, entry.getKey(), clazz);
+                    entryList.add(new Entry<String, T>(key, t));
                 }
             }
             keySet.clear();

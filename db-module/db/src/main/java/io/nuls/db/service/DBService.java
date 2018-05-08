@@ -53,9 +53,9 @@ public interface DBService {
 
     Result put(String area, byte[] key, String value);
 
-    <T> Result putModel(String area, String key, ModelWrapper<T> value);
+    <T> Result putModel(String area, String key, T value);
 
-    <T> Result putModel(String area, byte[] key, ModelWrapper<T> value);
+    <T> Result putModel(String area, byte[] key, T value);
 
     Result delete(String area, String key);
 
@@ -65,9 +65,13 @@ public interface DBService {
 
     byte[] get(String area, byte[] key);
 
-    <T> ModelWrapper<T> getModel(String area, String key);
+    <T> T getModel(String area, String key, Class<T> clazz);
 
-    <T> ModelWrapper<T> getModel(String area, byte[] key);
+    <T> T getModel(String area, byte[] key, Class<T> clazz);
+
+    Object getModel(String area, String key);
+
+    Object getModel(String area, byte[] key);
 
     Set<String> keySet(String area);
 
@@ -76,5 +80,7 @@ public interface DBService {
     Set<Entry<String, byte[]>> entrySet(String area);
 
     List<Entry<String, byte[]>> entryList(String area);
+
+    <T> List<Entry<String, T>> entryList(String area, Class<T> clazz);
 
 }
