@@ -34,7 +34,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         Log.debug("---------------------- server channelRegistered ------------------------- " + nodeId);
 
         String remoteIP = channel.remoteAddress().getHostString();
-        Map<String, Node> nodeMap = null;
+        Map<String, Node> nodeMap = networkService.getNodes();
                 //getNetworkService().getNodes();
         for (Node node : nodeMap.values()) {
             if (node.getIp().equals(remoteIP)) {

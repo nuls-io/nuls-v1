@@ -165,4 +165,9 @@ public class LevelDBServiceImpl implements DBService {
     public <T> List<Entry<String, T>> entryList(String area, Class<T> clazz) {
         return LevelDBManager.entryList(area, clazz);
     }
+
+    @Override
+    public <T> List<T> values(String area, Class<T> clazz) {
+        return LevelDBManager.values(area, clazz);
+    }
 }
