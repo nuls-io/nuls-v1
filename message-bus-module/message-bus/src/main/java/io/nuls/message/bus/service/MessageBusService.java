@@ -63,7 +63,7 @@ public interface MessageBusService {
 
     /**
      * 广播消息
-     * broadcast to nodes except "excludeNodeId"
+     * broadcast to nodes except "excludeNode"
      *
      * @param message     The message was broadcast.
      * @param excludeNode 不会广播的节点 The node that is not passed.
