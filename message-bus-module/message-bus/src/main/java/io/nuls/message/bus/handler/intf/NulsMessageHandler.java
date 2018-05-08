@@ -3,6 +3,7 @@ package io.nuls.message.bus.handler.intf;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.message.bus.filter.NulsMessageFilter;
 import io.nuls.message.bus.filter.NulsMessageFilterChain;
+import io.nuls.network.entity.Node;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**
@@ -27,5 +28,5 @@ public interface NulsMessageHandler<T extends BaseMessage> {
      */
     NulsMessageFilterChain getFilterChian();
 
-    void onMessage(T message, String formId) throws NulsException;
+    void onMessage(T message, Node formNode) throws NulsException;
 }
