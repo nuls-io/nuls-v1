@@ -25,12 +25,14 @@ package io.nuls.db.service.impl;
 
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.model.Entry;
+import io.nuls.db.model.ModelWrapper;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -90,8 +92,13 @@ public class LevelDBServiceImpl implements DBService {
     }
 
     @Override
-    public <T extends BaseNulsData> Result put(String area, String key, T value) {
-        return LevelDBManager.put(area, key, value);
+    public <T> Result putModel(String area, String key, ModelWrapper<T> value) {
+        return LevelDBManager.putModel(area, key, value);
+    }
+
+    @Override
+    public <T> Result putModel(String area, byte[] key, ModelWrapper<T> value) {
+        return LevelDBManager.putModel(area, key, value);
     }
 
     @Override
@@ -115,8 +122,13 @@ public class LevelDBServiceImpl implements DBService {
     }
 
     @Override
-    public <T extends BaseNulsData> T get(String area, String key, Class<T> clazz) {
-        return LevelDBManager.get(area, key, clazz);
+    public <T> ModelWrapper<T> getModel(String area, String key) {
+        return LevelDBManager.getModel(area, key);
+    }
+
+    @Override
+    public <T> ModelWrapper<T> getModel(String area, byte[] key) {
+        return LevelDBManager.getModel(area, key);
     }
 
     @Override
@@ -125,12 +137,17 @@ public class LevelDBServiceImpl implements DBService {
     }
 
     @Override
-    public <V extends BaseNulsData> Set<Entry<String, V>> entrySet(String area, Class<V> clazz) {
-        return LevelDBManager.entrySet(area, clazz);
+    public List<String> keyList(String area) {
+        return LevelDBManager.keyList(area);
     }
 
     @Override
     public Set<Entry<String, byte[]>> entrySet(String area) {
         return LevelDBManager.entrySet(area);
+    }
+
+    @Override
+    public List<Entry<String, byte[]>> entryList(String area) {
+        return LevelDBManager.entryList(area);
     }
 }

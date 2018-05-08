@@ -27,10 +27,14 @@ import io.nuls.core.tools.cfg.ConfigLoader;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.model.Entry;
+import io.nuls.db.model.ModelWrapper;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Result;
+import io.protostuff.LinkedBuffer;
+import io.protostuff.ProtostuffIOUtil;
+import io.protostuff.runtime.RuntimeSchema;
 import org.iq80.leveldb.*;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 
@@ -55,7 +59,10 @@ public class LevelDBManager {
 
     private static final ConcurrentHashMap<String, DB> AREAS = new ConcurrentHashMap<>();
 
+    private static final Map<Class, RuntimeSchema> SCHEMA_MAP = new ConcurrentHashMap<>();
+
     private static final String BASE_DB_NAME = "leveldb";
+    private static final String BASE_AREA_NAME = "base";
 
     private static volatile boolean isInit = false;
 
@@ -71,21 +78,61 @@ public class LevelDBManager {
             File dir = loadDataPath();
             dataPath = dir.getPath();
             Log.info("LevelDBManager dataPath is " + dataPath);
+
+            initSchema();
+            initBaseDB(dataPath);
+
             File[] areaFiles = dir.listFiles();
             DB db = null;
+            String dbPath = null;
             for (File areaFile : areaFiles) {
+                if (BASE_AREA_NAME.equals(areaFile.getName())) {
+                    continue;
+                }
                 if (!areaFile.isDirectory()) {
                     continue;
                 }
                 try {
-                    db = openDB(areaFile.getPath() + File.separator + BASE_DB_NAME, false);
+                    dbPath = areaFile.getPath() + File.separator + BASE_DB_NAME;
+                    db = initOpenDB(dbPath);
                     if (db != null) {
                         AREAS.put(areaFile.getName(), db);
                     }
                 } catch (Exception e) {
-                    Log.warn("load area failed, areaName: " + areaFile.getName(), e);
+                    Log.warn("load area failed, areaName: " + areaFile.getName() + ", dbPath: " + dbPath, e);
                 }
 
+            }
+        }
+    }
+
+    private static void initSchema() {
+        RuntimeSchema schema = RuntimeSchema.createFrom(ModelWrapper.class);
+        SCHEMA_MAP.put(ModelWrapper.class, schema);
+    }
+
+
+    /**
+     * 优先初始化BASE_AREA
+     * 存放基础数据，比如Area的自定义比较器，于下次启动数据库时取出，否则，若Area自定义了比较器，下次重启数据库时，此Area会启动失败，失败异常：java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
+     * Prioritize BASE_AREA.
+     * Based data storage, such as custom comparator Area, for the next time you start the database, otherwise, if the Area custom the comparator, the next time you restart the database, this Area will start failure, failure Exception: java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
+     *
+     * @param dataPath
+     */
+    private static void initBaseDB(String dataPath) {
+        if (AREAS.get(BASE_AREA_NAME) == null) {
+            String baseAreaPath = dataPath + File.separator + BASE_AREA_NAME;
+            File dir = new File(baseAreaPath);
+            if (!dir.exists()) {
+                dir.mkdir();
+            }
+            String filePath = baseAreaPath + File.separator + BASE_DB_NAME;
+            try {
+                DB db = openDB(filePath, true, null, null);
+                AREAS.put(BASE_AREA_NAME, db);
+            } catch (IOException e) {
+                Log.error(e);
             }
         }
     }
@@ -212,6 +259,7 @@ public class LevelDBManager {
             String filePath = dataPath + File.separator + areaName + File.separator + BASE_DB_NAME;
             destroyDB(filePath);
             AREAS.remove(areaName);
+            delete(BASE_AREA_NAME, areaName);
             result = Result.getSuccess();
         } catch (Exception e) {
             Log.error("error destroy area: " + areaName, e);
@@ -249,12 +297,21 @@ public class LevelDBManager {
      * @return
      * @throws IOException
      */
-    private static DB openDB(String dbPath, boolean createIfMissing) throws IOException {
+    private static DB initOpenDB(String dbPath) throws IOException {
         File file = new File(dbPath);
-        if (!createIfMissing && !file.exists()) {
+        if (!file.exists()) {
             return null;
         }
-        Options options = new Options().createIfMissing(createIfMissing);
+        Options options = new Options().createIfMissing(false);
+
+        String areaName = getAreaNameFromDbPath(dbPath);
+        ModelWrapper dbComparatorWrapper = getModel(BASE_AREA_NAME, areaName);
+        if (dbComparatorWrapper != null) {
+            DBComparator dbComparator = (DBComparator) dbComparatorWrapper.getT();
+            if (dbComparator != null) {
+                options.comparator(dbComparator);
+            }
+        }
         DBFactory factory = Iq80DBFactory.factory;
         return factory.open(file, options);
     }
@@ -274,13 +331,14 @@ public class LevelDBManager {
             options.cacheSize(cacheSize);
         }
         if (comparator != null) {
+            String areaName = getAreaNameFromDbPath(dbPath);
             DBComparator dbComparator = new DBComparator() {
                 public int compare(byte[] key1, byte[] key2) {
                     return comparator.compare(key1, key2);
                 }
 
                 public String name() {
-                    return "key-comparator";
+                    return areaName + " - key-comparator";
                 }
 
                 public byte[] findShortestSeparator(byte[] start, byte[] limit) {
@@ -291,10 +349,22 @@ public class LevelDBManager {
                     return key;
                 }
             };
+            /*
+             * 保存area的自定义比较器，比如Area的自定义比较器，于下次启动数据库时取出，否则，若Area自定义了比较器，下次重启数据库时，此Area会启动失败，失败异常：java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
+             * Save the area's custom comparator, such as custom comparator Area, for the next time you start the database, otherwise, if the Area custom the comparator, the next time you restart the database, this Area will start failure, failure Exception: java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
+             */
+            ModelWrapper dbComparatorWrapper = new ModelWrapper(dbComparator);
+            putModel(BASE_AREA_NAME, areaName, dbComparatorWrapper);
             options.comparator(dbComparator);
         }
         DBFactory factory = Iq80DBFactory.factory;
         return factory.open(file, options);
+    }
+
+    private static String getAreaNameFromDbPath(String dbPath) {
+        int end = dbPath.lastIndexOf("/");
+        int start = dbPath.lastIndexOf("/", end - 1) + 1;
+        return dbPath.substring(start, end);
     }
 
     private static boolean checkPathLegal(String areaName) {
@@ -365,6 +435,7 @@ public class LevelDBManager {
             db.put(key, value);
             return Result.getSuccess();
         } catch (Exception e) {
+            Log.error(e);
             return Result.getFailed(e.getMessage());
         }
     }
@@ -381,6 +452,7 @@ public class LevelDBManager {
             db.put(bytes(key), bytes(value));
             return Result.getSuccess();
         } catch (Exception e) {
+            Log.error(e);
             return Result.getFailed(e.getMessage());
         }
     }
@@ -397,11 +469,16 @@ public class LevelDBManager {
             db.put(key, bytes(value));
             return Result.getSuccess();
         } catch (Exception e) {
+            Log.error(e);
             return Result.getFailed(e.getMessage());
         }
     }
 
-    public static <T extends BaseNulsData> Result put(String area, String key, T value) {
+    public static <T> Result putModel(String area, String key, ModelWrapper<T> value) {
+        return putModel(area, bytes(key), value);
+    }
+
+    public static <T> Result putModel(String area, byte[] key, ModelWrapper<T> value) {
         if (!baseCheckArea(area)) {
             return new Result(true, "KV_AREA_NOT_EXISTS");
         }
@@ -409,10 +486,17 @@ public class LevelDBManager {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
+            if (SCHEMA_MAP.get(ModelWrapper.class) == null) {
+                RuntimeSchema schema = RuntimeSchema.createFrom(ModelWrapper.class);
+                SCHEMA_MAP.put(ModelWrapper.class, schema);
+            }
+            RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
+            byte[] bytes = ProtostuffIOUtil.toByteArray(value, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
             DB db = AREAS.get(area);
-            db.put(bytes(key), value.serialize());
+            db.put(key, bytes);
             return Result.getSuccess();
         } catch (Exception e) {
+            Log.error(e);
             return Result.getFailed(e.getMessage());
         }
     }
@@ -429,6 +513,7 @@ public class LevelDBManager {
             db.delete(bytes(key));
             return Result.getSuccess();
         } catch (Exception e) {
+            Log.error(e);
             return Result.getFailed(e.getMessage());
         }
     }
@@ -445,6 +530,7 @@ public class LevelDBManager {
             db.delete(key);
             return Result.getSuccess();
         } catch (Exception e) {
+            Log.error(e);
             return Result.getFailed(e.getMessage());
         }
     }
@@ -464,24 +550,6 @@ public class LevelDBManager {
         }
     }
 
-    public static <T extends BaseNulsData> T get(String area, String key, Class<T> clazz) {
-        if (!baseCheckArea(area)) {
-            return null;
-        }
-        if (StringUtils.isBlank(key)) {
-            return null;
-        }
-        try {
-            DB db = AREAS.get(area);
-            byte[] bytes = db.get(bytes(key));
-            T value = clazz.newInstance();
-            value.parse(bytes);
-            return value;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     public static byte[] get(String area, byte[] key) {
         if (!baseCheckArea(area)) {
             return null;
@@ -492,6 +560,29 @@ public class LevelDBManager {
         try {
             DB db = AREAS.get(area);
             return db.get(key);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static <T> ModelWrapper<T> getModel(String area, String key) {
+        return getModel(area, bytes(key));
+    }
+
+    public static <T> ModelWrapper<T> getModel(String area, byte[] key) {
+        if (!baseCheckArea(area)) {
+            return null;
+        }
+        if (key == null) {
+            return null;
+        }
+        try {
+            DB db = AREAS.get(area);
+            byte[] bytes = db.get(key);
+            RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
+            ModelWrapper model = new ModelWrapper();
+            ProtostuffIOUtil.mergeFrom(bytes, model, schema);
+            return model;
         } catch (Exception e) {
             return null;
         }
@@ -526,23 +617,53 @@ public class LevelDBManager {
         }
     }
 
-    public static <V extends BaseNulsData> Set<Entry<String, V>> entrySet(String area, Class<V> clazz) {
+    public static List<String> keyList(String area) {
         if (!baseCheckArea(area)) {
             return null;
         }
         DBIterator iterator = null;
-        Set<Entry<String, V>> entrySet = null;
+        List<String> keyList = null;
+        try {
+            DB db = AREAS.get(area);
+            keyList = new ArrayList<>();
+            iterator = db.iterator();
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                keyList.add(asString(iterator.peekNext().getKey()));
+            }
+            return keyList;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        } finally {
+            // Make sure you close the iterator to avoid resource leaks.
+            if (iterator != null) {
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
+            }
+        }
+    }
+
+    public static Set<Entry<String, byte[]>> entrySet(String area) {
+        if (!baseCheckArea(area)) {
+            return null;
+        }
+        DBIterator iterator = null;
+        Set<Entry<String, byte[]>> entrySet = null;
         try {
             DB db = AREAS.get(area);
             entrySet = new HashSet<>();
             iterator = db.iterator();
-            V value;
+            String key;
+            byte[] bytes;
+            Map.Entry<byte[], byte[]> entry;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
-                String key = asString(iterator.peekNext().getKey());
-                byte[] bytes = iterator.peekNext().getValue();
-                value = clazz.newInstance();
-                value.parse(bytes);
-                entrySet.add(new Entry<String, V>(key, value));
+                entry = iterator.peekNext();
+                key = asString(entry.getKey());
+                bytes = entry.getValue();
+                entrySet.add(new Entry<String, byte[]>(key, bytes));
             }
 
         } catch (Exception e) {
@@ -561,23 +682,24 @@ public class LevelDBManager {
         return entrySet;
     }
 
-
-    public static Set<Entry<String, byte[]>> entrySet(String area) {
+    public static List<Entry<String, byte[]>> entryList(String area) {
         if (!baseCheckArea(area)) {
             return null;
         }
         DBIterator iterator = null;
-        Set<Entry<String, byte[]>> entrySet = null;
+        List<Entry<String, byte[]>> entryList = null;
         try {
             DB db = AREAS.get(area);
-            entrySet = new HashSet<>();
+            entryList = new ArrayList<>();
             iterator = db.iterator();
             String key;
             byte[] bytes;
+            Map.Entry<byte[], byte[]> entry;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
-                key = asString(iterator.peekNext().getKey());
-                bytes = iterator.peekNext().getValue();
-                entrySet.add(new Entry<String, byte[]>(key, bytes));
+                entry = iterator.peekNext();
+                key = asString(entry.getKey());
+                bytes = entry.getValue();
+                entryList.add(new Entry<String, byte[]>(key, bytes));
             }
 
         } catch (Exception e) {
@@ -593,6 +715,6 @@ public class LevelDBManager {
                 }
             }
         }
-        return entrySet;
+        return entryList;
     }
 }

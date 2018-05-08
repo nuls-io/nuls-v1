@@ -1,5 +1,6 @@
 package io.nuls.message.bus.module;
 
+import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.message.bus.service.MessageBusService;
 
 /**
@@ -8,10 +9,12 @@ import io.nuls.message.bus.service.MessageBusService;
  */
 public class MessageBusModuleBootstrap extends AbstractMessageBusModule {
 
+    @Autowired
     private MessageBusService messageBusService;
 
     @Override
     public void init() {
+
 
     }
 
