@@ -78,11 +78,11 @@ public interface MessageBusService {
      * send msg to one node
      *
      * @param message The message you want to sent
-     * @param nodeId  The node id that received the message
+     * @param node  The node that received the message
      * @param aysn    是否异步 Asynchronous execution
      * @return Return whether sent successfully
      */
-    Result sendToNode(BaseMessage message, String nodeId, boolean aysn);
+    Result sendToNode(BaseMessage message, Node node, boolean aysn);
 
 
 }

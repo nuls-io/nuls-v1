@@ -71,6 +71,10 @@ public class LevelDBManager {
         return max;
     }
 
+    public static String getBaseAreaName() {
+        return BASE_AREA_NAME;
+    }
+
     public static synchronized void init() throws Exception {
         if (!isInit) {
             isInit = true;
@@ -114,10 +118,10 @@ public class LevelDBManager {
     /**
      * 优先初始化BASE_AREA
      * 存放基础数据，比如Area的自定义比较器，下次启动数据库时获取并装载它，否则，若Area自定义了比较器，下次重启数据库时，此Area会启动失败，失败异常：java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
-     *             比如Area的自定义cacheSize，下次启动数据库时获取并装载它，否则，下次启动已存在的Area时会丢失之前的cacheSize设置。
+     * 比如Area的自定义cacheSize，下次启动数据库时获取并装载它，否则，下次启动已存在的Area时会丢失之前的cacheSize设置。
      * Prioritize BASE_AREA.
      * Based data storage, for example, Area of custom comparator, the next time you start the database access and loaded it, otherwise, if the Area custom the comparator, the next time you restart the database, this Area will start failure, failure exception: java.lang.IllegalArgumentException: Expected user comparator leveldb. BytewiseComparator to match existing database comparator
-     *                     the custom cacheSize of the Area will be retrieved and loaded next time the database is started, otherwise, the previous cacheSize setting will be lost when the existing Area is started.
+     * the custom cacheSize of the Area will be retrieved and loaded next time the database is started, otherwise, the previous cacheSize setting will be lost when the existing Area is started.
      *
      * @param dataPath
      */
@@ -306,7 +310,6 @@ public class LevelDBManager {
     }
 
 
-
     /**
      * @param dbPath
      * @param createIfMissing
@@ -346,6 +349,7 @@ public class LevelDBManager {
      * load database
      * If the area custom comparator, save area define the comparator, the next time you start the database access and loaded it, otherwise, the next time you restart the database, this area will start failure, failure exception: java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
      * If the area custom cacheSize, save the area's custom cacheSize, get and load it the next time you start the database, or you'll lose the cacheSize setting before starting the existing area.
+     *
      * @param dbPath
      * @param createIfMissing
      * @param cacheSize
@@ -613,13 +617,13 @@ public class LevelDBManager {
         try {
             DB db = AREAS.get(area);
             byte[] bytes = db.get(key);
-            if(bytes == null) {
+            if (bytes == null) {
                 return null;
             }
             RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
             ModelWrapper model = new ModelWrapper();
             ProtostuffIOUtil.mergeFrom(bytes, model, schema);
-            if(clazz != null && model.getT() != null) {
+            if (clazz != null && model.getT() != null) {
                 return clazz.cast(model.getT());
             }
             return (T) model.getT();
@@ -671,7 +675,7 @@ public class LevelDBManager {
             String key;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 key = asString(iterator.peekNext().getKey());
-                if(keySet.add(key)) {
+                if (keySet.add(key)) {
                     keyList.add(key);
                 }
             }
@@ -710,7 +714,7 @@ public class LevelDBManager {
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 entry = iterator.peekNext();
                 key = asString(entry.getKey());
-                if(keySet.add(key)) {
+                if (keySet.add(key)) {
                     bytes = entry.getValue();
                     entrySet.add(new Entry<String, byte[]>(key, bytes));
                 }
@@ -750,7 +754,7 @@ public class LevelDBManager {
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 entry = iterator.peekNext();
                 key = asString(entry.getKey());
-                if(keySet.add(key)) {
+                if (keySet.add(key)) {
                     bytes = entry.getValue();
                     entryList.add(new Entry<String, byte[]>(key, bytes));
                 }
@@ -773,7 +777,7 @@ public class LevelDBManager {
         return entryList;
     }
 
-    public static <T> List<Entry<String,T>> entryList(String area, Class<T> clazz) {
+    public static <T> List<Entry<String, T>> entryList(String area, Class<T> clazz) {
         if (!baseCheckArea(area)) {
             return null;
         }
@@ -792,7 +796,7 @@ public class LevelDBManager {
                 t = null;
                 entry = iterator.peekNext();
                 key = asString(entry.getKey());
-                if(keySet.add(key)) {
+                if (keySet.add(key)) {
                     t = getModel(area, entry.getKey(), clazz);
                     entryList.add(new Entry<String, T>(key, t));
                 }
@@ -834,7 +838,7 @@ public class LevelDBManager {
                 t = null;
                 entry = iterator.peekNext();
                 key = asString(entry.getKey());
-                if(keySet.add(key)) {
+                if (keySet.add(key)) {
                     t = getModel(area, entry.getKey(), clazz);
                     list.add(t);
                 }

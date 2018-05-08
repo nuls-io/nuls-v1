@@ -1,18 +1,18 @@
 /**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,9 +25,8 @@ package io.nuls.db.manager;
 
 import io.nuls.db.entity.DBTestEntity;
 import io.nuls.db.model.Entry;
-import io.nuls.db.model.ModelWrapper;
 import io.nuls.kernel.cfg.NulsConfig;
-import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBComparator;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.junit.After;
 import org.junit.Assert;
@@ -41,7 +40,6 @@ import java.util.Set;
 
 import static io.nuls.db.manager.LevelDBManager.*;
 import static org.iq80.leveldb.impl.Iq80DBFactory.asString;
-import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 
 /**
  * @Desription:
@@ -52,6 +50,7 @@ public class LevelDBManagerTest {
 
     private String area;
     private String key;
+
     @Before
     public void before() throws Exception {
         init();
@@ -85,14 +84,14 @@ public class LevelDBManagerTest {
     }
 
     public void testFullCreateArea() {
-        for(int i = 0, length = getMax() + 10; i < length; i++) {
+        for (int i = 0, length = getMax() + 10; i < length; i++) {
             createArea(area + "-" + i);
         }
         Assert.assertEquals(getMax(), listArea().length);
     }
 
     public void testDestroyArea() {
-        for(int i = 0, length = getMax() + 10; i < length; i++) {
+        for (int i = 0, length = getMax() + 10; i < length; i++) {
             destroyArea(area + "-" + i);
         }
         Assert.assertTrue(listArea().length < getMax());
@@ -132,13 +131,13 @@ public class LevelDBManagerTest {
 
     public void testListArea() throws UnsupportedEncodingException {
         String[] areas = listArea();
-        if(areas.length < getMax()) {
+        if (areas.length < getMax()) {
             String testArea = "testListArea";
             createArea(testArea);
             areas = listArea();
             boolean exist = false;
-            for(String area : areas) {
-                if(area.equals(testArea)) {
+            for (String area : areas) {
+                if (area.equals(testArea)) {
                     exist = true;
                     break;
                 }
@@ -193,7 +192,7 @@ public class LevelDBManagerTest {
         List<String> keys = keyList(area);
         Assert.assertEquals(6, keys.size());
         int i = 0;
-        for(String key : keys) {
+        for (String key : keys) {
             Assert.assertEquals("set0" + (++i), key);
         }
         destroyArea(area);
@@ -206,7 +205,7 @@ public class LevelDBManagerTest {
             public int compare(byte[] o1, byte[] o2) {
                 String s1 = asString(o1);
                 String s2 = asString(o2);
-                if("set03".equals(s1)) {
+                if ("set03".equals(s1)) {
                     return Math.abs(s1.compareTo(s2));
                 }
                 return s1.compareTo(s2);
@@ -222,30 +221,18 @@ public class LevelDBManagerTest {
         Assert.assertEquals(6, keys.size());
         int i = 0;
         String contactAllKeys = "";
-        for(String key : keys) {
+        for (String key : keys) {
             contactAllKeys += key;
         }
-
         Assert.assertEquals("set01set02set04set05set06set03", contactAllKeys);
+
+        closeArea(area);
+        DBComparator dbComparator = getModel(getBaseAreaName(), area + "-comparator", DBComparator.class);
+        Long cacheSize = getModel(getBaseAreaName(), area + "-cacheSize", Long.class);
+        Assert.assertTrue(createArea(area, cacheSize, dbComparator).isSuccess());
         destroyArea(area);
     }
 
-
-    public void testEntrySet() {
-        String area = "testEntrySet";
-        createArea(area);
-        put(area, "set1", "set1value");
-        put(area, "set2", "set2value");
-        put(area, "set3", "set3value");
-        Set<Entry<String, byte[]>> entries = entrySet(area);
-        Assert.assertEquals(3, entries.size());
-
-        for(Entry<String, byte[]> entry : entries) {
-            Assert.assertEquals(Iq80DBFactory.asString(entry.getValue()), entry.getKey() + "value");
-            Assert.assertTrue(Iq80DBFactory.asString(entry.getValue()).startsWith(entry.getKey()));
-        }
-        destroyArea(area);
-    }
 
     public void testCacheSize() {
         String area = "testCacheSize";
@@ -265,10 +252,30 @@ public class LevelDBManagerTest {
         Assert.assertEquals(6, entries.size());
 
         int i = 1;
-        for(Entry<String, byte[]> entry : entries) {
+        for (Entry<String, byte[]> entry : entries) {
             Assert.assertEquals("set" + i, entry.getKey());
             Assert.assertEquals("set" + i + "value", asString(entry.getValue()));
             i++;
+        }
+        closeArea(area);
+        DBComparator dbComparator = getModel(getBaseAreaName(), area + "-comparator", DBComparator.class);
+        Long cacheSize = getModel(getBaseAreaName(), area + "-cacheSize", Long.class);
+        Assert.assertTrue(createArea(area, cacheSize, dbComparator).isSuccess());
+        destroyArea(area);
+    }
+
+    public void testEntrySet() {
+        String area = "testEntrySet";
+        createArea(area);
+        put(area, "set1", "set1value");
+        put(area, "set2", "set2value");
+        put(area, "set3", "set3value");
+        Set<Entry<String, byte[]>> entries = entrySet(area);
+        Assert.assertEquals(3, entries.size());
+
+        for (Entry<String, byte[]> entry : entries) {
+            Assert.assertEquals(Iq80DBFactory.asString(entry.getValue()), entry.getKey() + "value");
+            Assert.assertTrue(Iq80DBFactory.asString(entry.getValue()).startsWith(entry.getKey()));
         }
         destroyArea(area);
     }
@@ -286,7 +293,7 @@ public class LevelDBManagerTest {
         Assert.assertEquals(6, entries.size());
 
         int i = 1;
-        for(Entry<String, byte[]> entry : entries) {
+        for (Entry<String, byte[]> entry : entries) {
             Assert.assertEquals("set" + i, entry.getKey());
             Assert.assertEquals("set" + i + "value", asString(entry.getValue()));
             i++;
