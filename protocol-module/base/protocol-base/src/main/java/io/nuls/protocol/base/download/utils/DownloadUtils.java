@@ -88,6 +88,7 @@ public class DownloadUtils {
             } catch (Exception e) {
                 Log.error(node.getId() + ",start:" + startHeight + " , size:" + size);
                 Log.error(e.getMessage());
+                DownloadCacheHandler.removeBlockFuture(request.getHash());
                 throw e;
             }
         } else {
@@ -103,6 +104,7 @@ public class DownloadUtils {
             } catch (Exception e) {
                 Log.error(node.getId() + ",start:" + startHeight + " , size:" + size);
                 Log.error(e.getMessage());
+                DownloadCacheHandler.removeHashesFuture(hashesRequest.getHash());
                 throw e;
             }
             if (null == response || response.getHashList() == null || response.getHashList().size() != size) {
@@ -131,6 +133,9 @@ public class DownloadUtils {
                 } catch (Exception e) {
                     Log.error(node.getId() + ",start:" + startHeight + " , size:" + size);
                     Log.error(e.getMessage());
+                    for (NulsDigestData hash : response.getHashList()) {
+                        DownloadCacheHandler.removeBlockFuture(hash);
+                    }
                     throw e;
                 }
             }
@@ -155,6 +160,7 @@ public class DownloadUtils {
         } catch (Exception e) {
             Log.error(node.getId() + ",get txgroup failed!");
             Log.error(e.getMessage());
+            DownloadCacheHandler.removeTxGroupFuture(request.getHash());
             throw e;
         }
     }

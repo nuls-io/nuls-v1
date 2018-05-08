@@ -42,8 +42,6 @@ import java.util.concurrent.Future;
  */
 public class DownloadCacheHandler {
 
-    //TODO 定期清除缓存，否则内存有可能被撑爆
-
     private static Map<NulsDigestData, CompletableFuture<Block>> blockCacher = new HashMap<>();
     private static Map<NulsDigestData, CompletableFuture<TxGroup>> txGroupCacher = new HashMap<>();
     private static Map<NulsDigestData, CompletableFuture<BlockHashResponse>> blockHashesCacher = new HashMap<>();
@@ -85,19 +83,19 @@ public class DownloadCacheHandler {
 
     public static void notFoundBlock(NotFound data) {
         String hash = data.getHash().getDigestHex();
-        if (data.getType()== NotFoundType.BLOCK) {
+        if (data.getType() == NotFoundType.BLOCK) {
             CompletableFuture<Block> future = blockCacher.get(hash);
             if (future != null) {
                 future.complete(null);
                 blockCacher.remove(hash);
             }
-        }else if(data.getType()== NotFoundType.TRANSACTION){
+        } else if (data.getType() == NotFoundType.TRANSACTION) {
             CompletableFuture<TxGroup> future = txGroupCacher.get(hash);
             if (future != null) {
                 future.complete(null);
                 txGroupCacher.remove(hash);
             }
-        }else if(data.getType()== NotFoundType.HASHES){
+        } else if (data.getType() == NotFoundType.HASHES) {
             CompletableFuture<BlockHashResponse> future = blockHashesCacher.get(hash);
             if (future != null) {
                 future.complete(null);
@@ -107,8 +105,8 @@ public class DownloadCacheHandler {
     }
 
     public static void receiveTxGroup(TxGroup txGroup) {
-        CompletableFuture<TxGroup> future= txGroupCacher.get(txGroup.getRequestHash());
-        if(null!= future){
+        CompletableFuture<TxGroup> future = txGroupCacher.get(txGroup.getRequestHash());
+        if (null != future) {
             future.complete(txGroup);
             txGroupCacher.remove(txGroup.getRequestHash());
         }
@@ -118,5 +116,17 @@ public class DownloadCacheHandler {
         CompletableFuture<TxGroup> future = new CompletableFuture<>();
         txGroupCacher.put(hash, future);
         return future;
+    }
+
+    public static void removeBlockFuture(NulsDigestData hash) {
+        blockCacher.remove(hash);
+    }
+
+    public static void removeHashesFuture(NulsDigestData hash) {
+        blockHashesCacher.remove(hash);
+    }
+
+    public static void removeTxGroupFuture(NulsDigestData hash) {
+        txGroupCacher.remove(hash);
     }
 }
