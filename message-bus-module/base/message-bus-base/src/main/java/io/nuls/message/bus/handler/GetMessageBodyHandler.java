@@ -2,7 +2,6 @@ package io.nuls.message.bus.handler;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.message.bus.message.AbstractMessageHandler;
 import io.nuls.message.bus.message.GetMessageBodyMessage;
 import io.nuls.message.bus.service.impl.MessageCacheService;
 import io.nuls.protocol.message.base.BaseMessage;

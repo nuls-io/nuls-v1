@@ -11,7 +11,7 @@ import io.nuls.kernel.module.service.ModuleService;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.message.bus.constant.MessageBusConstant;
-import io.nuls.message.bus.message.intf.NulsMessageHandler;
+import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.module.MessageBusModuleBootstrap;
 import io.nuls.message.bus.processor.MessageCheckingProcessor;
 import io.nuls.message.bus.processor.thread.MessageDispatchThread;

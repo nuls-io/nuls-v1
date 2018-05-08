@@ -1,7 +1,6 @@
 package io.nuls.message.bus.handler;
 
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.message.bus.message.AbstractMessageHandler;
 import io.nuls.message.bus.message.CommonDigestMessage;
 import io.nuls.message.bus.message.GetMessageBodyMessage;
 

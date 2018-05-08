@@ -1,4 +1,4 @@
-package io.nuls.message.bus.message.intf;
+package io.nuls.message.bus.handler.intf;
 
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.message.bus.filter.NulsMessageFilter;

@@ -38,6 +38,10 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
+ * 该工具类用于扫描classpath中所有的类，包含jar文件中的class和文件夹下的class
+ * The utility class is used to scan all classes in the classpath,
+ * including the class in the jar file and the class under the folder.
+ *
  * @author Niels Wang
  * @date 2018/1/30
  */
@@ -46,11 +50,17 @@ public class ScanUtil {
 
     public static final String FILE_TYPE = "file";
     public static final String JAR_TYPE = "jar";
-
     public static final String CLASS_TYPE = ".class";
 
+    /**
+     * 扫描执行包名称下的所有类型
+     * Scans all types under the package name.
+     *
+     * @param packageName 要扫描的包路径，如果传入的路径为空，默认为“io.nuls”/The package path to be scanned.If the incoming path is empty, the default is "IO. Nuls"
+     * @return 所有扫描到的类型的列表/List of all scanned types.
+     */
     public static List<Class> scan(String packageName) {
-        if(StringUtils.isBlank(packageName)){
+        if (StringUtils.isBlank(packageName)) {
             packageName = "io.nuls";
         }
         List<Class> list = new ArrayList<>();
@@ -63,7 +73,7 @@ public class ScanUtil {
         if (null == dirs) {
             return list;
         }
-        //todo OS
+        //todo OS test
         while (dirs.hasMoreElements()) {
             URL url = dirs.nextElement();
             String protocol = url.getProtocol();
@@ -73,12 +83,16 @@ public class ScanUtil {
                 findClassJar(packageName, url.getPath(), list);
             }
         }
-
         return list;
     }
 
     /**
-     * @param packageName
+     * 扫描所有本地类型，将扫描到的结果添加到类型列表中
+     * Scan all local types and add the scanned results to the list of types.
+     *
+     * @param packageName 要扫描的包路径/The package path to be scanned.
+     * @param filePath    文件路径
+     * @param list        结果列表
      */
     public static void findClassLocal(final String packageName, String filePath, List<Class> list) {
         File file = new File(filePath);
@@ -86,10 +100,14 @@ public class ScanUtil {
     }
 
     /**
-     * @param packageName
+     * 扫描某个jar包中符合条件的所有类型，将结果添加到类型列表中
+     *
+     * @param packageName 要扫描的包路径/The package path to be scanned.
+     * @param pathName    jar包文件路径/
+     * @param list        结果列表
      */
     private static void findClassJar(String packageName, String pathName, List<Class> list) {
-        if(StringUtils.isBlank(pathName)||list==null){
+        if (StringUtils.isBlank(pathName) || list == null) {
             return;
         }
         JarFile jarFile;
@@ -128,6 +146,10 @@ public class ScanUtil {
 
     }
 
+    /**
+     * 文件过滤器
+     * File filter
+     */
     static class LocalFileFilter implements FileFilter {
 
         private List<Class> list;

@@ -1,11 +1,10 @@
 package io.nuls.message.bus.service.impl;
 
 import TestHandler.BlockMessageHandler;
-import io.nuls.message.bus.message.intf.NulsMessageHandler;
+import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.processor.manager.ProcessorManager;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.protocol.message.BlockMessage;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
