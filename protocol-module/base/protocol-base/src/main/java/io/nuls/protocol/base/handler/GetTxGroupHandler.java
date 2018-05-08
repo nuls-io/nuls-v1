@@ -56,6 +56,10 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
     public void onMessage(GetTxGroupRequest message, Node fromNode) {
 //        GetTxGroupParam eventBody = message.getMsgBody();
 
+        if (message.getMsgBody().getTxHashList() == null || message.getMsgBody().getTxHashList().size() > 10000) {
+            return;
+        }
+
         TxGroupMessage txGroupMessage = new TxGroupMessage();
         TxGroup txGroup = new TxGroup();
         List<Transaction> txList = new ArrayList<>();
@@ -77,6 +81,7 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
         }
 
         txGroup.setTxList(txList);
+        txGroup.setRequestHash(message.getHash());
         txGroupMessage.setMsgBody(txGroup);
         messageBusService.sendToNode(txGroupMessage, fromNode, true);
     }
@@ -91,18 +96,4 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
         }
     }
 
-//    private List<Transaction> getTxList(Block block, List<NulsDigestData> txHashList) {
-//        List<Transaction> txList = new ArrayList<>();
-//
-//        for (Transaction tx : block.getTxs()) {
-//            if (txHashList.contains(tx.getHash())) {
-//                txList.add(tx);
-//            }
-//        }
-//
-//        if (txList.size() != txHashList.size()) {
-//            throw new NulsRuntimeException(ErrorCode.DATA_ERROR);
-//        }
-//        return txList;
-//    }
 }

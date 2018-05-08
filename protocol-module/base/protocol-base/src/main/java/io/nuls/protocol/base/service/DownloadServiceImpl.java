@@ -68,19 +68,6 @@ public class DownloadServiceImpl implements DownloadService {
     }
 
     /**
-     * 根据交易摘要列表下载交易列表，下载过程中线程是阻塞的
-     * Download the transaction list according to the transaction summary list, and the thread is blocked in the download process.
-     *
-     * @param txHashList 想要下载的交易摘要列表/The list of transactions that you want to download.
-     * @return 交易列表的封装对象/A wrapper object for a transaction list.
-     */
-    @Override
-    public Result<TxGroup> downloadTxGroup(List<NulsDigestData> txHashList) {
-        // todo auto-generated method stub(Niels)
-        return null;
-    }
-
-    /**
      * 根据交易摘要列表从指定节点处下载交易列表，下载过程中线程是阻塞的
      * Download the transaction list from the specified node according to the transaction summary list, and the thread is blocked in the download process.
      *
@@ -90,8 +77,16 @@ public class DownloadServiceImpl implements DownloadService {
      */
     @Override
     public Result<TxGroup> downloadTxGroup(List<NulsDigestData> txHashList, Node node) {
-        // todo auto-generated method stub(Niels)
-        return null;
+        TxGroup txGroup = null;
+        try {
+            txGroup = DownloadUtils.getTxGroup(txHashList, node);
+        } catch (RuntimeException e) {
+            return Result.getFailed(e.getMessage());
+        }
+        if (txGroup == null) {
+            return Result.getFailed(KernelErrorCode.FAILED);
+        }
+        return Result.getSuccess().setData(txGroup);
     }
 
     /**
@@ -100,8 +95,10 @@ public class DownloadServiceImpl implements DownloadService {
      */
     @Override
     public Result isDownloadSuccess() {
-        // todo auto-generated method stub(Niels)
-        return null;
+        if (processor.getDownloadStatus() == DownloadStatus.SUCCESS) {
+            return Result.getSuccess();
+        }
+        return Result.getFailed(processor.getDownloadStatus().name());
     }
 
     public boolean start() {

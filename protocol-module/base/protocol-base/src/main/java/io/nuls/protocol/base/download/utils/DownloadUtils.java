@@ -29,13 +29,18 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Result;
+import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.base.download.cache.DownloadCacheHandler;
 import io.nuls.protocol.message.GetBlockRequest;
 import io.nuls.protocol.message.GetBlocksHashRequest;
+import io.nuls.protocol.message.GetTxGroupRequest;
 import io.nuls.protocol.model.BlockHashResponse;
+import io.nuls.protocol.model.GetTxGroupParam;
+import io.nuls.protocol.model.TxGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +52,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class DownloadUtils {
 
-    private static NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
+    private static MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
     public static Block getBlockByHash(NulsDigestData hash, Node node) {
         List<Block> blocks = null;
@@ -71,7 +76,7 @@ public class DownloadUtils {
             GetBlockRequest request = new GetBlockRequest(startHeight, (long) size,
                     startHash, endHash);
             Future<Block> future = DownloadCacheHandler.addGetBlockRequest(endHash);
-            BroadcastResult result = networkService.sendToNode(request, node, false);
+            Result result = messageBusService.sendToNode(request, node, false);
             if (!result.isSuccess()) {
                 return resultList;
             }
@@ -88,7 +93,7 @@ public class DownloadUtils {
         } else {
             GetBlocksHashRequest hashesRequest = new GetBlocksHashRequest(startHeight, size);
             Future<BlockHashResponse> hashesFuture = DownloadCacheHandler.addGetBlockHashesRequest(hashesRequest.getHash());
-            BroadcastResult hashesResult = networkService.sendToNode(hashesRequest, node, false);
+            Result hashesResult = messageBusService.sendToNode(hashesRequest, node, false);
             if (!hashesResult.isSuccess()) {
                 return resultList;
             }
@@ -111,7 +116,7 @@ public class DownloadUtils {
                 Future<Block> future = DownloadCacheHandler.addGetBlockRequest(hash);
                 futureList.add(future);
             }
-            BroadcastResult result = networkService.sendToNode(request, node, false);
+            Result result = messageBusService.sendToNode(request, node, false);
             if (!result.isSuccess()) {
                 return resultList;
             }
@@ -134,4 +139,23 @@ public class DownloadUtils {
     }
 
 
+    public static TxGroup getTxGroup(List<NulsDigestData> txHashList, Node node) throws Exception {
+        GetTxGroupRequest request = new GetTxGroupRequest();
+        GetTxGroupParam param = new GetTxGroupParam();
+        param.setTxHashList(txHashList);
+        request.setMsgBody(param);
+        Future<TxGroup> future = DownloadCacheHandler.addGetTxGroupRequest(request.getHash());
+        Result result = messageBusService.sendToNode(request, node, false);
+        if (result.isFailed()) {
+            return null;
+        }
+        try {
+            TxGroup txGroup = future.get(30L, TimeUnit.SECONDS);
+            return txGroup;
+        } catch (Exception e) {
+            Log.error(node.getId() + ",get txgroup failed!");
+            Log.error(e.getMessage());
+            throw e;
+        }
+    }
 }

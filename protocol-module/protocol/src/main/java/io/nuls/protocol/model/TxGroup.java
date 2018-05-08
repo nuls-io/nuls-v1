@@ -47,6 +47,8 @@ public class TxGroup extends BaseNulsData {
      * transaction list for response
      */
     @Tag(1)
+    private NulsDigestData requestHash;
+    @Tag(2)
     private List<Transaction> txList;
 
     /**
@@ -95,5 +97,13 @@ public class TxGroup extends BaseNulsData {
             initTxMap();
         }
         return txMap;
+    }
+
+    public NulsDigestData getRequestHash() {
+        return requestHash;
+    }
+
+    public void setRequestHash(NulsDigestData requestHash) {
+        this.requestHash = requestHash;
     }
 }

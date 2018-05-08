@@ -35,6 +35,7 @@ import io.nuls.protocol.model.TxGroup;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 /**
  * Created by ln on 2018/4/8.
@@ -44,6 +45,7 @@ public class DownloadCacheHandler {
     //TODO 定期清除缓存，否则内存有可能被撑爆
 
     private static Map<NulsDigestData, CompletableFuture<Block>> blockCacher = new HashMap<>();
+    private static Map<NulsDigestData, CompletableFuture<TxGroup>> txGroupCacher = new HashMap<>();
     private static Map<NulsDigestData, CompletableFuture<BlockHashResponse>> blockHashesCacher = new HashMap<>();
 
     public static CompletableFuture<Block> addGetBlockRequest(NulsDigestData blockHash) {
@@ -90,7 +92,11 @@ public class DownloadCacheHandler {
                 blockCacher.remove(hash);
             }
         }else if(data.getType()== NotFoundType.TRANSACTION){
-            //todo
+            CompletableFuture<TxGroup> future = txGroupCacher.get(hash);
+            if (future != null) {
+                future.complete(null);
+                txGroupCacher.remove(hash);
+            }
         }else if(data.getType()== NotFoundType.HASHES){
             CompletableFuture<BlockHashResponse> future = blockHashesCacher.get(hash);
             if (future != null) {
@@ -101,7 +107,16 @@ public class DownloadCacheHandler {
     }
 
     public static void receiveTxGroup(TxGroup txGroup) {
-        // todo auto-generated method stub(Niels)
+        CompletableFuture<TxGroup> future= txGroupCacher.get(txGroup.getRequestHash());
+        if(null!= future){
+            future.complete(txGroup);
+            txGroupCacher.remove(txGroup.getRequestHash());
+        }
+    }
 
+    public static Future<TxGroup> addGetTxGroupRequest(NulsDigestData hash) {
+        CompletableFuture<TxGroup> future = new CompletableFuture<>();
+        txGroupCacher.put(hash, future);
+        return future;
     }
 }

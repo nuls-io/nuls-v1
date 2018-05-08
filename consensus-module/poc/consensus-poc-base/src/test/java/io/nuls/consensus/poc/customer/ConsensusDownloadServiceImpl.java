@@ -48,11 +48,6 @@ public class ConsensusDownloadServiceImpl implements DownloadService {
     }
 
     @Override
-    public Result<TxGroup> downloadTxGroup(List<NulsDigestData> txHashList) {
-        return null;
-    }
-
-    @Override
     public Result<TxGroup> downloadTxGroup(List<NulsDigestData> txHashList, Node node) {
         return null;
     }
