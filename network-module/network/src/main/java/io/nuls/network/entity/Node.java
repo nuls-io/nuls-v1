@@ -25,13 +25,10 @@
  */
 package io.nuls.network.entity;
 
-import io.nuls.core.tools.crypto.VarInt;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.BaseNulsData;
 
-import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 

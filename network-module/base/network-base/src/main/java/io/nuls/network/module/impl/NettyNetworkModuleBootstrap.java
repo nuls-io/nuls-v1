@@ -1,0 +1,72 @@
+package io.nuls.network.module.impl;
+
+import io.nuls.core.tools.network.IpUtil;
+import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.network.base.NetworkParam;
+import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.manager.ConnectionManager;
+import io.nuls.network.manager.NodeManager;
+import io.nuls.network.module.AbstractNetworkModule;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static io.nuls.network.constant.NetworkConstant.*;
+
+public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
+
+    @Autowired
+    private ConnectionManager connectionManager;
+
+    @Autowired
+    private NodeManager nodesManager;
+
+    @Override
+    public void init() {
+        initNetworkParam();
+        connectionManager.init();
+        nodesManager.init();
+    }
+
+    private void initNetworkParam() {
+        NetworkParam networkParam = NetworkParam.getInstance();
+        networkParam.setPort(NulsConfig.MODULES_CONFIG.getCfgValue(NETWORK_SECTION, NETWORK_SERVER_PORT, 8003));
+        networkParam.setPacketMagic(NulsConfig.MODULES_CONFIG.getCfgValue(NETWORK_SECTION, NETWORK_MAGIC, 123456789));
+        networkParam.setMaxInCount(NulsConfig.MODULES_CONFIG.getCfgValue(NETWORK_SECTION, NETWORK_NODE_MAX_IN, 30));
+        networkParam.setMaxOutCount(NulsConfig.MODULES_CONFIG.getCfgValue(NETWORK_SECTION, NETWORK_NODE_MAX_OUT, 10));
+        networkParam.setLocalIps(IpUtil.getIps());
+        String seedIp = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SEED_IP, "192.168.1.131:8003");
+        List<String> ipList = new ArrayList<>();
+        for (String ip : seedIp.split(",")) {
+            ipList.add(ip);
+        }
+        networkParam.setSeedIpList(ipList);
+    }
+
+    @Override
+    public void start() {
+        connectionManager.start();
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        nodesManager.start();
+    }
+
+    @Override
+    public void shutdown() {
+
+    }
+
+    @Override
+    public void destroy() {
+
+    }
+
+    @Override
+    public String getInfo() {
+        return null;
+    }
+}

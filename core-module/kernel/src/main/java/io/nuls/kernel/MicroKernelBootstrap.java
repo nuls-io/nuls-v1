@@ -29,7 +29,6 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.i18n.I18nUtils;
-import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.ModularServiceMethodInterceptor;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.module.BaseModuleBootstrap;
