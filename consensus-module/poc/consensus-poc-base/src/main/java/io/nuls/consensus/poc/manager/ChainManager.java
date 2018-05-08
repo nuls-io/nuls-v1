@@ -26,9 +26,7 @@
 
 package io.nuls.consensus.poc.manager;
 
-import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.container.ChainContainer;
-import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;

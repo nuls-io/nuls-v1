@@ -23,37 +23,11 @@
  *  * SOFTWARE.
  *
  */
-package io.nuls.consensus.poc.util;
 
-import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Transaction;
-import io.nuls.protocol.constant.ProtocolConstant;
-import io.nuls.protocol.model.SmallBlock;
-
-import java.util.*;
+package io.nuls.consensus.poc.process;
 
 /**
- * @author Niels
- * @date 2017/12/6
+ * Created by ln on 2018/5/8.
  */
-public class ConsensusTool {
-
-    public static SmallBlock getSmallBlock(Block block) {
-        SmallBlock smallBlock = new SmallBlock();
-        smallBlock.setHeader(block.getHeader());
-        List<NulsDigestData> txHashList = new ArrayList<>();
-        for (Transaction tx : block.getTxs()) {
-            txHashList.add(tx.getHash());
-            if (tx.getType() == ProtocolConstant.TX_TYPE_COINBASE ||
-                    tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH ||
-                    tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
-                smallBlock.addBaseTx(tx);
-            }
-        }
-        smallBlock.setTxHashList(txHashList);
-        return smallBlock;
-    }
+public class OrphanBlockProcessTest {
 }
-

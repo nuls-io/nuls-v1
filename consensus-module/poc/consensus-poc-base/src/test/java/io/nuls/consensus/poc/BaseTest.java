@@ -26,12 +26,22 @@
 
 package io.nuls.consensus.poc;
 
+import io.nuls.account.service.AccountService;
+import io.nuls.consensus.poc.customer.ConsensusAccountServiceImpl;
 import io.nuls.consensus.poc.customer.ConsensusBlockServiceImpl;
 import io.nuls.consensus.poc.customer.ConsensusDownloadServiceImpl;
+import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.kernel.lite.core.SpringLiteContext;
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.DownloadService;
 import org.junit.BeforeClass;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ln on 2018/5/8.
@@ -40,7 +50,7 @@ public class BaseTest {
     @BeforeClass
     public static void initClass() {
         try {
-            BlockService blockService = SpringLiteContext.getBean(BlockService.class);
+            SpringLiteContext.getBean(BlockService.class);
         } catch (Exception e) {
             SpringLiteContext.putBean(ConsensusBlockServiceImpl.class, false);
         }
@@ -49,5 +59,39 @@ public class BaseTest {
         } catch (Exception e) {
             SpringLiteContext.putBean(ConsensusDownloadServiceImpl.class, false);
         }
+        try {
+            SpringLiteContext.getBean(AccountService.class);
+        } catch (Exception e) {
+            SpringLiteContext.putBean(ConsensusAccountServiceImpl.class, false);
+        }
+    }
+
+    protected Block createBlock() {
+        // new a block header
+        BlockHeader blockHeader = new BlockHeader();
+        blockHeader.setHeight(0);
+        blockHeader.setPreHash(NulsDigestData.calcDigestData("00000000000".getBytes()));
+        blockHeader.setTime(1L);
+        blockHeader.setTxCount(0);
+
+        // add a round data
+        BlockRoundData roundData = new BlockRoundData();
+        roundData.setConsensusMemberCount(1);
+        roundData.setPackingIndexOfRound(1);
+        roundData.setRoundIndex(1);
+        roundData.setRoundStartTime(1L);
+        blockHeader.setExtend(roundData.serialize());
+
+        // new a block of height 0
+        Block block = new Block();
+        block.setHeader(blockHeader);
+
+        List<Transaction> txs = new ArrayList<>();
+        block.setTxs(txs);
+
+        Transaction tx = new TestTransaction();
+        txs.add(tx);
+
+        return block;
     }
 }
