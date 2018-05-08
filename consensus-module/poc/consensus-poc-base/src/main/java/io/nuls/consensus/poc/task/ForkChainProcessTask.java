@@ -24,17 +24,32 @@
  *
  */
 
-package io.nuls.consensus.poc.locker;
+package io.nuls.consensus.poc.task;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import io.nuls.consensus.poc.process.ForkChainProcess;
+import io.nuls.core.tools.log.Log;
 
 /**
- * Created by ln on 2018/4/13.
+ * Created by ln on 2018/5/8.
  */
-public final class Lockers {
+public class ForkChainProcessTask implements Runnable {
 
-    public final static Lock ROUND_LOCK = new ReentrantLock();
+    private ForkChainProcess forkChainProcess;
 
-    public final static Lock CHAIN_LOCK = new ReentrantLock();
+    public ForkChainProcessTask(ForkChainProcess forkChainProcess) {
+        this.forkChainProcess = forkChainProcess;
+    }
+
+    @Override
+    public void run() {
+        try {
+            doTask();
+        } catch (Exception e) {
+            Log.error(e);
+        }
+    }
+
+    private void doTask() {
+        forkChainProcess.doProcess();
+    }
 }

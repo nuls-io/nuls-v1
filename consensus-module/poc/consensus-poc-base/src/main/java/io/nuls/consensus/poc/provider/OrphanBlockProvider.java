@@ -24,17 +24,30 @@
  *
  */
 
-package io.nuls.consensus.poc.locker;
+package io.nuls.consensus.poc.provider;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import io.nuls.consensus.poc.container.BlockContainer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Created by ln on 2018/4/13.
+ * Created by ln on 2018/5/08.
  */
-public final class Lockers {
+public class OrphanBlockProvider {
 
-    public final static Lock ROUND_LOCK = new ReentrantLock();
+    // Orphaned block caching, isolated block refers to the case where the previous block was not found
+    // 孤儿区块的缓存，孤儿区块是指找不到上一个块的情况
+    private List<BlockContainer> orphanBlockList = new ArrayList<BlockContainer>();
 
-    public final static Lock CHAIN_LOCK = new ReentrantLock();
+    public boolean addBlock(BlockContainer block) {
+        return orphanBlockList.add(block);
+    }
+
+    public BlockContainer get() {
+        if(orphanBlockList == null || orphanBlockList.size() == 0) {
+            return null;
+        }
+        return orphanBlockList.remove(0);
+    }
 }

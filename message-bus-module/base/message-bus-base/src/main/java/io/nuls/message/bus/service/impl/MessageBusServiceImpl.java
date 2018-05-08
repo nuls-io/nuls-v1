@@ -1,6 +1,7 @@
 package io.nuls.message.bus.service.impl;
 
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.processor.manager.ProcessData;
 import io.nuls.message.bus.processor.manager.ProcessorManager;
@@ -11,6 +12,7 @@ import io.nuls.protocol.message.base.BaseMessage;
  * @author: Charlie
  * @date: 2018/5/6
  */
+@Service
 public class MessageBusServiceImpl implements MessageBusService {
 
     private ProcessorManager processorManager = ProcessorManager.getInstance();
@@ -34,5 +36,8 @@ public class MessageBusServiceImpl implements MessageBusService {
             Log.error(e);
         }
 
+    }
+    public void shutdown() {
+        this.processorManager.shutdown();
     }
 }

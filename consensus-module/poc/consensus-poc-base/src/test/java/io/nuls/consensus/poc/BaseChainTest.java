@@ -46,7 +46,7 @@ import java.util.List;
 /**
  * Created by ln on 2018/5/7.
  */
-public class BaseChainTest {
+public class BaseChainTest extends BaseTest {
 
     protected Chain chain;
 

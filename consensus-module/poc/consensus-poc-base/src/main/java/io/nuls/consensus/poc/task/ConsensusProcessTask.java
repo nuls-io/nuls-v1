@@ -23,18 +23,28 @@
  *  * SOFTWARE.
  *
  */
+package io.nuls.consensus.poc.task;
 
-package io.nuls.consensus.poc.locker;
-
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import io.nuls.consensus.poc.process.ConsensusProcess;
+import io.nuls.core.tools.log.Log;
 
 /**
  * Created by ln on 2018/4/13.
  */
-public final class Lockers {
+public class ConsensusProcessTask implements Runnable {
 
-    public final static Lock ROUND_LOCK = new ReentrantLock();
+    private ConsensusProcess consensusProcess;
 
-    public final static Lock CHAIN_LOCK = new ReentrantLock();
+    public ConsensusProcessTask(ConsensusProcess consensusProcess) {
+        this.consensusProcess = consensusProcess;
+    }
+
+    @Override
+    public void run() {
+        try {
+            consensusProcess.process();
+        } catch (Exception e) {
+            Log.error(e);
+        }
+    }
 }

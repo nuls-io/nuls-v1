@@ -23,7 +23,7 @@ public interface MessageBusService {
      * @param messageClass   需要订阅消息的 class对象
      * @param messageClass   The class object that needs to subscribe to the message.
      * @param messageHandler 消息处理器
-     * @param messageHandler The message handler
+     * @param messageHandler The message message
      * @return The id of the subscription message.
      */
     String subscribeMessage(Class<? extends BaseMessage> messageClass, NulsMessageHandler<? extends BaseMessage> messageHandler);
@@ -34,7 +34,7 @@ public interface MessageBusService {
      * unsubscribe
      *
      * @param subscribeId 订阅消息的id.
-     * @param subscribeId The id of the message handler.
+     * @param subscribeId The id of the message message.
      */
     void unsubscribeMessage(String subscribeId);
 

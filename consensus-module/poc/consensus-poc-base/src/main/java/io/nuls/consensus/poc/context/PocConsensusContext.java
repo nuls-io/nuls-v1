@@ -24,37 +24,22 @@
  *
  */
 
-package io.nuls.consensus.poc.cache;
+package io.nuls.consensus.poc.context;
 
-import io.nuls.consensus.poc.container.BlockContainer;
-
-import java.util.*;
-import java.util.concurrent.LinkedBlockingDeque;
+import io.nuls.consensus.poc.manager.ChainManager;
 
 /**
- * Created by ln on 2018/4/13.
+ * Created by ln on 2018/5/8.
  */
-public final class BlockMemoryPool {
+public class PocConsensusContext {
 
-    private Queue<BlockContainer> container;
+    private static ChainManager chainManager;
 
-    public BlockMemoryPool() {
-        container = new LinkedBlockingDeque<>();
+    public static ChainManager getChainManager() {
+        return chainManager;
     }
 
-    public boolean put(BlockContainer blockContainer) {
-        return container.offer(blockContainer);
-    }
-
-    public BlockContainer get() {
-        return container.poll();
-    }
-
-    public int size() {
-        return container.size();
-    }
-
-    public void clear() {
-        container.clear();
+    public static void setChainManager(ChainManager chainManager) {
+        PocConsensusContext.chainManager = chainManager;
     }
 }

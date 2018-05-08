@@ -24,17 +24,55 @@
  *
  */
 
-package io.nuls.consensus.poc.locker;
+package io.nuls.consensus.poc.customer;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Result;
+import io.nuls.network.entity.Node;
+import io.nuls.protocol.model.TxGroup;
+import io.nuls.protocol.service.DownloadService;
+
+import java.util.List;
 
 /**
- * Created by ln on 2018/4/13.
+ * Created by ln on 2018/5/8.
  */
-public final class Lockers {
+public class ConsensusDownloadServiceImpl implements DownloadService {
 
-    public final static Lock ROUND_LOCK = new ReentrantLock();
+    private boolean isDownloadSuccess;
 
-    public final static Lock CHAIN_LOCK = new ReentrantLock();
+    @Override
+    public Result<Block> downloadBlock(NulsDigestData hash) {
+        return null;
+    }
+
+    @Override
+    public Result<Block> downloadBlock(NulsDigestData hash, Node node) {
+        return null;
+    }
+
+    @Override
+    public Result<TxGroup> downloadTxGroup(List<NulsDigestData> txHashList) {
+        return null;
+    }
+
+    @Override
+    public Result<TxGroup> downloadTxGroup(List<NulsDigestData> txHashList, Node node) {
+        return null;
+    }
+
+    @Override
+    public Result isDownloadSuccess() {
+        return new Result(isDownloadSuccess, null);
+    }
+
+    @Override
+    public Result reset() {
+        return null;
+    }
+
+    public void setDownloadSuccess(boolean downloadSuccess) {
+        isDownloadSuccess = downloadSuccess;
+    }
 }

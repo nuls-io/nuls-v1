@@ -125,7 +125,7 @@ public class DisruptorUtil<T extends DisruptorData> {
     }
 
     /**
-     * add some handler to worker pool of the disruptor
+     * add some message to worker pool of the disruptor
      */
     public EventHandlerGroup<T> handleEventsWithWorkerPool(String name, WorkHandler<DisruptorData>... handler) {
         Disruptor disruptor = DISRUPTOR_MAP.get(name);

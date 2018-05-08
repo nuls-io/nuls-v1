@@ -24,17 +24,25 @@
  *
  */
 
-package io.nuls.consensus.poc.locker;
+package io.nuls.consensus.poc.process;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 
 /**
- * Created by ln on 2018/4/13.
+ * Created by ln on 2018/5/8.
  */
-public final class Lockers {
+public class ForkChainProcess {
 
-    public final static Lock ROUND_LOCK = new ReentrantLock();
+    private ChainManager chainManager;
+    private OrphanBlockProvider orphanBlockProvider;
 
-    public final static Lock CHAIN_LOCK = new ReentrantLock();
+    public ForkChainProcess(ChainManager chainManager, OrphanBlockProvider orphanBlockProvider) {
+        this.chainManager = chainManager;
+        this.orphanBlockProvider = orphanBlockProvider;
+    }
+
+    public void doProcess() {
+
+    }
 }
