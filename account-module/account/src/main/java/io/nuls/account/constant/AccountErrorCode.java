@@ -33,12 +33,12 @@ import io.nuls.kernel.constant.ErrorCode;
  */
 public interface AccountErrorCode {
 
-    ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("ACT000", 45000);
-    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("ACT001", 45001);
-    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED = ErrorCode.init("ACT002", 45002);
-    ErrorCode ACCOUNT_EXIST = ErrorCode.init("ACT003", 45003);
-    ErrorCode ADDRESS_ERROR = ErrorCode.init("ACT004", 45004);
-    ErrorCode ALIAS_EXIST = ErrorCode.init("ACT005", 45005);
-    ErrorCode ALIAS_ERROR = ErrorCode.init("ACT006", 40006);
-    ErrorCode ACCOUNT_ALREADY_SET_ALIAS = ErrorCode.init("ACT007", 40007);
+    ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("ACT000", 50000);
+    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("ACT001", 50001);
+    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED = ErrorCode.init("ACT002", 50002);
+    ErrorCode ACCOUNT_EXIST = ErrorCode.init("ACT003", 50003);
+    ErrorCode ADDRESS_ERROR = ErrorCode.init("ACT004", 50004);
+    ErrorCode ALIAS_EXIST = ErrorCode.init("ACT005", 50005);
+    ErrorCode ALIAS_ERROR = ErrorCode.init("ACT006", 50006);
+    ErrorCode ACCOUNT_ALREADY_SET_ALIAS = ErrorCode.init("ACT007", 50007);
 }

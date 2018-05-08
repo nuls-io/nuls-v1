@@ -66,38 +66,157 @@ public interface AccountService {
     Result<Boolean> removeAccount(String accountId, String password);
 
     /**
-     * 根据账户标识获取完成的账户信息
+     * 根据账户地址字符串获取完整的账户信息
      * <p>
-     * Obtain the completed account information according to the account id.
+     * Get the full account information based on the account address string.
      *
      * @param address the address of the account you want ;
      * @return the operation result and the account model
      */
     Result<Account> getAccount(String address);
 
+    /**
+     * 根据账户地址类对象获取完整的账户信息
+     * Get the full account information according to the account address object.
+     *
+     * @param address The address object of the account you want;
+     * @return the operation result and the account model
+     */
     Result<Account> getAccount(Address address);
 
+    /**
+     * 根据账户公钥获取账户地址对象
+     * Get the account address object from the account public key.
+     *
+     * @param pubKey Public key string
+     * @return the operation result and the address model
+     */
     Result<Address> getAddress(String pubKey);
+
+    /**
+     * 根据账户二进制公钥获取账户地址对象
+     * Gets the account address object from the account binary public key.
+     *
+     * @param pubKey Public key binary array.
+     * @return the operation result and the address model
+     */
     Result<Address> getAddress(byte[] pubKey);
 
+    /**
+     * 根据账户验证账户是否加密
+     * Verify that the account is encrypted according to the account.
+     *
+     * @param account The account to be verified.
+     * @return the result of the opration
+     */
     Result<Boolean> isEncrypted(Account account);
+
+    /**
+     * 根据账户的地址对象验证账户是否加密
+     * Verify that the account is encrypted according to the account's address object.
+     *
+     * @param address The address object of the account to be verified.
+     * @return the result of the opration
+     */
     Result<Boolean> isEncrypted(Address address);
+
+    /**
+     * 根据账户的地址字符串验证账户是否加密
+     * Verify that the account is encrypted according to the account's address string.
+     *
+     * @param address The address string of the account to be verified.
+     * @return the result of the opration
+     */
     Result<Boolean> isEncrypted(String address);
 
+    /**
+     * 验证地址字符串的格式
+     * Verify the format of the address string.
+     *
+     * @param address To verify the address string.
+     * @return the result of the opration
+     */
     Result verifyAddressFormat(String address);
 
+    /**
+     * 获取所有账户集合
+     * Get all account collections.
+     *
+     * @return the result of the opration and the account list
+     */
     Result<List<Account>> getAccountList();
 
+    /**
+     * 获取默认账户
+     * Get the default account
+     *
+     * @return the result of the opration and the account model
+     */
     Result<Account> getDefaultAccount();
 
+    /**
+     * 数据签名
+     * The data signature
+     *
+     * @param data     Data to be signed.
+     * @param account  Signed account
+     * @param password Account password
+     * @return The NulsSignData object after the signature.
+     * @throws NulsException
+     */
     NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
 
+    /**
+     * 数据签名(无密码)
+     * The data signature(no password)
+     *
+     * @param data    Data to be signed.
+     * @param account Signed account
+     * @return The NulsSignData object after the signature.
+     * @throws NulsException
+     */
     NulsSignData signData(byte[] data, Account account) throws NulsException;
 
+    /**
+     * 验证签名
+     * Verify the signature
+     *
+     * @param data Data to be validated.
+     * @param signData Signed data.
+     * @param pubKey Public key of account
+     * @return the result of the opration
+     */
     Result verifySignData(byte[] data, NulsSignData signData, byte[] pubKey);
 
+    /**
+     * 获取所有的账户的余额 ?
+     * Obtain the balance of all accounts.
+     *
+     * @return the result of the opration and the Balance model
+     */
     Result<Balance> getBalance();
+
+    /**
+     * 根据账户获取账户余额
+     *
+     * @param account The account to which the balance is to be obtained.
+     * @return the result of the opration and the Balance model
+     */
     Result<Balance> getBalance(Account account);
+
+    /**
+     * 根据账户地址对象获取账户余额
+     *
+     * @param address The address object of the account to which the balance is to be obtained.
+     * @return the result of the opration and the Balance model
+     */
     Result<Balance> getBalance(Address address);
+
+    /**
+     * 根据账户地址字符串获取账户余额
+     *
+     * @param address The address string of the account to which the balance is to be obtained.
+     * @return the result of the opration and the Balance model
+     */
     Result<Balance> getBalance(String address);
 }

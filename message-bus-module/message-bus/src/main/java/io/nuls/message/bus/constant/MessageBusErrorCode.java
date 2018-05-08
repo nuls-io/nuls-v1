@@ -9,6 +9,6 @@ import io.nuls.kernel.constant.ErrorCode;
  */
 public interface MessageBusErrorCode {
 
-    ErrorCode FAILED = ErrorCode.init("MB001", 60001);
+    ErrorCode FAILED = ErrorCode.init("MSB001", 60001);
 
 }
