@@ -5,12 +5,12 @@ import io.nuls.core.tools.disruptor.DisruptorData;
 import io.nuls.core.tools.disruptor.DisruptorUtil;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.module.service.ModuleService;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.message.bus.constant.MessageBusConstant;
+import io.nuls.message.bus.constant.MessageBusErrorCode;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.module.MessageBusModuleBootstrap;
 import io.nuls.message.bus.processor.MessageCheckingProcessor;
@@ -124,7 +124,7 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
 
     public void executeHandlers(ProcessData<M> data) throws InterruptedException {
         if (null == data) {
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "execute message message faild,the message is null!");
+            throw new NulsRuntimeException(MessageBusErrorCode.FAILED, "execute message message faild,the message is null!");
         }
         Set<NulsMessageHandler> handlerSet = this.getHandlerList((Class<M>) data.getData().getClass());
         for (NulsMessageHandler handler : handlerSet) {
