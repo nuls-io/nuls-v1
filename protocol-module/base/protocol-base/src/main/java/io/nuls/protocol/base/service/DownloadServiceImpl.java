@@ -80,7 +80,7 @@ public class DownloadServiceImpl implements DownloadService {
         TxGroup txGroup = null;
         try {
             txGroup = DownloadUtils.getTxGroup(txHashList, node);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return Result.getFailed(e.getMessage());
         }
         if (txGroup == null) {
