@@ -23,24 +23,27 @@
  *
  */
 
-package io.nuls.protocol.service;
+package io.nuls.protocol.base.service;
 
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.network.entity.Node;
+import io.nuls.protocol.base.constant.DownloadStatus;
+import io.nuls.protocol.base.download.processor.DownloadProcessor;
+import io.nuls.protocol.base.download.utils.DownloadUtils;
 import io.nuls.protocol.model.TxGroup;
+import io.nuls.protocol.service.DownloadService;
 
 import java.util.List;
 
 /**
- * 区块/交易下载服务接口
- * Block/transaction download service interface.
- *
- * @author Niels
- * @date 2018/4/10
+ * Created by ln on 2018/4/8.
  */
-public interface DownloadService {
+public class DownloadServiceImpl implements DownloadService {
+
+    private DownloadProcessor processor = DownloadProcessor.getInstance();
 
     /**
      * 从指定节点处根据hash下载一个区块，下载过程中线程是阻塞的
@@ -50,7 +53,19 @@ public interface DownloadService {
      * @param node 指定的节点/Specified node
      * @return 区块及结果/ block & results
      */
-    Result<Block> downloadBlock(NulsDigestData hash, Node node);
+    @Override
+    public Result<Block> downloadBlock(NulsDigestData hash, Node node) {
+        Block block = null;
+        try {
+            block = DownloadUtils.getBlockByHash(hash, node);
+        } catch (RuntimeException e) {
+            return Result.getFailed(e.getMessage());
+        }
+        if (block == null) {
+            return Result.getFailed(KernelErrorCode.FAILED);
+        }
+        return Result.getSuccess().setData(block);
+    }
 
     /**
      * 根据交易摘要列表下载交易列表，下载过程中线程是阻塞的
@@ -59,7 +74,11 @@ public interface DownloadService {
      * @param txHashList 想要下载的交易摘要列表/The list of transactions that you want to download.
      * @return 交易列表的封装对象/A wrapper object for a transaction list.
      */
-    Result<TxGroup> downloadTxGroup(List<NulsDigestData> txHashList);
+    @Override
+    public Result<TxGroup> downloadTxGroup(List<NulsDigestData> txHashList) {
+        // todo auto-generated method stub(Niels)
+        return null;
+    }
 
     /**
      * 根据交易摘要列表从指定节点处下载交易列表，下载过程中线程是阻塞的
@@ -69,18 +88,34 @@ public interface DownloadService {
      * @param node       指定的节点/Specified node
      * @return 交易列表的封装对象/A wrapper object for a transaction list.
      */
-    Result<TxGroup> downloadTxGroup(List<NulsDigestData> txHashList, Node node);
+    @Override
+    public Result<TxGroup> downloadTxGroup(List<NulsDigestData> txHashList, Node node) {
+        // todo auto-generated method stub(Niels)
+        return null;
+    }
 
     /**
      * 返回下载是否完成的结果
      * Returns the results of the download.
      */
-    Result isDownloadSuccess();
+    @Override
+    public Result isDownloadSuccess() {
+        // todo auto-generated method stub(Niels)
+        return null;
+    }
 
-    /**
-     * 重新检查当前状态是否需要重新同步区块，如果需要则下载
-     * Recheck whether the current state needs to be resynchronized, and download if necessary.
-     */
-    Result reset();
+    public boolean start() {
+        return processor.startup();
+    }
+
+    public boolean stop() {
+        return processor.shutdown();
+    }
+
+    @Override
+    public Result reset() {
+        processor.setDownloadStatus(DownloadStatus.WAIT);
+        return Result.getSuccess();
+    }
 
 }

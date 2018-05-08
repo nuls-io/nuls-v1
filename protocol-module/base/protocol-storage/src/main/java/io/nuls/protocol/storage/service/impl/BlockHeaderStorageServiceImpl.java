@@ -46,13 +46,17 @@ import io.nuls.protocol.storage.service.BlockHeaderStorageService;
 
 @Service
 public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService {
-
     /**
      * 通用数据存储服务
      * Universal data storage services.
      */
     @Autowired
     private DBService dbService;
+
+    public BlockHeaderStorageServiceImpl() {
+        this.dbService.createArea(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX);
+        this.dbService.createArea(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER);
+    }
 
     /**
      * 根据区块高度查询区块头数据
@@ -152,6 +156,10 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService 
         return removeBlockHerader(po.getHash().serialize());
     }
 
+    /**
+     * 获取最新区块头数据
+     * Gets the latest block header data.
+     */
     @Override
     public BlockHeaderPo getBestBlockHeaderPo() {
         return getBlockHeaderPo(ProtocolStorageConstant.BEST_BLOCK_HASH_INDEX);
