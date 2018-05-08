@@ -11,7 +11,7 @@ import io.nuls.kernel.module.service.ModuleService;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.message.bus.constant.MessageBusConstant;
-import io.nuls.message.bus.handler.intf.NulsMessageHandler;
+import io.nuls.message.bus.message.intf.NulsMessageHandler;
 import io.nuls.message.bus.module.MessageBusModuleBootstrap;
 import io.nuls.message.bus.processor.MessageCheckingProcessor;
 import io.nuls.message.bus.processor.thread.MessageDispatchThread;
@@ -22,6 +22,9 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 
 /**
+ * 消息处理的管理器
+ * Message processing manager.
+ *
  * @author: Charlie
  * @date: 2018/5/6
  */
@@ -121,7 +124,7 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
 
     public void executeHandlers(ProcessData<M> data) throws InterruptedException {
         if (null == data) {
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "execute message handler faild,the message is null!");
+            throw new NulsRuntimeException(KernelErrorCode.FAILED, "execute message message faild,the message is null!");
         }
         Set<NulsMessageHandler> handlerSet = this.getHandlerList((Class<M>) data.getData().getClass());
         for (NulsMessageHandler handler : handlerSet) {

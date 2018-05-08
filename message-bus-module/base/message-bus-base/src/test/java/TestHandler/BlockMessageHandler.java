@@ -1,7 +1,7 @@
 package TestHandler;
 
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.message.bus.handler.AbstractMessageHandler;
+import io.nuls.message.bus.message.AbstractMessageHandler;
 import io.nuls.protocol.message.BlockMessage;
 
 /**

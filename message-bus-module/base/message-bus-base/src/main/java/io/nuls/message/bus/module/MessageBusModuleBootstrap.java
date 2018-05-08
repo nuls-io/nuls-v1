@@ -1,7 +1,13 @@
 package io.nuls.message.bus.module;
 
 import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.message.bus.handler.CommonDigestHandler;
+import io.nuls.message.bus.handler.GetMessageBodyHandler;
+import io.nuls.message.bus.message.CommonDigestMessage;
+import io.nuls.message.bus.message.GetMessageBodyMessage;
+import io.nuls.message.bus.processor.manager.ProcessorManager;
 import io.nuls.message.bus.service.MessageBusService;
+import io.nuls.message.bus.service.impl.MessageCacheService;
 
 /**
  * @author: Charlie
@@ -15,22 +21,22 @@ public class MessageBusModuleBootstrap extends AbstractMessageBusModule {
     @Override
     public void init() {
 
-
     }
 
     @Override
     public void start() {
-
+        messageBusService.subscribeMessage(CommonDigestMessage.class, new CommonDigestHandler());
+        messageBusService.subscribeMessage(GetMessageBodyMessage.class, new GetMessageBodyHandler());
     }
 
     @Override
     public void shutdown() {
-
+        ProcessorManager.getInstance().shutdown();
     }
 
     @Override
     public void destroy() {
-
+        MessageCacheService.getInstance().destroy();
     }
 
     @Override

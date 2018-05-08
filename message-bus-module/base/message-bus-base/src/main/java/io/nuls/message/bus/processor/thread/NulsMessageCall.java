@@ -1,7 +1,7 @@
 package io.nuls.message.bus.processor.thread;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.message.bus.handler.intf.NulsMessageHandler;
+import io.nuls.message.bus.message.intf.NulsMessageHandler;
 import io.nuls.message.bus.processor.manager.ProcessData;
 import io.nuls.protocol.message.base.BaseMessage;
 
@@ -25,7 +25,7 @@ public class NulsMessageCall<T extends BaseMessage> implements Runnable {
             return;
         }
         try {
-            //filter&handler is the same level
+            //filter&message is the same level
             boolean ok = handler.getFilterChian().startDoFilter(data.getData());
             if (ok) {
                 long start = System.currentTimeMillis();
