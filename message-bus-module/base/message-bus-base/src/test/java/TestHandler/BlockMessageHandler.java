@@ -2,6 +2,7 @@ package TestHandler;
 
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
+import io.nuls.network.entity.Node;
 import io.nuls.protocol.message.BlockMessage;
 
 /**
@@ -11,7 +12,7 @@ import io.nuls.protocol.message.BlockMessage;
 public class BlockMessageHandler extends AbstractMessageHandler<BlockMessage> {
 
     @Override
-    public void onMessage(BlockMessage message, String formId) throws NulsException {
+    public void onMessage(BlockMessage message, Node node) throws NulsException {
         System.out.println("onMessage: this is a test funtion");
     }
 }

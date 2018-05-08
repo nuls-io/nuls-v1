@@ -4,6 +4,7 @@ import TestHandler.BlockMessageHandler;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.processor.manager.ProcessorManager;
 import io.nuls.message.bus.service.MessageBusService;
+import io.nuls.network.entity.Node;
 import io.nuls.protocol.message.BlockMessage;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,8 +88,8 @@ public class MessageBusServiceImplTest {
     @Test
     public void receiveMessage() {
         BlockMessage blockMessage = new BlockMessage();
-        String nodeId = "192.168.1.90:8003";
-        messageBusService.receiveMessage(blockMessage, nodeId);
+        Node node = new Node("192.168.1.90",8003,1);
+        messageBusService.receiveMessage(blockMessage, node);
     }
 
 

@@ -4,6 +4,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.message.bus.message.GetMessageBodyMessage;
 import io.nuls.message.bus.service.impl.MessageCacheService;
+import io.nuls.network.entity.Node;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**
@@ -17,10 +18,10 @@ public class GetMessageBodyHandler extends AbstractMessageHandler<GetMessageBody
     private MessageCacheService messageCacheService = MessageCacheService.getInstance();
 
     @Override
-    public void onMessage(GetMessageBodyMessage message, String formId) throws NulsException {
+    public void onMessage(GetMessageBodyMessage message, Node formNode) throws NulsException {
         BaseMessage baseMessage = messageCacheService.getSendMessage(message.getMsgBody().getDigestHex());
         if(null == baseMessage){
-            Log.warn("get message faild, node:" + formId + ",event:" + message.getMsgBody().getDigestHex());
+            Log.warn("get message faild, node:" + formNode.getId() + ",event:" + message.getMsgBody().getDigestHex());
         }
     }
 }
