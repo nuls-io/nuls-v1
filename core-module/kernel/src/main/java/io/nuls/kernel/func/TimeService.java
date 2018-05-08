@@ -91,7 +91,6 @@ public class TimeService implements Runnable {
      */
     public void start() {
         Log.debug("----------- network timeService start -------------");
-        syncWebTime();
         TaskManager.createAndRunThread((short) 1, "TimeService", this, true);
     }
 
@@ -126,6 +125,7 @@ public class TimeService implements Runnable {
     @Override
     public void run() {
         long lastTime = System.currentTimeMillis();
+        syncWebTime();
         while (true) {
             long newTime = System.currentTimeMillis();
 

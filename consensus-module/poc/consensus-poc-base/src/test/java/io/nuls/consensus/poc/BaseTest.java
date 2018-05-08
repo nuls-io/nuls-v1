@@ -24,17 +24,30 @@
  *
  */
 
-package io.nuls.consensus.poc.locker;
+package io.nuls.consensus.poc;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import io.nuls.consensus.poc.customer.ConsensusBlockServiceImpl;
+import io.nuls.consensus.poc.customer.ConsensusDownloadServiceImpl;
+import io.nuls.kernel.lite.core.SpringLiteContext;
+import io.nuls.protocol.service.BlockService;
+import io.nuls.protocol.service.DownloadService;
+import org.junit.BeforeClass;
 
 /**
- * Created by ln on 2018/4/13.
+ * Created by ln on 2018/5/8.
  */
-public final class Lockers {
-
-    public final static Lock ROUND_LOCK = new ReentrantLock();
-
-    public final static Lock CHAIN_LOCK = new ReentrantLock();
+public class BaseTest {
+    @BeforeClass
+    public static void initClass() {
+        try {
+            BlockService blockService = SpringLiteContext.getBean(BlockService.class);
+        } catch (Exception e) {
+            SpringLiteContext.putBean(ConsensusBlockServiceImpl.class, false);
+        }
+        try {
+            SpringLiteContext.getBean(DownloadService.class);
+        } catch (Exception e) {
+            SpringLiteContext.putBean(ConsensusDownloadServiceImpl.class, false);
+        }
+    }
 }

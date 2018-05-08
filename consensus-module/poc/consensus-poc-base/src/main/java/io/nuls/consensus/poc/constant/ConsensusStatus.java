@@ -24,17 +24,18 @@
  *
  */
 
-package io.nuls.consensus.poc.locker;
-
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+package io.nuls.consensus.poc.constant;
 
 /**
  * Created by ln on 2018/4/13.
  */
-public final class Lockers {
+public enum ConsensusStatus {
 
-    public final static Lock ROUND_LOCK = new ReentrantLock();
+    // Warning, the following order cannot be adjusted, otherwise the judgment in some places may go wrong
+    // 警告，以下顺序不能调整，否则某些地方的判断会出错
 
-    public final static Lock CHAIN_LOCK = new ReentrantLock();
+    INITING,
+    LOADING_CACHE,
+    WAIT_START,
+    RUNNING,
 }

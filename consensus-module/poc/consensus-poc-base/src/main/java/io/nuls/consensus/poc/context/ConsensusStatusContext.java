@@ -24,17 +24,26 @@
  *
  */
 
-package io.nuls.consensus.poc.locker;
+package io.nuls.consensus.poc.context;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import io.nuls.consensus.poc.constant.ConsensusStatus;
 
 /**
  * Created by ln on 2018/4/13.
  */
-public final class Lockers {
+public class ConsensusStatusContext {
 
-    public final static Lock ROUND_LOCK = new ReentrantLock();
+    private static ConsensusStatus consensusStatus;
 
-    public final static Lock CHAIN_LOCK = new ReentrantLock();
+    public static ConsensusStatus getConsensusStatus() {
+        return consensusStatus;
+    }
+
+    public static void setConsensusStatus(ConsensusStatus consensusStatus) {
+        ConsensusStatusContext.consensusStatus = consensusStatus;
+    }
+
+    public static boolean isRunning() {
+        return consensusStatus == ConsensusStatus.RUNNING;
+    }
 }
