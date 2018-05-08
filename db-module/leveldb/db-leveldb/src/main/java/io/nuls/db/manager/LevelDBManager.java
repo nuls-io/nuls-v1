@@ -30,7 +30,6 @@ import io.nuls.db.model.Entry;
 import io.nuls.db.model.ModelWrapper;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Result;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
@@ -114,9 +113,11 @@ public class LevelDBManager {
 
     /**
      * 优先初始化BASE_AREA
-     * 存放基础数据，比如Area的自定义比较器，于下次启动数据库时取出，否则，若Area自定义了比较器，下次重启数据库时，此Area会启动失败，失败异常：java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
+     * 存放基础数据，比如Area的自定义比较器，下次启动数据库时获取并装载它，否则，若Area自定义了比较器，下次重启数据库时，此Area会启动失败，失败异常：java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
+     *             比如Area的自定义cacheSize，下次启动数据库时获取并装载它，否则，下次启动已存在的Area时会丢失之前的cacheSize设置。
      * Prioritize BASE_AREA.
-     * Based data storage, such as custom comparator Area, for the next time you start the database, otherwise, if the Area custom the comparator, the next time you restart the database, this Area will start failure, failure Exception: java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
+     * Based data storage, for example, Area of custom comparator, the next time you start the database access and loaded it, otherwise, if the Area custom the comparator, the next time you restart the database, this Area will start failure, failure exception: java.lang.IllegalArgumentException: Expected user comparator leveldb. BytewiseComparator to match existing database comparator
+     *                     the custom cacheSize of the Area will be retrieved and loaded next time the database is started, otherwise, the previous cacheSize setting will be lost when the existing Area is started.
      *
      * @param dataPath
      */
@@ -304,12 +305,25 @@ public class LevelDBManager {
         }
         Options options = new Options().createIfMissing(false);
 
+        /*
+         * Area的自定义比较器，启动数据库时获取并装载它，否则，若Area自定义了比较器，重启数据库时，此Area会启动失败，失败异常：java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
+         * Area的自定义cacheSize，启动数据库时获取并装载它，否则，启动已存在的Area时会丢失之前的cacheSize设置。
+         * Area of custom comparator, you start the database access and loaded it, otherwise, if the Area custom the comparator, this time you restart the database, this Area will start failure, failure exception: java.lang.IllegalArgumentException: Expected user comparator leveldb. BytewiseComparator to match existing database comparator
+         * the custom cacheSize of the Area will be retrieved and loaded on the database is started, otherwise, the previous cacheSize setting will be lost when the existing Area is started.
+         */
         String areaName = getAreaNameFromDbPath(dbPath);
-        ModelWrapper dbComparatorWrapper = getModel(BASE_AREA_NAME, areaName);
+        ModelWrapper dbComparatorWrapper = getModel(BASE_AREA_NAME, areaName + "-comparator");
         if (dbComparatorWrapper != null) {
             DBComparator dbComparator = (DBComparator) dbComparatorWrapper.getT();
             if (dbComparator != null) {
                 options.comparator(dbComparator);
+            }
+        }
+        ModelWrapper cacheSizeWrapper = getModel(BASE_AREA_NAME, areaName + "-cacheSize");
+        if (cacheSizeWrapper != null) {
+            Long cacheSize = (Long) cacheSizeWrapper.getT();
+            if (cacheSize != null) {
+                options.cacheSize(cacheSize);
             }
         }
         DBFactory factory = Iq80DBFactory.factory;
@@ -317,6 +331,12 @@ public class LevelDBManager {
     }
 
     /**
+     * 装载数据库
+     * 如果Area自定义了比较器，保存area的自定义比较器，下次启动数据库时获取并装载它，否则，下次重启数据库时，此Area会启动失败，失败异常：java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
+     * 如果Area自定义了cacheSize，保存area的自定义cacheSize，下次启动数据库时获取并装载它，否则，启动已存在的Area时会丢失之前的cacheSize设置。
+     * load database
+     * If the area custom comparator, save area define the comparator, the next time you start the database access and loaded it, otherwise, the next time you restart the database, this area will start failure, failure exception: java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
+     * If the area custom cacheSize, save the area's custom cacheSize, get and load it the next time you start the database, or you'll lose the cacheSize setting before starting the existing area.
      * @param dbPath
      * @param createIfMissing
      * @param cacheSize
@@ -326,19 +346,21 @@ public class LevelDBManager {
      */
     private static DB openDB(String dbPath, boolean createIfMissing, Long cacheSize, Comparator<byte[]> comparator) throws IOException {
         File file = new File(dbPath);
+        String areaName = getAreaNameFromDbPath(dbPath);
         Options options = new Options().createIfMissing(createIfMissing);
         if (cacheSize != null) {
+            ModelWrapper cacheSizeWrapper = new ModelWrapper(cacheSize);
+            putModel(BASE_AREA_NAME, areaName + "-cacheSize", cacheSizeWrapper);
             options.cacheSize(cacheSize);
         }
         if (comparator != null) {
-            String areaName = getAreaNameFromDbPath(dbPath);
             DBComparator dbComparator = new DBComparator() {
                 public int compare(byte[] key1, byte[] key2) {
                     return comparator.compare(key1, key2);
                 }
 
                 public String name() {
-                    return areaName + " - key-comparator";
+                    return areaName + "-key-comparator";
                 }
 
                 public byte[] findShortestSeparator(byte[] start, byte[] limit) {
@@ -349,12 +371,8 @@ public class LevelDBManager {
                     return key;
                 }
             };
-            /*
-             * 保存area的自定义比较器，比如Area的自定义比较器，于下次启动数据库时取出，否则，若Area自定义了比较器，下次重启数据库时，此Area会启动失败，失败异常：java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
-             * Save the area's custom comparator, such as custom comparator Area, for the next time you start the database, otherwise, if the Area custom the comparator, the next time you restart the database, this Area will start failure, failure Exception: java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
-             */
             ModelWrapper dbComparatorWrapper = new ModelWrapper(dbComparator);
-            putModel(BASE_AREA_NAME, areaName, dbComparatorWrapper);
+            putModel(BASE_AREA_NAME, areaName + "-comparator", dbComparatorWrapper);
             options.comparator(dbComparator);
         }
         DBFactory factory = Iq80DBFactory.factory;
@@ -627,9 +645,16 @@ public class LevelDBManager {
             DB db = AREAS.get(area);
             keyList = new ArrayList<>();
             iterator = db.iterator();
+            Set<String> keySet = new HashSet<>();
+            String key;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
-                keyList.add(asString(iterator.peekNext().getKey()));
+                key = asString(iterator.peekNext().getKey());
+                if(keySet.add(key)) {
+                    keyList.add(key);
+                }
             }
+            keySet.clear();
+            keySet = null;
             return keyList;
         } catch (Exception e) {
             Log.error(e);
@@ -655,6 +680,7 @@ public class LevelDBManager {
         try {
             DB db = AREAS.get(area);
             entrySet = new HashSet<>();
+            Set<String> keySet = new HashSet<>();
             iterator = db.iterator();
             String key;
             byte[] bytes;
@@ -662,10 +688,13 @@ public class LevelDBManager {
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 entry = iterator.peekNext();
                 key = asString(entry.getKey());
-                bytes = entry.getValue();
-                entrySet.add(new Entry<String, byte[]>(key, bytes));
+                if(keySet.add(key)) {
+                    bytes = entry.getValue();
+                    entrySet.add(new Entry<String, byte[]>(key, bytes));
+                }
             }
-
+            keySet.clear();
+            keySet = null;
         } catch (Exception e) {
             Log.error(e);
             return null;
@@ -692,16 +721,20 @@ public class LevelDBManager {
             DB db = AREAS.get(area);
             entryList = new ArrayList<>();
             iterator = db.iterator();
+            Set<String> keySet = new HashSet<>();
             String key;
             byte[] bytes;
             Map.Entry<byte[], byte[]> entry;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 entry = iterator.peekNext();
                 key = asString(entry.getKey());
-                bytes = entry.getValue();
-                entryList.add(new Entry<String, byte[]>(key, bytes));
+                if(keySet.add(key)) {
+                    bytes = entry.getValue();
+                    entryList.add(new Entry<String, byte[]>(key, bytes));
+                }
             }
-
+            keySet.clear();
+            keySet = null;
         } catch (Exception e) {
             Log.error(e);
             return null;

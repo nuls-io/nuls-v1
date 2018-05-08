@@ -23,37 +23,23 @@
  *
  */
 
-package io.nuls.kernel.lite.exception;
+package io.nuls.protocol.storage.po;
 
-import io.nuls.kernel.constant.ErrorCode;
-import io.nuls.kernel.exception.NulsRuntimeException;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
- * 系统对象池中的对象实例访问状态不正确时，抛出的异常
- * An exception is thrown when the object instance in the system object pool is not in the right state.
- *
- * @author Niels
- * @date 2018/2/1
+ * @author: Niels Wang
+ * @date: 2018/5/8
  */
-public class BeanStatusException extends NulsRuntimeException {
-    public BeanStatusException(ErrorCode message) {
-        super(message);
+public class BlockHeaderPoTest {
+
+    @Test
+    public void serialize() {
     }
 
-    public BeanStatusException(ErrorCode message, Throwable cause) {
-        super(message, cause);
+    @Test
+    public void parse() {
     }
-
-    public BeanStatusException(Throwable cause) {
-        super(cause);
-    }
-
-    protected BeanStatusException(ErrorCode message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
-
-    public BeanStatusException(ErrorCode errorCode, String msg) {
-        super(errorCode, msg);
-    }
-
 }

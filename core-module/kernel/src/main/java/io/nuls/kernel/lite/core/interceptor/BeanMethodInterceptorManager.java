@@ -34,36 +34,62 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 拦截器管理器
+ * Interceptor manager.
+ *
  * @author Niels Wang
  * @date 2018/1/30
  */
 public class BeanMethodInterceptorManager {
 
-    private static final Map<Class, BeanMethodInterceptorChain> FILTER_MAP = new HashMap<>();
+    /**
+     * 拦截器池
+     * The interceptor pool
+     */
+    private static final Map<Class, BeanMethodInterceptorChain> INTERCEPTOR_MAP = new HashMap<>();
 
+    /**
+     * 添加方法拦截器到管理器中
+     * Add a method interceptor to the manager.
+     *
+     * @param annotationType 注解类型
+     * @param interceptor    拦截器
+     */
     public static void addBeanMethodInterceptor(Class annotationType, BeanMethodInterceptor interceptor) {
-        BeanMethodInterceptorChain interceptorChain = FILTER_MAP.get(annotationType);
+        BeanMethodInterceptorChain interceptorChain = INTERCEPTOR_MAP.get(annotationType);
         if (null == interceptorChain) {
             interceptorChain = new BeanMethodInterceptorChain();
         }
         interceptorChain.add(interceptor);
-        FILTER_MAP.put(annotationType, interceptorChain);
+        INTERCEPTOR_MAP.put(annotationType, interceptorChain);
     }
 
-    public static Object doFilter(Annotation[] anns, Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
-        List<Annotation> annotations = new ArrayList<>();
+    /**
+     * 执行一个方法，根据方法的注解组装拦截器链，并放入拦截器链中执行
+     * Implement a method that assembles the interceptor chain according to the method's annotations and puts it into the interceptor chain.
+     *
+     * @param annotations 方法上标注的注解列表/Method annotated list of annotations.
+     * @param object      方法所属对象/Method owner
+     * @param method      方法定义/Method definition
+     * @param params      方法参数列表/Method parameter list
+     * @param methodProxy 方法代理器
+     * @return 返回拦截的方法的返回值，可以对该值进行处理和替换/Returns the return value of the intercepting method, which can be processed and replaced.
+     * @throws Throwable 该方法可能抛出异常，请谨慎处理/This method may throw an exception, handle with care.
+     */
+    public static Object doInterceptor(Annotation[] annotations, Object object, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
+        List<Annotation> annotationList = new ArrayList<>();
         List<BeanMethodInterceptorChain> chainList = new ArrayList<>();
-        for(Annotation ann:anns){
-            BeanMethodInterceptorChain chain = FILTER_MAP.get(ann.annotationType());
-            if(null!=chain){
+        for (Annotation ann : annotations) {
+            BeanMethodInterceptorChain chain = INTERCEPTOR_MAP.get(ann.annotationType());
+            if (null != chain) {
                 chainList.add(chain);
-                annotations.add(ann );
+                annotationList.add(ann);
             }
         }
-        if(annotations.isEmpty()){
-            return methodProxy.invokeSuper(obj,params);
+        if (annotationList.isEmpty()) {
+            return methodProxy.invokeSuper(object, params);
         }
-        MultipleBeanMethodInterceptorChain chain = new MultipleBeanMethodInterceptorChain(annotations,chainList);
-        return chain.startFilter(null,obj,method,params,methodProxy);
+        MultipleBeanMethodInterceptorChain chain = new MultipleBeanMethodInterceptorChain(annotationList, chainList);
+        return chain.startInterceptor(null, object, method, params, methodProxy);
     }
 }

@@ -43,13 +43,30 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * 系统默认的服务拦截器
+ * System default service interceptor.
+ *
  * @author Niels
  * @date 2018/1/31
  */
 public class ModularServiceMethodInterceptor implements MethodInterceptor {
-
+    /**
+     * 线程安全的拦截器执行进度标识
+     * Thread-safe interceptors perform progress identification.
+     */
     private ThreadLocal<Integer> threadLocal = new ThreadLocal<>();
 
+    /**
+     * 拦截方法
+     * Intercept method
+     *
+     * @param obj         方法所属对象/Method owner
+     * @param method      方法定义/Method definition
+     * @param params      方法参数列表/Method parameter list
+     * @param methodProxy 方法代理器
+     * @return 返回拦截的方法的返回值，可以对该值进行处理和替换/Returns the return value of the intercepting method, which can be processed and replaced.
+     * @throws Throwable 该方法可能抛出异常，请谨慎处理/This method may throw an exception, handle with care.
+     */
     @Override
     public Object intercept(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
 //        Log.debug(method.toString());
@@ -67,6 +84,17 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
         throw throwable;
     }
 
+    /**
+     * 实际的拦截方法
+     * The actual intercept method
+     *
+     * @param obj         方法所属对象/Method owner
+     * @param method      方法定义/Method definition
+     * @param params      方法参数列表/Method parameter list
+     * @param methodProxy 方法代理器
+     * @return 返回拦截的方法的返回值，可以对该值进行处理和替换/Returns the return value of the intercepting method, which can be processed and replaced.
+     * @throws Throwable 该方法可能抛出异常，请谨慎处理/This method may throw an exception, handle with care.
+     */
     private Object doIntercept(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
         List<Annotation> annotationList = new ArrayList<>();
         if (!method.getDeclaringClass().equals(Object.class)) {
@@ -91,10 +119,18 @@ public class ModularServiceMethodInterceptor implements MethodInterceptor {
         if (annotationList.isEmpty()) {
             return methodProxy.invokeSuper(obj, params);
         }
-        return BeanMethodInterceptorManager.doFilter(annotationList.toArray(new Annotation[annotationList.size()]), obj, method, params, methodProxy);
+        return BeanMethodInterceptorManager.doInterceptor(annotationList.toArray(new Annotation[annotationList.size()]), obj, method, params, methodProxy);
 
     }
 
+    /**
+     * 组装拦截器需要的注解实例列表
+     * A list of annotated instances needed to assemble the interceptor.
+     *
+     * @param annotationList 全部注解实例列表/Full annotation instance list.
+     * @param clazz          方法所属对象的类型/The type of the object that the method belongs to.
+     * @param method         方法定义/Method definition
+     */
     private void fillAnnotationList(List<Annotation> annotationList, Class clazz, Method method) {
         Set<Class> classSet = new HashSet<>();
         for (Annotation ann : method.getDeclaredAnnotations()) {

@@ -23,37 +23,25 @@
  *
  */
 
-package io.nuls.kernel.lite.exception;
-
-import io.nuls.kernel.constant.ErrorCode;
-import io.nuls.kernel.exception.NulsRuntimeException;
+package io.nuls.protocol.storage.constant;
 
 /**
- * 系统对象池中的对象实例访问状态不正确时，抛出的异常
- * An exception is thrown when the object instance in the system object pool is not in the right state.
+ * 协议模块存储功能相关常量集合
+ * The protocol module stores a collection of related constants.
  *
- * @author Niels
- * @date 2018/2/1
+ * @author: Niels Wang
+ * @date: 2018/5/8
  */
-public class BeanStatusException extends NulsRuntimeException {
-    public BeanStatusException(ErrorCode message) {
-        super(message);
-    }
+public interface ProtocolStorageConstant {
+    /**
+     * 区块头高度索引表名称
+     * Block header height index table.
+     */
+    String DB_AREA_BLOCK_HEADER_INDEX = "BLOCK_HEADER_INDEX";
 
-    public BeanStatusException(ErrorCode message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public BeanStatusException(Throwable cause) {
-        super(cause);
-    }
-
-    protected BeanStatusException(ErrorCode message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
-
-    public BeanStatusException(ErrorCode errorCode, String msg) {
-        super(errorCode, msg);
-    }
-
+    /**
+     * 区块头表名称
+     * Block header table name.
+     */
+    String DB_AREA_BLOCK_HEADER = "BLOCK_HEADER";
 }
