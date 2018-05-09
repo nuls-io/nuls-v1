@@ -94,7 +94,7 @@ public class ChainManager {
 
     public long getBestBlockHeight() {
         if(masterChain == null || masterChain.getChain() == null || masterChain.getChain().getEndBlockHeader() == null) {
-            return 0l;
+            return 0L;
         }
         return masterChain.getChain().getEndBlockHeader().getHeight();
     }

@@ -197,7 +197,7 @@ public class RoundManager {
 
         BlockRoundData bestRoundData = new BlockRoundData(bestBlockHeader.getExtend());
 
-        if (startBlockHeader.getHeight() != 0l) {
+        if (startBlockHeader.getHeight() != 0L) {
             long roundIndex = bestRoundData.getRoundIndex();
             if (bestRoundData.getConsensusMemberCount() == bestRoundData.getPackingIndexOfRound() || TimeService.currentTimeMillis() >= bestRoundData.getRoundEndTime()) {
                 roundIndex += 1;
@@ -206,8 +206,8 @@ public class RoundManager {
         }
 
         long nowTime = TimeService.currentTimeMillis();
-        long index = 0l;
-        long startTime = 0l;
+        long index = 0L;
+        long startTime = 0L;
 
         if (nowTime < bestRoundData.getRoundEndTime()) {
             index = bestRoundData.getRoundIndex();
@@ -234,7 +234,7 @@ public class RoundManager {
 
         long roundIndex = roundData.getRoundIndex();
         long roundStartTime = roundData.getRoundStartTime();
-        if (startBlockHeader.getHeight() != 0l) {
+        if (startBlockHeader.getHeight() != 0L) {
 //            if(roundData.getConsensusMemberCount() == roundData.getPackingIndexOfRound()) {
 //                roundIndex += 1;
 //                roundStartTime = roundData.getRoundEndTime();
@@ -453,13 +453,13 @@ public class RoundManager {
 
     private BlockHeader getFirstBlockHeightOfPreRoundByRoundIndex(long roundIndex) {
         BlockHeader firstBlockHeader = null;
-        long startRoundIndex = 0l;
+        long startRoundIndex = 0L;
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
         for (int i = blockHeaderList.size() - 1; i >= 0; i--) {
             BlockHeader blockHeader = blockHeaderList.get(i);
             long currentRoundIndex = new BlockRoundData(blockHeader.getExtend()).getRoundIndex();
             if (roundIndex > currentRoundIndex) {
-                if (startRoundIndex == 0l) {
+                if (startRoundIndex == 0L) {
                     startRoundIndex = currentRoundIndex;
                 }
                 if (currentRoundIndex < startRoundIndex) {

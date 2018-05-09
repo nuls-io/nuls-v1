@@ -34,7 +34,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.nuls</groupId>
     <artifactId>tools-module</artifactId>
     <packaging>pom</packaging>
     <modules>

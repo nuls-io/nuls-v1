@@ -136,7 +136,7 @@ public class ForkChainProcess {
             return;
         }
 
-        if(time == 0l) {
+        if(time == 0L) {
             printLog();
         } else if(System.currentTimeMillis() - time > 5 * 60 * 1000L) {
             printLog();

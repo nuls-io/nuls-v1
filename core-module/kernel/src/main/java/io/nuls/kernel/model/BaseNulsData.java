@@ -55,6 +55,7 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
         }
     }
 
+    @Override
     public int size() {
         return this.serialize().length;
     }
@@ -62,11 +63,13 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
     /**
      * First, serialize the version field
      */
+    @Override
     public final byte[] serialize() {
         RuntimeSchema schema = SCHEMA_MAP.get(this.getClass());
         return ProtostuffIOUtil.toByteArray(this, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
     }
 
+    @Override
     public final void parse(byte[] bytes) {
         if (bytes == null || bytes.length == 0) {
             return;
