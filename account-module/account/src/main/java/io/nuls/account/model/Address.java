@@ -25,6 +25,7 @@
 
 package io.nuls.account.model;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.crypto.Utils;
@@ -53,7 +54,7 @@ public class Address {
      * chain id
      */
     @Tag(1)
-    private short chainId = Constant;
+    private short chainId = AccountConstant.CHAIN_ID;
 
     /**
      * hash160 of public key
