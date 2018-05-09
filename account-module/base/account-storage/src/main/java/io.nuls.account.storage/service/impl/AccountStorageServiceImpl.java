@@ -6,6 +6,7 @@ import io.nuls.account.storage.constant.AccountStorageConstant;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.db.constant.DBErrorCode;
+import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -31,21 +32,24 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
     @Override
     public void afterPropertiesSet() throws NulsException {
         Result result = this.dbService.createArea(AccountStorageConstant.DB_AREA_ACCOUNT);
-        if (result.isFailed() &&!DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
     }
 
     @Override
     public Result saveAccountList(List<AccountPo> accountPoList) {
-
-        return null;
+        BatchOperation batch = dbService.createWriteBatch(AccountStorageConstant.DB_AREA_ACCOUNT);
+        for (AccountPo po : accountPoList) {
+            batch.put(po.getAddressObj().getBase58Bytes(), po.serialize());
+        }
+        return batch.executeBatch();
     }
 
 
     @Override
     public Result removeAccount(Address address) {
-        if(null == address || address.getBase58Bytes() == null || address.getBase58Bytes().length<=0){
+        if (null == address || address.getBase58Bytes() == null || address.getBase58Bytes().length <= 0) {
             return Result.getFailed(AccountErrorCode.NULL_PARAMETER);
         }
         return dbService.delete(AccountStorageConstant.DB_AREA_ACCOUNT, address.getBase58Bytes());

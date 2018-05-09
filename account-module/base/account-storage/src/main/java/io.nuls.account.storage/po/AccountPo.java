@@ -16,6 +16,8 @@ import java.math.BigInteger;
  */
 public class AccountPo extends BaseNulsData {
 
+    private transient Address addressObj;
+
     @Tag(1)
     private String address;
     @Tag(2)
@@ -34,6 +36,7 @@ public class AccountPo extends BaseNulsData {
     private int status;
 
     public AccountPo(Account account){
+        this.addressObj = account.getAddress();
         this.address = account.getAddress().toString();
         this.createTime = account.getCreateTime();
         this.alias = account.getAlias();
@@ -69,6 +72,14 @@ public class AccountPo extends BaseNulsData {
 
     public String getAddress() {
         return address;
+    }
+
+    public Address getAddressObj() {
+        return addressObj;
+    }
+
+    public void setAddressObj(Address addressObj) {
+        this.addressObj = addressObj;
     }
 
     public void setAddress(String address) {
