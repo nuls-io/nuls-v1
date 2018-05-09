@@ -71,11 +71,11 @@ public class CoinData extends BaseNulsData {
     public Na getFee() {
         Na toNa = Na.ZERO;
         for (Coin coin : to) {
-            toNa.add(coin.getNa());
+            toNa = toNa.add(coin.getNa());
         }
         Na fromNa = Na.ZERO;
         for (Coin coin : from) {
-            fromNa.add(coin.getNa());
+            fromNa = fromNa.add(coin.getNa());
         }
         return fromNa.subtract(toNa);
     }
