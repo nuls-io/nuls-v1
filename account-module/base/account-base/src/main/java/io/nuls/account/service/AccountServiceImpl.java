@@ -4,6 +4,7 @@ import io.nuls.account.model.Account;
 import io.nuls.account.model.AccountKeyStore;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.NulsSignData;
@@ -101,6 +102,11 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public NulsSignData signData(byte[] data, Account account) throws NulsException {
+        return null;
+    }
+
+    @Override
+    public NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException {
         return null;
     }
 
