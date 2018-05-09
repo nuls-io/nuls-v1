@@ -26,6 +26,7 @@ package io.nuls.kernel.module.manager;
 
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.module.BaseModuleBootstrap;
 import io.nuls.kernel.module.service.ModuleService;
@@ -51,7 +52,7 @@ public class ServiceManager {
         return INSTANCE;
     }
 
-    public void regService(short moduleId, Class serviceClass) {
+    public void regService(short moduleId, Class serviceClass) throws NulsException {
         AssertUtil.canNotEmpty(serviceClass, KernelErrorCode.NULL_PARAMETER.getMsg());
         if (MODULE_ID_MAP.containsKey(serviceClass)) {
             return;

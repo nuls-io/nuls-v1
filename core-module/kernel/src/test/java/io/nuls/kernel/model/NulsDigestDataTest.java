@@ -22,35 +22,22 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.model.validator;
 
-import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.validate.NulsDataValidator;
-import io.nuls.kernel.validate.ValidateResult;
-import io.nuls.protocol.constant.ProtocolConstant;
+package io.nuls.kernel.model;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
- * @author Niels
- * @date 2017/11/17
+ * @author: Niels Wang
+ * @date: 2018/5/9
  */
-@Component
-public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
-    private static final String ERROR_MESSAGE = "The block is too big!";
+public class NulsDigestDataTest {
 
-    @Override
-    public ValidateResult validate(Block data) {
-        if (data == null) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), "Data is null!");
-        }
-        long length = 0L;
-        for (Transaction tx : data.getTxs()) {
-            length += tx.size();
-        }
-        if (length >= ProtocolConstant.MAX_BLOCK_SIZE) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), ERROR_MESSAGE);
-        }
-        return ValidateResult.getSuccessResult();
+    @Test
+    public void test(){
+        NulsDigestData hash = NulsDigestData.calcDigestData(new byte[32]);
+        System.out.println(hash);
     }
 }

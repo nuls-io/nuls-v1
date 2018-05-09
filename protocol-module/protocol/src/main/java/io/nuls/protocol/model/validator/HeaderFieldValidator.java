@@ -38,11 +38,7 @@ public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
 
     private static final int HEADER_EXTENDS_MAS_SIZE = 32;
 
-    private static final HeaderFieldValidator INSTANCE = new HeaderFieldValidator();
     private static final String ERROR_MESSAGE = "block header field check failed";
-
-    private HeaderFieldValidator() {
-    }
 
     @Override
     public ValidateResult validate(BlockHeader data) {
@@ -76,7 +72,4 @@ public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
         return result;
     }
 
-    public static HeaderFieldValidator getInstance() {
-        return INSTANCE;
-    }
 }

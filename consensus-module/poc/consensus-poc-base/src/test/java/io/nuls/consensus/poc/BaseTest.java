@@ -32,6 +32,8 @@ import io.nuls.consensus.poc.customer.ConsensusBlockServiceImpl;
 import io.nuls.consensus.poc.customer.ConsensusDownloadServiceImpl;
 import io.nuls.consensus.poc.customer.ConsensusNetworkService;
 import io.nuls.consensus.poc.model.BlockRoundData;
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
@@ -52,24 +54,28 @@ public class BaseTest {
     @BeforeClass
     public static void initClass() {
         try {
-            SpringLiteContext.getBean(BlockService.class);
+            try {
+                SpringLiteContext.getBean(BlockService.class);
+            } catch (Exception e) {
+                SpringLiteContext.putBean(ConsensusBlockServiceImpl.class, false);
+            }
+            try {
+                SpringLiteContext.getBean(DownloadService.class);
+            } catch (Exception e) {
+                SpringLiteContext.putBean(ConsensusDownloadServiceImpl.class, false);
+            }
+            try {
+                SpringLiteContext.getBean(AccountService.class);
+            } catch (Exception e) {
+                SpringLiteContext.putBean(ConsensusAccountServiceImpl.class, false);
+            }
+            try {
+                SpringLiteContext.getBean(NetworkService.class);
+            } catch (Exception e) {
+                SpringLiteContext.putBean(ConsensusNetworkService.class, false);
+            }
         } catch (Exception e) {
-            SpringLiteContext.putBean(ConsensusBlockServiceImpl.class, false);
-        }
-        try {
-            SpringLiteContext.getBean(DownloadService.class);
-        } catch (Exception e) {
-            SpringLiteContext.putBean(ConsensusDownloadServiceImpl.class, false);
-        }
-        try {
-            SpringLiteContext.getBean(AccountService.class);
-        } catch (Exception e) {
-            SpringLiteContext.putBean(ConsensusAccountServiceImpl.class, false);
-        }
-        try {
-            SpringLiteContext.getBean(NetworkService.class);
-        } catch (Exception e) {
-            SpringLiteContext.putBean(ConsensusNetworkService.class, false);
+            e.printStackTrace();
         }
     }
 

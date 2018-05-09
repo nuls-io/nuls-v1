@@ -36,14 +36,6 @@ import io.nuls.kernel.validate.ValidateResult;
 @Component
 public class BlockFieldValidator implements NulsDataValidator<Block> {
     private static final String ERROR_MESSAGE = "block field check failed";
-    public static final BlockFieldValidator INSTANCE = new BlockFieldValidator();
-
-    private BlockFieldValidator() {
-    }
-
-    public static BlockFieldValidator getInstance() {
-        return INSTANCE;
-    }
 
     @Override
     public ValidateResult validate(Block data) {
