@@ -29,4 +29,31 @@ package io.nuls.account.model;
  * date 2018/5/9.
  */
 public class AccountKeyStore {
+
+    String address;
+    String encryptedPrivateKey;
+
+    public AccountKeyStore() {
+    }
+
+    public AccountKeyStore(String address, String encryptedPrivateKey) {
+        this.address = address;
+        this.encryptedPrivateKey = encryptedPrivateKey;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getEncryptedPrivateKey() {
+        return encryptedPrivateKey;
+    }
+
+    public void setEncryptedPrivateKey(String encryptedPrivateKey) {
+        this.encryptedPrivateKey = encryptedPrivateKey;
+    }
 }
