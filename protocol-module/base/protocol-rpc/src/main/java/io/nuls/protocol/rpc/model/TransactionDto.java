@@ -41,20 +41,7 @@ public class TransactionDto {
     @ApiModelProperty(name = "hash", value = "交易的hash值")
     private String hash;
 
-    @ApiModelProperty(name = "type",
-                        value = "交易类型 " +
-                                "1:共识奖励, " +
-                                "2:转账交易, " +
-                                "3:锁仓交易, " +
-                                "4:解锁交易, " +
-                                "5:零钱换整, " +
-                                "11:设置别名, " +
-                                "90:注册共识节点, " +
-                                "91:加入共识, " +
-                                "92:退出共识, " +
-                                "93:黄牌惩罚, " +
-                                "94:红牌惩罚, " +
-                                "95:删除共识节点")
+    @ApiModelProperty(name = "type", value = "交易类型 ")
     private Integer type;
 
     @ApiModelProperty(name = "index", value = "所在打包区块里的索引")
@@ -125,7 +112,7 @@ public class TransactionDto {
                 this.setRemark(Hex.encode(tx.getRemark()));
             }
         }
-        if(tx.getScriptSig()!=null){
+        if (tx.getScriptSig() != null) {
             this.setScriptSig(Hex.encode(tx.getScriptSig()));
         }
 

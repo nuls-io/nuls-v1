@@ -25,6 +25,12 @@
 
 package io.nuls.protocol.storage.service.impl;
 
+import io.nuls.db.module.impl.LevelDbModuleBootstrap;
+import io.nuls.kernel.MicroKernelBootstrap;
+import io.nuls.kernel.context.NulsContext;
+import io.nuls.protocol.storage.service.BlockHeaderStorageService;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -35,19 +41,35 @@ import static org.junit.Assert.*;
  */
 public class BlockHeaderStorageServiceImplTest {
 
+    private BlockHeaderStorageService service;
+
+    @Before
+    public void init() {
+        MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
+        mk.init();
+        mk.start();
+
+        LevelDbModuleBootstrap bootstrap = new LevelDbModuleBootstrap();
+        bootstrap.init();
+        bootstrap.start();
+
+        service = NulsContext.getServiceBean(BlockHeaderStorageService.class);
+    }
+
     @Test
+    public void test() {
+        assertNotNull(service);
+    }
+
     public void getBlockPo() {
     }
 
-    @Test
     public void getBlockPo1() {
     }
 
-    @Test
     public void saveBlockHeader() {
     }
 
-    @Test
     public void removeBlockHerader() {
     }
 }

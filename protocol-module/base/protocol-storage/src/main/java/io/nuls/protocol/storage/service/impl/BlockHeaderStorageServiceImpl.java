@@ -26,10 +26,15 @@
 package io.nuls.protocol.storage.service.impl;
 
 import io.nuls.core.tools.crypto.VarInt;
+import io.nuls.db.constant.DBConstant;
+import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
+import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.protocol.storage.constant.ProtocolStorageConstant;
@@ -45,7 +50,7 @@ import io.nuls.protocol.storage.service.BlockHeaderStorageService;
  */
 
 @Service
-public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService {
+public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService, InitializingBean {
     /**
      * 通用数据存储服务
      * Universal data storage services.
@@ -53,9 +58,20 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService 
     @Autowired
     private DBService dbService;
 
-    public BlockHeaderStorageServiceImpl() {
-        this.dbService.createArea(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX);
-        this.dbService.createArea(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER);
+    /**
+     * 创建存储表，创建失败时如果是因为已存在则正常，否则抛出异常
+     * Create a storage table, or throw an exception if it is normal if it is already existing.
+     */
+    @Override
+    public void afterPropertiesSet() {
+        Result result = this.dbService.createArea(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX);
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+            throw new NulsRuntimeException(result.getErrorCode());
+        }
+        result = this.dbService.createArea(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER);
+        if (result.isFailed() &&!DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+            throw new NulsRuntimeException(result.getErrorCode());
+        }
     }
 
     /**
@@ -164,4 +180,5 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService 
     public BlockHeaderPo getBestBlockHeaderPo() {
         return getBlockHeaderPo(ProtocolStorageConstant.BEST_BLOCK_HASH_INDEX);
     }
+
 }

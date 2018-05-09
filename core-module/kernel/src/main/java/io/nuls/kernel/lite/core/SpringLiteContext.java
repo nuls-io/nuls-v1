@@ -29,6 +29,7 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.annotation.Interceptor;
 import io.nuls.kernel.lite.annotation.Service;
+import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.lite.core.interceptor.BeanMethodInterceptor;
 import io.nuls.kernel.lite.core.interceptor.BeanMethodInterceptorManager;
 import io.nuls.kernel.lite.utils.ScanUtil;
@@ -94,9 +95,17 @@ public class SpringLiteContext {
         Set<String> keySet = new HashSet<>(BEAN_TEMP_MAP.keySet());
         for (String key : keySet) {
             try {
-                injectionBeanFields(BEAN_TEMP_MAP.get(key), BEAN_TYPE_MAP.get(key));
-                BEAN_OK_MAP.put(key, BEAN_TEMP_MAP.get(key));
+                Object bean = BEAN_TEMP_MAP.get(key);
+                injectionBeanFields(bean, BEAN_TYPE_MAP.get(key));
+                BEAN_OK_MAP.put(key, bean);
                 BEAN_TEMP_MAP.remove(key);
+                if (bean instanceof InitializingBean) {
+                    try {
+                        ((InitializingBean) bean).afterPropertiesSet();
+                    } catch (Exception e) {
+                        Log.error(e);
+                    }
+                }
             } catch (Exception e) {
                 Log.debug(key + " autowire fields failed!");
             }
@@ -371,6 +380,7 @@ public class SpringLiteContext {
         loadBean(getBeanName(clazz), clazz, true);
         autowireFields();
     }
+
     public static void putBean(Class clazz, boolean proxy) {
         loadBean(getBeanName(clazz), clazz, proxy);
         autowireFields();
