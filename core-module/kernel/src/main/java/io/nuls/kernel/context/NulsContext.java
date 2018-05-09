@@ -25,6 +25,8 @@
 package io.nuls.kernel.context;
 
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Block;
 
@@ -150,7 +152,10 @@ public class NulsContext {
         }
         try {
             return SpringLiteContext.getBean(tClass);
-        } catch (Exception e) {
+        } catch (NulsRuntimeException e) {
+            if (e.getCode().equals(KernelErrorCode.DATA_ERROR)) {
+                throw e;
+            }
             if (l > 1200) {
                 Log.error(e);
                 return null;
