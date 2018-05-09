@@ -11,6 +11,8 @@ import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
 
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author: Charlie
@@ -20,6 +22,9 @@ import java.util.List;
 public class AccountServiceImpl implements AccountService {
 
 
+    private Lock locker = new ReentrantLock();
+
+    private AccountCacheService accountCacheService = AccountCacheService.getInstance();
     @Override
     public Result<List<Account>> createAccount(int count, String password) {
         return null;
