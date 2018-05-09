@@ -28,6 +28,7 @@ import io.nuls.account.model.Account;
 import io.nuls.account.model.AccountKeyStore;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
@@ -209,6 +210,17 @@ public interface AccountService {
      * @throws NulsException
      */
     NulsSignData signData(byte[] data, Account account) throws NulsException;
+
+    /**
+     * 数据签名(无密码)
+     * The data signature(no password)
+     *
+     * @param data    Data to be signed.
+     * @param ecKey  eckey
+     * @return The NulsSignData object after the signature.
+     * @throws NulsException
+     */
+    NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException;
 
     /**
      * 验证签名
