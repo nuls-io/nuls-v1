@@ -121,7 +121,7 @@ public class IpUtil {
     /**
      * lower is server
      */
-    public static boolean judgeIsLocalServer(String localIP, String remoteIP) {
+    public static boolean judgeLocalIsServer(String localIP, String remoteIP) {
         long local = ipToLong(localIP);
         long remote = ipToLong(remoteIP);
         if (local < remote)

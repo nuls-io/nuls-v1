@@ -1,23 +1,29 @@
 package io.nuls.network.service.impl;
 
+import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
+import io.nuls.network.manager.NodeManager;
 import io.nuls.network.service.NetworkService;
 
 import java.util.Collection;
 import java.util.Map;
 
 public class NetworkServiceImpl implements NetworkService {
+
+    @Autowired
+    private NodeManager nodeManager;
+
     @Override
     public void removeNode(String nodeId) {
-
+        nodeManager.removeNode(nodeId);
     }
 
     @Override
     public Node getNode(String nodeId) {
-        return null;
+        return nodeManager.getNode(nodeId);
     }
 
     @Override

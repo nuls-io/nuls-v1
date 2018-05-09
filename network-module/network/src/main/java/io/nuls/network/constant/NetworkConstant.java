@@ -31,4 +31,17 @@ public interface NetworkConstant {
 
     String NODE_DB_AREA = "nodeDbArea";
     long NODE_DB_CACHE_SIZE = 1024 * 1024;
+
+    int HANDSHAKE_SEVER_TYPE = 2;
+    int HANDSHAKE_CLIENT_TYPE = 1;
+
+    //network message type
+    short NETWORK_GET_VERSION = 01;
+    short NETWORK_VERSION = 02;
+    short NETWORK_GET_NODE = 03;
+    short NETWORK_NODE = 04;
+    short NETWORK_GET_NODEIP = 05;
+    short NETWORK_NODEIP = 06;
+    short NETWORK_HANDSHAKE = 07;
+
 }
