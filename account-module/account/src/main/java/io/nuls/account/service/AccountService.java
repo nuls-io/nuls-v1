@@ -55,6 +55,16 @@ public interface AccountService {
     Result<List<Account>> createAccount(int count, String password);
 
     /**
+     * 创建指定个数的账户（包含地址）
+     * <p>
+     * Create a specified number of accounts (including addresses)
+     *
+     * @param password the password of the wallet;
+     * @return the result of the opration
+     */
+    Result<List<Account>> createAccount(String password);
+
+    /**
      * 根据账户标识删除对应的账户
      * <p>
      * remove the corresponding account according to the account id.

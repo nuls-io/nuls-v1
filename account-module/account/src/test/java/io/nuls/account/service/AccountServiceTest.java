@@ -25,6 +25,8 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.Account;
+import io.nuls.core.tools.crypto.ECKey;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.kernel.model.Result;
 import org.junit.Before;
 import org.junit.Test;
@@ -97,5 +99,22 @@ public class AccountServiceTest {
 
     @Test
     public void removeAccount() {
+    }
+
+    public static void showAccount(Account account) {
+        System.out.println("---- account info ----");
+        System.out.println("Address： " + account.getAddress().getBase58());
+        System.out.println("Public key： " + Hex.encode(account.getPubKey()));
+        System.out.println("Private key：" + Hex.encode(account.getPriKey()));
+        System.out.println("Encrypted pri key： " + Hex.encode(account.getEncryptedPriKey()));
+        System.out.println("key object：");
+        System.out.println("\tpublic key：" + account.getEcKey().getPublicKeyAsHex());
+        try {
+            System.out.println("\tprivate key：" + Hex.encode(account.getEcKey().getPrivKeyBytes()));
+        } catch (ECKey.MissingPrivateKeyException e) {
+            System.out.println("\tprivate key：is NULL");
+        }
+        System.out.println("\tencrypted pkey： " + account.getEcKey().getEncryptedPrivateKey());
+        System.out.println("---- account info end----");
     }
 }

@@ -25,9 +25,55 @@
 
 package io.nuls.account.model;
 
+import io.nuls.kernel.model.Na;
+
+import java.io.Serializable;
+
 /**
- * @author: Niels Wang
+ * @author: Charlie
  * @date: 2018/5/5
  */
-public class Balance {
+public class Balance implements Serializable {
+
+    private Na balance;
+
+    private Na locked;
+
+    private Na usable;
+
+    public Balance() {
+        this.balance = Na.ZERO;
+        this.locked = Na.ZERO;
+        this.usable = Na.ZERO;
+    }
+
+    public Balance(Na usable, Na locked) {
+        this.usable = usable;
+        this.locked = locked;
+        this.balance = locked.add(usable);
+    }
+
+    public Na getBalance() {
+        return balance;
+    }
+
+    public void setBalance(Na balance) {
+        this.balance = balance;
+    }
+
+    public Na getLocked() {
+        return locked;
+    }
+
+    public void setLocked(Na locked) {
+        this.locked = locked;
+    }
+
+    public Na getUsable() {
+        return usable;
+    }
+
+    public void setUsable(Na usable) {
+        this.usable = usable;
+    }
 }
