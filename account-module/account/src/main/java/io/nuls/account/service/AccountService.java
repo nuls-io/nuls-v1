@@ -71,11 +71,11 @@ public interface AccountService {
      * <p>
      * remove the corresponding account according to the account id.
      *
-     * @param accountId the id of the account you want to delete;
+     * @param address the address of the account you want to delete;
      * @param password  the password of the wallet;
      * @return the result of the opration
      */
-    Result<Boolean> removeAccount(String accountId, String password);
+    Result<Boolean> removeAccount(String address, String password);
 
     /**
      * 从keyStore导入账户
@@ -93,11 +93,11 @@ public interface AccountService {
      * <p>
      * export an account to an account key store.
      *
-     * @param accountAddress the address of the account;
+     * @param address the address of the account;
      * @param password       the password of the account key store;
      * @return the account key store object
      */
-    Result<AccountKeyStore> exportAccountToKeyStore(String accountAddress, String password);
+    Result<AccountKeyStore> exportAccountToKeyStore(String address, String password);
 
     /**
      * 根据账户地址字符串获取完整的账户信息

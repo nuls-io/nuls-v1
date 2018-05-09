@@ -23,9 +23,11 @@
  */
 package io.nuls.db.service.impl;
 
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.model.Entry;
 import io.nuls.db.model.ModelWrapper;
+import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.lite.annotation.Service;
@@ -169,5 +171,13 @@ public class LevelDBServiceImpl implements DBService {
     @Override
     public <T> List<T> values(String area, Class<T> clazz) {
         return LevelDBManager.values(area, clazz);
+    }
+
+    @Override
+    public BatchOperation createWriteBatch(String area) {
+        if(StringUtils.isBlank(area)) {
+            return null;
+        }
+        return new BatchOperationImpl(area);
     }
 }

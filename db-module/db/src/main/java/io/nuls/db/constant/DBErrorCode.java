@@ -36,5 +36,6 @@ import io.nuls.kernel.constant.ErrorCode;
 public interface DBErrorCode {
 
     ErrorCode DB_AREA_EXIST = ErrorCode.init("DB001", 20009);
+    ErrorCode DB_AREA_NOT_EXIST = ErrorCode.init("DB002", 20010);
 
 }
