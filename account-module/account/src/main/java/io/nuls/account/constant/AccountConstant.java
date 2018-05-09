@@ -7,4 +7,6 @@ import io.nuls.kernel.constant.NulsConstant;
  * @date: 2018/5/9
  */
 public interface AccountConstant extends NulsConstant {
+
+    short CHAIN_ID = 0;
 }

@@ -50,16 +50,16 @@ public class Address {
     public static final int LENGTH = 20;
 
     /**
-     * hash160 of public key
-     */
-    @Tag(1)
-    protected byte[] hash160;
-
-    /**
      * chain id
      */
-    @Tag(2)
+    @Tag(1)
     private short chainId = Constant;
+
+    /**
+     * hash160 of public key
+     */
+    @Tag(2)
+    protected byte[] hash160;
 
     public Address(String address) {
         try {
