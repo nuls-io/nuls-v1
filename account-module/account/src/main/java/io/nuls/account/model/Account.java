@@ -40,7 +40,7 @@ import java.util.List;
  * @author: Charlie
  * @date: 2018/5/4
  */
-public class Account  extends BaseNulsData {
+public class Account extends BaseNulsData {
 
     /**
      * 账户地址
