@@ -57,10 +57,10 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class DownloadThreadManager implements Callable<Boolean> {
 
-    private DownloadUtils downloadUtils = new DownloadUtils();
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private ConsensusServiceIntf consensusService = NulsContext.getServiceBean(ConsensusServiceIntf.class);
+    private NulsThreadFactory factory = new NulsThreadFactory(ProtocolConstant.MODULE_ID_PROTOCOL, "download");
 
     private NetworkNewestBlockInfos newestInfos;
     private Queue<Block> blockQueue;
@@ -122,7 +122,8 @@ public class DownloadThreadManager implements Callable<Boolean> {
                 DownloadThread downloadThread = new DownloadThread(localBestHash, netBestHash, start, size, nodes.get(j));
 
                 FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<ResultMessage>(downloadThread);
-                executor.execute(new Thread(downloadThreadFuture));
+
+                executor.execute(factory.newThread(factory.newThread(downloadThreadFuture)));
 
                 futures.add(downloadThreadFuture);
 
@@ -240,7 +241,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         List<Node> nodes = newestInfos.getNodes();
 
         for (Node node : nodes) {
-            Block remoteBlock = downloadUtils.getBlockByHash(localBestBlock.getHeader().getHash(), node);
+            Block remoteBlock = DownloadUtils.getBlockByHash(localBestBlock.getHeader().getHash(), node);
             if (remoteBlock != null && remoteBlock.getHeader().getHeight() == localBestBlock.getHeader().getHeight()) {
                 return;
             }

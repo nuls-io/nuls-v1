@@ -53,6 +53,7 @@ public class RegisterAgentTransaction extends Transaction<Agent> {
 
     }
 
+    @Override
     public RegisterAgentTransaction clone() {
         RegisterAgentTransaction tx = new RegisterAgentTransaction();
         tx.parse(serialize());

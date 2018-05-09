@@ -72,6 +72,7 @@ public class ErrorCode {
         return new ErrorCode(code, msg);
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (null == obj) {
             return false;

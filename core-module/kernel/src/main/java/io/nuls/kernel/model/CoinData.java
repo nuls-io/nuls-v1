@@ -55,4 +55,22 @@ public class CoinData extends BaseNulsData {
     public void setTo(List<Coin> to) {
         this.to = to;
     }
+
+    /**
+     * 获取该交易的手续费
+     * The handling charge for the transaction.
+     *
+     * @return tx fee
+     */
+    public Na getFee() {
+        Na toNa = Na.ZERO;
+        for (Coin coin : to) {
+            toNa.add(coin.getNa());
+        }
+        Na fromNa = Na.ZERO;
+        for (Coin coin : from) {
+            fromNa.add(coin.getNa());
+        }
+        return fromNa.subtract(toNa);
+    }
 }

@@ -25,6 +25,7 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.Account;
+import io.nuls.account.model.AccountKeyStore;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.kernel.exception.NulsException;
@@ -55,6 +56,16 @@ public interface AccountService {
     Result<List<Account>> createAccount(int count, String password);
 
     /**
+     * 创建指定个数的账户（包含地址）
+     * <p>
+     * Create a specified number of accounts (including addresses)
+     *
+     * @param password the password of the wallet;
+     * @return the result of the opration
+     */
+    Result<List<Account>> createAccount(String password);
+
+    /**
      * 根据账户标识删除对应的账户
      * <p>
      * remove the corresponding account according to the account id.
@@ -64,6 +75,28 @@ public interface AccountService {
      * @return the result of the opration
      */
     Result<Boolean> removeAccount(String accountId, String password);
+
+    /**
+     * 从keyStore导入账户
+     * <p>
+     * import an account form account key store.
+     *
+     * @param keyStore  the keyStore of the account;
+     * @param password  the password of the account key store;
+     * @return the result of the opration
+     */
+    Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore, String password);
+
+    /**
+     * 导出账户到keyStore
+     * <p>
+     * export an account to an account key store.
+     *
+     * @param accountAddress the address of the account;
+     * @param password       the password of the account key store;
+     * @return the account key store object
+     */
+    Result<AccountKeyStore> exportAccountToKeyStore(String accountAddress, String password);
 
     /**
      * 根据账户地址字符串获取完整的账户信息
@@ -181,9 +214,9 @@ public interface AccountService {
      * 验证签名
      * Verify the signature
      *
-     * @param data Data to be validated.
+     * @param data     Data to be validated.
      * @param signData Signed data.
-     * @param pubKey Public key of account
+     * @param pubKey   Public key of account
      * @return the result of the opration
      */
     Result verifySignData(byte[] data, NulsSignData signData, byte[] pubKey);

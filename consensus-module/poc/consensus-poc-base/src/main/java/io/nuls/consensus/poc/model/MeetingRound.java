@@ -74,7 +74,7 @@ public class MeetingRound {
 
     public void init(List<MeetingMember> memberList) {
 
-        assert(startTime > 0l);
+        assert (startTime > 0L);
 
         this.memberList = memberList;
         if (null == memberList || memberList.isEmpty()) {
@@ -108,8 +108,8 @@ public class MeetingRound {
     }
 
     public Integer getOrder(byte[] address) {
-        for(MeetingMember member : memberList) {
-            if(Arrays.equals(address, member.getPackingAddress())) {
+        for (MeetingMember member : memberList) {
+            if (Arrays.equals(address, member.getPackingAddress())) {
                 return member.getPackingIndexOfRound();
             }
         }
@@ -149,12 +149,13 @@ public class MeetingRound {
         for (Account account : accountList) {
             //TODO
 //            if (null != this.getOrder(account.getAddress().getBase58())) {
-                this.localPacker = account;
-                return;
+            this.localPacker = account;
+            return;
 //            }
         }
     }
 
+    @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
         for (MeetingMember member : this.getMemberList()) {

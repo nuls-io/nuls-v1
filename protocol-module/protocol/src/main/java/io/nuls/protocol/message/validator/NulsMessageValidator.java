@@ -47,6 +47,7 @@ public class NulsMessageValidator implements NulsDataValidator<BaseMessage> {
      * @param data 网络消息实体，network message entity
      * @return 验证结果
      */
+    @Override
     public ValidateResult validate(BaseMessage data) {
         if (data.getHeader() == null || data.getMsgBody() == null) {
             return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NET_MESSAGE_ERROR);

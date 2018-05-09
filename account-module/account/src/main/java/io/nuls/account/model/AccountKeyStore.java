@@ -20,60 +20,13 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package io.nuls.account.model;
 
-import io.nuls.kernel.model.Na;
-
-import java.io.Serializable;
-
 /**
- * @author: Charlie
- * @date: 2018/5/5
+ * author Facjas
+ * date 2018/5/9.
  */
-public class Balance implements Serializable {
-
-    private Na balance;
-
-    private Na locked;
-
-    private Na usable;
-
-    public Balance() {
-        this.balance = Na.ZERO;
-        this.locked = Na.ZERO;
-        this.usable = Na.ZERO;
-    }
-
-    public Balance(Na usable, Na locked) {
-        this.usable = usable;
-        this.locked = locked;
-        this.balance = locked.add(usable);
-    }
-
-    public Na getBalance() {
-        return balance;
-    }
-
-    public void setBalance(Na balance) {
-        this.balance = balance;
-    }
-
-    public Na getLocked() {
-        return locked;
-    }
-
-    public void setLocked(Na locked) {
-        this.locked = locked;
-    }
-
-    public Na getUsable() {
-        return usable;
-    }
-
-    public void setUsable(Na usable) {
-        this.usable = usable;
-    }
+public class AccountKeyStore {
 }

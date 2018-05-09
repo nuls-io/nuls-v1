@@ -208,4 +208,11 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
         isMine = mine;
     }
 
+    public Na getFee() {
+        Na fee = Na.ZERO;
+        if (null != coinData) {
+            fee = coinData.getFee();
+        }
+        return fee;
+    }
 }
