@@ -66,8 +66,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             NioChannelMap.add(channelId, channel);
             node.setChannelId(channelId);
             node.setStatus(Node.CONNECT);
-//            boolean result = getNetworkService().addConnNode(node);
-            boolean result = false;
+            boolean result = nodeManager.processConnectedNode(node);
             if(!result) {
                 channel.close();
             }

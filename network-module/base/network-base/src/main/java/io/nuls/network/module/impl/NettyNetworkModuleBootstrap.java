@@ -7,6 +7,8 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;
+import io.nuls.network.message.filter.MessageFilterChain;
+import io.nuls.network.message.filter.impl.MagicNumberFilter;
 import io.nuls.network.module.AbstractNetworkModule;
 
 import java.util.ArrayList;
@@ -25,6 +27,8 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
     @Override
     public void init() {
         initNetworkParam();
+
+        initOther();
         connectionManager.init();
         nodesManager.init();
     }
@@ -42,6 +46,11 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
             ipList.add(ip);
         }
         networkParam.setSeedIpList(ipList);
+    }
+
+    private void initOther() {
+        MagicNumberFilter.getInstance().addMagicNum(NetworkParam.getInstance().getPacketMagic());
+        MessageFilterChain.getInstance().addFilter(MagicNumberFilter.getInstance());
     }
 
     @Override

@@ -62,7 +62,6 @@ public class NettyClient {
                         socketChannel = (SocketChannel) future.channel();
                     } else {
                         Log.info("Client connect to host error: " + future.cause() + ", remove node: " + node.getId());
-                        nodeManager.validateFirstUnConnectedNode(node.getId());
                         nodeManager.removeNode(node);
                     }
                 }
@@ -74,7 +73,6 @@ public class NettyClient {
                 socketChannel.close();
             }
             Log.error("Client start exception:" + e.getMessage() + ", remove node: " + node.getId());
-            nodeManager.validateFirstUnConnectedNode(node.getId());
             nodeManager.removeNode(node);
         }
     }

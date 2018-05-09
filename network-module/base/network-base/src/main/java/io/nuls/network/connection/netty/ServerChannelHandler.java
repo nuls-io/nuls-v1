@@ -89,7 +89,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         Node node = new Node(channel.remoteAddress().getHostString(), channel.remoteAddress().getPort(), Node.IN);
         node.setChannelId(channelId);
         node.setStatus(Node.CONNECT);
-        boolean success = nodeManager.addConnNode(node);
+        boolean success = nodeManager.processConnectedNode(node);
 
         if (!success) {
             ctx.channel().close();
