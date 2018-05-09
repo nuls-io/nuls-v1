@@ -135,20 +135,6 @@ public class ConsensusAccountServiceImpl implements AccountService {
         return null;
     }
 
-    /**
-     * 数据签名(无密码)
-     * The data signature(no password)
-     *
-     * @param data  Data to be signed.
-     * @param ecKey eckey
-     * @return The NulsSignData object after the signature.
-     */
-    @Override
-    public NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException {
-        // todo auto-generated method stub(Niels)
-        return null;
-    }
-
     @Override
     public NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException {
         return null;
