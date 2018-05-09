@@ -26,84 +26,71 @@
 
 package io.nuls.consensus.poc.customer;
 
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
-import io.nuls.protocol.model.SmallBlock;
-import io.nuls.protocol.service.BlockService;
+import io.nuls.network.service.NetworkService;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
 /**
- * Created by ln on 2018/5/8.
+ * Created by ln on 2018/5/9.
  */
-public class ConsensusBlockServiceImpl implements BlockService {
+public class ConsensusNetworkService implements NetworkService {
     @Override
-    public Result<Block> getGengsisBlock() {
+    public void removeNode(String nodeId) {
+
+    }
+
+    @Override
+    public Node getNode(String nodeId) {
         return null;
     }
 
     @Override
-    public Result<Block> getBestBlock() {
+    public Map<String, Node> getNodes() {
         return null;
     }
 
     @Override
-    public Result<BlockHeader> getBestBlockHeader() {
+    public Collection<Node> getAvailableNodes() {
         return null;
     }
 
     @Override
-    public Result<BlockHeader> getBlockHeader(long height) {
+    public BroadcastResult sendToAllNode(BaseNulsData event, boolean asyn) {
         return null;
     }
 
     @Override
-    public Result<BlockHeader> getBlockHeader(NulsDigestData hash) {
+    public BroadcastResult sendToAllNode(BaseNulsData event, Node excludeNode, boolean asyn) {
         return null;
     }
 
     @Override
-    public Result<Block> getBlock(NulsDigestData hash) {
-        Result result = new Result(true, null);
-
-        Block block = new Block();
-        BlockHeader blockHeader = new BlockHeader();
-        blockHeader.setHash(hash);
-        block.setHeader(blockHeader);
-        block.setTxs(new ArrayList<>());
-
-        result.setData(block);
-
-        return result;
-    }
-
-    @Override
-    public Result<Block> getBlock(long height) {
+    public BroadcastResult sendToNode(BaseNulsData event, Node node, boolean asyn) {
         return null;
     }
 
     @Override
-    public Result saveBlock(Block block) throws NulsException {
-        return new Result(true, null);
-    }
-
-    @Override
-    public Result rollbackBlock(Block block) throws NulsException {
-        return new Result(false, null);
-    }
-
-    @Override
-    public Result forwardBlock(SmallBlock block, Node excludeNode) {
+    public BroadcastResult sendToGroup(BaseNulsData event, String groupName, boolean asyn) {
         return null;
     }
 
     @Override
-    public Result broadcastBlock(SmallBlock block) {
+    public BroadcastResult sendToGroup(BaseNulsData event, String groupName, String excludeNodeId, boolean asyn) {
         return null;
     }
 
+    @Override
+    public boolean reset() {
+        return false;
+    }
+
+    @Override
+    public NetworkParam getNetworkParam() {
+        return null;
+    }
 }

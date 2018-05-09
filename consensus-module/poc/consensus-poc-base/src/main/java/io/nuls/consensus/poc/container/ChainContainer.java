@@ -553,7 +553,7 @@ public class ChainContainer implements Cloneable {
         return roundManager.resetRound(true);
     }
 
-    protected MeetingRound getOrResetCurrentRound(boolean isRealTime) {
+    public MeetingRound getOrResetCurrentRound(boolean isRealTime) {
         return roundManager.resetRound(isRealTime);
     }
 

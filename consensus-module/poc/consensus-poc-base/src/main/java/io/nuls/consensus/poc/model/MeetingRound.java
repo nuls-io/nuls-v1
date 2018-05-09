@@ -39,6 +39,7 @@ import java.util.*;
  * @date 2017/12/25
  */
 public class MeetingRound {
+
     private Account localPacker;
     private double totalWeight;
     private long index;
@@ -47,6 +48,7 @@ public class MeetingRound {
     private int memberCount;
     private List<MeetingMember> memberList;
     private MeetingRound preRound;
+    private MeetingMember myMember;
 
     public MeetingRound getPreRound() {
         return preRound;
@@ -107,21 +109,13 @@ public class MeetingRound {
         return this.memberList.get(order - 1);
     }
 
-    public Integer getOrder(byte[] address) {
+    public MeetingMember getMember(byte[] address) {
         for (MeetingMember member : memberList) {
             if (Arrays.equals(address, member.getPackingAddress())) {
-                return member.getPackingIndexOfRound();
+                return member;
             }
         }
         return null;
-    }
-
-    public MeetingMember getMember(byte[] address) {
-        Integer order = getOrder(address);
-        if (null == order) {
-            return null;
-        }
-        return getMember(order);
     }
 
     public Account getLocalPacker() {
@@ -145,13 +139,21 @@ public class MeetingRound {
         return memberList;
     }
 
+    public MeetingMember getMyMember() {
+        return myMember;
+    }
+
     public void calcLocalPacker(List<Account> accountList) {
         for (Account account : accountList) {
-            //TODO
-//            if (null != this.getOrder(account.getAddress().getBase58())) {
-            this.localPacker = account;
-            return;
-//            }
+            if(!account.isEncrypted()) {
+                continue;
+            }
+            MeetingMember member = getMember(account.getAddress().getBase58Bytes());
+            if (null != member) {
+                this.localPacker = account;
+                myMember = member;
+                return;
+            }
         }
     }
 

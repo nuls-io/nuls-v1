@@ -37,6 +37,9 @@ import io.nuls.kernel.script.P2PKHScriptSig;
 public class AddressTool {
 
     public static byte[] getAddress(byte[] publicKey) {
+        if(publicKey == null) {
+            return null;
+        }
         byte[] hash160 = Utils.sha256hash160(publicKey);
         short chainId = NulsContext.DEFAULT_CHAIN_ID;
         byte[] body = new byte[22];
@@ -50,7 +53,6 @@ public class AddressTool {
     }
 
     private static byte getXor(byte[] body) {
-
         byte xor = 0x00;
         for (int i = 0; i < body.length; i++) {
             xor ^= body[i];
@@ -60,15 +62,25 @@ public class AddressTool {
     }
 
     public static byte[] getAddress(P2PKHScriptSig scriptSig) {
+        if(scriptSig == null) {
+            return null;
+        }
         return getAddress(scriptSig.getPublicKey());
     }
 
     public static String getAddressBase58(byte[] publicKey) {
+        if(publicKey == null) {
+            return null;
+        }
         byte[] bytes = getAddress(publicKey);
         return Base58.encode(bytes);
     }
 
     public static String getAddressBase58(P2PKHScriptSig scriptSig) {
+        if(scriptSig == null) {
+            return null;
+
+        }
         return getAddressBase58(scriptSig.getPublicKey());
     }
 }

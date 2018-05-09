@@ -27,12 +27,14 @@
 package io.nuls.consensus.poc.customer;
 
 import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.network.entity.Node;
 import io.nuls.protocol.model.TxGroup;
 import io.nuls.protocol.service.DownloadService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,7 +46,18 @@ public class ConsensusDownloadServiceImpl implements DownloadService {
 
     @Override
     public Result<Block> downloadBlock(NulsDigestData hash, Node node) {
-        return null;
+        Result<Block> result = new Result<>();
+
+        Block block = new Block();
+        block.setTxs(new ArrayList<>());
+
+        BlockHeader blockHeader = new BlockHeader();
+        blockHeader.setHash(hash);
+        block.setHeader(blockHeader);
+
+        result.setData(block);
+
+        return result;
     }
 
     @Override

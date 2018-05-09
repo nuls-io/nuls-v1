@@ -42,12 +42,12 @@ import java.util.List;
 public class NulsDigestData extends BaseNulsData {
 
     @Tag(1)
-    protected short digestAlgType = DIGEST_ALG_SHA256;
+    protected byte digestAlgType = DIGEST_ALG_SHA256;
     @Tag(2)
     protected byte[] digestBytes;
 
-    public static short DIGEST_ALG_SHA256 = 0;
-    public static short DIGEST_ALG_SHA160 = 1;
+    public static byte DIGEST_ALG_SHA256 = 0;
+    public static byte DIGEST_ALG_SHA160 = 1;
 
     public NulsDigestData() {
     }
@@ -57,16 +57,16 @@ public class NulsDigestData extends BaseNulsData {
         this.parse(bytes);
     }
 
-    public NulsDigestData(short alg_type, byte[] bytes) {
+    public NulsDigestData(byte alg_type, byte[] bytes) {
         this.digestBytes = bytes;
         this.digestAlgType = alg_type;
     }
 
-    public short getDigestAlgType() {
+    public byte getDigestAlgType() {
         return digestAlgType;
     }
 
-    public void setDigestAlgType(short digestAlgType) {
+    public void setDigestAlgType(byte digestAlgType) {
         this.digestAlgType = digestAlgType;
     }
 
@@ -81,10 +81,10 @@ public class NulsDigestData extends BaseNulsData {
     }
 
     public static NulsDigestData calcDigestData(BaseNulsData data) {
-        return calcDigestData(data, (short) 0);
+        return calcDigestData(data, (byte) 0);
     }
 
-    public static NulsDigestData calcDigestData(BaseNulsData data, short digestAlgType) {
+    public static NulsDigestData calcDigestData(BaseNulsData data, byte digestAlgType) {
         try {
             return calcDigestData(data.serialize(), digestAlgType);
         } catch (Exception e) {
@@ -101,27 +101,26 @@ public class NulsDigestData extends BaseNulsData {
         if (null == digestBytes) {
             return null;
         }
-        byte[] bytes = new byte[2 + digestBytes.length];
-        byte[] algBytes = Utils.shortToBytes(this.digestAlgType);
-        System.arraycopy(algBytes, 0, bytes, 0, algBytes.length);
-        System.arraycopy(digestBytes, 0, bytes, algBytes.length, digestBytes.length);
+        byte[] bytes = new byte[1 + digestBytes.length];
+        bytes[0] = digestAlgType;
+        System.arraycopy(digestBytes, 0, bytes, 1, digestBytes.length);
         return bytes;
     }
 
     public static NulsDigestData calcDigestData(byte[] data) {
-        return calcDigestData(data, (short) 0);
+        return calcDigestData(data, (byte) 0);
     }
 
-    public static NulsDigestData calcDigestData(byte[] data, short digestAlgType) {
+    public static NulsDigestData calcDigestData(byte[] data, byte digestAlgType) {
         NulsDigestData digestData = new NulsDigestData();
         digestData.setDigestAlgType(digestAlgType);
-        if ((short) 0 == digestAlgType) {
+        if ((byte) 0 == digestAlgType) {
             byte[] content = Sha256Hash.hashTwice(data);
             digestData.digestBytes = content;
             return digestData;
         }
         //todo extend other algType
-        if ((short) 1 == digestAlgType) {
+        if ((byte) 1 == digestAlgType) {
             byte[] content = Utils.sha256hash160(data);
             digestData.digestBytes = content;
             return digestData;

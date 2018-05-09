@@ -39,15 +39,15 @@ public class NulsSignData extends BaseNulsData {
     public static short SIGN_ALG_ECC = (short) 0;
     public static short SIGN_ALG_DEFAULT = NulsSignData.SIGN_ALG_ECC;
     @Tag(1)
-    protected short signAlgType;
+    protected byte signAlgType;
     @Tag(2)
     protected byte[] signBytes;
 
-    public int getSignAlgType() {
+    public byte getSignAlgType() {
         return signAlgType;
     }
 
-    public void setSignAlgType(short signAlgType) {
+    public void setSignAlgType(byte signAlgType) {
         this.signAlgType = signAlgType;
     }
 
