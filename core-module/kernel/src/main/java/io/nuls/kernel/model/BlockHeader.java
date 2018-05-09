@@ -45,11 +45,11 @@ public class BlockHeader extends BaseNulsData {
     @Tag(5)
     private long txCount;
     @Tag(6)
-    private byte[] packingAddress;
-    @Tag(7)
     private P2PKHScriptSig scriptSign;
-    @Tag(8)
+    @Tag(7)
     private byte[] extend;
+
+    private transient byte[] packingAddress;
 
     private transient int size;
 
