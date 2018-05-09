@@ -35,6 +35,8 @@ import io.nuls.network.entity.Node;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
 
+import java.util.ArrayList;
+
 /**
  * Created by ln on 2018/5/8.
  */
@@ -66,7 +68,17 @@ public class ConsensusBlockServiceImpl implements BlockService {
 
     @Override
     public Result<Block> getBlock(NulsDigestData hash) {
-        return null;
+        Result result = new Result(true, null);
+
+        Block block = new Block();
+        BlockHeader blockHeader = new BlockHeader();
+        blockHeader.setHash(hash);
+        block.setHeader(blockHeader);
+        block.setTxs(new ArrayList<>());
+
+        result.setData(block);
+
+        return result;
     }
 
     @Override
@@ -76,7 +88,7 @@ public class ConsensusBlockServiceImpl implements BlockService {
 
     @Override
     public Result saveBlock(Block block) throws NulsException {
-        return new Result(false, null);
+        return new Result(true, null);
     }
 
     @Override

@@ -33,7 +33,7 @@ import io.nuls.kernel.model.BaseNulsData;
  */
 public abstract class Script extends BaseNulsData {
 
-    protected long creationTimeSeconds;
+    protected transient long creationTimeSeconds;
 
     public static final long MAX_SCRIPT_ELEMENT_SIZE = 520;  // bytes
     public static final int SIG_SIZE = 75;

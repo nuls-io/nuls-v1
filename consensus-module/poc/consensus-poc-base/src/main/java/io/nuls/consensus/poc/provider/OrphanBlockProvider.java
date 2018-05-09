@@ -50,4 +50,8 @@ public class OrphanBlockProvider {
         }
         return orphanBlockList.remove(0);
     }
+
+    public int size() {
+        return orphanBlockList.size();
+    }
 }

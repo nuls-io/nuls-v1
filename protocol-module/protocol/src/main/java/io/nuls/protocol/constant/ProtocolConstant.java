@@ -28,13 +28,19 @@ public interface ProtocolConstant extends NulsConstant {
      * 协议模块节点id
      * module id of the protocol module
      */
-    short MODULE_ID_PROTOCOL = 2;
+    short MODULE_ID_PROTOCOL = 3;
 
     /**
      * 系统运行的最小连接节点数量
      * The number of minimum connection nodes that the system runs.
      */
     int ALIVE_MIN_NODE_COUNT = 2;
+
+    /**
+     * 最大区块大小（不包含区块头）
+     * Maximum block size (excluding block headers)
+     */
+    long MAX_BLOCK_SIZE = 2 << 21;
 
     /**
      * 协议模块的所有消息类型定义

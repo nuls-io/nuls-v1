@@ -99,7 +99,7 @@ public class BlockDto {
     @ApiModelProperty(name = "txList", value = "transactionsJSON")
     private List<TransactionDto> txList;
 
-    public BlockDto(Block block) throws IOException {
+    public BlockDto(Block block) {
         this.size = block.size();
         this.txList = new ArrayList<>();
         Na fee = Na.ZERO;

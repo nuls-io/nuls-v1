@@ -25,7 +25,21 @@
 
 package io.nuls.protocol.storage.service.impl;
 
+import io.nuls.db.module.impl.LevelDbModuleBootstrap;
+import io.nuls.kernel.MicroKernelBootstrap;
+import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Result;
+import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.protocol.storage.po.BlockHeaderPo;
+import io.nuls.protocol.storage.service.BlockHeaderStorageService;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -35,19 +49,92 @@ import static org.junit.Assert.*;
  */
 public class BlockHeaderStorageServiceImplTest {
 
+    private BlockHeaderStorageService service;
+
+    private BlockHeaderPo entity;
+
+    @Before
+    public void init() {
+        MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
+        mk.init();
+        mk.start();
+
+        LevelDbModuleBootstrap bootstrap = new LevelDbModuleBootstrap();
+        bootstrap.init();
+        bootstrap.start();
+
+        service = NulsContext.getServiceBean(BlockHeaderStorageService.class);
+        BlockHeaderPo po = new BlockHeaderPo();
+        po.setHash(NulsDigestData.calcDigestData("hashhash".getBytes()));
+        po.setHeight(1286L);
+        po.setExtend("extends".getBytes());
+        po.setMerkleHash(NulsDigestData.calcDigestData("merkleHash".getBytes()));
+        po.setPreHash(NulsDigestData.calcDigestData("prehash".getBytes()));
+        try {
+            po.setPackingAddress("address".getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+            assertTrue(false);
+        }
+        po.setScriptSign(new P2PKHScriptSig());
+        po.setTime(12345678901L);
+        po.setTxCount(3);
+        List<NulsDigestData> txHashList = new ArrayList<>();
+        txHashList.add(NulsDigestData.calcDigestData("first-tx-hash".getBytes()));
+        txHashList.add(NulsDigestData.calcDigestData("second-tx-hash".getBytes()));
+        txHashList.add(NulsDigestData.calcDigestData("third-tx-hash".getBytes()));
+        po.setTxHashList(txHashList);
+        this.entity = po;
+    }
+
     @Test
+    public void test() {
+        assertNotNull(service);
+        this.saveBlockHeader();
+
+        this.getBlockPo();
+
+        this.getBlockPo1();
+
+        this.removeBlockHerader();
+    }
+
     public void getBlockPo() {
+        BlockHeaderPo po = this.service.getBlockHeaderPo(entity.getHeight());
+        this.testEquals(po, entity);
     }
 
-    @Test
     public void getBlockPo1() {
+        BlockHeaderPo po = this.service.getBlockHeaderPo(entity.getHash());
+        this.testEquals(po, entity);
     }
 
-    @Test
     public void saveBlockHeader() {
+        Result result = service.saveBlockHeader(entity);
+        assertTrue(result.isSuccess());
     }
 
-    @Test
     public void removeBlockHerader() {
+        service.removeBlockHerader(entity);
+        BlockHeaderPo po = this.service.getBlockHeaderPo(entity.getHash());
+        assertNull(po);
     }
+
+
+    private void testEquals(BlockHeaderPo po, BlockHeaderPo entity) {
+        assertEquals(po.getHash(),entity.getHash());
+        assertEquals(po.getHeight(), entity.getHeight());
+        assertEquals(po.getPreHash(), entity.getPreHash());
+        assertEquals(po.getMerkleHash(), entity.getMerkleHash());
+        assertTrue(Arrays.equals(po.getExtend(), entity.getExtend()));
+        assertTrue(Arrays.equals(po.getPackingAddress(), entity.getPackingAddress()));
+        assertEquals(po.getScriptSign().getPublicKey(), entity.getScriptSign().getPublicKey());
+        assertEquals(po.getScriptSign().getSignData(), entity.getScriptSign().getSignData());
+        assertEquals(po.getTime(), entity.getTime());
+        assertEquals(po.getTxCount(), entity.getTxCount());
+        assertEquals(po.getTxHashList().get(0), entity.getTxHashList().get(0));
+        assertEquals(po.getTxHashList().get(1), entity.getTxHashList().get(1));
+        assertEquals(po.getTxHashList().get(2), entity.getTxHashList().get(2));
+    }
+
 }

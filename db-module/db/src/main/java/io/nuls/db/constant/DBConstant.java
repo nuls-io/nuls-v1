@@ -32,6 +32,6 @@ import io.nuls.kernel.constant.NulsConstant;
  */
 public interface DBConstant extends NulsConstant {
 
-    short MODULE_ID_DB = 3;
+    short MODULE_ID_DB = 2;
 
 }

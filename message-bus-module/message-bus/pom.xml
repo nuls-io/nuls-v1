@@ -11,6 +11,19 @@
 
     <groupId>io.nuls.message-bus-module</groupId>
     <artifactId>message-bus</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>io.nuls.core-module</groupId>
+            <artifactId>kernel</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nuls.protocol-module</groupId>
+            <artifactId>protocol</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
+    </dependencies>
 
 
 </project>

@@ -25,21 +25,67 @@
 
 package io.nuls.protocol.storage.po;
 
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.script.P2PKHScriptSig;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
 /**
+ * 区块头实体单元测试工具类
+ * Block header entity unit test tool class.
+ *
  * @author: Niels Wang
  * @date: 2018/5/8
  */
 public class BlockHeaderPoTest {
 
+    /**
+     * 验证区块头实体的序列化和反序列化的正确性
+     * Verify the correctness of serialization and deserialization of block header entities.
+     */
     @Test
-    public void serialize() {
+    public void serializeAndParse() {
+        BlockHeaderPo po = new BlockHeaderPo();
+        po.setHeight(1286L);
+        po.setExtend("extends".getBytes());
+        po.setMerkleHash(NulsDigestData.calcDigestData("merkleHash".getBytes()));
+        try {
+            po.setPackingAddress("address".getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+            assertTrue(false);
+        }
+        po.setScriptSign(new P2PKHScriptSig());
+        po.setTime(12345678901L);
+        po.setTxCount(3);
+        List<NulsDigestData> txHashList = new ArrayList<>();
+        txHashList.add(NulsDigestData.calcDigestData("first-tx-hash".getBytes()));
+        txHashList.add(NulsDigestData.calcDigestData("second-tx-hash".getBytes()));
+        txHashList.add(NulsDigestData.calcDigestData("third-tx-hash".getBytes()));
+        po.setTxHashList(txHashList);
+
+        byte[] bytes = po.serialize();
+
+        BlockHeaderPo newPo = new BlockHeaderPo();
+        newPo.parse(bytes);
+        assertNull(newPo.getHash());
+        assertEquals(po.getHeight(), newPo.getHeight());
+        assertEquals(po.getPreHash(), newPo.getPreHash());
+        assertEquals(po.getMerkleHash(), newPo.getMerkleHash());
+        assertTrue(Arrays.equals(po.getExtend(), newPo.getExtend()));
+        assertTrue(Arrays.equals(po.getPackingAddress(), newPo.getPackingAddress()));
+        assertEquals(po.getScriptSign().getPublicKey(), newPo.getScriptSign().getPublicKey());
+        assertEquals(po.getScriptSign().getSignData(), newPo.getScriptSign().getSignData());
+        assertEquals(po.getTime(), newPo.getTime());
+        assertEquals(po.getTxCount(), newPo.getTxCount());
+        assertEquals(po.getTxHashList().get(0), newPo.getTxHashList().get(0));
+        assertEquals(po.getTxHashList().get(1), newPo.getTxHashList().get(1));
+        assertEquals(po.getTxHashList().get(2), newPo.getTxHashList().get(2));
     }
 
-    @Test
-    public void parse() {
-    }
 }

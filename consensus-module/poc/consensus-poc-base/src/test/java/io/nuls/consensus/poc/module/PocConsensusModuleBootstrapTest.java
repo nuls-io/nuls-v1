@@ -37,7 +37,7 @@ public class PocConsensusModuleBootstrapTest {
     private PocConsensusModuleBootstrap bootstrap = new PocConsensusModuleBootstrap();
 
     @Test
-    public void testStartModule() {
+    public void testStartModule() throws Exception {
         bootstrap.init();
         bootstrap.start();
     }

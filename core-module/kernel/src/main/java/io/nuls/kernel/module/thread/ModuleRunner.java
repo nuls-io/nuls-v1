@@ -72,6 +72,10 @@ public class ModuleRunner implements Runnable {
             module.setStatus(ModuleStatusEnum.EXCEPTION);
             Log.error(e);
             throw e;
+        } catch (Exception e) {
+            module.setStatus(ModuleStatusEnum.EXCEPTION);
+            Log.error(e);
+            System.exit(-1);
         }
     }
 

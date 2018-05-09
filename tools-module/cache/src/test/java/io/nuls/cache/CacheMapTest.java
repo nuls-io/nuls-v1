@@ -155,7 +155,7 @@ public class CacheMapTest {
         System.out.println("remove late:" + (System.currentTimeMillis() - start));
         assertTrue(map.get(data1.getName() + "_remove"));
     }
-    @Test
+
     public void testSpeed(){
         CacheMap<String,ValueData> cacheMap = new CacheMap("test-cache-speed", 1024, String.class, ValueData.class, 0, 0, null, null);
         Map<String,ValueData> map = new HashMap<>();

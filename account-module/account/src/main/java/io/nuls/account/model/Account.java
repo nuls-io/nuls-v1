@@ -168,7 +168,6 @@ public class Account  extends BaseNulsData {
             BigInteger newPriv = new BigInteger(1, unencryptedPrivateKey);
             ECKey key = ECKey.fromPrivate(newPriv);
 
-            //todo  pub key compress?
             if (!Arrays.equals(key.getPubKey(), getPubKey())) {
                 return false;
             }
@@ -183,7 +182,7 @@ public class Account  extends BaseNulsData {
 
     @Override
     public int size() {
-        int s = Utils.sizeOfBytes(address.getHash());
+        int s = Utils.sizeOfBytes(address.calcBase58bytes());
         s += Utils.sizeOfString(alias);
         s += Utils.sizeOfBytes(encryptedPriKey);
         s += Utils.sizeOfBytes(pubKey);

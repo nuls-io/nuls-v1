@@ -12,4 +12,8 @@
 
     <groupId>io.nuls.account-module</groupId>
     <artifactId>account</artifactId>
+
+    <dependencies>
+
+    </dependencies>
 </project>

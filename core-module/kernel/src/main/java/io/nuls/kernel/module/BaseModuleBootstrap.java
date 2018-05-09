@@ -50,7 +50,7 @@ public abstract class BaseModuleBootstrap {
     /**
      *
      */
-    public abstract void init();
+    public abstract void init() throws Exception;
 
     /**
      * start the module

@@ -11,14 +11,14 @@ import io.nuls.protocol.message.base.BaseMessage;
  * @author: Charlie
  * @date: 2018/5/6
  */
-@Service
+//@Service
 public class MessageCacheService {
 
     private static final MessageCacheService INSTANCE = new MessageCacheService();
 
     private static final int TIME_OF_IDLE_SECONDS = 600;
-    private CacheMap<String, BaseMessage> cacheMapSended = new CacheMap<>("event-cache-sended", 32, String.class, BaseMessage.class, 0, TIME_OF_IDLE_SECONDS);
-    private CacheMap<String, Integer> cacheMapRecieved = new CacheMap<>("event-cache-recieved", 8, String.class, Integer.class, 0, TIME_OF_IDLE_SECONDS);
+    private CacheMap<String, BaseMessage> cacheMapSended = new CacheMap<>("message-cache-sended", 32, String.class, BaseMessage.class, 0, TIME_OF_IDLE_SECONDS);
+    private CacheMap<String, Integer> cacheMapRecieved = new CacheMap<>("message-cache-recieved", 8, String.class, Integer.class, 0, TIME_OF_IDLE_SECONDS);
 
     public static MessageCacheService getInstance() {
         return INSTANCE;

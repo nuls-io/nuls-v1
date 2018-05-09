@@ -26,6 +26,7 @@
 package io.nuls.consensus.poc.module.impl;
 
 import io.nuls.consensus.module.AbstractConsensusModule;
+import io.nuls.consensus.poc.constant.ConsensusConfig;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.ModuleStatusEnum;
 import io.nuls.kernel.constant.NulsConstant;
@@ -43,8 +44,8 @@ import java.util.List;
 public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     @Override
-    public void init() {
-
+    public void init() throws Exception {
+        ConsensusConfig.initConfiguration();
     }
 
     @Override

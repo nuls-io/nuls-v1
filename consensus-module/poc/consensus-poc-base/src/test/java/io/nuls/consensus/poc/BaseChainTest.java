@@ -29,11 +29,15 @@ package io.nuls.consensus.poc;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
 import io.nuls.account.service.AccountService;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.entity.Agent;
 import io.nuls.consensus.entity.Deposit;
+import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.customer.ConsensusAccountServiceImpl;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
+import io.nuls.consensus.poc.model.MeetingMember;
+import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.tx.JoinConsensusTransaction;
 import io.nuls.consensus.tx.RegisterAgentTransaction;
 import io.nuls.kernel.lite.core.SpringLiteContext;
@@ -43,12 +47,15 @@ import org.junit.BeforeClass;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertNotNull;
+
 /**
  * Created by ln on 2018/5/7.
  */
 public class BaseChainTest extends BaseTest {
 
     protected Chain chain;
+    protected ChainContainer chainContainer;
 
     protected void initChain() {
         chain = new Chain();
@@ -124,5 +131,39 @@ public class BaseChainTest extends BaseTest {
 
         chain.setYellowPunishList(new ArrayList<>());
         chain.setRedPunishList(new ArrayList<>());
+
+        chainContainer = new ChainContainer(chain);
+    }
+
+    protected Block newBlock(Block preBlock) {
+
+        assertNotNull(preBlock);
+        assertNotNull(preBlock.getHeader());
+
+        BlockHeader blockHeader = new BlockHeader();
+        blockHeader.setHeight(preBlock.getHeader().getHeight() + 1);
+        blockHeader.setPreHash(preBlock.getHeader().getHash());
+        blockHeader.setTxCount(0);
+
+        MeetingRound currentRound = chainContainer.getOrResetCurrentRound(false);
+        MeetingMember member = currentRound.getMember(1);
+        blockHeader.setTime(member.getPackEndTime() + ConsensusConstant.BLOCK_TIME_INTERVAL_MILLIS * currentRound.getMemberCount());
+
+        // add a round data
+        BlockRoundData roundData = new BlockRoundData(preBlock.getHeader().getExtend());
+        roundData.setConsensusMemberCount(currentRound.getMemberCount());
+        roundData.setPackingIndexOfRound(1);
+        roundData.setRoundIndex(currentRound.getIndex() + 1);
+        roundData.setRoundStartTime(currentRound.getEndTime());
+        blockHeader.setExtend(roundData.serialize());
+
+        // new a block of height 0
+        Block block = new Block();
+        block.setHeader(blockHeader);
+
+        List<Transaction> txs = new ArrayList<>();
+        block.setTxs(txs);
+
+        return block;
     }
 }

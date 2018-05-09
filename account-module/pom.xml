@@ -19,6 +19,7 @@
         <module>base/account-storage</module>
         <module>base/account-rpc</module>
         <module>base/account-sdk</module>
+        <module>base/account-base</module>
     </modules>
     <dependencies>
         <dependency>

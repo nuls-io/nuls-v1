@@ -1,6 +1,7 @@
 package io.nuls.account.constant;
 
 import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.model.Na;
 
 /**
  * @author: Charlie
@@ -8,5 +9,7 @@ import io.nuls.kernel.constant.NulsConstant;
  */
 public interface AccountConstant extends NulsConstant {
 
-    short CHAIN_ID = 0;
+    String ACCOUNT_LIST_CACHE = "ACCOUNT_LIST";
+
+    Na ALIAS_NA = Na.parseNuls(1);
 }

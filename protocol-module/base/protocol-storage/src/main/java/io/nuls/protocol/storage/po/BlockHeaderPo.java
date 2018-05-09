@@ -164,7 +164,6 @@ public class BlockHeaderPo extends BaseNulsData {
         header.setPreHash(this.getPreHash());
         header.setTime(this.getTime());
         header.setMerkleHash(this.getMerkleHash());
-        header.setPackingAddress(this.getPackingAddress());
         header.setTxCount(this.getTxCount());
         header.setScriptSig(this.getScriptSign());
         return header;

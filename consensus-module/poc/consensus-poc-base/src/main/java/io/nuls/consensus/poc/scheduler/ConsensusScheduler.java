@@ -28,6 +28,7 @@ package io.nuls.consensus.poc.scheduler;
 
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.context.PocConsensusContext;
+import io.nuls.consensus.poc.manager.CacheManager;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.process.BlockProcess;
 import io.nuls.consensus.poc.process.ConsensusProcess;
@@ -55,6 +56,7 @@ public class ConsensusScheduler {
     private ScheduledThreadPoolExecutor threadPool;
 
     private OrphanBlockProcess orphanBlockProcess;
+    private CacheManager cacheManager;
 
     private ConsensusScheduler() {
     }
@@ -84,6 +86,7 @@ public class ConsensusScheduler {
         orphanBlockProcess.start();
 
         PocConsensusContext.setChainManager(chainManager);
+        cacheManager = new CacheManager(chainManager);
 
         initDatas();
 
@@ -110,7 +113,7 @@ public class ConsensusScheduler {
 
     private void initDatas() {
         try {
-
+            cacheManager.load();
         } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -118,9 +121,6 @@ public class ConsensusScheduler {
     }
 
     private void clear() {
-        try {
-
-        } finally {
-        }
+        cacheManager.clear();
     }
 }

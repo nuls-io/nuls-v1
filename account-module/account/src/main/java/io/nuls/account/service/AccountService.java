@@ -28,6 +28,7 @@ import io.nuls.account.model.Account;
 import io.nuls.account.model.AccountKeyStore;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
@@ -70,11 +71,11 @@ public interface AccountService {
      * <p>
      * remove the corresponding account according to the account id.
      *
-     * @param accountId the id of the account you want to delete;
+     * @param address the address of the account you want to delete;
      * @param password  the password of the wallet;
      * @return the result of the opration
      */
-    Result<Boolean> removeAccount(String accountId, String password);
+    Result<Boolean> removeAccount(String address, String password);
 
     /**
      * 从keyStore导入账户
@@ -92,11 +93,11 @@ public interface AccountService {
      * <p>
      * export an account to an account key store.
      *
-     * @param accountAddress the address of the account;
+     * @param address the address of the account;
      * @param password       the password of the account key store;
      * @return the account key store object
      */
-    Result<AccountKeyStore> exportAccountToKeyStore(String accountAddress, String password);
+    Result<AccountKeyStore> exportAccountToKeyStore(String address, String password);
 
     /**
      * 根据账户地址字符串获取完整的账户信息
@@ -142,7 +143,7 @@ public interface AccountService {
      * @param account The account to be verified.
      * @return the result of the opration
      */
-    Result<Boolean> isEncrypted(Account account);
+    Result isEncrypted(Account account);
 
     /**
      * 根据账户的地址对象验证账户是否加密
@@ -151,7 +152,7 @@ public interface AccountService {
      * @param address The address object of the account to be verified.
      * @return the result of the opration
      */
-    Result<Boolean> isEncrypted(Address address);
+    Result isEncrypted(Address address);
 
     /**
      * 根据账户的地址字符串验证账户是否加密
@@ -160,7 +161,7 @@ public interface AccountService {
      * @param address The address string of the account to be verified.
      * @return the result of the opration
      */
-    Result<Boolean> isEncrypted(String address);
+    Result isEncrypted(String address);
 
     /**
      * 验证地址字符串的格式
@@ -209,6 +210,17 @@ public interface AccountService {
      * @throws NulsException
      */
     NulsSignData signData(byte[] data, Account account) throws NulsException;
+
+    /**
+     * 数据签名(无密码)
+     * The data signature(no password)
+     *
+     * @param data    Data to be signed.
+     * @param ecKey  eckey
+     * @return The NulsSignData object after the signature.
+     * @throws NulsException
+     */
+    NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException;
 
     /**
      * 验证签名

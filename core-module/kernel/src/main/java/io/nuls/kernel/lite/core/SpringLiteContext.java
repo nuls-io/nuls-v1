@@ -25,16 +25,21 @@
 package io.nuls.kernel.lite.core;
 
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.annotation.Interceptor;
 import io.nuls.kernel.lite.annotation.Service;
+import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.lite.core.interceptor.BeanMethodInterceptor;
 import io.nuls.kernel.lite.core.interceptor.BeanMethodInterceptorManager;
 import io.nuls.kernel.lite.utils.ScanUtil;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
+import java.awt.image.Kernel;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -94,9 +99,17 @@ public class SpringLiteContext {
         Set<String> keySet = new HashSet<>(BEAN_TEMP_MAP.keySet());
         for (String key : keySet) {
             try {
-                injectionBeanFields(BEAN_TEMP_MAP.get(key), BEAN_TYPE_MAP.get(key));
-                BEAN_OK_MAP.put(key, BEAN_TEMP_MAP.get(key));
+                Object bean = BEAN_TEMP_MAP.get(key);
+                injectionBeanFields(bean, BEAN_TYPE_MAP.get(key));
+                BEAN_OK_MAP.put(key, bean);
                 BEAN_TEMP_MAP.remove(key);
+                if (bean instanceof InitializingBean) {
+                    try {
+                        ((InitializingBean) bean).afterPropertiesSet();
+                    } catch (Exception e) {
+                        Log.error(e);
+                    }
+                }
             } catch (Exception e) {
                 Log.debug(key + " autowire fields failed!");
             }
@@ -215,7 +228,12 @@ public class SpringLiteContext {
             if (beanName == null || beanName.trim().length() == 0) {
                 beanName = getBeanName(clazz);
             }
-            loadBean(beanName, clazz, aopProxy);
+            try {
+                loadBean(beanName, clazz, aopProxy);
+            } catch (NulsException e) {
+                Log.error(e);
+                return;
+            }
         }
         Annotation interceptorAnn = getFromArray(anns, Interceptor.class);
         if (null != interceptorAnn) {
@@ -270,7 +288,7 @@ public class SpringLiteContext {
      * @param clazz    对象类型
      * @param proxy    是否返回动态代理的对象
      */
-    private static Object loadBean(String beanName, Class clazz, boolean proxy) {
+    private static Object loadBean(String beanName, Class clazz, boolean proxy) throws NulsException {
         if (BEAN_OK_MAP.containsKey(beanName)) {
             Log.error("bean name repetition (" + beanName + "):" + clazz.getName());
             return BEAN_OK_MAP.get(beanName);
@@ -287,8 +305,10 @@ public class SpringLiteContext {
                 bean = clazz.newInstance();
             } catch (InstantiationException e) {
                 Log.error(e);
+                throw new NulsException(e);
             } catch (IllegalAccessException e) {
                 Log.error(e);
+                throw new NulsException(e);
             }
         }
         BEAN_TEMP_MAP.put(beanName, bean);
@@ -343,10 +363,10 @@ public class SpringLiteContext {
     public static <T> T getBean(Class<T> beanClass) {
         Set<String> nameSet = CLASS_NAME_SET_MAP.get(beanClass);
         if (null == nameSet || nameSet.isEmpty()) {
-            throw new RuntimeException("Can't find bean of " + beanClass.getName());
+            throw new NulsRuntimeException(KernelErrorCode.DATA_NOT_FOUND, "Can't find bean of " + beanClass.getName());
         }
         if (nameSet.size() > 1) {
-            throw new RuntimeException("There are " + nameSet.size() + " beans of " + beanClass.getName());
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "There are " + nameSet.size() + " beans of " + beanClass.getName());
         }
         T value = null;
         String beanName = null;
@@ -367,11 +387,12 @@ public class SpringLiteContext {
      *
      * @param clazz 对象类型
      */
-    public static void putBean(Class clazz) {
+    public static void putBean(Class clazz) throws NulsException {
         loadBean(getBeanName(clazz), clazz, true);
         autowireFields();
     }
-    public static void putBean(Class clazz, boolean proxy) {
+
+    public static void putBean(Class clazz, boolean proxy) throws NulsException {
         loadBean(getBeanName(clazz), clazz, proxy);
         autowireFields();
     }

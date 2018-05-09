@@ -34,9 +34,9 @@ import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.module.BaseModuleBootstrap;
 import io.nuls.kernel.module.manager.VersionManager;
 import io.nuls.kernel.validate.ValidatorManager;
-import io.nuls.module.version.KernelMavenInfo;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 
 /**
  * @author Niels
@@ -102,8 +102,16 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
     public String getInfo() {
         StringBuilder info = new StringBuilder();
         info.append("kernel module:\n");
-        info.append("module-version:");
-        info.append(KernelMavenInfo.VERSION);
+
+        try {
+            Class mavenInfo = Class.forName("io.nuls.module.version.KernelMavenInfo");
+            Field field = mavenInfo.getDeclaredField("VERSION");
+            info.append("module-version:");
+            info.append(field.get(mavenInfo));
+        } catch (Exception e) {
+            //do nothing
+        }
+
         info.append("\nDEFAULT_ENCODING:");
         info.append(NulsConfig.DEFAULT_ENCODING);
         info.append("\nLanguage：");
