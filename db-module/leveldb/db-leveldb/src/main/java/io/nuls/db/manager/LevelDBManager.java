@@ -26,6 +26,7 @@ package io.nuls.db.manager;
 import io.nuls.core.tools.cfg.ConfigLoader;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.model.ModelWrapper;
 import io.nuls.kernel.cfg.NulsConfig;
@@ -226,7 +227,7 @@ public class LevelDBManager {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         if (AREAS.containsKey(areaName)) {
-            return new Result(true, "KV_AREA_EXISTS");
+            return Result.getFailed(DBErrorCode.DB_AREA_EXIST);
         }
         if (StringUtils.isBlank(dataPath) || !checkPathLegal(areaName)) {
             return new Result(false, "KV_AREA_CREATE_ERROR");

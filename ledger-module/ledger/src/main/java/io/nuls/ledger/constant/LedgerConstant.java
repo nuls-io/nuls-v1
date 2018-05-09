@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.constant;
+package io.nuls.ledger.constant;
 
 import io.nuls.kernel.constant.NulsConstant;
 
@@ -30,8 +30,8 @@ import io.nuls.kernel.constant.NulsConstant;
  * @Author: PierreLuo
  * @Date: 2018/5/7
  */
-public interface DBConstant extends NulsConstant {
+public interface LedgerConstant extends NulsConstant {
 
-    short MODULE_ID_DB = 2;
+    short MODULE_ID_LEDGER = 8;
 
 }

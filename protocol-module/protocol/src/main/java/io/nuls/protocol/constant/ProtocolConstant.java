@@ -28,7 +28,7 @@ public interface ProtocolConstant extends NulsConstant {
      * 协议模块节点id
      * module id of the protocol module
      */
-    short MODULE_ID_PROTOCOL = 2;
+    short MODULE_ID_PROTOCOL = 3;
 
     /**
      * 系统运行的最小连接节点数量

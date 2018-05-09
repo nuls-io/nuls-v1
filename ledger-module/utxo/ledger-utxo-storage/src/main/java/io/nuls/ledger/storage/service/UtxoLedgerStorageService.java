@@ -21,17 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.constant;
+package io.nuls.ledger.storage.service;
 
-import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.Transaction;
 
 /**
  * @Desription:
  * @Author: PierreLuo
- * @Date: 2018/5/7
+ * @Date: 2018/5/8
  */
-public interface DBConstant extends NulsConstant {
+public interface UtxoLedgerStorageService {
 
-    short MODULE_ID_DB = 2;
+    Result saveTx(Transaction tx);
+
+    Transaction getTx(NulsDigestData hash);
+
+    Result deleteTx(Transaction tx);
+
+    Result saveUtxo(Coin coin);
+
+    Result deleteUtxo(Coin coin);
+
+
 
 }

@@ -40,9 +40,38 @@ import java.util.Set;
  */
 public interface DBService {
 
+    /**
+     * @param areaName
+     * @return
+     */
     Result createArea(String areaName);
+
+    /**
+     * 弃用的方法
+     * Deprecated method
+     * @param areaName
+     * @param cacheSize 无效字段，LevelDB未实现/cacheSize hasn't been implemented.
+     * @return
+     */
+    @Deprecated
     Result createArea(String areaName, Long cacheSize);
+
+    /**
+     * @param areaName
+     * @param comparator 自定义key比较器/Custom key comparator.
+     * @return
+     */
     Result createArea(String areaName, Comparator<byte[]> comparator);
+
+    /**
+     * 弃用的方法
+     * Deprecated method
+     * @param areaName
+     * @param cacheSize 无效字段，LevelDB未实现/cacheSize hasn't been implemented by LevelDB in Java's version.
+     * @param comparator
+     * @return
+     */
+    @Deprecated
     Result createArea(String areaName, Long cacheSize, Comparator<byte[]> comparator);
 
     String[] listArea();
@@ -84,5 +113,7 @@ public interface DBService {
     <T> List<Entry<String, T>> entryList(String area, Class<T> clazz);
 
     <T> List<T> values(String area, Class<T> clazz);
+
+
 
 }
