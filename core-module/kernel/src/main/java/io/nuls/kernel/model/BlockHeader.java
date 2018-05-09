@@ -130,8 +130,12 @@ public class BlockHeader extends BaseNulsData {
     }
 
     public byte[] getPackingAddress() {
-        return AddressTool.getAddress(scriptSign);
+        if (null == packingAddress && this.scriptSign != null) {
+            this.packingAddress = AddressTool.getAddress(scriptSign.getPublicKey());
+        }
+        return packingAddress;
     }
+
 
     public byte[] getExtend() {
         return extend;
@@ -147,5 +151,9 @@ public class BlockHeader extends BaseNulsData {
 
     public void setSize(int size) {
         this.size = size;
+    }
+
+    public void setPackingAddress(byte[] packingAddress) {
+        this.packingAddress = packingAddress;
     }
 }
