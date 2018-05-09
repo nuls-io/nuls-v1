@@ -142,7 +142,7 @@ public interface AccountService {
      * @param account The account to be verified.
      * @return the result of the opration
      */
-    Result<Boolean> isEncrypted(Account account);
+    Result isEncrypted(Account account);
 
     /**
      * 根据账户的地址对象验证账户是否加密
@@ -151,7 +151,7 @@ public interface AccountService {
      * @param address The address object of the account to be verified.
      * @return the result of the opration
      */
-    Result<Boolean> isEncrypted(Address address);
+    Result isEncrypted(Address address);
 
     /**
      * 根据账户的地址字符串验证账户是否加密
@@ -160,7 +160,7 @@ public interface AccountService {
      * @param address The address string of the account to be verified.
      * @return the result of the opration
      */
-    Result<Boolean> isEncrypted(String address);
+    Result isEncrypted(String address);
 
     /**
      * 验证地址字符串的格式
