@@ -37,16 +37,7 @@ import io.nuls.protocol.constant.ProtocolConstant;
  */
 @Component
 public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
-    public static final BlockMaxSizeValidator INSTANCE = new BlockMaxSizeValidator();
-
     private static final String ERROR_MESSAGE = "The block is too big!";
-
-    private BlockMaxSizeValidator() {
-    }
-
-    public static BlockMaxSizeValidator getInstance() {
-        return INSTANCE;
-    }
 
     @Override
     public ValidateResult validate(Block data) {

@@ -24,7 +24,6 @@
  */
 package io.nuls.protocol.model.validator;
 
-import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.validate.NulsDataValidator;
@@ -37,25 +36,12 @@ import io.nuls.kernel.validate.ValidateResult;
 @Component
 public class HeaderSignValidator implements NulsDataValidator<BlockHeader> {
     private static final String ERROR_MESSAGE = "block header sign check failed";
-    public static final HeaderSignValidator INSTANCE = new HeaderSignValidator();
-
-    private HeaderSignValidator() {
-    }
-
-    public static HeaderSignValidator getInstance() {
-        return INSTANCE;
-    }
 
     @Override
     public ValidateResult validate(BlockHeader data) {
         if (data.getScriptSig() == null) {
             return ValidateResult.getFailedResult(this.getClass().getName(), ERROR_MESSAGE);
         }
-        ValidateResult verifyRsult = data.getScriptSig().verifySign(data.getHash());
-        boolean result = ECKey.verify(data.getHash().getDigestBytes(), data.getScriptSig().getSignData().getSignBytes(), data.getScriptSig().getPublicKey());
-        if (result) {
-            return ValidateResult.getSuccessResult();
-        }
-        return ValidateResult.getFailedResult(this.getClass().getName(), ERROR_MESSAGE);
+        return data.getScriptSig().verifySign(data.getHash());
     }
 }

@@ -36,16 +36,6 @@ import io.nuls.kernel.validate.ValidateResult;
  */
 @Component
 public class BlockHeaderValidator implements NulsDataValidator<Block> {
-
-    private static final BlockHeaderValidator INSTANCE = new BlockHeaderValidator();
-
-    private BlockHeaderValidator() {
-    }
-
-    public static BlockHeaderValidator getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public ValidateResult validate(Block data) {
         if (null == data || data.getHeader() == null) {

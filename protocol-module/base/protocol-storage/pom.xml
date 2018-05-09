@@ -20,7 +20,6 @@
             <scope>test</scope>
         </dependency>
 
-
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db</artifactId>
