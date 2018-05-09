@@ -22,7 +22,7 @@ import java.util.List;
  * @author: Charlie
  * @date: 2018/5/6
  */
-@Service
+//@Service
 public class MessageBusServiceImpl implements MessageBusService {
 
     @Autowired

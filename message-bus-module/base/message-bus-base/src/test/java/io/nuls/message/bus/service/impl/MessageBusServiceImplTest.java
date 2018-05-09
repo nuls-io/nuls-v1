@@ -60,7 +60,6 @@ public class MessageBusServiceImplTest {
     public void subscribeMessage() throws Exception {
         subscribe();
         assertNotNull(handlerId);
-
         Field field = messageBusService.getClass().getDeclaredField("processorManager");
         field.setAccessible(true);
         ProcessorManager processorManager = (ProcessorManager) field.get(messageBusService);
