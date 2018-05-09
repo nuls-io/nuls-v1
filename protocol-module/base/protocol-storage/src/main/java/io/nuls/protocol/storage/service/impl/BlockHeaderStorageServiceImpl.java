@@ -26,11 +26,9 @@
 package io.nuls.protocol.storage.service.impl;
 
 import io.nuls.core.tools.crypto.VarInt;
-import io.nuls.db.constant.DBConstant;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;

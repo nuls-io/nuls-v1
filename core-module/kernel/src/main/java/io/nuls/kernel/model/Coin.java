@@ -39,6 +39,8 @@ public class Coin extends BaseNulsData {
     @Tag(3)
     private long lockTime;
 
+    private transient Coin from;
+
     public Coin(byte[] owner, Na na, long lockTime) {
         this.owner = owner;
         this.na = na;
@@ -55,5 +57,13 @@ public class Coin extends BaseNulsData {
 
     public long getLockTime() {
         return lockTime;
+    }
+
+    public Coin getFrom() {
+        return from;
+    }
+
+    public void setFrom(Coin from) {
+        this.from = from;
     }
 }
