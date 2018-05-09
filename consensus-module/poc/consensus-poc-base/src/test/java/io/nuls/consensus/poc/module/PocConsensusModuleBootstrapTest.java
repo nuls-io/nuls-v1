@@ -26,18 +26,25 @@
 
 package io.nuls.consensus.poc.module;
 
+import io.nuls.consensus.poc.BaseTest;
 import io.nuls.consensus.poc.module.impl.PocConsensusModuleBootstrap;
+import io.nuls.kernel.MicroKernelBootstrap;
 import org.junit.Test;
 
 /**
  * Created by ln on 2018/5/7.
  */
-public class PocConsensusModuleBootstrapTest {
+public class PocConsensusModuleBootstrapTest extends BaseTest {
 
     private PocConsensusModuleBootstrap bootstrap = new PocConsensusModuleBootstrap();
 
     @Test
     public void testStartModule() throws Exception {
+
+        MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
+        mk.init();
+        mk.start();
+
         bootstrap.init();
         bootstrap.start();
     }

@@ -23,7 +23,7 @@
  *  * SOFTWARE.
  *
  */
-package io.nuls.consensus.poc.constant;
+package io.nuls.consensus.poc.config;
 
 import io.nuls.account.model.Address;
 import io.nuls.account.service.AccountService;
@@ -57,8 +57,6 @@ public final class GenesisBlock extends Block {
 
     private final static String GENESIS_BLOCK_FILE = "block/genesis-block.json";
 
-    public static final NulsDigestData ZONE_HASH = NulsDigestData.fromDigestHex("0000000000000000000000000000000000000000000000000000000000000000000000");
-
     private static final String CONFIG_FILED_TIME = "time";
     private static final String CONFIG_FILED_HEIGHT = "height";
     private static final String CONFIG_FILED_TXS = "txs";
@@ -70,9 +68,9 @@ public final class GenesisBlock extends Block {
 
     private static GenesisBlock INSTANCE = new GenesisBlock();
 
-    private long blockTime;
+    private transient long blockTime;
 
-    private int status = 0;
+    private transient int status = 0;
 
     public static GenesisBlock getInstance() throws Exception {
         if (INSTANCE.status == 0) {
@@ -153,7 +151,7 @@ public final class GenesisBlock extends Block {
         this.setHeader(header);
         header.setHeight(height);
         header.setTime(blockTime);
-        header.setPreHash(ZONE_HASH);
+        header.setPreHash(NulsDigestData.calcDigestData(new byte[35]));
         header.setTxCount(this.getTxs().size());
         List<NulsDigestData> txHashList = new ArrayList<>();
         for (Transaction tx : this.getTxs()) {

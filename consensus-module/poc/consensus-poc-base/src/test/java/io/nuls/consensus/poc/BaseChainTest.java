@@ -26,23 +26,20 @@
 
 package io.nuls.consensus.poc;
 
-import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.model.Account;
-import io.nuls.account.service.AccountService;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.entity.Agent;
 import io.nuls.consensus.entity.Deposit;
 import io.nuls.consensus.poc.container.ChainContainer;
-import io.nuls.consensus.poc.customer.ConsensusAccountServiceImpl;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.tx.JoinConsensusTransaction;
 import io.nuls.consensus.tx.RegisterAgentTransaction;
-import io.nuls.kernel.lite.core.SpringLiteContext;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;
-import org.junit.BeforeClass;
+import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.utils.AddressTool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,8 +88,8 @@ public class BaseChainTest extends BaseTest {
 
         Transaction<Agent> agentTx = new RegisterAgentTransaction();
         Agent agent = new Agent();
-        agent.setPackingAddress(new byte[22]);
-        agent.setAgentAddress(new byte[21]);
+        agent.setPackingAddress(AddressTool.getAddress(ecKey.getPubKey()));
+        agent.setAgentAddress(AddressTool.getAddress(ecKey.getPubKey()));
         agent.setTime(System.currentTimeMillis());
         agent.setDeposit(Na.NA.multiply(20000));
         agent.setAgentName("test".getBytes());
@@ -104,6 +101,15 @@ public class BaseChainTest extends BaseTest {
         agentTx.setTime(agent.getTime());
         agentTx.setBlockHeight(blockHeader.getHeight());
 
+        NulsSignData signData = null;
+        try {
+            signData = accountService.signData(agentTx.getHash().getDigestBytes(), ecKey);
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+
+        agentTx.setScriptSig(signData.getSignBytes());
+
         // add the agent tx into agent list
         agentList.add(agentTx);
 
@@ -112,7 +118,7 @@ public class BaseChainTest extends BaseTest {
 
         // new a deposit
         Deposit deposit = new Deposit();
-        deposit.setAddress(new byte[21]);
+        deposit.setAddress(AddressTool.getAddress(ecKey.getPubKey()));
         deposit.setAgentHash(agentTx.getHash());
         deposit.setTime(System.currentTimeMillis());
         deposit.setDeposit(Na.NA.multiply(200000));
@@ -143,7 +149,8 @@ public class BaseChainTest extends BaseTest {
         BlockHeader blockHeader = new BlockHeader();
         blockHeader.setHeight(preBlock.getHeader().getHeight() + 1);
         blockHeader.setPreHash(preBlock.getHeader().getHash());
-        blockHeader.setTxCount(0);
+        blockHeader.setTxCount(1);
+        blockHeader.setMerkleHash(NulsDigestData.calcDigestData(new byte[20]));
 
         MeetingRound currentRound = chainContainer.getOrResetCurrentRound(false);
         MeetingMember member = currentRound.getMember(1);
@@ -163,6 +170,24 @@ public class BaseChainTest extends BaseTest {
 
         List<Transaction> txs = new ArrayList<>();
         block.setTxs(txs);
+        txs.add(new TestTransaction());
+
+        List<NulsDigestData> txHashList = block.getTxHashList();
+
+        blockHeader.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
+
+        NulsSignData signData = null;
+        try {
+            signData = accountService.signData(blockHeader.getHash().getDigestBytes(), ecKey);
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+
+        P2PKHScriptSig sig = new P2PKHScriptSig();
+        sig.setSignData(signData);
+        sig.setPublicKey(ecKey.getPubKey());
+
+        blockHeader.setScriptSig(sig);
 
         return block;
     }

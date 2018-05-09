@@ -31,6 +31,7 @@ import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
+import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.kernel.model.Block;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +51,10 @@ public class BlockProcessTest extends BaseChainTest {
 
     @Before
     public void init() {
+        MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
+        mk.init();
+        mk.start();
+
         initChain();
         chainManager = new ChainManager();
         chainManager.setMasterChain(chainContainer);

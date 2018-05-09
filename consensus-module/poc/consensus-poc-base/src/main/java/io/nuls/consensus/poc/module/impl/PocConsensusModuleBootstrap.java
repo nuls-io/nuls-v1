@@ -26,14 +26,11 @@
 package io.nuls.consensus.poc.module.impl;
 
 import io.nuls.consensus.module.AbstractConsensusModule;
-import io.nuls.consensus.poc.constant.ConsensusConfig;
+import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.ModuleStatusEnum;
-import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.thread.BaseThread;
 import io.nuls.kernel.thread.manager.TaskManager;
-import io.nuls.protocol.service.TransactionService;
 
 import java.util.List;
 

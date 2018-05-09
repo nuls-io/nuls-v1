@@ -36,8 +36,8 @@ import java.math.BigInteger;
  */
 public class NulsSignData extends BaseNulsData {
 
-    public static short SIGN_ALG_ECC = (short) 0;
-    public static short SIGN_ALG_DEFAULT = NulsSignData.SIGN_ALG_ECC;
+    public static byte SIGN_ALG_ECC = (short) 0;
+    public static byte SIGN_ALG_DEFAULT = NulsSignData.SIGN_ALG_ECC;
     @Tag(1)
     protected byte signAlgType;
     @Tag(2)

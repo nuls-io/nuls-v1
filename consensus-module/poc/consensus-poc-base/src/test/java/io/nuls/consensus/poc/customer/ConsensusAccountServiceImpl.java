@@ -37,13 +37,13 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by ln on 2018/5/7.
  */
-@Component
 public class ConsensusAccountServiceImpl implements AccountService {
     @Override
     public Result<List<Account>> createAccount(int count, String password) {
@@ -136,8 +136,12 @@ public class ConsensusAccountServiceImpl implements AccountService {
     }
 
     @Override
-    public NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException {
-        return null;
+    public NulsSignData signData(byte[] digest, ECKey ecKey) throws NulsException {
+        byte[] signbytes = ecKey.sign(digest);
+        NulsSignData nulsSignData = new NulsSignData();
+        nulsSignData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);
+        nulsSignData.setSignBytes(signbytes);
+        return nulsSignData;
     }
 
     @Override

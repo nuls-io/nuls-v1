@@ -28,8 +28,10 @@ package io.nuls.consensus.poc.storage.impl;
 
 import io.nuls.consensus.poc.storage.OraphanStorageService;
 import io.nuls.db.service.DBService;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
@@ -38,16 +40,12 @@ import io.nuls.kernel.model.Result;
  * Created by ln on 2018/5/8.
  */
 @Component
-public class OraphanStorageServiceImpl implements OraphanStorageService {
+public class OraphanStorageServiceImpl implements OraphanStorageService , InitializingBean {
 
     private final String DB_NAME = "oraphan";
 
     @Autowired
     private DBService dbService;
-
-    public OraphanStorageServiceImpl() {
-        initDatabases();
-    }
 
     @Override
     public boolean save(Block block) {
@@ -80,7 +78,8 @@ public class OraphanStorageServiceImpl implements OraphanStorageService {
         return result.isSuccess();
     }
 
-    private void initDatabases() {
+    @Override
+    public void afterPropertiesSet() throws NulsException {
         dbService.createArea(DB_NAME);
     }
 }
