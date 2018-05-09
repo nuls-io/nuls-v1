@@ -44,6 +44,7 @@ public class JoinConsensusTransaction extends Transaction<Deposit> {
         // TODO
     }
 
+    @Override
     public JoinConsensusTransaction clone() {
         JoinConsensusTransaction tx = new JoinConsensusTransaction();
         tx.parse(serialize());
