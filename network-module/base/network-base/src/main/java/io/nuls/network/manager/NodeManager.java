@@ -452,6 +452,17 @@ public class NodeManager implements Runnable {
 
     @Override
     public void run() {
+        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+        while (running) {
+            Log.info("disConnectNodes:" + disConnectNodes.size());
+            Log.info("disConnectNodes:" + connectedNodes.size());
+            Log.info("handShakeNodes:" + handShakeNodes.size());
+            for (Node node : handShakeNodes.values()) {
+             Log.info(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
+            }
+
+
+        }
 
     }
 }

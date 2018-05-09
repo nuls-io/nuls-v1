@@ -10,6 +10,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.network.entity.Node;
+import io.nuls.network.manager.NodeManager;
 import io.nuls.network.service.NetworkService;
 
 import java.io.UnsupportedEncodingException;
@@ -20,6 +21,8 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Autowired
     private NetworkService networkService;
+    @Autowired
+    private NodeManager nodeManager;
 
     private AttributeKey<Node> key = AttributeKey.valueOf("node");
 
@@ -35,7 +38,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         String nodeId = node == null ? null : node.getId();
         Log.debug("---------------------- client channelRegistered -----------" + nodeId);
 
-        Map<String, Node> nodes = null;
+        Map<String, Node> nodes = nodeManager.getNodes();
         //Map<String, Node> nodes = getNetworkService().getNodes();
         // If a node with the same IP already in nodes, as a out node, can not add anymore
         for (Node n : nodes.values()) {

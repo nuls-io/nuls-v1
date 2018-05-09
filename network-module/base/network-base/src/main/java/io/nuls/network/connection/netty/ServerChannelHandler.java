@@ -143,14 +143,19 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
 //        Log.debug(" ---------------------- server channelRead ------------------------- " + nodeId);
         Node node = networkService.getNode(nodeId);
-        if (node != null && node.isAlive()) {
-            ByteBuf buf = (ByteBuf) msg;
-            byte[] bytes = new byte[buf.readableBytes()];
-            buf.readBytes(bytes);
-            buf.release();
-            ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
-            buffer.put(bytes);
+        if (node != null) {
+            if(node.isAlive()) {
+                ByteBuf buf = (ByteBuf) msg;
+                byte[] bytes = new byte[buf.readableBytes()];
+                buf.readBytes(bytes);
+                buf.release();
+                ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
+                buffer.put(bytes);
+            }
+
 //            getNetworkService().receiveMessage(buffer, node);
+        }else {
+            ctx.channel().close();
         }
     }
 

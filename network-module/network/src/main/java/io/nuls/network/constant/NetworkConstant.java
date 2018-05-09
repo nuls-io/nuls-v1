@@ -12,7 +12,7 @@ public interface NetworkConstant {
     int WRITE_IDEL_TIME_OUT = 30;
     int ALL_IDEL_TIME_OUT = 30;
     int MAX_FRAME_LENGTH = 10 * 1024 * 1024;
-
+    int CONNETCI_TIME_OUT = 5000;
     int SAME_IP_MAX_COUNT = 10;
     int CONEECT_FAIL_MAX_COUNT = 6;
 

@@ -205,9 +205,9 @@ public class DownloadProcessor extends Thread {
 
         for (Node node : nodeList) {
             System.out.println("--------------");
-            System.out.println(node.getId() + " : " + node.getBlockHeight() + " : " + node.getBlockHash());
+            System.out.println(node.getId() + " : " + node.getBestBlockHeight() + " : " + node.getBestBlockHash());
             System.out.println("--------------");
-            NulsDigestData hash = node.getBlockHash();
+            NulsDigestData hash = node.getBestBlockHash();
 
             Integer statistics = statisticsMaps.get(hash);
 
@@ -236,7 +236,7 @@ public class DownloadProcessor extends Thread {
             NulsDigestData hash = entry.getKey();
 
             List<Node> tempNodes = nodeMaps.get(hash);
-            long height = tempNodes.get(0).getBlockHeight();
+            long height = tempNodes.get(0).getBestBlockHeight();
 
             if (count > max || (count == max && bestHeight < height)) {
                 max = count;

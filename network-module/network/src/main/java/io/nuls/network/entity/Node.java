@@ -312,11 +312,11 @@ public class Node extends BaseNulsData {
         this.canConnect = canConnect;
     }
 
-    public long getBlockHeight() {
+    public long getBestBlockHeight() {
         return 0;
     }
 
-    public NulsDigestData getBlockHash() {
+    public NulsDigestData getBestBlockHash() {
         return null;
     }
 }
