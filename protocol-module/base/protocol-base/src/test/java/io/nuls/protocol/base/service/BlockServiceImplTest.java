@@ -25,15 +25,71 @@
 
 package io.nuls.protocol.base.service;
 
+import io.nuls.db.module.impl.LevelDbModuleBootstrap;
+import io.nuls.kernel.MicroKernelBootstrap;
+import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.ledger.module.impl.UtxoLedgerModuleBootstrap;
+import io.nuls.protocol.service.BlockService;
+import io.nuls.protocol.storage.po.BlockHeaderPo;
+import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author: Niels Wang
  * @date: 2018/5/8
  */
 public class BlockServiceImplTest {
+
+    private BlockService service;
+
+    @Before
+    private void init() {
+        MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
+        mk.init();
+        mk.start();
+
+        LevelDbModuleBootstrap bootstrap = new LevelDbModuleBootstrap();
+        bootstrap.init();
+        bootstrap.start();
+
+        UtxoLedgerModuleBootstrap ledgerModuleBootstrap = new UtxoLedgerModuleBootstrap();
+        ledgerModuleBootstrap.init();
+        ledgerModuleBootstrap.start();
+
+
+        service = NulsContext.getServiceBean(BlockService.class);
+        Block block = new Block();
+        BlockHeader blockHeader  = new BlockHeader();
+        blockHeader.setHash(NulsDigestData.calcDigestData("hashhash".getBytes()));
+        blockHeader.setHeight(1286L);
+        blockHeader.setExtend("extends".getBytes());
+        blockHeader.setMerkleHash(NulsDigestData.calcDigestData("merkleHash".getBytes()));
+        blockHeader.setPreHash(NulsDigestData.calcDigestData("prehash".getBytes()));
+        try {
+            blockHeader.setPackingAddress("address".getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+            assertTrue(false);
+        }
+        blockHeader.setScriptSig(new P2PKHScriptSig());
+        blockHeader.setTime(12345678901L);
+        blockHeader.setTxCount(3);
+        List<NulsDigestData> txHashList = new ArrayList<>();
+        txHashList.add(NulsDigestData.calcDigestData("first-tx-hash".getBytes()));
+        txHashList.add(NulsDigestData.calcDigestData("second-tx-hash".getBytes()));
+        txHashList.add(NulsDigestData.calcDigestData("third-tx-hash".getBytes()));
+//        block.setTxHashList(txHashList);
+//        this.entity = blockHeader;
+    }
 
     @Test
     public void getGengsisBlock() {
