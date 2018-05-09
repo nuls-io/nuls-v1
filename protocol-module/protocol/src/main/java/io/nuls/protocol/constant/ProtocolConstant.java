@@ -37,6 +37,12 @@ public interface ProtocolConstant extends NulsConstant {
     int ALIVE_MIN_NODE_COUNT = 2;
 
     /**
+     * 最大区块大小（不包含区块头）
+     * Maximum block size (excluding block headers)
+     */
+    long MAX_BLOCK_SIZE = 2 << 21;
+
+    /**
      * 协议模块的所有消息类型定义
      * All message type definitions for the protocol module.
      * =======================================================================
