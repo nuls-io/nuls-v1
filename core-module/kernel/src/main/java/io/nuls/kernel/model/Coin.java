@@ -66,4 +66,16 @@ public class Coin extends BaseNulsData {
     public void setFrom(Coin from) {
         this.from = from;
     }
+
+    public void setOwner(byte[] owner) {
+        this.owner = owner;
+    }
+
+    public void setNa(Na na) {
+        this.na = na;
+    }
+
+    public void setLockTime(long lockTime) {
+        this.lockTime = lockTime;
+    }
 }

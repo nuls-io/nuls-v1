@@ -29,7 +29,13 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
 import io.nuls.account.service.AccountService;
 import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.entity.Deposit;
+import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.model.BlockData;
+import io.nuls.consensus.poc.model.MeetingMember;
+import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.core.tools.calc.DoubleUtils;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -37,6 +43,7 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.SmallBlock;
+import io.nuls.protocol.model.tx.CoinBaseTransaction;
 
 import java.util.*;
 
@@ -102,6 +109,95 @@ public class ConsensusTool {
         header.setScriptSig(scriptSig);
 
         return block;
+    }
+
+    public static CoinBaseTransaction createCoinBaseTx(MeetingMember member, List<Transaction> txList, MeetingRound localRound, long unlockHeight) {
+        CoinData coinData = new CoinData();
+        List<Coin> rewardList = calcReward(txList, member, localRound, unlockHeight);
+        for(Coin coin : rewardList) {
+            coinData.addTo(coin);
+        }
+        CoinBaseTransaction tx = new CoinBaseTransaction();
+        tx.setTime(member.getPackEndTime());
+        tx.setCoinData(coinData);
+        tx.setHash(NulsDigestData.calcDigestData(tx));
+        return tx;
+    }
+
+    private static List<Coin> calcReward(List<Transaction> txList, MeetingMember self, MeetingRound localRound, long unlockHeight) {
+        List<Coin> rewardList = new ArrayList<>();
+        if (self.getOwnDeposit().getValue() == Na.ZERO.getValue()) {
+            long totalFee = 0;
+            for (Transaction tx : txList) {
+                totalFee += tx.getFee().getValue();
+            }
+            if (totalFee == 0L) {
+                return rewardList;
+            }
+            double caReward = totalFee;
+            Coin agentReword = new Coin(self.getAgentAddress(), Na.valueOf((long) caReward), unlockHeight);
+            rewardList.add(agentReword);
+            return rewardList;
+        }
+        long totalFee = 0;
+        for (Transaction tx : txList) {
+            totalFee += tx.getFee().getValue();
+        }
+        double totalAll = DoubleUtils.mul(localRound.getMemberCount(), PocConsensusConstant.BLOCK_REWARD.getValue());
+        double commissionRate = DoubleUtils.div(self.getCommissionRate(), 100, 2);
+        double agentWeight = DoubleUtils.mul( DoubleUtils.sum(self.getOwnDeposit().getValue() , self.getTotalDeposit().getValue()), self.getCalcCreditVal());
+        double blockReword = totalFee;
+        if (localRound.getTotalWeight() > 0d && agentWeight > 0d) {
+            blockReword = DoubleUtils.sum(blockReword, DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight())));
+        }
+
+        if (blockReword == 0d) {
+            return rewardList;
+        }
+
+        long realTotalAllDeposit = self.getOwnDeposit().getValue() + self.getTotalDeposit().getValue();
+        double caReward = DoubleUtils.mul(blockReword, DoubleUtils.div(self.getOwnDeposit().getValue(), realTotalAllDeposit));
+
+        for (Transaction<Deposit> tx : self.getDepositList()) {
+            Deposit deposit = tx.getTxData();
+            double weight = DoubleUtils.div(deposit.getDeposit().getValue(), realTotalAllDeposit);
+            if (Arrays.equals(deposit.getAddress(), self.getAgentAddress())) {
+                caReward = caReward + DoubleUtils.mul(blockReword, weight);
+            } else {
+                double reward = DoubleUtils.mul(blockReword, weight);
+                double fee = DoubleUtils.mul(reward, commissionRate);
+                caReward = caReward + fee;
+                double hisReward = DoubleUtils.sub(reward, fee);
+                Na depositReward = Na.valueOf(DoubleUtils.longValue(hisReward));
+
+                Coin rewardCoin = null;
+
+                for(Coin coin : rewardList) {
+                    if(Arrays.equals(coin.getOwner(), deposit.getAddress())) {
+                        rewardCoin = coin;
+                        break;
+                    }
+                }
+                if(rewardCoin == null) {
+                    rewardCoin = new Coin(deposit.getAddress(), depositReward, unlockHeight);
+                    rewardList.add(rewardCoin);
+                } else {
+                    rewardCoin.setNa(rewardCoin.getNa().add(depositReward));
+                }
+            }
+        }
+
+        rewardList.sort(new Comparator<Coin>() {
+            @Override
+            public int compare(Coin o1, Coin o2) {
+                return Arrays.hashCode(o1.getOwner()) > Arrays.hashCode(o2.getOwner()) ? 1 : -1;
+            }
+        });
+
+        Coin agentReword = new Coin(self.getAgentAddress(), Na.valueOf(DoubleUtils.longValue(caReward)), unlockHeight);
+        rewardList.add(0, agentReword);
+
+        return rewardList;
     }
 }
 

@@ -30,6 +30,7 @@ import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.poc.constant.ConsensusStatus;
+import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.manager.ChainManager;
@@ -52,6 +53,7 @@ import io.nuls.ledger.service.LedgerService;
 import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.SmallBlock;
+import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.service.BlockService;
 
 import java.io.IOException;
@@ -343,9 +345,9 @@ public class ConsensusProcess {
      * @param self      agent meeting data
      */
     private void addConsensusTx(Block bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
-//        punishTx(bestBlock, txList, self, round);
-//        CoinBaseTransaction coinBaseTransaction = ConsensusTool.createCoinBaseTx(self, txList, round, bestBlock.getHeader().getHeight() + 1 + PocConsensusConstant.COINBASE_UNLOCK_HEIGHT);
-//        txList.add(0, coinBaseTransaction);
+        CoinBaseTransaction coinBaseTransaction = ConsensusTool.createCoinBaseTx(self, txList, round, bestBlock.getHeader().getHeight() + 1 + PocConsensusConstant.COINBASE_UNLOCK_HEIGHT);
+        txList.add(0, coinBaseTransaction);
+        punishTx(bestBlock, txList, self, round);
     }
 
     private void punishTx(Block bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
