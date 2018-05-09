@@ -53,7 +53,7 @@ public class TransactionManager {
     private static void registerProcessor(TransactionProcessor processor) {
         Method[] methods = processor.getClass().getDeclaredMethods();
         for (Method method : methods) {
-            if (!method.getName().equals("onCommit")) {
+            if (!"onCommit".equals(method.getName())) {
                 continue;
             }
             Class paramType = method.getParameterTypes()[0];

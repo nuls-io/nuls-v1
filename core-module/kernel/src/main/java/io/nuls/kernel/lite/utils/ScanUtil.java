@@ -46,7 +46,7 @@ import java.util.jar.JarFile;
  * @date 2018/1/30
  */
 public class ScanUtil {
-    private static final ClassLoader classLoader = ScanUtil.class.getClassLoader();
+    private static final ClassLoader CLASS_LOADER = ScanUtil.class.getClassLoader();
 
     public static final String FILE_TYPE = "file";
     public static final String JAR_TYPE = "jar";
@@ -135,7 +135,7 @@ public class ScanUtil {
                 Class<?> clazz;
                 try {
                     String className = jarEntry.getName().replace("/", ".").replace(CLASS_TYPE, "");
-                    clazz = classLoader.loadClass(className);
+                    clazz = CLASS_LOADER.loadClass(className);
                 } catch (ClassNotFoundException e) {
                     continue;
                 }
@@ -169,7 +169,7 @@ public class ScanUtil {
             if (file.getName().endsWith(CLASS_TYPE)) {
                 Class<?> clazz;
                 try {
-                    clazz = classLoader.loadClass(packageName + "." + file.getName().replace(CLASS_TYPE, ""));
+                    clazz = CLASS_LOADER.loadClass(packageName + "." + file.getName().replace(CLASS_TYPE, ""));
                 } catch (ClassNotFoundException e) {
                     return false;
                 }
