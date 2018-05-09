@@ -28,13 +28,20 @@ package io.nuls.db.service;
 
 import io.nuls.db.entity.DBTestEntity;
 import io.nuls.db.manager.LevelDBManager;
+import io.nuls.db.model.Entry;
 import io.nuls.db.service.impl.LevelDBServiceImpl;
 import io.nuls.kernel.model.Result;
+import org.iq80.leveldb.WriteBatch;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+import java.util.Set;
+
 import static org.junit.Assert.*;
+import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 
 /**
  * Created by ln on 2018/5/6.
@@ -94,5 +101,33 @@ public class LevelDBServiceTest {
         }
 
         System.out.println("It takes " + (System.currentTimeMillis() - time) + " ms to randomly acquire " + getCount + " data");
+    }
+
+    @Test
+    public void testBatch() {
+        String area = "testBatch";
+        dbService.createArea("testBatch");
+        BatchOperation batch = dbService.createWriteBatch(area);
+        batch.put(bytes("Tampa"), bytes("green"));
+        batch.put(bytes("London"), bytes("red"));
+        batch.put(bytes("London1"), bytes("red1"));
+        batch.put(bytes("London2"), bytes("red2"));
+        batch.put(bytes("Qweqwe"), bytes("blue"));
+        batch.delete(bytes("Qweqwe"));
+        batch.delete(bytes("Qwe123qwe"));
+        batch.executeBatch();
+
+        List<Entry<String, byte[]>> entries = dbService.entryList(area);
+        entries.stream().forEach(entry -> {
+            System.out.print("[" + entry.getKey() + "=" + asString(entry.getValue())+ "], ");
+        });
+        System.out.println();
+
+        Assert.assertEquals("green", asString(dbService.get(area, "Tampa")));
+        Assert.assertEquals("red", asString(dbService.get(area, "London")));
+        Assert.assertEquals("red1", asString(dbService.get(area, "London1")));
+        Assert.assertEquals("red2", asString(dbService.get(area, "London2")));
+        Assert.assertNull(dbService.get(area, "Qweqwe"));
+        LevelDBManager.destroyArea(area);
     }
 }

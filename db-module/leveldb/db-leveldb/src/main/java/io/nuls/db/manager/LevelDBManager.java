@@ -29,6 +29,8 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.model.ModelWrapper;
+import io.nuls.db.service.BatchOperation;
+import io.nuls.db.service.impl.BatchOperationImpl;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Result;
@@ -247,6 +249,10 @@ public class LevelDBManager {
             result = new Result(false, "KV_AREA_CREATE_ERROR");
         }
         return result;
+    }
+
+    public static DB getArea(String areaName) {
+        return AREAS.get(areaName);
     }
 
     public static Result destroyArea(String areaName) {

@@ -114,6 +114,6 @@ public interface DBService {
 
     <T> List<T> values(String area, Class<T> clazz);
 
-
+    BatchOperation createWriteBatch(String area);
 
 }

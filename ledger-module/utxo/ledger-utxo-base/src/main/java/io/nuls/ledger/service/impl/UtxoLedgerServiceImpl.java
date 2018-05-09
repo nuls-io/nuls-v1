@@ -55,13 +55,14 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         // 保存coindata
         CoinData coinData = tx.getCoinData();
         List<Coin> froms = coinData.getFrom();
-
-
         for(Coin from : froms) {
 
         }
+
         List<Coin> tos = coinData.getTo();
-        tos.stream().forEach(to -> storageService.saveUtxo(to));
+        for(Coin to : tos) {
+
+        }
         // 保存交易
         Result result = storageService.saveTx(tx);
         if(result.isFailed()){
