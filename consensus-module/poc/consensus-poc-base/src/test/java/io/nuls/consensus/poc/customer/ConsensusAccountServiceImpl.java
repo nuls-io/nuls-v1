@@ -27,6 +27,7 @@
 package io.nuls.consensus.poc.customer;
 
 import io.nuls.account.model.Account;
+import io.nuls.account.model.AccountKeyStore;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
@@ -48,8 +49,52 @@ public class ConsensusAccountServiceImpl implements AccountService {
         return null;
     }
 
+    /**
+     * 创建指定个数的账户（包含地址）
+     * <p>
+     * Create a specified number of accounts (including addresses)
+     *
+     * @param password the password of the wallet;
+     * @return the result of the opration
+     */
+    @Override
+    public Result<List<Account>> createAccount(String password) {
+        // todo auto-generated method stub(Niels)
+        return null;
+    }
+
     @Override
     public Result<Boolean> removeAccount(String accountId, String password) {
+        return null;
+    }
+
+    /**
+     * 从keyStore导入账户
+     * <p>
+     * import an account form account key store.
+     *
+     * @param keyStore the keyStore of the account;
+     * @param password the password of the account key store;
+     * @return the result of the opration
+     */
+    @Override
+    public Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore, String password) {
+        // todo auto-generated method stub(Niels)
+        return null;
+    }
+
+    /**
+     * 导出账户到keyStore
+     * <p>
+     * export an account to an account key store.
+     *
+     * @param accountAddress the address of the account;
+     * @param password       the password of the account key store;
+     * @return the account key store object
+     */
+    @Override
+    public Result<AccountKeyStore> exportAccountToKeyStore(String accountAddress, String password) {
+        // todo auto-generated method stub(Niels)
         return null;
     }
 

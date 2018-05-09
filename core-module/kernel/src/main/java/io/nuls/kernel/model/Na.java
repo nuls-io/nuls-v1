@@ -25,6 +25,7 @@
 package io.nuls.kernel.model;
 
 
+import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 
@@ -46,7 +47,7 @@ public final class Na implements Comparable<Na>, Serializable {
     public static final long NA_VALUE = (long) Math.pow(10, SMALLEST_UNIT_EXPONENT);
 
     public static final long TOTAL_VALUE = 100000000L;
-    public static final long MAX_NA_VALUE = TOTAL_VALUE * ((long) Math.pow(10, SMALLEST_UNIT_EXPONENT));
+    public static final long MAX_NA_VALUE = LongUtils.mul(TOTAL_VALUE ,((long) Math.pow(10, SMALLEST_UNIT_EXPONENT)));
 
     /**
      * Total amount of token
@@ -125,7 +126,7 @@ public final class Na implements Comparable<Na>, Serializable {
     }
 
     public Na add(final Na value) {
-        return new Na(this.value + value.value);
+        return new Na(LongUtils.add(this.value , value.value));
     }
 
     /**
@@ -136,7 +137,7 @@ public final class Na implements Comparable<Na>, Serializable {
     }
 
     public Na subtract(final Na value) {
-        return new Na(this.value - value.value);
+        return new Na(LongUtils.sub(this.value , value.value));
     }
 
     /**
@@ -147,7 +148,7 @@ public final class Na implements Comparable<Na>, Serializable {
     }
 
     public Na multiply(final long factor) {
-        return new Na(this.value * factor);
+        return new Na(LongUtils.mul(this.value , factor));
     }
 
     /**
@@ -165,7 +166,7 @@ public final class Na implements Comparable<Na>, Serializable {
     }
 
     public Na divide(final long divisor) {
-        return new Na(this.value / divisor);
+        return new Na(LongUtils.div(this.value , divisor));
     }
 
     /**
@@ -183,11 +184,11 @@ public final class Na implements Comparable<Na>, Serializable {
     }
 
     public Na[] divideAndRemainder(final long divisor) {
-        return new Na[]{new Na(this.value / divisor), new Na(this.value % divisor)};
+        return new Na[]{new Na(LongUtils.div(this.value , divisor)), new Na(LongUtils.mod(this.value , divisor))};
     }
 
     public long divide(final Na divisor) {
-        return this.value / divisor.value;
+        return LongUtils.div(this.value , divisor.value);
     }
 
     /**
