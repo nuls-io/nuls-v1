@@ -30,7 +30,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<Boolean> removeAccount(String accountId, String password) {
+    public Result<Boolean> removeAccount(String address, String password) {
         return null;
     }
 
@@ -40,7 +40,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<AccountKeyStore> exportAccountToKeyStore(String accountAddress, String password) {
+    public Result<AccountKeyStore> exportAccountToKeyStore(String address, String password) {
         return null;
     }
 
