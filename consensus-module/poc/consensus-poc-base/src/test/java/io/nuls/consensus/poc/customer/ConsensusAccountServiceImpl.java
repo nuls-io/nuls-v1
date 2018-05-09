@@ -31,6 +31,7 @@ import io.nuls.account.model.AccountKeyStore;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.NulsSignData;
@@ -160,6 +161,20 @@ public class ConsensusAccountServiceImpl implements AccountService {
 
     @Override
     public NulsSignData signData(byte[] data, Account account) throws NulsException {
+        return null;
+    }
+
+    /**
+     * 数据签名(无密码)
+     * The data signature(no password)
+     *
+     * @param data  Data to be signed.
+     * @param ecKey eckey
+     * @return The NulsSignData object after the signature.
+     */
+    @Override
+    public NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException {
+        // todo auto-generated method stub(Niels)
         return null;
     }
 
