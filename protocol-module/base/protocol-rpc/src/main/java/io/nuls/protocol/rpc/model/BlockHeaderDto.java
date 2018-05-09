@@ -46,7 +46,7 @@ import java.util.List;
  * @date: 2018/5/9
  */
 @ApiModel(value = "blockJSON 区块信息(包含区块头信息, 交易信息), 只返回对应的部分数据")
-public class BlockDto {
+public class BlockHeaderDto {
 
     @ApiModelProperty(name = "hash", value = "区块的hash值")
     private String hash;
@@ -96,15 +96,10 @@ public class BlockDto {
     @ApiModelProperty(name = "size", value = "大小")
     private int size;
 
-    @ApiModelProperty(name = "txList", value = "transactionsJSON")
-    private List<TransactionDto> txList;
-
-    public BlockDto(Block block) {
-        this.size = block.size();
-        this.txList = new ArrayList<>();
+    public BlockHeaderDto(Block block) {
+        this.size = block.getHeader().size();
         Na fee = Na.ZERO;
         for (Transaction tx : block.getTxs()) {
-            this.txList.add(new TransactionDto(tx));
             fee.add(tx.getFee());
             if (tx.getType() == ProtocolConstant.TX_TYPE_COINBASE) {
                 setBlockReward(tx);
@@ -125,7 +120,7 @@ public class BlockDto {
         this.reward = rewardNa.getValue();
     }
 
-    public BlockDto(BlockHeader header) throws IOException {
+    public BlockHeaderDto(BlockHeader header) throws IOException {
         long bestBlockHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
         this.hash = header.getHash().getDigestHex();
         this.preHash = header.getPreHash().getDigestHex();
@@ -241,14 +236,6 @@ public class BlockDto {
 
     public void setPackingIndexOfRound(Integer packingIndexOfRound) {
         this.packingIndexOfRound = packingIndexOfRound;
-    }
-
-    public List<TransactionDto> getTxList() {
-        return txList;
-    }
-
-    public void setTxList(List<TransactionDto> txList) {
-        this.txList = txList;
     }
 
     public Long getReward() {

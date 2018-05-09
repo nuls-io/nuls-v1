@@ -22,21 +22,24 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.script;
 
+package io.nuls.kernel.lite.core.bean;
 
-import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.exception.NulsException;
 
 /**
- * author Facjas
- * date 2018/3/8.
+ * 初始化对象接口
+ * Initialize the object interface.
+ *
+ * @author: Niels Wang
+ * @date: 2018/5/9
  */
-public abstract class Script extends BaseNulsData {
+public interface InitializingBean {
 
-    protected transient long creationTimeSeconds;
+    /**
+     * 该方法在所有属性被设置之后调用，用于辅助对象初始化
+     * This method is invoked after all properties are set, and is used to assist object initialization.
+     */
+    void afterPropertiesSet() throws NulsException;
 
-    public static final long MAX_SCRIPT_ELEMENT_SIZE = 520;  // bytes
-    public static final int SIG_SIZE = 75;
-
-    abstract public byte[] getBytes();
 }

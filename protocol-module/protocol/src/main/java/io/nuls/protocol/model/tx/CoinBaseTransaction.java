@@ -22,21 +22,22 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.script;
+package io.nuls.protocol.model.tx;
 
-
-import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.model.Transaction;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 /**
- * author Facjas
- * date 2018/3/8.
+ * @author Niels
+ * @date 2017/12/4
  */
-public abstract class Script extends BaseNulsData {
+public class CoinBaseTransaction extends Transaction {
 
-    protected transient long creationTimeSeconds;
+    public CoinBaseTransaction() {
+        this(ProtocolConstant.TX_TYPE_COINBASE);
+    }
 
-    public static final long MAX_SCRIPT_ELEMENT_SIZE = 520;  // bytes
-    public static final int SIG_SIZE = 75;
-
-    abstract public byte[] getBytes();
+    protected CoinBaseTransaction(int type) {
+        super(type);
+    }
 }
