@@ -26,8 +26,57 @@
 
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.poc.BaseChainTest;
+import io.nuls.consensus.poc.constant.BlockContainerStatus;
+import io.nuls.consensus.poc.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.container.BlockContainer;
+import io.nuls.consensus.poc.container.ChainContainer;
+import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.consensus.poc.provider.OrphanBlockProvider;
+import io.nuls.kernel.model.Block;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.IOException;
+
+import static org.junit.Assert.*;
+
 /**
  * Created by ln on 2018/5/8.
  */
-public class OrphanBlockProcessTest {
+public class OrphanBlockProcessTest extends BaseChainTest {
+
+    private OrphanBlockProcess orphanBlockProcess;
+    private ChainManager chainManager;
+    private OrphanBlockProvider orphanBlockProvider;
+
+    @Before
+    public void init() {
+        initChain();
+        chainManager = new ChainManager();
+        chainManager.setMasterChain(new ChainContainer(chain));
+        orphanBlockProvider = new OrphanBlockProvider();
+        orphanBlockProcess = new OrphanBlockProcess(chainManager, orphanBlockProvider);
+    }
+
+    @Test
+    public void testProcess() throws IOException {
+        assertNotNull(orphanBlockProcess);
+
+        assertEquals(chainManager.getOrphanChains().size() , 0);
+
+        Block block = createBlock();
+        BlockContainer blockContainer = new BlockContainer(block, BlockContainerStatus.RECEIVED);
+        orphanBlockProcess.process(blockContainer);
+
+        assertEquals(chainManager.getOrphanChains().size() , 1);
+
+
+        block = createBlock();
+        block.getHeader().setHeight(block.getHeader().getHeight() + PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT + 1L);
+        blockContainer = new BlockContainer(block, BlockContainerStatus.RECEIVED);
+        orphanBlockProcess.process(blockContainer);
+
+        assertEquals(chainManager.getOrphanChains().size() , 1);
+    }
 }

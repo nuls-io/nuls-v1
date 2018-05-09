@@ -25,6 +25,7 @@
 package io.nuls.kernel.model;
 
 import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.utils.AddressTool;
 import io.protostuff.Tag;
 
 /**
@@ -49,9 +50,8 @@ public class BlockHeader extends BaseNulsData {
     @Tag(7)
     private byte[] extend;
 
-    private transient byte[] packingAddress;
-
     private transient int size;
+    private transient byte[] packingAddress;
 
     public BlockHeader() {
     }
@@ -130,11 +130,7 @@ public class BlockHeader extends BaseNulsData {
     }
 
     public byte[] getPackingAddress() {
-        return packingAddress;
-    }
-
-    public void setPackingAddress(byte[] packingAddress) {
-        this.packingAddress = packingAddress;
+        return AddressTool.getAddress(scriptSign);
     }
 
     public byte[] getExtend() {

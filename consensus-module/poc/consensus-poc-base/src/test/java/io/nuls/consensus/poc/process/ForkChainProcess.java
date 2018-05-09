@@ -26,8 +26,31 @@
 
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.poc.BaseChainTest;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 /**
  * Created by ln on 2018/5/8.
  */
-public class ForkChainProcess {
+public class ForkChainProcess extends BaseChainTest {
+
+    private ForkChainProcess forkChainProcess;
+
+    @Before
+    public void init() {
+
+        forkChainProcess = new ForkChainProcess();
+
+    }
+
+    @Test
+    public void testChangeChain() {
+
+        assertNotNull(forkChainProcess);
+
+    }
+
 }

@@ -31,6 +31,7 @@ import io.nuls.consensus.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.constant.PunishType;
 import io.nuls.consensus.entity.Agent;
 import io.nuls.consensus.entity.Deposit;
+import io.nuls.consensus.poc.constant.ConsensusConfig;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
@@ -269,17 +270,15 @@ public class RoundManager {
         List<MeetingMember> memberList = new ArrayList<>();
         double totalWeight = 0;
 
-        //TODO
+        for (byte[] address : ConsensusConfig.getSeedNodeList()) {
+            MeetingMember member = new MeetingMember();
+            member.setAgentAddress(address);
+            member.setPackingAddress(address);
+            member.setCreditVal(1);
+            member.setRoundStartTime(round.getStartTime());
 
-//        for (String address : ConsensusContext.getSeedNodeList()) {
-//            MeetingMember member = new MeetingMember();
-//            member.setAgentAddress(address);
-//            member.setPackingAddress(address);
-//            member.setCreditVal(1);
-//            member.setRoundStartTime(round.getStartTime());
-//
-//            memberList.add(member);
-//        }
+            memberList.add(member);
+        }
 
         // TODO removeSmallBlock the test code in future
         List<Transaction<Deposit>> depositTempList = new ArrayList<>();
