@@ -8,5 +8,4 @@ import io.nuls.kernel.constant.NulsConstant;
  */
 public interface AccountConstant extends NulsConstant {
 
-    short CHAIN_ID = 0;
 }

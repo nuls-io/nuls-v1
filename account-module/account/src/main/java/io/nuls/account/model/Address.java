@@ -25,13 +25,13 @@
 
 package io.nuls.account.model;
 
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.crypto.Utils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.protostuff.Tag;
 
@@ -53,15 +53,24 @@ public class Address {
     /**
      * chain id
      */
-    @Tag(1)
-    private short chainId = AccountConstant.CHAIN_ID;
+
+    private short chainId = NulsContext.DEFAULT_CHAIN_ID;
 
     /**
      * hash160 of public key
      */
-    @Tag(2)
     protected byte[] hash160;
 
+    /**
+     *
+     * @param address bytes
+     */
+    @Tag(1)
+    protected byte[] base58Bytes;
+
+    /**
+     * @param address
+     */
     public Address(String address) {
         try {
             byte[] bytes = Base58.decode(address);
@@ -69,6 +78,7 @@ public class Address {
             Address addressTmp = Address.fromHashs(bytes);
             this.chainId = addressTmp.getChainId();
             this.hash160 = addressTmp.getHash160();
+            this.base58Bytes = calcBase58bytes();
         } catch (Exception e) {
             Log.error(e);
         }
@@ -77,6 +87,7 @@ public class Address {
     public Address(short chainId, byte[] hash160) {
         this.chainId = chainId;
         this.hash160 = hash160;
+        this.base58Bytes = calcBase58bytes();
     }
 
     public byte[] getHash160() {
@@ -92,7 +103,7 @@ public class Address {
         return chainId;
     }
     public String getBase58() {
-        return Base58.encode(getHash());
+        return Base58.encode(calcBase58bytes());
     }
 
     public static Address fromHashs(String address) throws Exception {
@@ -110,11 +121,11 @@ public class Address {
         System.arraycopy(hashs, 2, content, 0, LENGTH);
 
         Address address = new Address(chainId, content);
-        checkXOR(address.getHash());
+        checkXOR(address.calcBase58bytes());
         return address;
     }
 
-    public byte[] getHash() {
+    public byte[] calcBase58bytes() {
         byte[] body = new byte[22];
         System.arraycopy(Utils.shortToBytes(chainId), 0, body, 0, 2);
         System.arraycopy(hash160, 0, body, 2, hash160.length);
@@ -175,6 +186,14 @@ public class Address {
     }
 
     public String hashHex() {
-        return Hex.encode(getHash());
+        return Hex.encode(calcBase58bytes());
+    }
+
+    public byte[] getBase58Bytes() {
+        return base58Bytes;
+    }
+
+    public void setBase58Bytes(byte[] base58Bytes) {
+        this.base58Bytes = base58Bytes;
     }
 }
