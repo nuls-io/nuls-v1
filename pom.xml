@@ -18,6 +18,7 @@
     </properties>
     <modules>
         <module>account-module</module>
+        <module>account-ledger-module</module>
         <module>core-module</module>
         <module>protocol-module</module>
         <module>consensus-module</module>

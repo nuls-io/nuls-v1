@@ -10,17 +10,22 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>account-module</artifactId>
+    <artifactId>account-ledger-module</artifactId>
     <packaging>pom</packaging>
     <version>2.0.0</version>
     <modules>
-        <module>account</module>
-        <module>base/account-storage</module>
-        <module>base/account-rpc</module>
-        <module>base/account-sdk</module>
-        <module>base/account-base</module>
+        <module>account-ledger</module>
+        <module>base/account-ledger-storage</module>
+        <module>base/account-ledger-rpc</module>
+        <module>base/account-ledger-sdk</module>
+        <module>base/account-ledger-base</module>
     </modules>
     <dependencies>
+        <dependency>
+            <groupId>io.nuls.account-module</groupId>
+            <artifactId>account</artifactId>
+            <version>2.0.0</version>
+        </dependency>
         <dependency>
             <groupId>io.nuls.tools-module</groupId>
             <artifactId>tools</artifactId>
