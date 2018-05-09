@@ -26,14 +26,10 @@
 
 package io.nuls.consensus.poc.container;
 
-import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.entity.Agent;
 import io.nuls.consensus.entity.Deposit;
 import io.nuls.consensus.poc.BaseChainTest;
-import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
-import io.nuls.consensus.poc.model.MeetingMember;
-import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.tx.JoinConsensusTransaction;
 import io.nuls.consensus.tx.RegisterAgentTransaction;
 import io.nuls.kernel.model.Block;
@@ -43,7 +39,6 @@ import io.nuls.kernel.model.Transaction;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -52,8 +47,6 @@ import static org.junit.Assert.*;
  * Created by ln on 2018/5/7.
  */
 public class ChainContainerTest extends BaseChainTest {
-
-    private ChainContainer chainContainer;
 
     @Before
     public void initData() {
@@ -261,36 +254,5 @@ public class ChainContainerTest extends BaseChainTest {
 
     }
 
-    protected Block newBlock(Block preBlock) {
 
-        assertNotNull(preBlock);
-        assertNotNull(preBlock.getHeader());
-
-        BlockHeader blockHeader = new BlockHeader();
-        blockHeader.setHeight(preBlock.getHeader().getHeight() + 1);
-        blockHeader.setPreHash(preBlock.getHeader().getHash());
-        blockHeader.setTxCount(0);
-
-        MeetingRound currentRound = chainContainer.getOrResetCurrentRound(false);
-        MeetingMember member = currentRound.getMember(1);
-        blockHeader.setPackingAddress(member.getPackingAddress());
-        blockHeader.setTime(member.getPackEndTime() + ConsensusConstant.BLOCK_TIME_INTERVAL_MILLIS * currentRound.getMemberCount());
-
-        // add a round data
-        BlockRoundData roundData = new BlockRoundData(preBlock.getHeader().getExtend());
-        roundData.setConsensusMemberCount(currentRound.getMemberCount());
-        roundData.setPackingIndexOfRound(1);
-        roundData.setRoundIndex(currentRound.getIndex() + 1);
-        roundData.setRoundStartTime(currentRound.getEndTime());
-        blockHeader.setExtend(roundData.serialize());
-
-        // new a block of height 0
-        Block block = new Block();
-        block.setHeader(blockHeader);
-
-        List<Transaction> txs = new ArrayList<>();
-        block.setTxs(txs);
-
-        return block;
-    }
 }

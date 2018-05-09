@@ -28,6 +28,7 @@ package io.nuls.kernel.model;
 
 import io.protostuff.Tag;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,6 +40,11 @@ public class CoinData extends BaseNulsData {
     private List<Coin> from;
     @Tag(2)
     private List<Coin> to;
+
+    public CoinData() {
+        from = new ArrayList<>();
+        to = new ArrayList<>();
+    }
 
     public List<Coin> getFrom() {
         return from;
@@ -72,5 +78,13 @@ public class CoinData extends BaseNulsData {
             fromNa.add(coin.getNa());
         }
         return fromNa.subtract(toNa);
+    }
+
+    public void addTo(Coin coin) {
+        to.add(coin);
+    }
+
+    public void addFrom(Coin coin) {
+        from.add(coin);
     }
 }

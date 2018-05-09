@@ -26,10 +26,59 @@
 
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.poc.BaseChainTest;
+import io.nuls.consensus.poc.constant.BlockContainerStatus;
+import io.nuls.consensus.poc.container.BlockContainer;
+import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.consensus.poc.provider.OrphanBlockProvider;
+import io.nuls.kernel.model.Block;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.IOException;
+
+import static org.junit.Assert.*;
+
 /**
  * Created by ln on 2018/5/8.
  */
-public class BlockProcessTest {
+public class BlockProcessTest extends BaseChainTest {
 
+    private BlockProcess blockProcess;
+    private ChainManager chainManager;
+    private OrphanBlockProvider orphanBlockProvider;
 
+    @Before
+    public void init() {
+        initChain();
+        chainManager = new ChainManager();
+        chainManager.setMasterChain(chainContainer);
+        orphanBlockProvider = new OrphanBlockProvider();
+        blockProcess = new BlockProcess(chainManager, orphanBlockProvider);
+    }
+
+    @Test
+    public void testAddBlock() throws IOException {
+
+        assertNotNull(orphanBlockProvider);
+        assertNotNull(blockProcess);
+
+        assertEquals(orphanBlockProvider.size(), 0);
+
+        Block block = createBlock();
+        BlockContainer blockContainer = new BlockContainer(block, BlockContainerStatus.RECEIVED);
+
+        boolean success = blockProcess.addBlock(blockContainer);
+        assertFalse(success);
+
+        assertEquals(orphanBlockProvider.size(), 1);
+
+        Block bestBlock = chainManager.getBestBlock();
+        Block newBlock = newBlock(bestBlock);
+
+        success = blockProcess.addBlock(new BlockContainer(newBlock, BlockContainerStatus.RECEIVED));
+        assertTrue(success);
+
+        assertEquals(chainManager.getMasterChain().getChain().getBlockList().size(), 2);
+    }
 }

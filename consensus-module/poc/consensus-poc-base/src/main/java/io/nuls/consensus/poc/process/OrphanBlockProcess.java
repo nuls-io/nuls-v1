@@ -55,7 +55,6 @@ public class OrphanBlockProcess implements Runnable {
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
 
     private ChainManager chainManager;
-    private BlockProcess blockProcess;
     private OrphanBlockProvider orphanBlockProvider;
 
     private boolean running = true;

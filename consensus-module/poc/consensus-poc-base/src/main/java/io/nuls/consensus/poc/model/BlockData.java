@@ -23,22 +23,61 @@
  *  * SOFTWARE.
  *
  */
+package io.nuls.consensus.poc.model;
 
-package io.nuls.consensus.poc.module;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Transaction;
 
-import io.nuls.consensus.poc.module.impl.PocConsensusModuleBootstrap;
-import org.junit.Test;
+import java.util.List;
 
 /**
- * Created by ln on 2018/5/7.
+ * @author Niels
+ * @date 2017/12/26
  */
-public class PocConsensusModuleBootstrapTest {
+public class BlockData {
+    private long height;
+    private NulsDigestData preHash;
+    private List<Transaction> txList;
+    private BlockRoundData roundData;
+    private long time;
 
-    private PocConsensusModuleBootstrap bootstrap = new PocConsensusModuleBootstrap();
+    public long getHeight() {
+        return height;
+    }
 
-    @Test
-    public void testStartModule() throws Exception {
-        bootstrap.init();
-        bootstrap.start();
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public NulsDigestData getPreHash() {
+        return preHash;
+    }
+
+    public void setPreHash(NulsDigestData preHash) {
+        this.preHash = preHash;
+    }
+
+    public List<Transaction> getTxList() {
+        return txList;
+    }
+
+    public void setTxList(List<Transaction> txList) {
+        this.txList = txList;
+    }
+
+    public BlockRoundData getRoundData() {
+        return roundData;
+    }
+
+    public void setRoundData(BlockRoundData roundData) {
+        this.roundData = roundData;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 }

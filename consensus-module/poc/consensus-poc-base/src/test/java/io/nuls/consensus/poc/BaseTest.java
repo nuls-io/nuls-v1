@@ -30,12 +30,14 @@ import io.nuls.account.service.AccountService;
 import io.nuls.consensus.poc.customer.ConsensusAccountServiceImpl;
 import io.nuls.consensus.poc.customer.ConsensusBlockServiceImpl;
 import io.nuls.consensus.poc.customer.ConsensusDownloadServiceImpl;
+import io.nuls.consensus.poc.customer.ConsensusNetworkService;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.DownloadService;
 import org.junit.BeforeClass;
@@ -63,6 +65,11 @@ public class BaseTest {
             SpringLiteContext.getBean(AccountService.class);
         } catch (Exception e) {
             SpringLiteContext.putBean(ConsensusAccountServiceImpl.class, false);
+        }
+        try {
+            SpringLiteContext.getBean(NetworkService.class);
+        } catch (Exception e) {
+            SpringLiteContext.putBean(ConsensusNetworkService.class, false);
         }
     }
 

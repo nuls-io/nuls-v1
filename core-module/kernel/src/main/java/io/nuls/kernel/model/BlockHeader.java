@@ -50,9 +50,8 @@ public class BlockHeader extends BaseNulsData {
     @Tag(7)
     private byte[] extend;
 
-    private transient byte[] packingAddress;
-
     private transient int size;
+    private transient byte[] packingAddress;
 
     public BlockHeader() {
     }
