@@ -48,5 +48,4 @@ public interface MessageBusConstant extends NulsConstant {
      * The message type is the message to get the message body
      */
     short MSG_TYPE_GET_MSG_BODY_MSG = 2;
-
 }

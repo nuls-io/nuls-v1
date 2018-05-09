@@ -103,15 +103,15 @@ public interface KernelErrorCode {
     /*
      * ----------  Consensus Exception code   --------
      */
-    ErrorCode CS_UNKOWN_EXCEPTION = ErrorCode.init("CS000", 60000);
-    ErrorCode TIME_OUT = ErrorCode.init("CS001", 60001);
-    ErrorCode DEPOSIT_ERROR = ErrorCode.init("CS002", 60002);
-    ErrorCode DEPOSIT_NOT_ENOUGH = ErrorCode.init("CS003", 60003);
-    ErrorCode CONSENSUS_EXCEPTION = ErrorCode.init("CS004", 60004);
-    ErrorCode COMMISSION_RATE_OUT_OF_RANGE = ErrorCode.init("cs005", 60005);
-    ErrorCode LACK_OF_CREDIT = ErrorCode.init("cs006", 60006);
-    ErrorCode DEPOSIT_OVER_COUNT = ErrorCode.init("cs007", 60007);
-    ErrorCode DEPOSIT_TOO_MUCH = ErrorCode.init("cs008", 60008);
+    ErrorCode CS_UNKOWN_EXCEPTION = ErrorCode.init("CS000", 70000);
+    ErrorCode TIME_OUT = ErrorCode.init("CS001", 70001);
+    ErrorCode DEPOSIT_ERROR = ErrorCode.init("CS002", 70002);
+    ErrorCode DEPOSIT_NOT_ENOUGH = ErrorCode.init("CS003", 70003);
+    ErrorCode CONSENSUS_EXCEPTION = ErrorCode.init("CS004", 70004);
+    ErrorCode COMMISSION_RATE_OUT_OF_RANGE = ErrorCode.init("cs005", 70005);
+    ErrorCode LACK_OF_CREDIT = ErrorCode.init("cs006", 70006);
+    ErrorCode DEPOSIT_OVER_COUNT = ErrorCode.init("cs007", 70007);
+    ErrorCode DEPOSIT_TOO_MUCH = ErrorCode.init("cs008", 70008);
 
     /*
      * validator

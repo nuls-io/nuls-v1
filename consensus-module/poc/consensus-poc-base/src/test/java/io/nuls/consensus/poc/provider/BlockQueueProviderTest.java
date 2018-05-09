@@ -79,6 +79,10 @@ public class BlockQueueProviderTest extends BaseTest {
 
         assertEquals(0, blockQueueProvider.size());
 
+        if(downloadService.isDownloadSuccess().isSuccess()) {
+            downloadService.setDownloadSuccess(false);
+        }
+
         Block block = new Block();
         boolean result = blockQueueProvider.put(new BlockContainer(block, BlockContainerStatus.RECEIVED));
         assertTrue(result);

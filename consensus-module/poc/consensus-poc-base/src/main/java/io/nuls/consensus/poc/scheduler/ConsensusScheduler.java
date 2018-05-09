@@ -32,6 +32,7 @@ import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.process.BlockProcess;
 import io.nuls.consensus.poc.process.ConsensusProcess;
 import io.nuls.consensus.poc.process.ForkChainProcess;
+import io.nuls.consensus.poc.process.OrphanBlockProcess;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.consensus.poc.task.BlockProcessTask;
 import io.nuls.consensus.poc.task.ConsensusProcessTask;
@@ -53,6 +54,8 @@ public class ConsensusScheduler {
 
     private ScheduledThreadPoolExecutor threadPool;
 
+    private OrphanBlockProcess orphanBlockProcess;
+
     private ConsensusScheduler() {
     }
 
@@ -71,11 +74,14 @@ public class ConsensusScheduler {
         BlockProcess blockProcess = new BlockProcess(chainManager, orphanBlockProvider);
         threadPool.scheduleAtFixedRate(new BlockProcessTask(blockProcess), 1000L,100L, TimeUnit.MILLISECONDS);
 
-        ForkChainProcess forkChainProcess = new ForkChainProcess(chainManager, orphanBlockProvider);
+        ForkChainProcess forkChainProcess = new ForkChainProcess(chainManager);
         threadPool.scheduleAtFixedRate(new ForkChainProcessTask(forkChainProcess), 1000L,1000L, TimeUnit.MILLISECONDS);
 
         ConsensusProcess consensusProcess = new ConsensusProcess(chainManager);
         threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L,1000L, TimeUnit.MILLISECONDS);
+
+        orphanBlockProcess = new OrphanBlockProcess(chainManager, orphanBlockProvider);
+        orphanBlockProcess.start();
 
         PocConsensusContext.setChainManager(chainManager);
 
@@ -95,6 +101,8 @@ public class ConsensusScheduler {
     public boolean stop() {
 
         clear();
+
+        orphanBlockProcess.stop();
         threadPool.shutdown();
 
         return true;

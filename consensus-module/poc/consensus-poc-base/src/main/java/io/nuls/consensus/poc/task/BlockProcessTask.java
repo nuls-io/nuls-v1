@@ -71,9 +71,8 @@ public class BlockProcessTask implements Runnable {
             return;
         }
 
-        BlockContainer blockContainer = null;
+        BlockContainer blockContainer;
         while((blockContainer = blockQueueProvider.get()) != null) {
-
             try {
                 blockProcess.addBlock(blockContainer);
             } catch (IOException e) {

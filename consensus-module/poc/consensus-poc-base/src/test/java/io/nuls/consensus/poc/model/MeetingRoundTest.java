@@ -40,7 +40,7 @@ import static org.junit.Assert.*;
  */
 public class MeetingRoundTest {
 
-    long roundStartTime = System.currentTimeMillis();
+    private long roundStartTime = System.currentTimeMillis();
 
     @Test
     public void test() {

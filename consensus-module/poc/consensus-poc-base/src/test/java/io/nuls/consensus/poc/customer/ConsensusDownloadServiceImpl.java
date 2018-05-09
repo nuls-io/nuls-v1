@@ -43,17 +43,7 @@ public class ConsensusDownloadServiceImpl implements DownloadService {
     private boolean isDownloadSuccess;
 
     @Override
-    public Result<Block> downloadBlock(NulsDigestData hash) {
-        return null;
-    }
-
-    @Override
     public Result<Block> downloadBlock(NulsDigestData hash, Node node) {
-        return null;
-    }
-
-    @Override
-    public Result<TxGroup> downloadTxGroup(List<NulsDigestData> txHashList) {
         return null;
     }
 

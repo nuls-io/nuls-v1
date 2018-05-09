@@ -32,11 +32,11 @@ import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
+import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.po.PunishLogPo;
-import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
@@ -60,29 +60,17 @@ import java.util.List;
 public class ForkChainProcess {
 
     private ChainManager chainManager;
-    private OrphanBlockProvider orphanBlockProvider;
 
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
     private long time = 0L;
     private long lastClearTime = 0L;
 
-    public ForkChainProcess(ChainManager chainManager, OrphanBlockProvider orphanBlockProvider) {
+    public ForkChainProcess(ChainManager chainManager) {
         this.chainManager = chainManager;
-        this.orphanBlockProvider = orphanBlockProvider;
     }
 
-    public void doProcess() {
-        try {
-            processForkChain();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (NulsException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public boolean processForkChain() throws IOException, NulsException {
+    public boolean doProcess() throws IOException, NulsException {
 
         if(ConsensusStatusContext.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
             return false;
@@ -90,9 +78,9 @@ public class ForkChainProcess {
 
         printChainStatusLog();
 
-        // Monitor the status of the isolated chain, if it is available, join the verification chain
+        // Monitor the status of the orphan chain, if it is available, join the verification chain
         // 监控孤立链的状态，如果有可连接的，则加入验证链里面
-        monitorIsolatedChains();
+        monitorOrphanChains();
 
         long newestBlockHeight = chainManager.getBestBlockHeight() + PocConsensusConstant.CHANGE_CHAIN_BLOCK_DIFF_COUNT;
 
@@ -124,18 +112,20 @@ public class ForkChainProcess {
                 chainManager.getChains().remove(newChain);
             } else {
                 //Verify pass, try to switch chain
-                //验证通过，尝试切换链
-                boolean success = changeChain(resultChain, newChain);
-                if(success) {
-                    chainManager.getChains().remove(newChain);
+                Lockers.CHAIN_LOCK.lock();
+                try {
+                    //验证通过，尝试切换链
+                    boolean success = changeChain(resultChain, newChain);
+                    if (success) {
+                        chainManager.getChains().remove(newChain);
+                    }
+                    ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", newChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
+                } finally {
+                    Lockers.CHAIN_LOCK.unlock();
                 }
-
-                ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", newChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
-
             }
         }
 
-        //clear
         clearExpiredChain();
 
         return true;
@@ -176,10 +166,10 @@ public class ForkChainProcess {
             sb.append("\n");
         }
 
-        List<ChainContainer> iss = chainManager.getIsolatedChains();
+        List<ChainContainer> iss = chainManager.getOrphanChains();
 
         if(iss != null && iss.size() > 0) {
-            sb.append("isolated chains : \n");
+            sb.append("orphan chains : \n");
             for(ChainContainer chain : iss) {
                 sb.append(getChainStatus(chain));
             }
@@ -234,26 +224,26 @@ public class ForkChainProcess {
     }
 
     /**
-     * Monitor the isolated chain, if there is a connection with the main chain or the forked chain, the merged chain
+     * Monitor the orphan chain, if there is a connection with the main chain or the forked chain, the merged chain
      *
      * 监控孤立链，如果有和主链或者分叉链连上的情况，则合并链
      */
-    private void monitorIsolatedChains() {
-        List<ChainContainer> isolatedChains = chainManager.getIsolatedChains();
+    private void monitorOrphanChains() {
+        List<ChainContainer> orphanChains = chainManager.getOrphanChains();
 
-        Iterator<ChainContainer> iterator = isolatedChains.iterator();
+        Iterator<ChainContainer> iterator = orphanChains.iterator();
         while(iterator.hasNext()) {
-            ChainContainer isolatedChain = iterator.next();
-            if(checkIsolatedChainHasConnection(isolatedChain)) {
+            ChainContainer orphanChain = iterator.next();
+            if(checkOrphanChainHasConnection(orphanChain)) {
                 iterator.remove();
             }
         }
     }
 
-    private boolean checkIsolatedChainHasConnection(ChainContainer isolatedChain) {
-        // Determine whether the isolated chain is connected to the main chain
+    private boolean checkOrphanChainHasConnection(ChainContainer orphanChain) {
+        // Determine whether the orphan chain is connected to the main chain
         // 判断该孤立链是否和主链相连
-        BlockHeader startBlockHeader = isolatedChain.getChain().getStartBlockHeader();
+        BlockHeader startBlockHeader = orphanChain.getChain().getStartBlockHeader();
 
         List<BlockHeader> blockHeaderList = chainManager.getMasterChain().getChain().getBlockHeaderList();
 
@@ -262,11 +252,11 @@ public class ForkChainProcess {
             BlockHeader header = blockHeaderList.get(i);
             if(startBlockHeader.getPreHash().equals(header.getHash()) && startBlockHeader.getHeight() == header.getHeight() + 1) {
                 //yes connectioned
-                isolatedChain.getChain().setPreChainId(chainManager.getMasterChain().getChain().getId());
+                orphanChain.getChain().setPreChainId(chainManager.getMasterChain().getChain().getId());
 
-                chainManager.getChains().add(isolatedChain);
+                chainManager.getChains().add(orphanChain);
 
-                ChainLog.debug("discover the IsolatedChain {} : start {} - {} , end {} - {} , connection the master chain of {} - {} - {}, move into the fork chians", isolatedChain.getChain().getId(), startBlockHeader.getHeight(), startBlockHeader.getHash().getDigestHex(), isolatedChain.getChain().getEndBlockHeader().getHeight(), isolatedChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getMasterChain().getChain().getBestBlock().getHeader().getHeight(), chainManager.getMasterChain().getChain().getBestBlock().getHeader().getHash());
+                ChainLog.debug("discover the OrphanChain {} : start {} - {} , end {} - {} , connection the master chain of {} - {} - {}, move into the fork chians", orphanChain.getChain().getId(), startBlockHeader.getHeight(), startBlockHeader.getHash().getDigestHex(), orphanChain.getChain().getEndBlockHeader().getHeight(), orphanChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getMasterChain().getChain().getBestBlock().getHeader().getHeight(), chainManager.getMasterChain().getChain().getBestBlock().getHeader().getHash());
 
                 return true;
             } else if(startBlockHeader.getHeight() > header.getHeight()) {
@@ -280,7 +270,7 @@ public class ForkChainProcess {
 
             Chain chain = forkChain.getChain();
 
-            if(startBlockHeader.getHeight() > chain.getEndBlockHeader().getHeight() + 1 || startBlockHeader.getHeight() <= chain.getEndBlockHeader().getHeight()) {
+            if(startBlockHeader.getHeight() > chain.getEndBlockHeader().getHeight() + 1 || startBlockHeader.getHeight() <= chain.getStartBlockHeader().getHeight()) {
                 continue;
             }
 
@@ -290,19 +280,19 @@ public class ForkChainProcess {
                 BlockHeader header = blockHeaderList.get(i);
                 if(startBlockHeader.getPreHash().equals(header.getHash()) && startBlockHeader.getHeight() == header.getHeight() + 1) {
                     //yes connectioned
-                    isolatedChain.getChain().setPreChainId(chain.getPreChainId());
-                    isolatedChain.getChain().setStartBlockHeader(chain.getStartBlockHeader());
+                    orphanChain.getChain().setPreChainId(chain.getPreChainId());
+                    orphanChain.getChain().setStartBlockHeader(chain.getStartBlockHeader());
 
-                    isolatedChain.getChain().getBlockHeaderList().addAll(0, blockHeaderList.subList(0, i + 1));
-                    isolatedChain.getChain().getBlockList().addAll(0, chain.getBlockList().subList(0, i + 1));
+                    orphanChain.getChain().getBlockHeaderList().addAll(0, blockHeaderList.subList(0, i + 1));
+                    orphanChain.getChain().getBlockList().addAll(0, chain.getBlockList().subList(0, i + 1));
 
-                    chainManager.getChains().add(isolatedChain);
+                    chainManager.getChains().add(orphanChain);
 
                     if(i == blockHeaderList.size() - 1) {
                         chainManager.getChains().remove(forkChain);
                     }
 
-                    ChainLog.debug("discover the IsolatedChain {} : start {} - {} , end {} - {} , connection the fork chain of : start {} - {} , end {} - {}, move into the fork chians", isolatedChain.getChain().getId(), startBlockHeader.getHeight(), startBlockHeader.getHash().getDigestHex(), isolatedChain.getChain().getEndBlockHeader().getHeight(), isolatedChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chain.getStartBlockHeader().getHeight(), chain.getStartBlockHeader().getHash(), chain.getEndBlockHeader().getHeight(), chain.getEndBlockHeader().getHash());
+                    ChainLog.debug("discover the OrphanChain {} : start {} - {} , end {} - {} , connection the fork chain of : start {} - {} , end {} - {}, move into the fork chians", orphanChain.getChain().getId(), startBlockHeader.getHeight(), startBlockHeader.getHash().getDigestHex(), orphanChain.getChain().getEndBlockHeader().getHeight(), orphanChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chain.getStartBlockHeader().getHeight(), chain.getStartBlockHeader().getHash(), chain.getEndBlockHeader().getHeight(), chain.getEndBlockHeader().getHash());
 
                     return true;
                 } else if(startBlockHeader.getHeight() == header.getHeight() + 1) {
@@ -311,15 +301,15 @@ public class ForkChainProcess {
             }
         }
 
-        // Determine whether the isolated chains are connected
+        // Determine whether the orphan chains are connected
         // 判断孤立链之间是否相连
-        for(ChainContainer iso : chainManager.getIsolatedChains()) {
-            if(iso.getChain().getEndBlockHeader().getHash().equals(isolatedChain.getChain().getStartBlockHeader().getPreHash()) &&
-                    iso.getChain().getEndBlockHeader().getHeight() + 1 == isolatedChain.getChain().getStartBlockHeader().getHeight()) {
-                Chain chain = iso.getChain();
-                chain.setEndBlockHeader(isolatedChain.getChain().getEndBlockHeader());
-                chain.getBlockHeaderList().addAll(isolatedChain.getChain().getBlockHeaderList());
-                chain.getBlockList().addAll(isolatedChain.getChain().getBlockList());
+        for(ChainContainer orphan : chainManager.getOrphanChains()) {
+            if(orphan.getChain().getEndBlockHeader().getHash().equals(orphanChain.getChain().getStartBlockHeader().getPreHash()) &&
+                    orphan.getChain().getEndBlockHeader().getHeight() + 1 == orphanChain.getChain().getStartBlockHeader().getHeight()) {
+                Chain chain = orphan.getChain();
+                chain.setEndBlockHeader(orphanChain.getChain().getEndBlockHeader());
+                chain.getBlockHeaderList().addAll(orphanChain.getChain().getBlockHeaderList());
+                chain.getBlockList().addAll(orphanChain.getChain().getBlockList());
                 return true;
             }
         }
@@ -384,34 +374,12 @@ public class ForkChainProcess {
         //需要降序排列
         Collections.reverse(rollbackBlockList);
 
-        List<Block> rollbackList = new ArrayList<>();
-
-        for(Block rollbackBlock : rollbackBlockList) {
-            try {
-                boolean success = blockService.rollbackBlock(rollbackBlock).isSuccess();
-                if(success) {
-                    rollbackList.add(rollbackBlock);
-                }
-            } catch (Exception e) {
-                Collections.reverse(rollbackList);
-                for(Block block : rollbackList) {
-                    try {
-                        blockService.saveBlock(block);
-                    } catch (Exception ex) {
-                        Log.error("Rollback failed, failed to save block during recovery", ex);
-                        break;
-                    }
-
-                }
-                Log.error("Rollback failed during switch chain, skip this chain", e);
-                return false;
-            }
+        boolean rollbackResult = rollbackBlocks(rollbackBlockList);
+        if(!rollbackResult) {
+            return false;
         }
 
-        ChainLog.debug("rollback complete, success count is {} , now storage best block : {} - {}", rollbackList.size(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
-
         //add new block
-
         List<Block> addBlockList = originalForkChain.getChain().getBlockList();
 
         boolean changeSuccess = true;
@@ -464,39 +432,80 @@ public class ForkChainProcess {
         return changeSuccess;
     }
 
-    private void clearExpiredChain() {
+    private boolean rollbackBlocks(List<Block> rollbackBlockList) {
 
+        List<Block> rollbackList = new ArrayList<>();
+        for(Block rollbackBlock : rollbackBlockList) {
+            try {
+                boolean success = blockService.rollbackBlock(rollbackBlock).isSuccess();
+                if(success) {
+                    rollbackList.add(rollbackBlock);
+                } else {
+                    for(Block block : rollbackList) {
+                        try {
+                            blockService.saveBlock(block);
+                        } catch (Exception ex) {
+                            Log.error("Rollback failed, failed to save block during recovery", ex);
+                            break;
+                        }
+                    }
+                    Log.error("Rollback block height : " + rollbackBlock.getHeader().getHeight() + " hash : " + rollbackBlock.getHeader().getHash() + " failed, change chain failed !");
+                    return false;
+                }
+            } catch (Exception e) {
+                Collections.reverse(rollbackList);
+                for(Block block : rollbackList) {
+                    try {
+                        blockService.saveBlock(block);
+                    } catch (Exception ex) {
+                        Log.error("Rollback failed, failed to save block during recovery", ex);
+                        break;
+                    }
+                }
+                Log.error("Rollback failed during switch chain, skip this chain", e);
+                return false;
+            }
+        }
+
+        ChainLog.debug("rollback complete, success count is {} , now storage best block : {} - {}", rollbackList.size(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
+        return true;
+    }
+
+    protected void clearExpiredChain() {
         if(TimeService.currentTimeMillis() - lastClearTime < PocConsensusConstant.CLEAR_INTERVAL_TIME) {
             return;
         }
         lastClearTime = TimeService.currentTimeMillis();
+        Lockers.CHAIN_LOCK.lock();
+        try {
+            //clear the master data
+            clearMasterDatas();
 
-        //clear the master data
-        clearMasterDatas();
+            //clear the expired chain
+            long bestHeight = chainManager.getBestBlockHeight();
 
-        //clear the expired chain
-        long bestHeight = chainManager.getBestBlockHeight();
-
-        Iterator<ChainContainer> it = chainManager.getChains().iterator();
-        while(it.hasNext()) {
-            ChainContainer chain = it.next();
-            if(checkChainIsExpired(chain, bestHeight)) {
-                it.remove();
+            Iterator<ChainContainer> it = chainManager.getChains().iterator();
+            while(it.hasNext()) {
+                ChainContainer chain = it.next();
+                if(checkChainIsExpired(chain, bestHeight)) {
+                    it.remove();
+                }
             }
-        }
 
-        it = chainManager.getIsolatedChains().iterator();
-        while(it.hasNext()) {
-            ChainContainer isolatedChain = it.next();
-            if(checkChainIsExpired(isolatedChain, bestHeight)) {
-                it.remove();
+            it = chainManager.getOrphanChains().iterator();
+            while(it.hasNext()) {
+                ChainContainer orphanChain = it.next();
+                if(checkChainIsExpired(orphanChain, bestHeight)) {
+                    it.remove();
+                }
             }
+        } finally {
+            Lockers.CHAIN_LOCK.unlock();
         }
-
     }
 
-    private boolean checkChainIsExpired(ChainContainer isolatedChain, long bestHeight) {
-        if(bestHeight - isolatedChain.getChain().getEndBlockHeader().getHeight() > PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT) {
+    private boolean checkChainIsExpired(ChainContainer orphanChain, long bestHeight) {
+        if(bestHeight - orphanChain.getChain().getEndBlockHeader().getHeight() > PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT) {
             return true;
         }
         return false;
@@ -555,4 +564,6 @@ public class ForkChainProcess {
     private void clearMasterChainRound() {
         chainManager.getMasterChain().clearRound(PocConsensusConstant.CLEAR_MASTER_CHAIN_ROUND_COUNT);
     }
+
+
 }

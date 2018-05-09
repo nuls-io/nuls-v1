@@ -32,6 +32,7 @@ import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
+import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
@@ -106,7 +107,14 @@ public class BlockProcess {
 
         // Verify that the block round information is correct, if correct, join the main chain
         // 验证区块轮次信息是否正确、如果正确，则加入主链
-        if(chainManager.getMasterChain().verifyAndAddBlock(block, isDownload)) {
+        boolean verifyAndAddBlockResult = false;
+        Lockers.CHAIN_LOCK.lock();
+        try {
+            verifyAndAddBlockResult = chainManager.getMasterChain().verifyAndAddBlock(block, isDownload);
+        } finally {
+            Lockers.CHAIN_LOCK.unlock();
+        }
+        if(verifyAndAddBlockResult) {
             boolean success = false;
             try {
                 // Verify that the block transaction is valid, save the block if the verification passes, and discard the block if it fails
@@ -142,7 +150,12 @@ public class BlockProcess {
                 forwardingBlock(blockContainer);
                 return true;
             } else {
-                chainManager.getMasterChain().rollback(block);
+                Lockers.CHAIN_LOCK.lock();
+                try {
+                    chainManager.getMasterChain().rollback(block);
+                } finally {
+                    Lockers.CHAIN_LOCK.unlock();
+                }
                 NulsContext.getInstance().setBestBlock(chainManager.getBestBlock());
 
                 Log.error("save block fail : " + block.getHeader().getHeight() + " , isDownload : " + isDownload);

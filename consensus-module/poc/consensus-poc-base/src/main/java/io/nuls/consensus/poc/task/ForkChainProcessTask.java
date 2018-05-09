@@ -28,6 +28,9 @@ package io.nuls.consensus.poc.task;
 
 import io.nuls.consensus.poc.process.ForkChainProcess;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.exception.NulsException;
+
+import java.io.IOException;
 
 /**
  * Created by ln on 2018/5/8.
@@ -49,7 +52,7 @@ public class ForkChainProcessTask implements Runnable {
         }
     }
 
-    private void doTask() {
+    private void doTask() throws IOException, NulsException {
         forkChainProcess.doProcess();
     }
 }

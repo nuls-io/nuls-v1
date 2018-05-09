@@ -1,10 +1,10 @@
 package io.nuls.message.bus.service.impl;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
+import io.nuls.message.bus.constant.MessageBusErrorCode;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.message.CommonDigestMessage;
 import io.nuls.message.bus.processor.manager.ProcessData;
@@ -82,7 +82,7 @@ public class MessageBusServiceImpl implements MessageBusService {
     private Result<List<String>> getNodeIdListResult(BroadcastResult result) {
         List<String> list = new ArrayList<>();
         if (!result.isSuccess() || result.getBroadcastNodes() == null || result.getBroadcastNodes().isEmpty()) {
-            return new Result(false, KernelErrorCode.FAILED, list);
+            return new Result(false, MessageBusErrorCode.FAILED, list);
         }
         for (Node node : result.getBroadcastNodes()) {
             list.add(node.getId());

@@ -49,7 +49,7 @@ public class ConsensusTool {
             if (tx.getType() == ProtocolConstant.TX_TYPE_COINBASE ||
                     tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH ||
                     tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
-                smallBlock.addConsensusTx(tx);
+                smallBlock.addBaseTx(tx);
             }
         }
         smallBlock.setTxHashList(txHashList);

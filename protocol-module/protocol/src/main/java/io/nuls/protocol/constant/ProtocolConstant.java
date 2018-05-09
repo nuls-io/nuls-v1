@@ -24,7 +24,17 @@ public interface ProtocolConstant extends NulsConstant {
      */
     long BLOCK_TIME_INTERVAL_MILLIS = BLOCK_TIME_INTERVAL_SECOND * 1000L;
 
+    /**
+     * 协议模块节点id
+     * module id of the protocol module
+     */
     short MODULE_ID_PROTOCOL = 2;
+
+    /**
+     * 系统运行的最小连接节点数量
+     * The number of minimum connection nodes that the system runs.
+     */
+    int ALIVE_MIN_NODE_COUNT = 2;
 
     /**
      * 协议模块的所有消息类型定义

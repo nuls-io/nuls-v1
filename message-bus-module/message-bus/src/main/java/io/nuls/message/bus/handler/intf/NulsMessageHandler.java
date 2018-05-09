@@ -28,5 +28,5 @@ public interface NulsMessageHandler<T extends BaseMessage> {
      */
     NulsMessageFilterChain getFilterChian();
 
-    void onMessage(T message, Node formNode) throws NulsException;
+    void onMessage(T message, Node fromNode) throws NulsException;
 }

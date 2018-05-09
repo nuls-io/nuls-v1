@@ -33,7 +33,6 @@ import org.junit.Test;
  */
 public class MeetingMemberTest {
 
-
     @Test
     public void testSort() {
         MeetingMember member = new MeetingMember();

@@ -44,7 +44,7 @@ public interface BlockService {
      * 获取创世块（从存储中）
      * Get the creation block (from storage)
      */
-    Result<Block> getGengsisBlock();
+    Result<Block>  getGengsisBlock();
 
     /**
      * 获取最新的区块（从存储中）

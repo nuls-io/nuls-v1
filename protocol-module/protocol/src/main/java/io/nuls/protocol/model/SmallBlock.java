@@ -99,7 +99,7 @@ public class SmallBlock extends BaseNulsData {
         return subTxList;
     }
 
-    public void addConsensusTx(Transaction tx) {
+    public void addBaseTx(Transaction tx) {
         this.subTxList.add(tx);
     }
 

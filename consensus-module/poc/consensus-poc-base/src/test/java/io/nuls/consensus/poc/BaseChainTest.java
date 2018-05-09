@@ -50,15 +50,6 @@ public class BaseChainTest extends BaseTest {
 
     protected Chain chain;
 
-    @BeforeClass
-    public static void init() {
-        try {
-            AccountService accountService = SpringLiteContext.getBean(AccountService.class);
-        } catch (Exception e) {
-            SpringLiteContext.putBean(ConsensusAccountServiceImpl.class, false);
-        }
-    }
-
     protected void initChain() {
         chain = new Chain();
 

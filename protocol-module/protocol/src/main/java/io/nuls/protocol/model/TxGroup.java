@@ -25,6 +25,7 @@
 package io.nuls.protocol.model;
 
 import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 import io.protostuff.Tag;
 
@@ -40,18 +41,21 @@ import java.util.Map;
  * @date 2018/1/3
  */
 public class TxGroup extends BaseNulsData {
+
     /**
      * 应答的交易列表
      * transaction list for response
      */
     @Tag(1)
+    private NulsDigestData requestHash;
+    @Tag(2)
     private List<Transaction> txList;
 
     /**
      * 交易整理到hashmap中
      * The transaction is sorted into a hashmap.
      */
-    private transient Map<String, Transaction> txMap;
+    private transient Map<NulsDigestData, Transaction> txMap;
 
     /**
      * 交易整理到hashmap中
@@ -63,7 +67,7 @@ public class TxGroup extends BaseNulsData {
         }
         this.txMap = new HashMap<>();
         for (Transaction tx : txList) {
-            txMap.put(tx.getHash().getDigestHex(), tx);
+            txMap.put(tx.getHash(), tx);
         }
     }
 
@@ -80,18 +84,26 @@ public class TxGroup extends BaseNulsData {
         initTxMap();
     }
 
-    public Transaction getTx(String digestHex) {
-        return txMap.get(digestHex);
+    public Transaction getTx(NulsDigestData hash) {
+        return txMap.get(hash);
     }
 
     /**
      * 交易整理的hashmap
      * The transaction is sorted into a hashmap.
      */
-    public Map<String, Transaction> getTxMap() {
+    public Map<NulsDigestData, Transaction> getTxMap() {
         if (null == txMap) {
             initTxMap();
         }
         return txMap;
+    }
+
+    public NulsDigestData getRequestHash() {
+        return requestHash;
+    }
+
+    public void setRequestHash(NulsDigestData requestHash) {
+        this.requestHash = requestHash;
     }
 }
