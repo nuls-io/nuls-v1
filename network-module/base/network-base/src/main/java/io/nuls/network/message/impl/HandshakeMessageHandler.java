@@ -19,8 +19,7 @@ import io.nuls.network.protocol.message.NetworkMessageBody;
 
 public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 
-    @Autowired
-    private NodeManager nodeManager;
+    private NodeManager nodeManager = NodeManager.getInstance();
 
     private NetworkParam networkParam = NetworkParam.getInstance();
 

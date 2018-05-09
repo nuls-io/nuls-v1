@@ -10,6 +10,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.network.entity.Node;
+import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.NodeManager;
 import io.nuls.network.service.NetworkService;
 
@@ -19,10 +20,7 @@ import java.util.Map;
 
 public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
-    @Autowired
-    private NetworkService networkService;
-    @Autowired
-    private NodeManager nodeManager;
+    private NodeManager nodeManager = NodeManager.getInstance();
 
     private AttributeKey<Node> key = AttributeKey.valueOf("node");
 
@@ -85,11 +83,11 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
-        Node node = networkService.getNode(nodeId);
+        Node node = nodeManager.getNode(nodeId);
         if (node != null) {
             if (node.getChannelId() == null || channelId.equals(node.getChannelId())) {
 //                System.out.println(  "---------------client channelInactive remove node----------------" + nodeId);
-                networkService.removeNode(node.getId());
+                nodeManager.removeNode(node.getId());
             } else {
                 Log.debug("---------------- client channelId different----------------" + channelId + "," + node.getChannelId());
             }
@@ -101,7 +99,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
 //        Log.debug(" ---------------------- client channelRead ---------------------- " + nodeId);
-        Node node = networkService.getNode(nodeId);
+        Node node = nodeManager.getNode(nodeId);
         if (node != null && node.isAlive()) {
             ByteBuf buf = (ByteBuf) msg;
             byte[] bytes = new byte[buf.readableBytes()];

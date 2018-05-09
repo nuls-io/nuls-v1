@@ -27,8 +27,7 @@ public class NettyClient {
 
     private Node node;
 
-    @Autowired
-    private NodeManager nodeManager;
+    private NodeManager nodeManager = NodeManager.getInstance();
 
     public NettyClient(Node node) {
         this.node = node;

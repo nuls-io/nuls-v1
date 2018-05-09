@@ -23,15 +23,24 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
 public class ConnectionManager {
+
+    private static ConnectionManager instance = new ConnectionManager();
+
+    private ConnectionManager() {
+    }
+
+    public static ConnectionManager getInstance() {
+        return instance;
+    }
 
     private NetworkParam network = NetworkParam.getInstance();
 
     private NettyServer nettyServer;
 
-    @Autowired
-    private NetworkService networkService;
+    private NodeManager nodeManager = NodeManager.getInstance();
+
+    private BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
 
     private NetworkMessageHandlerFactory messageHandlerFactory = NetworkMessageHandlerFactory.getInstance();
 
@@ -102,7 +111,7 @@ public class ConnectionManager {
                 } else {
                     node.setStatus(Node.BAD);
 //                    System.out.println("-------------------- receive message filter remove node ---------------------------");
-                    networkService.removeNode(node.getId());
+                    nodeManager.removeNode(node.getId());
                 }
             }
         } catch (Exception e) {
@@ -167,7 +176,7 @@ public class ConnectionManager {
             return;
         }
         if (eventResult.getReplyMessage() != null) {
-            networkService.sendToNode(eventResult.getReplyMessage(), node, true);
+            broadcastHandler.broadcastToNode((BaseMessage) eventResult.getReplyMessage(), node, true);
         }
     }
 

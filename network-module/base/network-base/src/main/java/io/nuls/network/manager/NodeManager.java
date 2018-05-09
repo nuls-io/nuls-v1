@@ -4,6 +4,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.thread.manager.TaskManager;
@@ -19,8 +20,16 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-@Component
 public class NodeManager implements Runnable {
+
+    private static NodeManager instance = new NodeManager();
+
+    private NodeManager() {
+    }
+
+    public static NodeManager getInstance() {
+        return instance;
+    }
 
     private NetworkParam networkParam = NetworkParam.getInstance();
 
@@ -39,14 +48,11 @@ public class NodeManager implements Runnable {
 
     private boolean running = false;
 
-    @Autowired
     private NetworkStorage networkStorage;
 
-    @Autowired
-    private ConnectionManager connectionManager;
+    private ConnectionManager connectionManager = ConnectionManager.getInstance();
 
-    @Autowired
-    private NodeDiscoverHandler nodeDiscoverHandler;
+    private NodeDiscoverHandler nodeDiscoverHandler = NodeDiscoverHandler.getInstance();
 
     /**
      * 初始化主动连接节点组合(outGroup)被动连接节点组(inGroup)
@@ -64,7 +70,7 @@ public class NodeManager implements Runnable {
      * 同时开启获取对方最新信息的线程
      */
     public void start() {
-        List<Node> nodeList = networkStorage.getLocalNodeList(20);
+        List<Node> nodeList = getNetworkStorage().getLocalNodeList(20);
         nodeList.addAll(getSeedNodes());
         for (Node node : nodeList) {
             addNode(node);
@@ -216,7 +222,7 @@ public class NodeManager implements Runnable {
             removeNode(node);
         } else {
 //            Log.info("------------remove node is null-----------" + nodeId);
-            networkStorage.deleteNode(node);
+            getNetworkStorage().deleteNode(node);
             nodeIdSet.remove(nodeId);
         }
     }
@@ -228,7 +234,7 @@ public class NodeManager implements Runnable {
         } else {
 //            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
             nodeIdSet.remove(node.getId());
-            networkStorage.deleteNode(node);
+            getNetworkStorage().deleteNode(node);
         }
     }
 
@@ -263,7 +269,7 @@ public class NodeManager implements Runnable {
             connectedNodes.remove(node.getId());
             handShakeNodes.remove(node.getId());
             if (node.getStatus() == Node.BAD) {
-                networkStorage.deleteNode(node);
+                getNetworkStorage().deleteNode(node);
             }
             return;
         }
@@ -277,7 +283,7 @@ public class NodeManager implements Runnable {
         //超出最大连接尝试次数，则直接删除
         if (node.getFailCount() >= NetworkConstant.CONEECT_FAIL_MAX_COUNT) {
             disConnectNodes.remove(node.getId());
-            networkStorage.deleteNode(node);
+            getNetworkStorage().deleteNode(node);
             //node.setLastFailTime(TimeService.currentTimeMillis() + 10 * 1000 * node.getFailCount());
         }
     }
@@ -295,7 +301,7 @@ public class NodeManager implements Runnable {
     public void saveNode(Node node) {
 //        NodePo po = NodeTransferTool.toPojo(node);
 //        getNodeDao().saveChange(po);
-        networkStorage.saveNode(node);
+        getNetworkStorage().saveNode(node);
     }
 
     public void deleteNode(String nodeId) {
@@ -317,7 +323,7 @@ public class NodeManager implements Runnable {
         for (Node node : getNodes().values()) {
             ipSet.add(node.getIp());
         }
-        List<Node> nodes = networkStorage.getLocalNodeList(size, ipSet);
+        List<Node> nodes = getNetworkStorage().getLocalNodeList(size, ipSet);
         for (Node node : nodes) {
             addNode(node);
         }
@@ -472,5 +478,12 @@ public class NodeManager implements Runnable {
                 }
             }
         }
+    }
+
+    private NetworkStorage getNetworkStorage() {
+        if (networkStorage == null) {
+            networkStorage = NulsContext.getServiceBean(NetworkStorage.class);
+        }
+        return networkStorage;
     }
 }
