@@ -25,7 +25,6 @@
 
 package io.nuls.account.model;
 
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.crypto.Utils;
@@ -67,7 +66,7 @@ public class Address {
      * @param address bytes
      */
     @Tag(1)
-    protected byte[] base58bytes;
+    protected byte[] base58Bytes;
 
     /**
      * @param address
@@ -79,7 +78,7 @@ public class Address {
             Address addressTmp = Address.fromHashs(bytes);
             this.chainId = addressTmp.getChainId();
             this.hash160 = addressTmp.getHash160();
-            this.base58bytes = calcBase58bytes();
+            this.base58Bytes = calcBase58bytes();
         } catch (Exception e) {
             Log.error(e);
         }
@@ -88,7 +87,7 @@ public class Address {
     public Address(short chainId, byte[] hash160) {
         this.chainId = chainId;
         this.hash160 = hash160;
-        this.base58bytes = calcBase58bytes();
+        this.base58Bytes = calcBase58bytes();
     }
 
     public byte[] getHash160() {
@@ -188,5 +187,13 @@ public class Address {
 
     public String hashHex() {
         return Hex.encode(calcBase58bytes());
+    }
+
+    public byte[] getBase58Bytes() {
+        return base58Bytes;
+    }
+
+    public void setBase58Bytes(byte[] base58Bytes) {
+        this.base58Bytes = base58Bytes;
     }
 }
