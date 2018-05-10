@@ -22,31 +22,28 @@
  * SOFTWARE.
  *
  */
-package io.nuls.accountLedger.storage.service;
 
-import io.nuls.accountLedger.model.TransactionInfo;
-import io.nuls.accountLedger.storage.po.TransactionInfoPo;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
+package io.nuls.accountLedger.constant;
+
+import io.nuls.kernel.constant.ErrorCode;
 
 /**
- * author Facjas
- * date 2018/5/10.
+ * @author: Niels Wang
+ * @date: 2018/5/5
  */
-public interface AccountLedgerStorageService {
+public interface AccountLedgerErrorCode {
 
-    Result saveLocalTx(Transaction tx);
-
-    Result saveLocalTxInfo(TransactionInfoPo tx);
-
-    Result deleteLocalTxInfo(TransactionInfoPo tx);
-
-    Transaction getLocalTx(NulsDigestData hash);
-
-    Result deleteLocalTx(Transaction tx);
-
-    byte[] getCoinBytes(byte[] owner);
-
-    byte[] getTxBytes(byte[] txBytes);
+    ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("AL000", 50000);
+    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("AL001", 50001);
+    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED = ErrorCode.init("AL002", 50002);
+    ErrorCode ACCOUNT_EXIST = ErrorCode.init("AL003", 50003);
+    ErrorCode ADDRESS_ERROR = ErrorCode.init("AL004", 50004);
+    ErrorCode ALIAS_EXIST = ErrorCode.init("AL005", 50005);
+    ErrorCode ALIAS_ERROR = ErrorCode.init("AL006", 50006);
+    ErrorCode ACCOUNT_ALREADY_SET_ALIAS = ErrorCode.init("AL007", 50007);
+    ErrorCode NULL_PARAMETER = ErrorCode.init("AL008", 50008);
+    ErrorCode DATA_PARSE_ERROR = ErrorCode.init("AL009", 50009);
+    ErrorCode SUCCESS = ErrorCode.init("AL010", 50010);
+    ErrorCode FAILED = ErrorCode.init("AL011", 50011);
+    ErrorCode PARAMETER_ERROR = ErrorCode.init("AL012", 50012);
 }

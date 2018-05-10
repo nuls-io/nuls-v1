@@ -24,12 +24,110 @@
  */
 package io.nuls.accountLedger.storage.service.impl;
 
+import io.nuls.accountLedger.storage.constant.AccountLedgerStorageConstant;
+import io.nuls.accountLedger.storage.po.TransactionInfoPo;
 import io.nuls.accountLedger.storage.service.AccountLedgerStorageService;
+import io.nuls.core.tools.crypto.VarInt;
+import io.nuls.db.service.BatchOperation;
+import io.nuls.db.service.DBService;
+import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.model.*;
+import org.spongycastle.util.Arrays;
+
+import java.util.List;
 
 /**
  * author Facjas
  * date 2018/5/10.
  */
 public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageService {
+    /**
+     * 通用数据存储服务
+     * Universal data storage services.
+     */
+    @Autowired
+    private DBService dbService;
 
+    public AccountLedgerStorageServiceImpl() {
+
+        Result result = dbService.createArea(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TRANSACTION);
+        if (result.isFailed()) {
+            //TODO
+        }
+
+        result = dbService.createArea(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_COINDATA);
+        if (result.isFailed()) {
+            //TODO
+        }
+
+        result = dbService.createArea(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TXINFO);
+        if (result.isFailed()) {
+            //TODO
+        }
+    }
+
+    @Override
+    public Result saveLocalTx(Transaction tx) {
+        if (tx == null) {
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+        }
+        byte[] txHashBytes = tx.getHash().serialize();
+        CoinData coinData = tx.getCoinData();
+        if (coinData != null) {
+            // delete - from
+            List<Coin> froms = coinData.getFrom();
+            BatchOperation batch = dbService.createWriteBatch(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_COINDATA);
+            for (Coin from : froms) {
+                batch.delete(from.getOwner());
+            }
+            // save utxo - to
+            List<Coin> tos = coinData.getTo();
+            byte[] indexBytes;
+            for (int i = 0, length = tos.size(); i < length; i++) {
+                batch.put(Arrays.concatenate(txHashBytes, new VarInt(i).encode()), tos.get(i).serialize());
+            }
+
+            Result batchResult = batch.executeBatch();
+            if (batchResult.isFailed()) {
+                return batchResult;
+            }
+        }
+
+        Result result = dbService.put(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TRANSACTION, tx.getHash().serialize(), tx.serialize());
+        return result;
+    }
+
+    @Override
+    public Result saveLocalTxInfo(TransactionInfoPo tx) {
+        if (tx == null) {
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+        }
+        return null;
+    }
+
+    @Override
+    public Result deleteLocalTxInfo(TransactionInfoPo tx) {
+        return null;
+    }
+
+    @Override
+    public Transaction getLocalTx(NulsDigestData hash) {
+        return null;
+    }
+
+    @Override
+    public Result deleteLocalTx(Transaction tx) {
+        return null;
+    }
+
+    @Override
+    public byte[] getCoinBytes(byte[] owner) {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] getTxBytes(byte[] txBytes) {
+        return new byte[0];
+    }
 }
