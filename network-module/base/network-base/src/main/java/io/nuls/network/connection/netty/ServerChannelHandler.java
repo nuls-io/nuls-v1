@@ -127,14 +127,15 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        System.out.println("----------------ServerChannelHandler -----------");
-        SocketChannel channel = (SocketChannel) ctx.channel();
-        InetSocketAddress localAddress = channel.localAddress();
-        InetSocketAddress remoteAddress = channel.remoteAddress();
-        String local = IpUtil.getNodeId(localAddress);
-        String remote = IpUtil.getNodeId(remoteAddress);
-        Log.info("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage()
-                + ", localInfo: " + local + ", remoteInfo: " + remote);
+        System.out.println("----------------ServerChannelHandler exceptionCaught-----------");
+        System.out.println(cause.getMessage());
+//        SocketChannel channel = (SocketChannel) ctx.channel();
+//        InetSocketAddress localAddress = channel.localAddress();
+//        InetSocketAddress remoteAddress = channel.remoteAddress();
+//        String local = IpUtil.getNodeId(localAddress);
+//        String remote = IpUtil.getNodeId(remoteAddress);
+//        Log.info("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage()
+//                + ", localInfo: " + local + ", remoteInfo: " + remote);
         ctx.channel().close();
     }
 

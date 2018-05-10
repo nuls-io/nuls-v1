@@ -32,7 +32,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-
+        System.out.println(cause.getMessage());
         System.out.println("--------------ServerHandler   exceptionCaught---------------------");
     }
 
