@@ -9,8 +9,7 @@ import io.nuls.account.model.Balance;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.account.util.AccountTool;
-import io.nuls.core.tools.crypto.ECKey;
-import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.crypto.*;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
@@ -19,13 +18,12 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.math.BigInteger;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -51,21 +49,9 @@ public class AccountServiceImpl implements AccountService {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
             return new Result<>(false, "between 0 and 100 can be created at once");
         }
-        if (!StringUtils.validPassword(password)) {
+        if (null != password && !StringUtils.validPassword(password)) {
             return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
         }
-        Account defaultAccount = getDefaultAccount().getData();
-        if (defaultAccount != null && defaultAccount.isEncrypted()) {
-            try {
-                if (!defaultAccount.unlock(password)) {
-                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-                }
-                defaultAccount.lock();
-            } catch (NulsException e) {
-                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-            }
-        }
-
         locker.lock();
         try {
             List<Account> accounts = new ArrayList<>();
@@ -73,7 +59,9 @@ public class AccountServiceImpl implements AccountService {
             List<String> resultList = new ArrayList<>();
             for (int i = 0; i < count; i++) {
                 Account account = AccountTool.createAccount();
-                account.encrypt(password);
+                if (null != password) {
+                    account.encrypt(password);
+                }
                 AccountPo po = new AccountPo(account);
                 accounts.add(account);
                 accountPos.add(po);
@@ -99,8 +87,18 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Result<List<Account>> createAccount(int count) {
+        return createAccount(count, null);
+    }
+
+    @Override
+    public Result<List<Account>> createAccount() {
+        return createAccount(1, null);
+    }
+
+    @Override
     public Result<Boolean> removeAccount(String address, String password) {
-        Account account = getAccountPrivate(address);
+        Account account = getAccountByAddress(address);
         if (account == null) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
@@ -124,26 +122,43 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore, String password) {
+
         return null;
     }
 
     @Override
     public Result<AccountKeyStore> exportAccountToKeyStore(String address, String password) {
-        return null;
+        Account account = accountCacheService.getAccountByAddress(address);
+        if (account == null) {
+            return Result.getFailed(AccountErrorCode.DATA_ERROR);
+        }
+        try {
+            if (!account.decrypt(password)) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
+            account.encrypt(password);
+        } catch (NulsException e) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+        }
+        AccountKeyStore accountKeyStore = new AccountKeyStore();
+        EncryptedData encryptedData = new EncryptedData(account.getEncryptedPriKey());
+        accountKeyStore.setEncryptedPrivateKey(encryptedData.toString());
+        return Result.getSuccess().setData(accountKeyStore);
     }
 
     @Override
     public Result<Account> getAccount(String address) {
-        return Result.getSuccess().setData(getAccountPrivate(address));
+        return Result.getSuccess().setData(getAccountByAddress(address));
     }
 
     /**
      * 根据账户地址字符串,获取账户对象(内部调用)
      * Get account object based on account address string
+     *
      * @param address
      * @return Account
      */
-    private Account getAccountPrivate(String address) {
+    private Account getAccountByAddress(String address) {
         AssertUtil.canNotEmpty(address, "");
         Account account = accountCacheService.getAccountByAddress(address);
         return account;
@@ -151,10 +166,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Account> getAccount(Address address) {
-        if (null == address ) {
+        if (null == address) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        Account account = getAccountPrivate(address.toString());
+        Account account = getAccountByAddress(address.toString());
         return Result.getSuccess().setData(account);
     }
 
@@ -184,10 +199,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Boolean> isEncrypted(Account account) {
-        if(null == account || null == account.getAddress()){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        if (null == account || null == account.getAddress()) {
+            return Result.getFailed(AccountErrorCode.DATA_ERROR);
         }
-        if(!accountCacheService.contains(account.getAddress().getBase58Bytes())){
+        if (!accountCacheService.contains(account.getAddress().getBase58Bytes())) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         return new Result(account.isEncrypted(), null);
@@ -201,8 +216,8 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Boolean> isEncrypted(String address) {
-        Account account = getAccountPrivate(address);
-        if(null == account){
+        Account account = getAccountByAddress(address);
+        if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         return new Result(account.isEncrypted(), null);
@@ -237,12 +252,19 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Account> getDefaultAccount() {
-        return Result.getSuccess().setData(getDefaultAccountPrivate());
+        return Result.getSuccess().setData(getDefaultAccountOther());
     }
-    private Account getDefaultAccountPrivate() {
+
+    /**
+     * 获取默认账户账户(内部调用)
+     * Get the default account
+     *
+     * @return Account
+     */
+    private Account getDefaultAccountOther() {
         Account account = null;
         if (AccountConstant.DEFAULT_ACCOUNT_ADDRESS != null) {
-            account = getAccountPrivate(AccountConstant.DEFAULT_ACCOUNT_ADDRESS);
+            account = getAccountByAddress(AccountConstant.DEFAULT_ACCOUNT_ADDRESS);
         }
         if (account == null) {
             List<Account> accounts = getAccountList().getData();
@@ -256,22 +278,72 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public NulsSignData signData(byte[] data, Account account, String password) throws NulsException {
-        return null;
+        if (null == data || data.length == 0) {
+            throw new NulsException(AccountErrorCode.DATA_ERROR);
+        }
+        if (account == null) {
+            account = getDefaultAccountOther();
+            if (account == null) {
+                throw new NulsException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+        }
+        return this.signDigest(NulsDigestData.calcDigestData(data).getDigestBytes(), account, password);
     }
 
     @Override
     public NulsSignData signData(byte[] data, Account account) throws NulsException {
-        return null;
+        if (null == data || data.length == 0) {
+            throw new NulsException(AccountErrorCode.DATA_ERROR);
+        }
+        if (account == null) {
+            account = getDefaultAccountOther();
+            if (account == null) {
+                throw new NulsException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+        }
+        return this.signDigest(NulsDigestData.calcDigestData(data).getDigestBytes(), account.getPriKey());
     }
 
     @Override
     public NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException {
-        return null;
+        if (null == data || data.length == 0) {
+            throw new NulsException(AccountErrorCode.DATA_ERROR);
+        }
+        if (null == ecKey) {
+            throw new NulsException(AccountErrorCode.DATA_ERROR);
+        }
+        return this.signDigest(NulsDigestData.calcDigestData(data).getDigestBytes(), ecKey);
     }
+
+    private NulsSignData signDigest(byte[] digest, Account account, String password) throws NulsException {
+        if (null == digest || digest.length == 0) {
+            throw new NulsException(AccountErrorCode.DATA_ERROR);
+        }
+        if (account.isEncrypted()) {
+            return this.signDigest(digest, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
+        } else {
+            return this.signDigest(digest, account.getPriKey());
+        }
+    }
+
+    private NulsSignData signDigest(byte[] digest, byte[] priKey) {
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(priKey));
+        return signDigest(digest, ecKey);
+    }
+
+    private NulsSignData signDigest(byte[] digest, ECKey ecKey) {
+        byte[] signbytes = ecKey.sign(digest);
+        NulsSignData nulsSignData = new NulsSignData();
+        nulsSignData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);
+        nulsSignData.setSignBytes(signbytes);
+        return nulsSignData;
+    }
+
 
     @Override
     public Result verifySignData(byte[] data, NulsSignData signData, byte[] pubKey) {
-        return null;
+        ECKey.verify(NulsDigestData.calcDigestData(data).getDigestBytes(), signData.getSignBytes(), pubKey);
+        return new Result(true, null);
     }
 
     @Override

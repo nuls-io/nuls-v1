@@ -45,5 +45,5 @@ public interface AccountErrorCode {
     ErrorCode DATA_PARSE_ERROR = ErrorCode.init("ACT009", 50009);
     ErrorCode SUCCESS = ErrorCode.init("ACT010", 50010);
     ErrorCode FAILED = ErrorCode.init("ACT011", 50011);
-    ErrorCode PARAMETER_ERROR = ErrorCode.init("ACT012", 50012);
+    ErrorCode DATA_ERROR = ErrorCode.init("ACT012", 50012);
 }
