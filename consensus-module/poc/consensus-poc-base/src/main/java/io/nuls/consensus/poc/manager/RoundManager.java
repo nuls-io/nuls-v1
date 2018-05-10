@@ -37,7 +37,7 @@ import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
-import io.nuls.consensus.poc.po.PunishLogPo;
+import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.core.tools.log.ConsensusLog;
 import io.nuls.core.tools.log.Log;

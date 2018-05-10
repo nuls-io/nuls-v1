@@ -27,7 +27,11 @@ package io.nuls.kernel.utils;
 
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.Utils;
+import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.script.P2PKHScriptSig;
 
 /**
@@ -35,6 +39,11 @@ import io.nuls.kernel.script.P2PKHScriptSig;
  * @date: 2018/5/9
  */
 public class AddressTool {
+
+    /**
+     *
+     */
+    public static final int HASH_LENGTH = 23;
 
     public static byte[] getAddress(byte[] publicKey) {
         if(publicKey == null) {
@@ -82,5 +91,51 @@ public class AddressTool {
 
         }
         return getAddressBase58(scriptSig.getPublicKey());
+    }
+
+    public static boolean validAddress(String address) {
+        if (StringUtils.isBlank(address)) {
+            return false;
+        }
+        byte[] bytes = null;
+        try {
+            bytes = Base58.decode(address);
+            if (bytes.length != HASH_LENGTH) {
+                return false;
+            }
+        } catch (NulsException e) {
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+        return validAddress(bytes);
+    }
+
+    public static boolean validAddress(byte[] address) {
+        if (address == null) {
+            return false;
+        }
+        try {
+            checkXOR(address);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static void checkXOR(byte[] hashs) {
+        byte[] body = new byte[22];
+        System.arraycopy(hashs, 0, body, 0, 22);
+
+        byte xor = 0x00;
+        for (int i = 0; i < body.length; i++) {
+            xor ^= body[i];
+        }
+        byte[] sign = new byte[1];
+        System.arraycopy(hashs, 22, sign, 0, 1);
+
+        if (xor != hashs[22]) {
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
+        }
     }
 }

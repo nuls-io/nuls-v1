@@ -100,10 +100,6 @@ public interface DBService {
      */
     Result put(String area, byte[] key, byte[] value);
 
-    Result put(String area, String key, String value);
-
-    Result put(String area, byte[] key, String value);
-
     /**
      * 存储对象
      * Store the object
@@ -114,8 +110,6 @@ public interface DBService {
      * @param <T>
      * @return
      */
-    <T> Result putModel(String area, String key, T value);
-
     <T> Result putModel(String area, byte[] key, T value);
 
     /**
@@ -126,8 +120,6 @@ public interface DBService {
      * @param key
      * @return
      */
-    Result delete(String area, String key);
-
     Result delete(String area, byte[] key);
 
     /**
@@ -138,8 +130,6 @@ public interface DBService {
      * @param key
      * @return
      */
-    byte[] get(String area, String key);
-
     byte[] get(String area, byte[] key);
 
     /**
@@ -154,8 +144,6 @@ public interface DBService {
      * @param <T>
      * @return
      */
-    <T> T getModel(String area, String key, Class<T> clazz);
-
     <T> T getModel(String area, byte[] key, Class<T> clazz);
 
     /**
@@ -166,8 +154,6 @@ public interface DBService {
      * @param key
      * @return
      */
-    Object getModel(String area, String key);
-
     Object getModel(String area, byte[] key);
 
     /**
@@ -177,7 +163,7 @@ public interface DBService {
      * @param area
      * @return
      */
-    Set<String> keySet(String area);
+    Set<byte[]> keySet(String area);
 
     /**
      * 获取数据区域的所有key的有序集合
@@ -186,7 +172,7 @@ public interface DBService {
      * @param area
      * @return
      */
-    List<String> keyList(String area);
+    List<byte[]> keyList(String area);
 
     /**
      * 获取数据区域的所有key-value的无序集合
@@ -195,7 +181,7 @@ public interface DBService {
      * @param area
      * @return
      */
-    Set<Entry<String, byte[]>> entrySet(String area);
+    Set<Entry<byte[], byte[]>> entrySet(String area);
 
     /**
      * 获取数据区域的所有key-value的有序集合
@@ -204,7 +190,7 @@ public interface DBService {
      * @param area
      * @return
      */
-    List<Entry<String, byte[]>> entryList(String area);
+    List<Entry<byte[], byte[]>> entryList(String area);
 
     /**
      * 获取数据区域的所有key-value的有序集合，并指定返回的value对象
@@ -217,7 +203,7 @@ public interface DBService {
      * @param <T>
      * @return
      */
-    <T> List<Entry<String, T>> entryList(String area, Class<T> clazz);
+    <T> List<Entry<byte[], T>> entryList(String area, Class<T> clazz);
 
     /**
      * 获取数据区域的所有value的有序集合，并指定返回的value对象

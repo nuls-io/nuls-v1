@@ -8,7 +8,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.model.Block;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
@@ -17,7 +16,6 @@ import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.NodeManager;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
-import io.nuls.network.service.NetworkService;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -27,7 +25,7 @@ import java.util.Map;
 /**
  * @author Vivi
  */
-@ChannelHandler.Sharable
+
 public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     private NodeManager nodeManager = NodeManager.getInstance();
@@ -129,13 +127,15 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        SocketChannel channel = (SocketChannel) ctx.channel();
-        InetSocketAddress localAddress = channel.localAddress();
-        InetSocketAddress remoteAddress = channel.remoteAddress();
-        String local = IpUtil.getNodeId(localAddress);
-        String remote = IpUtil.getNodeId(remoteAddress);
-        Log.info("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage()
-                + ", localInfo: " + local + ", remoteInfo: " + remote);
+        System.out.println("----------------ServerChannelHandler exceptionCaught-----------");
+        System.out.println(cause.getMessage());
+//        SocketChannel channel = (SocketChannel) ctx.channel();
+//        InetSocketAddress localAddress = channel.localAddress();
+//        InetSocketAddress remoteAddress = channel.remoteAddress();
+//        String local = IpUtil.getNodeId(localAddress);
+//        String remote = IpUtil.getNodeId(remoteAddress);
+//        Log.info("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage()
+//                + ", localInfo: " + local + ", remoteInfo: " + remote);
         ctx.channel().close();
     }
 

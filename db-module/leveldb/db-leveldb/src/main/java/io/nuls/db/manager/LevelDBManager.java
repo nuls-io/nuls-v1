@@ -636,18 +636,18 @@ public class LevelDBManager {
         }
     }
 
-    public static Set<String> keySet(String area) {
+    public static Set<byte[]> keySet(String area) {
         if (!baseCheckArea(area)) {
             return null;
         }
         DBIterator iterator = null;
-        Set<String> keySet = null;
+        Set<byte[]> keySet = null;
         try {
             DB db = AREAS.get(area);
             keySet = new HashSet<>();
             iterator = db.iterator();
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
-                keySet.add(asString(iterator.peekNext().getKey()));
+                keySet.add(iterator.peekNext().getKey());
             }
             return keySet;
         } catch (Exception e) {
@@ -665,26 +665,20 @@ public class LevelDBManager {
         }
     }
 
-    public static List<String> keyList(String area) {
+    public static List<byte[]> keyList(String area) {
         if (!baseCheckArea(area)) {
             return null;
         }
         DBIterator iterator = null;
-        List<String> keyList = null;
+        List<byte[]> keyList = null;
         try {
             DB db = AREAS.get(area);
             keyList = new ArrayList<>();
             iterator = db.iterator();
-            Set<String> keySet = new HashSet<>();
             String key;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
-                key = asString(iterator.peekNext().getKey());
-                if (keySet.add(key)) {
-                    keyList.add(key);
-                }
+                keyList.add(iterator.peekNext().getKey());
             }
-            keySet.clear();
-            keySet = null;
             return keyList;
         } catch (Exception e) {
             Log.error(e);
@@ -701,30 +695,24 @@ public class LevelDBManager {
         }
     }
 
-    public static Set<Entry<String, byte[]>> entrySet(String area) {
+    public static Set<Entry<byte[], byte[]>> entrySet(String area) {
         if (!baseCheckArea(area)) {
             return null;
         }
         DBIterator iterator = null;
-        Set<Entry<String, byte[]>> entrySet = null;
+        Set<Entry<byte[], byte[]>> entrySet = null;
         try {
             DB db = AREAS.get(area);
             entrySet = new HashSet<>();
-            Set<String> keySet = new HashSet<>();
             iterator = db.iterator();
-            String key;
-            byte[] bytes;
+            byte[] key, bytes;
             Map.Entry<byte[], byte[]> entry;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 entry = iterator.peekNext();
-                key = asString(entry.getKey());
-                if (keySet.add(key)) {
-                    bytes = entry.getValue();
-                    entrySet.add(new Entry<String, byte[]>(key, bytes));
-                }
+                key = entry.getKey();
+                bytes = entry.getValue();
+                entrySet.add(new Entry<byte[], byte[]>(key, bytes));
             }
-            keySet.clear();
-            keySet = null;
         } catch (Exception e) {
             Log.error(e);
             return null;
@@ -741,30 +729,24 @@ public class LevelDBManager {
         return entrySet;
     }
 
-    public static List<Entry<String, byte[]>> entryList(String area) {
+    public static List<Entry<byte[], byte[]>> entryList(String area) {
         if (!baseCheckArea(area)) {
             return null;
         }
         DBIterator iterator = null;
-        List<Entry<String, byte[]>> entryList = null;
+        List<Entry<byte[], byte[]>> entryList = null;
         try {
             DB db = AREAS.get(area);
             entryList = new ArrayList<>();
             iterator = db.iterator();
-            Set<String> keySet = new HashSet<>();
-            String key;
-            byte[] bytes;
+            byte[] key, bytes;
             Map.Entry<byte[], byte[]> entry;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 entry = iterator.peekNext();
-                key = asString(entry.getKey());
-                if (keySet.add(key)) {
-                    bytes = entry.getValue();
-                    entryList.add(new Entry<String, byte[]>(key, bytes));
-                }
+                key = entry.getKey();
+                bytes = entry.getValue();
+                entryList.add(new Entry<byte[], byte[]>(key, bytes));
             }
-            keySet.clear();
-            keySet = null;
         } catch (Exception e) {
             Log.error(e);
             return null;
@@ -781,32 +763,26 @@ public class LevelDBManager {
         return entryList;
     }
 
-    public static <T> List<Entry<String, T>> entryList(String area, Class<T> clazz) {
+    public static <T> List<Entry<byte[], T>> entryList(String area, Class<T> clazz) {
         if (!baseCheckArea(area)) {
             return null;
         }
         DBIterator iterator = null;
-        List<Entry<String, T>> entryList = null;
+        List<Entry<byte[], T>> entryList = null;
         try {
             DB db = AREAS.get(area);
             entryList = new ArrayList<>();
             iterator = db.iterator();
-            Set<String> keySet = new HashSet<>();
-            String key;
-            byte[] bytes;
+            byte[] key, bytes;
             Map.Entry<byte[], byte[]> entry;
             T t = null;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 t = null;
                 entry = iterator.peekNext();
-                key = asString(entry.getKey());
-                if (keySet.add(key)) {
-                    t = getModel(area, entry.getKey(), clazz);
-                    entryList.add(new Entry<String, T>(key, t));
-                }
+                key = entry.getKey();
+                t = getModel(area, entry.getKey(), clazz);
+                entryList.add(new Entry<byte[], T>(key, t));
             }
-            keySet.clear();
-            keySet = null;
         } catch (Exception e) {
             Log.error(e);
             return null;

@@ -84,28 +84,8 @@ public class LevelDBServiceImpl implements DBService {
     }
 
     @Override
-    public Result put(String area, String key, String value) {
-        return LevelDBManager.put(area, key, value);
-    }
-
-    @Override
-    public Result put(String area, byte[] key, String value) {
-        return LevelDBManager.put(area, key, value);
-    }
-
-    @Override
-    public <T> Result putModel(String area, String key, T value) {
-        return LevelDBManager.putModel(area, key, value);
-    }
-
-    @Override
     public <T> Result putModel(String area, byte[] key, T value) {
         return LevelDBManager.putModel(area, key, value);
-    }
-
-    @Override
-    public Result delete(String area, String key) {
-        return LevelDBManager.delete(area, key);
     }
 
     @Override
@@ -114,18 +94,8 @@ public class LevelDBServiceImpl implements DBService {
     }
 
     @Override
-    public byte[] get(String area, String key) {
-        return LevelDBManager.get(area, key);
-    }
-
-    @Override
     public byte[] get(String area, byte[] key) {
         return LevelDBManager.get(area, key);
-    }
-
-    @Override
-    public <T> T getModel(String area, String key, Class<T> clazz) {
-        return LevelDBManager.getModel(area, key, clazz);
     }
 
     @Override
@@ -134,37 +104,32 @@ public class LevelDBServiceImpl implements DBService {
     }
 
     @Override
-    public Object getModel(String area, String key) {
-        return LevelDBManager.getModel(area, key);
-    }
-
-    @Override
     public Object getModel(String area, byte[] key) {
         return LevelDBManager.getModel(area, key);
     }
 
     @Override
-    public Set<String> keySet(String area) {
+    public Set<byte[]> keySet(String area) {
         return LevelDBManager.keySet(area);
     }
 
     @Override
-    public List<String> keyList(String area) {
+    public List<byte[]> keyList(String area) {
         return LevelDBManager.keyList(area);
     }
 
     @Override
-    public Set<Entry<String, byte[]>> entrySet(String area) {
+    public Set<Entry<byte[], byte[]>> entrySet(String area) {
         return LevelDBManager.entrySet(area);
     }
 
     @Override
-    public List<Entry<String, byte[]>> entryList(String area) {
+    public List<Entry<byte[], byte[]>> entryList(String area) {
         return LevelDBManager.entryList(area);
     }
 
     @Override
-    public <T> List<Entry<String, T>> entryList(String area, Class<T> clazz) {
+    public <T> List<Entry<byte[], T>> entryList(String area, Class<T> clazz) {
         return LevelDBManager.entryList(area, clazz);
     }
 
