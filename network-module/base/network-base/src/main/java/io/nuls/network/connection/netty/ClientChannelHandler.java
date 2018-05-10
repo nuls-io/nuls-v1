@@ -10,6 +10,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.network.entity.Node;
+import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.NodeManager;
 import io.nuls.network.service.NetworkService;
 
@@ -19,10 +20,7 @@ import java.util.Map;
 
 public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
-    @Autowired
-    private NetworkService networkService;
-    @Autowired
-    private NodeManager nodeManager;
+    private NodeManager nodeManager = NodeManager.getInstance();
 
     private AttributeKey<Node> key = AttributeKey.valueOf("node");
 
@@ -36,7 +34,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
         String nodeId = node == null ? null : node.getId();
-        Log.debug("---------------------- client channelRegistered -----------" + nodeId);
+        Log.info("---------------------- client channelRegistered -----------" + nodeId);
 
         Map<String, Node> nodes = nodeManager.getNodes();
         //Map<String, Node> nodes = getNetworkService().getNodes();
@@ -44,7 +42,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         for (Node n : nodes.values()) {
             //both ip and port equals , it means the node is myself
             if (n.getIp().equals(node.getIp()) && !n.getPort().equals(node.getSeverPort())) {
-                Log.debug("----------------------client: it already had a connection: " + n.getId() + " type:" + n.getType() + ", this connection: " + nodeId + "---------------------- ");
+                Log.info("----------------------client: it already had a connection: " + n.getId() + " type:" + n.getType() + ", this connection: " + nodeId + "---------------------- ");
                 ctx.channel().close();
                 return;
             }
@@ -56,8 +54,8 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         String channelId = ctx.channel().id().asLongText();
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.debug(" ---------------------- client channelActive ----------" + nodeId);
-        Log.debug("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
+        Log.info(" ---------------------- client channelActive ----------" + nodeId);
+        Log.info("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
 
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
@@ -66,8 +64,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             NioChannelMap.add(channelId, channel);
             node.setChannelId(channelId);
             node.setStatus(Node.CONNECT);
-//            boolean result = getNetworkService().addConnNode(node);
-            boolean result = false;
+            boolean result = nodeManager.processConnectedNode(node);
             if(!result) {
                 channel.close();
             }
@@ -81,18 +78,18 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.debug(" ---------------------- client channelInactive ---------------------- " + nodeId);
-        Log.debug("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
+        Log.info(" ---------------------- client channelInactive ---------------------- " + nodeId);
+        Log.info("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
-        Node node = networkService.getNode(nodeId);
+        Node node = nodeManager.getNode(nodeId);
         if (node != null) {
             if (node.getChannelId() == null || channelId.equals(node.getChannelId())) {
 //                System.out.println(  "---------------client channelInactive remove node----------------" + nodeId);
-                networkService.removeNode(node.getId());
+                nodeManager.removeNode(node.getId());
             } else {
-                Log.debug("---------------- client channelId different----------------" + channelId + "," + node.getChannelId());
+                Log.info("---------------- client channelId different----------------" + channelId + "," + node.getChannelId());
             }
         }
     }
@@ -102,7 +99,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
 //        Log.debug(" ---------------------- client channelRead ---------------------- " + nodeId);
-        Node node = networkService.getNode(nodeId);
+        Node node = nodeManager.getNode(nodeId);
         if (node != null && node.isAlive()) {
             ByteBuf buf = (ByteBuf) msg;
             byte[] bytes = new byte[buf.readableBytes()];
@@ -116,7 +113,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        Log.debug("--------------- ClientChannelHandler exceptionCaught :" + cause.getMessage());
+        Log.info("--------------- ClientChannelHandler exceptionCaught :" + cause.getMessage());
         ctx.channel().close();
     }
 
@@ -127,7 +124,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
         if (!channel.isActive() && node != null) {
-//            getNetworkService().deleteNode(node.getId());
+            nodeManager.deleteNode(node.getId());
         }
     }
 }

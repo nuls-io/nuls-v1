@@ -11,7 +11,9 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.model.Block;
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.Node;
+import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.NodeManager;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
@@ -27,24 +29,25 @@ import java.util.Map;
  */
 @ChannelHandler.Sharable
 public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
-    @Autowired
-    private NetworkService networkService;
 
-    @Autowired
-    private NodeManager nodeManager;
+    private NodeManager nodeManager = NodeManager.getInstance();
+
+    private NetworkParam networkParam = NetworkParam.getInstance();
+
+    private BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.debug("---------------------- server channelRegistered ------------------------- " + nodeId);
+        Log.info("---------------------- server channelRegistered ------------------------- " + nodeId);
 
         String remoteIP = channel.remoteAddress().getHostString();
 
         // 由于每个节点既是服务器，同时也会作为客户端去主动连接其他节点，
         // 为防止两个节点同时作为服务器一方相互连接，在这里做硬性规定，
         // 两个节点同时相互连接时，ip数字小的一方作为服务器，大的一方作为客户端
-        Map<String, Node> nodeMap = networkService.getNodes();
+        Map<String, Node> nodeMap = nodeManager.getNodes();
         for (Node node : nodeMap.values()) {
             if (node.getIp().equals(remoteIP)) {
                 if (node.getType() == Node.OUT) {
@@ -58,7 +61,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
                     } else {
                         //如果自己是服务器端，则删除当前主动作为客户端连接出去的节点，保存当前作为服务器端的连接
 //                        System.out.println("----------------sever client register each other remove node-----------------" + node.getId());
-                        networkService.removeNode(node.getId());
+                        nodeManager.removeNode(node.getId());
                     }
                 }
             }
@@ -82,40 +85,40 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.debug("---------------------- server channelActive ------------------------- " + nodeId);
+        Log.info("---------------------- server channelActive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.add(channelId, channel);
         Node node = new Node(channel.remoteAddress().getHostString(), channel.remoteAddress().getPort(), Node.IN);
         node.setChannelId(channelId);
         node.setStatus(Node.CONNECT);
-        boolean success = nodeManager.addConnNode(node);
+        boolean success = nodeManager.processConnectedNode(node);
 
         if (!success) {
             ctx.channel().close();
             return;
         }
         Block bestBlock = NulsContext.getInstance().getBestBlock();
-        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkService.getNetworkParam().getPort(),
+        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
                 bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
         HandshakeMessage handshakeMessage = new HandshakeMessage(body);
-        networkService.sendToNode(handshakeMessage, node, false);
+        broadcastHandler.broadcastToNode(handshakeMessage, node, false);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.debug(" ---------------------- server channelInactive ------------------------- " + nodeId);
+        Log.info(" ---------------------- server channelInactive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
-        Node node = networkService.getNode(nodeId);
+        Node node = nodeManager.getNode(nodeId);
 
         if (node != null) {
             if (channelId.equals(node.getChannelId())) {
 //                System.out.println("------------ sever channelInactive remove node-------------" + node.getId());
-                networkService.removeNode(nodeId);
+                nodeManager.removeNode(nodeId);
             } else {
                 Log.info("--------------server channel id different----------------------");
                 Log.info("--------node:" + node.getId() + ",type:" + node.getType());
@@ -132,7 +135,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         InetSocketAddress remoteAddress = channel.remoteAddress();
         String local = IpUtil.getNodeId(localAddress);
         String remote = IpUtil.getNodeId(remoteAddress);
-        Log.debug("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage()
+        Log.info("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage()
                 + ", localInfo: " + local + ", remoteInfo: " + remote);
         ctx.channel().close();
     }
@@ -142,9 +145,9 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
 //        Log.debug(" ---------------------- server channelRead ------------------------- " + nodeId);
-        Node node = networkService.getNode(nodeId);
+        Node node = nodeManager.getNode(nodeId);
         if (node != null) {
-            if(node.isAlive()) {
+            if (node.isAlive()) {
                 ByteBuf buf = (ByteBuf) msg;
                 byte[] bytes = new byte[buf.readableBytes()];
                 buf.readBytes(bytes);
@@ -154,7 +157,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             }
 
 //            getNetworkService().receiveMessage(buffer, node);
-        }else {
+        } else {
             ctx.channel().close();
         }
     }

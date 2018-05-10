@@ -26,4 +26,36 @@ public class NetworkMessageBody extends BaseNulsData {
         this.bestBlockHeight = bestBlockHeight;
         this.bestBlockHash = bestBlockHash;
     }
+
+    public int getHandshakeType() {
+        return handshakeType;
+    }
+
+    public void setHandshakeType(int handshakeType) {
+        this.handshakeType = handshakeType;
+    }
+
+    public int getSeverPort() {
+        return severPort;
+    }
+
+    public void setSeverPort(int severPort) {
+        this.severPort = severPort;
+    }
+
+    public long getBestBlockHeight() {
+        return bestBlockHeight;
+    }
+
+    public void setBestBlockHeight(long bestBlockHeight) {
+        this.bestBlockHeight = bestBlockHeight;
+    }
+
+    public NulsDigestData getBestBlockHash() {
+        return bestBlockHash;
+    }
+
+    public void setBestBlockHash(NulsDigestData bestBlockHash) {
+        this.bestBlockHash = bestBlockHash;
+    }
 }

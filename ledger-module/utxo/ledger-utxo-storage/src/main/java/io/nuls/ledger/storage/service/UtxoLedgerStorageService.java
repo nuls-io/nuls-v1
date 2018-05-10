@@ -41,10 +41,7 @@ public interface UtxoLedgerStorageService {
 
     Result deleteTx(Transaction tx);
 
-    Result saveUtxo(Coin coin);
+    byte[] getCoinBytes(byte[] owner);
 
-    Result deleteUtxo(Coin coin);
-
-
-
+    byte[] getTxBytes(byte[] txBytes);
 }

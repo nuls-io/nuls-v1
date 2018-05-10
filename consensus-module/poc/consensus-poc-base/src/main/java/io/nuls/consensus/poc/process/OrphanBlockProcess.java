@@ -26,12 +26,12 @@
 
 package io.nuls.consensus.poc.process;
 
-import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
-import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
+import io.nuls.consensus.poc.constant.BlockContainerStatus;
+import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.kernel.context.NulsContext;

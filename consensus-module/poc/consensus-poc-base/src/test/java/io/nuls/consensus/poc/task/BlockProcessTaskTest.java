@@ -27,14 +27,13 @@
 package io.nuls.consensus.poc.task;
 
 import io.nuls.consensus.poc.BaseTest;
-import io.nuls.consensus.poc.constant.ConsensusStatus;
-import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.customer.ConsensusDownloadServiceImpl;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.process.BlockProcess;
+import io.nuls.consensus.poc.constant.ConsensusStatus;
+import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.kernel.lite.core.SpringLiteContext;
-import io.nuls.protocol.service.DownloadService;
 import org.junit.Before;
 import org.junit.Test;
 

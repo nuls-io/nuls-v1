@@ -26,11 +26,11 @@
 
 package io.nuls.consensus.poc.task;
 
-import io.nuls.consensus.poc.constant.BlockContainerStatus;
-import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.process.BlockProcess;
+import io.nuls.consensus.poc.constant.BlockContainerStatus;
+import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.core.tools.log.Log;

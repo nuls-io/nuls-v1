@@ -1,6 +1,5 @@
 package io.nuls.network.service.impl;
 
-import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.BroadcastResult;
@@ -13,8 +12,7 @@ import java.util.Map;
 
 public class NetworkServiceImpl implements NetworkService {
 
-    @Autowired
-    private NodeManager nodeManager;
+    private NodeManager nodeManager = NodeManager.getInstance();
 
     @Override
     public void removeNode(String nodeId) {

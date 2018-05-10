@@ -12,13 +12,21 @@ import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.protocol.message.base.BaseMessage;
 
-@Component
 public class BroadcastHandler {
+
+    private static BroadcastHandler instance = new BroadcastHandler();
+
+    private BroadcastHandler() {
+
+    }
+
+    public static BroadcastHandler getInstance() {
+        return instance;
+    }
 
     private NetworkParam networkParam = NetworkParam.getInstance();
 
-    @Autowired
-    private NodeManager nodeManager;
+    private NodeManager nodeManager = NodeManager.getInstance();
 
     public BroadcastResult broadcast(BaseMessage msg, boolean asyn) {
         return null;
@@ -26,12 +34,12 @@ public class BroadcastHandler {
 
 
     public BroadcastResult broadcastToNode(BaseMessage msg, Node node, boolean asyn) {
-      return broadcastToNode(msg, node.getId(), asyn);
+        return broadcastToNode(msg, node.getId(), asyn);
     }
 
     public BroadcastResult broadcastToNode(BaseMessage msg, String nodeId, boolean asyn) {
         Node sendNode = nodeManager.getNode(nodeId);
-        if(sendNode == null) {
+        if (sendNode == null) {
             return new BroadcastResult(false, "node not found");
         }
         return broadcast(msg, sendNode, asyn);
@@ -54,7 +62,7 @@ public class BroadcastHandler {
                     return new BroadcastResult(false, "network send message failed");
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.error(e);
             return new BroadcastResult(false, "network send message failed");
         }

@@ -34,7 +34,7 @@ import io.protostuff.Tag;
  * @author Niels
  * @date 2017/11/7
  */
-public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
+public class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
     private transient NulsDigestData hash;
 
     @Tag(1)
@@ -43,6 +43,9 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
     @Tag(2)
     private T msgBody;
 
+    public BaseMessage() {
+
+    }
     /**
      * 初始化基础消息的消息头
      */

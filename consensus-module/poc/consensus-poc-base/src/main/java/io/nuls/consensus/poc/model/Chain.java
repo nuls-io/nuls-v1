@@ -26,9 +26,9 @@
 
 package io.nuls.consensus.poc.model;
 
-import io.nuls.consensus.entity.Agent;
-import io.nuls.consensus.entity.Deposit;
 import io.nuls.consensus.poc.po.PunishLogPo;
+import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;

@@ -23,15 +23,9 @@
  */
 package io.nuls.network.manager;
 
-import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.thread.manager.TaskManager;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.entity.Node;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import io.nuls.network.constant.NetworkParam;
 
 /**
  * @author vivi
@@ -39,13 +33,20 @@ import java.util.List;
  */
 public class NodeDiscoverHandler implements Runnable {
 
+    private static NodeDiscoverHandler instance = new NodeDiscoverHandler();
+
+    private NodeDiscoverHandler() {
+    }
+
+    public static NodeDiscoverHandler getInstance() {
+        return instance;
+    }
+
     private NetworkParam network = NetworkParam.getInstance();
 
-    @Autowired
-    private NodeManager nodesManager;
+    private NodeManager nodesManager = NodeManager.getInstance();
 
-    @Autowired
-    private BroadcastHandler broadcastHandler;
+    private BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
 
     private boolean running = false;
 
@@ -60,16 +61,17 @@ public class NodeDiscoverHandler implements Runnable {
      * @param size
      */
     public void findOtherNode(int size) {
-       // GetNodeEvent event = new GetNodeEvent(size);
-        List<Node> nodeList = new ArrayList<>(nodesManager.getAvailableNodes());
-        Collections.shuffle(nodeList);
-        for (int i = 0; i < nodeList.size(); i++) {
-            if (i == 2) {
-                break;
-            }
-            Node node = nodeList.get(i);
-            broadcastHandler.broadcastToNode(null, node, true);
-        }
+        System.out.println("---------- findOtherNode --------");
+        // GetNodeEvent event = new GetNodeEvent(size);
+//        List<Node> nodeList = new ArrayList<>(nodesManager.getAvailableNodes());
+//        Collections.shuffle(nodeList);
+//        for (int i = 0; i < nodeList.size(); i++) {
+//            if (i == 2) {
+//                break;
+//            }
+//            Node node = nodeList.get(i);
+//            broadcastHandler.broadcastToNode(null, node, true);
+//        }
     }
 
     @Override

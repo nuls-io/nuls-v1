@@ -28,7 +28,6 @@ package io.nuls.consensus.poc.util;
 
 import io.nuls.consensus.poc.BaseTest;
 import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.BlockHeader;
 import io.nuls.protocol.model.SmallBlock;
 import org.junit.Test;
 
