@@ -109,6 +109,13 @@ public class NodeManager implements Runnable {
             if (outNodeIdSet.contains(node.getId())) {
                 return false;
             }
+            //相同ip的节点，不再重复连接
+            Map<String,Node> nodes = getNodes();
+            for(Node n : nodes.values()) {
+                if(n.getIp().equals(node.getIp())) {
+                    return false;
+                }
+            }
 
             outNodeIdSet.add(node.getId());
             disConnectNodes.put(node.getId(), node);
