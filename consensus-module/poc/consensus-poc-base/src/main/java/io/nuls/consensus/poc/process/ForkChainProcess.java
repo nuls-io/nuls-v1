@@ -31,7 +31,7 @@ import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
-import io.nuls.consensus.poc.po.PunishLogPo;
+import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.constant.ConsensusStatus;
@@ -344,7 +344,7 @@ public class ForkChainProcess {
 
     /*
      * Switching the master chain to a new chain and verifying the block header before the switch is legal, so only the transactions in the block need to be verified here.
-     * In order to ensure the correctness of the transaction verification, you first need to roll back all blocks after the fork of the main chain, and then the new chain will start to go into storage.
+     * In order to ensure the correctness of the transaction verification, you first need to roll back all blocks after the fork of the main chain, and then the new chain will start to go into service.
      * If the verification fails during the warehousing process, it means that the transaction in the block is illegal, then the new connection that proves the need to switch is not trusted.
      * Once the new chain is not trusted, you need to add the previously rolled back block back
      * This method needs to be synchronized with the add block method
@@ -368,7 +368,7 @@ public class ForkChainProcess {
         //rollback
         List<Block> rollbackBlockList = oldChain.getChain().getBlockList();
 
-        ChainLog.debug("rollback the master chain , need rollback block count is {}, master chain is {} : {} - {} , storage best block : {} - {}", rollbackBlockList.size(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
+        ChainLog.debug("rollback the master chain , need rollback block count is {}, master chain is {} : {} - {} , service best block : {} - {}", rollbackBlockList.size(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
 
         //Need descending order
         //需要降序排列
@@ -406,7 +406,7 @@ public class ForkChainProcess {
             }
         }
 
-        ChainLog.debug("add new blocks complete, result {}, success count is {} , now storage best block : {} - {}", changeSuccess, successList.size(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
+        ChainLog.debug("add new blocks complete, result {}, success count is {} , now service best block : {} - {}", changeSuccess, successList.size(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
 
         if(changeSuccess) {
             chainManager.setMasterChain(newMasterChain);
@@ -467,7 +467,7 @@ public class ForkChainProcess {
             }
         }
 
-        ChainLog.debug("rollback complete, success count is {} , now storage best block : {} - {}", rollbackList.size(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
+        ChainLog.debug("rollback complete, success count is {} , now service best block : {} - {}", rollbackList.size(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
         return true;
     }
 

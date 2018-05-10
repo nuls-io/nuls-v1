@@ -23,14 +23,26 @@
  *
  */
 
-package io.nuls.consensus.poc.storage;
+package io.nuls.client.rpc;
+
+import io.nuls.kernel.MicroKernelBootstrap;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author: Niels Wang
  * @date: 2018/5/10
  */
-public interface PunishLogStorageService {
+public class RpcServerManagerTest {
 
+    @Test
+    public void startServer() {
+        MicroKernelBootstrap bootstrap = MicroKernelBootstrap.getInstance();
+        bootstrap.init();
+        bootstrap.start();
 
-    long getCountByType(byte[] agentAddress, int type);
+        RpcServerManager.getInstance().startServer("127.0.0.1", 8080);
+        assertTrue(true);
+    }
 }

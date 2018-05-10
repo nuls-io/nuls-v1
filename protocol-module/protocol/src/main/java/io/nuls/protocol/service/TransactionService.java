@@ -58,7 +58,7 @@ public interface TransactionService {
      * @param secondaryData 辅助数据（可以为空）/Secondary data (available for null)
      * @return 操作结果/operating results
      */
-    Result rollback(Transaction tx, Object secondaryData);
+    Result rollbackTx(Transaction tx, Object secondaryData);
 
     /**
      * 转发交易给连接的其他对等节点，允许一个列外（不转发给它）

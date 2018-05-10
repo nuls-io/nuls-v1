@@ -44,6 +44,7 @@ import java.util.List;
  * @date: 2018/5/4
  */
 public interface AccountService {
+
     /**
      * 创建指定个数的账户（包含地址）
      * <p>
@@ -58,6 +59,15 @@ public interface AccountService {
 
     /**
      * 创建指定个数的账户（包含地址）
+     * Create a specified number of accounts (including addresses)
+     * @param count    想要创建的账户个数
+     * @param count    the account count you want to create
+     * @return
+     */
+    Result<List<Account>> createAccount(int count);
+
+    /**
+     * 创建指定个数的账户（包含地址）
      * <p>
      * Create a specified number of accounts (including addresses)
      *
@@ -65,6 +75,8 @@ public interface AccountService {
      * @return the result of the opration
      */
     Result<List<Account>> createAccount(String password);
+
+    Result<List<Account>> createAccount();
 
     /**
      * 根据账户标识删除对应的账户
@@ -212,8 +224,8 @@ public interface AccountService {
     NulsSignData signData(byte[] data, Account account) throws NulsException;
 
     /**
-     * 数据签名(无密码)
-     * The data signature(no password)
+     * 数据签名
+     * The data signature
      *
      * @param data    Data to be signed.
      * @param ecKey  eckey

@@ -28,7 +28,7 @@ package io.nuls.consensus.poc.cache;
 
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
-import io.nuls.consensus.poc.po.PunishLogPo;
+import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Block;

@@ -30,8 +30,10 @@ package io.nuls.account.model;
  */
 public class AccountKeyStore {
 
-    String address;
-    String encryptedPrivateKey;
+    private String address;
+    private String encryptedPrivateKey;
+    private String alias;
+    private byte[] pubKey;
 
     public AccountKeyStore() {
     }
@@ -55,5 +57,21 @@ public class AccountKeyStore {
 
     public void setEncryptedPrivateKey(String encryptedPrivateKey) {
         this.encryptedPrivateKey = encryptedPrivateKey;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public byte[] getPubKey() {
+        return pubKey;
+    }
+
+    public void setPubKey(byte[] pubKey) {
+        this.pubKey = pubKey;
     }
 }

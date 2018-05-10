@@ -51,10 +51,6 @@ public class BlockProcessTest extends BaseChainTest {
 
     @Before
     public void init() {
-        MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
-        mk.init();
-        mk.start();
-
         initChain();
         chainManager = new ChainManager();
         chainManager.setMasterChain(chainContainer);
