@@ -29,8 +29,6 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.model.ModelWrapper;
-import io.nuls.db.service.BatchOperation;
-import io.nuls.db.service.impl.BatchOperationImpl;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Result;
@@ -47,8 +45,8 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.iq80.leveldb.impl.Iq80DBFactory.asString;
-import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
+import static io.nuls.core.tools.str.StringUtils.asString;
+import static io.nuls.core.tools.str.StringUtils.bytes;
 
 /**
  * @Desription:
