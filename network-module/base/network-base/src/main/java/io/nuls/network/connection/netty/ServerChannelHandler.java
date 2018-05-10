@@ -40,7 +40,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.debug("---------------------- server channelRegistered ------------------------- " + nodeId);
+        Log.info("---------------------- server channelRegistered ------------------------- " + nodeId);
 
         String remoteIP = channel.remoteAddress().getHostString();
 
@@ -85,7 +85,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.debug("---------------------- server channelActive ------------------------- " + nodeId);
+        Log.info("---------------------- server channelActive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.add(channelId, channel);
@@ -109,7 +109,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.debug(" ---------------------- server channelInactive ------------------------- " + nodeId);
+        Log.info(" ---------------------- server channelInactive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
@@ -135,7 +135,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         InetSocketAddress remoteAddress = channel.remoteAddress();
         String local = IpUtil.getNodeId(localAddress);
         String remote = IpUtil.getNodeId(remoteAddress);
-        Log.debug("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage()
+        Log.info("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage()
                 + ", localInfo: " + local + ", remoteInfo: " + remote);
         ctx.channel().close();
     }

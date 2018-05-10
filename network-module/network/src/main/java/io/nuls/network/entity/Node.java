@@ -169,8 +169,6 @@ public class Node extends BaseNulsData {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("id:" + getId() + ",");
-        sb.append("ip: '" + getIp() + "',");
-        sb.append("port: " + getPort() + ",");
         sb.append("type:" + type + ",");
         sb.append("status:" + status + "}");
 

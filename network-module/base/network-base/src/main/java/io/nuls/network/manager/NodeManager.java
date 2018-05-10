@@ -39,8 +39,8 @@ public class NodeManager implements Runnable {
     private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
     //存放握手成功的节点
     private Map<String, Node> handShakeNodes = new ConcurrentHashMap<>();
-    //存放所有正在连接或已连接节点的id，防止重复连接
-    private Set<String> nodeIdSet = ConcurrentHashMap.newKeySet();
+    //存放所有正在连接或已连接的主动节点的id，防止重复连接
+    private Set<String> outNodeIdSet = ConcurrentHashMap.newKeySet();
 
     private ReentrantLock lock = new ReentrantLock();
 
@@ -106,10 +106,11 @@ public class NodeManager implements Runnable {
         lock.lock();
         try {
             //已连接的节点，不再重复连接
-            if (nodeIdSet.contains(node.getId())) {
+            if (outNodeIdSet.contains(node.getId())) {
                 return false;
             }
-            nodeIdSet.add(node.getId());
+
+            outNodeIdSet.add(node.getId());
             disConnectNodes.put(node.getId(), node);
             connectionManager.connectionNode(node);
             return true;
@@ -223,7 +224,7 @@ public class NodeManager implements Runnable {
         } else {
 //            Log.info("------------remove node is null-----------" + nodeId);
             getNetworkStorage().deleteNode(node);
-            nodeIdSet.remove(nodeId);
+            outNodeIdSet.remove(nodeId);
         }
     }
 
@@ -233,7 +234,7 @@ public class NodeManager implements Runnable {
             removeNode(node);
         } else {
 //            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
-            nodeIdSet.remove(node.getId());
+            outNodeIdSet.remove(node.getId());
             getNetworkStorage().deleteNode(node);
         }
     }
@@ -254,7 +255,7 @@ public class NodeManager implements Runnable {
                     return;
                 }
             }
-            nodeIdSet.remove(node.getId());
+            outNodeIdSet.remove(node.getIp());
             node.destroy();
             removeNodeFromGroup(node);
             removeNodeHandler(node);
@@ -305,7 +306,7 @@ public class NodeManager implements Runnable {
     }
 
     public void deleteNode(String nodeId) {
-        nodeIdSet.remove(nodeId);
+        outNodeIdSet.remove(nodeId);
         disConnectNodes.remove(nodeId);
     }
 
@@ -435,9 +436,21 @@ public class NodeManager implements Runnable {
     public void run() {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         while (running) {
-            Log.info("disConnectNodes:" + disConnectNodes.size());
-            Log.info("disConnectNodes:" + connectedNodes.size());
-            Log.info("handShakeNodes:" + handShakeNodes.size());
+            Log.info("--------disConnectNodes:" + disConnectNodes.size());
+            for(Node node : disConnectNodes.values()) {
+                System.out.println(node.toString());
+            }
+
+            Log.info("--------connectedNodes:" + connectedNodes.size());
+            for(Node node : connectedNodes.values()) {
+                System.out.println(node.toString());
+            }
+
+            Log.info("--------handShakeNodes:" + handShakeNodes.size());
+            for(Node node : handShakeNodes.values()) {
+                System.out.println(node.toString());
+            }
+
             for (Node node : handShakeNodes.values()) {
                 Log.info(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
             }
