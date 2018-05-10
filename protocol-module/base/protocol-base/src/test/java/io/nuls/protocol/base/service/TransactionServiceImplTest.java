@@ -25,25 +25,25 @@
 
 package io.nuls.protocol.base.service;
 
-import io.nuls.consensus.constant.PunishReasonEnum;
-import io.nuls.consensus.entity.Deposit;
-import io.nuls.consensus.entity.RedPunishData;
-import io.nuls.consensus.entity.YellowPunishData;
-import io.nuls.consensus.tx.*;
+import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
+import io.nuls.consensus.poc.protocol.entity.RedPunishData;
+import io.nuls.consensus.poc.protocol.entity.YellowPunishData;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
+import io.nuls.consensus.poc.protocol.tx.JoinConsensusTransaction;
+import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
+import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
+import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
-import org.apache.tools.ant.taskdefs.Echo;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 /**
  * @author: Niels Wang
@@ -154,7 +154,9 @@ public class TransactionServiceImplTest {
         setCommonFields(tx);
         Deposit deposit = new Deposit();
         deposit.setDelHeight(0L);
-
+        deposit.setBlockHeight(1);
+        deposit.setTime(System.currentTimeMillis());
+        deposit.setAddress(AddressTool.getAddress(ecKey.getPubKey()));
 
 
 

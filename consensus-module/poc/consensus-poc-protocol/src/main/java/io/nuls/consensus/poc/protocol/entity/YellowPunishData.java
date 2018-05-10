@@ -22,18 +22,28 @@
  * SOFTWARE.
  *
  */
-package io.nuls.consensus.tx;
+package io.nuls.consensus.poc.protocol.entity;
 
-import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.consensus.entity.RedPunishData;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.BaseNulsData;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Niels
- * @date 2017/12/4
+ * @date 2017/12/28
  */
-public class RedPunishTransaction extends Transaction<RedPunishData> {
-    public RedPunishTransaction() {
-        super(ConsensusConstant.TX_TYPE_RED_PUNISH);
+public class YellowPunishData extends BaseNulsData {
+    private List<byte[]> addressList = new ArrayList<>();
+
+    public YellowPunishData() {
+    }
+
+    public List<byte[]> getAddressList() {
+        return addressList;
+    }
+
+    public void setAddressList(List<byte[]> addressList) {
+        this.addressList = addressList;
     }
 }

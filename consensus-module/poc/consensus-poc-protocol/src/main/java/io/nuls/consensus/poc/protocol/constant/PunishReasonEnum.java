@@ -22,28 +22,50 @@
  * SOFTWARE.
  *
  */
-package io.nuls.consensus.entity;
+package io.nuls.consensus.poc.protocol.constant;
 
-import io.nuls.kernel.model.BaseNulsData;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.nuls.kernel.i18n.I18nUtils;
 
 /**
  * @author Niels
  * @date 2017/12/28
  */
-public class YellowPunishData extends BaseNulsData {
-    private List<byte[]> addressList = new ArrayList<>();
+public enum PunishReasonEnum {
+    /**
+     * Bifurcate block chain
+     */
+    BIFURCATION((short) 1, 69980),
 
-    public YellowPunishData() {
+    /**
+     * double spend
+     */
+    DOUBLE_SPEND((short) 2, 69981),;
+    private final short code;
+    private final int msgCode;
+
+    private PunishReasonEnum(short code, int msgCode) {
+        this.code = code;
+        this.msgCode = msgCode;
     }
 
-    public List<byte[]> getAddressList() {
-        return addressList;
+    public String getMessage() {
+        return I18nUtils.get(this.msgCode);
     }
 
-    public void setAddressList(List<byte[]> addressList) {
-        this.addressList = addressList;
+    public short getCode() {
+        return code;
+    }
+
+    public static PunishReasonEnum getEnum(int code) {
+        switch (code) {
+            case 1:
+                return PunishReasonEnum.BIFURCATION;
+            case 2:
+                return PunishReasonEnum.DOUBLE_SPEND;
+            default:
+                return null;
+        }
+
     }
 }

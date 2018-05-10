@@ -22,52 +22,18 @@
  * SOFTWARE.
  *
  */
-package io.nuls.consensus.entity;
+package io.nuls.consensus.poc.protocol.tx;
 
-import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
+import io.nuls.consensus.poc.protocol.entity.RedPunishData;
+import io.nuls.kernel.model.Transaction;
 
 /**
  * @author Niels
- * @date 2017/12/28
+ * @date 2017/12/4
  */
-public class RedPunishData extends BaseNulsData {
-    private long height;
-    private byte[] address;
-    private short reasonCode;
-    private byte[] evidence;
-
-    public RedPunishData() {
-    }
-
-    public long getHeight() {
-        return height;
-    }
-
-    public void setHeight(long height) {
-        this.height = height;
-    }
-
-    public byte[] getAddress() {
-        return address;
-    }
-
-    public void setAddress(byte[] address) {
-        this.address = address;
-    }
-
-    public short getReasonCode() {
-        return reasonCode;
-    }
-
-    public void setReasonCode(short reasonCode) {
-        this.reasonCode = reasonCode;
-    }
-
-    public byte[] getEvidence() {
-        return evidence;
-    }
-
-    public void setEvidence(byte[] evidence) {
-        this.evidence = evidence;
+public class RedPunishTransaction extends Transaction<RedPunishData> {
+    public RedPunishTransaction() {
+        super(ConsensusConstant.TX_TYPE_RED_PUNISH);
     }
 }

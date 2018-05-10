@@ -22,10 +22,10 @@
  * SOFTWARE.
  *
  */
-package io.nuls.consensus.tx;
+package io.nuls.consensus.poc.protocol.tx;
 
-import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.consensus.entity.YellowPunishData;
+import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
+import io.nuls.consensus.poc.protocol.entity.YellowPunishData;
 import io.nuls.kernel.model.Transaction;
 
 /**
