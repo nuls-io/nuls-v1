@@ -33,5 +33,4 @@ import io.nuls.kernel.constant.NulsConstant;
 public interface AccountLedgerConstant extends NulsConstant {
 
     short MODULE_ID_ACCOUNTLEDGER = 9;
-
 }

@@ -63,19 +63,6 @@ public class BlockHeaderPo extends BaseNulsData {
     public BlockHeaderPo() {
     }
 
-    public BlockHeaderPo(Block block) {
-        this.hash = block.getHeader().getHash();
-        this.preHash = block.getHeader().getPreHash();
-        this.merkleHash = block.getHeader().getPreHash();
-        this.time = block.getHeader().getTime();
-        this.height = block.getHeader().getHeight();
-        this.txCount = block.getHeader().getTxCount();
-        this.packingAddress = block.getHeader().getPackingAddress();
-        this.scriptSign = block.getHeader().getScriptSig();
-        this.extend = block.getHeader().getExtend();
-        this.txHashList = block.getTxHashList();
-    }
-
     public NulsDigestData getHash() {
         return hash;
     }
@@ -156,16 +143,4 @@ public class BlockHeaderPo extends BaseNulsData {
         this.txHashList = txHashList;
     }
 
-    public BlockHeader toBlockHeader() {
-        BlockHeader header = new BlockHeader();
-        header.setHash(this.getHash());
-        header.setHeight(this.getHeight());
-        header.setExtend(this.getExtend());
-        header.setPreHash(this.getPreHash());
-        header.setTime(this.getTime());
-        header.setMerkleHash(this.getMerkleHash());
-        header.setTxCount(this.getTxCount());
-        header.setScriptSig(this.getScriptSign());
-        return header;
-    }
 }

@@ -33,6 +33,7 @@ import io.nuls.kernel.model.*;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.entity.Node;
+import io.nuls.protocol.base.utils.PoConvertUtil;
 import io.nuls.protocol.message.SmallBlockMessage;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
@@ -107,7 +108,7 @@ public class BlockServiceImpl implements BlockService {
             txList.add(tx);
         }
         Block block = new Block();
-        block.setHeader(headerPo.toBlockHeader());
+        block.setHeader(PoConvertUtil.fromBlockHeaderPo(headerPo));
         block.setTxs(txList);
         return block;
     }
@@ -122,7 +123,7 @@ public class BlockServiceImpl implements BlockService {
         if (null == headerPo) {
             return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         }
-        return Result.getSuccess().setData(headerPo.toBlockHeader());
+        return Result.getSuccess().setData(PoConvertUtil.fromBlockHeaderPo(headerPo));
     }
 
     /**
@@ -138,7 +139,7 @@ public class BlockServiceImpl implements BlockService {
         if (null == headerPo) {
             return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         }
-        return Result.getSuccess().setData(headerPo.toBlockHeader());
+        return Result.getSuccess().setData(PoConvertUtil.fromBlockHeaderPo(headerPo));
     }
 
     /**
@@ -154,7 +155,7 @@ public class BlockServiceImpl implements BlockService {
         if (null == headerPo) {
             return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         }
-        return Result.getSuccess().setData(headerPo.toBlockHeader());
+        return Result.getSuccess().setData(PoConvertUtil.fromBlockHeaderPo(headerPo));
     }
 
     /**
@@ -214,7 +215,7 @@ public class BlockServiceImpl implements BlockService {
                 return result;
             }
         }
-        Result result = this.blockHeaderStorageService.saveBlockHeader(new BlockHeaderPo(block));
+        Result result = this.blockHeaderStorageService.saveBlockHeader(PoConvertUtil.toBlockHeaderPo(block));
         if (result.isFailed()) {
             this.rollbackTxList(savedList);
             return result;

@@ -25,9 +25,56 @@
 
 package io.nuls.accountLedger.storage.po;
 
+import io.nuls.accountLedger.model.TransactionInfo;
+import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.model.NulsDigestData;
+import io.protostuff.Tag;
+
 /**
  * author Facjas
  * date 2018/5/10.
  */
-public class TransactionInfoPo {
+public class TransactionInfoPo extends BaseNulsData {
+    @Tag(1)
+    private NulsDigestData txHash;
+
+    @Tag(2)
+    private int blockHeight;
+
+    @Tag(3)
+    private Long time;
+
+    @Tag(4)
+    private byte[] addresses;
+
+    @Tag(5)
+    private int txType;
+
+    public TransactionInfoPo(){
+
+    }
+
+    public TransactionInfoPo(TransactionInfo txInfo){
+        if(txInfo == null){
+            return;
+        }
+        //todo  check weather need to clone the object
+        this.txHash = txInfo.getTxHash();
+        this.blockHeight = txInfo.getBlockHeight();
+        this.time = txInfo.getTime();
+        this.addresses = txInfo.getAddresses();
+        this.txType = txInfo.getTxType();
+    }
+
+    public TransactionInfo toTransactionInfo(){
+        //todo  check weather need to clone the object
+        TransactionInfo txInfo = new TransactionInfo();
+        txInfo.setTxHash(this.txHash);
+        txInfo.setBlockHeight(this.blockHeight);
+        txInfo.setTime(this.time);
+        txInfo.setAddresses(this.addresses);
+        txInfo.setTxType(this.txType);
+        return txInfo;
+    }
+
 }

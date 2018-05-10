@@ -39,7 +39,6 @@ import io.nuls.kernel.lite.utils.ScanUtil;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
-import java.awt.image.Kernel;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -171,7 +170,7 @@ public class SpringLiteContext {
         if (null == name || name.trim().length() == 0) {
             Set<String> nameSet = CLASS_NAME_SET_MAP.get(field.getType());
             if (nameSet == null || nameSet.isEmpty()) {
-                throw new Exception("Can't find the bean named:" + name);
+                throw new Exception("Can't find the bean,field:" + field.getName());
             } else if (nameSet.size() == 1) {
                 name = nameSet.iterator().next();
             } else {
@@ -452,5 +451,9 @@ public class SpringLiteContext {
 
     public static boolean isInitSuccess() {
         return success;
+    }
+
+    public static Collection<Object> getAllBeanList() {
+        return BEAN_OK_MAP.values();
     }
 }

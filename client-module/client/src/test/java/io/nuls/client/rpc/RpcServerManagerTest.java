@@ -23,52 +23,26 @@
  *
  */
 
-package io.nuls.accountLedger.service;
+package io.nuls.client.rpc;
 
-import io.nuls.account.model.Balance;
-import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.Na;
-import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.MicroKernelBootstrap;
+import org.junit.Test;
 
-import io.nuls.accountLedger.service.AccountLedgerService;
-
-import java.util.List;
+import static org.junit.Assert.*;
 
 /**
- * author Facjas
- * date 2018/5/10.
+ * @author: Niels Wang
+ * @date: 2018/5/10
  */
-public class AccountLedgerServiceImpl implements AccountLedgerService{
+public class RpcServerManagerTest {
 
+    @Test
+    public void startServer() {
+        MicroKernelBootstrap bootstrap = MicroKernelBootstrap.getInstance();
+        bootstrap.init();
+        bootstrap.start();
 
-    @Override
-    public Result<Integer> save(Transaction tx){
-        return null;
-    }
-
-    @Override
-    public Result<Integer> saveList(List<Transaction> txs){
-        return null;
-    }
-
-    @Override
-    public Result<Integer> rollback(Transaction tx){
-        return null;
-    }
-
-    @Override
-    public Result<Integer> rollback(List<Transaction> txs){
-        return null;
-    }
-
-    @Override
-    public Result<Balance> getBalance(byte[] addres){
-        return null;
-    }
-
-    @Override
-    public List<Coin> getCoinData(byte[] addres, Na amount){
-        return null;
+        RpcServerManager.getInstance().startServer("127.0.0.1", 8080);
+        assertTrue(true);
     }
 }

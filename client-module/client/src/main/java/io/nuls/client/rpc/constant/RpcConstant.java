@@ -1,18 +1,18 @@
-/**
+/*
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,28 +20,27 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.ledger.storage.service;
 
-import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
+package io.nuls.client.rpc.constant;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/8
+ * @author: Niels Wang
+ * @date: 2018/5/10
  */
-public interface UtxoLedgerStorageService {
+public interface RpcConstant {
 
-    Result saveTx(Transaction tx);
+    String PACKAGES = "io.nuls.rpc.resources.impl";
+    int DEFAULT_PORT = 8001;
+    String DEFAULT_IP = "127.0.0.1";
 
-    Transaction getTx(NulsDigestData hash);
 
-    Result deleteTx(Transaction tx);
+    String CFG_RPC_SECTION = "client";
+    String CFG_RPC_SERVER_IP = "server.ip";
+    String CFG_RPC_SERVER_PORT ="server.port" ;
+    String CFG_RPC_REQUEST_WHITE_SHEET="request.white.sheet";
 
-    byte[] getCoinBytes(byte[] owner);
+    String WHITE_SHEET_SPLIT = ",";
 
-    byte[] getTxBytes(byte[] txBytes);
 }
