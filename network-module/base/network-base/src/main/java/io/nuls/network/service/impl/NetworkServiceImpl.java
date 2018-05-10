@@ -16,7 +16,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void removeNode(String nodeId) {
-        nodeManager.removeNode(nodeId);
+        nodeManager.removeHandshakeNode(nodeId);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public Collection<Node> getAvailableNodes() {
-        return null;
+        return nodeManager.getAvailableNodes();
     }
 
     @Override

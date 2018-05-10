@@ -1,4 +1,4 @@
-/*
+/**
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,30 +20,20 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
+package io.nuls.accountLedger.module;
 
-package io.nuls.account.constant;
 
-import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.module.BaseModuleBootstrap;
+import io.nuls.accountLedger.constant.AccountLedgerConstant;
 
 /**
- * @author: Niels Wang
- * @date: 2018/5/5
+ * @Desription:
+ * @Author: Facjas
+ * @Date: 2018/5/10
  */
-public interface AccountErrorCode {
-
-    ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("ACT000", 50000);
-    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("ACT001", 50001);
-    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED = ErrorCode.init("ACT002", 50002);
-    ErrorCode ACCOUNT_EXIST = ErrorCode.init("ACT003", 50003);
-    ErrorCode ADDRESS_ERROR = ErrorCode.init("ACT004", 50004);
-    ErrorCode ALIAS_EXIST = ErrorCode.init("ACT005", 50005);
-    ErrorCode ALIAS_ERROR = ErrorCode.init("ACT006", 50006);
-    ErrorCode ACCOUNT_ALREADY_SET_ALIAS = ErrorCode.init("ACT007", 50007);
-    ErrorCode NULL_PARAMETER = ErrorCode.init("ACT008", 50008);
-    ErrorCode DATA_PARSE_ERROR = ErrorCode.init("ACT009", 50009);
-    ErrorCode SUCCESS = ErrorCode.init("ACT010", 50010);
-    ErrorCode FAILED = ErrorCode.init("ACT011", 50011);
-    ErrorCode PARAMETER_ERROR = ErrorCode.init("ACT012", 50012);
+public abstract class AbstractAccountLedgerModule extends BaseModuleBootstrap {
+    public AbstractAccountLedgerModule() {
+        super(AccountLedgerConstant.MODULE_ID_ACCOUNTLEDGER);
+    }
 }
