@@ -10,6 +10,7 @@ import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.core.tools.crypto.ECKey;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
@@ -41,6 +42,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     private AccountStorageService accountStorageService;
+
+    //@Autowired
+    //private LedgerService ledgerService;
 
     @Override
     public Result<List<Account>> createAccount(int count, String password) {
@@ -96,7 +100,26 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Boolean> removeAccount(String address, String password) {
-        return null;
+        Account account = getAccountPrivate(address);
+        if (account == null) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        try {
+            if (!account.decrypt(password)) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
+        } catch (NulsException e) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+        }
+        accountStorageService.removeAccount(account.getAddress());
+        accountCacheService.removeAccount(account.getAddress());
+        AccountConstant.LOCAL_ADDRESS_LIST.remove(address);
+        if (AccountConstant.DEFAULT_ACCOUNT_ADDRESS != null && AccountConstant.DEFAULT_ACCOUNT_ADDRESS.equals(address)) {
+            AccountConstant.DEFAULT_ACCOUNT_ADDRESS = null;
+        }
+        //to do 等新接口!!!!
+        //ledgerService.removeLocalTxs(address);
+        return Result.getSuccess();
     }
 
     @Override
@@ -114,6 +137,12 @@ public class AccountServiceImpl implements AccountService {
         return Result.getSuccess().setData(getAccountPrivate(address));
     }
 
+    /**
+     * 根据账户地址字符串,获取账户对象(内部调用)
+     * Get account object based on account address string
+     * @param address
+     * @return Account
+     */
     private Account getAccountPrivate(String address) {
         AssertUtil.canNotEmpty(address, "");
         Account account = accountCacheService.getAccountByAddress(address);
@@ -122,37 +151,66 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Account> getAccount(Address address) {
-        return null;
+        if (null == address ) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        Account account = getAccountPrivate(address.toString());
+        return Result.getSuccess().setData(account);
     }
 
     @Override
     public Result<Address> getAddress(String pubKey) {
-        return null;
+        AssertUtil.canNotEmpty(pubKey, "");
+        try {
+            Address address = AccountTool.newAddress(ECKey.fromPublicOnly(Hex.decode(pubKey)));
+            return Result.getSuccess().setData(address);
+        } catch (NulsException e) {
+            Log.error(e);
+            return null;
+        }
     }
 
     @Override
     public Result<Address> getAddress(byte[] pubKey) {
-        return null;
+        AssertUtil.canNotEmpty(pubKey, "");
+        try {
+            Address address = AccountTool.newAddress(pubKey);
+            return Result.getSuccess().setData(address);
+        } catch (NulsException e) {
+            Log.error(e);
+            return null;
+        }
     }
 
     @Override
     public Result<Boolean> isEncrypted(Account account) {
-        return null;
+        if(null == account || null == account.getAddress()){
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        if(!accountCacheService.contains(account.getAddress().getBase58Bytes())){
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        return new Result(account.isEncrypted(), null);
+
     }
 
     @Override
     public Result<Boolean> isEncrypted(Address address) {
-        return null;
+        return isEncrypted(address.toString());
     }
 
     @Override
     public Result<Boolean> isEncrypted(String address) {
-        return null;
+        Account account = getAccountPrivate(address);
+        if(null == account){
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        return new Result(account.isEncrypted(), null);
     }
 
     @Override
-    public Result verifyAddressFormat(String address) {
-        return null;
+    public Result<Boolean> verifyAddressFormat(String address) {
+        return new Result(Address.validAddress(address), null);
     }
 
     @Override
