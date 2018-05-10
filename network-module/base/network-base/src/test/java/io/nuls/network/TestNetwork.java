@@ -28,7 +28,9 @@ public class TestNetwork {
             dbModuleBootstrap.init();
             dbModuleBootstrap.start();
 
-
+            NettyNetworkModuleBootstrap networkModuleBootstrap = new NettyNetworkModuleBootstrap();
+            networkModuleBootstrap.init();
+            networkModuleBootstrap.start();
         } while (false);
     }
 

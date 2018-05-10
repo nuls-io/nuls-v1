@@ -5,12 +5,10 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.lite.annotation.Autowired;
-import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.thread.manager.TaskManager;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.protocol.message.NetworkMessageBody;
@@ -48,16 +46,18 @@ public class NodeManager implements Runnable {
 
     private boolean running = false;
 
+    private ConnectionManager connectionManager;
+
+    private NodeDiscoverHandler nodeDiscoverHandler;
+
     private NetworkStorage networkStorage;
-
-    private ConnectionManager connectionManager = ConnectionManager.getInstance();
-
-    private NodeDiscoverHandler nodeDiscoverHandler = NodeDiscoverHandler.getInstance();
 
     /**
      * 初始化主动连接节点组合(outGroup)被动连接节点组(inGroup)
      */
     public void init() {
+        connectionManager = ConnectionManager.getInstance();
+        nodeDiscoverHandler = NodeDiscoverHandler.getInstance();
         // init default NodeGroup
         NodeGroup inNodes = new NodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
         NodeGroup outNodes = new NodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);

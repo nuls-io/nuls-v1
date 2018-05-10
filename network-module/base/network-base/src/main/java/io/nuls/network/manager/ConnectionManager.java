@@ -38,13 +38,15 @@ public class ConnectionManager {
 
     private NettyServer nettyServer;
 
-    private NodeManager nodeManager = NodeManager.getInstance();
+    private NodeManager nodeManager;
 
-    private BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
+    private BroadcastHandler broadcastHandler;
 
     private NetworkMessageHandlerFactory messageHandlerFactory = NetworkMessageHandlerFactory.getInstance();
 
     public void init() {
+        nodeManager = NodeManager.getInstance();
+        broadcastHandler = BroadcastHandler.getInstance();
         nettyServer = new NettyServer(network.getPort());
         nettyServer.init();
 //        eventBusService = NulsContext.getServiceBean(EventBusService.class);

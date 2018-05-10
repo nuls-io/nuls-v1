@@ -24,6 +24,9 @@ public class NetworkStorage {
 
     public List<Node> getLocalNodeList(int size) {
         List<Node> nodeList = dbService.values(NetworkConstant.NODE_DB_AREA, Node.class);
+        if(nodeList == null) {
+            nodeList = new ArrayList<>();
+        }
         if (size > nodeList.size()) {
             size = nodeList.size();
         }
@@ -33,6 +36,9 @@ public class NetworkStorage {
     public List<Node> getLocalNodeList(int size, Set<String> ipSet) {
         List<Node> nodeList = new ArrayList<>();
         List<Node> localList = dbService.values(NetworkConstant.NODE_DB_AREA, Node.class);
+        if(localList == null) {
+            localList = new ArrayList<>();
+        }
         int count = 0;
         for (int i = localList.size() - 1; i >= 0; i--) {
             Node node = localList.get(i);
