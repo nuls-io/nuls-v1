@@ -23,6 +23,7 @@
  */
 package io.nuls.db.model;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -30,13 +31,20 @@ import java.util.Objects;
  * @Author: PierreLuo
  * @Date: 2018/5/7
  */
-public class Entry<K, V> {
+public class Entry<K, V> implements Comparable<K> {
     final K key;
     V value;
+    Comparator<K> comparator;
 
     public Entry(K key, V value) {
         this.key = key;
         this.value = value;
+    }
+
+    public Entry(K key, V value, Comparator<K> comparator) {
+        this.key = key;
+        this.value = value;
+        this.comparator = comparator;
     }
 
     public final K getKey()        { return key; }
@@ -57,5 +65,10 @@ public class Entry<K, V> {
                 return true;
         }
         return false;
+    }
+
+    @Override
+    public int compareTo(K thatKey) {
+        return comparator.compare(key, thatKey);
     }
 }

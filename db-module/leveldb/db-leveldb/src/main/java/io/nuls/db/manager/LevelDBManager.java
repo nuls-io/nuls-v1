@@ -29,23 +29,23 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.model.ModelWrapper;
-import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Result;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.runtime.RuntimeSchema;
-import org.iq80.leveldb.*;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBFactory;
+import org.iq80.leveldb.DBIterator;
+import org.iq80.leveldb.Options;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.nuls.core.tools.str.StringUtils.asString;
 import static io.nuls.core.tools.str.StringUtils.bytes;
 
 /**
@@ -58,6 +58,7 @@ public class LevelDBManager {
     private static int max;
 
     private static final ConcurrentHashMap<String, DB> AREAS = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Comparator<byte[]>> AREAS_COMPARATOR = new ConcurrentHashMap<>();
 
     private static final Map<Class, RuntimeSchema> SCHEMA_MAP = new ConcurrentHashMap<>();
 
@@ -269,7 +270,9 @@ public class LevelDBManager {
             String filePath = dataPath + File.separator + areaName + File.separator + BASE_DB_NAME;
             destroyDB(filePath);
             AREAS.remove(areaName);
-            delete(BASE_AREA_NAME, areaName);
+            AREAS_COMPARATOR.remove(areaName);
+            delete(BASE_AREA_NAME, bytes(areaName + "-comparator"));
+            delete(BASE_AREA_NAME, bytes(areaName + "-cacheSize"));
             result = Result.getSuccess();
         } catch (Exception e) {
             Log.error("error destroy area: " + areaName, e);
@@ -294,6 +297,7 @@ public class LevelDBManager {
         for (Map.Entry<String, DB> entry : entries) {
             try {
                 AREAS.remove(entry.getKey());
+                AREAS_COMPARATOR.remove(entry.getKey());
                 entry.getValue().close();
             } catch (Exception e) {
                 Log.warn("close leveldb error", e);
@@ -303,10 +307,11 @@ public class LevelDBManager {
 
     /**
      * close a area
-     * 关闭所有数据区域
+     * 关闭指定数据区域
      */
     public static void closeArea(String area) {
         try {
+            AREAS_COMPARATOR.remove(area);
             DB db = AREAS.remove(area);
             db.close();
         } catch (IOException e) {
@@ -328,17 +333,17 @@ public class LevelDBManager {
         Options options = new Options().createIfMissing(false);
 
         /*
-         * Area的自定义比较器，启动数据库时获取并装载它，否则，若Area自定义了比较器，重启数据库时，此Area会启动失败，失败异常：java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
+         * Area的自定义比较器，启动数据库时获取并装载它
          * Area的自定义cacheSize，启动数据库时获取并装载它，否则，启动已存在的Area时会丢失之前的cacheSize设置。
-         * Area of custom comparator, you start the database access and loaded it, otherwise, if the Area custom the comparator, this time you restart the database, this Area will start failure, failure exception: java.lang.IllegalArgumentException: Expected user comparator leveldb. BytewiseComparator to match existing database comparator
+         * Area of custom comparator, you start the database access and loaded it
          * the custom cacheSize of the Area will be retrieved and loaded on the database is started, otherwise, the previous cacheSize setting will be lost when the existing Area is started.
          */
         String areaName = getAreaNameFromDbPath(dbPath);
-        DBComparator dbComparator = getModel(BASE_AREA_NAME, areaName + "-comparator", DBComparator.class);
-        if (dbComparator != null) {
-            options.comparator(dbComparator);
+        Comparator comparator = getModel(BASE_AREA_NAME, bytes(areaName + "-comparator"), Comparator.class);
+        if (comparator != null) {
+            AREAS_COMPARATOR.put(areaName, comparator);
         }
-        Long cacheSize = getModel(BASE_AREA_NAME, areaName + "-cacheSize", Long.class);
+        Long cacheSize = getModel(BASE_AREA_NAME, bytes(areaName + "-cacheSize"), Long.class);
         if (cacheSize != null) {
             options.cacheSize(cacheSize);
         }
@@ -348,10 +353,10 @@ public class LevelDBManager {
 
     /**
      * 装载数据库
-     * 如果Area自定义了比较器，保存area的自定义比较器，下次启动数据库时获取并装载它，否则，下次重启数据库时，此Area会启动失败，失败异常：java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
+     * 如果Area自定义了比较器，保存area的自定义比较器，下次启动数据库时获取并装载它
      * 如果Area自定义了cacheSize，保存area的自定义cacheSize，下次启动数据库时获取并装载它，否则，启动已存在的Area时会丢失之前的cacheSize设置。
      * load database
-     * If the area custom comparator, save area define the comparator, the next time you start the database access and loaded it, otherwise, the next time you restart the database, this area will start failure, failure exception: java.lang.IllegalArgumentException: Expected user comparator leveldb.BytewiseComparator to match existing database comparator
+     * If the area custom comparator, save area define the comparator, the next time you start the database access and loaded it
      * If the area custom cacheSize, save the area's custom cacheSize, get and load it the next time you start the database, or you'll lose the cacheSize setting before starting the existing area.
      *
      * @param dbPath
@@ -366,29 +371,12 @@ public class LevelDBManager {
         String areaName = getAreaNameFromDbPath(dbPath);
         Options options = new Options().createIfMissing(createIfMissing);
         if (cacheSize != null) {
-            putModel(BASE_AREA_NAME, areaName + "-cacheSize", cacheSize);
+            putModel(BASE_AREA_NAME, bytes(areaName + "-cacheSize"), cacheSize);
             options.cacheSize(cacheSize);
         }
         if (comparator != null) {
-            DBComparator dbComparator = new DBComparator() {
-                public int compare(byte[] key1, byte[] key2) {
-                    return comparator.compare(key1, key2);
-                }
-
-                public String name() {
-                    return areaName + "-key-comparator";
-                }
-
-                public byte[] findShortestSeparator(byte[] start, byte[] limit) {
-                    return start;
-                }
-
-                public byte[] findShortSuccessor(byte[] key) {
-                    return key;
-                }
-            };
-            putModel(BASE_AREA_NAME, areaName + "-comparator", dbComparator);
-            options.comparator(dbComparator);
+            putModel(BASE_AREA_NAME, bytes(areaName + "-comparator"), comparator);
+            AREAS_COMPARATOR.put(areaName, comparator);
         }
         DBFactory factory = Iq80DBFactory.factory;
         return factory.open(file, options);
@@ -413,32 +401,6 @@ public class LevelDBManager {
             return false;
         }
         return true;
-    }
-
-    @Deprecated
-    private static byte[] bytes_(String str) {
-        if (StringUtils.isBlank(str)) {
-            return null;
-        }
-        try {
-            return str.getBytes(NulsConfig.DEFAULT_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            Log.error(e);
-            return null;
-        }
-    }
-
-    @Deprecated
-    private static String asString_(byte[] bytes) {
-        if (bytes == null) {
-            return null;
-        }
-        try {
-            return new String(bytes, NulsConfig.DEFAULT_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            Log.error(e);
-            return null;
-        }
     }
 
     public static String[] listArea() {
@@ -473,6 +435,14 @@ public class LevelDBManager {
         }
     }
 
+    /**
+     * 弃用的方法/Deprecated method
+     * @param area
+     * @param key
+     * @param value
+     * @return
+     */
+    @Deprecated
     public static Result put(String area, String key, String value) {
         if (!baseCheckArea(area)) {
             return new Result(true, "KV_AREA_NOT_EXISTS");
@@ -490,6 +460,14 @@ public class LevelDBManager {
         }
     }
 
+    /**
+     * 弃用的方法/Deprecated method
+     * @param area
+     * @param key
+     * @param value
+     * @return
+     */
+    @Deprecated
     public static Result put(String area, byte[] key, String value) {
         if (!baseCheckArea(area)) {
             return new Result(true, "KV_AREA_NOT_EXISTS");
@@ -507,6 +485,15 @@ public class LevelDBManager {
         }
     }
 
+    /**
+     * 弃用的方法/Deprecated method
+     * @param area
+     * @param key
+     * @param value
+     * @param <T>
+     * @return
+     */
+    @Deprecated
     public static <T> Result putModel(String area, String key, T value) {
         return putModel(area, bytes(key), value);
     }
@@ -535,6 +522,13 @@ public class LevelDBManager {
         }
     }
 
+    /**
+     * 弃用的方法/Deprecated method
+     * @param area
+     * @param key
+     * @return
+     */
+    @Deprecated
     public static Result delete(String area, String key) {
         if (!baseCheckArea(area)) {
             return new Result(true, "KV_AREA_NOT_EXISTS");
@@ -569,6 +563,13 @@ public class LevelDBManager {
         }
     }
 
+    /**
+     * 弃用的方法/Deprecated method
+     * @param area
+     * @param key
+     * @return
+     */
+    @Deprecated
     public static byte[] get(String area, String key) {
         if (!baseCheckArea(area)) {
             return null;
@@ -599,6 +600,13 @@ public class LevelDBManager {
         }
     }
 
+    /**
+     * 弃用的方法/Deprecated method
+     * @param area
+     * @param key
+     * @return
+     */
+    @Deprecated
     public static Object getModel(String area, String key) {
         return getModel(area, bytes(key));
     }
@@ -607,6 +615,15 @@ public class LevelDBManager {
         return getModel(area, key, null);
     }
 
+    /**
+     * 弃用的方法/Deprecated method
+     * @param area
+     * @param key
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    @Deprecated
     public static <T> T getModel(String area, String key, Class<T> clazz) {
         return getModel(area, bytes(key), clazz);
     }
@@ -679,6 +696,10 @@ public class LevelDBManager {
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 keyList.add(iterator.peekNext().getKey());
             }
+            Comparator<byte[]> comparator = AREAS_COMPARATOR.get(area);
+            if(comparator != null) {
+                keyList.sort(comparator);
+            }
             return keyList;
         } catch (Exception e) {
             Log.error(e);
@@ -741,11 +762,21 @@ public class LevelDBManager {
             iterator = db.iterator();
             byte[] key, bytes;
             Map.Entry<byte[], byte[]> entry;
+            Comparator<byte[]> comparator = AREAS_COMPARATOR.get(area);
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 entry = iterator.peekNext();
                 key = entry.getKey();
                 bytes = entry.getValue();
-                entryList.add(new Entry<byte[], byte[]>(key, bytes));
+                entryList.add(new Entry<byte[], byte[]>(key, bytes, comparator));
+            }
+            // 如果自定义了比较器，则执行排序
+            if(comparator != null) {
+                entryList.sort(new Comparator<Entry<byte[], byte[]>>() {
+                    @Override
+                    public int compare(Entry<byte[], byte[]> o1, Entry<byte[], byte[]> o2) {
+                        return o1.compareTo(o2.getKey());
+                    }
+                });
             }
         } catch (Exception e) {
             Log.error(e);
@@ -775,13 +806,23 @@ public class LevelDBManager {
             iterator = db.iterator();
             byte[] key, bytes;
             Map.Entry<byte[], byte[]> entry;
+            Comparator<byte[]> comparator = AREAS_COMPARATOR.get(area);
             T t = null;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 t = null;
                 entry = iterator.peekNext();
                 key = entry.getKey();
                 t = getModel(area, entry.getKey(), clazz);
-                entryList.add(new Entry<byte[], T>(key, t));
+                entryList.add(new Entry<byte[], T>(key, t, comparator));
+            }
+            // 如果自定义了比较器，则执行排序
+            if(comparator != null) {
+                entryList.sort(new Comparator<Entry<byte[], T>>() {
+                    @Override
+                    public int compare(Entry<byte[], T> o1, Entry<byte[], T> o2) {
+                        return o1.compareTo(o2.getKey());
+                    }
+                });
             }
         } catch (Exception e) {
             Log.error(e);
@@ -803,28 +844,43 @@ public class LevelDBManager {
         if (!baseCheckArea(area)) {
             return null;
         }
+        try {
+            Comparator<byte[]> comparator = AREAS_COMPARATOR.get(area);
+            if(comparator == null) {
+                return valuesInner(area, clazz);
+            } else {
+                List<Entry<byte[], T>> entryList = entryList(area, clazz);
+                List<T> resultList = new ArrayList<>();
+                if(entryList != null) {
+                    entryList.stream().forEach(entry -> resultList.add(entry.getValue()));
+                }
+                return resultList;
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
+    }
+
+    private static <T> List<T> valuesInner(String area, Class<T> clazz) {
+        if (!baseCheckArea(area)) {
+            return null;
+        }
         DBIterator iterator = null;
         List<T> list = null;
         try {
             DB db = AREAS.get(area);
             list = new ArrayList<>();
             iterator = db.iterator();
-            Set<String> keySet = new HashSet<>();
-            String key;
-            byte[] bytes;
+            byte[] key, bytes;
             Map.Entry<byte[], byte[]> entry;
             T t = null;
             for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
                 t = null;
                 entry = iterator.peekNext();
-                key = asString(entry.getKey());
-                if (keySet.add(key)) {
-                    t = getModel(area, entry.getKey(), clazz);
-                    list.add(t);
-                }
+                t = getModel(area, entry.getKey(), clazz);
+                list.add(t);
             }
-            keySet.clear();
-            keySet = null;
         } catch (Exception e) {
             Log.error(e);
             return null;
