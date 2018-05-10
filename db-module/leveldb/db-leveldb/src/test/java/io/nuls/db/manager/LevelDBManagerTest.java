@@ -228,7 +228,6 @@ public class LevelDBManagerTest {
         put(area, bytes("set03"), bytes("set03value"));
         List<byte[]> keys = keyList(area);
         Assert.assertEquals(6, keys.size());
-        int i = 0;
         String contactAllKeys = "";
         for (byte[] key : keys) {
             contactAllKeys += asString(key);
@@ -237,9 +236,17 @@ public class LevelDBManagerTest {
         Assert.assertEquals("set01set02set04set05set06set03", contactAllKeys);
 
         closeArea(area);
-        DBComparator dbComparator = getModel(getBaseAreaName(), bytes(area + "-comparator"), DBComparator.class);
+        Comparator comparator = getModel(getBaseAreaName(), bytes(area + "-comparator"), Comparator.class);
         Long cacheSize = getModel(getBaseAreaName(), bytes(area + "-cacheSize"), Long.class);
-        Assert.assertTrue(createArea(area, cacheSize, dbComparator).isSuccess());
+        Assert.assertTrue(createArea(area, cacheSize, comparator).isSuccess());
+        keys = keyList(area);
+        Assert.assertEquals(6, keys.size());
+        contactAllKeys = "";
+        for (byte[] key : keys) {
+            contactAllKeys += asString(key);
+        }
+        System.out.println(contactAllKeys);
+        Assert.assertEquals("set01set02set04set05set06set03", contactAllKeys);
         destroyArea(area);
     }
 
@@ -268,9 +275,9 @@ public class LevelDBManagerTest {
             i++;
         }
         closeArea(area);
-        DBComparator dbComparator = getModel(getBaseAreaName(), bytes(area + "-comparator"), DBComparator.class);
+        Comparator comparator = getModel(getBaseAreaName(), bytes(area + "-comparator"), Comparator.class);
         Long cacheSize = getModel(getBaseAreaName(), bytes(area + "-cacheSize"), Long.class);
-        Assert.assertTrue(createArea(area, cacheSize, dbComparator).isSuccess());
+        Assert.assertTrue(createArea(area, cacheSize, comparator).isSuccess());
         destroyArea(area);
     }
 
