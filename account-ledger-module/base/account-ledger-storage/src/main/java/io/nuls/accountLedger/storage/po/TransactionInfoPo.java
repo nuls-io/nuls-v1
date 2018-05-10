@@ -25,10 +25,14 @@
 
 package io.nuls.accountLedger.storage.po;
 
+import io.nuls.account.model.Address;
 import io.nuls.accountLedger.model.TransactionInfo;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Transaction;
 import io.protostuff.Tag;
+
+import java.util.List;
 
 /**
  * author Facjas
@@ -39,10 +43,10 @@ public class TransactionInfoPo extends BaseNulsData {
     private NulsDigestData txHash;
 
     @Tag(2)
-    private int blockHeight;
+    private long blockHeight;
 
     @Tag(3)
-    private Long time;
+    private long time;
 
     @Tag(4)
     private byte[] addresses;
@@ -50,12 +54,31 @@ public class TransactionInfoPo extends BaseNulsData {
     @Tag(5)
     private int txType;
 
-    public TransactionInfoPo(){
+    public TransactionInfoPo() {
 
     }
 
-    public TransactionInfoPo(TransactionInfo txInfo){
-        if(txInfo == null){
+    public TransactionInfoPo(Transaction tx) {
+        if (tx == null) {
+            return;
+        }
+        this.txHash = tx.getHash();
+        this.blockHeight = tx.getBlockHeight();
+        this.time = tx.getTime();
+        List<byte[]> addressList = tx.getAllRelativeAddress();
+
+        byte[] addresses = new byte[addressList.size() * Address.HASH_LENGTH];
+        for (int i = 0; i < addressList.size(); i++) {
+            System.arraycopy(addressList.get(i), 0, addressList, Address.HASH_LENGTH * i, Address.HASH_LENGTH);
+        }
+        this.addresses = addresses;
+
+        this.txType = tx.getType();
+    }
+
+
+    public TransactionInfoPo(TransactionInfo txInfo) {
+        if (txInfo == null) {
             return;
         }
         //todo  check weather need to clone the object
@@ -66,7 +89,7 @@ public class TransactionInfoPo extends BaseNulsData {
         this.txType = txInfo.getTxType();
     }
 
-    public TransactionInfo toTransactionInfo(){
+    public TransactionInfo toTransactionInfo() {
         //todo  check weather need to clone the object
         TransactionInfo txInfo = new TransactionInfo();
         txInfo.setTxHash(this.txHash);

@@ -24,7 +24,17 @@
 
 package io.nuls.accountLedger.model;
 
+import io.nuls.account.model.Address;
+import io.nuls.accountLedger.constant.AccountLedgerErrorCode;
+import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.Transaction;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * author Facjas
@@ -33,7 +43,7 @@ import io.nuls.kernel.model.NulsDigestData;
 public class TransactionInfo {
 
     private NulsDigestData txHash;
-    private int blockHeight;
+    private long blockHeight;
     private long time;
     private byte[] addresses;
     private int txType;
@@ -46,11 +56,11 @@ public class TransactionInfo {
         this.txHash = txHash;
     }
 
-    public int getBlockHeight() {
+    public long getBlockHeight() {
         return blockHeight;
     }
 
-    public void setBlockHeight(int blockHeight) {
+    public void setBlockHeight(long blockHeight) {
         this.blockHeight = blockHeight;
     }
 

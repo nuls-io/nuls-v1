@@ -46,6 +46,16 @@ import java.util.List;
  */
 public class ConsensusAccountServiceImpl implements AccountService {
     @Override
+    public Result<List<Account>> createAccount(int count) {
+        return null;
+    }
+
+    @Override
+    public Result<List<Account>> createAccount() {
+        return null;
+    }
+
+    @Override
     public Result<List<Account>> createAccount(int count, String password) {
         return null;
     }

@@ -48,6 +48,10 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
         return batch.executeBatch();
     }
 
+    @Override
+    public Result saveAccount(AccountPo po) {
+        return dbService.put(AccountStorageConstant.DB_AREA_ACCOUNT, po.getAddressObj().getBase58Bytes(), po.serialize());
+    }
 
     @Override
     public Result removeAccount(Address address) {
@@ -67,5 +71,16 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
             list.add(account);
         }
         return Result.getSuccess().setData(list) ;
+    }
+
+    @Override
+    public Result<AccountPo> getAccount(Address address) {
+        byte[] poByte = dbService.get(AccountStorageConstant.DB_AREA_ACCOUNT, address.getBase58Bytes());
+        if(null == poByte || poByte.length<=0){
+            return Result.getFailed();
+        }
+        AccountPo account = new AccountPo();
+        account.parse(poByte);
+        return Result.getSuccess().setData(account);
     }
 }
