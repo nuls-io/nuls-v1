@@ -34,7 +34,6 @@ public interface TransactionErrorCode {
     /*
      * ------------  transaction Exception code   -------------
      */
-    //TODO pierre 资源文件修改
     ErrorCode UTXO_UNUSABLE = ErrorCode.init("LED001", 12001);
     ErrorCode UTXO_STATUS_CHANGE = ErrorCode.init("LED002", 12002);
     ErrorCode BALANCE_NOT_ENOUGH = ErrorCode.init("LED003", 12003);

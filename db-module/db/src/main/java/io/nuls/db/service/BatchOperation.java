@@ -32,9 +32,30 @@ import io.nuls.kernel.model.Result;
  */
 public interface BatchOperation {
 
+    /**
+     * 增加或者更新操作
+     * Add or update operations.
+     *
+     * @param key
+     * @param value
+     * @return
+     */
     Result put(byte[] key, byte[] value);
 
+    /**
+     * 删除操作
+     * Delete operation
+     *
+     * @param key
+     * @return
+     */
     Result delete(byte[] key);
 
+    /**
+     * 执行批量操作
+     * Perform batch operation
+     *
+     * @return
+     */
     Result executeBatch();
 }
