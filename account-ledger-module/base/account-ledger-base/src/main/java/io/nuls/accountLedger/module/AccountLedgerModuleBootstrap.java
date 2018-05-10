@@ -25,6 +25,7 @@ package io.nuls.accountLedger.module;
 
 
 import io.nuls.accountLedger.module.AbstractAccountLedgerModule;
+import io.nuls.kernel.thread.manager.TaskManager;
 
 
 /**
@@ -36,17 +37,18 @@ public class AccountLedgerModuleBootstrap extends AbstractAccountLedgerModule {
 
     @Override
     public void init() {
-
+        //prepare cache
+        //load local account list into cache
     }
 
     @Override
     public void start() {
-
+        //start balance thread
     }
 
     @Override
     public void shutdown() {
-
+        TaskManager.shutdownByModuleId(this.getModuleId());
     }
 
     @Override

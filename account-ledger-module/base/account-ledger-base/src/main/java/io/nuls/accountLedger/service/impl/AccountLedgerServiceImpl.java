@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.accountLedger.service;
+package io.nuls.accountLedger.service.impl;
 
 import io.nuls.account.model.Balance;
 import io.nuls.kernel.model.Coin;
@@ -69,6 +69,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService{
 
     @Override
     public List<Coin> getCoinData(byte[] addres, Na amount){
+        return null;
+    }
+
+    protected boolean isLocalTransaction(Transaction tx){
+        return false;
+    }
+
+    protected List<Transaction> getLocalTransaction(List<Transaction> txs){
         return null;
     }
 }
