@@ -26,7 +26,7 @@
 
 package io.nuls.consensus.poc.model;
 
-import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
 import io.nuls.kernel.model.Na;
 import org.junit.Test;
 

@@ -25,7 +25,7 @@
  */
 package io.nuls.consensus.poc.process;
 
-import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.config.ConsensusConfig;
@@ -38,8 +38,8 @@ import io.nuls.consensus.poc.model.BlockData;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
-import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.util.ConsensusTool;
+import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;

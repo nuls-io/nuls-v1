@@ -40,7 +40,7 @@ import io.nuls.kernel.model.Result;
  * Created by ln on 2018/5/8.
  */
 @Component
-public class OraphanStorageServiceImpl implements OraphanStorageService , InitializingBean {
+public class OraphanStorageServiceImpl implements OraphanStorageService, InitializingBean {
 
     private final String DB_NAME = "oraphan";
 

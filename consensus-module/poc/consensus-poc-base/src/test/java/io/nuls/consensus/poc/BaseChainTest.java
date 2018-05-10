@@ -26,16 +26,16 @@
 
 package io.nuls.consensus.poc;
 
-import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.consensus.entity.Agent;
-import io.nuls.consensus.entity.Deposit;
+import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
+import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
-import io.nuls.consensus.tx.JoinConsensusTransaction;
-import io.nuls.consensus.tx.RegisterAgentTransaction;
+import io.nuls.consensus.poc.protocol.tx.JoinConsensusTransaction;
+import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;

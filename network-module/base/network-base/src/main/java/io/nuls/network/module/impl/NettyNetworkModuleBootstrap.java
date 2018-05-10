@@ -2,11 +2,12 @@ package io.nuls.network.module.impl;
 
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.cfg.NulsConfig;
-import io.nuls.kernel.lite.annotation.Autowired;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;
+import io.nuls.network.message.filter.MessageFilterChain;
+import io.nuls.network.message.filter.impl.MagicNumberFilter;
 import io.nuls.network.module.AbstractNetworkModule;
 
 import java.util.ArrayList;
@@ -16,17 +17,17 @@ import static io.nuls.network.constant.NetworkConstant.*;
 
 public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
 
-    @Autowired
-    private ConnectionManager connectionManager;
+    private ConnectionManager connectionManager = ConnectionManager.getInstance();
 
-    @Autowired
-    private NodeManager nodesManager;
+    private NodeManager nodeManager = NodeManager.getInstance();
 
     @Override
     public void init() {
         initNetworkParam();
+
+        initOther();
         connectionManager.init();
-        nodesManager.init();
+        nodeManager.init();
     }
 
     private void initNetworkParam() {
@@ -44,6 +45,11 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
         networkParam.setSeedIpList(ipList);
     }
 
+    private void initOther() {
+        MagicNumberFilter.getInstance().addMagicNum(NetworkParam.getInstance().getPacketMagic());
+        MessageFilterChain.getInstance().addFilter(MagicNumberFilter.getInstance());
+    }
+
     @Override
     public void start() {
         connectionManager.start();
@@ -52,7 +58,7 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        nodesManager.start();
+        nodeManager.start();
     }
 
     @Override

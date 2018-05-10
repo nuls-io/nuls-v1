@@ -319,7 +319,6 @@ public class LevelDBManager {
 
     /**
      * @param dbPath
-     * @param createIfMissing
      * @return
      * @throws IOException
      */

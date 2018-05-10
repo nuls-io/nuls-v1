@@ -57,6 +57,10 @@ public class Node extends BaseNulsData {
 
     private Integer failCount;
 
+    private Long bestBlockHeight;
+
+    private NulsDigestData bestBlockHash;
+
     private Set<String> groupSet;
 
     /**
@@ -318,5 +322,13 @@ public class Node extends BaseNulsData {
 
     public NulsDigestData getBestBlockHash() {
         return null;
+    }
+
+    public void setBestBlockHeight(Long bestBlockHeight) {
+        this.bestBlockHeight = bestBlockHeight;
+    }
+
+    public void setBestBlockHash(NulsDigestData bestBlockHash) {
+        this.bestBlockHash = bestBlockHash;
     }
 }

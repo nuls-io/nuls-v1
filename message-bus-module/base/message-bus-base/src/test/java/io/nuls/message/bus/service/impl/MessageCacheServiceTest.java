@@ -95,7 +95,7 @@ public class MessageCacheServiceTest {
      * 需要分别验证[cacheMapRecieved集合]和[cacheMapSended集合]
      * 在销毁前缓存数据不为0(如果为0则先添加缓存数据), 销毁后缓存数为0
      *
-     * Test case destroying the cache
+     * TestNetwork case destroying the cache
      * Verify cacheMapRecieved collection and cacheMapSended collection
      * cache data before destroy is not 0(add cached data for 0 first),
      * and the cache number is 0 after destroy.

@@ -28,14 +28,13 @@ package io.nuls.consensus.poc.util;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
 import io.nuls.account.service.AccountService;
-import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.consensus.entity.Deposit;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.model.BlockData;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.core.tools.calc.DoubleUtils;
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -194,7 +193,7 @@ public class ConsensusTool {
             }
         });
 
-        Coin agentReword = new Coin(self.getAgentAddress(), Na.valueOf(DoubleUtils.longValue(caReward)), unlockHeight);
+        Coin agentReword = new Coin(self.getRewardAddress(), Na.valueOf(DoubleUtils.longValue(caReward)), unlockHeight);
         rewardList.add(0, agentReword);
 
         return rewardList;

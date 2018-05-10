@@ -27,11 +27,11 @@
 package io.nuls.consensus.poc.process;
 
 import io.nuls.consensus.poc.BaseChainTest;
-import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
-import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.consensus.poc.constant.BlockContainerStatus;
+import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.kernel.model.Block;
 import org.junit.Before;

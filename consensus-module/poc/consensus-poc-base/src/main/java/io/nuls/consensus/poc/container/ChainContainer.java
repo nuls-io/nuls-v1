@@ -26,19 +26,19 @@
 
 package io.nuls.consensus.poc.container;
 
-import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.consensus.entity.Agent;
-import io.nuls.consensus.entity.Deposit;
 import io.nuls.consensus.poc.manager.RoundManager;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.po.PunishLogPo;
-import io.nuls.consensus.tx.CancelDepositTransaction;
-import io.nuls.consensus.tx.JoinConsensusTransaction;
-import io.nuls.consensus.tx.RegisterAgentTransaction;
-import io.nuls.consensus.tx.StopAgentTransaction;
+import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
+import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
+import io.nuls.consensus.poc.protocol.tx.JoinConsensusTransaction;
+import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
+import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;

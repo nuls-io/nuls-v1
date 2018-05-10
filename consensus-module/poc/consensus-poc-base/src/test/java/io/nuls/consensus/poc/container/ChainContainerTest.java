@@ -26,12 +26,12 @@
 
 package io.nuls.consensus.poc.container;
 
-import io.nuls.consensus.entity.Agent;
-import io.nuls.consensus.entity.Deposit;
+import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.BaseChainTest;
 import io.nuls.consensus.poc.model.Chain;
-import io.nuls.consensus.tx.JoinConsensusTransaction;
-import io.nuls.consensus.tx.RegisterAgentTransaction;
+import io.nuls.consensus.poc.protocol.tx.JoinConsensusTransaction;
+import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;

@@ -26,12 +26,12 @@
 
 package io.nuls.consensus.poc.scheduler;
 
-import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.manager.CacheManager;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.process.BlockProcess;
 import io.nuls.consensus.poc.process.ConsensusProcess;
+import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
 import io.nuls.consensus.poc.process.ForkChainProcess;
 import io.nuls.consensus.poc.process.OrphanBlockProcess;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
