@@ -26,7 +26,7 @@
 package io.nuls.protocol.rpc.model;
 
 import io.nuls.account.model.Address;
-import io.nuls.consensus.poc.model.BlockRoundData;
+import io.nuls.consensus.poc.protocol.poc.model.BlockRoundData;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -38,8 +38,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author: Niels Wang

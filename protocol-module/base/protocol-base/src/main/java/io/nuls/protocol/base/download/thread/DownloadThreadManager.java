@@ -25,7 +25,7 @@
 
 package io.nuls.protocol.base.download.thread;
 
-import io.nuls.consensus.service.ConsensusServiceIntf;
+import io.nuls.consensus.poc.protocol.service.ConsensusServiceIntf;
 import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
