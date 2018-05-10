@@ -40,6 +40,7 @@ import java.util.Set;
 
 import static io.nuls.db.manager.LevelDBManager.*;
 import static org.iq80.leveldb.impl.Iq80DBFactory.asString;
+import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 
 /**
  * @Desription:
@@ -172,11 +173,11 @@ public class LevelDBManagerTest {
         put(area, "set1", "set1value");
         put(area, "set2", "set2value");
         put(area, "set3", "set3value");
-        Set<String> keys = keySet(area);
+        Set<byte[]> keys = keySet(area);
         Assert.assertEquals(3, keys.size());
-        Assert.assertTrue(keys.contains("set1"));
-        Assert.assertTrue(keys.contains("set2"));
-        Assert.assertTrue(keys.contains("set3"));
+        //Assert.assertTrue(keys.contains(bytes("set1")));
+        //Assert.assertTrue(keys.contains(bytes("set2")));
+        //Assert.assertTrue(keys.contains(bytes("set3")));
         destroyArea(area);
     }
 
@@ -189,11 +190,11 @@ public class LevelDBManagerTest {
         put(area, "set01", "set01value");
         put(area, "set04", "set04value");
         put(area, "set03", "set03value");
-        List<String> keys = keyList(area);
+        List<byte[]> keys = keyList(area);
         Assert.assertEquals(6, keys.size());
         int i = 0;
-        for (String key : keys) {
-            Assert.assertEquals("set0" + (++i), key);
+        for (byte[] key : keys) {
+            Assert.assertEquals("set0" + (++i), asString(key));
         }
         destroyArea(area);
     }
@@ -217,12 +218,12 @@ public class LevelDBManagerTest {
         put(area, "set01", "set01value");
         put(area, "set04", "set04value");
         put(area, "set03", "set03value");
-        List<String> keys = keyList(area);
+        List<byte[]> keys = keyList(area);
         Assert.assertEquals(6, keys.size());
         int i = 0;
         String contactAllKeys = "";
-        for (String key : keys) {
-            contactAllKeys += key;
+        for (byte[] key : keys) {
+            contactAllKeys += asString(key);
         }
         Assert.assertEquals("set01set02set04set05set06set03", contactAllKeys);
 
@@ -248,12 +249,12 @@ public class LevelDBManagerTest {
         put(area, "set1", "set1value");
         put(area, "set4", "set4value");
         put(area, "set3", "set3value");
-        List<Entry<String, byte[]>> entries = entryList(area);
+        List<Entry<byte[], byte[]>> entries = entryList(area);
         Assert.assertEquals(6, entries.size());
 
         int i = 1;
-        for (Entry<String, byte[]> entry : entries) {
-            Assert.assertEquals("set" + i, entry.getKey());
+        for (Entry<byte[], byte[]> entry : entries) {
+            Assert.assertEquals("set" + i, asString(entry.getKey()));
             Assert.assertEquals("set" + i + "value", asString(entry.getValue()));
             i++;
         }
@@ -270,12 +271,12 @@ public class LevelDBManagerTest {
         put(area, "set1", "set1value");
         put(area, "set2", "set2value");
         put(area, "set3", "set3value");
-        Set<Entry<String, byte[]>> entries = entrySet(area);
+        Set<Entry<byte[], byte[]>> entries = entrySet(area);
         Assert.assertEquals(3, entries.size());
 
-        for (Entry<String, byte[]> entry : entries) {
-            Assert.assertEquals(Iq80DBFactory.asString(entry.getValue()), entry.getKey() + "value");
-            Assert.assertTrue(Iq80DBFactory.asString(entry.getValue()).startsWith(entry.getKey()));
+        for (Entry<byte[], byte[]> entry : entries) {
+            Assert.assertEquals(Iq80DBFactory.asString(entry.getValue()), asString(entry.getKey()) + "value");
+            Assert.assertTrue(Iq80DBFactory.asString(entry.getValue()).startsWith(asString(entry.getKey())));
         }
         destroyArea(area);
     }
@@ -289,12 +290,12 @@ public class LevelDBManagerTest {
         put(area, "set1", "set1value");
         put(area, "set4", "set4value");
         put(area, "set3", "set3value");
-        List<Entry<String, byte[]>> entries = entryList(area);
+        List<Entry<byte[], byte[]>> entries = entryList(area);
         Assert.assertEquals(6, entries.size());
 
         int i = 1;
-        for (Entry<String, byte[]> entry : entries) {
-            Assert.assertEquals("set" + i, entry.getKey());
+        for (Entry<byte[], byte[]> entry : entries) {
+            Assert.assertEquals("set" + i, asString(entry.getKey()));
             Assert.assertEquals("set" + i + "value", asString(entry.getValue()));
             i++;
         }
@@ -314,7 +315,7 @@ public class LevelDBManagerTest {
         putModel(area, "entity4", entity);
         entity = new DBTestEntity();
         putModel(area, "entity5", entity);
-        List<Entry<String, DBTestEntity>> list = entryList(area, DBTestEntity.class);
+        List<Entry<byte[], DBTestEntity>> list = entryList(area, DBTestEntity.class);
         Assert.assertEquals(5, list.size());
         destroyArea(area);
     }

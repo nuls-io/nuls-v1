@@ -59,9 +59,9 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
 
     @Override
     public Result<List<AccountPo>> getAccountList() {
-        List<Entry<String, byte[]>> entryList = dbService.entryList(AccountStorageConstant.DB_AREA_ACCOUNT);
+        List<Entry<byte[], byte[]>> entryList = dbService.entryList(AccountStorageConstant.DB_AREA_ACCOUNT);
         List<AccountPo> list = new ArrayList<>();
-        for (Entry<String, byte[]> entry : entryList){
+        for (Entry<byte[], byte[]> entry : entryList){
             AccountPo account = new AccountPo();
             account.parse(entry.getValue());
             list.add(account);

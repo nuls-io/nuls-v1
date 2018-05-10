@@ -117,17 +117,17 @@ public class LevelDBServiceTest {
         batch.delete(bytes("Qwe123qwe"));
         batch.executeBatch();
 
-        List<Entry<String, byte[]>> entries = dbService.entryList(area);
+        List<Entry<byte[], byte[]>> entries = dbService.entryList(area);
         entries.stream().forEach(entry -> {
             System.out.print("[" + entry.getKey() + "=" + asString(entry.getValue())+ "], ");
         });
         System.out.println();
 
-        Assert.assertEquals("green", asString(dbService.get(area, "Tampa")));
-        Assert.assertEquals("red", asString(dbService.get(area, "London")));
-        Assert.assertEquals("red1", asString(dbService.get(area, "London1")));
-        Assert.assertEquals("red2", asString(dbService.get(area, "London2")));
-        Assert.assertNull(dbService.get(area, "Qweqwe"));
+        Assert.assertEquals("green", asString(dbService.get(area, bytes("Tampa"))));
+        Assert.assertEquals("red", asString(dbService.get(area, bytes("London"))));
+        Assert.assertEquals("red1", asString(dbService.get(area, bytes("London1"))));
+        Assert.assertEquals("red2", asString(dbService.get(area, bytes("London2"))));
+        Assert.assertNull(dbService.get(area, bytes("Qweqwe")));
         LevelDBManager.destroyArea(area);
     }
 }
