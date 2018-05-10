@@ -17,13 +17,21 @@ import java.util.List;
 public interface AccountStorageService {
 
     /**
-     * 创建账户
+     * 创建账户多个账户
      * Create accounts
      * @param accountPoList 待创建的账户集合
      * @param accountPoList Account collection to be created
      * @return the result of the opration
      */
     Result saveAccountList(List<AccountPo> accountPoList);
+
+    /**
+     * 创建账户
+     * Create account
+     * @param account
+     * @return
+     */
+    Result saveAccount(AccountPo account);
 
     /**
      * 删除账户
@@ -38,4 +46,12 @@ public interface AccountStorageService {
      * @return the result of the opration and Result<List<Account>>
      */
     Result<List<AccountPo>> getAccountList();
+
+    /**
+     * 根据账户获取账户信息
+     * According to the account to obtain account information
+     * @param address
+     * @return the result of the opration
+     */
+    Result<AccountPo> getAccount(Address address);
 }
