@@ -26,7 +26,7 @@
 package io.nuls.protocol.rpc.model;
 
 import io.nuls.account.model.Address;
-import io.nuls.consensus.poc.protocol.poc.model.BlockRoundData;
+import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;

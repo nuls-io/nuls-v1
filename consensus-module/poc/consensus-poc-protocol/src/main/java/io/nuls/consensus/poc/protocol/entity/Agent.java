@@ -41,12 +41,14 @@ public class Agent extends BaseNulsData {
     @Tag(2)
     private byte[] packingAddress;
     @Tag(3)
-    private Na deposit;
+    private byte[] rewardAddress;
     @Tag(4)
-    private double commissionRate;
+    private Na deposit;
     @Tag(5)
-    private byte[] agentName;
+    private double commissionRate;
     @Tag(6)
+    private byte[] agentName;
+    @Tag(7)
     private byte[] introduction;
 
     private transient long time;
@@ -159,6 +161,14 @@ public class Agent extends BaseNulsData {
 
     public void setAgentAddress(byte[] agentAddress) {
         this.agentAddress = agentAddress;
+    }
+
+    public byte[] getRewardAddress() {
+        return rewardAddress;
+    }
+
+    public void setRewardAddress(byte[] rewardAddress) {
+        this.rewardAddress = rewardAddress;
     }
 
     @Override

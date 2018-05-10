@@ -22,28 +22,52 @@
  * SOFTWARE.
  *
  */
+package io.nuls.consensus.poc.protocol.entity;
 
-package io.nuls.account.constant;
-
-import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.model.BaseNulsData;
 
 /**
- * @author: Niels Wang
- * @date: 2018/5/5
+ * @author Niels
+ * @date 2017/12/28
  */
-public interface AccountErrorCode {
+public class RedPunishData extends BaseNulsData {
+    private long height;
+    private byte[] address;
+    private short reasonCode;
+    private byte[] evidence;
 
-    ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("ACT000", 50000);
-    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("ACT001", 50001);
-    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED = ErrorCode.init("ACT002", 50002);
-    ErrorCode ACCOUNT_EXIST = ErrorCode.init("ACT003", 50003);
-    ErrorCode ADDRESS_ERROR = ErrorCode.init("ACT004", 50004);
-    ErrorCode ALIAS_EXIST = ErrorCode.init("ACT005", 50005);
-    ErrorCode ALIAS_ERROR = ErrorCode.init("ACT006", 50006);
-    ErrorCode ACCOUNT_ALREADY_SET_ALIAS = ErrorCode.init("ACT007", 50007);
-    ErrorCode NULL_PARAMETER = ErrorCode.init("ACT008", 50008);
-    ErrorCode DATA_PARSE_ERROR = ErrorCode.init("ACT009", 50009);
-    ErrorCode SUCCESS = ErrorCode.init("ACT010", 50010);
-    ErrorCode FAILED = ErrorCode.init("ACT011", 50011);
-    ErrorCode PARAMETER_ERROR = ErrorCode.init("ACT012", 50012);
+    public RedPunishData() {
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public byte[] getAddress() {
+        return address;
+    }
+
+    public void setAddress(byte[] address) {
+        this.address = address;
+    }
+
+    public short getReasonCode() {
+        return reasonCode;
+    }
+
+    public void setReasonCode(short reasonCode) {
+        this.reasonCode = reasonCode;
+    }
+
+    public byte[] getEvidence() {
+        return evidence;
+    }
+
+    public void setEvidence(byte[] evidence) {
+        this.evidence = evidence;
+    }
 }
