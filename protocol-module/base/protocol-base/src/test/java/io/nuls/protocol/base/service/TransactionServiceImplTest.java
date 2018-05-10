@@ -26,24 +26,31 @@
 package io.nuls.protocol.base.service;
 
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
+import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.entity.YellowPunishData;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
-import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
-import io.nuls.consensus.poc.protocol.tx.JoinConsensusTransaction;
-import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
-import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
-import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
+import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.core.tools.crypto.ECKey;
+import io.nuls.db.module.impl.LevelDbModuleBootstrap;
+import io.nuls.kernel.MicroKernelBootstrap;
+import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.ledger.module.impl.UtxoLedgerModuleBootstrap;
+import io.nuls.network.module.impl.NettyNetworkModuleBootstrap;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
+import io.nuls.protocol.model.tx.TransferTransaction;
+import io.nuls.protocol.service.TransactionService;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * @author: Niels Wang
@@ -51,29 +58,83 @@ import java.util.List;
  */
 public class TransactionServiceImplTest {
 
+    private List<Transaction> allList;
+    private List<Transaction> txList;
+
+    private TransactionService transactionService;
+
+
     @Before
     public void init() {
+
+        MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
+        mk.init();
+        mk.start();
+
+        LevelDbModuleBootstrap bootstrap = new LevelDbModuleBootstrap();
+        bootstrap.init();
+        bootstrap.start();
+
+        UtxoLedgerModuleBootstrap ledgerModuleBootstrap = new UtxoLedgerModuleBootstrap();
+        ledgerModuleBootstrap.init();
+        ledgerModuleBootstrap.start();
+
+        NettyNetworkModuleBootstrap networkModuleBootstrap = new NettyNetworkModuleBootstrap();
+        networkModuleBootstrap.init();
+        networkModuleBootstrap.start();
+
+        transactionService = SpringLiteContext.getBean(TransactionService.class);
         initTxList();
     }
 
     @Test
-    public void commitTx() {
+    public void test() {
+        this.conflictDetect();
+        this.commitTx();
+        this.rollback();
+        this.broadcastTx();
+        this.forwardTx();
     }
 
-    @Test
-    public void rollback() {
+    private void commitTx() {
+        for (Transaction tx : txList) {
+            Result result = this.transactionService.commitTx(tx, null);
+            assertTrue(result.isSuccess());
+        }
     }
 
-    @Test
-    public void forwardTx() {
+    private void rollback() {
+        for (int i = txList.size() - 1; i >= 0; i--) {
+            Transaction tx = txList.get(i);
+            Result result = this.transactionService.rollbackTx(tx, null);
+            assertTrue(result.isSuccess());
+        }
+        Result result = this.transactionService.rollbackTx(txList.get(0), null);
+        assertFalse(result.isSuccess());
     }
 
-    @Test
-    public void broadcastTx() {
+    private void forwardTx() {
+        for (int i = txList.size() - 1; i >= 0; i--) {
+            Transaction tx = txList.get(i);
+            Result result = this.transactionService.forwardTx(tx, null);
+            assertTrue(result.isSuccess());
+        }
     }
 
-    @Test
-    public void conflictDetect() {
+    private void broadcastTx() {
+        for (int i = txList.size() - 1; i >= 0; i--) {
+            Transaction tx = txList.get(i);
+            Result result = this.transactionService.broadcastTx(tx);
+            assertTrue(result.isSuccess());
+        }
+    }
+
+    private void conflictDetect() {
+        ValidateResult result = transactionService.conflictDetect(allList);
+        this.txList = (List<Transaction>) result.getData();
+        assertNotNull(txList);
+        //todo 数值需要确定，目前随便写的
+        assertEquals(txList.size(), 2);
     }
 
     private void initTxList() {
@@ -87,24 +148,58 @@ public class TransactionServiceImplTest {
 
 
         Transaction tx = createCoinBaseTransaction(ecKey1, ecKey2, ecKey3, ecKey4, ecKey5, ecKey6);
+        list.add(tx);
 
-        createYellowPunishTx(ecKey1, new ECKey[3]);
+        Transaction yellowPunishTx = createYellowPunishTx(ecKey1, ecKey2, ecKey3, ecKey4, ecKey5, ecKey6);
+        list.add(yellowPunishTx);
 
-        createRedPunishTx(ecKey1, new ECKey[3]);
+        RedPunishTransaction redPunishTransaction = createRedPunishTx(ecKey1, ecKey4, ecKey5, ecKey6);
+        list.add(redPunishTransaction);
 
-        createTransaferTransaction(ecKey1, ecKey1, Na.ZERO);
+        TransferTransaction transferTransaction1 = createTransferTransaction(ecKey1, null, ecKey2, Na.ZERO);
+        TransferTransaction transferTransaction2 = createTransferTransaction(ecKey1, null, ecKey3, Na.ZERO);
+        list.add(transferTransaction1);
+        list.add(transferTransaction2);
 
-        createSetAliasTransaction(ecKey1, "alias");
+//        createSetAliasTransaction(ecKey1, "alias");
+//        createSetAliasTransaction(ecKey1, "alias1");
+//        createSetAliasTransaction(ecKey2, "alias");
 
-        createRegisterAgentTransaction(ecKey1, ecKey1, "agentName");
+        RegisterAgentTransaction tx1 = createRegisterAgentTransaction(ecKey1, ecKey2, "agentName");
+        RegisterAgentTransaction tx2 = createRegisterAgentTransaction(ecKey2, ecKey3, "agentName");
+        RegisterAgentTransaction tx3 = createRegisterAgentTransaction(ecKey4, ecKey5, "agentName2");
+        RegisterAgentTransaction tx4 = createRegisterAgentTransaction(ecKey1, ecKey3, "agentName3");
+        list.add(tx1);
+        list.add(tx2);
+        list.add(tx3);
+        list.add(tx4);
 
-        createDepositTransaction(ecKey1, NulsDigestData.fromDigestHex("agentTxHash"), Na.ZERO);
+        JoinConsensusTransaction join1 = createDepositTransaction(ecKey1, tx1.getHash(), Na.parseNuls(200000));
+        JoinConsensusTransaction join2 = createDepositTransaction(ecKey1, tx2.getHash(), Na.parseNuls(200000));
+        JoinConsensusTransaction join3 = createDepositTransaction(ecKey1, tx3.getHash(), Na.parseNuls(200000));
+        JoinConsensusTransaction join4 = createDepositTransaction(ecKey1, tx4.getHash(), Na.parseNuls(200000));
+        JoinConsensusTransaction join5 = createDepositTransaction(ecKey1, tx3.getHash(), Na.parseNuls(200000));
+        JoinConsensusTransaction join6 = createDepositTransaction(ecKey1, tx3.getHash(), Na.parseNuls(200000));
+        JoinConsensusTransaction join7 = createDepositTransaction(ecKey1, tx3.getHash(), Na.parseNuls(200000));
+        list.add(join1);
+        list.add(join3);
+        list.add(join2);
+        list.add(join4);
+        list.add(join5);
+        list.add(join6);
+        list.add(join7);
 
         createCancelDepositTransaction(ecKey1, NulsDigestData.fromDigestHex("txHash"));
 
-//        createStopAgentTransaction(ecKey1);
-
-
+        StopAgentTransaction stop1 = createStopAgentTransaction(ecKey1, tx1.getHash());
+        StopAgentTransaction stop2 = createStopAgentTransaction(ecKey1, tx2.getHash());
+        StopAgentTransaction stop3 = createStopAgentTransaction(ecKey4, tx3.getHash());
+        StopAgentTransaction stop4 = createStopAgentTransaction(ecKey1, tx4.getHash());
+        list.add(stop1);
+        list.add(stop2);
+        list.add(stop3);
+        list.add(stop4);
+        this.allList = list;
     }
 
     private RedPunishTransaction createRedPunishTx(ECKey ecKey, ECKey... ecKeys) {
@@ -157,26 +252,52 @@ public class TransactionServiceImplTest {
         deposit.setBlockHeight(1);
         deposit.setTime(System.currentTimeMillis());
         deposit.setAddress(AddressTool.getAddress(ecKey.getPubKey()));
-
-
-
-
+        deposit.setAgentHash(agentTxHash);
+        deposit.setDeposit(na);
+        tx.setTxData(deposit);
+        signTransaction(tx, ecKey);
         return tx;
     }
 
-    private Transaction createRegisterAgentTransaction(ECKey ecKey1, ECKey ecKey2, String agentName) {
-        return null;
+    private RegisterAgentTransaction createRegisterAgentTransaction(ECKey ecKey1, ECKey ecKey2, String agentName) {
+        RegisterAgentTransaction tx = new RegisterAgentTransaction();
+        setCommonFields(tx);
+        Agent agent = new Agent();
+        agent.setBlockHeight(1);
+        agent.setDelHeight(0);
+        agent.setTime(System.currentTimeMillis());
+        agent.setAgentAddress(AddressTool.getAddress(ecKey1.getPubKey()));
+        agent.setAgentName("test-agent-1".getBytes());
+        agent.setCommissionRate(10);
+        agent.setDeposit(Na.parseNuls(20000));
+        agent.setIntroduction("说明".getBytes());
+        agent.setPackingAddress(AddressTool.getAddress(ecKey2.getPubKey()));
+        agent.setRewardAddress(agent.getAgentAddress());
+        tx.setTxData(agent);
+        signTransaction(tx, ecKey1);
+        return tx;
     }
 
     private Transaction createSetAliasTransaction(ECKey ecKey, String alias) {
         return null;
     }
 
-    private Transaction createTransaferTransaction(ECKey ecKey1, ECKey ecKey2, Na na) {
-        return null;
+    private TransferTransaction createTransferTransaction(ECKey ecKey1, byte[] coinKey, ECKey ecKey2, Na na) {
+        TransferTransaction tx = new TransferTransaction();
+        setCommonFields(tx);
+        CoinData coinData = new CoinData();
+        List<Coin> fromList = new ArrayList<>();
+        fromList.add(new Coin(coinKey, Na.parseNuls(10001), 0));
+        coinData.setFrom(fromList);
+        List<Coin> toList = new ArrayList<>();
+        toList.add(new Coin(AddressTool.getAddress(ecKey2.getPubKey()), Na.parseNuls(10000), 1000));
+        coinData.setTo(toList);
+        tx.setCoinData(coinData);
+        signTransaction(tx, ecKey1);
+        return tx;
     }
 
-    private Transaction createCoinBaseTransaction(ECKey ecKey, ECKey... ecKeys) {
+    private CoinBaseTransaction createCoinBaseTransaction(ECKey ecKey, ECKey... ecKeys) {
         CoinBaseTransaction tx = new CoinBaseTransaction();
         setCommonFields(tx);
         CoinData coinData = new CoinData();

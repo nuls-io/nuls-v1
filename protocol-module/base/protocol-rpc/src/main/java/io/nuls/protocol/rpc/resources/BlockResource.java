@@ -28,6 +28,8 @@ package io.nuls.protocol.rpc.resources;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
@@ -49,8 +51,11 @@ import java.io.IOException;
  */
 @Path("/block")
 @Api(value = "/browse", description = "Block")
+@Component
 public class BlockResource {
-    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+
+    @Autowired
+    private BlockService blockService;
 
     @GET
     @Path("/header/height/{height}")

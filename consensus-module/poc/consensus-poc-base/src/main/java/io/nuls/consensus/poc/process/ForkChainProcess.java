@@ -365,10 +365,10 @@ public class ForkChainProcess {
         //现在的主链，在切换之后的分叉链，需要放入待验证链列表里面
         ChainContainer oldChain = chainManager.getMasterChain().getAfterTheForkChain(originalForkChain);
 
-        //rollback
+        //rollbackTx
         List<Block> rollbackBlockList = oldChain.getChain().getBlockList();
 
-        ChainLog.debug("rollback the master chain , need rollback block count is {}, master chain is {} : {} - {} , storage best block : {} - {}", rollbackBlockList.size(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
+        ChainLog.debug("rollbackTx the master chain , need rollbackTx block count is {}, master chain is {} : {} - {} , storage best block : {} - {}", rollbackBlockList.size(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
 
         //Need descending order
         //需要降序排列
@@ -467,7 +467,7 @@ public class ForkChainProcess {
             }
         }
 
-        ChainLog.debug("rollback complete, success count is {} , now storage best block : {} - {}", rollbackList.size(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
+        ChainLog.debug("rollbackTx complete, success count is {} , now storage best block : {} - {}", rollbackList.size(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
         return true;
     }
 
