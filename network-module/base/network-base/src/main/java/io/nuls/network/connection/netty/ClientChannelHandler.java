@@ -8,11 +8,8 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
-import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.network.entity.Node;
-import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.NodeManager;
-import io.nuls.network.service.NetworkService;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
