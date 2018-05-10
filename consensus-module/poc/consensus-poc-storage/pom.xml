@@ -42,6 +42,12 @@
             <artifactId>db</artifactId>
             <version>2.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>io.nuls.db-module</groupId>
+            <artifactId>db-leveldb</artifactId>
+            <version>2.0.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 

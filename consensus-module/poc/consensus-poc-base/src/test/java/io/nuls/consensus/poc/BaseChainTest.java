@@ -152,7 +152,7 @@ public class BaseChainTest extends BaseTest {
         blockHeader.setTxCount(1);
         blockHeader.setMerkleHash(NulsDigestData.calcDigestData(new byte[20]));
 
-        MeetingRound currentRound = chainContainer.getOrResetCurrentRound(false);
+        MeetingRound currentRound = chainContainer.initRound();
         MeetingMember member = currentRound.getMember(1);
         blockHeader.setTime(member.getPackEndTime() + ConsensusConstant.BLOCK_TIME_INTERVAL_MILLIS * currentRound.getMemberCount());
 

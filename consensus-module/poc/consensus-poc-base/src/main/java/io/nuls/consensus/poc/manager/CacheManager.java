@@ -32,7 +32,7 @@ import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.model.Chain;
-import io.nuls.consensus.poc.po.PunishLogPo;
+import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;

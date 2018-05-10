@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.consensus.poc.storage;
+package io.nuls.consensus.poc.storage.service;
 
 /**
  * @author: Niels Wang

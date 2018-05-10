@@ -29,10 +29,10 @@ import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.crypto.Utils;
 import io.nuls.core.tools.log.Log;
-import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.utils.AddressTool;
 import io.protostuff.Tag;
 
 /**
@@ -121,7 +121,7 @@ public class Address {
         System.arraycopy(hashs, 2, content, 0, LENGTH);
 
         Address address = new Address(chainId, content);
-        checkXOR(address.calcBase58bytes());
+        AddressTool.checkXOR(address.calcBase58bytes());
         return address;
     }
 
@@ -147,36 +147,7 @@ public class Address {
     }
 
     public static boolean validAddress(String address) {
-        if (StringUtils.isBlank(address)) {
-            return false;
-        }
-        byte[] bytes = null;
-        try {
-            bytes = Base58.decode(address);
-            if (bytes.length != HASH_LENGTH) {
-                return false;
-            }
-            checkXOR(bytes);
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
-
-    protected static void checkXOR(byte[] hashs) {
-        byte[] body = new byte[22];
-        System.arraycopy(hashs, 0, body, 0, 22);
-
-        byte xor = 0x00;
-        for (int i = 0; i < body.length; i++) {
-            xor ^= body[i];
-        }
-        byte[] sign = new byte[1];
-        System.arraycopy(hashs, 22, sign, 0, 1);
-
-        if (xor != hashs[22]) {
-            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
-        }
+        return AddressTool.validAddress(address);
     }
 
     @Override

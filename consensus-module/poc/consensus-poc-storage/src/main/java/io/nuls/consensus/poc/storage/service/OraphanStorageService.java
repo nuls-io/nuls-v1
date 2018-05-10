@@ -24,65 +24,20 @@
  *
  */
 
-package io.nuls.consensus.poc.po;
+package io.nuls.consensus.poc.storage.service;
+
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.NulsDigestData;
 
 /**
- * @author Niels
- * @date 2018/3/22
+ * Created by ln on 2018/5/8.
  */
-public class PunishLogPo {
-    private String id;
-    private int type;
-    private byte[] address;
-    private long time;
-    private long height;
-    private long roundIndex;
+public interface OraphanStorageService {
 
-    public long getRoundIndex() {
-        return roundIndex;
-    }
+    boolean save(Block block);
 
-    public void setRoundIndex(long roundIndex) {
-        this.roundIndex = roundIndex;
-    }
+    Block get(NulsDigestData key);
 
-    public String getId() {
-        return id;
-    }
+    boolean delete(NulsDigestData key);
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public byte[] getAddress() {
-        return address;
-    }
-
-    public void setAddress(byte[] address) {
-        this.address = address;
-    }
-
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
-    }
-
-    public long getHeight() {
-        return height;
-    }
-
-    public void setHeight(long height) {
-        this.height = height;
-    }
 }
