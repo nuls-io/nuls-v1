@@ -29,6 +29,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * @author Niels
  * @date 2017/10/9
@@ -161,5 +163,13 @@ public class StringUtils {
             return false;
         }
         return true;
+    }
+
+    public static byte[] bytes(String value) {
+        return (value == null) ? null : value.getBytes(UTF_8);
+    }
+
+    public static String asString(byte[] value) {
+        return (value == null) ? null : new String(value, UTF_8);
     }
 }
