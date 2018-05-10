@@ -26,10 +26,10 @@
 
 package io.nuls.consensus.poc.manager;
 
-import io.nuls.consensus.entity.Agent;
-import io.nuls.consensus.entity.Deposit;
 import io.nuls.consensus.poc.cache.CacheLoader;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.po.PunishLogPo;

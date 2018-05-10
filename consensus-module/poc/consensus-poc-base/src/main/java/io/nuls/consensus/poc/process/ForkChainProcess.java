@@ -26,17 +26,17 @@
 
 package io.nuls.consensus.poc.process;
 
-import io.nuls.consensus.entity.Agent;
-import io.nuls.consensus.entity.Deposit;
-import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
-import io.nuls.consensus.poc.container.ChainContainer;
-import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.po.PunishLogPo;
+import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.consensus.poc.constant.ConsensusStatus;
+import io.nuls.consensus.poc.container.ChainContainer;
+import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;

@@ -27,11 +27,11 @@
 package io.nuls.consensus.poc.manager;
 
 import io.nuls.account.service.AccountService;
-import io.nuls.consensus.constant.PocConsensusProtocolConstant;
-import io.nuls.consensus.constant.PunishType;
-import io.nuls.consensus.entity.Agent;
-import io.nuls.consensus.entity.Deposit;
 import io.nuls.consensus.poc.config.ConsensusConfig;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
+import io.nuls.consensus.poc.protocol.constant.PunishType;
+import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
@@ -274,6 +274,7 @@ public class RoundManager {
             MeetingMember member = new MeetingMember();
             member.setAgentAddress(address);
             member.setPackingAddress(address);
+            member.setRewardAddress(address);
             member.setCreditVal(1);
             member.setRoundStartTime(round.getStartTime());
 
@@ -291,6 +292,7 @@ public class RoundManager {
             member.setAgentTransaction(tx);
             member.setAgentHash(tx.getHash());
             member.setAgentAddress(agent.getAgentAddress());
+            member.setRewardAddress(agent.getRewardAddress());
             member.setPackingAddress(agent.getPackingAddress());
             member.setOwnDeposit(agent.getDeposit());
             member.setCommissionRate(agent.getCommissionRate());

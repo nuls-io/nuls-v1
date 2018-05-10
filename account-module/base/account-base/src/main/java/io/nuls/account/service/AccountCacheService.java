@@ -2,6 +2,7 @@ package io.nuls.account.service;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.Account;
+import io.nuls.account.model.Address;
 import io.nuls.cache.CacheMap;
 
 import java.util.List;
@@ -85,8 +86,8 @@ public class AccountCacheService {
         return this.cacheMap.values();
     }
 
-    public void removeAccount(Account account) {
-        this.cacheMap.remove(account.getAddress().getBase58Bytes());
+    public void removeAccount(Address address) {
+        this.cacheMap.remove(address.getBase58Bytes());
     }
 
     public void removeAccount(byte[] address) {

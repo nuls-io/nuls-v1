@@ -26,16 +26,15 @@
 
 package io.nuls.consensus.poc.provider;
 
+import io.nuls.consensus.poc.customer.ConsensusDownloadServiceImpl;
 import io.nuls.consensus.poc.BaseTest;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
-import io.nuls.consensus.poc.customer.ConsensusDownloadServiceImpl;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Block;
 import io.nuls.protocol.service.DownloadService;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

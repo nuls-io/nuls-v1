@@ -25,8 +25,8 @@
  */
 package io.nuls.consensus.poc.model;
 
-import io.nuls.consensus.entity.Agent;
-import io.nuls.consensus.entity.Deposit;
+import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.core.tools.crypto.Sha256Hash;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
@@ -44,6 +44,7 @@ public class MeetingMember implements Comparable<MeetingMember> {
     private long roundStartTime;
     private byte[] agentAddress;
     private byte[] packingAddress;
+    private byte[] rewardAddress;
     private NulsDigestData agentHash;
     /**
      * Starting from 1
@@ -197,5 +198,13 @@ public class MeetingMember implements Comparable<MeetingMember> {
 
     public void setSortValue(String sortValue) {
         this.sortValue = sortValue;
+    }
+
+    public byte[] getRewardAddress() {
+        return rewardAddress;
+    }
+
+    public void setRewardAddress(byte[] rewardAddress) {
+        this.rewardAddress = rewardAddress;
     }
 }

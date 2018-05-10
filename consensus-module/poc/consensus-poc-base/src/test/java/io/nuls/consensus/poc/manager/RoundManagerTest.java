@@ -26,14 +26,12 @@
 
 package io.nuls.consensus.poc.manager;
 
-import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
 import io.nuls.consensus.poc.BaseChainTest;
-import io.nuls.consensus.poc.customer.ConsensusAccountServiceImpl;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingRound;
-import io.nuls.kernel.lite.core.SpringLiteContext;
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -144,7 +142,7 @@ public class RoundManagerTest extends BaseChainTest {
         assertNotNull(round);
 
         assertEquals(round.getIndex(), 2L);
-        assertEquals(round.getStartTime(), ConsensusConstant.BLOCK_TIME_INTERVAL_MILLIS + 1L);
+        Assert.assertEquals(round.getStartTime(), ConsensusConstant.BLOCK_TIME_INTERVAL_MILLIS + 1L);
 
         MeetingRound round2 = roundManager.getNextRound(null, false);
         assertNotNull(round2);
