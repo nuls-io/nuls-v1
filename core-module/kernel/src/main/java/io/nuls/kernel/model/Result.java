@@ -115,6 +115,10 @@ public class Result<T> {
         return buffer.toString();
     }
 
+    public static Result getFailed() {
+        return getFailed(KernelErrorCode.FAILED);
+    }
+
     public static Result getFailed(String msg) {
         return new Result(false, msg);
     }
@@ -124,10 +128,10 @@ public class Result<T> {
     }
 
     public static Result getFailed(ErrorCode errorCode) {
-        return getFailed(errorCode,errorCode.getMsg());
+        return getFailed(errorCode, errorCode.getMsg());
     }
 
-    public static Result getFailed(ErrorCode errorCode,String msg) {
+    public static Result getFailed(ErrorCode errorCode, String msg) {
         Result result = new Result(false, msg);
         result.setErrorCode(errorCode);
         return result;
