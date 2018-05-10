@@ -124,7 +124,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
         if (!channel.isActive() && node != null) {
-//            getNetworkService().deleteNode(node.getId());
+            nodeManager.deleteNode(node.getId());
         }
     }
 }
