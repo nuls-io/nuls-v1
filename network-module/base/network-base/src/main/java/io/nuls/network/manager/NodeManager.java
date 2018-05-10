@@ -34,6 +34,8 @@ public class NodeManager implements Runnable {
     private Map<String, NodeGroup> nodeGroups = new ConcurrentHashMap<>();
 
     //存放未连接成功的节点
+    private Map<String, Integer> firstUnConnectedNodes = new ConcurrentHashMap<>();
+    //存放断开连接的节点
     private Map<String, Node> disConnectNodes = new ConcurrentHashMap<>();
     //存放连接成功但还未握手成功的节点
     private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
@@ -45,6 +47,8 @@ public class NodeManager implements Runnable {
     private ReentrantLock lock = new ReentrantLock();
 
     private boolean running = false;
+
+    private boolean isSeed = false;
 
     private ConnectionManager connectionManager;
 
@@ -63,6 +67,13 @@ public class NodeManager implements Runnable {
         NodeGroup outNodes = new NodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
         nodeGroups.put(inNodes.getName(), inNodes);
         nodeGroups.put(outNodes.getName(), outNodes);
+
+        for (String ip : IpUtil.getIps()) {
+            if (isSeedNode(ip)) {
+                networkParam.setMaxInCount(networkParam.getMaxInCount() * 2);
+                isSeed = true;
+            }
+        }
     }
 
     /**
@@ -109,18 +120,26 @@ public class NodeManager implements Runnable {
             if (outNodeIdSet.contains(node.getId())) {
                 return false;
             }
-            //相同ip的节点，不再重复连接
-            Map<String,Node> nodes = getNodes();
-            for(Node n : nodes.values()) {
-                if(n.getIp().equals(node.getIp())) {
-                    return false;
-                }
+
+            if (!checkFirstUnConnectedNode(node.getId())) {
+                return false;
             }
 
-            outNodeIdSet.add(node.getId());
-            disConnectNodes.put(node.getId(), node);
-            connectionManager.connectionNode(node);
-            return true;
+            if (!disConnectNodes.containsKey(node.getId()) &&
+                    !connectedNodes.containsKey(node.getId()) &&
+                    !handShakeNodes.containsKey(node.getId())) {
+                //判断是否有相同ip
+                Map<String, Node> nodeMap = getNodes();
+                for (Node n : nodeMap.values()) {
+                    if (n.getIp().equals(node.getIp())) {
+                        return false;
+                    }
+                }
+                outNodeIdSet.add(node.getId());
+                connectionManager.connectionNode(node);
+                return true;
+            }
+            return false;
         } finally {
             lock.unlock();
         }
@@ -136,6 +155,9 @@ public class NodeManager implements Runnable {
         lock.lock();
         try {
             if (!connectedNodes.containsKey(node.getId()) && !handShakeNodes.containsKey(node.getId())) {
+                // those nodes that are not connected at once, remove it when connected +
+                firstUnConnectedNodes.remove(node.getId());
+                // those nodes that are not connected at once, remove it when connected -
                 disConnectNodes.remove(node.getId());
                 connectedNodes.put(node.getId(), node);
                 return true;
@@ -262,7 +284,7 @@ public class NodeManager implements Runnable {
                     return;
                 }
             }
-            outNodeIdSet.remove(node.getIp());
+            outNodeIdSet.remove(node.getId());
             node.destroy();
             removeNodeFromGroup(node);
             removeNodeHandler(node);
@@ -288,11 +310,15 @@ public class NodeManager implements Runnable {
         if (handShakeNodes.containsKey(node.getId())) {
             handShakeNodes.remove(node.getId());
         }
-        //超出最大连接尝试次数，则直接删除
-        if (node.getFailCount() >= NetworkConstant.CONEECT_FAIL_MAX_COUNT) {
+
+        if (node.getFailCount() <= NetworkConstant.CONEECT_FAIL_MAX_COUNT) {
+            //node.setLastFailTime(TimeService.currentTimeMillis() + 10 * 1000 * node.getFailCount());
+            if (!disConnectNodes.containsKey(node.getId())) {
+                disConnectNodes.put(node.getId(), node);
+            }
+        } else {
             disConnectNodes.remove(node.getId());
             getNetworkStorage().deleteNode(node);
-            //node.setLastFailTime(TimeService.currentTimeMillis() + 10 * 1000 * node.getFailCount());
         }
     }
 
@@ -340,7 +366,6 @@ public class NodeManager implements Runnable {
     private void getNodeFromOther(int size) {
         nodeDiscoverHandler.findOtherNode(size);
     }
-
 
     public boolean handshakeNode(String groupName, Node node, NetworkMessageBody versionMessage) {
         lock.lock();
@@ -431,6 +456,58 @@ public class NodeManager implements Runnable {
         }
     }
 
+    /**
+     * those nodes that are not connected at once, reconnection 6 times
+     *
+     * @param nodeId
+     * @return
+     */
+    public void validateFirstUnConnectedNode(String nodeId) {
+        if (nodeId == null)
+            return;
+        Node node = getNode(nodeId);
+        if (node == null) {
+            // seed nodes
+            for (String ip : networkParam.getSeedIpList()) {
+                if (nodeId.startsWith(ip)) {
+                    return;
+                }
+            }
+            Integer count = firstUnConnectedNodes.get(nodeId);
+            if (count == null) {
+                firstUnConnectedNodes.put(nodeId, 1);
+            } else {
+                firstUnConnectedNodes.put(nodeId, ++count);
+            }
+        }
+    }
+
+    /**
+     * those nodes that are not connected at once, reconnection 6 times
+     * and then start counting, reconnection: counter >= 60
+     * [0,6] (6, 60) [60,]
+     *
+     * @param nodeId
+     * @return
+     */
+    private boolean checkFirstUnConnectedNode(String nodeId) {
+        Integer count = firstUnConnectedNodes.get(nodeId);
+        if (count == null)
+            return true;
+        if (count <= NetworkConstant.CONEECT_FAIL_MAX_COUNT) {
+            // [0,6]
+            return true;
+        } else if (count < (NetworkConstant.CONEECT_FAIL_MAX_COUNT * 10)) {
+            // (6, 60)
+            firstUnConnectedNodes.put(nodeId, ++count);
+            return false;
+        } else {
+            // [60, ~]
+            firstUnConnectedNodes.remove(nodeId);
+            return true;
+        }
+    }
+
     public boolean isSeedNode(String ip) {
         return networkParam.getSeedIpList().contains(ip);
     }
@@ -444,17 +521,17 @@ public class NodeManager implements Runnable {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         while (running) {
             Log.info("--------disConnectNodes:" + disConnectNodes.size());
-            for(Node node : disConnectNodes.values()) {
+            for (Node node : disConnectNodes.values()) {
                 System.out.println(node.toString());
             }
 
             Log.info("--------connectedNodes:" + connectedNodes.size());
-            for(Node node : connectedNodes.values()) {
+            for (Node node : connectedNodes.values()) {
                 System.out.println(node.toString());
             }
 
             Log.info("--------handShakeNodes:" + handShakeNodes.size());
-            for(Node node : handShakeNodes.values()) {
+            for (Node node : handShakeNodes.values()) {
                 System.out.println(node.toString());
             }
 
@@ -470,6 +547,14 @@ public class NodeManager implements Runnable {
 
             //连接的节点数量太少时，主动连接种子节点以获取种子节点
             //超过一定数量之后，就断开与种子节点的连接，减轻种子节点的压力
+            if (firstUnConnectedNodes.size() > 20) {
+                firstUnConnectedNodes.clear();
+            }
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
             if (handShakeNodes.size() <= 2) {
                 List<Node> seedNodes = getSeedNodes();
                 for (Node node : seedNodes) {
@@ -478,8 +563,6 @@ public class NodeManager implements Runnable {
             } else if (handShakeNodes.size() > networkParam.getMaxOutCount()) {
                 removeSeedNode();
             }
-
-            //如果主动连接节点未达到最大值时，从数据库或者询问其他节点获取可连接的更多节点尝试连接
             NodeGroup outGroup = getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
             if (outGroup.size() < networkParam.getMaxOutCount()) {
                 int size = networkParam.getMaxOutCount() - handShakeNodes.size();
@@ -487,14 +570,14 @@ public class NodeManager implements Runnable {
                     getNodeFromDataBase(size);
                     getNodeFromOther(size);
                 }
+            }
 
-                for (Node node : disConnectNodes.values()) {
-                    if (node.getType() == Node.OUT && node.getStatus() == Node.CLOSE) {
+            for (Node node : disConnectNodes.values()) {
+                if (node.getType() == Node.OUT && node.getStatus() == Node.CLOSE) {
                     /*if (node.getLastFailTime() <= TimeService.currentTimeMillis()) {
                         connectionManager.connectionNode(node);
                     }*/
-                        connectionManager.connectionNode(node);
-                    }
+                    connectionManager.connectionNode(node);
                 }
             }
         }

@@ -10,7 +10,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.network.entity.Node;
 import io.nuls.network.manager.NodeManager;
 
@@ -33,7 +32,6 @@ public class NettyClient {
         this.node = node;
         boot = new Bootstrap();
 
-        //当多线程执行以下代码时会报错，所以加同步锁
         AttributeKey<Node> key = null;
         synchronized (NettyClient.class) {
             if (AttributeKey.exists("node")) {
@@ -60,8 +58,9 @@ public class NettyClient {
                     if (future.isSuccess()) {
                         socketChannel = (SocketChannel) future.channel();
                     } else {
-                        Log.info("Client connect to host error: " + future.cause() + ", remove node: " + node.getId());
-                        nodeManager.removeNode(node);
+//                        Log.info("Client connect to host error: " + future.cause() + ", remove node: " + node.getId());
+                        nodeManager.validateFirstUnConnectedNode(node.getId());
+                        nodeManager.removeNode(node.getId());
                     }
                 }
             });
@@ -72,7 +71,8 @@ public class NettyClient {
                 socketChannel.close();
             }
             Log.error("Client start exception:" + e.getMessage() + ", remove node: " + node.getId());
-            nodeManager.removeNode(node);
+            nodeManager.validateFirstUnConnectedNode(node.getId());
+            nodeManager.removeNode(node.getId());
         }
     }
 

@@ -42,11 +42,10 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
         Log.info("---------------------- server channelRegistered ------------------------- " + nodeId);
 
-        String remoteIP = channel.remoteAddress().getHostString();
-
         // 由于每个节点既是服务器，同时也会作为客户端去主动连接其他节点，
         // 为防止两个节点同时作为服务器一方相互连接，在这里做硬性规定，
         // 两个节点同时相互连接时，ip数字小的一方作为服务器，大的一方作为客户端
+        String remoteIP = channel.remoteAddress().getHostString();
         Map<String, Node> nodeMap = nodeManager.getNodes();
         for (Node node : nodeMap.values()) {
             if (node.getIp().equals(remoteIP)) {
@@ -146,19 +145,14 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
 //        Log.debug(" ---------------------- server channelRead ------------------------- " + nodeId);
         Node node = nodeManager.getNode(nodeId);
-        if (node != null) {
-            if (node.isAlive()) {
-                ByteBuf buf = (ByteBuf) msg;
-                byte[] bytes = new byte[buf.readableBytes()];
-                buf.readBytes(bytes);
-                buf.release();
-                ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
-                buffer.put(bytes);
-            }
-
+        if (node != null && node.isAlive()) {
+            ByteBuf buf = (ByteBuf) msg;
+            byte[] bytes = new byte[buf.readableBytes()];
+            buf.readBytes(bytes);
+            buf.release();
+            ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
+            buffer.put(bytes);
 //            getNetworkService().receiveMessage(buffer, node);
-        } else {
-            ctx.channel().close();
         }
     }
 

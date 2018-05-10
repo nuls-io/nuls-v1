@@ -71,7 +71,6 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         } catch (Exception e) {
             Log.info("client channelActive error: " + nodeId);
         }
-
     }
 
     @Override
