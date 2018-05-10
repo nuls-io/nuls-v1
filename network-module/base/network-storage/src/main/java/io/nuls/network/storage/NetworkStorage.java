@@ -1,16 +1,20 @@
 package io.nuls.network.storage;
 
 
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.model.ModelWrapper;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.entity.Node;
+import sun.jvm.hotspot.runtime.Bytes;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import static io.nuls.core.tools.str.StringUtils.bytes;
 
 @Component
 public class NetworkStorage {
@@ -55,7 +59,7 @@ public class NetworkStorage {
     }
 
     public void saveNode(Node node) {
-        dbService.putModel(NetworkConstant.NODE_DB_AREA, node.getId(), node);
+        dbService.putModel(NetworkConstant.NODE_DB_AREA, bytes(node.getId()), node);
     }
 
     public void deleteNode(Node node) {
