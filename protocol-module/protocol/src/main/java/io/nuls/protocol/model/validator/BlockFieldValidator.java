@@ -55,7 +55,7 @@ public class BlockFieldValidator implements NulsDataValidator<Block> {
                 break;
             }
 
-            if(data.getHeader().getTxCount()==0||data.getTxs().size()!=data.getHeader().getTxCount()){
+            if(data.getHeader().getTxCount() == 0 || data.getTxs().size() != data.getHeader().getTxCount()){
                 failed = true;
                 break;
             }

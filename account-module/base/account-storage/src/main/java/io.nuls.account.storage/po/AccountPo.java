@@ -35,6 +35,8 @@ public class AccountPo extends BaseNulsData {
     @Tag(8)
     private int status;
 
+    public AccountPo(){
+    }
     public AccountPo(Account account){
         this.addressObj = account.getAddress();
         this.address = account.getAddress().toString();
@@ -47,26 +49,25 @@ public class AccountPo extends BaseNulsData {
         this.status = account.getStatus();
     }
 
-    public Account toAccount(AccountPo accountPo){
+    public Account toAccount(){
         Account account = new Account();
-        account.setCreateTime(accountPo.getCreateTime());
+        account.setCreateTime(this.getCreateTime());
         try {
-            account.setAddress(Address.fromHashs(accountPo.getAddress()));
+            account.setAddress(Address.fromHashs(this.getAddress()));
         } catch (Exception e) {
             Log.error(e);
         }
-        account.setAlias(accountPo.getAlias());
-        account.setExtend(accountPo.getExtend());
-        account.setPriKey(accountPo.getPriKey());
-        account.setPubKey(accountPo.getPubKey());
-        account.setEncryptedPriKey(accountPo.getEncryptedPriKey());
-        if (accountPo.getPriKey() != null && accountPo.getPriKey().length > 1) {
+        account.setAlias(this.getAlias());
+        account.setExtend(this.getExtend());
+        account.setPriKey(this.getPriKey());
+        account.setPubKey(this.getPubKey());
+        account.setEncryptedPriKey(this.getEncryptedPriKey());
+        if (this.getPriKey() != null && this.getPriKey().length > 1) {
             account.setEcKey(ECKey.fromPrivate(new BigInteger(account.getPriKey())));
         } else {
-            account.setEcKey(ECKey.fromEncrypted(new EncryptedData(accountPo.getEncryptedPriKey()), accountPo.getPubKey()));
+            account.setEcKey(ECKey.fromEncrypted(new EncryptedData(this.getEncryptedPriKey()), this.getPubKey()));
         }
-
-        account.setStatus(accountPo.getStatus());
+        account.setStatus(this.getStatus());
         return account;
     }
 

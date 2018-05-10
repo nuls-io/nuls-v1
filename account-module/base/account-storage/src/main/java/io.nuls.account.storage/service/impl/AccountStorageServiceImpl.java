@@ -6,6 +6,7 @@ import io.nuls.account.storage.constant.AccountStorageConstant;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.db.constant.DBErrorCode;
+import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.exception.NulsException;
@@ -14,6 +15,7 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Result;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -55,4 +57,15 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
         return dbService.delete(AccountStorageConstant.DB_AREA_ACCOUNT, address.getBase58Bytes());
     }
 
+    @Override
+    public Result<List<AccountPo>> getAccountList() {
+        List<Entry<String, byte[]>> entryList = dbService.entryList(AccountStorageConstant.DB_AREA_ACCOUNT);
+        List<AccountPo> list = new ArrayList<>();
+        for (Entry<String, byte[]> entry : entryList){
+            AccountPo account = new AccountPo();
+            account.parse(entry.getValue());
+            list.add(account);
+        }
+        return Result.getSuccess().setData(list) ;
+    }
 }

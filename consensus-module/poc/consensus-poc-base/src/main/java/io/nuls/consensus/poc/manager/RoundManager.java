@@ -31,7 +31,7 @@ import io.nuls.consensus.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.constant.PunishType;
 import io.nuls.consensus.entity.Agent;
 import io.nuls.consensus.entity.Deposit;
-import io.nuls.consensus.poc.constant.ConsensusConfig;
+import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;

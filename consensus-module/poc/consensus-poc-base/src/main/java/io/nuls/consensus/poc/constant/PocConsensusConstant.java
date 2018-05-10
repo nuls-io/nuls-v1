@@ -26,10 +26,23 @@
 
 package io.nuls.consensus.poc.constant;
 
+import io.nuls.kernel.model.Na;
+
 /**
  * Created by ln on 2018/4/22.
  */
-public class PocConsensusConstant {
+public interface PocConsensusConstant {
+
+    /**
+     * Coinbase rewards the number of locked blocks
+     * coinbase奖励的锁定块数
+     */
+    int COINBASE_UNLOCK_HEIGHT = 1000;
+
+    /**
+     * value = 5000000/3154600
+     */
+    Na BLOCK_REWARD = Na.valueOf(158548960);
 
     /**
      * Maximum height difference handled by furcation blocks
@@ -72,7 +85,4 @@ public class PocConsensusConstant {
      * 定期清理主链指定轮数之前的轮次信息
      */
     public final static int CLEAR_MASTER_CHAIN_ROUND_COUNT = 5;
-
-
-
 }

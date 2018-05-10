@@ -32,13 +32,11 @@ import io.nuls.consensus.poc.customer.ConsensusBlockServiceImpl;
 import io.nuls.consensus.poc.customer.ConsensusDownloadServiceImpl;
 import io.nuls.consensus.poc.customer.ConsensusNetworkService;
 import io.nuls.consensus.poc.model.BlockRoundData;
-import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.*;
+import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.DownloadService;
@@ -51,11 +49,16 @@ import java.util.List;
  * Created by ln on 2018/5/8.
  */
 public class BaseTest {
+
+    protected static AccountService accountService;
+    protected static BlockService blockService;
+    protected ECKey ecKey = new ECKey();
+
     @BeforeClass
     public static void initClass() {
         try {
             try {
-                SpringLiteContext.getBean(BlockService.class);
+                blockService = SpringLiteContext.getBean(BlockService.class);
             } catch (Exception e) {
                 SpringLiteContext.putBean(ConsensusBlockServiceImpl.class, false);
             }
@@ -65,9 +68,10 @@ public class BaseTest {
                 SpringLiteContext.putBean(ConsensusDownloadServiceImpl.class, false);
             }
             try {
-                SpringLiteContext.getBean(AccountService.class);
+                accountService = SpringLiteContext.getBean(AccountService.class);
             } catch (Exception e) {
                 SpringLiteContext.putBean(ConsensusAccountServiceImpl.class, false);
+                accountService = SpringLiteContext.getBean(AccountService.class);
             }
             try {
                 SpringLiteContext.getBean(NetworkService.class);
@@ -85,7 +89,8 @@ public class BaseTest {
         blockHeader.setHeight(0);
         blockHeader.setPreHash(NulsDigestData.calcDigestData("00000000000".getBytes()));
         blockHeader.setTime(1L);
-        blockHeader.setTxCount(0);
+        blockHeader.setTxCount(1);
+        blockHeader.setMerkleHash(NulsDigestData.calcDigestData(new byte[20]));
 
         // add a round data
         BlockRoundData roundData = new BlockRoundData();
@@ -104,6 +109,23 @@ public class BaseTest {
 
         Transaction tx = new TestTransaction();
         txs.add(tx);
+
+        List<NulsDigestData> txHashList = block.getTxHashList();
+
+        blockHeader.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
+
+        NulsSignData signData = null;
+        try {
+            signData = accountService.signData(blockHeader.getHash().getDigestBytes(), ecKey);
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+
+        P2PKHScriptSig sig = new P2PKHScriptSig();
+        sig.setSignData(signData);
+        sig.setPublicKey(ecKey.getPubKey());
+
+        blockHeader.setScriptSig(sig);
 
         return block;
     }

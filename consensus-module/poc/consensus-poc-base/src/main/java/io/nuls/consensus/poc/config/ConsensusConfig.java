@@ -23,7 +23,7 @@
  *  * SOFTWARE.
  *
  */
-package io.nuls.consensus.poc.constant;
+package io.nuls.consensus.poc.config;
 
 import io.nuls.account.model.Address;
 import io.nuls.core.tools.str.StringUtils;

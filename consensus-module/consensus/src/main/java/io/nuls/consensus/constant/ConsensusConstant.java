@@ -26,6 +26,8 @@
 
 package io.nuls.consensus.constant;
 
+import io.nuls.kernel.model.Na;
+
 /**
  * Created by ln on 2018/5/7.
  */
@@ -40,10 +42,16 @@ public interface ConsensusConstant {
      * unit:second
      */
     long BLOCK_TIME_INTERVAL_SECOND = 10;
+
     /**
      * unit:millis
      */
     long BLOCK_TIME_INTERVAL_MILLIS = BLOCK_TIME_INTERVAL_SECOND * 1000L;
+
+    /**
+     * default:2M
+     */
+    long MAX_BLOCK_SIZE = 2 << 21;
 
     /**
      * consensus transaction types

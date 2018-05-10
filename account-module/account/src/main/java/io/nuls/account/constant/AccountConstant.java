@@ -3,13 +3,36 @@ package io.nuls.account.constant;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.model.Na;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * @author: Charlie
  * @date: 2018/5/9
  */
-public interface AccountConstant extends NulsConstant {
+public class AccountConstant implements NulsConstant {
 
-    String ACCOUNT_LIST_CACHE = "ACCOUNT_LIST";
+    /**
+     * The module id of the message-bus module
+     */
+    public static final short MODULE_ID_ACCOUNT = 5;
 
-    Na ALIAS_NA = Na.parseNuls(1);
+    /**
+     * The name of accouts cache
+     */
+    public static final String ACCOUNT_LIST_CACHE = "ACCOUNT_LIST";
+
+
+    public static final Na ALIAS_NA = Na.parseNuls(1);
+
+    /**
+     * 默认账户地址
+     * Default account address
+     */
+    public static String DEFAULT_ACCOUNT_ADDRESS;
+
+    /**
+     * 本地账户集合
+     */
+    public static Set<String> LOCAL_ADDRESS_LIST = ConcurrentHashMap.newKeySet();
 }

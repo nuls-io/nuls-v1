@@ -32,10 +32,9 @@ import io.nuls.consensus.poc.BaseChainTest;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.tx.JoinConsensusTransaction;
 import io.nuls.consensus.tx.RegisterAgentTransaction;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.Na;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.*;
+import io.nuls.kernel.utils.AddressTool;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -221,8 +220,8 @@ public class ChainContainerTest extends BaseChainTest {
                 
         Transaction<Agent> agentTx = new RegisterAgentTransaction();
         Agent agent = new Agent();
-        agent.setPackingAddress(new byte[22]);
-        agent.setAgentAddress(new byte[21]);
+        agent.setPackingAddress(AddressTool.getAddress(ecKey.getPubKey()));
+        agent.setAgentAddress(AddressTool.getAddress(ecKey.getPubKey()));
         agent.setTime(System.currentTimeMillis());
         agent.setDeposit(Na.NA.multiply(20000));
         agent.setAgentName("test".getBytes());
@@ -234,12 +233,21 @@ public class ChainContainerTest extends BaseChainTest {
         agentTx.setTime(agent.getTime());
         agentTx.setBlockHeight(blockHeader.getHeight());
 
+        NulsSignData signData = null;
+        try {
+            signData = accountService.signData(agentTx.getHash().getDigestBytes(), ecKey);
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+
+        agentTx.setScriptSig(signData.getSignBytes());
+
         // add the agent tx into agent list
         txs.add(agentTx);
 
         // new a deposit
         Deposit deposit = new Deposit();
-        deposit.setAddress(new byte[21]);
+        deposit.setAddress(AddressTool.getAddress(ecKey.getPubKey()));
         deposit.setAgentHash(agentTx.getHash());
         deposit.setTime(System.currentTimeMillis());
         deposit.setDeposit(Na.NA.multiply(200000));
@@ -251,8 +259,5 @@ public class ChainContainerTest extends BaseChainTest {
         depositTx.setBlockHeight(blockHeader.getHeight());
 
         txs.add(depositTx);
-
     }
-
-
 }
