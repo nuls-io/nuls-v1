@@ -9,6 +9,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.Node;
@@ -29,11 +30,11 @@ import java.util.Map;
 @ChannelHandler.Sharable
 public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
-    private NodeManager nodeManager;
+    private NodeManager nodeManager = NodeManager.getInstance();
 
-    private NetworkParam networkParam;
+    private NetworkParam networkParam = NetworkParam.getInstance();
 
-    private BroadcastHandler broadcastHandler;
+    private BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -45,7 +46,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         // 为防止两个节点同时作为服务器一方相互连接，在这里做硬性规定，
         // 两个节点同时相互连接时，ip数字小的一方作为服务器，大的一方作为客户端
         String remoteIP = channel.remoteAddress().getHostString();
-        Map<String, Node> nodeMap = getNodeManager().getNodes();
+        Map<String, Node> nodeMap = nodeManager.getNodes();
         for (Node node : nodeMap.values()) {
             if (node.getIp().equals(remoteIP)) {
                 if (node.getType() == Node.OUT) {
@@ -59,7 +60,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
                     } else {
                         //如果自己是服务器端，则删除当前主动作为客户端连接出去的节点，保存当前作为服务器端的连接
 //                        System.out.println("----------------sever client register each other remove node-----------------" + node.getId());
-                        getNodeManager().removeNode(node.getId());
+                        nodeManager.removeNode(node.getId());
                     }
                 }
             }
@@ -77,7 +78,6 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
                 }
             }
         }
-        Log.info("---------------------- server channelRegistered END ------------------------- " + nodeId);
     }
 
     @Override
@@ -91,18 +91,19 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         Node node = new Node(channel.remoteAddress().getHostString(), channel.remoteAddress().getPort(), Node.IN);
         node.setChannelId(channelId);
         node.setStatus(Node.CONNECT);
-        boolean success = getNodeManager().processConnectedNode(node);
+        boolean success = nodeManager.processConnectedNode(node);
 
         if (!success) {
             ctx.channel().close();
             return;
         }
-        Block bestBlock = NulsContext.getInstance().getBestBlock();
-        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, getNetworkParam().getPort(),
-                bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
-        HandshakeMessage handshakeMessage = new HandshakeMessage(body);
-        Log.info("---------------------- server channelActive END------------------------- " + nodeId);
-        broadcastHandler.broadcastToNode(handshakeMessage, node, false);
+        //Block bestBlock = NulsContext.getInstance().getBestBlock();
+//        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
+//                bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
+//        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
+//                10001, new NulsDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
+//                HandshakeMessage handshakeMessage = new HandshakeMessage(body);
+//        broadcastHandler.broadcastToNode(handshakeMessage, node, false);
         Log.info("---------------------- server channelActive END------------------------- " + nodeId);
     }
 
@@ -114,12 +115,12 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
-        Node node = getNodeManager().getNode(nodeId);
+        Node node = nodeManager.getNode(nodeId);
 
         if (node != null) {
             if (channelId.equals(node.getChannelId())) {
 //                System.out.println("------------ sever channelInactive remove node-------------" + node.getId());
-                getNodeManager().removeNode(nodeId);
+                nodeManager.removeNode(nodeId);
             } else {
                 Log.info("--------------server channel id different----------------------");
                 Log.info("--------node:" + node.getId() + ",type:" + node.getType());
@@ -149,7 +150,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
         Log.info(" ---------------------- server channelRead ------------------------- " + nodeId);
-        Node node = getNodeManager().getNode(nodeId);
+        Node node = nodeManager.getNode(nodeId);
         if (node != null && node.isAlive()) {
             ByteBuf buf = (ByteBuf) msg;
             byte[] bytes = new byte[buf.readableBytes()];
@@ -157,29 +158,9 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             buf.release();
             ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
             buffer.put(bytes);
-//            getNetworkService().receiveMessage(buffer, node);
+//            co.receiveMessage(buffer, node);
         }
         Log.info(" ---------------------- server channelRead END------------------------- " + nodeId);
     }
 
-    public NodeManager getNodeManager() {
-        if(nodeManager == null) {
-            nodeManager = NodeManager.getInstance();
-        }
-        return nodeManager;
-    }
-
-    public NetworkParam getNetworkParam() {
-        if(networkParam == null) {
-            networkParam = NetworkParam.getInstance();
-        }
-        return networkParam;
-    }
-
-    public BroadcastHandler getBroadcastHandler() {
-        if(broadcastHandler == null) {
-            broadcastHandler = BroadcastHandler.getInstance();
-        }
-        return broadcastHandler;
-    }
 }
