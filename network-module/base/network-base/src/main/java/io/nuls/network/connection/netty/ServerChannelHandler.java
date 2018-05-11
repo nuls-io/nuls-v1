@@ -26,6 +26,7 @@ import java.util.Map;
  * @author Vivi
  */
 
+@ChannelHandler.Sharable
 public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     private NodeManager nodeManager = NodeManager.getInstance();
