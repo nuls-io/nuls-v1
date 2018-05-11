@@ -1,6 +1,5 @@
 package io.nuls.account.util;
 
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;

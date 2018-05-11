@@ -1,6 +1,5 @@
 package io.nuls.account.storage.service;
 
-import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.kernel.model.Result;
