@@ -27,7 +27,7 @@
 package io.nuls.consensus.poc.protocol.process;
 
 import io.nuls.consensus.poc.storage.po.AgentPo;
-import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;

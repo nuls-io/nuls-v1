@@ -24,7 +24,7 @@
  *
  */
 
-package io.nuls.consensus.poc.protocol.service;
+package io.nuls.consensus.service;
 
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;

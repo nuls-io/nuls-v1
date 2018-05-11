@@ -44,6 +44,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
                 return;
             }
         }
+        Log.info("---------------------- client channelRegistered END -----------" + nodeId);
     }
 
     @Override
@@ -53,6 +54,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
         Log.info(" ---------------------- client channelActive ----------" + nodeId);
         Log.info("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
+        Log.info("remoteInfo: "+channel.remoteAddress().getHostString()+":" + channel.remoteAddress().getPort());
 
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
@@ -68,6 +70,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         } catch (Exception e) {
             Log.info("client channelActive error: " + nodeId);
         }
+        Log.info(" ---------------------- client channelActive END ----------" + nodeId);
     }
 
     @Override
@@ -76,6 +79,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
         Log.info(" ---------------------- client channelInactive ---------------------- " + nodeId);
         Log.info("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
+        Log.info("remoteInfo: "+channel.remoteAddress().getHostString()+":" + channel.remoteAddress().getPort());
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
@@ -88,13 +92,14 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
                 Log.info("---------------- client channelId different----------------" + channelId + "," + node.getChannelId());
             }
         }
+        Log.info(" ---------------------- client channelInactive END---------------------- " + nodeId);
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws UnsupportedEncodingException {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.debug(" ---------------------- client channelRead ---------------------- " + nodeId);
+        Log.info(" ---------------------- client channelRead ---------------------- " + nodeId);
         Node node = nodeManager.getNode(nodeId);
         if (node != null && node.isAlive()) {
             ByteBuf buf = (ByteBuf) msg;
@@ -105,6 +110,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             buffer.put(bytes);
 //            getNetworkService().receiveMessage(buffer, node);
         }
+        Log.info(" ---------------------- client channelRead END ---------------------- " + nodeId);
     }
 
     @Override

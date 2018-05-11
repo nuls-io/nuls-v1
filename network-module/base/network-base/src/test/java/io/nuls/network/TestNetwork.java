@@ -13,17 +13,22 @@ public class TestNetwork {
 
     @Before
     public void init() {
-        MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
-        mk.init();
-        mk.start();
+        try {
+            MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
+            mk.init();
+            mk.start();
 
-        LevelDbModuleBootstrap dbModuleBootstrap = new LevelDbModuleBootstrap();
-        dbModuleBootstrap.init();
-        dbModuleBootstrap.start();
+            LevelDbModuleBootstrap dbModuleBootstrap = new LevelDbModuleBootstrap();
+            dbModuleBootstrap.init();
+            dbModuleBootstrap.start();
 
-        NettyNetworkModuleBootstrap networkModuleBootstrap = new NettyNetworkModuleBootstrap();
-        networkModuleBootstrap.init();
-        networkModuleBootstrap.start();
+            NettyNetworkModuleBootstrap networkModuleBootstrap = new NettyNetworkModuleBootstrap();
+            networkModuleBootstrap.init();
+            networkModuleBootstrap.start();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Test

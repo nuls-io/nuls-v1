@@ -28,21 +28,15 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.service.BatchOperation;
-import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Result;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
-import org.iq80.leveldb.util.Slice;
-import org.iq80.leveldb.util.Slices;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * @Desription:

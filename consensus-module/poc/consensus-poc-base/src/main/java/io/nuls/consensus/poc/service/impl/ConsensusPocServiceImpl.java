@@ -24,7 +24,7 @@
  *
  */
 
-package io.nuls.consensus.poc.storage.service;
+package io.nuls.consensus.poc.service.impl;
 
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
@@ -33,7 +33,7 @@ import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
-import io.nuls.consensus.poc.protocol.service.ConsensusServiceIntf;
+import io.nuls.consensus.service.ConsensusServiceIntf;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
