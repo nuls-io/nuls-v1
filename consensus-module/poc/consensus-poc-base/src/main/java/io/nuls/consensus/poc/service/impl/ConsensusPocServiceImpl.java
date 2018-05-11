@@ -33,7 +33,7 @@ import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
-import io.nuls.consensus.service.ConsensusServiceIntf;
+import io.nuls.consensus.service.ConsensusService;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -49,7 +49,7 @@ import java.util.List;
  * Created by ln on 2018/5/5.
  */
 @Service
-public class ConsensusPocServiceImpl implements ConsensusServiceIntf {
+public class ConsensusPocServiceImpl implements ConsensusService {
 
     private TxMemoryPool txMemoryPool = TxMemoryPool.getInstance();
     private BlockQueueProvider blockQueueProvider = BlockQueueProvider.getInstance();
