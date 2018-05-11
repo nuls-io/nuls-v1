@@ -158,7 +158,7 @@ public class TransactionServiceImplTest {
         list.add(transferTransaction1);
         list.add(transferTransaction2);
 
-//        createSetAliasTransaction(ecKey1, "alias");
+        createSetAliasTransaction(ecKey1, "alias");
 //        createSetAliasTransaction(ecKey1, "alias1");
 //        createSetAliasTransaction(ecKey2, "alias");
 

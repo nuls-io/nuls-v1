@@ -37,6 +37,7 @@ import io.nuls.protocol.base.utils.PoConvertUtil;
 import io.nuls.protocol.message.SmallBlockMessage;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
+import io.nuls.protocol.service.TransactionService;
 import io.nuls.protocol.storage.po.BlockHeaderPo;
 import io.nuls.protocol.storage.service.BlockHeaderStorageService;
 
@@ -62,6 +63,9 @@ public class BlockServiceImpl implements BlockService {
 
     @Autowired
     private LedgerService ledgerService;
+
+    @Autowired
+    private TransactionService transactionService;
 
     @Autowired
     private MessageBusService messageBusService;
@@ -207,7 +211,10 @@ public class BlockServiceImpl implements BlockService {
         }
         List<Transaction> savedList = new ArrayList<>();
         for (Transaction transaction : block.getTxs()) {
-            Result result = ledgerService.saveTx(transaction);
+            Result result = transactionService.commitTx(transaction, block.getHeader());
+            if (result.isSuccess()) {
+                result = ledgerService.saveTx(transaction);
+            }
             if (result.isSuccess()) {
                 savedList.add(transaction);
             } else {
@@ -229,6 +236,7 @@ public class BlockServiceImpl implements BlockService {
      */
     private void rollbackTxList(List<Transaction> savedList) {
         for (Transaction tx : savedList) {
+            transactionService.rollbackTx(tx,null);
             ledgerService.rollbackTx(tx);
         }
     }

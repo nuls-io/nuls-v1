@@ -52,7 +52,7 @@ public class BlockServiceImplTest {
     private BlockService service;
 
     @Before
-    private void init() {
+    public void init() {
         MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
         mk.init();
         mk.start();
@@ -68,7 +68,7 @@ public class BlockServiceImplTest {
 
         service = NulsContext.getServiceBean(BlockService.class);
         Block block = new Block();
-        BlockHeader blockHeader  = new BlockHeader();
+        BlockHeader blockHeader = new BlockHeader();
         blockHeader.setHash(NulsDigestData.calcDigestData("hashhash".getBytes()));
         blockHeader.setHeight(1286L);
         blockHeader.setExtend("extends".getBytes());
@@ -92,46 +92,51 @@ public class BlockServiceImplTest {
     }
 
     @Test
-    public void getGengsisBlock() {
-    }
+    public void test() {
 
-    @Test
-    public void getBestBlock() {
     }
-
-    @Test
-    public void getBestBlockHeader() {
-    }
-
-    @Test
-    public void getBlockHeader() {
-    }
-
-    @Test
-    public void getBlockHeader1() {
-    }
-
-    @Test
-    public void getBlock() {
-    }
-
-    @Test
-    public void getBlock1() {
-    }
-
-    @Test
-    public void saveBlock() {
-    }
-
-    @Test
-    public void rollbackBlock() {
-    }
-
-    @Test
-    public void forwardBlock() {
-    }
-
-    @Test
-    public void broadcastBlock() {
-    }
+//
+//    @Test
+//    public void getGengsisBlock() {
+//    }
+//
+//    @Test
+//    public void getBestBlock() {
+//    }
+//
+//    @Test
+//    public void getBestBlockHeader() {
+//    }
+//
+//    @Test
+//    public void getBlockHeader() {
+//    }
+//
+//    @Test
+//    public void getBlockHeader1() {
+//    }
+//
+//    @Test
+//    public void getBlock() {
+//    }
+//
+//    @Test
+//    public void getBlock1() {
+//    }
+//
+//    @Test
+//    public void saveBlock() {
+//    }
+//
+//    @Test
+//    public void rollbackBlock() {
+//    }
+//
+//    @Test
+//    public void forwardBlock() {
+//    }
+//
+//    @Test
+//    public void broadcastBlock() {
+//    }
 }

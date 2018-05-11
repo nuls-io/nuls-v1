@@ -30,6 +30,7 @@ import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 import java.util.*;
 
@@ -91,11 +92,11 @@ public class MeetingRound {
             member.setRoundIndex(this.getIndex());
             member.setRoundStartTime(this.getStartTime());
             member.setPackingIndexOfRound(i + 1);
-            member.setPackStartTime(startTime + i * ConsensusConstant.BLOCK_TIME_INTERVAL_MILLIS);
-            member.setPackEndTime(member.getPackStartTime() + ConsensusConstant.BLOCK_TIME_INTERVAL_MILLIS);
+            member.setPackStartTime(startTime + i * ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS);
+            member.setPackEndTime(member.getPackStartTime() + ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS);
             totalWeight += member.getTotalDeposit().toDouble() + member.getOwnDeposit().toDouble();
         }
-        endTime = startTime + memberCount * ConsensusConstant.BLOCK_TIME_INTERVAL_MILLIS;
+        endTime = startTime + memberCount * ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS;
     }
 
     public MeetingMember getMember(int order) {

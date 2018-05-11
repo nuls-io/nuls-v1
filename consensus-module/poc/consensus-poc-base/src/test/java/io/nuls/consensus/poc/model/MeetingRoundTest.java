@@ -26,14 +26,14 @@
 
 package io.nuls.consensus.poc.model;
 
-import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.kernel.model.Na;
+import io.nuls.protocol.constant.ProtocolConstant;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by ln on 2018/5/7.
@@ -52,7 +52,7 @@ public class MeetingRoundTest {
 
         assertEquals(round.getMemberCount(), meetingMemberList.size());
         assertEquals("error", 1010d, round.getTotalWeight(), 2);
-        assertEquals(meetingMemberList.size() * ConsensusConstant.BLOCK_TIME_INTERVAL_MILLIS + roundStartTime , round.getEndTime());
+        assertEquals(meetingMemberList.size() * ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS + roundStartTime , round.getEndTime());
 
         System.out.println(round.toString());
     }

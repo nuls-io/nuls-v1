@@ -40,6 +40,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -154,7 +155,7 @@ public class BaseChainTest extends BaseTest {
 
         MeetingRound currentRound = chainContainer.initRound();
         MeetingMember member = currentRound.getMember(1);
-        blockHeader.setTime(member.getPackEndTime() + ConsensusConstant.BLOCK_TIME_INTERVAL_MILLIS * currentRound.getMemberCount());
+        blockHeader.setTime(member.getPackEndTime() + ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS * currentRound.getMemberCount());
 
         // add a round data
         BlockRoundData roundData = new BlockRoundData(preBlock.getHeader().getExtend());

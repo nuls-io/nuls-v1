@@ -13,7 +13,7 @@ public class NetworkBootstrap {
             sysStart();
         } catch (Exception e) {
             Log.error(e);
-            System.exit(1);
+            System.exit(-1);
         }
     }
 

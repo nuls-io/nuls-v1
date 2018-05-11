@@ -327,7 +327,8 @@ public class LevelDBManager {
      */
     private static DB initOpenDB(String dbPath) throws IOException {
         File file = new File(dbPath);
-        if (!file.exists()) {
+        File checkFile = new File(dbPath + File.separator + "CURRENT");
+        if (!checkFile.exists()) {
             return null;
         }
         Options options = new Options().createIfMissing(false);

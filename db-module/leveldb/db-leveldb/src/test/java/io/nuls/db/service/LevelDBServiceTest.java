@@ -99,7 +99,8 @@ public class LevelDBServiceTest {
             e.parse(resultBytes);
             assertEquals(e.getTime(), index);
         }
-
+//        C:\workspace\nuls_v2\db-module\leveldb\db-leveldb\target\test-classes\data\test\pierre-test-15
+//        C:\workspace\nuls_v2\db-module\leveldb\db-leveldb\target\test-classes\data\test\pierre-test-15\leveldb
         System.out.println("It takes " + (System.currentTimeMillis() - time) + " ms to randomly acquire " + getCount + " data");
     }
 
