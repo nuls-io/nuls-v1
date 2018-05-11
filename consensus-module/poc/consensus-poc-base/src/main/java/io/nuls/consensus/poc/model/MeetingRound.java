@@ -26,6 +26,7 @@
 package io.nuls.consensus.poc.model;
 
 import io.nuls.account.model.Account;
+import io.nuls.account.model.Address;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -161,7 +162,7 @@ public class MeetingRound {
     public String toString() {
         StringBuilder str = new StringBuilder();
         for (MeetingMember member : this.getMemberList()) {
-            str.append(member.getPackingAddress());
+            str.append(Address.fromHashs(member.getPackingAddress()).getBase58());
             str.append(" ,order:" + member.getPackingIndexOfRound());
             str.append(",packTime:" + new Date(member.getPackEndTime()));
             str.append(",creditVal:" + member.getRealCreditVal());

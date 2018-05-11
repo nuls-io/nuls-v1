@@ -26,14 +26,17 @@
 
 package io.nuls.consensus.poc.model;
 
+import io.nuls.account.model.Address;
+import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.model.Na;
-import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.kernel.utils.AddressTool;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Created by ln on 2018/5/7.
@@ -52,9 +55,10 @@ public class MeetingRoundTest {
 
         assertEquals(round.getMemberCount(), meetingMemberList.size());
         assertEquals("error", 1010d, round.getTotalWeight(), 2);
-        assertEquals(meetingMemberList.size() * ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS + roundStartTime , round.getEndTime());
+        assertEquals(meetingMemberList.size() * ConsensusConstant.BLOCK_TIME_INTERVAL_MILLIS + roundStartTime , round.getEndTime());
 
         System.out.println(round.toString());
+
     }
 
     private List<MeetingMember> getMemberList() {
@@ -63,7 +67,7 @@ public class MeetingRoundTest {
         for(int i = 0 ; i < 10 ; i ++) {
             MeetingMember member = new MeetingMember();
             member.setRoundStartTime(roundStartTime);
-            member.setPackingAddress(new byte[i*3]);
+            member.setPackingAddress(AddressTool.getAddress(new ECKey().getPubKey()));
             member.setOwnDeposit(Na.NA);
             member.setCreditVal(0.1 * (i + 1));
             member.setCommissionRate(0.2d);

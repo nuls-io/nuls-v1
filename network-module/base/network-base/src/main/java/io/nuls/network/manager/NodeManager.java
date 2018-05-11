@@ -12,7 +12,7 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.protocol.message.NetworkMessageBody;
-import io.nuls.network.storage.NetworkStorage;
+import io.nuls.network.storage.manager.NetworkStorage;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
