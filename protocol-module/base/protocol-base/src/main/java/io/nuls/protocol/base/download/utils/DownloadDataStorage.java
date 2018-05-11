@@ -25,7 +25,7 @@
 
 package io.nuls.protocol.base.download.utils;
 
-import io.nuls.consensus.poc.protocol.service.ConsensusServiceIntf;
+import io.nuls.consensus.service.ConsensusServiceIntf;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Block;
