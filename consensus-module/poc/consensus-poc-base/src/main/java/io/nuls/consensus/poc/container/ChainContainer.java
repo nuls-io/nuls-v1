@@ -589,6 +589,10 @@ public class ChainContainer implements Cloneable {
         return other.getChain().getId().equals(this.chain.getId());
     }
 
+    public RoundManager getRoundManager() {
+        return roundManager;
+    }
+
     @Override
     protected Object clone() throws CloneNotSupportedException {
         return super.clone();
