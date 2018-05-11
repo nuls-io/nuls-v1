@@ -24,7 +24,7 @@
  */
 package io.nuls.protocol.base.handler;
 
-import io.nuls.consensus.poc.protocol.service.ConsensusServiceIntf;
+import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.Log;
@@ -58,7 +58,7 @@ import java.util.Map;
  */
 public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage> {
 
-    private ConsensusServiceIntf consensusService = NulsContext.getServiceBean(ConsensusServiceIntf.class);
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 

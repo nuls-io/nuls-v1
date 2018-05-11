@@ -9,6 +9,7 @@ import io.netty.util.AttributeKey;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.network.entity.Node;
+import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;
 
 import java.io.UnsupportedEncodingException;
@@ -18,6 +19,8 @@ import java.util.Map;
 public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     private NodeManager nodeManager = NodeManager.getInstance();
+
+    private ConnectionManager connectionManager = ConnectionManager.getInstance();
 
     private AttributeKey<Node> key = AttributeKey.valueOf("node");
 
@@ -53,6 +56,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
         Log.info(" ---------------------- client channelActive ----------" + nodeId);
         Log.info("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
+        Log.info("remoteInfo: "+channel.remoteAddress().getHostString()+":" + channel.remoteAddress().getPort());
 
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
@@ -76,6 +80,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
         Log.info(" ---------------------- client channelInactive ---------------------- " + nodeId);
         Log.info("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
+        Log.info("remoteInfo: "+channel.remoteAddress().getHostString()+":" + channel.remoteAddress().getPort());
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
@@ -94,7 +99,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws UnsupportedEncodingException {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.debug(" ---------------------- client channelRead ---------------------- " + nodeId);
+        Log.info(" ---------------------- client channelRead ---------------------- " + nodeId);
         Node node = nodeManager.getNode(nodeId);
         if (node != null && node.isAlive()) {
             ByteBuf buf = (ByteBuf) msg;
@@ -103,7 +108,8 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             buf.release();
             ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
             buffer.put(bytes);
-//            getNetworkService().receiveMessage(buffer, node);
+
+            connectionManager.receiveMessage(buffer, node);
         }
     }
 

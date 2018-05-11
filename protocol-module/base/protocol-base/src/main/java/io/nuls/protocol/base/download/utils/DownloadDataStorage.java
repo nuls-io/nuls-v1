@@ -25,7 +25,7 @@
 
 package io.nuls.protocol.base.download.utils;
 
-import io.nuls.consensus.poc.protocol.service.ConsensusServiceIntf;
+import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Block;
@@ -42,7 +42,7 @@ public class DownloadDataStorage implements Callable<Boolean> {
     private String queueName;
     private boolean running = true;
 
-    private ConsensusServiceIntf consensusService = NulsContext.getServiceBean(ConsensusServiceIntf.class);
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
     public DownloadDataStorage(BlockingQueue<Block> blockQueue) {
         this.blockQueue = blockQueue;

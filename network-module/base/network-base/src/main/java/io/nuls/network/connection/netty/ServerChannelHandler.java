@@ -9,10 +9,13 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.manager.BroadcastHandler;
+import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
@@ -26,6 +29,7 @@ import java.util.Map;
  * @author Vivi
  */
 
+@ChannelHandler.Sharable
 public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     private NodeManager nodeManager = NodeManager.getInstance();
@@ -33,6 +37,8 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     private NetworkParam networkParam = NetworkParam.getInstance();
 
     private BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
+
+    private ConnectionManager connectionManager = ConnectionManager.getInstance();
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -95,11 +101,14 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             ctx.channel().close();
             return;
         }
-        Block bestBlock = NulsContext.getInstance().getBestBlock();
+        //Block bestBlock = NulsContext.getInstance().getBestBlock();
+//        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
+//                bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
         NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
-                bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
+                10001, NulsDigestData.calcDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
         HandshakeMessage handshakeMessage = new HandshakeMessage(body);
-        broadcastHandler.broadcastToNode(handshakeMessage, node, false);
+        BroadcastResult result = broadcastHandler.broadcastToNode(handshakeMessage, node, false);
+        System.out.println("-----------result:" + result.getMessage());
     }
 
     @Override
@@ -127,8 +136,8 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        System.out.println("----------------ServerChannelHandler exceptionCaught-----------");
-        System.out.println(cause.getMessage());
+        Log.error("----------------ServerChannelHandler exceptionCaught-----------");
+        Log.error(cause.getMessage());
 //        SocketChannel channel = (SocketChannel) ctx.channel();
 //        InetSocketAddress localAddress = channel.localAddress();
 //        InetSocketAddress remoteAddress = channel.remoteAddress();
@@ -143,7 +152,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.debug(" ---------------------- server channelRead ------------------------- " + nodeId);
+        Log.info(" ---------------------- server channelRead ------------------------- " + nodeId);
         Node node = nodeManager.getNode(nodeId);
         if (node != null && node.isAlive()) {
             ByteBuf buf = (ByteBuf) msg;
@@ -152,7 +161,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             buf.release();
             ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
             buffer.put(bytes);
-//            getNetworkService().receiveMessage(buffer, node);
+            connectionManager.receiveMessage(buffer, node);
         }
     }
 

@@ -32,6 +32,7 @@ import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 import org.spongycastle.util.Arrays;
 
@@ -41,6 +42,7 @@ import java.util.List;
  * author Facjas
  * date 2018/5/10.
  */
+@Component
 public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageService {
     /**
      * 通用数据存储服务

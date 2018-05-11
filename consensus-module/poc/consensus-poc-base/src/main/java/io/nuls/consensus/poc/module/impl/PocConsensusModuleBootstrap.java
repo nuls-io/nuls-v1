@@ -26,7 +26,7 @@
 package io.nuls.consensus.poc.module.impl;
 
 import io.nuls.consensus.poc.config.ConsensusConfig;
-import io.nuls.consensus.poc.protocol.module.AbstractConsensusModule;
+import io.nuls.consensus.module.AbstractConsensusModule;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.ModuleStatusEnum;
 import io.nuls.kernel.thread.BaseThread;

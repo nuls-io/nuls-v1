@@ -25,7 +25,7 @@
  */
 package io.nuls.consensus.poc.process;
 
-import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.config.ConsensusConfig;

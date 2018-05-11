@@ -25,10 +25,9 @@
  */
 package io.nuls.consensus.poc.protocol.tx;
 
-import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.CancelDeposit;
 import io.nuls.kernel.model.CoinData;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 
 /**

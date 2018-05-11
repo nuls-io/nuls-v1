@@ -2,6 +2,7 @@ package io.nuls.network.connection.netty;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.nuls.core.tools.log.Log;
@@ -26,8 +27,11 @@ public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
             } else if (event.state() == IdleState.ALL_IDLE) {
                 type = "all idle";
             }
-
+            SocketChannel channel = (SocketChannel) ctx.channel();
             Log.info(ctx.channel().remoteAddress() + "timeout type：" + type);
+            Log.info(" ---------------------- HeartbeatServerHandler ---------------------- ");
+            Log.info("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
+            Log.info("remoteInfo: "+channel.remoteAddress().getHostString()+":" + channel.remoteAddress().getPort());
             ctx.channel().close();
 
         } else {

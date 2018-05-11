@@ -12,6 +12,7 @@ import io.nuls.db.service.DBService;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Result;
 
@@ -22,6 +23,7 @@ import java.util.List;
  * @author: Charlie
  * @date: 2018/5/9
  */
+@Component
 public class AccountStorageServiceImpl implements AccountStorageService, InitializingBean {
 
     /**
