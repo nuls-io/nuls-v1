@@ -42,7 +42,7 @@ import java.util.Set;
  * @author Niels
  * @date 2017/10/30
  */
-public abstract class Transaction<T extends TransactionLogicData> extends BaseNulsData implements Cloneable {
+public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData implements Cloneable {
 
     @Tag(1)
     protected int type;
@@ -234,8 +234,8 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
             addresses.addAll(coinAddressSet);
         }
         if (txData != null) {
-            Set<byte[]> txAddressSet = txData.getAddresses();
-            addresses.addAll(txAddressSet);
+//            Set<byte[]> txAddressSet = txData.getAddresses();
+//            addresses.addAll(txAddressSet);
         }
         return new ArrayList<>(addresses);
     }
