@@ -26,10 +26,7 @@
 package io.nuls.protocol.base.service;
 
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
-import io.nuls.consensus.poc.protocol.entity.Agent;
-import io.nuls.consensus.poc.protocol.entity.RedPunishData;
-import io.nuls.consensus.poc.protocol.entity.YellowPunishData;
-import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.consensus.poc.protocol.entity.*;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.db.module.impl.LevelDbModuleBootstrap;
@@ -230,7 +227,10 @@ public class TransactionServiceImplTest {
     private CancelDepositTransaction createCancelDepositTransaction(ECKey ecKey, NulsDigestData txHash) {
         CancelDepositTransaction tx = new CancelDepositTransaction();
         setCommonFields(tx);
-        tx.setTxData(txHash);
+        CancelDeposit cd = new CancelDeposit();
+        cd.setAddress(AddressTool.getAddress(ecKey.getPubKey()));
+        cd.setJoinTxHash(txHash);
+        tx.setTxData(cd);
         signTransaction(tx, ecKey);
         return tx;
     }
@@ -238,7 +238,10 @@ public class TransactionServiceImplTest {
     private StopAgentTransaction createStopAgentTransaction(ECKey ecKey, NulsDigestData agentTxHash) {
         StopAgentTransaction tx = new StopAgentTransaction();
         setCommonFields(tx);
-        tx.setTxData(agentTxHash);
+        StopAgent txData = new StopAgent();
+        txData.setAddress(AddressTool.getAddress(ecKey.getPubKey()));
+        txData.setRegisterTxHash(tx.getHash());
+        tx.setTxData(txData);
         signTransaction(tx, ecKey);
         return tx;
 

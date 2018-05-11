@@ -7,7 +7,5 @@ import java.util.Set;
  * date 2018/5/10.
  */
 public abstract class TransactionLogicData extends BaseNulsData {
-    public Set<byte[]> getAddresses() {
-        return null;
-    }
+    public abstract Set<byte[]> getAddresses();
 }

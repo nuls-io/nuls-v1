@@ -26,16 +26,16 @@
 package io.nuls.consensus.poc.protocol.tx;
 
 import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
+import io.nuls.consensus.poc.protocol.entity.StopAgent;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.CoinData;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 
 /**
  * @author Niels
  * @date 2017/12/4
  */
-public class StopAgentTransaction extends Transaction<NulsDigestData> {
+public class StopAgentTransaction extends Transaction<StopAgent> {
 
     public StopAgentTransaction() {
         super(ConsensusConstant.TX_TYPE_STOP_AGENT);

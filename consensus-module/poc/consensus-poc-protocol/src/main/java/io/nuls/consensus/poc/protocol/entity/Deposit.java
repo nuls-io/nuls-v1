@@ -28,13 +28,17 @@ package io.nuls.consensus.poc.protocol.entity;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.TransactionLogicData;
 import io.protostuff.Tag;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Niels
  * @date 2017/12/4
  */
-public class Deposit extends BaseNulsData {
+public class Deposit extends TransactionLogicData {
 
     @Tag(1)
     private Na deposit;
@@ -111,5 +115,12 @@ public class Deposit extends BaseNulsData {
 
     public void setAddress(byte[] address) {
         this.address = address;
+    }
+
+    @Override
+    public Set<byte[]> getAddresses() {
+        Set<byte[]> addressSet = new HashSet<>();
+        addressSet.add(this.address);
+        return addressSet;
     }
 }
