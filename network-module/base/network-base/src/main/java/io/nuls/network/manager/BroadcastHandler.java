@@ -11,6 +11,7 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.protocol.message.base.BaseMessage;
+import io.nuls.protocol.message.base.MessageHeader;
 
 public class BroadcastHandler {
 
@@ -54,6 +55,7 @@ public class BroadcastHandler {
             return new BroadcastResult(false, "node not found");
         }
         try {
+            message.getHeader().setMagicNumber(networkParam.getPacketMagic());
             ChannelFuture future = channel.writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
             if (!asyn) {
                 future.await();
