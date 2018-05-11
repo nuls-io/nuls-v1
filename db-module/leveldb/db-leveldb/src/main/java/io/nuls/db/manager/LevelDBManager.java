@@ -29,6 +29,7 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.model.ModelWrapper;
+import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Result;
 import io.protostuff.LinkedBuffer;
@@ -222,7 +223,7 @@ public class LevelDBManager {
     public static Result createArea(String areaName, Long cacheSize, Comparator<byte[]> comparator) {
         // prevent too many areas
         if (AREAS.size() > (max - 1)) {
-            return new Result(false, "KV_AREA_CREATE_ERROR");
+            return Result.getFailed(DBErrorCode.DB_AREA_CREATE_EXCEED_LIMIT);
         }
         if (StringUtils.isBlank(areaName)) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
@@ -231,7 +232,7 @@ public class LevelDBManager {
             return Result.getFailed(DBErrorCode.DB_AREA_EXIST);
         }
         if (StringUtils.isBlank(dataPath) || !checkPathLegal(areaName)) {
-            return new Result(false, "KV_AREA_CREATE_ERROR");
+            return Result.getFailed(DBErrorCode.DB_AREA_CREATE_PATH_ERROR);
         }
         Result result;
         try {
@@ -245,7 +246,7 @@ public class LevelDBManager {
             result = Result.getSuccess();
         } catch (Exception e) {
             Log.error("error create area: " + areaName, e);
-            result = new Result(false, "KV_AREA_CREATE_ERROR");
+            result = Result.getFailed(DBErrorCode.DB_AREA_CREATE_ERROR);
         }
         return result;
     }
@@ -256,16 +257,16 @@ public class LevelDBManager {
 
     public static Result destroyArea(String areaName) {
         if (!baseCheckArea(areaName)) {
-            return new Result(false, "KV_AREA_NOT_EXISTS");
+            return Result.getFailed(DBErrorCode.DB_AREA_NOT_EXIST);
         }
         if (StringUtils.isBlank(dataPath) || !checkPathLegal(areaName)) {
-            return new Result(false, "KV_AREA_PATH_ERROR");
+            return Result.getFailed(DBErrorCode.DB_AREA_CREATE_PATH_ERROR);
         }
         Result result;
         try {
             File dir = new File(dataPath + File.separator + areaName);
             if (!dir.exists()) {
-                return new Result(false, "KV_AREA_NOT_EXISTS");
+                return Result.getFailed(DBErrorCode.DB_AREA_NOT_EXIST);
             }
             String filePath = dataPath + File.separator + areaName + File.separator + BASE_DB_NAME;
             destroyDB(filePath);
@@ -276,7 +277,7 @@ public class LevelDBManager {
             result = Result.getSuccess();
         } catch (Exception e) {
             Log.error("error destroy area: " + areaName, e);
-            result = new Result(false, "KV_AREA_DESTROY_ERROR");
+            result = Result.getFailed(DBErrorCode.DB_AREA_DESTROY_ERROR);
         }
         return result;
     }
@@ -326,8 +327,8 @@ public class LevelDBManager {
      * @throws IOException
      */
     private static DB initOpenDB(String dbPath) throws IOException {
-        File file = new File(dbPath);
-        if (!file.exists()) {
+        File checkFile = new File(dbPath + File.separator + "CURRENT");
+        if (!checkFile.exists()) {
             return null;
         }
         Options options = new Options().createIfMissing(false);
@@ -347,6 +348,7 @@ public class LevelDBManager {
         if (cacheSize != null) {
             options.cacheSize(cacheSize);
         }
+        File file = new File(dbPath);
         DBFactory factory = Iq80DBFactory.factory;
         return factory.open(file, options);
     }
@@ -420,7 +422,7 @@ public class LevelDBManager {
 
     public static Result put(String area, byte[] key, byte[] value) {
         if (!baseCheckArea(area)) {
-            return new Result(true, "KV_AREA_NOT_EXISTS");
+            return Result.getFailed(DBErrorCode.DB_AREA_NOT_EXIST);
         }
         if (key == null || value == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
@@ -445,7 +447,7 @@ public class LevelDBManager {
     @Deprecated
     public static Result put(String area, String key, String value) {
         if (!baseCheckArea(area)) {
-            return new Result(true, "KV_AREA_NOT_EXISTS");
+            return Result.getFailed(DBErrorCode.DB_AREA_NOT_EXIST);
         }
         if (StringUtils.isBlank(key) || StringUtils.isBlank(value)) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
@@ -470,7 +472,7 @@ public class LevelDBManager {
     @Deprecated
     public static Result put(String area, byte[] key, String value) {
         if (!baseCheckArea(area)) {
-            return new Result(true, "KV_AREA_NOT_EXISTS");
+            return Result.getFailed(DBErrorCode.DB_AREA_NOT_EXIST);
         }
         if (key == null || StringUtils.isBlank(value)) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
@@ -500,7 +502,7 @@ public class LevelDBManager {
 
     public static <T> Result putModel(String area, byte[] key, T value) {
         if (!baseCheckArea(area)) {
-            return new Result(true, "KV_AREA_NOT_EXISTS");
+            return Result.getFailed(DBErrorCode.DB_AREA_NOT_EXIST);
         }
         if (key == null || value == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
@@ -531,7 +533,7 @@ public class LevelDBManager {
     @Deprecated
     public static Result delete(String area, String key) {
         if (!baseCheckArea(area)) {
-            return new Result(true, "KV_AREA_NOT_EXISTS");
+            return Result.getFailed(DBErrorCode.DB_AREA_NOT_EXIST);
         }
         if (StringUtils.isBlank(key)) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
@@ -548,7 +550,7 @@ public class LevelDBManager {
 
     public static Result delete(String area, byte[] key) {
         if (!baseCheckArea(area)) {
-            return new Result(true, "KV_AREA_NOT_EXISTS");
+            return Result.getFailed(DBErrorCode.DB_AREA_NOT_EXIST);
         }
         if (key == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);

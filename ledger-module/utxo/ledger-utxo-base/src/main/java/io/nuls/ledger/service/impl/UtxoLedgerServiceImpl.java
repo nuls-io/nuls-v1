@@ -82,19 +82,19 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.NULL_PARAMETER);
         }
         List<Coin> froms = coinData.getFrom();
-        long fromTotal = 0L;
+        Na fromTotal = Na.ZERO;
         for (Coin from : froms) {
             if (TimeService.currentTimeMillis() < from.getLockTime()) {
                 return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_UNUSABLE);
             }
-            fromTotal += from.getNa().getValue();
+            fromTotal = fromTotal.add(from.getNa());
         }
         List<Coin> tos = coinData.getTo();
-        long toTotal = 0L;
+        Na toTotal = Na.ZERO;
         for (Coin to : tos) {
-            toTotal += to.getNa().getValue();
+            toTotal = toTotal.add(to.getNa());
         }
-        if (fromTotal != toTotal) {
+        if (!fromTotal.equals(toTotal)) {
             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_INPUT);
         }
         return ValidateResult.getSuccessResult();
