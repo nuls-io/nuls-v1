@@ -26,13 +26,14 @@ import java.util.Map;
  * @author Vivi
  */
 
+@ChannelHandler.Sharable
 public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
-    private NodeManager nodeManager = NodeManager.getInstance();
+    private NodeManager nodeManager;
 
-    private NetworkParam networkParam = NetworkParam.getInstance();
+    private NetworkParam networkParam;
 
-    private BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
+    private BroadcastHandler broadcastHandler;
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -44,7 +45,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         // 为防止两个节点同时作为服务器一方相互连接，在这里做硬性规定，
         // 两个节点同时相互连接时，ip数字小的一方作为服务器，大的一方作为客户端
         String remoteIP = channel.remoteAddress().getHostString();
-        Map<String, Node> nodeMap = nodeManager.getNodes();
+        Map<String, Node> nodeMap = getNodeManager().getNodes();
         for (Node node : nodeMap.values()) {
             if (node.getIp().equals(remoteIP)) {
                 if (node.getType() == Node.OUT) {
@@ -58,7 +59,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
                     } else {
                         //如果自己是服务器端，则删除当前主动作为客户端连接出去的节点，保存当前作为服务器端的连接
 //                        System.out.println("----------------sever client register each other remove node-----------------" + node.getId());
-                        nodeManager.removeNode(node.getId());
+                        getNodeManager().removeNode(node.getId());
                     }
                 }
             }
@@ -89,14 +90,14 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         Node node = new Node(channel.remoteAddress().getHostString(), channel.remoteAddress().getPort(), Node.IN);
         node.setChannelId(channelId);
         node.setStatus(Node.CONNECT);
-        boolean success = nodeManager.processConnectedNode(node);
+        boolean success = getNodeManager().processConnectedNode(node);
 
         if (!success) {
             ctx.channel().close();
             return;
         }
         Block bestBlock = NulsContext.getInstance().getBestBlock();
-        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
+        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, getNetworkParam().getPort(),
                 bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
         HandshakeMessage handshakeMessage = new HandshakeMessage(body);
         broadcastHandler.broadcastToNode(handshakeMessage, node, false);
@@ -111,12 +112,12 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
-        Node node = nodeManager.getNode(nodeId);
+        Node node = getNodeManager().getNode(nodeId);
 
         if (node != null) {
             if (channelId.equals(node.getChannelId())) {
 //                System.out.println("------------ sever channelInactive remove node-------------" + node.getId());
-                nodeManager.removeNode(nodeId);
+                getNodeManager().removeNode(nodeId);
             } else {
                 Log.info("--------------server channel id different----------------------");
                 Log.info("--------node:" + node.getId() + ",type:" + node.getType());
@@ -145,7 +146,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
 //        Log.debug(" ---------------------- server channelRead ------------------------- " + nodeId);
-        Node node = nodeManager.getNode(nodeId);
+        Node node = getNodeManager().getNode(nodeId);
         if (node != null && node.isAlive()) {
             ByteBuf buf = (ByteBuf) msg;
             byte[] bytes = new byte[buf.readableBytes()];
@@ -157,4 +158,24 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
+    public NodeManager getNodeManager() {
+        if(nodeManager == null) {
+            nodeManager = NodeManager.getInstance();
+        }
+        return nodeManager;
+    }
+
+    public NetworkParam getNetworkParam() {
+        if(networkParam == null) {
+            networkParam = NetworkParam.getInstance();
+        }
+        return networkParam;
+    }
+
+    public BroadcastHandler getBroadcastHandler() {
+        if(broadcastHandler == null) {
+            broadcastHandler = BroadcastHandler.getInstance();
+        }
+        return broadcastHandler;
+    }
 }
