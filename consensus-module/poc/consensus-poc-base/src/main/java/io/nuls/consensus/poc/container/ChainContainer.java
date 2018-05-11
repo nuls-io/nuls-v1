@@ -113,7 +113,7 @@ public class ChainContainer implements Cloneable {
 
                 CancelDepositTransaction cancelDepositTx = (CancelDepositTransaction) tx;
 
-                NulsDigestData joinHash = cancelDepositTx.getTxData();
+                NulsDigestData joinHash = cancelDepositTx.getTxData().getJoinTxHash();
 
                 Iterator<Transaction<Deposit>> it = depositList.iterator();
                 while (it.hasNext()) {
@@ -129,7 +129,7 @@ public class ChainContainer implements Cloneable {
 
                 StopAgentTransaction stopAgentTx = (StopAgentTransaction) tx;
 
-                NulsDigestData agentHash = stopAgentTx.getTxData();
+                NulsDigestData agentHash = stopAgentTx.getTxData().getRegisterTxHash();
 
                 Iterator<Transaction<Deposit>> it = depositList.iterator();
                 while (it.hasNext()) {

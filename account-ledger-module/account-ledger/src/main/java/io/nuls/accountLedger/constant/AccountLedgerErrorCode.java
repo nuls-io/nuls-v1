@@ -22,35 +22,28 @@
  * SOFTWARE.
  *
  */
-package io.nuls.consensus.poc.protocol.entity;
 
-import io.nuls.kernel.model.TransactionLogicData;
+package io.nuls.accountLedger.constant;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import io.nuls.kernel.constant.ErrorCode;
 
 /**
- * @author Niels
- * @date 2017/12/28
+ * @author: Niels Wang
+ * @date: 2018/5/5
  */
-public class YellowPunishData extends TransactionLogicData {
-    private List<byte[]> addressList = new ArrayList<>();
+public interface AccountLedgerErrorCode {
 
-    public YellowPunishData() {
-    }
-
-    public List<byte[]> getAddressList() {
-        return addressList;
-    }
-
-    public void setAddressList(List<byte[]> addressList) {
-        this.addressList = addressList;
-    }
-
-    @Override
-    public Set<byte[]> getAddresses() {
-        return new HashSet<>(addressList);
-    }
+    ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("AL000", 50000);
+    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("AL001", 50001);
+    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED = ErrorCode.init("AL002", 50002);
+    ErrorCode ACCOUNT_EXIST = ErrorCode.init("AL003", 50003);
+    ErrorCode ADDRESS_ERROR = ErrorCode.init("AL004", 50004);
+    ErrorCode ALIAS_EXIST = ErrorCode.init("AL005", 50005);
+    ErrorCode ALIAS_ERROR = ErrorCode.init("AL006", 50006);
+    ErrorCode ACCOUNT_ALREADY_SET_ALIAS = ErrorCode.init("AL007", 50007);
+    ErrorCode NULL_PARAMETER = ErrorCode.init("AL008", 50008);
+    ErrorCode DATA_PARSE_ERROR = ErrorCode.init("AL009", 50009);
+    ErrorCode SUCCESS = ErrorCode.init("AL010", 50010);
+    ErrorCode FAILED = ErrorCode.init("AL011", 50011);
+    ErrorCode PARAMETER_ERROR = ErrorCode.init("AL012", 50012);
 }

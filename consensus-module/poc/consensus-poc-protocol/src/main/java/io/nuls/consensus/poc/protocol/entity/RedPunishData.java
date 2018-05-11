@@ -24,13 +24,16 @@
  */
 package io.nuls.consensus.poc.protocol.entity;
 
-import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.model.TransactionLogicData;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Niels
  * @date 2017/12/28
  */
-public class RedPunishData extends BaseNulsData {
+public class RedPunishData extends TransactionLogicData {
     private long height;
     private byte[] address;
     private short reasonCode;
@@ -69,5 +72,12 @@ public class RedPunishData extends BaseNulsData {
 
     public void setEvidence(byte[] evidence) {
         this.evidence = evidence;
+    }
+
+    @Override
+    public Set<byte[]> getAddresses() {
+        Set<byte[]> set = new HashSet<>();
+        set.add(address);
+        return set;
     }
 }

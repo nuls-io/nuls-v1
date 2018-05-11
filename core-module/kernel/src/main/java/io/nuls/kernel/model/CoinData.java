@@ -30,6 +30,7 @@ import io.protostuff.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by ln on 2018/5/5.
@@ -86,5 +87,9 @@ public class CoinData extends BaseNulsData {
 
     public void addFrom(Coin coin) {
         from.add(coin);
+    }
+
+    public Set<byte[]> getAddresses() {
+        return null;
     }
 }

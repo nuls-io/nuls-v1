@@ -44,7 +44,7 @@ public interface AccountLedgerService {
      * save a tx to account ledger.
      * save if the tx is relative to local accounts, or do nothing.
      *
-     * @param tx    transaction to save
+     * @param tx transaction to save
      * @return return the tx count saved,
      */
     Result<Integer> save(Transaction tx);
@@ -55,7 +55,7 @@ public interface AccountLedgerService {
      * save a tx to account ledger.
      * save if the tx is relative to local accounts, or do nothing.
      *
-     * @param txs    transactions to save
+     * @param txs transactions to save
      * @return return the tx count saved,
      */
     Result<Integer> saveList(List<Transaction> txs);
@@ -66,7 +66,7 @@ public interface AccountLedgerService {
      * rollback a tx in account ledger
      * save if the tx is relative to local accounts, or do nothing
      *
-     * @param tx    transaction to rollback
+     * @param tx transaction to rollback
      * @return return the tx count rollbacked
      */
     Result<Integer> rollback(Transaction tx);
@@ -76,7 +76,7 @@ public interface AccountLedgerService {
      * rollback a tx list in account ledger.
      * save if the tx is relative to local accounts, or do nothing
      *
-     * @param txs    transactions to rollback
+     * @param txs transactions to rollback
      * @return return the tx count rollbacked
      */
     Result<Integer> rollback(List<Transaction> txs);
@@ -85,7 +85,7 @@ public interface AccountLedgerService {
      * <p>
      * get the balance of an local account.
      *
-     * @param addres    account address
+     * @param addres account address
      * @return return balance of account, return 0 if  account is not a local account
      */
     Result<Balance> getBalance(byte[] addres);
@@ -94,8 +94,8 @@ public interface AccountLedgerService {
      * <p>
      * get useable coindata
      *
-     * @param addres    account address
-     * @param amount    amount want to use
+     * @param addres account address
+     * @param amount amount want to use
      * @return return balance of account, return 0 if  account is not a local account
      */
     List<Coin> getCoinData(byte[] addres, Na amount);

@@ -25,16 +25,19 @@
  */
 package io.nuls.consensus.poc.protocol.entity;
 
-import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.TransactionLogicData;
 import io.protostuff.Tag;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Niels
  * @date 2017/12/10
  */
-public class Agent extends BaseNulsData {
+public class Agent extends TransactionLogicData {
 
     @Tag(1)
     private byte[] agentAddress;
@@ -192,5 +195,12 @@ public class Agent extends BaseNulsData {
 //        return agent;
 
         return (Agent) super.clone();
+    }
+
+    @Override
+    public Set<byte[]> getAddresses() {
+        Set<byte[]> addressSet = new HashSet<>();
+        addressSet.add(this.agentAddress);
+        return addressSet;
     }
 }

@@ -27,16 +27,22 @@ package io.nuls.kernel.model;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TxStatusEnum;
 import io.nuls.kernel.func.TimeService;
+import io.nuls.kernel.utils.AddressTool;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Tag;
 import io.protostuff.runtime.RuntimeSchema;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * @author Niels
  * @date 2017/10/30
  */
-public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData implements Cloneable {
+public abstract class Transaction<T extends TransactionLogicData> extends BaseNulsData implements Cloneable {
 
     @Tag(1)
     protected int type;
@@ -214,5 +220,23 @@ public abstract class Transaction<T extends BaseNulsData> extends BaseNulsData i
             fee = coinData.getFee();
         }
         return fee;
+    }
+
+    public byte[] getAddress() {
+        return AddressTool.getAddress(scriptSig);
+    }
+
+    public List<byte[]> getAllRelativeAddress() {
+        Set<byte[]> addresses = new HashSet<>();
+
+        if (coinData != null) {
+            Set<byte[]> coinAddressSet = coinData.getAddresses();
+            addresses.addAll(coinAddressSet);
+        }
+        if (txData != null) {
+//            Set<byte[]> txAddressSet = txData.getAddresses();
+//            addresses.addAll(txAddressSet);
+        }
+        return new ArrayList<>(addresses);
     }
 }

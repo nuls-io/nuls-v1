@@ -22,35 +22,45 @@
  * SOFTWARE.
  *
  */
+
 package io.nuls.consensus.poc.protocol.entity;
 
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.TransactionLogicData;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
- * @author Niels
- * @date 2017/12/28
+ * @author: Niels Wang
+ * @date: 2018/5/11
  */
-public class YellowPunishData extends TransactionLogicData {
-    private List<byte[]> addressList = new ArrayList<>();
+public class StopAgent extends TransactionLogicData {
 
-    public YellowPunishData() {
-    }
+    private transient byte[] address;
 
-    public List<byte[]> getAddressList() {
-        return addressList;
-    }
-
-    public void setAddressList(List<byte[]> addressList) {
-        this.addressList = addressList;
-    }
+    private NulsDigestData registerTxHash;
 
     @Override
     public Set<byte[]> getAddresses() {
-        return new HashSet<>(addressList);
+        Set<byte[]> addressSet = new HashSet<>();
+        addressSet.add(this.address);
+        return addressSet;
+    }
+
+    public byte[] getAddress() {
+        return address;
+    }
+
+    public void setAddress(byte[] address) {
+        this.address = address;
+    }
+
+    public NulsDigestData getRegisterTxHash() {
+        return registerTxHash;
+    }
+
+    public void setRegisterTxHash(NulsDigestData registerTxHash) {
+        this.registerTxHash = registerTxHash;
     }
 }

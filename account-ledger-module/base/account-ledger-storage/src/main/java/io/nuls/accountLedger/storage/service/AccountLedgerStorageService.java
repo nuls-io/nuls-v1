@@ -24,10 +24,29 @@
  */
 package io.nuls.accountLedger.storage.service;
 
+import io.nuls.accountLedger.model.TransactionInfo;
+import io.nuls.accountLedger.storage.po.TransactionInfoPo;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.Transaction;
+
 /**
  * author Facjas
  * date 2018/5/10.
  */
 public interface AccountLedgerStorageService {
 
+    Result saveLocalTx(Transaction tx);
+
+    Result saveLocalTxInfo(TransactionInfoPo tx);
+
+    Result deleteLocalTxInfo(TransactionInfoPo tx);
+
+    Transaction getLocalTx(NulsDigestData hash);
+
+    Result deleteLocalTx(Transaction tx);
+
+    byte[] getCoinBytes(byte[] owner);
+
+    byte[] getTxBytes(byte[] txBytes);
 }
