@@ -33,6 +33,7 @@ import io.nuls.accountLedger.storage.po.TransactionInfoPo;
 import io.nuls.accountLedger.storage.service.AccountLedgerStorageService;
 import io.nuls.core.tools.BloomFilter.BloomFilter;
 import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Result;
@@ -47,6 +48,7 @@ import java.util.List;
  * author Facjas
  * date 2018/5/10.
  */
+@Component
 public class AccountLedgerServiceImpl implements AccountLedgerService {
 
     @Autowired
