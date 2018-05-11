@@ -159,14 +159,14 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     public NodeManager getNodeManager() {
         if(nodeManager == null) {
-            NodeManager.getInstance();
+            nodeManager = NodeManager.getInstance();
         }
         return nodeManager;
     }
 
     public NetworkParam getNetworkParam() {
         if(networkParam == null) {
-            NetworkParam.getInstance();
+            networkParam = NetworkParam.getInstance();
         }
         return networkParam;
     }
