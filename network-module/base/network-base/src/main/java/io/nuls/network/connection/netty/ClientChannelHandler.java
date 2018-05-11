@@ -9,6 +9,7 @@ import io.netty.util.AttributeKey;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.network.entity.Node;
+import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;
 
 import java.io.UnsupportedEncodingException;
@@ -18,6 +19,8 @@ import java.util.Map;
 public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     private NodeManager nodeManager = NodeManager.getInstance();
+
+    private ConnectionManager connectionManager = ConnectionManager.getInstance();
 
     private AttributeKey<Node> key = AttributeKey.valueOf("node");
 
@@ -108,7 +111,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             buf.release();
             ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
             buffer.put(bytes);
-//            getNetworkService().receiveMessage(buffer, node);
+            connectionManager.receiveMessage(buffer, node);
         }
         Log.info(" ---------------------- client channelRead END ---------------------- " + nodeId);
     }
