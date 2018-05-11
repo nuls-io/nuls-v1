@@ -64,7 +64,7 @@ public class BroadcastHandler {
             }
         } catch (Exception e) {
             Log.error(e);
-            return new BroadcastResult(false, "network send message failed");
+            return new BroadcastResult(false, "network send message Exception");
         }
         return new BroadcastResult(true, "OK");
     }

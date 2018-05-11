@@ -73,7 +73,7 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 //            body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
 //                    bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
             body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
-                    10001, new NulsDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
+                    10001, NulsDigestData.calcDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
             return new NetworkEventResult(true, new HandshakeMessage(body));
         }
         return null;

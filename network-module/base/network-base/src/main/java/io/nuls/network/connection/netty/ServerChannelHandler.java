@@ -12,6 +12,7 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.ConnectionManager;
@@ -104,9 +105,10 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 //        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
 //                bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
         NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
-                10001, new NulsDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
-                HandshakeMessage handshakeMessage = new HandshakeMessage(body);
-        broadcastHandler.broadcastToNode(handshakeMessage, node, false);
+                10001, NulsDigestData.calcDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
+        HandshakeMessage handshakeMessage = new HandshakeMessage(body);
+        BroadcastResult result = broadcastHandler.broadcastToNode(handshakeMessage, node, false);
+        System.out.println("-----------result:" + result.getMessage());
         Log.info("---------------------- server channelActive END------------------------- " + nodeId);
     }
 
