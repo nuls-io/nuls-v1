@@ -77,6 +77,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
                 }
             }
         }
+        Log.info("---------------------- server channelRegistered END ------------------------- " + nodeId);
     }
 
     @Override
@@ -96,11 +97,11 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             ctx.channel().close();
             return;
         }
-        Block bestBlock = NulsContext.getInstance().getBestBlock();
-        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, getNetworkParam().getPort(),
-                bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
-        HandshakeMessage handshakeMessage = new HandshakeMessage(body);
-        broadcastHandler.broadcastToNode(handshakeMessage, node, false);
+        //Block bestBlock = NulsContext.getInstance().getBestBlock();
+        //NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, getNetworkParam().getPort(),
+        //        bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
+        //HandshakeMessage handshakeMessage = new HandshakeMessage(body);
+        //broadcastHandler.broadcastToNode(handshakeMessage, node, false);
         Log.info("---------------------- server channelActive END------------------------- " + nodeId);
     }
 
@@ -125,6 +126,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
                 Log.info(channelId);
             }
         }
+        Log.info(" ---------------------- server channelInactive END------------------------- " + nodeId);
     }
 
     @Override
@@ -156,6 +158,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             buffer.put(bytes);
 //            getNetworkService().receiveMessage(buffer, node);
         }
+        Log.info(" ---------------------- server channelRead END------------------------- " + nodeId);
     }
 
     public NodeManager getNodeManager() {
