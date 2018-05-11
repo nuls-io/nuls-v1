@@ -109,7 +109,6 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
             buffer.put(bytes);
 
-            System.out.println("~~~~~~~~~~~~connectionManager receiveMessage~~~~~~" + node.getId());
             connectionManager.receiveMessage(buffer, node);
         }
     }
