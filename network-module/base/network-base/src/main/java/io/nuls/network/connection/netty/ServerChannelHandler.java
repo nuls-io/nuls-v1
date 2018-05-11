@@ -100,6 +100,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
                 bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
         HandshakeMessage handshakeMessage = new HandshakeMessage(body);
         broadcastHandler.broadcastToNode(handshakeMessage, node, false);
+        Log.info("---------------------- server channelActive END------------------------- " + nodeId);
     }
 
     @Override
