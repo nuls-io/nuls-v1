@@ -97,11 +97,12 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             ctx.channel().close();
             return;
         }
-        //Block bestBlock = NulsContext.getInstance().getBestBlock();
-        //NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, getNetworkParam().getPort(),
-        //        bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
-        //HandshakeMessage handshakeMessage = new HandshakeMessage(body);
-        //broadcastHandler.broadcastToNode(handshakeMessage, node, false);
+        Block bestBlock = NulsContext.getInstance().getBestBlock();
+        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, getNetworkParam().getPort(),
+                bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
+        HandshakeMessage handshakeMessage = new HandshakeMessage(body);
+        Log.info("---------------------- server channelActive END------------------------- " + nodeId);
+        broadcastHandler.broadcastToNode(handshakeMessage, node, false);
         Log.info("---------------------- server channelActive END------------------------- " + nodeId);
     }
 
