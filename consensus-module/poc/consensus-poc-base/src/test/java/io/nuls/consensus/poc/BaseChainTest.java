@@ -26,7 +26,7 @@
 
 package io.nuls.consensus.poc;
 
-import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.container.ChainContainer;

@@ -25,7 +25,7 @@
  */
 package io.nuls.consensus.poc.protocol.tx;
 
-import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.CoinData;
