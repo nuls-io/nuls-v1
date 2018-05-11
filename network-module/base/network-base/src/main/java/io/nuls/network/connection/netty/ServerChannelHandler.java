@@ -14,6 +14,7 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.Node;
 import io.nuls.network.manager.BroadcastHandler;
+import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
@@ -35,6 +36,8 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     private NetworkParam networkParam = NetworkParam.getInstance();
 
     private BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
+
+    private ConnectionManager connectionManager = ConnectionManager.getInstance();
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -100,10 +103,10 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         //Block bestBlock = NulsContext.getInstance().getBestBlock();
 //        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
 //                bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
-//        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
-//                10001, new NulsDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
-//                HandshakeMessage handshakeMessage = new HandshakeMessage(body);
-//        broadcastHandler.broadcastToNode(handshakeMessage, node, false);
+        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
+                10001, new NulsDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
+                HandshakeMessage handshakeMessage = new HandshakeMessage(body);
+        broadcastHandler.broadcastToNode(handshakeMessage, node, false);
         Log.info("---------------------- server channelActive END------------------------- " + nodeId);
     }
 
@@ -158,7 +161,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             buf.release();
             ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
             buffer.put(bytes);
-//            co.receiveMessage(buffer, node);
+            connectionManager.receiveMessage(buffer, node);
         }
         Log.info(" ---------------------- server channelRead END------------------------- " + nodeId);
     }

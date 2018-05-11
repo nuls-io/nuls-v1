@@ -4,6 +4,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
@@ -68,9 +69,11 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
         nodeManager.saveNode(node);
 
         if (!isServer) {
-            Block bestBlock = NulsContext.getInstance().getBestBlock();
+//            Block bestBlock = NulsContext.getInstance().getBestBlock();
+//            body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
+//                    bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
             body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
-                    bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
+                    10001, new NulsDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
             return new NetworkEventResult(true, new HandshakeMessage(body));
         }
         return null;
