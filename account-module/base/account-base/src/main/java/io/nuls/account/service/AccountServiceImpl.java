@@ -98,6 +98,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Boolean> removeAccount(String address, String password) {
+        AssertUtil.canNotEmpty(password, "");
+        if(!Address.validAddress(address)){
+            Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
         Account account = getAccountByAddress(address);
         if (account == null) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
@@ -145,6 +149,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<AccountKeyStore> exportAccountToKeyStore(String address, String password) {
+        if(!Address.validAddress(address)){
+            Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
         Account account = accountCacheService.getAccountByAddress(address);
         if (account == null) {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
@@ -196,7 +203,9 @@ public class AccountServiceImpl implements AccountService {
      * @return Account
      */
     private Account getAccountByAddress(String address) {
-        AssertUtil.canNotEmpty(address, "");
+        if(!Address.validAddress(address)){
+            return null;
+        }
         Account account = accountCacheService.getAccountByAddress(address);
         if (null == account) {
             Result<AccountPo> result = accountStorageService.getAccount(new Address(address));
@@ -290,6 +299,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Boolean> isEncrypted(String address) {
+        if(!Address.validAddress(address)){
+            Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
         Account account = getAccountByAddress(address);
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
@@ -299,6 +311,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Boolean> verifyAddressFormat(String address) {
+        if(!Address.validAddress(address)){
+            Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
         return new Result(Address.validAddress(address), null);
     }
 
@@ -389,6 +404,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Balance> getBalance(String address) {
+        if(!Address.validAddress(address)){
+            Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
         Address addr = new Address(address);
         return accountLedgerService.getBalance(addr.getBase58Bytes());
     }
