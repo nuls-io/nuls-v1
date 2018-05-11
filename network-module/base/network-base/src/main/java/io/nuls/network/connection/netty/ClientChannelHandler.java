@@ -47,7 +47,6 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
                 return;
             }
         }
-        Log.info("---------------------- client channelRegistered END -----------" + nodeId);
     }
 
     @Override
@@ -73,7 +72,6 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         } catch (Exception e) {
             Log.info("client channelActive error: " + nodeId);
         }
-        Log.info(" ---------------------- client channelActive END ----------" + nodeId);
     }
 
     @Override
@@ -95,7 +93,6 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
                 Log.info("---------------- client channelId different----------------" + channelId + "," + node.getChannelId());
             }
         }
-        Log.info(" ---------------------- client channelInactive END---------------------- " + nodeId);
     }
 
     @Override
@@ -113,7 +110,6 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             buffer.put(bytes);
             connectionManager.receiveMessage(buffer, node);
         }
-        Log.info(" ---------------------- client channelRead END ---------------------- " + nodeId);
     }
 
     @Override

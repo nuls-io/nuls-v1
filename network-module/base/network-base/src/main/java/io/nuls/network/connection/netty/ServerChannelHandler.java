@@ -109,7 +109,6 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         HandshakeMessage handshakeMessage = new HandshakeMessage(body);
         BroadcastResult result = broadcastHandler.broadcastToNode(handshakeMessage, node, false);
         System.out.println("-----------result:" + result.getMessage());
-        Log.info("---------------------- server channelActive END------------------------- " + nodeId);
     }
 
     @Override
@@ -133,7 +132,6 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
                 Log.info(channelId);
             }
         }
-        Log.info(" ---------------------- server channelInactive END------------------------- " + nodeId);
     }
 
     @Override
@@ -165,7 +163,6 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             buffer.put(bytes);
             connectionManager.receiveMessage(buffer, node);
         }
-        Log.info(" ---------------------- server channelRead END------------------------- " + nodeId);
     }
 
 }
