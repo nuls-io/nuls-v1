@@ -1,4 +1,4 @@
-package io.nuls.account.service;
+package io.nuls.account.service.impl;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
@@ -6,6 +6,8 @@ import io.nuls.account.model.Account;
 import io.nuls.account.model.AccountKeyStore;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
+import io.nuls.account.service.AccountCacheService;
+import io.nuls.account.service.AccountService;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.account.util.AccountTool;
@@ -18,6 +20,7 @@ import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.NulsSignData;
@@ -32,7 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author: Charlie
  * @date: 2018/5/9
  */
-@Service
+@Component
 public class AccountServiceImpl implements AccountService {
 
     private Lock locker = new ReentrantLock();

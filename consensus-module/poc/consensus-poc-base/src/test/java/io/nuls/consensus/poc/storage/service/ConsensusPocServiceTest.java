@@ -30,7 +30,7 @@ import io.nuls.consensus.poc.TestTransaction;
 import io.nuls.consensus.poc.BaseTest;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.service.impl.ConsensusPocServiceImpl;
-import io.nuls.consensus.service.ConsensusServiceIntf;
+import io.nuls.consensus.service.ConsensusService;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.NulsDataValidator;
@@ -50,7 +50,7 @@ import static org.junit.Assert.*;
  */
 public class ConsensusPocServiceTest extends BaseTest {
 
-    private ConsensusServiceIntf service = new ConsensusPocServiceImpl();
+    private ConsensusService service = new ConsensusPocServiceImpl();
 
     @Before
     public void setUp() throws Exception {

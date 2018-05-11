@@ -25,7 +25,7 @@
 package io.nuls.protocol.base.handler;
 
 import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.consensus.service.ConsensusServiceIntf;
+import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.constant.TransactionErrorCode;
@@ -51,7 +51,7 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
 
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-    private ConsensusServiceIntf consensusService = NulsContext.getServiceBean(ConsensusServiceIntf.class);
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
     public NewTxMessageHandler() {
     }

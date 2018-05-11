@@ -25,7 +25,7 @@
 
 package io.nuls.protocol.base.download.thread;
 
-import io.nuls.consensus.service.ConsensusServiceIntf;
+import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -59,7 +59,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
-    private ConsensusServiceIntf consensusService = NulsContext.getServiceBean(ConsensusServiceIntf.class);
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
     private NulsThreadFactory factory = new NulsThreadFactory(ProtocolConstant.MODULE_ID_PROTOCOL, "download");
 
     private NetworkNewestBlockInfos newestInfos;

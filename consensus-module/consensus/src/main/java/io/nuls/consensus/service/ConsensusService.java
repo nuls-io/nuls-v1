@@ -35,7 +35,7 @@ import java.util.List;
 /**
  * Created by ln on 2018/5/4.
  */
-public interface ConsensusServiceIntf {
+public interface ConsensusService {
 
     /**
      * receive a new transaction, add in memory pool after verify success
