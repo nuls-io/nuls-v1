@@ -29,11 +29,17 @@ import java.util.Map;
 @ChannelHandler.Sharable
 public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
-    private NodeManager nodeManager = NodeManager.getInstance();
+    private NodeManager nodeManager;
 
-    private NetworkParam networkParam = NetworkParam.getInstance();
+    private NetworkParam networkParam;
 
-    private BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
+    private BroadcastHandler broadcastHandler;
+
+    public ServerChannelHandler() {
+        nodeManager = NodeManager.getInstance();
+        networkParam = NetworkParam.getInstance();
+        broadcastHandler = BroadcastHandler.getInstance();
+    }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
