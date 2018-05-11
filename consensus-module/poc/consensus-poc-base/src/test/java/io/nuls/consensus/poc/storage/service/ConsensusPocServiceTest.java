@@ -29,7 +29,7 @@ package io.nuls.consensus.poc.storage.service;
 import io.nuls.consensus.poc.TestTransaction;
 import io.nuls.consensus.poc.BaseTest;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
-import io.nuls.consensus.poc.protocol.service.ConsensusServiceIntf;
+import io.nuls.consensus.service.ConsensusServiceIntf;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.NulsDataValidator;

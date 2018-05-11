@@ -24,7 +24,7 @@
  */
 package io.nuls.protocol.base.handler;
 
-import io.nuls.consensus.poc.protocol.service.ConsensusServiceIntf;
+import io.nuls.consensus.service.ConsensusServiceIntf;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.Log;

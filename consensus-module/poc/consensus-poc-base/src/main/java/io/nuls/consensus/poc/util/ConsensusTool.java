@@ -32,7 +32,7 @@ import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.model.BlockData;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
-import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.kernel.context.NulsContext;

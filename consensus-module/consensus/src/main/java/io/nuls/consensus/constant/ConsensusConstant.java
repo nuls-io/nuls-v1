@@ -23,21 +23,45 @@
  *  * SOFTWARE.
  *
  */
-package io.nuls.consensus.poc.protocol.module;
 
-import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
-import io.nuls.kernel.module.BaseModuleBootstrap;
+package io.nuls.consensus.constant;
+
+import io.nuls.kernel.model.Na;
 
 /**
- * @author Niels
- * @date 2017/10/18
- *
+ * Created by ln on 2018/5/7.
  */
-public abstract class AbstractConsensusModule extends BaseModuleBootstrap {
-    public AbstractConsensusModule() {
-        super(ConsensusConstant.MODULE_ID_CONSENSUS);
-    }
-    public AbstractConsensusModule(short moduleId) {
-        super(moduleId);
-    }
+public interface ConsensusConstant {
+
+    /**
+     * consensus module id
+     */
+    short MODULE_ID_CONSENSUS = 7;
+
+    /**
+     * unit:second
+     */
+    long BLOCK_TIME_INTERVAL_SECOND = 10;
+
+    /**
+     * unit:millis
+     */
+    long BLOCK_TIME_INTERVAL_MILLIS = BLOCK_TIME_INTERVAL_SECOND * 1000L;
+
+    /**
+     * default:2M
+     */
+    long MAX_BLOCK_SIZE = 2 << 21;
+
+    /**
+     * consensus transaction types
+     */
+    int TX_TYPE_REGISTER_AGENT = 90;
+    int TX_TYPE_JOIN_CONSENSUS = 91;
+    int TX_TYPE_CANCEL_DEPOSIT = 92;
+    int TX_TYPE_STOP_AGENT = 95;
+    int TX_TYPE_YELLOW_PUNISH = 93;
+    int TX_TYPE_RED_PUNISH = 94;
+
+
 }

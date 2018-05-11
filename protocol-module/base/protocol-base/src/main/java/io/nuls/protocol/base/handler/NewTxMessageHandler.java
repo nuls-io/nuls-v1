@@ -24,8 +24,8 @@
  */
 package io.nuls.protocol.base.handler;
 
-import io.nuls.consensus.poc.protocol.constant.ConsensusConstant;
-import io.nuls.consensus.poc.protocol.service.ConsensusServiceIntf;
+import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.service.ConsensusServiceIntf;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.constant.TransactionErrorCode;
