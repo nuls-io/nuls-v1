@@ -40,9 +40,6 @@ import io.nuls.protocol.model.GetBlockDataParam;
 import io.nuls.protocol.model.NotFound;
 import io.nuls.protocol.service.BlockService;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author facjas
  * @date 2017/11/16
@@ -105,7 +102,7 @@ public class GetBlockHandler extends AbstractMessageHandler<GetBlockRequest> {
         event.setMsgBody(data);
         Result result = this.messageBusService.sendToNode(event, node, true);
         if (result.isFailed()) {
-            Log.warn("send not found failed:" + node.getId() + ", hash:" + hash.getDigestHex());
+            Log.warn("send not found failed:" + node.getId() + ", hash:" + hash);
         }
     }
 

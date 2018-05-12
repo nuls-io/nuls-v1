@@ -45,53 +45,53 @@ public class Account extends BaseNulsData {
     /**
      * 账户地址
      */
-    @Tag(1)
+
     private Address address;
 
     /**
      * 账户别名
      */
-    @Tag(2)
+
     private String alias;
 
     /**
      * is default acct
      */
-    @Tag(3)
+
     private int status;
 
     /**
      * 账户公钥
      */
-    @Tag(4)
+
     private byte[] pubKey;
 
     /**
      *
      */
-    @Tag(5)
+
     private byte[] extend;
 
     /**
      * 创建时间
      */
-    @Tag(6)
+
     private Long createTime;
 
 
-    @Tag(7)
+
     private byte[] encryptedPriKey;
 
     /**
      *Decrypted  prikey
      */
-    @Tag(8)
+
     private byte[] priKey;
 
     /**
      * local field
      */
-    @Tag(9)
+
     private ECKey ecKey;
 
 

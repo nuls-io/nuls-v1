@@ -26,13 +26,15 @@
 package io.nuls.protocol.cache;
 
 import io.nuls.cache.manager.EhCacheManager;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.NulsDataType;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.model.SmallBlock;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 
@@ -74,7 +76,6 @@ public class TemporaryCacheManagerTest {
     @Test
     public void cacheSmallBlock() {
         SmallBlock smallBlock = new SmallBlock();
-        smallBlock.setDataType(NulsDataType.TRANSACTION);
         BlockHeader header = new BlockHeader();
         NulsDigestData hash = NulsDigestData.calcDigestData("abcdefg".getBytes());
         header.setHash(hash);
@@ -101,7 +102,7 @@ public class TemporaryCacheManagerTest {
      */
     private void getSmallBlock(NulsDigestData hash, SmallBlock smallBlock) {
         SmallBlock sb = manager.getSmallBlock(NulsDigestData.calcDigestData("abcdefg".getBytes()));
-        assertEquals(sb.getDataType(), smallBlock.getDataType());
+        assertEquals(sb.getHeader().getHash(), smallBlock.getHeader().getHash());
     }
 
     /**
@@ -120,7 +121,11 @@ public class TemporaryCacheManagerTest {
     public void cacheTx() {
         Transaction tx = new CacheTestTx();
         tx.setTime(1234567654L);
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        try {
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        } catch (IOException e) {
+            Log.error(e);
+        }
         manager.cacheTx(tx);
         assertTrue(true);
 

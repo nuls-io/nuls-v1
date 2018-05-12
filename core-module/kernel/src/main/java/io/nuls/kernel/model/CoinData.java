@@ -26,8 +26,12 @@
 
 package io.nuls.kernel.model;
 
-import io.protostuff.Tag;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -37,14 +41,74 @@ import java.util.Set;
  */
 public class CoinData extends BaseNulsData {
 
-    @Tag(1)
     private List<Coin> from;
-    @Tag(2)
+
     private List<Coin> to;
 
     public CoinData() {
         from = new ArrayList<>();
         to = new ArrayList<>();
+    }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        int fromCount = from == null ? 0 : from.size();
+        stream.writeVarInt(fromCount);
+        if (null != from) {
+            for (Coin coin : from) {
+                stream.writeNulsData(coin);
+            }
+        }
+        int toCount = to == null ? 0 : to.size();
+        stream.writeVarInt(toCount);
+        if (null != from) {
+            for (Coin coin : from) {
+                stream.writeNulsData(coin);
+            }
+        }
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        int fromCount = (int) byteBuffer.readVarInt();
+
+        if (0 < fromCount) {
+            List<Coin> from = new ArrayList<>();
+            for (int i = 0; i < fromCount; i++) {
+                from.add(byteBuffer.readNulsData(new Coin()));
+            }
+            this.from = from;
+        }
+
+        int toCount = (int) byteBuffer.readVarInt();
+
+        if (0 < toCount) {
+            List<Coin> to = new ArrayList<>();
+            for (int i = 0; i < toCount; i++) {
+                to.add(byteBuffer.readNulsData(new Coin()));
+            }
+            this.to = to;
+        }
+    }
+
+    @Override
+    public int size() {
+        int size = SerializeUtils.sizeOfVarInt(from == null ? 0 : from.size());
+        if (null != from) {
+            for (Coin coin : from) {
+                size += SerializeUtils.sizeOfNulsData(coin);
+            }
+        }
+        size += SerializeUtils.sizeOfVarInt(to == null ? 0 : to.size());
+        if (null != from) {
+            for (Coin coin : to) {
+                size += SerializeUtils.sizeOfNulsData(coin);
+            }
+        }
+        return size;
     }
 
     public List<Coin> getFrom() {
@@ -92,4 +156,6 @@ public class CoinData extends BaseNulsData {
     public Set<byte[]> getAddresses() {
         return null;
     }
+
+
 }

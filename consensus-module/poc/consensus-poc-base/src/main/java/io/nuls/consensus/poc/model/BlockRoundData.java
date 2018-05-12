@@ -35,13 +35,13 @@ import io.protostuff.Tag;
  */
 public class BlockRoundData extends BaseNulsData {
 
-    @Tag(1)
+
     protected long roundIndex;
-    @Tag(2)
+
     protected int consensusMemberCount;
-    @Tag(3)
+
     protected long roundStartTime;
-    @Tag(4)
+
     protected int packingIndexOfRound;
 
     public long getRoundEndTime() {

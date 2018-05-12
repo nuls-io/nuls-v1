@@ -26,10 +26,12 @@
 
 package io.nuls.db.service;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.db.entity.DBTestEntity;
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.impl.LevelDBServiceImpl;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Result;
 import org.iq80.leveldb.WriteBatch;
 import org.junit.After;
@@ -37,6 +39,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -63,16 +66,16 @@ public class LevelDBServiceTest {
     }
 
     @Test
-    public void testPerformanceTesting() {
+    public void testPerformanceTesting() throws IOException {
 
         long time = System.currentTimeMillis();
 
         long maxCount = 1000000;
-        for(long i = 0 ; i < maxCount ; i++) {
+        for (long i = 0; i < maxCount; i++) {
             DBTestEntity entity = new DBTestEntity();
             entity.setTime(i);
 
-            byte[] key = entity.serializeForHash();
+            byte[] key = entity.getHash().serialize();
             byte[] value = entity.serialize();
 
             Result result = dbService.put(areaName, key, value);
@@ -86,17 +89,21 @@ public class LevelDBServiceTest {
         long getCount = 10000;
 
         System.out.println("Test random performance of " + getCount + " data ···");
-        for(long i = 0 ; i < getCount ; i++) {
+        for (long i = 0; i < getCount; i++) {
 
             long index = (long) (Math.random() * maxCount);
             DBTestEntity entity = new DBTestEntity();
             entity.setTime(index);
 
-            byte[] resultBytes = dbService.get(areaName, entity.serializeForHash());
+            byte[] resultBytes = dbService.get(areaName, entity.getHash().serialize());
             assertNotNull(resultBytes);
 
             DBTestEntity e = new DBTestEntity();
-            e.parse(resultBytes);
+            try {
+                e.parse(resultBytes);
+            } catch (NulsException e1) {
+                Log.error(e1);
+            }
             assertEquals(e.getTime(), index);
         }
 //        C:\workspace\nuls_v2\db-module\leveldb\db-leveldb\target\test-classes\data\test\pierre-test-15
@@ -120,7 +127,7 @@ public class LevelDBServiceTest {
 
         List<Entry<byte[], byte[]>> entries = dbService.entryList(area);
         entries.stream().forEach(entry -> {
-            System.out.print("[" + entry.getKey() + "=" + asString(entry.getValue())+ "], ");
+            System.out.print("[" + entry.getKey() + "=" + asString(entry.getValue()) + "], ");
         });
         System.out.println();
 

@@ -26,6 +26,8 @@
 package io.nuls.protocol.cache;
 
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.utils.NulsByteBuffer;
 
 /**
  * @author: Niels Wang
@@ -34,5 +36,11 @@ import io.nuls.kernel.model.Transaction;
 public class CacheTestTx extends Transaction {
     public CacheTestTx() {
         super(1234);
+    }
+
+    @Override
+    protected TransactionLogicData parseTxData(NulsByteBuffer byteBuffer) {
+        // todo auto-generated method stub
+        return null;
     }
 }

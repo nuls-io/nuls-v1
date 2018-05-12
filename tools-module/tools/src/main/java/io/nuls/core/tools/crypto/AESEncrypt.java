@@ -66,8 +66,8 @@ public class AESEncrypt {
      * @return EncryptedData
      */
     public static EncryptedData encrypt(byte[] plainBytes, byte[] iv, KeyParameter aesKey) throws RuntimeException {
-        Utils.checkNotNull(plainBytes);
-        Utils.checkNotNull(aesKey);
+        Util.checkNotNull(plainBytes);
+        Util.checkNotNull(aesKey);
 
         try {
             if (iv == null) {
@@ -108,8 +108,8 @@ public class AESEncrypt {
      * @return byte[]
      */
     public static byte[] decrypt(EncryptedData dataToDecrypt, KeyParameter aesKey) throws RuntimeException {
-        Utils.checkNotNull(dataToDecrypt);
-        Utils.checkNotNull(aesKey);
+        Util.checkNotNull(dataToDecrypt);
+        Util.checkNotNull(aesKey);
 
         try {
             ParametersWithIV keyWithIv = new ParametersWithIV(new KeyParameter(aesKey.getKey()), dataToDecrypt.getInitialisationVector());

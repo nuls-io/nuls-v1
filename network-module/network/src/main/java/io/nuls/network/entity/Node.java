@@ -25,11 +25,19 @@
  */
 package io.nuls.network.entity;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.VarInt;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -63,6 +71,35 @@ public class Node extends BaseNulsData {
 
     private Set<String> groupSet;
 
+    @Override
+    public int size() {
+        int s = 0;
+        s += VarInt.sizeOf(magicNumber);
+        s += VarInt.sizeOf(severPort);
+        s += 1;
+        try {
+            s += ip.getBytes(NulsConfig.DEFAULT_ENCODING).length;
+        } catch (UnsupportedEncodingException e) {
+            Log.error(e);
+        }
+        return s;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.write(new VarInt(magicNumber).encode());
+        stream.write(new VarInt(getSeverPort()).encode());
+        stream.writeString(ip);
+    }
+
+    @Override
+    public void parse(NulsByteBuffer buffer) throws NulsException {
+        magicNumber = (int) buffer.readVarInt();
+        severPort = (int) buffer.readVarInt();
+        port = severPort;
+        ip = new String(buffer.readByLengthByte());
+        this.groupSet = ConcurrentHashMap.newKeySet();
+    }
     /**
      * 1: inNode ,  2: outNode
      */

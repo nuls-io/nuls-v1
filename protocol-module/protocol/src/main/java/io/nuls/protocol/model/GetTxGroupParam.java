@@ -24,10 +24,15 @@
  */
 package io.nuls.protocol.model;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
-import io.protostuff.Tag;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
+import io.nuls.kernel.utils.VarInt;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,10 +49,43 @@ public class GetTxGroupParam extends BaseNulsData {
      * 请求的交易摘要列表
      * the list of transaction digest data
      */
-    @Tag(1)
+
     private List<NulsDigestData> txHashList = new ArrayList<>();
 
     public GetTxGroupParam() {
+    }
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += VarInt.sizeOf(txHashList.size());
+        size += this.getTxHashBytesLength();
+        return size;
+    }
+
+    private int getTxHashBytesLength() {
+        int size = 0;
+        for (NulsDigestData hash : txHashList) {
+            size += SerializeUtils.sizeOfNulsData(hash);
+        }
+        return size;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(txHashList.size());
+        for (NulsDigestData data : txHashList) {
+            stream.writeNulsData(data);
+        }
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        long txCount = byteBuffer.readVarInt();
+        this.txHashList = new ArrayList<>();
+        for (int i = 0; i < txCount; i++) {
+            this.txHashList.add(byteBuffer.readHash());
+        }
     }
 
     /**

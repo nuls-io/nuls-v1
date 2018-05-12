@@ -25,13 +25,16 @@
 
 package io.nuls.protocol.storage.po;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.script.P2PKHScriptSig;
-import io.protostuff.Tag;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,24 +44,70 @@ import java.util.List;
 public class BlockHeaderPo extends BaseNulsData {
 
     private transient NulsDigestData hash;
-    @Tag(1)
+
     private NulsDigestData preHash;
-    @Tag(2)
+
     private NulsDigestData merkleHash;
-    @Tag(3)
+
     private long time;
-    @Tag(4)
+
     private long height = -1L;
-    @Tag(5)
+
     private long txCount;
-    @Tag(6)
+
     private byte[] packingAddress;
-    @Tag(7)
+
     private P2PKHScriptSig scriptSign;
-    @Tag(8)
+
     private byte[] extend;
-    @Tag(9)
+
     private List<NulsDigestData> txHashList;
+
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfNulsData(preHash);
+        size += SerializeUtils.sizeOfNulsData(merkleHash);
+        size += SerializeUtils.sizeOfVarInt(time);
+        size += SerializeUtils.sizeOfVarInt(height);
+        size += SerializeUtils.sizeOfVarInt(txCount);
+        size += SerializeUtils.sizeOfBytes(extend);
+        size += SerializeUtils.sizeOfNulsData(scriptSign);
+        for (NulsDigestData hash : txHashList) {
+            size += SerializeUtils.sizeOfNulsData(hash);
+        }
+        return size;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(preHash);
+        stream.writeNulsData(merkleHash);
+        stream.writeVarInt(time);
+        stream.writeVarInt(height);
+        stream.writeVarInt(txCount);
+        stream.writeBytesWithLength(extend);
+        stream.writeNulsData(scriptSign);
+        for (NulsDigestData hash : txHashList) {
+            stream.writeNulsData(hash);
+        }
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.preHash = byteBuffer.readHash();
+        this.merkleHash = byteBuffer.readHash();
+        this.time = byteBuffer.readVarInt();
+        this.height = byteBuffer.readVarInt();
+        this.txCount = byteBuffer.readVarInt();
+        this.extend = byteBuffer.readByLengthByte();
+        this.scriptSign = byteBuffer.readNulsData(new P2PKHScriptSig());
+        this.txHashList = new ArrayList<>();
+        for (int i = 0; i < txCount; i++) {
+            this.txHashList.add(byteBuffer.readHash());
+        }
+    }
 
     public BlockHeaderPo() {
     }

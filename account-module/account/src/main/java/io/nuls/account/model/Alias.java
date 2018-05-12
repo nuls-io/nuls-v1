@@ -16,13 +16,13 @@ import java.util.Set;
  */
 public class Alias extends TransactionLogicData {
 
-    @Tag(1)
+
     private byte[] address;
 
-    @Tag(2)
+
     private String alias;
 
-    @Tag(3)
+
     private int status;
 
     public Alias() {

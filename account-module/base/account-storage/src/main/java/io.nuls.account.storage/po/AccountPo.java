@@ -18,21 +18,21 @@ public class AccountPo extends BaseNulsData {
 
     private transient Address addressObj;
 
-    @Tag(1)
+
     private String address;
-    @Tag(2)
+
     private Long createTime;
-    @Tag(3)
+
     private String alias;
-    @Tag(4)
+
     private byte[] pubKey;
-    @Tag(5)
+
     private byte[] priKey;
-    @Tag(6)
+
     private byte[] encryptedPriKey;
-    @Tag(7)
+
     private byte[] extend;
-    @Tag(8)
+
     private int status;
 
     public AccountPo(){

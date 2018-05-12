@@ -35,7 +35,7 @@ import io.protostuff.Tag;
  * @date 2017/12/7
  */
 public abstract class BasicTypeData<T> extends BaseNulsData {
-    @Tag(1)
+
     private T val;
 
     public BasicTypeData(T data) {

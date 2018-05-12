@@ -25,7 +25,7 @@
 
 
 
-package io.nuls.core.tools.crypto;
+package io.nuls.kernel.utils;
 
 
 /**
@@ -62,11 +62,11 @@ public class VarInt {
             // 1 marker + 2 data bytes (16 bits)
             originallyEncodedSize = 3;
         } else if (first == 254) {
-            value = Utils.readUint32LE(buf, offset + 1);
+            value = SerializeUtils.readUint32LE(buf, offset + 1);
             // 1 marker + 4 data bytes (32 bits)
             originallyEncodedSize = 5;
         } else {
-            value = Utils.readInt64LE(buf, offset + 1);
+            value = SerializeUtils.readInt64LE(buf, offset + 1);
             // 1 marker + 8 data bytes (64 bits)
             originallyEncodedSize = 9;
         }
@@ -129,12 +129,12 @@ public class VarInt {
             case 5:
                 bytes = new byte[5];
                 bytes[0] = (byte) 254;
-                Utils.uint32ToByteArrayLE(value, bytes, 1);
+                SerializeUtils.uint32ToByteArrayLE(value, bytes, 1);
                 return bytes;
             default:
                 bytes = new byte[9];
                 bytes[0] = (byte) 255;
-                Utils.uint64ToByteArrayLE(value, bytes, 1);
+                SerializeUtils.uint64ToByteArrayLE(value, bytes, 1);
                 return bytes;
         }
     }

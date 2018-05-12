@@ -65,7 +65,7 @@ public class Address {
      *
      * @param address bytes
      */
-    @Tag(1)
+
     protected byte[] base58Bytes;
 
     /**

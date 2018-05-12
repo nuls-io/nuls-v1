@@ -24,8 +24,14 @@
  */
 package io.nuls.kernel.model;
 
-import io.protostuff.Tag;
+import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.TransactionManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,12 +41,38 @@ import java.util.List;
  */
 public class Block extends BaseNulsData implements Cloneable {
 
-    @Tag(1)
     private BlockHeader header;
-    @Tag(2)
     private List<Transaction> txs;
 
-    public Block() {
+    @Override
+    public int size() {
+        int size = header.size();
+        for (Transaction tx : txs) {
+            size += tx.size();
+        }
+        return size;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        header.serializeToStream(stream);
+        for (Transaction tx : txs) {
+            stream.write(tx.serialize());
+        }
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        header = new BlockHeader();
+        header.parse(byteBuffer);
+        try {
+            txs = TransactionManager.getInstances(byteBuffer, header.getTxCount());
+        } catch (Exception e) {
+            throw new NulsRuntimeException(KernelErrorCode.PARSE_OBJECT_ERROR, e.getMessage());
+        }
+        for (Transaction tx : txs) {
+            tx.setBlockHeight(header.getHeight());
+        }
     }
 
     public List<Transaction> getTxs() {

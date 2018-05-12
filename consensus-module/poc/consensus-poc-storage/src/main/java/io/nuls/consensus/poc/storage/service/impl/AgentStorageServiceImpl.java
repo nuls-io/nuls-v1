@@ -28,6 +28,7 @@ package io.nuls.consensus.poc.storage.service.impl;
 
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
+import io.nuls.core.tools.log.Log;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.exception.NulsException;
@@ -37,6 +38,7 @@ import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -45,7 +47,7 @@ import java.util.Set;
  * Created by ln on 2018/5/10.
  */
 @Component
-public class AgentStorageServiceImpl implements AgentStorageService ,InitializingBean {
+public class AgentStorageServiceImpl implements AgentStorageService, InitializingBean {
 
     private final String DB_NAME = "agent";
 
@@ -54,21 +56,31 @@ public class AgentStorageServiceImpl implements AgentStorageService ,Initializin
 
     @Override
     public boolean save(AgentPo agentPo) {
-        if(agentPo == null || agentPo.getHash() == null) {
+        if (agentPo == null || agentPo.getHash() == null) {
             return false;
         }
-        byte[] hash = agentPo.getHash().serialize();
+        byte[] hash = new byte[0];
+        try {
+            hash = agentPo.getHash().serialize();
+        } catch (IOException e) {
+            Log.error(e);
+        }
         Result result = dbService.put(DB_NAME, hash, agentPo.serialize());
         return result.isSuccess();
     }
 
     @Override
     public AgentPo get(NulsDigestData hash) {
-        if(hash == null) {
+        if (hash == null) {
             return null;
         }
-        byte[] body = dbService.get(DB_NAME, hash.serialize());
-        if(body == null) {
+        byte[] body = new byte[0];
+        try {
+            body = dbService.get(DB_NAME, hash.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+        }
+        if (body == null) {
             return null;
         }
         AgentPo agentPo = new AgentPo();
@@ -79,10 +91,15 @@ public class AgentStorageServiceImpl implements AgentStorageService ,Initializin
 
     @Override
     public boolean delete(NulsDigestData hash) {
-        if(hash == null) {
+        if (hash == null) {
             return false;
         }
-        Result result = dbService.delete(DB_NAME, hash.serialize());
+        Result result = null;
+        try {
+            result = dbService.delete(DB_NAME, hash.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+        }
         return result.isSuccess();
     }
 
@@ -90,13 +107,19 @@ public class AgentStorageServiceImpl implements AgentStorageService ,Initializin
     public List<AgentPo> getList() {
         List<Entry<byte[], byte[]>> list = dbService.entryList(DB_NAME);
         List<AgentPo> resultList = new ArrayList<>();
-        if(list == null) {
+        if (list == null) {
             return resultList;
         }
-        for(Entry<byte[], byte[]> entry : list) {
+        for (Entry<byte[], byte[]> entry : list) {
             AgentPo agentPo = new AgentPo();
             agentPo.parse(entry.getValue());
-            agentPo.setHash(new NulsDigestData(entry.getKey()));
+            NulsDigestData hash = new NulsDigestData();
+            try {
+                hash.parse(entry.getKey());
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+            agentPo.setHash(hash);
             resultList.add(agentPo);
         }
         return resultList;
@@ -105,7 +128,7 @@ public class AgentStorageServiceImpl implements AgentStorageService ,Initializin
     @Override
     public int size() {
         Set<byte[]> list = dbService.keySet(DB_NAME);
-        if(list == null) {
+        if (list == null) {
             return 0;
         }
         return list.size();

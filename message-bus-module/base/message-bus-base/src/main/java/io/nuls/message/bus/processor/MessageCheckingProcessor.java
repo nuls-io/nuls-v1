@@ -25,7 +25,6 @@ public class MessageCheckingProcessor<E extends BaseMessage> implements EventHan
             if (null == message || message.getHeader() == null) {
                 return;
             }
-            String eventHash = message.getHash().getDigestHex();
 
             boolean commonDigestTx = message.getHeader().getMsgType() == MessageBusConstant.MSG_TYPE_COMMON_MSG_HASH_MSG &&
                     message.getHeader().getModuleId() == MessageBusConstant.MODULE_ID_MESSAGE_BUS;
@@ -34,15 +33,15 @@ public class MessageCheckingProcessor<E extends BaseMessage> implements EventHan
             specialTx = specialTx || (message.getHeader().getMsgType() == ProtocolConstant.MESSAGE_TYPE_NEW_BLOCK &&
                     message.getHeader().getModuleId() == ProtocolConstant.MODULE_ID_PROTOCOL);
             if (!specialTx) {
-                messageCacheService.cacheRecievedMessageHash(eventHash);
+                messageCacheService.cacheRecievedMessageHash(message.getHash());
                 return;
             }
-            if (commonDigestTx && messageCacheService.kownTheMessage(((CommonDigestMessage) message).getMsgBody().getDigestHex())) {
+            if (commonDigestTx && messageCacheService.kownTheMessage(((CommonDigestMessage) message).getMsgBody())) {
                 processDataDisruptorMessage.setStoped(true);
-            } else if (messageCacheService.kownTheMessage(eventHash)) {
+            } else if (messageCacheService.kownTheMessage(message.getHash())) {
                 processDataDisruptorMessage.setStoped(true);
             } else {
-                messageCacheService.cacheRecievedMessageHash(eventHash);
+                messageCacheService.cacheRecievedMessageHash(message.getHash());
             }
         } catch (Exception e) {
             Log.error(e);

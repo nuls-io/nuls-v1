@@ -25,10 +25,13 @@
 
 package io.nuls.protocol.storage.po;
 
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -69,10 +72,19 @@ public class BlockHeaderPoTest {
         txHashList.add(NulsDigestData.calcDigestData("third-tx-hash".getBytes()));
         po.setTxHashList(txHashList);
 
-        byte[] bytes = po.serialize();
+        byte[] bytes = new byte[0];
+        try {
+            bytes = po.serialize();
+        } catch (IOException e) {
+            Log.error(e);
+        }
 
         BlockHeaderPo newPo = new BlockHeaderPo();
-        newPo.parse(bytes);
+        try {
+            newPo.parse(bytes);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
         assertNull(newPo.getHash());
         assertEquals(po.getHeight(), newPo.getHeight());
         assertEquals(po.getPreHash(), newPo.getPreHash());

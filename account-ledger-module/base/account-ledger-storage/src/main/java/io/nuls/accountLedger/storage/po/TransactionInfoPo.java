@@ -39,19 +39,19 @@ import java.util.List;
  * date 2018/5/10.
  */
 public class TransactionInfoPo extends BaseNulsData {
-    @Tag(1)
+
     private NulsDigestData txHash;
 
-    @Tag(2)
+
     private long blockHeight;
 
-    @Tag(3)
+
     private long time;
 
-    @Tag(4)
+
     private byte[] addresses;
 
-    @Tag(5)
+
     private int txType;
 
     public TransactionInfoPo() {
