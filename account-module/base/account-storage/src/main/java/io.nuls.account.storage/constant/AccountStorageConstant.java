@@ -11,4 +11,10 @@ public interface AccountStorageConstant {
      * The name of the account table
      */
     String DB_AREA_ACCOUNT = "ACCOUNT";
+
+    /**
+     * 别名表的名称
+     * The name of the account table
+     */
+    String DB_AREA_ALIAS = "ALIAS";
 }
