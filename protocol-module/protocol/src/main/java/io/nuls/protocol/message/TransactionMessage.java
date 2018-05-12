@@ -24,7 +24,11 @@
  */
 package io.nuls.protocol.message;
 
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.TransactionManager;
 import io.nuls.protocol.constant.ProtocolConstant;
 
 /**
@@ -38,5 +42,15 @@ public class TransactionMessage extends BaseProtocolMessage<Transaction> {
 
     public TransactionMessage() {
         super(ProtocolConstant.MESSAGE_TYPE_NEW_TX);
+    }
+
+    @Override
+    protected Transaction parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        try {
+            return TransactionManager.getInstance(byteBuffer);
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
     }
 }

@@ -1,6 +1,8 @@
 package io.nuls.network.protocol.message;
 
 
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
 
 public class NodesIpMessage extends BaseNetworkMessage<NodeMessageBody>{
@@ -10,6 +12,11 @@ public class NodesIpMessage extends BaseNetworkMessage<NodeMessageBody>{
      */
     public NodesIpMessage() {
         super(NetworkConstant.NETWORK_GET_NODE);
+    }
+
+    @Override
+    protected NodeMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new NodeMessageBody());
     }
 
     public NodesIpMessage(NodeMessageBody body) {
