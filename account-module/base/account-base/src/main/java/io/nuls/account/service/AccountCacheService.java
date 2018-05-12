@@ -4,6 +4,7 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.cache.CacheMap;
+import io.nuls.kernel.lite.annotation.Component;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import java.util.List;
  * @author: Charlie
  * @date: 2018/5/9
  */
+@Component
 public class AccountCacheService {
 
     private static final AccountCacheService INSTANCE = new AccountCacheService();

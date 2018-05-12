@@ -224,6 +224,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Result<Account> getAccount(byte[] address) {
+        return Result.getSuccess().setData(getAccountByAddress(Base58.encode(address)));
+    }
+
+    @Override
     public Result<Account> getAccount(String address) {
         return Result.getSuccess().setData(getAccountByAddress(address));
     }

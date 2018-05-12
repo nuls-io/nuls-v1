@@ -1,12 +1,9 @@
 package io.nuls.account.model;
 
 import io.nuls.core.tools.crypto.Utils;
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.TransactionLogicData;
 import io.protostuff.Tag;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
