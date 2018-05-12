@@ -23,6 +23,8 @@
  */
 package io.nuls.protocol.message;
 
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.TxGroup;
 
@@ -37,6 +39,11 @@ public class TxGroupMessage extends BaseProtocolMessage<TxGroup> {
 
     public TxGroupMessage() {
         super(ProtocolConstant.MESSAGE_TYPE_TX_GROUP);
+    }
+
+    @Override
+    protected TxGroup parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new TxGroup());
     }
 
 }
