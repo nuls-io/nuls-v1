@@ -1,6 +1,8 @@
 package io.nuls.network.protocol.message;
 
 
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
 
 public class HandshakeMessage extends BaseNetworkMessage<NetworkMessageBody> {
@@ -10,6 +12,11 @@ public class HandshakeMessage extends BaseNetworkMessage<NetworkMessageBody> {
 
     public HandshakeMessage() {
         super(NetworkConstant.NETWORK_HANDSHAKE);
+    }
+
+    @Override
+    protected NetworkMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new NetworkMessageBody());
     }
 
     public HandshakeMessage(NetworkMessageBody body) {
