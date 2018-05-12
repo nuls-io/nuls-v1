@@ -45,14 +45,14 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
     public Result saveAccountList(List<AccountPo> accountPoList) {
         BatchOperation batch = dbService.createWriteBatch(AccountStorageConstant.DB_AREA_ACCOUNT);
         for (AccountPo po : accountPoList) {
-            batch.put(po.getAddressObj().getBase58Bytes(), po.serialize());
+            //batch.put(po.getAddressObj().getBase58Bytes(), po.serialize());
         }
         return batch.executeBatch();
     }
 
     @Override
     public Result saveAccount(AccountPo po) {
-        return dbService.put(AccountStorageConstant.DB_AREA_ACCOUNT, po.getAddressObj().getBase58Bytes(), po.serialize());
+        return dbService.putModel(AccountStorageConstant.DB_AREA_ACCOUNT, po.getAddressObj().getBase58Bytes(), po);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
         List<AccountPo> list = new ArrayList<>();
         for (Entry<byte[], byte[]> entry : entryList){
             AccountPo account = new AccountPo();
-            account.parse(entry.getValue());
+            //account.parse(entry.getValue());
             list.add(account);
         }
         return Result.getSuccess().setData(list) ;
@@ -82,12 +82,10 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
 
     @Override
     public Result<AccountPo> getAccount(byte[] address) {
-        byte[] poByte = dbService.get(AccountStorageConstant.DB_AREA_ACCOUNT, address);
-        if(null == poByte || poByte.length<=0){
+        AccountPo account = (AccountPo)dbService.getModel(AccountStorageConstant.DB_AREA_ACCOUNT, address, AccountPo.class);
+        if(null == account){
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        AccountPo account = new AccountPo();
-        account.parse(poByte);
         return Result.getSuccess().setData(account);
     }
 
@@ -97,6 +95,6 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
         if(null == poByte || poByte.length<=0){
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        return dbService.put(AccountStorageConstant.DB_AREA_ACCOUNT, po.getAddressObj().getBase58Bytes(), po.serialize());
+        return dbService.putModel(AccountStorageConstant.DB_AREA_ACCOUNT, po.getAddressObj().getBase58Bytes(), po);
     }
 }

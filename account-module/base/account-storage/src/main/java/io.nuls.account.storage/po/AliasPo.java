@@ -1,8 +1,12 @@
 package io.nuls.account.storage.po;
 
 import io.nuls.account.model.Alias;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
-import io.protostuff.Tag;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+
+import java.io.IOException;
 
 /**
  * @author: Charlie
@@ -61,4 +65,18 @@ public class AliasPo extends BaseNulsData {
         this.status = status;
     }
 
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+
+    }
+
+    @Override
+    public int size() {
+        return 0;
+    }
 }

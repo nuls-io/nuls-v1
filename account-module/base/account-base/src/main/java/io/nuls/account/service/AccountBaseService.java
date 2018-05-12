@@ -94,7 +94,7 @@ public class AccountBaseService {
             P2PKHScriptSig scriptSig = new P2PKHScriptSig(nulsSignData, account.getPubKey());
             tx.setScriptSig(scriptSig.serialize());
 
-            ValidateResult validate = this.ledgerService.verifyTx(aliasTx,this.ledgerService.getWaitingTxList());
+//            ValidateResult validate = this.ledgerService.verifyTx(aliasTx,this.ledgerService.getWaitingTxList());
 //            if (validate.isFailed()) {
 //                return new Result(false, validate.getMessage());
 //            }
@@ -112,10 +112,11 @@ public class AccountBaseService {
             Log.error(e);
             return new Result(false, e.getMessage());
         }
+        return null;
     }
 
 
-    public Result<Alias> getAlias(Account account){
+    /*public Result<Alias> getAlias(Account account){
         return this.getAlias(account.getAddress());
     }
 
@@ -124,7 +125,7 @@ public class AccountBaseService {
     }
     public Result<Alias> getAlias(String address){
         return getAlias(new Address(address));
-    }
+    }*/
   /*  public Result<Alias> getAlias(byte[] address){
         Account account = accountService.getAccount(address).getData();
         if(null == account){

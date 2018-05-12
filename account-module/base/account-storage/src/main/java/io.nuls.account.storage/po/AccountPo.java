@@ -5,16 +5,13 @@ import io.nuls.account.model.Address;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.EncryptedData;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.model.BaseNulsData;
-import io.protostuff.Tag;
-
 import java.math.BigInteger;
 
 /**
  * @author: Charlie
  * @date: 2018/5/9
  */
-public class AccountPo extends BaseNulsData {
+public class AccountPo {
 
     private transient Address addressObj;
 
@@ -142,4 +139,6 @@ public class AccountPo extends BaseNulsData {
     public void setStatus(int status) {
         this.status = status;
     }
+
+
 }

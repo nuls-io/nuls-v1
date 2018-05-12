@@ -27,13 +27,12 @@ package io.nuls.account.model;
 
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.Hex;
-import io.nuls.core.tools.crypto.Utils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.utils.AddressTool;
-import io.protostuff.Tag;
+import io.nuls.kernel.utils.SerializeUtils;
 
 /**
  * @author: Chralie
@@ -116,7 +115,7 @@ public class Address {
             throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
 
-        short chainId = Utils.bytes2Short(hashs);
+        short chainId = SerializeUtils.bytes2Short(hashs);
         byte[] content = new byte[LENGTH];
         System.arraycopy(hashs, 2, content, 0, LENGTH);
 
@@ -127,7 +126,7 @@ public class Address {
 
     public byte[] calcBase58bytes() {
         byte[] body = new byte[22];
-        System.arraycopy(Utils.shortToBytes(chainId), 0, body, 0, 2);
+        System.arraycopy(SerializeUtils.shortToBytes(chainId), 0, body, 0, 2);
         System.arraycopy(hash160, 0, body, 2, hash160.length);
         byte xor = getXor(body);
         byte[] base58bytes = new byte[23];
