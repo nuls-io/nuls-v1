@@ -16,9 +16,7 @@ public class HandshakeMessage extends BaseNetworkMessage<NetworkMessageBody> {
 
     @Override
     protected NetworkMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
-        NetworkMessageBody messageBody = new NetworkMessageBody();
-        messageBody.parse(byteBuffer);
-        return messageBody;
+        return byteBuffer.readNulsData(new NetworkMessageBody());
     }
 
     public HandshakeMessage(NetworkMessageBody body) {
