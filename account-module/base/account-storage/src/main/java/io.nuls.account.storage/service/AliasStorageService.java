@@ -1,6 +1,7 @@
 package io.nuls.account.storage.service;
 
 import io.nuls.account.storage.po.AliasPo;
+import io.nuls.kernel.model.Result;
 
 /**
  * @author: Charlie
@@ -8,10 +9,10 @@ import io.nuls.account.storage.po.AliasPo;
  */
 public interface AliasStorageService {
 
-    AliasPo getAlias(byte[] address);
+    Result<AliasPo> getAlias(byte[] address);
 
-    void saveAlias(AliasPo aliasPo);
+    Result saveAlias(AliasPo aliasPo);
 
-    void rollbackAlias(AliasPo aliasPo);
+    Result removeAlias(byte[] address);
 
 }
