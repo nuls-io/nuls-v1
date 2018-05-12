@@ -78,11 +78,15 @@ public interface MessageBusService {
      * send msg to one node
      *
      * @param message The message you want to sent
-     * @param node  The node that received the message
+     * @param node    The node that received the message
      * @param aysn    是否异步 Asynchronous execution
      * @return Return whether sent successfully
      */
     Result sendToNode(BaseMessage message, Node node, boolean aysn);
 
-
+    /**
+     * 根据消息类型和模块标识实例化一个消息对象
+     * Instantiate a message object based on message type and module identity.
+     */
+    Result<? extends BaseMessage> getMessageInstance(short moduleId, int type);
 }

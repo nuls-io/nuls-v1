@@ -256,7 +256,11 @@ public class ForkChainProcess {
 
                 chainManager.getChains().add(orphanChain);
 
-                ChainLog.debug("discover the OrphanChain {} : start {} - {} , end {} - {} , connection the master chain of {} - {} - {}, move into the fork chians", orphanChain.getChain().getId(), startBlockHeader.getHeight(), startBlockHeader.getHash().getDigestHex(), orphanChain.getChain().getEndBlockHeader().getHeight(), orphanChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getMasterChain().getChain().getBestBlock().getHeader().getHeight(), chainManager.getMasterChain().getChain().getBestBlock().getHeader().getHash());
+                try {
+                    ChainLog.debug("discover the OrphanChain {} : start {} - {} , end {} - {} , connection the master chain of {} - {} - {}, move into the fork chians", orphanChain.getChain().getId(), startBlockHeader.getHeight(), startBlockHeader.getHash().getDigestHex(), orphanChain.getChain().getEndBlockHeader().getHeight(), orphanChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getMasterChain().getChain().getBestBlock().getHeader().getHeight(), chainManager.getMasterChain().getChain().getBestBlock().getHeader().getHash());
+                } catch (IOException e) {
+                    Log.error(e);
+                }
 
                 return true;
             } else if(startBlockHeader.getHeight() > header.getHeight()) {
@@ -292,7 +296,11 @@ public class ForkChainProcess {
                         chainManager.getChains().remove(forkChain);
                     }
 
-                    ChainLog.debug("discover the OrphanChain {} : start {} - {} , end {} - {} , connection the fork chain of : start {} - {} , end {} - {}, move into the fork chians", orphanChain.getChain().getId(), startBlockHeader.getHeight(), startBlockHeader.getHash().getDigestHex(), orphanChain.getChain().getEndBlockHeader().getHeight(), orphanChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chain.getStartBlockHeader().getHeight(), chain.getStartBlockHeader().getHash(), chain.getEndBlockHeader().getHeight(), chain.getEndBlockHeader().getHash());
+                    try {
+                        ChainLog.debug("discover the OrphanChain {} : start {} - {} , end {} - {} , connection the fork chain of : start {} - {} , end {} - {}, move into the fork chians", orphanChain.getChain().getId(), startBlockHeader.getHeight(), startBlockHeader.getHash().getDigestHex(), orphanChain.getChain().getEndBlockHeader().getHeight(), orphanChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chain.getStartBlockHeader().getHeight(), chain.getStartBlockHeader().getHash(), chain.getEndBlockHeader().getHeight(), chain.getEndBlockHeader().getHash());
+                    } catch (IOException e) {
+                        Log.error(e);
+                    }
 
                     return true;
                 } else if(startBlockHeader.getHeight() == header.getHeight() + 1) {

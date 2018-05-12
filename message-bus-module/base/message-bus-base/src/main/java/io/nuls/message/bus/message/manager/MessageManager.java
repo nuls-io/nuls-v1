@@ -22,27 +22,36 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.message;
 
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.utils.NulsByteBuffer;
-import io.nuls.protocol.constant.ProtocolConstant;
+package io.nuls.message.bus.message.manager;
+
+import io.nuls.protocol.message.base.BaseMessage;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * 区块头在网络消息中的承载类
- * The host class of the block header in the network message.
- *
- * @author Niels
- * @date 2017/11/13
+ * @author: Niels Wang
+ * @date: 2018/5/12
  */
-public class BlockHeaderMessage extends BaseProtocolMessage<BlockHeader> {
-    public BlockHeaderMessage() {
-        super(ProtocolConstant.MESSAGE_TYPE_BLOCK_HEADER);
+public class MessageManager {
+
+    private static final Map<String, Class<? extends BaseMessage>> MESSAGE_MAP = new HashMap<>();
+
+    private static void putMessage(short moduleId, int type, Class<? extends BaseMessage> msgClass) {
+        MESSAGE_MAP.put(moduleId + "_" + type, msgClass);
     }
 
-    @Override
-    protected BlockHeader parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new BlockHeader());
+    public static Class<? extends BaseMessage> getMessage(short moduleId, int type) {
+        return MESSAGE_MAP.get(moduleId + "_" + type);
+    }
+
+    public static void putMessage(Class<? extends BaseMessage> msgClass) {
+        try {
+            BaseMessage message = msgClass.newInstance();
+            putMessage(message.getHeader().getModuleId(), message.getHeader().getMsgType(), msgClass);
+        } catch (Exception e) {
+            //do nothing
+        }
     }
 }

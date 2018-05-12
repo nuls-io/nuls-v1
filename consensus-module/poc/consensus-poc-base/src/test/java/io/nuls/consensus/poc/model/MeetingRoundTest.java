@@ -26,17 +26,16 @@
 
 package io.nuls.consensus.poc.model;
 
-import io.nuls.account.model.Address;
-import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.protocol.constant.ProtocolConstant;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by ln on 2018/5/7.
@@ -55,7 +54,7 @@ public class MeetingRoundTest {
 
         assertEquals(round.getMemberCount(), meetingMemberList.size());
         assertEquals("error", 1010d, round.getTotalWeight(), 2);
-        assertEquals(meetingMemberList.size() * ConsensusConstant.BLOCK_TIME_INTERVAL_MILLIS + roundStartTime , round.getEndTime());
+        assertEquals(meetingMemberList.size() * ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS + roundStartTime, round.getEndTime());
 
         System.out.println(round.toString());
 
@@ -64,7 +63,7 @@ public class MeetingRoundTest {
     private List<MeetingMember> getMemberList() {
         List<MeetingMember> meetingMemberList = new ArrayList<>();
 
-        for(int i = 0 ; i < 10 ; i ++) {
+        for (int i = 0; i < 10; i++) {
             MeetingMember member = new MeetingMember();
             member.setRoundStartTime(roundStartTime);
             member.setPackingAddress(AddressTool.getAddress(new ECKey().getPubKey()));

@@ -44,6 +44,7 @@ import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -130,7 +131,7 @@ public final class GenesisBlock extends Block {
             Address ads = Address.fromHashs(address);
 
             Coin coin = new Coin(ads.getBase58Bytes(), Na.parseNuls(nuls), height == null ? 0 : height.longValue());
-            coinData.addTo( coin);
+            coinData.addTo(coin);
         }
 
         CoinBaseTransaction tx = new CoinBaseTransaction();
@@ -164,7 +165,12 @@ public final class GenesisBlock extends Block {
         data.setRoundStartTime(header.getTime() - ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000);
         data.setConsensusMemberCount(1);
         data.setPackingIndexOfRound(1);
-        header.setExtend(data.serialize());
+        try {
+            header.setExtend(data.serialize());
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+
+        }
         header.setHash(NulsDigestData.calcDigestData(header));
 
         P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();

@@ -22,27 +22,36 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.message;
 
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.utils.NulsByteBuffer;
-import io.nuls.protocol.constant.ProtocolConstant;
+package io.nuls.consensus.poc.protocol.tx;
+
+import io.nuls.consensus.poc.protocol.entity.CancelDeposit;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.utils.AddressTool;
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 /**
- * 区块头在网络消息中的承载类
- * The host class of the block header in the network message.
- *
- * @author Niels
- * @date 2017/11/13
+ * @author: Niels Wang
+ * @date: 2018/5/12
  */
-public class BlockHeaderMessage extends BaseProtocolMessage<BlockHeader> {
-    public BlockHeaderMessage() {
-        super(ProtocolConstant.MESSAGE_TYPE_BLOCK_HEADER);
+public class CancelDepositTransactionTest extends TxSerializeTest {
+
+
+    @Test
+    public void testSerialize() {
+        CancelDepositTransaction tx = new CancelDepositTransaction();
+        this.setCommonFields(tx);
+        CancelDeposit txData = new CancelDeposit();
+        txData.setAddress(AddressTool.getAddress(ecKey1.getPubKey()));
+        txData.setJoinTxHash(NulsDigestData.calcDigestData("1234567890".getBytes()));
+        this.signTransaction(tx, ecKey1);
+        try {
+            this.testTxSerialize(tx, new CancelDepositTransaction());
+        } catch (Exception e) {
+            assertTrue(false);
+        }
     }
 
-    @Override
-    protected BlockHeader parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new BlockHeader());
-    }
 }

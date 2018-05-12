@@ -31,7 +31,9 @@ import io.nuls.consensus.poc.BaseTest;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.service.impl.ConsensusPocServiceImpl;
 import io.nuls.consensus.service.ConsensusService;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
@@ -40,6 +42,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,10 +91,14 @@ public class ConsensusPocServiceTest extends BaseTest {
         NulsDataValidator<TestTransaction> testValidator = new NulsDataValidator<TestTransaction>() {
             @Override
             public ValidateResult validate(TestTransaction data) {
-                if(data.getHash().getDigestHex().equals("08001220328876d03b50feba0ac58d3fcb4638a2fb95847315a88c8de7105408d931999a")) {
-                    return ValidateResult.getFailedResult("test.transaction", TransactionErrorCode.ORPHAN_TX);
-                } else {
-                    return ValidateResult.getSuccessResult();
+                try {
+                    if(data.getHash().getDigestHex().equals("08001220328876d03b50feba0ac58d3fcb4638a2fb95847315a88c8de7105408d931999a")) {
+                        return ValidateResult.getFailedResult("test.transaction", TransactionErrorCode.ORPHAN_TX);
+                    } else {
+                        return ValidateResult.getSuccessResult();
+                    }
+                } catch (IOException e) {
+                    throw new NulsRuntimeException(e);
                 }
             }
         };

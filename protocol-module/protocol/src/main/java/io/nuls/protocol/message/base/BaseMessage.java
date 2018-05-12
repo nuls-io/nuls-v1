@@ -39,11 +39,11 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/11/7
  */
-public class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
+public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
     private transient NulsDigestData hash;
 
 
-    private MessageHeader header;
+    private transient MessageHeader header;
 
 
     private T msgBody;
@@ -71,9 +71,13 @@ public class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        // todo auto-generated method stub
-
+        MessageHeader header = new MessageHeader();
+        header.parse(byteBuffer);
+        this.header = header;
+        this.msgBody = parseMessageBody(byteBuffer);
     }
+
+    protected abstract T parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException;
 
     @Override
     public int size() {

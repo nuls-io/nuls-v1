@@ -25,9 +25,11 @@
 
 package io.nuls.protocol.rpc.resources;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Block;
@@ -89,7 +91,12 @@ public class BlockResource {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         Result result = Result.getSuccess();
-        Block block = blockService.getBlock(NulsDigestData.fromDigestHex(hash)).getData();
+        Block block = null;
+        try {
+            block = blockService.getBlock(NulsDigestData.fromDigestHex(hash)).getData();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
         if (block == null) {
             return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         }
@@ -110,7 +117,12 @@ public class BlockResource {
         if (!StringUtils.validHash(hash)) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
-        Block block = blockService.getBlock(NulsDigestData.fromDigestHex(hash)).getData();
+        Block block = null;
+        try {
+            block = blockService.getBlock(NulsDigestData.fromDigestHex(hash)).getData();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
         if (block == null) {
             result = Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         } else {

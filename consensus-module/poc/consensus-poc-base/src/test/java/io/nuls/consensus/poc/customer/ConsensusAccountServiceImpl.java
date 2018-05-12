@@ -79,6 +79,20 @@ public class ConsensusAccountServiceImpl implements AccountService {
         return null;
     }
 
+    /**
+     * 根据账户地址byte[]获取完整的账户信息
+     * <p>
+     * Get the full account information based on the account address string.
+     *
+     * @param address the address of the account you want ;
+     * @return the operation result and the account model
+     */
+    @Override
+    public Result<Account> getAccount(byte[] address) {
+        // todo auto-generated method stub
+        return null;
+    }
+
     @Override
     public Result<Account> getAccount(String address) {
         return null;
