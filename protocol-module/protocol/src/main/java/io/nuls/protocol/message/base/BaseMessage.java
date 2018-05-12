@@ -77,7 +77,7 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
         this.msgBody = parseMessageBody(byteBuffer);
     }
 
-    protected abstract T parseMessageBody(NulsByteBuffer byteBuffer);
+    protected abstract T parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException;
 
     @Override
     public int size() {
