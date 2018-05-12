@@ -26,8 +26,11 @@
 
 package io.nuls.consensus.poc;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.utils.NulsByteBuffer;
 
 /**
  * Created by ln on 2018/5/5.
@@ -38,4 +41,9 @@ public class TestTransaction extends Transaction {
         super(0);
     }
 
+    @Override
+    protected TransactionLogicData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        // todo auto-generated method stub
+        return null;
+    }
 }

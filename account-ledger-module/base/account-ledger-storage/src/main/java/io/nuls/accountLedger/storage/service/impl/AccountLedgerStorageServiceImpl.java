@@ -27,15 +27,18 @@ package io.nuls.accountLedger.storage.service.impl;
 import io.nuls.accountLedger.storage.constant.AccountLedgerStorageConstant;
 import io.nuls.accountLedger.storage.po.TransactionInfoPo;
 import io.nuls.accountLedger.storage.service.AccountLedgerStorageService;
-import io.nuls.core.tools.crypto.VarInt;
+import io.nuls.core.tools.log.Log;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.utils.VarInt;
 import org.spongycastle.util.Arrays;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -74,7 +77,12 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
         if (tx == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
-        byte[] txHashBytes = tx.getHash().serialize();
+        byte[] txHashBytes = new byte[0];
+        try {
+            txHashBytes = tx.getHash().serialize();
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+        }
         CoinData coinData = tx.getCoinData();
         if (coinData != null) {
             // delete - from
@@ -87,7 +95,11 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
             List<Coin> tos = coinData.getTo();
             byte[] indexBytes;
             for (int i = 0, length = tos.size(); i < length; i++) {
-                batch.put(Arrays.concatenate(txHashBytes, new VarInt(i).encode()), tos.get(i).serialize());
+                try {
+                    batch.put(Arrays.concatenate(txHashBytes, new VarInt(i).encode()), tos.get(i).serialize());
+                } catch (IOException e) {
+                    throw new NulsRuntimeException(e);
+                }
             }
 
             Result batchResult = batch.executeBatch();
@@ -96,7 +108,12 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
             }
         }
 
-        Result result = dbService.put(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TRANSACTION, tx.getHash().serialize(), tx.serialize());
+        Result result = null;
+        try {
+            result = dbService.put(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TRANSACTION, tx.getHash().serialize(), tx.serialize());
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+        }
         return result;
     }
 

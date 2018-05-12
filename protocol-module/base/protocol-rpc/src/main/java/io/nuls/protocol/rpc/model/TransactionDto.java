@@ -26,13 +26,16 @@
 package io.nuls.protocol.rpc.model;
 
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.TxStatusEnum;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Transaction;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 @ApiModel(value = "transactionJSON")
@@ -85,7 +88,11 @@ public class TransactionDto {
 
     public TransactionDto(Transaction tx) {
         long bestBlockHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
-        this.hash = tx.getHash().getDigestHex();
+        try {
+            this.hash = tx.getHash().getDigestHex();
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+        }
         this.type = tx.getType();
         this.time = tx.getTime();
         this.blockHeight = tx.getBlockHeight();

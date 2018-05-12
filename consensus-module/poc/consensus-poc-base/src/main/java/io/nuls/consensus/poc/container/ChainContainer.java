@@ -186,7 +186,7 @@ public class ChainContainer implements Cloneable {
         BlockHeader bestBlockHeader = chain.getEndBlockHeader();
 
         if (!preHash.equals(bestBlockHeader.getHash())) {
-            Log.error("block height " + blockHeader.getHeight() + " prehash is error! hash :" + blockHeader.getHash().getDigestHex());
+            Log.error("block height " + blockHeader.getHeight() + " prehash is error! hash :" + blockHeader.getHash());
             return false;
         }
 
@@ -196,7 +196,7 @@ public class ChainContainer implements Cloneable {
 
         if(roundData.getRoundIndex() < bestBlcokRoundData.getRoundIndex() ||
                 (roundData.getRoundIndex() == bestBlcokRoundData.getRoundIndex() && roundData.getPackingIndexOfRound() <= bestBlcokRoundData.getPackingIndexOfRound())) {
-            Log.error("new block rounddata error, block height : " + blockHeader.getHeight() + " , hash :" + blockHeader.getHash().getDigestHex());
+            Log.error("new block rounddata error, block height : " + blockHeader.getHeight() + " , hash :" + blockHeader.getHash());
             return false;
         }
 
@@ -220,15 +220,15 @@ public class ChainContainer implements Cloneable {
 //        }
         if (roundData.getRoundIndex() > currentRound.getIndex()) {
             if (roundData.getRoundStartTime() > TimeService.currentTimeMillis()) {
-                Log.error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeader.getHash().getDigestHex());
+                Log.error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeader.getHash());
                 return false;
             }
             if (!isDownload && (roundData.getRoundStartTime() + (roundData.getPackingIndexOfRound() - 1) * ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L) > TimeService.currentTimeMillis()) {
-                Log.error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash().getDigestHex());
+                Log.error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash());
                 return false;
             }
             if (roundData.getRoundStartTime() < currentRound.getEndTime()) {
-                Log.error("block height " + blockHeader.getHeight() + " round index and start time not match! hash :" + blockHeader.getHash().getDigestHex());
+                Log.error("block height " + blockHeader.getHeight() + " round index and start time not match! hash :" + blockHeader.getHash());
                 return false;
             }
             MeetingRound tempRound = roundManager.getNextRound(roundData, !isDownload);
@@ -249,32 +249,32 @@ public class ChainContainer implements Cloneable {
         }
 
         if (roundData.getRoundIndex() != currentRound.getIndex() || roundData.getRoundStartTime() != currentRound.getStartTime()) {
-            Log.error("block height " + blockHeader.getHeight() + " round startTime is error! hash :" + blockHeader.getHash().getDigestHex());
+            Log.error("block height " + blockHeader.getHeight() + " round startTime is error! hash :" + blockHeader.getHash());
             return false;
         }
 
         Log.debug(currentRound.toString());
 
         if (roundData.getConsensusMemberCount() != currentRound.getMemberCount()) {
-            Log.error("block height " + blockHeader.getHeight() + " packager count is error! hash :" + blockHeader.getHash().getDigestHex());
+            Log.error("block height " + blockHeader.getHeight() + " packager count is error! hash :" + blockHeader.getHash());
             return false;
         }
         // Verify that the packager is correct
         // 验证打包人是否正确
         MeetingMember member = currentRound.getMember(roundData.getPackingIndexOfRound());
         if (!Arrays.equals(member.getPackingAddress(), blockHeader.getPackingAddress())) {
-            Log.error("block height " + blockHeader.getHeight() + " packager error! hash :" + blockHeader.getHash().getDigestHex());
+            Log.error("block height " + blockHeader.getHeight() + " packager error! hash :" + blockHeader.getHash());
             return false;
         }
 
         if (member.getPackEndTime() != block.getHeader().getTime()) {
-            Log.error("block height " + blockHeader.getHeight() + " time error! hash :" + blockHeader.getHash().getDigestHex());
+            Log.error("block height " + blockHeader.getHeight() + " time error! hash :" + blockHeader.getHash());
             return false;
         }
 
         boolean success = verifyBaseTx(block, currentRound, member);
         if (!success) {
-            Log.error("block height " + blockHeader.getHeight() + " verify tx error! hash :" + blockHeader.getHash().getDigestHex());
+            Log.error("block height " + blockHeader.getHeight() + " verify tx error! hash :" + blockHeader.getHash());
             return false;
         }
 
@@ -290,31 +290,31 @@ public class ChainContainer implements Cloneable {
 //        List<Transaction> txs = block.getTxs();
 //        Transaction tx = txs.get(0);
 //        if (tx.getType() != TransactionConstant.TX_TYPE_COIN_BASE) {
-//            BlockLog.debug("Coinbase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
-////            Log.error("Coinbase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
+//            BlockLog.debug("Coinbase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+////            Log.error("Coinbase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
 //            return false;
 //        }
 //        YellowPunishTransaction yellowPunishTx = null;
 //        for (int i = 1; i < txs.size(); i++) {
 //            Transaction transaction = txs.get(i);
 //            if (transaction.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
-//                BlockLog.debug("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
-////                Log.error("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
+//                BlockLog.debug("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+////                Log.error("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
 //                return false;
 //            }
 //            if (null == yellowPunishTx && transaction.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH) {
 //                yellowPunishTx = (YellowPunishTransaction) transaction;
 //            } else if (null != yellowPunishTx && transaction.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH) {
-//                BlockLog.debug("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
-////                Log.error("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
+//                BlockLog.debug("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+////                Log.error("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
 //                return false;
 //            }
 //        }
 //
 //        CoinBaseTransaction coinBaseTransaction = ConsensusTool.createCoinBaseTx(member, block.getTxs(), currentRound, block.getHeader().getHeight() + PocConsensusConstant.COINBASE_UNLOCK_HEIGHT);
 //        if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
-//            BlockLog.debug("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
-//            Log.error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
+//            BlockLog.debug("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+//            Log.error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
 //            return false;
 //        }
 //
@@ -323,18 +323,18 @@ public class ChainContainer implements Cloneable {
 //            if (yellowPunishTransaction == yellowPunishTx) {
 //                return true;
 //            } else if (yellowPunishTransaction == null || yellowPunishTx == null) {
-//                BlockLog.debug("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
-////                Log.error("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
+//                BlockLog.debug("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+////                Log.error("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
 //                return false;
 //            } else if (!yellowPunishTransaction.getHash().equals(yellowPunishTx.getHash())) {
-//                BlockLog.debug("The yellow punish tx's hash is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
-////                Log.error("The yellow punish tx's hash is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex());
+//                BlockLog.debug("The yellow punish tx's hash is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+////                Log.error("The yellow punish tx's hash is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
 //                return false;
 //            }
 //
 //        } catch (Exception e) {
-//            BlockLog.debug("The tx's wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex(), e);
-////            Log.error("The tx's wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash().getDigestHex(), e);
+//            BlockLog.debug("The tx's wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash(), e);
+////            Log.error("The tx's wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash(), e);
 //            return false;
 //        }
 
@@ -436,7 +436,7 @@ public class ChainContainer implements Cloneable {
 
     private void addBlockInBlockList(List<Block> blockList) {
         // TODO
-//        String firstHash = blockList.get(0).getHeader().getPreHash().getDigestHex();
+//        String firstHash = blockList.get(0).getHeader().getPreHash();
 //        Block block = blockService.getBlock(firstHash);
 //        blockList.add(0, block);
     }

@@ -34,6 +34,7 @@ import io.nuls.consensus.poc.customer.ConsensusNetworkService;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
@@ -42,6 +43,7 @@ import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.DownloadService;
 import org.junit.BeforeClass;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,7 +100,11 @@ public class BaseTest {
         roundData.setPackingIndexOfRound(1);
         roundData.setRoundIndex(1);
         roundData.setRoundStartTime(1L);
-        blockHeader.setExtend(roundData.serialize());
+        try {
+            blockHeader.setExtend(roundData.serialize());
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+        }
 
         // new a block of height 0
         Block block = new Block();

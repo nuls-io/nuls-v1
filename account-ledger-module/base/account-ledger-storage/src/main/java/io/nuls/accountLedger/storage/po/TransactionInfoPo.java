@@ -27,11 +27,14 @@ package io.nuls.accountLedger.storage.po;
 
 import io.nuls.account.model.Address;
 import io.nuls.accountLedger.model.TransactionInfo;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
-import io.protostuff.Tag;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -100,4 +103,24 @@ public class TransactionInfoPo extends BaseNulsData {
         return txInfo;
     }
 
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        // todo auto-generated method stub
+
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        // todo auto-generated method stub
+
+    }
+
+    @Override
+    public int size() {
+        // todo auto-generated method stub
+        return 0;
+    }
 }
