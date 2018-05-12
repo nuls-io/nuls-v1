@@ -4,7 +4,8 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Alias;
 import io.nuls.account.service.AliasService;
-import io.nuls.account.storage.service.AccountStorageService;
+import io.nuls.account.storage.po.AliasPo;
+import io.nuls.account.storage.service.AliasStorageService;
 import io.nuls.account.tx.AliasTransaction;
 import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.core.tools.str.StringUtils;
@@ -26,7 +27,7 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
     private AliasService accountBaseService;
 
     @Autowired
-    private AccountStorageService accountStorageService;
+    private AliasStorageService alisaStorageService;
 
     @Autowired
     private AccountLedgerService accountledgerService;
@@ -57,12 +58,12 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
 
         if (aliasValue < AccountConstant.ALIAS_NA.getValue() + tx.getFee().getValue()) {
             return ValidateResult.getFailedResult(ErrorCode.INVALID_INPUT);
-        }
-
-        AliasPo aliasPo = accountStorageService.getAccount(alias.getAddress()) .get(alias.getAlias());
-        if (aliasPo != null) {
-            return ValidateResult.getFailedResult(ErrorCode.ALIAS_EXIST);
         }*/
+
+        AliasPo aliasPo = alisaStorageService.getAlias(alias.getAlias()).getData();
+        if (aliasPo != null) {
+            return ValidateResult.getFailedResult(AliasPo.class.getName(), AccountErrorCode.ALIAS_EXIST);
+        }
         return ValidateResult.getSuccessResult();
     }
 
