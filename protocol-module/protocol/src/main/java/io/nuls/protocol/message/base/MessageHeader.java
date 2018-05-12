@@ -28,6 +28,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.VarInt;
 import io.protostuff.Tag;
 
 import java.io.IOException;
@@ -89,21 +90,36 @@ public class MessageHeader extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        // todo auto-generated method stub
-
+        stream.write(new VarInt(magicNumber).encode());
+        stream.write(new VarInt(length).encode());
+        stream.write(xor);
+        stream.write(arithmetic);
+        stream.write(new VarInt(moduleId).encode());
+        stream.write(new VarInt(msgType).encode());
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        // todo auto-generated method stub
-
+    protected void parse(NulsByteBuffer buffer) throws NulsException {
+        magicNumber = (int) buffer.readVarInt();
+        length = (int) buffer.readVarInt();
+        xor = buffer.readByte();
+        arithmetic = buffer.readByte();
+        moduleId = (short) buffer.readVarInt();
+        msgType = (short) buffer.readVarInt();
     }
 
     @Override
     public int size() {
-        // todo auto-generated method stub
-        return 0;
+        int s = 0;
+        s += VarInt.sizeOf(magicNumber);
+        s += VarInt.sizeOf(length);
+        s += 1;
+        s += 1;
+        s += VarInt.sizeOf(moduleId);
+        s += VarInt.sizeOf(msgType);
+        return s;
     }
+
     public short getMsgType() {
         return msgType;
     }

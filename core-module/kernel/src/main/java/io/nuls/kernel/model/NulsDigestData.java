@@ -66,13 +66,13 @@ public class NulsDigestData extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
-        buffer.writeShort(digestAlgType);
+        buffer.write(digestAlgType);
         buffer.writeBytesWithLength(digestBytes);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.setDigestAlgType(byteBuffer.readByte());
+        digestAlgType = byteBuffer.readByte();
         try {
             this.digestBytes = byteBuffer.readByLengthByte();
         } catch (Exception e) {
