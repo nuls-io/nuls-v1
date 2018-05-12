@@ -2,7 +2,9 @@ package io.nuls.account.tx;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.Alias;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.NulsByteBuffer;
 
 /**
  * @author: Charlie
@@ -18,4 +20,8 @@ public class AliasTransaction extends Transaction<Alias> {
         super(type);
     }
 
+    @Override
+    protected Alias parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new Alias());
+    }
 }

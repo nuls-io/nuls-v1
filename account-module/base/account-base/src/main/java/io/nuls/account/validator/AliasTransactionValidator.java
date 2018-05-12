@@ -52,7 +52,7 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
             return ValidateResult.getFailedResult(alias.getClass().getName(), AccountErrorCode.ALIAS_ERROR);
         }
 
-        long aliasValue = 0;
+       /* long aliasValue = 0;
         UtxoData utxoData = (UtxoData) tx.getCoinData();
         for (UtxoInput input : utxoData.getInputs()) {
             aliasValue += input.getFrom().getValue();
@@ -65,7 +65,7 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
         AliasPo aliasPo = accountStorageService.getAccount(alias.getAddress()) .get(alias.getAlias());
         if (aliasPo != null) {
             return ValidateResult.getFailedResult(ErrorCode.ALIAS_EXIST);
-        }
+        }*/
         return ValidateResult.getSuccessResult();
     }
 
