@@ -149,6 +149,9 @@ public class Address {
     public static boolean validAddress(String address) {
         return AddressTool.validAddress(address);
     }
+    public static boolean validAddress(byte[] address) {
+        return AddressTool.validAddress(address);
+    }
 
     @Override
     public boolean equals(Object obj) {

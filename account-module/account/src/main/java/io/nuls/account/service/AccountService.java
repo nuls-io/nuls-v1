@@ -112,6 +112,16 @@ public interface AccountService {
     Result<AccountKeyStore> exportAccountToKeyStore(String address, String password);
 
     /**
+     * 根据账户地址byte[]获取完整的账户信息
+     * <p>
+     * Get the full account information based on the account address string.
+     *
+     * @param address the address of the account you want ;
+     * @return the operation result and the account model
+     */
+    Result<Account> getAccount(byte[] address);
+
+    /**
      * 根据账户地址字符串获取完整的账户信息
      * <p>
      * Get the full account information based on the account address string.
