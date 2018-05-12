@@ -3,7 +3,7 @@ package io.nuls.account.validator;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Alias;
-import io.nuls.account.service.AccountBaseService;
+import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.account.tx.AliasTransaction;
 import io.nuls.accountLedger.service.AccountLedgerService;
@@ -23,7 +23,7 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
     private static final AliasTransactionValidator INSTANCE = new AliasTransactionValidator();
 
     @Autowired
-    private AccountBaseService accountBaseService;
+    private AliasService accountBaseService;
 
     @Autowired
     private AccountStorageService accountStorageService;

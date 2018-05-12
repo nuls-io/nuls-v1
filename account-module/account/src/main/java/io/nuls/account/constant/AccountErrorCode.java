@@ -46,4 +46,5 @@ public interface AccountErrorCode {
     ErrorCode SUCCESS = ErrorCode.init("ACT010", 50010);
     ErrorCode FAILED = ErrorCode.init("ACT011", 50011);
     ErrorCode INSUFFICIENT_BALANCE = ErrorCode.init("ACT012", 50012);
+    ErrorCode ROLLBACK_ERROR = ErrorCode.init("ACT013", 50013);
 }
