@@ -23,9 +23,14 @@
  */
 package io.nuls.protocol.message.base;
 
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
-import io.protostuff.Tag;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+
+import java.io.IOException;
 
 /**
  * 所有网络上传输的消息的基类，定义了网络消息的基本格式
@@ -37,20 +42,43 @@ import io.protostuff.Tag;
 public class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
     private transient NulsDigestData hash;
 
-    @Tag(1)
+
     private MessageHeader header;
 
-    @Tag(2)
+
     private T msgBody;
 
     public BaseMessage() {
 
     }
+
     /**
      * 初始化基础消息的消息头
      */
     public BaseMessage(short moduleId, short eventType) {
         this.header = new MessageHeader(moduleId, eventType);
+    }
+
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        // todo auto-generated method stub
+
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        // todo auto-generated method stub
+
+    }
+
+    @Override
+    public int size() {
+        // todo auto-generated method stub
+        return 0;
     }
 
     /**
@@ -65,7 +93,12 @@ public class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
             return 0x00;
         }
         byte xor = 0x00;
-        byte[] data = msgBody.serialize();
+        byte[] data = new byte[0];
+        try {
+            data = msgBody.serialize();
+        } catch (IOException e) {
+            Log.error(e);
+        }
         for (int i = 0; i < data.length; i++) {
             xor ^= data[i];
         }
@@ -91,8 +124,13 @@ public class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
 
     public NulsDigestData getHash() {
         if (hash == null) {
-            this.hash = NulsDigestData.calcDigestData(this.serialize());
+            try {
+                this.hash = NulsDigestData.calcDigestData(this.serialize());
+            } catch (IOException e) {
+                Log.error(e);
+            }
         }
         return hash;
     }
+
 }

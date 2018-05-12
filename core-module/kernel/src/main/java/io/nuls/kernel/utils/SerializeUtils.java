@@ -22,9 +22,16 @@
  * SOFTWARE.
  *
  */
-package io.nuls.core.tools.crypto;
+package io.nuls.kernel.utils;
 
-import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+import io.nuls.core.tools.crypto.Sha256Hash;
+import io.nuls.core.tools.crypto.Util;
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.model.NulsData;
+import org.spongycastle.crypto.digests.RIPEMD160Digest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,11 +44,11 @@ import java.util.List;
 /**
  * @author somebody
  */
-public class Utils {
+public class SerializeUtils {
     /**
      * @auther somebody
      */
-    public static final Charset CHARSET = Charset.forName("UTF-8");
+    public static final Charset CHARSET = Charset.forName(NulsConfig.DEFAULT_ENCODING);
     private static final int MAGIC_8 = 8;
     private static final int MAGIC_0X80 = 0x80;
     /**
@@ -125,9 +132,9 @@ public class Utils {
     }
 
     /**
-     * Given a textual validator, returns a byte buffer formatted as follows:</p>
+     * Given a textual message, returns a byte buffer formatted as follows:</p>
      * <p>
-     * <tt>[24] "Bitcoin Signed Message:\n" [validator.length as a varint] validator</p></tt>
+     * <tt>[24] "Bitcoin Signed Message:\n" [message.length as a varint] message</p></tt>
      */
     public static byte[] formatMessageForSigning(String message) {
         try {
@@ -143,16 +150,6 @@ public class Utils {
             // Cannot happen.
             throw new RuntimeException(e);
         }
-    }
-
-    private static int isAndroid = -1;
-
-    public static boolean isAndroidRuntime() {
-        if (isAndroid == -1) {
-            final String runtime = System.getProperty("java.runtime.name");
-            isAndroid = (runtime != null && "Android Runtime".equals(runtime)) ? 1 : 0;
-        }
-        return isAndroid == 1;
     }
 
     public static String toString(byte[] bytes, String charsetName) {
@@ -175,13 +172,7 @@ public class Utils {
      * Returns a copy of the given byte array in reverse order.
      */
     public static byte[] reverseBytes(byte[] bytes) {
-        // We could use the XOR trick here but it's easier to understand if we don't. If we find this is really a
-        // performance issue the matter can be revisited.
-        byte[] buf = new byte[bytes.length];
-        for (int i = 0; i < bytes.length; i++) {
-            buf[i] = bytes[bytes.length - 1 - i];
-        }
-        return buf;
+        return Util.reverseBytes(bytes);
     }
 
     /**
@@ -237,12 +228,6 @@ public class Utils {
     public static int readUint16BE(byte[] bytes, int offset) {
         return ((bytes[offset] & 0xff) << 8) |
                 (bytes[offset + 1] & 0xff);
-    }
-
-    public static byte[] copyOf(byte[] in, int length) {
-        byte[] out = new byte[length];
-        System.arraycopy(in, 0, out, 0, Math.min(length, in.length));
-        return out;
     }
 
     /**
@@ -388,35 +373,6 @@ public class Utils {
         return Double.longBitsToDouble(value);
     }
 
-    public static <T> T checkNotNull(T t) {
-        if (t == null) {
-            throw new NullPointerException();
-        }
-        return t;
-    }
-
-    public static void checkState(boolean status) {
-        if (status) {
-            return;
-        } else {
-            throw new RuntimeException();
-        }
-    }
-
-    public static void checkState(boolean status, Object... args) {
-        if (status) {
-            return;
-        } else {
-            String msg = null;
-            if (args != null) {
-                for (Object object : args) {
-                    msg = (msg == null ? object.toString() : msg + object.toString());
-                }
-            }
-            throw new RuntimeException("SYS_UNKOWN_EXCEPTION");
-        }
-    }
-
     public static String join(List<? extends Object> list) {
         if (list == null) {
             return null;
@@ -456,7 +412,7 @@ public class Utils {
     }
 
     public static int sizeOfDouble(Double val) {
-        byte[] bytes = Utils.double2Bytes(val);
+        byte[] bytes = SerializeUtils.double2Bytes(val);
         return VarInt.sizeOf(bytes.length) + bytes.length;
     }
 
@@ -465,7 +421,12 @@ public class Utils {
             return 1;
         }
         byte[] bytes;
-        bytes = val.getBytes(CHARSET);
+        try {
+            bytes = val.getBytes(NulsConfig.DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
         return sizeOfBytes(bytes);
     }
 
@@ -474,7 +435,7 @@ public class Utils {
     }
 
     public static int sizeOfInt48() {
-        return 6;
+        return NulsConstant.INT48_VALUE_LENGTH;
     }
 
     public static int sizeOfVarInt(Integer val) {
@@ -490,6 +451,14 @@ public class Utils {
             return 1;
         }
         return VarInt.sizeOf((val).length) + (val).length;
+    }
+
+    public static int sizeOfNulsData(NulsData val) {
+        if (null == val) {
+            return NulsConstant.PLACE_HOLDER.length;
+        }
+        int size = val.size();
+        return size == 0 ? 1 : size;
     }
 
 }

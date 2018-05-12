@@ -99,14 +99,16 @@ public class SpringLiteContext {
         for (String key : keySet) {
             try {
                 Object bean = BEAN_TEMP_MAP.get(key);
-                injectionBeanFields(bean, BEAN_TYPE_MAP.get(key));
-                BEAN_OK_MAP.put(key, bean);
-                BEAN_TEMP_MAP.remove(key);
-                if (bean instanceof InitializingBean) {
-                    try {
-                        ((InitializingBean) bean).afterPropertiesSet();
-                    } catch (Exception e) {
-                        Log.error(e);
+                boolean result = injectionBeanFields(bean, BEAN_TYPE_MAP.get(key));
+                if (result) {
+                    BEAN_OK_MAP.put(key, bean);
+                    BEAN_TEMP_MAP.remove(key);
+                    if (bean instanceof InitializingBean) {
+                        try {
+                            ((InitializingBean) bean).afterPropertiesSet();
+                        } catch (Exception e) {
+                            Log.error(e);
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -122,11 +124,16 @@ public class SpringLiteContext {
      * @param obj     bean对象
      * @param objType 对象类型
      */
-    private static void injectionBeanFields(Object obj, Class objType) throws Exception {
+    private static boolean injectionBeanFields(Object obj, Class objType) throws Exception {
         Set<Field> fieldSet = getFieldSet(objType);
+        boolean result = true;
         for (Field field : fieldSet) {
-            injectionBeanField(obj, field);
+            boolean b = injectionBeanField(obj, field);
+            if (!b) {
+                result = true;
+            }
         }
+        return result;
     }
 
     /**
@@ -156,14 +163,14 @@ public class SpringLiteContext {
      * @param obj   bean对象
      * @param field 对象的一个属性
      */
-    private static void injectionBeanField(Object obj, Field field) throws Exception {
+    private static boolean injectionBeanField(Object obj, Field field) throws Exception {
         Annotation[] anns = field.getDeclaredAnnotations();
         if (anns == null || anns.length == 0) {
-            return;
+            return true;
         }
         Annotation automired = getFromArray(anns, Autowired.class);
         if (null == automired) {
-            return;
+            return true;
         }
         String name = ((Autowired) automired).value();
         Object value = null;
@@ -184,6 +191,7 @@ public class SpringLiteContext {
         field.setAccessible(true);
         field.set(obj, value);
         field.setAccessible(false);
+        return true;
     }
 
     /**

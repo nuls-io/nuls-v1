@@ -90,4 +90,15 @@ public interface NulsConstant {
      */
     int TX_TYPE_TRANSFER = 2;
 
+
+    /**
+     * 空值占位符
+     * Null placeholder.
+     */
+    byte[] PLACE_HOLDER = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
+    /**
+     * 48位整型数据长度
+     * 48 bit integer data length.
+     */
+    int INT48_VALUE_LENGTH = 6;
 }

@@ -25,23 +25,26 @@
 package io.nuls.kernel.script;
 
 import io.nuls.core.tools.crypto.ECKey;
-import io.nuls.core.tools.crypto.Utils;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.NulsSignData;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.validate.ValidateResult;
-import io.protostuff.Tag;
+
+import java.io.IOException;
 
 /**
- * author Facjas
- * date 2018/3/8.
+ * @author Facjas
+ * @date 2018/3/8.
  */
 public class P2PKHScriptSig extends Script {
 
-    @Tag(1)
     private NulsSignData signData;
-    @Tag(2)
+
     private byte[] publicKey;
 
     public P2PKHScriptSig() {
@@ -49,7 +52,12 @@ public class P2PKHScriptSig extends Script {
     }
 
     public P2PKHScriptSig(byte[] signBytes, byte[] publicKey) {
-        this.signData = new NulsSignData(signBytes);
+        this.signData = new NulsSignData();
+        try {
+            this.signData.parse(signBytes);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
         this.publicKey = publicKey;
     }
 
@@ -84,7 +92,7 @@ public class P2PKHScriptSig extends Script {
     }
 
     public byte[] getSignerHash160() {
-        return Utils.sha256hash160(getPublicKey());
+        return SerializeUtils.sha256hash160(getPublicKey());
     }
 
     public static P2PKHScriptSig createFromBytes(byte[] bytes) throws NulsException {
@@ -95,6 +103,38 @@ public class P2PKHScriptSig extends Script {
 
     @Override
     public byte[] getBytes() {
-        return this.serialize();
+        try {
+            return this.serialize();
+        } catch (IOException e) {
+            Log.error(e);
+            return null;
+        }
+    }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.write(publicKey.length);
+        stream.write(publicKey);
+        stream.writeNulsData(signData);
+
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        int length = byteBuffer.readByte();
+        this.publicKey = byteBuffer.readBytes(length);
+        this.signData = new NulsSignData();
+        this.signData.parse(byteBuffer);
+
+    }
+
+    @Override
+    public int size() {
+        int size = 1 + publicKey.length;
+        size += SerializeUtils.sizeOfNulsData(signData);
+        return size;
     }
 }

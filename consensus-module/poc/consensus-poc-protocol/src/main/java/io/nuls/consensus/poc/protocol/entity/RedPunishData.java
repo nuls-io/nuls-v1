@@ -24,8 +24,11 @@
  */
 package io.nuls.consensus.poc.protocol.entity;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.utils.*;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,6 +43,33 @@ public class RedPunishData extends TransactionLogicData {
     private byte[] evidence;
 
     public RedPunishData() {
+    }
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += VarInt.sizeOf(height);
+        size += address.length;
+        size += 2;
+        size += SerializeUtils.sizeOfBytes(evidence);
+        return size;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(height);
+        stream.write(address);
+        stream.writeShort(reasonCode);
+        stream.writeBytesWithLength(evidence);
+
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.height = byteBuffer.readVarInt();
+        this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.reasonCode = byteBuffer.readShort();
+        this.evidence = byteBuffer.readByLengthByte();
     }
 
     public long getHeight() {

@@ -25,10 +25,15 @@
 
 package io.nuls.protocol.model;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.protocol.constant.NotFoundType;
-import io.protostuff.Tag;
+
+import java.io.IOException;
 
 /**
  * @author: Niels Wang
@@ -39,14 +44,14 @@ public class NotFound extends BaseNulsData {
      * 数据类型 {@link NotFoundType}
      * data type
      */
-    @Tag(1)
+
     private NotFoundType type;
 
     /**
      * 数据摘要
      * request hash
      */
-    @Tag(2)
+
     private NulsDigestData hash;
 
     public NotFound() {
@@ -55,6 +60,28 @@ public class NotFound extends BaseNulsData {
     public NotFound(NotFoundType type, NulsDigestData hash) {
         this.type = type;
         this.hash = hash;
+    }
+
+    @Override
+    public int size() {
+        int size = 1;
+        size += SerializeUtils.sizeOfNulsData(hash);
+        return size;
+    }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.write((byte) type.getCode());
+        stream.writeNulsData(hash);
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.type = NotFoundType.getType(byteBuffer.readByte());
+        this.hash = byteBuffer.readHash();
     }
 
     /**

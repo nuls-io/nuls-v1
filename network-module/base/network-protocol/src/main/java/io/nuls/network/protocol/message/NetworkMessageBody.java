@@ -1,18 +1,23 @@
 package io.nuls.network.protocol.message;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.protostuff.Tag;
+
+import java.io.IOException;
 
 public class NetworkMessageBody extends BaseNulsData {
 
-    @Tag(1)
+
     private int handshakeType;
-    @Tag(2)
+
     private int severPort;
-    @Tag(3)
+
     private long bestBlockHeight;
-    @Tag(4)
+
     private NulsDigestData bestBlockHash;
 
 
@@ -57,5 +62,26 @@ public class NetworkMessageBody extends BaseNulsData {
 
     public void setBestBlockHash(NulsDigestData bestBlockHash) {
         this.bestBlockHash = bestBlockHash;
+    }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        // todo auto-generated method stub
+
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        // todo auto-generated method stub
+
+    }
+
+    @Override
+    public int size() {
+        // todo auto-generated method stub
+        return 0;
     }
 }

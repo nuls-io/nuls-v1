@@ -28,8 +28,12 @@ package io.nuls.consensus.poc.protocol.entity;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 import io.protostuff.Tag;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,19 +43,19 @@ import java.util.Set;
  */
 public class Agent extends TransactionLogicData {
 
-    @Tag(1)
+
     private byte[] agentAddress;
-    @Tag(2)
+
     private byte[] packingAddress;
-    @Tag(3)
+
     private byte[] rewardAddress;
-    @Tag(4)
+
     private Na deposit;
-    @Tag(5)
+
     private double commissionRate;
-    @Tag(6)
+
     private byte[] agentName;
-    @Tag(7)
+
     private byte[] introduction;
 
     private transient long time;
@@ -62,6 +66,37 @@ public class Agent extends TransactionLogicData {
     private transient long totalDeposit;
     private transient NulsDigestData txHash;
 
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfVarInt(deposit.getValue());
+        size += this.packingAddress.length;
+        size += SerializeUtils.sizeOfDouble(this.commissionRate);
+        size += this.introduction.length;
+        size += SerializeUtils.sizeOfBytes(agentName);
+        size += SerializeUtils.sizeOfInt48();
+        return size;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(deposit.getValue());
+        stream.writeString(packingAddress);
+        stream.writeDouble(this.commissionRate);
+        stream.writeString(this.introduction);
+        stream.writeString(agentName);
+        stream.writeInt48(startTime);
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.deposit = Na.valueOf(byteBuffer.readVarInt());
+        this.packingAddress = byteBuffer.readString();
+        this.commissionRate = byteBuffer.readDouble();
+        this.introduction = byteBuffer.readString();
+        this.agentName = byteBuffer.readString();
+        this.startTime = byteBuffer.readInt48();
+    }
     public Na getDeposit() {
         return deposit;
     }

@@ -22,14 +22,20 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.model;
+
+package io.nuls.consensus.poc.storage.po;
 
 /**
- *
- * @author facjas
- * @date 2017/11/20
+ * @author: Niels Wang
+ * @date: 2018/5/12
  */
-public enum NulsDataType {
+public class BasePo {
+    public byte[] serialize() {
+        // todo auto-generated method stub
+        return new byte[0];
+    }
 
-    TRANSACTION,
+    public void parse(byte[] bytes) {
+
+    }
 }

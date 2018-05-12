@@ -40,11 +40,11 @@ import java.util.Set;
  */
 public class Deposit extends TransactionLogicData {
 
-    @Tag(1)
+
     private Na deposit;
-    @Tag(2)
+
     private NulsDigestData agentHash;
-    @Tag(3)
+
     private byte[] address;
 
     private transient long time;

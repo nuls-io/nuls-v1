@@ -56,11 +56,10 @@ public class DownloadCacheHandler {
     }
 
     public static void receiveBlock(Block block) {
-        String hash = block.getHeader().getHash().getDigestHex();
-        CompletableFuture<Block> future = blockCacher.get(hash);
+        CompletableFuture<Block> future = blockCacher.get(block.getHeader().getHash());
         if (future != null) {
             future.complete(block);
-            blockCacher.remove(hash);
+            blockCacher.remove(block.getHeader().getHash());
         }
     }
 
@@ -82,24 +81,23 @@ public class DownloadCacheHandler {
     }
 
     public static void notFoundBlock(NotFound data) {
-        String hash = data.getHash().getDigestHex();
         if (data.getType() == NotFoundType.BLOCK) {
-            CompletableFuture<Block> future = blockCacher.get(hash);
+            CompletableFuture<Block> future = blockCacher.get(data.getHash());
             if (future != null) {
                 future.complete(null);
-                blockCacher.remove(hash);
+                blockCacher.remove(data.getHash());
             }
         } else if (data.getType() == NotFoundType.TRANSACTION) {
-            CompletableFuture<TxGroup> future = txGroupCacher.get(hash);
+            CompletableFuture<TxGroup> future = txGroupCacher.get(data.getHash());
             if (future != null) {
                 future.complete(null);
-                txGroupCacher.remove(hash);
+                txGroupCacher.remove(data.getHash());
             }
         } else if (data.getType() == NotFoundType.HASHES) {
-            CompletableFuture<BlockHashResponse> future = blockHashesCacher.get(hash);
+            CompletableFuture<BlockHashResponse> future = blockHashesCacher.get(data.getHash());
             if (future != null) {
                 future.complete(null);
-                blockHashesCacher.remove(hash);
+                blockHashesCacher.remove(data.getHash());
             }
         }
     }

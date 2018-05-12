@@ -26,26 +26,61 @@
 
 package io.nuls.kernel.model;
 
-import io.protostuff.Tag;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
+
+import java.io.IOException;
 
 /**
  * Created by ln on 2018/5/5.
  */
 public class Coin extends BaseNulsData {
-    @Tag(1)
+
     private byte[] owner;
-    @Tag(2)
+
     private Na na;
-    @Tag(3)
+
     private long lockTime;
 
     private transient Coin from;
+
+    public Coin() {
+    }
 
     public Coin(byte[] owner, Na na, long lockTime) {
         this.owner = owner;
         this.na = na;
         this.lockTime = lockTime;
     }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeBytesWithLength(owner);
+        stream.writeVarInt(na.getValue());
+        stream.writeInt48(lockTime);
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.owner = byteBuffer.readByLengthByte();
+        this.na = Na.valueOf(byteBuffer.readVarInt());
+        this.lockTime = byteBuffer.readInt48();
+    }
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfBytes(owner);
+        size += SerializeUtils.sizeOfVarInt(na.getValue());
+        size += SerializeUtils.sizeOfInt48();
+        return size;
+    }
+
 
     public Na getNa() {
         return na;
@@ -78,4 +113,6 @@ public class Coin extends BaseNulsData {
     public void setLockTime(long lockTime) {
         this.lockTime = lockTime;
     }
+
+
 }

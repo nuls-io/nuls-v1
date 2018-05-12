@@ -46,7 +46,7 @@ public class AssemblyBlockUtil {
         block.setHeader(header);
         List<Transaction> txs = new ArrayList<>();
         for (NulsDigestData txHash : txHashList) {
-            Transaction tx = txMap.get(txHash.getDigestHex());
+            Transaction tx = txMap.get(txHash);
             tx.setBlockHeight(header.getHeight());
             if (null == tx) {
                 throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);

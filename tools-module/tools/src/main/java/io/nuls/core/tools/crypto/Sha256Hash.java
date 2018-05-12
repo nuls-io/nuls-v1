@@ -53,7 +53,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
      */
     @Deprecated
     public Sha256Hash(byte[] rawHashBytes) {
-        Utils.checkState(rawHashBytes.length == LENGTH);
+        Util.checkState(rawHashBytes.length == LENGTH);
         this.bytes = rawHashBytes;
     }
 
@@ -62,7 +62,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
      */
     @Deprecated
     public Sha256Hash(String hexString) {
-    	Utils.checkState(hexString.length() == LENGTH * 2);
+    	Util.checkState(hexString.length() == LENGTH * 2);
         this.bytes = Hex.decode(hexString);
     }
 
@@ -97,7 +97,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
      * @throws IllegalArgumentException if the given array length is not exactly 32
      */
     public static Sha256Hash wrapReversed(byte[] rawHashBytes) {
-        return wrap(Utils.reverseBytes(rawHashBytes));
+        return wrap(Util.reverseBytes(rawHashBytes));
     }
 
     /** Use {@link #of(byte[])} instead: this old name is ambiguous. */
@@ -273,7 +273,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
      * Returns a reversed copy of the internal byte array.
      */
     public byte[] getReversedBytes() {
-        return Utils.reverseBytes(bytes);
+        return Util.reverseBytes(bytes);
     }
 
     @Override

@@ -41,37 +41,50 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by ln on 2018/4/13.
+ * 系统启动时加载缓存的处理器
+ * The processor that loads the cache when the system starts.
+ *
+ * @author ln
+ * @date 2018/4/13
  */
 public class CacheLoader {
-
+    /**
+     * 区块服务
+     */
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
-    public List<Block> loadBlocks(int size) throws NulsException {
+    /**
+     * 从数据存储中加载指定个数的最新块
+     * Loads the latest block of the specified number from the data store.
+     *
+     * @param size 加载数量/load count
+     * @return 区块列表/block list
+     */
+    public List<Block> loadBlocks(int size) {
 
         List<Block> blockList = new ArrayList<>();
 
         Block block = blockService.getBestBlock().getData();
 
-        if(null == block){
+        if (null == block) {
             return blockList;
         }
 
-        for(int i = size ; i >= 0 ; i --) {
+        for (int i = size; i >= 0; i--) {
 
-            if(block == null) {
+            if (block == null) {
                 break;
             }
 
             blockList.add(block);
 
-            if(block.getHeader().getHeight() == 0L) {
+            if (block.getHeader().getHeight() == 0L) {
                 break;
             }
 
             NulsDigestData preHash = block.getHeader().getPreHash();
             block = blockService.getBlock(preHash).getData();
-            if(block == null || block.getHeader().getHeight() == 0L) {
+            if (block == null || block.getHeader().getHeight() == 0L) {
                 break;
             }
         }
@@ -79,25 +92,30 @@ public class CacheLoader {
         return blockList;
     }
 
+    /**
+     *
+     * @param size
+     * @return
+     */
     public List<BlockHeader> loadBlockHeaders(int size) {
 
         List<BlockHeader> blockHeaderList = new ArrayList<>();
 
         BlockHeader blockHeader = blockService.getBestBlockHeader().getData();
 
-        if(null == blockHeader){
+        if (null == blockHeader) {
             return blockHeaderList;
         }
 
-        for(int i = size ; i >= 0 ; i --) {
+        for (int i = size; i >= 0; i--) {
 
-            if(blockHeader == null) {
+            if (blockHeader == null) {
                 break;
             }
 
             blockHeaderList.add(blockHeader);
 
-            if(blockHeader.getHeight() == 0L) {
+            if (blockHeader.getHeight() == 0L) {
                 break;
             }
 

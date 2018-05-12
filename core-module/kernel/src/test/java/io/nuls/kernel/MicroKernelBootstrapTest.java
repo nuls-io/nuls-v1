@@ -51,6 +51,13 @@ public class MicroKernelBootstrapTest {
     }
 
     @Test
+    public void test(){
+        getInfo();
+        start();
+        shutdown();
+        destroy();
+    }
+
     public void getInfo() {
         this.init();
         String info = bootstrap.getInfo();
@@ -58,19 +65,16 @@ public class MicroKernelBootstrapTest {
         assertTrue(true);
     }
 
-    @Test
     public void start() {
         bootstrap.start();
         assertTrue(true);
     }
 
-    @Test
     public void shutdown() {
         bootstrap.shutdown();
         assertTrue(true);
     }
 
-    @Test
     public void destroy() {
         bootstrap.destroy();
         assertTrue(true);

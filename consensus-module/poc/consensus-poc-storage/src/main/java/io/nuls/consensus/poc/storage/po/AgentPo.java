@@ -34,26 +34,26 @@ import io.protostuff.Tag;
 /**
  * Created by ln on 2018/5/10.
  */
-public class AgentPo extends BaseNulsData {
+public class AgentPo extends BasePo {
 
     private transient NulsDigestData hash;
-    @Tag(1)
+
     private byte[] agentAddress;
-    @Tag(2)
+
     private byte[] packingAddress;
-    @Tag(3)
+
     private byte[] rewardAddress;
-    @Tag(4)
+
     private Na deposit;
-    @Tag(5)
+
     private double commissionRate;
-    @Tag(6)
+
     private byte[] agentName;
-    @Tag(7)
+
     private byte[] introduction;
-    @Tag(8)
+
     private long time;
-    @Tag(9)
+
     private long blockHeight;
 
     public NulsDigestData getHash() {

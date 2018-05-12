@@ -11,14 +11,14 @@ import io.protostuff.Tag;
 public class AliasPo extends BaseNulsData {
 
 
-    @Tag(1)
+
     private byte[] address;
 
-    @Tag(2)
+
     private String alias;
 
     // 0: locked   1:confirm
-    @Tag(3)
+
     private int status;
 
 
