@@ -1,16 +1,13 @@
 package io.nuls.account.validator;
 
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Alias;
 import io.nuls.account.service.AccountBaseService;
-import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.account.tx.AliasTransaction;
 import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.validate.NulsDataValidator;
