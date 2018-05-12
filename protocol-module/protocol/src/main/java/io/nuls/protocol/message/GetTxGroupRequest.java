@@ -24,12 +24,15 @@
  */
 package io.nuls.protocol.message;
 
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.GetTxGroupParam;
 
 /**
  * 从对等节点处获取交易列表的消息
  * The message of gets the transaction list from the peer node.
+ *
  * @author Niels
  * @date 2017/11/13
  */
@@ -37,6 +40,11 @@ public class GetTxGroupRequest extends BaseProtocolMessage<GetTxGroupParam> {
 
     public GetTxGroupRequest() {
         super(ProtocolConstant.MESSAGE_TYPE_GET_TX_GROUP);
+    }
+
+    @Override
+    protected GetTxGroupParam parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new GetTxGroupParam());
     }
 
 }

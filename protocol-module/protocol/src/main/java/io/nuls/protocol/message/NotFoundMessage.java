@@ -25,17 +25,25 @@
 
 package io.nuls.protocol.message;
 
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.NotFound;
 
 /**
  * "找不到"反馈在网络消息中的承载类
  * "Unable to find" feedback on the host class in the network message.
+ *
  * @author: Niels Wang
  * @date: 2018/4/9
  */
 public class NotFoundMessage extends BaseProtocolMessage<NotFound> {
     public NotFoundMessage() {
         super(ProtocolConstant.MESSAGE_TYPE_NOT_FOUND);
+    }
+
+    @Override
+    protected NotFound parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new NotFound());
     }
 }
