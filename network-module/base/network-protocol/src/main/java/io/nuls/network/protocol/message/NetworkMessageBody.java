@@ -5,6 +5,7 @@ import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.VarInt;
 import io.protostuff.Tag;
 
 import java.io.IOException;
@@ -64,24 +65,31 @@ public class NetworkMessageBody extends BaseNulsData {
         this.bestBlockHash = bestBlockHash;
     }
 
+    @Override
+    public int size() {
+        int s = 0;
+        s += VarInt.sizeOf(severPort);
+        s += VarInt.sizeOf(bestBlockHeight);
+        s += bestBlockHash.size();
+        return s;
+    }
+
     /**
      * serialize important field
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        // todo auto-generated method stub
-
+        stream.write(new VarInt(severPort).encode());
+        stream.write(new VarInt(bestBlockHeight).encode());
+        stream.write(bestBlockHash.serialize());
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        // todo auto-generated method stub
-
+    protected void parse(NulsByteBuffer buffer) throws NulsException {
+        severPort = (int) buffer.readVarInt();
+        bestBlockHeight = (int) buffer.readVarInt();
+        bestBlockHash = buffer.readHash();
     }
 
-    @Override
-    public int size() {
-        // todo auto-generated method stub
-        return 0;
-    }
+
 }

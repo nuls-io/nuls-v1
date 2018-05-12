@@ -25,9 +25,13 @@
 
 package io.nuls.consensus.poc.protocol.entity;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -62,5 +66,24 @@ public class CancelDeposit extends TransactionLogicData {
 
     public void setJoinTxHash(NulsDigestData joinTxHash) {
         this.joinTxHash = joinTxHash;
+    }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(this.joinTxHash);
+
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.joinTxHash = byteBuffer.readHash();
+    }
+
+    @Override
+    public int size() {
+        return this.joinTxHash.size();
     }
 }

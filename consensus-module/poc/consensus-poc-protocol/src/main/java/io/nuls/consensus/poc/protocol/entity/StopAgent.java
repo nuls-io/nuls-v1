@@ -25,9 +25,13 @@
 
 package io.nuls.consensus.poc.protocol.entity;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,7 +44,24 @@ public class StopAgent extends TransactionLogicData {
     private transient byte[] address;
 
     private NulsDigestData registerTxHash;
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(this.registerTxHash);
 
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.registerTxHash = byteBuffer.readHash();
+    }
+
+    @Override
+    public int size() {
+        return this.registerTxHash.size();
+    }
     @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();

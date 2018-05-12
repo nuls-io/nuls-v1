@@ -25,9 +25,11 @@
  */
 package io.nuls.consensus.poc.protocol.entity;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -70,32 +72,35 @@ public class Agent extends TransactionLogicData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfVarInt(deposit.getValue());
+        size += this.agentAddress.length;
+        size += this.rewardAddress.length;
         size += this.packingAddress.length;
         size += SerializeUtils.sizeOfDouble(this.commissionRate);
-        size += this.introduction.length;
+        size += SerializeUtils.sizeOfBytes(this.introduction);
         size += SerializeUtils.sizeOfBytes(agentName);
-        size += SerializeUtils.sizeOfInt48();
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(deposit.getValue());
-        stream.writeString(packingAddress);
+        stream.write(agentAddress);
+        stream.write(packingAddress);
+        stream.write(rewardAddress);
         stream.writeDouble(this.commissionRate);
-        stream.writeString(this.introduction);
-        stream.writeString(agentName);
-        stream.writeInt48(startTime);
+        stream.writeBytesWithLength(this.introduction);
+        stream.writeBytesWithLength(agentName);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readVarInt());
-        this.packingAddress = byteBuffer.readString();
+        this.agentAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.rewardAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.packingAddress =  byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.commissionRate = byteBuffer.readDouble();
-        this.introduction = byteBuffer.readString();
-        this.agentName = byteBuffer.readString();
-        this.startTime = byteBuffer.readInt48();
+        this.introduction = byteBuffer.readByLengthByte();
+        this.agentName = byteBuffer.readByLengthByte();
     }
     public Na getDeposit() {
         return deposit;

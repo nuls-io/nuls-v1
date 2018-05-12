@@ -25,12 +25,18 @@
  */
 package io.nuls.consensus.poc.protocol.entity;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.VarInt;
 import io.protostuff.Tag;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -52,6 +58,33 @@ public class Deposit extends TransactionLogicData {
     private transient NulsDigestData txHash;
     private transient long blockHeight = -1L;
     private transient long delHeight = -1L;
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(deposit.getValue());
+        stream.write(address);
+        stream.writeNulsData(agentHash);
+
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.deposit = Na.valueOf(byteBuffer.readVarInt());
+        this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.agentHash = byteBuffer.readHash();
+    }
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += VarInt.sizeOf(deposit.getValue());
+        size += AddressTool.HASH_LENGTH;
+        size += this.agentHash.size();
+        return size;
+    }
 
     public Na getDeposit() {
         return deposit;
@@ -123,4 +156,6 @@ public class Deposit extends TransactionLogicData {
         addressSet.add(this.address);
         return addressSet;
     }
+
+
 }
