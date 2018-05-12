@@ -113,7 +113,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         scriptSig = byteBuffer.readByLengthByte();
     }
 
-    protected abstract T parseTxData(NulsByteBuffer byteBuffer);
+    protected abstract T parseTxData(NulsByteBuffer byteBuffer) throws NulsException;
 
     public Transaction(int type) {
         this.time = TimeService.currentTimeMillis();

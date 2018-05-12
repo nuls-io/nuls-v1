@@ -30,6 +30,7 @@ import io.nuls.consensus.poc.protocol.entity.StopAgent;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.NulsByteBuffer;
 
 /**
  * @author Niels
@@ -45,4 +46,8 @@ public class StopAgentTransaction extends Transaction<StopAgent> {
         super(ConsensusConstant.TX_TYPE_STOP_AGENT);
     }
 
+    @Override
+    protected StopAgent parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new StopAgent());
+    }
 }

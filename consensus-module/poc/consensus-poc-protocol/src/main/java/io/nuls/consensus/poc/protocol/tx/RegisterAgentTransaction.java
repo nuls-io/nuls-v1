@@ -28,8 +28,12 @@ package io.nuls.consensus.poc.protocol.tx;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.NulsByteBuffer;
+
+import java.io.IOException;
 
 /**
  * @author Niels
@@ -39,23 +43,16 @@ public class RegisterAgentTransaction extends Transaction<Agent> {
 
     public RegisterAgentTransaction() {
         super(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
-        this.initValidator();
-    }
-
-    public RegisterAgentTransaction(CoinData coinData) throws NulsException {
-        super(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
-        this.initValidator();
-        this.setCoinData(coinData);
-    }
-
-    private void initValidator() {
-
     }
 
     @Override
     public RegisterAgentTransaction clone() {
         RegisterAgentTransaction tx = new RegisterAgentTransaction();
-        tx.parse(serialize());
+        try {
+            tx.parse(serialize());
+        } catch (Exception e) {
+            throw new NulsRuntimeException(e);
+        }
         tx.setBlockHeight(blockHeight);
         tx.setIndex(index);
         tx.setStatus(status);
@@ -74,5 +71,10 @@ public class RegisterAgentTransaction extends Transaction<Agent> {
         agent.setCreditVal(txData.getCreditVal());
 
         return tx;
+    }
+
+    @Override
+    protected Agent parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new Agent());
     }
 }
