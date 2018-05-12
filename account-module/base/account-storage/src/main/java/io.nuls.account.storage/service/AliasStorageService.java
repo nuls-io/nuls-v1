@@ -9,10 +9,10 @@ import io.nuls.kernel.model.Result;
  */
 public interface AliasStorageService {
 
-    Result<AliasPo> getAlias(byte[] address);
+    Result<AliasPo> getAlias(String alias);
 
     Result saveAlias(AliasPo aliasPo);
 
-    Result removeAlias(byte[] address);
+    Result removeAlias(String alias);
 
 }

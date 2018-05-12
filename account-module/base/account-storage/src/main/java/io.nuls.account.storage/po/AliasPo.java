@@ -37,8 +37,8 @@ public class AliasPo extends BaseNulsData {
 
     }
 
-    public Alias toAlias(AliasPo aliasPo){
-        return new Alias(aliasPo.address, aliasPo.getAlias().trim(), aliasPo.getStatus());
+    public Alias toAlias(){
+        return new Alias(this.address, this.getAlias().trim(), this.getStatus());
     }
 
     public String getAlias() {

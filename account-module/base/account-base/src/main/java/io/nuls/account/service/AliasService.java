@@ -5,7 +5,10 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Alias;
+import io.nuls.account.storage.po.AccountPo;
+import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AccountStorageService;
+import io.nuls.account.storage.service.AliasStorageService;
 import io.nuls.account.tx.AliasTransaction;
 import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.core.tools.log.Log;
@@ -14,7 +17,6 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
-import io.nuls.kernel.validate.ValidateResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +29,22 @@ import java.util.List;
  * @date: 2018/5/11
  */
 @Service
-public class AccountBaseService {
+public class AliasService {
 
     @Autowired
     public AccountService accountService;
 
     @Autowired
+    public AccountStorageService accountStorageService;
+
+    @Autowired
     private AccountLedgerService accountLedgerService;
+
+    @Autowired
+    private AliasStorageService aliasStorageService;
+
+    @Autowired
+    private AccountCacheService AccountCacheService;
 
     /**
      * 设置别名
@@ -60,6 +71,8 @@ public class AccountBaseService {
         }
         byte[] addressBytes = address.getBase58Bytes();
         try {
+
+
 
             //手续费 fee ////////暂时!!!!
             Na fee = Na.parseNuls(0.01);
@@ -115,23 +128,25 @@ public class AccountBaseService {
         return null;
     }
 
-
-    /*public Result<Alias> getAlias(Account account){
-        return this.getAlias(account.getAddress());
+    public Alias getAlias(String alias){
+        AliasPo aliasPo = aliasStorageService.getAlias(alias).getData();
+        return aliasPo == null ? null : aliasPo.toAlias();
     }
 
-    public Result<Alias> getAlias(Address address){
-        return getAlias(address.getBase58Bytes());
+    public boolean isAliasExist(String alias){
+        return null != getAlias(alias);
     }
-    public Result<Alias> getAlias(String address){
-        return getAlias(new Address(address));
-    }*/
-  /*  public Result<Alias> getAlias(byte[] address){
-        Account account = accountService.getAccount(address).getData();
-        if(null == account){
-            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+
+    public void rollbackAlias(AliasPo aliasPo) {
+        AliasPo po = aliasStorageService.getAlias(aliasPo.getAlias()).getData();
+        if (po != null && po.getAddress().equals(aliasPo.getAddress())) {
+            aliasStorageService.removeAlias(aliasPo.getAlias());
+            AccountPo accountPo = accountStorageService.getAccount(aliasPo.getAddress()).getData();
+            accountPo.setAlias("");
+            accountStorageService.updateAccount(accountPo);
+            AccountCacheService.putAccount(accountPo.toAccount());
         }
-        return Result.getSuccess().setData()
-    }*/
+    }
+
 
 }
