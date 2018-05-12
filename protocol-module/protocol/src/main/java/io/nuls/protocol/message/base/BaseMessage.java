@@ -40,11 +40,10 @@ import java.io.IOException;
  * @date 2017/11/7
  */
 public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
+
     private transient NulsDigestData hash;
 
-
-    private transient MessageHeader header;
-
+    private MessageHeader header;
 
     private T msgBody;
 
@@ -65,8 +64,8 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        // todo auto-generated method stub
-
+        stream.write(header.serialize());
+        stream.write(msgBody.serialize());
     }
 
     @Override
@@ -77,12 +76,14 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
         this.msgBody = parseMessageBody(byteBuffer);
     }
 
-    protected abstract T parseMessageBody(NulsByteBuffer byteBuffer);
+    protected abstract T parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException;
 
     @Override
     public int size() {
-        // todo auto-generated method stub
-        return 0;
+        int s = 0;
+        s += header.size();
+        s += msgBody.size();
+        return s;
     }
 
     /**
