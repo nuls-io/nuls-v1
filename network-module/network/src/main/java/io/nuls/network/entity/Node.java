@@ -88,7 +88,7 @@ public class Node extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write(new VarInt(magicNumber).encode());
-        stream.write(new VarInt(getSeverPort()).encode());
+        stream.write(new VarInt(severPort).encode());
         stream.writeString(ip);
     }
 
@@ -208,18 +208,6 @@ public class Node extends BaseNulsData {
         sb.append("id:" + getId() + ",");
         sb.append("type:" + type + ",");
         sb.append("status:" + status + "}");
-
-//        sb.append("{");
-//        sb.append("ip: '" + getIp() + "',");
-//        sb.append("port: " + getPort() + ",");
-//        sb.append("id:" + getId() + ",");
-//        sb.append("type:" + type + ",");
-//        sb.append("status:" + status + "}");
-//        if (lastTime == null) {
-//            lastTime = System.currentTimeMillis();
-//        }
-//        sb.append("lastTime: " + DateUtil.convertDate(new Date(lastTime)) + ",");
-//        sb.append("magicNumber: " + magicNumber + "}");
         return sb.toString();
     }
 

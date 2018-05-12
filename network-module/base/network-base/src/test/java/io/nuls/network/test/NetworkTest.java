@@ -18,6 +18,7 @@ public class NetworkTest {
 
             HandshakeMessage handshakeMessage1 = new HandshakeMessage();
             handshakeMessage1.parse(handshakeMessage.serialize());
+            System.out.println("-------");
         }catch (Exception e) {
             e.printStackTrace();
         }

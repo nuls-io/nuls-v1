@@ -63,7 +63,7 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
             }
             byte[] bytes = bos.toByteArray();
             if (bytes.length != this.size()) {
-                throw new NulsRuntimeException(KernelErrorCode.FAILED, "date serialize error：" + this.getClass());
+                throw new NulsRuntimeException(KernelErrorCode.FAILED, "data serialize error：" + this.getClass());
             }
             return bytes;
         } finally {
