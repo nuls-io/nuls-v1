@@ -49,7 +49,6 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
     private void initOther() {
         MagicNumberFilter.getInstance().addMagicNum(NetworkParam.getInstance().getPacketMagic());
         MessageFilterChain.getInstance().addFilter(MagicNumberFilter.getInstance());
-        MessageManager.putMessage(BaseNetworkMessage.class);
         MessageManager.putMessage(HandshakeMessage.class);
         MessageManager.putMessage(GetVersionMessage.class);
         MessageManager.putMessage(VersionMessage.class);

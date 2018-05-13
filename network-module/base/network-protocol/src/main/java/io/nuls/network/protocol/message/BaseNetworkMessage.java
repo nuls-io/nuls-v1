@@ -7,9 +7,6 @@ import io.nuls.protocol.model.basic.NulsBytesData;
 
 public abstract class BaseNetworkMessage<T extends BaseNulsData> extends BaseMessage<T> {
 
-    public BaseNetworkMessage() {
-
-    }
     /**
      * 初始化基础消息的消息头
      * @param eventType
