@@ -220,7 +220,6 @@ public class SpringLiteContext {
         if (anns == null || anns.length == 0) {
             return;
         }
-        System.out.println("check :"+clazz);
         Annotation ann = getFromArray(anns, Service.class);
         String beanName = null;
         boolean aopProxy = false;

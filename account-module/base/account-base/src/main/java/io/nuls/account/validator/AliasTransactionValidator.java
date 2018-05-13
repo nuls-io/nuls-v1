@@ -21,8 +21,6 @@ import io.nuls.kernel.validate.ValidateResult;
 @Component
 public class AliasTransactionValidator implements NulsDataValidator<AliasTransaction> {
 
-    private static final AliasTransactionValidator INSTANCE = new AliasTransactionValidator();
-
     @Autowired
     private AliasService accountBaseService;
 
@@ -31,14 +29,6 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
 
     @Autowired
     private AccountLedgerService accountledgerService;
-
-    private AliasTransactionValidator() {
-
-    }
-
-    public static AliasTransactionValidator getInstance() {
-        return INSTANCE;
-    }
 
     @Override
     public ValidateResult validate(AliasTransaction tx) {

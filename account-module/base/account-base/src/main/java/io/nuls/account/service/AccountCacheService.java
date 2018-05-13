@@ -15,7 +15,6 @@ import java.util.List;
  * @author: Charlie
  * @date: 2018/5/9
  */
-@Component
 public class AccountCacheService {
 
     private static final AccountCacheService INSTANCE = new AccountCacheService();

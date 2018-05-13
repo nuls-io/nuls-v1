@@ -57,7 +57,7 @@ public class ModuleRunner implements Runnable {
             module.start();
             module.setStatus(ModuleStatusEnum.RUNNING);
         } catch (ClassNotFoundException e) {
-            module.setStatus(ModuleStatusEnum.EXCEPTION);
+//            module.setStatus(ModuleStatusEnum.EXCEPTION);
             Log.error(e);
             throw new RuntimeException( e);
         } catch (IllegalAccessException e) {

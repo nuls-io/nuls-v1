@@ -29,7 +29,7 @@ package io.nuls.account.module;
  * @author: Niels Wang
  * @date: 2018/5/13
  */
-public class AccountModuleBootstrap extends AbstractAccountModule {
+public class AccountModuleBootstrap extends AbstractAccountModuleBootstrap {
     /**
      *
      */
@@ -72,6 +72,6 @@ public class AccountModuleBootstrap extends AbstractAccountModule {
     @Override
     public String getInfo() {
         // todo auto-generated method stub
-        return null;
+        return "";
     }
 }

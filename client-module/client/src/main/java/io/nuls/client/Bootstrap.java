@@ -98,7 +98,13 @@ public class Bootstrap {
             return map;
         }
         for (String moduleName : moduleNameList) {
-            String className = NulsConfig.MODULES_CONFIG.getCfgValue(moduleName, NulsConstant.MODULE_BOOTSTRAP_KEY);
+
+            String className = null;
+            try {
+                className = NulsConfig.MODULES_CONFIG.getCfgValue(moduleName, NulsConstant.MODULE_BOOTSTRAP_KEY);
+            } catch (Exception e) {
+                continue;
+            }
             map.put(moduleName, className);
         }
         return map;
