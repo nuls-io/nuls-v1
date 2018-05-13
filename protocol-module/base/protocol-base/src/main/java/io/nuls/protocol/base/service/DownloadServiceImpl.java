@@ -40,12 +40,13 @@ import io.nuls.protocol.service.DownloadService;
 import java.util.List;
 
 /**
- * Created by ln on 2018/4/8.
+ * @author ln
+ * @date 2018/4/8
  */
 @Service
 public class DownloadServiceImpl implements DownloadService {
 
-    private DownloadProcessor processor = DownloadProcessor.getInstance();
+    private DownloadProcessor processor;
 
     /**
      * 从指定节点处根据hash下载一个区块，下载过程中线程是阻塞的
@@ -104,6 +105,7 @@ public class DownloadServiceImpl implements DownloadService {
     }
 
     public boolean start() {
+        processor = DownloadProcessor.getInstance();
         return processor.startup();
     }
 

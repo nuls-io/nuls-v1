@@ -37,6 +37,7 @@ import io.nuls.consensus.service.ConsensusService;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
@@ -46,15 +47,18 @@ import io.nuls.protocol.service.BlockService;
 import java.util.List;
 
 /**
- * Created by ln on 2018/5/5.
+ * @author ln
+ * @date 2018/5/5
  */
 @Service
 public class ConsensusPocServiceImpl implements ConsensusService {
 
     private TxMemoryPool txMemoryPool = TxMemoryPool.getInstance();
-    private BlockQueueProvider blockQueueProvider = BlockQueueProvider.getInstance();
+    @Autowired
+    private BlockQueueProvider blockQueueProvider;
 
-    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    @Autowired
+    private BlockService blockService;
 
     @Override
     public Result newTx(Transaction<? extends BaseNulsData> tx) {
@@ -63,9 +67,9 @@ public class ConsensusPocServiceImpl implements ConsensusService {
         // 验证交易，验证通过则放入交易内存池中，如果验证到是孤立交易，则放入孤立交易池里，其它失败情况则直接丢弃交易
         ValidateResult verifyResult = tx.verify();
         boolean success = false;
-        if(verifyResult.isSuccess()) {
+        if (verifyResult.isSuccess()) {
             success = txMemoryPool.add(tx, false);
-        } else if(verifyResult.isFailed() && TransactionErrorCode.ORPHAN_TX == verifyResult.getErrorCode()) {
+        } else if (verifyResult.isFailed() && TransactionErrorCode.ORPHAN_TX == verifyResult.getErrorCode()) {
             success = txMemoryPool.add(tx, true);
         }
         return new Result(success, null);
@@ -100,9 +104,9 @@ public class ConsensusPocServiceImpl implements ConsensusService {
         } finally {
             Lockers.CHAIN_LOCK.unlock();
         }
-        if(success) {
+        if (success) {
             success = blockService.rollbackBlock(block).isSuccess();
-            if(!success) {
+            if (!success) {
                 PocConsensusContext.getChainManager().getMasterChain().addBlock(block);
             }
         }
