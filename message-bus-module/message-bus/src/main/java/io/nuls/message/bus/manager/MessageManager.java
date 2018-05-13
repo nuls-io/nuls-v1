@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.message.bus.message.manager;
+package io.nuls.message.bus.manager;
 
 import io.nuls.protocol.message.base.BaseMessage;
 
