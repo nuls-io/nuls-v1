@@ -508,20 +508,23 @@ public class LevelDBManager {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         try {
-            if (SCHEMA_MAP.get(ModelWrapper.class) == null) {
-                RuntimeSchema schema = RuntimeSchema.createFrom(ModelWrapper.class);
-                SCHEMA_MAP.put(ModelWrapper.class, schema);
-            }
-            RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
-            ModelWrapper modelWrapper = new ModelWrapper(value);
-            byte[] bytes = ProtostuffIOUtil.toByteArray(modelWrapper, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
-            DB db = AREAS.get(area);
-            db.put(key, bytes);
-            return Result.getSuccess();
+            byte[] bytes = getModelSerialize(value);
+            return put(area, key, bytes);
         } catch (Exception e) {
             Log.error(e);
             return Result.getFailed(e.getMessage());
         }
+    }
+
+    public static <T> byte[] getModelSerialize(T value) {
+        if (SCHEMA_MAP.get(ModelWrapper.class) == null) {
+            RuntimeSchema schema = RuntimeSchema.createFrom(ModelWrapper.class);
+            SCHEMA_MAP.put(ModelWrapper.class, schema);
+        }
+        RuntimeSchema schema = SCHEMA_MAP.get(ModelWrapper.class);
+        ModelWrapper modelWrapper = new ModelWrapper(value);
+        byte[] bytes = ProtostuffIOUtil.toByteArray(modelWrapper, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
+        return bytes;
     }
 
     /**
