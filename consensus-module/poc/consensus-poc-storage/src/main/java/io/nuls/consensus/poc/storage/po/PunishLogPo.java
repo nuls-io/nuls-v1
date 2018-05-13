@@ -26,17 +26,60 @@
 
 package io.nuls.consensus.poc.storage.po;
 
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
+
+import java.io.IOException;
+
 /**
  * @author Niels
  * @date 2018/3/22
  */
-public class PunishLogPo {
+public class PunishLogPo extends BaseNulsData {
     private String id;
-    private int type;
+    private byte type;
     private byte[] address;
     private long time;
     private long height;
     private long roundIndex;
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeString(id);
+        stream.write(type);
+        stream.write(address);
+        stream.writeInt48(time);
+        stream.writeVarInt(height);
+        stream.writeVarInt(roundIndex);
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.id = byteBuffer.readString();
+        this.type = byteBuffer.readByte();
+        this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.time = byteBuffer.readInt48();
+        this.height = byteBuffer.readVarInt();
+        this.roundIndex = byteBuffer.readVarInt();
+    }
+
+    @Override
+    public int size() {
+        int size = SerializeUtils.sizeOfString(id);
+        size += 1;
+        size += AddressTool.HASH_LENGTH;
+        size += SerializeUtils.sizeOfInt48();
+        size += SerializeUtils.sizeOfVarInt(height);
+        size += SerializeUtils.sizeOfVarInt(roundIndex);
+        return size;
+    }
 
     public long getRoundIndex() {
         return roundIndex;
@@ -58,7 +101,7 @@ public class PunishLogPo {
         return type;
     }
 
-    public void setType(int type) {
+    public void setType(byte type) {
         this.type = type;
     }
 

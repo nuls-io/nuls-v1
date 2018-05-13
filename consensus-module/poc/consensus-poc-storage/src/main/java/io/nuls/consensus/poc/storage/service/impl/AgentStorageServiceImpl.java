@@ -32,6 +32,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
@@ -65,7 +66,13 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
         } catch (IOException e) {
             Log.error(e);
         }
-        Result result = dbService.put(DB_NAME, hash, agentPo.serialize());
+        Result result = null;
+        try {
+            result = dbService.put(DB_NAME, hash, agentPo.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return false;
+        }
         return result.isSuccess();
     }
 
@@ -84,7 +91,12 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
             return null;
         }
         AgentPo agentPo = new AgentPo();
-        agentPo.parse(body);
+        try {
+            agentPo.parse(body);
+        } catch (NulsException e) {
+            Log.error(e);
+            throw  new NulsRuntimeException(e);
+        }
         agentPo.setHash(hash);
         return agentPo;
     }
@@ -112,7 +124,12 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
         }
         for (Entry<byte[], byte[]> entry : list) {
             AgentPo agentPo = new AgentPo();
-            agentPo.parse(entry.getValue());
+            try {
+                agentPo.parse(entry.getValue());
+            } catch (NulsException e) {
+                Log.error(e);
+                throw  new NulsRuntimeException(e);
+            }
             NulsDigestData hash = new NulsDigestData();
             try {
                 hash.parse(entry.getKey());

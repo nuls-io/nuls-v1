@@ -29,10 +29,15 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
+import io.nuls.network.protocol.message.GetNodesMessage;
 import io.nuls.network.protocol.message.GetVersionMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.network.protocol.message.NodeMessageBody;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author vivi
@@ -68,17 +73,18 @@ public class NodeDiscoverHandler implements Runnable {
      * @param size
      */
     public void findOtherNode(int size) {
-        System.out.println("---------- findOtherNode --------");
-        // GetNodeEvent event = new GetNodeEvent(size);
-//        List<Node> nodeList = new ArrayList<>(nodesManager.getAvailableNodes());
-//        Collections.shuffle(nodeList);
-//        for (int i = 0; i < nodeList.size(); i++) {
-//            if (i == 2) {
-//                break;
-//            }
-//            Node node = nodeList.get(i);
-//            broadcastHandler.broadcastToNode(null, node, true);
-//        }
+        NodeMessageBody messageBody = new NodeMessageBody();
+        messageBody.setLength(size);
+        GetNodesMessage message = new GetNodesMessage(messageBody);
+        List<Node> nodeList = new ArrayList<>(nodesManager.getAvailableNodes());
+        Collections.shuffle(nodeList);
+        for (int i = 0; i < nodeList.size(); i++) {
+            if (i == 2) {
+                break;
+            }
+            Node node = nodeList.get(i);
+            broadcastHandler.broadcastToNode(message, node, true);
+        }
     }
 
     @Override
@@ -87,7 +93,7 @@ public class NodeDiscoverHandler implements Runnable {
 
         while (running) {
             try {
-                Thread.sleep(5000);
+                Thread.sleep(10000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -98,9 +104,7 @@ public class NodeDiscoverHandler implements Runnable {
             GetVersionMessage getVersionMessage = new GetVersionMessage(body);
             for (Node node : nodeList) {
                 if (node.getType() == Node.OUT) {
-                    System.out.println("--------------------discont------node:" + node.toString());
-                    BroadcastResult result = broadcastHandler.broadcastToNode(getVersionMessage, node, true);
-                    System.out.println("---------------send getVersionMessage --------" + result.isSuccess());
+                    broadcastHandler.broadcastToNode(getVersionMessage, node, true);
                 }
             }
         }
