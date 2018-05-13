@@ -161,6 +161,7 @@ public class ConnectionManager {
                     NetworkEventResult messageResult = handler.process(message, node);
                     processMessageResult(messageResult, node);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     Log.error(e);
                 }
             }
@@ -176,17 +177,17 @@ public class ConnectionManager {
         });
     }
 
-    public void processMessageResult(NetworkEventResult eventResult, Node node) throws IOException {
+    public void processMessageResult(NetworkEventResult messageResult, Node node) throws IOException {
         if (node.getStatus() == Node.CLOSE) {
             return;
         }
-        if (eventResult == null || !eventResult.isSuccess()) {
+        if (messageResult == null || !messageResult.isSuccess()) {
             return;
         }
-        if (eventResult.getReplyMessage() != null) {
+        if (messageResult.getReplyMessage() != null) {
             System.out.println("---------------processMessageResult send replyMessage----------------" + node.getId());
 
-            broadcastHandler.broadcastToNode((BaseMessage) eventResult.getReplyMessage(), node, true);
+            broadcastHandler.broadcastToNode((BaseMessage) messageResult.getReplyMessage(), node, true);
         }
     }
 

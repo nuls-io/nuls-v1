@@ -14,6 +14,8 @@ import io.nuls.account.tx.AliasTransaction;
 import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
@@ -51,6 +53,7 @@ public class AliasService {
 
     @Autowired
     private MessageBusService messageBusService;
+
     /**
      * 设置别名
      * Set an alias for the account.
@@ -70,7 +73,7 @@ public class AliasService {
             Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         if (StringUtils.isNotBlank(account.getAlias())) {
-            return new Result(false, "Alias has been set up");
+            return new Result(false, AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS, "Alias has been set up");
         }
         if (!StringUtils.validAlias(aliasName)) {
             return new Result(false, "The alias is between 3 to 20 characters");
@@ -116,25 +119,38 @@ public class AliasService {
             NulsSignData nulsSignData = accountService.signData(tx.serializeForHash(), account, password);
             P2PKHScriptSig scriptSig = new P2PKHScriptSig(nulsSignData, account.getPubKey());
             tx.setScriptSig(scriptSig.serialize());
-/*            ValidateResult validate = AliasTransactionValidator.getInstance().validate(tx);
-            ValidateResult validate = this.ledgerService.verifyTx(aliasTx,this.ledgerService.getWaitingTxList());
-            if (validate.isFailed()) {
-                return new Result(false, validate.getMessage());
-            }*/
             TransactionMessage message = new TransactionMessage();
             message.setMsgBody(tx);
-//            this.ledgerService.saveLocalTx(aliasTx);
-//            boolean b  = messageBusService.publishToLocal(event);
-//            if(b){
-//                return Result.getSuccess();
-//            }else{
-//                return Result.getFailed("publish failed!");
-//            }
+            messageBusService.receiveMessage(message, null);
+            return Result.getSuccess();
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());
         }
-        return null;
+    }
+
+    /**
+     * 保存别名
+     * 1.保存别名alias至数据库
+     * 2.从数据库取出对应的account账户,将别名设置进account然后保存至数据库
+     * 3.将修改后的account重新进行缓存
+     * @param aliaspo
+     * @return
+     */
+    public Result saveAlias(AliasPo aliaspo) {
+        try {
+            aliasStorageService.saveAlias(aliaspo);
+            AccountPo po = accountStorageService.getAccount(aliaspo.getAddress()).getData();
+            if(null == po){
+                return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            po.setAlias(aliaspo.getAlias());
+            accountStorageService.updateAccount(po);
+            AccountCacheService.putAccount(po.toAccount());
+        } catch (Exception e) {
+            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+        }
+        return Result.getSuccess();
     }
 
     public Alias getAlias(String alias) {
@@ -146,15 +162,28 @@ public class AliasService {
         return null != getAlias(alias);
     }
 
-    public void rollbackAlias(AliasPo aliasPo) {
-        AliasPo po = aliasStorageService.getAlias(aliasPo.getAlias()).getData();
-        if (po != null && po.getAddress().equals(aliasPo.getAddress())) {
-            aliasStorageService.removeAlias(aliasPo.getAlias());
-            AccountPo accountPo = accountStorageService.getAccount(aliasPo.getAddress()).getData();
-            accountPo.setAlias("");
-            accountStorageService.updateAccount(accountPo);
-            AccountCacheService.putAccount(accountPo.toAccount());
+    /**
+     * 回滚别名操作(删除别名)
+     * 1.从数据库删除别名对象数据
+     * 2.取出对应的account将别名清除,重新存入数据库
+     * 3.重新缓存account
+     * @param aliasPo
+     * @return
+     */
+    public Result rollbackAlias(AliasPo aliasPo) {
+        try {
+            AliasPo po = aliasStorageService.getAlias(aliasPo.getAlias()).getData();
+            if (po != null && po.getAddress().equals(aliasPo.getAddress())) {
+                aliasStorageService.removeAlias(aliasPo.getAlias());
+                AccountPo accountPo = accountStorageService.getAccount(aliasPo.getAddress()).getData();
+                accountPo.setAlias("");
+                accountStorageService.updateAccount(accountPo);
+                AccountCacheService.putAccount(accountPo.toAccount());
+            }
+        } catch (Exception e) {
+            throw new NulsRuntimeException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
         }
+        return Result.getSuccess();
     }
 
 
