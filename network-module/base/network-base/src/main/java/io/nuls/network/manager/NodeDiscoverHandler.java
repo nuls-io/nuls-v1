@@ -27,6 +27,7 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.protocol.message.GetVersionMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
@@ -86,7 +87,7 @@ public class NodeDiscoverHandler implements Runnable {
 
         while (running) {
             try {
-                Thread.sleep(10000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -97,7 +98,9 @@ public class NodeDiscoverHandler implements Runnable {
             GetVersionMessage getVersionMessage = new GetVersionMessage(body);
             for (Node node : nodeList) {
                 if (node.getType() == Node.OUT) {
-                    broadcastHandler.broadcastToNode(getVersionMessage, node, true);
+
+                    BroadcastResult result = broadcastHandler.broadcastToNode(getVersionMessage, node, true);
+                    System.out.println("---------------send getVersionMessage --------" + result.isSuccess());
                 }
             }
         }
