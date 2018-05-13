@@ -94,8 +94,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         for (Coin to : tos) {
             toTotal = toTotal.add(to.getNa());
         }
-        if (!fromTotal.equals(toTotal)) {
-            return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_INPUT);
+        if (fromTotal.compareTo(toTotal) < 0) {
+            return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_AMOUNT);
         }
         return ValidateResult.getSuccessResult();
     }

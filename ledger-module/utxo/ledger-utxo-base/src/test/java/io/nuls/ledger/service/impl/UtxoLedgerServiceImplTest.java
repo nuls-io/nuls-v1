@@ -14,6 +14,7 @@ import io.nuls.kernel.utils.AddressTool;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.model.tx.TransferTransaction;
+import org.iq80.leveldb.util.Slice;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,37 +50,70 @@ public class UtxoLedgerServiceImplTest {
     @Test
     public void saveTx() {
         Transaction tx = allList.get(0);
-        System.out.println("tx: " + asString(tx.serialize()));
+        System.out.println("tx: " + new Slice(tx.serialize()));
         Result result = ledgerService.saveTx(tx);
         Assert.assertTrue(result.isSuccess());
         Transaction txFromDB = ledgerService.getTx(tx.getHash());
-        System.out.println("txFromDB: " + asString(txFromDB.serialize()));
-        Assert.assertEquals(asString(tx.serialize()), asString(txFromDB.serialize()));
+        System.out.println("txFromDB: " + new Slice(txFromDB.serialize()));
+        Assert.assertEquals(new Slice(tx.serialize()), new Slice(txFromDB.serialize()));
 
     }
 
     @Test
     public void rollbackTx() {
+        saveTx();
+        Transaction tx = allList.get(0);
+        System.out.println("tx: " + new Slice(tx.serialize()));
+        Result result = ledgerService.rollbackTx(tx);
+        Assert.assertTrue(result.isSuccess());
+        Transaction txFromDB = ledgerService.getTx(tx.getHash());
+        System.out.println("txFromDB: " + txFromDB);
+        Assert.assertNull(txFromDB);
     }
 
     @Test
     public void getTx() {
+        saveTx();
+        Transaction tx = allList.get(0);
+        System.out.println("tx: " + new Slice(tx.serialize()));
+        Transaction txFromDB = ledgerService.getTx(tx.getHash());
+        System.out.println("txFromDB: " + new Slice(txFromDB.serialize()));
+        Assert.assertEquals(new Slice(tx.serialize()), new Slice(txFromDB.serialize()));
     }
 
     @Test
     public void verifyCoinDataItself() {
+        for(Transaction tx : allList) {
+            if(tx.getCoinData() == null) {
+                continue;
+            }
+            if(tx.getCoinData().getFrom().size() == 0) {
+                continue;
+            }
+            System.out.println("tx: " + new Slice(tx.serialize()));
+            Result result = ledgerService.verifyCoinData(tx.getCoinData());
+            System.out.println(result.getErrorCode().getCode());
+            Assert.assertTrue(result.isSuccess());
+        }
+
     }
 
     @Test
     public void verifyCoinDataIsExist() {
+        Result result = ledgerService.verifyCoinData(allList.get(2).getCoinData(), allList);
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
     public void verifyDoubleSpend() {
+        Result result = ledgerService.verifyDoubleSpend(allList);
+        Assert.assertTrue(result.isSuccess());
     }
 
     @Test
     public void unlockTxCoinData() {
+        Result result = ledgerService.unlockTxCoinData(allList.get(1));
+        Assert.assertTrue(result.isSuccess());
     }
 
     private void initAllList() {
@@ -134,7 +168,7 @@ public class UtxoLedgerServiceImplTest {
         list.add(join6);
         list.add(join7);
 
-        createCancelDepositTransaction(ecKey1, NulsDigestData.fromDigestHex("txHash"));
+        //createCancelDepositTransaction(ecKey1, NulsDigestData.fromDigestHex("ab"));
 
         StopAgentTransaction stop1 = createStopAgentTransaction(ecKey1, tx1.getHash());
         StopAgentTransaction stop2 = createStopAgentTransaction(ecKey1, tx2.getHash());
