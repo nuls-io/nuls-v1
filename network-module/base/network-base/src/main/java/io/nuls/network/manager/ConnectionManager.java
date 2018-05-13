@@ -158,7 +158,7 @@ public class ConnectionManager {
             @Override
             public void run() {
                 try {
-                    NetworkEventResult messageResult = handler.process((BaseNetworkMessage) message, node);
+                    NetworkEventResult messageResult = handler.process(message, node);
                     processMessageResult(messageResult, node);
                 } catch (Exception e) {
                     Log.error(e);
@@ -184,6 +184,8 @@ public class ConnectionManager {
             return;
         }
         if (eventResult.getReplyMessage() != null) {
+            System.out.println("---------------processMessageResult send replyMessage----------------" + node.getId());
+
             broadcastHandler.broadcastToNode((BaseMessage) eventResult.getReplyMessage(), node, true);
         }
     }
@@ -200,7 +202,7 @@ public class ConnectionManager {
     }
 
     public MessageBusService getMessageBusService() {
-        if(messageBusService == null) {
+        if (messageBusService == null) {
             messageBusService = NulsContext.getServiceBean(MessageBusService.class);
         }
         return messageBusService;
