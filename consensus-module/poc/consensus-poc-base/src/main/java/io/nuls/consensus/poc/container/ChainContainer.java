@@ -37,7 +37,7 @@ import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
-import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
+import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.func.TimeService;
@@ -88,9 +88,9 @@ public class ChainContainer implements Cloneable {
             if (txType == ConsensusConstant.TX_TYPE_REGISTER_AGENT) {
                 // Registered agent transaction
                 // 注册代理交易
-                RegisterAgentTransaction registerAgentTx = (RegisterAgentTransaction) tx;
+                CreateAgentTransaction registerAgentTx = (CreateAgentTransaction) tx;
 
-                RegisterAgentTransaction agentTx = registerAgentTx.clone();
+                CreateAgentTransaction agentTx = registerAgentTx.clone();
                 Agent agent = agentTx.getTxData();
                 agent.setDelHeight(-1L);
                 agent.setBlockHeight(height);
@@ -129,7 +129,7 @@ public class ChainContainer implements Cloneable {
 
                 StopAgentTransaction stopAgentTx = (StopAgentTransaction) tx;
 
-                NulsDigestData agentHash = stopAgentTx.getTxData().getRegisterTxHash();
+                NulsDigestData agentHash = stopAgentTx.getTxData().getCreateTxHash();
 
                 Iterator<Deposit> it = depositList.iterator();
                 while (it.hasNext()) {

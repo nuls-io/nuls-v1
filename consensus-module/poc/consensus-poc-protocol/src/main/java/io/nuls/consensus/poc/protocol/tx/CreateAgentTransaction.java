@@ -29,25 +29,22 @@ import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
-import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.NulsByteBuffer;
-
-import java.io.IOException;
 
 /**
  * @author Niels
  * @date 2017/12/4
  */
-public class RegisterAgentTransaction extends Transaction<Agent> {
+public class CreateAgentTransaction extends Transaction<Agent> {
 
-    public RegisterAgentTransaction() {
+    public CreateAgentTransaction() {
         super(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
     }
 
     @Override
-    public RegisterAgentTransaction clone() {
-        RegisterAgentTransaction tx = new RegisterAgentTransaction();
+    public CreateAgentTransaction clone() {
+        CreateAgentTransaction tx = new CreateAgentTransaction();
         try {
             tx.parse(serialize());
         } catch (Exception e) {

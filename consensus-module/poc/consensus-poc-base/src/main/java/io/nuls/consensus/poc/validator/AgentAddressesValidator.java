@@ -27,9 +27,8 @@ package io.nuls.consensus.poc.validator;
 
 import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
-import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.Agent;
-import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
+import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.validate.NulsDataValidator;
@@ -42,21 +41,19 @@ import java.util.Arrays;
  * @date: 2018/5/13
  */
 @Component
-public class AgentAddressesValidator implements NulsDataValidator<RegisterAgentTransaction> {
+public class AgentAddressesValidator implements NulsDataValidator<CreateAgentTransaction> {
     /**
      * @param data
      * @return
      */
     @Override
-    public ValidateResult validate(RegisterAgentTransaction data) {
+    public ValidateResult validate(CreateAgentTransaction data) {
         Agent agent = data.getTxData();
         for (byte[] address : ConsensusConfig.getSeedNodeList()) {
             if (Arrays.equals(address, agent.getAgentAddress())) {
                 return ValidateResult.getFailedResult(this.getClass().getName(), "The agent address is a seed address");
             } else if (Arrays.equals(address, agent.getPackingAddress())) {
                 return ValidateResult.getFailedResult(this.getClass().getName(), "The packing address is a seed address");
-            } else if (Arrays.equals(address, agent.getRewardAddress())) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), "The reward address is a seed address");
             }
         }
         long count = 0;

@@ -37,11 +37,11 @@ import java.util.List;
 public interface ConflictDetectProcessor {
 
     /**
-     * 冲突检测，检测如果传入的交易列表中有相冲突的交易，则返回失败，写明失败原因及所有的应该舍弃的交易列表
+     * 冲突检测，检测如果传入的交易列表中有相冲突的交易，则返回失败，写明失败原因及所有的应该舍弃的交易
      * 本方法不检查双花冲突，双花由账本接口实现
      * <p>
      * Conflict detection, which detects conflicting transactions in the incoming transaction list, returns failure,
-     * indicating the cause of failure and all the list of trades that should be discarded.
+     * indicating the cause of failure and the transaction that should be discarded.
      * This method does not check the double flower conflict, the double flower is realized by the accounting interface.
      *
      * @param txList 需要检查的交易列表/A list of transactions to be checked.

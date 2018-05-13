@@ -31,7 +31,7 @@ import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.BaseChainTest;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
-import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
+import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
@@ -218,7 +218,7 @@ public class ChainContainerTest extends BaseChainTest {
         BlockHeader blockHeader = block.getHeader();
         List<Transaction> txs = block.getTxs();
                 
-        Transaction<Agent> agentTx = new RegisterAgentTransaction();
+        Transaction<Agent> agentTx = new CreateAgentTransaction();
         Agent agent = new Agent();
         agent.setPackingAddress(AddressTool.getAddress(ecKey.getPubKey()));
         agent.setAgentAddress(AddressTool.getAddress(ecKey.getPubKey()));

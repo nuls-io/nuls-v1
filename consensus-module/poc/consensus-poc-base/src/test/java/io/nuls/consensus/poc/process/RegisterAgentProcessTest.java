@@ -24,39 +24,90 @@
  *
  */
 
-package io.nuls.consensus.poc.protocol.validator;
+package io.nuls.consensus.poc.process;
 
-import io.nuls.consensus.poc.protocol.BaseTest;
+import io.nuls.consensus.poc.BaseTest;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
-import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
+import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.core.tools.crypto.ECKey;
+import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
 /**
  * Created by ln on 2018/5/10.
  */
-public class RegisterAgentTxValidatorTest extends BaseTest {
+public class RegisterAgentProcessTest extends BaseTest {
+
+    private CreateAgentTxProcessor registerAgentProcess;
+
+    private CreateAgentTransaction tx = newTx();
+
+    @Before
+    public void init() {
+        registerAgentProcess = NulsContext.getServiceBean(CreateAgentTxProcessor.class);
+    }
 
     @Test
-    public void test() {
-        RegisterAgentTransaction tx = new RegisterAgentTransaction();
+    public void testOnRollback() {
+        assertNotNull(tx);
+        assertNotNull(registerAgentProcess);
 
-        RegisterAgentTxValidator validator = new RegisterAgentTxValidator();
+        testOnCommit();
+        Result result = registerAgentProcess.onRollback(tx, null);
+        assert (result.isSuccess());
+    }
 
-        ValidateResult result = validator.validate(tx);
+    @Test
+    public void testOnCommit() {
+        assertNotNull(tx);
+        assertNotNull(registerAgentProcess);
+
+        Result result = registerAgentProcess.onCommit(tx, null);
+        assert (result.isSuccess());
+    }
+
+    @Test
+    public void testConflictDetect() {
+        assertNotNull(tx);
+        assertNotNull(registerAgentProcess);
+
+        List<Transaction> list = new ArrayList<>();
+
+        ValidateResult result = registerAgentProcess.conflictDetect(list);
+        assertTrue(result.isSuccess());
+
+        list.add(tx);
+
+        result = registerAgentProcess.conflictDetect(list);
+        assertTrue(result.isSuccess());
+
+        list.add(newTx());
+        result = registerAgentProcess.conflictDetect(list);
+        assertTrue(result.isSuccess());
+
+        list.add(tx);
+
+        result = registerAgentProcess.conflictDetect(list);
         assertFalse(result.isSuccess());
+    }
+
+    private CreateAgentTransaction newTx() {
+        CreateAgentTransaction tx = new CreateAgentTransaction();
 
         Agent agent = new Agent();
 
         tx.setTxData(agent);
-
-        result = validator.validate(tx);
-        assertFalse(result.isSuccess());
 
         byte[] address = AddressTool.getAddress(ecKey.getPubKey());
         byte[] address1 = AddressTool.getAddress(new ECKey().getPubKey());
@@ -64,16 +115,11 @@ public class RegisterAgentTxValidatorTest extends BaseTest {
         agent.setRewardAddress(address);
         agent.setPackingAddress(address1);
         agent.setAgentAddress(address2);
-
-        result = validator.validate(tx);
-        assertFalse(result.isSuccess());
-
         agent.setAgentName("test".getBytes());
         agent.setDeposit(PocConsensusProtocolConstant.AGENT_DEPOSIT_LOWER_LIMIT);
 
         tx.setTime(System.currentTimeMillis());
 
-        result = validator.validate(tx);
-        assertTrue(result.isSuccess());
+        return tx;
     }
 }

@@ -43,24 +43,24 @@ public class StopAgent extends TransactionLogicData {
 
     private transient byte[] address;
 
-    private NulsDigestData registerTxHash;
+    private NulsDigestData createTxHash;
     /**
      * serialize important field
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(this.registerTxHash);
+        stream.writeNulsData(this.createTxHash);
 
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.registerTxHash = byteBuffer.readHash();
+        this.createTxHash = byteBuffer.readHash();
     }
 
     @Override
     public int size() {
-        return this.registerTxHash.size();
+        return this.createTxHash.size();
     }
     @Override
     public Set<byte[]> getAddresses() {
@@ -77,11 +77,11 @@ public class StopAgent extends TransactionLogicData {
         this.address = address;
     }
 
-    public NulsDigestData getRegisterTxHash() {
-        return registerTxHash;
+    public NulsDigestData getCreateTxHash() {
+        return createTxHash;
     }
 
-    public void setRegisterTxHash(NulsDigestData registerTxHash) {
-        this.registerTxHash = registerTxHash;
+    public void setCreateTxHash(NulsDigestData createTxHash) {
+        this.createTxHash = createTxHash;
     }
 }

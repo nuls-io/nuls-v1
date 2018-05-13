@@ -34,7 +34,7 @@ import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
-import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
+import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -90,9 +90,9 @@ public class BaseChainTest extends BaseTest {
         chain.setEndBlockHeader(blockHeader);
 
         // init some agent
-        List< Agent>  agentList = new ArrayList<>();
+        List<Agent> agentList = new ArrayList<>();
 
-        Transaction<Agent> agentTx = new RegisterAgentTransaction();
+        Transaction<Agent> agentTx = new CreateAgentTransaction();
         Agent agent = new Agent();
         agent.setPackingAddress(AddressTool.getAddress(ecKey.getPubKey()));
         agent.setAgentAddress(AddressTool.getAddress(new ECKey().getPubKey()));
@@ -136,7 +136,7 @@ public class BaseChainTest extends BaseTest {
         depositTx.setTxData(deposit);
         depositTx.setBlockHeight(blockHeader.getHeight());
 
-        List< Deposit>  depositList = new ArrayList<>();
+        List<Deposit> depositList = new ArrayList<>();
 
         depositList.add(depositTx.getTxData());
 
@@ -158,7 +158,7 @@ public class BaseChainTest extends BaseTest {
         blockHeader.setPreHash(preBlock.getHeader().getHash());
         blockHeader.setTxCount(1);
 
-        MeetingRound round =  chainContainer.initRound();
+        MeetingRound round = chainContainer.initRound();
 
         BlockRoundData nextRoundData = new BlockRoundData();
         nextRoundData.setRoundIndex(round.getIndex() + 1);

@@ -45,7 +45,6 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.service.BlockService;
 
 import java.io.IOException;

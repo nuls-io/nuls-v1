@@ -26,6 +26,7 @@
 package io.nuls.kernel.utils;
 
 import io.nuls.core.tools.crypto.Base58;
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
@@ -43,6 +44,15 @@ public class AddressTool {
      *
      */
     public static final int HASH_LENGTH = 23;
+
+    public static byte[] getAddress(String base58Address) {
+        try {
+            return Base58.decode(base58Address);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
+    }
 
     public static byte[] getAddress(byte[] publicKey) {
         if (publicKey == null) {

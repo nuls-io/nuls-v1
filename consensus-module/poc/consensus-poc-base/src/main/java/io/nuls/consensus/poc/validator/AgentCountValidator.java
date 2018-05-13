@@ -23,10 +23,10 @@
  *
  */
 
-package io.nuls.consensus.poc.protocol.validator;
+package io.nuls.consensus.poc.validator;
 
 import io.nuls.consensus.poc.protocol.entity.Agent;
-import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
+import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.core.tools.crypto.Hex;
@@ -48,13 +48,13 @@ import java.util.Set;
  * @author Facjas
  */
 @Component
-public class AgentCountValidator implements NulsDataValidator<RegisterAgentTransaction> {
+public class AgentCountValidator implements NulsDataValidator<CreateAgentTransaction> {
 
     @Autowired
     private AgentStorageService agentStorageService;
 
     @Override
-    public ValidateResult validate(RegisterAgentTransaction tx) {
+    public ValidateResult validate(CreateAgentTransaction tx) {
         ValidateResult result = ValidateResult.getSuccessResult();
         Agent agent = tx.getTxData();
         byte[] agentName = agent.getAgentName();
@@ -67,7 +67,6 @@ public class AgentCountValidator implements NulsDataValidator<RegisterAgentTrans
                     return ValidateResult.getFailedResult(this.getClass().getName(), "agent tx repeated!");
                 }
                 set.add(Hex.encode(ca.getAgentAddress()));
-                set.add(Hex.encode(ca.getRewardAddress()));
                 set.add(Hex.encode(ca.getPackingAddress()));
                 try {
                     set.add(new String(ca.getAgentName(), NulsConfig.DEFAULT_ENCODING));
@@ -86,10 +85,6 @@ public class AgentCountValidator implements NulsDataValidator<RegisterAgentTrans
             boolean b = set.add(Hex.encode(agent.getAgentAddress()));
             if (!b) {
                 return ValidateResult.getFailedResult(this.getClass().getName(), "need change the agentAddress.");
-            }
-            b = set.add(Hex.encode(agent.getRewardAddress()));
-            if (!b) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), "need change the rewardAddress.");
             }
             b = set.add(Hex.encode(agent.getPackingAddress()));
             if (!b) {

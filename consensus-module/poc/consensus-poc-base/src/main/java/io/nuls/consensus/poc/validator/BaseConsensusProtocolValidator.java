@@ -23,26 +23,29 @@
  *
  */
 
-package io.nuls.consensus.poc.context;
+package io.nuls.consensus.poc.validator;
 
-import io.nuls.consensus.poc.constant.ConsensusStatus;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
+import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.model.CoinData;
+import io.nuls.kernel.model.Na;
+import io.nuls.kernel.model.NulsData;
+import io.nuls.kernel.validate.NulsDataValidator;
 
-/**
- * Created by ln on 2018/4/13.
- */
-public class ConsensusStatusContext {
+public abstract class BaseConsensusProtocolValidator<T extends NulsData> implements NulsDataValidator<T> {
 
-    private static ConsensusStatus consensusStatus;
-
-    public static ConsensusStatus getConsensusStatus() {
-        return consensusStatus;
+    protected final boolean isDepositOk(Na deposit, CoinData coinData) {
+        if(coinData == null || coinData.getTo().size() == 0) {
+            return false;
+        }
+        Coin coin = coinData.getTo().get(0);
+        if(!deposit.equals(coin.getNa())) {
+            return false;
+        }
+        if(coin.getLockTime() != PocConsensusProtocolConstant.LOCK_OF_LOCK_TIME) {
+            return false;
+        }
+        return true;
     }
 
-    public static void setConsensusStatus(ConsensusStatus consensusStatus) {
-        ConsensusStatusContext.consensusStatus = consensusStatus;
-    }
-
-    public static boolean isRunning() {
-        return consensusStatus == ConsensusStatus.RUNNING;
-    }
 }

@@ -142,10 +142,10 @@ public class UtxoLedgerServiceImplTest {
 //        createSetAliasTransaction(ecKey1, "alias1");
 //        createSetAliasTransaction(ecKey2, "alias");
 
-        RegisterAgentTransaction tx1 = createRegisterAgentTransaction(ecKey1, ecKey2, "agentName");
-        RegisterAgentTransaction tx2 = createRegisterAgentTransaction(ecKey2, ecKey3, "agentName");
-        RegisterAgentTransaction tx3 = createRegisterAgentTransaction(ecKey4, ecKey5, "agentName2");
-        RegisterAgentTransaction tx4 = createRegisterAgentTransaction(ecKey1, ecKey3, "agentName3");
+        CreateAgentTransaction tx1 = createRegisterAgentTransaction(ecKey1, ecKey2, "agentName");
+        CreateAgentTransaction tx2 = createRegisterAgentTransaction(ecKey2, ecKey3, "agentName");
+        CreateAgentTransaction tx3 = createRegisterAgentTransaction(ecKey4, ecKey5, "agentName2");
+        CreateAgentTransaction tx4 = createRegisterAgentTransaction(ecKey1, ecKey3, "agentName3");
         list.add(tx1);
         list.add(tx2);
         list.add(tx3);
@@ -220,7 +220,7 @@ public class UtxoLedgerServiceImplTest {
         setCommonFields(tx);
         StopAgent txData = new StopAgent();
         txData.setAddress(AddressTool.getAddress(ecKey.getPubKey()));
-        txData.setRegisterTxHash(agentTxHash);
+        txData.setCreateTxHash(agentTxHash);
         tx.setTxData(txData);
         signTransaction(tx, ecKey);
         return tx;
@@ -242,8 +242,8 @@ public class UtxoLedgerServiceImplTest {
         return tx;
     }
 
-    private RegisterAgentTransaction createRegisterAgentTransaction(ECKey ecKey1, ECKey ecKey2, String agentName) throws IOException {
-        RegisterAgentTransaction tx = new RegisterAgentTransaction();
+    private CreateAgentTransaction createRegisterAgentTransaction(ECKey ecKey1, ECKey ecKey2, String agentName) throws IOException {
+        CreateAgentTransaction tx = new CreateAgentTransaction();
         setCommonFields(tx);
         Agent agent = new Agent();
         agent.setBlockHeight(1);
