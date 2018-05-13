@@ -29,7 +29,7 @@ public class GetVersionMessageHandler implements BaseNetworkMeesageHandler {
 
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
-
+        System.out.println("---------------GetVersionMessageHandler process-----------------------");
         GetVersionMessage getVersionMessage = (GetVersionMessage) message;
 
         NetworkMessageBody body = getVersionMessage.getMsgBody();
