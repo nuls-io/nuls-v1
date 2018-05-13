@@ -64,8 +64,8 @@ public class CoinData extends BaseNulsData {
         }
         int toCount = to == null ? 0 : to.size();
         stream.writeVarInt(toCount);
-        if (null != from) {
-            for (Coin coin : from) {
+        if (null != to) {
+            for (Coin coin : to) {
                 stream.writeNulsData(coin);
             }
         }
