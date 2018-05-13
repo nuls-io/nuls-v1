@@ -43,6 +43,17 @@ public interface BatchOperation {
     Result put(byte[] key, byte[] value);
 
     /**
+     * 存储或者更新对象
+     * Add or update the object
+     *
+     * @param area
+     * @param key
+     * @param value 需要存储或者更新的对象/Objects that need to be added or updated.
+     * @return
+     */
+    <T> Result putModel(byte[] key, T value);
+
+    /**
      * 删除操作
      * Delete operation
      *
