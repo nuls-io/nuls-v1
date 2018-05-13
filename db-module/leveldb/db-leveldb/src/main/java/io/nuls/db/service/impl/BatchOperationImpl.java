@@ -80,10 +80,8 @@ public class BatchOperationImpl implements BatchOperation {
         if(key == null || value == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
-        //TODO pierre
         byte[] bytes = LevelDBManager.getModelSerialize(value);
-
-        return null;
+        return put(key, bytes);
     }
 
     /**
