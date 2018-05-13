@@ -23,7 +23,6 @@
  */
 package io.nuls.ledger.storage.service;
 
-import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -31,17 +30,15 @@ import io.nuls.kernel.model.Transaction;
 /**
  * @Desription:
  * @Author: PierreLuo
- * @Date: 2018/5/8
+ * @Date: 2018/5/13
  */
-public interface UtxoLedgerStorageService {
+public interface UtxoLedgerTransactionStorageService {
 
     Result saveTx(Transaction tx);
 
     Transaction getTx(NulsDigestData hash);
 
     Result deleteTx(Transaction tx);
-
-    byte[] getCoinBytes(byte[] owner);
 
     byte[] getTxBytes(byte[] txBytes);
 }
