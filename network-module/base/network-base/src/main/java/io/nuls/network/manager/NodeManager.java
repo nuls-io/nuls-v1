@@ -138,6 +138,7 @@ public class NodeManager implements Runnable {
                     }
                 }
                 outNodeIdSet.add(node.getId());
+                node.setType(Node.OUT);
                 connectionManager.connectionNode(node);
                 return true;
             }
