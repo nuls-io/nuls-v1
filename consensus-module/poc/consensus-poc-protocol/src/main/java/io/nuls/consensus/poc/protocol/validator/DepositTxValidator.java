@@ -26,19 +26,25 @@
 package io.nuls.consensus.poc.protocol.validator;
 
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.storage.po.AgentPo;
+import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
+import io.nuls.consensus.poc.storage.service.DepositStorageService;
 import io.nuls.consensus.poc.storage.service.PunishLogStorageService;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
+
+import java.util.List;
 
 /**
  * @author ln
@@ -52,6 +58,9 @@ public class DepositTxValidator implements NulsDataValidator<DepositTransaction>
 
     @Autowired
     private AgentStorageService agentStorageService;
+
+    @Autowired
+    private DepositStorageService depositStorageService;
 
     @Override
     public ValidateResult validate(DepositTransaction tx) {
@@ -73,8 +82,26 @@ public class DepositTxValidator implements NulsDataValidator<DepositTransaction>
         if (count > 0) {
             return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT);
         }
+        List<DepositPo> poList = this.depositStorageService.getDepositListByAgent(deposit.getAgentHash());
+        if (null != poList && poList.size() >= PocConsensusProtocolConstant.MAX_ACCEPT_NUM_OF_DEPOSIT) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.DEPOSIT_OVER_COUNT);
+        }
+        Na limit = PocConsensusProtocolConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT;
+        Na max = PocConsensusProtocolConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT;
+        Na total = Na.ZERO;
+        for (DepositPo cd : poList) {
+            total = total.add(cd.getDeposit());
+        }
+        if (limit.isGreaterThan(deposit.getDeposit())) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.DEPOSIT_NOT_ENOUGH);
+        }
+        if (max.isLessThan(total.add(deposit.getDeposit()))) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.DEPOSIT_TOO_MUCH);
+        }
 
-
+        if (!isDepositOk(deposit.getDeposit(), tx.getCoinData())) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), SeverityLevelEnum.FLAGRANT_FOUL, PocConsensusErrorCode.DEPOSIT_ERROR);
+        }
         return ValidateResult.getSuccessResult();
     }
 

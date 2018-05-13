@@ -26,15 +26,24 @@
 
 package io.nuls.consensus.poc.storage.po;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 import io.protostuff.Tag;
 
+import java.io.IOException;
+
 /**
- * Created by ln on 2018/5/10.
+ *
+ * @author ln
+ * @date 2018/5/10
  */
-public class AgentPo extends BasePo {
+public class AgentPo extends BaseNulsData {
 
     private transient NulsDigestData hash;
 
@@ -55,6 +64,55 @@ public class AgentPo extends BasePo {
     private long time;
 
     private long blockHeight;
+
+    private long delHeight;
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(hash);
+        stream.write(agentAddress);
+        stream.write(packingAddress);
+        stream.write(rewardAddress);
+        stream.writeVarInt(deposit.getValue());
+        stream.writeDouble(commissionRate);
+        stream.writeBytesWithLength(agentName);
+        stream.writeBytesWithLength(introduction);
+        stream.writeInt48(time);
+        stream.writeVarInt(blockHeight);
+        stream.writeVarInt(delHeight);
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.hash = byteBuffer.readHash();
+        this.agentAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.packingAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.rewardAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.deposit = Na.valueOf(byteBuffer.readVarInt());
+        this.commissionRate = byteBuffer.readDouble();
+        this.agentName = byteBuffer.readByLengthByte();
+        this.introduction = byteBuffer.readByLengthByte();
+        this.time = byteBuffer.readInt48();
+        this.blockHeight = byteBuffer.readVarInt();
+        this.delHeight = byteBuffer.readVarInt();
+    }
+
+    @Override
+    public int size() {
+        int size = SerializeUtils.sizeOfNulsData(hash);
+        size += AddressTool.HASH_LENGTH * 3;
+        size += SerializeUtils.sizeOfVarInt(deposit.getValue());
+        size += SerializeUtils.sizeOfDouble(commissionRate);
+        size += SerializeUtils.sizeOfBytes(agentName);
+        size += SerializeUtils.sizeOfBytes(introduction);
+        size += SerializeUtils.sizeOfInt48();
+        size += SerializeUtils.sizeOfVarInt(blockHeight);
+        size += SerializeUtils.sizeOfVarInt(delHeight);
+        return size;
+    }
 
     public NulsDigestData getHash() {
         return hash;

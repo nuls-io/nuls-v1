@@ -23,19 +23,22 @@
  *
  */
 
-package io.nuls.consensus.poc.storage.po;
+package io.nuls.consensus.poc.storage.service.impl;
+
+import io.nuls.consensus.poc.storage.po.DepositPo;
+import io.nuls.consensus.poc.storage.service.DepositStorageService;
+import io.nuls.kernel.model.NulsDigestData;
+
+import java.util.List;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/12
+ * @date: 2018/5/13
  */
-public class BasePo {
-    public byte[] serialize() {
+public class DepositStorageServiceImpl implements DepositStorageService {
+    @Override
+    public List<DepositPo> getDepositListByAgent(NulsDigestData agentHash) {
         // todo auto-generated method stub
-        return new byte[0];
-    }
-
-    public void parse(byte[] bytes) {
-
+        return null;
     }
 }
