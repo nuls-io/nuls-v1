@@ -6,7 +6,6 @@ import io.nuls.account.storage.constant.AccountStorageConstant;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.db.constant.DBErrorCode;
-import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.exception.NulsException;
@@ -16,7 +15,6 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Result;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

@@ -29,9 +29,7 @@ public class GetVersionMessageHandler implements BaseNetworkMeesageHandler {
 
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
-
         GetVersionMessage getVersionMessage = (GetVersionMessage) message;
-
         NetworkMessageBody body = getVersionMessage.getMsgBody();
 
         if (body.getBestBlockHeight() < 0) {

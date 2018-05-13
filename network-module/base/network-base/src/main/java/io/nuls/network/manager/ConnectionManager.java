@@ -185,8 +185,6 @@ public class ConnectionManager {
             return;
         }
         if (messageResult.getReplyMessage() != null) {
-            System.out.println("---------------processMessageResult send replyMessage----------------" + node.getId());
-
             broadcastHandler.broadcastToNode((BaseMessage) messageResult.getReplyMessage(), node, true);
         }
     }

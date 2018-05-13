@@ -14,7 +14,6 @@ import io.nuls.account.tx.AliasTransaction;
 import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
@@ -56,7 +55,7 @@ public class AliasService {
 
     /**
      * 设置别名
-     * Set an alias for the account.
+     * Initiate a transaction to set alias.
      *
      * @param addr      Address of account
      * @param password  password of account
@@ -134,6 +133,11 @@ public class AliasService {
      * 1.保存别名alias至数据库
      * 2.从数据库取出对应的account账户,将别名设置进account然后保存至数据库
      * 3.将修改后的account重新进行缓存
+     * saveAlias
+     * 1. Save the alias to the database.
+     * 2. Take the corresponding account from the database, set the alias to account and save it to the database.
+     * 3. Re-cache the modified account.
+     *
      * @param aliaspo
      * @return
      */
@@ -141,7 +145,7 @@ public class AliasService {
         try {
             aliasStorageService.saveAlias(aliaspo);
             AccountPo po = accountStorageService.getAccount(aliaspo.getAddress()).getData();
-            if(null == po){
+            if (null == po) {
                 return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
             }
             po.setAlias(aliaspo.getAlias());
@@ -167,6 +171,11 @@ public class AliasService {
      * 1.从数据库删除别名对象数据
      * 2.取出对应的account将别名清除,重新存入数据库
      * 3.重新缓存account
+     * rollbackAlias
+     * 1.Delete the alias data from the database.
+     * 2. Remove the corresponding account to clear the alias and restore it in the database.
+     * 3. Recache the account.
+     *
      * @param aliasPo
      * @return
      */
