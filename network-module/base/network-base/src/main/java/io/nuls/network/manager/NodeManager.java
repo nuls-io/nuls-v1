@@ -89,6 +89,7 @@ public class NodeManager implements Runnable {
         }
         running = true;
         TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "NetworkNodeManager", this);
+        nodeDiscoverHandler.start();
     }
 
     /**
