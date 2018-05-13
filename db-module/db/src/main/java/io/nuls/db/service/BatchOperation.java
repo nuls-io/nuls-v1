@@ -51,7 +51,7 @@ public interface BatchOperation {
      * @param value 需要存储或者更新的对象/Objects that need to be added or updated.
      * @return
      */
-    <T> Result putModel(String area, byte[] key, T value);
+    <T> Result putModel(byte[] key, T value);
 
     /**
      * 删除操作

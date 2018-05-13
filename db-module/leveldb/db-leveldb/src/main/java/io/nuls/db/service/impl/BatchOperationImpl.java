@@ -76,8 +76,13 @@ public class BatchOperationImpl implements BatchOperation {
      * @return
      */
     @Override
-    public <T> Result putModel(String area, byte[] key, T value) {
+    public <T> Result putModel(byte[] key, T value) {
+        if(key == null || value == null) {
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+        }
         //TODO pierre
+        byte[] bytes = LevelDBManager.getModelSerialize(value);
+
         return null;
     }
 
