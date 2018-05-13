@@ -4,7 +4,6 @@ import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.*;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.core.tools.crypto.ECKey;
-import io.nuls.core.tools.log.Log;
 import io.nuls.db.module.impl.LevelDbModuleBootstrap;
 import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.kernel.exception.NulsException;
@@ -152,13 +151,13 @@ public class UtxoLedgerServiceImplTest {
         list.add(tx3);
         list.add(tx4);
 
-        JoinConsensusTransaction join1 = createDepositTransaction(ecKey1, tx1.getHash(), Na.parseNuls(200000));
-        JoinConsensusTransaction join2 = createDepositTransaction(ecKey1, tx2.getHash(), Na.parseNuls(200000));
-        JoinConsensusTransaction join3 = createDepositTransaction(ecKey1, tx3.getHash(), Na.parseNuls(200000));
-        JoinConsensusTransaction join4 = createDepositTransaction(ecKey1, tx4.getHash(), Na.parseNuls(200000));
-        JoinConsensusTransaction join5 = createDepositTransaction(ecKey1, tx3.getHash(), Na.parseNuls(200000));
-        JoinConsensusTransaction join6 = createDepositTransaction(ecKey1, tx3.getHash(), Na.parseNuls(200000));
-        JoinConsensusTransaction join7 = createDepositTransaction(ecKey1, tx3.getHash(), Na.parseNuls(200000));
+        DepositTransaction join1 = createDepositTransaction(ecKey1, tx1.getHash(), Na.parseNuls(200000));
+        DepositTransaction join2 = createDepositTransaction(ecKey1, tx2.getHash(), Na.parseNuls(200000));
+        DepositTransaction join3 = createDepositTransaction(ecKey1, tx3.getHash(), Na.parseNuls(200000));
+        DepositTransaction join4 = createDepositTransaction(ecKey1, tx4.getHash(), Na.parseNuls(200000));
+        DepositTransaction join5 = createDepositTransaction(ecKey1, tx3.getHash(), Na.parseNuls(200000));
+        DepositTransaction join6 = createDepositTransaction(ecKey1, tx3.getHash(), Na.parseNuls(200000));
+        DepositTransaction join7 = createDepositTransaction(ecKey1, tx3.getHash(), Na.parseNuls(200000));
         list.add(join1);
         list.add(join3);
         list.add(join2);
@@ -228,8 +227,8 @@ public class UtxoLedgerServiceImplTest {
 
     }
 
-    private JoinConsensusTransaction createDepositTransaction(ECKey ecKey, NulsDigestData agentTxHash, Na na) throws IOException {
-        JoinConsensusTransaction tx = new JoinConsensusTransaction();
+    private DepositTransaction createDepositTransaction(ECKey ecKey, NulsDigestData agentTxHash, Na na) throws IOException {
+        DepositTransaction tx = new DepositTransaction();
         setCommonFields(tx);
         Deposit deposit = new Deposit();
         deposit.setDelHeight(0L);

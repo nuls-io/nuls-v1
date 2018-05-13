@@ -26,6 +26,7 @@
 
 package io.nuls.consensus.poc.protocol.process;
 
+import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
@@ -107,7 +108,7 @@ public class RegisterAgentProcess implements TransactionProcessor<RegisterAgentT
                     RedPunishData redPunishData = redPunishTransaction.getTxData();
                     String addressHex = Hex.encode(redPunishData.getAddress());
                     if (!addressHexSet.add(addressHex)) {
-                        return ValidateResult.getFailedResult(getClass().getName(), KernelErrorCode.LACK_OF_CREDIT, "there is a new Red Punish Transaction!");
+                        return ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT, "there is a new Red Punish Transaction!");
                     }
                     break;
             }

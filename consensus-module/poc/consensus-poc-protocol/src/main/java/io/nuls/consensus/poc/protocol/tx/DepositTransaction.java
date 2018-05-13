@@ -27,21 +27,18 @@ package io.nuls.consensus.poc.protocol.tx;
 
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.NulsByteBuffer;
 
-import java.io.IOException;
-
 /**
  * @author Niels
  * @date 2017/12/4
  */
-public class JoinConsensusTransaction extends Transaction<Deposit> {
+public class DepositTransaction extends Transaction<Deposit> {
 
-    public JoinConsensusTransaction() {
+    public DepositTransaction() {
         super(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
     }
 
@@ -51,8 +48,8 @@ public class JoinConsensusTransaction extends Transaction<Deposit> {
     }
 
     @Override
-    public JoinConsensusTransaction clone() {
-        JoinConsensusTransaction tx = new JoinConsensusTransaction();
+    public DepositTransaction clone() {
+        DepositTransaction tx = new DepositTransaction();
         try {
             tx.parse(serialize());
         } catch (Exception e) {
