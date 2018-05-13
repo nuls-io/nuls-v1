@@ -36,6 +36,7 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 
     @Override
     public NetworkEventResult process(BaseNetworkMessage message, Node node) {
+        System.out.println("-------------------- HandshakeMessageHandler process  ------------------------");
 
         HandshakeMessage handshakeMessage = (HandshakeMessage) message;
 
