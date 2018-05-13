@@ -1,5 +1,6 @@
 package io.nuls.network.service.impl;
 
+import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.BroadcastResult;
@@ -10,6 +11,7 @@ import io.nuls.network.service.NetworkService;
 import java.util.Collection;
 import java.util.Map;
 
+@Service
 public class NetworkServiceImpl implements NetworkService {
 
     private NodeManager nodeManager = NodeManager.getInstance();
