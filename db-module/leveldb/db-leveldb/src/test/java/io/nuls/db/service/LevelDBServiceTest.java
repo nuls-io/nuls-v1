@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import static io.nuls.db.manager.LevelDBManager.putModel;
 import static org.junit.Assert.*;
 import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 
@@ -114,7 +115,7 @@ public class LevelDBServiceTest {
     @Test
     public void testBatch() {
         String area = "testBatch";
-        dbService.createArea("testBatch");
+        dbService.createArea(area);
         BatchOperation batch = dbService.createWriteBatch(area);
         batch.put(bytes("Tampa"), bytes("green"));
         batch.put(bytes("London"), bytes("red"));
@@ -136,6 +137,56 @@ public class LevelDBServiceTest {
         Assert.assertEquals("red1", asString(dbService.get(area, bytes("London1"))));
         Assert.assertEquals("red2", asString(dbService.get(area, bytes("London2"))));
         Assert.assertNull(dbService.get(area, bytes("Qweqwe")));
+        LevelDBManager.destroyArea(area);
+    }
+
+    @Test
+    public void testBatchModel() {
+        String area = "testBatchModel";
+        dbService.createArea(area);
+        BatchOperation batch = dbService.createWriteBatch(area);
+        DBTestEntity entity = new DBTestEntity();
+        entity.setType(11111);
+        batch.putModel(bytes("entity1"), entity);
+        entity = new DBTestEntity();
+        entity.setType(22222);
+        batch.putModel(bytes("entity2"), entity);
+        entity = new DBTestEntity();
+        entity.setType(33333);
+        batch.putModel(bytes("entity3"), entity);
+        entity = new DBTestEntity();
+        entity.setType(44444);
+        batch.putModel(bytes("entity4"), entity);
+        entity = new DBTestEntity();
+        entity.setType(55555);
+        batch.putModel(bytes("entity5"), entity);
+        batch.executeBatch();
+        List<DBTestEntity> list = dbService.values(area, DBTestEntity.class);
+        list.stream().forEach(dbTestEntity -> {
+            System.out.println("[" + dbTestEntity.toString() + "=" + dbTestEntity.getType() + "], ");
+        });
+        System.out.println();
+        Assert.assertEquals(11111, dbService.getModel(area, bytes("entity1"), DBTestEntity.class).getType());
+        Assert.assertEquals(22222, dbService.getModel(area, bytes("entity2"), DBTestEntity.class).getType());
+        Assert.assertEquals(33333, dbService.getModel(area, bytes("entity3"), DBTestEntity.class).getType());
+        Assert.assertEquals(44444, dbService.getModel(area, bytes("entity4"), DBTestEntity.class).getType());
+        Assert.assertEquals(55555, dbService.getModel(area, bytes("entity5"), DBTestEntity.class).getType());
+
+
+        batch.delete(bytes("entity4"));
+        batch.delete(bytes("entity5"));
+        batch.executeBatch();
+        List<Entry<byte[], DBTestEntity>> entries = dbService.entryList(area, DBTestEntity.class);
+        entries.stream().forEach(entry -> {
+            System.out.println("[" + asString(entry.getKey()) + "=" + entry.getValue().getType() + "], ");
+        });
+        System.out.println();
+        Assert.assertEquals(11111, dbService.getModel(area, bytes("entity1"), DBTestEntity.class).getType());
+        Assert.assertEquals(22222, dbService.getModel(area, bytes("entity2"), DBTestEntity.class).getType());
+        Assert.assertEquals(33333, dbService.getModel(area, bytes("entity3"), DBTestEntity.class).getType());
+        Assert.assertNotNull(dbService.get(area, bytes("entity3")));
+        Assert.assertNull(dbService.get(area, bytes("entity4")));
+        Assert.assertNull(dbService.get(area, bytes("entity5")));
         LevelDBManager.destroyArea(area);
     }
 }
