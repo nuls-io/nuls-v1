@@ -54,6 +54,11 @@ public class BatchOperationImpl implements BatchOperation {
     private final List<Entry<byte[], byte[]>> batchPut = new ArrayList<>();
     private final List<byte[]> batchDelete = new ArrayList<>();
 
+    /**
+     * @param key
+     * @param value
+     * @return
+     */
     @Override
     public Result put(byte[] key, byte[] value) {
         if(key == null || value == null) {
@@ -63,6 +68,23 @@ public class BatchOperationImpl implements BatchOperation {
         return Result.getSuccess();
     }
 
+    /**
+     * @param area
+     * @param key
+     * @param value 需要存储或者更新的对象/Objects that need to be added or updated.
+     * @param <T>
+     * @return
+     */
+    @Override
+    public <T> Result putModel(String area, byte[] key, T value) {
+        //TODO pierre
+        return null;
+    }
+
+    /**
+     * @param key
+     * @return
+     */
     @Override
     public Result delete(byte[] key) {
         if(key == null) {
@@ -72,6 +94,9 @@ public class BatchOperationImpl implements BatchOperation {
         return Result.getSuccess();
     }
 
+    /**
+     * @return
+     */
     @Override
     public Result executeBatch() {
         DB db = LevelDBManager.getArea(area);
