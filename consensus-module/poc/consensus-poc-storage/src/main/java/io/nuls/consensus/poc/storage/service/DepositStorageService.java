@@ -36,5 +36,13 @@ import java.util.List;
  */
 public interface DepositStorageService {
 
-    List<DepositPo> getDepositListByAgent(NulsDigestData agentHash);
+    boolean save(DepositPo depositPo);
+
+    DepositPo get(NulsDigestData hash);
+
+    boolean delete(NulsDigestData hash);
+
+    List<DepositPo> getList();
+
+    int size();
 }

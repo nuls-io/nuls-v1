@@ -75,8 +75,8 @@ public class ChainContainer implements Cloneable {
         List<Block> blockList = chain.getBlockList();
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
 
-        List<Transaction<Agent>> agentList = chain.getAgentList();
-        List<Transaction<Deposit>> depositList = chain.getDepositList();
+        List<Agent> agentList = chain.getAgentList();
+        List<Deposit> depositList = chain.getDepositList();
         List<PunishLogPo> yellowList = chain.getYellowPunishList();
         List<PunishLogPo> redList = chain.getRedPunishList();
 
@@ -95,7 +95,7 @@ public class ChainContainer implements Cloneable {
                 agent.setDelHeight(-1L);
                 agent.setBlockHeight(height);
 
-                agentList.add(agentTx);
+                agentList.add(agent);
             } else if (txType == ConsensusConstant.TX_TYPE_JOIN_CONSENSUS) {
 
                 // 加入共识交易，设置该交易的高度和删除高度，然后加入列表
@@ -107,7 +107,7 @@ public class ChainContainer implements Cloneable {
                 deposit.setDelHeight(-1L);
                 deposit.setBlockHeight(height);
 
-                depositList.add(depositTx);
+                depositList.add(deposit);
 
             } else if (txType == ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT) {
 
@@ -115,12 +115,12 @@ public class ChainContainer implements Cloneable {
 
                 NulsDigestData joinHash = cancelDepositTx.getTxData().getJoinTxHash();
 
-                Iterator<Transaction<Deposit>> it = depositList.iterator();
+                Iterator<Deposit> it = depositList.iterator();
                 while (it.hasNext()) {
-                    Transaction<Deposit> depositTx = it.next();
-                    if (depositTx.getHash().equals(joinHash)) {
-                        if(depositTx.getTxData().getDelHeight() == -1L) {
-                            depositTx.getTxData().setDelHeight(height);
+                    Deposit depositTx = it.next();
+                    if (depositTx.getTxHash().equals(joinHash)) {
+                        if (depositTx.getDelHeight() == -1L) {
+                            depositTx.setDelHeight(height);
                         }
                         break;
                     }
@@ -131,21 +131,20 @@ public class ChainContainer implements Cloneable {
 
                 NulsDigestData agentHash = stopAgentTx.getTxData().getRegisterTxHash();
 
-                Iterator<Transaction<Deposit>> it = depositList.iterator();
+                Iterator<Deposit> it = depositList.iterator();
                 while (it.hasNext()) {
-                    Transaction<Deposit> depositTx = it.next();
-                    Deposit deposit = depositTx.getTxData();
+                    Deposit deposit = it.next();
                     if (deposit.getAgentHash().equals(agentHash) && deposit.getDelHeight() == -1L) {
                         deposit.setDelHeight(height);
                     }
                 }
 
-                Iterator<Transaction<Agent>> ita = agentList.iterator();
+                Iterator<Agent> ita = agentList.iterator();
                 while (ita.hasNext()) {
-                    Transaction<Agent> agentTx = ita.next();
-                    if (agentTx.getHash().equals(agentHash)) {
-                        if(agentTx.getTxData().getDelHeight() == -1L) {
-                            agentTx.getTxData().setDelHeight(height);
+                    Agent agent = ita.next();
+                    if (agent.getTxHash().equals(agentHash)) {
+                        if (agent.getDelHeight() == -1L) {
+                            agent.setDelHeight(height);
                         }
                         break;
                     }
@@ -194,7 +193,7 @@ public class ChainContainer implements Cloneable {
 
         BlockRoundData roundData = new BlockRoundData(blockHeader.getExtend());
 
-        if(roundData.getRoundIndex() < bestBlcokRoundData.getRoundIndex() ||
+        if (roundData.getRoundIndex() < bestBlcokRoundData.getRoundIndex() ||
                 (roundData.getRoundIndex() == bestBlcokRoundData.getRoundIndex() && roundData.getPackingIndexOfRound() <= bestBlcokRoundData.getPackingIndexOfRound())) {
             Log.error("new block rounddata error, block height : " + blockHeader.getHeight() + " , hash :" + blockHeader.getHash());
             return false;
@@ -232,7 +231,7 @@ public class ChainContainer implements Cloneable {
                 return false;
             }
             MeetingRound tempRound = roundManager.getNextRound(roundData, !isDownload);
-            if(tempRound.getIndex() > currentRound.getIndex()) {
+            if (tempRound.getIndex() > currentRound.getIndex()) {
                 tempRound.setPreRound(currentRound);
                 hasChangeRound = true;
             }
@@ -375,16 +374,15 @@ public class ChainContainer implements Cloneable {
         BlockHeader rollbackBlockHeader = blockHeaderList.remove(blockHeaderList.size() - 1);
 
         // update txs
-        List<Transaction<Agent>> agentList = chain.getAgentList();
-        List<Transaction<Deposit>> depositList = chain.getDepositList();
+        List<Agent> agentList = chain.getAgentList();
+        List<Deposit> depositList = chain.getDepositList();
         List<PunishLogPo> yellowList = chain.getYellowPunishList();
         List<PunishLogPo> redPunishList = chain.getRedPunishList();
 
         long height = rollbackBlockHeader.getHeight();
 
         for (int i = agentList.size() - 1; i >= 0; i--) {
-            Transaction<Agent> agentTx = agentList.get(i);
-            Agent agent = agentTx.getTxData();
+            Agent agent = agentList.get(i);
 
             if (agent.getDelHeight() == height) {
                 agent.setDelHeight(-1L);
@@ -396,8 +394,7 @@ public class ChainContainer implements Cloneable {
         }
 
         for (int i = depositList.size() - 1; i >= 0; i--) {
-            Transaction<Deposit> depositTx = depositList.get(i);
-            Deposit deposit = depositTx.getTxData();
+            Deposit deposit = depositList.get(i);
 
             if (deposit.getDelHeight() == height) {
                 deposit.setDelHeight(-1L);
@@ -460,21 +457,27 @@ public class ChainContainer implements Cloneable {
         newChain.setBlockList(new ArrayList<>(chain.getBlockList()));
 
         if (chain.getAgentList() != null) {
-            List<Transaction<Agent>> agentList = new ArrayList<>();
+            List<Agent> agentList = new ArrayList<>();
 
-            for(Transaction<Agent> tx : chain.getAgentList()) {
-                RegisterAgentTransaction agentTx = (RegisterAgentTransaction) tx;
-                agentList.add(agentTx.clone());
+            for (Agent agent : chain.getAgentList()) {
+                try {
+                    agentList.add(agent.clone());
+                } catch (CloneNotSupportedException e) {
+                    Log.error(e);
+                }
             }
 
             newChain.setAgentList(agentList);
         }
         if (chain.getDepositList() != null) {
-            List<Transaction<Deposit>> depositList = new ArrayList<>();
+            List<Deposit> depositList = new ArrayList<>();
 
-            for(Transaction<Deposit> tx : chain.getDepositList()) {
-                DepositTransaction depositTx = (DepositTransaction) tx;
-                depositList.add(depositTx.clone());
+            for (Deposit deposit : chain.getDepositList()) {
+                try {
+                    depositList.add(deposit.clone());
+                } catch (CloneNotSupportedException e) {
+                    Log.error(e);
+                }
             }
 
             newChain.setDepositList(depositList);

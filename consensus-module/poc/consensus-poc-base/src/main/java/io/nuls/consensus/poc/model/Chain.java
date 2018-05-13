@@ -48,8 +48,8 @@ public class Chain implements Cloneable {
     private BlockHeader endBlockHeader;
     private List<BlockHeader> blockHeaderList;
     private List<Block> blockList;
-    private List<Transaction<Agent>> agentList;
-    private List<Transaction<Deposit>> depositList;
+    private List<Agent> agentList;
+    private List<Deposit> depositList;
     private List<PunishLogPo> yellowPunishList;
     private List<PunishLogPo> redPunishList;
 
@@ -103,11 +103,11 @@ public class Chain implements Cloneable {
         return blockList;
     }
 
-    public List<Transaction<Agent>> getAgentList() {
+    public List<Agent> getAgentList() {
         return agentList;
     }
 
-    public List<Transaction<Deposit>> getDepositList() {
+    public List<Deposit> getDepositList() {
         return depositList;
     }
 
@@ -115,11 +115,11 @@ public class Chain implements Cloneable {
         this.blockList = blockList;
     }
 
-    public void setAgentList(List<Transaction<Agent>> agentList) {
+    public void setAgentList(List<Agent> agentList) {
         this.agentList = agentList;
     }
 
-    public void setDepositList(List<Transaction<Deposit>> depositList) {
+    public void setDepositList(List<Deposit> depositList) {
         this.depositList = depositList;
     }
 

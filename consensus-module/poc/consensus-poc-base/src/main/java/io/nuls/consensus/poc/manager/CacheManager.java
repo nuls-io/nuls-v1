@@ -63,12 +63,12 @@ public class CacheManager {
         List<BlockHeader> blockHeaderList = cacheLoader.loadBlockHeaders(PocConsensusConstant.INIT_HEADERS_OF_ROUND_COUNT);
         List<Block> blockList = cacheLoader.loadBlocks(PocConsensusConstant.INIT_BLOCKS_COUNT);
 
-        if(blockHeaderList == null || blockHeaderList.size() == 0 || blockList == null || blockList.size() == 0) {
+        if (blockHeaderList == null || blockHeaderList.size() == 0 || blockList == null || blockList.size() == 0) {
             Log.error("load cache error ,not find the block info!");
             throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "load cache error ,not find the block info!");
         }
-        List<Transaction<Agent>> agentList = cacheLoader.loadAgents();
-        List<Transaction<Deposit>> depositList = cacheLoader.loadDepositList();
+        List<Agent> agentList = cacheLoader.loadAgents();
+        List<Deposit> depositList = cacheLoader.loadDepositList();
         List<PunishLogPo> yellowPunishList = cacheLoader.loadYellowPunishList();
         List<PunishLogPo> redPunishList = cacheLoader.loadRedPunishList();
 

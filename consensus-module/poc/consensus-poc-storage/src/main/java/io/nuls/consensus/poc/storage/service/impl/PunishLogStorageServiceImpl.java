@@ -25,16 +25,50 @@
 
 package io.nuls.consensus.poc.storage.service.impl;
 
+import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.storage.service.PunishLogStorageService;
+import io.nuls.core.tools.log.Log;
+import io.nuls.db.service.DBService;
+import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.Result;
+
+import java.io.IOException;
+import java.util.Set;
 
 /**
  * @author: Niels Wang
  * @date: 2018/5/13
  */
+@Component
 public class PunishLogStorageServiceImpl implements PunishLogStorageService {
+
+    private final String DB_NAME = "punish-log";
+
+    @Autowired
+    private DBService dbService;
+
     @Override
-    public long getCountByType(byte[] agentAddress, int type) {
-        // todo auto-generated method stub
-        return 0;
+    public boolean save(PunishLogPo po) {
+        if (po == null || po.getKey() == null) {
+            return false;
+        }
+        Result result = null;
+        try {
+            result = dbService.put(DB_NAME, po.getKey(), po.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return false;
+        }
+        return result.isSuccess();
+    }
+
+    @Override
+    public boolean delete(byte[] key) {
+        if (null == key) {
+            return false;
+        }
+        Result result = dbService.delete(DB_NAME, key);
+        return result.isSuccess();
     }
 }

@@ -1,4 +1,4 @@
-/*
+package io.nuls.consensus.poc.validator;/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -23,13 +23,13 @@
  *
  */
 
-package io.nuls.consensus.poc.protocol.validator;
-
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
+import io.nuls.consensus.poc.protocol.validator.BaseConsensusProtocolValidator;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
@@ -40,6 +40,7 @@ import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Na;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.validate.ValidateResult;
 
 import java.util.List;
@@ -72,7 +73,7 @@ public class DepositTxValidator extends BaseConsensusProtocolValidator<DepositTr
         }
         long count = 0;
         try {
-            count = punishLogStorageService.getCountByType(deposit.getAddress(), PunishType.RED.getCode());
+            count = this.getCountByType(deposit.getAddress(), PunishType.RED.getCode());
         } catch (Exception e) {
             Log.error(e);
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getMessage());
@@ -80,7 +81,7 @@ public class DepositTxValidator extends BaseConsensusProtocolValidator<DepositTr
         if (count > 0) {
             return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT);
         }
-        List<DepositPo> poList = this.depositStorageService.getDepositListByAgent(deposit.getAgentHash());
+        List<DepositPo> poList = this.getDepositListByAgent(deposit.getAgentHash());
         if (null != poList && poList.size() >= PocConsensusProtocolConstant.MAX_ACCEPT_NUM_OF_DEPOSIT) {
             return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.DEPOSIT_OVER_COUNT);
         }
@@ -101,6 +102,17 @@ public class DepositTxValidator extends BaseConsensusProtocolValidator<DepositTr
             return ValidateResult.getFailedResult(this.getClass().getName(), SeverityLevelEnum.FLAGRANT_FOUL, PocConsensusErrorCode.DEPOSIT_ERROR);
         }
         return ValidateResult.getSuccessResult();
+    }
+
+    private List<DepositPo> getDepositListByAgent(NulsDigestData agentHash) {
+        // todo auto-generated method stub
+        List<Deposit> depositList = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
+        return null;
+    }
+
+    private long getCountByType(byte[] address, int code) {
+        //todo
+        return 0;
     }
 
 }

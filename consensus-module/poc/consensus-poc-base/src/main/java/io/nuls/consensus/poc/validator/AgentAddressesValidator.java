@@ -26,8 +26,11 @@
 package io.nuls.consensus.poc.validator;
 
 import io.nuls.consensus.poc.config.ConsensusConfig;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
+import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
@@ -56,6 +59,21 @@ public class AgentAddressesValidator implements NulsDataValidator<RegisterAgentT
                 return ValidateResult.getFailedResult(this.getClass().getName(), "The reward address is a seed address");
             }
         }
+        long count = 0;
+        try {
+            count = this.getRedPunishCount(agent.getAgentAddress());
+        } catch (Exception e) {
+            Log.error(e);
+            return ValidateResult.getFailedResult(this.getClass().getName(), e.getMessage());
+        }
+        if (count > 0) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT);
+        }
         return ValidateResult.getSuccessResult();
+    }
+
+    private long getRedPunishCount(byte[] agentAddress) {
+        // todo auto-generated method stub
+        return 0;
     }
 }

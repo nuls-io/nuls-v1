@@ -30,7 +30,6 @@ import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.core.tools.crypto.Sha256Hash;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,8 +50,8 @@ public class MeetingMember implements Comparable<MeetingMember> {
      */
     private int packingIndexOfRound;
     private double creditVal;
-    private Transaction<Agent> agentTransaction;
-    private List<Transaction<Deposit>> depositList = new ArrayList<>();
+    private Agent agent;
+    private List<Deposit> depositList = new ArrayList<>();
     private Na totalDeposit = Na.ZERO;
     private Na ownDeposit = Na.ZERO;
     private double commissionRate;
@@ -180,19 +179,19 @@ public class MeetingMember implements Comparable<MeetingMember> {
         return creditVal;
     }
 
-    public Transaction<Agent> getAgentTransaction() {
-        return agentTransaction;
+    public Agent getAgent() {
+        return agent;
     }
 
-    public void setAgentTransaction(Transaction<Agent> agentTransaction) {
-        this.agentTransaction = agentTransaction;
+    public void setAgent(Agent agent) {
+        this.agent = agent;
     }
 
-    public List<Transaction<Deposit>> getDepositList() {
+    public List<Deposit> getDepositList() {
         return depositList;
     }
 
-    public void setDepositList(List<Transaction<Deposit>> depositList) {
+    public void setDepositList(List<Deposit> depositList) {
         this.depositList = depositList;
     }
 

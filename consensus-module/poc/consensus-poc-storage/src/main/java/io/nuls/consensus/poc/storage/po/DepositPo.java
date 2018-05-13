@@ -43,11 +43,11 @@ import java.io.IOException;
 public class DepositPo extends BaseNulsData {
 
 
+    private NulsDigestData txHash;
     private Na deposit;
     private NulsDigestData agentHash;
     private byte[] address;
     private long time;
-    private NulsDigestData txHash;
     private long blockHeight = -1L;
     private long delHeight = -1L;
 

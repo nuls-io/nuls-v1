@@ -28,11 +28,11 @@ package io.nuls.consensus.poc.util;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
 import io.nuls.account.service.AccountService;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.model.BlockData;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
-import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.core.tools.log.Log;
@@ -46,7 +46,10 @@ import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * @author Niels
@@ -80,10 +83,10 @@ public class ConsensusTool {
         // Account cannot be encrypted, otherwise it will be wrong
         // 账户不能加密，否则抛错
         Result result = accountService.isEncrypted(account);
-        if(result.isSuccess()) {
+        if (result.isSuccess()) {
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED);
         }
-        
+
         Block block = new Block();
         block.setTxs(blockData.getTxList());
         BlockHeader header = new BlockHeader();
@@ -120,7 +123,7 @@ public class ConsensusTool {
     public static CoinBaseTransaction createCoinBaseTx(MeetingMember member, List<Transaction> txList, MeetingRound localRound, long unlockHeight) {
         CoinData coinData = new CoinData();
         List<Coin> rewardList = calcReward(txList, member, localRound, unlockHeight);
-        for(Coin coin : rewardList) {
+        for (Coin coin : rewardList) {
             coinData.addTo(coin);
         }
         CoinBaseTransaction tx = new CoinBaseTransaction();
@@ -151,7 +154,7 @@ public class ConsensusTool {
         }
         double totalAll = DoubleUtils.mul(localRound.getMemberCount(), PocConsensusConstant.BLOCK_REWARD.getValue());
         double commissionRate = DoubleUtils.div(self.getCommissionRate(), 100, 2);
-        double agentWeight = DoubleUtils.mul( DoubleUtils.sum(self.getOwnDeposit().getValue() , self.getTotalDeposit().getValue()), self.getCalcCreditVal());
+        double agentWeight = DoubleUtils.mul(DoubleUtils.sum(self.getOwnDeposit().getValue(), self.getTotalDeposit().getValue()), self.getCalcCreditVal());
         double blockReword = totalFee;
         if (localRound.getTotalWeight() > 0d && agentWeight > 0d) {
             blockReword = DoubleUtils.sum(blockReword, DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight())));
@@ -164,8 +167,7 @@ public class ConsensusTool {
         long realTotalAllDeposit = self.getOwnDeposit().getValue() + self.getTotalDeposit().getValue();
         double caReward = DoubleUtils.mul(blockReword, DoubleUtils.div(self.getOwnDeposit().getValue(), realTotalAllDeposit));
 
-        for (Transaction<Deposit> tx : self.getDepositList()) {
-            Deposit deposit = tx.getTxData();
+        for (Deposit deposit : self.getDepositList()) {
             double weight = DoubleUtils.div(deposit.getDeposit().getValue(), realTotalAllDeposit);
             if (Arrays.equals(deposit.getAddress(), self.getAgentAddress())) {
                 caReward = caReward + DoubleUtils.mul(blockReword, weight);
@@ -178,13 +180,13 @@ public class ConsensusTool {
 
                 Coin rewardCoin = null;
 
-                for(Coin coin : rewardList) {
-                    if(Arrays.equals(coin.getOwner(), deposit.getAddress())) {
+                for (Coin coin : rewardList) {
+                    if (Arrays.equals(coin.getOwner(), deposit.getAddress())) {
                         rewardCoin = coin;
                         break;
                     }
                 }
-                if(rewardCoin == null) {
+                if (rewardCoin == null) {
                     rewardCoin = new Coin(deposit.getAddress(), depositReward, unlockHeight);
                     rewardList.add(rewardCoin);
                 } else {

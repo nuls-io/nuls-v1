@@ -28,15 +28,15 @@ package io.nuls.consensus.poc.manager;
 
 import io.nuls.account.service.AccountService;
 import io.nuls.consensus.poc.config.ConsensusConfig;
-import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
-import io.nuls.consensus.poc.protocol.constant.PunishType;
-import io.nuls.consensus.poc.protocol.entity.Agent;
-import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
+import io.nuls.consensus.poc.protocol.constant.PunishType;
+import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.core.tools.log.ConsensusLog;
@@ -47,7 +47,6 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.constant.ProtocolConstant;
 
 import java.io.IOException;
@@ -284,15 +283,14 @@ public class RoundManager {
         }
 
         // TODO removeSmallBlock the test code in future
-        List<Transaction<Deposit>> depositTempList = new ArrayList<>();
+        List<Deposit> depositTempList = new ArrayList<>();
 
-        List<Transaction<Agent>> agentList = getAliveAgentList(startBlockHeader.getHeight());
-        for (Transaction<Agent> tx : agentList) {
-            Agent agent = tx.getTxData();
+        List<Agent> agentList = getAliveAgentList(startBlockHeader.getHeight());
+        for (Agent agent : agentList) {
 
             MeetingMember member = new MeetingMember();
-            member.setAgentTransaction(tx);
-            member.setAgentHash(tx.getHash());
+            member.setAgent(agent);
+            member.setAgentHash(agent.getTxHash());
             member.setAgentAddress(agent.getAgentAddress());
             member.setRewardAddress(agent.getRewardAddress());
             member.setPackingAddress(agent.getPackingAddress());
@@ -300,9 +298,9 @@ public class RoundManager {
             member.setCommissionRate(agent.getCommissionRate());
             member.setRoundStartTime(round.getStartTime());
 
-            List<Transaction<Deposit>> cdlist = getDepositListByAgentId(tx.getHash(), startBlockHeader.getHeight());
-            for (Transaction<Deposit> dtx : cdlist) {
-                member.setTotalDeposit(member.getTotalDeposit().add(dtx.getTxData().getDeposit()));
+            List<Deposit> cdlist = getDepositListByAgentId(agent.getTxHash(), startBlockHeader.getHeight());
+            for (Deposit dtx : cdlist) {
+                member.setTotalDeposit(member.getTotalDeposit().add(dtx.getDeposit()));
                 depositTempList.add(dtx);
             }
 
@@ -330,11 +328,11 @@ public class RoundManager {
 
         round.init(memberList);
 
-        Collections.sort(depositTempList, new Comparator<Transaction<Deposit>>() {
+        Collections.sort(depositTempList, new Comparator<Deposit>() {
             @Override
-            public int compare(Transaction<Deposit> o1, Transaction<Deposit> o2) {
+            public int compare(Deposit o1, Deposit o2) {
                 try {
-                    return o1.getHash().getDigestHex().compareTo(o2.getHash().getDigestHex());
+                    return o1.getTxHash().getDigestHex().compareTo(o2.getTxHash().getDigestHex());
                 } catch (IOException e) {
                     Log.error(e);
                     throw new NulsRuntimeException(e);
@@ -342,8 +340,7 @@ public class RoundManager {
             }
         });
 
-        for (Transaction<Deposit> cd : depositTempList) {
-            Deposit deposit = cd.getTxData();
+        for (Deposit deposit : depositTempList) {
             sb.append("------------------------ agent hash : " + deposit.getAgentHash());
             sb.append("dep address : " + deposit.getAddress());
             sb.append(" , amount : " + deposit.getDeposit());
@@ -354,14 +351,13 @@ public class RoundManager {
         }
     }
 
-    private List<Transaction<Deposit>> getDepositListByAgentId(NulsDigestData agentHash, long startBlockHeight) {
+    private List<Deposit> getDepositListByAgentId(NulsDigestData agentHash, long startBlockHeight) {
 
-        List<Transaction<Deposit>> depositList = chain.getDepositList();
-        List<Transaction<Deposit>> resultList = new ArrayList<>();
+        List<Deposit> depositList = chain.getDepositList();
+        List<Deposit> resultList = new ArrayList<>();
 
         for (int i = depositList.size() - 1; i >= 0; i--) {
-            Transaction<Deposit> tx = depositList.get(i);
-            Deposit deposit = tx.getTxData();
+            Deposit deposit = depositList.get(i);
             if (deposit.getDelHeight() != -1L && deposit.getDelHeight() <= startBlockHeight) {
                 continue;
             }
@@ -371,24 +367,23 @@ public class RoundManager {
             if (!deposit.getAgentHash().equals(agentHash)) {
                 continue;
             }
-            resultList.add(tx);
+            resultList.add(deposit);
         }
 
         return resultList;
     }
 
-    private List<Transaction<Agent>> getAliveAgentList(long startBlockHeight) {
-        List<Transaction<Agent>> resultList = new ArrayList<>();
+    private List<Agent> getAliveAgentList(long startBlockHeight) {
+        List<Agent> resultList = new ArrayList<>();
         for (int i = chain.getAgentList().size() - 1; i >= 0; i--) {
-            Transaction<Agent> tx = chain.getAgentList().get(i);
-            Agent agent = tx.getTxData();
+            Agent agent = chain.getAgentList().get(i);
             if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
                 continue;
             }
             if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
                 continue;
             }
-            resultList.add(tx);
+            resultList.add(agent);
         }
         return resultList;
     }

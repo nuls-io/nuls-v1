@@ -26,6 +26,7 @@
 
 package io.nuls.consensus.poc.storage.po;
 
+import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.utils.AddressTool;
@@ -40,7 +41,6 @@ import java.io.IOException;
  * @date 2018/3/22
  */
 public class PunishLogPo extends BaseNulsData {
-    private String id;
     private byte type;
     private byte[] address;
     private long time;
@@ -52,7 +52,6 @@ public class PunishLogPo extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(id);
         stream.write(type);
         stream.write(address);
         stream.writeInt48(time);
@@ -62,7 +61,6 @@ public class PunishLogPo extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.id = byteBuffer.readString();
         this.type = byteBuffer.readByte();
         this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.time = byteBuffer.readInt48();
@@ -72,7 +70,7 @@ public class PunishLogPo extends BaseNulsData {
 
     @Override
     public int size() {
-        int size = SerializeUtils.sizeOfString(id);
+        int size = 0;
         size += 1;
         size += AddressTool.HASH_LENGTH;
         size += SerializeUtils.sizeOfInt48();
@@ -87,14 +85,6 @@ public class PunishLogPo extends BaseNulsData {
 
     public void setRoundIndex(long roundIndex) {
         this.roundIndex = roundIndex;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public int getType() {
@@ -128,4 +118,9 @@ public class PunishLogPo extends BaseNulsData {
     public void setHeight(long height) {
         this.height = height;
     }
+
+    public byte[] getKey() {
+        return ArraysTool.joinintTogether(address, new byte[]{type}, SerializeUtils.uint64ToByteArray(height));
+    }
+
 }

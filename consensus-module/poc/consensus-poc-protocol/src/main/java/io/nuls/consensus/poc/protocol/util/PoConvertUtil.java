@@ -26,8 +26,10 @@
 
 package io.nuls.consensus.poc.protocol.util;
 
+import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.storage.po.DepositPo;
 
 /**
  * Created by ln on 2018/5/10.
@@ -35,7 +37,7 @@ import io.nuls.consensus.poc.protocol.entity.Agent;
 public final class PoConvertUtil {
 
     public static Agent poToAgent(AgentPo agentPo) {
-        if(agentPo == null) {
+        if (agentPo == null) {
             return null;
         }
         Agent agent = new Agent();
@@ -54,7 +56,7 @@ public final class PoConvertUtil {
 
 
     public static AgentPo agentToPo(Agent agent) {
-        if(agent == null) {
+        if (agent == null) {
             return null;
         }
         AgentPo agentPo = new AgentPo();
@@ -72,4 +74,27 @@ public final class PoConvertUtil {
     }
 
 
+    public static Deposit poToDeposit(DepositPo po) {
+        Deposit deposit = new Deposit();
+        deposit.setDeposit(po.getDeposit());
+        deposit.setAgentHash(po.getAgentHash());
+        deposit.setTime(po.getTime());
+        deposit.setDelHeight(po.getDelHeight());
+        deposit.setBlockHeight(po.getBlockHeight());
+        deposit.setAddress(po.getAddress());
+        deposit.setTxHash(po.getTxHash());
+        return deposit;
+    }
+
+    public static DepositPo depositToPo(Deposit deposit) {
+        DepositPo po = new DepositPo();
+        po.setTxHash(deposit.getTxHash());
+        po.setAddress(deposit.getAddress());
+        po.setAgentHash(deposit.getAgentHash());
+        po.setBlockHeight(deposit.getBlockHeight());
+        po.setDelHeight(deposit.getDelHeight());
+        po.setDeposit(deposit.getDeposit());
+        po.setTime(deposit.getTime());
+        return po;
+    }
 }

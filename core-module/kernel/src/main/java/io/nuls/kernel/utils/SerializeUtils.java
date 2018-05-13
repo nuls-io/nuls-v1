@@ -461,4 +461,16 @@ public class SerializeUtils {
         return size == 0 ? 1 : size;
     }
 
+    public static byte[] uint64ToByteArray(long val) {
+        byte[] out = new byte[8];
+        out[0] = (byte) (0xFF & val);
+        out[1] = (byte) (0xFF & (val >> 8));
+        out[2] = (byte) (0xFF & (val >> 16));
+        out[3] = (byte) (0xFF & (val >> 24));
+        out[4] = (byte) (0xFF & (val >> 32));
+        out[5] = (byte) (0xFF & (val >> 40));
+        out[6] = (byte) (0xFF & (val >> 48));
+        out[7] = (byte) (0xFF & (val >> 56));
+        return out;
+    }
 }

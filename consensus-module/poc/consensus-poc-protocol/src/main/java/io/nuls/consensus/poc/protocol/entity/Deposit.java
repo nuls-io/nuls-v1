@@ -157,5 +157,9 @@ public class Deposit extends TransactionLogicData {
         return addressSet;
     }
 
+    @Override
+    public Deposit clone() throws CloneNotSupportedException {
+        return (Deposit) super.clone();
+    }
 
 }

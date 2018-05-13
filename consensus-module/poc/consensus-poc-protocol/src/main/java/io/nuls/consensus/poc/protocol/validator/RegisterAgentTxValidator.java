@@ -49,8 +49,6 @@ import java.util.Arrays;
 public class RegisterAgentTxValidator extends BaseConsensusProtocolValidator<RegisterAgentTransaction> {
 
     private static int AGENT_NAME_MAS_LENGTH = 32;
-    @Autowired
-    private PunishLogStorageService punishLogStorageService;
 
     @Override
     public ValidateResult validate(RegisterAgentTransaction tx) {
@@ -80,16 +78,6 @@ public class RegisterAgentTxValidator extends BaseConsensusProtocolValidator<Reg
         double commissionRate = agent.getCommissionRate();
         if (commissionRate < PocConsensusProtocolConstant.MIN_COMMISSION_RATE || commissionRate > PocConsensusProtocolConstant.MAX_COMMISSION_RATE) {
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), PocConsensusErrorCode.COMMISSION_RATE_OUT_OF_RANGE.getMsg());
-        }
-        long count = 0;
-        try {
-            count = punishLogStorageService.getCountByType(agent.getAgentAddress(), PunishType.RED.getCode());
-        } catch (Exception e) {
-            Log.error(e);
-            return ValidateResult.getFailedResult(this.getClass().getName(), e.getMessage());
-        }
-        if (count > 0) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT);
         }
 
         if (PocConsensusProtocolConstant.AGENT_DEPOSIT_LOWER_LIMIT.isGreaterThan(agent.getDeposit())) {

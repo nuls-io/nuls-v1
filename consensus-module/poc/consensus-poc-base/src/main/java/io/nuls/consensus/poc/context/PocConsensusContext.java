@@ -29,7 +29,9 @@ package io.nuls.consensus.poc.context;
 import io.nuls.consensus.poc.manager.ChainManager;
 
 /**
- * Created by ln on 2018/5/8.
+ *
+ * @author ln
+ * @date 2018/5/8
  */
 public class PocConsensusContext {
 

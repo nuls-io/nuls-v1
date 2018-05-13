@@ -23,17 +23,31 @@
  *
  */
 
-package io.nuls.consensus.poc.storage.service;
-
-import io.nuls.consensus.poc.storage.po.PunishLogPo;
+package io.nuls.core.tools.array;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/10
+ * @date: 2018/5/13
  */
-public interface PunishLogStorageService {
-
-    boolean save(PunishLogPo po);
-
-    boolean delete(byte[] key);
+public class ArraysTool {
+    /**
+     * 按照传入的顺序拼接数组为一个包含所有数组的大数组
+     * Splices the array into a large array containing all of the arrays in the incoming order.
+     *
+     * @param arrays 想要拼接的数组集合、A collection of arrays that you want to concatenate.
+     * @return 拼接结果、 the result of the Joining together
+     */
+    public static final byte[] joinintTogether(byte[]... arrays) {
+        int length = 0;
+        for (byte[] array : arrays) {
+            length += array.length;
+        }
+        byte[] t = new byte[length];
+        int offset = 0;
+        for (byte[] array : arrays) {
+            System.arraycopy(array, 0, t, offset, array.length);
+            offset += array.length;
+        }
+        return t;
+    }
 }

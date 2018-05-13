@@ -9,7 +9,7 @@ import io.nuls.kernel.validate.NulsDataValidator;
 
 public abstract class BaseConsensusProtocolValidator<T extends NulsData> implements NulsDataValidator<T> {
 
-    protected boolean isDepositOk(Na deposit, CoinData coinData) {
+    protected final boolean isDepositOk(Na deposit, CoinData coinData) {
         if(coinData == null || coinData.getTo().size() == 0) {
             return false;
         }

@@ -90,7 +90,7 @@ public class BaseChainTest extends BaseTest {
         chain.setEndBlockHeader(blockHeader);
 
         // init some agent
-        List<Transaction<Agent>> agentList = new ArrayList<>();
+        List< Agent>  agentList = new ArrayList<>();
 
         Transaction<Agent> agentTx = new RegisterAgentTransaction();
         Agent agent = new Agent();
@@ -118,7 +118,7 @@ public class BaseChainTest extends BaseTest {
         agentTx.setScriptSig(signData.getSignBytes());
 
         // add the agent tx into agent list
-        agentList.add(agentTx);
+        agentList.add(agentTx.getTxData());
 
         // set the agent list into chain
         chain.setAgentList(agentList);
@@ -136,9 +136,9 @@ public class BaseChainTest extends BaseTest {
         depositTx.setTxData(deposit);
         depositTx.setBlockHeight(blockHeader.getHeight());
 
-        List<Transaction<Deposit>> depositList = new ArrayList<>();
+        List< Deposit>  depositList = new ArrayList<>();
 
-        depositList.add(depositTx);
+        depositList.add(depositTx.getTxData());
 
         chain.setDepositList(depositList);
 

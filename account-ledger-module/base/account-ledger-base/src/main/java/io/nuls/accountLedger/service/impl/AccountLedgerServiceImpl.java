@@ -86,6 +86,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
                 savedTxList.add(txListToSave.get(i));
             } else {
                 rollback(savedTxList, false);
+                return result;
             }
         }
         return Result.getSuccess().setData(txListToSave.size());

@@ -60,11 +60,12 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
         if (agentPo == null || agentPo.getHash() == null) {
             return false;
         }
-        byte[] hash = new byte[0];
+        byte[] hash;
         try {
             hash = agentPo.getHash().serialize();
         } catch (IOException e) {
             Log.error(e);
+            throw new NulsRuntimeException(e);
         }
         Result result = null;
         try {

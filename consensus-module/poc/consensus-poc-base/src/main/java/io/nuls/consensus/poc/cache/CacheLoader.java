@@ -28,7 +28,13 @@ package io.nuls.consensus.poc.cache;
 
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
+import io.nuls.consensus.poc.storage.po.AgentPo;
+import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
+import io.nuls.consensus.poc.storage.service.AgentStorageService;
+import io.nuls.consensus.poc.storage.service.DepositStorageService;
+import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Block;
@@ -52,6 +58,8 @@ public class CacheLoader {
      * 区块服务
      */
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private AgentStorageService agentStorageService = NulsContext.getServiceBean(AgentStorageService.class);
+    private DepositStorageService depositStorageService = NulsContext.getServiceBean(DepositStorageService.class);
 
     /**
      * 从数据存储中加载指定个数的最新块
@@ -126,17 +134,23 @@ public class CacheLoader {
         return blockHeaderList;
     }
 
-    public List<Transaction<Agent>> loadAgents() {
+    public List<Agent> loadAgents() {
 
-        List<Transaction<Agent>> agentList = new ArrayList<>();
-
+        List<Agent> agentList = new ArrayList<>();
+        List<AgentPo> poList = this.agentStorageService.getList();
+        for (AgentPo po : poList) {
+            Agent agent = PoConvertUtil.poToAgent(po);
+            agentList.add(agent);
+        }
         return agentList;
     }
 
-    public List<Transaction<Deposit>> loadDepositList() {
-
-        List<Transaction<Deposit>> depositList = new ArrayList<>();
-
+    public List<Deposit> loadDepositList() {
+        List<Deposit> depositList = new ArrayList<>();
+        List<DepositPo> poList  = depositStorageService.getList();
+        for(DepositPo po:poList){
+            depositList .add(PoConvertUtil.poToDeposit(po));
+        }
         return depositList;
     }
 
