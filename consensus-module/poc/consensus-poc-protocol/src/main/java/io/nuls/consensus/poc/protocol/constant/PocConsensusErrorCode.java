@@ -23,28 +23,22 @@
  *
  */
 
-package io.nuls.account.constant;
+package io.nuls.consensus.poc.protocol.constant;
 
 import io.nuls.kernel.constant.ErrorCode;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/5
+ * @date: 2018/5/13
  */
-public interface AccountErrorCode {
-
-    ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("ACT000", 50000);
-    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("ACT001", 50001);
-    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED = ErrorCode.init("ACT002", 50002);
-    ErrorCode ACCOUNT_EXIST = ErrorCode.init("ACT003", 50003);
-    ErrorCode ADDRESS_ERROR = ErrorCode.init("ACT004", 50004);
-    ErrorCode ALIAS_EXIST = ErrorCode.init("ACT005", 50005);
-    ErrorCode ALIAS_ERROR = ErrorCode.init("ACT006", 50006);
-    ErrorCode ACCOUNT_ALREADY_SET_ALIAS = ErrorCode.init("ACT007", 50007);
-    ErrorCode NULL_PARAMETER = ErrorCode.init("ACT008", 50008);
-    ErrorCode DATA_PARSE_ERROR = ErrorCode.init("ACT009", 50009);
-    ErrorCode SUCCESS = ErrorCode.init("ACT010", 50010);
-    ErrorCode FAILED = ErrorCode.init("ACT011", 50011);
-    ErrorCode INSUFFICIENT_BALANCE = ErrorCode.init("ACT012", 50012);
-    ErrorCode ALIAS_ROLLBACK_ERROR = ErrorCode.init("ACT013", 50013);
+public interface PocConsensusErrorCode {
+    ErrorCode CS_UNKOWN_EXCEPTION = ErrorCode.init("CS000", 70000);
+    ErrorCode TIME_OUT = ErrorCode.init("CS001", 70001);
+    ErrorCode DEPOSIT_ERROR = ErrorCode.init("CS002", 70002);
+    ErrorCode DEPOSIT_NOT_ENOUGH = ErrorCode.init("CS003", 70003);
+    ErrorCode CONSENSUS_EXCEPTION = ErrorCode.init("CS004", 70004);
+    ErrorCode COMMISSION_RATE_OUT_OF_RANGE = ErrorCode.init("cs005", 70005);
+    ErrorCode LACK_OF_CREDIT = ErrorCode.init("cs006", 70006);
+    ErrorCode DEPOSIT_OVER_COUNT = ErrorCode.init("cs007", 70007);
+    ErrorCode DEPOSIT_TOO_MUCH = ErrorCode.init("cs008", 70008);
 }
