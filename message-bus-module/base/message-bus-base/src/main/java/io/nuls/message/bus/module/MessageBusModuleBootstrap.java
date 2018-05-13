@@ -1,5 +1,6 @@
 package io.nuls.message.bus.module;
 
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.message.bus.handler.CommonDigestHandler;
 import io.nuls.message.bus.handler.GetMessageBodyHandler;
@@ -15,8 +16,6 @@ import io.nuls.message.bus.service.impl.MessageCacheService;
  */
 public class MessageBusModuleBootstrap extends AbstractMessageBusModule {
 
-    @Autowired
-    private MessageBusService messageBusService;
 
     @Override
     public void init() {
@@ -25,6 +24,8 @@ public class MessageBusModuleBootstrap extends AbstractMessageBusModule {
 
     @Override
     public void start() {
+
+        MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
         messageBusService.subscribeMessage(CommonDigestMessage.class, new CommonDigestHandler());
         messageBusService.subscribeMessage(GetMessageBodyMessage.class, new GetMessageBodyHandler());
     }

@@ -28,9 +28,11 @@ import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
+import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.storage.constant.LedgerStorageConstant;
@@ -46,7 +48,7 @@ import java.util.List;
  * @Date: 2018/5/8
  */
 @Service
-public class UtxoLedgerStorageServiceImpl implements UtxoLedgerStorageService {
+public class UtxoLedgerStorageServiceImpl implements UtxoLedgerStorageService,InitializingBean {
 
     /**
      * 通用数据存储服务
@@ -54,8 +56,12 @@ public class UtxoLedgerStorageServiceImpl implements UtxoLedgerStorageService {
      */
     @Autowired
     private DBService dbService;
-
-    public UtxoLedgerStorageServiceImpl() {
+    /**
+     * 该方法在所有属性被设置之后调用，用于辅助对象初始化
+     * This method is invoked after all properties are set, and is used to assist object initialization.
+     */
+    @Override
+    public void afterPropertiesSet() throws NulsException {
         Result result = dbService.createArea(LedgerStorageConstant.DB_AREA_LEDGER_TRANSACTION);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
@@ -64,7 +70,6 @@ public class UtxoLedgerStorageServiceImpl implements UtxoLedgerStorageService {
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
-
     }
 
     @Override
