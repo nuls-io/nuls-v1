@@ -40,13 +40,13 @@ import static org.junit.Assert.*;
 /**
  * Created by ln on 2018/5/10.
  */
-public class RegisterAgentTransactionValidatorTest extends BaseTest {
+public class RegisterAgentTxValidatorTest extends BaseTest {
 
     @Test
     public void test() {
         RegisterAgentTransaction tx = new RegisterAgentTransaction();
 
-        RegisterAgentTransactionValidator validator = new RegisterAgentTransactionValidator();
+        RegisterAgentTxValidator validator = new RegisterAgentTxValidator();
 
         ValidateResult result = validator.validate(tx);
         assertFalse(result.isSuccess());

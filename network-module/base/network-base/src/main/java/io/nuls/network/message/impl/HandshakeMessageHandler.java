@@ -17,6 +17,7 @@ import io.nuls.network.protocol.message.HandshakeMessage;
 
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.protocol.message.base.BaseMessage;
 
 public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 
@@ -35,7 +36,8 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
     }
 
     @Override
-    public NetworkEventResult process(BaseNetworkMessage message, Node node) {
+    public NetworkEventResult process(BaseMessage message, Node node) {
+        System.out.println("-------------------- HandshakeMessageHandler process  ------------------------");
 
         HandshakeMessage handshakeMessage = (HandshakeMessage) message;
 

@@ -6,8 +6,8 @@ import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.constant.MessageBusErrorCode;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
+import io.nuls.message.bus.manager.MessageManager;
 import io.nuls.message.bus.message.CommonDigestMessage;
-import io.nuls.message.bus.message.manager.MessageManager;
 import io.nuls.message.bus.processor.manager.ProcessData;
 import io.nuls.message.bus.processor.manager.ProcessorManager;
 import io.nuls.message.bus.service.MessageBusService;
@@ -23,7 +23,7 @@ import java.util.List;
  * @author: Charlie
  * @date: 2018/5/6
  */
-//@Service
+@Service
 public class MessageBusServiceImpl implements MessageBusService {
 
     @Autowired

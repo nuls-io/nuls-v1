@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,53 +20,25 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.db.service;
 
-import io.nuls.kernel.model.Result;
+package io.nuls.consensus.poc.protocol.constant;
+
+import io.nuls.kernel.constant.ErrorCode;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/9
+ * @author: Niels Wang
+ * @date: 2018/5/13
  */
-public interface BatchOperation {
-
-    /**
-     * 增加或者更新操作
-     * Add or update operations.
-     *
-     * @param key
-     * @param value
-     * @return
-     */
-    Result put(byte[] key, byte[] value);
-
-    /**
-     * 存储或者更新对象
-     * Add or update the object
-     *
-     * @param area
-     * @param key
-     * @param value 需要存储或者更新的对象/Objects that need to be added or updated.
-     * @return
-     */
-    <T> Result putModel(byte[] key, T value);
-
-    /**
-     * 删除操作
-     * Delete operation
-     *
-     * @param key
-     * @return
-     */
-    Result delete(byte[] key);
-
-    /**
-     * 执行批量操作
-     * Perform batch operation
-     *
-     * @return
-     */
-    Result executeBatch();
+public interface PocConsensusErrorCode {
+    ErrorCode CS_UNKOWN_EXCEPTION = ErrorCode.init("CS000", 70000);
+    ErrorCode TIME_OUT = ErrorCode.init("CS001", 70001);
+    ErrorCode DEPOSIT_ERROR = ErrorCode.init("CS002", 70002);
+    ErrorCode DEPOSIT_NOT_ENOUGH = ErrorCode.init("CS003", 70003);
+    ErrorCode CONSENSUS_EXCEPTION = ErrorCode.init("CS004", 70004);
+    ErrorCode COMMISSION_RATE_OUT_OF_RANGE = ErrorCode.init("cs005", 70005);
+    ErrorCode LACK_OF_CREDIT = ErrorCode.init("cs006", 70006);
+    ErrorCode DEPOSIT_OVER_COUNT = ErrorCode.init("cs007", 70007);
+    ErrorCode DEPOSIT_TOO_MUCH = ErrorCode.init("cs008", 70008);
 }

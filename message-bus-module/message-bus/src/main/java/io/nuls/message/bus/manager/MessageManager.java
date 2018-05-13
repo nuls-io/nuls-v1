@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.message.bus.message.manager;
+package io.nuls.message.bus.manager;
 
 import io.nuls.protocol.message.base.BaseMessage;
 
@@ -51,7 +51,8 @@ public class MessageManager {
             BaseMessage message = msgClass.newInstance();
             putMessage(message.getHeader().getModuleId(), message.getHeader().getMsgType(), msgClass);
         } catch (Exception e) {
-            //do nothing
+            e.printStackTrace();
+            //todo nothing
         }
     }
 }

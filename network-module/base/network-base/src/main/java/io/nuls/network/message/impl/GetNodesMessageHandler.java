@@ -8,6 +8,7 @@ import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
 import io.nuls.network.protocol.message.BaseNetworkMessage;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.protocol.message.base.BaseMessage;
 
 public class GetNodesMessageHandler implements BaseNetworkMeesageHandler {
 
@@ -22,7 +23,7 @@ public class GetNodesMessageHandler implements BaseNetworkMeesageHandler {
     }
 
     @Override
-    public NetworkEventResult process(BaseNetworkMessage message, Node node) {
+    public NetworkEventResult process(BaseMessage message, Node node) {
 
         HandshakeMessage handshakeMessage = (HandshakeMessage) message;
 

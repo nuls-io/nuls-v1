@@ -2,6 +2,7 @@ package io.nuls.network.module.impl;
 
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.message.bus.manager.MessageManager;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.ConnectionManager;
@@ -9,6 +10,7 @@ import io.nuls.network.manager.NodeManager;
 import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.message.filter.impl.MagicNumberFilter;
 import io.nuls.network.module.AbstractNetworkModule;
+import io.nuls.network.protocol.message.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,6 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
     @Override
     public void init() {
         initNetworkParam();
-
         initOther();
         connectionManager.init();
         nodeManager.init();
@@ -48,6 +49,13 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
     private void initOther() {
         MagicNumberFilter.getInstance().addMagicNum(NetworkParam.getInstance().getPacketMagic());
         MessageFilterChain.getInstance().addFilter(MagicNumberFilter.getInstance());
+        MessageManager.putMessage(HandshakeMessage.class);
+        MessageManager.putMessage(GetVersionMessage.class);
+        MessageManager.putMessage(VersionMessage.class);
+        MessageManager.putMessage(GetNodesMessage.class);
+        MessageManager.putMessage(NodesMessage.class);
+        MessageManager.putMessage(GetNodesIpMessage.class);
+        MessageManager.putMessage(NodesIpMessage.class);
     }
 
     @Override

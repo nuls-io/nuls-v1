@@ -23,9 +23,15 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.entity.Node;
+import io.nuls.network.protocol.message.GetVersionMessage;
+import io.nuls.network.protocol.message.NetworkMessageBody;
+
+import java.util.Collection;
 
 /**
  * @author vivi
@@ -42,7 +48,7 @@ public class NodeDiscoverHandler implements Runnable {
         return instance;
     }
 
-    private NetworkParam network = NetworkParam.getInstance();
+    private NetworkParam networkParam = NetworkParam.getInstance();
 
     private NodeManager nodesManager = NodeManager.getInstance();
 
@@ -76,6 +82,17 @@ public class NodeDiscoverHandler implements Runnable {
 
     @Override
     public void run() {
-
+        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+        while (running) {
+            Collection<Node> nodeList = nodesManager.getAvailableNodes();
+            NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
+                    10001, NulsDigestData.calcDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
+            GetVersionMessage getVersionMessage = new GetVersionMessage(body);
+            for (Node node : nodeList) {
+                if (node.getType() == Node.OUT) {
+                    broadcastHandler.broadcastToNode(getVersionMessage, node, true);
+                }
+            }
+        }
     }
 }

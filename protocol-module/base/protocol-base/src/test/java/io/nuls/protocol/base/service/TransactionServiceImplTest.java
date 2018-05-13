@@ -247,7 +247,7 @@ public class TransactionServiceImplTest {
         setCommonFields(tx);
         StopAgent txData = new StopAgent();
         txData.setAddress(AddressTool.getAddress(ecKey.getPubKey()));
-        txData.setRegisterTxHash(tx.getHash());
+        txData.setRegisterTxHash(agentTxHash);
         tx.setTxData(txData);
         signTransaction(tx, ecKey);
         return tx;
