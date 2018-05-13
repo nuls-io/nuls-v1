@@ -36,10 +36,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.CoinData;
-import io.nuls.kernel.model.Na;
 import io.nuls.kernel.utils.AddressTool;
-import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 
 import java.util.Arrays;
@@ -49,7 +46,7 @@ import java.util.Arrays;
  * @date 2018/5/10
  */
 @Component
-public class RegisterAgentTxValidator implements NulsDataValidator<RegisterAgentTransaction> {
+public class RegisterAgentTxValidator extends BaseConsensusProtocolValidator<RegisterAgentTransaction> {
 
     private static int AGENT_NAME_MAS_LENGTH = 32;
     @Autowired
@@ -104,9 +101,4 @@ public class RegisterAgentTxValidator implements NulsDataValidator<RegisterAgent
         }
         return ValidateResult.getSuccessResult();
     }
-
-    private boolean isDepositOk(Na deposit, CoinData coinData) {
-        return deposit.equals(coinData.getTo().get(0).getNa());
-    }
-
 }

@@ -39,9 +39,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Na;
-import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 
 import java.util.List;
@@ -51,7 +49,7 @@ import java.util.List;
  * @date 2018/5/10
  */
 @Component
-public class DepositTxValidator implements NulsDataValidator<DepositTransaction> {
+public class DepositTxValidator extends BaseConsensusProtocolValidator<DepositTransaction> {
 
     @Autowired
     private PunishLogStorageService punishLogStorageService;
@@ -103,10 +101,6 @@ public class DepositTxValidator implements NulsDataValidator<DepositTransaction>
             return ValidateResult.getFailedResult(this.getClass().getName(), SeverityLevelEnum.FLAGRANT_FOUL, PocConsensusErrorCode.DEPOSIT_ERROR);
         }
         return ValidateResult.getSuccessResult();
-    }
-
-    private boolean isDepositOk(Na deposit, CoinData coinData) {
-        return deposit.equals(coinData.getTo().get(0).getNa());
     }
 
 }

@@ -106,4 +106,9 @@ public interface PocConsensusProtocolConstant {
      * Penalty coefficient,greater than 4.
      */
     int CREDIT_MAGIC_NUM = 4;
+
+    /**
+     * lock of lockTime
+     */
+    long LOCK_OF_LOCK_TIME =  -1L;
 }
