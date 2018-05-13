@@ -46,7 +46,7 @@ public class ConnectionManager {
 
     private NetworkMessageHandlerFactory messageHandlerFactory = NetworkMessageHandlerFactory.getInstance();
 
-    private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
+    private MessageBusService messageBusService;
 
     public void init() {
         nodeManager = NodeManager.getInstance();
@@ -196,5 +196,12 @@ public class ConnectionManager {
             return true;
         }
         return false;
+    }
+
+    public MessageBusService getMessageBusService() {
+        if(messageBusService == null) {
+            messageBusService = NulsContext.getServiceBean(MessageBusService.class);
+        }
+        return messageBusService;
     }
 }

@@ -81,6 +81,7 @@ public class NodeManager implements Runnable {
      * 同时开启获取对方最新信息的线程
      */
     public void start() {
+        getNetworkStorage().init();
         List<Node> nodeList = getNetworkStorage().getLocalNodeList(20);
         nodeList.addAll(getSeedNodes());
         for (Node node : nodeList) {
