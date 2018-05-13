@@ -74,13 +74,13 @@ public class NetworkStorage {
         getDbService().putModel(NetworkConstant.NODE_DB_AREA, bytes(node.getId()), po);
     }
 
-    public void deleteNode(Node node) {
-        getDbService().delete(NetworkConstant.NODE_DB_AREA, bytes(node.getId()));
+    public void deleteNode(String nodeId) {
+        getDbService().delete(NetworkConstant.NODE_DB_AREA, bytes(nodeId));
     }
 
 
     private DBService getDbService() {
-        if(dbService == null) {
+        if (dbService == null) {
             dbService = NulsContext.getServiceBean(DBService.class);
         }
         return dbService;

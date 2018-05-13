@@ -253,7 +253,7 @@ public class NodeManager implements Runnable {
             removeNode(node);
         } else {
 //            Log.info("------------remove node is null-----------" + nodeId);
-            getNetworkStorage().deleteNode(node);
+            getNetworkStorage().deleteNode(nodeId);
             outNodeIdSet.remove(nodeId);
         }
     }
@@ -265,7 +265,7 @@ public class NodeManager implements Runnable {
         } else {
 //            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
             outNodeIdSet.remove(node.getId());
-            getNetworkStorage().deleteNode(node);
+            getNetworkStorage().deleteNode(nodeId);
         }
     }
 
@@ -300,7 +300,7 @@ public class NodeManager implements Runnable {
             connectedNodes.remove(node.getId());
             handShakeNodes.remove(node.getId());
             if (node.getStatus() == Node.BAD) {
-                getNetworkStorage().deleteNode(node);
+                getNetworkStorage().deleteNode(node.getId());
             }
             return;
         }
@@ -319,7 +319,7 @@ public class NodeManager implements Runnable {
             }
         } else {
             disConnectNodes.remove(node.getId());
-            getNetworkStorage().deleteNode(node);
+            getNetworkStorage().deleteNode(node.getId());
         }
     }
 
