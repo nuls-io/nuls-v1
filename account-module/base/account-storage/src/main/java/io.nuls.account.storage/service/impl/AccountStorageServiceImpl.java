@@ -45,7 +45,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
     public Result saveAccountList(List<AccountPo> accountPoList) {
         BatchOperation batch = dbService.createWriteBatch(AccountStorageConstant.DB_AREA_ACCOUNT);
         for (AccountPo po : accountPoList) {
-            //batch.put(po.getAddressObj().getBase58Bytes(), po.serialize());
+            batch.putModel(po.getAddressObj().getBase58Bytes(), po);
         }
         return batch.executeBatch();
     }
@@ -65,14 +65,8 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
 
     @Override
     public Result<List<AccountPo>> getAccountList() {
-        List<Entry<byte[], byte[]>> entryList = dbService.entryList(AccountStorageConstant.DB_AREA_ACCOUNT);
-        List<AccountPo> list = new ArrayList<>();
-        for (Entry<byte[], byte[]> entry : entryList){
-            AccountPo account = new AccountPo();
-            //account.parse(entry.getValue());
-            list.add(account);
-        }
-        return Result.getSuccess().setData(list) ;
+        List<AccountPo> listPo = dbService.values(AccountStorageConstant.DB_AREA_ACCOUNT, AccountPo.class);
+        return Result.getSuccess().setData(listPo) ;
     }
 
     @Override

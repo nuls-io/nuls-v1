@@ -40,16 +40,6 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
             return ValidateResult.getFailedResult(alias.getClass().getName(), AccountErrorCode.ALIAS_ERROR);
         }
 
-       /* long aliasValue = 0;
-        UtxoData utxoData = (UtxoData) tx.getCoinData();
-        for (UtxoInput input : utxoData.getInputs()) {
-            aliasValue += input.getFrom().getValue();
-        }
-
-        if (aliasValue < AccountConstant.ALIAS_NA.getValue() + tx.getFee().getValue()) {
-            return ValidateResult.getFailedResult(ErrorCode.INVALID_INPUT);
-        }*/
-
         AliasPo aliasPo = alisaStorageService.getAlias(alias.getAlias()).getData();
         if (aliasPo != null) {
             return ValidateResult.getFailedResult(AliasPo.class.getName(), AccountErrorCode.ALIAS_EXIST);
