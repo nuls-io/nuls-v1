@@ -29,10 +29,15 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
+import io.nuls.network.protocol.message.GetNodesMessage;
 import io.nuls.network.protocol.message.GetVersionMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.network.protocol.message.NodeMessageBody;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author vivi
@@ -69,16 +74,18 @@ public class NodeDiscoverHandler implements Runnable {
      */
     public void findOtherNode(int size) {
         System.out.println("---------- findOtherNode --------");
-        // GetNodeEvent event = new GetNodeEvent(size);
-//        List<Node> nodeList = new ArrayList<>(nodesManager.getAvailableNodes());
-//        Collections.shuffle(nodeList);
-//        for (int i = 0; i < nodeList.size(); i++) {
-//            if (i == 2) {
-//                break;
-//            }
-//            Node node = nodeList.get(i);
-//            broadcastHandler.broadcastToNode(null, node, true);
-//        }
+        NodeMessageBody messageBody = new NodeMessageBody();
+        messageBody.setLength(size);
+        GetNodesMessage message = new GetNodesMessage(messageBody);
+        List<Node> nodeList = new ArrayList<>(nodesManager.getAvailableNodes());
+        Collections.shuffle(nodeList);
+        for (int i = 0; i < nodeList.size(); i++) {
+            if (i == 2) {
+                break;
+            }
+            Node node = nodeList.get(i);
+            broadcastHandler.broadcastToNode(message, node, true);
+        }
     }
 
     @Override
