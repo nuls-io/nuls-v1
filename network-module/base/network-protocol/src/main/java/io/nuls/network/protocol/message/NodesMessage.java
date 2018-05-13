@@ -11,7 +11,7 @@ public class NodesMessage extends BaseNetworkMessage<NodeMessageBody>{
      * 初始化基础消息的消息头
      */
     public NodesMessage() {
-        super(NetworkConstant.NETWORK_GET_NODE);
+        super(NetworkConstant.NETWORK_NODE);
     }
 
     @Override
