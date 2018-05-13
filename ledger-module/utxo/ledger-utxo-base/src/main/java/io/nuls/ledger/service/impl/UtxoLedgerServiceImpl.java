@@ -23,15 +23,21 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.core.tools.log.Log;
+import io.nuls.db.service.BatchOperation;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.utils.VarInt;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
-import io.nuls.ledger.storage.service.UtxoLedgerStorageService;
+import io.nuls.ledger.storage.service.UtxoLedgerUtxoStorageService;
+import io.nuls.ledger.storage.service.UtxoLedgerTransactionStorageService;
+import org.spongycastle.util.Arrays;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,18 +53,53 @@ import static io.nuls.core.tools.str.StringUtils.asString;
 public class UtxoLedgerServiceImpl implements LedgerService {
 
     private final static String CLASS_NAME = UtxoLedgerServiceImpl.class.getName();
-    private final static int TX_HASH_LENGTH = 35;
+    private final static int TX_HASH_LENGTH = 34;
 
     @Autowired
-    private UtxoLedgerStorageService storageService;
+    private UtxoLedgerUtxoStorageService utxoStorageService;
+    @Autowired
+    private UtxoLedgerTransactionStorageService transactionStorageService;
 
     @Override
     public Result saveTx(Transaction tx) {
         if (tx == null) {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER);
         }
+        byte[] txHashBytes = new byte[0];
+        try {
+            txHashBytes = tx.getHash().serialize();
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
+        // 保存CoinData
+        BatchOperation batch = utxoStorageService.createWriteBatch();
+        CoinData coinData = tx.getCoinData();
+        if (coinData != null) {
+            // 删除utxo已花费 - from
+            List<Coin> froms = coinData.getFrom();
+            for (Coin from : froms) {
+                batch.delete(from.getOwner());
+            }
+            // 保存utxo - to
+            List<Coin> tos = coinData.getTo();
+            byte[] indexBytes;
+            for (int i = 0, length = tos.size(); i < length; i++) {
+                try {
+                    batch.put(Arrays.concatenate(txHashBytes, new VarInt(i).encode()), tos.get(i).serialize());
+                } catch (IOException e) {
+                    Log.error(e);
+                    return Result.getFailed(e.getMessage());
+                }
+            }
+            // 执行批量
+            Result batchResult = batch.executeBatch();
+            if (batchResult.isFailed()) {
+                return batchResult;
+            }
+        }
         // 保存交易
-        Result result = storageService.saveTx(tx);
+        Result result = transactionStorageService.saveTx(tx);
         return result;
     }
 
@@ -67,13 +108,47 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         if (tx == null) {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER);
         }
-        Result result = storageService.deleteTx(tx);
+        byte[] txHashBytes = new byte[0];
+        try {
+            txHashBytes = tx.getHash().serialize();
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
+
+        // 回滚CoinData
+        BatchOperation batch = utxoStorageService.createWriteBatch();
+        CoinData coinData = tx.getCoinData();
+        if (coinData != null) {
+            // 保存utxo已花费 - from
+            List<Coin> froms = coinData.getFrom();
+            for (Coin from : froms) {
+                try {
+                    batch.put(from.getOwner(), from.serialize());
+                } catch (IOException e) {
+                    Log.error(e);
+                    return Result.getFailed(e.getMessage());
+                }
+            }
+            // 删除utxo - to
+            List<Coin> tos = coinData.getTo();
+            byte[] indexBytes;
+            for (int i = 0, length = tos.size(); i < length; i++) {
+                batch.delete(Arrays.concatenate(txHashBytes, new VarInt(i).encode()));
+            }
+            // 执行批量
+            Result batchResult = batch.executeBatch();
+            if (batchResult.isFailed()) {
+                return batchResult;
+            }
+        }
+        Result result = transactionStorageService.deleteTx(tx);
         return result;
     }
 
     @Override
     public Transaction getTx(NulsDigestData hash) {
-        return storageService.getTx(hash);
+        return transactionStorageService.getTx(hash);
     }
 
     @Override
@@ -82,8 +157,14 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.NULL_PARAMETER);
         }
         List<Coin> froms = coinData.getFrom();
+        HashSet set = new HashSet(froms.size());
         Na fromTotal = Na.ZERO;
         for (Coin from : froms) {
+            // 验证双花
+            if(!set.add(asString(from.getOwner()))) {
+                return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT);
+            }
+            // 验证是否可用
             if (TimeService.currentTimeMillis() < from.getLockTime()) {
                 return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_UNUSABLE);
             }
@@ -94,6 +175,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         for (Coin to : tos) {
             toTotal = toTotal.add(to.getNa());
         }
+        // 验证输出不能大于输入
         if (fromTotal.compareTo(toTotal) < 0) {
             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_AMOUNT);
         }
@@ -137,8 +219,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             if(validateUtxoKeySet.contains(asString(fromBytes))) {
                 continue;
             } else {
-                if(null == storageService.getCoinBytes(fromBytes)) {
-                    if(null != storageService.getTxBytes(getTxBytes(fromBytes))) {
+                if(null == utxoStorageService.getCoinBytes(fromBytes)) {
+                    if(null != transactionStorageService.getTxBytes(getTxBytes(fromBytes))) {
                         return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT);
                     } else {
                         return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.ORPHAN_TX);
@@ -208,10 +290,10 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         List<Coin> froms = coinData.getFrom();
         for(Coin from : froms) {
             if(from.getLockTime() != -1) {
-                return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_UNUSABLE);
+                return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_STATUS_CHANGE);
             }
         }
-        Result result = storageService.saveTx(tx);
+        Result result = transactionStorageService.saveTx(tx);
         return result;
     }
 }

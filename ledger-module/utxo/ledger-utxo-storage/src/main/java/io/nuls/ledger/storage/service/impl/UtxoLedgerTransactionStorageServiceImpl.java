@@ -25,7 +25,6 @@ package io.nuls.ledger.storage.service.impl;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.db.constant.DBErrorCode;
-import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
@@ -34,21 +33,18 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.storage.constant.LedgerStorageConstant;
-import io.nuls.ledger.storage.service.UtxoLedgerStorageService;
-import org.spongycastle.util.Arrays;
+import io.nuls.ledger.storage.service.UtxoLedgerTransactionStorageService;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * @Desription:
  * @Author: PierreLuo
- * @Date: 2018/5/8
+ * @Date: 2018/5/13
  */
 @Service
-public class UtxoLedgerStorageServiceImpl implements UtxoLedgerStorageService,InitializingBean {
+public class UtxoLedgerTransactionStorageServiceImpl implements UtxoLedgerTransactionStorageService,InitializingBean {
 
     /**
      * 通用数据存储服务
@@ -66,10 +62,6 @@ public class UtxoLedgerStorageServiceImpl implements UtxoLedgerStorageService,In
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
-        result = dbService.createArea(LedgerStorageConstant.DB_AREA_LEDGER_UTXO);
-        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
-            throw new NulsRuntimeException(result.getErrorCode());
-        }
     }
 
     @Override
@@ -82,32 +74,7 @@ public class UtxoLedgerStorageServiceImpl implements UtxoLedgerStorageService,In
             txHashBytes = tx.getHash().serialize();
         } catch (IOException e) {
             Log.error(e);
-            Result.getFailed(e.getMessage());
-        }
-        CoinData coinData = tx.getCoinData();
-        if (coinData != null) {
-            // 删除utxo已花费 - from
-            List<Coin> froms = coinData.getFrom();
-            BatchOperation batch = dbService.createWriteBatch(LedgerStorageConstant.DB_AREA_LEDGER_UTXO);
-            for (Coin from : froms) {
-                batch.delete(from.getOwner());
-            }
-            // 保存utxo - to
-            List<Coin> tos = coinData.getTo();
-            byte[] indexBytes;
-            for (int i = 0, length = tos.size(); i < length; i++) {
-                try {
-                    batch.put(Arrays.concatenate(txHashBytes, new VarInt(i).encode()), tos.get(i).serialize());
-                } catch (IOException e) {
-                    Log.error(e);
-                    Result.getFailed(e.getMessage());
-                }
-            }
-            // 执行批量
-            Result batchResult = batch.executeBatch();
-            if (batchResult.isFailed()) {
-                return batchResult;
-            }
+            return Result.getFailed(e.getMessage());
         }
         // 保存交易
         Result result = dbService.putModel(LedgerStorageConstant.DB_AREA_LEDGER_TRANSACTION, txHashBytes, tx);
@@ -142,42 +109,9 @@ public class UtxoLedgerStorageServiceImpl implements UtxoLedgerStorageService,In
             Log.error(e);
             return Result.getFailed(e.getMessage());
         }
-        CoinData coinData = tx.getCoinData();
-        if (coinData != null) {
-            // 保存utxo已花费 - from
-            List<Coin> froms = coinData.getFrom();
-            BatchOperation batch = dbService.createWriteBatch(LedgerStorageConstant.DB_AREA_LEDGER_UTXO);
-            for (Coin from : froms) {
-                try {
-                    batch.put(from.getOwner(), from.serialize());
-                } catch (IOException e) {
-                    Log.error(e);
-                    Result.getFailed(e.getMessage());
-                }
-            }
-            // 删除utxo - to
-            List<Coin> tos = coinData.getTo();
-            byte[] indexBytes;
-            for (int i = 0, length = tos.size(); i < length; i++) {
-                batch.delete(Arrays.concatenate(txHashBytes, new VarInt(i).encode()));
-            }
-            // 执行批量
-            Result batchResult = batch.executeBatch();
-            if (batchResult.isFailed()) {
-                return batchResult;
-            }
-        }
         // 删除交易
         Result result = dbService.delete(LedgerStorageConstant.DB_AREA_LEDGER_TRANSACTION, txHashBytes);
         return result;
-    }
-
-    @Override
-    public byte[] getCoinBytes(byte[] owner) {
-        if (owner == null) {
-            return null;
-        }
-        return dbService.get(LedgerStorageConstant.DB_AREA_LEDGER_UTXO, owner);
     }
 
     @Override
@@ -187,5 +121,4 @@ public class UtxoLedgerStorageServiceImpl implements UtxoLedgerStorageService,In
         }
         return dbService.get(LedgerStorageConstant.DB_AREA_LEDGER_TRANSACTION, txBytes);
     }
-
 }

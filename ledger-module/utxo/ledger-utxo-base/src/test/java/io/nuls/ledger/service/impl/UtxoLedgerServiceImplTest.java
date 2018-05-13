@@ -4,7 +4,7 @@ import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.*;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.core.tools.crypto.ECKey;
-import io.nuls.core.tools.log.Log;
+import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.module.impl.LevelDbModuleBootstrap;
 import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.kernel.exception.NulsException;
@@ -12,14 +12,17 @@ import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.VarInt;
+import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.ledger.storage.constant.LedgerStorageConstant;
+import io.nuls.ledger.storage.service.UtxoLedgerTransactionStorageService;
+import io.nuls.ledger.storage.service.UtxoLedgerUtxoStorageService;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import org.iq80.leveldb.util.Slice;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
+import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,13 +30,15 @@ import java.util.List;
 
 public class UtxoLedgerServiceImplTest {
 
-    private List<Transaction> allList;
-    private List<Transaction> txList;
+    private static List<Transaction> allList;
+    private static List<Transaction> txList;
 
-    private LedgerService ledgerService;
+    private static LedgerService ledgerService;
+    private static UtxoLedgerUtxoStorageService utxoStorageService;
+    private static UtxoLedgerTransactionStorageService transactionStorageService;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
         MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
         mk.init();
         mk.start();
@@ -43,23 +48,58 @@ public class UtxoLedgerServiceImplTest {
         bootstrap.start();
 
         ledgerService = SpringLiteContext.getBean(LedgerService.class);
+        utxoStorageService = SpringLiteContext.getBean(UtxoLedgerUtxoStorageService.class);
+        transactionStorageService = SpringLiteContext.getBean(UtxoLedgerTransactionStorageService.class);
         initAllList();
+    }
+
+    private void recoveryTx3Data() {
+        allList.get(3).getCoinData().getFrom().clear();
+        allList.get(3).getCoinData().getFrom().add(new Coin("abcd3".getBytes(), Na.parseNuls(10001), 0));
+        Coin coinTemp = allList.get(3).getCoinData().getTo().remove(0);
+        allList.get(3).getCoinData().getTo().clear();
+        allList.get(3).getCoinData().getTo().add(coinTemp);
     }
 
     @Test
     public void saveTx() throws IOException {
+        // 无from的交易
         Transaction tx = allList.get(0);
         System.out.println("tx: " + new Slice(tx.serialize()));
         Result result = ledgerService.saveTx(tx);
+        System.out.println(result);
         Assert.assertTrue(result.isSuccess());
+        byte[] toCoin = utxoStorageService.getCoinBytes(Arrays.concatenate(tx.getHash().serialize(), new VarInt(0).encode()));
+        Assert.assertNotNull(toCoin);
+        Assert.assertEquals(new Slice(tx.getCoinData().getTo().get(0).serialize()), new Slice(toCoin));
         Transaction txFromDB = ledgerService.getTx(tx.getHash());
         System.out.println("txFromDB: " + new Slice(txFromDB.serialize()));
         Assert.assertEquals(new Slice(tx.serialize()), new Slice(txFromDB.serialize()));
 
+        // 有from的交易, 检验交易和coindata
+        Transaction tx3 = allList.get(3);
+        CoinData from3 = tx3.getCoinData();
+        from3.getFrom().get(0).setOwner("abcd3".getBytes());
+        from3.getFrom().add(new Coin("abcd3.1".getBytes(), Na.parseNuls(10002), 0));
+        from3.getFrom().add(new Coin("abcd3.2".getBytes(), Na.parseNuls(10003), 0));
+        from3.getTo().add(new Coin("abcd3.1".getBytes(), Na.parseNuls(10002), 0));
+        from3.getTo().add(new Coin("abcd3.2".getBytes(), Na.parseNuls(10003), 0));
+        result = ledgerService.saveTx(tx3);
+        Assert.assertTrue(result.isSuccess());
+        byte[] to3Coin0 = utxoStorageService.getCoinBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
+        byte[] to3Coin1 = utxoStorageService.getCoinBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(1).encode()));
+        byte[] to3Coin2 = utxoStorageService.getCoinBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(2).encode()));
+        Assert.assertNotNull(to3Coin0);
+        Assert.assertNotNull(to3Coin1);
+        Assert.assertNotNull(to3Coin2);
+        Assert.assertEquals(new Slice(tx3.getCoinData().getTo().get(0).serialize()), new Slice(to3Coin0));
+        Assert.assertEquals(new Slice(tx3.getCoinData().getTo().get(1).serialize()), new Slice(to3Coin1));
+        Assert.assertEquals(new Slice(tx3.getCoinData().getTo().get(2).serialize()), new Slice(to3Coin2));
     }
 
     @Test
     public void rollbackTx() throws IOException {
+        //TODO pierre
         saveTx();
         Transaction tx = allList.get(0);
         System.out.println("tx: " + new Slice(tx.serialize()));
@@ -72,6 +112,7 @@ public class UtxoLedgerServiceImplTest {
 
     @Test
     public void getTx() throws IOException {
+        //TODO pierre
         saveTx();
         Transaction tx = allList.get(0);
         System.out.println("tx: " + new Slice(tx.serialize()));
@@ -82,40 +123,122 @@ public class UtxoLedgerServiceImplTest {
 
     @Test
     public void verifyCoinDataItself() throws IOException {
-        for(Transaction tx : allList) {
-            if(tx.getCoinData() == null) {
-                continue;
-            }
-            if(tx.getCoinData().getFrom().size() == 0) {
-                continue;
-            }
-            System.out.println("tx: " + new Slice(tx.serialize()));
-            Result result = ledgerService.verifyCoinData(tx.getCoinData());
-            System.out.println(result.getErrorCode().getCode());
-            Assert.assertTrue(result.isSuccess());
-        }
+        recoveryTx3Data();
+
+        CoinData from3 = allList.get(3).getCoinData();
+        from3.getFrom().get(0).setOwner("abcd3".getBytes());
+        from3.getFrom().add(new Coin("abcd3.1".getBytes(), Na.parseNuls(10001), 0));
+        from3.getFrom().add(new Coin("abcd3.2".getBytes(), Na.parseNuls(10001), 0));
+        // 普通校验
+        Result result = ledgerService.verifyCoinData(from3);
+        System.out.println(result.getErrorCode().getCode());
+        System.out.println(result);
+        Assert.assertTrue(result.isSuccess());
+
+        // 双花校验
+        from3.getFrom().add(new Coin("abcd3.2".getBytes(), Na.parseNuls(10001), 0));
+        result = ledgerService.verifyCoinData(from3);
+        System.out.println(result.getErrorCode().getCode());
+        Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), result.getErrorCode().getCode());
+
+        // 是否可用校验
+        from3.getFrom().remove(from3.getFrom().size() - 1);
+        from3.getFrom().add(new Coin("abcd3.3".getBytes(), Na.parseNuls(10001), System.currentTimeMillis() + 1000 * 9));
+        result = ledgerService.verifyCoinData(from3);
+        System.out.println(result.getErrorCode().getCode());
+        Assert.assertEquals(LedgerErrorCode.UTXO_UNUSABLE.getCode(), result.getErrorCode().getCode());
+
+        // 是否输出大于输入校验
+        from3.getFrom().remove(from3.getFrom().size() - 1);
+        from3.getTo().add(new Coin("abcd3.3".getBytes(), Na.parseNuls(90001), 0));
+        result = ledgerService.verifyCoinData(from3);
+        System.out.println(result.getErrorCode().getCode());
+        Assert.assertEquals(LedgerErrorCode.INVALID_AMOUNT.getCode(), result.getErrorCode().getCode());
+
 
     }
 
     @Test
-    public void verifyCoinDataIsExist() {
-        Result result = ledgerService.verifyCoinData(allList.get(2).getCoinData(), allList);
+    public void verifyCoinDataIsExist() throws IOException {
+        allList.get(3).getCoinData().getFrom().get(0).setOwner("abcd3".getBytes());
+        allList.get(4).getCoinData().getFrom().get(0).setOwner("abcd4".getBytes());
+
+        // 存在，测试期望是成功
+        CoinData coinData = new CoinData();
+        coinData.getFrom().add(new Coin("abcd3".getBytes(), Na.parseNuls(10001), 0));
+        Result result = ledgerService.verifyCoinData(coinData, allList);
         Assert.assertTrue(result.isSuccess());
+
+        // 不存在，测试期望是失败 - 孤儿交易
+        coinData.getFrom().get(0).setOwner("abcd3.0".getBytes());
+        result = ledgerService.verifyCoinData(coinData, allList);
+        Assert.assertEquals(LedgerErrorCode.ORPHAN_TX.getCode(), result.getErrorCode().getCode());
+
+        // 不存在，测试期望是失败 - 双花交易
+        ECKey ecKey1 = new ECKey();
+        ECKey ecKey2 = new ECKey();
+        ECKey ecKey3 = new ECKey();
+        TransferTransaction tx = createTransferTransaction(ecKey1, null, ecKey2, Na.ZERO);
+        byte[] txHashBytes = tx.getHash().serialize();
+        coinData = tx.getCoinData();
+        coinData.getFrom().get(0).setOwner(Arrays.concatenate(txHashBytes, new VarInt(0).encode()));
+        result = ledgerService.saveTx(tx);
+        Object object = transactionStorageService.getTxBytes(txHashBytes);
+        //System.out.println("before=" + java.util.Arrays.toString(txHashBytes) + ", size=" + txHashBytes.length);
+        Assert.assertTrue(result.isSuccess());
+        result = ledgerService.verifyCoinData(coinData, allList);
+        Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), result.getErrorCode().getCode());
     }
 
     @Test
     public void verifyDoubleSpend() {
+        // 无双花，测试期望是成功
+        allList.get(3).getCoinData().getFrom().get(0).setOwner("abcd3".getBytes());
+        allList.get(4).getCoinData().getFrom().get(0).setOwner("abcd4".getBytes());
         Result result = ledgerService.verifyDoubleSpend(allList);
         Assert.assertTrue(result.isSuccess());
+
+        // 存在双花，测试期望是失败
+        allList.get(4).getCoinData().getFrom().get(0).setOwner("abcd3".getBytes());
+        result = ledgerService.verifyDoubleSpend(allList);
+        Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), result.getErrorCode().getCode());
     }
 
     @Test
     public void unlockTxCoinData() {
-        Result result = ledgerService.unlockTxCoinData(allList.get(1));
+        recoveryTx3Data();
+
+        // 有一条LockTime为-1的，测试期望是成功
+        Coin coin = allList.get(3).getCoinData().getFrom().get(0);
+        coin.setOwner("abcd3".getBytes());
+        coin.setNa(Na.parseNuls(10001));
+        coin.setLockTime(-1);
+        Result result = ledgerService.unlockTxCoinData(allList.get(3));
+        System.out.println(result);
         Assert.assertTrue(result.isSuccess());
+
+        // 没有LockTime为-1的，测试期望是失败
+        coin = allList.get(3).getCoinData().getFrom().get(0);
+        coin.setLockTime(1000);
+        result = ledgerService.unlockTxCoinData(allList.get(3));
+        Assert.assertEquals(LedgerErrorCode.UTXO_STATUS_CHANGE.getCode(), result.getErrorCode().getCode());
+
+        // LockTime既有-1的，又有不是-1的，测试期望是失败
+        coin = allList.get(3).getCoinData().getFrom().get(0);
+        coin.setLockTime(-1);
+        CoinData coinData = allList.get(3).getCoinData();
+        coinData.getFrom().add(new Coin("abcd3.1".getBytes(), Na.parseNuls(10001), 0));
+        result = ledgerService.unlockTxCoinData(allList.get(3));
+        Assert.assertEquals(LedgerErrorCode.UTXO_STATUS_CHANGE.getCode(), result.getErrorCode().getCode());
     }
 
-    private void initAllList() throws NulsException, IOException {
+    @AfterClass
+    public static void tearDown() throws Exception {
+        LevelDBManager.destroyArea(LedgerStorageConstant.DB_AREA_LEDGER_TRANSACTION);
+        LevelDBManager.destroyArea(LedgerStorageConstant.DB_AREA_LEDGER_UTXO);
+    }
+
+    private static void initAllList() throws NulsException, IOException {
         List<Transaction> list = new ArrayList<>();
         ECKey ecKey1 = new ECKey();
         ECKey ecKey2 = new ECKey();
@@ -177,10 +300,10 @@ public class UtxoLedgerServiceImplTest {
         list.add(stop2);
         list.add(stop3);
         list.add(stop4);
-        this.allList = list;
+        allList = list;
     }
 
-    private RedPunishTransaction createRedPunishTx(ECKey ecKey, ECKey... ecKeys) {
+    private static RedPunishTransaction createRedPunishTx(ECKey ecKey, ECKey... ecKeys) {
         RedPunishTransaction tx = new RedPunishTransaction();
         setCommonFields(tx);
         RedPunishData data = new RedPunishData();
@@ -192,7 +315,7 @@ public class UtxoLedgerServiceImplTest {
         return tx;
     }
 
-    private YellowPunishTransaction createYellowPunishTx(ECKey ecKey, ECKey... ecKeys) {
+    private static YellowPunishTransaction createYellowPunishTx(ECKey ecKey, ECKey... ecKeys) {
         YellowPunishTransaction tx = new YellowPunishTransaction();
         setCommonFields(tx);
         YellowPunishData data = new YellowPunishData();
@@ -216,7 +339,7 @@ public class UtxoLedgerServiceImplTest {
         return tx;
     }
 
-    private StopAgentTransaction createStopAgentTransaction(ECKey ecKey, NulsDigestData agentTxHash) throws IOException {
+    private static StopAgentTransaction createStopAgentTransaction(ECKey ecKey, NulsDigestData agentTxHash) throws IOException {
         StopAgentTransaction tx = new StopAgentTransaction();
         setCommonFields(tx);
         StopAgent txData = new StopAgent();
@@ -228,7 +351,7 @@ public class UtxoLedgerServiceImplTest {
 
     }
 
-    private JoinConsensusTransaction createDepositTransaction(ECKey ecKey, NulsDigestData agentTxHash, Na na) throws IOException {
+    private static JoinConsensusTransaction createDepositTransaction(ECKey ecKey, NulsDigestData agentTxHash, Na na) throws IOException {
         JoinConsensusTransaction tx = new JoinConsensusTransaction();
         setCommonFields(tx);
         Deposit deposit = new Deposit();
@@ -243,7 +366,7 @@ public class UtxoLedgerServiceImplTest {
         return tx;
     }
 
-    private RegisterAgentTransaction createRegisterAgentTransaction(ECKey ecKey1, ECKey ecKey2, String agentName) throws IOException {
+    private static RegisterAgentTransaction createRegisterAgentTransaction(ECKey ecKey1, ECKey ecKey2, String agentName) throws IOException {
         RegisterAgentTransaction tx = new RegisterAgentTransaction();
         setCommonFields(tx);
         Agent agent = new Agent();
@@ -266,7 +389,7 @@ public class UtxoLedgerServiceImplTest {
         return null;
     }
 
-    private TransferTransaction createTransferTransaction(ECKey ecKey1, byte[] coinKey, ECKey ecKey2, Na na) throws IOException {
+    private static TransferTransaction createTransferTransaction(ECKey ecKey1, byte[] coinKey, ECKey ecKey2, Na na) throws IOException {
         TransferTransaction tx = new TransferTransaction();
         setCommonFields(tx);
         CoinData coinData = new CoinData();
@@ -281,7 +404,7 @@ public class UtxoLedgerServiceImplTest {
         return tx;
     }
 
-    private CoinBaseTransaction createCoinBaseTransaction(ECKey ecKey, ECKey... ecKeys) throws IOException {
+    private static CoinBaseTransaction createCoinBaseTransaction(ECKey ecKey, ECKey... ecKeys) throws IOException {
         CoinBaseTransaction tx = new CoinBaseTransaction();
         setCommonFields(tx);
         CoinData coinData = new CoinData();
@@ -298,13 +421,13 @@ public class UtxoLedgerServiceImplTest {
         return tx;
     }
 
-    private void setCommonFields(Transaction tx) {
+    private static void setCommonFields(Transaction tx) {
         tx.setTime(System.currentTimeMillis());
         tx.setBlockHeight(1);
         tx.setRemark("for test".getBytes());
     }
 
-    private void signTransaction(Transaction tx, ECKey ecKey) throws IOException {
+    private static void signTransaction(Transaction tx, ECKey ecKey) throws IOException {
         NulsDigestData hash = null;
         hash = NulsDigestData.calcDigestData(tx.serializeForHash());
         tx.setHash(hash);
@@ -319,7 +442,4 @@ public class UtxoLedgerServiceImplTest {
         tx.setScriptSig(scriptSig.serialize());
     }
 
-    @After
-    public void tearDown() throws Exception {
-    }
 }
