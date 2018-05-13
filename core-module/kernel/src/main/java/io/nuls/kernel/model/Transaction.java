@@ -256,7 +256,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
     public byte[] serializeForHash() throws IOException {
         ByteArrayOutputStream bos = null;
         try {
-            int size = size();
+            int size = size()-SerializeUtils.sizeOfBytes(scriptSig);;
             bos = new UnsafeByteArrayOutputStream(size);
             NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
             if (size == 0) {
@@ -268,11 +268,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
                 buffer.writeNulsData(txData);
                 buffer.writeNulsData(coinData);
             }
-            byte[] bytes = bos.toByteArray();
-            if (bytes.length != this.size()) {
-                throw new NulsRuntimeException(KernelErrorCode.FAILED, "date serialize for hash error：" + this.getClass());
-            }
-            return bytes;
+           return bos.toByteArray();
         } finally {
             if (bos != null) {
                 try {
