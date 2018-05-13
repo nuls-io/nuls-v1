@@ -76,6 +76,13 @@ public interface AccountService {
      */
     Result<List<Account>> createAccount(String password);
 
+    /**
+     * 创建一个账户
+     * <p>
+     * Create a accounts
+     *
+     * @return the result of the opration
+     */
     Result<List<Account>> createAccount();
 
     /**
