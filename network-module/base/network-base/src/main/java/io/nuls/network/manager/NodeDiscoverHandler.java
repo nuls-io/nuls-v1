@@ -98,7 +98,7 @@ public class NodeDiscoverHandler implements Runnable {
             GetVersionMessage getVersionMessage = new GetVersionMessage(body);
             for (Node node : nodeList) {
                 if (node.getType() == Node.OUT) {
-
+                    System.out.println("--------------------discont------node:" + node.toString());
                     BroadcastResult result = broadcastHandler.broadcastToNode(getVersionMessage, node, true);
                     System.out.println("---------------send getVersionMessage --------" + result.isSuccess());
                 }
