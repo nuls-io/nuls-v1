@@ -2,6 +2,7 @@ package io.nuls.message.bus.service.impl;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.constant.MessageBusErrorCode;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
