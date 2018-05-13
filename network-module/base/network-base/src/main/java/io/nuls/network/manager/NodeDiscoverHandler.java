@@ -73,7 +73,6 @@ public class NodeDiscoverHandler implements Runnable {
      * @param size
      */
     public void findOtherNode(int size) {
-        System.out.println("---------- findOtherNode --------");
         NodeMessageBody messageBody = new NodeMessageBody();
         messageBody.setLength(size);
         GetNodesMessage message = new GetNodesMessage(messageBody);

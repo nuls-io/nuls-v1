@@ -32,7 +32,6 @@ public class NodesMessageHandler implements BaseNetworkMeesageHandler {
 
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
-        System.out.println("---------------  NodesMessageHandler process -------------------");
         NodesMessage nodesMessage = (NodesMessage) message;
         NodeMessageBody body = nodesMessage.getMsgBody();
 
