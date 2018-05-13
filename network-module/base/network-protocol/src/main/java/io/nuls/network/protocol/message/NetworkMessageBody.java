@@ -68,6 +68,7 @@ public class NetworkMessageBody extends BaseNulsData {
     @Override
     public int size() {
         int s = 0;
+        s += VarInt.sizeOf(handshakeType);
         s += VarInt.sizeOf(severPort);
         s += VarInt.sizeOf(bestBlockHeight);
         s += bestBlockHash.size();
@@ -79,6 +80,7 @@ public class NetworkMessageBody extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.write(new VarInt(handshakeType).encode());
         stream.write(new VarInt(severPort).encode());
         stream.write(new VarInt(bestBlockHeight).encode());
         stream.write(bestBlockHash.serialize());
@@ -86,6 +88,7 @@ public class NetworkMessageBody extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer buffer) throws NulsException {
+        handshakeType = (int) buffer.readVarInt();
         severPort = (int) buffer.readVarInt();
         bestBlockHeight = (int) buffer.readVarInt();
         bestBlockHash = buffer.readHash();
