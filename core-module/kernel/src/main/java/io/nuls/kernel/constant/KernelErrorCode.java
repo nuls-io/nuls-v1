@@ -100,18 +100,6 @@ public interface KernelErrorCode {
      * ---------  RPC Exception code   --------
      */
     ErrorCode REQUEST_DENIED = ErrorCode.init("RPC001", 50001);
-    /*
-     * ----------  Consensus Exception code   --------
-     */
-    ErrorCode CS_UNKOWN_EXCEPTION = ErrorCode.init("CS000", 70000);
-    ErrorCode TIME_OUT = ErrorCode.init("CS001", 70001);
-    ErrorCode DEPOSIT_ERROR = ErrorCode.init("CS002", 70002);
-    ErrorCode DEPOSIT_NOT_ENOUGH = ErrorCode.init("CS003", 70003);
-    ErrorCode CONSENSUS_EXCEPTION = ErrorCode.init("CS004", 70004);
-    ErrorCode COMMISSION_RATE_OUT_OF_RANGE = ErrorCode.init("cs005", 70005);
-    ErrorCode LACK_OF_CREDIT = ErrorCode.init("cs006", 70006);
-    ErrorCode DEPOSIT_OVER_COUNT = ErrorCode.init("cs007", 70007);
-    ErrorCode DEPOSIT_TOO_MUCH = ErrorCode.init("cs008", 70008);
 
     /*
      * validator
