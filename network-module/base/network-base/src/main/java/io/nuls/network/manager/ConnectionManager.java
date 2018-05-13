@@ -96,7 +96,7 @@ public class ConnectionManager {
             while (offset < bytes.length - 1) {
                 MessageHeader header = new MessageHeader();
                 header.parse(bytes);
-                BaseMessage message = this.messageBusService.getMessageInstance(header.getModuleId(), header.getMsgType()).getData();
+                BaseMessage message = getMessageBusService().getMessageInstance(header.getModuleId(), header.getMsgType()).getData();
                 list.add(message);
                 offset = message.serialize().length;
                 if (bytes.length > offset) {
