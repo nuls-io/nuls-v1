@@ -24,8 +24,15 @@
  */
 package io.nuls.kernel.script;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
+
+import java.io.IOException;
 
 /**
  * author Facjas
@@ -38,20 +45,18 @@ public class P2PKHScript extends Script {
     public P2PKHScript() {
     }
 
-    public P2PKHScript(byte[] bytes) throws NulsException {
-        this();
-        NulsDigestData nulsDigestData = new NulsDigestData();
-        nulsDigestData.parse(bytes);
-        this.publicKeyDigest = nulsDigestData;
-    }
-
     public P2PKHScript(NulsDigestData publicKeyDigest) {
         this.publicKeyDigest = publicKeyDigest;
     }
 
     @Override
     public byte[] getBytes() {
-        return publicKeyDigest.serialize();
+        try {
+            return publicKeyDigest.serialize();
+        } catch (IOException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
     }
 
     public NulsDigestData getPublicKeyDigest() {
@@ -60,6 +65,24 @@ public class P2PKHScript extends Script {
 
     public void setPublicKeyDigest(NulsDigestData publicKeyDigest) {
         this.publicKeyDigest = publicKeyDigest;
+    }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(publicKeyDigest);
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.publicKeyDigest = byteBuffer.readHash();
+    }
+
+    @Override
+    public int size() {
+        return SerializeUtils.sizeOfNulsData(publicKeyDigest);
     }
 
     //todo  not finished

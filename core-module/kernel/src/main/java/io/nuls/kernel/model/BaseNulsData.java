@@ -24,19 +24,21 @@
  */
 package io.nuls.kernel.model;
 
+import io.nuls.core.tools.crypto.UnsafeByteArrayOutputStream;
+import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.exception.NulsVerificationException;
-import io.nuls.kernel.validate.NulsDataValidator;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.kernel.validate.ValidatorManager;
-import io.protostuff.LinkedBuffer;
-import io.protostuff.ProtostuffIOUtil;
-import io.protostuff.runtime.RuntimeSchema;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Arrays;
 
 /**
  * @author Niels
@@ -44,39 +46,52 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class BaseNulsData implements NulsData, Serializable, Cloneable {
 
-    protected transient static Map<Class<? extends BaseNulsData>, RuntimeSchema<? extends BaseNulsData>> SCHEMA_MAP = new ConcurrentHashMap<>();
-
-    protected transient NulsDataType dataType;
-
-    public BaseNulsData() {
-        if (SCHEMA_MAP.get(this.getClass()) == null) {
-            RuntimeSchema<? extends BaseNulsData> schema = RuntimeSchema.createFrom(this.getClass());
-            SCHEMA_MAP.put(this.getClass(), schema);
-        }
-    }
-
-    @Override
-    public int size() {
-        return this.serialize().length;
-    }
-
     /**
      * First, serialize the version field
      */
     @Override
-    public final byte[] serialize() {
-        RuntimeSchema schema = SCHEMA_MAP.get(this.getClass());
-        return ProtostuffIOUtil.toByteArray(this, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
+    public final byte[] serialize() throws IOException {
+        ByteArrayOutputStream bos = null;
+        try {
+            int size = size();
+            bos = new UnsafeByteArrayOutputStream(size);
+            NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
+            if (size == 0) {
+                bos.write(NulsConstant.PLACE_HOLDER);
+            } else {
+                serializeToStream(buffer);
+            }
+            byte[] bytes = bos.toByteArray();
+            if (bytes.length != this.size()) {
+                throw new NulsRuntimeException(KernelErrorCode.FAILED, "data serialize error：" + this.getClass());
+            }
+            return bytes;
+        } finally {
+            if (bos != null) {
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    throw e;
+                }
+            }
+        }
     }
 
+    /**
+     * serialize important field
+     */
+    protected abstract void serializeToStream(NulsOutputStreamBuffer stream) throws IOException;
+
+
     @Override
-    public final void parse(byte[] bytes) {
-        if (bytes == null || bytes.length == 0) {
+    public final void parse(byte[] bytes) throws NulsException {
+        if (bytes == null || bytes.length == 0 || ((bytes.length == 4) && Arrays.equals(NulsConstant.PLACE_HOLDER, bytes))) {
             return;
         }
-        RuntimeSchema schema = SCHEMA_MAP.get(this.getClass());
-        ProtostuffIOUtil.mergeFrom(bytes, this, schema);
+        this.parse(new NulsByteBuffer(bytes));
     }
+
+    protected abstract void parse(NulsByteBuffer byteBuffer) throws NulsException;
 
     /**
      * @throws NulsException
@@ -92,14 +107,5 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
             throw new NulsVerificationException(result.getMessage());
         }
     }
-
-    public NulsDataType getDataType() {
-        return dataType;
-    }
-
-    public void setDataType(NulsDataType dataType) {
-        this.dataType = dataType;
-    }
-
 
 }

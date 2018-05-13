@@ -6,11 +6,11 @@ import io.nuls.account.model.Address;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.crypto.Sha256Hash;
-import io.nuls.core.tools.crypto.Utils;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
+import io.nuls.kernel.utils.SerializeUtils;
 
 import java.math.BigInteger;
 
@@ -31,7 +31,7 @@ public class AccountTool {
     }
 
     public static Address newAddress(byte[] publicKey) throws NulsException {
-        return new Address(NulsContext.DEFAULT_CHAIN_ID, Utils.sha256hash160(publicKey));
+        return new Address(NulsContext.DEFAULT_CHAIN_ID, SerializeUtils.sha256hash160(publicKey));
     }
 
     public static Account createAccount(String prikey) throws NulsException {
@@ -45,7 +45,7 @@ public class AccountTool {
                 throw new NulsException(AccountErrorCode.DATA_PARSE_ERROR);
             }
         }
-        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, Utils.sha256hash160(key.getPubKey()));
+        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, SerializeUtils.sha256hash160(key.getPubKey()));
         Account account = new Account();
         account.setEncryptedPriKey(new byte[0]);
         account.setAddress(address);

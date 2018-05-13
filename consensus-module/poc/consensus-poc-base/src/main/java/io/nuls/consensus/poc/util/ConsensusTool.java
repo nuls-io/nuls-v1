@@ -35,6 +35,7 @@ import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.core.tools.calc.DoubleUtils;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -44,6 +45,7 @@ import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -86,7 +88,12 @@ public class ConsensusTool {
         block.setTxs(blockData.getTxList());
         BlockHeader header = new BlockHeader();
         block.setHeader(header);
-        block.getHeader().setExtend(blockData.getRoundData().serialize());
+        try {
+            block.getHeader().setExtend(blockData.getRoundData().serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
         header.setHeight(blockData.getHeight());
         header.setTime(blockData.getTime());
         header.setPreHash(blockData.getPreHash());

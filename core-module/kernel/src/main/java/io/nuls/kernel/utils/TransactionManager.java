@@ -25,6 +25,8 @@
 package io.nuls.kernel.utils;
 
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.TransactionProcessor;
@@ -41,7 +43,8 @@ import java.util.Map;
  */
 public class TransactionManager {
 
-    private static final Map<Class<? extends Transaction>, Class> TX_SERVICE_MAP = new HashMap<>();
+    private static final Map<Class<? extends Transaction>, Class<? extends TransactionProcessor>> TX_SERVICE_MAP = new HashMap<>();
+    private static final Map<Integer, Class<? extends Transaction>> TYPE_TX_MAP = new HashMap<>();
 
     public static void init() throws Exception {
         List<TransactionProcessor> beanList = SpringLiteContext.getBeanList(TransactionProcessor.class);
@@ -62,8 +65,16 @@ public class TransactionManager {
         }
     }
 
-    public static final void putTx(Class<? extends Transaction> txClass, Class<? extends TransactionProcessor> txProcessorClass) {
+    private static final void putTx(Class<? extends Transaction> txClass, Class<? extends TransactionProcessor> txProcessorClass) {
         TX_SERVICE_MAP.put(txClass, txProcessorClass);
+        try {
+            Transaction tx = txClass.newInstance();
+            TYPE_TX_MAP.put(tx.getType(), txClass);
+        } catch (InstantiationException e) {
+            Log.error(e);
+        } catch (IllegalAccessException e) {
+            Log.error(e);
+        }
     }
 
     private static TransactionProcessor getProcessor(Class<? extends Transaction> txClass) {
@@ -94,5 +105,24 @@ public class TransactionManager {
             Log.error(e);
             return new ArrayList<>();
         }
+    }
+
+    public static Transaction getInstance(NulsByteBuffer byteBuffer) throws Exception {
+        int txType = (int) new NulsByteBuffer(byteBuffer.getPayloadByCursor()).readVarInt();
+        Class<? extends Transaction> txClass = TYPE_TX_MAP.get(txType);
+        if (null == txClass) {
+            throw new NulsRuntimeException(KernelErrorCode.FAILED, "transaction type not exist!");
+        }
+        Transaction tx = byteBuffer.readNulsData(txClass.newInstance());
+        return tx;
+    }
+
+
+    public static List<Transaction> getInstances(NulsByteBuffer byteBuffer, long txCount) throws Exception {
+        List<Transaction> list = new ArrayList<>();
+        for (int i = 0; i < txCount; i++) {
+            list.add(getInstance(byteBuffer));
+        }
+        return list;
     }
 }

@@ -24,12 +24,15 @@
  */
 package io.nuls.protocol.message;
 
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.GetBlocksHashParam;
 
 /**
  * 从对等节点处获取区块头摘要列表的消息
  * The message of gets the block header summary list from the peer node.
+ *
  * @author Niels
  * @date 2018/1/15
  */
@@ -37,6 +40,11 @@ public class GetBlocksHashRequest extends BaseProtocolMessage<GetBlocksHashParam
 
     public GetBlocksHashRequest() {
         super(ProtocolConstant.MESSAGE_TYPE_GET_BLOCKS_HASH);
+    }
+
+    @Override
+    protected GetBlocksHashParam parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new GetBlocksHashParam());
     }
 
     public GetBlocksHashRequest(long start, long size) {

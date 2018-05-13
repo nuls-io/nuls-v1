@@ -27,6 +27,8 @@
 package io.nuls.db.entity;
 
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.utils.NulsByteBuffer;
 
 /**
  * Created by ln on 2018/5/6.
@@ -35,5 +37,11 @@ public class DBTestEntity extends Transaction {
 
     public DBTestEntity() {
         super(0);
+    }
+
+    @Override
+    protected TransactionLogicData parseTxData(NulsByteBuffer byteBuffer) {
+        // todo auto-generated method stub
+        return null;
     }
 }

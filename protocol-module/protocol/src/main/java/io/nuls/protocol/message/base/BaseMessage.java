@@ -23,9 +23,14 @@
  */
 package io.nuls.protocol.message.base;
 
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
-import io.protostuff.Tag;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+
+import java.io.IOException;
 
 /**
  * 所有网络上传输的消息的基类，定义了网络消息的基本格式
@@ -34,23 +39,51 @@ import io.protostuff.Tag;
  * @author Niels
  * @date 2017/11/7
  */
-public class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
+public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
+
     private transient NulsDigestData hash;
 
-    @Tag(1)
     private MessageHeader header;
 
-    @Tag(2)
     private T msgBody;
 
     public BaseMessage() {
 
     }
+
     /**
      * 初始化基础消息的消息头
      */
     public BaseMessage(short moduleId, short eventType) {
         this.header = new MessageHeader(moduleId, eventType);
+    }
+
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.write(header.serialize());
+        stream.write(msgBody.serialize());
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        MessageHeader header = new MessageHeader();
+        header.parse(byteBuffer);
+        this.header = header;
+        this.msgBody = parseMessageBody(byteBuffer);
+    }
+
+    protected abstract T parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException;
+
+    @Override
+    public int size() {
+        int s = 0;
+        s += header.size();
+        s += msgBody.size();
+        return s;
     }
 
     /**
@@ -65,7 +98,12 @@ public class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
             return 0x00;
         }
         byte xor = 0x00;
-        byte[] data = msgBody.serialize();
+        byte[] data = new byte[0];
+        try {
+            data = msgBody.serialize();
+        } catch (IOException e) {
+            Log.error(e);
+        }
         for (int i = 0; i < data.length; i++) {
             xor ^= data[i];
         }
@@ -91,8 +129,13 @@ public class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
 
     public NulsDigestData getHash() {
         if (hash == null) {
-            this.hash = NulsDigestData.calcDigestData(this.serialize());
+            try {
+                this.hash = NulsDigestData.calcDigestData(this.serialize());
+            } catch (IOException e) {
+                Log.error(e);
+            }
         }
         return hash;
     }
+
 }

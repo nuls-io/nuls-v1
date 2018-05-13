@@ -36,11 +36,14 @@ import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.protocol.tx.JoinConsensusTransaction;
 import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +73,11 @@ public class BaseChainTest extends BaseTest {
         roundData.setPackingIndexOfRound(1);
         roundData.setRoundIndex(1);
         roundData.setRoundStartTime(1L);
-        blockHeader.setExtend(roundData.serialize());
+        try {
+            blockHeader.setExtend(roundData.serialize());
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+        }
 
         chain.setEndBlockHeader(blockHeader);
 
@@ -89,7 +96,8 @@ public class BaseChainTest extends BaseTest {
         Transaction<Agent> agentTx = new RegisterAgentTransaction();
         Agent agent = new Agent();
         agent.setPackingAddress(AddressTool.getAddress(ecKey.getPubKey()));
-        agent.setAgentAddress(AddressTool.getAddress(ecKey.getPubKey()));
+        agent.setAgentAddress(AddressTool.getAddress(new ECKey().getPubKey()));
+        agent.setRewardAddress(AddressTool.getAddress(ecKey.getPubKey()));
         agent.setTime(System.currentTimeMillis());
         agent.setDeposit(Na.NA.multiply(20000));
         agent.setAgentName("test".getBytes());
@@ -150,19 +158,29 @@ public class BaseChainTest extends BaseTest {
         blockHeader.setHeight(preBlock.getHeader().getHeight() + 1);
         blockHeader.setPreHash(preBlock.getHeader().getHash());
         blockHeader.setTxCount(1);
-        blockHeader.setMerkleHash(NulsDigestData.calcDigestData(new byte[20]));
 
-        MeetingRound currentRound = chainContainer.initRound();
-        MeetingMember member = currentRound.getMember(1);
-        blockHeader.setTime(member.getPackEndTime() + ConsensusConstant.BLOCK_TIME_INTERVAL_MILLIS * currentRound.getMemberCount());
+        MeetingRound round =  chainContainer.initRound();
+
+        BlockRoundData nextRoundData = new BlockRoundData();
+        nextRoundData.setRoundIndex(round.getIndex() + 1);
+        nextRoundData.setRoundStartTime(round.getEndTime());
+
+        MeetingRound currentRound = chainContainer.getRoundManager().getNextRound(nextRoundData, false);
+
+        MeetingMember member = currentRound.getMember(AddressTool.getAddress(ecKey.getPubKey()));
+        blockHeader.setTime(member.getPackEndTime());
 
         // add a round data
         BlockRoundData roundData = new BlockRoundData(preBlock.getHeader().getExtend());
         roundData.setConsensusMemberCount(currentRound.getMemberCount());
-        roundData.setPackingIndexOfRound(1);
-        roundData.setRoundIndex(currentRound.getIndex() + 1);
-        roundData.setRoundStartTime(currentRound.getEndTime());
-        blockHeader.setExtend(roundData.serialize());
+        roundData.setPackingIndexOfRound(member.getPackingIndexOfRound());
+        roundData.setRoundIndex(currentRound.getIndex());
+        roundData.setRoundStartTime(currentRound.getStartTime());
+        try {
+            blockHeader.setExtend(roundData.serialize());
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+        }
 
         // new a block of height 0
         Block block = new Block();

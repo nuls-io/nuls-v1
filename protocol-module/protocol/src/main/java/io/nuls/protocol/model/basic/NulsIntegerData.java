@@ -25,7 +25,13 @@
 
 package io.nuls.protocol.model.basic;
 
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.protocol.model.BasicTypeData;
+
+import java.io.IOException;
 
 /**
  * 受控的、整数类型封装
@@ -41,5 +47,19 @@ public class NulsIntegerData extends BasicTypeData<Integer> {
 
     public NulsIntegerData(Integer val) {
         super(val);
+    }
+    @Override
+    public int size() {
+        return SerializeUtils.sizeOfVarInt(getVal());
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(getVal());
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.setVal((int) byteBuffer.readVarInt());
     }
 }

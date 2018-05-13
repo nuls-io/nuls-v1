@@ -28,13 +28,14 @@ import io.nuls.core.tools.crypto.*;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
-import io.nuls.kernel.model.Transaction;
-import io.protostuff.Tag;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 import org.spongycastle.crypto.params.KeyParameter;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author: Charlie
@@ -42,56 +43,57 @@ import java.util.List;
  */
 public class Account extends BaseNulsData {
 
+
     /**
      * 账户地址
      */
-    @Tag(1)
+
     private Address address;
 
     /**
      * 账户别名
      */
-    @Tag(2)
+
     private String alias;
 
     /**
      * is default acct
      */
-    @Tag(3)
+
     private int status;
 
     /**
      * 账户公钥
      */
-    @Tag(4)
+
     private byte[] pubKey;
 
     /**
      *
      */
-    @Tag(5)
+
     private byte[] extend;
 
     /**
      * 创建时间
      */
-    @Tag(6)
+
     private Long createTime;
 
 
-    @Tag(7)
+
     private byte[] encryptedPriKey;
 
     /**
      *Decrypted  prikey
      */
-    @Tag(8)
+
     private byte[] priKey;
 
     /**
      * local field
      */
-    @Tag(9)
+
     private ECKey ecKey;
 
 
@@ -182,13 +184,33 @@ public class Account extends BaseNulsData {
 
     @Override
     public int size() {
-        int s = Utils.sizeOfBytes(address.calcBase58bytes());
-        s += Utils.sizeOfString(alias);
-        s += Utils.sizeOfBytes(encryptedPriKey);
-        s += Utils.sizeOfBytes(pubKey);
+        int s = SerializeUtils.sizeOfBytes(address.calcBase58bytes());
+        s += SerializeUtils.sizeOfString(alias);
+        s += SerializeUtils.sizeOfBytes(encryptedPriKey);
+        s += SerializeUtils.sizeOfBytes(pubKey);
         s += 1;
-        s += Utils.sizeOfBytes(extend);
+        s += SerializeUtils.sizeOfBytes(extend);
         return s;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeBytesWithLength(address.calcBase58bytes());
+        stream.writeString(alias);
+        stream.writeBytesWithLength(encryptedPriKey);
+        stream.writeBytesWithLength(pubKey);
+        stream.write(status);
+        stream.writeBytesWithLength(extend);
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        address = Address.fromHashs(byteBuffer.readByLengthByte());
+        alias = new String(byteBuffer.readByLengthByte());
+        encryptedPriKey = byteBuffer.readByLengthByte();
+        pubKey = byteBuffer.readByLengthByte();
+        status = (int) (byteBuffer.readByte());
+        extend = byteBuffer.readByLengthByte();
     }
 
     public Object copy() {

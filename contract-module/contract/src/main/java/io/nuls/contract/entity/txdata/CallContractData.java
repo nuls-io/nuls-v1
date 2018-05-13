@@ -24,7 +24,12 @@
 package io.nuls.contract.entity.txdata;
 
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+
+import java.io.IOException;
 
 /**
  * @Desription:
@@ -86,5 +91,26 @@ public class CallContractData extends BaseNulsData {
 
     public void setArgs(Object[] args) {
         this.args = args;
+    }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        // todo auto-generated method stub
+
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        // todo auto-generated method stub
+
+    }
+
+    @Override
+    public int size() {
+        // todo auto-generated method stub
+        return 0;
     }
 }

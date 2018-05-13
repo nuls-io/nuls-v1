@@ -24,9 +24,16 @@
  */
 package io.nuls.kernel.model;
 
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
-import io.protostuff.Tag;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
+
+import java.io.IOException;
 
 /**
  * @author vivi
@@ -35,19 +42,12 @@ import io.protostuff.Tag;
 public class BlockHeader extends BaseNulsData {
 
     private transient NulsDigestData hash;
-    @Tag(1)
     private NulsDigestData preHash;
-    @Tag(2)
     private NulsDigestData merkleHash;
-    @Tag(3)
     private long time;
-    @Tag(4)
     private long height;
-    @Tag(5)
     private long txCount;
-    @Tag(6)
     private P2PKHScriptSig scriptSign;
-    @Tag(7)
     private byte[] extend;
 
     private transient int size;
@@ -63,11 +63,54 @@ public class BlockHeader extends BaseNulsData {
         forceCalcHash();
     }
 
-    protected void forceCalcHash() {
-        P2PKHScriptSig tempSign = this.scriptSign;
-        this.scriptSign = null;
-        this.hash = NulsDigestData.calcDigestData(this.serialize());
-        this.scriptSign = tempSign;
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfNulsData(preHash);
+        size += SerializeUtils.sizeOfNulsData(merkleHash);
+        size += SerializeUtils.sizeOfVarInt(time);
+        size += SerializeUtils.sizeOfVarInt(height);
+        size += SerializeUtils.sizeOfVarInt(txCount);
+        size += SerializeUtils.sizeOfBytes(extend);
+        size += SerializeUtils.sizeOfNulsData(scriptSign);
+        return size;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(preHash);
+        stream.writeNulsData(merkleHash);
+        stream.writeVarInt(time);
+        stream.writeVarInt(height);
+        stream.writeVarInt(txCount);
+        stream.writeBytesWithLength(extend);
+        stream.writeNulsData(scriptSign);
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.preHash = byteBuffer.readHash();
+        this.merkleHash = byteBuffer.readHash();
+        this.time = byteBuffer.readVarInt();
+        this.height = byteBuffer.readVarInt();
+        this.txCount = byteBuffer.readVarInt();
+        this.extend = byteBuffer.readByLengthByte();
+        try {
+            this.hash = NulsDigestData.calcDigestData(this.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+        }
+        this.scriptSign = byteBuffer.readNulsData(new P2PKHScriptSig());
+    }
+
+    private NulsDigestData forceCalcHash() {
+        try {
+            BlockHeader header = (BlockHeader) this.clone();
+            header.setScriptSig(null);
+            return NulsDigestData.calcDigestData(header.serialize());
+        } catch (Exception e) {
+            throw new NulsRuntimeException(e);
+        }
     }
 
     public NulsDigestData getHash() {

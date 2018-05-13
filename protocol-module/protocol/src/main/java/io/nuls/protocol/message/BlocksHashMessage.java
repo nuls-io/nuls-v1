@@ -24,6 +24,8 @@
  */
 package io.nuls.protocol.message;
 
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.BlockHashResponse;
 
@@ -35,5 +37,10 @@ public class BlocksHashMessage extends BaseProtocolMessage<BlockHashResponse> {
 
     public BlocksHashMessage() {
         super(ProtocolConstant.MESSAGE_TYPE_BLOCKS_HASH);
+    }
+
+    @Override
+    protected BlockHashResponse parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new BlockHashResponse());
     }
 }

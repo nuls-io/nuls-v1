@@ -27,8 +27,10 @@ package io.nuls.consensus.poc.protocol.tx;
 
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.CancelDeposit;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.NulsByteBuffer;
 
 /**
  * @author Niels
@@ -44,4 +46,8 @@ public class CancelDepositTransaction extends Transaction<CancelDeposit> {
         super(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
     }
 
+    @Override
+    protected CancelDeposit parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new CancelDeposit());
+    }
 }

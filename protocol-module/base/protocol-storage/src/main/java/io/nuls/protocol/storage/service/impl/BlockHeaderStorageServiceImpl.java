@@ -25,19 +25,23 @@
 
 package io.nuls.protocol.storage.service.impl;
 
-import io.nuls.core.tools.crypto.VarInt;
+import io.nuls.core.tools.log.Log;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.utils.VarInt;
 import io.nuls.protocol.storage.constant.ProtocolStorageConstant;
 import io.nuls.protocol.storage.po.BlockHeaderPo;
 import io.nuls.protocol.storage.service.BlockHeaderStorageService;
+
+import java.io.IOException;
 
 /**
  * 区块头数据存储服务实现类
@@ -67,7 +71,7 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
             throw new NulsRuntimeException(result.getErrorCode());
         }
         result = this.dbService.createArea(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER);
-        if (result.isFailed() &&!DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
     }
@@ -100,7 +104,12 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
         if (null == hash) {
             return null;
         }
-        return getBlockHeaderPo(hash.serialize());
+        try {
+            return getBlockHeaderPo(hash.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return null;
+        }
     }
 
     /**
@@ -116,9 +125,17 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
             return null;
         }
         BlockHeaderPo po = new BlockHeaderPo();
-        po.parse(bytes);
+        try {
+            po.parse(bytes);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
         NulsDigestData hash = new NulsDigestData();
-        hash.parse(hashBytes);
+        try {
+            hash.parse(hashBytes);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
         po.setHash(hash);
         return po;
     }
@@ -135,8 +152,20 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
         if (null == po) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
-        byte[] hashBytes = po.getHash().serialize();
-        Result result = dbService.put(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER, hashBytes, po.serialize());
+        byte[] hashBytes = new byte[0];
+        try {
+            hashBytes = po.getHash().serialize();
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
+        Result result = null;
+        try {
+            result = dbService.put(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER, hashBytes, po.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
         if (result.isFailed()) {
             return result;
         }
@@ -166,8 +195,17 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         dbService.delete(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX, new VarInt(po.getHeight()).encode());
-        dbService.put(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX, new VarInt(ProtocolStorageConstant.BEST_BLOCK_HASH_INDEX).encode(), po.getPreHash().serialize());
-        return removeBlockHerader(po.getHash().serialize());
+        try {
+            dbService.put(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX, new VarInt(ProtocolStorageConstant.BEST_BLOCK_HASH_INDEX).encode(), po.getPreHash().serialize());
+        } catch (IOException e) {
+            Log.error(e);
+        }
+        try {
+            return removeBlockHerader(po.getHash().serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
     }
 
     /**

@@ -25,6 +25,10 @@
 
 package io.nuls.kernel.model;
 
+import io.nuls.kernel.exception.NulsException;
+
+import java.io.IOException;
+
 /**
  * @author: Niels Wang
  * @date: 2018/4/17
@@ -36,7 +40,7 @@ public interface NulsData {
     /**
      * serialize important field
      */
-    byte[] serialize();
+    byte[] serialize() throws IOException;
 
-    void parse(byte[] bytes);
+    void parse(byte[] bytes) throws NulsException;
 }

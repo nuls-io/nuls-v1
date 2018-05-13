@@ -22,14 +22,18 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.model;
+
+package io.nuls.account.module;
+
+import io.nuls.account.constant.AccountConstant;
+import io.nuls.kernel.module.BaseModuleBootstrap;
 
 /**
- *
- * @author facjas
- * @date 2017/11/20
+ * @author: Niels Wang
+ * @date: 2018/5/13
  */
-public enum NulsDataType {
-
-    TRANSACTION,
+public abstract class AbstractAccountModule extends BaseModuleBootstrap {
+    public AbstractAccountModule( ) {
+        super(AccountConstant.MODULE_ID_ACCOUNT);
+    }
 }

@@ -1,10 +1,12 @@
 package io.nuls.network.manager;
 
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.connection.netty.NettyClient;
 import io.nuls.network.connection.netty.NettyServer;
@@ -43,6 +45,8 @@ public class ConnectionManager {
     private BroadcastHandler broadcastHandler;
 
     private NetworkMessageHandlerFactory messageHandlerFactory = NetworkMessageHandlerFactory.getInstance();
+
+    private MessageBusService messageBusService;
 
     public void init() {
         nodeManager = NodeManager.getInstance();
@@ -90,8 +94,9 @@ public class ConnectionManager {
             byte[] bytes = buffer.array();
             int offset = 0;
             while (offset < bytes.length - 1) {
-                BaseMessage message = new BaseMessage();
-                message.parse(bytes);
+                MessageHeader header = new MessageHeader();
+                header.parse(bytes);
+                BaseMessage message = getMessageBusService().getMessageInstance(header.getModuleId(), header.getMsgType()).getData();
                 list.add(message);
                 offset = message.serialize().length;
                 if (bytes.length > offset) {
@@ -191,5 +196,12 @@ public class ConnectionManager {
             return true;
         }
         return false;
+    }
+
+    public MessageBusService getMessageBusService() {
+        if(messageBusService == null) {
+            messageBusService = NulsContext.getServiceBean(MessageBusService.class);
+        }
+        return messageBusService;
     }
 }

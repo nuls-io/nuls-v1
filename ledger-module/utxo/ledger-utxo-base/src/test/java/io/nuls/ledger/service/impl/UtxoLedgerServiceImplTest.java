@@ -4,9 +4,10 @@ import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.*;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.core.tools.crypto.ECKey;
-import io.nuls.core.tools.str.StringUtils;
+import io.nuls.core.tools.log.Log;
 import io.nuls.db.module.impl.LevelDbModuleBootstrap;
 import io.nuls.kernel.MicroKernelBootstrap;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
@@ -20,11 +21,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.*;
-import static io.nuls.core.tools.str.StringUtils.*;
 
 public class UtxoLedgerServiceImplTest {
 
@@ -48,7 +47,7 @@ public class UtxoLedgerServiceImplTest {
     }
 
     @Test
-    public void saveTx() {
+    public void saveTx() throws IOException {
         Transaction tx = allList.get(0);
         System.out.println("tx: " + new Slice(tx.serialize()));
         Result result = ledgerService.saveTx(tx);
@@ -60,7 +59,7 @@ public class UtxoLedgerServiceImplTest {
     }
 
     @Test
-    public void rollbackTx() {
+    public void rollbackTx() throws IOException {
         saveTx();
         Transaction tx = allList.get(0);
         System.out.println("tx: " + new Slice(tx.serialize()));
@@ -72,7 +71,7 @@ public class UtxoLedgerServiceImplTest {
     }
 
     @Test
-    public void getTx() {
+    public void getTx() throws IOException {
         saveTx();
         Transaction tx = allList.get(0);
         System.out.println("tx: " + new Slice(tx.serialize()));
@@ -82,7 +81,7 @@ public class UtxoLedgerServiceImplTest {
     }
 
     @Test
-    public void verifyCoinDataItself() {
+    public void verifyCoinDataItself() throws IOException {
         for(Transaction tx : allList) {
             if(tx.getCoinData() == null) {
                 continue;
@@ -116,7 +115,7 @@ public class UtxoLedgerServiceImplTest {
         Assert.assertTrue(result.isSuccess());
     }
 
-    private void initAllList() {
+    private void initAllList() throws NulsException, IOException {
         List<Transaction> list = new ArrayList<>();
         ECKey ecKey1 = new ECKey();
         ECKey ecKey2 = new ECKey();
@@ -206,7 +205,7 @@ public class UtxoLedgerServiceImplTest {
         return tx;
     }
 
-    private CancelDepositTransaction createCancelDepositTransaction(ECKey ecKey, NulsDigestData txHash) {
+    private CancelDepositTransaction createCancelDepositTransaction(ECKey ecKey, NulsDigestData txHash) throws IOException {
         CancelDepositTransaction tx = new CancelDepositTransaction();
         setCommonFields(tx);
         CancelDeposit cd = new CancelDeposit();
@@ -217,7 +216,7 @@ public class UtxoLedgerServiceImplTest {
         return tx;
     }
 
-    private StopAgentTransaction createStopAgentTransaction(ECKey ecKey, NulsDigestData agentTxHash) {
+    private StopAgentTransaction createStopAgentTransaction(ECKey ecKey, NulsDigestData agentTxHash) throws IOException {
         StopAgentTransaction tx = new StopAgentTransaction();
         setCommonFields(tx);
         StopAgent txData = new StopAgent();
@@ -229,7 +228,7 @@ public class UtxoLedgerServiceImplTest {
 
     }
 
-    private JoinConsensusTransaction createDepositTransaction(ECKey ecKey, NulsDigestData agentTxHash, Na na) {
+    private JoinConsensusTransaction createDepositTransaction(ECKey ecKey, NulsDigestData agentTxHash, Na na) throws IOException {
         JoinConsensusTransaction tx = new JoinConsensusTransaction();
         setCommonFields(tx);
         Deposit deposit = new Deposit();
@@ -244,7 +243,7 @@ public class UtxoLedgerServiceImplTest {
         return tx;
     }
 
-    private RegisterAgentTransaction createRegisterAgentTransaction(ECKey ecKey1, ECKey ecKey2, String agentName) {
+    private RegisterAgentTransaction createRegisterAgentTransaction(ECKey ecKey1, ECKey ecKey2, String agentName) throws IOException {
         RegisterAgentTransaction tx = new RegisterAgentTransaction();
         setCommonFields(tx);
         Agent agent = new Agent();
@@ -267,7 +266,7 @@ public class UtxoLedgerServiceImplTest {
         return null;
     }
 
-    private TransferTransaction createTransferTransaction(ECKey ecKey1, byte[] coinKey, ECKey ecKey2, Na na) {
+    private TransferTransaction createTransferTransaction(ECKey ecKey1, byte[] coinKey, ECKey ecKey2, Na na) throws IOException {
         TransferTransaction tx = new TransferTransaction();
         setCommonFields(tx);
         CoinData coinData = new CoinData();
@@ -282,7 +281,7 @@ public class UtxoLedgerServiceImplTest {
         return tx;
     }
 
-    private CoinBaseTransaction createCoinBaseTransaction(ECKey ecKey, ECKey... ecKeys) {
+    private CoinBaseTransaction createCoinBaseTransaction(ECKey ecKey, ECKey... ecKeys) throws IOException {
         CoinBaseTransaction tx = new CoinBaseTransaction();
         setCommonFields(tx);
         CoinData coinData = new CoinData();
@@ -305,10 +304,12 @@ public class UtxoLedgerServiceImplTest {
         tx.setRemark("for test".getBytes());
     }
 
-    private void signTransaction(Transaction tx, ECKey ecKey) {
-        NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());
+    private void signTransaction(Transaction tx, ECKey ecKey) throws IOException {
+        NulsDigestData hash = null;
+        hash = NulsDigestData.calcDigestData(tx.serializeForHash());
         tx.setHash(hash);
-        byte[] signbytes = ecKey.sign(hash.serialize());
+        byte[] signbytes = new byte[0];
+        signbytes = ecKey.sign(hash.serialize());
         NulsSignData nulsSignData = new NulsSignData();
         nulsSignData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);
         nulsSignData.setSignBytes(signbytes);

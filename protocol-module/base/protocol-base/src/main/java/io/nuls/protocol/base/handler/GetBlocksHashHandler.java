@@ -80,7 +80,7 @@ public class GetBlocksHashHandler extends AbstractMessageHandler<GetBlocksHashRe
         event.setMsgBody(data);
         Result result = this.messageBusService.sendToNode(event, node, true);
         if (result.isFailed()) {
-            Log.warn("send not found failed:" + node.getId() + ", hash:" + hash.getDigestHex());
+            Log.warn("send not found failed:" + node.getId() + ", hash:" + hash);
         }
     }
 

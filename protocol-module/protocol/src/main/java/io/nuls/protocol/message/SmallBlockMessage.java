@@ -23,6 +23,8 @@
  */
 package io.nuls.protocol.message;
 
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.SmallBlock;
 
@@ -36,6 +38,11 @@ import io.nuls.protocol.model.SmallBlock;
 public class SmallBlockMessage extends BaseProtocolMessage<SmallBlock> {
     public SmallBlockMessage() {
         super(ProtocolConstant.MESSAGE_TYPE_NEW_BLOCK);
+    }
+
+    @Override
+    protected SmallBlock parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new SmallBlock());
     }
 
     public SmallBlockMessage(SmallBlock newBlock) {

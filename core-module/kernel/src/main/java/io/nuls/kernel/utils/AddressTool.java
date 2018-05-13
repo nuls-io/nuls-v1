@@ -26,7 +26,6 @@
 package io.nuls.kernel.utils;
 
 import io.nuls.core.tools.crypto.Base58;
-import io.nuls.core.tools.crypto.Utils;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
@@ -46,13 +45,13 @@ public class AddressTool {
     public static final int HASH_LENGTH = 23;
 
     public static byte[] getAddress(byte[] publicKey) {
-        if(publicKey == null) {
+        if (publicKey == null) {
             return null;
         }
-        byte[] hash160 = Utils.sha256hash160(publicKey);
+        byte[] hash160 = SerializeUtils.sha256hash160(publicKey);
         short chainId = NulsContext.DEFAULT_CHAIN_ID;
         byte[] body = new byte[22];
-        System.arraycopy(Utils.shortToBytes(chainId), 0, body, 0, 2);
+        System.arraycopy(SerializeUtils.shortToBytes(chainId), 0, body, 0, 2);
         System.arraycopy(hash160, 0, body, 2, hash160.length);
         byte xor = getXor(body);
         byte[] base58bytes = new byte[23];
@@ -71,14 +70,14 @@ public class AddressTool {
     }
 
     public static byte[] getAddress(P2PKHScriptSig scriptSig) {
-        if(scriptSig == null) {
+        if (scriptSig == null) {
             return null;
         }
         return getAddress(scriptSig.getPublicKey());
     }
 
     public static String getAddressBase58(byte[] publicKey) {
-        if(publicKey == null) {
+        if (publicKey == null) {
             return null;
         }
         byte[] bytes = getAddress(publicKey);
@@ -86,7 +85,7 @@ public class AddressTool {
     }
 
     public static String getAddressBase58(P2PKHScriptSig scriptSig) {
-        if(scriptSig == null) {
+        if (scriptSig == null) {
             return null;
 
         }

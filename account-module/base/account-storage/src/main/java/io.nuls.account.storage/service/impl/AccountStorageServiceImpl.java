@@ -45,14 +45,14 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
     public Result saveAccountList(List<AccountPo> accountPoList) {
         BatchOperation batch = dbService.createWriteBatch(AccountStorageConstant.DB_AREA_ACCOUNT);
         for (AccountPo po : accountPoList) {
-            batch.put(po.getAddressObj().getBase58Bytes(), po.serialize());
+            //batch.put(po.getAddressObj().getBase58Bytes(), po.serialize());
         }
         return batch.executeBatch();
     }
 
     @Override
     public Result saveAccount(AccountPo po) {
-        return dbService.put(AccountStorageConstant.DB_AREA_ACCOUNT, po.getAddressObj().getBase58Bytes(), po.serialize());
+        return dbService.putModel(AccountStorageConstant.DB_AREA_ACCOUNT, po.getAddressObj().getBase58Bytes(), po);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
         List<AccountPo> list = new ArrayList<>();
         for (Entry<byte[], byte[]> entry : entryList){
             AccountPo account = new AccountPo();
-            account.parse(entry.getValue());
+            //account.parse(entry.getValue());
             list.add(account);
         }
         return Result.getSuccess().setData(list) ;
@@ -77,12 +77,21 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
 
     @Override
     public Result<AccountPo> getAccount(Address address) {
-        byte[] poByte = dbService.get(AccountStorageConstant.DB_AREA_ACCOUNT, address.getBase58Bytes());
-        if(null == poByte || poByte.length<=0){
-            return Result.getFailed();
-        }
-        AccountPo account = new AccountPo();
-        account.parse(poByte);
+        return this.getAccount(address.getBase58Bytes());
+    }
+
+    @Override
+    public Result<AccountPo> getAccount(byte[] address) {
+        AccountPo account = dbService.getModel(AccountStorageConstant.DB_AREA_ACCOUNT, address, AccountPo.class);
         return Result.getSuccess().setData(account);
+    }
+
+    @Override
+    public Result updateAccount(AccountPo po) {
+        AccountPo account = dbService.getModel(AccountStorageConstant.DB_AREA_ACCOUNT, po.getAddressObj().getBase58Bytes(), AccountPo.class);
+        if(null == account){
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        return dbService.putModel(AccountStorageConstant.DB_AREA_ACCOUNT, po.getAddressObj().getBase58Bytes(), po);
     }
 }

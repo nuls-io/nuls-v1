@@ -27,6 +27,7 @@
 package io.nuls.consensus.poc.storage.service.impl;
 
 import io.nuls.consensus.poc.storage.service.OraphanStorageService;
+import io.nuls.core.tools.log.Log;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -35,6 +36,8 @@ import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
+
+import java.io.IOException;
 
 /**
  * Created by ln on 2018/5/8.
@@ -50,20 +53,30 @@ public class OraphanStorageServiceImpl implements OraphanStorageService, Initial
     @Override
     public boolean save(Block block) {
 
-        assert(block != null);
+        assert (block != null);
 
-        Result result = dbService.put(DB_NAME, block.getHeader().getHash().getDigestBytes(), block.serialize());
+        Result result = null;
+        try {
+            result = dbService.put(DB_NAME, block.getHeader().getHash().getDigestBytes(), block.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return false;
+        }
         return result.isSuccess();
     }
 
     @Override
     public Block get(NulsDigestData key) {
 
-        assert(key != null);
+        assert (key != null);
 
         byte[] content = dbService.get(DB_NAME, key.getDigestBytes());
         Block block = new Block();
-        block.parse(content);
+        try {
+            block.parse(content);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
 
         return block;
     }
@@ -71,7 +84,7 @@ public class OraphanStorageServiceImpl implements OraphanStorageService, Initial
     @Override
     public boolean delete(NulsDigestData key) {
 
-        assert(key != null);
+        assert (key != null);
 
         Result result = dbService.delete(DB_NAME, key.getDigestBytes());
 

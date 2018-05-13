@@ -24,10 +24,15 @@
  */
 package io.nuls.protocol.model;
 
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
-import io.protostuff.Tag;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,51 +48,105 @@ public class BlockHashResponse extends BaseNulsData {
      * 请求消息的hash值
      * the digest data of the request message
      */
-    @Tag(1)
+
     private NulsDigestData requestMessageHash;
     /**
      * 返回的高度列表
      * Returns a list of heights.
      */
-    @Tag(2)
+
     private List<Long> heightList = new ArrayList<>();
     /**
      * 返回的hash列表
      * Returns a list of hashes.
      */
-    @Tag(3)
+
     private List<NulsDigestData> hashList = new ArrayList<>();
 
 
     /**
      * 返回的高度列表
      * Returns a list of heights.
-     * @return
      */
     public List<Long> getHeightList() {
         return heightList;
     }
 
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfNulsData(requestMessageHash);
+        size += SerializeUtils.sizeOfVarInt(heightList.size());
+        for (Long height : heightList) {
+            size += SerializeUtils.sizeOfVarInt(height);
+        }
+        size += SerializeUtils.sizeOfVarInt(hashList.size());
+        for (NulsDigestData hash : hashList) {
+            size += SerializeUtils.sizeOfNulsData(hash);
+        }
+        return size;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(requestMessageHash);
+        stream.writeVarInt(heightList.size());
+        for (Long height : heightList) {
+            stream.writeVarInt(height);
+        }
+        stream.writeVarInt(hashList.size());
+        for (NulsDigestData hash : hashList) {
+            stream.writeNulsData(hash);
+        }
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.requestMessageHash = byteBuffer.readHash();
+        long heightListSize = byteBuffer.readVarInt();
+        if (heightListSize > 0) {
+            this.heightList = new ArrayList<>();
+            for (int i = 0; i < heightListSize; i++) {
+                heightList.add(byteBuffer.readVarInt());
+            }
+        }
+        long hashListSize = byteBuffer.readVarInt();
+        if (hashListSize <= 0) {
+            return;
+        }
+        this.hashList = new ArrayList<>();
+        for (int i = 0; i < hashListSize; i++) {
+            hashList.add(byteBuffer.readHash());
+        }
+    }
+
+
     /**
      * 返回的hash列表
      * Returns a list of hashes.
-     * @return
      */
     public List<NulsDigestData> getHashList() {
         return hashList;
     }
 
     public NulsDigestData getHash() {
-        return NulsDigestData.calcDigestData(this.serialize());
+        try {
+            return NulsDigestData.calcDigestData(this.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return null;
+        }
     }
 
     public void put(long height, NulsDigestData hash) {
         heightList.add(height);
         hashList.add(hash);
     }
+
     public void putFront(long height, NulsDigestData hash) {
-        heightList.add(0,height);
-        hashList.add(0,hash);
+        heightList.add(0, height);
+        hashList.add(0, hash);
     }
 
     public NulsDigestData getRequestMessageHash() {

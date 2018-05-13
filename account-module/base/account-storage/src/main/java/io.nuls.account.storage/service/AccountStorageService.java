@@ -53,4 +53,22 @@ public interface AccountStorageService {
      * @return the result of the opration
      */
     Result<AccountPo> getAccount(Address address);
+
+    /**
+     * 根据账户获取账户信息
+     * According to the account to obtain account information
+     * @param address
+     * @return the result of the opration
+     */
+    Result<AccountPo> getAccount(byte[] address);
+
+
+    /**
+     * 根据账户更新账户信息
+     * Update account information according to the account.
+     * @param account The account to be updated.
+     * @return the result of the opration
+     */
+    Result updateAccount(AccountPo account);
+
 }

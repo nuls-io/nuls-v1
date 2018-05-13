@@ -25,8 +25,13 @@
 
 package io.nuls.protocol.model;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
-import io.protostuff.Tag;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
+
+import java.io.IOException;
 
 /**
  * 请求区块摘要的数据封装
@@ -41,16 +46,35 @@ public class GetBlocksHashParam extends BaseNulsData {
      * 请求的起始高度，即需要返回的第一个高度
      * The starting height of the request is the first height to be returned.
      */
-    @Tag(1)
+
     private long start;
 
     /**
      * 请求的区块数量
      * the count of the blocks request
      */
-    @Tag(2)
+
     private long size;
 
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfVarInt(start);
+        size += SerializeUtils.sizeOfVarInt(size);
+        return size;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(start);
+        stream.writeVarInt(size);
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.start = byteBuffer.readVarInt();
+        this.size = byteBuffer.readVarInt();
+    }
     public GetBlocksHashParam() {
     }
 

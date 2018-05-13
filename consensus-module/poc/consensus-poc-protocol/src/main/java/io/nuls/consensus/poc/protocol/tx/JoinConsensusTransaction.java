@@ -27,7 +27,13 @@ package io.nuls.consensus.poc.protocol.tx;
 
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.NulsByteBuffer;
+
+import java.io.IOException;
 
 /**
  * @author Niels
@@ -37,17 +43,21 @@ public class JoinConsensusTransaction extends Transaction<Deposit> {
 
     public JoinConsensusTransaction() {
         super(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
-        this.initValidator();
     }
 
-    private void initValidator() {
-        // TODO
+    @Override
+    protected Deposit parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new Deposit());
     }
 
     @Override
     public JoinConsensusTransaction clone() {
         JoinConsensusTransaction tx = new JoinConsensusTransaction();
-        tx.parse(serialize());
+        try {
+            tx.parse(serialize());
+        } catch (Exception e) {
+            throw new NulsRuntimeException(e);
+        }
         tx.setBlockHeight(blockHeight);
         tx.setIndex(index);
         tx.setStatus(status);

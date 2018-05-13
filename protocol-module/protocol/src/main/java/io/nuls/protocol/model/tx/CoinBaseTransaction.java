@@ -25,6 +25,8 @@
 package io.nuls.protocol.model.tx;
 
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.protocol.constant.ProtocolConstant;
 
 /**
@@ -35,6 +37,12 @@ public class CoinBaseTransaction extends Transaction {
 
     public CoinBaseTransaction() {
         this(ProtocolConstant.TX_TYPE_COINBASE);
+    }
+
+    @Override
+    protected TransactionLogicData parseTxData(NulsByteBuffer byteBuffer) {
+        //Don't need
+        return null;
     }
 
     protected CoinBaseTransaction(int type) {

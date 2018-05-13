@@ -25,11 +25,17 @@
  */
 package io.nuls.consensus.poc.protocol.entity;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 import io.protostuff.Tag;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,19 +45,19 @@ import java.util.Set;
  */
 public class Agent extends TransactionLogicData {
 
-    @Tag(1)
+
     private byte[] agentAddress;
-    @Tag(2)
+
     private byte[] packingAddress;
-    @Tag(3)
+
     private byte[] rewardAddress;
-    @Tag(4)
+
     private Na deposit;
-    @Tag(5)
+
     private double commissionRate;
-    @Tag(6)
+
     private byte[] agentName;
-    @Tag(7)
+
     private byte[] introduction;
 
     private transient long time;
@@ -62,6 +68,40 @@ public class Agent extends TransactionLogicData {
     private transient long totalDeposit;
     private transient NulsDigestData txHash;
 
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfVarInt(deposit.getValue());
+        size += this.agentAddress.length;
+        size += this.rewardAddress.length;
+        size += this.packingAddress.length;
+        size += SerializeUtils.sizeOfDouble(this.commissionRate);
+        size += SerializeUtils.sizeOfBytes(this.introduction);
+        size += SerializeUtils.sizeOfBytes(agentName);
+        return size;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(deposit.getValue());
+        stream.write(agentAddress);
+        stream.write(packingAddress);
+        stream.write(rewardAddress);
+        stream.writeDouble(this.commissionRate);
+        stream.writeBytesWithLength(this.introduction);
+        stream.writeBytesWithLength(agentName);
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.deposit = Na.valueOf(byteBuffer.readVarInt());
+        this.agentAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.rewardAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.packingAddress =  byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.commissionRate = byteBuffer.readDouble();
+        this.introduction = byteBuffer.readByLengthByte();
+        this.agentName = byteBuffer.readByLengthByte();
+    }
     public Na getDeposit() {
         return deposit;
     }

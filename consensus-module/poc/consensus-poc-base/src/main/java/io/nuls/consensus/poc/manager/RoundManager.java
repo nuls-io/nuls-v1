@@ -42,6 +42,7 @@ import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.core.tools.log.ConsensusLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
@@ -49,6 +50,7 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.constant.ProtocolConstant;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -331,11 +333,16 @@ public class RoundManager {
         Collections.sort(depositTempList, new Comparator<Transaction<Deposit>>() {
             @Override
             public int compare(Transaction<Deposit> o1, Transaction<Deposit> o2) {
-                return o1.getHash().getDigestHex().compareTo(o2.getHash().getDigestHex());
+                try {
+                    return o1.getHash().getDigestHex().compareTo(o2.getHash().getDigestHex());
+                } catch (IOException e) {
+                    Log.error(e);
+                    throw new NulsRuntimeException(e);
+                }
             }
         });
 
-        for(Transaction<Deposit> cd : depositTempList) {
+        for (Transaction<Deposit> cd : depositTempList) {
             Deposit deposit = cd.getTxData();
             sb.append("------------------------ agent hash : " + deposit.getAgentHash());
             sb.append("dep address : " + deposit.getAddress());

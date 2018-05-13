@@ -68,7 +68,7 @@ public class ECKey {
     private static final SecureRandom SECURE_RANDOM;    //随机种子
 
     static {
-        if (Utils.isAndroidRuntime()) {
+        if (Util.isAndroidRuntime()) {
             new LinuxSecureRandom();
         }
 
@@ -108,11 +108,11 @@ public class ECKey {
     private ECKey(BigInteger priv, ECPoint pub) {
         if (priv != null) {
             //私匙不应该是0和1
-            Utils.checkState(!priv.equals(BigInteger.ZERO));
-            Utils.checkState(!priv.equals(BigInteger.ONE));
+            Util.checkState(!priv.equals(BigInteger.ZERO));
+            Util.checkState(!priv.equals(BigInteger.ONE));
         }
         this.priv = priv;
-        this.pub = Utils.checkNotNull(pub);
+        this.pub = Util.checkNotNull(pub);
         creationTimeSeconds = System.currentTimeMillis();
     }
 
@@ -391,7 +391,7 @@ public class ECKey {
     }
 
     protected byte[] doSign(byte[] input, BigInteger privateKeyForSigning) {
-        Utils.checkNotNull(privateKeyForSigning);
+        Util.checkNotNull(privateKeyForSigning);
         ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
         ECPrivateKeyParameters privKey = new ECPrivateKeyParameters(privateKeyForSigning, CURVE);
         signer.init(true, privKey);

@@ -24,11 +24,17 @@
  */
 package io.nuls.protocol.model;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
-import io.protostuff.Tag;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
+import io.nuls.kernel.utils.VarInt;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +52,9 @@ public class TxGroup extends BaseNulsData {
      * 应答的交易列表
      * transaction list for response
      */
-    @Tag(1)
+
     private NulsDigestData requestHash;
-    @Tag(2)
+
     private List<Transaction> txList;
 
     /**
@@ -56,6 +62,44 @@ public class TxGroup extends BaseNulsData {
      * The transaction is sorted into a hashmap.
      */
     private transient Map<NulsDigestData, Transaction> txMap;
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += VarInt.sizeOf(txList.size());
+        size += this.getTxListLength();
+        return size;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(txList.size());
+        for (Transaction data : txList) {
+            stream.writeNulsData(data);
+        }
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        long txCount = byteBuffer.readVarInt();
+        this.txList = new ArrayList<>();
+        for (int i = 0; i < txCount; i++) {
+            try {
+                this.txList.add(byteBuffer.readTransaction());
+            } catch (Exception e) {
+                throw new NulsException(e);
+            }
+        }
+        initTxMap();
+    }
+
+    private int getTxListLength() {
+        int size = 0;
+        for (Transaction tx : txList) {
+            size += SerializeUtils.sizeOfNulsData(tx);
+        }
+        return size;
+    }
 
     /**
      * 交易整理到hashmap中

@@ -29,8 +29,10 @@ import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.*;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.core.tools.crypto.ECKey;
+import io.nuls.core.tools.log.Log;
 import io.nuls.db.module.impl.LevelDbModuleBootstrap;
 import io.nuls.kernel.MicroKernelBootstrap;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
@@ -44,6 +46,7 @@ import io.nuls.protocol.service.TransactionService;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -158,7 +161,7 @@ public class TransactionServiceImplTest {
         list.add(transferTransaction1);
         list.add(transferTransaction2);
 
-//        createSetAliasTransaction(ecKey1, "alias");
+        createSetAliasTransaction(ecKey1, "alias");
 //        createSetAliasTransaction(ecKey1, "alias1");
 //        createSetAliasTransaction(ecKey2, "alias");
 
@@ -186,7 +189,11 @@ public class TransactionServiceImplTest {
         list.add(join6);
         list.add(join7);
 
-        createCancelDepositTransaction(ecKey1, NulsDigestData.fromDigestHex("txHash"));
+        try {
+            createCancelDepositTransaction(ecKey1, NulsDigestData.fromDigestHex("txHash"));
+        } catch (NulsException e) {
+            Log.error(e);
+        }
 
         StopAgentTransaction stop1 = createStopAgentTransaction(ecKey1, tx1.getHash());
         StopAgentTransaction stop2 = createStopAgentTransaction(ecKey1, tx2.getHash());
@@ -324,15 +331,29 @@ public class TransactionServiceImplTest {
     }
 
     private void signTransaction(Transaction tx, ECKey ecKey) {
-        NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());
+        NulsDigestData hash = null;
+        try {
+            hash = NulsDigestData.calcDigestData(tx.serializeForHash());
+        } catch (IOException e) {
+            Log.error(e);
+        }
         tx.setHash(hash);
-        byte[] signbytes = ecKey.sign(hash.serialize());
+        byte[] signbytes = new byte[0];
+        try {
+            signbytes = ecKey.sign(hash.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+        }
         NulsSignData nulsSignData = new NulsSignData();
         nulsSignData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);
         nulsSignData.setSignBytes(signbytes);
         P2PKHScriptSig scriptSig = new P2PKHScriptSig();
         scriptSig.setPublicKey(ecKey.getPubKey());
         scriptSig.setSignData(nulsSignData);
-        tx.setScriptSig(scriptSig.serialize());
+        try {
+            tx.setScriptSig(scriptSig.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+        }
     }
 }

@@ -12,7 +12,7 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.protocol.message.NetworkMessageBody;
-import io.nuls.network.storage.NetworkStorage;
+import io.nuls.network.storage.manager.NetworkStorage;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -81,6 +81,7 @@ public class NodeManager implements Runnable {
      * 同时开启获取对方最新信息的线程
      */
     public void start() {
+        getNetworkStorage().init();
         List<Node> nodeList = getNetworkStorage().getLocalNodeList(20);
         nodeList.addAll(getSeedNodes());
         for (Node node : nodeList) {
@@ -252,7 +253,7 @@ public class NodeManager implements Runnable {
             removeNode(node);
         } else {
 //            Log.info("------------remove node is null-----------" + nodeId);
-            getNetworkStorage().deleteNode(node);
+            getNetworkStorage().deleteNode(nodeId);
             outNodeIdSet.remove(nodeId);
         }
     }
@@ -264,7 +265,7 @@ public class NodeManager implements Runnable {
         } else {
 //            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
             outNodeIdSet.remove(node.getId());
-            getNetworkStorage().deleteNode(node);
+            getNetworkStorage().deleteNode(nodeId);
         }
     }
 
@@ -299,7 +300,7 @@ public class NodeManager implements Runnable {
             connectedNodes.remove(node.getId());
             handShakeNodes.remove(node.getId());
             if (node.getStatus() == Node.BAD) {
-                getNetworkStorage().deleteNode(node);
+                getNetworkStorage().deleteNode(node.getId());
             }
             return;
         }
@@ -318,7 +319,7 @@ public class NodeManager implements Runnable {
             }
         } else {
             disConnectNodes.remove(node.getId());
-            getNetworkStorage().deleteNode(node);
+            getNetworkStorage().deleteNode(node.getId());
         }
     }
 

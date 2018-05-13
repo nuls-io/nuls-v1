@@ -24,12 +24,16 @@
  */
 package io.nuls.protocol.model;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
-import io.protostuff.Tag;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,24 +51,73 @@ public class SmallBlock extends BaseNulsData {
      * 区块头
      * block header
      */
-    @Tag(1)
+
     private BlockHeader header;
 
     /**
      * 交易摘要列表
      * transaction hash list
      */
-    @Tag(2)
+
     private List<NulsDigestData> txHashList;
 
     /**
      * 共识交易列表（其他节点一定没有的交易）
      * Consensus trading list (transactions that no other node must have)
      */
-    @Tag(3)
+
     private List<Transaction> subTxList = new ArrayList<>();
 
     public SmallBlock() {
+    }
+
+    @Override
+    public int size() {
+        int size = header.size();
+        size += SerializeUtils.sizeOfVarInt(txHashList.size());
+        for (NulsDigestData hash : txHashList) {
+            size += SerializeUtils.sizeOfNulsData(hash);
+        }
+        size += SerializeUtils.sizeOfVarInt(subTxList.size());
+        for (Transaction tx : subTxList) {
+            size += SerializeUtils.sizeOfNulsData(tx);
+        }
+        return size;
+    }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(header);
+        stream.writeVarInt(txHashList.size());
+        for (NulsDigestData hash : txHashList) {
+            stream.writeNulsData(hash);
+        }
+        stream.writeVarInt(subTxList.size());
+        for (Transaction tx : subTxList) {
+            stream.writeNulsData(tx);
+        }
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.header = byteBuffer.readNulsData(new BlockHeader());
+
+        this.txHashList = new ArrayList<>();
+        long hashListSize = byteBuffer.readVarInt();
+        for (int i = 0; i < hashListSize; i++) {
+            this.txHashList.add(byteBuffer.readHash());
+        }
+
+        this.subTxList = new ArrayList<>();
+        long subTxListSize = byteBuffer.readVarInt();
+        for (int i = 0; i < subTxListSize; i++) {
+            Transaction tx = byteBuffer.readTransaction();
+            tx.setBlockHeight(header.getHeight());
+            this.subTxList.add(tx);
+        }
     }
 
     /**

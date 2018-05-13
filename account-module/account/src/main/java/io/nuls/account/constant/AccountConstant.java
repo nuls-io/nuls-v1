@@ -35,4 +35,10 @@ public class AccountConstant implements NulsConstant {
      * 本地账户集合
      */
     public static Set<String> LOCAL_ADDRESS_LIST = ConcurrentHashMap.newKeySet();
+
+
+    /**
+     * 设置账户别名的交易类型
+     */
+    public static final int TX_TYPE_ACCOUNT_ALIAS = 51;
 }

@@ -27,10 +27,13 @@ package io.nuls.kernel.model;
 
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.crypto.Sha256Hash;
-import io.nuls.core.tools.crypto.Utils;
 import io.nuls.core.tools.log.Log;
-import io.protostuff.Tag;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -41,9 +44,8 @@ import java.util.List;
  */
 public class NulsDigestData extends BaseNulsData {
 
-    @Tag(1)
     protected byte digestAlgType = DIGEST_ALG_SHA256;
-    @Tag(2)
+
     protected byte[] digestBytes;
 
     public static byte DIGEST_ALG_SHA256 = 0;
@@ -52,14 +54,30 @@ public class NulsDigestData extends BaseNulsData {
     public NulsDigestData() {
     }
 
-    public NulsDigestData(byte[] bytes) {
-        this();
-        this.parse(bytes);
-    }
-
     public NulsDigestData(byte alg_type, byte[] bytes) {
         this.digestBytes = bytes;
         this.digestAlgType = alg_type;
+    }
+
+    @Override
+    public int size() {
+        return SerializeUtils.sizeOfBytes(digestBytes) + 1;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
+        buffer.write(digestAlgType);
+        buffer.writeBytesWithLength(digestBytes);
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        digestAlgType = byteBuffer.readByte();
+        try {
+            this.digestBytes = byteBuffer.readByLengthByte();
+        } catch (Exception e) {
+            Log.error(e);
+        }
     }
 
     public byte getDigestAlgType() {
@@ -71,13 +89,15 @@ public class NulsDigestData extends BaseNulsData {
     }
 
 
-    public String getDigestHex() {
+    public String getDigestHex() throws IOException {
         return Hex.encode(serialize());
     }
 
-    public static NulsDigestData fromDigestHex(String hex) {
+    public static NulsDigestData fromDigestHex(String hex) throws NulsException {
         byte[] bytes = Hex.decode(hex);
-        return new NulsDigestData(bytes);
+        NulsDigestData hash = new NulsDigestData();
+        hash.parse(bytes);
+        return hash;
     }
 
     public static NulsDigestData calcDigestData(BaseNulsData data) {
@@ -121,7 +141,7 @@ public class NulsDigestData extends BaseNulsData {
         }
         //todo extend other algType
         if ((byte) 1 == digestAlgType) {
-            byte[] content = Utils.sha256hash160(data);
+            byte[] content = SerializeUtils.sha256hash160(data);
             digestData.digestBytes = content;
             return digestData;
         }
@@ -134,8 +154,8 @@ public class NulsDigestData extends BaseNulsData {
         for (int levelSize = ddList.size(); levelSize > 1; levelSize = (levelSize + 1) / 2) {
             for (int left = 0; left < levelSize; left += 2) {
                 int right = Math.min(left + 1, levelSize - 1);
-                byte[] leftBytes = Utils.reverseBytes(ddList.get(levelOffset + left).getDigestBytes());
-                byte[] rightBytes = Utils.reverseBytes(ddList.get(levelOffset + right).getDigestBytes());
+                byte[] leftBytes = SerializeUtils.reverseBytes(ddList.get(levelOffset + left).getDigestBytes());
+                byte[] rightBytes = SerializeUtils.reverseBytes(ddList.get(levelOffset + right).getDigestBytes());
                 byte[] whole = new byte[leftBytes.length + rightBytes.length];
                 System.arraycopy(leftBytes, 0, whole, 0, leftBytes.length);
                 System.arraycopy(rightBytes, 0, whole, leftBytes.length, rightBytes.length);
@@ -217,7 +237,12 @@ public class NulsDigestData extends BaseNulsData {
 
     @Override
     public String toString() {
-        return getDigestHex();
+        try {
+            return getDigestHex();
+        } catch (IOException e) {
+            Log.error(e);
+            return super.toString();
+        }
     }
 
     /**

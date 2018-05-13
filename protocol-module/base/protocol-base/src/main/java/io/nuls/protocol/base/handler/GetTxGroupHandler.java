@@ -92,7 +92,7 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
         event.setMsgBody(data);
         Result result = this.messageBusService.sendToNode(event, fromNode, true);
         if (result.isFailed()) {
-            Log.warn("send not found failed:" + fromNode.getId() + ", hash:" + hash.getDigestHex());
+            Log.warn("send not found failed:" + fromNode.getId() + ", hash:" + hash);
         }
     }
 

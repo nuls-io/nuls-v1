@@ -25,7 +25,13 @@
 
 package io.nuls.protocol.model.basic;
 
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.protocol.model.BasicTypeData;
+
+import java.io.IOException;
 
 /**
  * 受控的、字符串类型封装
@@ -42,5 +48,20 @@ public class NulsStringData extends BasicTypeData<String> {
 
     public NulsStringData(String val) {
         super(val);
+    }
+
+    @Override
+    public int size() {
+        return SerializeUtils.sizeOfString(getVal());
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeString(getVal());
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.setVal(byteBuffer.readString());
     }
 }

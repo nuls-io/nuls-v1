@@ -1,6 +1,7 @@
 package io.nuls.message.bus.service.impl;
 
 import io.nuls.cache.CacheMap;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.protocol.message.BlockMessage;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +14,7 @@ public class MessageCacheServiceTest {
 
     private MessageCacheService messageCacheService = MessageCacheService.getInstance();
 
-    private BlockMessage blockMessage =  null;
+    private BlockMessage blockMessage = null;
 
     @Before
     public void before() {
@@ -27,22 +28,21 @@ public class MessageCacheServiceTest {
     @Test
     public void cacheSendedMessage() {
         messageCacheService.cacheSendedMessage(blockMessage);
-        assertNotNull(messageCacheService.getSendMessage(blockMessage.getHash().getDigestHex()));
+        assertNotNull(messageCacheService.getSendMessage(blockMessage.getHash()));
     }
 
     /**
      * 将缓存的消息移除
      * Removes the cached message.
-     *
      */
     @Test
     public void removeSendedMessage() {
-        if (null == messageCacheService.getSendMessage(blockMessage.getHash().getDigestHex())){
+        if (null == messageCacheService.getSendMessage(blockMessage.getHash())) {
             messageCacheService.cacheSendedMessage(blockMessage);
         }
-        assertNotNull(messageCacheService.getSendMessage(blockMessage.getHash().getDigestHex()));
+        assertNotNull(messageCacheService.getSendMessage(blockMessage.getHash()));
         messageCacheService.removeSendedMessage(blockMessage);
-        assertNull(messageCacheService.getSendMessage(blockMessage.getHash().getDigestHex()));
+        assertNull(messageCacheService.getSendMessage(blockMessage.getHash()));
     }
 
     /**
@@ -51,13 +51,13 @@ public class MessageCacheServiceTest {
      */
     @Test
     public void cacheRecievedMessageHash() throws Exception {
-        messageCacheService.cacheRecievedMessageHash(blockMessage.getHash().getDigestHex());
+        messageCacheService.cacheRecievedMessageHash(blockMessage.getHash());
         assertNotNull(messageCacheService);
 
         Field cacheMapRecievedField = messageCacheService.getClass().getDeclaredField("cacheMapRecieved");
         cacheMapRecievedField.setAccessible(true);
-        CacheMap<String, Integer>  cacheMap = (CacheMap<String, Integer>)cacheMapRecievedField.get(messageCacheService);
-        assertTrue(cacheMap.get(blockMessage.getHash().getDigestHex()) == 1);
+        CacheMap<NulsDigestData, Integer> cacheMap = (CacheMap<NulsDigestData, Integer>) cacheMapRecievedField.get(messageCacheService);
+        assertTrue(cacheMap.get(blockMessage.getHash()) == 1);
     }
 
     /**
@@ -66,14 +66,14 @@ public class MessageCacheServiceTest {
      */
     @Test
     public void kownTheMessage() {
-        if (null == messageCacheService.getSendMessage(blockMessage.getHash().getDigestHex())){
+        if (null == messageCacheService.getSendMessage(blockMessage.getHash())) {
             messageCacheService.cacheSendedMessage(blockMessage);
-            assertTrue(messageCacheService.kownTheMessage(blockMessage.getHash().getDigestHex()));
-        }else{
-            assertTrue(messageCacheService.kownTheMessage(blockMessage.getHash().getDigestHex()));
+            assertTrue(messageCacheService.kownTheMessage(blockMessage.getHash()));
+        } else {
+            assertTrue(messageCacheService.kownTheMessage(blockMessage.getHash()));
         }
-        messageCacheService.cacheRecievedMessageHash(blockMessage.getHash().getDigestHex());
-        assertTrue(messageCacheService.kownTheMessage(blockMessage.getHash().getDigestHex()));
+        messageCacheService.cacheRecievedMessageHash(blockMessage.getHash());
+        assertTrue(messageCacheService.kownTheMessage(blockMessage.getHash()));
     }
 
     /**
@@ -84,47 +84,46 @@ public class MessageCacheServiceTest {
      */
     @Test
     public void getSendMessage() {
-        if (null == messageCacheService.getSendMessage(blockMessage.getHash().getDigestHex())){
+        if (null == messageCacheService.getSendMessage(blockMessage.getHash())) {
             messageCacheService.cacheSendedMessage(blockMessage);
         }
-        assertNotNull(messageCacheService.getSendMessage(blockMessage.getHash().getDigestHex()));
+        assertNotNull(messageCacheService.getSendMessage(blockMessage.getHash()));
     }
 
     /**
      * 验证销毁缓存的方法
      * 需要分别验证[cacheMapRecieved集合]和[cacheMapSended集合]
      * 在销毁前缓存数据不为0(如果为0则先添加缓存数据), 销毁后缓存数为0
-     *
+     * <p>
      * TestNetwork case destroying the cache
      * Verify cacheMapRecieved collection and cacheMapSended collection
      * cache data before destroy is not 0(add cached data for 0 first),
      * and the cache number is 0 after destroy.
-     * @throws Exception
      */
     @Test
     public void destroy() throws Exception {
         //缓存消息,验证cacheMapRecieved集合是否有值
-        messageCacheService.cacheRecievedMessageHash(blockMessage.getHash().getDigestHex());
+        messageCacheService.cacheRecievedMessageHash(blockMessage.getHash());
         Field cacheMapRecievedField = messageCacheService.getClass().getDeclaredField("cacheMapRecieved");
         cacheMapRecievedField.setAccessible(true);
-        CacheMap<String, Integer>  cacheMap = (CacheMap<String, Integer>)cacheMapRecievedField.get(messageCacheService);
+        CacheMap<String, Integer> cacheMap = (CacheMap<String, Integer>) cacheMapRecievedField.get(messageCacheService);
         assertTrue(cacheMap.size() > 0);
 
         //缓存消息,验证cacheMapSended集合是否有值
         messageCacheService.cacheSendedMessage(blockMessage);
         Field cacheMapSendedField = messageCacheService.getClass().getDeclaredField("cacheMapSended");
         cacheMapSendedField.setAccessible(true);
-        CacheMap<String, Integer>  cacheMapSended = (CacheMap<String, Integer>)cacheMapSendedField.get(messageCacheService);
+        CacheMap<String, Integer> cacheMapSended = (CacheMap<String, Integer>) cacheMapSendedField.get(messageCacheService);
         assertTrue(cacheMapSended.size() > 0);
 
         //销毁
         messageCacheService.destroy();
 
         //销毁后, 验证cacheMapRecieved集合是否被销毁
-        cacheMap = (CacheMap<String, Integer>)cacheMapRecievedField.get(messageCacheService);
+        cacheMap = (CacheMap<String, Integer>) cacheMapRecievedField.get(messageCacheService);
         assertTrue(cacheMap.size() == 0);
 
-        cacheMapSended = (CacheMap<String, Integer>)cacheMapRecievedField.get(messageCacheService);
+        cacheMapSended = (CacheMap<String, Integer>) cacheMapRecievedField.get(messageCacheService);
         assertTrue(cacheMapSended.size() == 0);
     }
 }

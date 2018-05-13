@@ -24,15 +24,18 @@
  */
 package io.nuls.kernel.model;
 
+import io.nuls.core.tools.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.TxStatusEnum;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
-import io.nuls.kernel.utils.AddressTool;
-import io.protostuff.LinkedBuffer;
-import io.protostuff.ProtostuffIOUtil;
-import io.protostuff.Tag;
-import io.protostuff.runtime.RuntimeSchema;
+import io.nuls.kernel.utils.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -44,17 +47,16 @@ import java.util.Set;
  */
 public abstract class Transaction<T extends TransactionLogicData> extends BaseNulsData implements Cloneable {
 
-    @Tag(1)
     protected int type;
-    @Tag(2)
+
     protected CoinData coinData;
-    @Tag(3)
+
     protected T txData;
-    @Tag(4)
+
     protected long time;
-    @Tag(5)
+
     private byte[] scriptSig;
-    @Tag(6)
+
     protected byte[] remark;
 
     protected transient NulsDigestData hash;
@@ -74,32 +76,46 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
 
     protected transient boolean isMine;
 
-    protected synchronized void calcHash() {
-        if (null != hash) {
-            return;
-        }
-        forceCalcHash();
+    @Override
+    public int size() {
+        int size = 0;
+        size += VarInt.sizeOf(type);
+        size += VarInt.sizeOf(time);
+        size += SerializeUtils.sizeOfBytes(remark);
+        size += SerializeUtils.sizeOfNulsData(txData);
+        size += SerializeUtils.sizeOfNulsData(coinData);
+        size += SerializeUtils.sizeOfBytes(scriptSig);
+        return size;
     }
 
-    protected void forceCalcHash() {
-        this.hash = NulsDigestData.calcDigestData(this.serializeForHash());
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(type);
+        stream.writeVarInt(time);
+        stream.writeBytesWithLength(remark);
+        stream.writeNulsData(txData);
+        stream.writeNulsData(coinData);
+        stream.writeBytesWithLength(scriptSig);
     }
 
-
-    public final byte[] serializeForHash() {
-        RuntimeSchema schema = SCHEMA_MAP.get(this.getClass());
-        Transaction tx = null;
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        type = (int) byteBuffer.readVarInt();
+        time = byteBuffer.readVarInt();
+        this.remark = byteBuffer.readByLengthByte();
+        txData = this.parseTxData(byteBuffer);
         try {
-            tx = (Transaction) this.clone();
-        } catch (CloneNotSupportedException e) {
+            hash = NulsDigestData.calcDigestData(this.serialize());
+        } catch (IOException e) {
             Log.error(e);
         }
-        tx.setScriptSig(null);
-        return ProtostuffIOUtil.toByteArray(tx, schema, LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE));
+        this.coinData = byteBuffer.readNulsData(new CoinData());
+        scriptSig = byteBuffer.readByLengthByte();
     }
 
+    protected abstract T parseTxData(NulsByteBuffer byteBuffer) throws NulsException;
+
     public Transaction(int type) {
-        this.dataType = NulsDataType.TRANSACTION;
         this.time = TimeService.currentTimeMillis();
         this.type = type;
     }
@@ -129,9 +145,6 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
     }
 
     public NulsDigestData getHash() {
-        if (null == hash) {
-            this.calcHash();
-        }
         return hash;
     }
 
@@ -234,9 +247,40 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
             addresses.addAll(coinAddressSet);
         }
         if (txData != null) {
-//            Set<byte[]> txAddressSet = txData.getAddresses();
-//            addresses.addAll(txAddressSet);
+            Set<byte[]> txAddressSet = txData.getAddresses();
+            addresses.addAll(txAddressSet);
         }
         return new ArrayList<>(addresses);
+    }
+
+    public byte[] serializeForHash() throws IOException {
+        ByteArrayOutputStream bos = null;
+        try {
+            int size = size();
+            bos = new UnsafeByteArrayOutputStream(size);
+            NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
+            if (size == 0) {
+                bos.write(NulsConstant.PLACE_HOLDER);
+            } else {
+                buffer.writeVarInt(type);
+                buffer.writeVarInt(time);
+                buffer.writeBytesWithLength(remark);
+                buffer.writeNulsData(txData);
+                buffer.writeNulsData(coinData);
+            }
+            byte[] bytes = bos.toByteArray();
+            if (bytes.length != this.size()) {
+                throw new NulsRuntimeException(KernelErrorCode.FAILED, "date serialize for hash error：" + this.getClass());
+            }
+            return bytes;
+        } finally {
+            if (bos != null) {
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    throw e;
+                }
+            }
+        }
     }
 }

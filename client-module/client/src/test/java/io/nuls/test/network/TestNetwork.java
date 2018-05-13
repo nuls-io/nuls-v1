@@ -1,8 +1,10 @@
-package io.nuls.network;
+package io.nuls.test.network;
 
 import io.nuls.db.module.impl.LevelDbModuleBootstrap;
 import io.nuls.kernel.MicroKernelBootstrap;
+import io.nuls.message.bus.module.MessageBusModuleBootstrap;
 import io.nuls.network.module.impl.NettyNetworkModuleBootstrap;
+import io.nuls.protocol.base.module.BaseProtocolsModuleBootstrap;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,6 +20,14 @@ public class TestNetwork {
             LevelDbModuleBootstrap dbModuleBootstrap = new LevelDbModuleBootstrap();
             dbModuleBootstrap.init();
             dbModuleBootstrap.start();
+
+            BaseProtocolsModuleBootstrap protocolsModuleBootstrap = new BaseProtocolsModuleBootstrap();
+            protocolsModuleBootstrap.init();
+            protocolsModuleBootstrap.start();
+
+            MessageBusModuleBootstrap messageBusModuleBootstrap = new MessageBusModuleBootstrap();
+            messageBusModuleBootstrap.init();
+            messageBusModuleBootstrap.start();
 
             NettyNetworkModuleBootstrap networkModuleBootstrap = new NettyNetworkModuleBootstrap();
             networkModuleBootstrap.init();

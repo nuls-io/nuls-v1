@@ -23,17 +23,25 @@
  */
 package io.nuls.protocol.message;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Block;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.protocol.constant.ProtocolConstant;
 
 /**
  * 区块在网络消息中的承载类
  * The host class of the block in the network message.
+ *
  * @author Niels
  * @date 2017/11/13
  */
 public class BlockMessage extends BaseProtocolMessage<Block> {
     public BlockMessage() {
         super(ProtocolConstant.MESSAGE_TYPE_BLOCK);
+    }
+
+    @Override
+    protected Block parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new Block());
     }
 }

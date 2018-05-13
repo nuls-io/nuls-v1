@@ -30,6 +30,7 @@ import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.BaseChainTest;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.protocol.constant.ProtocolConstant;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -142,7 +143,7 @@ public class RoundManagerTest extends BaseChainTest {
         assertNotNull(round);
 
         assertEquals(round.getIndex(), 2L);
-        Assert.assertEquals(round.getStartTime(), ConsensusConstant.BLOCK_TIME_INTERVAL_MILLIS + 1L);
+        Assert.assertEquals(round.getStartTime(), ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS + 1L);
 
         MeetingRound round2 = roundManager.getNextRound(null, false);
         assertNotNull(round2);

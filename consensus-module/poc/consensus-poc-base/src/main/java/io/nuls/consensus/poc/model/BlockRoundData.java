@@ -25,9 +25,17 @@
  */
 package io.nuls.consensus.poc.model;
 
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
+import io.nuls.kernel.utils.VarInt;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.protostuff.Tag;
+
+import java.io.IOException;
 
 /**
  * @author Niels
@@ -35,13 +43,13 @@ import io.protostuff.Tag;
  */
 public class BlockRoundData extends BaseNulsData {
 
-    @Tag(1)
+
     protected long roundIndex;
-    @Tag(2)
+
     protected int consensusMemberCount;
-    @Tag(3)
+
     protected long roundStartTime;
-    @Tag(4)
+
     protected int packingIndexOfRound;
 
     public long getRoundEndTime() {
@@ -52,7 +60,11 @@ public class BlockRoundData extends BaseNulsData {
     }
 
     public BlockRoundData(byte[] extend) {
-        this.parse(extend);
+        try {
+            this.parse(extend);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
     }
 
     public int getConsensusMemberCount() {
@@ -85,5 +97,32 @@ public class BlockRoundData extends BaseNulsData {
 
     public void setRoundIndex(long roundIndex) {
         this.roundIndex = roundIndex;
+    }
+
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += VarInt.sizeOf(roundIndex);
+        size += VarInt.sizeOf(consensusMemberCount);
+        size += SerializeUtils.sizeOfInt48();
+        size += VarInt.sizeOf(packingIndexOfRound);
+        return size;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(roundIndex);
+        stream.writeVarInt(consensusMemberCount);
+        stream.writeInt48(roundStartTime);
+        stream.writeVarInt(packingIndexOfRound);
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.roundIndex = byteBuffer.readVarInt();
+        this.consensusMemberCount = (int) byteBuffer.readVarInt();
+        this.roundStartTime = byteBuffer.readInt48();
+        this.packingIndexOfRound = (int) byteBuffer.readVarInt();
     }
 }

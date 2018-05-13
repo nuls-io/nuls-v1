@@ -24,8 +24,14 @@
  */
 package io.nuls.protocol.message.base;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.VarInt;
 import io.protostuff.Tag;
+
+import java.io.IOException;
 
 /**
  * 网络消息头，消息头中包含魔法参数、消息体大小、校验位、加密算法标识、模块id、消息类型信息
@@ -40,35 +46,35 @@ public class MessageHeader extends BaseNulsData {
      * 魔法参数，用于隔离网段
      * Magic parameters used in the isolation section.
      */
-    @Tag(1)
+
     private int magicNumber;
     /**
      * 消息体大小
      * the length of the msgBody
      */
-    @Tag(2)
+
     private int length;
     /**
      * 校验位，用于消息体的奇偶校验
      * Parity bit for the parity of the message body.
      */
-    @Tag(3)
+
     private byte xor;
     /**
      * 加密算法标识
      * Encryption algorithm identification
      */
-    @Tag(4)
+
     private byte arithmetic;
     /**
      * 模块id
      */
-    @Tag(5)
+
     private short moduleId;
     /**
      * 消息类型
      */
-    @Tag(6)
+
     private short msgType;
 
     public MessageHeader() {
@@ -77,6 +83,41 @@ public class MessageHeader extends BaseNulsData {
     public MessageHeader(short moduleId, short msgType) {
         this.moduleId = moduleId;
         this.msgType = msgType;
+    }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.write(new VarInt(magicNumber).encode());
+        stream.write(new VarInt(length).encode());
+        stream.write(xor);
+        stream.write(arithmetic);
+        stream.write(new VarInt(moduleId).encode());
+        stream.write(new VarInt(msgType).encode());
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer buffer) throws NulsException {
+        magicNumber = (int) buffer.readVarInt();
+        length = (int) buffer.readVarInt();
+        xor = buffer.readByte();
+        arithmetic = buffer.readByte();
+        moduleId = (short) buffer.readVarInt();
+        msgType = (short) buffer.readVarInt();
+    }
+
+    @Override
+    public int size() {
+        int s = 0;
+        s += VarInt.sizeOf(magicNumber);
+        s += VarInt.sizeOf(length);
+        s += 1;
+        s += 1;
+        s += VarInt.sizeOf(moduleId);
+        s += VarInt.sizeOf(msgType);
+        return s;
     }
 
     public short getMsgType() {
@@ -126,4 +167,5 @@ public class MessageHeader extends BaseNulsData {
     public void setArithmetic(byte arithmetic) {
         this.arithmetic = arithmetic;
     }
+
 }

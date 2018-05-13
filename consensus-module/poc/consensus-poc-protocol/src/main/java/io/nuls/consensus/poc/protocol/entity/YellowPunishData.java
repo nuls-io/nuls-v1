@@ -24,8 +24,15 @@
  */
 package io.nuls.consensus.poc.protocol.entity;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 
+import javax.lang.model.element.VariableElement;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -52,5 +59,36 @@ public class YellowPunishData extends TransactionLogicData {
     @Override
     public Set<byte[]> getAddresses() {
         return new HashSet<>(addressList);
+    }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeVarInt(addressList.size());
+        for (byte[] address : addressList) {
+            stream.write(address);
+        }
+
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        int count = (int) byteBuffer.readVarInt();
+        addressList.clear();
+        for (int i = 0; i < count; i++) {
+            addressList.add(byteBuffer.readBytes(AddressTool.HASH_LENGTH));
+        }
+
+    }
+
+    @Override
+    public int size() {
+        int size = SerializeUtils.sizeOfVarInt(addressList.size());
+        for (byte[] address : addressList) {
+            size += AddressTool.HASH_LENGTH;
+        }
+        return size;
     }
 }

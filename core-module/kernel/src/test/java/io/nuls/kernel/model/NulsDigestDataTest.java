@@ -36,8 +36,9 @@ import static org.junit.Assert.*;
 public class NulsDigestDataTest {
 
     @Test
-    public void test(){
+    public void test() {
         NulsDigestData hash = NulsDigestData.calcDigestData(new byte[32]);
         System.out.println(hash);
+        assertTrue(true);
     }
 }

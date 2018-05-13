@@ -431,4 +431,50 @@ public class Util {
         }
         return bt;
     }
+
+    public static <T> T checkNotNull(T t) {
+        if (t == null) {
+            throw new NullPointerException();
+        }
+        return t;
+    }
+
+    private static int isAndroid = -1;
+
+    public static boolean isAndroidRuntime() {
+        if (isAndroid == -1) {
+            final String runtime = System.getProperty("java.runtime.name");
+            isAndroid = (runtime != null && "Android Runtime".equals(runtime)) ? 1 : 0;
+        }
+        return isAndroid == 1;
+    }
+
+
+    public static void checkState(boolean status) {
+        if (status) {
+            return;
+        } else {
+            throw new RuntimeException();
+        }
+    }
+
+    /**
+     * Returns a copy of the given byte array in reverse order.
+     */
+    public static byte[] reverseBytes(byte[] bytes) {
+        // We could use the XOR trick here but it's easier to understand if we don't. If we find this is really a
+        // performance issue the matter can be revisited.
+        byte[] buf = new byte[bytes.length];
+        for (int i = 0; i < bytes.length; i++) {
+            buf[i] = bytes[bytes.length - 1 - i];
+        }
+        return buf;
+    }
+
+
+    public static byte[] copyOf(byte[] in, int length) {
+        byte[] out = new byte[length];
+        System.arraycopy(in, 0, out, 0, Math.min(length, in.length));
+        return out;
+    }
 }
