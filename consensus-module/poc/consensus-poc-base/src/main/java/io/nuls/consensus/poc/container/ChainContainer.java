@@ -36,7 +36,7 @@ import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
-import io.nuls.consensus.poc.protocol.tx.JoinConsensusTransaction;
+import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.core.tools.log.Log;
@@ -99,9 +99,9 @@ public class ChainContainer implements Cloneable {
             } else if (txType == ConsensusConstant.TX_TYPE_JOIN_CONSENSUS) {
 
                 // 加入共识交易，设置该交易的高度和删除高度，然后加入列表
-                JoinConsensusTransaction joinConsensusTx = (JoinConsensusTransaction) tx;
+                DepositTransaction joinConsensusTx = (DepositTransaction) tx;
 
-                JoinConsensusTransaction depositTx = joinConsensusTx.clone();
+                DepositTransaction depositTx = joinConsensusTx.clone();
 
                 Deposit deposit = depositTx.getTxData();
                 deposit.setDelHeight(-1L);
@@ -473,7 +473,7 @@ public class ChainContainer implements Cloneable {
             List<Transaction<Deposit>> depositList = new ArrayList<>();
 
             for(Transaction<Deposit> tx : chain.getDepositList()) {
-                JoinConsensusTransaction depositTx = (JoinConsensusTransaction) tx;
+                DepositTransaction depositTx = (DepositTransaction) tx;
                 depositList.add(depositTx.clone());
             }
 

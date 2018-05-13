@@ -172,4 +172,19 @@ public class StringUtils {
     public static String asString(byte[] value) {
         return (value == null) ? null : new String(value, UTF_8);
     }
+
+    public static Long parseLong(Object obj) {
+        if (obj == null) {
+            return 0L;
+        }
+        String value = obj.toString();
+        if (value.trim().length() == 0) {
+            return 0L;
+        }
+        try {
+            return Long.valueOf(value);
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
 }

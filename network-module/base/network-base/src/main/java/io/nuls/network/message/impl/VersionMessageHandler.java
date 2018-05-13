@@ -1,13 +1,11 @@
 package io.nuls.network.message.impl;
 
-import io.netty.channel.socket.SocketChannel;
-import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.entity.NetworkEventResult;
 import io.nuls.network.entity.Node;
+import io.nuls.network.manager.NodeManager;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
-import io.nuls.network.protocol.message.BaseNetworkMessage;
-import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.network.protocol.message.VersionMessage;
 import io.nuls.protocol.message.base.BaseMessage;
 
 public class VersionMessageHandler implements BaseNetworkMeesageHandler {
@@ -22,16 +20,20 @@ public class VersionMessageHandler implements BaseNetworkMeesageHandler {
         return instance;
     }
 
+    private NodeManager nodeManager = NodeManager.getInstance();
+
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
+        VersionMessage versionMessage = (VersionMessage) message;
+        NetworkMessageBody body = versionMessage.getMsgBody();
 
-        HandshakeMessage handshakeMessage = (HandshakeMessage) message;
-
-        SocketChannel socketChannel = NioChannelMap.get(node.getChannelId());
-
-        NetworkMessageBody body = handshakeMessage.getMsgBody();
-
-
+        if (body.getBestBlockHeight() < 0) {
+            node.setStatus(Node.BAD);
+            nodeManager.removeNode(node.getId());
+            return null;
+        }
+        node.setBestBlockHeight(body.getBestBlockHeight());
+        node.setBestBlockHash(body.getBestBlockHash());
         return null;
     }
 }

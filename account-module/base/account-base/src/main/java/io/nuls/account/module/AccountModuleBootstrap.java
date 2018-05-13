@@ -35,7 +35,6 @@ public class AccountModuleBootstrap extends AbstractAccountModuleBootstrap {
      */
     @Override
     public void init() throws Exception {
-        // todo auto-generated method stub
 
     }
 
@@ -44,8 +43,7 @@ public class AccountModuleBootstrap extends AbstractAccountModuleBootstrap {
      */
     @Override
     public void start() {
-        // todo auto-generated method stub
-
+        System.out.println("start success");
     }
 
     /**
@@ -53,7 +51,6 @@ public class AccountModuleBootstrap extends AbstractAccountModuleBootstrap {
      */
     @Override
     public void shutdown() {
-        // todo auto-generated method stub
 
     }
 
@@ -62,7 +59,6 @@ public class AccountModuleBootstrap extends AbstractAccountModuleBootstrap {
      */
     @Override
     public void destroy() {
-        // todo auto-generated method stub
 
     }
 
@@ -71,7 +67,6 @@ public class AccountModuleBootstrap extends AbstractAccountModuleBootstrap {
      */
     @Override
     public String getInfo() {
-        // todo auto-generated method stub
-        return "";
+        return null;
     }
 }

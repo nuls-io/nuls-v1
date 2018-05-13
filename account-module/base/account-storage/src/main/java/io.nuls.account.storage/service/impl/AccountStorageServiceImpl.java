@@ -6,7 +6,6 @@ import io.nuls.account.storage.constant.AccountStorageConstant;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.db.constant.DBErrorCode;
-import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.exception.NulsException;
@@ -16,7 +15,6 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Result;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,7 +43,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
     public Result saveAccountList(List<AccountPo> accountPoList) {
         BatchOperation batch = dbService.createWriteBatch(AccountStorageConstant.DB_AREA_ACCOUNT);
         for (AccountPo po : accountPoList) {
-            //batch.put(po.getAddressObj().getBase58Bytes(), po.serialize());
+            batch.putModel(po.getAddressObj().getBase58Bytes(), po);
         }
         return batch.executeBatch();
     }
@@ -65,14 +63,8 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
 
     @Override
     public Result<List<AccountPo>> getAccountList() {
-        List<Entry<byte[], byte[]>> entryList = dbService.entryList(AccountStorageConstant.DB_AREA_ACCOUNT);
-        List<AccountPo> list = new ArrayList<>();
-        for (Entry<byte[], byte[]> entry : entryList){
-            AccountPo account = new AccountPo();
-            //account.parse(entry.getValue());
-            list.add(account);
-        }
-        return Result.getSuccess().setData(list) ;
+        List<AccountPo> listPo = dbService.values(AccountStorageConstant.DB_AREA_ACCOUNT, AccountPo.class);
+        return Result.getSuccess().setData(listPo) ;
     }
 
     @Override

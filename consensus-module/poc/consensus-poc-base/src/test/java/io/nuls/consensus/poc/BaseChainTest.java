@@ -26,7 +26,6 @@
 
 package io.nuls.consensus.poc;
 
-import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.container.ChainContainer;
@@ -34,7 +33,7 @@ import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
-import io.nuls.consensus.poc.protocol.tx.JoinConsensusTransaction;
+import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.RegisterAgentTransaction;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
@@ -132,7 +131,7 @@ public class BaseChainTest extends BaseTest {
         deposit.setDeposit(Na.NA.multiply(200000));
         deposit.setBlockHeight(blockHeader.getHeight());
 
-        JoinConsensusTransaction depositTx = new JoinConsensusTransaction();
+        DepositTransaction depositTx = new DepositTransaction();
         depositTx.setTime(deposit.getTime());
         depositTx.setTxData(deposit);
         depositTx.setBlockHeight(blockHeader.getHeight());

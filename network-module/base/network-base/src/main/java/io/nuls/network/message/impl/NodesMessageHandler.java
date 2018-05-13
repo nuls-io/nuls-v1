@@ -1,14 +1,18 @@
 package io.nuls.network.message.impl;
 
-import io.netty.channel.socket.SocketChannel;
-import io.nuls.network.connection.netty.NioChannelMap;
+import io.nuls.core.tools.network.IpUtil;
 import io.nuls.network.entity.NetworkEventResult;
 import io.nuls.network.entity.Node;
+import io.nuls.network.manager.NodeManager;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
-import io.nuls.network.protocol.message.BaseNetworkMessage;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.network.protocol.message.NodeMessageBody;
+import io.nuls.network.protocol.message.NodesMessage;
 import io.nuls.protocol.message.base.BaseMessage;
+
+import java.util.Map;
+import java.util.Set;
 
 public class NodesMessageHandler implements BaseNetworkMeesageHandler {
 
@@ -22,16 +26,35 @@ public class NodesMessageHandler implements BaseNetworkMeesageHandler {
         return instance;
     }
 
+    private NodeManager nodeManager = NodeManager.getInstance();
+
+    private Set<String> localIps = IpUtil.getIps();
+
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
+        NodesMessage nodesMessage = (NodesMessage) message;
+        NodeMessageBody body = nodesMessage.getMsgBody();
 
-        HandshakeMessage handshakeMessage = (HandshakeMessage) message;
-
-        SocketChannel socketChannel = NioChannelMap.get(node.getChannelId());
-
-        NetworkMessageBody body = handshakeMessage.getMsgBody();
-
-
+        boolean exist = false;
+        Map<String, Node> outNodes = nodeManager.getNodes();
+        for (Node newNode : body.getNodeList()) {
+            if (localIps.contains(newNode.getIp())) {
+                continue;
+            }
+            exist = false;
+            for (Node outNode : outNodes.values()) {
+                if (outNode.getIp().equals(newNode.getIp())) {
+                    exist = true;
+                    break;
+                }
+            }
+            if (!exist) {
+                newNode.setType(Node.OUT);
+                newNode.setStatus(Node.CLOSE);
+                newNode.setId(null);
+                nodeManager.addNode(newNode);
+            }
+        }
         return null;
     }
 }
