@@ -162,6 +162,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
 
     @Override
     public Result<Balance> getBalance(byte[] address) throws NulsException {
+
+        if(!isLocalAccount(address)){
+            return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
+        }
         List<Coin> coinList = storageService.getCoinBytes(address);
         Balance balance = new Balance();
         long usable = 0;
