@@ -41,6 +41,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
+import io.nuls.ledger.service.LedgerService;
 import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
@@ -59,6 +60,9 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
      */
     @Autowired
     private DBService dbService;
+
+    @Autowired
+    private LedgerService ledgerService;
 
     public AccountLedgerStorageServiceImpl() {
 
@@ -95,14 +99,16 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
             List<Coin> froms = coinData.getFrom();
             BatchOperation batch = dbService.createWriteBatch(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_COINDATA);
             for (Coin from : froms) {
-                batch.delete(from.getOwner());
+                //todo from.getFrom().getOwner() need be change to call LedgerService to find the Owner of output;
+                batch.delete(Arrays.concatenate(from.getFrom().getOwner(),from.getOwner()));
             }
             // save utxo - to
             List<Coin> tos = coinData.getTo();
             byte[] indexBytes;
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
-                    batch.put(Arrays.concatenate(txHashBytes, new VarInt(i).encode()), tos.get(i).serialize());
+                    byte[] outKey = Arrays.concatenate(tos.get(i).getOwner(),tx.getHash().serialize(),new VarInt(i).encode());
+                    batch.put(outKey, tos.get(i).serialize());
                 } catch (IOException e) {
                     throw new NulsRuntimeException(e);
                 }
@@ -121,6 +127,11 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
             throw new NulsRuntimeException(e);
         }
         return result;
+    }
+
+    @Override
+    public Result deleteLocalTx(Transaction tx) {
+        return null;
     }
 
     @Override
@@ -192,11 +203,6 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
 
     @Override
     public Transaction getLocalTx(NulsDigestData hash) {
-        return null;
-    }
-
-    @Override
-    public Result deleteLocalTx(Transaction tx) {
         return null;
     }
 
