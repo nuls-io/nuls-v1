@@ -24,13 +24,17 @@
  */
 package io.nuls.accountLedger.storage.service.impl;
 
+import com.sun.org.apache.regexp.internal.RE;
+import io.nuls.account.model.Address;
+import io.nuls.accountLedger.constant.AccountLedgerErrorCode;
 import io.nuls.accountLedger.storage.constant.AccountLedgerStorageConstant;
 import io.nuls.accountLedger.storage.po.TransactionInfoPo;
 import io.nuls.accountLedger.storage.service.AccountLedgerStorageService;
-import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -39,6 +43,7 @@ import io.nuls.kernel.utils.VarInt;
 import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -118,16 +123,70 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     }
 
     @Override
-    public Result saveLocalTxInfo(TransactionInfoPo tx) {
-        if (tx == null) {
+    public Result<Integer> saveLocalTxInfo(TransactionInfoPo infoPo,List<byte[]> addresses) {
+        if (infoPo == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
-        return null;
+
+        if(addresses == null || addresses.size()==0){
+            return Result.getSuccess().setData(new Integer(0));
+        }
+
+        List<byte[]> savedKeyList = new ArrayList<>();
+
+        try {
+            for (int i = 0; i < addresses.size(); i++) {
+                byte[] infoKey = new byte[Address.size() + infoPo.getTxHash().size()];
+                System.arraycopy(addresses.get(i), 0, infoKey, 0, Address.size());
+                System.arraycopy(infoPo.getTxHash().getWholeBytes(), 0, infoKey, Address.size(), infoPo.getTxHash().size());
+                dbService.put(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TXINFO, infoKey, infoPo.serialize());
+                savedKeyList.add(infoKey);
+            }
+        }catch (IOException e){
+            for(int i = 0; i<savedKeyList.size(); i++){
+                dbService.delete(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TXINFO, savedKeyList.get(i));
+            }
+
+            return Result.getFailed(AccountLedgerErrorCode.IO_ERROR);
+        }
+        return Result.getSuccess().setData(new Integer(addresses.size()));
     }
 
     @Override
-    public Result deleteLocalTxInfo(TransactionInfoPo tx) {
-        return null;
+    public Result deleteLocalTxInfo(TransactionInfoPo infoPo) {
+        byte[] infoBytes = null;
+        if (infoPo == null) {
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+
+        }
+
+        try{
+            infoBytes = infoPo.serialize();
+        }catch (IOException e){
+            return Result.getFailed(AccountLedgerErrorCode.IO_ERROR);
+        }
+
+        if(ArraysTool.isEmptyOrNull(infoBytes)){
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+        }
+
+        byte[] addresses = infoPo.getAddresses();
+        if (addresses.length % Address.size() != 0) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
+        }
+
+        int addressCount = addresses.length / Address.size();
+
+        for (int i = 0; i < addressCount; i++) {
+
+            byte[] infoKey = new byte[Address.size() + infoPo.getTxHash().size()];
+            System.arraycopy(addresses, i * Address.size(), infoKey, 0, Address.size());
+            System.arraycopy(infoPo.getTxHash().getWholeBytes(), 0, infoKey, Address.size(), infoPo.getTxHash().size());
+            dbService.delete(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TXINFO, infoKey);
+
+        }
+
+        return Result.getSuccess().setData(new Integer(addressCount));
     }
 
     @Override

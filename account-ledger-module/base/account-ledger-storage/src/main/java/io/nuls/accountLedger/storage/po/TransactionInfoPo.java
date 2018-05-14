@@ -45,15 +45,11 @@ public class TransactionInfoPo extends BaseNulsData {
 
     private NulsDigestData txHash;
 
-
     private long blockHeight;
-
 
     private long time;
 
-
     private byte[] addresses;
-
 
     private int txType;
 
@@ -70,9 +66,9 @@ public class TransactionInfoPo extends BaseNulsData {
         this.time = tx.getTime();
         List<byte[]> addressList = tx.getAllRelativeAddress();
 
-        byte[] addresses = new byte[addressList.size() * Address.HASH_LENGTH];
+        byte[] addresses = new byte[addressList.size() * Address.size()];
         for (int i = 0; i < addressList.size(); i++) {
-            System.arraycopy(addressList.get(i), 0, addressList, Address.HASH_LENGTH * i, Address.HASH_LENGTH);
+            System.arraycopy(addressList.get(i), 0, addressList, Address.size() * i, Address.size());
         }
         this.addresses = addresses;
 
@@ -122,5 +118,21 @@ public class TransactionInfoPo extends BaseNulsData {
     public int size() {
         // todo auto-generated method stub
         return 0;
+    }
+
+    public NulsDigestData getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(NulsDigestData txHash) {
+        this.txHash = txHash;
+    }
+
+    public byte[] getAddresses() {
+        return addresses;
+    }
+
+    public void setAddresses(byte[] addresses) {
+        this.addresses = addresses;
     }
 }
