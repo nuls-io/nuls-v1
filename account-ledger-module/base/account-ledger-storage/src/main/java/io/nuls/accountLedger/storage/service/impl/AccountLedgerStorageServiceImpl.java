@@ -24,13 +24,12 @@
  */
 package io.nuls.accountLedger.storage.service.impl;
 
-import com.sun.org.apache.regexp.internal.RE;
-import io.nuls.account.model.Address;
 import io.nuls.accountLedger.constant.AccountLedgerErrorCode;
 import io.nuls.accountLedger.storage.constant.AccountLedgerStorageConstant;
 import io.nuls.accountLedger.storage.po.TransactionInfoPo;
 import io.nuls.accountLedger.storage.service.AccountLedgerStorageService;
 import io.nuls.core.tools.array.ArraysTool;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -41,6 +40,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
+import io.nuls.ledger.service.LedgerService;
 import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
@@ -59,6 +59,9 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
      */
     @Autowired
     private DBService dbService;
+
+    @Autowired
+    private LedgerService ledgerService;
 
     public AccountLedgerStorageServiceImpl() {
 
@@ -95,14 +98,30 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
             List<Coin> froms = coinData.getFrom();
             BatchOperation batch = dbService.createWriteBatch(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_COINDATA);
             for (Coin from : froms) {
-                batch.delete(from.getOwner());
+                byte[] fromSource = from.getOwner();
+                byte[] utxoFromSource = new byte[tx.getHash().size()];
+                byte[] fromIndex = new byte[fromSource.length - utxoFromSource.length];
+                System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
+                System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
+                Transaction sourceTx = null;
+                try {
+                    sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
+                } catch (Exception e) {
+                    throw new NulsRuntimeException(e);
+                }
+                if (sourceTx == null) {
+                    return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
+                }
+                byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
+                batch.delete(Arrays.concatenate(address, from.getOwner()));
             }
             // save utxo - to
             List<Coin> tos = coinData.getTo();
             byte[] indexBytes;
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
-                    batch.put(Arrays.concatenate(txHashBytes, new VarInt(i).encode()), tos.get(i).serialize());
+                    byte[] outKey = Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                    batch.put(outKey, tos.get(i).serialize());
                 } catch (IOException e) {
                     throw new NulsRuntimeException(e);
                 }
@@ -124,12 +143,17 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     }
 
     @Override
-    public Result<Integer> saveLocalTxInfo(TransactionInfoPo infoPo,List<byte[]> addresses) {
+    public Result deleteLocalTx(Transaction tx) {
+        return null;
+    }
+
+    @Override
+    public Result<Integer> saveLocalTxInfo(TransactionInfoPo infoPo, List<byte[]> addresses) {
         if (infoPo == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
 
-        if(addresses == null || addresses.size()==0){
+        if (addresses == null || addresses.size() == 0) {
             return Result.getSuccess().setData(new Integer(0));
         }
 
@@ -143,8 +167,8 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
                 dbService.put(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TXINFO, infoKey, infoPo.serialize());
                 savedKeyList.add(infoKey);
             }
-        }catch (IOException e){
-            for(int i = 0; i<savedKeyList.size(); i++){
+        } catch (IOException e) {
+            for (int i = 0; i < savedKeyList.size(); i++) {
                 dbService.delete(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TXINFO, savedKeyList.get(i));
             }
 
@@ -161,13 +185,13 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
 
         }
 
-        try{
+        try {
             infoBytes = infoPo.serialize();
-        }catch (IOException e){
+        } catch (IOException e) {
             return Result.getFailed(AccountLedgerErrorCode.IO_ERROR);
         }
 
-        if(ArraysTool.isEmptyOrNull(infoBytes)){
+        if (ArraysTool.isEmptyOrNull(infoBytes)) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
 
@@ -196,13 +220,19 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     }
 
     @Override
-    public Result deleteLocalTx(Transaction tx) {
-        return null;
-    }
-
-    @Override
-    public byte[] getCoinBytes(byte[] owner) {
-        return new byte[0];
+    public List<Coin> getCoinBytes(byte[] owner) throws NulsException {
+        List<Coin> coinList = new ArrayList<>();
+        List<byte[]> keyList = dbService.keyList(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_COINDATA);
+        byte[] keyOwner = new byte[AddressTool.HASH_LENGTH];
+        for (byte[] key : keyList) {
+            System.arraycopy(key, 0, keyOwner, 0, AddressTool.HASH_LENGTH);
+            if (java.util.Arrays.equals(keyOwner, owner)) {
+                Coin coin = new Coin();
+                coin.parse(dbService.get(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_COINDATA, key));
+                coinList.add(coin);
+            }
+        }
+        return coinList;
     }
 
     @Override

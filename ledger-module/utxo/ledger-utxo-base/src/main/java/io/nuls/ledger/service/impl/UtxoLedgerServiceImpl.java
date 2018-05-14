@@ -270,16 +270,17 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return ValidateResult.getSuccessResult();
     }
 
+    //todo 双花验证不通过的交易需要放入result的data中，一次只验证一对双花的交易
     @Override
-    public ValidateResult verifyDoubleSpend(Block block) {
+    public ValidateResult<List<Transaction>> verifyDoubleSpend(Block block) {
         if (block == null) {
             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.NULL_PARAMETER);
         }
         return verifyDoubleSpend(block.getTxs());
     }
-
+    //todo 双花验证不通过的交易需要放入result的data中，一次只验证一对双花的交易
     @Override
-    public ValidateResult verifyDoubleSpend(List<Transaction> txList) {
+    public ValidateResult<List<Transaction>> verifyDoubleSpend(List<Transaction> txList) {
         if (txList == null) {
             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.NULL_PARAMETER);
         }

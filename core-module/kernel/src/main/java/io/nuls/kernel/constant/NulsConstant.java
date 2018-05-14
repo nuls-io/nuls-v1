@@ -101,4 +101,11 @@ public interface NulsConstant {
      * 48 bit integer data length.
      */
     int INT48_VALUE_LENGTH = 6;
+
+    /**
+     * utxo锁定时间分界值
+     * 小于该值表示按照高度锁定
+     * 大于该值表示按照时间锁定
+     */
+    long BlOCKHEIGHT_TIME_DIVIDE = 1000000000000L;
 }
