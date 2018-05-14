@@ -35,7 +35,9 @@ import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
- * Created by ln on 2018/4/13.
+ *
+ * @author ln
+ * @date 2018/4/13
  */
 public class BlockQueueProvider {
 

@@ -47,7 +47,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by ln on 2018/5/8.
+ *
+ * @author ln
+ * @date 2018/5/8
  */
 public class ConsensusScheduler {
 

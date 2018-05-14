@@ -32,6 +32,9 @@ import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsData;
 import io.nuls.kernel.validate.NulsDataValidator;
 
+/**
+ * @author Niels
+ */
 public abstract class BaseConsensusProtocolValidator<T extends NulsData> implements NulsDataValidator<T> {
 
     protected final boolean isDepositOk(Na deposit, CoinData coinData) {

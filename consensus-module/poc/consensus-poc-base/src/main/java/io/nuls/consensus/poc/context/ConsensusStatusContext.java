@@ -28,7 +28,8 @@ package io.nuls.consensus.poc.context;
 import io.nuls.consensus.poc.constant.ConsensusStatus;
 
 /**
- * Created by ln on 2018/4/13.
+ * @author ln
+ * @date 2018/4/13
  */
 public class ConsensusStatusContext {
 
