@@ -1,5 +1,6 @@
 package io.nuls.account.rpc.resources;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
@@ -20,7 +21,6 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -54,8 +54,7 @@ public class AccountResource {
     @Autowired
     private AccountBaseService accountBaseService;
 
-    @Autowired
-    private AccountCacheService accountCacheService;
+    private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -64,10 +63,10 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = ArrayList.class)
     })
     public Result<List<AccountDto>> create(@ApiParam(name = "form", value = "账户表单数据", required = true)
-                                 AccountCreateForm form) {
+                                                   AccountCreateForm form) {
         int count = form.getCount() < 1 ? 1 : form.getCount();
         String password = form.getPassword();
-        if(null == form.getPassword() || "".equals(form.getPassword())){
+        if (null == form.getPassword() || "".equals(form.getPassword())) {
             password = null;
         }
         List<Account> listAccount = accountService.createAccount(count, password).getData();
@@ -86,12 +85,12 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = AccountDto.class)
     })
     public Result<AccountDto> get(@ApiParam(name = "address", value = "账户地址 ，缺省时默认为所有账户", required = true)
-                         @PathParam("address") String address) {
+                                  @PathParam("address") String address) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Account account = accountService.getAccount(address).getData();
-        if(null == account){
+        if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         return Result.getSuccess().setData(new AccountDto(account));
@@ -105,11 +104,11 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result<Boolean> alias(@ApiParam(name = "form", value = "设置别名表单数据", required = true)
-                                AccountAliasForm form) {
+                                         AccountAliasForm form) {
         if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        if(StringUtils.isBlank(form.getAlias()) || !StringUtils.validPassword(form.getPassword())){
+        if (StringUtils.isBlank(form.getAlias()) || !StringUtils.validPassword(form.getPassword())) {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
         return aliasService.setAlias(form.getAddress(), form.getPassword(), form.getAlias());
@@ -123,9 +122,9 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = AccountDto.class)
     })
     public Result accountList(@ApiParam(name = "pageNumber", value = "页码")
-                                 @QueryParam("pageNumber") int pageNumber,
-                                 @ApiParam(name = "pageSize", value = "每页条数")
-                                 @QueryParam("pageSize") int pageSize) {
+                              @QueryParam("pageNumber") int pageNumber,
+                              @ApiParam(name = "pageSize", value = "每页条数")
+                              @QueryParam("pageSize") int pageSize) {
         if (pageNumber < 0 || pageSize < 0) {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
@@ -167,12 +166,12 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = BalanceDto.class)
     })
     public Result<BalanceDto> getBalance(@ApiParam(name = "address", value = "账户地址", required = true)
-                                @PathParam("address") String address) {
+                                         @PathParam("address") String address) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Balance balance = accountService.getBalance(address).getData();
-        if(balance == null) {
+        if (balance == null) {
             balance = new Balance();
         }
         Result result = Result.getSuccess();
@@ -202,9 +201,9 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success"/*, response = OutputDto.class*/)
     })
     public Result getUtxo(@ApiParam(name = "address", value = "账户地址", required = true)
-                             @QueryParam("address") String address,
-                             @ApiParam(name = "amount", value = "Nuls数量", required = true)
-                             @QueryParam("amount") long amount) {
+                          @QueryParam("address") String address,
+                          @ApiParam(name = "amount", value = "Nuls数量", required = true)
+                          @QueryParam("amount") long amount) {
         if (!Address.validAddress(address) || amount <= 0 || amount > Na.MAX_NA_VALUE) {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
@@ -223,7 +222,7 @@ public class AccountResource {
 
         return Result.getSuccess().setData(dtoList);
         */
-       return null;
+        return null;
     }
 
     @POST
@@ -249,7 +248,7 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = AssetDto.class)
     })
     public Result getAssets(@ApiParam(name = "address", value = "账户地址", required = true)
-                               @PathParam("address") String address) {
+                            @PathParam("address") String address) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
@@ -267,7 +266,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "获取账户地址", notes = "result.data: String")
     public Result getAddress(@QueryParam("publicKey") String publicKey,
-                                @QueryParam("subChainId") Integer subChainId) {
+                             @QueryParam("subChainId") Integer subChainId) {
         if (subChainId < 1 || subChainId >= 65535) {
             return Result.getFailed(KernelErrorCode.CHAIN_ID_ERROR);
         }
@@ -283,7 +282,7 @@ public class AccountResource {
     @ApiOperation(value = "锁定账户地址", notes = "")
     public Result lock(@QueryParam("address") String address, @QueryParam("password") String password) {
         Account account = accountService.getAccount(address).getData();
-        if(null == account){
+        if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         try {
@@ -296,32 +295,32 @@ public class AccountResource {
         return Result.getSuccess();
     }
 
-    private static final int MAX_UNLOCK_TIME = 60;
+    private static final int ACCOUNT_MAX_UNLOCK_TIME = 600;
+
     @POST
     @Path("/unlock")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "解锁账户", notes = "")
-    public Result unlock(@QueryParam("address") String address, @QueryParam("password") String password) {
+    public Result unlock(@QueryParam("address") String address, @QueryParam("password") String password, @QueryParam("unlockTime") Integer unlockTime) {
         Account account = accountService.getAccount(address).getData();
-        if(null == account){
+        if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         try {
             account.decrypt(password);
             accountCacheService.putAccount(account);
+            if (null == unlockTime || unlockTime > AccountConstant.ACCOUNT_MAX_UNLOCK_TIME) {
+                unlockTime = AccountConstant.ACCOUNT_MAX_UNLOCK_TIME;
+            }
+            if (unlockTime < 0) {
+                unlockTime = 0;
+            }
             // 解锁120秒后自动锁定
             ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1);
             scheduler.schedule(() -> {
-                try {
-                    account.encrypt(password);
-                    accountCacheService.putAccount(account);
-                } catch (NulsException e) {
-                    Log.error("account.encrypt Exception : account:" + account.getAddress().toString());
-                } finally {
-                    accountCacheService.removeAccount(account.getAddress());
-                    scheduler.shutdown();
-                }
-            },MAX_UNLOCK_TIME, TimeUnit.SECONDS);
+                accountCacheService.clear();
+                scheduler.shutdown();
+            }, unlockTime, TimeUnit.SECONDS);
         } catch (NulsException e) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
@@ -334,7 +333,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "重置钱包密码")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result password(@ApiParam(name = "form", value = "重置钱包密码表单数据", required = true)
                                    AccountPasswordForm form) {
@@ -344,5 +343,4 @@ public class AccountResource {
         }
         return result;
     }
-
 }

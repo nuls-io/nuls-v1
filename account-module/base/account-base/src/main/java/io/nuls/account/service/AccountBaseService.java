@@ -6,16 +6,14 @@ import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.service.AccountStorageService;
-import io.nuls.account.util.AccountTool;
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author: Charlie
@@ -123,12 +121,12 @@ public class AccountBaseService {
 //                accountDao.update(accountPoList);
 //            }
             accountStorageService.updateAccount(po);
-            accountCacheService.putAccountList(accounts);
+            //accountCacheService.putAccountList(accounts);
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, "change password failed");
         }
-        this.eventBroadcaster.publishToLocal(new PasswordChangeNotice());
+        //this.eventBroadcaster.publishToLocal(new PasswordChangeNotice());
         return new Result(true, "OK");
     }
 }

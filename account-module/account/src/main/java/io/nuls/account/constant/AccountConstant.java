@@ -34,12 +34,20 @@ public class AccountConstant implements NulsConstant {
 
     /**
      * 本地账户集合
+     * Collection of local accounts
      */
     public static Set<String> LOCAL_ADDRESS_LIST = ConcurrentHashMap.newKeySet();
 
 
     /**
      * 设置账户别名的交易类型
+     * Set the transaction type of account alias.
      */
     public static final int TX_TYPE_ACCOUNT_ALIAS = 51;
+
+    /**
+     * 账户解锁时间最大值(单位:秒)
+     * Account unlock time maximum (unit: second)
+     */
+    public static final int ACCOUNT_MAX_UNLOCK_TIME = 600;
 }

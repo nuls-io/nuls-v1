@@ -14,6 +14,7 @@ import io.nuls.account.tx.AliasTransaction;
 import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
@@ -67,9 +68,19 @@ public class AliasService {
             Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
         Address address = new Address(addr);
-        Account account = accountService.getAccount(address).getData();
+        Account account = AccountCacheService.getAccountByAddress(addr);
+
         if (null == account) {
-            Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            account = accountService.getAccount(address).getData();
+            if(null == account){
+                Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            try {
+                account.decrypt(password);
+            } catch (NulsException e) {
+                Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
+
         }
         if (StringUtils.isNotBlank(account.getAlias())) {
             return new Result(false, AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS, "Alias has been set up");
