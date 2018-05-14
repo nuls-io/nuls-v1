@@ -210,14 +210,6 @@ public interface AccountService {
     Result<List<Account>> getAccountList();
 
     /**
-     * 获取默认账户
-     * Get the default account
-     *
-     * @return the result of the opration and the account model
-     */
-    Result<Account> getDefaultAccount();
-
-    /**
      * 数据签名
      * The data signature
      *
