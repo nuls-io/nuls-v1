@@ -62,8 +62,8 @@ public class UtxoLedgerServiceImplTest {
     private static List<Transaction> txList;
 
     private static LedgerService ledgerService;
-    private static UtxoLedgerUtxoStorageService utxoStorageService;
-    private static UtxoLedgerTransactionStorageService transactionStorageService;
+    private static UtxoLedgerUtxoStorageService utxoLedgerUtxoStorageService;
+    private static UtxoLedgerTransactionStorageService utxoLedgerTransactionStorageService;
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -76,8 +76,8 @@ public class UtxoLedgerServiceImplTest {
         bootstrap.start();
 
         ledgerService = SpringLiteContext.getBean(LedgerService.class);
-        utxoStorageService = SpringLiteContext.getBean(UtxoLedgerUtxoStorageService.class);
-        transactionStorageService = SpringLiteContext.getBean(UtxoLedgerTransactionStorageService.class);
+        utxoLedgerUtxoStorageService = SpringLiteContext.getBean(UtxoLedgerUtxoStorageService.class);
+        utxoLedgerTransactionStorageService = SpringLiteContext.getBean(UtxoLedgerTransactionStorageService.class);
         initAllList();
     }
 
@@ -97,7 +97,7 @@ public class UtxoLedgerServiceImplTest {
         Result result = ledgerService.saveTx(tx);
         System.out.println(result);
         Assert.assertTrue(result.isSuccess());
-        byte[] toCoin = utxoStorageService.getCoinBytes(Arrays.concatenate(tx.getHash().serialize(), new VarInt(0).encode()));
+        byte[] toCoin = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(tx.getHash().serialize(), new VarInt(0).encode()));
         Assert.assertNotNull(toCoin);
         Assert.assertEquals(new Slice(tx.getCoinData().getTo().get(0).serialize()), new Slice(toCoin));
         Transaction txFromDB = ledgerService.getTx(tx.getHash());
@@ -114,9 +114,9 @@ public class UtxoLedgerServiceImplTest {
         from3.getTo().add(new Coin("abcd3.2".getBytes(), Na.parseNuls(10003), 0));
         result = ledgerService.saveTx(tx3);
         Assert.assertTrue(result.isSuccess());
-        byte[] to3Coin0 = utxoStorageService.getCoinBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
-        byte[] to3Coin1 = utxoStorageService.getCoinBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(1).encode()));
-        byte[] to3Coin2 = utxoStorageService.getCoinBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(2).encode()));
+        byte[] to3Coin0 = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
+        byte[] to3Coin1 = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(1).encode()));
+        byte[] to3Coin2 = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(2).encode()));
         Assert.assertNotNull(to3Coin0);
         Assert.assertNotNull(to3Coin1);
         Assert.assertNotNull(to3Coin2);
@@ -150,7 +150,7 @@ public class UtxoLedgerServiceImplTest {
         System.out.println("tx: " + new Slice(tx.serialize()));
         Result result = ledgerService.rollbackTx(tx);
         Assert.assertTrue(result.isSuccess());
-        byte[] toCoin = utxoStorageService.getCoinBytes(Arrays.concatenate(tx.getHash().serialize(), new VarInt(0).encode()));
+        byte[] toCoin = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(tx.getHash().serialize(), new VarInt(0).encode()));
         Assert.assertNull(toCoin);
         Transaction txFromDB = ledgerService.getTx(tx.getHash());
         System.out.println("txFromDB: " + txFromDB);
@@ -161,15 +161,15 @@ public class UtxoLedgerServiceImplTest {
         CoinData from3 = tx3.getCoinData();
         result = ledgerService.rollbackTx(tx3);
         Assert.assertTrue(result.isSuccess());
-        byte[] to3Coin0 = utxoStorageService.getCoinBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
-        byte[] to3Coin1 = utxoStorageService.getCoinBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(1).encode()));
-        byte[] to3Coin2 = utxoStorageService.getCoinBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(2).encode()));
+        byte[] to3Coin0 = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
+        byte[] to3Coin1 = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(1).encode()));
+        byte[] to3Coin2 = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(2).encode()));
         Assert.assertNull(to3Coin0);
         Assert.assertNull(to3Coin1);
         Assert.assertNull(to3Coin2);
-        byte[] from3Coin0 = utxoStorageService.getCoinBytes(from3.getFrom().get(0).getOwner());
-        byte[] from3Coin1 = utxoStorageService.getCoinBytes(from3.getFrom().get(1).getOwner());
-        byte[] from3Coin2 = utxoStorageService.getCoinBytes(from3.getFrom().get(2).getOwner());
+        byte[] from3Coin0 = utxoLedgerUtxoStorageService.getUtxoBytes(from3.getFrom().get(0).getOwner());
+        byte[] from3Coin1 = utxoLedgerUtxoStorageService.getUtxoBytes(from3.getFrom().get(1).getOwner());
+        byte[] from3Coin2 = utxoLedgerUtxoStorageService.getUtxoBytes(from3.getFrom().get(2).getOwner());
         Assert.assertNotNull(from3Coin0);
         Assert.assertNotNull(from3Coin1);
         Assert.assertNotNull(from3Coin2);
@@ -186,6 +186,11 @@ public class UtxoLedgerServiceImplTest {
         from3.getFrom().get(0).setOwner("abcd3".getBytes());
         from3.getFrom().add(new Coin("abcd3.1".getBytes(), Na.parseNuls(10001), 0));
         from3.getFrom().add(new Coin("abcd3.2".getBytes(), Na.parseNuls(10001), 0));
+        // save 以上三笔 UTXO
+        utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(0).getOwner(), from3.getFrom().get(0));
+        utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(1).getOwner(), from3.getFrom().get(1));
+        utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(2).getOwner(), from3.getFrom().get(2));
+
         // 普通校验
         Result result = ledgerService.verifyCoinData(from3);
         System.out.println(result.getErrorCode().getCode());
@@ -205,6 +210,7 @@ public class UtxoLedgerServiceImplTest {
         System.out.println(result.getErrorCode().getCode());
         Assert.assertEquals(LedgerErrorCode.UTXO_UNUSABLE.getCode(), result.getErrorCode().getCode());
 
+
         // 是否输出大于输入校验
         from3.getFrom().remove(from3.getFrom().size() - 1);
         from3.getTo().add(new Coin("abcd3.3".getBytes(), Na.parseNuls(90001), 0));
@@ -212,18 +218,32 @@ public class UtxoLedgerServiceImplTest {
         System.out.println(result.getErrorCode().getCode());
         Assert.assertEquals(LedgerErrorCode.INVALID_AMOUNT.getCode(), result.getErrorCode().getCode());
 
+        // 是否可花费
+        from3.getTo().remove(from3.getTo().size() - 1);
+        // 数据库中删除保存的三笔UTXO
+        utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(0).getOwner());
+        utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(1).getOwner());
+        utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(2).getOwner());
+        result = ledgerService.verifyCoinData(from3);
+        System.out.println(result.getErrorCode().getCode());
+        Assert.assertEquals(LedgerErrorCode.UTXO_NOT_FOUND.getCode(), result.getErrorCode().getCode());
+
 
     }
 
     @Test
     public void verifyCoinDataIsExist() throws IOException {
-        allList.get(3).getCoinData().getFrom().get(0).setOwner("abcd3".getBytes());
-        allList.get(4).getCoinData().getFrom().get(0).setOwner("abcd4".getBytes());
+        Transaction tx3 = allList.get(3);
+        Transaction tx4 = allList.get(4);
+        //allList.get(3).getCoinData().getTo().get(0).setOwner("abcd3".getBytes());
+        //allList.get(4).getCoinData().getTo().get(0).setOwner("abcd4".getBytes());
 
         // 存在，测试期望是成功
+        byte[] tx3HashBytes = tx3.getHash().serialize();
         CoinData coinData = new CoinData();
-        coinData.getFrom().add(new Coin("abcd3".getBytes(), Na.parseNuls(10001), 0));
+        coinData.getFrom().add(new Coin(Arrays.concatenate(tx3HashBytes, new VarInt(3).encode()), Na.parseNuls(10001), 0));
         Result result = ledgerService.verifyCoinData(coinData, allList);
+        System.out.println(result);
         Assert.assertTrue(result.isSuccess());
 
         // 不存在，测试期望是失败 - 孤儿交易
@@ -240,7 +260,6 @@ public class UtxoLedgerServiceImplTest {
         coinData = tx.getCoinData();
         coinData.getFrom().get(0).setOwner(Arrays.concatenate(txHashBytes, new VarInt(0).encode()));
         result = ledgerService.saveTx(tx);
-        Object object = transactionStorageService.getTxBytes(txHashBytes);
         //System.out.println("before=" + java.util.Arrays.toString(txHashBytes) + ", size=" + txHashBytes.length);
         Assert.assertTrue(result.isSuccess());
         result = ledgerService.verifyCoinData(coinData, allList);
@@ -274,10 +293,10 @@ public class UtxoLedgerServiceImplTest {
         Result result = ledgerService.unlockTxCoinData(allList.get(3));
         //System.out.println(result);
         Assert.assertTrue(result.isSuccess());
-        byte[] to3Coin0 = utxoStorageService.getCoinBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
+        byte[] to3Coin0 = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
         Assert.assertNotNull(to3Coin0);
         Assert.assertEquals(new Slice(tx3.getCoinData().getTo().get(0).serialize()), new Slice(to3Coin0));
-        byte[] from3Coin0 = utxoStorageService.getCoinBytes(tx3.getCoinData().getFrom().get(0).getOwner());
+        byte[] from3Coin0 = utxoLedgerUtxoStorageService.getUtxoBytes(tx3.getCoinData().getFrom().get(0).getOwner());
         Assert.assertNull(from3Coin0);
 
 

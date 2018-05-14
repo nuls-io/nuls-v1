@@ -38,5 +38,9 @@ public interface UtxoLedgerUtxoStorageService {
 
     BatchOperation createWriteBatch();
 
-    byte[] getCoinBytes(byte[] owner);
+    Result saveUtxo(byte[] owner, Coin coin);
+
+    Result deleteUtxo(byte[] owner);
+
+    byte[] getUtxoBytes(byte[] owner);
 }
