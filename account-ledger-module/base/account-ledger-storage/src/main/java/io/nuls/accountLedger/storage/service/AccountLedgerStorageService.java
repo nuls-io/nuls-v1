@@ -39,13 +39,13 @@ public interface AccountLedgerStorageService {
 
     Result saveLocalTx(Transaction tx);
 
+    Result deleteLocalTx(Transaction tx);
+
     Result saveLocalTxInfo(TransactionInfoPo tx, List<byte[]> addresses);
 
     Result deleteLocalTxInfo(TransactionInfoPo tx);
 
     Transaction getLocalTx(NulsDigestData hash);
-
-    Result deleteLocalTx(Transaction tx);
 
     byte[] getCoinBytes(byte[] owner);
 
