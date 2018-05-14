@@ -94,14 +94,10 @@ public class NodeMessageBody extends BaseNulsData {
         int s = 0;
         s += VarInt.sizeOf(length);
         s += SerializeUtils.sizeOfVarInt(ipList == null ? 0 : ipList.size());
-        try {
-            if (null != ipList) {
-                for (String ip : ipList) {
-                    s += ip.getBytes(NulsConfig.DEFAULT_ENCODING).length;
-                }
+        if (null != ipList) {
+            for (String ip : ipList) {
+                s += SerializeUtils.sizeOfString(ip);
             }
-        } catch (UnsupportedEncodingException e) {
-            Log.error(e);
         }
 
         s += SerializeUtils.sizeOfVarInt(nodeList == null ? 0 : nodeList.size());
