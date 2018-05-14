@@ -47,7 +47,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
  * @author ln
  * @date 2018/5/8
  */
@@ -76,21 +75,24 @@ public class ConsensusScheduler {
         OrphanBlockProvider orphanBlockProvider = new OrphanBlockProvider();
 
         BlockProcess blockProcess = new BlockProcess(chainManager, orphanBlockProvider);
-        threadPool.scheduleAtFixedRate(new BlockProcessTask(blockProcess), 1000L,100L, TimeUnit.MILLISECONDS);
+        threadPool.scheduleAtFixedRate(new BlockProcessTask(blockProcess), 1000L, 100L, TimeUnit.MILLISECONDS);
 
         ForkChainProcess forkChainProcess = new ForkChainProcess(chainManager);
-        threadPool.scheduleAtFixedRate(new ForkChainProcessTask(forkChainProcess), 1000L,1000L, TimeUnit.MILLISECONDS);
+        threadPool.scheduleAtFixedRate(new ForkChainProcessTask(forkChainProcess), 1000L, 1000L, TimeUnit.MILLISECONDS);
 
         ConsensusProcess consensusProcess = new ConsensusProcess(chainManager);
-        threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L,1000L, TimeUnit.MILLISECONDS);
+        threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L, 1000L, TimeUnit.MILLISECONDS);
 
         orphanBlockProcess = new OrphanBlockProcess(chainManager, orphanBlockProvider);
         orphanBlockProcess.start();
 
         PocConsensusContext.setChainManager(chainManager);
         cacheManager = new CacheManager(chainManager);
-
-        initDatas();
+        try {
+            initDatas();
+        } catch (Exception e) {
+            Log.warn(e.getMessage());
+        }
 
         return true;
     }
@@ -117,7 +119,6 @@ public class ConsensusScheduler {
         try {
             cacheManager.load();
         } catch (Exception e) {
-            Log.error(e);
             throw new NulsRuntimeException(e);
         }
     }
