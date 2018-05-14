@@ -28,7 +28,6 @@ public class GetNodesIpMessageHandler implements BaseNetworkMeesageHandler {
 
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
-        System.out.println("---------------------GetNodesIpMessageHandler process----------------------");
         Collection<Node> availableNodes = nodeManager.getNodes().values();
         List<String> ipList = new ArrayList<>();
         for (Node n : availableNodes) {

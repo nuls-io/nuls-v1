@@ -25,7 +25,6 @@ public class NodesIpMessageHandler implements BaseNetworkMeesageHandler {
 
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
-        System.out.println("---------------------NodesIpMessageHandler process----------------------");
         NodesIpMessage handshakeMessage = (NodesIpMessage) message;
         NodeMessageBody body = handshakeMessage.getMsgBody();
 
