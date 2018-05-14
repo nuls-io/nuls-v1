@@ -1,5 +1,6 @@
 package io.nuls.account.constant;
 
+import io.nuls.account.model.Account;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.model.Na;
 
@@ -29,7 +30,7 @@ public class AccountConstant implements NulsConstant {
      * 默认账户地址
      * Default account address
      */
-    public static String DEFAULT_ACCOUNT_ADDRESS;
+    public static Account DEFAULT_ACCOUNT;
 
     /**
      * 本地账户集合

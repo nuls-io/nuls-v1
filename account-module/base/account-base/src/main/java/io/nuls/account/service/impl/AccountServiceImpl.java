@@ -40,8 +40,6 @@ public class AccountServiceImpl implements AccountService {
 
     private Lock locker = new ReentrantLock();
 
-    private AccountCacheService accountCacheService = AccountCacheService.getInstance();
-
     @Autowired
     private AccountStorageService accountStorageService;
 
@@ -72,8 +70,11 @@ public class AccountServiceImpl implements AccountService {
                 resultList.add(account.getAddress().getBase58());
             }
             accountStorageService.saveAccountList(accountPos);
-            accountCacheService.putAccountList(accounts);
             AccountConstant.LOCAL_ADDRESS_LIST.addAll(resultList);
+
+            AccountPo accountpo = accountPos.get(0);
+            accountStorageService.saveDefaultAccount(accountpo);
+            AccountConstant.DEFAULT_ACCOUNT = accountpo.toAccount();
             return Result.getSuccess().setData(resultList);
         } catch (Exception e) {
             Log.error(e);
@@ -116,12 +117,23 @@ public class AccountServiceImpl implements AccountService {
         } catch (NulsException e) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
+
+        AccountPo accountPo = accountStorageService.getDefaultAccount().getData();
+        Account accDb = accountPo.toAccount();
         accountStorageService.removeAccount(account.getAddress());
-        accountCacheService.removeAccount(account.getAddress());
-        AccountConstant.LOCAL_ADDRESS_LIST.remove(address);
-        if (AccountConstant.DEFAULT_ACCOUNT_ADDRESS != null && AccountConstant.DEFAULT_ACCOUNT_ADDRESS.equals(address)) {
-            AccountConstant.DEFAULT_ACCOUNT_ADDRESS = null;
+        if(accDb.getAddress().toString().equals(account.getAddress().toString())){
+            //要删除的是默认账户, 需要重新设置默认账户
+            List<Account> accountList = getAccountList().getData();
+            if(null != accountList && accountList.size() > 0){
+                Account accDefault = accountList.get(0);
+                accountStorageService.saveDefaultAccount(new AccountPo(accDefault));
+                AccountConstant.DEFAULT_ACCOUNT = accDefault;
+            }else{
+                accountStorageService.removeDefaultAccount();
+                AccountConstant.DEFAULT_ACCOUNT = null;
+            }
         }
+        AccountConstant.LOCAL_ADDRESS_LIST.remove(address);
         //to do 等新接口!!!!
         //accountLedgerService.removeLocalTxs(address);
         return Result.getSuccess();
@@ -145,20 +157,21 @@ public class AccountServiceImpl implements AccountService {
         account.setPubKey(keyStore.getPubKey());
         AccountPo po = new AccountPo(account);
         accountStorageService.saveAccount(po);
-        accountCacheService.putAccount(account);
+        if (null == AccountConstant.DEFAULT_ACCOUNT) {
+            AccountConstant.DEFAULT_ACCOUNT = account;
+            accountStorageService.saveDefaultAccount(po);
+        }
         AccountConstant.LOCAL_ADDRESS_LIST.add(keyStore.getAddress());
         return Result.getSuccess().setData(account);
     }
+
 
     @Override
     public Result<AccountKeyStore> exportAccountToKeyStore(String address, String password) {
         if(!Address.validAddress(address)){
             Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
-        Account account = accountCacheService.getAccountByAddress(address);
-        if (account == null) {
-            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
-        }
+        Account account = getAccountByAddress(address);
         try {
             if (!account.decrypt(password)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
@@ -175,7 +188,8 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Account> getDefaultAccount() {
-        return Result.getSuccess().setData(getDefaultAccountOther());
+        Account account = getDefaultAccountOther();
+        return null == account ? Result.getFailed() : Result.getSuccess().setData(account);
     }
 
     /**
@@ -185,15 +199,11 @@ public class AccountServiceImpl implements AccountService {
      * @return Account
      */
     private Account getDefaultAccountOther() {
-        Account account = null;
-        if (AccountConstant.DEFAULT_ACCOUNT_ADDRESS != null) {
-            account = getAccountByAddress(AccountConstant.DEFAULT_ACCOUNT_ADDRESS);
-        }
+        Account account = AccountConstant.DEFAULT_ACCOUNT;
         if (account == null) {
-            List<Account> accounts = getAccountList().getData();
-            if (accounts != null && !accounts.isEmpty()) {
-                account = accounts.get(0);
-                AccountConstant.DEFAULT_ACCOUNT_ADDRESS = account.getAddress().getBase58();
+            AccountPo accountPo = accountStorageService.getDefaultAccount().getData();
+            if(null != accountPo){
+                account = accountPo.toAccount();
             }
         }
         return account;
@@ -209,16 +219,16 @@ public class AccountServiceImpl implements AccountService {
         if(!Address.validAddress(address)){
             return null;
         }
-        Account account = accountCacheService.getAccountByAddress(address);
-        if (null == account) {
-            Result<AccountPo> result = accountStorageService.getAccount(new Address(address));
-            if (result.isSuccess()) {
-                account = result.getData().toAccount();
-                accountCacheService.putAccount(account);
-                if(!AccountConstant.LOCAL_ADDRESS_LIST.contains(account.getAddress().toString())){
-                    AccountConstant.LOCAL_ADDRESS_LIST.add(account.getAddress().toString());
-                }
-            }
+        if(AccountConstant.DEFAULT_ACCOUNT.getAddress().toString().equals(address)){
+            return AccountConstant.DEFAULT_ACCOUNT;
+        }
+        AccountPo accountPo = accountStorageService.getAccount(Hex.decode(address)).getData();
+        if (accountPo == null) {
+            return null;
+        }
+        Account account = accountPo.toAccount();
+        if(!AccountConstant.LOCAL_ADDRESS_LIST.contains(account.getAddress().toString())){
+            AccountConstant.LOCAL_ADDRESS_LIST.add(account.getAddress().toString());
         }
         return account;
     }
@@ -244,11 +254,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<List<Account>> getAccountList() {
-        List<Account> list = this.accountCacheService.getAccountList();
-        if (null != list && !list.isEmpty()) {
-            return Result.getSuccess().setData(list);
-        }
-        list = new ArrayList<>();
+        List<Account> list = new ArrayList<>();
         List<AccountPo> poList = this.accountStorageService.getAccountList().getData();
         Set<String> addressList = new HashSet<>();
         if (null == poList || poList.isEmpty()) {
@@ -259,7 +265,6 @@ public class AccountServiceImpl implements AccountService {
             list.add(account);
             addressList.add(account.getAddress().getBase58());
         }
-        this.accountCacheService.putAccountList(list);
         AccountConstant.LOCAL_ADDRESS_LIST = addressList;
         return Result.getSuccess().setData(list);
     }
@@ -293,7 +298,8 @@ public class AccountServiceImpl implements AccountService {
         if (null == account || null == account.getAddress()) {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
-        if (!accountCacheService.contains(account.getAddress().getBase58Bytes())) {
+
+        if (null == getAccountByAddress(account.getAddress().toString())) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         return new Result(account.isEncrypted(), null);
@@ -421,11 +427,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Balance> getBalance() {
-        List<Account> list = this.accountCacheService.getAccountList();
-        if (null != list && !list.isEmpty()) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
-        }
-        list = new ArrayList<>();
+        List<Account> list = new ArrayList<>();
         List<AccountPo> poList = this.accountStorageService.getAccountList().getData();
         if (null == poList || poList.isEmpty()) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);

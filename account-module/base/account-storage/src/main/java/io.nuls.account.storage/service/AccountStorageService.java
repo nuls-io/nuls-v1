@@ -71,4 +71,24 @@ public interface AccountStorageService {
      */
     Result updateAccount(AccountPo account);
 
+    /**
+     * 保存默认账户
+     * Set default account
+     * @param account default
+     * @return
+     */
+    Result saveDefaultAccount(AccountPo account);
+
+    /**
+     * 获取默认账户
+     * get default account
+     * @return
+     */
+    Result<AccountPo> getDefaultAccount();
+
+    /**
+     * remove default account
+     * @return
+     */
+    Result removeDefaultAccount();
 }
