@@ -373,7 +373,6 @@ public class UtxoLedgerServiceImplTest {
         RedPunishData data = new RedPunishData();
         data.setAddress(AddressTool.getAddress(ecKeys[0].getPubKey()));
         data.setEvidence("for test".getBytes());
-        data.setHeight(1);
         data.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
         tx.setTxData(data);
         return tx;
