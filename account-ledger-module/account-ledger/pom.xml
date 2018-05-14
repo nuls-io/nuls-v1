@@ -12,8 +12,4 @@
 
     <groupId>io.nuls.account-ledger-module</groupId>
     <artifactId>account-ledger</artifactId>
-
-    <dependencies>
-
-    </dependencies>
 </project>

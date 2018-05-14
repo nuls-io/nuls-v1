@@ -29,9 +29,9 @@ import io.nuls.kernel.thread.manager.TaskManager;
 
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/8
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/5/8
  */
 public class AccountLedgerModuleBootstrap extends AbstractAccountLedgerModule {
 

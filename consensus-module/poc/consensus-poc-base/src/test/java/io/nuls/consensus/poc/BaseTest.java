@@ -27,7 +27,7 @@
 package io.nuls.consensus.poc;
 
 import io.nuls.account.service.AccountService;
-import io.nuls.consensus.poc.customer.ConsensusAccountServiceImpl;
+import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.consensus.poc.customer.ConsensusBlockServiceImpl;
 import io.nuls.consensus.poc.customer.ConsensusDownloadServiceImpl;
 import io.nuls.consensus.poc.customer.ConsensusNetworkService;
@@ -72,8 +72,8 @@ public class BaseTest {
             try {
                 accountService = SpringLiteContext.getBean(AccountService.class);
             } catch (Exception e) {
-                SpringLiteContext.putBean(ConsensusAccountServiceImpl.class, false);
-                accountService = SpringLiteContext.getBean(AccountService.class);
+                //SpringLiteContext.putBean(AccountServiceImpl.class, false);
+                //accountService = SpringLiteContext.getBean(AccountService.class);
             }
             try {
                 SpringLiteContext.getBean(NetworkService.class);

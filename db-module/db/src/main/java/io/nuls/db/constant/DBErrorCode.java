@@ -29,9 +29,9 @@ package io.nuls.db.constant;
 import io.nuls.kernel.constant.ErrorCode;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/9
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/5/9
  */
 public interface DBErrorCode {
 

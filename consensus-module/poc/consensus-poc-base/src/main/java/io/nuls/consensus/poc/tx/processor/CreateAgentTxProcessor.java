@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.consensus.poc.process;
+package io.nuls.consensus.poc.tx.processor;
 
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.storage.po.AgentPo;
@@ -48,7 +48,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created by ln on 2018/5/10.
+ *
+ * @author ln
+ * @date 2018/5/10
  */
 @Component
 public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentTransaction> {

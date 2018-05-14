@@ -24,21 +24,11 @@
 
 package io.nuls.accountLedger.model;
 
-import io.nuls.account.model.Address;
-import io.nuls.accountLedger.constant.AccountLedgerErrorCode;
-import io.nuls.kernel.constant.ErrorCode;
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
- * author Facjas
- * date 2018/5/10.
+ * @author Facjas
+ * @date 2018/5/10.
  */
 public class TransactionInfo {
 

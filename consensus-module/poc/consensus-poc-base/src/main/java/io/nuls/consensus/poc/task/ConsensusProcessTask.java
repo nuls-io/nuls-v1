@@ -29,7 +29,9 @@ import io.nuls.consensus.poc.process.ConsensusProcess;
 import io.nuls.core.tools.log.Log;
 
 /**
- * Created by ln on 2018/4/13.
+ *
+ * @author ln
+ * @date 2018/4/13
  */
 public class ConsensusProcessTask implements Runnable {
 

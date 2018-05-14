@@ -54,7 +54,9 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Created by ln on 2018/5/8.
+ *
+ * @author ln
+ * @date 2018/5/8
  */
 public class ForkChainProcess {
 
@@ -143,7 +145,6 @@ public class ForkChainProcess {
     }
 
     private void printLog() {
-        // TODO  remove log
         time = System.currentTimeMillis();
 
         StringBuilder sb = new StringBuilder();

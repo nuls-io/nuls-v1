@@ -40,7 +40,9 @@ import io.nuls.protocol.service.DownloadService;
 import java.io.IOException;
 
 /**
- * Created by ln on 2018/4/13.
+ *
+ * @author ln
+ * @date 2018/4/13
  */
 public class BlockProcessTask implements Runnable {
 

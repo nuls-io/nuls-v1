@@ -49,7 +49,9 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Created by ln on 2018/4/13.
+ *
+ * @author ln
+ * @date 2018/4/13
  */
 public class BlockProcess {
 
@@ -132,7 +134,7 @@ public class BlockProcess {
                 Log.error("save block error : " + e.getMessage(), e);
             }
             if(success) {
-                //check TODO need remove
+                //check .TODO need remove,代码稳定后删除
 
                 try {
                     Block tempBlock = blockService.getBlock(block.getHeader().getHash()).getData();

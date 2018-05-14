@@ -26,9 +26,9 @@ package io.nuls.ledger.constant;
 import io.nuls.kernel.constant.NulsConstant;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/7
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/5/7
  */
 public interface LedgerConstant extends NulsConstant {
 

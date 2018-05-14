@@ -46,6 +46,8 @@ public class PunishLogPo extends BaseNulsData {
     private long time;
     private long height;
     private long roundIndex;
+    private short reasonCode;
+    private byte[] evidence;
 
     /**
      * serialize important field
@@ -57,6 +59,8 @@ public class PunishLogPo extends BaseNulsData {
         stream.writeInt48(time);
         stream.writeVarInt(height);
         stream.writeVarInt(roundIndex);
+        stream.writeShort(reasonCode);
+        stream.writeBytesWithLength(evidence);
     }
 
     @Override
@@ -66,6 +70,8 @@ public class PunishLogPo extends BaseNulsData {
         this.time = byteBuffer.readInt48();
         this.height = byteBuffer.readVarInt();
         this.roundIndex = byteBuffer.readVarInt();
+        this.reasonCode = byteBuffer.readShort();
+        this.evidence = byteBuffer.readByLengthByte();
     }
 
     @Override
@@ -76,6 +82,8 @@ public class PunishLogPo extends BaseNulsData {
         size += SerializeUtils.sizeOfInt48();
         size += SerializeUtils.sizeOfVarInt(height);
         size += SerializeUtils.sizeOfVarInt(roundIndex);
+        size += 2;
+        size += SerializeUtils.sizeOfBytes(this.evidence);
         return size;
     }
 

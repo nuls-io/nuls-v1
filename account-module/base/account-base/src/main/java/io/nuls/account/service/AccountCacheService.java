@@ -4,6 +4,7 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.cache.CacheMap;
+import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.lite.annotation.Component;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class AccountCacheService {
 
     private static final AccountCacheService INSTANCE = new AccountCacheService();
 
-    private CacheMap<byte[], Account> cacheMap;
+    private CacheMap<String, Account> cacheMap;
 
     private AccountCacheService() {
         this.cacheMap = new CacheMap<>(AccountConstant.ACCOUNT_LIST_CACHE, 32, String.class, Account.class);
@@ -37,18 +38,7 @@ public class AccountCacheService {
      * @param account Account to be cached
      */
     public void putAccount(Account account) {
-        this.cacheMap.put(account.getAddress().getBase58Bytes(), account);
-    }
-
-    /**
-     * 根据账户地址获取账户详细信息
-     * Get accounts based on account address
-     *
-     * @param address address format: Base58Bytes
-     * @return
-     */
-    public Account getAccountByAddress(byte[] address) {
-        return this.cacheMap.get(address);
+        this.cacheMap.put(account.getAddress().getBase58(), account);
     }
 
     /**
@@ -75,7 +65,7 @@ public class AccountCacheService {
      * @return
      */
     public boolean contains(byte[] address) {
-        return this.cacheMap.containsKey(address);
+        return this.cacheMap.containsKey(Base58.encode(address));
     }
 
     /**
@@ -88,11 +78,11 @@ public class AccountCacheService {
     }
 
     public void removeAccount(Address address) {
-        this.cacheMap.remove(address.getBase58Bytes());
+        this.cacheMap.remove(address.getBase58());
     }
 
     public void removeAccount(byte[] address) {
-        this.cacheMap.remove(address);
+        this.cacheMap.remove(Base58.encode(address));
     }
 
 

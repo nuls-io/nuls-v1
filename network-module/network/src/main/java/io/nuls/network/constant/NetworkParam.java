@@ -1,7 +1,9 @@
 package io.nuls.network.constant;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class NetworkParam {
 
@@ -25,6 +27,8 @@ public class NetworkParam {
     private Set<String> localIps;
 
     private List<String> seedIpList;
+
+    private Map<String, Long> ipMap = new ConcurrentHashMap<>();
 
     public int getPort() {
         return port;
@@ -72,5 +76,9 @@ public class NetworkParam {
 
     public void setSeedIpList(List<String> seedIpList) {
         this.seedIpList = seedIpList;
+    }
+
+    public Map<String, Long> getIpMap() {
+        return ipMap;
     }
 }

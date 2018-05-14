@@ -23,25 +23,28 @@
  *
  */
 
-package io.nuls.consensus.poc.validator;
+package io.nuls.consensus.poc.tx.validator;
 
 import io.nuls.consensus.poc.config.ConsensusConfig;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
+import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author: Niels Wang
  * @date: 2018/5/13
  */
 @Component
-public class AgentAddressesValidator implements NulsDataValidator<CreateAgentTransaction> {
+public class AgentAddressesValidator extends BaseConsensusProtocolValidator<CreateAgentTransaction> {
     /**
      * @param data
      * @return
@@ -67,10 +70,5 @@ public class AgentAddressesValidator implements NulsDataValidator<CreateAgentTra
             return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT);
         }
         return ValidateResult.getSuccessResult();
-    }
-
-    private long getRedPunishCount(byte[] agentAddress) {
-        // todo auto-generated method stub
-        return 0;
     }
 }

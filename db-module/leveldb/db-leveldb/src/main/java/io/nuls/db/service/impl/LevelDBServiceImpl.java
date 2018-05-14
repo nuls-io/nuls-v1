@@ -26,10 +26,8 @@ package io.nuls.db.service.impl;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.model.Entry;
-import io.nuls.db.model.ModelWrapper;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
-import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
 
@@ -38,9 +36,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/4/18
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/4/18
  */
 @Service
 public class LevelDBServiceImpl implements DBService {

@@ -29,7 +29,8 @@ package io.nuls.consensus.poc.constant;
 import io.nuls.kernel.model.Na;
 
 /**
- * Created by ln on 2018/4/22.
+ * @author ln
+ * @date 2018/4/22
  */
 public interface PocConsensusConstant {
 
@@ -48,41 +49,46 @@ public interface PocConsensusConstant {
      * Maximum height difference handled by furcation blocks
      * 当分叉链高度超过主链多少高度时，触发切换主链的操作
      */
-    public final static int CHANGE_CHAIN_BLOCK_DIFF_COUNT = 3;
+    int CHANGE_CHAIN_BLOCK_DIFF_COUNT = 3;
 
     /**
      * Maximum height difference handled by furcation blocks , Blocks that exceed this difference will be discarded directly
      * 分叉块处理的最大高度差值，超过这个差值的区块，会直接丢弃掉
      */
-    public final static int MAX_ISOLATED_BLOCK_COUNT = 1000;
+    int MAX_ISOLATED_BLOCK_COUNT = 1000;
 
     /**
      * How long does the current network time exceed the number of blocks that are discarded directly, in milliseconds
      * 超过当前网络时间多久的区块，直接丢弃掉，单位毫秒
      */
-    public final static long DISCARD_FUTURE_BLOCKS_TIME = 60 * 1000L;
+    long DISCARD_FUTURE_BLOCKS_TIME = 60 * 1000L;
 
     /**
      * Load the block header of the last specified number of rounds during initialization
      * 初始化时加载最近指定轮数的区块头
      */
-    public final static int INIT_HEADERS_OF_ROUND_COUNT = 200;
+    int INIT_HEADERS_OF_ROUND_COUNT = 200;
 
     /**
      * When the system starts up, load the newly specified number of blocks into memory
      * 系统启动时，加载最新指定数量的区块到内存里面
      */
-    public static final int INIT_BLOCKS_COUNT = 10;
+    int INIT_BLOCKS_COUNT = 10;
 
     /**
      * Consensus memory expiration data cleaning interval, in milliseconds
      * 共识内存过期数据清理间隔时间，单位毫秒
      */
-    public static final long CLEAR_INTERVAL_TIME = 60000L;
+    long CLEAR_INTERVAL_TIME = 60000L;
 
     /**
      * Regularly clear the round before the specified number of rounds of the main chain
      * 定期清理主链指定轮数之前的轮次信息
      */
-    public final static int CLEAR_MASTER_CHAIN_ROUND_COUNT = 5;
+    int CLEAR_MASTER_CHAIN_ROUND_COUNT = 5;
+
+    /**
+     * The maximum continuous number of yellow punish log.
+     */
+    int MAXINUM_CONTINUOUS_YELLOW_NUMBER = 100;
 }

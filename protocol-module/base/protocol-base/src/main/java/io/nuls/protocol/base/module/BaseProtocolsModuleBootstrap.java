@@ -25,13 +25,16 @@
 package io.nuls.protocol.base.module;
 
 
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.protocol.base.handler.*;
+import io.nuls.protocol.base.service.DownloadServiceImpl;
 import io.nuls.protocol.message.*;
 import io.nuls.protocol.module.AbstractProtocolModule;
+import io.nuls.protocol.service.DownloadService;
 
 ;
 
@@ -41,7 +44,6 @@ import io.nuls.protocol.module.AbstractProtocolModule;
  */
 public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
 
-
     @Override
     public void init() {
     }
@@ -49,7 +51,9 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
     @Override
     public void start() {
         this.waitForDependencyRunning(MessageBusConstant.MODULE_ID_MESSAGE_BUS);
+        this.waitForDependencyInited(ConsensusConstant.MODULE_ID_CONSENSUS);
         this.initHandlers();
+        ((DownloadServiceImpl) NulsContext.getServiceBean(DownloadService.class)).start();
     }
 
     private void initHandlers() {
@@ -65,9 +69,9 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         messageBusService.subscribeMessage(SmallBlockMessage.class, new SmallBlockHandler());
     }
 
-
     @Override
     public void shutdown() {
+        ((DownloadServiceImpl) NulsContext.getServiceBean(DownloadService.class)).stop();
         TaskManager.shutdownByModuleId(this.getModuleId());
     }
 

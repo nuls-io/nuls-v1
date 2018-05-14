@@ -36,7 +36,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created by ln on 2018/4/13.
+ *
+ * @author ln
+ * @date 2018/4/13
  */
 public class ConsensusConfig {
 

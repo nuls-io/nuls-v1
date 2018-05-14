@@ -40,7 +40,6 @@ public class CacheTestTx extends Transaction {
 
     @Override
     protected TransactionLogicData parseTxData(NulsByteBuffer byteBuffer) {
-        // todo auto-generated method stub
         return null;
     }
 }

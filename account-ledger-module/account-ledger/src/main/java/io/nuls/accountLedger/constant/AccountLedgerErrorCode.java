@@ -46,4 +46,5 @@ public interface AccountLedgerErrorCode {
     ErrorCode SUCCESS = ErrorCode.init("AL010", 50010);
     ErrorCode FAILED = ErrorCode.init("AL011", 50011);
     ErrorCode PARAMETER_ERROR = ErrorCode.init("AL012", 50012);
+    ErrorCode IO_ERROR = ErrorCode.init("AL013", 50013);
 }

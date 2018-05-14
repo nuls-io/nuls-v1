@@ -30,7 +30,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Created by ln on 2018/4/13.
+ *
+ * @author ln
+ * @date 2018/4/13
  */
 public final class Lockers {
 

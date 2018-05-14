@@ -26,12 +26,15 @@
 package io.nuls.accountLedger.service.impl;
 
 import io.nuls.account.model.Account;
+import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
+import io.nuls.accountLedger.constant.AccountLedgerErrorCode;
 import io.nuls.accountLedger.model.TransactionInfo;
 import io.nuls.accountLedger.storage.po.TransactionInfoPo;
 import io.nuls.accountLedger.storage.service.AccountLedgerStorageService;
 import io.nuls.core.tools.BloomFilter.BloomFilter;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Coin;
@@ -42,11 +45,12 @@ import io.nuls.kernel.model.Transaction;
 import io.nuls.accountLedger.service.AccountLedgerService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
- * author Facjas
- * date 2018/5/10.
+ * @author Facjas
+ * @date 2018/5/10.
  */
 @Component
 public class AccountLedgerServiceImpl implements AccountLedgerService {
@@ -57,6 +61,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
     @Autowired
     private AccountService accountService;
 
+    private static List<Account> localAccountList;
+
     @Override
     public Result<Integer> save(Transaction tx) {
         if (!isLocalTransaction(tx)) {
@@ -64,7 +70,27 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
-        Result result = storageService.saveLocalTxInfo(txInfoPo);
+        List<byte[]> addresses = new ArrayList<>();
+        byte[] addressesBytes = tx.getAddress();
+
+        if (addressesBytes == null || addressesBytes.length == 0) {
+            return Result.getSuccess().setData(new Integer(0));
+        }
+
+        if (addressesBytes.length % Address.size() != 0) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
+
+        for (int i = 0; i < addressesBytes.length / Address.size(); i++) {
+            byte[] tmpAddress = new byte[Address.size()];
+            System.arraycopy(addressesBytes, i * Address.size(), tmpAddress, 0, Address.size());
+            if (isLocalAccount(tmpAddress)) {
+                addresses.add(tmpAddress);
+            }
+        }
+
+        Result result = storageService.saveLocalTxInfo(txInfoPo, addresses);
+
         if (result.isFailed()) {
             return result;
         }
@@ -94,7 +120,19 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
 
     @Override
     public Result<Integer> rollback(Transaction tx) {
-        return null;
+        if (!isLocalTransaction(tx)) {
+            return Result.getFailed().setData(new Integer(0));
+        }
+
+        TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
+        Result result = storageService.deleteLocalTxInfo(txInfoPo);
+
+        if (result.isFailed()) {
+            return result;
+        }
+        result = storageService.deleteLocalTx(tx);
+
+        return result;
     }
 
     @Override
@@ -135,22 +173,15 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         if (txs == null || txs.size() == 0) {
             return resultTxs;
         }
-
-        List<Account> localAddressList = accountService.getAccountList().getData();
-        if (localAddressList == null || localAddressList.size() == 0) {
+        if (localAccountList == null || localAccountList.size() == 0) {
             return resultTxs;
-        }
-
-        BloomFilter accountFilter = new BloomFilter(localAddressList.size() * 100, 0.0001, txs.get(1).getTime());
-        for (int i = 0; i < localAddressList.size(); i++) {
-            accountFilter.insert(localAddressList.get(i).getAddress().getBase58Bytes());
         }
         Transaction tmpTx;
         for (int i = 0; i < txs.size(); i++) {
             tmpTx = txs.get(i);
             List<byte[]> addresses = tmpTx.getAllRelativeAddress();
             for (int j = 0; j < addresses.size(); i++) {
-                if (accountFilter.contains(addresses.get(i))) {
+                if (isLocalAccount(addresses.get(i))) {
                     resultTxs.add(tmpTx);
                     continue;
                 }
@@ -158,5 +189,22 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         }
 
         return resultTxs;
+    }
+
+    public void reloadAccount() {
+        localAccountList = accountService.getAccountList().getData();
+    }
+
+    public boolean isLocalAccount(byte[] address) {
+        if (localAccountList == null || localAccountList.size() == 0) {
+            return false;
+        }
+
+        for (int i = 0; i < localAccountList.size(); i++) {
+            if (Arrays.equals(localAccountList.get(i).getAddress().getBase58Bytes(), address)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

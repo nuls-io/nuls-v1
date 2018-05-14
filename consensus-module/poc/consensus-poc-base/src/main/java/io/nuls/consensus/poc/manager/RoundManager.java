@@ -53,7 +53,9 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Created by ln on 2018/4/14.
+ *
+ * @author ln
+ * @date 2018/4/14
  */
 public class RoundManager {
 
@@ -282,7 +284,7 @@ public class RoundManager {
             memberList.add(member);
         }
 
-        // TODO removeSmallBlock the test code in future
+        //TODO removeSmallBlock the test code in future
         List<Deposit> depositTempList = new ArrayList<>();
 
         List<Agent> agentList = getAliveAgentList(startBlockHeader.getHeight());

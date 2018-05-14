@@ -33,7 +33,9 @@ import io.nuls.network.entity.Node;
 import java.util.List;
 
 /**
- * Created by ln on 2018/5/4.
+ *
+ * @author ln
+ * @date 2018/5/4
  */
 public interface ConsensusService {
 
@@ -81,14 +83,5 @@ public interface ConsensusService {
      * @return List<Transaction>
      */
     List<Transaction> getMemoryTxs();
-
-    /**
-     * Reset consensus module, restart, load memory data, reinitialize all states
-     *
-     * 重置共识模块，会重新启动，加载内存数据，重新初始化所有状态
-     * @return Result
-     */
-    //todo 内部
-    Result reset();
 
 }

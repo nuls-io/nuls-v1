@@ -32,9 +32,9 @@ import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import java.io.IOException;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/4/21
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/4/21
  */
 public class CallContractData extends BaseNulsData {
 

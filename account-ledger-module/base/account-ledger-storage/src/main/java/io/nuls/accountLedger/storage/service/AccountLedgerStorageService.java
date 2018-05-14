@@ -24,21 +24,22 @@
  */
 package io.nuls.accountLedger.storage.service;
 
-import io.nuls.accountLedger.model.TransactionInfo;
 import io.nuls.accountLedger.storage.po.TransactionInfoPo;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 
+import java.util.List;
+
 /**
- * author Facjas
- * date 2018/5/10.
+ * @author Facjas
+ * @date 2018/5/10.
  */
 public interface AccountLedgerStorageService {
 
     Result saveLocalTx(Transaction tx);
 
-    Result saveLocalTxInfo(TransactionInfoPo tx);
+    Result saveLocalTxInfo(TransactionInfoPo tx, List<byte[]> addresses);
 
     Result deleteLocalTxInfo(TransactionInfoPo tx);
 

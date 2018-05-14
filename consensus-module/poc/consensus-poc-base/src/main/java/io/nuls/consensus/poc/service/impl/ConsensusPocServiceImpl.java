@@ -117,7 +117,13 @@ public class ConsensusPocServiceImpl implements ConsensusService {
         return txMemoryPool.getAll();
     }
 
-    @Override
+    /**
+     * Reset consensus module, restart, load memory data, reinitialize all states
+     * <p>
+     * 重置共识模块，会重新启动，加载内存数据，重新初始化所有状态
+     *
+     * @return Result
+     */
     public Result reset() {
         boolean success = ConsensusScheduler.getInstance().restart();
         return new Result(success, null);

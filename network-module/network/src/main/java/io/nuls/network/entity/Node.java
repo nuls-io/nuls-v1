@@ -34,6 +34,7 @@ import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.VarInt;
 
 import java.io.IOException;
@@ -76,12 +77,7 @@ public class Node extends BaseNulsData {
         int s = 0;
         s += VarInt.sizeOf(magicNumber);
         s += VarInt.sizeOf(severPort);
-        s += 1;
-        try {
-            s += ip.getBytes(NulsConfig.DEFAULT_ENCODING).length;
-        } catch (UnsupportedEncodingException e) {
-            Log.error(e);
-        }
+        s += SerializeUtils.sizeOfString(ip);
         return s;
     }
 
@@ -149,33 +145,6 @@ public class Node extends BaseNulsData {
         this.setFailCount(this.getFailCount() + 1);
         this.status = Node.CLOSE;
     }
-//
-//    public int size() {
-//        int s = 0;
-//        s += VarInt.sizeOf(magicNumber);
-//        s += VarInt.sizeOf(severPort);
-//        s += 1;
-//        try {
-//            s += ip.getBytes(NulsConfig.DEFAULT_ENCODING).length;
-//        } catch (UnsupportedEncodingException e) {
-//            Log.error(e);
-//        }
-//        return s;
-//    }
-
-//    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-//        stream.write(new VarInt(magicNumber).encode());
-//        stream.write(new VarInt(getSeverPort()).encode());
-//        stream.writeString(ip);
-//    }
-//
-//    public void parse(NulsByteBuffer buffer) throws NulsException {
-//        magicNumber = (int) buffer.readVarInt();
-//        severPort = (int) buffer.readVarInt();
-//        port = severPort;
-//        ip = new String(buffer.readByLengthByte());
-//        this.groupSet = ConcurrentHashMap.newKeySet();
-//    }
 
     public boolean isHandShake() {
         return this.status == Node.HANDSHAKE;

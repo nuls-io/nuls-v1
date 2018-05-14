@@ -63,7 +63,6 @@ public final class GenesisBlock extends Block {
     private static final String CONFIG_FILED_ADDRESS = "address";
     private static final String CONFIG_FILED_NULS = "nuls";
     private static final String CONFIG_FILED_UNLOCK_HEIGHT = "unlockHeight";
-    private static final String address = "2CjGt6mMMwZpp1ajcfyEdUP5sQv9p2D";
     private static final String priKey = "009cf05b6b3fe8c09b84c13783140c0f1958e8841f8b6f894ef69431522bc65712";
 
     private static GenesisBlock INSTANCE = new GenesisBlock();

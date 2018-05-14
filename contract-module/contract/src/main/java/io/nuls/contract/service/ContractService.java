@@ -31,9 +31,9 @@ import io.nuls.contract.entity.form.ContractUpdate;
 import io.nuls.kernel.model.Result;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/5
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/5/5
  */
 public interface ContractService {
 

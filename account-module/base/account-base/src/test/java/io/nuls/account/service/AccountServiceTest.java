@@ -24,14 +24,12 @@
 
 package io.nuls.account.service;
 
+import io.nuls.db.module.impl.LevelDbModuleBootstrap;
 import io.nuls.account.model.Account;
-import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
-import io.nuls.db.module.impl.LevelDbModuleBootstrap;
+
 import io.nuls.kernel.MicroKernelBootstrap;
-import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Result;
 import org.junit.Before;
@@ -54,15 +52,16 @@ public class AccountServiceTest {
         MicroKernelBootstrap kernel = MicroKernelBootstrap.getInstance();
         kernel.init();
         kernel.start();
-        LevelDbModuleBootstrap bootstrap = new LevelDbModuleBootstrap();
-        bootstrap.init();
-        bootstrap.start();
-        accountService = NulsContext.getServiceBean(AccountService.class);
+        LevelDbModuleBootstrap db = new LevelDbModuleBootstrap();
+        db.init();
+        db.start();
+        accountService = SpringLiteContext.getBean(AccountService.class);
     }
 
     @Test
     public void createAccount() {
-        Result<List<Account>> result = this.accountService.createAccount(1, null);
+
+        Result<List<Account>> result = this.accountService.createAccount(0, null);
         assertTrue(result.isFailed());
         assertNotNull(result.getMessage());
 
@@ -87,7 +86,7 @@ public class AccountServiceTest {
 
         //todo 设置钱包密码
         result = this.accountService.createAccount(1, null);
-        assertTrue(result.isFailed());
+        assertTrue(result.isSuccess());
         assertNotNull(result.getMessage());
 
         //todo 设置钱包密码为nuls123456
@@ -110,7 +109,6 @@ public class AccountServiceTest {
 
     }
 
-    @Test
     public void removeAccount() {
     }
 

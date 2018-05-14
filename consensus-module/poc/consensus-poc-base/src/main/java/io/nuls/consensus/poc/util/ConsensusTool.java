@@ -31,9 +31,12 @@ import io.nuls.account.service.AccountService;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.model.BlockData;
+import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.consensus.poc.protocol.entity.YellowPunishData;
+import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
 import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
@@ -207,5 +210,48 @@ public class ConsensusTool {
 
         return rewardList;
     }
+
+
+    public static YellowPunishTransaction createYellowPunishTx(Block preBlock, MeetingMember self, MeetingRound round) throws NulsException, IOException {
+        BlockRoundData preBlockRoundData = new BlockRoundData(preBlock.getHeader().getExtend());
+        if (self.getRoundIndex() - preBlockRoundData.getRoundIndex() > 1) {
+            return null;
+        }
+
+        int yellowCount = 0;
+        if (self.getRoundIndex() == preBlockRoundData.getRoundIndex() && self.getPackingIndexOfRound() != preBlockRoundData.getPackingIndexOfRound() + 1) {
+            yellowCount = self.getPackingIndexOfRound() - preBlockRoundData.getPackingIndexOfRound() - 1;
+        }
+
+        if (self.getRoundIndex() != preBlockRoundData.getRoundIndex() && (self.getPackingIndexOfRound() != 1 || preBlockRoundData.getPackingIndexOfRound() != preBlockRoundData.getConsensusMemberCount())) {
+            yellowCount = self.getPackingIndexOfRound() + preBlockRoundData.getConsensusMemberCount() - preBlockRoundData.getPackingIndexOfRound() - 1;
+        }
+
+        if (yellowCount == 0) {
+            return null;
+        }
+
+        List<byte[]> addressList = new ArrayList<>();
+        for (int i = 1; i <= yellowCount; i++) {
+            int index = self.getPackingIndexOfRound() - i;
+            if (index > 0) {
+                addressList.add(round.getMember(index).getAgentAddress());
+            } else {
+                MeetingRound preRound = round.getPreRound();
+                addressList.add(preRound.getMember(index + preRound.getMemberCount()).getAgentAddress());
+            }
+        }
+        if (addressList.isEmpty()) {
+            return null;
+        }
+        YellowPunishTransaction punishTx = new YellowPunishTransaction();
+        YellowPunishData data = new YellowPunishData();
+        data.setAddressList(addressList);
+        punishTx.setTxData(data);
+        punishTx.setTime(self.getPackEndTime());
+        punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
+        return punishTx;
+    }
+
 }
 

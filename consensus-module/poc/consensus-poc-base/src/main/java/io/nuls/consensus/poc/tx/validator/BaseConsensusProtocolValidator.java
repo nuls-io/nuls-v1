@@ -23,15 +23,23 @@
  *
  */
 
-package io.nuls.consensus.poc.validator;
+package io.nuls.consensus.poc.tx.validator;
 
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
+import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsData;
 import io.nuls.kernel.validate.NulsDataValidator;
 
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * @author Niels
+ */
 public abstract class BaseConsensusProtocolValidator<T extends NulsData> implements NulsDataValidator<T> {
 
     protected final boolean isDepositOk(Na deposit, CoinData coinData) {
@@ -48,4 +56,17 @@ public abstract class BaseConsensusProtocolValidator<T extends NulsData> impleme
         return true;
     }
 
+    protected long getRedPunishCount(byte[] address ) {
+        List<PunishLogPo> list = PocConsensusContext.getChainManager().getMasterChain().getChain().getRedPunishList();
+        if (null == list || list.isEmpty()) {
+            return 0;
+        }
+        long count = 0;
+        for (PunishLogPo po : list) {
+            if (Arrays.equals(address, po.getAddress())) {
+                count++;
+            }
+        }
+        return count;
+    }
 }

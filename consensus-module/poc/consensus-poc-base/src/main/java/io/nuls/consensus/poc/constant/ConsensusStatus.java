@@ -27,7 +27,9 @@
 package io.nuls.consensus.poc.constant;
 
 /**
- * Created by ln on 2018/4/13.
+ *
+ * @author ln
+ * @date 2018/4/13
  */
 public enum ConsensusStatus {
 

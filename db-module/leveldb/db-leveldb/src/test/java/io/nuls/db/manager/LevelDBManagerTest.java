@@ -44,9 +44,9 @@ import static org.iq80.leveldb.impl.Iq80DBFactory.asString;
 import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date:
+ * @desription:
+ * @author: PierreLuo
+ * @date:
  */
 public class LevelDBManagerTest {
 

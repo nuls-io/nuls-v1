@@ -38,10 +38,12 @@ import io.nuls.consensus.poc.model.BlockData;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
@@ -49,12 +51,14 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.service.BlockService;
+import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,7 +67,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by ln on 2018/4/13.
+ * @author ln
+ * @date 2018/4/13
  */
 public class ConsensusProcess {
 
@@ -76,6 +81,8 @@ public class ConsensusProcess {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
+    private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
+
 
     private boolean hasPacking;
 
@@ -84,49 +91,38 @@ public class ConsensusProcess {
     }
 
     public void process() {
-
         boolean canPackage = checkCanPackage();
-
         if (!canPackage || false) {
             return;
         }
-
         doWork();
     }
 
     private boolean checkCanPackage() {
-
         if (!ConsensusConfig.isPartakePacking()) {
             return false;
         }
-
         // wait consensus ready running
         if (ConsensusStatusContext.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_START.ordinal()) {
             return false;
         }
-
         // check network status
         if (networkService.getAvailableNodes().size() == 0) {
             return false;
         }
-
         return true;
     }
 
     private void doWork() {
-
         MeetingRound round = chainManager.getMasterChain().getOrResetCurrentRound();
-
         if (round == null) {
             return;
         }
-
         //check i am is a consensus node
         MeetingMember member = round.getMyMember();
         if (member == null) {
             return;
         }
-
         if (!hasPacking && member.getPackStartTime() < TimeService.currentTimeMillis() && member.getPackEndTime() > TimeService.currentTimeMillis()) {
             hasPacking = true;
             try {
@@ -228,6 +224,7 @@ public class ConsensusProcess {
             MeetingRound preRound = round.getPreRound();
             if (preRound == null) {
                 //FIXME
+                Log.error("这里完成前必须处理掉");
                 return true;
             }
             preBlockPackingAddress = preRound.getMember(preRound.getMemberCount()).getPackingAddress();
@@ -305,19 +302,14 @@ public class ConsensusProcess {
             if (repeatTx != null) {
                 continue;
             }
-//            ValidateResult result = ledgerService.conflictDetectTx(tx, packingTxList);
-//            if (result.isFailed()) {
-//                Log.debug(result.getMessage());
-//                continue;
-//            }
-//            result = this.ledgerService.verifyTx(tx,packingTxList);
-//            if (result.isFailed()) {
-//                if(result.getErrorCode() == ProtocolConstant.ORPHAN_TX){
-//                    txMemoryPool.add(tx, true);
-//                }
-//                Log.debug(result.getMessage());
-//                continue;
-//            }
+            ValidateResult result = tx.verify();
+            if (result.isFailed()) {
+                if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
+                    txMemoryPool.add(tx, true);
+                }
+                Log.debug(result.getMessage());
+                continue;
+            }
             outHashList.add(tx.getHash());
 
             tx.setBlockHeight(bd.getHeight());
@@ -325,7 +317,13 @@ public class ConsensusProcess {
 
             totalSize += tx.size();
         }
-
+        ValidateResult validateResult = null;
+        while (null == validateResult || validateResult.isFailed()) {
+            validateResult = transactionService.conflictDetect(packingTxList);
+            if (validateResult.isFailed()) {
+                packingTxList.remove(validateResult.getData());
+            }
+        }
         addConsensusTx(bestBlock, packingTxList, self, round);
         bd.setTxList(packingTxList);
 
@@ -351,14 +349,14 @@ public class ConsensusProcess {
     }
 
     private void punishTx(Block bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
-//        redPunishTx(bestBlock, txList, round);
-//        YellowPunishTransaction yellowPunishTransaction = ConsensusTool.createYellowPunishTx(bestBlock, self, round);
-//        if (null != yellowPunishTransaction) {
-//            txList.add(yellowPunishTransaction);
-//        }
+        redPunishTx(bestBlock, txList, round);
+        YellowPunishTransaction yellowPunishTransaction = ConsensusTool.createYellowPunishTx(bestBlock, self, round);
+        if (null != yellowPunishTransaction) {
+            txList.add(yellowPunishTransaction);
+        }
     }
 
     private void redPunishTx(Block bestBlock, List<Transaction> txList, MeetingRound round) throws NulsException, IOException {
-        //todo implement
+        // todo implement
     }
 }

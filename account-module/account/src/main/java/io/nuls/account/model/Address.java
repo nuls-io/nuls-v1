@@ -39,15 +39,16 @@ import io.nuls.kernel.utils.SerializeUtils;
  * @date: 2018/5/4
  */
 public class Address {
+
     /**
      *  hash length
      */
-    public static final int HASH_LENGTH = 23;
+    private static final int HASH_LENGTH = 23;
 
     /**
      * RIPEMD160 length
      */
-    public static final int LENGTH = 20;
+    private static final int LENGTH = 20;
 
     /**
      * chain id
@@ -168,5 +169,9 @@ public class Address {
 
     public void setBase58Bytes(byte[] base58Bytes) {
         this.base58Bytes = base58Bytes;
+    }
+
+    public static int size() {
+        return HASH_LENGTH;
     }
 }

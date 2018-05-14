@@ -29,9 +29,9 @@ import io.nuls.kernel.module.BaseModuleBootstrap;
 import io.nuls.ledger.constant.LedgerConstant;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/8
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/5/8
  */
 public abstract class AbstractLedgerModule extends BaseModuleBootstrap {
     public AbstractLedgerModule() {
