@@ -27,6 +27,8 @@ package io.nuls.consensus.poc.module.impl;
 
 import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.module.AbstractConsensusModule;
+import io.nuls.consensus.poc.constant.ConsensusStatus;
+import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.ModuleStatusEnum;
@@ -43,7 +45,9 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     @Override
     public void init() throws Exception {
+        ConsensusStatusContext.setConsensusStatus(ConsensusStatus.INITING);
         ConsensusConfig.initConfiguration();
+        ConsensusStatusContext.setConsensusStatus(ConsensusStatus.WAIT_START);
     }
 
     @Override
