@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.consensus.poc.validator;
+package io.nuls.consensus.poc.tx.validator;
 
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;

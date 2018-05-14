@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.consensus.poc.process;
+package io.nuls.consensus.poc.tx.processor;
 
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.storage.po.AgentPo;

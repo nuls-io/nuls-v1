@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.consensus.poc.validator;
+package io.nuls.consensus.poc.tx.validator;
 
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;

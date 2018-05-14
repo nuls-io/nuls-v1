@@ -29,7 +29,6 @@ package io.nuls.consensus.poc.constant;
 import io.nuls.kernel.model.Na;
 
 /**
- *
  * @author ln
  * @date 2018/4/22
  */
@@ -87,4 +86,9 @@ public interface PocConsensusConstant {
      * 定期清理主链指定轮数之前的轮次信息
      */
     int CLEAR_MASTER_CHAIN_ROUND_COUNT = 5;
+
+    /**
+     * The maximum continuous number of yellow punish log.
+     */
+    int MAXINUM_CONTINUOUS_YELLOW_NUMBER = 100;
 }
