@@ -28,9 +28,9 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/13
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/5/13
  */
 public interface UtxoLedgerTransactionStorageService {
 

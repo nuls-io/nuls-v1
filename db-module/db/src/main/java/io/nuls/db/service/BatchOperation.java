@@ -26,9 +26,9 @@ package io.nuls.db.service;
 import io.nuls.kernel.model.Result;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/9
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/5/9
  */
 public interface BatchOperation {
 

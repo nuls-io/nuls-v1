@@ -50,9 +50,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import static io.nuls.core.tools.str.StringUtils.bytes;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date:
+ * @desription:
+ * @author: PierreLuo
+ * @date:
  */
 public class LevelDBManager {
 

@@ -1,14 +1,16 @@
 package io.nuls.network.message.impl;
 
-import io.netty.channel.socket.SocketChannel;
-import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.entity.NetworkEventResult;
 import io.nuls.network.entity.Node;
+import io.nuls.network.manager.NodeManager;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
-import io.nuls.network.protocol.message.BaseNetworkMessage;
-import io.nuls.network.protocol.message.HandshakeMessage;
-import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.network.protocol.message.NodeMessageBody;
+import io.nuls.network.protocol.message.NodesIpMessage;
 import io.nuls.protocol.message.base.BaseMessage;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class GetNodesIpMessageHandler implements BaseNetworkMeesageHandler {
 
@@ -22,16 +24,21 @@ public class GetNodesIpMessageHandler implements BaseNetworkMeesageHandler {
         return instance;
     }
 
+    private NodeManager nodeManager = NodeManager.getInstance();
+
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
+        System.out.println("---------------------GetNodesIpMessageHandler process----------------------");
+        Collection<Node> availableNodes = nodeManager.getNodes().values();
+        List<String> ipList = new ArrayList<>();
+        for (Node n : availableNodes) {
+            ipList.add(n.getIp());
+        }
 
-        HandshakeMessage handshakeMessage = (HandshakeMessage) message;
+        NodeMessageBody messageBody = new NodeMessageBody();
+        messageBody.setIpList(ipList);
+        NodesIpMessage nodesIpMessage = new NodesIpMessage(messageBody);
 
-        SocketChannel socketChannel = NioChannelMap.get(node.getChannelId());
-
-        NetworkMessageBody body = handshakeMessage.getMsgBody();
-
-
-        return null;
+        return new NetworkEventResult(true, nodesIpMessage);
     }
 }

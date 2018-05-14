@@ -24,9 +24,9 @@
 package io.nuls.db.model;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/4
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/5/4
  */
 public class ModelWrapper<T> {
     private T t;
