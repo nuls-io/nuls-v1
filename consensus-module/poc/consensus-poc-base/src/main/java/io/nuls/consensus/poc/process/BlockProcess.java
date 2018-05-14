@@ -134,7 +134,7 @@ public class BlockProcess {
                 Log.error("save block error : " + e.getMessage(), e);
             }
             if(success) {
-                //check TODO need remove
+                //check .TODO need remove,代码稳定后删除
 
                 try {
                     Block tempBlock = blockService.getBlock(block.getHeader().getHash()).getData();

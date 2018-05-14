@@ -145,7 +145,6 @@ public class ForkChainProcess {
     }
 
     private void printLog() {
-        // TODO  remove log
         time = System.currentTimeMillis();
 
         StringBuilder sb = new StringBuilder();

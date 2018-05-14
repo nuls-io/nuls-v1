@@ -150,6 +150,9 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public ValidateResult conflictDetect(List<Transaction> txList) {
+        if (null == txList || txList.size() <= 1) {
+            return ValidateResult.getSuccessResult();
+        }
         ValidateResult result = ledgerService.verifyDoubleSpend(txList);
         if (result.isFailed()) {
             return result;

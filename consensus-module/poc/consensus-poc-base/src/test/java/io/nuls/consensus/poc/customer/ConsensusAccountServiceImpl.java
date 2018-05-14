@@ -89,7 +89,6 @@ public class ConsensusAccountServiceImpl implements AccountService {
      */
     @Override
     public Result<Account> getAccount(byte[] address) {
-        // todo auto-generated method stub
         return null;
     }
 

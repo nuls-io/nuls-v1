@@ -26,26 +26,29 @@
 
 package io.nuls.consensus.poc.container;
 
+import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.manager.RoundManager;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
-import io.nuls.consensus.poc.storage.po.PunishLogPo;
-import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
-import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
-import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
-import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
-import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
+import io.nuls.consensus.poc.protocol.tx.*;
+import io.nuls.consensus.poc.storage.po.PunishLogPo;
+import io.nuls.consensus.poc.util.ConsensusTool;
+import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.model.tx.CoinBaseTransaction;
+import io.nuls.protocol.service.BlockService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +56,6 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- *
  * @author ln
  * @date 2018/4/13
  */
@@ -288,56 +290,56 @@ public class ChainContainer implements Cloneable {
     // Verify conbase transactions and penalties
     // 验证conbase交易和处罚交易
     private boolean verifyBaseTx(Block block, MeetingRound currentRound, MeetingMember member) {
-//        List<Transaction> txs = block.getTxs();
-//        Transaction tx = txs.get(0);
-//        if (tx.getType() != TransactionConstant.TX_TYPE_COIN_BASE) {
-//            BlockLog.debug("Coinbase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
-////            Log.error("Coinbase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
-//            return false;
-//        }
-//        YellowPunishTransaction yellowPunishTx = null;
-//        for (int i = 1; i < txs.size(); i++) {
-//            Transaction transaction = txs.get(i);
-//            if (transaction.getType() == TransactionConstant.TX_TYPE_COIN_BASE) {
-//                BlockLog.debug("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
-////                Log.error("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
-//                return false;
-//            }
-//            if (null == yellowPunishTx && transaction.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH) {
-//                yellowPunishTx = (YellowPunishTransaction) transaction;
-//            } else if (null != yellowPunishTx && transaction.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH) {
-//                BlockLog.debug("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
-////                Log.error("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
-//                return false;
-//            }
-//        }
-//
-//        CoinBaseTransaction coinBaseTransaction = ConsensusTool.createCoinBaseTx(member, block.getTxs(), currentRound, block.getHeader().getHeight() + PocConsensusConstant.COINBASE_UNLOCK_HEIGHT);
-//        if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
-//            BlockLog.debug("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
-//            Log.error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
-//            return false;
-//        }
-//
-//        try {
-//            YellowPunishTransaction yellowPunishTransaction = ConsensusTool.createYellowPunishTx(chain.getBestBlock(), member, currentRound);
-//            if (yellowPunishTransaction == yellowPunishTx) {
-//                return true;
-//            } else if (yellowPunishTransaction == null || yellowPunishTx == null) {
-//                BlockLog.debug("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
-////                Log.error("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
-//                return false;
-//            } else if (!yellowPunishTransaction.getHash().equals(yellowPunishTx.getHash())) {
-//                BlockLog.debug("The yellow punish tx's hash is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
-////                Log.error("The yellow punish tx's hash is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
-//                return false;
-//            }
-//
-//        } catch (Exception e) {
-//            BlockLog.debug("The tx's wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash(), e);
-////            Log.error("The tx's wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash(), e);
-//            return false;
-//        }
+        List<Transaction> txs = block.getTxs();
+        Transaction tx = txs.get(0);
+        if (tx.getType() != ProtocolConstant.TX_TYPE_COINBASE) {
+            BlockLog.debug("Coinbase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+//            Log.error("Coinbase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+            return false;
+        }
+        YellowPunishTransaction yellowPunishTx = null;
+        for (int i = 1; i < txs.size(); i++) {
+            Transaction transaction = txs.get(i);
+            if (transaction.getType() == ProtocolConstant.TX_TYPE_COINBASE) {
+                BlockLog.debug("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+//                Log.error("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+                return false;
+            }
+            if (null == yellowPunishTx && transaction.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH) {
+                yellowPunishTx = (YellowPunishTransaction) transaction;
+            } else if (null != yellowPunishTx && transaction.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH) {
+                BlockLog.debug("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+//                Log.error("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+                return false;
+            }
+        }
+
+        CoinBaseTransaction coinBaseTransaction = ConsensusTool.createCoinBaseTx(member, block.getTxs(), currentRound, block.getHeader().getHeight() + PocConsensusConstant.COINBASE_UNLOCK_HEIGHT);
+        if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
+            BlockLog.debug("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+            Log.error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+            return false;
+        }
+
+        try {
+            YellowPunishTransaction yellowPunishTransaction = ConsensusTool.createYellowPunishTx(chain.getBestBlock(), member, currentRound);
+            if (yellowPunishTransaction == yellowPunishTx) {
+                return true;
+            } else if (yellowPunishTransaction == null || yellowPunishTx == null) {
+                BlockLog.debug("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+//                Log.error("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+                return false;
+            } else if (!yellowPunishTransaction.getHash().equals(yellowPunishTx.getHash())) {
+                BlockLog.debug("The yellow punish tx's hash is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+//                Log.error("The yellow punish tx's hash is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+                return false;
+            }
+
+        } catch (Exception e) {
+            BlockLog.debug("The tx's wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash(), e);
+//            Log.error("The tx's wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash(), e);
+            return false;
+        }
 
         return true;
     }
@@ -434,10 +436,17 @@ public class ChainContainer implements Cloneable {
     }
 
     private void addBlockInBlockList(List<Block> blockList) {
-        // TODO
-//        String firstHash = blockList.get(0).getHeader().getPreHash();
-//        Block block = blockService.getBlock(firstHash);
-//        blockList.add(0, block);
+        BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+        if (blockList.isEmpty()) {
+            blockList.add(blockService.getBestBlock().getData());
+        }
+        while (blockList.size() < PocConsensusConstant.INIT_BLOCKS_COUNT) {
+            Block preBlock = blockList.get(0);
+            if (preBlock.getHeader().getHeight() == 0) {
+                break;
+            }
+            blockList.add(0, blockService.getBlock(preBlock.getHeader().getPreHash()).getData());
+        }
     }
 
     /**
