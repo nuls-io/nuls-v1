@@ -170,7 +170,13 @@ public class AccountResource {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        Balance balance = accountService.getBalance(address).getData();
+        Balance balance = null;
+        try {
+            balance = accountService.getBalance(address).getData();
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.FAILED);
+        }
         if (balance == null) {
             balance = new Balance();
         }
@@ -187,7 +193,13 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = BalanceDto.class)
     })
     public Result getBalance() {
-        Balance balance = accountService.getBalance().getData();
+        Balance balance = null;
+        try {
+            balance = accountService.getBalance().getData();
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.FAILED);
+        }
         Result result = Result.getSuccess();
         result.setData(new BalanceDto(balance));
         return result;
@@ -253,7 +265,13 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
 
-        Balance balance = accountService.getBalance(address).getData();
+        Balance balance = null;
+        try {
+            balance = accountService.getBalance(address).getData();
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.FAILED);
+        }
         Result result = Result.getSuccess();
         List<AssetDto> dtoList = new ArrayList<>();
         dtoList.add(new AssetDto("NULS", balance));
@@ -276,26 +294,18 @@ public class AccountResource {
         return result;
     }
 
-    @POST
-    @Path("/lock")
+    @DELETE
+    @Path("/cache")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "锁定账户地址", notes = "")
-    public Result lock(@QueryParam("address") String address, @QueryParam("password") String password) {
+    @ApiOperation(value = "清除缓存的解锁账户", notes = "Clear the cache unlock account.")
+    public Result clearCacheOfUnlockAccount(@QueryParam("address") String address) {
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        try {
-            account.encrypt(password);
-            accountCacheService.putAccount(account);
-        } catch (NulsException e) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-        }
-
+        accountCacheService.removeAccount(account.getAddress());
         return Result.getSuccess();
     }
-
-    private static final int ACCOUNT_MAX_UNLOCK_TIME = 600;
 
     @POST
     @Path("/unlock")
@@ -315,10 +325,10 @@ public class AccountResource {
             if (unlockTime < 0) {
                 unlockTime = 0;
             }
-            // 解锁120秒后自动锁定
+            // 一定时间后自动锁定
             ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1);
             scheduler.schedule(() -> {
-                accountCacheService.clear();
+                accountCacheService.removeAccount(account.getAddress());
                 scheduler.shutdown();
             }, unlockTime, TimeUnit.SECONDS);
         } catch (NulsException e) {
@@ -329,18 +339,47 @@ public class AccountResource {
 
 
     @POST
-    @Path("/reset")
+    @Path("/password")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "重置钱包密码")
+    @ApiOperation(value = "设置账户密码")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result password(@ApiParam(name = "form", value = "重置钱包密码表单数据", required = true)
+    public Result updatePassword(@ApiParam(name = "form", value = "设置钱包密码表单数据", required = true)
                                    AccountPasswordForm form) {
-        Result result = this.accountBaseService.changePassword(form.getAddress(), form.getPassword(), form.getNewPassword());
-        if (result.isSuccess()) {
-            //NulsContext.setCachedPasswordOfWallet(form.getNewPassword());
+
+        String address = form.getAddress();
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        return result;
+        String password = form.getPassword();
+        if (!StringUtils.validPassword(password)) {
+            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+        }
+        return accountBaseService.setPassword(address, password);
+    }
+
+    @POST
+    @Path("/password")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "修改账户密码")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Result.class)
+    })
+    public Result setPassword(@ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
+                                      AccountPasswordForm form) {
+        String address = form.getAddress();
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        String password = form.getPassword();
+        if (!StringUtils.validPassword(password)) {
+            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+        }
+        String newPassword = form.getNewPassword();
+        if (!StringUtils.validPassword(newPassword)) {
+            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+        }
+        return this.accountBaseService.changePassword(address, password, newPassword);
     }
 }

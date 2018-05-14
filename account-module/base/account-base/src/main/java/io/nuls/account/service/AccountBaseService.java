@@ -1,6 +1,5 @@
 package io.nuls.account.service;
 
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
@@ -57,20 +56,32 @@ public class AccountBaseService {
     }
 
     /**
-     * 设置默认账户
+     * 设置密码
      * @param address
+     * @param password
      * @return
      */
-    public Result setDefaultAccount(String address) {
+    public Result setPassword(String address, String password) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        if (!StringUtils.validPassword(password)) {
+            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
         }
         Account account = accountService.getAccount(address).getData();
         if (null != account) {
             Result.getFailed(AccountErrorCode.FAILED, "The account not exist, address:" + address);
         }
-        accountStorageService.saveDefaultAccount(new AccountPo(account));
-        AccountConstant.DEFAULT_ACCOUNT = account;
+        if(account.isEncrypted()){
+            Result.getFailed(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED, "The account has been set to password.");
+        }
+        try {
+            account.encrypt(password);
+            accountStorageService.updateAccount(new AccountPo(account));
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed();
+        }
         return Result.getSuccess();
     }
 
@@ -94,39 +105,19 @@ public class AccountBaseService {
         if (null != account) {
             Result.getFailed(AccountErrorCode.FAILED, "The account not exist, address:" + address);
         }
-
-       /* List<Account> accounts = accountService.getAccountList().getData();
-        if (accounts == null || accounts.isEmpty()) {
-            new Result(false, "No account was found");
-        }*/
-
         try {
             if (!account.isEncrypted()) {
                 return new Result(false, "No password has been set up yet");
             }
-
-//            List<AccountPo> accountPoList = new ArrayList<>();
-//            for (Account account : accounts) {
-                if (!account.unlock(oldPassword)) {
-                    return new Result(false, "old password error");
-                }
-                account.encrypt(newPassword, true);
-
-                AccountPo po = new AccountPo(account);
-//                AccountTool.toPojo(account, po);
-//                accountPoList.add(po);
-//            }
-
-//            if (accountPoList.size() > 0) {
-//                accountDao.update(accountPoList);
-//            }
-            accountStorageService.updateAccount(po);
-            //accountCacheService.putAccountList(accounts);
+            if (!account.unlock(oldPassword)) {
+                return new Result(false, "old password error");
+            }
+            account.encrypt(newPassword, true);
+            AccountPo po = new AccountPo(account);
+            return accountStorageService.updateAccount(po);
         } catch (Exception e) {
             Log.error(e);
-            return new Result(false, "change password failed");
+            return  Result.getFailed(AccountErrorCode.FAILED, "change password failed");
         }
-        //this.eventBroadcaster.publishToLocal(new PasswordChangeNotice());
-        return new Result(true, "OK");
     }
 }
