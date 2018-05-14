@@ -8,9 +8,9 @@ import io.netty.handler.timeout.IdleStateEvent;
 import io.nuls.core.tools.log.Log;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date:
+ * @desription:
+ * @author: PierreLuo
+ * @date:
  */
 public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
 

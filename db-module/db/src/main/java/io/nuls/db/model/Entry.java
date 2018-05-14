@@ -27,9 +27,9 @@ import java.util.Comparator;
 import java.util.Objects;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/7
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/5/7
  */
 public class Entry<K, V> implements Comparable<K> {
     final K key;

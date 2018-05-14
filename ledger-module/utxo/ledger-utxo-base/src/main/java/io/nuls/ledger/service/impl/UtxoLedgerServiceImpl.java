@@ -45,9 +45,9 @@ import java.util.Set;
 import static io.nuls.core.tools.str.StringUtils.asString;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/8
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/5/8
  */
 @Service
 public class UtxoLedgerServiceImpl implements LedgerService {
@@ -65,14 +65,20 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         if (tx == null) {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER);
         }
-        byte[] txHashBytes = new byte[0];
         try {
-            txHashBytes = tx.getHash().serialize();
-        } catch (IOException e) {
+            // 保存CoinData
+            saveCoinData(tx);
+            // 保存交易
+            Result result = transactionStorageService.saveTx(tx);
+            return result;
+        } catch (Exception e) {
             Log.error(e);
             return Result.getFailed(e.getMessage());
         }
-        // 保存CoinData
+    }
+
+    private Result saveCoinData(Transaction tx) throws IOException {
+        byte[] txHashBytes = txHashBytes = tx.getHash().serialize();
         BatchOperation batch = utxoStorageService.createWriteBatch();
         CoinData coinData = tx.getCoinData();
         if (coinData != null) {
@@ -98,9 +104,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 return batchResult;
             }
         }
-        // 保存交易
-        Result result = transactionStorageService.saveTx(tx);
-        return result;
+        return Result.getSuccess();
     }
 
     @Override
@@ -108,15 +112,20 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         if (tx == null) {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER);
         }
-        byte[] txHashBytes = new byte[0];
         try {
-            txHashBytes = tx.getHash().serialize();
-        } catch (IOException e) {
+            // 回滚CoinData
+            rollbackCoinData(tx);
+            // 回滚交易
+            Result result = transactionStorageService.deleteTx(tx);
+            return result;
+        } catch (Exception e) {
             Log.error(e);
             return Result.getFailed(e.getMessage());
         }
+    }
 
-        // 回滚CoinData
+    private Result rollbackCoinData(Transaction tx) throws IOException {
+        byte[] txHashBytes = txHashBytes = tx.getHash().serialize();
         BatchOperation batch = utxoStorageService.createWriteBatch();
         CoinData coinData = tx.getCoinData();
         if (coinData != null) {
@@ -142,8 +151,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 return batchResult;
             }
         }
-        Result result = transactionStorageService.deleteTx(tx);
-        return result;
+        return Result.getSuccess();
     }
 
     @Override
@@ -286,14 +294,19 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         if (tx == null || tx.getCoinData() == null) {
             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.NULL_PARAMETER);
         }
-        CoinData coinData = tx.getCoinData();
-        List<Coin> froms = coinData.getFrom();
-        for(Coin from : froms) {
-            if(from.getLockTime() != -1) {
-                return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_STATUS_CHANGE);
+        try {
+            CoinData coinData = tx.getCoinData();
+            List<Coin> froms = coinData.getFrom();
+            for(Coin from : froms) {
+                if(from.getLockTime() != -1) {
+                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_STATUS_CHANGE);
+                }
             }
+            Result result = saveCoinData(tx);
+            return result;
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
         }
-        Result result = transactionStorageService.saveTx(tx);
-        return result;
     }
 }

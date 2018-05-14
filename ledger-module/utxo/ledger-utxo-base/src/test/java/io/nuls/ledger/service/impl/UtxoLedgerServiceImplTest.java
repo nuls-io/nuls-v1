@@ -1,3 +1,26 @@
+/**
+ * MIT License
+ * <p>
+ * Copyright (c) 2017-2018 nuls.io
+ * <p>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * <p>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * <p>
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package io.nuls.ledger.service.impl;
 
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
@@ -28,6 +51,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/5/14
+ */
 public class UtxoLedgerServiceImplTest {
 
     private static List<Transaction> allList;
@@ -98,27 +126,56 @@ public class UtxoLedgerServiceImplTest {
     }
 
     @Test
-    public void rollbackTx() throws IOException {
-        //TODO pierre
-        saveTx();
-        Transaction tx = allList.get(0);
-        System.out.println("tx: " + new Slice(tx.serialize()));
-        Result result = ledgerService.rollbackTx(tx);
-        Assert.assertTrue(result.isSuccess());
-        Transaction txFromDB = ledgerService.getTx(tx.getHash());
-        System.out.println("txFromDB: " + txFromDB);
-        Assert.assertNull(txFromDB);
-    }
-
-    @Test
     public void getTx() throws IOException {
-        //TODO pierre
         saveTx();
         Transaction tx = allList.get(0);
         System.out.println("tx: " + new Slice(tx.serialize()));
         Transaction txFromDB = ledgerService.getTx(tx.getHash());
         System.out.println("txFromDB: " + new Slice(txFromDB.serialize()));
         Assert.assertEquals(new Slice(tx.serialize()), new Slice(txFromDB.serialize()));
+
+        Transaction tx3 = allList.get(3);
+        System.out.println("tx3: " + new Slice(tx3.serialize()));
+        Transaction tx3FromDB = ledgerService.getTx(tx3.getHash());
+        System.out.println("tx3FromDB: " + new Slice(tx3FromDB.serialize()));
+        Assert.assertEquals(new Slice(tx3.serialize()), new Slice(tx3FromDB.serialize()));
+
+    }
+
+    @Test
+    public void rollbackTx() throws IOException {
+        saveTx();
+        // 无from的交易
+        Transaction tx = allList.get(0);
+        System.out.println("tx: " + new Slice(tx.serialize()));
+        Result result = ledgerService.rollbackTx(tx);
+        Assert.assertTrue(result.isSuccess());
+        byte[] toCoin = utxoStorageService.getCoinBytes(Arrays.concatenate(tx.getHash().serialize(), new VarInt(0).encode()));
+        Assert.assertNull(toCoin);
+        Transaction txFromDB = ledgerService.getTx(tx.getHash());
+        System.out.println("txFromDB: " + txFromDB);
+        Assert.assertNull(txFromDB);
+
+        // 有from的交易, 检验交易和coindata
+        Transaction tx3 = allList.get(3);
+        CoinData from3 = tx3.getCoinData();
+        result = ledgerService.rollbackTx(tx3);
+        Assert.assertTrue(result.isSuccess());
+        byte[] to3Coin0 = utxoStorageService.getCoinBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
+        byte[] to3Coin1 = utxoStorageService.getCoinBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(1).encode()));
+        byte[] to3Coin2 = utxoStorageService.getCoinBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(2).encode()));
+        Assert.assertNull(to3Coin0);
+        Assert.assertNull(to3Coin1);
+        Assert.assertNull(to3Coin2);
+        byte[] from3Coin0 = utxoStorageService.getCoinBytes(from3.getFrom().get(0).getOwner());
+        byte[] from3Coin1 = utxoStorageService.getCoinBytes(from3.getFrom().get(1).getOwner());
+        byte[] from3Coin2 = utxoStorageService.getCoinBytes(from3.getFrom().get(2).getOwner());
+        Assert.assertNotNull(from3Coin0);
+        Assert.assertNotNull(from3Coin1);
+        Assert.assertNotNull(from3Coin2);
+        Assert.assertEquals(new Slice(tx3.getCoinData().getFrom().get(0).serialize()), new Slice(from3Coin0));
+        Assert.assertEquals(new Slice(tx3.getCoinData().getFrom().get(1).serialize()), new Slice(from3Coin1));
+        Assert.assertEquals(new Slice(tx3.getCoinData().getFrom().get(2).serialize()), new Slice(from3Coin2));
     }
 
     @Test
@@ -205,17 +262,24 @@ public class UtxoLedgerServiceImplTest {
     }
 
     @Test
-    public void unlockTxCoinData() {
+    public void unlockTxCoinData() throws IOException {
         recoveryTx3Data();
 
         // 有一条LockTime为-1的，测试期望是成功
+        Transaction tx3 = allList.get(3);
         Coin coin = allList.get(3).getCoinData().getFrom().get(0);
         coin.setOwner("abcd3".getBytes());
         coin.setNa(Na.parseNuls(10001));
         coin.setLockTime(-1);
         Result result = ledgerService.unlockTxCoinData(allList.get(3));
-        System.out.println(result);
+        //System.out.println(result);
         Assert.assertTrue(result.isSuccess());
+        byte[] to3Coin0 = utxoStorageService.getCoinBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
+        Assert.assertNotNull(to3Coin0);
+        Assert.assertEquals(new Slice(tx3.getCoinData().getTo().get(0).serialize()), new Slice(to3Coin0));
+        byte[] from3Coin0 = utxoStorageService.getCoinBytes(tx3.getCoinData().getFrom().get(0).getOwner());
+        Assert.assertNull(from3Coin0);
+
 
         // 没有LockTime为-1的，测试期望是失败
         coin = allList.get(3).getCoinData().getFrom().get(0);

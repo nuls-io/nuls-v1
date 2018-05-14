@@ -29,9 +29,9 @@ import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.module.BaseModuleBootstrap;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/4/20
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/4/20
  */
 public abstract class AbstractContractModule extends BaseModuleBootstrap {
     public AbstractContractModule() {

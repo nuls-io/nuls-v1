@@ -28,9 +28,9 @@ import io.nuls.db.constant.DBConstant;
 import io.nuls.kernel.module.BaseModuleBootstrap;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/7
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/5/7
  */
 public abstract class AbstractDBModule extends BaseModuleBootstrap {
 

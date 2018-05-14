@@ -30,9 +30,9 @@ import io.nuls.db.service.impl.LevelDBServiceImpl;
 import org.iq80.leveldb.DBException;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/5/5
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/5/5
  */
 public class LevelDbModuleBootstrap extends AbstractDBModule {
 

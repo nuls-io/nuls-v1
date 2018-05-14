@@ -1,9 +1,9 @@
 package io.nuls.contract.dto;
 
 /**
- * @Desription:
- * @Author: PierreLuo
- * @Date: 2018/4/20
+ * @desription:
+ * @author: PierreLuo
+ * @date: 2018/4/20
  */
 public class ContractResult {
     private String contractAddress;
