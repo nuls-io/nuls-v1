@@ -260,7 +260,7 @@ public interface AccountService {
      *
      * @return the result of the opration and the Balance model
      */
-    Result<Balance> getBalance();
+    Result<Balance> getBalance() throws NulsException;
 
     /**
      * 根据账户获取账户余额
@@ -268,7 +268,7 @@ public interface AccountService {
      * @param account The account to which the balance is to be obtained.
      * @return the result of the opration and the Balance model
      */
-    Result<Balance> getBalance(Account account);
+    Result<Balance> getBalance(Account account) throws NulsException;
 
     /**
      * 根据账户地址对象获取账户余额
@@ -276,7 +276,7 @@ public interface AccountService {
      * @param address The address object of the account to which the balance is to be obtained.
      * @return the result of the opration and the Balance model
      */
-    Result<Balance> getBalance(Address address);
+    Result<Balance> getBalance(Address address) throws NulsException;
 
     /**
      * 根据账户地址字符串获取账户余额
@@ -284,5 +284,5 @@ public interface AccountService {
      * @param address The address string of the account to which the balance is to be obtained.
      * @return the result of the opration and the Balance model
      */
-    Result<Balance> getBalance(String address);
+    Result<Balance> getBalance(String address) throws NulsException;
 }

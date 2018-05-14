@@ -170,7 +170,13 @@ public class AccountResource {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        Balance balance = accountService.getBalance(address).getData();
+        Balance balance = null;
+        try {
+            balance = accountService.getBalance(address).getData();
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.FAILED);
+        }
         if (balance == null) {
             balance = new Balance();
         }
@@ -187,7 +193,13 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = BalanceDto.class)
     })
     public Result getBalance() {
-        Balance balance = accountService.getBalance().getData();
+        Balance balance = null;
+        try {
+            balance = accountService.getBalance().getData();
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.FAILED);
+        }
         Result result = Result.getSuccess();
         result.setData(new BalanceDto(balance));
         return result;
@@ -253,7 +265,13 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
 
-        Balance balance = accountService.getBalance(address).getData();
+        Balance balance = null;
+        try {
+            balance = accountService.getBalance(address).getData();
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.FAILED);
+        }
         Result result = Result.getSuccess();
         List<AssetDto> dtoList = new ArrayList<>();
         dtoList.add(new AssetDto("NULS", balance));
@@ -350,11 +368,18 @@ public class AccountResource {
     })
     public Result setPassword(@ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
                                       AccountPasswordForm form) {
-
-        Result result = this.accountBaseService.changePassword(form.getAddress(), form.getPassword(), form.getNewPassword());
-        if (result.isSuccess()) {
-            //NulsContext.setCachedPasswordOfWallet(form.getNewPassword());
+        String address = form.getAddress();
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        return result;
+        String password = form.getPassword();
+        if (!StringUtils.validPassword(password)) {
+            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+        }
+        String newPassword = form.getNewPassword();
+        if (!StringUtils.validPassword(newPassword)) {
+            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+        }
+        return this.accountBaseService.changePassword(address, password, newPassword);
     }
 }

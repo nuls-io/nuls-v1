@@ -354,7 +354,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<Balance> getBalance(Account account) {
+    public Result<Balance> getBalance(Account account) throws NulsException {
         if (null == account || null == account.getAddress()) {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
@@ -362,7 +362,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<Balance> getBalance(Address address) {
+    public Result<Balance> getBalance(Address address) throws NulsException {
         if (null == address) {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
@@ -370,7 +370,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<Balance> getBalance(String address) {
+    public Result<Balance> getBalance(String address) throws NulsException {
         if (!Address.validAddress(address)) {
             Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
@@ -379,7 +379,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<Balance> getBalance() {
+    public Result<Balance> getBalance() throws NulsException {
         List<Account> list = new ArrayList<>();
         List<AccountPo> poList = this.accountStorageService.getAccountList().getData();
         if (null == poList || poList.isEmpty()) {
