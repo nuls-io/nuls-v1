@@ -26,6 +26,7 @@
 package io.nuls.accountLedger.service;
 
 import io.nuls.account.model.Balance;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Result;
@@ -88,15 +89,15 @@ public interface AccountLedgerService {
      * @param addres account address
      * @return return balance of account, return 0 if  account is not a local account
      */
-    Result<Balance> getBalance(byte[] addres);
+    Result<Balance> getBalance(byte[] addres) throws NulsException;
 
     /**
      * <p>
      * get useable coindata
      *
-     * @param addres account address
+     * @param address account address
      * @param amount amount want to use
      * @return return balance of account, return 0 if  account is not a local account
      */
-    List<Coin> getCoinData(byte[] addres, Na amount);
+    List<Coin> getCoinData(byte[] address, Na amount) throws NulsException;
 }

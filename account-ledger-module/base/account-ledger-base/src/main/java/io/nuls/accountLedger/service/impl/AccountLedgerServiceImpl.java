@@ -25,6 +25,7 @@
 
 package io.nuls.accountLedger.service.impl;
 
+import com.sun.org.apache.regexp.internal.RE;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
@@ -33,7 +34,11 @@ import io.nuls.accountLedger.constant.AccountLedgerErrorCode;
 import io.nuls.accountLedger.model.TransactionInfo;
 import io.nuls.accountLedger.storage.po.TransactionInfoPo;
 import io.nuls.accountLedger.storage.service.AccountLedgerStorageService;
+import io.nuls.accountLedger.util.CoinComparator;
 import io.nuls.core.tools.BloomFilter.BloomFilter;
+import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -46,6 +51,7 @@ import io.nuls.accountLedger.service.AccountLedgerService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -155,13 +161,69 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
     }
 
     @Override
-    public Result<Balance> getBalance(byte[] addres) {
-        return null;
+    public Result<Balance> getBalance(byte[] address) throws NulsException {
+        List<Coin> coinList = storageService.getCoinBytes(address);
+        Balance balance = new Balance();
+        long usable = 0;
+        long locked = 0;
+
+        long currentTime = System.currentTimeMillis();
+        //long bestHeight = NulsContext.getInstance().getBestHeight();
+        long bestHeight = 1;
+
+        for (Coin coin : coinList) {
+            if (coin.getLockTime() < 0) {
+                locked += coin.getNa().getValue();
+            } else if (coin.getLockTime() == 0) {
+                usable += coin.getNa().getValue();
+            } else {
+                if (coin.getLockTime() > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE) {
+                    if (coin.getLockTime() <= currentTime) {
+                        usable += coin.getNa().getValue();
+                    } else {
+                        locked += coin.getNa().getValue();
+                    }
+                } else {
+                    if (coin.getLockTime() <= bestHeight) {
+                        usable += coin.getNa().getValue();
+                    } else {
+                        locked += coin.getNa().getValue();
+                    }
+                }
+            }
+        }
+
+        balance.setUsable(Na.valueOf(usable));
+        balance.setLocked(Na.valueOf(locked));
+        balance.setBalance(balance.getUsable().add(balance.getLocked()));
+        Result<Balance> result = new Result<>();
+        result.setData(balance);
+        return result;
     }
 
     @Override
-    public List<Coin> getCoinData(byte[] addres, Na amount) {
-        return null;
+    public List<Coin> getCoinData(byte[] address, Na amount) throws NulsException {
+        List<Coin> coinList = storageService.getCoinBytes(address);
+        if (coinList.isEmpty()) {
+            return coinList;
+        }
+        Collections.sort(coinList, CoinComparator.getInstance());
+
+        boolean enough = false;
+        List<Coin> coins = new ArrayList<>();
+        Na values = Na.ZERO;
+        for (int i = 0; i < coinList.size(); i++) {
+            coins.add(coinList.get(i));
+            values = values.add(coinList.get(i).getNa());
+            if (values.isGreaterOrEquals(values)) {
+                enough = true;
+                break;
+            }
+        }
+        if (!enough) {
+            coins = new ArrayList<>();
+        }
+        return coins;
     }
 
     protected boolean isLocalTransaction(Transaction tx) {
