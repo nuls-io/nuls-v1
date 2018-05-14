@@ -28,9 +28,9 @@ import io.nuls.kernel.module.BaseModuleBootstrap;
 import io.nuls.accountLedger.constant.AccountLedgerConstant;
 
 /**
- * @Desription:
- * @Author: Facjas
- * @Date: 2018/5/10
+ * @desription:
+ * @author: Facjas
+ * @date: 2018/5/10
  */
 public abstract class AbstractAccountLedgerModule extends BaseModuleBootstrap {
     public AbstractAccountLedgerModule() {

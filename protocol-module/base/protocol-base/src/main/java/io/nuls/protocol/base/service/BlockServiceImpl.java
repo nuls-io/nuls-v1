@@ -218,13 +218,13 @@ public class BlockServiceImpl implements BlockService {
             if (result.isSuccess()) {
                 savedList.add(transaction);
             } else {
-                this.rollbackTxList(savedList);
+                this.rollbackTxList(savedList,block.getHeader());
                 return result;
             }
         }
         Result result = this.blockHeaderStorageService.saveBlockHeader(PoConvertUtil.toBlockHeaderPo(block));
         if (result.isFailed()) {
-            this.rollbackTxList(savedList);
+            this.rollbackTxList(savedList,block.getHeader());
             return result;
         }
         return Result.getSuccess();
@@ -234,9 +234,9 @@ public class BlockServiceImpl implements BlockService {
      * 保存区块失败时，需要将已经存储的交易回滚
      * When you fail to save the block, you need to roll back the already stored transaction.
      */
-    private void rollbackTxList(List<Transaction> savedList) {
+    private void rollbackTxList(List<Transaction> savedList,BlockHeader blockHeader) {
         for (Transaction tx : savedList) {
-            transactionService.rollbackTx(tx,null);
+            transactionService.rollbackTx(tx,blockHeader);
             ledgerService.rollbackTx(tx);
         }
     }
@@ -254,7 +254,7 @@ public class BlockServiceImpl implements BlockService {
         if (null == block) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
-        this.rollbackTxList(block.getTxs());
+        this.rollbackTxList(block.getTxs(),block.getHeader());
         BlockHeaderPo po = new BlockHeaderPo();
         po.setHash(block.getHeader().getHash());
         po.setHeight(block.getHeader().getHeight());

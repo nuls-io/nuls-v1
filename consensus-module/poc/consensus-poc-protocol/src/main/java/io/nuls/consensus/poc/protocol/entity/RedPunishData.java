@@ -39,7 +39,7 @@ import java.util.Set;
 public class RedPunishData extends TransactionLogicData {
     private long height;
     private byte[] address;
-    private short reasonCode;
+    private byte reasonCode;
     private byte[] evidence;
 
     public RedPunishData() {
@@ -50,7 +50,7 @@ public class RedPunishData extends TransactionLogicData {
         int size = 0;
         size += VarInt.sizeOf(height);
         size += address.length;
-        size += 2;
+        size += 1;
         size += SerializeUtils.sizeOfBytes(evidence);
         return size;
     }
@@ -59,7 +59,7 @@ public class RedPunishData extends TransactionLogicData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeVarInt(height);
         stream.write(address);
-        stream.writeShort(reasonCode);
+        stream.write(reasonCode);
         stream.writeBytesWithLength(evidence);
 
     }
@@ -68,7 +68,7 @@ public class RedPunishData extends TransactionLogicData {
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.height = byteBuffer.readVarInt();
         this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
-        this.reasonCode = byteBuffer.readShort();
+        this.reasonCode = byteBuffer.readByte();
         this.evidence = byteBuffer.readByLengthByte();
     }
 
@@ -92,7 +92,7 @@ public class RedPunishData extends TransactionLogicData {
         return reasonCode;
     }
 
-    public void setReasonCode(short reasonCode) {
+    public void setReasonCode(byte reasonCode) {
         this.reasonCode = reasonCode;
     }
 

@@ -35,16 +35,22 @@ public enum PunishReasonEnum {
     /**
      * Bifurcate block chain
      */
-    BIFURCATION((short) 1, 69980),
+    BIFURCATION((byte) 1, 69980),
 
     /**
      * double spend
      */
-    DOUBLE_SPEND((short) 2, 69981),;
-    private final short code;
+    DOUBLE_SPEND((byte) 2, 69981),
+
+    /**
+     * 连续x轮黄牌
+     * Continuous x round yellow card.
+     */
+    TOO_MUCH_YELLOW_PUNISH((byte) 3, 69982),;
+    private final byte code;
     private final int msgCode;
 
-    private PunishReasonEnum(short code, int msgCode) {
+    private PunishReasonEnum(byte code, int msgCode) {
         this.code = code;
         this.msgCode = msgCode;
     }
@@ -53,7 +59,7 @@ public enum PunishReasonEnum {
         return I18nUtils.get(this.msgCode);
     }
 
-    public short getCode() {
+    public byte getCode() {
         return code;
     }
 

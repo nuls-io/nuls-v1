@@ -149,7 +149,6 @@ public class NulsDigestData extends BaseNulsData {
     }
 
     public static NulsDigestData calcMerkleDigestData(List<NulsDigestData> ddList) {
-        //todo
         int levelOffset = 0;
         for (int levelSize = ddList.size(); levelSize > 1; levelSize = (levelSize + 1) / 2) {
             for (int left = 0; left < levelSize; left += 2) {
