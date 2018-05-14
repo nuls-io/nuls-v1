@@ -25,6 +25,8 @@
 package io.nuls.accountLedger.storage.service;
 
 import io.nuls.accountLedger.storage.po.TransactionInfoPo;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -39,15 +41,15 @@ public interface AccountLedgerStorageService {
 
     Result saveLocalTx(Transaction tx);
 
+    Result deleteLocalTx(Transaction tx);
+
     Result saveLocalTxInfo(TransactionInfoPo tx, List<byte[]> addresses);
 
     Result deleteLocalTxInfo(TransactionInfoPo tx);
 
     Transaction getLocalTx(NulsDigestData hash);
 
-    Result deleteLocalTx(Transaction tx);
-
-    byte[] getCoinBytes(byte[] owner);
+    List<Coin> getCoinBytes(byte[] owner) throws NulsException;
 
     byte[] getTxBytes(byte[] txBytes);
 }

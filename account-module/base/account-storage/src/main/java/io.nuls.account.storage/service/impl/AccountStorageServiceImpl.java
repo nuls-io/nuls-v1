@@ -86,4 +86,19 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
         }
         return dbService.putModel(AccountStorageConstant.DB_AREA_ACCOUNT, po.getAddressObj().getBase58Bytes(), po);
     }
+
+    @Override
+    public Result saveDefaultAccount(AccountPo po) {
+        return dbService.putModel(AccountStorageConstant.DB_AREA_ACCOUNT, AccountStorageConstant.DEFAULT_ACCOUNT_KEY, po);
+    }
+
+    @Override
+    public Result<AccountPo> getDefaultAccount() {
+        return Result.getSuccess().setData(dbService.getModel(AccountStorageConstant.DB_AREA_ACCOUNT, AccountStorageConstant.DEFAULT_ACCOUNT_KEY));
+    }
+
+    @Override
+    public Result removeDefaultAccount() {
+        return dbService.delete(AccountStorageConstant.DB_AREA_ACCOUNT, AccountStorageConstant.DEFAULT_ACCOUNT_KEY);
+    }
 }
