@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.consensus.poc.validator;/*
+package io.nuls.consensus.poc.tx.validator;/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io

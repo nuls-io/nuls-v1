@@ -27,6 +27,7 @@ package io.nuls.consensus.poc.module.impl;
 
 import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.module.AbstractConsensusModule;
+import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.ModuleStatusEnum;
 import io.nuls.kernel.thread.BaseThread;
@@ -47,16 +48,18 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     @Override
     public void start() {
+        ConsensusScheduler.getInstance().start();
         this.registerHandlers();
         Log.info("the POC consensus module is started!");
     }
 
     private void registerHandlers() {
-
+        //todo 确认是否需要删除
     }
 
     @Override
     public void shutdown() {
+        ConsensusScheduler.getInstance().stop();
         TaskManager.shutdownByModuleId(this.getModuleId());
     }
 

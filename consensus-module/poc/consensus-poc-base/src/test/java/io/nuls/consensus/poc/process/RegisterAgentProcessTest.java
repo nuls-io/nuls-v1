@@ -30,6 +30,7 @@ import io.nuls.consensus.poc.BaseTest;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
+import io.nuls.consensus.poc.tx.processor.CreateAgentTxProcessor;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Result;

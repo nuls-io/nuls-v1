@@ -47,7 +47,9 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * Created by ln on 2018/4/8.
+ *
+ * @author ln
+ * @date 2018/4/8
  */
 public class DownloadProcessor extends Thread {
 
@@ -104,8 +106,7 @@ public class DownloadProcessor extends Thread {
         //Finding the highest block hash consistent with most nodes in the network
         NetworkNewestBlockInfos newestInfos = getNetworkNewestBlockInfos();
 
-        if (newestInfos.getNodes().size() < 1) {
-            //TODO
+        if (newestInfos.getNodes().size() < ProtocolConstant.ALIVE_MIN_NODE_COUNT) {
             downloadStatus = DownloadStatus.WAIT;
             return;
         }
@@ -157,7 +158,7 @@ public class DownloadProcessor extends Thread {
             if (TimeService.currentTimeMillis() - time > timeout) {
                 break;
             }
-            // TODO 只需要最新的区块头信息
+
             long bestHeight = blockService.getBestBlock().getData().getHeader().getHeight();
             if (bestHeight >= downloadBestHeight) {
                 break;
