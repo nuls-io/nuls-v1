@@ -26,10 +26,8 @@ package io.nuls.db.service.impl;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.model.Entry;
-import io.nuls.db.model.ModelWrapper;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
-import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
 

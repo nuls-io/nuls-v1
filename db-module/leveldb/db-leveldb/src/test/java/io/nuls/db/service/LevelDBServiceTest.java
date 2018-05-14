@@ -26,26 +26,29 @@
 
 package io.nuls.db.service;
 
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.log.Log;
 import io.nuls.db.entity.DBTestEntity;
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.impl.LevelDBServiceImpl;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.Result;
-import org.iq80.leveldb.WriteBatch;
+import io.nuls.kernel.model.*;
+import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.utils.AddressTool;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-import static io.nuls.db.manager.LevelDBManager.putModel;
+import static org.iq80.leveldb.impl.Iq80DBFactory.asString;
+import static org.iq80.leveldb.impl.Iq80DBFactory.bytes;
 import static org.junit.Assert.*;
-import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 
 /**
  * Created by ln on 2018/5/6.
@@ -66,17 +69,55 @@ public class LevelDBServiceTest {
     public void clear() {
     }
 
+    private static void setCommonFields(Transaction tx) {
+        tx.setTime(System.currentTimeMillis());
+        tx.setBlockHeight(1);
+        tx.setRemark("for test".getBytes());
+    }
+
+    private static void signTransaction(Transaction tx, ECKey ecKey) throws IOException {
+        NulsDigestData hash = null;
+        hash = NulsDigestData.calcDigestData(tx.serializeForHash());
+        tx.setHash(hash);
+        byte[] signbytes = new byte[0];
+        signbytes = ecKey.sign(hash.serialize());
+        NulsSignData nulsSignData = new NulsSignData();
+        nulsSignData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);
+        nulsSignData.setSignBytes(signbytes);
+        P2PKHScriptSig scriptSig = new P2PKHScriptSig();
+        scriptSig.setPublicKey(ecKey.getPubKey());
+        scriptSig.setSignData(nulsSignData);
+        tx.setScriptSig(scriptSig.serialize());
+    }
+
+    private static DBTestEntity createTransferTransaction(byte[] coinKey, Na na, long index) throws IOException {
+        ECKey ecKey1 = new ECKey();
+        ECKey ecKey2 = new ECKey();
+        DBTestEntity tx = new DBTestEntity();
+        setCommonFields(tx);
+        tx.setTime(index);
+        CoinData coinData = new CoinData();
+        List<Coin> fromList = new ArrayList<>();
+        fromList.add(new Coin(coinKey, Na.parseNuls(10001), 0));
+        coinData.setFrom(fromList);
+        List<Coin> toList = new ArrayList<>();
+        toList.add(new Coin(AddressTool.getAddress(ecKey2.getPubKey()), Na.parseNuls(10000), 1000));
+        coinData.setTo(toList);
+        tx.setCoinData(coinData);
+        signTransaction(tx, ecKey1);
+        return tx;
+    }
+
     @Test
     public void testPerformanceTesting() throws IOException {
 
         long time = System.currentTimeMillis();
 
-        long maxCount = 1000000;
+        long maxCount = 100000;
         for (long i = 0; i < maxCount; i++) {
-            DBTestEntity entity = new DBTestEntity();
-            entity.setTime(i);
+            DBTestEntity entity = createTransferTransaction(null, Na.ZERO, i);
 
-            byte[] key = entity.getHash().serialize();
+            byte[] key = ("entitySerialize" + i).getBytes(StandardCharsets.UTF_8);
             byte[] value = entity.serialize();
 
             Result result = dbService.put(areaName, key, value);
@@ -93,10 +134,8 @@ public class LevelDBServiceTest {
         for (long i = 0; i < getCount; i++) {
 
             long index = (long) (Math.random() * maxCount);
-            DBTestEntity entity = new DBTestEntity();
-            entity.setTime(index);
 
-            byte[] resultBytes = dbService.get(areaName, entity.getHash().serialize());
+            byte[] resultBytes = dbService.get(areaName, ("entitySerialize" + index).getBytes(StandardCharsets.UTF_8));
             assertNotNull(resultBytes);
 
             DBTestEntity e = new DBTestEntity();
@@ -110,6 +149,7 @@ public class LevelDBServiceTest {
 //        C:\workspace\nuls_v2\db-module\leveldb\db-leveldb\target\test-classes\data\test\pierre-test-15
 //        C:\workspace\nuls_v2\db-module\leveldb\db-leveldb\target\test-classes\data\test\pierre-test-15\leveldb
         System.out.println("It takes " + (System.currentTimeMillis() - time) + " ms to randomly acquire " + getCount + " data");
+        LevelDBManager.destroyArea(areaName);
     }
 
     @Test

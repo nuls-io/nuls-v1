@@ -29,7 +29,6 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.model.ModelWrapper;
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Result;
 import io.protostuff.LinkedBuffer;
@@ -46,6 +45,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static io.nuls.core.tools.str.StringUtils.bytes;
 
@@ -67,6 +67,8 @@ public class LevelDBManager {
     private static final String BASE_AREA_NAME = "base";
 
     private static volatile boolean isInit = false;
+
+    private static ReentrantLock lock = new ReentrantLock();
 
     private static String dataPath;
 
@@ -221,34 +223,39 @@ public class LevelDBManager {
     }
 
     public static Result createArea(String areaName, Long cacheSize, Comparator<byte[]> comparator) {
-        // prevent too many areas
-        if (AREAS.size() > (max - 1)) {
-            return Result.getFailed(DBErrorCode.DB_AREA_CREATE_EXCEED_LIMIT);
-        }
-        if (StringUtils.isBlank(areaName)) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
-        }
-        if (AREAS.containsKey(areaName)) {
-            return Result.getFailed(DBErrorCode.DB_AREA_EXIST);
-        }
-        if (StringUtils.isBlank(dataPath) || !checkPathLegal(areaName)) {
-            return Result.getFailed(DBErrorCode.DB_AREA_CREATE_PATH_ERROR);
-        }
-        Result result;
+        lock.lock();
         try {
-            File dir = new File(dataPath + File.separator + areaName);
-            if (!dir.exists()) {
-                dir.mkdir();
+            // prevent too many areas
+            if (AREAS.size() > (max - 1)) {
+                return Result.getFailed(DBErrorCode.DB_AREA_CREATE_EXCEED_LIMIT);
             }
-            String filePath = dataPath + File.separator + areaName + File.separator + BASE_DB_NAME;
-            DB db = openDB(filePath, true, cacheSize, comparator);
-            AREAS.put(areaName, db);
-            result = Result.getSuccess();
-        } catch (Exception e) {
-            Log.error("error create area: " + areaName, e);
-            result = Result.getFailed(DBErrorCode.DB_AREA_CREATE_ERROR);
+            if (StringUtils.isBlank(areaName)) {
+                return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+            }
+            if (AREAS.containsKey(areaName)) {
+                return Result.getFailed(DBErrorCode.DB_AREA_EXIST);
+            }
+            if (StringUtils.isBlank(dataPath) || !checkPathLegal(areaName)) {
+                return Result.getFailed(DBErrorCode.DB_AREA_CREATE_PATH_ERROR);
+            }
+            Result result;
+            try {
+                File dir = new File(dataPath + File.separator + areaName);
+                if (!dir.exists()) {
+                    dir.mkdir();
+                }
+                String filePath = dataPath + File.separator + areaName + File.separator + BASE_DB_NAME;
+                DB db = openDB(filePath, true, cacheSize, comparator);
+                AREAS.put(areaName, db);
+                result = Result.getSuccess();
+            } catch (Exception e) {
+                Log.error("error create area: " + areaName, e);
+                result = Result.getFailed(DBErrorCode.DB_AREA_CREATE_ERROR);
+            }
+            return result;
+        } finally {
+            lock.unlock();
         }
-        return result;
     }
 
     public static DB getArea(String areaName) {
