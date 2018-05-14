@@ -73,23 +73,23 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         List<byte[]> addresses = new ArrayList<>();
         byte[] addressesBytes = tx.getAddress();
 
-        if(addressesBytes == null || addressesBytes.length ==0){
+        if (addressesBytes == null || addressesBytes.length == 0) {
             return Result.getSuccess().setData(new Integer(0));
         }
 
-        if(addressesBytes.length % Address.size() != 0 ){
+        if (addressesBytes.length % Address.size() != 0) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
 
-        for(int i = 0; i<addressesBytes.length/Address.size();i++){
+        for (int i = 0; i < addressesBytes.length / Address.size(); i++) {
             byte[] tmpAddress = new byte[Address.size()];
-            System.arraycopy(addressesBytes,i*Address.size(),tmpAddress,0,Address.size());
-            if(isLocalAccount(tmpAddress)){
+            System.arraycopy(addressesBytes, i * Address.size(), tmpAddress, 0, Address.size());
+            if (isLocalAccount(tmpAddress)) {
                 addresses.add(tmpAddress);
             }
         }
 
-        Result result = storageService.saveLocalTxInfo(txInfoPo,addresses);
+        Result result = storageService.saveLocalTxInfo(txInfoPo, addresses);
 
         if (result.isFailed()) {
             return result;

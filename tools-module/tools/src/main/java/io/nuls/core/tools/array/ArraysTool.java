@@ -50,4 +50,8 @@ public class ArraysTool {
         }
         return t;
     }
+
+    public static final boolean isEmptyOrNull(byte[] bytes) {
+        return (bytes == null || bytes.length == 0);
+    }
 }

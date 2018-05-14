@@ -10,6 +10,7 @@ import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.service.AccountStorageService;
+import io.nuls.account.storage.service.impl.AccountStorageServiceImpl;
 import io.nuls.account.util.AccountTool;
 import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.core.tools.crypto.*;
@@ -70,6 +71,9 @@ public class AccountServiceImpl implements AccountService {
                 accounts.add(account);
                 accountPos.add(po);
                 resultList.add(account.getAddress().getBase58());
+            }
+            if(accountStorageService == null){
+                Log.info("accountStorageService is null");
             }
             accountStorageService.saveAccountList(accountPos);
             accountCacheService.putAccountList(accounts);
