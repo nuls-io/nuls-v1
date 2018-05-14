@@ -29,10 +29,7 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
-import io.nuls.network.protocol.message.GetNodesMessage;
-import io.nuls.network.protocol.message.GetVersionMessage;
-import io.nuls.network.protocol.message.NetworkMessageBody;
-import io.nuls.network.protocol.message.NodeMessageBody;
+import io.nuls.network.protocol.message.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,6 +84,12 @@ public class NodeDiscoverHandler implements Runnable {
         }
     }
 
+    /**
+     * 每10秒询问一次当前连接的节点的最新高度和最新区块信息
+     * 每30秒询问一次已连接的节点，向他们询问其他更多可连接的节点的IP地址
+     */
+    private int count = 2;
+
     @Override
     public void run() {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
@@ -97,15 +100,24 @@ public class NodeDiscoverHandler implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            count++;
 
             Collection<Node> nodeList = nodesManager.getAvailableNodes();
             NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
                     10001, NulsDigestData.calcDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
             GetVersionMessage getVersionMessage = new GetVersionMessage(body);
+            GetNodesIpMessage getNodesIpMessage = new GetNodesIpMessage();
+
             for (Node node : nodeList) {
                 if (node.getType() == Node.OUT) {
                     broadcastHandler.broadcastToNode(getVersionMessage, node, true);
                 }
+                if (count == 3) {
+                    broadcastHandler.broadcastToNode(getNodesIpMessage, node, true);
+                }
+            }
+            if (count == 3) {
+                count = 0;
             }
         }
     }

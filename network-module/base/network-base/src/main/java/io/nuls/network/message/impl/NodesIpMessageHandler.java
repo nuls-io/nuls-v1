@@ -1,13 +1,12 @@
 package io.nuls.network.message.impl;
 
-import io.netty.channel.socket.SocketChannel;
-import io.nuls.network.connection.netty.NioChannelMap;
+import io.nuls.kernel.func.TimeService;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.NetworkEventResult;
 import io.nuls.network.entity.Node;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
-import io.nuls.network.protocol.message.BaseNetworkMessage;
-import io.nuls.network.protocol.message.HandshakeMessage;
-import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.network.protocol.message.NodeMessageBody;
+import io.nuls.network.protocol.message.NodesIpMessage;
 import io.nuls.protocol.message.base.BaseMessage;
 
 public class NodesIpMessageHandler implements BaseNetworkMeesageHandler {
@@ -22,16 +21,17 @@ public class NodesIpMessageHandler implements BaseNetworkMeesageHandler {
         return instance;
     }
 
+    private NetworkParam networkParam = NetworkParam.getInstance();
+
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
+        System.out.println("---------------------NodesIpMessageHandler process----------------------");
+        NodesIpMessage handshakeMessage = (NodesIpMessage) message;
+        NodeMessageBody body = handshakeMessage.getMsgBody();
 
-        HandshakeMessage handshakeMessage = (HandshakeMessage) message;
-
-        SocketChannel socketChannel = NioChannelMap.get(node.getChannelId());
-
-        NetworkMessageBody body = handshakeMessage.getMsgBody();
-
-
+        for(String ip : body.getIpList()) {
+            networkParam.getIpMap().put(ip, TimeService.currentTimeMillis());
+        }
         return null;
     }
 }
