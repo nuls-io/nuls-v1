@@ -91,49 +91,38 @@ public class ConsensusProcess {
     }
 
     public void process() {
-
         boolean canPackage = checkCanPackage();
-
         if (!canPackage || false) {
             return;
         }
-
         doWork();
     }
 
     private boolean checkCanPackage() {
-
         if (!ConsensusConfig.isPartakePacking()) {
             return false;
         }
-
         // wait consensus ready running
         if (ConsensusStatusContext.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_START.ordinal()) {
             return false;
         }
-
         // check network status
         if (networkService.getAvailableNodes().size() == 0) {
             return false;
         }
-
         return true;
     }
 
     private void doWork() {
-
         MeetingRound round = chainManager.getMasterChain().getOrResetCurrentRound();
-
         if (round == null) {
             return;
         }
-
         //check i am is a consensus node
         MeetingMember member = round.getMyMember();
         if (member == null) {
             return;
         }
-
         if (!hasPacking && member.getPackStartTime() < TimeService.currentTimeMillis() && member.getPackEndTime() > TimeService.currentTimeMillis()) {
             hasPacking = true;
             try {

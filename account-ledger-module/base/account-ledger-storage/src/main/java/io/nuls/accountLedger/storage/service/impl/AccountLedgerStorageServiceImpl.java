@@ -39,6 +39,7 @@ import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
 import org.spongycastle.util.Arrays;
 
@@ -136,9 +137,9 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
 
         try {
             for (int i = 0; i < addresses.size(); i++) {
-                byte[] infoKey = new byte[Address.size() + infoPo.getTxHash().size()];
-                System.arraycopy(addresses.get(i), 0, infoKey, 0, Address.size());
-                System.arraycopy(infoPo.getTxHash().getWholeBytes(), 0, infoKey, Address.size(), infoPo.getTxHash().size());
+                byte[] infoKey = new byte[AddressTool.HASH_LENGTH + infoPo.getTxHash().size()];
+                System.arraycopy(addresses.get(i), 0, infoKey, 0, AddressTool.HASH_LENGTH);
+                System.arraycopy(infoPo.getTxHash().getWholeBytes(), 0, infoKey, AddressTool.HASH_LENGTH, infoPo.getTxHash().size());
                 dbService.put(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TXINFO, infoKey, infoPo.serialize());
                 savedKeyList.add(infoKey);
             }
@@ -171,17 +172,17 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
         }
 
         byte[] addresses = infoPo.getAddresses();
-        if (addresses.length % Address.size() != 0) {
+        if (addresses.length % AddressTool.HASH_LENGTH != 0) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
 
-        int addressCount = addresses.length / Address.size();
+        int addressCount = addresses.length / AddressTool.HASH_LENGTH;
 
         for (int i = 0; i < addressCount; i++) {
 
-            byte[] infoKey = new byte[Address.size() + infoPo.getTxHash().size()];
-            System.arraycopy(addresses, i * Address.size(), infoKey, 0, Address.size());
-            System.arraycopy(infoPo.getTxHash().getWholeBytes(), 0, infoKey, Address.size(), infoPo.getTxHash().size());
+            byte[] infoKey = new byte[AddressTool.HASH_LENGTH + infoPo.getTxHash().size()];
+            System.arraycopy(addresses, i * AddressTool.HASH_LENGTH, infoKey, 0, AddressTool.HASH_LENGTH);
+            System.arraycopy(infoPo.getTxHash().getWholeBytes(), 0, infoKey, AddressTool.HASH_LENGTH, infoPo.getTxHash().size());
             dbService.delete(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TXINFO, infoKey);
 
         }

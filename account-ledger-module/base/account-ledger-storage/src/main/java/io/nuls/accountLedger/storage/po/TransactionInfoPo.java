@@ -31,6 +31,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 
@@ -66,9 +67,9 @@ public class TransactionInfoPo extends BaseNulsData {
         this.time = tx.getTime();
         List<byte[]> addressList = tx.getAllRelativeAddress();
 
-        byte[] addresses = new byte[addressList.size() * Address.size()];
+        byte[] addresses = new byte[addressList.size() * AddressTool.HASH_LENGTH];
         for (int i = 0; i < addressList.size(); i++) {
-            System.arraycopy(addressList.get(i), 0, addressList, Address.size() * i, Address.size());
+            System.arraycopy(addressList.get(i), 0, addressList, AddressTool.HASH_LENGTH* i, AddressTool.HASH_LENGTH);
         }
         this.addresses = addresses;
 
