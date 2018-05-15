@@ -66,11 +66,11 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
      */
     @Override
     public void afterPropertiesSet() {
-        Result result = this.dbService.createArea(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX);
+        Result result = this.dbService.createArea(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
-        result = this.dbService.createArea(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER);
+        result = this.dbService.createArea(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
@@ -85,7 +85,7 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
      */
     @Override
     public BlockHeaderPo getBlockHeaderPo(long height) {
-        byte[] hashBytes = dbService.get(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX, new VarInt(height).encode());
+        byte[] hashBytes = dbService.get(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, new VarInt(height).encode());
         if (null == hashBytes) {
             return null;
         }
@@ -120,7 +120,7 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
      * @return BlockHeaderPo 区块头数据
      */
     private BlockHeaderPo getBlockHeaderPo(byte[] hashBytes) {
-        byte[] bytes = dbService.get(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER, hashBytes);
+        byte[] bytes = dbService.get(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER, hashBytes);
         if (null == bytes) {
             return null;
         }
@@ -161,7 +161,7 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
         }
         Result result = null;
         try {
-            result = dbService.put(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER, hashBytes, po.serialize());
+            result = dbService.put(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER, hashBytes, po.serialize());
         } catch (IOException e) {
             Log.error(e);
             return Result.getFailed(e.getMessage());
@@ -169,17 +169,17 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
         if (result.isFailed()) {
             return result;
         }
-        result = dbService.put(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX, new VarInt(po.getHeight()).encode(), hashBytes);
+        result = dbService.put(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, new VarInt(po.getHeight()).encode(), hashBytes);
         if (result.isFailed()) {
             this.removeBlockHerader(hashBytes);
             return result;
         }
-        dbService.put(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX, new VarInt(ProtocolStorageConstant.BEST_BLOCK_HASH_INDEX).encode(), hashBytes);
+        dbService.put(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, new VarInt(ProtocolStorageConstant.BEST_BLOCK_HASH_INDEX).encode(), hashBytes);
         return Result.getSuccess();
     }
 
     private Result removeBlockHerader(byte[] hashBytes) {
-        return dbService.delete(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER, hashBytes);
+        return dbService.delete(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER, hashBytes);
     }
 
     /**
@@ -194,9 +194,9 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
         if (null == po || po.getHeight() < 0 || po.getHash() == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
-        dbService.delete(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX, new VarInt(po.getHeight()).encode());
+        dbService.delete(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, new VarInt(po.getHeight()).encode());
         try {
-            dbService.put(ProtocolStorageConstant.DB_AREA_BLOCK_HEADER_INDEX, new VarInt(ProtocolStorageConstant.BEST_BLOCK_HASH_INDEX).encode(), po.getPreHash().serialize());
+            dbService.put(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, new VarInt(ProtocolStorageConstant.BEST_BLOCK_HASH_INDEX).encode(), po.getPreHash().serialize());
         } catch (IOException e) {
             Log.error(e);
         }

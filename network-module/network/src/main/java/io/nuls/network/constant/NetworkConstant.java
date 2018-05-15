@@ -29,9 +29,6 @@ public interface NetworkConstant {
     String NETWORK_NODE_OUT_GROUP = "outGroup";
 
 
-    String NODE_DB_AREA = "nodeDbArea";
-    long NODE_DB_CACHE_SIZE = 1024 * 1024;
-
     int HANDSHAKE_SEVER_TYPE = 2;
     int HANDSHAKE_CLIENT_TYPE = 1;
 

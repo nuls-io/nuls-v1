@@ -58,7 +58,7 @@ public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageSe
      */
     @Override
     public void afterPropertiesSet() throws NulsException {
-        Result result = dbService.createArea(LedgerStorageConstant.DB_AREA_LEDGER_UTXO);
+        Result result = dbService.createArea(LedgerStorageConstant.DB_NAME_LEDGER_UTXO);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
@@ -66,13 +66,13 @@ public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageSe
 
     @Override
     public BatchOperation createWriteBatch() {
-        return dbService.createWriteBatch(LedgerStorageConstant.DB_AREA_LEDGER_UTXO);
+        return dbService.createWriteBatch(LedgerStorageConstant.DB_NAME_LEDGER_UTXO);
     }
 
     @Override
     public Result saveUtxo(byte[] owner, Coin coin) {
         try {
-            return dbService.put(LedgerStorageConstant.DB_AREA_LEDGER_UTXO, owner, coin.serialize());
+            return dbService.put(LedgerStorageConstant.DB_NAME_LEDGER_UTXO, owner, coin.serialize());
         } catch (IOException e) {
             Log.error(e);
             return Result.getFailed(e.getMessage());
@@ -94,7 +94,7 @@ public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageSe
 
     @Override
     public Result deleteUtxo(byte[] owner) {
-        return dbService.delete(LedgerStorageConstant.DB_AREA_LEDGER_UTXO, owner);
+        return dbService.delete(LedgerStorageConstant.DB_NAME_LEDGER_UTXO, owner);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageSe
         if (owner == null) {
             return null;
         }
-        return dbService.get(LedgerStorageConstant.DB_AREA_LEDGER_UTXO, owner);
+        return dbService.get(LedgerStorageConstant.DB_NAME_LEDGER_UTXO, owner);
     }
 
 

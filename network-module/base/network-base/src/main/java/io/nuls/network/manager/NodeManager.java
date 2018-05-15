@@ -12,7 +12,7 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.Node;
 import io.nuls.network.entity.NodeGroup;
 import io.nuls.network.protocol.message.NetworkMessageBody;
-import io.nuls.network.storage.manager.NetworkStorage;
+import io.nuls.network.storage.service.NetworkStorageService;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,7 +54,7 @@ public class NodeManager implements Runnable {
 
     private NodeDiscoverHandler nodeDiscoverHandler;
 
-    private NetworkStorage networkStorage;
+    private NetworkStorageService networkStorageService;
 
     /**
      * 初始化主动连接节点组合(outGroup)被动连接节点组(inGroup)
@@ -81,7 +81,6 @@ public class NodeManager implements Runnable {
      * 同时开启获取对方最新信息的线程
      */
     public void start() {
-        getNetworkStorage().init();
         List<Node> nodeList = getNetworkStorage().getLocalNodeList(20);
         nodeList.addAll(getSeedNodes());
         for (Node node : nodeList) {
@@ -586,10 +585,10 @@ public class NodeManager implements Runnable {
         }
     }
 
-    private NetworkStorage getNetworkStorage() {
-        if (networkStorage == null) {
-            networkStorage = NulsContext.getServiceBean(NetworkStorage.class);
+    private NetworkStorageService getNetworkStorage() {
+        if (networkStorageService == null) {
+            networkStorageService = NulsContext.getServiceBean(NetworkStorageService.class);
         }
-        return networkStorage;
+        return networkStorageService;
     }
 }

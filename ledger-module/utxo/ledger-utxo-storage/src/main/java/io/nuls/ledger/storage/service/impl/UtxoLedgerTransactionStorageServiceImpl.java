@@ -59,7 +59,7 @@ public class UtxoLedgerTransactionStorageServiceImpl implements UtxoLedgerTransa
      */
     @Override
     public void afterPropertiesSet() throws NulsException {
-        Result result = dbService.createArea(LedgerStorageConstant.DB_AREA_LEDGER_TRANSACTION);
+        Result result = dbService.createArea(LedgerStorageConstant.DB_NAME_LEDGER_TX);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
@@ -78,7 +78,7 @@ public class UtxoLedgerTransactionStorageServiceImpl implements UtxoLedgerTransa
             return Result.getFailed(e.getMessage());
         }
         // 保存交易
-        Result result = dbService.putModel(LedgerStorageConstant.DB_AREA_LEDGER_TRANSACTION, txHashBytes, tx);
+        Result result = dbService.putModel(LedgerStorageConstant.DB_NAME_LEDGER_TX, txHashBytes, tx);
         return result;
     }
 
@@ -94,7 +94,7 @@ public class UtxoLedgerTransactionStorageServiceImpl implements UtxoLedgerTransa
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        Transaction tx = dbService.getModel(LedgerStorageConstant.DB_AREA_LEDGER_TRANSACTION, hashBytes, Transaction.class);
+        Transaction tx = dbService.getModel(LedgerStorageConstant.DB_NAME_LEDGER_TX, hashBytes, Transaction.class);
         if (tx != null) {
             tx.setHash(hash);
         }
@@ -114,7 +114,7 @@ public class UtxoLedgerTransactionStorageServiceImpl implements UtxoLedgerTransa
             return Result.getFailed(e.getMessage());
         }
         // 删除交易
-        Result result = dbService.delete(LedgerStorageConstant.DB_AREA_LEDGER_TRANSACTION, txHashBytes);
+        Result result = dbService.delete(LedgerStorageConstant.DB_NAME_LEDGER_TX, txHashBytes);
         return result;
     }
 
@@ -123,6 +123,6 @@ public class UtxoLedgerTransactionStorageServiceImpl implements UtxoLedgerTransa
         if (txBytes == null) {
             return null;
         }
-        return dbService.get(LedgerStorageConstant.DB_AREA_LEDGER_TRANSACTION, txBytes);
+        return dbService.get(LedgerStorageConstant.DB_NAME_LEDGER_TX, txBytes);
     }
 }

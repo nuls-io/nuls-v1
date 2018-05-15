@@ -33,7 +33,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-        Result result = this.dbService.createArea(AccountStorageConstant.DB_AREA_ACCOUNT);
+        Result result = this.dbService.createArea(AccountStorageConstant.DB_NAME_ACCOUNT);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
@@ -41,7 +41,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
 
     @Override
     public Result saveAccountList(List<AccountPo> accountPoList) {
-        BatchOperation batch = dbService.createWriteBatch(AccountStorageConstant.DB_AREA_ACCOUNT);
+        BatchOperation batch = dbService.createWriteBatch(AccountStorageConstant.DB_NAME_ACCOUNT);
         for (AccountPo po : accountPoList) {
             batch.putModel(po.getAddressObj().getBase58Bytes(), po);
         }
@@ -50,7 +50,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
 
     @Override
     public Result saveAccount(AccountPo po) {
-        return dbService.putModel(AccountStorageConstant.DB_AREA_ACCOUNT, po.getAddressObj().getBase58Bytes(), po);
+        return dbService.putModel(AccountStorageConstant.DB_NAME_ACCOUNT, po.getAddressObj().getBase58Bytes(), po);
     }
 
     @Override
@@ -58,12 +58,12 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
         if (null == address || address.getBase58Bytes() == null || address.getBase58Bytes().length <= 0) {
             return Result.getFailed(AccountErrorCode.NULL_PARAMETER);
         }
-        return dbService.delete(AccountStorageConstant.DB_AREA_ACCOUNT, address.getBase58Bytes());
+        return dbService.delete(AccountStorageConstant.DB_NAME_ACCOUNT, address.getBase58Bytes());
     }
 
     @Override
     public Result<List<AccountPo>> getAccountList() {
-        List<AccountPo> listPo = dbService.values(AccountStorageConstant.DB_AREA_ACCOUNT, AccountPo.class);
+        List<AccountPo> listPo = dbService.values(AccountStorageConstant.DB_NAME_ACCOUNT, AccountPo.class);
         return Result.getSuccess().setData(listPo) ;
     }
 
@@ -74,31 +74,31 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
 
     @Override
     public Result<AccountPo> getAccount(byte[] address) {
-        AccountPo account = dbService.getModel(AccountStorageConstant.DB_AREA_ACCOUNT, address, AccountPo.class);
+        AccountPo account = dbService.getModel(AccountStorageConstant.DB_NAME_ACCOUNT, address, AccountPo.class);
         return Result.getSuccess().setData(account);
     }
 
     @Override
     public Result updateAccount(AccountPo po) {
-        AccountPo account = dbService.getModel(AccountStorageConstant.DB_AREA_ACCOUNT, po.getAddressObj().getBase58Bytes(), AccountPo.class);
+        AccountPo account = dbService.getModel(AccountStorageConstant.DB_NAME_ACCOUNT, po.getAddressObj().getBase58Bytes(), AccountPo.class);
         if(null == account){
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        return dbService.putModel(AccountStorageConstant.DB_AREA_ACCOUNT, po.getAddressObj().getBase58Bytes(), po);
+        return dbService.putModel(AccountStorageConstant.DB_NAME_ACCOUNT, po.getAddressObj().getBase58Bytes(), po);
     }
 
     @Override
     public Result saveDefaultAccount(AccountPo po) {
-        return dbService.putModel(AccountStorageConstant.DB_AREA_ACCOUNT, AccountStorageConstant.DEFAULT_ACCOUNT_KEY, po);
+        return dbService.putModel(AccountStorageConstant.DB_NAME_ACCOUNT, AccountStorageConstant.DEFAULT_ACCOUNT_KEY, po);
     }
 
     @Override
     public Result<AccountPo> getDefaultAccount() {
-        return Result.getSuccess().setData(dbService.getModel(AccountStorageConstant.DB_AREA_ACCOUNT, AccountStorageConstant.DEFAULT_ACCOUNT_KEY));
+        return Result.getSuccess().setData(dbService.getModel(AccountStorageConstant.DB_NAME_ACCOUNT, AccountStorageConstant.DEFAULT_ACCOUNT_KEY));
     }
 
     @Override
     public Result removeDefaultAccount() {
-        return dbService.delete(AccountStorageConstant.DB_AREA_ACCOUNT, AccountStorageConstant.DEFAULT_ACCOUNT_KEY);
+        return dbService.delete(AccountStorageConstant.DB_NAME_ACCOUNT, AccountStorageConstant.DEFAULT_ACCOUNT_KEY);
     }
 }

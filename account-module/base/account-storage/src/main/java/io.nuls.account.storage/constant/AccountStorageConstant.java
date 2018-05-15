@@ -12,7 +12,7 @@ public interface AccountStorageConstant {
      * 账户表的名称
      * The name of the account table
      */
-    String DB_AREA_ACCOUNT = "ACCOUNT";
+    String DB_NAME_ACCOUNT = "account";
 
     /**
      * 默认账户的数据库key
@@ -23,6 +23,6 @@ public interface AccountStorageConstant {
      * 别名表的名称
      * The name of the account table
      */
-    String DB_AREA_ALIAS = "ALIAS";
+    String DB_NAME_ACCOUNT_ALIAS = "account_alias";
 
 }

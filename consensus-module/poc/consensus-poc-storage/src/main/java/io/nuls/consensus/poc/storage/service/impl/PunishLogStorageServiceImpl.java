@@ -25,25 +25,25 @@
 
 package io.nuls.consensus.poc.storage.service.impl;
 
+import io.nuls.consensus.poc.storage.constant.ConsensusStorageConstant;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.storage.service.PunishLogStorageService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.db.service.DBService;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Result;
 
 import java.io.IOException;
-import java.util.Set;
 
 /**
  * @author: Niels Wang
  * @date: 2018/5/13
  */
 @Component
-public class PunishLogStorageServiceImpl implements PunishLogStorageService {
-
-    private final String DB_NAME = "punish-log";
+public class PunishLogStorageServiceImpl implements PunishLogStorageService, InitializingBean {
 
     @Autowired
     private DBService dbService;
@@ -55,7 +55,7 @@ public class PunishLogStorageServiceImpl implements PunishLogStorageService {
         }
         Result result = null;
         try {
-            result = dbService.put(DB_NAME, po.getKey(), po.serialize());
+            result = dbService.put(ConsensusStorageConstant.DB_NAME_CONSENSUS_PUNISH_LOG, po.getKey(), po.serialize());
         } catch (IOException e) {
             Log.error(e);
             return false;
@@ -68,7 +68,12 @@ public class PunishLogStorageServiceImpl implements PunishLogStorageService {
         if (null == key) {
             return false;
         }
-        Result result = dbService.delete(DB_NAME, key);
+        Result result = dbService.delete(ConsensusStorageConstant.DB_NAME_CONSENSUS_PUNISH_LOG, key);
         return result.isSuccess();
+    }
+
+    @Override
+    public void afterPropertiesSet() throws NulsException {
+        dbService.createArea(ConsensusStorageConstant.DB_NAME_CONSENSUS_PUNISH_LOG);
     }
 }

@@ -25,6 +25,7 @@
 
 package io.nuls.consensus.poc.storage.service.impl;
 
+import io.nuls.consensus.poc.storage.constant.ConsensusStorageConstant;
 import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.service.DepositStorageService;
 import io.nuls.core.tools.log.Log;
@@ -34,6 +35,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 
@@ -47,9 +49,7 @@ import java.util.Set;
  * @date: 2018/5/13
  */
 @Component
-public class DepositStorageServiceImpl implements DepositStorageService {
-
-    private final String DB_NAME = "deposit";
+public class DepositStorageServiceImpl implements DepositStorageService, InitializingBean {
 
     @Autowired
     private DBService dbService;
@@ -68,7 +68,7 @@ public class DepositStorageServiceImpl implements DepositStorageService {
         }
         Result result = null;
         try {
-            result = dbService.put(DB_NAME, hash, depositPo.serialize());
+            result = dbService.put(ConsensusStorageConstant.DB_NAME_CONSENSUS_DEPOSIT, hash, depositPo.serialize());
         } catch (IOException e) {
             Log.error(e);
             return false;
@@ -81,9 +81,9 @@ public class DepositStorageServiceImpl implements DepositStorageService {
         if (hash == null) {
             return null;
         }
-        byte[] body = new byte[0];
+        byte[] body = null;
         try {
-            body = dbService.get(DB_NAME, hash.serialize());
+            body = dbService.get(ConsensusStorageConstant.DB_NAME_CONSENSUS_DEPOSIT, hash.serialize());
         } catch (IOException e) {
             Log.error(e);
         }
@@ -108,7 +108,7 @@ public class DepositStorageServiceImpl implements DepositStorageService {
         }
         Result result = null;
         try {
-            result = dbService.delete(DB_NAME, hash.serialize());
+            result = dbService.delete(ConsensusStorageConstant.DB_NAME_CONSENSUS_DEPOSIT, hash.serialize());
         } catch (IOException e) {
             Log.error(e);
         }
@@ -117,7 +117,7 @@ public class DepositStorageServiceImpl implements DepositStorageService {
 
     @Override
     public List<DepositPo> getList() {
-        List<Entry<byte[], byte[]>> list = dbService.entryList(DB_NAME);
+        List<Entry<byte[], byte[]>> list = dbService.entryList(ConsensusStorageConstant.DB_NAME_CONSENSUS_DEPOSIT);
         List<DepositPo> resultList = new ArrayList<>();
         if (list == null) {
             return resultList;
@@ -144,10 +144,15 @@ public class DepositStorageServiceImpl implements DepositStorageService {
 
     @Override
     public int size() {
-        Set<byte[]> list = dbService.keySet(DB_NAME);
+        Set<byte[]> list = dbService.keySet(ConsensusStorageConstant.DB_NAME_CONSENSUS_DEPOSIT);
         if (list == null) {
             return 0;
         }
         return list.size();
+    }
+
+    @Override
+    public void afterPropertiesSet() throws NulsException {
+        dbService.createArea(ConsensusStorageConstant.DB_NAME_CONSENSUS_DEPOSIT);
     }
 }

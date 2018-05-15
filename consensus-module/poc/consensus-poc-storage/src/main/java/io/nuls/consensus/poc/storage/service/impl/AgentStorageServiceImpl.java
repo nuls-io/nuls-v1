@@ -26,6 +26,7 @@
 
 package io.nuls.consensus.poc.storage.service.impl;
 
+import io.nuls.consensus.poc.storage.constant.ConsensusStorageConstant;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.core.tools.log.Log;
@@ -50,8 +51,6 @@ import java.util.Set;
 @Component
 public class AgentStorageServiceImpl implements AgentStorageService, InitializingBean {
 
-    private final String DB_NAME = "agent";
-
     @Autowired
     private DBService dbService;
 
@@ -69,7 +68,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
         }
         Result result = null;
         try {
-            result = dbService.put(DB_NAME, hash, agentPo.serialize());
+            result = dbService.put(ConsensusStorageConstant.DB_NAME_CONSENSUS_AGENT, hash, agentPo.serialize());
         } catch (IOException e) {
             Log.error(e);
             return false;
@@ -82,9 +81,9 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
         if (hash == null) {
             return null;
         }
-        byte[] body = new byte[0];
+        byte[] body = null;
         try {
-            body = dbService.get(DB_NAME, hash.serialize());
+            body = dbService.get(ConsensusStorageConstant.DB_NAME_CONSENSUS_AGENT, hash.serialize());
         } catch (IOException e) {
             Log.error(e);
         }
@@ -109,7 +108,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
         }
         Result result = null;
         try {
-            result = dbService.delete(DB_NAME, hash.serialize());
+            result = dbService.delete(ConsensusStorageConstant.DB_NAME_CONSENSUS_AGENT, hash.serialize());
         } catch (IOException e) {
             Log.error(e);
         }
@@ -118,7 +117,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
 
     @Override
     public List<AgentPo> getList() {
-        List<Entry<byte[], byte[]>> list = dbService.entryList(DB_NAME);
+        List<Entry<byte[], byte[]>> list = dbService.entryList(ConsensusStorageConstant.DB_NAME_CONSENSUS_AGENT);
         List<AgentPo> resultList = new ArrayList<>();
         if (list == null) {
             return resultList;
@@ -145,7 +144,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
 
     @Override
     public int size() {
-        Set<byte[]> list = dbService.keySet(DB_NAME);
+        Set<byte[]> list = dbService.keySet(ConsensusStorageConstant.DB_NAME_CONSENSUS_AGENT);
         if (list == null) {
             return 0;
         }
@@ -154,6 +153,6 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-        dbService.createArea(DB_NAME);
+        dbService.createArea(ConsensusStorageConstant.DB_NAME_CONSENSUS_AGENT);
     }
 }

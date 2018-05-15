@@ -93,6 +93,6 @@ public class OrphanStorageServiceImpl implements OrphanStorageService, Initializ
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-        dbService.createArea(DB_NAME);
+//        dbService.createArea(DB_NAME);
     }
 }

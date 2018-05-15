@@ -36,8 +36,8 @@ public interface AccountLedgerStorageConstant {
      * 账户表的名称
      * The name of the account table
      */
-    String DB_AREA_ACCOUNTLEDGER_TXINFO = "ACCOUNTLEDGER_TXINFO";
-    String DB_AREA_ACCOUNTLEDGER_TRANSACTION = "ACCOUNTLEDGER_TX";
-    String DB_AREA_ACCOUNTLEDGER_COINDATA = "ACCOUNTLEDGER_COINDATA";
+    String DB_NAME_ACCOUNT_LEDGER_TX_INDEX = "account_ledger_tx_index";
+    String DB_NAME_ACCOUNT_LEDGER_TX = "account_ledger_tx";
+    String DB_NAME_ACCOUNT_LEDGER_COINDATA = "account_ledger_coindata";
 
 }
