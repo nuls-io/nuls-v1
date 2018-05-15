@@ -7,12 +7,18 @@ import java.util.List;
 
 /**
  * 获取coinData时，包含coin集合以及需要花费的手续费
+ *
+ * @author Vivi
  */
 public class CoinDataResult {
 
     private boolean enough;
 
     private List<Coin> coinList;
+    /**
+     * 找零
+     */
+    private Coin change;
 
     private Na fee;
 
@@ -38,5 +44,13 @@ public class CoinDataResult {
 
     public void setEnough(boolean enough) {
         this.enough = enough;
+    }
+
+    public Coin getChange() {
+        return change;
+    }
+
+    public void setChange(Coin change) {
+        this.change = change;
     }
 }
