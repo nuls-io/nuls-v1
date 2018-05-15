@@ -54,6 +54,8 @@ public class TransactionInfoPo extends BaseNulsData {
 
     private int txType;
 
+    private byte status;
+
     public TransactionInfoPo() {
 
     }
@@ -72,7 +74,6 @@ public class TransactionInfoPo extends BaseNulsData {
             System.arraycopy(addressList.get(i), 0, addressList, AddressTool.HASH_LENGTH* i, AddressTool.HASH_LENGTH);
         }
         this.addresses = addresses;
-
         this.txType = tx.getType();
     }
 
@@ -87,6 +88,7 @@ public class TransactionInfoPo extends BaseNulsData {
         this.time = txInfo.getTime();
         this.addresses = txInfo.getAddresses();
         this.txType = txInfo.getTxType();
+        this.status = txInfo.getStatus();
     }
 
     public TransactionInfo toTransactionInfo() {
@@ -97,6 +99,7 @@ public class TransactionInfoPo extends BaseNulsData {
         txInfo.setTime(this.time);
         txInfo.setAddresses(this.addresses);
         txInfo.setTxType(this.txType);
+        txInfo.setStatus(this.status);
         return txInfo;
     }
 
@@ -135,5 +138,13 @@ public class TransactionInfoPo extends BaseNulsData {
 
     public void setAddresses(byte[] addresses) {
         this.addresses = addresses;
+    }
+
+    public byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(byte status) {
+        this.status = status;
     }
 }

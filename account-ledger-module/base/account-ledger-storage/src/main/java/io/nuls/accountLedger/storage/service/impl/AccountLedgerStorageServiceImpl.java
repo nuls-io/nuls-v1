@@ -133,13 +133,12 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
             }
         }
 
-        Result result = null;
-        try {
-            result = dbService.put(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TRANSACTION, tx.getHash().serialize(), tx.serialize());
-        } catch (IOException e) {
-            throw new NulsRuntimeException(e);
-        }
-        return result;
+//        try {
+//            result = dbService.put(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TRANSACTION, tx.getHash().serialize(), tx.serialize());
+//        } catch (IOException e) {
+//            throw new NulsRuntimeException(e);
+//        }
+        return Result.getSuccess();
     }
 
     @Override
