@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.account.ledger.module;
+package io.nuls.account.ledger.base.module.impl;
 
 
 import io.nuls.account.constant.AccountConstant;
+import io.nuls.account.ledger.module.AbstractAccountLedgerModule;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.thread.manager.TaskManager;
