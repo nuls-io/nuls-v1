@@ -327,7 +327,7 @@ public class AccountResource {
         return accountBaseService.setPassword(address, password);
     }
 
-    @POST
+    @PUT
     @Path("/password")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "修改账户密码")
