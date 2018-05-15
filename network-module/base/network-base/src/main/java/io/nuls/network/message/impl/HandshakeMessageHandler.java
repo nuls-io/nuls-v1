@@ -63,14 +63,13 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 
         node.setFailCount(0);
         node.setSeverPort(body.getSeverPort());
+        node.setBestBlockHash(body.getBestBlockHash());
+        node.setBestBlockHeight(body.getBestBlockHeight());
         nodeManager.saveNode(node);
 
         if (!isServer) {
-//            Block bestBlock = NulsContext.getInstance().getBestBlock();
-//            body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
-//                    bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
             body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
-                    10001, NulsDigestData.calcDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
+                    NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash());
             return new NetworkEventResult(true, new HandshakeMessage(body));
         }
         return null;

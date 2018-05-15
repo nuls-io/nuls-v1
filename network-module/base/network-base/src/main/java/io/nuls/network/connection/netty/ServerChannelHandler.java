@@ -101,13 +101,10 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             ctx.channel().close();
             return;
         }
-        //Block bestBlock = NulsContext.getInstance().getBestBlock();
-//        NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
-//                bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
         NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
-                10001, NulsDigestData.calcDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
+                NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash());
         HandshakeMessage handshakeMessage = new HandshakeMessage(body);
-        BroadcastResult result = broadcastHandler.broadcastToNode(handshakeMessage, node, false);
+        broadcastHandler.broadcastToNode(handshakeMessage, node, false);
     }
 
     @Override

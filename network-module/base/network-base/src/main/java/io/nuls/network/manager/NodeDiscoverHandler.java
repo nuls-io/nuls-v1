@@ -23,6 +23,7 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.constant.NetworkConstant;
@@ -104,7 +105,7 @@ public class NodeDiscoverHandler implements Runnable {
 
             Collection<Node> nodeList = nodesManager.getAvailableNodes();
             NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
-                    10001, NulsDigestData.calcDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
+                    NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash());
             GetVersionMessage getVersionMessage = new GetVersionMessage(body);
             NodeMessageBody nodeMessageBody = new NodeMessageBody();
             GetNodesIpMessage getNodesIpMessage = new GetNodesIpMessage(nodeMessageBody);
