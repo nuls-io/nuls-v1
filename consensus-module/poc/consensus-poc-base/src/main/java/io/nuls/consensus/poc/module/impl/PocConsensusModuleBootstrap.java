@@ -52,6 +52,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     @Override
     public void start() {
+
         ConsensusScheduler.getInstance().start();
         this.registerHandlers();
         Log.info("the POC consensus module is started!");

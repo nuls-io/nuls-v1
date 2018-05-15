@@ -26,14 +26,21 @@ package io.nuls.protocol.base.module;
 
 
 import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.model.Block;
 import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.protocol.base.handler.*;
 import io.nuls.protocol.base.service.DownloadServiceImpl;
 import io.nuls.protocol.message.*;
 import io.nuls.protocol.module.AbstractProtocolModule;
+import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.DownloadService;
 
 ;
@@ -52,6 +59,25 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
     public void start() {
         this.waitForDependencyRunning(MessageBusConstant.MODULE_ID_MESSAGE_BUS);
         this.waitForDependencyInited(ConsensusConstant.MODULE_ID_CONSENSUS);
+        BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+        Block block0 = blockService.getBlock(0L).getData();
+        if (null == block0) {
+            try {
+                blockService.saveBlock(NulsContext.getInstance().getGenesisBlock());
+            } catch (NulsException e) {
+                Log.error(e);
+                throw new NulsRuntimeException(e);
+            }
+        } else {
+            Block block = blockService.getBestBlock().getData();
+            ValidateResult result = block.verify();
+            if (result.isFailed()) {
+                throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "the best block is wrong!");
+            }
+            NulsContext.getInstance().setBestBlock(block);
+        }
+
+
         this.initHandlers();
         ((DownloadServiceImpl) NulsContext.getServiceBean(DownloadService.class)).start();
     }

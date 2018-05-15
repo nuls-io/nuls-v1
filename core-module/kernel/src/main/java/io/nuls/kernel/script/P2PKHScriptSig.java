@@ -86,7 +86,12 @@ public class P2PKHScriptSig extends Script {
     }
 
     public ValidateResult verifySign(NulsDigestData digestData) {
-        boolean b = ECKey.verify(digestData.getDigestBytes(), signData.getSignBytes(), this.getPublicKey());
+        boolean b = false;
+        try {
+            b = ECKey.verify(digestData.serialize(), signData.getSignBytes(), this.getPublicKey());
+        } catch (IOException e) {
+            Log.error(e);
+        }
         if (b) {
             return ValidateResult.getSuccessResult();
         } else {

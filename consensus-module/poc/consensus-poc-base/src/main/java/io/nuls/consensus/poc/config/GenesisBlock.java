@@ -172,7 +172,13 @@ public final class GenesisBlock extends Block {
         header.setHash(NulsDigestData.calcDigestData(header));
 
         P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
-        NulsSignData signData = this.signature(header.getHash().getDigestBytes());
+        NulsSignData signData = null;
+        try {
+            signData = this.signature(header.getHash().serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
         p2PKHScriptSig.setSignData(signData);
         p2PKHScriptSig.setPublicKey(getGenesisPubkey());
         header.setScriptSig(p2PKHScriptSig);

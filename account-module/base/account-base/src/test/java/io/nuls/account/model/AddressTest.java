@@ -25,12 +25,7 @@
 
 package io.nuls.account.model;
 
-import io.nuls.core.tools.crypto.Base58;
-import io.nuls.kernel.utils.AddressTool;
-import io.nuls.kernel.utils.SerializeUtils;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * @author: Niels Wang
