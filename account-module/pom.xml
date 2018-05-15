@@ -20,23 +20,4 @@
         <module>base/account-sdk</module>
         <module>base/account-base</module>
     </modules>
-    <dependencies>
-        <dependency>
-            <groupId>io.nuls.tools-module</groupId>
-            <artifactId>tools</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.core-module</groupId>
-            <artifactId>kernel</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.db-module</groupId>
-            <artifactId>db-leveldb</artifactId>
-            <version>2.0.0</version>
-            <!--<scope>test</scope>-->
-        </dependency>
-    </dependencies>
-
 </project>

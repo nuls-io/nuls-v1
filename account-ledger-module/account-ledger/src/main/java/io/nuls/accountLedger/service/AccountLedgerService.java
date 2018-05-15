@@ -27,12 +27,11 @@ package io.nuls.accountLedger.service;
 
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Balance;
+import io.nuls.accountLedger.model.CoinDataResult;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.ledger.model.CoinDataResult;
 
 import java.util.List;
 

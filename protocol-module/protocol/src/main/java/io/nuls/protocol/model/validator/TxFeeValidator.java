@@ -47,7 +47,7 @@ public class TxFeeValidator implements NulsDataValidator<Transaction> {
         if (null == coinData) {
             return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
         }
-        Na realFee = TransactionFeeCalculator.calcFee(tx);
+        Na realFee = tx.getFee();
         Na fee = TransactionFeeCalculator.getFee(tx.size());
         if (realFee.isGreaterOrEquals(fee)) {
             return ValidateResult.getSuccessResult();

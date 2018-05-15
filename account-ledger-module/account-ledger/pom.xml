@@ -14,8 +14,13 @@
     <artifactId>account-ledger</artifactId>
     <dependencies>
         <dependency>
-            <groupId>io.nuls.ledger-module</groupId>
-            <artifactId>ledger</artifactId>
+            <groupId>io.nuls.core-module</groupId>
+            <artifactId>kernel</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nuls.account-module</groupId>
+            <artifactId>account</artifactId>
             <version>2.0.0</version>
         </dependency>
     </dependencies>

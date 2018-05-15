@@ -4,6 +4,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.service.AccountService;
+import io.nuls.accountLedger.model.CoinDataResult;
 import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
@@ -25,7 +26,6 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
-import io.nuls.ledger.model.CoinDataResult;
 import io.nuls.protocol.service.TransactionService;
 import io.swagger.annotations.*;
 
@@ -261,7 +261,7 @@ public class PocConsensusResource {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         Result result = Result.getSuccess();
-        Page<Map<String, Object>> list = null ;//this.consensusService.getAgentList(keyword, null, null, sortType, pageNumber, pageSize);
+        Page<Map<String, Object>> list = null;//this.consensusService.getAgentList(keyword, null, null, sortType, pageNumber, pageSize);
         result.setData(list);
         return result;
     }

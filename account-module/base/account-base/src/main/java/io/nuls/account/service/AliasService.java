@@ -11,6 +11,7 @@ import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.account.storage.service.AliasStorageService;
 import io.nuls.account.tx.AliasTransaction;
+import io.nuls.accountLedger.model.CoinDataResult;
 import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
@@ -20,7 +21,6 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
-import io.nuls.ledger.model.CoinDataResult;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.protocol.message.TransactionMessage;
 
