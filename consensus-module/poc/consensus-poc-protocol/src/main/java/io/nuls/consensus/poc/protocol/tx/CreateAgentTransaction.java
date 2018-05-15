@@ -51,12 +51,9 @@ public class CreateAgentTransaction extends Transaction<Agent> {
             throw new NulsRuntimeException(e);
         }
         tx.setBlockHeight(blockHeight);
-        tx.setIndex(index);
         tx.setStatus(status);
         tx.setHash(hash);
-        tx.setTransferType(transferType);
         tx.setSize(size);
-        tx.setMine(isMine);
 
         Agent agent = tx.getTxData();
         agent.setBlockHeight(txData.getBlockHeight());

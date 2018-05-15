@@ -61,20 +61,11 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
 
     protected transient NulsDigestData hash;
 
-    protected transient int index;
-
     protected transient long blockHeight = -1L;
 
     protected transient TxStatusEnum status = TxStatusEnum.UNCONFIRM;
 
-    public static final transient int TRANSFER_RECEIVE = 1;
-    public static final transient int TRANSFER_SEND = 0;
-    // when localTx is true, should care transferType
-    protected transient int transferType;
-
     protected transient int size;
-
-    protected transient boolean isMine;
 
     @Override
     public int size() {
@@ -176,28 +167,12 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         this.blockHeight = blockHeight;
     }
 
-    public int getIndex() {
-        return index;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
-    }
-
     public TxStatusEnum getStatus() {
         return status;
     }
 
     public void setStatus(TxStatusEnum status) {
         this.status = status;
-    }
-
-    public int getTransferType() {
-        return transferType;
-    }
-
-    public void setTransferType(int transferType) {
-        this.transferType = transferType;
     }
 
     public CoinData getCoinData() {
@@ -219,14 +194,6 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         this.size = size;
     }
 
-    public boolean isMine() {
-        return isMine;
-    }
-
-    public void setMine(boolean mine) {
-        isMine = mine;
-    }
-
     public Na getFee() {
         Na fee = Na.ZERO;
         if (null != coinData) {
@@ -235,7 +202,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         return fee;
     }
 
-    public byte[] getAddress() {
+    public byte[] getAddressFromSig() {
         return AddressTool.getAddress(scriptSig);
     }
 

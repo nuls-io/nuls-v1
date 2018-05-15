@@ -25,7 +25,6 @@
 
 package io.nuls.accountLedger.service.impl;
 
-import com.sun.org.apache.regexp.internal.RE;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
@@ -38,9 +37,6 @@ import io.nuls.accountLedger.storage.service.AccountLedgerStorageService;
 import io.nuls.accountLedger.util.CoinComparator;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.ErrorCode;
-import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -85,7 +81,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
         List<byte[]> addresses = new ArrayList<>();
-        byte[] addressesBytes = tx.getAddress();
+        byte[] addressesBytes = tx.getAddressFromSig();
 
         if (addressesBytes == null || addressesBytes.length == 0) {
             return Result.getSuccess().setData(new Integer(0));

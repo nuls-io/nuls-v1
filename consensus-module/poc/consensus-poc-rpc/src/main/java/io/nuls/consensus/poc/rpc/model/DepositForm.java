@@ -1,4 +1,5 @@
 /*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,67 +21,63 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package io.nuls.account.model;
+package io.nuls.consensus.poc.rpc.model;
+
+import io.nuls.core.tools.str.StringUtils;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
- * @author Facjas
- * @date 2018/5/9.
+ * @author Niels
+ * @date 2018/3/14
  */
-public class AccountKeyStore {
+@ApiModel(value = "申请参与共识表单数据")
+public class DepositForm {
 
+    @ApiModelProperty(name = "address", value = "参与共识账户地址", required = true)
     private String address;
-    private String encryptedPrivateKey;
-    private byte[] prikey;
-    private String alias;
-    private byte[] pubKey;
 
-    public AccountKeyStore() {
-    }
+    @ApiModelProperty(name = "agentHash", value = "共识节点id", required = true)
+    private String agentHash;
 
-    public AccountKeyStore(String address, String encryptedPrivateKey) {
-        this.address = address;
-        this.encryptedPrivateKey = encryptedPrivateKey;
-    }
+    @ApiModelProperty(name = "deposit", value = "参与共识的金额", required = true)
+    private long deposit;
+
+    @ApiModelProperty(name = "password", value = "密码", required = true)
+    private String password;
 
     public String getAddress() {
         return address;
     }
 
     public void setAddress(String address) {
-        this.address = address;
+        this.address = StringUtils.formatStringPara(address);
     }
 
-    public String getEncryptedPrivateKey() {
-        return encryptedPrivateKey;
+    public String getAgentHash() {
+        return agentHash;
     }
 
-    public void setEncryptedPrivateKey(String encryptedPrivateKey) {
-        this.encryptedPrivateKey = encryptedPrivateKey;
+    public void setAgentHash(String agentHash) {
+        this.agentHash = StringUtils.formatStringPara(agentHash);
     }
 
-    public String getAlias() {
-        return alias;
+    public long getDeposit() {
+        return deposit;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
+    public void setDeposit(long deposit) {
+        this.deposit = deposit;
     }
 
-    public byte[] getPubKey() {
-        return pubKey;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPubKey(byte[] pubKey) {
-        this.pubKey = pubKey;
-    }
-
-    public byte[] getPrikey() {
-        return prikey;
-    }
-
-    public void setPrikey(byte[] prikey) {
-        this.prikey = prikey;
+    public void setPassword(String password) {
+        this.password = StringUtils.formatStringPara(password);
     }
 }
