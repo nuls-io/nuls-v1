@@ -377,7 +377,6 @@ public class AccountResource {
 
     }
 
-
     @POST
     @Path("/import")
     @Produces(MediaType.APPLICATION_JSON)
@@ -395,19 +394,36 @@ public class AccountResource {
         if(null != password && !StringUtils.validPassword(password)){
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
-        /*if(null != form.getPrikey() && !ECKey.isValidPrivteHex(form.getPrikey())){
-            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
-        }*/
-
         AccountKeyStoreDto accountKeyStoreDto = null;
         try {
             accountKeyStoreDto = JSONUtils.json2pojo(keyStore, AccountKeyStoreDto.class);
-
         } catch (Exception e) {
             Log.error(e);
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
-        return accountService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), password);
+        Account account = accountService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), password).getData();
+        return Result.getSuccess().setData(account.getAddress().toString());
+    }
+
+    @POST
+    @Path("/import/pri")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "根据私钥导入账户 [3.4.7]", notes = "返回账户地址")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = Result.class)
+    })
+    public Result<String> importAccountBypriKey(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
+                                                    AccountImportPrikeyForm form) {
+        String priKey = form.getPriKey();
+        if (!ECKey.isValidPrivteHex(priKey)) {
+            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
+        String password = form.getPassword();
+        if(null != password && !StringUtils.validPassword(password)){
+            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
+        Account account = accountService.importAccount(priKey, password).getData();
+        return Result.getSuccess().setData(account.getAddress().toString());
     }
 
     @POST

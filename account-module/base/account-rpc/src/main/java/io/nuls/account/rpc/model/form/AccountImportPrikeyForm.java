@@ -8,20 +8,20 @@ import io.swagger.annotations.ApiModelProperty;
  * @date: 2018/4/19
  */
 @ApiModel(value = "导入账户表单数据")
-public class AccountImportForm {
+public class AccountImportPrikeyForm {
 
-    @ApiModelProperty(name = "accountKeyStore", value = "备份的账户数据", required = true)
-    private String accountKeyStore;
+    @ApiModelProperty(name = "priKey", value = "私钥", required = true)
+    private String priKey;
 
     @ApiModelProperty(name = "password", value = "密码")
     private String password;
 
-    public String getAccountKeyStore() {
-        return accountKeyStore;
+    public String getPriKey() {
+        return priKey;
     }
 
-    public void setAccountKeyStore(String accountKeyStore) {
-        this.accountKeyStore = accountKeyStore;
+    public void setPriKey(String priKey) {
+        this.priKey = priKey;
     }
 
     public String getPassword() {
