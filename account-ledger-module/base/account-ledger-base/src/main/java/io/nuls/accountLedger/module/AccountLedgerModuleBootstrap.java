@@ -26,6 +26,7 @@ package io.nuls.accountLedger.module;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.accountLedger.service.AccountLedgerService;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.thread.manager.TaskManager;
 
@@ -37,12 +38,10 @@ import io.nuls.kernel.thread.manager.TaskManager;
  */
 public class AccountLedgerModuleBootstrap extends AbstractAccountLedgerModule {
 
-    @Autowired
-    AccountLedgerService accountLedgerService;
 
     @Override
     public void init() {
-        accountLedgerService.init();
+        NulsContext.getServiceBean(AccountLedgerService.class).init();
         //load local account list into cache
     }
 
