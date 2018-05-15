@@ -57,7 +57,7 @@ public interface NetworkService {
 
     BroadcastResult sendToGroup(BaseNulsData event, String groupName, String excludeNodeId, boolean asyn);
 
-    boolean reset();
+    void reset();
 
     NetworkParam getNetworkParam();
 }

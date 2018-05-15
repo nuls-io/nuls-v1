@@ -13,6 +13,7 @@ import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
+import io.nuls.network.entity.NodeGroup;
 import io.nuls.protocol.message.base.BaseMessage;
 import io.nuls.protocol.message.base.MessageHeader;
 
@@ -39,10 +40,15 @@ public class BroadcastHandler {
         if (nodeManager.getAvailableNodes().isEmpty()) {
             return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_NODE_EMPTY);
         }
-       // return broadcastToList(nodesManager.getAvailableNodes(), event, null, asyn);
-        return null;
+        return broadcastToList(nodeManager.getAvailableNodes(), msg, null, asyn);
     }
 
+    public BroadcastResult broadcast(BaseMessage msg, String excludeNodeId, boolean asyn) {
+        if (nodeManager.getAvailableNodes().isEmpty()) {
+            return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_NODE_EMPTY);
+        }
+        return broadcastToList(nodeManager.getAvailableNodes(), msg, excludeNodeId, asyn);
+    }
 
     public BroadcastResult broadcastToNode(BaseMessage msg, Node node, boolean asyn) {
         return broadcastToNode(msg, node.getId(), asyn);
@@ -56,6 +62,21 @@ public class BroadcastHandler {
         return broadcast(msg, sendNode, asyn);
     }
 
+    public BroadcastResult broadcastToNodeGroup(BaseMessage msg, String groupName, boolean asyn) {
+        NodeGroup group = nodeManager.getNodeGroup(groupName);
+        if (group == null || group.size() == 0) {
+            return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_NODE_EMPTY);
+        }
+        return broadcastToList(group.getNodes().values(), msg, null, asyn);
+    }
+
+    public BroadcastResult broadcastToNodeGroup(BaseMessage msg, String groupName,String excludeNodeId, boolean asyn) {
+        NodeGroup group = nodeManager.getNodeGroup(groupName);
+        if (group == null || group.size() == 0) {
+            return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_NODE_EMPTY);
+        }
+        return broadcastToList(group.getNodes().values(), msg, excludeNodeId, asyn);
+    }
 
     private BroadcastResult broadcastToList(Collection<Node> nodeList, BaseMessage message, String excludeNodeId, boolean asyn) {
         BroadcastResult result = new BroadcastResult();
@@ -69,6 +90,8 @@ public class BroadcastHandler {
                 if (br.isSuccess()) {
                     successCount++;
                     result.getBroadcastNodes().add(node);
+                } else if (br.getErrorCode().equals(NetworkErrorCode.NET_MESSAGE_ERROR)) {
+                    return br;
                 }
             }
             if (successCount == 0) {

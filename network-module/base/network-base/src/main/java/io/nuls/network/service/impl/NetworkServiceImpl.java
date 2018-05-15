@@ -43,33 +43,36 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public BroadcastResult sendToAllNode(BaseNulsData nulsData, boolean asyn) {
         BaseMessage baseMessage = (BaseMessage) nulsData;
-       // broadcastHandler.broadcast()
-        return null;
+        return broadcastHandler.broadcast(baseMessage, asyn);
     }
 
     @Override
-    public BroadcastResult sendToAllNode(BaseNulsData event, Node excludeNode, boolean asyn) {
-        return null;
+    public BroadcastResult sendToAllNode(BaseNulsData nulsData, Node excludeNode, boolean asyn) {
+        BaseMessage baseMessage = (BaseMessage) nulsData;
+        return broadcastHandler.broadcast(baseMessage, excludeNode.getId(), asyn);
     }
 
     @Override
-    public BroadcastResult sendToNode(BaseNulsData event, Node node, boolean asyn) {
-        return null;
+    public BroadcastResult sendToNode(BaseNulsData nulsData, Node node, boolean asyn) {
+        BaseMessage baseMessage = (BaseMessage) nulsData;
+        return broadcastHandler.broadcastToNode(baseMessage, node, asyn);
     }
 
     @Override
-    public BroadcastResult sendToGroup(BaseNulsData event, String groupName, boolean asyn) {
-        return null;
+    public BroadcastResult sendToGroup(BaseNulsData nulsData, String groupName, boolean asyn) {
+        BaseMessage baseMessage = (BaseMessage) nulsData;
+        return broadcastHandler.broadcastToNodeGroup(baseMessage, groupName, asyn);
     }
 
     @Override
-    public BroadcastResult sendToGroup(BaseNulsData event, String groupName, String excludeNodeId, boolean asyn) {
-        return null;
+    public BroadcastResult sendToGroup(BaseNulsData nulsData, String groupName, String excludeNodeId, boolean asyn) {
+        BaseMessage baseMessage = (BaseMessage) nulsData;
+        return broadcastHandler.broadcastToNodeGroup(baseMessage, groupName, excludeNodeId, asyn);
     }
 
     @Override
-    public boolean reset() {
-        return false;
+    public void reset() {
+        nodeManager.reset();
     }
 
     @Override
