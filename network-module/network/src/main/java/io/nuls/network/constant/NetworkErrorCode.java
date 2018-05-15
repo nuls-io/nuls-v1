@@ -45,5 +45,5 @@ public interface NetworkErrorCode {
     ErrorCode NET_NODE_AREA_NOT_FOUND = ErrorCode.init("NET009", 40009);
     ErrorCode NET_NODE_NOT_FOUND = ErrorCode.init("NET010", 40010);
     ErrorCode NET_BROADCAST_FAIL = ErrorCode.init("NET011", 40011);
-
+    ErrorCode NET_BROADCAST_NODE_EMPTY = ErrorCode.init("NET012", 40012);
 }

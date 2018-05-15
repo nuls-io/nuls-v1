@@ -254,6 +254,17 @@ public interface AccountService {
     /**
      * 数据签名
      * The data signature
+     * @param digest
+     * @param account
+     * @param password
+     * @return
+     * @throws NulsException
+     */
+    NulsSignData signDigest(byte[] digest, Account account, String password) throws NulsException;
+
+    /**
+     * 数据签名
+     * The data signature
      *
      * @param digest to be signed.
      * @param ecKey eckey

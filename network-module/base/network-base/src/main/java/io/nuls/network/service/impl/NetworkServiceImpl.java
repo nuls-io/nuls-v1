@@ -5,8 +5,10 @@ import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.entity.BroadcastResult;
 import io.nuls.network.entity.Node;
+import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.NodeManager;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.message.base.BaseMessage;
 
 import java.util.Collection;
 import java.util.Map;
@@ -15,6 +17,8 @@ import java.util.Map;
 public class NetworkServiceImpl implements NetworkService {
 
     private NodeManager nodeManager = NodeManager.getInstance();
+
+    private BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
 
     @Override
     public void removeNode(String nodeId) {
@@ -28,7 +32,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public Map<String, Node> getNodes() {
-        return null;
+        return nodeManager.getNodes();
     }
 
     @Override
@@ -37,7 +41,9 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public BroadcastResult sendToAllNode(BaseNulsData event, boolean asyn) {
+    public BroadcastResult sendToAllNode(BaseNulsData nulsData, boolean asyn) {
+        BaseMessage baseMessage = (BaseMessage) nulsData;
+       // broadcastHandler.broadcast()
         return null;
     }
 
@@ -68,6 +74,6 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public NetworkParam getNetworkParam() {
-        return null;
+        return NetworkParam.getInstance();
     }
 }
