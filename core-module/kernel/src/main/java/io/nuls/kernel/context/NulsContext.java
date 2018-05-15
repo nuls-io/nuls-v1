@@ -47,7 +47,7 @@ public class NulsContext {
      * The default chain id (nuls main chain), the chain id affects the generation of the address,
      * and the current address begins with "Ns".
      */
-    public static short DEFAULT_CHAIN_ID = -3068;
+    public static short DEFAULT_CHAIN_ID = 1;
 
     /**
      * cache the best block
