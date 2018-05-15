@@ -24,7 +24,6 @@ import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Result;
 import io.swagger.annotations.*;
 
@@ -205,37 +204,6 @@ public class AccountResource {
         return result;
     }
 
-    @GET
-    @Path("/utxo/")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询账户足够数量的未花费输出 [3.3.5]", notes = "result.data: List<OutputDto>")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success"/*, response = OutputDto.class*/)
-    })
-    public Result getUtxo(@ApiParam(name = "address", value = "账户地址", required = true)
-                          @QueryParam("address") String address,
-                          @ApiParam(name = "amount", value = "Nuls数量", required = true)
-                          @QueryParam("amount") long amount) {
-        if (!Address.validAddress(address) || amount <= 0 || amount > Na.MAX_NA_VALUE) {
-            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
-        }
-        // todo
-       /* amount += this.ledgerService.getTxFee(Integer.MAX_VALUE).getValue();
-
-        UtxoBalance balance = (UtxoBalance) ledgerService.getAccountUtxo(address, Na.valueOf(amount));
-        if (balance == null || balance.getUnSpends() == null || balance.getUnSpends().isEmpty()) {
-            return Result.getFailed("balance not enough");
-        }
-
-        List<OutputDto> dtoList = new ArrayList<>();
-        for (int i = 0; i < balance.getUnSpends().size(); i++) {
-            dtoList.add(new OutputDto(balance.getUnSpends().get(i)));
-        }
-
-        return Result.getSuccess().setData(dtoList);
-        */
-        return null;
-    }
 
     @POST
     @Path("/prikey")
