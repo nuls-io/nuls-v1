@@ -81,50 +81,22 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
     }
 
     @Override
-    public Result<Integer> save(Transaction tx) {
-        if (!isLocalTransaction(tx)) {
-            return Result.getFailed().setData(new Integer(0));
-        }
-
-        TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
-        List<byte[]> addresses = new ArrayList<>();
-        byte[] addressesBytes = tx.getAddressFromSig();
-
-        if (addressesBytes == null || addressesBytes.length == 0) {
-            return Result.getSuccess().setData(new Integer(0));
-        }
-
-        if (addressesBytes.length % Address.size() != 0) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
-        }
-
-        for (int i = 0; i < addressesBytes.length / Address.size(); i++) {
-            byte[] tmpAddress = new byte[Address.size()];
-            System.arraycopy(addressesBytes, i * Address.size(), tmpAddress, 0, Address.size());
-            if (isLocalAccount(tmpAddress)) {
-                addresses.add(tmpAddress);
-            }
-        }
-
-        Result result = storageService.saveLocalTxInfo(txInfoPo, addresses);
-
-        if (result.isFailed()) {
-            return result;
-        }
-        result = storageService.saveLocalTx(tx);
-        if (result.isFailed()) {
-            storageService.deleteLocalTxInfo(txInfoPo);
-        }
-        return result;
+    public Result<Integer> saveConfirmedTransaction(Transaction tx) {
+        return saveConfirmedTransaction(tx,TransactionInfo.CONFIRMED);
     }
 
     @Override
-    public Result<Integer> saveList(List<Transaction> txs) {
+    public Result<Integer> saveUnconfirmedTransaction(Transaction tx){
+        return saveConfirmedTransaction(tx,TransactionInfo.UNCONFIRMED);
+    }
+
+    @Override
+    public Result<Integer> saveConfirmedTransactionList(List<Transaction> txs) {
         List<Transaction> txListToSave = getLocalTransaction(txs);
         List<Transaction> savedTxList = new ArrayList<>();
         Result result;
         for (int i = 0; i < txListToSave.size(); i++) {
-            result = save(txListToSave.get(i));
+            result = saveConfirmedTransaction(txListToSave.get(i));
             if (result.isSuccess()) {
                 savedTxList.add(txListToSave.get(i));
             } else {
@@ -295,6 +267,44 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         }
 
         return Result.getSuccess();
+    }
+
+    protected Result<Integer> saveConfirmedTransaction(Transaction tx,byte status) {
+        if (!isLocalTransaction(tx)) {
+            return Result.getFailed().setData(new Integer(0));
+        }
+
+        TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
+        txInfoPo.setStatus(status);
+        List<byte[]> addresses = new ArrayList<>();
+        byte[] addressesBytes = tx.getAddressFromSig();
+
+        if (addressesBytes == null || addressesBytes.length == 0) {
+            return Result.getSuccess().setData(new Integer(0));
+        }
+
+        if (addressesBytes.length % Address.size() != 0) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
+
+        for (int i = 0; i < addressesBytes.length / Address.size(); i++) {
+            byte[] tmpAddress = new byte[Address.size()];
+            System.arraycopy(addressesBytes, i * Address.size(), tmpAddress, 0, Address.size());
+            if (isLocalAccount(tmpAddress)) {
+                addresses.add(tmpAddress);
+            }
+        }
+
+        Result result = storageService.saveLocalTxInfo(txInfoPo, addresses);
+
+        if (result.isFailed()) {
+            return result;
+        }
+        result = storageService.saveLocalTx(tx);
+        if (result.isFailed()) {
+            storageService.deleteLocalTxInfo(txInfoPo);
+        }
+        return result;
     }
 
 

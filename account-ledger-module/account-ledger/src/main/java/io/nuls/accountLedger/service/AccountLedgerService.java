@@ -44,13 +44,23 @@ public interface AccountLedgerService {
 
     /**
      * <p>
-     * save a tx to account ledger.
+     * save a confirmed tx to account ledger.
      * save if the tx is relative to local accounts, or do nothing.
      *
      * @param tx transaction to save
      * @return return the tx count saved,
      */
-    Result<Integer> save(Transaction tx);
+    Result<Integer> saveConfirmedTransaction(Transaction tx);
+
+    /**
+     * <p>
+     * save a unconfirmed tx to account ledger.
+     * save if the tx is relative to local accounts, or do nothing.
+     *
+     * @param tx transaction to save
+     * @return return the tx count saved,
+     */
+    Result<Integer> saveUnconfirmedTransaction(Transaction tx);
 
 
     /**
@@ -61,7 +71,7 @@ public interface AccountLedgerService {
      * @param txs transactions to save
      * @return return the tx count saved,
      */
-    Result<Integer> saveList(List<Transaction> txs);
+    Result<Integer> saveConfirmedTransactionList(List<Transaction> txs);
 
 
     /**

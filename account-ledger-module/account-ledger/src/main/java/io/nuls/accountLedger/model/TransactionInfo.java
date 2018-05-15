@@ -32,11 +32,15 @@ import io.nuls.kernel.model.NulsDigestData;
  */
 public class TransactionInfo {
 
+    public static byte CONFIRMED = 0;
+    public static byte UNCONFIRMED = 1;
+
     private NulsDigestData txHash;
     private long blockHeight;
     private long time;
     private byte[] addresses;
     private int txType;
+    private byte status;
 
     public NulsDigestData getTxHash() {
         return txHash;
@@ -76,5 +80,13 @@ public class TransactionInfo {
 
     public void setTxType(int txType) {
         this.txType = txType;
+    }
+
+    public byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(byte status) {
+        this.status = status;
     }
 }

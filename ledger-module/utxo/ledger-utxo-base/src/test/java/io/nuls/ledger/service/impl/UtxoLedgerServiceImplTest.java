@@ -91,7 +91,7 @@ public class UtxoLedgerServiceImplTest {
     }
 
     @Test
-    public void saveTx() throws IOException {
+    public void saveTx() throws IOException, NulsException {
         // 无from的交易
         Transaction tx = allList.get(0);
         System.out.println("tx: " + new Slice(tx.serialize()));
@@ -127,7 +127,7 @@ public class UtxoLedgerServiceImplTest {
     }
 
     @Test
-    public void getTx() throws IOException {
+    public void getTx() throws IOException, NulsException {
         saveTx();
         Transaction tx = allList.get(0);
         System.out.println("tx: " + new Slice(tx.serialize()));
@@ -144,7 +144,7 @@ public class UtxoLedgerServiceImplTest {
     }
 
     @Test
-    public void rollbackTx() throws IOException {
+    public void rollbackTx() throws IOException, NulsException {
         saveTx();
         // 无from的交易
         Transaction tx = allList.get(0);
@@ -233,7 +233,7 @@ public class UtxoLedgerServiceImplTest {
     }
 
     @Test
-    public void verifyCoinDataIsExist() throws IOException {
+    public void verifyCoinDataIsExist() throws IOException, NulsException {
         Transaction tx3 = allList.get(3);
         Transaction tx4 = allList.get(4);
         //allList.get(3).getCoinData().getTo().get(0).setOwner("abcd3".getBytes());
@@ -289,7 +289,7 @@ public class UtxoLedgerServiceImplTest {
     }
 
     @Test
-    public void unlockTxCoinData() throws IOException {
+    public void unlockTxCoinData() throws IOException, NulsException {
         recoveryTx3Data();
 
         // 有一条LockTime为-1的，测试期望是成功
