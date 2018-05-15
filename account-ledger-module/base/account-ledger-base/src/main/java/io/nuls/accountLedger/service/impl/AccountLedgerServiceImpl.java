@@ -30,6 +30,7 @@ import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.accountLedger.constant.AccountLedgerErrorCode;
+import io.nuls.accountLedger.model.TransactionInfo;
 import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.accountLedger.service.Balance.BalanceService;
 import io.nuls.accountLedger.storage.po.TransactionInfoPo;
@@ -82,7 +83,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
 
     @Override
     public Result<Integer> saveConfirmedTransaction(Transaction tx) {
-        return saveConfirmedTransaction(tx,TransactionInfo.CONFIRMED);
+        return saveConfirmedTransaction(tx, TransactionInfo.CONFIRMED);
     }
 
     @Override
