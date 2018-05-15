@@ -23,7 +23,6 @@
  */
 package io.nuls.account.ledger.base.module.impl;
 
-
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.ledger.module.AbstractAccountLedgerModule;
 import io.nuls.account.ledger.service.AccountLedgerService;
@@ -41,7 +40,6 @@ public class AccountLedgerModuleBootstrap extends AbstractAccountLedgerModule {
 
     @Override
     public void init() {
-        NulsContext.getServiceBean(AccountLedgerService.class).init();
         //load local account list into cache
     }
 

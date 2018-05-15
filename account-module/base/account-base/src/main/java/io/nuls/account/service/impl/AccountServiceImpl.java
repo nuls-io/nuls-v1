@@ -376,7 +376,8 @@ public class AccountServiceImpl implements AccountService {
         return signDigest(digest, ecKey);
     }
 
-    private NulsSignData signDigest(byte[] digest, ECKey ecKey) {
+    @Override
+    public NulsSignData signDigest(byte[] digest, ECKey ecKey) {
         byte[] signbytes = ecKey.sign(digest);
         NulsSignData nulsSignData = new NulsSignData();
         nulsSignData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);

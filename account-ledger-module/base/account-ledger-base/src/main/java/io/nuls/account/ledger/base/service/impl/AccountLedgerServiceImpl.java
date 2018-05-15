@@ -45,6 +45,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
@@ -66,7 +67,7 @@ import java.util.List;
  * @date 2018/5/10.
  */
 @Component
-public class AccountLedgerServiceImpl implements AccountLedgerService {
+public class AccountLedgerServiceImpl implements AccountLedgerService,InitializingBean{
 
     @Autowired
     private AccountLedgerStorageService storageService;
@@ -83,8 +84,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
     private static List<Account> localAccountList;
 
     @Override
-    public void init() {
-        reloadAccount();
+    public void afterPropertiesSet() throws NulsException {
+        init();
     }
 
     @Override
@@ -364,6 +365,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
 
     public void reloadAccount() {
         localAccountList = accountService.getAccountList().getData();
+    }
+
+    public void init() {
+        reloadAccount();
     }
 
 }

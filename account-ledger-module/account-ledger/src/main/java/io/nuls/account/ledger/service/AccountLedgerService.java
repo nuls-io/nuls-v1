@@ -136,6 +136,4 @@ public interface AccountLedgerService {
      * @param values
      */
     Result transfer(byte[] from, byte[] to, Na values, String password, String remark);
-
-    void init();
 }

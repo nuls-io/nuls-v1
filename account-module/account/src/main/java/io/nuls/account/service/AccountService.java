@@ -252,6 +252,17 @@ public interface AccountService {
     NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException;
 
     /**
+     * 数据签名
+     * The data signature
+     *
+     * @param digest to be signed.
+     * @param ecKey eckey
+     * @return The NulsSignData object after the signature.
+     * @throws NulsException
+     */
+    NulsSignData signDigest(byte[] digest, ECKey ecKey);
+
+    /**
      * 验证签名
      * Verify the signature
      *
