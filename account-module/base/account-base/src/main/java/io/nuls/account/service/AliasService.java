@@ -92,47 +92,27 @@ public class AliasService {
         }
         byte[] addressBytes = account.getAddress().getBase58Bytes();
         try {
-            //手续费 fee ////////暂时!!!!
-        /*    Na fee = Na.parseNuls(0.01);
-            Na total = fee.add(AccountConstant.ALIAS_NA);
-            Balance balance = accountLedgerService.getBalance(addressBytes).getData();
-            if (balance.getUsable().isLessThan(total)) {
-                Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
-            }
-*/
             //创建一笔设置别名的交易
             AliasTransaction tx = new AliasTransaction();
             tx.setTime(System.currentTimeMillis());
             Alias alias = new Alias(addressBytes, aliasName);
             tx.setTxData(alias);
-            //tx.setCoinData(coinData);
             tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
 
-            //CoinDataResult
             CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size());
             if(!coinDataResult.isEnough()){
                 Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
-            List<Coin> fromList = coinDataResult.getCoinList();
-            Na fee = coinDataResult.getFee();
-            Na total = fee.add(AccountConstant.ALIAS_NA);
-            Na totalFrom = Na.ZERO;
-            for (Coin coin : fromList) {
-                totalFrom = totalFrom.add(coin.getNa());
-            }
-
             CoinData coinData = new CoinData();
-            coinData.setFrom(fromList);
-            if (totalFrom.isGreaterThan(total)) {
+            coinData.setFrom(coinDataResult.getCoinList());
+            Coin change = coinDataResult.getChange();
+            if (null != change) {
                 //创建toList
                 List<Coin> toList = new ArrayList<>();
-                Na change = totalFrom.minus(total);
-                toList.add(new Coin(addressBytes, change, 0));
+                toList.add(change);
                 coinData.setTo(toList);
             }
-
-
-
+            tx.setCoinData(coinData);
             NulsSignData nulsSignData = accountService.signData(tx.serializeForHash(), account, password);
             P2PKHScriptSig scriptSig = new P2PKHScriptSig(nulsSignData, account.getPubKey());
             tx.setScriptSig(scriptSig.serialize());
