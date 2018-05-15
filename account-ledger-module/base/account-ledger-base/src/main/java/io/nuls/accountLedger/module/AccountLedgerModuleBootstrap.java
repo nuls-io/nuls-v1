@@ -28,7 +28,6 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.ledger.module.AbstractAccountLedgerModule;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.thread.manager.TaskManager;
 
 
