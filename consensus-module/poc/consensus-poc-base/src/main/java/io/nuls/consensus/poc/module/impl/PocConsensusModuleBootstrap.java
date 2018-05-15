@@ -47,13 +47,13 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     public void init() throws Exception {
         ConsensusStatusContext.setConsensusStatus(ConsensusStatus.INITING);
         ConsensusConfig.initConfiguration();
-        ConsensusStatusContext.setConsensusStatus(ConsensusStatus.WAIT_START);
     }
 
     @Override
     public void start() {
 
         ConsensusScheduler.getInstance().start();
+        ConsensusStatusContext.setConsensusStatus(ConsensusStatus.WAIT_RUNNING);
         this.registerHandlers();
         Log.info("the POC consensus module is started!");
     }

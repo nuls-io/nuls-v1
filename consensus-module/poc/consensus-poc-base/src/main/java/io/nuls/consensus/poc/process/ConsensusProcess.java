@@ -106,7 +106,7 @@ public class ConsensusProcess {
             return false;
         }
         // wait consensus ready running
-        if (ConsensusStatusContext.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_START.ordinal()) {
+        if (ConsensusStatusContext.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_RUNNING.ordinal()) {
             return false;
         }
         // check network status
