@@ -309,11 +309,11 @@ public class Node extends BaseNulsData {
     }
 
     public long getBestBlockHeight() {
-        return 0;
+        return bestBlockHeight;
     }
 
     public NulsDigestData getBestBlockHash() {
-        return null;
+        return bestBlockHash;
     }
 
     public void setBestBlockHeight(Long bestBlockHeight) {
