@@ -30,6 +30,7 @@ import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.accountLedger.constant.AccountLedgerErrorCode;
+import io.nuls.accountLedger.model.CoinDataResult;
 import io.nuls.accountLedger.model.TransactionInfo;
 import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.accountLedger.service.Balance.BalanceService;
@@ -48,7 +49,6 @@ import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.ledger.constant.LedgerErrorCode;
-import io.nuls.ledger.model.CoinDataResult;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.service.TransactionService;
 

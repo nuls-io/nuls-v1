@@ -22,20 +22,9 @@
     </modules>
     <dependencies>
         <dependency>
-            <groupId>io.nuls.account-module</groupId>
-            <artifactId>account</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.tools-module</groupId>
-            <artifactId>tools</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.core-module</groupId>
-            <artifactId>kernel</artifactId>
+            <groupId>io.nuls.account-ledger-module</groupId>
+            <artifactId>account-ledger</artifactId>
             <version>2.0.0</version>
         </dependency>
     </dependencies>
-
 </project>
