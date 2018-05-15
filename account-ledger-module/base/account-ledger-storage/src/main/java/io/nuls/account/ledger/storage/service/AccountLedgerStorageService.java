@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,51 +20,36 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.accountLedger.module;
+package io.nuls.account.ledger.storage.service;
 
+import io.nuls.account.ledger.storage.po.TransactionInfoPo;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.Transaction;
 
-import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.ledger.module.AbstractAccountLedgerModule;
-import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.kernel.lite.annotation.Autowired;
-import io.nuls.kernel.thread.manager.TaskManager;
-
+import java.util.List;
 
 /**
- * @desription:
- * @author: PierreLuo
- * @date: 2018/5/8
+ * @author Facjas
+ * @date 2018/5/10.
  */
-public class AccountLedgerModuleBootstrap extends AbstractAccountLedgerModule {
+public interface AccountLedgerStorageService {
 
-    @Autowired
-    AccountLedgerService accountLedgerService;
+    Result saveLocalTx(Transaction tx);
 
-    @Override
-    public void init() {
-        accountLedgerService.init();
-        //load local account list into cache
-    }
+    Result deleteLocalTx(Transaction tx);
 
-    @Override
-    public void start() {
-        this.waitForDependencyRunning(AccountConstant.MODULE_ID_ACCOUNT);
-        //todo start balance thread
-    }
+    Result saveLocalTxInfo(TransactionInfoPo tx, List<byte[]> addresses);
 
-    @Override
-    public void shutdown() {
-        TaskManager.shutdownByModuleId(this.getModuleId());
-    }
+    Result deleteLocalTxInfo(TransactionInfoPo tx);
 
-    @Override
-    public void destroy() {
+    Transaction getLocalTx(NulsDigestData hash);
 
-    }
+    List<Coin> getCoinBytes(byte[] owner) throws NulsException;
 
-    @Override
-    public String getInfo() {
-        return null;
-    }
+    byte[] getTxBytes(byte[] txBytes);
 }

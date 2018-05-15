@@ -8,7 +8,7 @@ import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AliasStorageService;
 import io.nuls.account.tx.AliasTransaction;
-import io.nuls.accountLedger.service.AccountLedgerService;
+import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.lite.annotation.Autowired;

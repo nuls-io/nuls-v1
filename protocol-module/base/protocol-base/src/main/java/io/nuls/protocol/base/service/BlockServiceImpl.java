@@ -25,7 +25,7 @@
 
 package io.nuls.protocol.base.service;
 
-import io.nuls.accountLedger.service.AccountLedgerService;
+import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;

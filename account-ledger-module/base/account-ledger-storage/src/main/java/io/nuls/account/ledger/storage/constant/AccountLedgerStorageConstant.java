@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -20,15 +20,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.accountLedger.module;
 
-
-import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.ledger.module.AbstractAccountLedgerModule;
-import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.kernel.lite.annotation.Autowired;
-import io.nuls.kernel.thread.manager.TaskManager;
+package io.nuls.account.ledger.storage.constant;
 
 
 /**
@@ -36,35 +31,13 @@ import io.nuls.kernel.thread.manager.TaskManager;
  * @author: PierreLuo
  * @date: 2018/5/8
  */
-public class AccountLedgerModuleBootstrap extends AbstractAccountLedgerModule {
+public interface AccountLedgerStorageConstant {
+    /**
+     * 账户表的名称
+     * The name of the account table
+     */
+    String DB_AREA_ACCOUNTLEDGER_TXINFO = "ACCOUNTLEDGER_TXINFO";
+    String DB_AREA_ACCOUNTLEDGER_TRANSACTION = "ACCOUNTLEDGER_TX";
+    String DB_AREA_ACCOUNTLEDGER_COINDATA = "ACCOUNTLEDGER_COINDATA";
 
-    @Autowired
-    AccountLedgerService accountLedgerService;
-
-    @Override
-    public void init() {
-        accountLedgerService.init();
-        //load local account list into cache
-    }
-
-    @Override
-    public void start() {
-        this.waitForDependencyRunning(AccountConstant.MODULE_ID_ACCOUNT);
-        //todo start balance thread
-    }
-
-    @Override
-    public void shutdown() {
-        TaskManager.shutdownByModuleId(this.getModuleId());
-    }
-
-    @Override
-    public void destroy() {
-
-    }
-
-    @Override
-    public String getInfo() {
-        return null;
-    }
 }
