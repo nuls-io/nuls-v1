@@ -44,7 +44,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.info("---------------------- server channelRegistered ------------------------- " + nodeId);
+//        Log.info("---------------------- server channelRegistered ------------------------- " + nodeId);
 
         // 由于每个节点既是服务器，同时也会作为客户端去主动连接其他节点，
         // 为防止两个节点同时作为服务器一方相互连接，在这里做硬性规定，
@@ -88,7 +88,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.info("---------------------- server channelActive ------------------------- " + nodeId);
+//        Log.info("---------------------- server channelActive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.add(channelId, channel);
@@ -108,14 +108,13 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
                 10001, NulsDigestData.calcDigestData("a1b2c3d4e5gf6g7h8i9j10".getBytes()));
         HandshakeMessage handshakeMessage = new HandshakeMessage(body);
         BroadcastResult result = broadcastHandler.broadcastToNode(handshakeMessage, node, false);
-        System.out.println("-----------result:" + result.getMessage());
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.info(" ---------------------- server channelInactive ------------------------- " + nodeId);
+//        Log.info(" ---------------------- server channelInactive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
@@ -136,8 +135,8 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        Log.error("----------------ServerChannelHandler exceptionCaught-----------");
-        Log.error(cause.getMessage());
+//        Log.error("----------------ServerChannelHandler exceptionCaught-----------");
+        Log.info("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage());
 //        SocketChannel channel = (SocketChannel) ctx.channel();
 //        InetSocketAddress localAddress = channel.localAddress();
 //        InetSocketAddress remoteAddress = channel.remoteAddress();
