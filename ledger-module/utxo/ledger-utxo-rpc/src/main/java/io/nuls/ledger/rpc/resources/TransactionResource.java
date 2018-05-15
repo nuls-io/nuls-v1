@@ -57,7 +57,7 @@ import java.util.List;
  * @date: 2018/5/14
  */
 @Path("/tx")
-@Api(value = "/browse", description = "Block")
+@Api(value = "/transaction", description = "transaction")
 @Component
 public class TransactionResource {
 

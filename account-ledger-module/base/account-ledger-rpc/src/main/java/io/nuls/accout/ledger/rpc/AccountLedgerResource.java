@@ -52,7 +52,7 @@ import javax.ws.rs.core.MediaType;
  */
 
 @Path("/accountledger")
-@Api(value = "/browse", description = "Block")
+@Api(value = "/accountledger", description = "accountledger")
 @Component
 public class AccountLedgerResource {
 
