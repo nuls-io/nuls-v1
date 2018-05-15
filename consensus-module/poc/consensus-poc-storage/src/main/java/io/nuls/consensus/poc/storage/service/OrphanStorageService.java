@@ -30,9 +30,11 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 
 /**
- * Created by ln on 2018/5/8.
+ *
+ * @author ln
+ * @date 2018/5/8
  */
-public interface OraphanStorageService {
+public interface OrphanStorageService {
 
     boolean save(Block block);
 
