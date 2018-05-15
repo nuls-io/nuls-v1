@@ -46,7 +46,7 @@ import java.util.List;
  * @author: PierreLuo
  * @date: 2018/5/14
  */
-@ApiModel(value = "transactionJSON")
+@ApiModel(value = "transactionDtoJSON")
 public class TransactionDto {
 
     @ApiModelProperty(name = "hash", value = "交易的hash值")
@@ -67,12 +67,6 @@ public class TransactionDto {
     @ApiModelProperty(name = "value", value = "交易金额")
     private Long value;
 
-    @ApiModelProperty(name = "inputs", value = "交易输入")
-    private List<InputDto> inputs;
-
-    @ApiModelProperty(name = "outputs", value = "交易输出")
-    private List<OutputDto> outputs;
-
     @ApiModelProperty(name = "remark", value = "备注")
     private String remark;
 
@@ -87,6 +81,12 @@ public class TransactionDto {
 
     @ApiModelProperty(name = "size", value = "大小")
     private int size;
+
+    @ApiModelProperty(name = "inputs", value = "输入")
+    private List<InputDto> inputs;
+
+    @ApiModelProperty(name = "outputs", value = "输出")
+    private List<OutputDto> outputs;
 
     public TransactionDto(Transaction tx) {
         long bestBlockHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
@@ -232,4 +232,6 @@ public class TransactionDto {
     public void setSize(int size) {
         this.size = size;
     }
+
+
 }
