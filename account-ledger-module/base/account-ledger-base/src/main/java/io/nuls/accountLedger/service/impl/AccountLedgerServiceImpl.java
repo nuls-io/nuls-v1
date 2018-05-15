@@ -40,6 +40,7 @@ import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -47,6 +48,7 @@ import io.nuls.kernel.model.*;
 
 import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.protocol.model.tx.TransferTransaction;
 
 import java.util.*;
@@ -199,8 +201,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
             Coin coin = coinList.get(i);
             coins.add(coin);
             size += coin.size();
+            Na fee = TransactionFeeCalculator.getFee(size);
             values = values.add(coin.getNa());
-            if (values.isGreaterOrEquals(values)) {
+            if (values.isGreaterOrEquals(values.add(fee))) {
                 enough = true;
                 break;
             }
@@ -231,21 +234,25 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
     }
 
     @Override
-    public Result transfer(byte[] from, byte[] to, Na values) {
+    public Result transfer(byte[] from, byte[] to, Na values, String remark) {
         try {
-            List<Coin> coinList = getCoinData(from, values);
-            if(coinList.isEmpty()) {
+
+            TransferTransaction tx = new TransferTransaction();
+            tx.setRemark(remark.getBytes());
+            List<Coin> coinList = getCoinData(from, values, tx.size());
+            if (coinList.isEmpty()) {
                 return Result.getFailed("balance not enough");
             }
             CoinData coinData = new CoinData();
             coinData.setFrom(coinList);
 
-            TransferTransaction tx = new TransferTransaction();
 
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
+        return Result.getSuccess();
+
     }
 
 

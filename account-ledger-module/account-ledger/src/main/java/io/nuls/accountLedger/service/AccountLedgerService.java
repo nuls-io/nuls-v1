@@ -126,7 +126,7 @@ public interface AccountLedgerService {
      * @param to
      * @param values
      */
-    Result transfer(byte[] from, byte[]to, Na values);
+    Result transfer(byte[] from, byte[]to, Na values, String remark);
 
     void init();
 }
