@@ -4,13 +4,17 @@ import io.nuls.account.storage.constant.AccountStorageConstant;
 import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AliasStorageService;
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.log.Log;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.DBService;
+import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Result;
+
+import java.io.UnsupportedEncodingException;
 
 /**
  * @author: Charlie
@@ -35,17 +39,33 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
 
     @Override
     public Result<AliasPo> getAlias(String alias) {
-        AliasPo aliasPo = dbService.getModel(AccountStorageConstant.DB_AREA_ALIAS, Hex.decode(alias), AliasPo.class);
-        return Result.getSuccess().setData(aliasPo);
+        try {
+            byte[] aliasByte = alias.getBytes(NulsConfig.DEFAULT_ENCODING);
+            AliasPo aliasPo = dbService.getModel(AccountStorageConstant.DB_AREA_ALIAS, aliasByte, AliasPo.class);
+            return Result.getSuccess().setData(aliasPo);
+        } catch (UnsupportedEncodingException e) {
+            Log.error(e);
+            return Result.getFailed();
+        }
     }
 
     @Override
     public Result saveAlias(AliasPo aliasPo) {
-        return dbService.putModel(AccountStorageConstant.DB_AREA_ALIAS, Hex.decode(aliasPo.getAlias()), aliasPo);
+        try {
+            return dbService.putModel(AccountStorageConstant.DB_AREA_ALIAS, aliasPo.getAlias().getBytes(NulsConfig.DEFAULT_ENCODING), aliasPo);
+        } catch (UnsupportedEncodingException e) {
+            Log.error(e);
+            return Result.getFailed();
+        }
     }
 
     @Override
     public Result removeAlias(String alias) {
-        return dbService.delete(AccountStorageConstant.DB_AREA_ALIAS, Hex.decode(alias));
+        try {
+            return dbService.delete(AccountStorageConstant.DB_AREA_ALIAS, alias.getBytes(NulsConfig.DEFAULT_ENCODING));
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed();
+        }
     }
 }
