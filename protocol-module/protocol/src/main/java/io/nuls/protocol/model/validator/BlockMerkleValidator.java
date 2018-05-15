@@ -48,7 +48,7 @@ public class BlockMerkleValidator implements NulsDataValidator<Block> {
                 result.setMessage("Data is null!");
                 break;
             }
-            if (data.getHeader().getMerkleHash().equals(buildMerkleHash(data))) {
+            if (data.getHeader().getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(data.getTxHashList()))) {
                 result = ValidateResult.getSuccessResult();
                 break;
             }
@@ -56,8 +56,4 @@ public class BlockMerkleValidator implements NulsDataValidator<Block> {
         return result;
     }
 
-    private NulsDigestData buildMerkleHash(Block data) {
-        List<NulsDigestData> txHashList = data.getTxHashList();
-        return NulsDigestData.calcMerkleDigestData(txHashList);
-    }
 }

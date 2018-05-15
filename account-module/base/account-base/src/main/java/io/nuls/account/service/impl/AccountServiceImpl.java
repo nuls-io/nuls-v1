@@ -120,8 +120,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore) {
-        if (null == keyStore) {
+    public Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore, String password) {
+        if (null == keyStore || null == keyStore.getAddress()) {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
         //maybe account has been imported
@@ -129,20 +129,71 @@ public class AccountServiceImpl implements AccountService {
         if (null != acc) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST);
         }
-        Account account = new Account();
-        account.setAddress(new Address(keyStore.getAddress()));
-        if (null != keyStore.getEncryptedPrivateKey()) {
-            account.setEncryptedPriKey(Hex.decode(keyStore.getEncryptedPrivateKey()));
+        Account account;
+        byte[] priKey = null;
+        if (null != keyStore.getPrikey() && keyStore.getPrikey().length > 0) {
+            if (!ECKey.isValidPrivteHex(Hex.encode(keyStore.getPrikey()))) {
+                return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+            }
+            priKey = keyStore.getPrikey();
+        } else if (null == keyStore.getPrikey() && null != keyStore.getEncryptedPrivateKey() && StringUtils.validPassword(password)) {
+            priKey = AESEncrypt.decrypt(Hex.decode(keyStore.getEncryptedPrivateKey()), password);
         } else {
-            account.setPriKey(keyStore.getPrikey());
+            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
-        account.setCreateTime(System.currentTimeMillis());
+        try {
+            account = AccountTool.createAccount(Hex.encode(priKey));
+        } catch (NulsException e) {
+            return Result.getFailed(AccountErrorCode.FAILED);
+        }
+        account.setAddress(new Address(keyStore.getAddress()));
         account.setAlias(keyStore.getAlias());
         account.setPubKey(keyStore.getPubKey());
+        if(StringUtils.validPassword(password)){
+            try {
+                account.encrypt(password);
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+        }
         AccountPo po = new AccountPo(account);
         accountStorageService.saveAccount(po);
         AccountConstant.LOCAL_ADDRESS_LIST.add(keyStore.getAddress());
         return Result.getSuccess().setData(account);
+    }
+
+    @Override
+    public Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore) {
+        return importAccountFormKeyStore(keyStore, null);
+    }
+
+    @Override
+    public Result<Account> importAccount(String prikey, String password) {
+        if (!ECKey.isValidPrivteHex(prikey)) {
+            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
+        Account account = null;
+        try {
+            account = AccountTool.createAccount(prikey);
+        } catch (NulsException e) {
+            return Result.getFailed(AccountErrorCode.FAILED);
+        }
+        if(StringUtils.validPassword(password)){
+            try {
+                account.encrypt(password);
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+        }
+        AccountPo po = new AccountPo(account);
+        accountStorageService.saveAccount(po);
+        AccountConstant.LOCAL_ADDRESS_LIST.add(account.getAddress().toString());
+        return Result.getSuccess().setData(account);
+    }
+
+    @Override
+    public Result<Account> importAccount(String prikey) {
+        return importAccount(prikey, null);
     }
 
 
@@ -304,7 +355,7 @@ public class AccountServiceImpl implements AccountService {
         try {
             if (!account.unlock(password)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-            }else{
+            } else {
                 return Result.getSuccess();
             }
         } catch (NulsException e) {
@@ -366,6 +417,7 @@ public class AccountServiceImpl implements AccountService {
             throw new NulsException(AccountErrorCode.DATA_PARSE_ERROR);
         }
         if (account.isEncrypted()) {
+            AssertUtil.canNotEmpty(password,"password can not be empty");
             return this.signDigest(digest, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
         } else {
             return this.signDigest(digest, account.getPriKey());

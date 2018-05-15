@@ -36,6 +36,7 @@ import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.message.bus.service.MessageBusService;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.protocol.base.handler.*;
 import io.nuls.protocol.base.service.DownloadServiceImpl;
 import io.nuls.protocol.message.*;
@@ -58,7 +59,7 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
     @Override
     public void start() {
         this.waitForDependencyRunning(MessageBusConstant.MODULE_ID_MESSAGE_BUS);
-        this.waitForDependencyInited(ConsensusConstant.MODULE_ID_CONSENSUS);
+        this.waitForDependencyInited(ConsensusConstant.MODULE_ID_CONSENSUS, NetworkConstant.NETWORK_MODULE_ID);
         BlockService blockService = NulsContext.getServiceBean(BlockService.class);
         Block block0 = blockService.getBlock(0L).getData();
         if (null == block0) {

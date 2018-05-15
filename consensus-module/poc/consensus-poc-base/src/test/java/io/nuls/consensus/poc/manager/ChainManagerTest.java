@@ -85,13 +85,13 @@ public class ChainManagerTest extends BaseTest {
         block1.getHeader().setHeight(1L);
         block1.getHeader().setPreHash(block.getHeader().getHash());
 
-        ChainContainer oraphanChain = new ChainContainer(new Chain());
-        oraphanChain.getChain().setEndBlockHeader(block1.getHeader());
-        oraphanChain.getChain().setStartBlockHeader(block1.getHeader());
-        oraphanChain.getChain().getBlockList().add(block1);
-        oraphanChain.getChain().getBlockHeaderList().add(block1.getHeader());
+        ChainContainer orphanChain = new ChainContainer(new Chain());
+        orphanChain.getChain().setEndBlockHeader(block1.getHeader());
+        orphanChain.getChain().setStartBlockHeader(block1.getHeader());
+        orphanChain.getChain().getBlockList().add(block1);
+        orphanChain.getChain().getBlockHeaderList().add(block1.getHeader());
 
-        chainManager.getOrphanChains().add(oraphanChain);
+        chainManager.getOrphanChains().add(orphanChain);
 
         assertEquals(1, chainManager.getOrphanChains().size());
 
@@ -112,13 +112,13 @@ public class ChainManagerTest extends BaseTest {
         block1.getHeader().setHeight(1L);
         block1.getHeader().setPreHash(block.getHeader().getHash());
 
-        ChainContainer oraphanChain = new ChainContainer(new Chain());
-        oraphanChain.getChain().setEndBlockHeader(block.getHeader());
-        oraphanChain.getChain().setStartBlockHeader(block.getHeader());
-        oraphanChain.getChain().getBlockList().add(block);
-        oraphanChain.getChain().getBlockHeaderList().add(block.getHeader());
+        ChainContainer orphanChain = new ChainContainer(new Chain());
+        orphanChain.getChain().setEndBlockHeader(block.getHeader());
+        orphanChain.getChain().setStartBlockHeader(block.getHeader());
+        orphanChain.getChain().getBlockList().add(block);
+        orphanChain.getChain().getBlockHeaderList().add(block.getHeader());
 
-        chainManager.getOrphanChains().add(oraphanChain);
+        chainManager.getOrphanChains().add(orphanChain);
 
         assertEquals(1, chainManager.getOrphanChains().size());
 

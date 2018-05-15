@@ -17,6 +17,7 @@ import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
@@ -358,7 +359,7 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = Result.class)
     })
-    public Result backup(@ApiParam(name = "form", value = "钱包备份表单数据")
+    public Result<String> backup(@ApiParam(name = "form", value = "钱包备份表单数据")
                                     AccountAPForm form) {
         if (StringUtils.isNotBlank(form.getAddress()) && !Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
@@ -367,7 +368,13 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
         AccountKeyStore accountKeyStore = accountService.exportAccountToKeyStore(form.getAddress(), form.getPassword()).getData();
-        return Result.getSuccess().setData(new AccountKeyStoreDto(accountKeyStore));
+        try {
+            return Result.getSuccess().setData(JSONUtils.obj2json(new AccountKeyStoreDto(accountKeyStore)));
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed();
+        }
+
     }
 
 
@@ -380,14 +387,27 @@ public class AccountResource {
     })
     public Result importAccount(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
                                         AccountImportForm form) {
-        if (!Address.validAddress(form.getAddress())) {
+        String keyStore = form.getAccountKeyStore();
+        if (null == keyStore) {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
-        if(null != form.getPrikey() && !ECKey.isValidPrivteHex(form.getPrikey())){
+        String password = form.getPassword();
+        if(null != password && !StringUtils.validPassword(password)){
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
-        AccountKeyStore accountKeyStore = form.toAccountKeyStore();
-        return accountService.importAccountFormKeyStore(accountKeyStore);
+        /*if(null != form.getPrikey() && !ECKey.isValidPrivteHex(form.getPrikey())){
+            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }*/
+
+        AccountKeyStoreDto accountKeyStoreDto = null;
+        try {
+            accountKeyStoreDto = JSONUtils.json2pojo(keyStore, AccountKeyStoreDto.class);
+
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
+        return accountService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), password);
     }
 
     @POST
