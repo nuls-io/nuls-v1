@@ -43,7 +43,7 @@ import java.util.Map;
  * @date 2018/5/15
  */
 @Path("/poc")
-@Api(value = "/browse", description = "poc-consensus")
+@Api(value = "/consensus", description = "poc-consensus")
 @Component
 public class PocConsensusResource {
 
