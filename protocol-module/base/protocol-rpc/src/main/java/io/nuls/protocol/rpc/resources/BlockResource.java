@@ -52,7 +52,7 @@ import java.io.IOException;
  * @date: 2018/5/8
  */
 @Path("/block")
-@Api(value = "/browse", description = "Block")
+@Api(value = "/block", description = "Block")
 @Component
 public class BlockResource {
 

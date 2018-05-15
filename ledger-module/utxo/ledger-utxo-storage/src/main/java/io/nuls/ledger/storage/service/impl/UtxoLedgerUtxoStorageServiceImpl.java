@@ -80,6 +80,19 @@ public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageSe
     }
 
     @Override
+    public Coin getUtxo(byte[] owner) {
+        byte[] utxoBytes = getUtxoBytes(owner);
+        Coin coin = new Coin();
+        try {
+            coin.parse(utxoBytes);
+        } catch (NulsException e) {
+            Log.error(e);
+            return null;
+        }
+        return coin;
+    }
+
+    @Override
     public Result deleteUtxo(byte[] owner) {
         return dbService.delete(LedgerStorageConstant.DB_AREA_LEDGER_UTXO, owner);
     }
