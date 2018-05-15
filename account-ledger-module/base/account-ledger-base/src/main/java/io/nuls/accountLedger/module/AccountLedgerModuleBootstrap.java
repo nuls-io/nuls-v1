@@ -25,8 +25,6 @@ package io.nuls.accountLedger.module;
 
 
 import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.service.AccountService;
-import io.nuls.accountLedger.module.AbstractAccountLedgerModule;
 import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.thread.manager.TaskManager;
