@@ -86,7 +86,7 @@ public interface LedgerService {
      * @param block
      * @return
      */
-    ValidateResult verifyDoubleSpend(Block block);
+    ValidateResult<List<Transaction>> verifyDoubleSpend(Block block);
 
     /**
      * Verify that the from is repeated, and if repeated, it represents a double spend and throws an exception.
@@ -95,7 +95,7 @@ public interface LedgerService {
      * @param txList
      * @return
      */
-    ValidateResult verifyDoubleSpend(List<Transaction> txList);
+    ValidateResult<List<Transaction>> verifyDoubleSpend(List<Transaction> txList);
 
     /**
      * Unlock the coindata of a transaction. When certain business scenarios require a certain amount of funds to be locked, an action is unlocked at some point in the future, the method is called, and the lock state changes to the spent state.

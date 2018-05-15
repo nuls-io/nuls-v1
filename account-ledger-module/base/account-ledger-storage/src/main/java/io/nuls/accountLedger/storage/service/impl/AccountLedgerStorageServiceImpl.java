@@ -29,6 +29,7 @@ import io.nuls.accountLedger.storage.constant.AccountLedgerStorageConstant;
 import io.nuls.accountLedger.storage.po.TransactionInfoPo;
 import io.nuls.accountLedger.storage.service.AccountLedgerStorageService;
 import io.nuls.core.tools.array.ArraysTool;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -97,8 +98,22 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
             List<Coin> froms = coinData.getFrom();
             BatchOperation batch = dbService.createWriteBatch(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_COINDATA);
             for (Coin from : froms) {
-                //todo from.getFrom().getOwner() need be change to call LedgerService to find the Owner of output;
-                batch.delete(Arrays.concatenate(from.getFrom().getOwner(), from.getOwner()));
+                byte[] fromSource = from.getOwner();
+                byte[] utxoFromSource = new byte[tx.getHash().size()];
+                byte[] fromIndex = new byte[fromSource.length - utxoFromSource.length];
+                System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
+                System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
+                Transaction sourceTx = null;
+                try {
+                    sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
+                } catch (Exception e) {
+                    throw new NulsRuntimeException(e);
+                }
+                if (sourceTx == null) {
+                    return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
+                }
+                byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
+                batch.delete(Arrays.concatenate(address, from.getOwner()));
             }
             // save utxo - to
             List<Coin> tos = coinData.getTo();

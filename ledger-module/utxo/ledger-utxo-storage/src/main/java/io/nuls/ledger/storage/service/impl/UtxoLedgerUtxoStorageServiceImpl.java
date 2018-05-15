@@ -23,6 +23,7 @@
  */
 package io.nuls.ledger.storage.service.impl;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
@@ -34,6 +35,8 @@ import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.*;
 import io.nuls.ledger.storage.constant.LedgerStorageConstant;
 import io.nuls.ledger.storage.service.UtxoLedgerUtxoStorageService;
+
+import java.io.IOException;
 
 /**
  * @desription:
@@ -67,7 +70,22 @@ public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageSe
     }
 
     @Override
-    public byte[] getCoinBytes(byte[] owner) {
+    public Result saveUtxo(byte[] owner, Coin coin) {
+        try {
+            return dbService.put(LedgerStorageConstant.DB_AREA_LEDGER_UTXO, owner, coin.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
+    }
+
+    @Override
+    public Result deleteUtxo(byte[] owner) {
+        return dbService.delete(LedgerStorageConstant.DB_AREA_LEDGER_UTXO, owner);
+    }
+
+    @Override
+    public byte[] getUtxoBytes(byte[] owner) {
         if (owner == null) {
             return null;
         }

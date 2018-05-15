@@ -37,7 +37,6 @@ import java.util.Set;
  * @date 2017/12/28
  */
 public class RedPunishData extends TransactionLogicData {
-    private long height;
     private byte[] address;
     private byte reasonCode;
     private byte[] evidence;
@@ -48,7 +47,6 @@ public class RedPunishData extends TransactionLogicData {
     @Override
     public int size() {
         int size = 0;
-        size += VarInt.sizeOf(height);
         size += address.length;
         size += 1;
         size += SerializeUtils.sizeOfBytes(evidence);
@@ -57,7 +55,6 @@ public class RedPunishData extends TransactionLogicData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(height);
         stream.write(address);
         stream.write(reasonCode);
         stream.writeBytesWithLength(evidence);
@@ -66,18 +63,9 @@ public class RedPunishData extends TransactionLogicData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.height = byteBuffer.readVarInt();
         this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.reasonCode = byteBuffer.readByte();
         this.evidence = byteBuffer.readByLengthByte();
-    }
-
-    public long getHeight() {
-        return height;
-    }
-
-    public void setHeight(long height) {
-        this.height = height;
     }
 
     public byte[] getAddress() {
