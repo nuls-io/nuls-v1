@@ -25,6 +25,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.db.service.BatchOperation;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
@@ -33,8 +34,8 @@ import io.nuls.kernel.utils.VarInt;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
-import io.nuls.ledger.storage.service.UtxoLedgerUtxoStorageService;
 import io.nuls.ledger.storage.service.UtxoLedgerTransactionStorageService;
+import io.nuls.ledger.storage.service.UtxoLedgerUtxoStorageService;
 import io.nuls.ledger.utils.LedgerUtil;
 import org.spongycastle.util.Arrays;
 
@@ -59,7 +60,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     private UtxoLedgerTransactionStorageService utxoLedgerTransactionStorageService;
 
     @Override
-    public Result saveTx(Transaction tx) {
+    public Result saveTx(Transaction tx) throws NulsException {
         if (tx == null) {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER);
         }
@@ -67,21 +68,27 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             // 保存CoinData
             Result result = saveCoinData(tx);
             if(result.isFailed()) {
-                //TODO pierre 是否由内部调用回滚
-                rollbackCoinData(tx);
+                Result rollbackResult = rollbackCoinData(tx);
+                if(rollbackResult.isFailed()) {
+                    throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR, CLASS_NAME + ".saveTx.rollbackCoinData: data error.");
+                }
                 return result;
             }
             // 保存交易
             result = utxoLedgerTransactionStorageService.saveTx(tx);
             if(result.isFailed()) {
-                //TODO pierre 是否由内部调用回滚
-                rollbackTx(tx);
+                Result rollbackResult = rollbackTx(tx);
+                if(rollbackResult.isFailed()) {
+                    throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR, CLASS_NAME + ".saveTx.rollbackTx: data error.");
+                }
             }
             return result;
-        } catch (Exception e) {
-            //TODO pierre 是否由内部调用回滚
-            rollbackTx(tx);
+        } catch (IOException e) {
             Log.error(e);
+            Result rollbackResult = rollbackTx(tx);
+            if(rollbackResult.isFailed()) {
+                throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR, CLASS_NAME + ".saveTx: data error.");
+            }
             return Result.getFailed(e.getMessage());
         }
     }
@@ -117,7 +124,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public Result rollbackTx(Transaction tx) {
+    public Result rollbackTx(Transaction tx) throws NulsException {
         if (tx == null) {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER);
         }
@@ -125,13 +132,27 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             // 回滚CoinData
             Result result = rollbackCoinData(tx);
             if(result.isFailed()) {
+                Result recoveryResult = saveCoinData(tx);
+                if(recoveryResult.isFailed()) {
+                    throw new NulsException(LedgerErrorCode.DB_DATA_ERROR, CLASS_NAME + ".rollbackTx.saveCoinData: data error.");
+                }
                 return result;
             }
             // 回滚交易
             result = utxoLedgerTransactionStorageService.deleteTx(tx);
+            if(result.isFailed()) {
+                Result recoveryResult = saveTx(tx);
+                if(recoveryResult.isFailed()) {
+                    throw new NulsException(LedgerErrorCode.DB_DATA_ERROR, CLASS_NAME + ".rollbackTx.saveTx: data error.");
+                }
+            }
             return result;
-        } catch (Exception e) {
+        } catch (IOException e) {
             Log.error(e);
+            Result rollbackResult = saveTx(tx);
+            if(rollbackResult.isFailed()) {
+                throw new NulsException(LedgerErrorCode.DB_DATA_ERROR, CLASS_NAME + ".rollbackTx.saveTx: data error.");
+            }
             return Result.getFailed(e.getMessage());
         }
     }
@@ -337,7 +358,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public Result unlockTxCoinData(Transaction tx) {
+    public Result unlockTxCoinData(Transaction tx) throws NulsException {
         if (tx == null || tx.getCoinData() == null) {
             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.NULL_PARAMETER);
         }
@@ -351,16 +372,20 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             }
             Result result = saveCoinData(tx);
             if(result.isFailed()) {
-                //TODO pierre 是否由内部调用回滚
-                rollbackCoinData(tx);
+                Result rollbackResult = rollbackCoinData(tx);
+                if(rollbackResult.isFailed()) {
+                    throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR, CLASS_NAME + ".unlockTxCoinData.rollbackCoinData: data error.");
+                }
             }
             return result;
         } catch (IOException e) {
-            //TODO pierre 是否由内部调用回滚
             try {
-                rollbackCoinData(tx);
+                Result rollbackResult = rollbackCoinData(tx);
+                if(rollbackResult.isFailed()) {
+                    throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR, CLASS_NAME + ".unlockTxCoinData.rollbackCoinData: data error.");
+                }
             } catch (IOException e1) {
-                //skip it
+                throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR, CLASS_NAME + ".unlockTxCoinData.rollbackCoinData: data error.");
             }
             Log.error(e);
             return Result.getFailed(e.getMessage());
