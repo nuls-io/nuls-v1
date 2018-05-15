@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- *
  * @author ln
  * @date 2018/4/14
  */
@@ -333,12 +332,7 @@ public class RoundManager {
         Collections.sort(depositTempList, new Comparator<Deposit>() {
             @Override
             public int compare(Deposit o1, Deposit o2) {
-                try {
-                    return o1.getTxHash().getDigestHex().compareTo(o2.getTxHash().getDigestHex());
-                } catch (IOException e) {
-                    Log.error(e);
-                    throw new NulsRuntimeException(e);
-                }
+                return o1.getTxHash().getDigestHex().compareTo(o2.getTxHash().getDigestHex());
             }
         });
 

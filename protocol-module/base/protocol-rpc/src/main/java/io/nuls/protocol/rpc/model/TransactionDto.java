@@ -88,17 +88,11 @@ public class TransactionDto {
 
     public TransactionDto(Transaction tx) {
         long bestBlockHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
-        try {
-            this.hash = tx.getHash().getDigestHex();
-        } catch (IOException e) {
-            throw new NulsRuntimeException(e);
-        }
+        this.hash = tx.getHash().getDigestHex();
         this.type = tx.getType();
         this.time = tx.getTime();
         this.blockHeight = tx.getBlockHeight();
         this.setFee(tx.getFee().getValue());
-        this.setTransferType(tx.getTransferType());
-        this.setIndex(tx.getIndex());
         this.size = tx.getSize();
         if (this.blockHeight > 0 || TxStatusEnum.CONFIRMED.equals(tx.getStatus())) {
             this.confirmCount = bestBlockHeight - this.blockHeight;
