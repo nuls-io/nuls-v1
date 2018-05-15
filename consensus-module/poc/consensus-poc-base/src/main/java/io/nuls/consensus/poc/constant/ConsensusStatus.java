@@ -38,6 +38,6 @@ public enum ConsensusStatus {
 
     INITING,
     LOADING_CACHE,
-    WAIT_START,
+    WAIT_RUNNING,
     RUNNING,
 }

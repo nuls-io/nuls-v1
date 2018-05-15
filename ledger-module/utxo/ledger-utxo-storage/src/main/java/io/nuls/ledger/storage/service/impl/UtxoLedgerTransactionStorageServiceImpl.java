@@ -44,7 +44,7 @@ import java.io.IOException;
  * @date: 2018/5/13
  */
 @Service
-public class UtxoLedgerTransactionStorageServiceImpl implements UtxoLedgerTransactionStorageService,InitializingBean {
+public class UtxoLedgerTransactionStorageServiceImpl implements UtxoLedgerTransactionStorageService, InitializingBean {
 
     /**
      * 通用数据存储服务
@@ -52,6 +52,7 @@ public class UtxoLedgerTransactionStorageServiceImpl implements UtxoLedgerTransa
      */
     @Autowired
     private DBService dbService;
+
     /**
      * 该方法在所有属性被设置之后调用，用于辅助对象初始化
      * This method is invoked after all properties are set, and is used to assist object initialization.
@@ -94,6 +95,9 @@ public class UtxoLedgerTransactionStorageServiceImpl implements UtxoLedgerTransa
             throw new NulsRuntimeException(e);
         }
         Transaction tx = dbService.getModel(LedgerStorageConstant.DB_AREA_LEDGER_TRANSACTION, hashBytes, Transaction.class);
+        if (tx != null) {
+            tx.setHash(hash);
+        }
         return tx;
     }
 

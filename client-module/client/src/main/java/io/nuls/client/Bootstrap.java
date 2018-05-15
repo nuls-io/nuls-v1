@@ -68,11 +68,12 @@ public class Bootstrap {
         while (true) {
             try {
                 //todo 后续启动一个系统监视线程
-                Thread.sleep(20000L);
+                Thread.sleep(10000L);
             } catch (InterruptedException e) {
                 Log.error(e);
             }
             if (null != NulsContext.getInstance().getBestBlock()) {
+                Log.info("bestHeight:" + NulsContext.getInstance().getBestHeight());
 //                Log.info("node: " + NulsContext.getServiceBean(NetworkService.class).getAvailableNodes().size() + "), height:{}, threadCount:{}, consensusStatus: {}, downloadStatus: {}", NulsContext.getInstance().getBestBlock().getHeader().getHeight(), Thread.activeCount(), NulsContext.getServiceBean(ConsensusService.class).getConsensusStatus(), NulsContext.getServiceBean(DownloadService.class).getStatus());
 //                Collection<Node> nodes = NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
 //                for (Node node : nodes) {

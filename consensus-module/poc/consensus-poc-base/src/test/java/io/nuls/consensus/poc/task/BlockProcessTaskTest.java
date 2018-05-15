@@ -66,7 +66,7 @@ public class BlockProcessTaskTest extends BaseTest {
             downloadService.setDownloadSuccess(false);
         }
 
-        ConsensusStatusContext.setConsensusStatus(ConsensusStatus.WAIT_START);
+        ConsensusStatusContext.setConsensusStatus(ConsensusStatus.WAIT_RUNNING);
 
         blockProcessTask.run();
 
