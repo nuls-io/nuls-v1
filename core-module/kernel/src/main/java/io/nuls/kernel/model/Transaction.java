@@ -104,6 +104,14 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         scriptSig = byteBuffer.readByLengthByte();
     }
 
+    public boolean isFreeOfFee(){
+        return false;
+    }
+
+    public boolean isNoSignature(){
+        return false;
+    }
+
     protected abstract T parseTxData(NulsByteBuffer byteBuffer) throws NulsException;
 
     public Transaction(int type) {

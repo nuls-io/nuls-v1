@@ -36,14 +36,6 @@ import io.nuls.kernel.validate.ValidateResult;
 @Component
 public class TxMaxSizeValidator implements NulsDataValidator<Transaction> {
     public static final int MAX_TX_SIZE = 300 * 1024;
-    private static final TxMaxSizeValidator INSTANCE = new TxMaxSizeValidator();
-
-    private TxMaxSizeValidator() {
-    }
-
-    public static TxMaxSizeValidator getInstance() {
-        return INSTANCE;
-    }
 
     @Override
     public ValidateResult validate(Transaction data) {

@@ -43,4 +43,14 @@ public class YellowPunishTransaction extends Transaction<YellowPunishData> {
     protected YellowPunishData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readNulsData(new YellowPunishData());
     }
+
+    @Override
+    public boolean isFreeOfFee() {
+        return true;
+    }
+
+    @Override
+    public boolean isNoSignature() {
+        return true;
+    }
 }

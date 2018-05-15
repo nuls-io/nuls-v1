@@ -147,7 +147,7 @@ public class ConsensusTool {
                 return rewardList;
             }
             double caReward = totalFee;
-            Coin agentReword = new Coin(self.getAgentAddress(), Na.valueOf((long) caReward), unlockHeight);
+            Coin agentReword = new Coin(self.getRewardAddress(), Na.valueOf((long) caReward), unlockHeight);
             rewardList.add(agentReword);
             return rewardList;
         }
