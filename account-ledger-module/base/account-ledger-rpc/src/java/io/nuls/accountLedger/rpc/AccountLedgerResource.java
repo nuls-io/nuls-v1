@@ -42,11 +42,9 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.utils.AddressTool;
 import io.swagger.annotations.*;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.nuls.accountLedger.rpc.form.TransferForm;
 
 /**
  * author Facjas
@@ -71,8 +69,8 @@ public class AccountLedgerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Balance.class)
     })
-    public Result<Balance> getHeaderByHeight(@ApiParam(name = "address", value = "账户地址", required = true)
-                                             @PathParam("address") String address) {
+    public Result<Balance> getBalance(@ApiParam(name = "address", value = "账户地址", required = true)
+                                      @PathParam("address") String address) {
         byte[] addressBytes = null;
         try {
             addressBytes = Base58.decode(address);
@@ -98,5 +96,16 @@ public class AccountLedgerResource {
         return result;
     }
 
+    @POST
+    @Path("/accountLedger/address/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "转账", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public Result<Balance> transfer(@ApiParam(name = "form", value = "转账", required = true)
+                                            TransferForm form) {
 
+        return Result.getSuccess();
+    }
 }

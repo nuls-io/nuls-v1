@@ -31,15 +31,15 @@ import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.accountLedger.constant.AccountLedgerErrorCode;
-import io.nuls.accountLedger.model.TransactionInfo;
+
+import io.nuls.accountLedger.service.Balance.BalanceService;
 import io.nuls.accountLedger.storage.po.TransactionInfoPo;
 import io.nuls.accountLedger.storage.service.AccountLedgerStorageService;
 import io.nuls.accountLedger.util.CoinComparator;
-import io.nuls.core.tools.BloomFilter.BloomFilter;
+import io.nuls.core.tools.crypto.Base58;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Coin;
@@ -48,11 +48,9 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 
 import io.nuls.accountLedger.service.AccountLedgerService;
+import io.nuls.kernel.utils.AddressTool;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Facjas
@@ -67,7 +65,15 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
     @Autowired
     private AccountService accountService;
 
+    @Autowired
+    private BalanceService balanceService;
+
     private static List<Account> localAccountList;
+
+    @Override
+    public void init() {
+        reloadAccount();
+    }
 
     @Override
     public Result<Integer> save(Transaction tx) {
@@ -162,47 +168,21 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
 
     @Override
     public Result<Balance> getBalance(byte[] address) throws NulsException {
+        if (address == null || address.length != AddressTool.HASH_LENGTH) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
 
-        if(!isLocalAccount(address)){
+        if (!isLocalAccount(address)) {
             return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
         }
-        List<Coin> coinList = storageService.getCoinBytes(address);
-        Balance balance = new Balance();
-        long usable = 0;
-        long locked = 0;
 
-        long currentTime = System.currentTimeMillis();
-        //long bestHeight = NulsContext.getInstance().getBestHeight();
-        long bestHeight = 1;
+        Balance balance = balanceService.getBalance(Base58.encode(address));
 
-        for (Coin coin : coinList) {
-            if (coin.getLockTime() < 0) {
-                locked += coin.getNa().getValue();
-            } else if (coin.getLockTime() == 0) {
-                usable += coin.getNa().getValue();
-            } else {
-                if (coin.getLockTime() > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE) {
-                    if (coin.getLockTime() <= currentTime) {
-                        usable += coin.getNa().getValue();
-                    } else {
-                        locked += coin.getNa().getValue();
-                    }
-                } else {
-                    if (coin.getLockTime() <= bestHeight) {
-                        usable += coin.getNa().getValue();
-                    } else {
-                        locked += coin.getNa().getValue();
-                    }
-                }
-            }
+        if (balance == null) {
+            return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
         }
 
-        balance.setUsable(Na.valueOf(usable));
-        balance.setLocked(Na.valueOf(locked));
-        balance.setBalance(balance.getUsable().add(balance.getLocked()));
-        Result<Balance> result = new Result<>();
-        result.setData(balance);
-        return result;
+        return Result.getSuccess().setData(balance);
     }
 
     @Override
@@ -230,37 +210,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         return coins;
     }
 
-    protected boolean isLocalTransaction(Transaction tx) {
-        return false;
-    }
-
-    protected List<Transaction> getLocalTransaction(List<Transaction> txs) {
-        List<Transaction> resultTxs = new ArrayList<>();
-        if (txs == null || txs.size() == 0) {
-            return resultTxs;
-        }
-        if (localAccountList == null || localAccountList.size() == 0) {
-            return resultTxs;
-        }
-        Transaction tmpTx;
-        for (int i = 0; i < txs.size(); i++) {
-            tmpTx = txs.get(i);
-            List<byte[]> addresses = tmpTx.getAllRelativeAddress();
-            for (int j = 0; j < addresses.size(); i++) {
-                if (isLocalAccount(addresses.get(i))) {
-                    resultTxs.add(tmpTx);
-                    continue;
-                }
-            }
-        }
-
-        return resultTxs;
-    }
-
-    public void reloadAccount() {
-        localAccountList = accountService.getAccountList().getData();
-    }
-
+    @Override
     public boolean isLocalAccount(byte[] address) {
         if (localAccountList == null || localAccountList.size() == 0) {
             return false;
@@ -273,4 +223,49 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         }
         return false;
     }
+
+    @Override
+    public List<Account> getLocalAccountList() {
+        return localAccountList;
+    }
+
+
+    protected List<Transaction> getLocalTransaction(List<Transaction> txs) {
+        List<Transaction> resultTxs = new ArrayList<>();
+        if (txs == null || txs.size() == 0) {
+            return resultTxs;
+        }
+        if (localAccountList == null || localAccountList.size() == 0) {
+            return resultTxs;
+        }
+        Transaction tmpTx;
+        for (int i = 0; i < txs.size(); i++) {
+            tmpTx = txs.get(i);
+            if (isLocalTransaction(tmpTx)) {
+                resultTxs.add(tmpTx);
+            }
+        }
+        return resultTxs;
+    }
+
+    protected boolean isLocalTransaction(Transaction tx) {
+        if (tx == null) {
+            return false;
+        }
+        if (localAccountList == null || localAccountList.size() == 0) {
+            return false;
+        }
+        List<byte[]> addresses = tx.getAllRelativeAddress();
+        for (int j = 0; j < addresses.size(); j++) {
+            if (isLocalAccount(addresses.get(j))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void reloadAccount() {
+        localAccountList = accountService.getAccountList().getData();
+    }
+
 }

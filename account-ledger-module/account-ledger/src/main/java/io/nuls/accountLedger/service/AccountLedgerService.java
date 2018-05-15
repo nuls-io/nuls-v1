@@ -25,6 +25,7 @@
 
 package io.nuls.accountLedger.service;
 
+import io.nuls.account.model.Account;
 import io.nuls.account.model.Balance;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Coin;
@@ -100,4 +101,23 @@ public interface AccountLedgerService {
      * @return return balance of account, return 0 if  account is not a local account
      */
     List<Coin> getCoinData(byte[] address, Na amount) throws NulsException;
+
+    /**
+     * <p>
+     * check weather address is a local address
+     *
+     * @param address account address
+     * @return true if a address is a local address
+     */
+    public boolean isLocalAccount(byte[] address);
+
+    /**
+     * <p>
+     * get local address list
+     *
+     * @return local account list
+     */
+    public List<Account> getLocalAccountList();
+
+    void init();
 }
