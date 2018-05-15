@@ -36,6 +36,7 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
+import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.ledger.storage.constant.LedgerStorageConstant;
@@ -270,14 +271,21 @@ public class UtxoLedgerServiceImplTest {
     public void verifyDoubleSpend() {
         // 无双花，测试期望是成功
         allList.get(3).getCoinData().getFrom().get(0).setOwner("abcd3".getBytes());
+        allList.get(3).getCoinData().getFrom().get(0).setLockTime(3);
         allList.get(4).getCoinData().getFrom().get(0).setOwner("abcd4".getBytes());
-        Result result = ledgerService.verifyDoubleSpend(allList);
+        allList.get(4).getCoinData().getFrom().get(0).setLockTime(4);
+        ValidateResult result = ledgerService.verifyDoubleSpend(allList);
         Assert.assertTrue(result.isSuccess());
 
         // 存在双花，测试期望是失败
         allList.get(4).getCoinData().getFrom().get(0).setOwner("abcd3".getBytes());
-        result = ledgerService.verifyDoubleSpend(allList);
-        Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), result.getErrorCode().getCode());
+        ValidateResult<List<Transaction>> validateResult = ledgerService.verifyDoubleSpend(allList);
+        List<Transaction> resultList = validateResult.getData();
+        Assert.assertNotNull(resultList);
+        Assert.assertEquals(2, resultList.size());
+        Assert.assertEquals(7, resultList.get(0).getCoinData().getFrom().get(0).getLockTime() + resultList.get(1).getCoinData().getFrom().get(0).getLockTime());
+
+        Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), validateResult.getErrorCode().getCode());
     }
 
     @Test
