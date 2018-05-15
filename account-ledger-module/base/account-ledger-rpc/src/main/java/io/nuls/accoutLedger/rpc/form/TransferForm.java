@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package java.io.nuls.accountLedger.rpc.form;
+package io.nuls.accoutLedger.rpc.form;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -44,7 +44,10 @@ public class TransferForm {
     private String password;
 
     @ApiModelProperty(name = "alias", value = "金额", required = true)
-    long amount;
+    private long amount;
+
+    @ApiModelProperty(name = "remark", value = "备注", required = true)
+    private String remark;
 
     public String getAddress() {
         return address;
@@ -76,5 +79,13 @@ public class TransferForm {
 
     public void setAmount(long amount) {
         this.amount = amount;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }
