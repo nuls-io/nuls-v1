@@ -1,41 +1,37 @@
-package io.nuls.account.rpc.model.form;
+package io.nuls.account.rpc.model;
 
 import io.nuls.account.model.AccountKeyStore;
 import io.nuls.core.tools.crypto.Hex;
-import io.nuls.core.tools.str.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author: Charlie
- * @date: 2018/4/19
+ * @date: 2018/5/15
  */
-@ApiModel(value = "导入账户表单数据")
-public class AccountImportForm {
+@ApiModel(value = "导出账户JSON")
+public class AccountKeyStoreDto {
 
-    @ApiModelProperty(name = "address", value = "账户地址", required = true)
+    @ApiModelProperty(name = "address", value = "账户地址")
     private String address;
-
     @ApiModelProperty(name = "encryptedPrivateKey", value = "加密后的私钥")
     private String encryptedPrivateKey;
-
-    @ApiModelProperty(name = "alias", value = "别名")
+    @ApiModelProperty(name = "alias", value = "账户别名")
     private String alias;
-
-    @ApiModelProperty(name = "pubKey", value = "公钥", required = true)
+    @ApiModelProperty(name = "pubKey", value = "公钥")
     private String pubKey;
-
     @ApiModelProperty(name = "prikey", value = "私钥")
     private String prikey;
 
-    public AccountKeyStore toAccountKeyStore() {
-        AccountKeyStore accountKeyStore = new AccountKeyStore();
-        accountKeyStore.setAddress(this.address);
-        accountKeyStore.setEncryptedPrivateKey(this.encryptedPrivateKey);
-        accountKeyStore.setAlias(this.alias);
-        accountKeyStore.setPubKey(Hex.decode(this.pubKey));
-        accountKeyStore.setPrikey(Hex.decode(this.prikey));
-        return accountKeyStore;
+    public AccountKeyStoreDto() {
+    }
+
+    public AccountKeyStoreDto(AccountKeyStore accountKeyStore) {
+        this.address = accountKeyStore.getAddress();
+        this.encryptedPrivateKey = accountKeyStore.getEncryptedPrivateKey();
+        this.alias = accountKeyStore.getAlias();
+        this.pubKey = Hex.encode(accountKeyStore.getPubKey());
+        this.prikey = Hex.encode(accountKeyStore.getPrikey());
     }
 
     public String getAddress() {
@@ -51,7 +47,7 @@ public class AccountImportForm {
     }
 
     public void setEncryptedPrivateKey(String encryptedPrivateKey) {
-        this.encryptedPrivateKey = StringUtils.formatStringPara(encryptedPrivateKey);
+        this.encryptedPrivateKey = encryptedPrivateKey;
     }
 
     public String getAlias() {
@@ -68,13 +64,5 @@ public class AccountImportForm {
 
     public void setPubKey(String pubKey) {
         this.pubKey = pubKey;
-    }
-
-    public String getPrikey() {
-        return prikey;
-    }
-
-    public void setPrikey(String prikey) {
-        this.prikey = prikey;
     }
 }
