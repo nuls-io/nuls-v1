@@ -56,7 +56,7 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
         if (null == coinData) {
             return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
         }
-        Na realFee = TransactionFeeCalculator.calcFee(tx);
+        Na realFee = tx.getFee();
         Na fee = TransactionFeeCalculator.getFee(tx.size());
         if (realFee.isLessThan(fee.add(AccountConstant.ALIAS_NA))) {
             return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
