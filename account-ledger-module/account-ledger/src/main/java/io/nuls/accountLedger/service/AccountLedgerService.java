@@ -32,6 +32,7 @@ import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.ledger.model.CoinDataResult;
 
 import java.util.List;
 
@@ -101,7 +102,7 @@ public interface AccountLedgerService {
      * @param size size of transaction ,to calc the fee
      * @return return balance of account, return 0 if  account is not a local account
      */
-    List<Coin> getCoinData(byte[] address, Na amount, int size) throws NulsException;
+    CoinDataResult getCoinData(byte[] address, Na amount, int size) throws NulsException;
 
     /**
      * <p>
