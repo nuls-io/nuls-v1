@@ -117,6 +117,7 @@ public class AccountServiceImpl implements AccountService {
         accountStorageService.removeAccount(account.getAddress());
         AccountConstant.LOCAL_ADDRESS_LIST.remove(address);
         //to do 等新接口!!!!
+        //accountLedgerService.
         //accountLedgerService.removeLocalTxs(address);
         return Result.getSuccess();
     }
@@ -310,7 +311,7 @@ public class AccountServiceImpl implements AccountService {
                 return Result.getSuccess();
             }
         } catch (NulsException e) {
-           Log.error(e);
+            Log.error(e);
             return Result.getFailed();
         }
     }
