@@ -27,7 +27,6 @@ public class AccountDto {
     private Long createTime;
 
     public AccountDto() {
-
     }
 
     public AccountDto(Account account) {

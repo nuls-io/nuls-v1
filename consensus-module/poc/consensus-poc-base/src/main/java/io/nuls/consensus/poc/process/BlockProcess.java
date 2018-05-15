@@ -44,6 +44,7 @@ import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
@@ -51,8 +52,10 @@ import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
+import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -68,6 +71,7 @@ public class BlockProcess {
     private TxMemoryPool txMemoryPool = TxMemoryPool.getInstance();
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
 
     public BlockProcess(ChainManager chainManager, OrphanBlockProvider orphanBlockProvider) {
         this.chainManager = chainManager;
@@ -148,7 +152,20 @@ public class BlockProcess {
                 // Verify that the block transaction is valid, save the block if the verification passes, and discard the block if it fails
                 // 验证区块交易是否合法，如果验证通过则保存区块，如果失败则丢弃该块
                 block.verifyWithException();
-                //todo 验证所有交易
+                List<Transaction> verifiedList = new ArrayList<>();
+                for (Transaction tx : block.getTxs()) {
+                    ValidateResult result = ledgerService.verifyCoinData(tx.getCoinData(), verifiedList);
+                    if (result.isSuccess()) {
+                        tx.verifyWithException();
+                        verifiedList.add(tx);
+                    } else {
+                        throw new NulsRuntimeException(result.getErrorCode(), result.getMessage());
+                    }
+                }
+                ValidateResult validateResult1 = tansactionService.conflictDetect(block.getTxs());
+                if (validateResult1.isFailed()) {
+                    throw new NulsRuntimeException(validateResult1.getErrorCode(), validateResult1.getMessage());
+                }
                 // save block
                 Result result = blockService.saveBlock(block);
                 success = result.isSuccess();
@@ -161,7 +178,6 @@ public class BlockProcess {
             }
             if (success) {
                 //check .TODO need remove,代码稳定后删除
-
                 try {
                     Block tempBlock = blockService.getBlock(block.getHeader().getHash()).getData();
                     if (tempBlock.getHeader().getTxCount() != tempBlock.getTxs().size()) {
