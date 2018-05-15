@@ -37,6 +37,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
@@ -48,11 +49,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * author Facjas
- * date 2018/5/10.
+ * @author Facjas
+ * @date 2018/5/10.
  */
 @Component
-public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageService {
+public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageService ,InitializingBean{
     /**
      * 通用数据存储服务
      * Universal data storage services.
@@ -63,8 +64,8 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     @Autowired
     private LedgerService ledgerService;
 
-    public AccountLedgerStorageServiceImpl() {
-
+    @Override
+    public void afterPropertiesSet() throws NulsException {
         Result result = dbService.createArea(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TRANSACTION);
         if (result.isFailed()) {
             //TODO
@@ -79,6 +80,7 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
         if (result.isFailed()) {
             //TODO
         }
+
     }
 
     @Override
