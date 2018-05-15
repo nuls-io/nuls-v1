@@ -365,6 +365,9 @@ public class AccountServiceImpl implements AccountService {
             throw new NulsException(AccountErrorCode.DATA_PARSE_ERROR);
         }
         if (account.isEncrypted()) {
+            if (StringUtils.isNotBlank(password)) {
+                throw new NulsException(AccountErrorCode.DATA_PARSE_ERROR, "password can not be empty");
+            }
             return this.signDigest(digest, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
         } else {
             return this.signDigest(digest, account.getPriKey());

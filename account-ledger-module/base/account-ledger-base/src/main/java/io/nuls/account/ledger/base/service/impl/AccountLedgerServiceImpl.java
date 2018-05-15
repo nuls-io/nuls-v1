@@ -40,6 +40,7 @@ import io.nuls.account.ledger.storage.service.AccountLedgerStorageService;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
@@ -234,22 +235,35 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
     @Override
     public Result transfer(byte[] from, byte[] to, Na values, String password, String remark) {
         try {
+            if(from == null || to == null || values == null) {
+                return Result.getFailed("parameter error");
+            }
+            if(values.isZero() || values.isLessThan(Na.ZERO)) {
+                return Result.getFailed("amount error");
+            }
             Result<Account> accountResult = accountService.getAccount(from);
             if (accountResult.isFailed()) {
                 return accountResult;
             }
             Account account = accountResult.getData();
 
-            Result passwordResult = accountService.validPassword(account, password);
-            if (passwordResult.isFailed()) {
-                return passwordResult;
+            if(accountService.isEncrypted(account).isSuccess()) {
+                if(StringUtils.isBlank(password)) {
+                    return Result.getFailed("the password can not be empty");
+                }
+                Result passwordResult = accountService.validPassword(account, password);
+                if (passwordResult.isFailed()) {
+                    return passwordResult;
+                }
             }
 
             TransferTransaction tx = new TransferTransaction();
-            try {
-                tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+            if(StringUtils.isNotBlank(remark)) {
+                try {
+                    tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
             }
             tx.setTime(TimeService.currentTimeMillis());
             CoinData coinData = new CoinData();
@@ -283,7 +297,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
             }
             return Result.getSuccess().setData(tx.getHash().getDigestHex());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error(e);
             return Result.getFailed(e.getMessage());
         } catch (NulsException e) {
             Log.error(e);
