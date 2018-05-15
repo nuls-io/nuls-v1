@@ -115,7 +115,7 @@ public class ConsensusTool {
 
         P2PKHScriptSig scriptSig = new P2PKHScriptSig();
 
-        NulsSignData signData = accountService.signData(header.getHash().getDigestBytes(), account);
+        NulsSignData signData = accountService.signDigest(header.getHash().getDigestBytes(), account.getEcKey());
         scriptSig.setSignData(signData);
         scriptSig.setPublicKey(account.getPubKey());
         header.setScriptSig(scriptSig);

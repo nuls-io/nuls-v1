@@ -127,7 +127,6 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getPackingAddress());
         AssertUtil.canNotEmpty(form.getDeposit());
         AssertUtil.canNotEmpty(form.getRemark());
-        AssertUtil.canNotEmpty(form.getPassword());
 
         if (!AddressTool.validAddress(form.getPackingAddress()) || !AddressTool.validAddress(form.getAgentAddress())) {
             throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
@@ -135,6 +134,9 @@ public class PocConsensusResource {
         Account account = accountService.getAccount(form.getAgentAddress()).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        if(account.isEncrypted()){
+            AssertUtil.canNotEmpty(form.getPassword());
         }
         CreateAgentTransaction tx = new CreateAgentTransaction();
         tx.setTime(TimeService.currentTimeMillis());
@@ -173,7 +175,7 @@ public class PocConsensusResource {
             tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
             P2PKHScriptSig sig = new P2PKHScriptSig();
             sig.setPublicKey(account.getPubKey());
-            sig.setSignData(accountService.signData(tx.getHash().serialize(), account, form.getPassword()));
+            sig.setSignData(accountService.signDigest(tx.getHash().serialize(), account, form.getPassword()));
             tx.setScriptSig(sig.serialize());
         } catch (IOException e) {
             Log.error(e);

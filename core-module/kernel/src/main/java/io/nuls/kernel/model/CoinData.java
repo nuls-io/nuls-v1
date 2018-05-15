@@ -33,6 +33,7 @@ import io.nuls.kernel.utils.SerializeUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -156,8 +157,15 @@ public class CoinData extends BaseNulsData {
     }
 
     public Set<byte[]> getAddresses() {
-        return null;
+        Set<byte[]> addressSet = new HashSet<>();
+        if(from != null && from.size()!= 0){
+            //todo
+        }
+        if(to != null && to.size() != 0){
+            for(int i = 0; i<to.size(); i++) {
+                addressSet.add(to.get(i).getOwner());
+            }
+        }
+       return  addressSet;
     }
-
-
 }

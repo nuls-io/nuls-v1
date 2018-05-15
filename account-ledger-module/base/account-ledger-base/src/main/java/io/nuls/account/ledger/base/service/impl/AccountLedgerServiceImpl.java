@@ -200,6 +200,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
                     Coin changeCoin = new Coin();
                     changeCoin.setOwner(address);
                     changeCoin.setNa(change);
+                    coinDataResult.setChange(changeCoin);
                 }
                 break;
             }
