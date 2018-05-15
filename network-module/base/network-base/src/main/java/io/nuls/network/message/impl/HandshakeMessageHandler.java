@@ -37,16 +37,11 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
-        System.out.println("-------------------- HandshakeMessageHandler process  ------------------------");
-
         HandshakeMessage handshakeMessage = (HandshakeMessage) message;
-
         SocketChannel socketChannel = NioChannelMap.get(node.getChannelId());
-
         NetworkMessageBody body = handshakeMessage.getMsgBody();
 
         boolean isServer = false;
-
         boolean isSuccess = false;
 
         if (body.getHandshakeType() == NetworkConstant.HANDSHAKE_SEVER_TYPE) {

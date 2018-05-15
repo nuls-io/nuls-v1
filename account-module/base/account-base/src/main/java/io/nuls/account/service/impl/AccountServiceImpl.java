@@ -411,11 +411,13 @@ public class AccountServiceImpl implements AccountService {
         return this.signDigest(NulsDigestData.calcDigestData(data).getDigestBytes(), ecKey);
     }
 
-    private NulsSignData signDigest(byte[] digest, Account account, String password) throws NulsException {
+    @Override
+    public NulsSignData signDigest(byte[] digest, Account account, String password) throws NulsException {
         if (null == digest || digest.length == 0) {
             throw new NulsException(AccountErrorCode.DATA_PARSE_ERROR);
         }
         if (account.isEncrypted()) {
+            AssertUtil.canNotEmpty(password,"password can not be empty");
             return this.signDigest(digest, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
         } else {
             return this.signDigest(digest, account.getPriKey());

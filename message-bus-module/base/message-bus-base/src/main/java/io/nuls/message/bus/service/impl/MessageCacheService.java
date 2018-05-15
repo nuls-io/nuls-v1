@@ -18,8 +18,8 @@ public class MessageCacheService {
     private static final MessageCacheService INSTANCE = new MessageCacheService();
 
     private static final int TIME_OF_IDLE_SECONDS = 600;
-    private CacheMap<NulsDigestData, BaseMessage> cacheMapSended = new CacheMap<>("message-cache-sended", 32, String.class, BaseMessage.class, 0, TIME_OF_IDLE_SECONDS);
-    private CacheMap<NulsDigestData, Integer> cacheMapRecieved = new CacheMap<>("message-cache-recieved", 8, String.class, Integer.class, 0, TIME_OF_IDLE_SECONDS);
+    private CacheMap<NulsDigestData, BaseMessage> cacheMapSended = new CacheMap<>("message-cache-sended", 32, NulsDigestData.class, BaseMessage.class, 0, TIME_OF_IDLE_SECONDS);
+    private CacheMap<NulsDigestData, Integer> cacheMapRecieved = new CacheMap<>("message-cache-recieved", 8, NulsDigestData.class, Integer.class, 0, TIME_OF_IDLE_SECONDS);
 
     public static MessageCacheService getInstance() {
         return INSTANCE;

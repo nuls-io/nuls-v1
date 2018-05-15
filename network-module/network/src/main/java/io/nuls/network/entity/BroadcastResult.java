@@ -25,6 +25,8 @@
  */
 package io.nuls.network.entity;
 
+import io.nuls.kernel.constant.ErrorCode;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +38,7 @@ public class BroadcastResult implements Cloneable {
 
     private boolean success;
 
-    private String message;
+    private ErrorCode errorCode;
 
     private String hash;
 
@@ -46,32 +48,18 @@ public class BroadcastResult implements Cloneable {
 
     private int repliedCount;
 
-    public BroadcastResult(){
+    public BroadcastResult() {
 
     }
 
-    public BroadcastResult(boolean success, String message) {
+    public BroadcastResult(boolean success, ErrorCode errorCode) {
         this.success = success;
-        this.message = message;
+        this.errorCode = errorCode;
     }
 
-    public BroadcastResult(boolean success, String message, List<Node> broadcastNodes) {
-        this.success = success;
-        this.message = message;
+    public BroadcastResult(boolean success, ErrorCode errorCode, List<Node> broadcastNodes) {
+        this(success, errorCode);
         this.broadcastNodes = broadcastNodes;
-    }
-
-    @Override
-    public String toString() {
-        return "";
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     public boolean isSuccess() {
@@ -114,6 +102,14 @@ public class BroadcastResult implements Cloneable {
         this.repliedCount = repliedCount;
     }
 
+    public ErrorCode getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(ErrorCode errorCode) {
+        this.errorCode = errorCode;
+    }
+
     @Override
     public Object clone() {
         BroadcastResult result = new BroadcastResult();
@@ -122,7 +118,9 @@ public class BroadcastResult implements Cloneable {
         result.setWaitReplyCount(this.waitReplyCount);
         result.setRepliedCount(this.repliedCount);
         result.setBroadcastNodes(this.broadcastNodes);
-        result.setMessage(this.getMessage());
+        result.setErrorCode(this.getErrorCode());
         return result;
     }
+
+
 }

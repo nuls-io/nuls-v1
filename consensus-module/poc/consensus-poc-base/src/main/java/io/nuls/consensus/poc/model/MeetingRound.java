@@ -146,7 +146,7 @@ public class MeetingRound {
 
     public void calcLocalPacker(List<Account> accountList) {
         for (Account account : accountList) {
-            if(!account.isEncrypted()) {
+            if(account.isEncrypted()) {
                 continue;
             }
             MeetingMember member = getMember(account.getAddress().getBase58Bytes());

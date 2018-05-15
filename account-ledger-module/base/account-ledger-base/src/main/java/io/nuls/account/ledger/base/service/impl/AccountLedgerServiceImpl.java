@@ -40,6 +40,8 @@ import io.nuls.account.ledger.storage.service.AccountLedgerStorageService;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.param.AssertUtil;
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
@@ -189,17 +191,18 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
             size += coin.size();
             Na fee = TransactionFeeCalculator.getFee(size);
             values = values.add(coin.getNa());
-            if (values.isGreaterOrEquals(values.add(fee))) {
+            if (values.isGreaterOrEquals(amount.add(fee))) {
                 enough = true;
                 coinDataResult.setEnough(true);
                 coinDataResult.setFee(fee);
                 coinDataResult.setCoinList(coins);
 
-                Na change = values.subtract(values.add(fee));
+                Na change = values.subtract(amount.add(fee));
                 if (change.isGreaterThan(Na.ZERO)) {
                     Coin changeCoin = new Coin();
                     changeCoin.setOwner(address);
                     changeCoin.setNa(change);
+                    coinDataResult.setChange(changeCoin);
                 }
                 break;
             }
@@ -233,22 +236,36 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
     @Override
     public Result transfer(byte[] from, byte[] to, Na values, String password, String remark) {
         try {
+            AssertUtil.canNotEmpty(from,"the from address can not be empty");
+            AssertUtil.canNotEmpty(to,"the to address can not be empty");
+            AssertUtil.canNotEmpty(values,"the amount can not be empty");
+
+            if(values.isZero() || values.isLessThan(Na.ZERO)) {
+                return Result.getFailed("amount error");
+            }
+
             Result<Account> accountResult = accountService.getAccount(from);
             if (accountResult.isFailed()) {
                 return accountResult;
             }
             Account account = accountResult.getData();
 
-            Result passwordResult = accountService.validPassword(account, password);
-            if (passwordResult.isFailed()) {
-                return passwordResult;
+            if(accountService.isEncrypted(account).isSuccess()) {
+                AssertUtil.canNotEmpty(password,"the password can not be empty");
+
+                Result passwordResult = accountService.validPassword(account, password);
+                if (passwordResult.isFailed()) {
+                    return passwordResult;
+                }
             }
 
             TransferTransaction tx = new TransferTransaction();
-            try {
-                tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+            if(StringUtils.isNotBlank(remark)) {
+                try {
+                    tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
             }
             tx.setTime(TimeService.currentTimeMillis());
             CoinData coinData = new CoinData();
@@ -282,7 +299,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
             }
             return Result.getSuccess().setData(tx.getHash().getDigestHex());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error(e);
             return Result.getFailed(e.getMessage());
         } catch (NulsException e) {
             Log.error(e);

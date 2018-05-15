@@ -26,6 +26,7 @@
 package io.nuls.protocol.rpc.resources;
 
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
@@ -68,6 +69,7 @@ public class BlockResource {
     })
     public Result<BlockHeaderDto> getHeaderByHeight(@ApiParam(name = "height", value = "区块高度", required = true)
                                                     @PathParam("height") Integer height) {
+        AssertUtil.canNotEmpty(height);
         Result<Block> blockResult = blockService.getBlock(height);
         if (blockResult.isFailed()) {
             return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
@@ -86,6 +88,7 @@ public class BlockResource {
     })
     public Result<BlockHeaderDto> getHeader(@ApiParam(name = "hash", value = "区块hash", required = true)
                                             @PathParam("hash") String hash) {
+        AssertUtil.canNotEmpty(hash);
         hash = StringUtils.formatStringPara(hash);
         if (!StringUtils.validHash(hash)) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
@@ -113,6 +116,7 @@ public class BlockResource {
     })
     public Result<BlockDto> loadBlock(@ApiParam(name = "hash", value = "区块hash", required = true)
                                       @PathParam("hash") String hash) {
+        AssertUtil.canNotEmpty(hash);
         Result result;
         if (!StringUtils.validHash(hash)) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
@@ -142,6 +146,7 @@ public class BlockResource {
     })
     public Result<BlockDto> getBlock(@ApiParam(name = "height", value = "区块高度", required = true)
                                      @PathParam("height") Long height) {
+        AssertUtil.canNotEmpty(height);
         Result result = Result.getSuccess();
         if (height < 0) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);

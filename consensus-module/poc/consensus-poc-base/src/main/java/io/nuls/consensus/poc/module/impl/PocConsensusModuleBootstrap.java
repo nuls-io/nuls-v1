@@ -34,6 +34,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.ModuleStatusEnum;
 import io.nuls.kernel.thread.BaseThread;
 import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 import java.util.List;
 
@@ -47,13 +48,13 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     public void init() throws Exception {
         ConsensusStatusContext.setConsensusStatus(ConsensusStatus.INITING);
         ConsensusConfig.initConfiguration();
-        ConsensusStatusContext.setConsensusStatus(ConsensusStatus.WAIT_START);
     }
 
     @Override
     public void start() {
-
+        this.waitForDependencyRunning(ProtocolConstant.MODULE_ID_PROTOCOL);
         ConsensusScheduler.getInstance().start();
+        ConsensusStatusContext.setConsensusStatus(ConsensusStatus.WAIT_RUNNING);
         this.registerHandlers();
         Log.info("the POC consensus module is started!");
     }

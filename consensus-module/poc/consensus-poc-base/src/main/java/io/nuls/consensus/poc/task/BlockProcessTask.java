@@ -84,7 +84,7 @@ public class BlockProcessTask implements Runnable {
 
         // The system starts up. The local height and the network height are the same. When the block is not to be downloaded, the system needs to know and set the consensus status to running.
         // 系统启动，本地高度和网络高度一致，不需要下载区块时，系统需要知道并设置共识状态为运行中
-        if(downloadService.isDownloadSuccess().isSuccess() && ConsensusStatusContext.getConsensusStatus() == ConsensusStatus.WAIT_START &&
+        if(downloadService.isDownloadSuccess().isSuccess() && ConsensusStatusContext.getConsensusStatus() == ConsensusStatus.WAIT_RUNNING &&
                 (blockContainer == null || blockContainer.getStatus() == BlockContainerStatus.RECEIVED)) {
             ConsensusStatusContext.setConsensusStatus(ConsensusStatus.RUNNING);
         }

@@ -76,7 +76,7 @@ public final class AssertUtil {
             }
         } while (false);
         if (b) {
-            throw new RuntimeException("NULL_PARAMETER");
+            throw new RuntimeException(msg);
         }
     }
 }
