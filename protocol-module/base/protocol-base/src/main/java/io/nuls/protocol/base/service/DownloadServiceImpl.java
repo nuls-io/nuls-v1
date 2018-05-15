@@ -46,7 +46,7 @@ import java.util.List;
 @Service
 public class DownloadServiceImpl implements DownloadService {
 
-    private DownloadProcessor processor;
+    private DownloadProcessor processor = DownloadProcessor.getInstance();
 
     /**
      * 从指定节点处根据hash下载一个区块，下载过程中线程是阻塞的
