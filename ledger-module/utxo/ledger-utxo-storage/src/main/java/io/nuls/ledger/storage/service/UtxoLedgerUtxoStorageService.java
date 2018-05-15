@@ -40,6 +40,8 @@ public interface UtxoLedgerUtxoStorageService {
 
     Result saveUtxo(byte[] owner, Coin coin);
 
+    Coin getUtxo(byte[] owner);
+
     Result deleteUtxo(byte[] owner);
 
     byte[] getUtxoBytes(byte[] owner);
