@@ -40,6 +40,7 @@ import io.nuls.account.ledger.storage.service.AccountLedgerStorageService;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.exception.NulsException;
@@ -235,12 +236,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
     @Override
     public Result transfer(byte[] from, byte[] to, Na values, String password, String remark) {
         try {
-            if(from == null || to == null || values == null) {
-                return Result.getFailed("parameter error");
-            }
+            AssertUtil.canNotEmpty(from,"the from address can not be empty");
+            AssertUtil.canNotEmpty(to,"the to address can not be empty");
+            AssertUtil.canNotEmpty(values,"the amount can not be empty");
+
             if(values.isZero() || values.isLessThan(Na.ZERO)) {
                 return Result.getFailed("amount error");
             }
+
             Result<Account> accountResult = accountService.getAccount(from);
             if (accountResult.isFailed()) {
                 return accountResult;
@@ -248,9 +251,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
             Account account = accountResult.getData();
 
             if(accountService.isEncrypted(account).isSuccess()) {
-                if(StringUtils.isBlank(password)) {
-                    return Result.getFailed("the password can not be empty");
-                }
+                AssertUtil.canNotEmpty(password,"the password can not be empty");
+
                 Result passwordResult = accountService.validPassword(account, password);
                 if (passwordResult.isFailed()) {
                     return passwordResult;
