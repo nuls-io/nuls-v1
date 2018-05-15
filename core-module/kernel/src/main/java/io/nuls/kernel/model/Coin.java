@@ -49,9 +49,13 @@ public class Coin extends BaseNulsData {
     public Coin() {
     }
 
-    public Coin(byte[] owner, Na na, long lockTime) {
+    public Coin(byte[] owner, Na na) {
         this.owner = owner;
         this.na = na;
+    }
+
+    public Coin(byte[] owner, Na na, long lockTime) {
+        this(owner, na);
         this.lockTime = lockTime;
     }
 

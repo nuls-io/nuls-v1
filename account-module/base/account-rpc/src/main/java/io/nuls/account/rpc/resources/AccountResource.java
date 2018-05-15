@@ -62,7 +62,7 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = ArrayList.class)
     })
-    public Result<List<AccountDto>> create(@ApiParam(name = "form", value = "账户表单数据", required = true)
+    public Result<List<String>> create(@ApiParam(name = "form", value = "账户表单数据", required = true)
                                                    AccountCreateForm form) {
         int count = form.getCount() < 1 ? 1 : form.getCount();
         String password = form.getPassword();
@@ -70,11 +70,11 @@ public class AccountResource {
             password = null;
         }
         List<Account> listAccount = accountService.createAccount(count, password).getData();
-        List<AccountDto> listAccountDto = new ArrayList<>();
+        List<String> list = new ArrayList<>();
         for (Account account : listAccount) {
-            listAccountDto.add(new AccountDto(account));
+            list.add(account.getAddress().toString());
         }
-        return Result.getSuccess().setData(listAccountDto);
+        return Result.getSuccess().setData(list);
     }
 
     @GET

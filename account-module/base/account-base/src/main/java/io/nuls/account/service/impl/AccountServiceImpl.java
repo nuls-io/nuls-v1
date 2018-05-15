@@ -62,20 +62,19 @@ public class AccountServiceImpl implements AccountService {
                 if (null != password) {
                     account.encrypt(password);
                 }
-                AccountPo po = new AccountPo(account);
                 accounts.add(account);
+                AccountPo po = new AccountPo(account);
                 accountPos.add(po);
-                resultList.add(account.getAddress().getBase58());
+                resultList.add(account.getAddress().toString());
             }
             if (accountStorageService == null) {
                 Log.info("accountStorageService is null");
             }
             accountStorageService.saveAccountList(accountPos);
             AccountConstant.LOCAL_ADDRESS_LIST.addAll(resultList);
-            return Result.getSuccess().setData(resultList);
+            return Result.getSuccess().setData(accounts);
         } catch (Exception e) {
             Log.error(e);
-            //todo remove newaccounts
             throw new NulsRuntimeException(KernelErrorCode.FAILED, "create account failed!");
         } finally {
             locker.unlock();
@@ -190,7 +189,13 @@ public class AccountServiceImpl implements AccountService {
         if (!Address.validAddress(address)) {
             return null;
         }
-        AccountPo accountPo = accountStorageService.getAccount(Hex.decode(address)).getData();
+        AccountPo accountPo = null;
+        try {
+            accountPo = accountStorageService.getAccount(Base58.decode(address)).getData();
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
         if (accountPo == null) {
             return null;
         }
@@ -288,6 +293,26 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         return new Result(account.isEncrypted(), null);
+    }
+
+    @Override
+    public Result validPassword(Account account, String password) {
+        if (!StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+        }
+        if (null != account) {
+            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
+        try {
+            if (!account.unlock(password)) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }else{
+                return Result.getSuccess();
+            }
+        } catch (NulsException e) {
+           Log.error(e);
+            return Result.getFailed();
+        }
     }
 
     @Override

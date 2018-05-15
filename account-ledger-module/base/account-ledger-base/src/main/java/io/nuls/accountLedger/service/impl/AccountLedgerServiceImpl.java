@@ -30,26 +30,34 @@ import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.accountLedger.constant.AccountLedgerErrorCode;
-
 import io.nuls.accountLedger.model.TransactionInfo;
+import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.accountLedger.service.Balance.BalanceService;
 import io.nuls.accountLedger.storage.po.TransactionInfoPo;
 import io.nuls.accountLedger.storage.service.AccountLedgerStorageService;
 import io.nuls.accountLedger.util.CoinComparator;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
-
-import io.nuls.accountLedger.service.AccountLedgerService;
+import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
+import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.CoinDataResult;
 import io.nuls.protocol.model.tx.TransferTransaction;
+import io.nuls.protocol.service.TransactionService;
 
-import java.util.*;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Facjas
@@ -67,6 +75,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
     @Autowired
     private BalanceService balanceService;
 
+    @Autowired
+    private TransactionService transactionService;
+
     private static List<Account> localAccountList;
 
     @Override
@@ -76,12 +87,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
 
     @Override
     public Result<Integer> saveConfirmedTransaction(Transaction tx) {
-        return saveConfirmedTransaction(tx,TransactionInfo.CONFIRMED);
+        return saveConfirmedTransaction(tx, TransactionInfo.CONFIRMED);
     }
 
     @Override
-    public Result<Integer> saveUnconfirmedTransaction(Transaction tx){
-        return saveConfirmedTransaction(tx,TransactionInfo.UNCONFIRMED);
+    public Result<Integer> saveUnconfirmedTransaction(Transaction tx) {
+        return saveConfirmedTransaction(tx, TransactionInfo.UNCONFIRMED);
     }
 
     @Override
@@ -217,30 +228,66 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
     }
 
     @Override
-    public Result transfer(byte[] from, byte[] to, Na values, String remark) {
+    public Result transfer(byte[] from, byte[] to, Na values, String password, String remark) {
         try {
+            Result<Account> accountResult = accountService.getAccount(from);
+            if (accountResult.isFailed()) {
+                return accountResult;
+            }
+            Account account = accountResult.getData();
+
+            Result passwordResult = accountService.validPassword(account, password);
+            if (passwordResult.isFailed()) {
+                return passwordResult;
+            }
+
             TransferTransaction tx = new TransferTransaction();
-            tx.setRemark(remark.getBytes());
-            List<Coin> coinList = getCoinData(from, values, tx.size()).getCoinList();
-            if (coinList.isEmpty()) {
-                return Result.getFailed("balance not enough");
+            try {
+                tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             }
+            tx.setTime(TimeService.currentTimeMillis());
             CoinData coinData = new CoinData();
-            coinData.setFrom(coinList);
+            Coin toCoin = new Coin(to, values);
+            coinData.getTo().add(toCoin);
 
-            for (Coin coin : coinList) {
-
+            CoinDataResult coinDataResult = getCoinData(from, values, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+            if (coinDataResult.isEnough()) {
+                return Result.getFailed(LedgerErrorCode.BALANCE_NOT_ENOUGH);
             }
+            coinData.setFrom(coinDataResult.getCoinList());
+            if (coinDataResult.getChange() != null) {
+                coinData.getTo().add(coinDataResult.getChange());
+            }
+            tx.setCoinData(coinData);
 
+            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+            P2PKHScriptSig sig = new P2PKHScriptSig();
+            sig.setPublicKey(account.getPubKey());
+            sig.setSignData(accountService.signData(tx.getHash().serialize(), account, password));
+            tx.setScriptSig(sig.serialize());
+
+            tx.verifyWithException();
+            Result saveResult = saveUnconfirmedTransaction(tx);
+            if (saveResult.isFailed()) {
+                return saveResult;
+            }
+            Result sendResult = this.transactionService.broadcastTx(tx);
+            if (sendResult.isFailed()) {
+                return sendResult;
+            }
+            return Result.getSuccess().setData(tx.getHash().getDigestHex());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Result.getFailed(e.getMessage());
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
-        return Result.getSuccess();
-
     }
 
-    protected Result<Integer> saveConfirmedTransaction(Transaction tx,byte status) {
+    protected Result<Integer> saveConfirmedTransaction(Transaction tx, byte status) {
         if (!isLocalTransaction(tx)) {
             return Result.getFailed().setData(new Integer(0));
         }

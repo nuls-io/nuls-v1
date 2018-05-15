@@ -109,7 +109,7 @@ public interface AccountLedgerService {
      *
      * @param address account address
      * @param amount  amount want to use
-     * @param size size of transaction ,to calc the fee
+     * @param size    size of transaction ,to calc the fee
      * @return return balance of account, return 0 if  account is not a local account
      */
     CoinDataResult getCoinData(byte[] address, Na amount, int size) throws NulsException;
@@ -132,12 +132,11 @@ public interface AccountLedgerService {
     List<Account> getLocalAccountList();
 
     /**
-     *
      * @param from
      * @param to
      * @param values
      */
-    Result transfer(byte[] from, byte[]to, Na values, String remark);
+    Result transfer(byte[] from, byte[] to, Na values, String password, String remark);
 
     void init();
 }
