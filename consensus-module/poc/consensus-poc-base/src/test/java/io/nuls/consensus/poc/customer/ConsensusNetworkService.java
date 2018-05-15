@@ -85,8 +85,7 @@ public class ConsensusNetworkService implements NetworkService {
     }
 
     @Override
-    public boolean reset() {
-        return false;
+    public void reset() {
     }
 
     @Override
