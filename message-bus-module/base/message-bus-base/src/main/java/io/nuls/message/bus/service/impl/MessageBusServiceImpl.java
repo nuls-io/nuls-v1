@@ -104,7 +104,7 @@ public class MessageBusServiceImpl implements MessageBusService {
     private Result<List<String>> getNodeIdListResult(BroadcastResult result) {
         List<String> list = new ArrayList<>();
         if (!result.isSuccess() || result.getBroadcastNodes() == null || result.getBroadcastNodes().isEmpty()) {
-            return new Result(false, MessageBusErrorCode.FAILED, list);
+            return Result.getFailed().setData(list);
         }
         for (Node node : result.getBroadcastNodes()) {
             list.add(node.getId());

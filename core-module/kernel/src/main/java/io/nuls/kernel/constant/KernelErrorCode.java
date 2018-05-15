@@ -96,10 +96,6 @@ public interface KernelErrorCode {
     ErrorCode DB_SAVE_ERROR = ErrorCode.init("DB006", 20006);
     ErrorCode DB_UPDATE_ERROR = ErrorCode.init("DB007", 20007);
     ErrorCode DB_ROLLBACK_ERROR = ErrorCode.init("DB008", 20008);
-    /*
-     * ---------  RPC Exception code   --------
-     */
-    ErrorCode REQUEST_DENIED = ErrorCode.init("RPC001", 50001);
 
     /*
      * validator
