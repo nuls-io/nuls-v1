@@ -104,11 +104,11 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         scriptSig = byteBuffer.readByLengthByte();
     }
 
-    public boolean isFreeOfFee(){
+    public boolean isFreeOfFee() {
         return false;
     }
 
-    public boolean isNoSignature(){
+    public boolean isNoSignature() {
         return false;
     }
 
@@ -219,11 +219,15 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
 
         if (coinData != null) {
             Set<byte[]> coinAddressSet = coinData.getAddresses();
-            addresses.addAll(coinAddressSet);
+            if (null != coinAddressSet) {
+                addresses.addAll(coinAddressSet);
+            }
         }
         if (txData != null) {
             Set<byte[]> txAddressSet = txData.getAddresses();
-            addresses.addAll(txAddressSet);
+            if (null != txAddressSet) {
+                addresses.addAll(txAddressSet);
+            }
         }
         return new ArrayList<>(addresses);
     }
@@ -231,7 +235,8 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
     public byte[] serializeForHash() throws IOException {
         ByteArrayOutputStream bos = null;
         try {
-            int size = size()-SerializeUtils.sizeOfBytes(scriptSig);;
+            int size = size() - SerializeUtils.sizeOfBytes(scriptSig);
+            ;
             bos = new UnsafeByteArrayOutputStream(size);
             NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
             if (size == 0) {
@@ -243,7 +248,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
                 buffer.writeNulsData(txData);
                 buffer.writeNulsData(coinData);
             }
-           return bos.toByteArray();
+            return bos.toByteArray();
         } finally {
             if (bos != null) {
                 try {
