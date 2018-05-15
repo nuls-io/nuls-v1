@@ -41,7 +41,7 @@ import java.util.Arrays;
  * @date 2018/5/10
  */
 @Component
-public class RegisterAgentTxValidator extends BaseConsensusProtocolValidator<CreateAgentTransaction> {
+public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<CreateAgentTransaction> {
 
     private static int AGENT_NAME_MAS_LENGTH = 32;
 

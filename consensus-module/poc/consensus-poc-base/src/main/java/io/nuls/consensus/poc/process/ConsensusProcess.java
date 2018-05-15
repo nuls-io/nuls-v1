@@ -360,7 +360,7 @@ public class ConsensusProcess {
             //When 100 yellow CARDS in a row, give a red card.
             List<PunishLogPo> yellowPunishList = PocConsensusContext.getChainManager().getMasterChain().getChain().getYellowPunishList();
             Map<String, Integer> countMap = new HashMap<>();
-            long startRoundIndex = yellowPunishTransaction.getIndex() - PocConsensusConstant.MAXINUM_CONTINUOUS_YELLOW_NUMBER;
+            long startRoundIndex = round.getIndex() - PocConsensusConstant.MAXINUM_CONTINUOUS_YELLOW_NUMBER;
             for (PunishLogPo po : yellowPunishList) {
                 if (startRoundIndex > po.getRoundIndex()) {
                     continue;
