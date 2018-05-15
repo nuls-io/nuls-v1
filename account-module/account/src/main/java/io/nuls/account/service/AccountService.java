@@ -193,6 +193,14 @@ public interface AccountService {
     Result isEncrypted(String address);
 
     /**
+     * Verify the account password is correct
+     * @param account
+     * @param password
+     * @return
+     */
+    Result validPassword(Account account, String password);
+
+    /**
      * 验证地址字符串的格式
      * Verify the format of the address string.
      *

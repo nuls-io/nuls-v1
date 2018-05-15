@@ -32,6 +32,7 @@ import io.nuls.core.tools.crypto.Hex;
 import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Result;
+import io.protostuff.Tag;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -109,7 +110,17 @@ public class AccountServiceTest {
 
     }
 
+    @Test
     public void removeAccount() {
+        List<Account> accounts = this.accountService.createAccount(2, "nuls123456").getData();
+        Result result0 = accountService.removeAccount(accounts.get(0).getAddress().toString(), "nuls123456");
+        assertTrue(result0.isSuccess());
+        assertNull(result0.getMessage());
+        Result result1 = accountService.removeAccount(accounts.get(1).getAddress().toString(), "123456");
+        assertFalse(result1.isFailed());
+        assertNotNull(result0.getMessage());
+
+
     }
 
     public static void showAccount(Account account) {
