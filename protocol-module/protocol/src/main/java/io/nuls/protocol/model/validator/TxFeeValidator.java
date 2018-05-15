@@ -23,8 +23,12 @@
  */
 package io.nuls.protocol.model.validator;
 
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.CoinData;
+import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 
@@ -34,18 +38,20 @@ import io.nuls.kernel.validate.ValidateResult;
  */
 @Component
 public class TxFeeValidator implements NulsDataValidator<Transaction> {
-    private static final TxFeeValidator INSTANCE = new TxFeeValidator();
-
-    private TxFeeValidator() {
-    }
-
-    public static TxFeeValidator getInstance() {
-        return INSTANCE;
-    }
-
     @Override
     public ValidateResult validate(Transaction tx) {
-        //todo
-        return null;
+        if (tx.isFreeOfFee()) {
+            return ValidateResult.getSuccessResult();
+        }
+        CoinData coinData = tx.getCoinData();
+        if (null == coinData) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
+        }
+        Na realFee = TransactionFeeCalculator.calcFee(tx);
+        Na fee = TransactionFeeCalculator.getFee(tx.size());
+        if (realFee.isGreaterOrEquals(fee)) {
+            return ValidateResult.getSuccessResult();
+        }
+        return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
     }
 }

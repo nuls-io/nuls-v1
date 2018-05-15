@@ -48,4 +48,14 @@ public class CoinBaseTransaction extends Transaction {
     protected CoinBaseTransaction(int type) {
         super(type);
     }
+
+    @Override
+    public boolean isFreeOfFee() {
+        return true;
+    }
+
+    @Override
+    public boolean isNoSignature() {
+        return true;
+    }
 }

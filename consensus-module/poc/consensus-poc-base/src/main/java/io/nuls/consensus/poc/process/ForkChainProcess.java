@@ -41,11 +41,16 @@ import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.service.BlockService;
+import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,6 +70,9 @@ public class ForkChainProcess {
 
     private long time = 0L;
     private long lastClearTime = 0L;
+
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
 
     public ForkChainProcess(ChainManager chainManager) {
         this.chainManager = chainManager;
@@ -388,6 +396,23 @@ public class ForkChainProcess {
         //Need to sort in ascending order, the default is
         //需要升序排列，默认就是
         for (Block newBlock : addBlockList) {
+            newBlock.verifyWithException();
+            List<Transaction> verifiedList = new ArrayList<>();
+            for (Transaction tx : newBlock.getTxs()) {
+                ValidateResult result = ledgerService.verifyCoinData(tx.getCoinData(), verifiedList);
+                if (result.isSuccess()) {
+                    tx.verifyWithException();
+                    verifiedList.add(tx);
+                } else {
+                    throw new NulsRuntimeException(result.getErrorCode(), result.getMessage());
+                }
+            }
+            ValidateResult validateResult1 = tansactionService.conflictDetect(newBlock.getTxs());
+            if (validateResult1.isFailed()) {
+                throw new NulsRuntimeException(validateResult1.getErrorCode(), validateResult1.getMessage());
+            }
+
+
             try {
                 Result result = blockService.saveBlock(newBlock);
                 boolean success = result.isSuccess();

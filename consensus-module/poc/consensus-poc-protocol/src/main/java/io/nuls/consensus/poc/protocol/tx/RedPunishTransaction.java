@@ -43,4 +43,14 @@ public class RedPunishTransaction extends Transaction<RedPunishData> {
     protected RedPunishData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readNulsData(new RedPunishData());
     }
+
+    @Override
+    public boolean isFreeOfFee() {
+        return true;
+    }
+
+    @Override
+    public boolean isNoSignature() {
+        return true;
+    }
 }

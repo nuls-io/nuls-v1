@@ -42,6 +42,7 @@ public interface TransactionErrorCode {
     ErrorCode ORPHAN_TX = ErrorCode.init("LED006", 12006);
     ErrorCode ORPHAN_BLOCK = ErrorCode.init("LED007", 12007);
     ErrorCode UTXO_NOT_FOUND = ErrorCode.init("LED008", 12008);
+    ErrorCode FEE_NOT_RIGHT = ErrorCode.init("LED009", 12009);
 
 
 }

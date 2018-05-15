@@ -36,14 +36,6 @@ import io.nuls.kernel.validate.ValidateResult;
 @Component
 public class TxRemarkValidator implements NulsDataValidator<Transaction> {
     public final static int MAX_REMARK_LEN = 100;
-    private static final TxRemarkValidator INSTANCE = new TxRemarkValidator();
-
-    private TxRemarkValidator() {
-    }
-
-    public static TxRemarkValidator getInstance() {
-        return INSTANCE;
-    }
 
     @Override
     public ValidateResult validate(Transaction data) {
