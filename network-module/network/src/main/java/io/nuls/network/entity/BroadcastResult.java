@@ -42,17 +42,18 @@ public class BroadcastResult implements Cloneable {
 
     private String hash;
 
-    private List<Node> broadcastNodes = new ArrayList<>();
+    private List<Node> broadcastNodes;
 
     private int waitReplyCount;
 
     private int repliedCount;
 
     public BroadcastResult() {
-
+        broadcastNodes = new ArrayList<>();
     }
 
     public BroadcastResult(boolean success, ErrorCode errorCode) {
+        this();
         this.success = success;
         this.errorCode = errorCode;
     }
