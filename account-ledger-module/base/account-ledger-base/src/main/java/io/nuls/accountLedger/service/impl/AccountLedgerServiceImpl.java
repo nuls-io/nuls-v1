@@ -38,17 +38,16 @@ import io.nuls.accountLedger.storage.service.AccountLedgerStorageService;
 import io.nuls.accountLedger.util.CoinComparator;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.Na;
-import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.*;
 
 import io.nuls.accountLedger.service.AccountLedgerService;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.protocol.model.tx.TransferTransaction;
 
 import java.util.*;
 
@@ -186,7 +185,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
     }
 
     @Override
-    public List<Coin> getCoinData(byte[] address, Na amount) throws NulsException {
+    public List<Coin> getCoinData(byte[] address, Na amount, int size) throws NulsException {
         List<Coin> coinList = storageService.getCoinBytes(address);
         if (coinList.isEmpty()) {
             return coinList;
@@ -197,8 +196,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         List<Coin> coins = new ArrayList<>();
         Na values = Na.ZERO;
         for (int i = 0; i < coinList.size(); i++) {
-            coins.add(coinList.get(i));
-            values = values.add(coinList.get(i).getNa());
+            Coin coin = coinList.get(i);
+            coins.add(coin);
+            size += coin.size();
+            values = values.add(coin.getNa());
             if (values.isGreaterOrEquals(values)) {
                 enough = true;
                 break;
@@ -227,6 +228,24 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
     @Override
     public List<Account> getLocalAccountList() {
         return localAccountList;
+    }
+
+    @Override
+    public Result transfer(byte[] from, byte[] to, Na values) {
+        try {
+            List<Coin> coinList = getCoinData(from, values);
+            if(coinList.isEmpty()) {
+                return Result.getFailed("balance not enough");
+            }
+            CoinData coinData = new CoinData();
+            coinData.setFrom(coinList);
+
+            TransferTransaction tx = new TransferTransaction();
+
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }
     }
 
 
