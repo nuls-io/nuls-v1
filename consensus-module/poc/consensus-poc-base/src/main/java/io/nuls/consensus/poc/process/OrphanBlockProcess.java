@@ -26,8 +26,10 @@
 
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
+import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
@@ -47,7 +49,6 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- *
  * @author ln
  * @date 2018/4/14
  */
@@ -72,7 +73,7 @@ public class OrphanBlockProcess implements Runnable {
 
     @Override
     public void run() {
-        while(running) {
+        while (running) {
             try {
                 process();
             } catch (IOException e) {
@@ -94,7 +95,9 @@ public class OrphanBlockProcess implements Runnable {
     }
 
     public void process(BlockContainer blockContainer) throws IOException {
-
+        if (ConsensusStatusContext.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
+            return;
+        }
         Block block = blockContainer.getBlock();
 
         // 只处理本地误差配置的块个数以内的孤块
@@ -168,11 +171,11 @@ public class OrphanBlockProcess implements Runnable {
 
         List<BlockHeader> masterChainBlockHeaderList = chainManager.getMasterChain().getChain().getBlockHeaderList();
         int size = (int) (masterChainBlockHeaderList.size() - PocConsensusConstant.MAX_ISOLATED_BLOCK_COUNT * 1.05);
-        if(size < 0) {
+        if (size < 0) {
             size = 0;
         }
-        for (int i = masterChainBlockHeaderList.size() - 1 ; i >= size ; i--) {
-            if(blockHash.equals(masterChainBlockHeaderList.get(i).getHash())) {
+        for (int i = masterChainBlockHeaderList.size() - 1; i >= size; i--) {
+            if (blockHash.equals(masterChainBlockHeaderList.get(i).getHash())) {
                 return true;
             }
         }
@@ -193,16 +196,16 @@ public class OrphanBlockProcess implements Runnable {
 
         Block preBlock = downloadService.downloadBlock(blockHeader.getPreHash(), blockContainer.getNode()).getData();
 
-        if(preBlock != null) {
+        if (preBlock != null) {
             ChainLog.debug("get pre block success {} - {}", preBlock.getHeader().getHeight(), preBlock.getHeader().getHash());
             orphanBlockProvider.addBlock(new BlockContainer(preBlock, blockContainer.getNode(), BlockContainerStatus.DOWNLOADING));
         } else {
             ChainLog.debug("get pre block fail {} - {}", blockHeader.getHeight() - 1, blockHeader.getPreHash());
 
             //失败情况的处理，从其它所以可用的节点去获取，如果都不成功，那么就失败，包括本次失败的节点，再次获取一次
-            for(Node node : networkService.getAvailableNodes()) {
+            for (Node node : networkService.getAvailableNodes()) {
                 preBlock = downloadService.downloadBlock(blockHeader.getPreHash(), node).getData();
-                if(preBlock != null) {
+                if (preBlock != null) {
                     orphanBlockProvider.addBlock(new BlockContainer(preBlock, node, BlockContainerStatus.DOWNLOADING));
                     ChainLog.debug("get pre block retry success {} - {}", preBlock.getHeader().getHeight() - 1, preBlock.getHeader().getPreHash());
                     return;

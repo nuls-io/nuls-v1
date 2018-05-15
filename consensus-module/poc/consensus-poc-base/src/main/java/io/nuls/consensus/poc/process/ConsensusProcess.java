@@ -117,6 +117,9 @@ public class ConsensusProcess {
     }
 
     private void doWork() {
+        if (ConsensusStatusContext.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
+            return;
+        }
         MeetingRound round = chainManager.getMasterChain().getOrResetCurrentRound();
         if (round == null) {
             return;
@@ -377,7 +380,7 @@ public class ConsensusProcess {
             for (byte[] addressBytes : yellowPunishTransaction.getTxData().getAddressList()) {
                 String address = Base58.encode(addressBytes);
                 Integer count = countMap.get(address);
-                if (null != count && count>=PocConsensusConstant.MAXINUM_CONTINUOUS_YELLOW_NUMBER){
+                if (null != count && count >= PocConsensusConstant.MAXINUM_CONTINUOUS_YELLOW_NUMBER) {
                     RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
                     RedPunishData redPunishData = new RedPunishData();
                     redPunishData.setAddress(addressBytes);
