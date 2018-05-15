@@ -123,8 +123,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore, String password) {
-        if (null == keyStore || !StringUtils.validPassword(password)) {
+    public Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore) {
+        if (null == keyStore) {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
         //maybe account has been imported
@@ -134,7 +134,11 @@ public class AccountServiceImpl implements AccountService {
         }
         Account account = new Account();
         account.setAddress(new Address(keyStore.getAddress()));
-        account.setEncryptedPriKey(Hex.decode(keyStore.getEncryptedPrivateKey()));
+        if (null != keyStore.getEncryptedPrivateKey()) {
+            account.setEncryptedPriKey(Hex.decode(keyStore.getEncryptedPrivateKey()));
+        } else {
+            account.setPriKey(keyStore.getPrikey());
+        }
         account.setCreateTime(System.currentTimeMillis());
         account.setAlias(keyStore.getAlias());
         account.setPubKey(keyStore.getPubKey());
@@ -151,17 +155,27 @@ public class AccountServiceImpl implements AccountService {
             Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
         Account account = getAccountByAddress(address);
-        try {
-            if (!account.decrypt(password)) {
+        AccountKeyStore accountKeyStore = new AccountKeyStore();
+        if (null != password) {
+            if (!StringUtils.validPassword(password)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
-            account.encrypt(password);
-        } catch (NulsException e) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            try {
+                if (!account.decrypt(password)) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+                account.encrypt(password);
+            } catch (NulsException e) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
+            EncryptedData encryptedData = new EncryptedData(account.getEncryptedPriKey());
+            accountKeyStore.setEncryptedPrivateKey(encryptedData.toString());
+        } else {
+            accountKeyStore.setPrikey(account.getPriKey());
         }
-        AccountKeyStore accountKeyStore = new AccountKeyStore();
-        EncryptedData encryptedData = new EncryptedData(account.getEncryptedPriKey());
-        accountKeyStore.setEncryptedPrivateKey(encryptedData.toString());
+        accountKeyStore.setAddress(account.getAddress().toString());
+        accountKeyStore.setAlias(account.getAlias());
+        accountKeyStore.setPubKey(account.getPubKey());
         return Result.getSuccess().setData(accountKeyStore);
     }
 

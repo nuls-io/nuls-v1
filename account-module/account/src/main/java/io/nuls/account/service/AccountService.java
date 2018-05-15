@@ -60,8 +60,9 @@ public interface AccountService {
     /**
      * 创建指定个数的账户（包含地址）
      * Create a specified number of accounts (including addresses)
-     * @param count    想要创建的账户个数
-     * @param count    the account count you want to create
+     *
+     * @param count 想要创建的账户个数
+     * @param count the account count you want to create
      * @return
      */
     Result<List<Account>> createAccount(int count);
@@ -90,8 +91,8 @@ public interface AccountService {
      * <p>
      * remove the corresponding account according to the account id.
      *
-     * @param address the address of the account you want to delete;
-     * @param password  the password of the wallet;
+     * @param address  the address of the account you want to delete;
+     * @param password the password of the wallet;
      * @return the result of the opration
      */
     Result<Boolean> removeAccount(String address, String password);
@@ -101,19 +102,18 @@ public interface AccountService {
      * <p>
      * import an account form account key store.
      *
-     * @param keyStore  the keyStore of the account;
-     * @param password  the password of the account key store;
+     * @param keyStore the keyStore of the account;
      * @return the result of the opration
      */
-    Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore, String password);
+    Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore);
 
     /**
      * 导出账户到keyStore
      * <p>
      * export an account to an account key store.
      *
-     * @param address the address of the account;
-     * @param password       the password of the account key store;
+     * @param address  the address of the account;
+     * @param password the password of the account key store;
      * @return the account key store object
      */
     Result<AccountKeyStore> exportAccountToKeyStore(String address, String password);
@@ -236,8 +236,8 @@ public interface AccountService {
      * 数据签名
      * The data signature
      *
-     * @param data    Data to be signed.
-     * @param ecKey  eckey
+     * @param data  Data to be signed.
+     * @param ecKey eckey
      * @return The NulsSignData object after the signature.
      * @throws NulsException
      */
