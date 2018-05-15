@@ -50,6 +50,7 @@ import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.CoinDataResult;
 import io.nuls.protocol.model.tx.TransferTransaction;
+import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -74,6 +75,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
     @Autowired
     private BalanceService balanceService;
 
+    @Autowired
+    private TransactionService transactionService;
+
     private static List<Account> localAccountList;
 
     @Override
@@ -87,8 +91,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
     }
 
     @Override
-    public Result<Integer> saveUnconfirmedTransaction(Transaction tx){
-        return saveConfirmedTransaction(tx,TransactionInfo.UNCONFIRMED);
+    public Result<Integer> saveUnconfirmedTransaction(Transaction tx) {
+        return saveConfirmedTransaction(tx, TransactionInfo.UNCONFIRMED);
     }
 
     @Override
@@ -232,6 +236,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
             }
             Account account = accountResult.getData();
 
+            Result passwordResult = accountService.validPassword(account, password);
+            if (passwordResult.isFailed()) {
+                return passwordResult;
+            }
 
             TransferTransaction tx = new TransferTransaction();
             try {
@@ -257,8 +265,19 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
             tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
             P2PKHScriptSig sig = new P2PKHScriptSig();
             sig.setPublicKey(account.getPubKey());
-           // sig.setSignData(accountService.signData(tx.getHash().serialize(), account, form.getPassword()));
+            sig.setSignData(accountService.signData(tx.getHash().serialize(), account, password));
             tx.setScriptSig(sig.serialize());
+
+            tx.verifyWithException();
+            Result saveResult = saveUnconfirmedTransaction(tx);
+            if (saveResult.isFailed()) {
+                return saveResult;
+            }
+            Result sendResult = this.transactionService.broadcastTx(tx);
+            if (sendResult.isFailed()) {
+                return sendResult;
+            }
+            return Result.getSuccess().setData(tx.getHash().getDigestHex());
         } catch (IOException e) {
             e.printStackTrace();
             return Result.getFailed(e.getMessage());
@@ -266,11 +285,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
-
-        return Result.getSuccess();
     }
 
-    protected Result<Integer> saveConfirmedTransaction(Transaction tx,byte status) {
+    protected Result<Integer> saveConfirmedTransaction(Transaction tx, byte status) {
         if (!isLocalTransaction(tx)) {
             return Result.getFailed().setData(new Integer(0));
         }
