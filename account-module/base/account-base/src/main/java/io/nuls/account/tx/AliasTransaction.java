@@ -24,4 +24,5 @@ public class AliasTransaction extends Transaction<Alias> {
     protected Alias parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readNulsData(new Alias());
     }
+
 }

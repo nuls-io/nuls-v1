@@ -207,6 +207,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
                 coinDataResult.setEnough(true);
                 coinDataResult.setFee(fee);
                 coinDataResult.setCoinList(coins);
+
+                Na change = values.subtract(values.add(fee));
+                if (change.isGreaterThan(Na.ZERO)) {
+                    Coin changeCoin = new Coin();
+                    changeCoin.setOwner(address);
+                    changeCoin.setNa(change);
+                }
                 break;
             }
         }
