@@ -83,6 +83,11 @@
         </dependency>
         <dependency>
             <groupId>io.nuls.account-module</groupId>
+            <artifactId>account-rpc</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nuls.account-module</groupId>
             <artifactId>account-storage</artifactId>
             <version>2.0.0</version>
         </dependency>
