@@ -32,6 +32,7 @@ public class AccountKeyStore {
 
     private String address;
     private String encryptedPrivateKey;
+    private byte[] prikey;
     private String alias;
     private byte[] pubKey;
 
@@ -73,5 +74,13 @@ public class AccountKeyStore {
 
     public void setPubKey(byte[] pubKey) {
         this.pubKey = pubKey;
+    }
+
+    public byte[] getPrikey() {
+        return prikey;
+    }
+
+    public void setPrikey(byte[] prikey) {
+        this.prikey = prikey;
     }
 }

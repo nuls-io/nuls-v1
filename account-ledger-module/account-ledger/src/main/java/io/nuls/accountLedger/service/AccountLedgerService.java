@@ -32,6 +32,7 @@ import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.ledger.model.CoinDataResult;
 
 import java.util.List;
 
@@ -87,20 +88,21 @@ public interface AccountLedgerService {
      * <p>
      * get the balance of an local account.
      *
-     * @param addres account address
+     * @param address account address
      * @return return balance of account, return 0 if  account is not a local account
      */
-    Result<Balance> getBalance(byte[] addres) throws NulsException;
+    Result<Balance> getBalance(byte[] address) throws NulsException;
 
     /**
      * <p>
      * get useable coindata
      *
      * @param address account address
-     * @param amount amount want to use
+     * @param amount  amount want to use
+     * @param size size of transaction ,to calc the fee
      * @return return balance of account, return 0 if  account is not a local account
      */
-    List<Coin> getCoinData(byte[] address, Na amount) throws NulsException;
+    CoinDataResult getCoinData(byte[] address, Na amount, int size) throws NulsException;
 
     /**
      * <p>
@@ -109,7 +111,7 @@ public interface AccountLedgerService {
      * @param address account address
      * @return true if a address is a local address
      */
-    public boolean isLocalAccount(byte[] address);
+    boolean isLocalAccount(byte[] address);
 
     /**
      * <p>
@@ -117,7 +119,15 @@ public interface AccountLedgerService {
      *
      * @return local account list
      */
-    public List<Account> getLocalAccountList();
+    List<Account> getLocalAccountList();
+
+    /**
+     *
+     * @param from
+     * @param to
+     * @param values
+     */
+    Result transfer(byte[] from, byte[]to, Na values, String remark);
 
     void init();
 }

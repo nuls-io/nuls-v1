@@ -3,19 +3,19 @@ package io.nuls.account.rpc.resources;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
+import io.nuls.account.model.AccountKeyStore;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.rpc.model.AccountDto;
+import io.nuls.account.rpc.model.AccountKeyStoreDto;
 import io.nuls.account.rpc.model.AssetDto;
 import io.nuls.account.rpc.model.BalanceDto;
-import io.nuls.account.rpc.model.form.AccountAPForm;
-import io.nuls.account.rpc.model.form.AccountAliasForm;
-import io.nuls.account.rpc.model.form.AccountCreateForm;
-import io.nuls.account.rpc.model.form.AccountPasswordForm;
+import io.nuls.account.rpc.model.form.*;
 import io.nuls.account.service.AccountBaseService;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
@@ -346,7 +346,7 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result updatePassword(@ApiParam(name = "form", value = "设置钱包密码表单数据", required = true)
-                                   AccountPasswordForm form) {
+                                             AccountSetPasswordForm form) {
 
         String address = form.getAddress();
         if (!Address.validAddress(address)) {
@@ -381,5 +381,59 @@ public class AccountResource {
             return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
         }
         return this.accountBaseService.changePassword(address, password, newPassword);
+    }
+
+    @POST
+    @Path("/export")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "账户备份，导出AccountKeyStore ")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = Result.class)
+    })
+    public Result backup(@ApiParam(name = "form", value = "钱包备份表单数据")
+                                    AccountAPForm form) {
+        if (StringUtils.isNotBlank(form.getAddress()) && !Address.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        if (null != form.getPassword() && !StringUtils.validPassword(form.getPassword())) {
+            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
+        AccountKeyStore accountKeyStore = accountService.exportAccountToKeyStore(form.getAddress(), form.getPassword()).getData();
+        return Result.getSuccess().setData(new AccountKeyStoreDto(accountKeyStore));
+    }
+
+
+    @POST
+    @Path("/import")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "根据私钥导入账户 [3.4.7]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = Result.class)
+    })
+    public Result importAccount(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
+                                        AccountImportForm form) {
+        if (!Address.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
+        if(null != form.getPrikey() && !ECKey.isValidPrivteHex(form.getPrikey())){
+            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
+        AccountKeyStore accountKeyStore = form.toAccountKeyStore();
+        return accountService.importAccountFormKeyStore(accountKeyStore);
+    }
+
+    @POST
+    @Path("/remove")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "移除账户", notes = "Nuls_RPC_API文档[3.4.9]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success",response = Result.class)
+    })
+    public Result removeAccount(@ApiParam(name = "钱包移除账户表单数据", value = "JSONFormat", required = true)
+                                           AccountAPForm form) {
+        if (!StringUtils.validPassword(form.getPassword()) || !Address.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
+        return accountService.removeAccount(form.getAddress(), form.getPassword());
     }
 }
