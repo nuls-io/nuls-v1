@@ -1,8 +1,5 @@
 package io.nuls.account.rpc.model.form;
 
-import io.nuls.account.model.AccountKeyStore;
-import io.nuls.core.tools.crypto.Hex;
-import io.nuls.core.tools.str.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -13,22 +10,29 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "导入账户表单数据")
 public class AccountImportForm {
 
-    @ApiModelProperty(name = "address", value = "账户地址", required = true)
-    private String address;
+    @ApiModelProperty(name = "accountKeyStore", value = "备份的账户数据", required = true)
+    private String accountKeyStore;
 
-    @ApiModelProperty(name = "encryptedPrivateKey", value = "加密后的私钥")
-    private String encryptedPrivateKey;
+    @ApiModelProperty(name = "password", value = "密码")
+    private String password;
 
-    @ApiModelProperty(name = "alias", value = "别名")
-    private String alias;
+    public String getAccountKeyStore() {
+        return accountKeyStore;
+    }
 
-    @ApiModelProperty(name = "pubKey", value = "公钥", required = true)
-    private String pubKey;
+    public void setAccountKeyStore(String accountKeyStore) {
+        this.accountKeyStore = accountKeyStore;
+    }
 
-    @ApiModelProperty(name = "prikey", value = "私钥")
-    private String prikey;
+    public String getPassword() {
+        return password;
+    }
 
-    public AccountKeyStore toAccountKeyStore() {
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+/*  public AccountKeyStore toAccountKeyStore() {
         AccountKeyStore accountKeyStore = new AccountKeyStore();
         accountKeyStore.setAddress(this.address);
         accountKeyStore.setEncryptedPrivateKey(this.encryptedPrivateKey);
@@ -36,9 +40,9 @@ public class AccountImportForm {
         accountKeyStore.setPubKey(Hex.decode(this.pubKey));
         accountKeyStore.setPrikey(Hex.decode(this.prikey));
         return accountKeyStore;
-    }
+    }*/
 
-    public String getAddress() {
+   /* public String getAddress() {
         return address;
     }
 
@@ -76,5 +80,5 @@ public class AccountImportForm {
 
     public void setPrikey(String prikey) {
         this.prikey = prikey;
-    }
+    }*/
 }

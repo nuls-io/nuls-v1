@@ -105,7 +105,37 @@ public interface AccountService {
      * @param keyStore the keyStore of the account;
      * @return the result of the opration
      */
+    Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore, String password);
+
+    /**
+     * 从keyStore导入账户
+     * <p>
+     * import an account form account key store.
+     *
+     * @param keyStore the keyStore of the account;
+     * @return the result of the opration
+     */
     Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore);
+
+
+    /**
+     * 从priky和密码导入账户
+     * import an account by priKey and password.
+     *
+     * @param prikey
+     * @param password
+     * @return
+     */
+    Result<Account> importAccount(String prikey, String password);
+
+    /**
+     * 从priky导入账户
+     * import an account by priKey
+     *
+     * @param prikey
+     * @return
+     */
+    Result<Account> importAccount(String prikey);
 
     /**
      * 导出账户到keyStore
@@ -194,6 +224,7 @@ public interface AccountService {
 
     /**
      * Verify the account password is correct
+     *
      * @param account
      * @param password
      * @return
@@ -256,7 +287,7 @@ public interface AccountService {
      * The data signature
      *
      * @param digest to be signed.
-     * @param ecKey eckey
+     * @param ecKey  eckey
      * @return The NulsSignData object after the signature.
      * @throws NulsException
      */

@@ -34,6 +34,16 @@ public class AccountKeyStoreDto {
         this.prikey = Hex.encode(accountKeyStore.getPrikey());
     }
 
+    public AccountKeyStore toAccountKeyStore(){
+        AccountKeyStore accountKeyStore = new AccountKeyStore();
+        accountKeyStore.setAddress(this.address);
+        accountKeyStore.setAlias(this.alias);
+        accountKeyStore.setEncryptedPrivateKey(this.encryptedPrivateKey);
+        accountKeyStore.setPrikey(Hex.decode(this.prikey));
+        accountKeyStore.setPubKey(Hex.decode(this.pubKey));
+        return accountKeyStore;
+    }
+
     public String getAddress() {
         return address;
     }
