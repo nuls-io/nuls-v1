@@ -39,9 +39,7 @@ import io.nuls.ledger.utils.LedgerUtil;
 import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static io.nuls.core.tools.str.StringUtils.asString;
 
@@ -210,6 +208,15 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return ValidateResult.getSuccessResult();
     }
 
+    /**
+     * 此txList是待打包的块中的交易，所以toList是下一步的UTXO，应该校验它
+     * coinData的交易和txList同处一个块中，txList中的to可能是coinData的from，
+     * 也就是可能存在，在同一个块中，下一笔输入就是上一笔的输出，所以需要校验它
+     *
+     * @param coinData
+     * @param txList
+     * @return
+     */
     @Override
     public ValidateResult verifyCoinData(CoinData coinData, List<Transaction> txList) {
         if (coinData == null || txList == null) {
@@ -219,17 +226,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             int initialCapacity = 0;
             CoinData validateCoinData;
             List<Coin> validateTos;
-            // txList中所有的from.getOwner()存放于HashSet中
             // 计算HashSet容量
             for(Transaction tx : txList) {
                 validateCoinData = tx.getCoinData();
                 if(validateCoinData == null) {
                     continue;
                 }
-                // 此txList是待保存交易列表，等待打包的交易，所以toList是下一步的UTXO，应该校验它
-                //TODO pierre 此处txList是什么业务逻辑
+                // 此txList是待打包的块中的交易，所以toList是下一步的UTXO，应该校验它
                 initialCapacity += tx.getCoinData().getTo().size();
             }
+            // txList中所有的from.getOwner()存放于HashSet中
             Set<String> validateUtxoKeySet = new HashSet<>(initialCapacity);
             Transaction tx;
             for(int i = 0, length = txList.size(); i < length; i++) {
@@ -238,15 +244,14 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 if(validateCoinData == null) {
                     continue;
                 }
-                // 此txList是待保存交易列表，等待打包的交易，所以toList是下一步的UTXO，应该校验它
-                //TODO pierre 此处txList是什么业务逻辑
+                // 此txList是待打包的块中的交易，所以toList是下一步的UTXO，应该校验它
                 validateTos = validateCoinData.getTo();
                 for(Coin to : validateTos) {
                     validateUtxoKeySet.add(asString(Arrays.concatenate(tx.getHash().serialize(), new VarInt(i).encode())));
                 }
             }
 
-            // 遍历需校验的coinData的fromOwner，如果既不存在于txList，又不存在于数据库中，那么这是一笔问题数据，进一步查是否存在这笔交易，交易有就是双花，没有就是孤儿交易，则返回失败
+            // 遍历需校验的coinData的fromOwner，如果既不存在于txList的to中，又不存在于数据库中，那么这是一笔问题数据，进一步查是否存在这笔交易，交易有就是双花，没有就是孤儿交易，则返回失败
             List<Coin> froms = coinData.getFrom();
             byte[] fromBytes;
             for(Coin from : froms) {
@@ -270,7 +275,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return ValidateResult.getSuccessResult();
     }
 
-    //TODO pierre 双花验证不通过的交易需要放入result的data中，一次只验证一对双花的交易
+    /**
+     * 双花验证不通过的交易需要放入result的data中，一次只验证一对双花的交易
+     *
+     * @param block
+     * @return
+     */
     @Override
     public ValidateResult<List<Transaction>> verifyDoubleSpend(Block block) {
         if (block == null) {
@@ -278,7 +288,13 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
         return verifyDoubleSpend(block.getTxs());
     }
-    //TODO pierre 双花验证不通过的交易需要放入result的data中，一次只验证一对双花的交易
+
+    /**
+     * 双花验证不通过的交易需要放入result的data中，一次只验证一对双花的交易
+     *
+     * @param txList
+     * @return
+     */
     @Override
     public ValidateResult<List<Transaction>> verifyDoubleSpend(List<Transaction> txList) {
         if (txList == null) {
@@ -294,8 +310,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             }
             initialCapacity += tx.getCoinData().getFrom().size();
         }
-        HashSet<String> fromSet = new HashSet<>(initialCapacity);
+        HashMap<String, Transaction> fromMap = new HashMap<>(initialCapacity);
         List<Coin> froms;
+        Transaction prePutTx;
         // 判断是否有重复的fromCoin存在，如果存在，则是双花
         for(Transaction tx : txList) {
             coinData = tx.getCoinData();
@@ -304,8 +321,15 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             }
             froms = coinData.getFrom();
             for(Coin from : froms) {
-                if(!fromSet.add(asString(from.getOwner()))) {
-                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT);
+                prePutTx = fromMap.put(asString(from.getOwner()), tx);
+                // 不为空则代表此coin在map中已存在，则是双花
+                if(prePutTx != null) {
+                    List<Transaction> resultList = new ArrayList<>(2);
+                    resultList.add(prePutTx);
+                    resultList.add(tx);
+                    ValidateResult validateResult = ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT);
+                    validateResult.setData(resultList);
+                    return validateResult;
                 }
             }
         }
