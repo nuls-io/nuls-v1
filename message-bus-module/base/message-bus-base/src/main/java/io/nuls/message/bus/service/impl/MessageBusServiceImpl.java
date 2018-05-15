@@ -74,10 +74,10 @@ public class MessageBusServiceImpl implements MessageBusService {
     public Result sendToNode(BaseMessage message, Node node, boolean aysn) {
         BroadcastResult result = networkService.sendToNode(message, node, false);
         if (!result.isSuccess()) {
-            Log.error("send to node fail reason: " + result.getMessage());
+            Log.error("send to node fail reason: " + result.getErrorCode().getMsg());
         }
 
-        return new Result(result.isSuccess(), result.getMessage());
+        return new Result(result.isSuccess(), result.getErrorCode(), null);
     }
 
     @Override

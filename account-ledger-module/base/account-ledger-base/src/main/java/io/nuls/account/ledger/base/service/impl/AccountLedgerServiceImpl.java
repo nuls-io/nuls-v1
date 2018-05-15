@@ -189,13 +189,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
             size += coin.size();
             Na fee = TransactionFeeCalculator.getFee(size);
             values = values.add(coin.getNa());
-            if (values.isGreaterOrEquals(values.add(fee))) {
+            if (values.isGreaterOrEquals(amount.add(fee))) {
                 enough = true;
                 coinDataResult.setEnough(true);
                 coinDataResult.setFee(fee);
                 coinDataResult.setCoinList(coins);
 
-                Na change = values.subtract(values.add(fee));
+                Na change = values.subtract(amount.add(fee));
                 if (change.isGreaterThan(Na.ZERO)) {
                     Coin changeCoin = new Coin();
                     changeCoin.setOwner(address);
