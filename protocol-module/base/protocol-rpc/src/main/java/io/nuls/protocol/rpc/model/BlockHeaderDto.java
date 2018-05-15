@@ -94,7 +94,8 @@ public class BlockHeaderDto {
     @ApiModelProperty(name = "size", value = "大小")
     private int size;
 
-    public BlockHeaderDto(Block block) {
+    public BlockHeaderDto(Block block) throws IOException {
+        this(block.getHeader());
         this.size = block.getHeader().size();
         Na fee = Na.ZERO;
         for (Transaction tx : block.getTxs()) {

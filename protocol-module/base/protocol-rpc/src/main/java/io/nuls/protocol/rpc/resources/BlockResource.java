@@ -74,7 +74,13 @@ public class BlockResource {
         if (blockResult.isFailed()) {
             return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         }
-        BlockHeaderDto dto = new BlockHeaderDto(blockResult.getData());
+        BlockHeaderDto dto = null;
+        try {
+            dto = new BlockHeaderDto(blockResult.getData());
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
         return Result.getSuccess().setData(dto);
     }
 
@@ -103,7 +109,12 @@ public class BlockResource {
         if (block == null) {
             return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         }
-        result.setData(new BlockHeaderDto(block));
+        try {
+            result.setData(new BlockHeaderDto(block));
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
         return result;
     }
 
