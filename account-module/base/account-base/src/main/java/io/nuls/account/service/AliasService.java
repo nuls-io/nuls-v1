@@ -20,6 +20,7 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.ledger.model.CoinDataResult;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.protocol.message.TransactionMessage;
 
@@ -92,20 +93,34 @@ public class AliasService {
         byte[] addressBytes = account.getAddress().getBase58Bytes();
         try {
             //手续费 fee ////////暂时!!!!
-            Na fee = Na.parseNuls(0.01);
+        /*    Na fee = Na.parseNuls(0.01);
             Na total = fee.add(AccountConstant.ALIAS_NA);
             Balance balance = accountLedgerService.getBalance(addressBytes).getData();
             if (balance.getUsable().isLessThan(total)) {
                 Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
-            List<Coin> fromList = accountLedgerService.getCoinData(addressBytes, total);
+*/
+            //创建一笔设置别名的交易
+            AliasTransaction tx = new AliasTransaction();
+            tx.setTime(System.currentTimeMillis());
+            Alias alias = new Alias(addressBytes, aliasName);
+            tx.setTxData(alias);
+            //tx.setCoinData(coinData);
+            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+
+            //CoinDataResult
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size());
+            if(!coinDataResult.isEnough()){
+                Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
+            }
+            List<Coin> fromList = coinDataResult.getCoinList();
+            Na fee = coinDataResult.getFee();
+            Na total = fee.add(AccountConstant.ALIAS_NA);
             Na totalFrom = Na.ZERO;
             for (Coin coin : fromList) {
                 totalFrom = totalFrom.add(coin.getNa());
             }
-            if (totalFrom.isLessThan(total)) {
-                Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
-            }
+
             CoinData coinData = new CoinData();
             coinData.setFrom(fromList);
             if (totalFrom.isGreaterThan(total)) {
@@ -116,13 +131,7 @@ public class AliasService {
                 coinData.setTo(toList);
             }
 
-            //创建一笔设置别名的交易
-            AliasTransaction tx = new AliasTransaction();
-            tx.setTime(System.currentTimeMillis());
-            Alias alias = new Alias(addressBytes, aliasName);
-            tx.setTxData(alias);
-            tx.setCoinData(coinData);
-            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+
 
             NulsSignData nulsSignData = accountService.signData(tx.serializeForHash(), account, password);
             P2PKHScriptSig scriptSig = new P2PKHScriptSig(nulsSignData, account.getPubKey());
