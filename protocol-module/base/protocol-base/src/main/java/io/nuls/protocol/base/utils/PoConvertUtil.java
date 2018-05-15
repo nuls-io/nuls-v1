@@ -54,7 +54,7 @@ public class PoConvertUtil {
         BlockHeaderPo po = new BlockHeaderPo();
         po.setHash(block.getHeader().getHash());
         po.setPreHash(block.getHeader().getPreHash());
-        po.setMerkleHash(block.getHeader().getPreHash());
+        po.setMerkleHash(block.getHeader().getMerkleHash());
         po.setTime(block.getHeader().getTime());
         po.setHeight(block.getHeader().getHeight());
         po.setTxCount(block.getHeader().getTxCount());
