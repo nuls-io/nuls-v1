@@ -30,7 +30,7 @@ import io.nuls.consensus.poc.BaseTest;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
-import io.nuls.consensus.poc.tx.validator.RegisterAgentTxValidator;
+import io.nuls.consensus.poc.tx.validator.CreateAgentTxValidator;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
@@ -42,13 +42,13 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by ln on 2018/5/10.
  */
-public class RegisterAgentTxValidatorTest extends BaseTest {
+public class CreateAgentTxValidatorTest extends BaseTest {
 
     @Test
     public void test() {
         CreateAgentTransaction tx = new CreateAgentTransaction();
 
-        RegisterAgentTxValidator validator = new RegisterAgentTxValidator();
+        CreateAgentTxValidator validator = new CreateAgentTxValidator();
 
         ValidateResult result = validator.validate(tx);
         assertFalse(result.isSuccess());

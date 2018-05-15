@@ -234,7 +234,7 @@ public class BlockServiceImpl implements BlockService {
      * 保存区块失败时，需要将已经存储的交易回滚
      * When you fail to save the block, you need to roll back the already stored transaction.
      */
-    private void rollbackTxList(List<Transaction> savedList,BlockHeader blockHeader) {
+    private void rollbackTxList(List<Transaction> savedList,BlockHeader blockHeader) throws NulsException {
         for (Transaction tx : savedList) {
             transactionService.rollbackTx(tx,blockHeader);
             ledgerService.rollbackTx(tx);

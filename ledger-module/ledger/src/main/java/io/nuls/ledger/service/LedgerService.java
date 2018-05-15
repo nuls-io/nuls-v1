@@ -23,6 +23,7 @@
  */
 package io.nuls.ledger.service;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 
@@ -40,7 +41,7 @@ public interface LedgerService {
      * @param tx
      * @return boolean
      */
-    Result saveTx(Transaction tx);
+    Result saveTx(Transaction tx) throws NulsException;
 
     /**
      * Roll back transactions while rolling back coindata data
@@ -49,7 +50,7 @@ public interface LedgerService {
      * @param tx
      * @return boolean
      */
-    Result rollbackTx(Transaction tx);
+    Result rollbackTx(Transaction tx) throws NulsException;
 
     /**
      * get a transaction
@@ -106,5 +107,5 @@ public interface LedgerService {
      * @param tx
      * @return boolean
      */
-    Result unlockTxCoinData(Transaction tx);
+    Result unlockTxCoinData(Transaction tx) throws NulsException;
 }

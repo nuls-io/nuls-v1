@@ -89,8 +89,13 @@ public class NulsDigestData extends BaseNulsData {
     }
 
 
-    public String getDigestHex() throws IOException {
-        return Hex.encode(serialize());
+    public String getDigestHex() {
+        try {
+            return Hex.encode(serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return null;
+        }
     }
 
     public static NulsDigestData fromDigestHex(String hex) throws NulsException {
@@ -236,12 +241,7 @@ public class NulsDigestData extends BaseNulsData {
 
     @Override
     public String toString() {
-        try {
-            return getDigestHex();
-        } catch (IOException e) {
-            Log.error(e);
-            return super.toString();
-        }
+        return getDigestHex();
     }
 
     /**

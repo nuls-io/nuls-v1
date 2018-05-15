@@ -91,14 +91,10 @@ public class ConsensusPocServiceTest extends BaseTest {
         NulsDataValidator<TestTransaction> testValidator = new NulsDataValidator<TestTransaction>() {
             @Override
             public ValidateResult validate(TestTransaction data) {
-                try {
-                    if(data.getHash().getDigestHex().equals("08001220328876d03b50feba0ac58d3fcb4638a2fb95847315a88c8de7105408d931999a")) {
-                        return ValidateResult.getFailedResult("test.transaction", TransactionErrorCode.ORPHAN_TX);
-                    } else {
-                        return ValidateResult.getSuccessResult();
-                    }
-                } catch (IOException e) {
-                    throw new NulsRuntimeException(e);
+                if (data.getHash().getDigestHex().equals("08001220328876d03b50feba0ac58d3fcb4638a2fb95847315a88c8de7105408d931999a")) {
+                    return ValidateResult.getFailedResult("test.transaction", TransactionErrorCode.ORPHAN_TX);
+                } else {
+                    return ValidateResult.getSuccessResult();
                 }
             }
         };
