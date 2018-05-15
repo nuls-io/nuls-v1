@@ -93,7 +93,9 @@ public class ForkChainProcess {
         long newestBlockHeight = chainManager.getBestBlockHeight() + PocConsensusConstant.CHANGE_CHAIN_BLOCK_DIFF_COUNT;
 
         ChainContainer newChain = chainManager.getMasterChain();
-
+        if (null == newChain) {
+            return false;
+        }
         Iterator<ChainContainer> iterator = chainManager.getChains().iterator();
         while (iterator.hasNext()) {
             ChainContainer forkChain = iterator.next();

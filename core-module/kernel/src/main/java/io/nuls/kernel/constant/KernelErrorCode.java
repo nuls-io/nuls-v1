@@ -60,6 +60,7 @@ public interface KernelErrorCode {
     ErrorCode FILE_BROKEN = ErrorCode.init("SYS020", 20020);
     ErrorCode SIGNATURE_ERROR = ErrorCode.init("SYS021", 20021);
     ErrorCode CHAIN_ID_ERROR = ErrorCode.init("SYS022", 20022);
+    ErrorCode REQUEST_DENIED = ErrorCode.init("SYS023", 20023);
     /*
      * ----------  Consensus Network code   --------
      */
