@@ -49,6 +49,7 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
@@ -120,7 +121,7 @@ public class BlockProcess {
         block.verifyWithException();
 
         ValidateResult<List<Transaction>> validateResult = ledgerService.verifyDoubleSpend(block);
-        if (validateResult.isFailed()) {
+        if (validateResult.isFailed() && validateResult.getErrorCode().equals(LedgerErrorCode.LEDGER_DOUBLE_SPENT)) {
             RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
             RedPunishData redPunishData = new RedPunishData();
             redPunishData.setAddress(AddressTool.getAddress(block.getHeader().getScriptSig()));
