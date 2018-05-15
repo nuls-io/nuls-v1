@@ -1,4 +1,4 @@
-package io.nuls.account.ledger.util;
+package io.nuls.account.ledger.base.util;
 
 import io.nuls.kernel.model.Coin;
 

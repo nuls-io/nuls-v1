@@ -1,4 +1,4 @@
-package io.nuls.account.ledger.service.Balance;
+package io.nuls.account.ledger.base.service.balance;
 
 import io.nuls.account.model.Balance;
 import io.nuls.kernel.model.Result;
