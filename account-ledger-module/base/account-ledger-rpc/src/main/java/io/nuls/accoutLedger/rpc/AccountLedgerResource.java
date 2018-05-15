@@ -27,24 +27,25 @@
  * @author: Facjas
  * @date: 2018/5/8
  */
-package java.io.nuls.accountLedger.rpc;
+package io.nuls.accoutLedger.rpc;
 
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.accountLedger.constant.AccountLedgerErrorCode;
 import io.nuls.accountLedger.service.AccountLedgerService;
+import io.nuls.accoutLedger.rpc.form.TransferForm;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.utils.AddressTool;
 import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.io.nuls.accountLedger.rpc.form.TransferForm;
 
 /**
  * author Facjas
@@ -103,9 +104,10 @@ public class AccountLedgerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
-    public Result<Balance> transfer(@ApiParam(name = "form", value = "转账", required = true)
-                                            TransferForm form) {
-
-        return Result.getSuccess();
+    public Result<Balance> transfer(@ApiParam(name = "form", value = "转账", required = true) TransferForm form) {
+        Na value = Na.valueOf(form.getAmount());
+        return accountLedgerService.transfer(AddressTool.getAddress(form.getAddress()),
+                                             AddressTool.getAddress(form.getAddress()),
+                                             value, form.getPassword(), form.getRemark());
     }
 }
