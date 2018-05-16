@@ -23,10 +23,9 @@
  *  * SOFTWARE.
  *
  */
-package io.nuls.network.entity;
+package io.nuls.network.model;
 
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.network.constant.NetworkErrorCode;
 

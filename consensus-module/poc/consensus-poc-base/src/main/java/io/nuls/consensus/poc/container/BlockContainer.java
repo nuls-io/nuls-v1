@@ -27,7 +27,7 @@
 package io.nuls.consensus.poc.container;
 
 import io.nuls.kernel.model.Block;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 
 /**
  * @author ln

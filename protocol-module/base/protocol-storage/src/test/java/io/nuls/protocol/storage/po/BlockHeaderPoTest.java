@@ -40,7 +40,7 @@ import static org.junit.Assert.*;
 
 /**
  * 区块头实体单元测试工具类
- * Block header entity unit test tool class.
+ * Block header model unit test tool class.
  *
  * @author: Niels Wang
  * @date: 2018/5/8

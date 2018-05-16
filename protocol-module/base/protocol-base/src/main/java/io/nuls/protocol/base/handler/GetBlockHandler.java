@@ -31,7 +31,7 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.protocol.constant.NotFoundType;
 import io.nuls.protocol.message.BlockMessage;
 import io.nuls.protocol.message.GetBlockRequest;

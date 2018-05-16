@@ -1,6 +1,6 @@
 package io.nuls.message.bus.processor.manager;
 
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**

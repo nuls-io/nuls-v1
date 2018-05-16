@@ -7,7 +7,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.network.storage.constant.NetworkStorageConstant;
 import io.nuls.network.storage.po.NetworkTransferTool;
 import io.nuls.network.storage.po.NodePo;

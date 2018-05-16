@@ -2,7 +2,7 @@ package TestHandler;
 
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.protocol.message.BlockMessage;
 
 /**

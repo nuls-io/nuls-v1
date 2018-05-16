@@ -1,4 +1,4 @@
-package io.nuls.network.entity;
+package io.nuls.network.model;
 
 import io.nuls.kernel.model.BaseNulsData;
 

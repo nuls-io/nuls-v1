@@ -5,8 +5,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.message.bus.message.CommonDigestMessage;
 import io.nuls.message.bus.message.GetMessageBodyMessage;
 import io.nuls.message.bus.service.MessageBusService;
-import io.nuls.message.bus.service.impl.MessageCacheService;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 
 /**
  * 普通消息处理器

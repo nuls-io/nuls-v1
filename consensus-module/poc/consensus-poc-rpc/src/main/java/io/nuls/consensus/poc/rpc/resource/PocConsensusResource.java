@@ -7,6 +7,7 @@ import io.nuls.account.service.AccountService;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.rpc.model.*;
@@ -135,7 +136,7 @@ public class PocConsensusResource {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        if(account.isEncrypted()){
+        if (account.isEncrypted()) {
             AssertUtil.canNotEmpty(form.getPassword());
         }
         CreateAgentTransaction tx = new CreateAgentTransaction();
@@ -209,14 +210,55 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getAgentHash());
         AssertUtil.canNotEmpty(form.getDeposit());
         AssertUtil.canNotEmpty(form.getPassword());
-        Map<String, Object> paramsMap = new HashMap<>();
-        if (!Address.validAddress(form.getAddress())) {
+        if (!AddressTool.validAddress(form.getAddress())) {
             throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
         }
-
-        paramsMap.put("deposit", form.getDeposit());
-        paramsMap.put("agentHash", form.getAgentHash());
+        Account account = accountService.getAccount(form.getAddress()).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        if (account.isEncrypted()) {
+            AssertUtil.canNotEmpty(form.getPassword());
+        }
         DepositTransaction tx = new DepositTransaction();
+        Deposit deposit = new Deposit();
+        deposit.setAddress(AddressTool.getAddress(form.getAddress()));
+        deposit.setAgentHash(NulsDigestData.fromDigestHex(form.getAgentHash()));
+        deposit.setDeposit(Na.valueOf(form.getDeposit()));
+        tx.setTxData(deposit);
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), -1));
+        tx.setCoinData(coinData);
+        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        if (result.isEnough()) {
+            tx.getCoinData().setFrom(result.getCoinList());
+            if (null != result.getChange()) {
+                tx.getCoinData().getTo().add(result.getChange());
+            }
+        } else {
+            return Result.getFailed(TransactionErrorCode.BALANCE_NOT_ENOUGH);
+        }
+        try {
+            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+            P2PKHScriptSig sig = new P2PKHScriptSig();
+            sig.setPublicKey(account.getPubKey());
+            sig.setSignData(accountService.signDigest(tx.getHash().serialize(), account, form.getPassword()));
+            tx.setScriptSig(sig.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
+        tx.verifyWithException();
+
+        Result saveResult = accountLedgerService.saveUnconfirmedTransaction(tx);
+        if (saveResult.isFailed()) {
+            return saveResult;
+        }
+        Result sendResult = this.transactionService.broadcastTx(tx);
+        if (sendResult.isFailed()) {
+            return sendResult;
+        }
 
         return Result.getSuccess().setData(tx.getHash().getDigestHex());
     }

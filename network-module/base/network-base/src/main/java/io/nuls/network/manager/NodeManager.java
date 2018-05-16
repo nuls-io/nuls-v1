@@ -9,8 +9,8 @@ import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.entity.Node;
-import io.nuls.network.entity.NodeGroup;
+import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeGroup;
 import io.nuls.network.protocol.message.NetworkMessageBody;
 import io.nuls.network.storage.service.NetworkStorageService;
 
