@@ -132,7 +132,7 @@ public class ConnectionManager {
 //            Log.error("---------------------message is null--------------------------------");
             return;
         }
-        System.out.println("-----------------=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-------"+message.getClass());
+
         if (isNetworkMessage(message)) {
             if (node.getStatus() != Node.HANDSHAKE && !isHandShakeMessage(message)) {
                 return;
@@ -143,6 +143,7 @@ public class ConnectionManager {
             if (!node.isHandShake()) {
                 return;
             }
+            System.out.println("-----------------=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-------"+message.getClass());
             messageBusService.receiveMessage(message, node);
         }
     }

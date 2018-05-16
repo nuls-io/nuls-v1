@@ -1,17 +1,27 @@
 package io.nuls.consensus.poc.rpc.resource;
 
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.ledger.model.CoinDataResult;
+import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.service.AccountService;
-import io.nuls.account.ledger.model.CoinDataResult;
-import io.nuls.account.ledger.service.AccountLedgerService;
+import io.nuls.consensus.poc.context.PocConsensusContext;
+import io.nuls.consensus.poc.model.MeetingMember;
+import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.protocol.entity.CancelDeposit;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.consensus.poc.protocol.entity.StopAgent;
+import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
+import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.rpc.model.*;
+import io.nuls.consensus.poc.rpc.utils.AgentComparator;
 import io.nuls.consensus.service.ConsensusService;
+import io.nuls.core.tools.array.ArraysTool;
+import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.param.AssertUtil;
@@ -19,6 +29,7 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.TransactionErrorCode;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
@@ -27,6 +38,8 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.VarInt;
+import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.service.TransactionService;
 import io.swagger.annotations.*;
 
@@ -34,10 +47,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Niels
@@ -60,6 +70,9 @@ public class PocConsensusResource {
     @Autowired
     private TransactionService transactionService;
 
+    @Autowired
+    private LedgerService ledgerService;
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("Get the whole network consensus infomation! 查询全网共识总体信息 [3.6.1]")
@@ -68,28 +81,37 @@ public class PocConsensusResource {
     })
     public Result getWholeInfo() {
         Result result = Result.getSuccess();
-//        WholeNetConsensusInfoDTO dto = new WholeNetConsensusInfoDTO();
-//
-//        Map<String, Object> map = this.consensusService.getConsensusInfo();
-//        dto.setAgentCount((Integer) map.get("agentCount"));
-//        dto.setRewardOfDay((Long) map.get("rewardOfDay"));
-//        dto.setTotalDeposit((Long) map.get("totalDeposit"));
-//        dto.setConsensusAccountNumber((Integer) map.get("memberCount"));
-//        result.setData(dto);
-        return result;
-    }
 
-    @GET
-    @Path("/local")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("获取钱包内(本地)全部账户参与共识信息 [3.6.2b]")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Map.class)
-    })
-    public Result getInfo() {
-        Result result = Result.getSuccess();
-//        Map<String, Object> dataMap = consensusService.getConsensusInfo(null);
-//        result.setData(dataMap);
+        WholeNetConsensusInfoDTO dto = new WholeNetConsensusInfoDTO();
+
+        List<Agent> allAgentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+        long startBlockHeight = NulsContext.getInstance().getBestHeight();
+        List<Agent> agentList = new ArrayList<>();
+
+        for (int i = allAgentList.size() - 1; i >= 0; i--) {
+            Agent agent = allAgentList.get(i);
+            if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
+                continue;
+            } else if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
+                continue;
+            }
+            agentList.add(agent);
+        }
+        MeetingRound round = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
+        int memberCount = 0;
+        long totalDeposit = 0;
+        if (null != round) {
+            memberCount = round.getMemberList().size();
+            for (MeetingMember member : round.getMemberList()) {
+                totalDeposit += (member.getTotalDeposit().getValue() + member.getOwnDeposit().getValue());
+            }
+        }
+
+        dto.setAgentCount(agentList.size());
+        //todo 需要添加计算奖励的机制
+        dto.setRewardOfDay(201800000000L);
+        dto.setTotalDeposit(totalDeposit);
+        dto.setConsensusAccountNumber(memberCount);
         return result;
     }
 
@@ -100,16 +122,61 @@ public class PocConsensusResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Map.class)
     })
-    public Result getInfo(@ApiParam(name = "address", value = "钱包账户地", required = true)
-                          @PathParam("address") String address) {
+    public Result<AccountConsensusInfoDTO> getInfo(@ApiParam(name = "address", value = "钱包账户地", required = true)
+                                                   @PathParam("address") String address) {
 
-//        if (!Address.validAddress(StringUtils.formatStringPara(address))) {
-//            return Result.getFailed(ErrorCode.ADDRESS_ERROR);
-//        }
+        if (!Address.validAddress(StringUtils.formatStringPara(address))) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
         Result result = Result.getSuccess();
-//
-//        Map<String, Object> dataMap = consensusService.getConsensusInfo(address);
-//        result.setData(dataMap);
+        AccountConsensusInfoDTO dto = new AccountConsensusInfoDTO();
+        List<Agent> allAgentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+        long startBlockHeight = NulsContext.getInstance().getBestHeight();
+        int agentCount = 0;
+        byte[] addressBytes = AddressTool.getAddress(address);
+        for (int i = allAgentList.size() - 1; i >= 0; i--) {
+            Agent agent = allAgentList.get(i);
+            if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
+                continue;
+            } else if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
+                continue;
+            }
+            if (Arrays.equals(agent.getAgentAddress(), addressBytes)) {
+                agentCount = 1;
+                break;
+            }
+        }
+        List<Deposit> depositList = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
+        Set<NulsDigestData> agentSet = new HashSet<>();
+        long totalDeposit = 0;
+        for (Deposit deposit : depositList) {
+            if (deposit.getDelHeight() != -1L && deposit.getDelHeight() <= startBlockHeight) {
+                continue;
+            }
+            if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
+                continue;
+            }
+            if (!Arrays.equals(deposit.getAddress(), addressBytes)) {
+                continue;
+            }
+            agentSet.add(deposit.getAgentHash());
+            totalDeposit += deposit.getDeposit().getValue();
+        }
+
+
+        dto.setAgentCount(agentCount);
+        dto.setJoinAgentCount(agentSet.size());
+        //todo 需要添加计算奖励的机制
+        dto.setReward(201800000000L);
+        dto.setRewardOfDay(201800000000L);
+        dto.setTotalDeposit(totalDeposit);
+        try {
+            dto.setUsableBalance(accountLedgerService.getBalance(addressBytes).getData().getUsable().getValue());
+        } catch (Exception e) {
+            Log.error(e);
+            dto.setUsableBalance(0L);
+        }
+        result.setData(dto);
         return result;
     }
 
@@ -164,33 +231,9 @@ public class PocConsensusResource {
         toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), -1));
         tx.setCoinData(coinData);
         CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        if (result.isEnough()) {
-            tx.getCoinData().setFrom(result.getCoinList());
-            if (null != result.getChange()) {
-                tx.getCoinData().getTo().add(result.getChange());
-            }
-        } else {
-            return Result.getFailed(TransactionErrorCode.BALANCE_NOT_ENOUGH);
-        }
-        try {
-            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-            P2PKHScriptSig sig = new P2PKHScriptSig();
-            sig.setPublicKey(account.getPubKey());
-            sig.setSignData(accountService.signDigest(tx.getHash().serialize(), account, form.getPassword()));
-            tx.setScriptSig(sig.serialize());
-        } catch (IOException e) {
-            Log.error(e);
-            return Result.getFailed(e.getMessage());
-        }
-        tx.verifyWithException();
-
-        Result saveResult = accountLedgerService.saveUnconfirmedTransaction(tx);
-        if (saveResult.isFailed()) {
-            return saveResult;
-        }
-        Result sendResult = this.transactionService.broadcastTx(tx);
-        if (sendResult.isFailed()) {
-            return sendResult;
+        Result result1 = this.txProcessing(tx, result, account, form.getPassword());
+        if (result1.isFailed()) {
+            return result1;
         }
         return Result.getSuccess().setData(tx.getHash().getDigestHex());
     }
@@ -209,7 +252,6 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getAgentHash());
         AssertUtil.canNotEmpty(form.getDeposit());
-        AssertUtil.canNotEmpty(form.getPassword());
         if (!AddressTool.validAddress(form.getAddress())) {
             throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
         }
@@ -231,21 +273,32 @@ public class PocConsensusResource {
         toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), -1));
         tx.setCoinData(coinData);
         CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        if (result.isEnough()) {
-            tx.getCoinData().setFrom(result.getCoinList());
-            if (null != result.getChange()) {
-                tx.getCoinData().getTo().add(result.getChange());
+
+        Result result1 = this.txProcessing(tx, result, account, form.getPassword());
+        if (result1.isFailed()) {
+            return result1;
+        }
+        return Result.getSuccess().setData(tx.getHash().getDigestHex());
+    }
+
+    public Result txProcessing(Transaction tx, CoinDataResult result, Account account, String password) {
+        if (null != result) {
+            if (result.isEnough()) {
+                tx.getCoinData().setFrom(result.getCoinList());
+                if (null != result.getChange()) {
+                    tx.getCoinData().getTo().add(result.getChange());
+                }
+            } else {
+                return Result.getFailed(TransactionErrorCode.BALANCE_NOT_ENOUGH);
             }
-        } else {
-            return Result.getFailed(TransactionErrorCode.BALANCE_NOT_ENOUGH);
         }
         try {
             tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
             P2PKHScriptSig sig = new P2PKHScriptSig();
             sig.setPublicKey(account.getPubKey());
-            sig.setSignData(accountService.signDigest(tx.getHash().serialize(), account, form.getPassword()));
+            sig.setSignData(accountService.signDigest(tx.getHash().serialize(), account, password));
             tx.setScriptSig(sig.serialize());
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.error(e);
             return Result.getFailed(e.getMessage());
         }
@@ -259,24 +312,74 @@ public class PocConsensusResource {
         if (sendResult.isFailed()) {
             return sendResult;
         }
-
-        return Result.getSuccess().setData(tx.getHash().getDigestHex());
+        return Result.getSuccess();
     }
 
 
     @POST
     @Path("/agent/stop")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "删除共识节点 [3.6.5]", notes = "返回删除成功交易hash")
+    @ApiOperation(value = "注销共识节点 [3.6.5]", notes = "返回注销成功交易hash")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
-    public Result stopAgent(@ApiParam(name = "form", value = "删除共识节点表单数据", required = true)
+    public Result stopAgent(@ApiParam(name = "form", value = "注销共识节点表单数据", required = true)
                                     StopAgentForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
-        AssertUtil.canNotEmpty(form.getPassword());
-        Transaction tx = null;//consensusService.stopConsensus(form.getAddress(), form.getPassword(), null);
+        if (!AddressTool.validAddress(form.getAddress())) {
+            throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
+        }
+        Account account = accountService.getAccount(form.getAddress()).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        if (account.isEncrypted()) {
+            AssertUtil.canNotEmpty(form.getPassword());
+        }
+        StopAgentTransaction tx = new StopAgentTransaction();
+        StopAgent stopAgent = new StopAgent();
+        stopAgent.setAddress(AddressTool.getAddress(form.getAddress()));
+        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+        Agent agent = null;
+        for (Agent a : agentList) {
+            if (Arrays.equals(a.getAgentAddress(), account.getAddress().getBase58Bytes())) {
+                agent = a;
+                break;
+            }
+        }
+        if (agent == null || agent.getDelHeight() > 0) {
+            return Result.getFailed("Can not found any agent!");
+        }
+        NulsDigestData createTxHash = agent.getTxHash();
+        stopAgent.setCreateTxHash(createTxHash);
+        tx.setTxData(stopAgent);
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        toList.add(new Coin(stopAgent.getAddress(), agent.getDeposit(), 0));
+        CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);
+        if (null == transaction) {
+            return Result.getFailed("Can not find the create agent transaction!");
+        }
+        List<Coin> fromList = new ArrayList<>();
+        for (int index = 0; index < transaction.getCoinData().getTo().size(); index++) {
+            Coin coin = transaction.getCoinData().getTo().get(index);
+            if (coin.getLockTime() == -1L && coin.getNa().equals(agent.getDeposit())) {
+                coin.setOwner(ArraysTool.joinintTogether(transaction.getHash().serialize(), new VarInt(index).encode()));
+                fromList.add(coin);
+                break;
+            }
+        }
+        if (fromList.isEmpty()) {
+            return Result.getFailed(KernelErrorCode.DATA_ERROR);
+        }
+        coinData.setFrom(fromList);
+        tx.setCoinData(coinData);
+        CoinDataResult result = accountLedgerService.getCoinData(stopAgent.getAddress(), Na.ZERO, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        Result result1 = this.txProcessing(tx, result, account, form.getPassword());
+        if (result1.isFailed()) {
+            return result1;
+        }
         return Result.getSuccess().setData(tx.getHash().getDigestHex());
     }
 
@@ -294,7 +397,7 @@ public class PocConsensusResource {
                                @ApiParam(name = "keyword", value = "搜索关键字")
                                @QueryParam("keyword") String keyword,
                                @ApiParam(name = "sortType", value = "排序字段名")
-                               @QueryParam("sortType") String sortType) {
+                               @QueryParam("sortType") String sortType) throws UnsupportedEncodingException {
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
         }
@@ -305,9 +408,80 @@ public class PocConsensusResource {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         Result result = Result.getSuccess();
-        Page<Map<String, Object>> list = null;//this.consensusService.getAgentList(keyword, null, null, sortType, pageNumber, pageSize);
-        result.setData(list);
+        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+        agentList = new ArrayList<>(agentList);
+        long startBlockHeight = NulsContext.getInstance().getBestHeight();
+        for (int i = agentList.size() - 1; i >= 0; i--) {
+            Agent agent = agentList.get(i);
+            if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
+                agentList.remove(i);
+            } else if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
+                agentList.remove(i);
+            } else if (StringUtils.isNotBlank(keyword)) {
+                String agentName = new String(agent.getAgentName(), NulsConfig.DEFAULT_ENCODING);
+                String agentAddress = Base58.encode(agent.getAgentAddress());
+                String packingAddress = Base58.encode(agent.getPackingAddress());
+                boolean b = agentName.indexOf(keyword) >= 0;
+                b = b || agentAddress.equals(keyword) || packingAddress.equals(keyword);
+                if (!b) {
+                    agentList.remove(i);
+                }
+            }
+        }
+        int start = pageNumber * pageSize - pageSize;
+        Page<AgentDTO> page = new Page<>();
+        page.setTotal(agentList.size());
+        page.setPageNumber(pageNumber);
+        page.setPageSize(pageSize);
+        int pages = agentList.size() / pageSize;
+        if (agentList.size() % pageSize > 0) {
+            pages++;
+        }
+        page.setPages(pages);
+        if (start >= agentList.size()) {
+            result.setData(page);
+            return result;
+        }
+        fillAgentList(agentList);
+        int type = AgentComparator.COMMISSION_RATE;
+        if ("owndeposit".equals(sortType)) {
+            type = AgentComparator.DEPOSIT;
+        } else if ("commissionRate".equals(sortType)) {
+            type = AgentComparator.COMMISSION_RATE;
+        } else if ("creditRatio".equals(sortType)) {
+            type = AgentComparator.CREDIT_VALUE;
+        } else if ("totalDeposit".equals(sortType)) {
+            type = AgentComparator.DEPOSITABLE;
+        }
+        Collections.sort(agentList, AgentComparator.getInstance(type));
+        List<AgentDTO> resultList = new ArrayList<>();
+        for (int i = start; i < agentList.size() && i < (start + pageSize); i++) {
+            resultList.add(new AgentDTO(agentList.get(i)));
+        }
+        page.setList(resultList);
+        result.setData(page);
         return result;
+    }
+
+    private void fillAgentList(List<Agent> agentList) {
+        MeetingRound round = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
+        for (Agent agent : agentList) {
+            fillAgent(agent, round);
+        }
+    }
+
+    private void fillAgent(Agent agent, MeetingRound round) {
+        if (round == null) {
+            return;
+        }
+        MeetingMember member = round.getMember(agent.getPackingAddress());
+        if (null == member) {
+            agent.setStatus(0);
+            return;
+        }
+        agent.setStatus(1);
+        agent.setCreditVal(member.getCreditVal());
+        agent.setTotalDeposit(member.getTotalDeposit().getValue());
     }
 
     @GET
@@ -317,15 +491,24 @@ public class PocConsensusResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Map.class)
     })
-    public Result getAgentByAddress(@ApiParam(name = "agentAddress", value = "节点地址", required = true)
-                                    @PathParam("agentAddress") String agentAddress) {
+    public Result<AgentDTO> getAgentByAddress(@ApiParam(name = "agentAddress", value = "节点地址", required = true)
+                                              @PathParam("agentAddress") String agentAddress) {
         if (!Address.validAddress(agentAddress)) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         Result result = Result.getSuccess();
-        Map<String, Object> data = null;//this.consensusService.getAgent(agentAddress);
-        result.setData(data);
-        return result;
+        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+
+        for (Agent agent : agentList) {
+            if (Arrays.equals(agent.getAgentAddress(), AddressTool.getAddress(agentAddress))) {
+                MeetingRound round = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
+                this.fillAgent(agent, round);
+                AgentDTO dto = new AgentDTO(agent);
+                result.setData(dto);
+                return result;
+            }
+        }
+        return Result.getFailed("Can not find agent!");
     }
 
     @GET
@@ -342,8 +525,10 @@ public class PocConsensusResource {
                                                @QueryParam("pageSize") Integer pageSize,
                                                @ApiParam(name = "address", value = "账户地址", required = true)
                                                @PathParam("address") String address) {
-        Result result = Result.getSuccess();
-
+        AssertUtil.canNotEmpty(address);
+        if (!AddressTool.validAddress(address)) {
+            return Result.getFailed("The address is wrong!");
+        }
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
         }
@@ -353,9 +538,58 @@ public class PocConsensusResource {
         if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
-
-        Page<Map<String, Object>> list = null;//this.consensusService.getAgentList(null, address, null, null, pageNumber, pageSize);
-        result.setData(list);
+        Result result = Result.getSuccess();
+        List<Deposit> allList = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
+        long startBlockHeight = NulsContext.getInstance().getBestHeight();
+        byte[] addressBytes = AddressTool.getAddress(address);
+        Set<NulsDigestData> agentHashSet = new HashSet<>();
+        for (Deposit deposit : allList) {
+            if (deposit.getDelHeight() != -1L && deposit.getDelHeight() <= startBlockHeight) {
+                continue;
+            }
+            if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
+                continue;
+            }
+            if (!Arrays.equals(deposit.getAddress(), addressBytes)) {
+                continue;
+            }
+            agentHashSet.add(deposit.getAgentHash());
+        }
+        List<Agent> allAgentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+        List<Agent> agentList = new ArrayList<>();
+        for (int i = allAgentList.size() - 1; i >= 0; i--) {
+            Agent agent = allAgentList.get(i);
+            if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
+                continue;
+            } else if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
+                continue;
+            }
+            if (!agentHashSet.contains(agent.getTxHash())) {
+                continue;
+            }
+            agentList.add(agent);
+        }
+        int start = pageNumber * pageSize - pageSize;
+        Page<AgentDTO> page = new Page<>();
+        page.setTotal(agentList.size());
+        page.setPageNumber(pageNumber);
+        page.setPageSize(pageSize);
+        int pages = agentList.size() / pageSize;
+        if (agentList.size() % pageSize > 0) {
+            pages++;
+        }
+        page.setPages(pages);
+        if (start >= agentList.size()) {
+            result.setData(page);
+            return result;
+        }
+        fillAgentList(agentList);
+        List<AgentDTO> resultList = new ArrayList<>();
+        for (int i = start; i < agentList.size() && i < (start + pageSize); i++) {
+            resultList.add(new AgentDTO(agentList.get(i)));
+        }
+        page.setList(resultList);
+        result.setData(page);
         return result;
     }
 
@@ -373,9 +607,12 @@ public class PocConsensusResource {
                                           @QueryParam("pageNumber") Integer pageNumber,
                                           @ApiParam(name = "pageSize", value = "每页条数")
                                           @QueryParam("pageSize") Integer pageSize,
-                                          @ApiParam(name = "agentAddress", value = "指定代理节点地址(不传查所有)")
-                                          @QueryParam("agentAddress") String agentAddress) {
+                                          @ApiParam(name = "agentHash", value = "指定代理节点标识(不传查所有)")
+                                          @QueryParam("agentHash") String agentHash) {
         AssertUtil.canNotEmpty(address);
+        if (!AddressTool.validAddress(address)) {
+            return Result.getFailed("The address is wrong!");
+        }
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
         }
@@ -386,28 +623,63 @@ public class PocConsensusResource {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         Result result = Result.getSuccess();
-
-        Page<Map<String, Object>> page = null;//this.consensusService.getDepositList(address, agentAddress, pageNumber, pageSize);
+        List<Deposit> allList = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
+        List<Deposit> depositList = new ArrayList<>();
+        long startBlockHeight = NulsContext.getInstance().getBestHeight();
+        byte[] addressBytes = AddressTool.getAddress(address);
+        for (Deposit deposit : allList) {
+            if (deposit.getDelHeight() != -1L && deposit.getDelHeight() <= startBlockHeight) {
+                continue;
+            }
+            if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
+                continue;
+            }
+            if (!Arrays.equals(deposit.getAddress(), addressBytes)) {
+                continue;
+            }
+            if (agentHash != null && !deposit.getAgentHash().getDigestHex().equals(agentHash)) {
+                continue;
+            }
+            depositList.add(deposit);
+        }
+        int start = pageNumber * pageSize - pageSize;
+        Page<DepositDTO> page = new Page<>();
+        page.setTotal(depositList.size());
+        page.setPageNumber(pageNumber);
+        page.setPageSize(pageSize);
+        int pages = depositList.size() / pageSize;
+        if (depositList.size() % pageSize > 0) {
+            pages++;
+        }
+        page.setPages(pages);
+        if (start >= depositList.size()) {
+            result.setData(page);
+            return result;
+        }
+        List<DepositDTO> resultList = new ArrayList<>();
+        for (int i = start; i < depositList.size() && i < (start + pageSize); i++) {
+            resultList.add(new DepositDTO(depositList.get(i)));
+        }
+        page.setList(resultList);
         result.setData(page);
         return result;
     }
 
     @GET
-    @Path("/deposit/agent/{agentAddress}")
+    @Path("/deposit/agent/{agentHash}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "查询共识节点受托列表信息 [3.6.9]",
             notes = "result.data.page.list: List<Map<String, Object>>")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
-    public Result queryDepositListByAgentAddress(@ApiParam(name = "agentAddress", value = "指定代理节点地址", required = true)
-                                                 @PathParam("agentAddress") String agentAddress,
-                                                 @ApiParam(name = "pageNumber", value = "页码")
-                                                 @QueryParam("pageNumber") Integer pageNumber,
-                                                 @ApiParam(name = "pageSize", value = "每页条数")
-                                                 @QueryParam("pageSize") Integer pageSize) {
-        AssertUtil.canNotEmpty(agentAddress);
-
+    public Result<List<DepositDTO>> queryDepositListByAgentAddress(@ApiParam(name = "agentHash", value = "指定代理节点标识", required = true)
+                                                                   @PathParam("agentHash") String agentHash,
+                                                                   @ApiParam(name = "pageNumber", value = "页码")
+                                                                   @QueryParam("pageNumber") Integer pageNumber,
+                                                                   @ApiParam(name = "pageSize", value = "每页条数")
+                                                                   @QueryParam("pageSize") Integer pageSize) {
+        AssertUtil.canNotEmpty(agentHash);
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
         }
@@ -418,35 +690,42 @@ public class PocConsensusResource {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         Result result = Result.getSuccess();
-
-        Page<Map<String, Object>> page = null;//this.consensusService.getDepositList(null, agentAddress, pageNumber, pageSize);
+        List<Deposit> allList = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
+        List<Deposit> depositList = new ArrayList<>();
+        long startBlockHeight = NulsContext.getInstance().getBestHeight();
+        for (Deposit deposit : allList) {
+            if (deposit.getDelHeight() != -1L && deposit.getDelHeight() <= startBlockHeight) {
+                continue;
+            }
+            if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
+                continue;
+            }
+            if (!deposit.getAgentHash().equals(agentHash)) {
+                continue;
+            }
+            depositList.add(deposit);
+        }
+        int start = pageNumber * pageSize - pageSize;
+        Page<DepositDTO> page = new Page<>();
+        page.setTotal(depositList.size());
+        page.setPageNumber(pageNumber);
+        page.setPageSize(pageSize);
+        int pages = depositList.size() / pageSize;
+        if (depositList.size() % pageSize > 0) {
+            pages++;
+        }
+        page.setPages(pages);
+        if (start >= depositList.size()) {
+            result.setData(page);
+            return result;
+        }
+        List<DepositDTO> resultList = new ArrayList<>();
+        for (int i = start; i < depositList.size() && i < (start + pageSize); i++) {
+            resultList.add(new DepositDTO(depositList.get(i)));
+        }
+        page.setList(resultList);
         result.setData(page);
         return result;
-    }
-
-    @GET
-    @Path("/agent/status")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询所有共识信息状态 [3.6.10]",
-            notes = "result.data: Map<String, Object>")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Map.class)
-    })
-    public Result getAllAgentStatusList() {
-//        List<AgentPo> poList = agentDataService.getList();
-//        if (null == poList || poList.isEmpty()) {
-//            return Result;
-//        }
-        Map<String, Object> statusMap = new HashMap<>();
-//        MeetingRound round = this.consensusService.getCurrentRound();
-//        for (AgentPo po : poList) {
-//            if (null != round && round.getMember(po.getPackingAddress()) != null) {
-//                statusMap.put(po.getAgentAddress(), ConsensusStatusEnum.IN.getCode());
-//            } else {
-//                statusMap.put(po.getAgentAddress(), ConsensusStatusEnum.WAITING.getCode());
-//            }
-//        }
-        return Result.getSuccess().setData(statusMap);
     }
 
     @POST
@@ -458,7 +737,7 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
     public Result exitConsensus(@ApiParam(name = "form", value = "退出共识表单数据", required = true)
-                                        WithdrawForm form) {
+                                        WithdrawForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
         AssertUtil.canNotEmpty(form.getPassword());
@@ -466,19 +745,45 @@ public class PocConsensusResource {
         if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
+        Account account = accountService.getAccount(form.getAddress()).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        if (account.isEncrypted()) {
+            AssertUtil.canNotEmpty(form.getPassword());
+        }
+        CancelDepositTransaction tx = new CancelDepositTransaction();
+        CancelDeposit cancelDeposit = new CancelDeposit();
+        NulsDigestData hash = NulsDigestData.fromDigestHex(form.getTxHash());
+        DepositTransaction depositTransaction = (DepositTransaction) ledgerService.getTx(hash);
+        if (null == depositTransaction) {
+            return Result.getFailed("Cann't find the deposit transaction!");
+        }
+        cancelDeposit.setAddress(AddressTool.getAddress(form.getAddress()));
+        cancelDeposit.setJoinTxHash(hash);
+        tx.setTxData(cancelDeposit);
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        toList.add(new Coin(cancelDeposit.getAddress(), depositTransaction.getTxData().getDeposit(), 0));
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("txHash", form.getTxHash());
-        Transaction tx = null;
-//        try {
-//            tx = consensusService.stopConsensus(form.getAddress(), form.getPassword(), params);
-//        } catch (NulsException e) {
-//            Log.error(e);
-//            return Result.getFailed(e.getMessage());
-//        } catch (IOException e) {
-//            Log.error(e);
-//            return Result.getFailed(e.getMessage());
-//        }
+        List<Coin> fromList = new ArrayList<>();
+        for (int index = 0; index < depositTransaction.getCoinData().getTo().size(); index++) {
+            Coin coin = depositTransaction.getCoinData().getTo().get(index);
+            if (coin.getLockTime() == -1L && coin.getNa().equals(depositTransaction.getTxData().getDeposit())) {
+                coin.setOwner(ArraysTool.joinintTogether(hash.serialize(), new VarInt(index).encode()));
+                fromList.add(coin);
+                break;
+            }
+        }
+        if (fromList.isEmpty()) {
+            return Result.getFailed(KernelErrorCode.DATA_ERROR);
+        }
+        coinData.setFrom(fromList);
+        tx.setCoinData(coinData);
+        Result result1 = this.txProcessing(tx, null, account, form.getPassword());
+        if (result1.isFailed()) {
+            return result1;
+        }
         return Result.getSuccess().setData(tx.getHash().getDigestHex());
     }
 }
