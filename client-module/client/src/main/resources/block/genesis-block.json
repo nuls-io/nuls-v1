@@ -26,6 +26,16 @@
       "address": "Ns3j8uGKZ3tfJaWFDqTigjuzKRV1Luo",
       "nuls": 10000000,
       "unlockHeight": 0
+    },
+    {
+      "address": "Ns7xeWbLC8Vd6wMZXJaiQfQVJihWave",
+      "nuls": 10000000,
+      "unlockHeight": 0
+    },
+    {
+      "address": "NsBRuaWURoRGSzysNUa4kpnUNJ7NuLS",
+      "nuls": 40000000,
+      "unlockHeight": 0
     }
   ]
 }
