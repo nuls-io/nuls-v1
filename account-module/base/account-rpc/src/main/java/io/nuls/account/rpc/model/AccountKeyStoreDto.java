@@ -28,10 +28,10 @@ public class AccountKeyStoreDto {
 
     public AccountKeyStoreDto(AccountKeyStore accountKeyStore) {
         this.address = accountKeyStore.getAddress();
-        this.encryptedPrivateKey = accountKeyStore.getEncryptedPrivateKey();
+        this.encryptedPrivateKey = null == accountKeyStore.getEncryptedPrivateKey() ? null : accountKeyStore.getEncryptedPrivateKey();
         this.alias = accountKeyStore.getAlias();
         this.pubKey = Hex.encode(accountKeyStore.getPubKey());
-        this.prikey = Hex.encode(accountKeyStore.getPrikey());
+        this.prikey = null == accountKeyStore.getPrikey() ? null : Hex.encode(accountKeyStore.getPrikey());
     }
 
     public AccountKeyStore toAccountKeyStore(){
@@ -39,7 +39,7 @@ public class AccountKeyStoreDto {
         accountKeyStore.setAddress(this.address);
         accountKeyStore.setAlias(this.alias);
         accountKeyStore.setEncryptedPrivateKey(this.encryptedPrivateKey);
-        accountKeyStore.setPrikey(Hex.decode(this.prikey));
+        accountKeyStore.setPrikey(null == this.prikey ? null : Hex.decode(this.prikey));
         accountKeyStore.setPubKey(Hex.decode(this.pubKey));
         return accountKeyStore;
     }
@@ -74,5 +74,13 @@ public class AccountKeyStoreDto {
 
     public void setPubKey(String pubKey) {
         this.pubKey = pubKey;
+    }
+
+    public String getPrikey() {
+        return prikey;
+    }
+
+    public void setPrikey(String prikey) {
+        this.prikey = prikey;
     }
 }

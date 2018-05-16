@@ -106,7 +106,7 @@ public class AccountServiceImpl implements AccountService {
     public Result<Boolean> removeAccount(String address, String password) {
         AssertUtil.canNotEmpty(password, "");
         if (!Address.validAddress(address)) {
-            Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Account account = getAccountByAddress(address);
         if (account == null) {
@@ -155,7 +155,7 @@ public class AccountServiceImpl implements AccountService {
         account.setAddress(new Address(keyStore.getAddress()));
         account.setAlias(keyStore.getAlias());
         account.setPubKey(keyStore.getPubKey());
-        if(StringUtils.validPassword(password)){
+        if (StringUtils.validPassword(password)) {
             try {
                 account.encrypt(password);
             } catch (NulsException e) {
@@ -184,7 +184,7 @@ public class AccountServiceImpl implements AccountService {
         } catch (NulsException e) {
             return Result.getFailed(AccountErrorCode.FAILED);
         }
-        if(StringUtils.validPassword(password)){
+        if (StringUtils.validPassword(password)) {
             try {
                 account.encrypt(password);
             } catch (NulsException e) {
@@ -206,9 +206,12 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<AccountKeyStore> exportAccountToKeyStore(String address, String password) {
         if (!Address.validAddress(address)) {
-            Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Account account = getAccountByAddress(address);
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
         AccountKeyStore accountKeyStore = new AccountKeyStore();
         if (null != password) {
             if (!StringUtils.validPassword(password)) {
@@ -230,7 +233,6 @@ public class AccountServiceImpl implements AccountService {
         accountKeyStore.setAddress(account.getAddress().toString());
         accountKeyStore.setAlias(account.getAlias());
         accountKeyStore.setPubKey(account.getPubKey());
-        accountKeyStore.setPrikey(account.getPriKey());
         return Result.getSuccess().setData(accountKeyStore);
     }
 
@@ -342,7 +344,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<Boolean> isEncrypted(String address) {
         if (!Address.validAddress(address)) {
-            Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Account account = getAccountByAddress(address);
         if (null == account) {
@@ -374,7 +376,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<Boolean> verifyAddressFormat(String address) {
         if (!Address.validAddress(address)) {
-            Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         return new Result(Address.validAddress(address), null);
     }
@@ -424,7 +426,7 @@ public class AccountServiceImpl implements AccountService {
             throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
         }
         if (account.isEncrypted()) {
-            AssertUtil.canNotEmpty(password,"password can not be empty");
+            AssertUtil.canNotEmpty(password, "password can not be empty");
             return this.signDigest(digest, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
         } else {
             return this.signDigest(digest, account.getPriKey());

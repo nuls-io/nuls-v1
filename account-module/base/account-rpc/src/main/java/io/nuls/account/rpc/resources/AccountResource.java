@@ -66,7 +66,7 @@ public class AccountResource {
                                                    AccountCreateForm form) {
         int count = form.getCount() < 1 ? 1 : form.getCount();
         String password = form.getPassword();
-        if (null == form.getPassword() || "".equals(form.getPassword())) {
+        if (StringUtils.isBlank(password)) {
             password = null;
         }
         List<Account> listAccount = accountService.createAccount(count, password).getData();
@@ -364,7 +364,7 @@ public class AccountResource {
         if (StringUtils.isNotBlank(form.getAddress()) && !Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        if (null != form.getPassword() && !StringUtils.validPassword(form.getPassword())) {
+        if (StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Result<AccountKeyStore> result = accountService.exportAccountToKeyStore(form.getAddress(), form.getPassword());
@@ -383,13 +383,13 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success",response = Result.class)
     })
     public Result importAccount(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
-                                        AccountImportForm form) {
+                                            AccountKeyStoreImportForm form) {
         String keyStore = form.getAccountKeyStore();
         if (null == keyStore) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         String password = form.getPassword();
-        if(null != password && !StringUtils.validPassword(password)){
+        if(StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)){
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         AccountKeyStoreDto accountKeyStoreDto = null;
@@ -399,6 +399,7 @@ public class AccountResource {
             Log.error(e);
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
+        AccountKeyStore accountKeyStore = accountKeyStoreDto.toAccountKeyStore();
         Result result = accountService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), password);
         if(result.isFailed()){
             return result;
@@ -421,7 +422,7 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         String password = form.getPassword();
-        if(null != password && !StringUtils.validPassword(password)){
+        if(StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)){
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         Result result = accountService.importAccount(priKey, password);

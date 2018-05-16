@@ -5,10 +5,10 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author: Charlie
- * @date: 2018/4/19
+ * @date: 2018/5/16
  */
-@ApiModel(value = "导入账户表单数据")
-public class AccountImportForm {
+@ApiModel(value = "导入账户KeyStore表单数据")
+public class AccountKeyStoreImportForm {
 
     @ApiModelProperty(name = "accountKeyStore", value = "备份的账户数据", required = true)
     private String accountKeyStore;
@@ -31,5 +31,4 @@ public class AccountImportForm {
     public void setPassword(String password) {
         this.password = password;
     }
-
 }
