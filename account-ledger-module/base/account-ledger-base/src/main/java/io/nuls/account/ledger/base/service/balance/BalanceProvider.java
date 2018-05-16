@@ -70,7 +70,7 @@ public class BalanceProvider extends Thread {
         Integer status = statusMap.get(addressKey);
 
         Balance balance = null;
-        if(status == null || status.intValue() == STATUS_EXPIRED) {
+        if (status == null || status.intValue() == STATUS_EXPIRED) {
             try {
                 balance = loadBalanceByAddress(address);
             } catch (NulsException e) {
@@ -90,7 +90,7 @@ public class BalanceProvider extends Thread {
 
     public Result refreshBalance(byte[] address) {
 
-        if(address == null) {
+        if (address == null) {
             // FIXME 当address为null时刷新所有，慎重使用
             statusMap.clear();
             return Result.getSuccess();
@@ -99,7 +99,7 @@ public class BalanceProvider extends Thread {
         String addressKey = new String(address);
         Integer status = statusMap.get(addressKey);
 
-        if(status != null && status.intValue() == STATUS_NEWEST) {
+        if (status != null && status.intValue() == STATUS_NEWEST) {
             statusMap.put(addressKey, STATUS_EXPIRED);
         }
 
@@ -112,7 +112,7 @@ public class BalanceProvider extends Thread {
         balanceMap.clear();
 
         List<Account> accounts = accountService.getAccountList().getData();
-        if(accounts == null) {
+        if (accounts == null) {
             return;
         }
         for (Account account : accounts) {
@@ -121,8 +121,8 @@ public class BalanceProvider extends Thread {
         for (byte[] address : addressList) {
             try {
                 loadBalanceByAddress(address);
-            }catch (NulsException e){
-                Log.info("getbalance of address["+Base58.encode(address)+"] error");
+            } catch (NulsException e) {
+                Log.info("getbalance of address[" + Base58.encode(address) + "] error");
             }
         }
     }

@@ -324,29 +324,31 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result importAccountLedger(String address) {
-        if(address == null || !Address.validAddress(address)){
-            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
-        }
-        byte[] base58 = null;
-        try {
-            base58 = Base58.decode(address);
-        }catch (Exception e){
+        if (address == null || !Address.validAddress(address)) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
 
-        //todo, when the node is downloading blocks, the txs in newly downloaded blocks will miss
+        byte[] addressBytes = null;
+        try {
+            addressBytes = Base58.decode(address);
+        } catch (Exception e) {
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+        }
+
+        // 确认先刷新账户是否就不存在这个问题了 todo, when the node is downloading blocks, the txs in newly downloaded blocks will miss
+        reloadAccount();
+
         long height = NulsContext.getInstance().getBestHeight();
         for (int i = 0; i <= height; i++) {
             List<NulsDigestData> txs = blockService.getBlock(i).getData().getTxHashList();
             for (int j = 0; j < txs.size(); j++) {
                 Transaction tx = ledgerService.getTx(txs.get(j));
-                saveConfirmedTransaction(tx,base58,TransactionInfo.CONFIRMED);
+                saveConfirmedTransaction(tx, addressBytes, TransactionInfo.CONFIRMED);
             }
         }
         try {
-            reloadAccount();
-            balanceProvider.refreshBalance(base58);
-        }catch (Exception e){
+            balanceProvider.refreshBalance(addressBytes);
+        } catch (Exception e) {
             Log.info(address);
         }
         return Result.getSuccess();
@@ -372,17 +374,17 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             storageService.deleteLocalTxInfo(txInfoPo);
         }
 
-        if(status == TransactionInfo.UNCONFIRMED) {
+        if (status == TransactionInfo.UNCONFIRMED) {
             result = storageService.saveTempTx(tx);
         }
 
         return result;
     }
 
-    protected Result<Integer> saveConfirmedTransaction(Transaction tx,byte[] addresss,byte status) {
+    protected Result<Integer> saveConfirmedTransaction(Transaction tx, byte[] addresss, byte status) {
         List<byte[]> destAddresses = new ArrayList<byte[]>();
         destAddresses.add(addresss);
-        List<byte[]> addresses = getRelatedAddresses(tx,destAddresses);
+        List<byte[]> addresses = getRelatedAddresses(tx, destAddresses);
         if (addresses == null || addresses.size() == 0) {
             return Result.getFailed().setData(new Integer(0));
         }
@@ -421,38 +423,38 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         return resultTxs;
     }
 
-    protected List<byte[]> getRelatedAddresses(Transaction tx){
+    protected List<byte[]> getRelatedAddresses(Transaction tx) {
         List<byte[]> result = new ArrayList<>();
-        if(tx == null){
+        if (tx == null) {
             return result;
         }
         if (localAccountList == null || localAccountList.size() == 0) {
             return result;
         }
         List<byte[]> destAddresses = new ArrayList<>();
-        for(Account account:localAccountList){
+        for (Account account : localAccountList) {
             destAddresses.add(account.getAddress().getBase58Bytes());
         }
 
-        return getRelatedAddresses(tx,destAddresses);
+        return getRelatedAddresses(tx, destAddresses);
     }
 
-    protected List<byte[]> getRelatedAddresses(Transaction tx, List<byte[]> addresses){
+    protected List<byte[]> getRelatedAddresses(Transaction tx, List<byte[]> addresses) {
         List<byte[]> result = new ArrayList<>();
-        if(tx == null){
+        if (tx == null) {
             return result;
         }
-        if(addresses == null || addresses.size() == 0){
+        if (addresses == null || addresses.size() == 0) {
             return result;
         }
         List<byte[]> sourceAddresses = tx.getAllRelativeAddress();
-        if(sourceAddresses == null || sourceAddresses.size() == 0){
+        if (sourceAddresses == null || sourceAddresses.size() == 0) {
             return result;
         }
 
-        for(byte[] tempSourceAddress : sourceAddresses){
-            for(byte[] tempDestAddress : addresses){
-                if(Arrays.equals(tempDestAddress,tempSourceAddress)){
+        for (byte[] tempSourceAddress : sourceAddresses) {
+            for (byte[] tempDestAddress : addresses) {
+                if (Arrays.equals(tempDestAddress, tempSourceAddress)) {
                     result.add(tempSourceAddress);
                     continue;
                 }
