@@ -203,6 +203,9 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
     }
 
     public Na getFee() {
+        if(isFreeOfFee()){
+            return Na.ZERO;
+        }
         Na fee = Na.ZERO;
         if (null != coinData) {
             fee = coinData.getFee();

@@ -24,6 +24,7 @@
  */
 package io.nuls.kernel.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -71,6 +72,7 @@ public class Result<T> {
         return success;
     }
 
+    @JsonIgnore
     public boolean isFailed() {
         return !success;
     }
