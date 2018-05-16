@@ -47,7 +47,6 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- *
  * @author ln
  * @date 2018/4/8
  */
@@ -86,8 +85,11 @@ public class DownloadProcessor extends Thread {
         // To ensure the accuracy and security of data, try to wait for more nodes to start synchronization.
 //        waitNetworkNotChange();
         downloadStatus = DownloadStatus.READY;
-
-        doSynchronize();
+        try {
+            doSynchronize();
+        } catch (NulsRuntimeException e) {
+            Log.warn(e.getMessage());
+        }
     }
 
     /**

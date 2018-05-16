@@ -1,5 +1,6 @@
 package io.nuls.network.service.impl;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.network.constant.NetworkParam;
@@ -72,6 +73,7 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void reset() {
+        Log.warn("start network reset");
         nodeManager.reset();
     }
 

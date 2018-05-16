@@ -147,7 +147,6 @@ public class ConnectionManager {
             if (!node.isHandShake()) {
                 return;
             }
-            //todo 传给其他模块处理
             messageBusService.receiveMessage(message, node);
         }
     }
