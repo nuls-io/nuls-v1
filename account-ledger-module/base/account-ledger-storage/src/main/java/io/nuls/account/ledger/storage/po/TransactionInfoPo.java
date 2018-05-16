@@ -30,9 +30,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.utils.AddressTool;
-import io.nuls.kernel.utils.NulsByteBuffer;
-import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -70,7 +68,7 @@ public class TransactionInfoPo extends BaseNulsData {
 
         byte[] addresses = new byte[addressList.size() * AddressTool.HASH_LENGTH];
         for (int i = 0; i < addressList.size(); i++) {
-            System.arraycopy(addressList.get(i), 0, addressList, AddressTool.HASH_LENGTH* i, AddressTool.HASH_LENGTH);
+            System.arraycopy(addressList.get(i), 0, addresses, AddressTool.HASH_LENGTH* i, AddressTool.HASH_LENGTH);
         }
         this.addresses = addresses;
         this.txType = tx.getType();
@@ -107,20 +105,34 @@ public class TransactionInfoPo extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        // todo auto-generated method stub
-
+        stream.writeNulsData(this.txHash);
+        stream.writeVarInt(blockHeight);
+        stream.writeInt48(time);
+        stream.writeBytesWithLength(addresses);
+        stream.writeVarInt(txType);
+        stream.write(status);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        // todo auto-generated method stub
-
+        this.txHash = byteBuffer.readHash();
+        this.blockHeight = byteBuffer.readVarInt();
+        this.time = byteBuffer.readInt48();
+        this.addresses = byteBuffer.readByLengthByte();
+        this.txType = (int)byteBuffer.readVarInt();
+        this.status = byteBuffer.readByte();
     }
 
     @Override
     public int size() {
-        // todo auto-generated method stub
-        return 0;
+        int size = 0;
+        size += SerializeUtils.sizeOfNulsData(txHash);
+        size += VarInt.sizeOf(blockHeight);
+        size += SerializeUtils.sizeOfInt48();
+        size += SerializeUtils.sizeOfBytes(addresses);
+        size += VarInt.sizeOf(txType);
+        size += 1;
+        return size;
     }
 
     public NulsDigestData getTxHash() {

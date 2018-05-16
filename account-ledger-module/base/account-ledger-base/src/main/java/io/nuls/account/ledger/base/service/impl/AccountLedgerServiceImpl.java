@@ -315,7 +315,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
         txInfoPo.setStatus(status);
         List<byte[]> addresses = new ArrayList<>();
-        byte[] addressesBytes = tx.getAddressFromSig();
+        byte[] addressesBytes = txInfoPo.getAddresses();
 
         if (addressesBytes == null || addressesBytes.length == 0) {
             return Result.getSuccess().setData(new Integer(0));

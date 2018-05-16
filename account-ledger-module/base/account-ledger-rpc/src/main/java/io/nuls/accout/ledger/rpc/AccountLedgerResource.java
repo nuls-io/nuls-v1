@@ -63,7 +63,7 @@ public class AccountLedgerResource {
     private AccountLedgerService accountLedgerService;
 
     @GET
-    @Path("/accountledger/address/{address}")
+    @Path("/accountledger/balance/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "账户地址查询账户余额", notes = "result.data: balanceJson 返回对应的余额信息")
     @ApiResponses(value = {
