@@ -359,7 +359,7 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = Result.class)
     })
-    public Result<String> backup(@ApiParam(name = "form", value = "钱包备份表单数据")
+    public Result<AccountKeyStore> backup(@ApiParam(name = "form", value = "钱包备份表单数据")
                                     AccountAPForm form) {
         if (StringUtils.isNotBlank(form.getAddress()) && !Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
@@ -367,7 +367,11 @@ public class AccountResource {
         if (null != form.getPassword() && !StringUtils.validPassword(form.getPassword())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        AccountKeyStore accountKeyStore = accountService.exportAccountToKeyStore(form.getAddress(), form.getPassword()).getData();
+        Result<AccountKeyStore> result = accountService.exportAccountToKeyStore(form.getAddress(), form.getPassword());
+        if(result.isFailed()){
+            return result;
+        }
+        AccountKeyStore accountKeyStore = result.getData();
         return Result.getSuccess().setData(new AccountKeyStoreDto(accountKeyStore));
     }
 
@@ -395,14 +399,18 @@ public class AccountResource {
             Log.error(e);
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        Account account = accountService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), password).getData();
+        Result result = accountService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), password);
+        if(result.isFailed()){
+            return result;
+        }
+        Account account = (Account)result.getData();
         return Result.getSuccess().setData(account.getAddress().toString());
     }
 
     @POST
     @Path("/import/pri")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "根据私钥导入账户 [3.4.7]", notes = "返回账户地址")
+    @ApiOperation(value = "根据私钥导入账户", notes = "返回账户地址")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = Result.class)
     })
@@ -416,7 +424,11 @@ public class AccountResource {
         if(null != password && !StringUtils.validPassword(password)){
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        Account account = accountService.importAccount(priKey, password).getData();
+        Result result = accountService.importAccount(priKey, password);
+        if(result.isFailed()){
+            return result;
+        }
+        Account account = (Account)result.getData();
         return Result.getSuccess().setData(account.getAddress().toString());
     }
 
