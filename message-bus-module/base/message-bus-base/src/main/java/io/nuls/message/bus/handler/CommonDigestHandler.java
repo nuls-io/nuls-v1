@@ -1,8 +1,11 @@
 package io.nuls.message.bus.handler;
 
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.message.bus.message.CommonDigestMessage;
 import io.nuls.message.bus.message.GetMessageBodyMessage;
+import io.nuls.message.bus.service.MessageBusService;
+import io.nuls.message.bus.service.impl.MessageCacheService;
 import io.nuls.network.entity.Node;
 
 /**
@@ -14,9 +17,12 @@ import io.nuls.network.entity.Node;
  */
 public class CommonDigestHandler extends AbstractMessageHandler<CommonDigestMessage> {
 
+    private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
+
     @Override
-    public void onMessage(CommonDigestMessage message, Node formNode) throws NulsException {
+    public void onMessage(CommonDigestMessage message, Node fromNode) throws NulsException {
         GetMessageBodyMessage getMessageBodyMessage = new GetMessageBodyMessage();
         getMessageBodyMessage.setMsgBody(message.getMsgBody());
+        messageBusService.sendToNode(getMessageBodyMessage,fromNode,false);
     }
 }
