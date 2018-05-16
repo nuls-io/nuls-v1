@@ -24,7 +24,7 @@
 package io.nuls.account.ledger.base.module.impl;
 
 import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.ledger.base.service.balance.BalanceCalculator;
+import io.nuls.account.ledger.base.service.balance.BalanceProvider;
 import io.nuls.account.ledger.constant.AccountLedgerConstant;
 import io.nuls.account.ledger.module.AbstractAccountLedgerModule;
 import io.nuls.kernel.context.NulsContext;
@@ -46,7 +46,7 @@ public class AccountLedgerModuleBootstrap extends AbstractAccountLedgerModule {
     @Override
     public void start() {
         this.waitForDependencyRunning(AccountConstant.MODULE_ID_ACCOUNT);
-        TaskManager.createAndRunThread(AccountLedgerConstant.MODULE_ID_ACCOUNTLEDGER,"Account-balance-calculate", NulsContext.getServiceBean(BalanceCalculator.class));
+        TaskManager.createAndRunThread(AccountLedgerConstant.MODULE_ID_ACCOUNTLEDGER,"Account-balance-calculate", NulsContext.getServiceBean(BalanceProvider.class));
     }
 
     @Override
