@@ -30,6 +30,7 @@ import io.nuls.account.ledger.storage.po.TransactionInfoPo;
 import io.nuls.account.ledger.storage.service.AccountLedgerStorageService;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.log.Log;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -53,7 +54,7 @@ import java.util.List;
  * @date 2018/5/10.
  */
 @Component
-public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageService,InitializingBean{
+public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageService, InitializingBean {
     /**
      * 通用数据存储服务
      * Universal data storage services.
@@ -164,7 +165,7 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
             for (int i = 0; i < addresses.size(); i++) {
                 byte[] infoKey = new byte[AddressTool.HASH_LENGTH + infoPo.getTxHash().size()];
                 System.arraycopy(addresses.get(i), 0, infoKey, 0, AddressTool.HASH_LENGTH);
-                System.arraycopy(infoPo.getTxHash().getWholeBytes(), 0, infoKey, AddressTool.HASH_LENGTH, infoPo.getTxHash().size());
+                System.arraycopy(infoPo.getTxHash().serialize(), 0, infoKey, AddressTool.HASH_LENGTH, infoPo.getTxHash().size());
                 dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, infoKey, infoPo.serialize());
                 savedKeyList.add(infoKey);
             }
@@ -207,7 +208,11 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
 
             byte[] infoKey = new byte[AddressTool.HASH_LENGTH + infoPo.getTxHash().size()];
             System.arraycopy(addresses, i * AddressTool.HASH_LENGTH, infoKey, 0, AddressTool.HASH_LENGTH);
-            System.arraycopy(infoPo.getTxHash().getWholeBytes(), 0, infoKey, AddressTool.HASH_LENGTH, infoPo.getTxHash().size());
+            try {
+                System.arraycopy(infoPo.getTxHash().serialize(), 0, infoKey, AddressTool.HASH_LENGTH, infoPo.getTxHash().size());
+            } catch (IOException e) {
+                Log.info(e.getMessage());
+            }
             dbService.delete(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, infoKey);
 
         }

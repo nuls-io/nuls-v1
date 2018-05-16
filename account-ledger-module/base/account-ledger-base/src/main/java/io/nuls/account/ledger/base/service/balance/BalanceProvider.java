@@ -128,7 +128,7 @@ public class BalanceProvider extends Thread {
     }
 
     protected Balance loadBalanceByAddress(byte[] address) throws NulsException {
-        if (accountLedgerService.isLocalAccount(address)) {
+        if (!accountLedgerService.isLocalAccount(address)) {
             return null;
         }
         List<Coin> coinList = storageService.getCoinBytes(address);

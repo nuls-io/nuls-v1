@@ -122,16 +122,6 @@ public class NulsDigestData extends BaseNulsData {
         return digestBytes;
     }
 
-    public byte[] getWholeBytes() {
-        if (null == digestBytes) {
-            return null;
-        }
-        byte[] bytes = new byte[1 + digestBytes.length];
-        bytes[0] = digestAlgType;
-        System.arraycopy(digestBytes, 0, bytes, 1, digestBytes.length);
-        return bytes;
-    }
-
     public static NulsDigestData calcDigestData(byte[] data) {
         return calcDigestData(data, (byte) 0);
     }
@@ -230,10 +220,15 @@ public class NulsDigestData extends BaseNulsData {
         if (!(obj instanceof NulsDigestData)) {
             return false;
         }
-        if (this.getWholeBytes() == null || ((NulsDigestData) obj).getWholeBytes() == null) {
-            return false;
-        }
-        if (this.getWholeBytes().length != ((NulsDigestData) obj).getWholeBytes().length) {
+        try {
+            if (this.serialize() == null || ((NulsDigestData) obj).serialize() == null) {
+                return false;
+            }
+
+            if (this.serialize().length != ((NulsDigestData) obj).serialize().length) {
+                return false;
+            }
+        }catch (Exception e){
             return false;
         }
         return Arrays.equals(this.getDigestBytes(), ((NulsDigestData) obj).getDigestBytes());
