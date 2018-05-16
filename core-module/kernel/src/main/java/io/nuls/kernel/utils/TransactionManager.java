@@ -60,6 +60,9 @@ public class TransactionManager {
                 continue;
             }
             Class paramType = method.getParameterTypes()[0];
+            if (paramType.equals(Transaction.class)) {
+                continue;
+            }
             putTx(paramType, processor.getClass());
             break;
         }
