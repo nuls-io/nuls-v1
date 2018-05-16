@@ -442,8 +442,11 @@ public class AccountResource {
     })
     public Result removeAccount(@ApiParam(name = "钱包移除账户表单数据", value = "JSONFormat", required = true)
                                            AccountAPForm form) {
-        if (!StringUtils.validPassword(form.getPassword()) || !Address.validAddress(form.getAddress())) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        if (!Address.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        if (!StringUtils.validPassword(form.getPassword())){
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         return accountService.removeAccount(form.getAddress(), form.getPassword());
     }

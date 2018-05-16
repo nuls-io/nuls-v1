@@ -106,7 +106,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Boolean> removeAccount(String address, String password) {
-        AssertUtil.canNotEmpty(password, "");
+
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
@@ -114,14 +114,18 @@ public class AccountServiceImpl implements AccountService {
         if (account == null) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        try {
-            if (!account.decrypt(password)) {
+        if (account.isEncrypted()) {
+            if(!StringUtils.validPassword(password)){
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
-        } catch (NulsException e) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            try {
+                if (!account.decrypt(password)) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            } catch (NulsException e) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
         }
-
         accountStorageService.removeAccount(account.getAddress());
         LOCAL_ADDRESS_LIST.remove(address);
         return Result.getSuccess();
