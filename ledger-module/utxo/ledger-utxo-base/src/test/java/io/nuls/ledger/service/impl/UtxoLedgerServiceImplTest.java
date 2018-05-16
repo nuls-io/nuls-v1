@@ -325,8 +325,8 @@ public class UtxoLedgerServiceImplTest {
 
     @AfterClass
     public static void tearDown() throws Exception {
-        LevelDBManager.destroyArea(LedgerStorageConstant.DB_AREA_LEDGER_TRANSACTION);
-        LevelDBManager.destroyArea(LedgerStorageConstant.DB_AREA_LEDGER_UTXO);
+        LevelDBManager.destroyArea(LedgerStorageConstant.DB_NAME_LEDGER_TX);
+        LevelDBManager.destroyArea(LedgerStorageConstant.DB_NAME_LEDGER_UTXO);
     }
 
     private static void initAllList() throws NulsException, IOException {

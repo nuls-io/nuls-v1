@@ -66,17 +66,17 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-        Result result = dbService.createArea(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TRANSACTION);
+        Result result = dbService.createArea(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX);
         if (result.isFailed()) {
             //TODO
         }
 
-        result = dbService.createArea(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_COINDATA);
+        result = dbService.createArea(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
         if (result.isFailed()) {
             //TODO
         }
 
-        result = dbService.createArea(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TXINFO);
+        result = dbService.createArea(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX);
         if (result.isFailed()) {
             //TODO
         }
@@ -98,7 +98,7 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
         if (coinData != null) {
             // delete - from
             List<Coin> froms = coinData.getFrom();
-            BatchOperation batch = dbService.createWriteBatch(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_COINDATA);
+            BatchOperation batch = dbService.createWriteBatch(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
             for (Coin from : froms) {
                 byte[] fromSource = from.getOwner();
                 byte[] utxoFromSource = new byte[tx.getHash().size()];
@@ -136,7 +136,7 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
         }
 
 //        try {
-//            result = dbService.put(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TRANSACTION, tx.getHash().serialize(), tx.serialize());
+//            result = dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, tx.getHash().serialize(), tx.serialize());
 //        } catch (IOException e) {
 //            throw new NulsRuntimeException(e);
 //        }
@@ -165,12 +165,12 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
                 byte[] infoKey = new byte[AddressTool.HASH_LENGTH + infoPo.getTxHash().size()];
                 System.arraycopy(addresses.get(i), 0, infoKey, 0, AddressTool.HASH_LENGTH);
                 System.arraycopy(infoPo.getTxHash().getWholeBytes(), 0, infoKey, AddressTool.HASH_LENGTH, infoPo.getTxHash().size());
-                dbService.put(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TXINFO, infoKey, infoPo.serialize());
+                dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, infoKey, infoPo.serialize());
                 savedKeyList.add(infoKey);
             }
         } catch (IOException e) {
             for (int i = 0; i < savedKeyList.size(); i++) {
-                dbService.delete(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TXINFO, savedKeyList.get(i));
+                dbService.delete(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, savedKeyList.get(i));
             }
 
             return Result.getFailed(AccountLedgerErrorCode.IO_ERROR);
@@ -208,7 +208,7 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
             byte[] infoKey = new byte[AddressTool.HASH_LENGTH + infoPo.getTxHash().size()];
             System.arraycopy(addresses, i * AddressTool.HASH_LENGTH, infoKey, 0, AddressTool.HASH_LENGTH);
             System.arraycopy(infoPo.getTxHash().getWholeBytes(), 0, infoKey, AddressTool.HASH_LENGTH, infoPo.getTxHash().size());
-            dbService.delete(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_TXINFO, infoKey);
+            dbService.delete(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, infoKey);
 
         }
 
@@ -223,13 +223,13 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     @Override
     public List<Coin> getCoinBytes(byte[] owner) throws NulsException {
         List<Coin> coinList = new ArrayList<>();
-        List<byte[]> keyList = dbService.keyList(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_COINDATA);
+        List<byte[]> keyList = dbService.keyList(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
         byte[] keyOwner = new byte[AddressTool.HASH_LENGTH];
         for (byte[] key : keyList) {
             System.arraycopy(key, 0, keyOwner, 0, AddressTool.HASH_LENGTH);
             if (java.util.Arrays.equals(keyOwner, owner)) {
                 Coin coin = new Coin();
-                coin.parse(dbService.get(AccountLedgerStorageConstant.DB_AREA_ACCOUNTLEDGER_COINDATA, key));
+                coin.parse(dbService.get(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA, key));
                 coinList.add(coin);
             }
         }

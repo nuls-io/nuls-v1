@@ -3,7 +3,6 @@ package io.nuls.account.storage.service.impl;
 import io.nuls.account.storage.constant.AccountStorageConstant;
 import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AliasStorageService;
-import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.DBService;
@@ -31,7 +30,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-        Result result = this.dbService.createArea(AccountStorageConstant.DB_AREA_ALIAS);
+        Result result = this.dbService.createArea(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
@@ -41,7 +40,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
     public Result<AliasPo> getAlias(String alias) {
         try {
             byte[] aliasByte = alias.getBytes(NulsConfig.DEFAULT_ENCODING);
-            AliasPo aliasPo = dbService.getModel(AccountStorageConstant.DB_AREA_ALIAS, aliasByte, AliasPo.class);
+            AliasPo aliasPo = dbService.getModel(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS, aliasByte, AliasPo.class);
             return Result.getSuccess().setData(aliasPo);
         } catch (UnsupportedEncodingException e) {
             Log.error(e);
@@ -52,7 +51,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
     @Override
     public Result saveAlias(AliasPo aliasPo) {
         try {
-            return dbService.putModel(AccountStorageConstant.DB_AREA_ALIAS, aliasPo.getAlias().getBytes(NulsConfig.DEFAULT_ENCODING), aliasPo);
+            return dbService.putModel(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS, aliasPo.getAlias().getBytes(NulsConfig.DEFAULT_ENCODING), aliasPo);
         } catch (UnsupportedEncodingException e) {
             Log.error(e);
             return Result.getFailed();
@@ -62,7 +61,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
     @Override
     public Result removeAlias(String alias) {
         try {
-            return dbService.delete(AccountStorageConstant.DB_AREA_ALIAS, alias.getBytes(NulsConfig.DEFAULT_ENCODING));
+            return dbService.delete(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS, alias.getBytes(NulsConfig.DEFAULT_ENCODING));
         } catch (Exception e) {
             Log.error(e);
             return Result.getFailed();

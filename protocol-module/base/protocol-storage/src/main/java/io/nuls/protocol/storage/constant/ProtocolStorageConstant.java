@@ -37,13 +37,13 @@ public interface ProtocolStorageConstant {
      * 区块头高度索引表名称
      * Block header height index table.
      */
-    String DB_AREA_BLOCK_HEADER_INDEX = "BLOCK_HEADER_INDEX";
+    String DB_NAME_BLOCK_HEADER_INDEX = "block_header_index";
 
     /**
      * 区块头表名称
      * Block header table name.
      */
-    String DB_AREA_BLOCK_HEADER = "BLOCK_HEADER";
+    String DB_NAME_BLOCK_HEADER = "block_header";
 
     /**
      * 数据库中存储的最新区块hash的索引值

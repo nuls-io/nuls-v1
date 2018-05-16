@@ -33,7 +33,7 @@ package io.nuls.ledger.storage.constant;
  */
 public interface LedgerStorageConstant {
 
-    String DB_AREA_LEDGER_TRANSACTION = "ledger_transaction";
-    String DB_AREA_LEDGER_UTXO = "ledger_utxo";
+    String DB_NAME_LEDGER_TX = "ledger_tx";
+    String DB_NAME_LEDGER_UTXO = "ledger_utxo";
 
 }

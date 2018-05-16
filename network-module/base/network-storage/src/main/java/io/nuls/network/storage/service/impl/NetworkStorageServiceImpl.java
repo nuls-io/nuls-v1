@@ -1,14 +1,17 @@
-package io.nuls.network.storage.manager;
+package io.nuls.network.storage.service.impl;
 
 
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.network.constant.NetworkConstant;
+import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.network.entity.Node;
+import io.nuls.network.storage.constant.NetworkStorageConstant;
 import io.nuls.network.storage.po.NetworkTransferTool;
 import io.nuls.network.storage.po.NodePo;
+import io.nuls.network.storage.service.NetworkStorageService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,17 +20,13 @@ import java.util.Set;
 import static io.nuls.core.tools.str.StringUtils.bytes;
 
 @Component
-public class NetworkStorage {
+public class NetworkStorageServiceImpl implements NetworkStorageService , InitializingBean {
 
     @Autowired
     private DBService dbService;
 
-    public void init() {
-        getDbService().createArea(NetworkConstant.NODE_DB_AREA);
-    }
-
     public List<Node> getLocalNodeList(int size) {
-        List<NodePo> poList = getDbService().values(NetworkConstant.NODE_DB_AREA, NodePo.class);
+        List<NodePo> poList = getDbService().values(NetworkStorageConstant.DB_NAME_NETWORK_NODE, NodePo.class);
         if (poList == null) {
             return new ArrayList<>();
         }
@@ -45,7 +44,7 @@ public class NetworkStorage {
 
     public List<Node> getLocalNodeList(int size, Set<String> ipSet) {
         List<Node> nodeList = new ArrayList<>();
-        List<NodePo> poList = getDbService().values(NetworkConstant.NODE_DB_AREA, NodePo.class);
+        List<NodePo> poList = getDbService().values(NetworkStorageConstant.DB_NAME_NETWORK_NODE, NodePo.class);
         if (poList == null) {
             return nodeList;
         }
@@ -65,17 +64,17 @@ public class NetworkStorage {
     }
 
     public void saveNode(Node node) {
-        NodePo po = getDbService().getModel(NetworkConstant.NODE_DB_AREA, bytes(node.getId()), NodePo.class);
+        NodePo po = getDbService().getModel(NetworkStorageConstant.DB_NAME_NETWORK_NODE, bytes(node.getId()), NodePo.class);
         if (po != null) {
             NetworkTransferTool.toPojo(node, po);
         } else {
             po = NetworkTransferTool.toPojo(node);
         }
-        getDbService().putModel(NetworkConstant.NODE_DB_AREA, bytes(node.getId()), po);
+        getDbService().putModel(NetworkStorageConstant.DB_NAME_NETWORK_NODE, bytes(node.getId()), po);
     }
 
     public void deleteNode(String nodeId) {
-        getDbService().delete(NetworkConstant.NODE_DB_AREA, bytes(nodeId));
+        getDbService().delete(NetworkStorageConstant.DB_NAME_NETWORK_NODE, bytes(nodeId));
     }
 
 
@@ -84,5 +83,10 @@ public class NetworkStorage {
             dbService = NulsContext.getServiceBean(DBService.class);
         }
         return dbService;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws NulsException {
+        getDbService().createArea(NetworkStorageConstant.DB_NAME_NETWORK_NODE);
     }
 }
