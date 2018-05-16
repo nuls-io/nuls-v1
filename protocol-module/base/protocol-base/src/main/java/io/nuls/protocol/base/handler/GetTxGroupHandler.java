@@ -40,6 +40,7 @@ import io.nuls.protocol.message.TxGroupMessage;
 import io.nuls.protocol.model.NotFound;
 import io.nuls.protocol.model.TxGroup;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +60,14 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
         if (message.getMsgBody().getTxHashList() == null || message.getMsgBody().getTxHashList().size() > 10000) {
             return;
         }
+        NulsDigestData requestHash = null;
+        try {
+            requestHash = NulsDigestData.calcDigestData(message.getMsgBody().serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return;
+        }
+
 
         TxGroupMessage txGroupMessage = new TxGroupMessage();
         TxGroup txGroup = new TxGroup();
@@ -72,7 +81,7 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
             if (tx != null) {
                 txList.add(tx);
             } else {
-                this.sendNotFound(message.getHash(), fromNode);
+                this.sendNotFound(requestHash, fromNode);
             }
         }
         if (txList.isEmpty()) {
@@ -81,7 +90,8 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
         }
 
         txGroup.setTxList(txList);
-        txGroup.setRequestHash(message.getHash());
+
+        txGroup.setRequestHash(requestHash);
         txGroupMessage.setMsgBody(txGroup);
         messageBusService.sendToNode(txGroupMessage, fromNode, true);
     }
