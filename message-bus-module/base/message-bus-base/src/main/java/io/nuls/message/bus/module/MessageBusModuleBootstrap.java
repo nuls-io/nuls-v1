@@ -24,7 +24,7 @@ public class MessageBusModuleBootstrap extends AbstractMessageBusModule {
 
     @Override
     public void start() {
-
+        ProcessorManager.getInstance().init(true);
         MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
         messageBusService.subscribeMessage(CommonDigestMessage.class, new CommonDigestHandler());
         messageBusService.subscribeMessage(GetMessageBodyMessage.class, new GetMessageBodyHandler());
