@@ -9,7 +9,9 @@ import io.nuls.account.service.AccountService;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Coin;
@@ -27,41 +29,26 @@ import java.util.Map;
  * date 2018/5/15.
  */
 @Component
-public class BalanceCalculator extends Thread{
+public class BalanceProvider extends Thread {
+
+    private final static int STATUS_NEWEST = 1;
+    private final static int STATUS_EXPIRED = 2;
 
     @Autowired
-    AccountLedgerService accountLedgerService;
-
+    private AccountLedgerService accountLedgerService;
     @Autowired
-    AccountLedgerStorageService storageService;
-
+    private AccountLedgerStorageService storageService;
     @Autowired
-    AccountService accountService;
+    private AccountService accountService;
 
-    final static int WAITING = 0;
-    final static int LOADING = 1;
+    private List<byte[]> addressList = new ArrayList<>();
+    private Map<String, Balance> balanceMap = new HashMap<>();
+    private Map<String, Integer> statusMap = new HashMap<>();
 
     @Override
     public void run() {
-        while (true) {
-            if (getStatus() == WAITING) {
-                try {
-                    Thread.sleep(100L);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            } else if(getStatus() == LOADING){
-                reloadAccountBalance();
-                setStatus(LOADING);
-            }
-        }
+        initAccountsBalance();
     }
-
-    private static List<byte[]> addressNeedtoReloadBalance = new ArrayList<>();
-
-    private static Map<String, Balance> balanceMap = new HashMap<>();
-
-    private static int status = LOADING;
 
     public Result<Balance> getBalance(String address) {
         Result result = null;
@@ -69,7 +56,7 @@ public class BalanceCalculator extends Thread{
             result = getBalance(Base58.decode(address));
         } catch (Exception e) {
             Log.info("getBalance of address[" + address + "] failed");
-            return null;
+            return Result.getFailed(e.getMessage());
         }
         return result;
     }
@@ -83,7 +70,20 @@ public class BalanceCalculator extends Thread{
             return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
         }
 
-        Balance balance = balanceMap.get(Base58.encode(address));
+        String addressKey = new String(address);
+        Integer status = statusMap.get(addressKey);
+
+        Balance balance = null;
+        if(status == null || status.intValue() == STATUS_EXPIRED) {
+            try {
+                balance = loadBalanceByAddress(address);
+            } catch (NulsException e) {
+                Log.error(e);
+                return Result.getFailed(e.getMessage());
+            }
+        } else {
+            balance = balanceMap.get(addressKey);
+        }
 
         if (balance == null) {
             return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
@@ -92,57 +92,60 @@ public class BalanceCalculator extends Thread{
         return Result.getSuccess().setData(balance);
     }
 
-    public void reloadAccountBalance() {
-        Map<String, Balance> newbalanceMap = new HashMap<>();
-        addressNeedtoReloadBalance.clear();
-        List<Account> accounts = accountService.getAccountList().getData();
-        if (accounts != null) {
-            for (Account account : accounts) {
-                addressNeedtoReloadBalance.add(account.getAddress().getBase58Bytes());
-            }
-        }
-        if (addressNeedtoReloadBalance == null || addressNeedtoReloadBalance.size() == 0) {
-            return;
+    public Result refreshBalance(byte[] address) {
+
+        if(address == null) {
+            // FIXME 当address为null时刷新所有，慎重使用
+            statusMap.clear();
+            return Result.getSuccess();
         }
 
-        //todo need to improve performance
-        for(byte[] address:addressNeedtoReloadBalance){
+        String addressKey = new String(address);
+        Integer status = statusMap.get(addressKey);
+
+        if(status != null && status.intValue() == STATUS_NEWEST) {
+            statusMap.put(addressKey, STATUS_EXPIRED);
+        }
+
+        return Result.getSuccess();
+    }
+
+    protected void initAccountsBalance() {
+
+        addressList.clear();
+        balanceMap.clear();
+
+        List<Account> accounts = accountService.getAccountList().getData();
+        if(accounts == null) {
+            return;
+        }
+        for (Account account : accounts) {
+            addressList.add(account.getAddress().getBase58Bytes());
+        }
+        for (byte[] address : addressList) {
             try {
-                Balance balance = getBalanceByAddress(address).getData();
-                newbalanceMap.put(Base58.encode(address),balance);
+                loadBalanceByAddress(address);
             }catch (NulsException e){
                 Log.info("getbalance of address["+Base58.encode(address)+"] error");
             }
         }
-        balanceMap = newbalanceMap;
-        return;
     }
 
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        BalanceCalculator.status = status;
-    }
-
-    protected Result<Balance> getBalanceByAddress(byte[] address) throws NulsException {
+    protected Balance loadBalanceByAddress(byte[] address) throws NulsException {
         if (accountLedgerService.isLocalAccount(address)) {
-            return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
+            return null;
         }
         List<Coin> coinList = storageService.getCoinBytes(address);
-        Balance balance = new Balance();
+
+        long currentTime = TimeService.currentTimeMillis();
+        long bestHeight = NulsContext.getInstance().getBestHeight();
         long usable = 0;
         long locked = 0;
 
-        long currentTime = System.currentTimeMillis();
-        //long bestHeight = NulsContext.getInstance().getBestHeight();
-        long bestHeight = 1;
-
         for (Coin coin : coinList) {
-            if (coin.getLockTime() < 0) {
+            if (coin.getLockTime() < 0L) {
                 locked += coin.getNa().getValue();
-            } else if (coin.getLockTime() == 0) {
+            } else if (coin.getLockTime() == 0L) {
                 usable += coin.getNa().getValue();
             } else {
                 if (coin.getLockTime() > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE) {
@@ -161,12 +164,16 @@ public class BalanceCalculator extends Thread{
             }
         }
 
+        Balance balance = new Balance();
         balance.setUsable(Na.valueOf(usable));
         balance.setLocked(Na.valueOf(locked));
         balance.setBalance(balance.getUsable().add(balance.getLocked()));
-        Result<Balance> result = new Result<>();
-        result.setData(balance);
-        return result;
+
+        String addressKey = new String(address);
+        statusMap.put(addressKey, STATUS_NEWEST);
+        balanceMap.put(addressKey, balance);
+
+        return balance;
     }
 
 }
