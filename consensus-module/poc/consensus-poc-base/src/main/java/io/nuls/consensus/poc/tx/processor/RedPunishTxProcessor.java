@@ -10,6 +10,7 @@ import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -24,6 +25,7 @@ import java.util.List;
  * @author Niels
  * @date 2018/5/14
  */
+@Component
 public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTransaction> {
 
     @Autowired

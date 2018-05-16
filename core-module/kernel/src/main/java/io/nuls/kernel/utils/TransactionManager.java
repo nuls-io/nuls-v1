@@ -65,8 +65,10 @@ public class TransactionManager {
         }
     }
 
-    private static final void putTx(Class<? extends Transaction> txClass, Class<? extends TransactionProcessor> txProcessorClass) {
-        TX_SERVICE_MAP.put(txClass, txProcessorClass);
+    public static final void putTx(Class<? extends Transaction> txClass, Class<? extends TransactionProcessor> txProcessorClass) {
+        if (null != txProcessorClass) {
+            TX_SERVICE_MAP.put(txClass, txProcessorClass);
+        }
         try {
             Transaction tx = txClass.newInstance();
             TYPE_TX_MAP.put(tx.getType(), txClass);
