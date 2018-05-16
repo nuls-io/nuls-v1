@@ -25,7 +25,7 @@ import java.util.Set;
  * @date: 2018/5/13
  */
 @Component
-public class AliasProcess implements TransactionProcessor<AliasTransaction> {
+public class AliasTxProcessor implements TransactionProcessor<AliasTransaction> {
 
     @Autowired
     private AliasService aliasService;

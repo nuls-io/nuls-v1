@@ -33,7 +33,10 @@ import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.module.service.ModuleService;
+import io.nuls.network.entity.Node;
+import io.nuls.network.service.NetworkService;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,10 +78,10 @@ public class Bootstrap {
             if (null != NulsContext.getInstance().getBestBlock()) {
                 Log.info("bestHeight:" + NulsContext.getInstance().getBestHeight());
 //                Log.info("node: " + NulsContext.getServiceBean(NetworkService.class).getAvailableNodes().size() + "), height:{}, threadCount:{}, consensusStatus: {}, downloadStatus: {}", NulsContext.getInstance().getBestBlock().getHeader().getHeight(), Thread.activeCount(), NulsContext.getServiceBean(ConsensusService.class).getConsensusStatus(), NulsContext.getServiceBean(DownloadService.class).getStatus());
-//                Collection<Node> nodes = NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
-//                for (Node node : nodes) {
-//                    Log.info(node.getVersionMessage().getBestBlockHeight() + ", " + node.getId() + ", " + node.getVersionMessage().getBestBlockHash());
-//                }
+                Collection<Node> nodes = NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
+                for (Node node : nodes) {
+                    Log.info(node.getBestBlockHeight() + ", " + node.getId() + ", " + node.getBestBlockHash());
+                }
             }
         }
     }

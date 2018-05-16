@@ -24,6 +24,8 @@
  */
 package io.nuls.protocol.model.tx;
 
+import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.model.TransactionLogicData;
 import io.nuls.kernel.utils.NulsByteBuffer;
@@ -40,8 +42,8 @@ public class CoinBaseTransaction extends Transaction {
     }
 
     @Override
-    protected TransactionLogicData parseTxData(NulsByteBuffer byteBuffer) {
-        //Don't need
+    protected TransactionLogicData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        byteBuffer.readBytes(NulsConstant.PLACE_HOLDER.length);
         return null;
     }
 

@@ -33,6 +33,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.kernel.utils.TransactionManager;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.message.bus.service.MessageBusService;
@@ -40,6 +41,8 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.protocol.base.handler.*;
 import io.nuls.protocol.base.service.DownloadServiceImpl;
 import io.nuls.protocol.message.*;
+import io.nuls.protocol.model.tx.CoinBaseTransaction;
+import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.module.AbstractProtocolModule;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.DownloadService;
@@ -54,6 +57,8 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
 
     @Override
     public void init() {
+        TransactionManager.putTx(CoinBaseTransaction.class, null);
+        TransactionManager.putTx(TransferTransaction.class, null);
     }
 
     @Override

@@ -59,7 +59,7 @@ public class GetBlocksHashHandler extends AbstractMessageHandler<GetBlocksHashRe
         if (param.getSize() > MAX_SIZE) {
             return;
         }
-        BlockHeader endHeader = blockService.getBlockHeader(param.getStart() + param.getSize()).getData();
+        BlockHeader endHeader = blockService.getBlockHeader(param.getStart() + param.getSize()-1).getData();
         if (null == endHeader) {
             sendNotFound(fromNode, message.getHash());
             return;

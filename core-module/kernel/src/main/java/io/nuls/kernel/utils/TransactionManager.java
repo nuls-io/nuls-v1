@@ -60,13 +60,18 @@ public class TransactionManager {
                 continue;
             }
             Class paramType = method.getParameterTypes()[0];
+            if (paramType.equals(Transaction.class)) {
+                continue;
+            }
             putTx(paramType, processor.getClass());
             break;
         }
     }
 
-    private static final void putTx(Class<? extends Transaction> txClass, Class<? extends TransactionProcessor> txProcessorClass) {
-        TX_SERVICE_MAP.put(txClass, txProcessorClass);
+    public static final void putTx(Class<? extends Transaction> txClass, Class<? extends TransactionProcessor> txProcessorClass) {
+        if (null != txProcessorClass) {
+            TX_SERVICE_MAP.put(txClass, txProcessorClass);
+        }
         try {
             Transaction tx = txClass.newInstance();
             TYPE_TX_MAP.put(tx.getType(), txClass);

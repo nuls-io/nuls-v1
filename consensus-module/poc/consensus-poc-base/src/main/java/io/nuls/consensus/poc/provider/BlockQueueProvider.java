@@ -35,7 +35,6 @@ import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
- *
  * @author ln
  * @date 2018/4/13
  */
@@ -46,7 +45,7 @@ public class BlockQueueProvider {
     private Queue<BlockContainer> blockQueue;
     private Queue<BlockContainer> downloadBlockQueue;
 
-    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
+    private DownloadService downloadService;
 
     private boolean downloadBlockQueueHasDestory;
 
@@ -66,6 +65,7 @@ public class BlockQueueProvider {
 
         if (receive) {
             int status = BlockContainerStatus.RECEIVED;
+            checkDownloadService();
             if (!downloadService.isDownloadSuccess().isSuccess()) {
                 status = BlockContainerStatus.DOWNLOADING;
             }
@@ -81,6 +81,12 @@ public class BlockQueueProvider {
         return true;
     }
 
+    private void checkDownloadService() {
+        if (null == downloadService) {
+            downloadService = NulsContext.getServiceBean(DownloadService.class);
+        }
+    }
+
     public BlockContainer get() {
 
         BlockContainer blockContainer = null;
@@ -89,11 +95,11 @@ public class BlockQueueProvider {
         if (!downloadBlockQueueHasDestory) {
             blockContainer = downloadBlockQueue.poll();
         }
-
+        checkDownloadService();
         boolean hasDownloadSuccess = downloadService.isDownloadSuccess().isSuccess();
         if (blockContainer == null && hasDownloadSuccess && !downloadBlockQueueHasDestory) {
             downloadBlockQueueHasDestory = true;
-            if(blockContainer == null) {
+            if (blockContainer == null) {
                 blockContainer = blockQueue.poll();
             }
         } else if (hasDownloadSuccess && blockContainer == null) {

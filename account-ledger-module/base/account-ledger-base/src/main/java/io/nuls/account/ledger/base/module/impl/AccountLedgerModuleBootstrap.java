@@ -24,10 +24,10 @@
 package io.nuls.account.ledger.base.module.impl;
 
 import io.nuls.account.constant.AccountConstant;
+import io.nuls.account.ledger.base.service.balance.BalanceProvider;
+import io.nuls.account.ledger.constant.AccountLedgerConstant;
 import io.nuls.account.ledger.module.AbstractAccountLedgerModule;
-import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.thread.manager.TaskManager;
 
 
@@ -38,15 +38,15 @@ import io.nuls.kernel.thread.manager.TaskManager;
  */
 public class AccountLedgerModuleBootstrap extends AbstractAccountLedgerModule {
 
+
     @Override
     public void init() {
-        //load local account list into cache
     }
 
     @Override
     public void start() {
         this.waitForDependencyRunning(AccountConstant.MODULE_ID_ACCOUNT);
-        //todo start balance thread
+        TaskManager.createAndRunThread(AccountLedgerConstant.MODULE_ID_ACCOUNTLEDGER,"Account-balance-calculate", NulsContext.getServiceBean(BalanceProvider.class));
     }
 
     @Override

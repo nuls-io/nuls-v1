@@ -44,8 +44,8 @@ public class AddressTest {
         while (true) {
             ECKey ecKey = new ECKey();
             String address = getAddress(chainId, ecKey.getPubKey());
-            if (address.toUpperCase().endsWith("NIELS")||address.toUpperCase().endsWith("JASON")||address.toUpperCase().endsWith("JIAN")||address.toUpperCase().endsWith("XING")) {
-                System.out.println(chainId + "::::::::::" + address+":::::::"+ecKey.getPublicKeyAsHex());
+            if (address.endsWith("Niels")||address.endsWith("Jason")||address.toUpperCase().endsWith("NULS")) {
+                System.out.println(chainId + "::::::::::" + address+":::::::"+ecKey.getPrivateKeyAsHex());
             }
 // else if (address.toUpperCase().startsWith("N")) {
 //                System.out.println(chainId + "::::::::::" + address);

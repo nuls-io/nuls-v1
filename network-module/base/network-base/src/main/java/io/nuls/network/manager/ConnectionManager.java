@@ -46,7 +46,7 @@ public class ConnectionManager {
 
     private NetworkMessageHandlerFactory messageHandlerFactory = NetworkMessageHandlerFactory.getInstance();
 
-    private MessageBusService messageBusService;
+    private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
     public void init() {
         nodeManager = NodeManager.getInstance();
@@ -137,6 +137,7 @@ public class ConnectionManager {
 //            Log.error("---------------------message is null--------------------------------");
             return;
         }
+        System.out.println("-----------------=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-------"+message.getClass());
         if (isNetworkMessage(message)) {
             if (node.getStatus() != Node.HANDSHAKE && !isHandShakeMessage(message)) {
                 return;
@@ -147,8 +148,7 @@ public class ConnectionManager {
             if (!node.isHandShake()) {
                 return;
             }
-            //todo 传给其他模块处理
-            //eventBusService.publishNetworkEvent(event, node.getId());
+            messageBusService.receiveMessage(message, node);
         }
     }
 
