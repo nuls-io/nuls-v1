@@ -27,7 +27,7 @@ package io.nuls.protocol.base.handler;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.protocol.base.download.cache.DownloadCacheHandler;
 import io.nuls.protocol.message.TxGroupMessage;
 import io.nuls.protocol.model.TxGroup;

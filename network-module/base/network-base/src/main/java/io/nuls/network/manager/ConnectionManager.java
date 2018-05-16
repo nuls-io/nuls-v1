@@ -2,21 +2,16 @@ package io.nuls.network.manager;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.lite.annotation.Autowired;
-import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.connection.netty.NettyClient;
 import io.nuls.network.connection.netty.NettyServer;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.entity.NetworkEventResult;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.NetworkEventResult;
+import io.nuls.network.model.Node;
 import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
-import io.nuls.network.protocol.message.BaseNetworkMessage;
-import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.message.base.BaseMessage;
 import io.nuls.protocol.message.base.MessageHeader;
 

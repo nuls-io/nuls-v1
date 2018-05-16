@@ -1,6 +1,6 @@
 package io.nuls.network.storage.po;
 
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 
 public class NetworkTransferTool {
 

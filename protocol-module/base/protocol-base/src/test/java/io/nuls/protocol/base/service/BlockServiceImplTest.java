@@ -88,7 +88,7 @@ public class BlockServiceImplTest {
         txHashList.add(NulsDigestData.calcDigestData("second-tx-hash".getBytes()));
         txHashList.add(NulsDigestData.calcDigestData("third-tx-hash".getBytes()));
 //        block.setTxHashList(txHashList);
-//        this.entity = blockHeader;
+//        this.model = blockHeader;
     }
 
     @Test

@@ -4,15 +4,14 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
-import io.nuls.message.bus.constant.MessageBusErrorCode;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.manager.MessageManager;
 import io.nuls.message.bus.message.CommonDigestMessage;
 import io.nuls.message.bus.processor.manager.ProcessData;
 import io.nuls.message.bus.processor.manager.ProcessorManager;
 import io.nuls.message.bus.service.MessageBusService;
-import io.nuls.network.entity.BroadcastResult;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.BroadcastResult;
+import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.message.base.BaseMessage;
 

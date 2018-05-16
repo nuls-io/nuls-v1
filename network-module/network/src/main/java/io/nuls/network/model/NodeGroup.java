@@ -23,7 +23,7 @@
  *  * SOFTWARE.
  *
  */
-package io.nuls.network.entity;
+package io.nuls.network.model;
 
 import java.util.Map;
 import java.util.Set;

@@ -1,12 +1,10 @@
 package io.nuls.network.message.impl;
 
 import io.nuls.core.tools.network.IpUtil;
-import io.nuls.network.entity.NetworkEventResult;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.NetworkEventResult;
+import io.nuls.network.model.Node;
 import io.nuls.network.manager.NodeManager;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
-import io.nuls.network.protocol.message.HandshakeMessage;
-import io.nuls.network.protocol.message.NetworkMessageBody;
 import io.nuls.network.protocol.message.NodeMessageBody;
 import io.nuls.network.protocol.message.NodesMessage;
 import io.nuls.protocol.message.base.BaseMessage;

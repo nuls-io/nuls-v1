@@ -28,7 +28,7 @@ package io.nuls.protocol.service;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.validate.ValidateResult;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 
 import java.util.List;
 

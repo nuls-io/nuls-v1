@@ -31,7 +31,7 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.NotFoundType;
 import io.nuls.protocol.message.GetTxGroupRequest;

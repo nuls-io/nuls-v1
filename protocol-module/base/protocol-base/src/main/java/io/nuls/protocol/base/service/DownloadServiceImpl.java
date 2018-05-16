@@ -30,7 +30,7 @@ import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.protocol.base.constant.DownloadStatus;
 import io.nuls.protocol.base.download.processor.DownloadProcessor;
 import io.nuls.protocol.base.download.utils.DownloadUtils;

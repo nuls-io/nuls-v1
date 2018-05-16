@@ -2,17 +2,13 @@ package io.nuls.network.message.impl;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.lite.annotation.Autowired;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.entity.NetworkEventResult;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.NetworkEventResult;
+import io.nuls.network.model.Node;
 import io.nuls.network.manager.NodeManager;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
-import io.nuls.network.protocol.message.BaseNetworkMessage;
 import io.nuls.network.protocol.message.HandshakeMessage;
 
 import io.netty.channel.socket.SocketChannel;

@@ -28,7 +28,7 @@ package io.nuls.protocol.base.download.thread;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.protocol.base.download.entity.ResultMessage;
 import io.nuls.protocol.base.download.utils.DownloadUtils;
 

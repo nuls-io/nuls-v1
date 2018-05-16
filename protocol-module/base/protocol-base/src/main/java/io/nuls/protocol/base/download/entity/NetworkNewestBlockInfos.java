@@ -26,7 +26,7 @@
 package io.nuls.protocol.base.download.entity;
 
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 
 import java.util.List;
 
