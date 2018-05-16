@@ -522,23 +522,23 @@ public class NodeManager implements Runnable {
     public void run() {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         while (running) {
-            Log.info("--------disConnectNodes:" + disConnectNodes.size());
+            Log.debug("--------disConnectNodes:" + disConnectNodes.size());
             for (Node node : disConnectNodes.values()) {
                 System.out.println(node.toString());
             }
 
-            Log.info("--------connectedNodes:" + connectedNodes.size());
+            Log.debug("--------connectedNodes:" + connectedNodes.size());
             for (Node node : connectedNodes.values()) {
                 System.out.println(node.toString());
             }
 
-            Log.info("--------handShakeNodes:" + handShakeNodes.size());
+            Log.debug("--------handShakeNodes:" + handShakeNodes.size());
             for (Node node : handShakeNodes.values()) {
-                System.out.println(node.toString());
+//                System.out.println(node.toString());
             }
 
             for (Node node : handShakeNodes.values()) {
-                Log.info(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
+                Log.debug(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
             }
 
             try {

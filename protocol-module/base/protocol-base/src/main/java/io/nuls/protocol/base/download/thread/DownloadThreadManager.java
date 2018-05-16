@@ -53,7 +53,9 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * Created by ln on 2018/4/8.
+ *
+ * @author ln
+ * @date 2018/4/8
  */
 public class DownloadThreadManager implements Callable<Boolean> {
 

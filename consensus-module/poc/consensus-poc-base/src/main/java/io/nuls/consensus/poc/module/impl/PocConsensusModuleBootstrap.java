@@ -54,7 +54,6 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     public void start() {
         this.waitForDependencyRunning(ProtocolConstant.MODULE_ID_PROTOCOL);
         ConsensusScheduler.getInstance().start();
-        ConsensusStatusContext.setConsensusStatus(ConsensusStatus.WAIT_RUNNING);
         this.registerHandlers();
         Log.info("the POC consensus module is started!");
     }
