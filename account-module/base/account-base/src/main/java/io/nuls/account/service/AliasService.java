@@ -65,7 +65,7 @@ public class AliasService {
      */
     public Result<Boolean> setAlias(String addr, String password, String aliasName) {
         if (!Address.validAddress(addr)) {
-            Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+            Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Account account = AccountCacheService.getAccountByAddress(addr);
 

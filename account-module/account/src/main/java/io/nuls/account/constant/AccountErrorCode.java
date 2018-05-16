@@ -41,7 +41,7 @@ public interface AccountErrorCode {
     ErrorCode ALIAS_EXIST = ErrorCode.init("ACT005", 50005);
     ErrorCode ALIAS_ERROR = ErrorCode.init("ACT006", 50006);
     ErrorCode ACCOUNT_ALREADY_SET_ALIAS = ErrorCode.init("ACT007", 50007);
-    ErrorCode NULL_PARAMETER = ErrorCode.init("ACT008", 50008);
+    ErrorCode PARAMETER_ERROR = ErrorCode.init("ACT008", 50008);
     ErrorCode DATA_PARSE_ERROR = ErrorCode.init("ACT009", 50009);
     ErrorCode SUCCESS = ErrorCode.init("ACT010", 50010);
     ErrorCode FAILED = ErrorCode.init("ACT011", 50011);

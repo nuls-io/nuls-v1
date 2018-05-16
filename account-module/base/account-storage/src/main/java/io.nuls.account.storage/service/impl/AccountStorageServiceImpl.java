@@ -56,7 +56,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
     @Override
     public Result removeAccount(Address address) {
         if (null == address || address.getBase58Bytes() == null || address.getBase58Bytes().length <= 0) {
-            return Result.getFailed(AccountErrorCode.NULL_PARAMETER);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         return dbService.delete(AccountStorageConstant.DB_AREA_ACCOUNT, address.getBase58Bytes());
     }

@@ -109,7 +109,7 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isBlank(form.getAlias()) || !StringUtils.validPassword(form.getPassword())) {
-            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         return aliasService.setAlias(form.getAddress(), form.getPassword(), form.getAlias());
     }
@@ -126,7 +126,7 @@ public class AccountResource {
                               @ApiParam(name = "pageSize", value = "每页条数")
                               @QueryParam("pageSize") int pageSize) {
         if (pageNumber < 0 || pageSize < 0) {
-            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         if (pageNumber == 0) {
             pageNumber = 1;
@@ -365,7 +365,7 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (null != form.getPassword() && !StringUtils.validPassword(form.getPassword())) {
-            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         AccountKeyStore accountKeyStore = accountService.exportAccountToKeyStore(form.getAddress(), form.getPassword()).getData();
         try {
@@ -388,18 +388,18 @@ public class AccountResource {
                                         AccountImportForm form) {
         String keyStore = form.getAccountKeyStore();
         if (null == keyStore) {
-            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         String password = form.getPassword();
         if(null != password && !StringUtils.validPassword(password)){
-            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         AccountKeyStoreDto accountKeyStoreDto = null;
         try {
             accountKeyStoreDto = JSONUtils.json2pojo(keyStore, AccountKeyStoreDto.class);
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Account account = accountService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), password).getData();
         return Result.getSuccess().setData(account.getAddress().toString());
@@ -416,11 +416,11 @@ public class AccountResource {
                                                     AccountImportPrikeyForm form) {
         String priKey = form.getPriKey();
         if (!ECKey.isValidPrivteHex(priKey)) {
-            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         String password = form.getPassword();
         if(null != password && !StringUtils.validPassword(password)){
-            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Account account = accountService.importAccount(priKey, password).getData();
         return Result.getSuccess().setData(account.getAddress().toString());
@@ -436,7 +436,7 @@ public class AccountResource {
     public Result removeAccount(@ApiParam(name = "钱包移除账户表单数据", value = "JSONFormat", required = true)
                                            AccountAPForm form) {
         if (!StringUtils.validPassword(form.getPassword()) || !Address.validAddress(form.getAddress())) {
-            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         return accountService.removeAccount(form.getAddress(), form.getPassword());
     }
