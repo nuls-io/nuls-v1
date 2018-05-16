@@ -68,13 +68,13 @@ public class GetBlocksHashHandler extends AbstractMessageHandler<GetBlocksHashRe
             Log.error(e);
             return;
         }
-        BlockHeader endHeader = blockService.getBlockHeader(param.getStart() + param.getSize()-1).getData();
+        BlockHeader endHeader = blockService.getBlockHeader(param.getStart() + param.getSize() - 1).getData();
         if (null == endHeader) {
             sendNotFound(fromNode, requestHash);
             return;
         }
         BlockHashResponse response = new BlockHashResponse();
-       
+
         response.setRequestMessageHash(requestHash);
         BlockHeader header = endHeader;
         while (header.getHeight() >= param.getStart()) {
