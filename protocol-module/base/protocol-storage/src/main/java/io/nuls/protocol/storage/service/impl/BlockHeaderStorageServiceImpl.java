@@ -179,6 +179,9 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
     }
 
     private Result removeBlockHerader(byte[] hashBytes) {
+        if (null == hashBytes) {
+            return Result.getFailed("Null Parameter");
+        }
         return dbService.delete(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER, hashBytes);
     }
 
