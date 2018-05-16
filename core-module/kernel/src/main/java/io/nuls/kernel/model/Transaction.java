@@ -61,7 +61,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
 
     protected transient NulsDigestData hash;
 
-    protected transient long blockHeight = -1L;
+    protected long blockHeight = -1L;
 
     protected transient TxStatusEnum status = TxStatusEnum.UNCONFIRM;
 
