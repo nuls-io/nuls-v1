@@ -46,7 +46,7 @@ public class ConnectionManager {
 
     private NetworkMessageHandlerFactory messageHandlerFactory = NetworkMessageHandlerFactory.getInstance();
 
-    private MessageBusService messageBusService;
+    private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
     public void init() {
         nodeManager = NodeManager.getInstance();
@@ -148,7 +148,7 @@ public class ConnectionManager {
                 return;
             }
             //todo 传给其他模块处理
-            //eventBusService.publishNetworkEvent(event, node.getId());
+            messageBusService.receiveMessage(message, node);
         }
     }
 
