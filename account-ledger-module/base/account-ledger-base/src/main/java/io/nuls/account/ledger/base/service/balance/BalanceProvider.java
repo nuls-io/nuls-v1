@@ -66,10 +66,6 @@ public class BalanceProvider extends Thread {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
 
-        if (!accountLedgerService.isLocalAccount(address)) {
-            return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
-        }
-
         String addressKey = new String(address);
         Integer status = statusMap.get(addressKey);
 
