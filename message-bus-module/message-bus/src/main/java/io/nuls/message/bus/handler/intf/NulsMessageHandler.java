@@ -3,7 +3,7 @@ package io.nuls.message.bus.handler.intf;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.message.bus.filter.NulsMessageFilter;
 import io.nuls.message.bus.filter.NulsMessageFilterChain;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**

@@ -8,12 +8,9 @@ import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.entity.BroadcastResult;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;
@@ -21,7 +18,6 @@ import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Map;
 

@@ -5,7 +5,7 @@ import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.processor.manager.ProcessorManager;
 import io.nuls.message.bus.service.MessageBusService;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
 import io.nuls.network.service.impl.NetworkServiceImpl;
 import io.nuls.protocol.message.BlockMessage;

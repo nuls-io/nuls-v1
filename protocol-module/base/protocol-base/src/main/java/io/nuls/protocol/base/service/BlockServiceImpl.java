@@ -34,7 +34,7 @@ import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.service.MessageBusService;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.protocol.base.utils.PoConvertUtil;
 import io.nuls.protocol.message.SmallBlockMessage;
 import io.nuls.protocol.model.SmallBlock;

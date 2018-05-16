@@ -8,7 +8,7 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;
 

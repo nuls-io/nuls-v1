@@ -1,18 +1,14 @@
 package io.nuls.network.protocol.message;
 
-import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.VarInt;
-import io.nuls.network.entity.Node;
-import io.protostuff.Tag;
+import io.nuls.network.model.Node;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 

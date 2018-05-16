@@ -24,12 +24,10 @@
 package io.nuls.network.manager;
 
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.entity.BroadcastResult;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.network.protocol.message.*;
 
 import java.util.ArrayList;

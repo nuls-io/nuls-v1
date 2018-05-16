@@ -28,7 +28,7 @@ package io.nuls.consensus.service;
 
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 
 import java.util.List;
 

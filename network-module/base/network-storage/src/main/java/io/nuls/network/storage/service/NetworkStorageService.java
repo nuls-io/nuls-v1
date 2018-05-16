@@ -1,6 +1,6 @@
 package io.nuls.network.storage.service;
 
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import java.util.List;
 import java.util.Set;
 

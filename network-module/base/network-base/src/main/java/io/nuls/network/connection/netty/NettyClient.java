@@ -9,8 +9,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
-import io.nuls.core.tools.log.Log;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.network.manager.NodeManager;
 
 import static io.nuls.network.constant.NetworkConstant.CONNETCI_TIME_OUT;

@@ -31,7 +31,7 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
 

@@ -1,4 +1,4 @@
-package io.nuls.account.rpc.resources;
+package io.nuls.account.rpc.resource;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;

@@ -44,7 +44,7 @@ public class NulsMessageValidator implements NulsDataValidator<BaseMessage> {
      * 验证消息体不为空，消息体长度正确，校验值正确
      * Verify that the message body is not empty, the message body length is correct, and the check value is correct.
      *
-     * @param data 网络消息实体，network message entity
+     * @param data 网络消息实体，network message model
      * @return 验证结果
      */
     @Override

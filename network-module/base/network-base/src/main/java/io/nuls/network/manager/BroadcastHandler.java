@@ -4,20 +4,15 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.lite.annotation.Autowired;
-import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.entity.BroadcastResult;
-import io.nuls.network.entity.Node;
-import io.nuls.network.entity.NodeGroup;
+import io.nuls.network.model.BroadcastResult;
+import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeGroup;
 import io.nuls.protocol.message.base.BaseMessage;
-import io.nuls.protocol.message.base.MessageHeader;
 
-import java.io.IOException;
 import java.util.Collection;
 
 public class BroadcastHandler {

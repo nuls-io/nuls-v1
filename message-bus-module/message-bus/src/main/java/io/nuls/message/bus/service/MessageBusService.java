@@ -2,7 +2,7 @@ package io.nuls.message.bus.service;
 
 import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.Node;
 import io.nuls.protocol.message.base.BaseMessage;
 
 import java.util.List;

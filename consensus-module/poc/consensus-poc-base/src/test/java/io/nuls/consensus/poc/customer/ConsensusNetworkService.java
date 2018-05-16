@@ -28,8 +28,8 @@ package io.nuls.consensus.poc.customer;
 
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.entity.BroadcastResult;
-import io.nuls.network.entity.Node;
+import io.nuls.network.model.BroadcastResult;
+import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
 
 import java.util.Collection;
