@@ -355,7 +355,7 @@ public class AccountResource {
     @POST
     @Path("/export")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "账户备份，导出AccountKeyStore ")
+    @ApiOperation(value = "账户备份，导出AccountKeyStore字符串 ")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = Result.class)
     })
@@ -368,19 +368,13 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         AccountKeyStore accountKeyStore = accountService.exportAccountToKeyStore(form.getAddress(), form.getPassword()).getData();
-        try {
-            return Result.getSuccess().setData(JSONUtils.obj2json(new AccountKeyStoreDto(accountKeyStore)));
-        } catch (Exception e) {
-            Log.error(e);
-            return Result.getFailed();
-        }
-
+        return Result.getSuccess().setData(new AccountKeyStoreDto(accountKeyStore));
     }
 
     @POST
     @Path("/import")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "根据私钥导入账户 [3.4.7]")
+    @ApiOperation(value = "根据AccountKeyStore导入账户")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = Result.class)
     })
@@ -412,7 +406,7 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = Result.class)
     })
-    public Result<String> importAccountBypriKey(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
+    public Result<String> importAccountByPriKey(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
                                                     AccountImportPrikeyForm form) {
         String priKey = form.getPriKey();
         if (!ECKey.isValidPrivteHex(priKey)) {
@@ -420,7 +414,7 @@ public class AccountResource {
         }
         String password = form.getPassword();
         if(null != password && !StringUtils.validPassword(password)){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         Account account = accountService.importAccount(priKey, password).getData();
         return Result.getSuccess().setData(account.getAddress().toString());
