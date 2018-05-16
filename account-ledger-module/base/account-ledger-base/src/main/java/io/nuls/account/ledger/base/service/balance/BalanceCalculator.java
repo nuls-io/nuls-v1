@@ -1,10 +1,11 @@
-package io.nuls.account.ledger.base.service.balance.impl;
+package io.nuls.account.ledger.base.service.balance;
 
-import io.nuls.account.ledger.base.service.balance.BalanceService;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
+import io.nuls.account.model.Account;
 import io.nuls.account.model.Balance;
 import io.nuls.account.ledger.storage.service.AccountLedgerStorageService;
+import io.nuls.account.service.AccountService;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.NulsConstant;
@@ -17,6 +18,7 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.utils.AddressTool;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,62 +27,53 @@ import java.util.Map;
  * date 2018/5/15.
  */
 @Component
-public class BalanceServiceImpl extends Thread implements BalanceService {
+public class BalanceCalculator extends Thread{
+
     @Autowired
     AccountLedgerService accountLedgerService;
 
     @Autowired
-    private AccountLedgerStorageService storageService;
+    AccountLedgerStorageService storageService;
 
-    private static boolean needToReloadBalance = false;
-    private static List<String> addressNeedtoReloadBalance = new ArrayList<>();
-    private static Map<String, Balance> balanceMap;
+    @Autowired
+    AccountService accountService;
+
+    final static int WAITING = 0;
+    final static int LOADING = 1;
 
     @Override
     public void run() {
         while (true) {
-            if (!needToReloadBalance) {
+            if (getStatus() == WAITING) {
                 try {
                     Thread.sleep(100L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            } else {
-                if (addressNeedtoReloadBalance == null || addressNeedtoReloadBalance.size() == 0) {
-                    continue;
-                }
-                List<String> reloadedAddresses = new ArrayList<>();
-                for (String address : addressNeedtoReloadBalance) {
-                    reloadAccountBalance(address);
-                    reloadedAddresses.add(address);
-                }
-                addressNeedtoReloadBalance.removeAll(reloadedAddresses);
-                setNeedToReloadBalance(false);
+            } else if(getStatus() == LOADING){
+                reloadAccountBalance();
+                setStatus(LOADING);
             }
         }
     }
 
-    public static boolean isNeedToReloadBalance() {
-        return needToReloadBalance;
-    }
+    private static List<byte[]> addressNeedtoReloadBalance = new ArrayList<>();
 
-    public static void setNeedToReloadBalance(boolean needToReloadBalance) {
-        BalanceServiceImpl.needToReloadBalance = needToReloadBalance;
-    }
+    private static Map<String, Balance> balanceMap = new HashMap<>();
 
-    @Override
-    public Balance getBalance(String address) {
-        Balance balance = null;
+    private static int status = LOADING;
+
+    public Result<Balance> getBalance(String address) {
+        Result result = null;
         try {
-            balance = getBalance(Base58.decode(address)).getData();
+            result = getBalance(Base58.decode(address));
         } catch (Exception e) {
             Log.info("getBalance of address[" + address + "] failed");
             return null;
         }
-        return balance;
+        return result;
     }
 
-    @Override
     public Result<Balance> getBalance(byte[] address) {
         if (address == null || address.length != AddressTool.HASH_LENGTH) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
@@ -99,24 +92,38 @@ public class BalanceServiceImpl extends Thread implements BalanceService {
         return Result.getSuccess().setData(balance);
     }
 
-    @Override
-    public void reloadAccountBalance(List<String> addresses) {
-        setNeedToReloadBalance(true);
-        for (String address : addresses) {
-            if (!addressNeedtoReloadBalance.contains(address)) {
-                addressNeedtoReloadBalance.add(address);
+    public void reloadAccountBalance() {
+        Map<String, Balance> newbalanceMap = new HashMap<>();
+        addressNeedtoReloadBalance.clear();
+        List<Account> accounts = accountService.getAccountList().getData();
+        if (accounts != null) {
+            for (Account account : accounts) {
+                addressNeedtoReloadBalance.add(account.getAddress().getBase58Bytes());
             }
         }
+        if (addressNeedtoReloadBalance == null || addressNeedtoReloadBalance.size() == 0) {
+            return;
+        }
+
+        //todo need to improve performance
+        for(byte[] address:addressNeedtoReloadBalance){
+            try {
+                Balance balance = getBalanceByAddress(address).getData();
+                newbalanceMap.put(Base58.encode(address),balance);
+            }catch (NulsException e){
+                Log.info("getbalance of address["+Base58.encode(address)+"] error");
+            }
+        }
+        balanceMap = newbalanceMap;
+        return;
     }
 
-    public void reloadAccountBalance(String address) {
-        Balance balance = null;
-        try {
-            balance = getBalanceByAddress(Base58.decode(address)).getData();
-        } catch (Exception e) {
-            Log.info("load balance of address[" + address + "]failed");
-        }
-        balanceMap.put(address, balance);
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        BalanceCalculator.status = status;
     }
 
     protected Result<Balance> getBalanceByAddress(byte[] address) throws NulsException {
@@ -161,4 +168,5 @@ public class BalanceServiceImpl extends Thread implements BalanceService {
         result.setData(balance);
         return result;
     }
+
 }

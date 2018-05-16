@@ -25,9 +25,9 @@
 
 package io.nuls.account.ledger.base.service.impl;
 
+import io.nuls.account.ledger.base.service.balance.BalanceCalculator;
 import io.nuls.account.ledger.base.util.CoinComparator;
 import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.account.ledger.base.service.balance.BalanceService;
 import io.nuls.account.ledger.storage.po.TransactionInfoPo;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
@@ -78,7 +78,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
     private AccountService accountService;
 
     @Autowired
-    private BalanceService balanceService;
+    private BalanceCalculator balanceCalculator;
 
     @Autowired
     private TransactionService transactionService;
@@ -163,7 +163,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
             return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
         }
 
-        Balance balance = balanceService.getBalance(Base58.encode(address));
+        Balance balance = balanceCalculator.getBalance(Base58.encode(address)).getData();
 
         if (balance == null) {
             return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
