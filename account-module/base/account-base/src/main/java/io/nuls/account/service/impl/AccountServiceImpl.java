@@ -230,6 +230,7 @@ public class AccountServiceImpl implements AccountService {
         accountKeyStore.setAddress(account.getAddress().toString());
         accountKeyStore.setAlias(account.getAlias());
         accountKeyStore.setPubKey(account.getPubKey());
+        accountKeyStore.setPrikey(account.getPriKey());
         return Result.getSuccess().setData(accountKeyStore);
     }
 
