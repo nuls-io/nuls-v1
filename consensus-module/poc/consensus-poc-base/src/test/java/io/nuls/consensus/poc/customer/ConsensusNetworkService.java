@@ -30,6 +30,7 @@ import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.BroadcastResult;
 import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeGroup;
 import io.nuls.network.service.NetworkService;
 
 import java.util.Collection;
@@ -56,6 +57,12 @@ public class ConsensusNetworkService implements NetworkService {
 
     @Override
     public Collection<Node> getAvailableNodes() {
+        return null;
+    }
+
+    @Override
+    public NodeGroup getNodeGroup(String groupName) {
+        // todo auto-generated method stub
         return null;
     }
 

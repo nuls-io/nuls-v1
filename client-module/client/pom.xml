@@ -92,11 +92,6 @@
             <version>2.0.0</version>
         </dependency>
         <dependency>
-            <groupId>io.nuls.account-module</groupId>
-            <artifactId>account-storage</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <dependency>
             <groupId>io.nuls.consensus-module</groupId>
             <artifactId>consensus</artifactId>
             <version>2.0.0</version>

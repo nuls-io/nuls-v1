@@ -49,7 +49,7 @@ public interface AccountLedgerStorageService {
 
     Transaction getLocalTx(NulsDigestData hash);
 
-    List<Coin> getCoinBytes(byte[] owner) throws NulsException;
+    List<Coin> getCoinBytes(byte[] address) throws NulsException;
 
     byte[] getTxBytes(byte[] txBytes);
 }

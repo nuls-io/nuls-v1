@@ -1,5 +1,6 @@
 package io.nuls.network.test;
 
+import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.protocol.message.GetNodesIpMessage;
