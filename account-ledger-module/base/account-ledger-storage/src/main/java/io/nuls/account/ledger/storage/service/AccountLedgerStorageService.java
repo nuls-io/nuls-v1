@@ -52,4 +52,6 @@ public interface AccountLedgerStorageService {
     List<Coin> getCoinBytes(byte[] address) throws NulsException;
 
     byte[] getTxBytes(byte[] txBytes);
+
+    Result saveTempTx(Transaction tx);
 }

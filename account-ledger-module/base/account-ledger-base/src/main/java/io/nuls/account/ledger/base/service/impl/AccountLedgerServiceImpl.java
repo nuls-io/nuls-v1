@@ -28,6 +28,7 @@ package io.nuls.account.ledger.base.service.impl;
 import io.nuls.account.ledger.base.service.balance.BalanceProvider;
 import io.nuls.account.ledger.base.util.CoinComparator;
 import io.nuls.account.ledger.service.AccountLedgerService;
+import io.nuls.account.ledger.storage.constant.AccountLedgerStorageConstant;
 import io.nuls.account.ledger.storage.po.TransactionInfoPo;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
@@ -43,7 +44,9 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -54,7 +57,9 @@ import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.ledger.constant.LedgerErrorCode;
 
+import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.model.tx.TransferTransaction;
+import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
@@ -69,7 +74,7 @@ import java.util.List;
  * @date 2018/5/10.
  */
 @Component
-public class AccountLedgerServiceImpl implements AccountLedgerService,InitializingBean{
+public class AccountLedgerServiceImpl implements AccountLedgerService, InitializingBean {
 
     @Autowired
     private AccountLedgerStorageService storageService;
@@ -78,10 +83,16 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
     private AccountService accountService;
 
     @Autowired
-    private BalanceProvider balanceCalculator;
+    private BalanceProvider balanceProvider;
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    private LedgerService ledgerService;
+
+    @Autowired
+    private BlockService blockService;
 
     private static List<Account> localAccountList;
 
@@ -102,19 +113,18 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
 
     @Override
     public Result<Integer> saveConfirmedTransactionList(List<Transaction> txs) {
-        List<Transaction> txListToSave = getLocalTransaction(txs);
         List<Transaction> savedTxList = new ArrayList<>();
         Result result;
-        for (int i = 0; i < txListToSave.size(); i++) {
-            result = saveConfirmedTransaction(txListToSave.get(i));
+        for (int i = 0; i < txs.size(); i++) {
+            result = saveConfirmedTransaction(txs.get(i));
             if (result.isSuccess()) {
-                savedTxList.add(txListToSave.get(i));
+                savedTxList.add(txs.get(i));
             } else {
                 rollback(savedTxList, false);
                 return result;
             }
         }
-        return Result.getSuccess().setData(txListToSave.size());
+        return Result.getSuccess().setData(savedTxList.size());
     }
 
     @Override
@@ -163,7 +173,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
             return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
         }
 
-        Balance balance = balanceCalculator.getBalance(address).getData();
+        Balance balance = balanceProvider.getBalance(address).getData();
 
         if (balance == null) {
             return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
@@ -236,11 +246,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
     @Override
     public Result transfer(byte[] from, byte[] to, Na values, String password, String remark) {
         try {
-            AssertUtil.canNotEmpty(from,"the from address can not be empty");
-            AssertUtil.canNotEmpty(to,"the to address can not be empty");
-            AssertUtil.canNotEmpty(values,"the amount can not be empty");
+            AssertUtil.canNotEmpty(from, "the from address can not be empty");
+            AssertUtil.canNotEmpty(to, "the to address can not be empty");
+            AssertUtil.canNotEmpty(values, "the amount can not be empty");
 
-            if(values.isZero() || values.isLessThan(Na.ZERO)) {
+            if (values.isZero() || values.isLessThan(Na.ZERO)) {
                 return Result.getFailed("amount error");
             }
 
@@ -250,8 +260,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
             }
             Account account = accountResult.getData();
 
-            if(accountService.isEncrypted(account).isSuccess()) {
-                AssertUtil.canNotEmpty(password,"the password can not be empty");
+            if (accountService.isEncrypted(account).isSuccess()) {
+                AssertUtil.canNotEmpty(password, "the password can not be empty");
 
                 Result passwordResult = accountService.validPassword(account, password);
                 if (passwordResult.isFailed()) {
@@ -260,7 +270,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
             }
 
             TransferTransaction tx = new TransferTransaction();
-            if(StringUtils.isNotBlank(remark)) {
+            if (StringUtils.isNotBlank(remark)) {
                 try {
                     tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
                 } catch (UnsupportedEncodingException e) {
@@ -307,31 +317,78 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
         }
     }
 
+    @Override
+    public Result unlockCoinData(List<Transaction> txs) {
+        return null;
+    }
+
+    @Override
+    public Result importAccountLedger(String address) {
+        if(address == null || !Address.validAddress(address)){
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+        }
+        byte[] base58 = null;
+        try {
+            base58 = Base58.decode(address);
+        }catch (Exception e){
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+        }
+
+        //todo, when the node is downloading blocks, the txs in newly downloaded blocks will miss
+        long height = NulsContext.getInstance().getBestHeight();
+        for (int i = 0; i <= height; i++) {
+            List<NulsDigestData> txs = blockService.getBlock(i).getData().getTxHashList();
+            for (int j = 0; j < txs.size(); j++) {
+                Transaction tx = ledgerService.getTx(txs.get(j));
+                saveConfirmedTransaction(tx,base58,TransactionInfo.CONFIRMED);
+            }
+        }
+        try {
+            reloadAccount();
+            balanceProvider.refreshBalance(base58);
+        }catch (Exception e){
+            Log.info(address);
+        }
+        return Result.getSuccess();
+    }
+
     protected Result<Integer> saveConfirmedTransaction(Transaction tx, byte status) {
-        if (!isLocalTransaction(tx)) {
+
+        List<byte[]> addresses = getRelatedAddresses(tx);
+        if (addresses == null || addresses.size() == 0) {
             return Result.getFailed().setData(new Integer(0));
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
         txInfoPo.setStatus(status);
-        List<byte[]> addresses = new ArrayList<>();
-        byte[] addressesBytes = txInfoPo.getAddresses();
 
-        if (addressesBytes == null || addressesBytes.length == 0) {
-            return Result.getSuccess().setData(new Integer(0));
+        Result result = storageService.saveLocalTxInfo(txInfoPo, addresses);
+
+        if (result.isFailed()) {
+            return result;
+        }
+        result = storageService.saveLocalTx(tx);
+        if (result.isFailed()) {
+            storageService.deleteLocalTxInfo(txInfoPo);
         }
 
-        if (addressesBytes.length % Address.size() != 0) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        if(status == TransactionInfo.UNCONFIRMED) {
+            result = storageService.saveTempTx(tx);
         }
 
-        for (int i = 0; i < addressesBytes.length / Address.size(); i++) {
-            byte[] tmpAddress = new byte[Address.size()];
-            System.arraycopy(addressesBytes, i * Address.size(), tmpAddress, 0, Address.size());
-            if (isLocalAccount(tmpAddress)) {
-                addresses.add(tmpAddress);
-            }
+        return result;
+    }
+
+    protected Result<Integer> saveConfirmedTransaction(Transaction tx,byte[] addresss,byte status) {
+        List<byte[]> destAddresses = new ArrayList<byte[]>();
+        destAddresses.add(addresss);
+        List<byte[]> addresses = getRelatedAddresses(tx,destAddresses);
+        if (addresses == null || addresses.size() == 0) {
+            return Result.getFailed().setData(new Integer(0));
         }
+
+        TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
+        txInfoPo.setStatus(status);
 
         Result result = storageService.saveLocalTxInfo(txInfoPo, addresses);
 
@@ -362,6 +419,46 @@ public class AccountLedgerServiceImpl implements AccountLedgerService,Initializi
             }
         }
         return resultTxs;
+    }
+
+    protected List<byte[]> getRelatedAddresses(Transaction tx){
+        List<byte[]> result = new ArrayList<>();
+        if(tx == null){
+            return result;
+        }
+        if (localAccountList == null || localAccountList.size() == 0) {
+            return result;
+        }
+        List<byte[]> destAddresses = new ArrayList<>();
+        for(Account account:localAccountList){
+            destAddresses.add(account.getAddress().getBase58Bytes());
+        }
+
+        return getRelatedAddresses(tx,destAddresses);
+    }
+
+    protected List<byte[]> getRelatedAddresses(Transaction tx, List<byte[]> addresses){
+        List<byte[]> result = new ArrayList<>();
+        if(tx == null){
+            return result;
+        }
+        if(addresses == null || addresses.size() == 0){
+            return result;
+        }
+        List<byte[]> sourceAddresses = tx.getAllRelativeAddress();
+        if(sourceAddresses == null || sourceAddresses.size() == 0){
+            return result;
+        }
+
+        for(byte[] tempSourceAddress : sourceAddresses){
+            for(byte[] tempDestAddress : addresses){
+                if(Arrays.equals(tempDestAddress,tempSourceAddress)){
+                    result.add(tempSourceAddress);
+                    continue;
+                }
+            }
+        }
+        return result;
     }
 
     protected boolean isLocalTransaction(Transaction tx) {

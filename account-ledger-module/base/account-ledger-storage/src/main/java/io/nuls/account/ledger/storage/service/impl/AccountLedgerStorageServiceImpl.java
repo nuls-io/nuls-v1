@@ -40,11 +40,13 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.model.Result;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
 import org.spongycastle.util.Arrays;
 
+import javax.xml.transform.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,12 +137,6 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
                 return batchResult;
             }
         }
-
-//        try {
-//            result = dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, tx.getHash().serialize(), tx.serialize());
-//        } catch (IOException e) {
-//            throw new NulsRuntimeException(e);
-//        }
         return Result.getSuccess();
     }
 
@@ -234,7 +230,7 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
             if (java.util.Arrays.equals(addressOwner, address)) {
                 Coin coin = new Coin();
                 coin.parse(dbService.get(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA, key));
-                byte[] fromOwner = new byte[coin.getOwner().length - AddressTool.HASH_LENGTH];
+                byte[] fromOwner = new byte[key.length - AddressTool.HASH_LENGTH];
                 System.arraycopy(key, AddressTool.HASH_LENGTH, fromOwner, 0, key.length - AddressTool.HASH_LENGTH);
                 coin.setOwner(fromOwner);
                 coinList.add(coin);
@@ -246,5 +242,16 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     @Override
     public byte[] getTxBytes(byte[] txBytes) {
         return new byte[0];
+    }
+
+    @Override
+    public Result saveTempTx(Transaction tx) {
+        Result result;
+        try {
+            result = dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, tx.getHash().serialize(), tx.serialize());
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+        }
+        return result;
     }
 }
