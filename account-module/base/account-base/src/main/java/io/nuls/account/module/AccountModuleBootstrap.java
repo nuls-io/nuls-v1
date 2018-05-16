@@ -43,7 +43,6 @@ public class AccountModuleBootstrap extends AbstractAccountModuleBootstrap {
      */
     @Override
     public void start() {
-        System.out.println("start success");
     }
 
     /**
