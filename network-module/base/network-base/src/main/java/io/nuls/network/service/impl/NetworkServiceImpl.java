@@ -8,11 +8,13 @@ import io.nuls.network.model.BroadcastResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.NodeManager;
+import io.nuls.network.model.NodeGroup;
 import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.message.base.BaseMessage;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class NetworkServiceImpl implements NetworkService {
@@ -39,6 +41,11 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public Collection<Node> getAvailableNodes() {
         return nodeManager.getAvailableNodes();
+    }
+
+    @Override
+    public NodeGroup getNodeGroup(String groupName) {
+        return nodeManager.getNodeGroup(groupName);
     }
 
     @Override

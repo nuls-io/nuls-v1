@@ -30,9 +30,11 @@ import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.BroadcastResult;
 import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeGroup;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by ln on 2018/5/5.
@@ -46,6 +48,8 @@ public interface NetworkService {
     Map<String, Node> getNodes();
 
     Collection<Node> getAvailableNodes();
+
+    NodeGroup getNodeGroup(String groupName);
 
     BroadcastResult sendToAllNode(BaseNulsData event, boolean asyn);
 
