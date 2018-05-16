@@ -26,6 +26,9 @@ public class AccountDto {
     @ApiModelProperty(name = "createTime", value = "创建时间")
     private Long createTime;
 
+    @ApiModelProperty(name = "isEncrypted", value = "账户是否加密")
+    private boolean isEncrypted;
+
     public AccountDto() {
     }
 
@@ -37,6 +40,7 @@ public class AccountDto {
         if (account.getExtend() != null) {
             this.extend = Hex.encode(account.getExtend());
         }
+        this.isEncrypted = account.isEncrypted();
     }
 
     public String getAddress() {
@@ -77,5 +81,13 @@ public class AccountDto {
 
     public void setCreateTime(Long createTime) {
         this.createTime = createTime;
+    }
+
+    public boolean isEncrypted() {
+        return isEncrypted;
+    }
+
+    public void setEncrypted(boolean encrypted) {
+        isEncrypted = encrypted;
     }
 }
