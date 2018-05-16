@@ -80,11 +80,11 @@ public class AccountResource {
     @GET
     @Path("/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("查询账户信息 [3.3.2]")
+    @ApiOperation("查询账户信息")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = AccountDto.class)
     })
-    public Result<AccountDto> get(@ApiParam(name = "address", value = "账户地址 ，缺省时默认为所有账户", required = true)
+    public Result<AccountDto> get(@ApiParam(name = "address", value = "账户地址", required = true)
                                   @PathParam("address") String address) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
@@ -248,21 +248,6 @@ public class AccountResource {
         return result;
     }
 
-    @GET
-    @Path("/address")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "获取账户地址", notes = "result.data: String")
-    public Result getAddress(@QueryParam("publicKey") String publicKey,
-                             @QueryParam("subChainId") Integer subChainId) {
-        if (subChainId < 1 || subChainId >= 65535) {
-            return Result.getFailed(KernelErrorCode.CHAIN_ID_ERROR);
-        }
-        Address address = new Address((short) subChainId.intValue(), Hex.decode(publicKey));
-        Result result = Result.getSuccess();
-        result.setData(address.toString());
-        return result;
-    }
-
     @DELETE
     @Path("/cache")
     @Produces(MediaType.APPLICATION_JSON)
@@ -273,14 +258,22 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         accountCacheService.removeAccount(account.getAddress());
+        if(!scheduler.isShutdown()){
+            scheduler.shutdownNow();
+        }
         return Result.getSuccess();
     }
-
+    private ScheduledExecutorService scheduler;
     @POST
     @Path("/unlock")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "解锁账户", notes = "")
-    public Result unlock(@QueryParam("address") String address, @QueryParam("password") String password, @QueryParam("unlockTime") Integer unlockTime) {
+    public Result unlock(@ApiParam(name = "address", value = "账户地址", required = true)
+                             @QueryParam("address") String address,
+                         @ApiParam(name = "password", value = "账户密码", required = true)
+                         @QueryParam("password") String password,
+                         @ApiParam(name = "unlockTime", value = "解锁时间默认120秒(单位:秒)")
+                             @QueryParam("unlockTime") Integer unlockTime) {
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
@@ -295,11 +288,12 @@ public class AccountResource {
                 unlockTime = 0;
             }
             // 一定时间后自动锁定
-            ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1);
+            scheduler = new ScheduledThreadPoolExecutor(1);
             scheduler.schedule(() -> {
                 accountCacheService.removeAccount(account.getAddress());
                 scheduler.shutdown();
             }, unlockTime, TimeUnit.SECONDS);
+
         } catch (NulsException e) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
@@ -445,7 +439,7 @@ public class AccountResource {
         if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        if (!StringUtils.validPassword(form.getPassword())){
+        if(StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())){
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         return accountService.removeAccount(form.getAddress(), form.getPassword());

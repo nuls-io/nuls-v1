@@ -10,6 +10,7 @@ import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Result;
 
@@ -19,6 +20,7 @@ import java.io.UnsupportedEncodingException;
  * @author: Charlie
  * @date: 2018/5/12
  */
+@Service
 public class AliasStorageServiceImpl implements AliasStorageService, InitializingBean {
 
     /**

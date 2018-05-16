@@ -37,5 +37,5 @@ public interface AccountConstant extends NulsConstant {
      * 账户解锁时间最大值(单位:秒)
      * Account unlock time maximum (unit: second)
      */
-    int ACCOUNT_MAX_UNLOCK_TIME = 600;
+    int ACCOUNT_MAX_UNLOCK_TIME = 120;
 }
