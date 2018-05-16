@@ -53,8 +53,8 @@ import java.util.List;
 public class ConsensusPocServiceImpl implements ConsensusService {
 
     private TxMemoryPool txMemoryPool = TxMemoryPool.getInstance();
-    @Autowired
-    private BlockQueueProvider blockQueueProvider;
+
+    private BlockQueueProvider blockQueueProvider = BlockQueueProvider.getInstance();
 
     @Autowired
     private BlockService blockService;
