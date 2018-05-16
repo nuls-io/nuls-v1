@@ -214,7 +214,6 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
                 Log.info(e.getMessage());
             }
             dbService.delete(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, infoKey);
-
         }
 
         return Result.getSuccess().setData(new Integer(addressCount));
@@ -226,15 +225,18 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     }
 
     @Override
-    public List<Coin> getCoinBytes(byte[] owner) throws NulsException {
+    public List<Coin> getCoinBytes(byte[] address) throws NulsException {
         List<Coin> coinList = new ArrayList<>();
         List<byte[]> keyList = dbService.keyList(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
-        byte[] keyOwner = new byte[AddressTool.HASH_LENGTH];
+        byte[] addressOwner = new byte[AddressTool.HASH_LENGTH];
         for (byte[] key : keyList) {
-            System.arraycopy(key, 0, keyOwner, 0, AddressTool.HASH_LENGTH);
-            if (java.util.Arrays.equals(keyOwner, owner)) {
+            System.arraycopy(key, 0, addressOwner, 0, AddressTool.HASH_LENGTH);
+            if (java.util.Arrays.equals(addressOwner, address)) {
                 Coin coin = new Coin();
                 coin.parse(dbService.get(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA, key));
+                byte[] fromOwner = new byte[coin.getOwner().length - AddressTool.HASH_LENGTH];
+                System.arraycopy(key, AddressTool.HASH_LENGTH, fromOwner, 0, key.length - AddressTool.HASH_LENGTH);
+                coin.setOwner(fromOwner);
                 coinList.add(coin);
             }
         }
