@@ -26,6 +26,8 @@
 
 package io.nuls.consensus.poc.scheduler;
 
+import io.nuls.consensus.poc.constant.ConsensusStatus;
+import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.manager.CacheManager;
 import io.nuls.consensus.poc.manager.ChainManager;
@@ -68,11 +70,20 @@ public class ConsensusScheduler {
 
     public boolean start() {
 
-        threadPool = TaskManager.createScheduledThreadPool(3,
-                new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, "consensus-poll-control"));
-
         ChainManager chainManager = new ChainManager();
         OrphanBlockProvider orphanBlockProvider = new OrphanBlockProvider();
+
+        PocConsensusContext.setChainManager(chainManager);
+        cacheManager = new CacheManager(chainManager);
+        try {
+            initDatas();
+            ConsensusStatusContext.setConsensusStatus(ConsensusStatus.WAIT_RUNNING);
+        } catch (Exception e) {
+            Log.warn(e.getMessage());
+        }
+
+        threadPool = TaskManager.createScheduledThreadPool(3,
+                new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, "consensus-poll-control"));
 
         BlockProcess blockProcess = new BlockProcess(chainManager, orphanBlockProvider);
         threadPool.scheduleAtFixedRate(new BlockProcessTask(blockProcess), 1000L, 100L, TimeUnit.MILLISECONDS);
@@ -85,14 +96,6 @@ public class ConsensusScheduler {
 
         orphanBlockProcess = new OrphanBlockProcess(chainManager, orphanBlockProvider);
         orphanBlockProcess.start();
-
-        PocConsensusContext.setChainManager(chainManager);
-        cacheManager = new CacheManager(chainManager);
-        try {
-            initDatas();
-        } catch (Exception e) {
-            Log.warn(e.getMessage());
-        }
 
         return true;
     }

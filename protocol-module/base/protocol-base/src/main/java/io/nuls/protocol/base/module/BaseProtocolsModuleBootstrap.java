@@ -61,23 +61,26 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         this.waitForDependencyRunning(MessageBusConstant.MODULE_ID_MESSAGE_BUS);
         this.waitForDependencyInited(ConsensusConstant.MODULE_ID_CONSENSUS, NetworkConstant.NETWORK_MODULE_ID);
         BlockService blockService = NulsContext.getServiceBean(BlockService.class);
-        Block block0 = blockService.getBlock(0L).getData();
+        Block block0 = blockService.getGengsisBlock().getData();
+        Block genesisBlock = NulsContext.getInstance().getGenesisBlock();
         if (null == block0) {
             try {
-                blockService.saveBlock(NulsContext.getInstance().getGenesisBlock());
+                blockService.saveBlock(genesisBlock);
             } catch (NulsException e) {
                 Log.error(e);
                 throw new NulsRuntimeException(e);
             }
         } else {
-            Block block = blockService.getBestBlock().getData();
-            ValidateResult result = block.verify();
-            if (result.isFailed()) {
-                throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "the best block is wrong!");
+            if (!block0.getHeader().getHash().equals(genesisBlock.getHeader().getHash())) {
+                throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "the local genesis block is wrong!");
             }
-            NulsContext.getInstance().setBestBlock(block);
         }
-
+        Block block = blockService.getBestBlock().getData();
+        ValidateResult result = block.verify();
+        if (result.isFailed()) {
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "the local best block is wrong!");
+        }
+        NulsContext.getInstance().setBestBlock(block);
 
         this.initHandlers();
         ((DownloadServiceImpl) NulsContext.getServiceBean(DownloadService.class)).start();

@@ -126,7 +126,7 @@ public class BlockResource {
             @ApiResponse(code = 200, message = "success", response = BlockDto.class)
     })
     public Result<BlockDto> loadBlock(@ApiParam(name = "hash", value = "区块hash", required = true)
-                                      @PathParam("hash") String hash) {
+                                      @PathParam("hash") String hash) throws IOException {
         AssertUtil.canNotEmpty(hash);
         Result result;
         if (!StringUtils.validHash(hash)) {
@@ -156,7 +156,7 @@ public class BlockResource {
             @ApiResponse(code = 200, message = "success", response = BlockDto.class)
     })
     public Result<BlockDto> getBlock(@ApiParam(name = "height", value = "区块高度", required = true)
-                                     @PathParam("height") Long height) {
+                                     @PathParam("height") Long height) throws IOException {
         AssertUtil.canNotEmpty(height);
         Result result = Result.getSuccess();
         if (height < 0) {
