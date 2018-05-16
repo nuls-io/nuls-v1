@@ -15,6 +15,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -22,6 +23,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.utils.SerializeUtils;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -178,7 +180,11 @@ public class AccountServiceImpl implements AccountService {
         if (!ECKey.isValidPrivteHex(prikey)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        Account account = null;
+        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, SerializeUtils.sha256hash160(Hex.decode(prikey)));
+        Account account = getAccountByAddress(address.toString());
+        if (null != account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST);
+        }
         try {
             account = AccountTool.createAccount(prikey);
         } catch (NulsException e) {
@@ -228,6 +234,10 @@ public class AccountServiceImpl implements AccountService {
             EncryptedData encryptedData = new EncryptedData(account.getEncryptedPriKey());
             accountKeyStore.setEncryptedPrivateKey(encryptedData.toString());
         } else {
+            if (account.isEncrypted()) {
+                //账户已经加密,但是传入密码为空.The account is encrypted, but the pass password is empty.
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
             accountKeyStore.setPrikey(account.getPriKey());
         }
         accountKeyStore.setAddress(account.getAddress().toString());
