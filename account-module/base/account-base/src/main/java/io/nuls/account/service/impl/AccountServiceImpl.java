@@ -232,7 +232,7 @@ public class AccountServiceImpl implements AccountService {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
             EncryptedData encryptedData = new EncryptedData(account.getEncryptedPriKey());
-            accountKeyStore.setEncryptedPrivateKey(encryptedData.toString());
+            accountKeyStore.setEncryptedPrivateKey(Hex.encode(encryptedData.getEncryptedBytes()));
         } else {
             if (account.isEncrypted()) {
                 //账户已经加密,但是传入密码为空.The account is encrypted, but the pass password is empty.
