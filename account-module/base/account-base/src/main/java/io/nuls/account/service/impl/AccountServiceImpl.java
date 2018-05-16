@@ -57,7 +57,7 @@ public class AccountServiceImpl implements AccountService {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
             return new Result<>(false, "between 0 and 100 can be created at once");
         }
-        if (null != password && !StringUtils.validPassword(password)) {
+        if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
             return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
         }
         locker.lock();

@@ -48,8 +48,7 @@ public class AliasService {
     @Autowired
     private AliasStorageService aliasStorageService;
 
-    @Autowired
-    private AccountCacheService AccountCacheService;
+    private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
     @Autowired
     private MessageBusService messageBusService;
@@ -67,7 +66,7 @@ public class AliasService {
         if (!Address.validAddress(addr)) {
             Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        Account account = AccountCacheService.getAccountByAddress(addr);
+        Account account = accountCacheService.getAccountByAddress(addr);
 
         if (null == account) {
             account = accountService.getAccount(addr).getData();
@@ -147,7 +146,7 @@ public class AliasService {
             }
             po.setAlias(aliaspo.getAlias());
             accountStorageService.updateAccount(po);
-            AccountCacheService.putAccount(po.toAccount());
+            accountCacheService.putAccount(po.toAccount());
         } catch (Exception e) {
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
@@ -184,7 +183,7 @@ public class AliasService {
                 AccountPo accountPo = accountStorageService.getAccount(aliasPo.getAddress()).getData();
                 accountPo.setAlias("");
                 accountStorageService.updateAccount(accountPo);
-                AccountCacheService.putAccount(accountPo.toAccount());
+                accountCacheService.putAccount(accountPo.toAccount());
             }
         } catch (Exception e) {
             throw new NulsRuntimeException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
