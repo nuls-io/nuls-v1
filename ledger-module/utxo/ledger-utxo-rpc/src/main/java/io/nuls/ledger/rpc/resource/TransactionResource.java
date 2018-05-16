@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.ledger.rpc.resources;
+package io.nuls.ledger.rpc.resource;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
