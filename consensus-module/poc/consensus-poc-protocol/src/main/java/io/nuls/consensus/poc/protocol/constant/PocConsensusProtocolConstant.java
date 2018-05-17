@@ -108,7 +108,7 @@ public interface PocConsensusProtocolConstant {
     int CREDIT_MAGIC_NUM = 4;
 
     /**
-     * lock of lockTime
+     * lock of lockTime,(max of int48)(281474976710655L)
      */
-    long LOCK_OF_LOCK_TIME =  -1L;
+    long LOCK_OF_LOCK_TIME = -1L ;
 }

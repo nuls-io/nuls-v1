@@ -119,13 +119,7 @@ public class NulsOutputStreamBuffer {
     }
 
     public void writeInt48(long time) throws IOException {
-        byte[] bytes = new byte[SerializeUtils.sizeOfInt48()];
-        bytes[0] = (byte) (0xFF & time);
-        bytes[1] = (byte) (0xFF & (time >> 8));
-        bytes[2] = (byte) (0xFF & (time >> 16));
-        bytes[3] = (byte) (0xFF & (time >> 24));
-        bytes[4] = (byte) (0xFF & (time >> 32));
-        bytes[5] = (byte) (0xFF & (time >> 40));
+        byte[] bytes = SerializeUtils.int48ToBytes(time);
         this.write(bytes);
     }
 }
