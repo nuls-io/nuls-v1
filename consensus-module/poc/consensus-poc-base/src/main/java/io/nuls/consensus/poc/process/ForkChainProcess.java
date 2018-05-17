@@ -401,6 +401,9 @@ public class ForkChainProcess {
             newBlock.verifyWithException();
             List<Transaction> verifiedList = new ArrayList<>();
             for (Transaction tx : newBlock.getTxs()) {
+                if(tx.getCoinData()==null){
+                    continue;
+                }
                 ValidateResult result = ledgerService.verifyCoinData(tx.getCoinData(), verifiedList);
                 if (result.isSuccess()) {
                     tx.verifyWithException();
