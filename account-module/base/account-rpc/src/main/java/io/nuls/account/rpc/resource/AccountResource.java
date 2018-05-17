@@ -56,6 +56,8 @@ public class AccountResource {
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
+    private ScheduledExecutorService scheduler;
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "创建账户 [3.3.1]", notes = "result.data: List<AccountDto>")
@@ -69,12 +71,56 @@ public class AccountResource {
         if (StringUtils.isBlank(password)) {
             password = null;
         }
+        Result result = accountService.createAccount(count, password);
+        if(result.isFailed()){
+            return result;
+        }
         List<Account> listAccount = accountService.createAccount(count, password).getData();
         List<String> list = new ArrayList<>();
         for (Account account : listAccount) {
             list.add(account.getAddress().toString());
         }
         return Result.getSuccess().setData(list);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "查询账户列表 [3.3.4]", notes = "result.data: Page<AccountDto>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = AccountDto.class)
+    })
+    public Result accountList(@ApiParam(name = "pageNumber", value = "页码")
+                              @QueryParam("pageNumber") int pageNumber,
+                              @ApiParam(name = "pageSize", value = "每页条数")
+                              @QueryParam("pageSize") int pageSize) {
+        if (pageNumber < 0 || pageSize < 0) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        if (pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (pageSize == 0) {
+            pageSize = 100;
+        }
+        List<Account> accountList = accountService.getAccountList().getData();
+        Page<Account> page = new Page<>(pageNumber, pageSize);
+        page.setTotal(accountList.size());
+        int start = (pageNumber - 1) * pageSize;
+        if (start >= accountList.size()) {
+            return Result.getSuccess().setData(page);
+        }
+        int end = pageNumber * pageSize;
+        if (end > accountList.size()) {
+            end = accountList.size();
+        }
+        accountList = accountList.subList(start, end);
+        Page<AccountDto> resultPage = new Page<>(page);
+        List<AccountDto> dtoList = new ArrayList<>();
+        for (Account account : accountList) {
+            dtoList.add(new AccountDto(account));
+        }
+        resultPage.setList(dtoList);
+        return Result.getSuccess().setData(resultPage);
     }
 
     @GET
@@ -115,50 +161,6 @@ public class AccountResource {
     }
 
     @GET
-    @Path("/list")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询账户列表 [3.3.4]", notes = "result.data: Page<AccountDto>")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = AccountDto.class)
-    })
-    public Result accountList(@ApiParam(name = "pageNumber", value = "页码")
-                              @QueryParam("pageNumber") int pageNumber,
-                              @ApiParam(name = "pageSize", value = "每页条数")
-                              @QueryParam("pageSize") int pageSize) {
-        if (pageNumber < 0 || pageSize < 0) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
-        }
-        if (pageNumber == 0) {
-            pageNumber = 1;
-        }
-        if (pageSize == 0) {
-            pageSize = 100;
-        }
-
-        List<Account> accountList = accountService.getAccountList().getData();
-
-        Page<Account> page = new Page<>(pageNumber, pageSize);
-        page.setTotal(accountList.size());
-        int start = (pageNumber - 1) * pageSize;
-        if (start >= accountList.size()) {
-            return Result.getSuccess().setData(page);
-        }
-
-        int end = pageNumber * pageSize;
-        if (end > accountList.size()) {
-            end = accountList.size();
-        }
-        accountList = accountList.subList(start, end);
-        Page<AccountDto> resultPage = new Page<>(page);
-        List<AccountDto> dtoList = new ArrayList<>();
-        for (Account account : accountList) {
-            dtoList.add(new AccountDto(account));
-        }
-        resultPage.setList(dtoList);
-        return Result.getSuccess().setData(resultPage);
-    }
-
-    @GET
     @Path("/balance/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("查询账户余额 [3.3.3]")
@@ -186,27 +188,6 @@ public class AccountResource {
     }
 
     @GET
-    @Path("/balances")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("查询当前钱包所有账户余额(合计) [3.3.9]")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = BalanceDto.class)
-    })
-    public Result getBalance() {
-        Balance balance = null;
-        try {
-            balance = accountService.getBalance().getData();
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(AccountErrorCode.FAILED);
-        }
-        Result result = Result.getSuccess();
-        result.setData(new BalanceDto(balance));
-        return result;
-    }
-
-
-    @POST
     @Path("/prikey")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("查询账户私钥，只能查询本地创建或导入的账户 [3.3.7]")
@@ -215,8 +196,11 @@ public class AccountResource {
     })
     public Result getPrikey(@ApiParam(name = "form", value = "查询私钥表单数据", required = true)
                                     AccountAPForm form) {
-        if (!Address.validAddress(form.getAddress()) || !StringUtils.validPassword(form.getPassword())) {
+        if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        if(StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())){
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         return accountBaseService.getPrivateKey(form.getAddress(), form.getPassword());
     }
@@ -248,11 +232,11 @@ public class AccountResource {
         return result;
     }
 
-    @DELETE
-    @Path("/cache")
+    @POST
+    @Path("/lock")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "清除缓存的解锁账户", notes = "Clear the cache unlock account.")
-    public Result clearCacheOfUnlockAccount(@QueryParam("address") String address) {
+    public Result lock(@QueryParam("address") String address) {
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
@@ -263,7 +247,7 @@ public class AccountResource {
         }
         return Result.getSuccess();
     }
-    private ScheduledExecutorService scheduler;
+
     @POST
     @Path("/unlock")
     @Produces(MediaType.APPLICATION_JSON)
@@ -317,7 +301,7 @@ public class AccountResource {
         }
         String password = form.getPassword();
         if (!StringUtils.validPassword(password)) {
-            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
         }
         return accountBaseService.setPassword(address, password);
     }
@@ -337,11 +321,12 @@ public class AccountResource {
         }
         String password = form.getPassword();
         if (!StringUtils.validPassword(password)) {
-            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
+
         }
         String newPassword = form.getNewPassword();
         if (!StringUtils.validPassword(newPassword)) {
-            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
         }
         return this.accountBaseService.changePassword(address, password, newPassword);
     }
@@ -359,7 +344,7 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         Result<AccountKeyStore> result = accountService.exportAccountToKeyStore(form.getAddress(), form.getPassword());
         if(result.isFailed()){
@@ -384,7 +369,7 @@ public class AccountResource {
         }
         String password = form.getPassword();
         if(StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         AccountKeyStoreDto accountKeyStoreDto = null;
         try {
@@ -427,7 +412,7 @@ public class AccountResource {
         return Result.getSuccess().setData(account.getAddress().toString());
     }
 
-    @POST
+    @DELETE
     @Path("/remove")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "移除账户", notes = "Nuls_RPC_API文档[3.4.9]")

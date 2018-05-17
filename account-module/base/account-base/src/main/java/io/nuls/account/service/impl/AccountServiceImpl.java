@@ -55,10 +55,10 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<List<Account>> createAccount(int count, String password) {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
-            return new Result<>(false, "between 0 and 100 can be created at once");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"between 0 and 100 can be created at once");
         }
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
-            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
         }
         locker.lock();
         try {
