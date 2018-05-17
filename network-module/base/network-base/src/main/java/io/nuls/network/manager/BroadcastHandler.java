@@ -38,8 +38,11 @@ public class BroadcastHandler {
         return broadcastToList(nodeManager.getAvailableNodes(), msg, null, asyn);
     }
 
-    public BroadcastResult broadcastToNode(BaseMessage msg, Node node, boolean asyn) {
-        return broadcastToNode(msg, node, asyn);
+    public BroadcastResult broadcastToNode(BaseMessage msg, Node sendNode, boolean asyn) {
+        if (sendNode == null) {
+            return new BroadcastResult(false, NetworkErrorCode.NET_NODE_NOT_FOUND);
+        }
+        return broadcast(msg, sendNode, asyn);
     }
 
     public BroadcastResult broadcastToNodeGroup(BaseMessage msg, String groupName, boolean asyn) {
