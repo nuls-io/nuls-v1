@@ -87,7 +87,7 @@ public class ConsensusNetworkService implements NetworkService {
     }
 
     @Override
-    public BroadcastResult sendToGroup(BaseNulsData event, String groupName, String excludeNodeId, boolean asyn) {
+    public BroadcastResult sendToGroup(BaseNulsData event, String groupName, Node excludeNode, boolean asyn) {
         return null;
     }
 

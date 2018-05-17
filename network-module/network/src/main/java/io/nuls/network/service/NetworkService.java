@@ -59,7 +59,7 @@ public interface NetworkService {
 
     BroadcastResult sendToGroup(BaseNulsData event, String groupName, boolean asyn);
 
-    BroadcastResult sendToGroup(BaseNulsData event, String groupName, String excludeNodeId, boolean asyn);
+    BroadcastResult sendToGroup(BaseNulsData event, String groupName, Node excludeNode, boolean asyn);
 
     void reset();
 
