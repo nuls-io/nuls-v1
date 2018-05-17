@@ -61,6 +61,7 @@ public class GetBlockHandler extends AbstractMessageHandler<GetBlockRequest> {
                 sendNotFound(param.getStartHash(), fromNode);
                 return;
             }
+            block = result.getData();
             sendBlock(block, fromNode);
             return;
         }
@@ -90,8 +91,15 @@ public class GetBlockHandler extends AbstractMessageHandler<GetBlockRequest> {
         }
 
         Block block = chainEndBlock;
-        while (!block.getHeader().getHash().equals(chainStartBlock.getHeader().getHash())) {
+        while (true) {
             this.sendBlock(block, fromNode);
+            if (block.getHeader().getHash().equals(chainStartBlock.getHeader().getHash())) {
+                break;
+            }
+            if (block.getHeader().getPreHash().equals(chainStartBlock.getHeader().getHash())) {
+                block = chainStartBlock;
+                continue;
+            }
             block = blockService.getBlock(block.getHeader().getPreHash()).getData();
         }
     }

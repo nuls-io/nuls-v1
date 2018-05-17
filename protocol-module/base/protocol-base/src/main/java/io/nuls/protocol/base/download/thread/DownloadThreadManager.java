@@ -33,6 +33,7 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
@@ -53,7 +54,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- *
  * @author ln
  * @date 2018/4/8
  */
@@ -215,21 +215,21 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         if (newestInfos.getNetBestHeight() < localBestBlock.getHeader().getHeight()) {
-            if (networkService.getAvailableNodes().size() >= networkService.getNetworkParam().getMaxOutCount() && DoubleUtils.div(newestInfos.getNodes().size(), networkService.getAvailableNodes().size(), 2) >= 0.8d) {
+            BlockHeader header = blockService.getBlockHeader(newestInfos.getNetBestHash()).getData();
+
+            if (null == header && networkService.getAvailableNodes().size() >= networkService.getNetworkParam().getMaxOutCount() && DoubleUtils.div(newestInfos.getNodes().size(), networkService.getAvailableNodes().size(), 2) >= 0.8d) {
                 for (long i = localBestBlock.getHeader().getHeight(); i <= newestInfos.getNetBestHeight(); i--) {
                     consensusService.rollbackBlock(localBestBlock);
-
                     localBestBlock = blockService.getBestBlock().getData();
                 }
-            } else {
+            } else if (null == header) {
                 resetNetwork("The local block is higher than the network block, the number of connected nodes is not enough to allow the local rollbackTx, so reset");
                 return false;
             }
+        } else {
+            //check need rollbackTx
+            checkRollback(localBestBlock, 0);
         }
-
-        //check need rollbackTx
-        checkRollback(localBestBlock, 0);
-
         return true;
     }
 
@@ -241,7 +241,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         List<Node> nodes = newestInfos.getNodes();
-
+        //todo 这里逻辑感觉不完整
         for (Node node : nodes) {
             Block remoteBlock = DownloadUtils.getBlockByHash(localBestBlock.getHeader().getHash(), node);
             if (remoteBlock != null && remoteBlock.getHeader().getHeight() == localBestBlock.getHeader().getHeight()) {

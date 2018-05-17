@@ -15,7 +15,7 @@ public interface ProtocolConstant extends NulsConstant {
      * Block interval time.
      * unit:second
      */
-    long BLOCK_TIME_INTERVAL_SECOND = 10;
+    long BLOCK_TIME_INTERVAL_SECOND = 5;
 
     /**
      * 出块间隔时间（毫秒）

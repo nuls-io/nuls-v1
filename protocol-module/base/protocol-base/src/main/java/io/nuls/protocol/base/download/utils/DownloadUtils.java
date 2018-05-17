@@ -91,7 +91,8 @@ public class DownloadUtils {
             }
         } else {
             GetBlocksHashRequest hashesRequest = new GetBlocksHashRequest(startHeight, size);
-            Future<BlockHashResponse> hashesFuture = DownloadCacheHandler.addGetBlockHashesRequest(hashesRequest.getHash());
+            NulsDigestData requestHash = NulsDigestData.calcDigestData(hashesRequest.getMsgBody().serialize());
+            Future<BlockHashResponse> hashesFuture = DownloadCacheHandler.addGetBlockHashesRequest(requestHash);
             Result hashesResult = messageBusService.sendToNode(hashesRequest, node, false);
             if (!hashesResult.isSuccess()) {
                 return resultList;
@@ -147,7 +148,8 @@ public class DownloadUtils {
         GetTxGroupParam param = new GetTxGroupParam();
         param.setTxHashList(txHashList);
         request.setMsgBody(param);
-        Future<TxGroup> future = DownloadCacheHandler.addGetTxGroupRequest(request.getHash());
+        NulsDigestData requestHash = NulsDigestData.calcDigestData(request.getMsgBody().serialize());
+        Future<TxGroup> future = DownloadCacheHandler.addGetTxGroupRequest(requestHash);
         Result result = messageBusService.sendToNode(request, node, false);
         if (result.isFailed()) {
             return null;

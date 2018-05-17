@@ -56,7 +56,6 @@ public class DownloadThread implements Callable<ResultMessage> {
 
     @Override
     public ResultMessage call() throws Exception {
-
         List<Block> blockList = null;
         try {
             Log.info("download thread : " + Thread.currentThread().getName() + " ,  startHeight : " + startHeight + ", size : " + size + " , from node : " + node.getId() + " , startHash : " + startHash + " , endHash : " + endHash);

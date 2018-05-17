@@ -136,4 +136,22 @@ public interface AccountLedgerService {
      * @param values
      */
     Result transfer(byte[] from, byte[] to, Na values, String password, String remark);
+
+    /**
+     * <p>
+     * get local address list
+     *
+     * @param txs
+     * @return true if a address is a local address
+     */
+    Result unlockCoinData(List<Transaction> txs);
+
+    /**
+     * <p>
+     * load the local ledger of a account when an account imported
+     *
+     * @param address
+     * @return true if a address is a local address
+     */
+    Result importAccountLedger(String address);
 }

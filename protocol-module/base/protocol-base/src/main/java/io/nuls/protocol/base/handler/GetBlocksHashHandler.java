@@ -42,6 +42,8 @@ import io.nuls.protocol.model.GetBlocksHashParam;
 import io.nuls.protocol.model.NotFound;
 import io.nuls.protocol.service.BlockService;
 
+import java.io.IOException;
+
 /**
  * @author Niels
  * @date 2018/1/16
@@ -59,15 +61,23 @@ public class GetBlocksHashHandler extends AbstractMessageHandler<GetBlocksHashRe
         if (param.getSize() > MAX_SIZE) {
             return;
         }
-        BlockHeader endHeader = blockService.getBlockHeader(param.getStart() + param.getSize()-1).getData();
+        NulsDigestData requestHash = null;
+        try {
+            requestHash = NulsDigestData.calcDigestData(message.getMsgBody().serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return;
+        }
+        BlockHeader endHeader = blockService.getBlockHeader(param.getStart() + param.getSize() - 1).getData();
         if (null == endHeader) {
-            sendNotFound(fromNode, message.getHash());
+            sendNotFound(fromNode, requestHash);
             return;
         }
         BlockHashResponse response = new BlockHashResponse();
-        response.setRequestMessageHash(message.getHash());
+
+        response.setRequestMessageHash(requestHash);
         BlockHeader header = endHeader;
-        while (header.getHeight() > param.getStart()) {
+        while (header.getHeight() >= param.getStart()) {
             response.putFront(header.getHeight(), header.getHash());
             header = blockService.getBlockHeader(header.getPreHash()).getData();
         }

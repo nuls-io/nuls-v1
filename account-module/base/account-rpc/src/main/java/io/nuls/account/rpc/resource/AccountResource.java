@@ -16,12 +16,10 @@ import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.core.tools.crypto.ECKey;
-import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -65,7 +63,7 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = ArrayList.class)
     })
     public Result<List<String>> create(@ApiParam(name = "form", value = "账户表单数据", required = true)
-                                                   AccountCreateForm form) {
+                                               AccountCreateForm form) {
         int count = form.getCount() < 1 ? 1 : form.getCount();
         String password = form.getPassword();
         if (StringUtils.isBlank(password)) {
@@ -242,7 +240,7 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         accountCacheService.removeAccount(account.getAddress());
-        if(!scheduler.isShutdown()){
+        if (!scheduler.isShutdown()) {
             scheduler.shutdownNow();
         }
         return Result.getSuccess();
@@ -253,11 +251,11 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "解锁账户", notes = "")
     public Result unlock(@ApiParam(name = "address", value = "账户地址", required = true)
-                             @QueryParam("address") String address,
+                         @QueryParam("address") String address,
                          @ApiParam(name = "password", value = "账户密码", required = true)
                          @QueryParam("password") String password,
                          @ApiParam(name = "unlockTime", value = "解锁时间默认120秒(单位:秒)")
-                             @QueryParam("unlockTime") Integer unlockTime) {
+                         @QueryParam("unlockTime") Integer unlockTime) {
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
@@ -293,7 +291,7 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result updatePassword(@ApiParam(name = "form", value = "设置钱包密码表单数据", required = true)
-                                             AccountSetPasswordForm form) {
+                                         AccountSetPasswordForm form) {
 
         String address = form.getAddress();
         if (!Address.validAddress(address)) {
@@ -336,10 +334,10 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "账户备份，导出AccountKeyStore字符串 ")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result<AccountKeyStore> backup(@ApiParam(name = "form", value = "钱包备份表单数据")
-                                    AccountAPForm form) {
+                                                  AccountAPForm form) {
         if (StringUtils.isNotBlank(form.getAddress()) && !Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
@@ -347,7 +345,7 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         Result<AccountKeyStore> result = accountService.exportAccountToKeyStore(form.getAddress(), form.getPassword());
-        if(result.isFailed()){
+        if (result.isFailed()) {
             return result;
         }
         AccountKeyStore accountKeyStore = result.getData();
@@ -359,15 +357,16 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "根据AccountKeyStore导入账户")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result importAccount(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
-                                            AccountKeyStoreImportForm form) {
+                                        AccountKeyStoreImportForm form) {
         String keyStore = form.getAccountKeyStore();
         if (null == keyStore) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         String password = form.getPassword();
+
         if(StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)){
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
@@ -378,12 +377,11 @@ public class AccountResource {
             Log.error(e);
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        AccountKeyStore accountKeyStore = accountKeyStoreDto.toAccountKeyStore();
         Result result = accountService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), password);
-        if(result.isFailed()){
+        if (result.isFailed()) {
             return result;
         }
-        Account account = (Account)result.getData();
+        Account account = (Account) result.getData();
         return Result.getSuccess().setData(account.getAddress().toString());
     }
 
@@ -392,23 +390,23 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "根据私钥导入账户", notes = "返回账户地址")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result<String> importAccountByPriKey(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
-                                                    AccountImportPrikeyForm form) {
+                                                        AccountImportPrikeyForm form) {
         String priKey = form.getPriKey();
         if (!ECKey.isValidPrivteHex(priKey)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         String password = form.getPassword();
-        if(StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)){
+        if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         Result result = accountService.importAccount(priKey, password);
-        if(result.isFailed()){
+        if (result.isFailed()) {
             return result;
         }
-        Account account = (Account)result.getData();
+        Account account = (Account) result.getData();
         return Result.getSuccess().setData(account.getAddress().toString());
     }
 
@@ -417,14 +415,14 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "移除账户", notes = "Nuls_RPC_API文档[3.4.9]")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result removeAccount(@ApiParam(name = "钱包移除账户表单数据", value = "JSONFormat", required = true)
-                                           AccountAPForm form) {
+                                        AccountAPForm form) {
         if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        if(StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())){
+        if (StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         return accountService.removeAccount(form.getAddress(), form.getPassword());
