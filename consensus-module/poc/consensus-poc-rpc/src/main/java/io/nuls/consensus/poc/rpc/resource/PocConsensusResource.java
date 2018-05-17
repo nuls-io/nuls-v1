@@ -433,16 +433,8 @@ public class PocConsensusResource {
             }
         }
         int start = pageNumber * pageSize - pageSize;
-        Page<AgentDTO> page = new Page<>();
-        page.setTotal(agentList.size());
-        page.setPageNumber(pageNumber);
-        page.setPageSize(pageSize);
-        int pages = agentList.size() / pageSize;
-        if (agentList.size() % pageSize > 0) {
-            pages++;
-        }
-        page.setPages(pages);
-        if (start >= agentList.size()) {
+        Page<AgentDTO> page = new Page<>(pageNumber, pageSize, agentList.size());
+        if (start >= page.getTotal()) {
             result.setData(page);
             return result;
         }
@@ -524,11 +516,11 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
     public Result<Page<AgentDTO>> getAgentListByDepositAddress(@ApiParam(name = "pageNumber", value = "页码")
-                                               @QueryParam("pageNumber") Integer pageNumber,
-                                               @ApiParam(name = "pageSize", value = "每页条数")
-                                               @QueryParam("pageSize") Integer pageSize,
-                                               @ApiParam(name = "address", value = "账户地址", required = true)
-                                               @PathParam("address") String address) {
+                                                               @QueryParam("pageNumber") Integer pageNumber,
+                                                               @ApiParam(name = "pageSize", value = "每页条数")
+                                                               @QueryParam("pageSize") Integer pageSize,
+                                                               @ApiParam(name = "address", value = "账户地址", required = true)
+                                                               @PathParam("address") String address) {
         AssertUtil.canNotEmpty(address);
         if (!AddressTool.validAddress(address)) {
             return Result.getFailed("The address is wrong!");
@@ -574,15 +566,7 @@ public class PocConsensusResource {
             agentList.add(agent);
         }
         int start = pageNumber * pageSize - pageSize;
-        Page<AgentDTO> page = new Page<>();
-        page.setTotal(agentList.size());
-        page.setPageNumber(pageNumber);
-        page.setPageSize(pageSize);
-        int pages = agentList.size() / pageSize;
-        if (agentList.size() % pageSize > 0) {
-            pages++;
-        }
-        page.setPages(pages);
+        Page<AgentDTO> page = new Page<>(pageNumber, pageSize, agentList.size());
         if (start >= agentList.size()) {
             result.setData(page);
             return result;
@@ -647,15 +631,7 @@ public class PocConsensusResource {
             depositList.add(deposit);
         }
         int start = pageNumber * pageSize - pageSize;
-        Page<DepositDTO> page = new Page<>();
-        page.setTotal(depositList.size());
-        page.setPageNumber(pageNumber);
-        page.setPageSize(pageSize);
-        int pages = depositList.size() / pageSize;
-        if (depositList.size() % pageSize > 0) {
-            pages++;
-        }
-        page.setPages(pages);
+        Page<DepositDTO> page = new Page<>(pageNumber, pageSize, depositList.size());
         if (start >= depositList.size()) {
             result.setData(page);
             return result;
@@ -678,11 +654,11 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
     public Result queryDepositListByAgentAddress(@ApiParam(name = "agentHash", value = "指定代理节点标识", required = true)
-                                                                   @PathParam("agentHash") String agentHash,
-                                                                   @ApiParam(name = "pageNumber", value = "页码")
-                                                                   @QueryParam("pageNumber") Integer pageNumber,
-                                                                   @ApiParam(name = "pageSize", value = "每页条数")
-                                                                   @QueryParam("pageSize") Integer pageSize) throws NulsException {
+                                                 @PathParam("agentHash") String agentHash,
+                                                 @ApiParam(name = "pageNumber", value = "页码")
+                                                 @QueryParam("pageNumber") Integer pageNumber,
+                                                 @ApiParam(name = "pageSize", value = "每页条数")
+                                                 @QueryParam("pageSize") Integer pageSize) throws NulsException {
         AssertUtil.canNotEmpty(agentHash);
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
@@ -711,15 +687,7 @@ public class PocConsensusResource {
             depositList.add(deposit);
         }
         int start = pageNumber * pageSize - pageSize;
-        Page<DepositDTO> page = new Page<>();
-        page.setTotal(depositList.size());
-        page.setPageNumber(pageNumber);
-        page.setPageSize(pageSize);
-        int pages = depositList.size() / pageSize;
-        if (depositList.size() % pageSize > 0) {
-            pages++;
-        }
-        page.setPages(pages);
+        Page<DepositDTO> page = new Page<>(pageNumber, pageSize, depositList.size());
         if (start >= depositList.size()) {
             result.setData(page);
             return result;

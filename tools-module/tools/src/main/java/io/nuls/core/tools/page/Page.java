@@ -15,14 +15,25 @@ public class Page<T> {
 
     private List<T> list;
 
-    public Page(int pageNumber, int pageSize) {
-        this.pageNumber = pageNumber;
-        this.pageSize = pageSize;
+    public Page() {
         this.list = new ArrayList<>();
     }
 
-    public Page() {
-        this.list = new ArrayList<>();
+    public Page(int pageNumber, int pageSize) {
+        this();
+        this.pageNumber = pageNumber;
+        this.pageSize = pageSize;
+    }
+
+    public Page(int pageNumber, int pageSize, int total) {
+        this(pageNumber, pageSize);
+        this.total = total;
+
+        int p = total / pageSize;
+        if (total % pageSize > 0) {
+            p++;
+        }
+        this.pages = p;
     }
 
     public Page(Page page) {
