@@ -98,6 +98,8 @@ public class ChainContainer implements Cloneable {
                 Agent agent = agentTx.getTxData();
                 agent.setDelHeight(-1L);
                 agent.setBlockHeight(height);
+                agent.setTxHash(agentTx.getHash());
+                agent.setTime(agentTx.getTime());
 
                 agentList.add(agent);
             } else if (txType == ConsensusConstant.TX_TYPE_JOIN_CONSENSUS) {
@@ -110,7 +112,8 @@ public class ChainContainer implements Cloneable {
                 Deposit deposit = depositTx.getTxData();
                 deposit.setDelHeight(-1L);
                 deposit.setBlockHeight(height);
-
+                deposit.setTxHash(depositTx.getHash());
+                deposit.setTime(depositTx.getTime());
                 depositList.add(deposit);
 
             } else if (txType == ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT) {
