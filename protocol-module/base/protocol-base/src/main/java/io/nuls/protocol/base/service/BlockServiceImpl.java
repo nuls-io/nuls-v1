@@ -215,6 +215,7 @@ public class BlockServiceImpl implements BlockService {
         }
         List<Transaction> savedList = new ArrayList<>();
         for (Transaction transaction : block.getTxs()) {
+            transaction.setBlockHeight(block.getHeader().getHeight());
             Result result = transactionService.commitTx(transaction, block.getHeader());
             if (result.isSuccess()) {
                 result = ledgerService.saveTx(transaction);

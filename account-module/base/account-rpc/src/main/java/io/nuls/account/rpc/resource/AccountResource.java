@@ -153,8 +153,11 @@ public class AccountResource {
         if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        if (StringUtils.isBlank(alias) || !StringUtils.validPassword(form.getPassword())) {
+        if (StringUtils.isBlank(alias)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        if (StringUtils.isBlank(form.getPassword()) || !StringUtils.validPassword(form.getPassword())) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         return aliasService.setAlias(form.getAddress(), form.getPassword(), alias);
     }
@@ -186,7 +189,7 @@ public class AccountResource {
         return result;
     }
 
-    @GET
+    @POST
     @Path("/prikey/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("查询账户私钥，只能查询本地创建或导入的账户 [3.3.7]")
@@ -414,7 +417,7 @@ public class AccountResource {
         return Result.getSuccess().setData(account.getAddress().toString());
     }
 
-    @DELETE
+    @POST
     @Path("/remove/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "移除账户", notes = "Nuls_RPC_API文档[3.4.9]")

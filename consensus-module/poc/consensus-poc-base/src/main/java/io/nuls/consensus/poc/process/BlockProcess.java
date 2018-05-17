@@ -155,6 +155,9 @@ public class BlockProcess {
                 block.verifyWithException();
                 List<Transaction> verifiedList = new ArrayList<>();
                 for (Transaction tx : block.getTxs()) {
+                    if (tx.getCoinData() == null) {
+                        continue;
+                    }
                     ValidateResult result = ledgerService.verifyCoinData(tx.getCoinData(), verifiedList);
                     if (result.isSuccess()) {
                         tx.verifyWithException();

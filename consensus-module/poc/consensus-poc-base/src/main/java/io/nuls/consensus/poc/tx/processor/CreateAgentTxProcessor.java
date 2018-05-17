@@ -38,6 +38,7 @@ import io.nuls.core.tools.crypto.Hex;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.TransactionProcessor;
@@ -48,7 +49,6 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
  * @author ln
  * @date 2018/5/10
  */
@@ -61,7 +61,7 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
     @Override
     public Result onRollback(CreateAgentTransaction tx, Object secondaryData) {
         Agent agent = tx.getTxData();
-        if(agent.getTxHash() == null) {
+        if (agent.getTxHash() == null) {
             agent.setTxHash(tx.getHash());
         }
         boolean success = agentStorageService.delete(agent.getTxHash());
@@ -71,8 +71,11 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
     @Override
     public Result onCommit(CreateAgentTransaction tx, Object secondaryData) {
         Agent agent = tx.getTxData();
-        if(agent.getTxHash() == null) {
+        BlockHeader header = (BlockHeader) secondaryData;
+        if (agent.getTxHash() == null) {
             agent.setTxHash(tx.getHash());
+            agent.setBlockHeight(header.getHeight());
+            agent.setTime(tx.getTime());
         }
         AgentPo agentPo = PoConvertUtil.agentToPo(agent);
 
@@ -100,10 +103,10 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
                     String agentAddressHex = Hex.encode(agent.getAgentAddress());
                     String packAddressHex = Hex.encode(agent.getPackingAddress());
 
-                    if(!addressHexSet.add(agentAddressHex) || !addressHexSet.add(packAddressHex)) {
+                    if (!addressHexSet.add(agentAddressHex) || !addressHexSet.add(packAddressHex)) {
                         return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), KernelErrorCode.FAILED, "there is a agent has same address!").setData(transaction);
                     }
-                break;
+                    break;
                 case ConsensusConstant.TX_TYPE_RED_PUNISH:
                     RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
                     RedPunishData redPunishData = redPunishTransaction.getTxData();

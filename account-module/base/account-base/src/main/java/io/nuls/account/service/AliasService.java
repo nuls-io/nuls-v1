@@ -67,14 +67,17 @@ public class AliasService {
             Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Account account = accountCacheService.getAccountByAddress(addr);
-
         if (null == account) {
             account = accountService.getAccount(addr).getData();
             if(null == account){
                 return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
             }
             try {
-                account.decrypt(password);
+                if(account.isEncrypted()){
+                    if(!account.unlock(password)){
+                        return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                    }
+                }
             } catch (NulsException e) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
