@@ -185,15 +185,15 @@ public class AccountServiceImpl implements AccountService {
         if (!ECKey.isValidPrivteHex(prikey)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, SerializeUtils.sha256hash160(Hex.decode(prikey)));
-        Account account = getAccountByAddress(address.toString());
-        if (null != account) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST);
-        }
+        Account account;
         try {
             account = AccountTool.createAccount(prikey);
         } catch (NulsException e) {
             return Result.getFailed(AccountErrorCode.FAILED);
+        }
+        Account accountDB = getAccountByAddress(account.getAddress().toString());
+        if (null != accountDB) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST);
         }
         if (StringUtils.validPassword(password)) {
             try {
