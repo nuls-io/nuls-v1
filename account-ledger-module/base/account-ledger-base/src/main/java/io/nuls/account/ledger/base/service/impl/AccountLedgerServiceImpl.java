@@ -27,6 +27,7 @@ package io.nuls.account.ledger.base.service.impl;
 
 import io.nuls.account.ledger.base.service.balance.BalanceProvider;
 import io.nuls.account.ledger.base.util.CoinComparator;
+import io.nuls.account.ledger.base.util.TxInfoComparator;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.ledger.storage.constant.AccountLedgerStorageConstant;
 import io.nuls.account.ledger.storage.po.TransactionInfoPo;
@@ -193,13 +194,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         Collections.sort(coinList, CoinComparator.getInstance());
 
 
-
         boolean enough = false;
         List<Coin> coins = new ArrayList<>();
         Na values = Na.ZERO;
         for (int i = 0; i < coinList.size(); i++) {
             Coin coin = coinList.get(i);
-            if(!coin.usable()) {
+            if (!coin.usable()) {
                 continue;
             }
             coins.add(coin);
@@ -241,11 +241,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
         }
         return false;
-    }
-
-    @Override
-    public List<Account> getLocalAccountList() {
-        return localAccountList;
     }
 
     @Override
@@ -357,6 +352,18 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Log.info(address);
         }
         return Result.getSuccess();
+    }
+
+    @Override
+    public Result getTxInfoList(byte[] address) {
+        List<TransactionInfoPo> infoPoList = storageService.getTxInfoList(address);
+        List<TransactionInfo> infoList = new ArrayList<>();
+        for (TransactionInfoPo po : infoPoList) {
+            infoList.add(po.toTransactionInfo());
+        }
+
+        Collections.sort(infoList, TxInfoComparator.getInstance());
+        return Result.getSuccess().setData(infoList);
     }
 
     protected Result<Integer> saveConfirmedTransaction(Transaction tx, byte status) {

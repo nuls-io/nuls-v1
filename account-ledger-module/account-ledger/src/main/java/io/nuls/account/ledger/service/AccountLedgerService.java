@@ -123,14 +123,6 @@ public interface AccountLedgerService {
     boolean isLocalAccount(byte[] address);
 
     /**
-     * <p>
-     * get local address list
-     *
-     * @return local account list
-     */
-    List<Account> getLocalAccountList();
-
-    /**
      * @param from
      * @param to
      * @param values
@@ -154,4 +146,7 @@ public interface AccountLedgerService {
      * @return true if a address is a local address
      */
     Result importAccountLedger(String address);
+
+
+    Result getTxInfoList(byte[] address);
 }
