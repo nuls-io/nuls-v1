@@ -26,6 +26,7 @@
 
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.ChainManager;
@@ -401,7 +402,7 @@ public class ForkChainProcess {
             newBlock.verifyWithException();
             List<Transaction> verifiedList = new ArrayList<>();
             for (Transaction tx : newBlock.getTxs()) {
-                if(tx.getCoinData()==null){
+                if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
                     continue;
                 }
                 ValidateResult result = ledgerService.verifyCoinData(tx.getCoinData(), verifiedList);

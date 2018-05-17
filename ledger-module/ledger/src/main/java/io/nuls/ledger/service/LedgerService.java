@@ -108,4 +108,13 @@ public interface LedgerService {
      * @return boolean
      */
     Result unlockTxCoinData(Transaction tx) throws NulsException;
+
+    /**
+     * rollback unlockTxCoinData
+     *
+     * 回滚unlockTxCoinData
+     * @param tx
+     * @return boolean
+     */
+    Result rollbackUnlockTxCoinData(Transaction tx) throws NulsException;
 }

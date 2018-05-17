@@ -134,10 +134,12 @@ public interface AccountLedgerService {
      * <p>
      * get local address list
      *
-     * @param txs
+     * @param tx
      * @return true if a address is a local address
      */
-    Result unlockCoinData(List<Transaction> txs);
+    Result unlockCoinData(Transaction tx);
+
+    Result rollbackUnlockTxCoinData(Transaction tx);
 
     /**
      * <p>
