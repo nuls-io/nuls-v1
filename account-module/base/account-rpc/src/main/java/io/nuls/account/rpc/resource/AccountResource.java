@@ -153,8 +153,11 @@ public class AccountResource {
         if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        if (StringUtils.isBlank(alias) || !StringUtils.validPassword(form.getPassword())) {
+        if (StringUtils.isBlank(alias)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        if (StringUtils.isBlank(form.getPassword()) || !StringUtils.validPassword(form.getPassword())) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         return aliasService.setAlias(form.getAddress(), form.getPassword(), alias);
     }
