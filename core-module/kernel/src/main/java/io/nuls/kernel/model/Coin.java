@@ -26,7 +26,10 @@
 
 package io.nuls.kernel.model;
 
+import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -118,5 +121,34 @@ public class Coin extends BaseNulsData {
         this.lockTime = lockTime;
     }
 
+    /**
+     * 根据当前时间和当前最新高度，判断coin是否可用
+     *
+     * @return
+     */
+    public boolean usable() {
+        if (lockTime < 0) {
+            return false;
+        }
+        if (lockTime == 0) {
+            return true;
+        }
 
+        long currentTime = TimeService.currentTimeMillis();
+        long bestHeight = NulsContext.getInstance().getBestHeight();
+
+        if (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE) {
+            if (lockTime <= currentTime) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (lockTime <= bestHeight) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
 }
