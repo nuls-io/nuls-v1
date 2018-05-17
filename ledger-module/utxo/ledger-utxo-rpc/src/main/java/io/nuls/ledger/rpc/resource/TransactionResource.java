@@ -25,6 +25,7 @@ package io.nuls.ledger.rpc.resource;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.constant.TxStatusEnum;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -81,6 +82,7 @@ public class TransactionResource {
             if (tx == null) {
                 result = Result.getFailed(LedgerErrorCode.DATA_NOT_FOUND);
             } else {
+                tx.setStatus(TxStatusEnum.CONFIRMED);
                 TransactionDto txDto = null;
                 CoinData coinData = tx.getCoinData();
                 if(coinData != null) {
@@ -111,7 +113,7 @@ public class TransactionResource {
                     List<Coin> tos = coinData.getTo();
                     if(tos != null && tos.size() > 0) {
                         byte[] txHashBytes = tx.getHash().serialize();
-                        String txHash = tx.getHash().getDigestHex();
+                        String txHash = hash;
                         OutputDto outputDto = null;
                         Coin to, temp;
                         for(int i = 0, length = tos.size(); i < length; i++) {
