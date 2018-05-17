@@ -65,6 +65,9 @@ public class AccountBaseService {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
+        if(StringUtils.isBlank(password)){
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The password is required");
+        }
         if (!StringUtils.validPassword(password)) {
             return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
         }
@@ -94,6 +97,12 @@ public class AccountBaseService {
     public Result changePassword(String address, String oldPassword, String newPassword) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        if(StringUtils.isBlank(oldPassword)){
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The oldPassword is required");
+        }
+        if(StringUtils.isBlank(newPassword)){
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The newPassword is required");
         }
         if (!StringUtils.validPassword(oldPassword)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "oldPassword Length between 8 and 20, the combination of characters and numbers");

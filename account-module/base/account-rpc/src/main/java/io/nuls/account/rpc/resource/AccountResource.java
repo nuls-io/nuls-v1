@@ -156,7 +156,7 @@ public class AccountResource {
         if (StringUtils.isBlank(alias)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        if (StringUtils.isBlank(form.getPassword()) || !StringUtils.validPassword(form.getPassword())) {
+        if (StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         return aliasService.setAlias(form.getAddress(), form.getPassword(), alias);
@@ -302,6 +302,9 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         String password = form.getPassword();
+        if(StringUtils.isBlank(password)){
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The password is required");
+        }
         if (!StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
         }
@@ -323,11 +326,17 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         String password = form.getPassword();
+        String newPassword = form.getNewPassword();
+        if(StringUtils.isBlank(password)){
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The password is required");
+        }
+        if(StringUtils.isBlank(newPassword)){
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The newPassword is required");
+        }
         if (!StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
 
         }
-        String newPassword = form.getNewPassword();
         if (!StringUtils.validPassword(newPassword)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
         }
