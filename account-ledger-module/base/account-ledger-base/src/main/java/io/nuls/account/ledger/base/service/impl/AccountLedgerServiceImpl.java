@@ -283,7 +283,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             coinData.getTo().add(toCoin);
 
             CoinDataResult coinDataResult = getCoinData(from, values, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-            if (coinDataResult.isEnough()) {
+            if (!coinDataResult.isEnough()) {
                 return Result.getFailed(LedgerErrorCode.BALANCE_NOT_ENOUGH);
             }
             coinData.setFrom(coinDataResult.getCoinList());
