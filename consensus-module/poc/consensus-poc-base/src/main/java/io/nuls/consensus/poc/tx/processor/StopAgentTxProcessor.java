@@ -19,6 +19,7 @@ import io.nuls.kernel.processor.TransactionProcessor;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,30 +55,52 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
         }
         agentPo.setDelHeight(tx.getBlockHeight());
 
-//todo        解锁所有委托到该节点的委托金额
+//       解锁所有委托到该节点的委托金额
 //        Unlocks the amount of trust that is delegated to the node.
         List<DepositPo> depositPoList = depositStorageService.getList();
-        if(null==depositPoList){
+        if (null == depositPoList) {
             return Result.getSuccess();
         }
-        for(DepositPo po :depositPoList){
+        List<Transaction> unlockedList = new ArrayList<>();
+        for (DepositPo po : depositPoList) {
             po.setDelHeight(tx.getBlockHeight());
             Transaction depositTx = ledgerService.getTx(po.getTxHash());
             try {
-                ledgerService.unlockTxCoinData(depositTx);
-                accountLedgerService.unlockCoinData(depositTx);
+                Result result = ledgerService.unlockTxCoinData(depositTx);
+                if (result.isFailed()) {
+                    this.rollbackUnlock(unlockedList);
+                    return result;
+                }
+                result = accountLedgerService.unlockCoinData(depositTx);
+                if (result.isFailed()) {
+                    this.rollbackUnlock(unlockedList);
+                    return result;
+                }
+                unlockedList.add(depositTx);
             } catch (NulsException e) {
+                this.rollbackUnlock(unlockedList);
                 return Result.getFailed(e.getMessage());
             }
-
-
         }
 
         boolean b = agentStorageService.save(agentPo);
-        if(!b){
-
+        if (!b) {
+            this.rollbackUnlock(unlockedList);
+            return Result.getFailed("update agent failed!");
         }
         return Result.getSuccess();
+    }
+
+    private void rollbackUnlock(List<Transaction> unlockedList) {
+        for (Transaction depositTx : unlockedList) {
+            try {
+                ledgerService.rollbackUnlockTxCoinData(depositTx);
+                accountLedgerService.rollbackUnlockTxCoinData(depositTx);
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+        }
+
     }
 
     @Override

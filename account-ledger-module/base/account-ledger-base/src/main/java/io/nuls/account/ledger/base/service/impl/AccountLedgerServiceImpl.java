@@ -319,6 +319,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result unlockCoinData(Transaction tx) {
+        // todo auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Result rollbackUnlockTxCoinData(Transaction tx) {
+        // todo auto-generated method stub
         return null;
     }
 

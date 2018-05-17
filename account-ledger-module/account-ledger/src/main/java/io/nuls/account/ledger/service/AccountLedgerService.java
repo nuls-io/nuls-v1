@@ -138,6 +138,8 @@ public interface AccountLedgerService {
      */
     Result unlockCoinData(Transaction tx);
 
+    Result rollbackUnlockTxCoinData(Transaction tx);
+
     /**
      * <p>
      * load the local ledger of a account when an account imported
