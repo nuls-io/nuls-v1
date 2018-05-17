@@ -1,5 +1,6 @@
 package io.nuls.account.ledger.base.service.balance;
 
+import io.nuls.account.ledger.base.util.CoinComparator;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Account;
@@ -19,10 +20,7 @@ import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.utils.AddressTool;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * author Facjas
@@ -132,38 +130,22 @@ public class BalanceProvider extends Thread {
             return null;
         }
         List<Coin> coinList = storageService.getCoinBytes(address);
+        Collections.sort(coinList, CoinComparator.getInstance());
 
-        long currentTime = TimeService.currentTimeMillis();
-        long bestHeight = NulsContext.getInstance().getBestHeight();
-        long usable = 0;
-        long locked = 0;
-
+        Na usable = Na.ZERO;
+        Na locked = Na.ZERO;
         for (Coin coin : coinList) {
-            if (coin.getLockTime() < 0L) {
-                locked += coin.getNa().getValue();
-            } else if (coin.getLockTime() == 0L) {
-                usable += coin.getNa().getValue();
+            if (coin.usable()) {
+                usable = usable.add(coin.getNa());
             } else {
-                if (coin.getLockTime() > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE) {
-                    if (coin.getLockTime() <= currentTime) {
-                        usable += coin.getNa().getValue();
-                    } else {
-                        locked += coin.getNa().getValue();
-                    }
-                } else {
-                    if (coin.getLockTime() <= bestHeight) {
-                        usable += coin.getNa().getValue();
-                    } else {
-                        locked += coin.getNa().getValue();
-                    }
-                }
+                locked = locked.add(coin.getNa());
             }
         }
 
         Balance balance = new Balance();
-        balance.setUsable(Na.valueOf(usable));
-        balance.setLocked(Na.valueOf(locked));
-        balance.setBalance(balance.getUsable().add(balance.getLocked()));
+        balance.setUsable(usable);
+        balance.setLocked(locked);
+        balance.setBalance(usable.add(locked));
 
         String addressKey = new String(address);
         statusMap.put(addressKey, STATUS_NEWEST);

@@ -473,4 +473,15 @@ public class SerializeUtils {
         out[7] = (byte) (0xFF & (val >> 56));
         return out;
     }
+
+    public static byte[] int48ToBytes(long time) {
+        byte[] bytes = new byte[SerializeUtils.sizeOfInt48()];
+        bytes[0] = (byte) (0xFF & time);
+        bytes[1] = (byte) (0xFF & (time >> 8));
+        bytes[2] = (byte) (0xFF & (time >> 16));
+        bytes[3] = (byte) (0xFF & (time >> 24));
+        bytes[4] = (byte) (0xFF & (time >> 32));
+        bytes[5] = (byte) (0xFF & (time >> 40));
+        return bytes;
+    }
 }

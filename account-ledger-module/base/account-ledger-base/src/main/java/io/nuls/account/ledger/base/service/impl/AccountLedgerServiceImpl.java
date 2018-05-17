@@ -192,11 +192,16 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
         Collections.sort(coinList, CoinComparator.getInstance());
 
+
+
         boolean enough = false;
         List<Coin> coins = new ArrayList<>();
         Na values = Na.ZERO;
         for (int i = 0; i < coinList.size(); i++) {
             Coin coin = coinList.get(i);
+            if(!coin.usable()) {
+                continue;
+            }
             coins.add(coin);
             size += coin.size();
             Na fee = TransactionFeeCalculator.getFee(size);
@@ -283,7 +288,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             coinData.getTo().add(toCoin);
 
             CoinDataResult coinDataResult = getCoinData(from, values, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-            if (coinDataResult.isEnough()) {
+            if (!coinDataResult.isEnough()) {
                 return Result.getFailed(LedgerErrorCode.BALANCE_NOT_ENOUGH);
             }
             coinData.setFrom(coinDataResult.getCoinList());

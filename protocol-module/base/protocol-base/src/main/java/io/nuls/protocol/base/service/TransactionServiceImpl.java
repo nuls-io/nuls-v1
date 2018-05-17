@@ -135,7 +135,7 @@ public class TransactionServiceImpl implements TransactionService {
     public Result broadcastTx(Transaction tx) {
         TransactionMessage message = new TransactionMessage();
         message.setMsgBody(tx);
-        return messageBusService.broadcastHashAndCache(message, null, false);
+        return messageBusService.broadcastAndCache(message, null, false);
     }
 
     /**

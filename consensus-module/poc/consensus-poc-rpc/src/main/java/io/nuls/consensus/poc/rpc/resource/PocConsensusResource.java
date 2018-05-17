@@ -229,6 +229,7 @@ public class PocConsensusResource {
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
         toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), -1));
+        coinData.setTo(toList);
         tx.setCoinData(coinData);
         CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
         Result result1 = this.txProcessing(tx, result, account, form.getPassword());
@@ -271,6 +272,7 @@ public class PocConsensusResource {
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
         toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), -1));
+        coinData.setTo(toList);
         tx.setCoinData(coinData);
         CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
 
@@ -357,6 +359,7 @@ public class PocConsensusResource {
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
         toList.add(new Coin(stopAgent.getAddress(), agent.getDeposit(), 0));
+        coinData.setTo(toList);
         CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);
         if (null == transaction) {
             return Result.getFailed("Can not find the create agent transaction!");

@@ -28,8 +28,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * author Facjas
- * date 2018/5/15.
+ * @author Facjas
+ * @date 2018/5/15.
  */
 @ApiModel(value = "转账表单数据")
 public class TransferForm {
@@ -43,7 +43,7 @@ public class TransferForm {
     @ApiModelProperty(name = "password", value = "账户密码", required = false)
     private String password;
 
-    @ApiModelProperty(name = "alias", value = "金额", required = true)
+    @ApiModelProperty(name = "amount", value = "金额", required = true)
     private long amount;
 
     @ApiModelProperty(name = "remark", value = "备注", required = true)
