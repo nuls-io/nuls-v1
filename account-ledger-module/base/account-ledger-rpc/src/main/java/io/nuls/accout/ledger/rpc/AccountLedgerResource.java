@@ -97,7 +97,7 @@ public class AccountLedgerResource {
     }
 
     @POST
-    @Path("/transfer/{address}")
+    @Path("/transfer")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "转账", notes = "result.data: resultJson 返回转账结果")
     @ApiResponses(value = {

@@ -141,21 +141,22 @@ public class AccountResource {
     }
 
     @POST
-    @Path("/alias")
+    @Path("/alias/{alias}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("设置别名 [3.3.6]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result<Boolean> alias(@ApiParam(name = "form", value = "设置别名表单数据", required = true)
+    public Result<Boolean> alias(@PathParam("alias") String alias,
+                                 @ApiParam(name = "form", value = "设置别名表单数据", required = true)
                                          AccountAliasForm form) {
         if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        if (StringUtils.isBlank(form.getAlias()) || !StringUtils.validPassword(form.getPassword())) {
+        if (StringUtils.isBlank(alias) || !StringUtils.validPassword(form.getPassword())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        return aliasService.setAlias(form.getAddress(), form.getPassword(), form.getAlias());
+        return aliasService.setAlias(form.getAddress(), form.getPassword(), alias);
     }
 
     @GET
@@ -186,21 +187,21 @@ public class AccountResource {
     }
 
     @GET
-    @Path("/prikey")
+    @Path("/prikey/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("查询账户私钥，只能查询本地创建或导入的账户 [3.3.7]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
-    public Result getPrikey(@ApiParam(name = "form", value = "查询私钥表单数据", required = true)
-                                    AccountAPForm form) {
-        if (!Address.validAddress(form.getAddress())) {
+    public Result getPrikey(@PathParam("address") String address, @ApiParam(name = "form", value = "查询私钥表单数据", required = true)
+                                    AccountPasswordForm form) {
+        if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if(StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())){
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        return accountBaseService.getPrivateKey(form.getAddress(), form.getPassword());
+        return accountBaseService.getPrivateKey(address, form.getPassword());
     }
 
     @GET
@@ -231,10 +232,10 @@ public class AccountResource {
     }
 
     @POST
-    @Path("/lock")
+    @Path("/lock/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "清除缓存的解锁账户", notes = "Clear the cache unlock account.")
-    public Result lock(@QueryParam("address") String address) {
+    public Result lock(@ApiParam(name = "address", value = "账户地址", required = true) @PathParam("address") String address) {
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
@@ -247,11 +248,11 @@ public class AccountResource {
     }
 
     @POST
-    @Path("/unlock")
+    @Path("/unlock{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "解锁账户", notes = "")
     public Result unlock(@ApiParam(name = "address", value = "账户地址", required = true)
-                         @QueryParam("address") String address,
+                         @PathParam("address") String address,
                          @ApiParam(name = "password", value = "账户密码", required = true)
                          @QueryParam("password") String password,
                          @ApiParam(name = "unlockTime", value = "解锁时间默认120秒(单位:秒)")
@@ -284,16 +285,16 @@ public class AccountResource {
 
 
     @POST
-    @Path("/password")
+    @Path("/password/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "设置账户密码")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result updatePassword(@ApiParam(name = "form", value = "设置钱包密码表单数据", required = true)
-                                         AccountSetPasswordForm form) {
-
-        String address = form.getAddress();
+    public Result updatePassword(@ApiParam(name = "address", value = "账户地址", required = true)
+                                     @PathParam("address") String address,
+                                 @ApiParam(name = "form", value = "设置钱包密码表单数据", required = true)
+                                         AccountPasswordForm form) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
@@ -305,15 +306,16 @@ public class AccountResource {
     }
 
     @PUT
-    @Path("/password")
+    @Path("/password{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "修改账户密码")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result setPassword(@ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
-                                      AccountPasswordForm form) {
-        String address = form.getAddress();
+    public Result setPassword(@ApiParam(name = "address", value = "账户地址", required = true)
+                                  @PathParam("address") String address,
+                              @ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
+                                      AccountUpdatePasswordForm form) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
@@ -330,21 +332,23 @@ public class AccountResource {
     }
 
     @POST
-    @Path("/export")
+    @Path("/export/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "账户备份，导出AccountKeyStore字符串 ")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result<AccountKeyStore> backup(@ApiParam(name = "form", value = "钱包备份表单数据")
-                                                  AccountAPForm form) {
-        if (StringUtils.isNotBlank(form.getAddress()) && !Address.validAddress(form.getAddress())) {
+    public Result<AccountKeyStore> backup(@ApiParam(name = "address", value = "账户地址", required = true)
+                                              @PathParam("address") String address,
+                                          @ApiParam(name = "form", value = "钱包备份表单数据")
+                                                  AccountPasswordForm form) {
+        if (StringUtils.isNotBlank(address) && !Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        Result<AccountKeyStore> result = accountService.exportAccountToKeyStore(form.getAddress(), form.getPassword());
+        Result<AccountKeyStore> result = accountService.exportAccountToKeyStore(address, form.getPassword());
         if (result.isFailed()) {
             return result;
         }
@@ -411,20 +415,22 @@ public class AccountResource {
     }
 
     @DELETE
-    @Path("/remove")
+    @Path("/remove/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "移除账户", notes = "Nuls_RPC_API文档[3.4.9]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result removeAccount(@ApiParam(name = "钱包移除账户表单数据", value = "JSONFormat", required = true)
-                                        AccountAPForm form) {
-        if (!Address.validAddress(form.getAddress())) {
+    public Result removeAccount(@ApiParam(name = "address", value = "账户地址", required = true)
+                                    @PathParam("address") String address,
+                                @ApiParam(name = "钱包移除账户表单数据", value = "JSONFormat", required = true)
+                                        AccountPasswordForm form) {
+        if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        return accountService.removeAccount(form.getAddress(), form.getPassword());
+        return accountService.removeAccount(address, form.getPassword());
     }
 }

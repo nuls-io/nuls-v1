@@ -29,9 +29,18 @@ import io.nuls.client.rpc.config.NulsResourceConfig;
 import io.nuls.core.tools.log.Log;
 import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
+import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
+import org.glassfish.grizzly.servlet.WebappContext;
+import org.glassfish.grizzly.strategies.WorkerThreadIOStrategy;
+import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
+import org.glassfish.grizzly.utils.Charsets;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.internal.guava.ThreadFactoryBuilder;
+import org.glassfish.jersey.servlet.ServletContainer;
 
+import javax.servlet.ServletRegistration;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
@@ -57,23 +66,47 @@ public class RpcServerManager {
 
     public void startServer(String ip, int port) {
         URI serverURI = UriBuilder.fromUri("http://" + ip).port(port).build();
-        final Map<String, Object> initParams = new HashMap<>();
-//        initParams.put("jersey.config.server.provider.packages", RpcConstant.PACKAGES);
-        initParams.put("load-on-startup", "1");
-        NulsResourceConfig rc = new NulsResourceConfig();
-        rc.addProperties(initParams);
-        httpServer = GrizzlyHttpServerFactory.createHttpServer(serverURI, rc);
+        // Create test web application context.
+        WebappContext webappContext = new WebappContext("NULS-RPC-SERVER", "/");
+
+        ServletRegistration servletRegistration = webappContext.addServlet("jersey-servlet", ServletContainer.class);
+
+        servletRegistration.setInitParameter("javax.ws.rs.Application","io.nuls.client.rpc.config.NulsResourceConfig");
+        servletRegistration.addMapping("/*");
+
+        httpServer = new HttpServer();
+        NetworkListener listener = new NetworkListener("grizzly2", ip, port);
+        TCPNIOTransport transport = listener.getTransport();
+        ThreadPoolConfig workerPool = ThreadPoolConfig.defaultConfig()
+                .setCorePoolSize(8)
+                .setMaxPoolSize(16)
+                .setQueueLimit(1000)
+                .setThreadFactory((new ThreadFactoryBuilder()).setNameFormat("grizzly-http-server-%d").build());
+        transport.configureBlocking(false);
+        transport.setSelectorRunnersCount(2);
+        transport.setWorkerThreadPoolConfig(workerPool);
+        transport.setIOStrategy(WorkerThreadIOStrategy.getInstance());
+        transport.setTcpNoDelay(true);
+        listener.setSecure(false);
+        httpServer.addListener(listener);
+
+        ServerConfiguration config = httpServer.getServerConfiguration();
+        config.setDefaultQueryEncoding(Charsets.UTF8_CHARSET);
+
+        webappContext.deploy(httpServer);
+
         try {
-            httpServer.start();
             ClassLoader loader = this.getClass().getClassLoader();
             CLStaticHttpHandler docsHandler = new CLStaticHttpHandler(loader, "swagger-ui/");
             docsHandler.setFileCacheEnabled(false);
             ServerConfiguration cfg = httpServer.getServerConfiguration();
             cfg.addHttpHandler(docsHandler, "/docs/");
+            httpServer.start();
+            Log.info("http restFul server is started!url is " + serverURI.toString());
         } catch (IOException e) {
             Log.error(e);
+            httpServer.shutdownNow();
         }
-        Log.info("http restFul server is started!url is " + serverURI.toString());
     }
 
     public void shutdown() {

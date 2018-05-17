@@ -17,9 +17,6 @@ public class AccountAliasForm {
     @ApiModelProperty(name = "password", value = "账户密码", required = true)
     private String password;
 
-    @ApiModelProperty(name = "alias", value = "别名", required = true)
-    private String alias;
-
     public String getAddress() {
         return address;
     }
@@ -34,13 +31,5 @@ public class AccountAliasForm {
 
     public void setPassword(String password) {
         this.password = StringUtils.formatStringPara(password);
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = StringUtils.formatStringPara(alias);
     }
 }
