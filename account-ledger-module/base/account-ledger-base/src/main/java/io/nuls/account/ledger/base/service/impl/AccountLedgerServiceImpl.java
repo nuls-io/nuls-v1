@@ -27,6 +27,7 @@ package io.nuls.account.ledger.base.service.impl;
 
 import io.nuls.account.ledger.base.service.balance.BalanceProvider;
 import io.nuls.account.ledger.base.util.CoinComparator;
+import io.nuls.account.ledger.base.util.TxInfoComparator;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.ledger.storage.constant.AccountLedgerStorageConstant;
 import io.nuls.account.ledger.storage.po.TransactionInfoPo;
@@ -243,11 +244,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public List<Account> getLocalAccountList() {
-        return localAccountList;
-    }
-
-    @Override
     public Result transfer(byte[] from, byte[] to, Na values, String password, String remark) {
         try {
             AssertUtil.canNotEmpty(from, "the from address can not be empty");
@@ -356,6 +352,18 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Log.info(address);
         }
         return Result.getSuccess();
+    }
+
+    @Override
+    public Result getTxInfoList(byte[] address) {
+        List<TransactionInfoPo> infoPoList = storageService.getTxInfoList(address);
+        List<TransactionInfo> infoList = new ArrayList<>();
+        for (TransactionInfoPo po : infoPoList) {
+            infoList.add(po.toTransactionInfo());
+        }
+
+        Collections.sort(infoList, TxInfoComparator.getInstance());
+        return Result.getSuccess().setData(infoList);
     }
 
     protected Result<Integer> saveConfirmedTransaction(Transaction tx, byte status) {

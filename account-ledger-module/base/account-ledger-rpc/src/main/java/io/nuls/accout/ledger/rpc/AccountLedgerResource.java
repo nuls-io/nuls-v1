@@ -40,11 +40,13 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.AddressTool;
 import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.List;
 
 /**
  * author Facjas
@@ -108,5 +110,23 @@ public class AccountLedgerResource {
         return accountLedgerService.transfer(AddressTool.getAddress(form.getAddress()),
                                              AddressTool.getAddress(form.getAddress()),
                                              value, form.getPassword(), form.getRemark());
+    }
+
+    @GET
+    @Path("/tx/list/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "账户地址查询交易列表", notes = "result.data: balanceJson 返回账户相关的交易列表")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Balance.class)
+    })
+    public Result<List<Transaction>> getTxInfoList(@PathParam("address") String address) {
+        byte[] addressBytes = null;
+        try {
+            addressBytes = Base58.decode(address);
+        } catch (Exception e) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
+
+        return accountLedgerService.getTxInfoList(addressBytes);
     }
 }

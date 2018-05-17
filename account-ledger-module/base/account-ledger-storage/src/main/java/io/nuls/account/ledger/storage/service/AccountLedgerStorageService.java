@@ -47,6 +47,8 @@ public interface AccountLedgerStorageService {
 
     Result deleteLocalTxInfo(TransactionInfoPo tx);
 
+    List<TransactionInfoPo> getTxInfoList(byte[] address);
+
     Transaction getLocalTx(NulsDigestData hash);
 
     List<Coin> getCoinBytes(byte[] address) throws NulsException;
