@@ -249,7 +249,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
             }
         }
 
-        if (newestInfos.getNodes().size() >= ProtocolConstant.ALIVE_MIN_NODE_COUNT) {
+        if (newestInfos.getNodes().size() > ProtocolConstant.ALIVE_MIN_NODE_COUNT) {
             consensusService.rollbackBlock(localBestBlock);
         } else {
             resetNetwork("the number of available nodes is insufficient for rollbackTx blocks");
