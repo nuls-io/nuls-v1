@@ -382,7 +382,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (status == TransactionInfo.UNCONFIRMED) {
             result = storageService.saveTempTx(tx);
         }
-
+        for(int i = 0 ;i< addresses.size(); i++){
+            balanceProvider.refreshBalance(addresses.get(i));
+        }
         return result;
     }
 
