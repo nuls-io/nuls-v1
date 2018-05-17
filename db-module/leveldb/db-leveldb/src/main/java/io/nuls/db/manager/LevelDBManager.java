@@ -661,6 +661,7 @@ public class LevelDBManager {
             }
             return (T) model.getT();
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }

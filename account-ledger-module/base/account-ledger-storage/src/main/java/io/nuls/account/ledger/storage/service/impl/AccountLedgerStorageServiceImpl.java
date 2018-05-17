@@ -217,7 +217,7 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     }
 
     @Override
-    public List<TransactionInfoPo> getTxInfoList(byte[] address) {
+    public List<TransactionInfoPo> getTxInfoList(byte[] address) throws NulsException {
         List<TransactionInfoPo> infoPoList = new ArrayList<>();
         Set<byte[]> keySet = dbService.keySet(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX);
         if (keySet == null || keySet.isEmpty()) {
@@ -228,7 +228,9 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
         for (byte[] key : keySet) {
             System.arraycopy(key, 0, addressKey, 0, AddressTool.HASH_LENGTH);
             if (java.util.Arrays.equals(addressKey, address)) {
-                TransactionInfoPo transactionInfoPo = dbService.getModel(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, key, TransactionInfoPo.class);
+                byte[] values = dbService.get(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, key);
+                TransactionInfoPo transactionInfoPo = new TransactionInfoPo();
+                transactionInfoPo.parse(values);
                 infoPoList.add(transactionInfoPo);
             }
         }

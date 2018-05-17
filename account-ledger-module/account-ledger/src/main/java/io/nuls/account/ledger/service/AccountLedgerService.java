@@ -25,6 +25,7 @@
 
 package io.nuls.account.ledger.service;
 
+import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Balance;
 import io.nuls.account.ledger.model.CoinDataResult;
@@ -150,5 +151,5 @@ public interface AccountLedgerService {
     Result importAccountLedger(String address);
 
 
-    Result getTxInfoList(byte[] address);
+    Result<List<TransactionInfo>> getTxInfoList(byte[] address);
 }
