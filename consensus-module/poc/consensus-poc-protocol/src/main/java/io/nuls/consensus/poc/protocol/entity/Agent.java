@@ -96,8 +96,8 @@ public class Agent extends TransactionLogicData {
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readVarInt());
         this.agentAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
-        this.rewardAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.packingAddress =  byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.rewardAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.commissionRate = byteBuffer.readDouble();
         this.introduction = byteBuffer.readByLengthByte();
         this.agentName = byteBuffer.readByLengthByte();
