@@ -84,7 +84,7 @@ public class CacheLoader {
                 break;
             }
 
-            blockList.add(block);
+            blockList.add(0,block);
 
             if (block.getHeader().getHeight() == 0L) {
                 break;
@@ -121,7 +121,7 @@ public class CacheLoader {
                 break;
             }
 
-            blockHeaderList.add(blockHeader);
+            blockHeaderList.add(0,blockHeader);
 
             if (blockHeader.getHeight() == 0L) {
                 break;

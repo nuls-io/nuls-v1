@@ -86,7 +86,6 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
             throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "the local best block is wrong!");
         }
         NulsContext.getInstance().setBestBlock(block);
-
         this.initHandlers();
         ((DownloadServiceImpl) NulsContext.getServiceBean(DownloadService.class)).start();
     }

@@ -129,7 +129,6 @@ public class ConnectionManager {
 
     private void processMessage(BaseMessage message, Node node) {
         if (message == null) {
-//            Log.error("---------------------message is null--------------------------------");
             return;
         }
 
@@ -137,13 +136,11 @@ public class ConnectionManager {
             if (node.getStatus() != Node.HANDSHAKE && !isHandShakeMessage(message)) {
                 return;
             }
-            // System.out.println( sdf.format(System.currentTimeMillis()) + "-----------processMessage------------node:" + node.getId() + "------------moduleId: " + event.getHeader().getModuleId() + "," + "eventType:" + event.getHeader().getEventType());
             asynExecute(message, node);
         } else {
             if (!node.isHandShake()) {
                 return;
             }
-            System.out.println("-----------------=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-------"+message.getClass());
             messageBusService.receiveMessage(message, node);
         }
     }
