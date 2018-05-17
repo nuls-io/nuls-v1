@@ -25,6 +25,7 @@
 package io.nuls.kernel.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -198,6 +199,7 @@ public final class Na implements Comparable<Na>, Serializable {
      * Returns true if and only if this instance represents a monetary value greater than zero,
      * otherwise false.
      */
+    @JsonIgnore
     public boolean isPositive() {
         return signum() == 1;
     }
@@ -206,6 +208,7 @@ public final class Na implements Comparable<Na>, Serializable {
      * Returns true if and only if this instance represents a monetary value less than zero,
      * otherwise false.
      */
+    @JsonIgnore
     public boolean isNegative() {
         return signum() == -1;
     }
@@ -214,6 +217,7 @@ public final class Na implements Comparable<Na>, Serializable {
      * Returns true if and only if this instance represents zero monetary value,
      * otherwise false.
      */
+    @JsonIgnore
     public boolean isZero() {
         return signum() == 0;
     }

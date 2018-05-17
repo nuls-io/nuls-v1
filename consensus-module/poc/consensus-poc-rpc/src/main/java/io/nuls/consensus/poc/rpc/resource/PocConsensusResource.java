@@ -112,6 +112,7 @@ public class PocConsensusResource {
         dto.setRewardOfDay(201800000000L);
         dto.setTotalDeposit(totalDeposit);
         dto.setConsensusAccountNumber(memberCount);
+        result.setData(dto);
         return result;
     }
 
@@ -522,7 +523,7 @@ public class PocConsensusResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
-    public Result getAgentListByDepositAddress(@ApiParam(name = "pageNumber", value = "页码")
+    public Result<Page<AgentDTO>> getAgentListByDepositAddress(@ApiParam(name = "pageNumber", value = "页码")
                                                @QueryParam("pageNumber") Integer pageNumber,
                                                @ApiParam(name = "pageSize", value = "每页条数")
                                                @QueryParam("pageSize") Integer pageSize,
@@ -676,12 +677,12 @@ public class PocConsensusResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
-    public Result<List<DepositDTO>> queryDepositListByAgentAddress(@ApiParam(name = "agentHash", value = "指定代理节点标识", required = true)
+    public Result queryDepositListByAgentAddress(@ApiParam(name = "agentHash", value = "指定代理节点标识", required = true)
                                                                    @PathParam("agentHash") String agentHash,
                                                                    @ApiParam(name = "pageNumber", value = "页码")
                                                                    @QueryParam("pageNumber") Integer pageNumber,
                                                                    @ApiParam(name = "pageSize", value = "每页条数")
-                                                                   @QueryParam("pageSize") Integer pageSize) {
+                                                                   @QueryParam("pageSize") Integer pageSize) throws NulsException {
         AssertUtil.canNotEmpty(agentHash);
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
@@ -696,6 +697,7 @@ public class PocConsensusResource {
         List<Deposit> allList = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
         List<Deposit> depositList = new ArrayList<>();
         long startBlockHeight = NulsContext.getInstance().getBestHeight();
+        NulsDigestData agentDigestData = NulsDigestData.fromDigestHex(agentHash);
         for (Deposit deposit : allList) {
             if (deposit.getDelHeight() != -1L && deposit.getDelHeight() <= startBlockHeight) {
                 continue;
@@ -703,7 +705,7 @@ public class PocConsensusResource {
             if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
                 continue;
             }
-            if (!deposit.getAgentHash().equals(agentHash)) {
+            if (!deposit.getAgentHash().equals(agentDigestData)) {
                 continue;
             }
             depositList.add(deposit);

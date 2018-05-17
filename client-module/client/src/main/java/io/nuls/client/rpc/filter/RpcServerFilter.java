@@ -35,10 +35,12 @@ import org.glassfish.grizzly.http.server.Request;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -50,13 +52,12 @@ import java.io.IOException;
  */
 public class RpcServerFilter implements ContainerRequestFilter, ContainerResponseFilter, ExceptionMapper<Exception> {
 
-    @Inject
-    private Provider<Request> grizzlyRequestProvider;
+    @Context
+    private HttpServletRequest request;
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        HttpContextHelper.put(grizzlyRequestProvider.get());
-        if (!whiteSheetVerifier(grizzlyRequestProvider.get())) {
+        if (!whiteSheetVerifier(request)) {
             throw new NulsRuntimeException(KernelErrorCode.REQUEST_DENIED);
         }
         requestContext.setProperty("start", System.currentTimeMillis());
@@ -75,7 +76,7 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
         return Response.ok(result, MediaType.APPLICATION_JSON).build();
     }
 
-    private boolean whiteSheetVerifier(Request request) {
+    private boolean whiteSheetVerifier(HttpServletRequest request) {
         String ips = null;
         try {
             ips = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_REQUEST_WHITE_SHEET);
