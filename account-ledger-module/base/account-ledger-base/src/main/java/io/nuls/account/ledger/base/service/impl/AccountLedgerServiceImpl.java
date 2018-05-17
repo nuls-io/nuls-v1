@@ -193,13 +193,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         Collections.sort(coinList, CoinComparator.getInstance());
 
 
-
         boolean enough = false;
         List<Coin> coins = new ArrayList<>();
         Na values = Na.ZERO;
         for (int i = 0; i < coinList.size(); i++) {
             Coin coin = coinList.get(i);
-            if(!coin.usable()) {
+            if (!coin.usable()) {
                 continue;
             }
             coins.add(coin);
@@ -323,7 +322,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result unlockCoinData(List<Transaction> txs) {
+    public Result unlockCoinData(Transaction tx) {
         return null;
     }
 
@@ -382,7 +381,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (status == TransactionInfo.UNCONFIRMED) {
             result = storageService.saveTempTx(tx);
         }
-        for(int i = 0 ;i< addresses.size(); i++){
+        for (int i = 0; i < addresses.size(); i++) {
             balanceProvider.refreshBalance(addresses.get(i));
         }
         return result;

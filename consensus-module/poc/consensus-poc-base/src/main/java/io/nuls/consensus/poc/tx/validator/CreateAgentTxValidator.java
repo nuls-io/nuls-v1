@@ -25,12 +25,17 @@
 
 package io.nuls.consensus.poc.tx.validator;
 
+import io.nuls.account.model.Address;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.SeverityLevelEnum;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 
@@ -81,6 +86,18 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
 
         if (!isDepositOk(agent.getDeposit(), tx.getCoinData())) {
             return ValidateResult.getFailedResult(this.getClass().getName(), SeverityLevelEnum.FLAGRANT_FOUL, PocConsensusErrorCode.DEPOSIT_ERROR);
+        }
+        P2PKHScriptSig sig = new P2PKHScriptSig();
+        try {
+            sig.parse(tx.getScriptSig());
+        } catch (NulsException e) {
+            Log.error(e);
+            return ValidateResult.getFailedResult(this.getClass().getName(), e.getMessage());
+        }
+        if (!Arrays.equals(agent.getAgentAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
+            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "The agent does not belong to this address.");
+            result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
+            return result;
         }
         return ValidateResult.getSuccessResult();
     }

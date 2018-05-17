@@ -60,13 +60,17 @@ import io.nuls.consensus.poc.storage.service.PunishLogStorageService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -124,6 +128,18 @@ public class DepositTxValidator extends BaseConsensusProtocolValidator<DepositTr
 
         if (!isDepositOk(deposit.getDeposit(), tx.getCoinData())) {
             return ValidateResult.getFailedResult(this.getClass().getName(), SeverityLevelEnum.FLAGRANT_FOUL, PocConsensusErrorCode.DEPOSIT_ERROR);
+        }
+        P2PKHScriptSig sig = new P2PKHScriptSig();
+        try {
+            sig.parse(tx.getScriptSig());
+        } catch (NulsException e) {
+            Log.error(e);
+            return ValidateResult.getFailedResult(this.getClass().getName(), e.getMessage());
+        }
+        if (!Arrays.equals(deposit.getAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
+            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "The deposit address is not this address.");
+            result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
+            return result;
         }
         return ValidateResult.getSuccessResult();
     }

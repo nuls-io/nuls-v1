@@ -745,7 +745,6 @@ public class PocConsensusResource {
                                         WithdrawForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
-        AssertUtil.canNotEmpty(form.getPassword());
         AssertUtil.canNotEmpty(form.getAddress());
         if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
@@ -770,7 +769,7 @@ public class PocConsensusResource {
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
         toList.add(new Coin(cancelDeposit.getAddress(), depositTransaction.getTxData().getDeposit(), 0));
-
+        coinData.setTo(toList);
         List<Coin> fromList = new ArrayList<>();
         for (int index = 0; index < depositTransaction.getCoinData().getTo().size(); index++) {
             Coin coin = depositTransaction.getCoinData().getTo().get(index);
