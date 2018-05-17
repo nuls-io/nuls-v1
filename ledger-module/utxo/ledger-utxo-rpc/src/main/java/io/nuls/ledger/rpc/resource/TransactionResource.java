@@ -33,6 +33,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.constant.LedgerErrorCode;
+import io.nuls.ledger.rpc.model.InputDto;
 import io.nuls.ledger.rpc.model.OutputDto;
 import io.nuls.ledger.rpc.model.TransactionDto;
 import io.nuls.ledger.service.LedgerService;
@@ -47,7 +48,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @desription:
@@ -141,6 +144,8 @@ public class TransactionResource {
                         }
                     }
                     txDto.setOutputs(outputDtoList);
+                    // 计算交易实际发生的金额
+                    calTransactionValue(txDto);
                 }
                 result = Result.getSuccess();
                 result.setData(txDto);
@@ -153,6 +158,32 @@ public class TransactionResource {
             result = Result.getFailed(LedgerErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return result;
+    }
+
+    /**
+     * 计算交易实际发生的金额
+     * Calculate the actual amount of the transaction.
+     *
+     * @param txDto
+     */
+    private void calTransactionValue(TransactionDto txDto) {
+        if(txDto == null) {
+            return;
+        }
+        List<InputDto> inputDtoList = txDto.getInputs();
+        Set<String> inputAdressSet = new HashSet<>(inputDtoList.size());
+        for(InputDto inputDto : inputDtoList) {
+            inputAdressSet.add(inputDto.getAddress());
+        }
+        Na value = Na.ZERO;
+        List<OutputDto> outputDtoList = txDto.getOutputs();
+        for(OutputDto outputDto : outputDtoList) {
+            if(inputAdressSet.contains(outputDto.getAddress())) {
+                continue;
+            }
+            value = value.add(Na.valueOf(outputDto.getValue()));
+        }
+        txDto.setValue(value.getValue());
     }
 
 }
