@@ -193,4 +193,12 @@ public class AgentPo extends BaseNulsData {
     public void setBlockHeight(long blockHeight) {
         this.blockHeight = blockHeight;
     }
+
+    public long getDelHeight() {
+        return delHeight;
+    }
+
+    public void setDelHeight(long delHeight) {
+        this.delHeight = delHeight;
+    }
 }

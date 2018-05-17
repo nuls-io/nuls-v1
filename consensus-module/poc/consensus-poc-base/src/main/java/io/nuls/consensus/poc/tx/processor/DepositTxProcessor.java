@@ -41,10 +41,7 @@ import io.nuls.consensus.poc.storage.service.DepositStorageService;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.Na;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.*;
 import io.nuls.kernel.processor.TransactionProcessor;
 import io.nuls.kernel.validate.ValidateResult;
 
@@ -87,8 +84,11 @@ public class DepositTxProcessor implements TransactionProcessor<DepositTransacti
     @Override
     public Result onCommit(DepositTransaction tx, Object secondaryData) {
         Deposit deposit = tx.getTxData();
+        BlockHeader header = (BlockHeader) secondaryData;
         if (deposit.getTxHash() == null) {
             deposit.setTxHash(tx.getHash());
+            deposit.setTime(tx.getTime());
+            deposit.setBlockHeight(header.getHeight());
         }
         DepositPo depositPo = PoConvertUtil.depositToPo(deposit);
 
