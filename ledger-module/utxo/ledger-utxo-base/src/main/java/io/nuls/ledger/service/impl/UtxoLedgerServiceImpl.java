@@ -391,4 +391,32 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             return Result.getFailed(e.getMessage());
         }
     }
+
+    @Override
+    public Result rollbackUnlockTxCoinData(Transaction tx) throws NulsException {
+        if (tx == null || tx.getCoinData() == null) {
+            return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.NULL_PARAMETER);
+        }
+        try {
+            Result result = rollbackCoinData(tx);
+            if(result.isFailed()) {
+                Result rollbackResult = saveCoinData(tx);
+                if(rollbackResult.isFailed()) {
+                    throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR, CLASS_NAME + ".rollbackUnlockTxCoinData.rollbackCoinData: data error.");
+                }
+            }
+            return result;
+        } catch (IOException e) {
+            try {
+                Result rollbackResult = saveCoinData(tx);
+                if(rollbackResult.isFailed()) {
+                    throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR, CLASS_NAME + ".rollbackUnlockTxCoinData.rollbackCoinData: data error.");
+                }
+            } catch (IOException e1) {
+                throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR, CLASS_NAME + ".rollbackUnlockTxCoinData.rollbackCoinData: data error.");
+            }
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
+    }
 }
