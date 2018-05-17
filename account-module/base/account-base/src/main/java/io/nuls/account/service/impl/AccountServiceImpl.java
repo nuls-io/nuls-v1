@@ -374,7 +374,7 @@ public class AccountServiceImpl implements AccountService {
         if (!StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        if (null != account) {
+        if (null == account) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         try {
