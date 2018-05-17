@@ -29,10 +29,12 @@
  */
 package io.nuls.accout.ledger.rpc;
 
+import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
+import io.nuls.accout.ledger.rpc.dto.TransactionInfoDto;
 import io.nuls.accout.ledger.rpc.form.TransferForm;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.exception.NulsException;
@@ -46,6 +48,7 @@ import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -108,8 +111,8 @@ public class AccountLedgerResource {
     public Result<Balance> transfer(@ApiParam(name = "form", value = "转账", required = true) TransferForm form) {
         Na value = Na.valueOf(form.getAmount());
         return accountLedgerService.transfer(AddressTool.getAddress(form.getAddress()),
-                                             AddressTool.getAddress(form.getAddress()),
-                                             value, form.getPassword(), form.getRemark());
+                AddressTool.getAddress(form.getAddress()),
+                value, form.getPassword(), form.getRemark());
     }
 
     @GET
@@ -117,16 +120,32 @@ public class AccountLedgerResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "账户地址查询交易列表", notes = "result.data: balanceJson 返回账户相关的交易列表")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Balance.class)
+            @ApiResponse(code = 200, message = "success")
     })
-    public Result<List<Transaction>> getTxInfoList(@PathParam("address") String address) {
+    public Result<List<TransactionInfoDto>> getTxInfoList(@PathParam("address") String address) {
         byte[] addressBytes = null;
+        Result<List<TransactionInfoDto>> dtoResult = new Result<>();
+
         try {
             addressBytes = Base58.decode(address);
         } catch (Exception e) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
 
-        return accountLedgerService.getTxInfoList(addressBytes);
+        Result<List<TransactionInfo>> result = accountLedgerService.getTxInfoList(addressBytes);
+        if (result.isFailed()) {
+            dtoResult.setErrorCode(result.getErrorCode());
+            return dtoResult;
+        }
+
+        List<TransactionInfoDto> infoDtoList = new ArrayList<>();
+        for (TransactionInfo info : result.getData()) {
+            infoDtoList.add(new TransactionInfoDto(info));
+        }
+        List list = new ArrayList();
+        list.add("a");
+        dtoResult.setSuccess(true);
+        dtoResult.setData(infoDtoList);
+        return dtoResult;
     }
 }

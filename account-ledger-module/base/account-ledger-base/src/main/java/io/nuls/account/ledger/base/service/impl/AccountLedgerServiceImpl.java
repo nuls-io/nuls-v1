@@ -355,15 +355,20 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result getTxInfoList(byte[] address) {
-        List<TransactionInfoPo> infoPoList = storageService.getTxInfoList(address);
-        List<TransactionInfo> infoList = new ArrayList<>();
-        for (TransactionInfoPo po : infoPoList) {
-            infoList.add(po.toTransactionInfo());
-        }
+    public Result<List<TransactionInfo>> getTxInfoList(byte[] address) {
+        try {
+            List<TransactionInfoPo> infoPoList = storageService.getTxInfoList(address);
+            List<TransactionInfo> infoList = new ArrayList<>();
+            for (TransactionInfoPo po : infoPoList) {
+                infoList.add(po.toTransactionInfo());
+            }
 
-        Collections.sort(infoList, TxInfoComparator.getInstance());
-        return Result.getSuccess().setData(infoList);
+            Collections.sort(infoList, TxInfoComparator.getInstance());
+            return Result.getSuccess().setData(infoList);
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }
     }
 
     protected Result<Integer> saveConfirmedTransaction(Transaction tx, byte status) {
@@ -389,7 +394,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (status == TransactionInfo.UNCONFIRMED) {
             result = storageService.saveTempTx(tx);
         }
-        for(int i = 0 ;i< addresses.size(); i++){
+        for (int i = 0; i < addresses.size(); i++) {
             balanceProvider.refreshBalance(addresses.get(i));
         }
         return result;

@@ -29,11 +29,13 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 
+import java.io.Serializable;
+
 /**
  * @author vivi
  * @date 2017/12/12.
  */
-public class Result<T> {
+public class Result<T> implements Serializable{
 
     private boolean success;
 
