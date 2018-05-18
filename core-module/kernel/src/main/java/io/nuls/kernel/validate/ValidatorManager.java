@@ -57,6 +57,9 @@ public class ValidatorManager {
             for (Method method : methods) {
                 if ("validate".equals(method.getName())) {
                     Class paramType = method.getParameterTypes()[0];
+                    if(paramType.equals(NulsData.class)){
+                        continue;
+                    }
                     addValidator(paramType, validator);
                     break;
                 }

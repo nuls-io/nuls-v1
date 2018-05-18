@@ -27,22 +27,21 @@
 package io.nuls.consensus.poc.process;
 
 import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.container.ChainContainer;
+import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
-import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
-import io.nuls.consensus.poc.constant.ConsensusStatus;
-import io.nuls.consensus.poc.container.ChainContainer;
-import io.nuls.consensus.poc.context.ConsensusStatusContext;
+import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
@@ -408,15 +407,15 @@ public class ForkChainProcess {
                 ValidateResult result = ledgerService.verifyCoinData(tx.getCoinData(), verifiedList);
                 if (result.isSuccess()) {
                     result = tx.verify();
-                    if(result.isFailed()){
-                        Log.info(result.getMessage());
+                    if (result.isFailed()) {
+                        Log.info("failed message:" + result.getMessage());
                         changeSuccess = false;
                         break;
-                    }else{
+                    } else {
                         verifiedList.add(tx);
                     }
                 } else {
-                    Log.info(result.getMessage());
+                    Log.info("failed message:" + result.getMessage());
                     changeSuccess = false;
                     break;
                 }
@@ -426,7 +425,7 @@ public class ForkChainProcess {
             }
             ValidateResult validateResult1 = tansactionService.conflictDetect(newBlock.getTxs());
             if (validateResult1.isFailed()) {
-                Log.info(validateResult1.getMessage());
+                Log.info("failed message:" + validateResult1.getMessage());
                 changeSuccess = false;
                 break;
             }
