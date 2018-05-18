@@ -31,6 +31,7 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -159,16 +160,21 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
     }
 
-    private Result rollbackCoinData(Transaction tx) throws IOException {
+    private Result rollbackCoinData(Transaction tx) throws IOException, NulsException {
         byte[] txHashBytes = txHashBytes = tx.getHash().serialize();
         BatchOperation batch = utxoLedgerUtxoStorageService.createWriteBatch();
         CoinData coinData = tx.getCoinData();
+        P2PKHScriptSig p2PKHScriptSig = P2PKHScriptSig.createFromBytes(tx.getScriptSig());
         if (coinData != null) {
             // 保存utxo已花费 - from
             List<Coin> froms = coinData.getFrom();
+            Coin recovery;
+            byte[] fromAdress = AddressTool.getAddress(p2PKHScriptSig.getPublicKey());
             for (Coin from : froms) {
                 try {
-                    batch.put(from.getOwner(), from.serialize());
+                    recovery = new Coin(fromAdress, from.getNa(), from.getLockTime());
+                    recovery.setFrom(from.getFrom());
+                    batch.put(from.getOwner(), recovery.serialize());
                 } catch (IOException e) {
                     Log.error(e);
                     return Result.getFailed(e.getMessage());
