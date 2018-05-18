@@ -50,4 +50,9 @@ public class CancelDepositTransaction extends Transaction<CancelDeposit> {
     protected CancelDeposit parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readNulsData(new CancelDeposit());
     }
+
+    @Override
+    public boolean isFreeOfFee() {
+        return true;
+    }
 }
