@@ -250,7 +250,7 @@ public class AccountResource {
     }
 
     @POST
-    @Path("/unlock{address}")
+    @Path("/unlock/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "解锁账户", notes = "")
     public Result unlock(@ApiParam(name = "address", value = "账户地址", required = true)
