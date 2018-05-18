@@ -164,6 +164,7 @@ public class BlockProcess {
                         tx.verifyWithException();
                         verifiedList.add(tx);
                     } else {
+
                         throw new NulsRuntimeException(result.getErrorCode(), result.getMessage());
                     }
                 }

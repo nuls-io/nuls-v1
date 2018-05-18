@@ -108,6 +108,10 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         return false;
     }
 
+    public boolean isUnlockTx() {
+        return false;
+    }
+
     public boolean isNoSignature() {
         return false;
     }
@@ -203,7 +207,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
     }
 
     public Na getFee() {
-        if(isFreeOfFee()){
+        if (isFreeOfFee()) {
             return Na.ZERO;
         }
         Na fee = Na.ZERO;

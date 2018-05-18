@@ -30,6 +30,7 @@
 package io.nuls.accout.ledger.rpc;
 
 import io.nuls.account.ledger.model.TransactionInfo;
+import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
@@ -111,9 +112,26 @@ public class AccountLedgerResource {
             @ApiResponse(code = 200, message = "success")
     })
     public Result<Balance> transfer(@ApiParam(name = "form", value = "转账", required = true) TransferForm form) {
+
+        if (form == null) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
+
+        if (!Address.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+        }
+
+        if (!Address.validAddress(form.getToAddress())) {
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+        }
+
+        if (form.getAmount() <= 0) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
+
         Na value = Na.valueOf(form.getAmount());
         return accountLedgerService.transfer(AddressTool.getAddress(form.getAddress()),
-                AddressTool.getAddress(form.getAddress()),
+                AddressTool.getAddress(form.getToAddress()),
                 value, form.getPassword(), form.getRemark());
     }
 

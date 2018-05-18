@@ -50,4 +50,9 @@ public class StopAgentTransaction extends Transaction<StopAgent> {
     protected StopAgent parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readNulsData(new StopAgent());
     }
+
+    @Override
+    public boolean isUnlockTx() {
+        return true;
+    }
 }

@@ -29,7 +29,6 @@ import io.nuls.account.ledger.base.service.balance.BalanceProvider;
 import io.nuls.account.ledger.base.util.CoinComparator;
 import io.nuls.account.ledger.base.util.TxInfoComparator;
 import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.account.ledger.storage.constant.AccountLedgerStorageConstant;
 import io.nuls.account.ledger.storage.po.TransactionInfoPo;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
@@ -56,6 +55,7 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
+import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.constant.LedgerErrorCode;
 
 import io.nuls.ledger.service.LedgerService;
@@ -104,12 +104,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result<Integer> saveConfirmedTransaction(Transaction tx) {
-        return saveConfirmedTransaction(tx, TransactionInfo.CONFIRMED);
+        return saveTransaction(tx, TransactionInfo.CONFIRMED);
     }
 
     @Override
     public Result<Integer> saveUnconfirmedTransaction(Transaction tx) {
-        return saveConfirmedTransaction(tx, TransactionInfo.UNCONFIRMED);
+        return saveTransaction(tx, TransactionInfo.UNCONFIRMED);
     }
 
     @Override
@@ -192,7 +192,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return coinDataResult;
         }
         Collections.sort(coinList, CoinComparator.getInstance());
-
 
         boolean enough = false;
         List<Coin> coins = new ArrayList<>();
@@ -319,14 +318,76 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result unlockCoinData(Transaction tx) {
-        // todo auto-generated method stub
-        return null;
+        List<byte[]> addresses = getRelatedAddresses(tx);
+        if (addresses == null || addresses.size() == 0) {
+            return Result.getFailed().setData(new Integer(0));
+        }
+        byte status = TransactionInfo.CONFIRMED;
+        TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
+        txInfoPo.setStatus(status);
+
+        byte[] txHashBytes = new byte[0];
+        try {
+            txHashBytes = tx.getHash().serialize();
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+        }
+        CoinData coinData = tx.getCoinData();
+        if (coinData != null) {
+            // unlock utxo - to
+            List<Coin> tos = coinData.getTo();
+            byte[] indexBytes;
+            for (int i = 0, length = tos.size(); i < length; i++) {
+                if(tos.get(i).getLockTime() == -1) {
+                    tos.get(i).setLockTime(0);
+                    try {
+                        byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                        storageService.saveOutPut(outKey, tos.get(i).serialize());
+                    } catch (IOException e) {
+                        throw new NulsRuntimeException(e);
+                    }
+                    //todo , think about weather to add a transaction history
+                    //addresses.clear();
+                    //addresses.add(tos.get(i).getOwner());
+                    //Result result = storageService.saveLocalTxInfo(txInfoPo, addresses);
+                }
+            }
+        }
+        return Result.getSuccess();
     }
 
     @Override
     public Result rollbackUnlockTxCoinData(Transaction tx) {
-        // todo auto-generated method stub
-        return null;
+        List<byte[]> addresses = getRelatedAddresses(tx);
+        if (addresses == null || addresses.size() == 0) {
+            return Result.getFailed().setData(new Integer(0));
+        }
+        byte status = TransactionInfo.CONFIRMED;
+        TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
+        txInfoPo.setStatus(status);
+
+        byte[] txHashBytes = new byte[0];
+        try {
+            txHashBytes = tx.getHash().serialize();
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+        }
+        CoinData coinData = tx.getCoinData();
+        if (coinData != null) {
+            // lock utxo - to
+            List<Coin> tos = coinData.getTo();
+            for (int i = 0, length = tos.size(); i < length; i++) {
+                if(tos.get(i).getLockTime() == -1) {
+                    try {
+                        byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                        storageService.saveOutPut(outKey, tos.get(i).serialize());
+                    } catch (IOException e) {
+                        throw new NulsRuntimeException(e);
+                    }
+                }
+            }
+        }
+        return Result.getSuccess();
     }
 
     @Override
@@ -350,7 +411,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             List<NulsDigestData> txs = blockService.getBlock(i).getData().getTxHashList();
             for (int j = 0; j < txs.size(); j++) {
                 Transaction tx = ledgerService.getTx(txs.get(j));
-                saveConfirmedTransaction(tx, addressBytes, TransactionInfo.CONFIRMED);
+                saveTransaction(tx, addressBytes, TransactionInfo.CONFIRMED);
             }
         }
         try {
@@ -378,7 +439,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
     }
 
-    protected Result<Integer> saveConfirmedTransaction(Transaction tx, byte status) {
+    protected Result<Integer> saveTransaction(Transaction tx, byte status) {
 
         List<byte[]> addresses = getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
@@ -407,9 +468,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         return result;
     }
 
-    protected Result<Integer> saveConfirmedTransaction(Transaction tx, byte[] addresss, byte status) {
+    protected Result<Integer> saveTransaction(Transaction tx, byte[] address, byte status) {
         List<byte[]> destAddresses = new ArrayList<byte[]>();
-        destAddresses.add(addresss);
+        destAddresses.add(address);
         List<byte[]> addresses = getRelatedAddresses(tx, destAddresses);
         if (addresses == null || addresses.size() == 0) {
             return Result.getFailed().setData(new Integer(0));

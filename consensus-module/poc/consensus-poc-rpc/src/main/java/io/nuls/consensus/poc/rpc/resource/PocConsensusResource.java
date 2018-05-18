@@ -38,6 +38,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.service.TransactionService;
@@ -379,8 +380,9 @@ public class PocConsensusResource {
         }
         coinData.setFrom(fromList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(stopAgent.getAddress(), Na.ZERO, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        Result result1 = this.txProcessing(tx, result, account, form.getPassword());
+        Na fee = TransactionFeeCalculator.getFee(tx.size());
+        coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
+        Result result1 = this.txProcessing(tx, null, account, form.getPassword());
         if (result1.isFailed()) {
             return result1;
         }

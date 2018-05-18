@@ -39,6 +39,8 @@ import java.util.List;
  */
 public interface AccountLedgerStorageService {
 
+    Result saveOutPut(byte[] key, byte[] value);
+
     Result saveLocalTx(Transaction tx);
 
     Result deleteLocalTx(Transaction tx);
