@@ -40,6 +40,7 @@ import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.utils.VarInt;
+import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.service.TransactionService;
 import io.swagger.annotations.*;
@@ -306,8 +307,10 @@ public class PocConsensusResource {
             Log.error(e);
             return Result.getFailed(e.getMessage());
         }
-        tx.verifyWithException();
-
+        ValidateResult result1 = tx.verify();
+        if(result1.isFailed()){
+            return result1;
+        }
         Result saveResult = accountLedgerService.saveUnconfirmedTransaction(tx);
         if (saveResult.isFailed()) {
             return saveResult;

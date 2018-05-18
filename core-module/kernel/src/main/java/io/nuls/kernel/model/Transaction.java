@@ -227,13 +227,21 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         if (coinData != null) {
             Set<byte[]> coinAddressSet = coinData.getAddresses();
             if (null != coinAddressSet) {
-                addresses.addAll(coinAddressSet);
+                for(byte[] address : coinAddressSet){
+                    if(address != null && address.length == AddressTool.HASH_LENGTH){
+                        addresses.add(address);
+                    }
+                }
             }
         }
         if (txData != null) {
             Set<byte[]> txAddressSet = txData.getAddresses();
             if (null != txAddressSet) {
-                addresses.addAll(txAddressSet);
+                for(byte[] address : txAddressSet){
+                    if(address != null && address.length == AddressTool.HASH_LENGTH){
+                        addresses.add(address);
+                    }
+                }
             }
         }
         return new ArrayList<>(addresses);

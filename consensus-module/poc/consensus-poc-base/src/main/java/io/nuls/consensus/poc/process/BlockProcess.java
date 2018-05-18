@@ -164,7 +164,7 @@ public class BlockProcess {
                         if (result.isSuccess()) {
                             result = tx.verify();
                             if(result.isFailed()){
-                                Log.info(result.getMessage());
+                                Log.info("failed message:" + result.getMessage());
                                 success = false;
                                 break;
                             }else{
@@ -172,7 +172,7 @@ public class BlockProcess {
                             }
                         } else {
                             success = false;
-                            Log.info(result.getMessage());
+                            Log.info("failed message:" + result.getMessage());
                             break;
                         }
                     }
@@ -182,7 +182,7 @@ public class BlockProcess {
                     ValidateResult validateResult1 = tansactionService.conflictDetect(block.getTxs());
                     if (validateResult1.isFailed()) {
                         success = false;
-                        Log.info(validateResult1.getMessage());
+                        Log.info("failed message:" + validateResult1.getMessage());
                         break;
                     }
                     // save block

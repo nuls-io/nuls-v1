@@ -24,6 +24,7 @@
  */
 package io.nuls.kernel.validate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.SeverityLevelEnum;
@@ -73,6 +74,7 @@ public class ValidateResult<T> extends Result<T> {
         return result;
     }
 
+    @JsonIgnore
     public SeverityLevelEnum getLevel() {
         return level;
     }
@@ -87,6 +89,7 @@ public class ValidateResult<T> extends Result<T> {
         return vr;
     }
 
+    @JsonIgnore
     public String getClassName() {
         return className;
     }
