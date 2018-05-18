@@ -69,6 +69,8 @@ public class Node extends BaseNulsData {
 
     private Set<String> groupSet;
 
+    private long timeOffset;
+
     @Override
     public int size() {
         int s = 0;
@@ -93,6 +95,7 @@ public class Node extends BaseNulsData {
         ip = new String(buffer.readByLengthByte());
         this.groupSet = ConcurrentHashMap.newKeySet();
     }
+
     /**
      * 1: inNode ,  2: outNode
      */
@@ -319,5 +322,13 @@ public class Node extends BaseNulsData {
 
     public void setBestBlockHash(NulsDigestData bestBlockHash) {
         this.bestBlockHash = bestBlockHash;
+    }
+
+    public long getTimeOffset() {
+        return timeOffset;
+    }
+
+    public void setTimeOffset(long timeOffset) {
+        this.timeOffset = timeOffset;
     }
 }

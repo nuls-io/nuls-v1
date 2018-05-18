@@ -1,6 +1,7 @@
 package io.nuls.network.protocol.message;
 
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.NulsByteBuffer;
@@ -21,6 +22,8 @@ public class NetworkMessageBody extends BaseNulsData {
 
     private NulsDigestData bestBlockHash;
 
+    private long networkTime;
+
 
     public NetworkMessageBody() {
 
@@ -31,6 +34,39 @@ public class NetworkMessageBody extends BaseNulsData {
         this.severPort = severPort;
         this.bestBlockHeight = bestBlockHeight;
         this.bestBlockHash = bestBlockHash;
+        this.networkTime = TimeService.currentTimeMillis();
+    }
+
+    @Override
+    public int size() {
+        int s = 0;
+        s += VarInt.sizeOf(handshakeType);
+        s += VarInt.sizeOf(severPort);
+        s += VarInt.sizeOf(bestBlockHeight);
+        s += bestBlockHash.size();
+        s += VarInt.sizeOf(networkTime);
+        return s;
+    }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.write(new VarInt(handshakeType).encode());
+        stream.write(new VarInt(severPort).encode());
+        stream.write(new VarInt(bestBlockHeight).encode());
+        stream.write(bestBlockHash.serialize());
+        stream.write(new VarInt(networkTime).encode());
+    }
+
+    @Override
+    protected void parse(NulsByteBuffer buffer) throws NulsException {
+        handshakeType = (int) buffer.readVarInt();
+        severPort = (int) buffer.readVarInt();
+        bestBlockHeight = (int) buffer.readVarInt();
+        bestBlockHash = buffer.readHash();
+        networkTime = buffer.readVarInt();
     }
 
     public int getHandshakeType() {
@@ -65,34 +101,12 @@ public class NetworkMessageBody extends BaseNulsData {
         this.bestBlockHash = bestBlockHash;
     }
 
-    @Override
-    public int size() {
-        int s = 0;
-        s += VarInt.sizeOf(handshakeType);
-        s += VarInt.sizeOf(severPort);
-        s += VarInt.sizeOf(bestBlockHeight);
-        s += bestBlockHash.size();
-        return s;
+    public long getNetworkTime() {
+        return networkTime;
     }
 
-    /**
-     * serialize important field
-     */
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(new VarInt(handshakeType).encode());
-        stream.write(new VarInt(severPort).encode());
-        stream.write(new VarInt(bestBlockHeight).encode());
-        stream.write(bestBlockHash.serialize());
+    public void setNetworkTime(long networkTime) {
+        this.networkTime = networkTime;
     }
-
-    @Override
-    protected void parse(NulsByteBuffer buffer) throws NulsException {
-        handshakeType = (int) buffer.readVarInt();
-        severPort = (int) buffer.readVarInt();
-        bestBlockHeight = (int) buffer.readVarInt();
-        bestBlockHash = buffer.readHash();
-    }
-
 
 }

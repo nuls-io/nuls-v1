@@ -1,5 +1,6 @@
 package io.nuls.network.message.impl;
 
+import io.nuls.kernel.func.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.manager.NodeManager;
@@ -34,6 +35,7 @@ public class VersionMessageHandler implements BaseNetworkMeesageHandler {
         }
         node.setBestBlockHeight(body.getBestBlockHeight());
         node.setBestBlockHash(body.getBestBlockHash());
+        node.setTimeOffset(TimeService.currentTimeMillis() - body.getNetworkTime());
         return null;
     }
 }

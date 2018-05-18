@@ -1,6 +1,7 @@
 package io.nuls.network.message.impl;
 
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.NetworkEventResult;
@@ -38,6 +39,7 @@ public class GetVersionMessageHandler implements BaseNetworkMeesageHandler {
         }
         node.setBestBlockHeight(body.getBestBlockHeight());
         node.setBestBlockHash(body.getBestBlockHash());
+
 
         NetworkMessageBody myVersionBody = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, NetworkParam.getInstance().getPort(),
                 NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash());
