@@ -1,23 +1,17 @@
 package io.nuls.accout.ledger.rpc.dto;
 
 import io.nuls.account.ledger.model.TransactionInfo;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
-import java.io.Serializable;
+public class TransactionInfoDto {
 
-@ApiModel(value = "transactionInfoJson")
-public class TransactionInfoDto implements Serializable{
-
-    @ApiModelProperty(name = "txHash", value = "交易hash")
     private String txHash;
-    @ApiModelProperty(name = "blockHeight", value = "区块高度")
+
     private long blockHeight;
-    @ApiModelProperty(name = "time", value = "创建时间")
+
     private long time;
-    @ApiModelProperty(name = "txType", value = "交易类型")
+
     private int txType;
-    @ApiModelProperty(name = "status", value = "状态")
+
     private byte status;
 
     public TransactionInfoDto() {
@@ -30,5 +24,45 @@ public class TransactionInfoDto implements Serializable{
         this.time = info.getTime();
         this.status = info.getStatus();
         this.txType = info.getTxType();
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public int getTxType() {
+        return txType;
+    }
+
+    public void setTxType(int txType) {
+        this.txType = txType;
+    }
+
+    public byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(byte status) {
+        this.status = status;
     }
 }

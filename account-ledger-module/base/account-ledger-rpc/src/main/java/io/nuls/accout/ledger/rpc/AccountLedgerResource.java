@@ -37,6 +37,8 @@ import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.accout.ledger.rpc.dto.TransactionInfoDto;
 import io.nuls.accout.ledger.rpc.form.TransferForm;
 import io.nuls.core.tools.crypto.Base58;
+import io.nuls.core.tools.page.Page;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -120,11 +122,26 @@ public class AccountLedgerResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "账户地址查询交易列表", notes = "result.data: balanceJson 返回账户相关的交易列表")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success")
+            @ApiResponse(code = 200, message = "success", response = Page.class)
     })
-    public Result<List<TransactionInfoDto>> getTxInfoList(@PathParam("address") String address) {
+    public Result getTxInfoList(@ApiParam(name = "pageNumber", value = "页码")
+                                @QueryParam("pageNumber") Integer pageNumber,
+                                @ApiParam(name = "pageSize", value = "每页条数")
+                                @QueryParam("pageSize") Integer pageSize,
+                                @ApiParam(name = "address", value = "地址")
+                                @QueryParam("address") String address) {
+        if (null == pageNumber || pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (null == pageSize || pageSize == 0) {
+            pageSize = 10;
+        }
+        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
+        }
+
         byte[] addressBytes = null;
-        Result<List<TransactionInfoDto>> dtoResult = new Result<>();
+        Result dtoResult = new Result<>();
 
         try {
             addressBytes = Base58.decode(address);
@@ -134,18 +151,31 @@ public class AccountLedgerResource {
 
         Result<List<TransactionInfo>> result = accountLedgerService.getTxInfoList(addressBytes);
         if (result.isFailed()) {
+            dtoResult.setSuccess(false);
             dtoResult.setErrorCode(result.getErrorCode());
             return dtoResult;
         }
 
-        List<TransactionInfoDto> infoDtoList = new ArrayList<>();
-        for (TransactionInfo info : result.getData()) {
-            infoDtoList.add(new TransactionInfoDto(info));
+        Page<TransactionInfoDto> page = new Page<>(pageNumber, pageSize, result.getData().size());
+        int start = pageNumber * pageSize - pageSize;
+        if (start >= page.getTotal()) {
+            dtoResult.setData(page);
+            return dtoResult;
         }
-        List list = new ArrayList();
-        list.add("a");
+
+        int end = start + pageSize;
+        if (end > page.getTotal()) {
+            end = (int) page.getTotal();
+        }
+
+        List<TransactionInfoDto> infoDtoList = new ArrayList<>();
+        for (int i = start; i < end; i++) {
+            infoDtoList.add(new TransactionInfoDto(result.getData().get(i)));
+        }
+        page.setList(infoDtoList);
+
         dtoResult.setSuccess(true);
-        dtoResult.setData(infoDtoList);
+        dtoResult.setData(page);
         return dtoResult;
     }
 }
