@@ -5,6 +5,7 @@ import io.nuls.account.model.Account;
 import io.nuls.account.model.AccountKeyStore;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
+import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.service.AccountStorageService;
@@ -15,7 +16,6 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -23,8 +23,6 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.utils.SerializeUtils;
-
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,6 +44,8 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private AccountLedgerService accountLedgerService;
 
+    private AccountCacheService accountCacheService = AccountCacheService.getInstance();
+
     /**
      * 本地账户集合
      * Collection of local accounts
@@ -55,10 +55,10 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<List<Account>> createAccount(int count, String password) {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"between 0 and 100 can be created at once");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "between 0 and 100 can be created at once");
         }
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "Length between 8 and 20, the combination of characters and numbers");
         }
         locker.lock();
         try {
@@ -114,8 +114,8 @@ public class AccountServiceImpl implements AccountService {
         if (account == null) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        if (account.isEncrypted()) {
-            if(!StringUtils.validPassword(password)){
+        if (account.isEncrypted() && account.isLocked()) {
+            if (!StringUtils.validPassword(password)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
             try {
@@ -252,6 +252,7 @@ public class AccountServiceImpl implements AccountService {
         return Result.getSuccess().setData(accountKeyStore);
     }
 
+
     /**
      * 根据账户地址字符串,获取账户对象(内部调用)
      * Get account object based on account address string
@@ -262,6 +263,11 @@ public class AccountServiceImpl implements AccountService {
     private Account getAccountByAddress(String address) {
         if (!Address.validAddress(address)) {
             return null;
+        }
+        //如果账户已经解锁,则直接返回解锁后的账户. If the account is unlocked, return directly to the unlocked account
+        Account accountCache =  accountCacheService.getAccountByAddress(address);
+        if(null != accountCache){
+            return accountCache;
         }
         AccountPo accountPo = null;
         try {
@@ -489,6 +495,10 @@ public class AccountServiceImpl implements AccountService {
     public Result<Balance> getBalance(String address) throws NulsException {
         if (!Address.validAddress(address)) {
             Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        Account account = getAccountByAddress(address);
+        if (null == account) {
+            Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         Address addr = new Address(address);
         return accountLedgerService.getBalance(addr.getBase58Bytes());

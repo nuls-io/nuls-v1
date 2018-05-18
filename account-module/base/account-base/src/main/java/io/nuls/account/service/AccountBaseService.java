@@ -38,7 +38,9 @@ public class AccountBaseService {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Account account = accountService.getAccount(address).getData();
-
+        if(null == account){
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
         if (!account.isLocked()) {
             return Result.getSuccess().setData(Hex.encode(account.getPriKey()));
         } else {

@@ -276,4 +276,9 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
         }
         return result;
     }
+
+    @Override
+    public Result saveOutPut(byte[] key, byte[] value){
+        return dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA,key,value);
+    }
 }

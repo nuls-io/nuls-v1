@@ -1,5 +1,6 @@
 package io.nuls.account.rpc.model.form;
 
+import io.nuls.account.rpc.model.AccountKeyStoreDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -10,18 +11,18 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "导入账户KeyStore表单数据")
 public class AccountKeyStoreImportForm {
 
-    @ApiModelProperty(name = "accountKeyStore", value = "备份的账户数据", required = true)
-    private String accountKeyStore;
+    @ApiModelProperty(name = "accountKeyStoreDto", value = "备份的账户数据", required = true)
+    private AccountKeyStoreDto accountKeyStoreDto;
 
     @ApiModelProperty(name = "password", value = "密码")
     private String password;
 
-    public String getAccountKeyStore() {
-        return accountKeyStore;
+    public AccountKeyStoreDto getAccountKeyStoreDto() {
+        return accountKeyStoreDto;
     }
 
-    public void setAccountKeyStore(String accountKeyStore) {
-        this.accountKeyStore = accountKeyStore;
+    public void setAccountKeyStoreDto(AccountKeyStoreDto accountKeyStoreDto) {
+        this.accountKeyStoreDto = accountKeyStoreDto;
     }
 
     public String getPassword() {
