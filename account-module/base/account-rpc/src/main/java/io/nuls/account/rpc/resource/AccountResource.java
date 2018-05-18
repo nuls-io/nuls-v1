@@ -124,7 +124,7 @@ public class AccountResource {
     @GET
     @Path("/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("查询账户信息")
+    @ApiOperation("查询账户信息 [3.3.2]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = AccountDto.class)
     })
@@ -169,24 +169,24 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = BalanceDto.class)
     })
-    public Result<BalanceDto> getBalance(@ApiParam(name = "address", value = "账户地址", required = true)
+    public Result getBalance(@ApiParam(name = "address", value = "账户地址", required = true)
                                          @PathParam("address") String address) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        Balance balance = null;
         try {
-            balance = accountService.getBalance(address).getData();
+            Result<Balance> result = accountService.getBalance(address);
+            if (result.isFailed()) {
+                return result;
+            }
+            Balance balance = result.getData();
+            return Result.getSuccess().setData(new BalanceDto(balance));
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(AccountErrorCode.FAILED);
         }
-        if (balance == null) {
-            balance = new Balance();
-        }
-        Result result = Result.getSuccess();
-        result.setData(new BalanceDto(balance));
-        return result;
+
+
     }
 
     @POST
@@ -219,19 +219,19 @@ public class AccountResource {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-
-        Balance balance = null;
         try {
-            balance = accountService.getBalance(address).getData();
+            Result<Balance> result = accountService.getBalance(address);
+            if (result.isFailed()) {
+                return result;
+            }
+            Balance balance = result.getData();
+            List<AssetDto> dtoList = new ArrayList<>();
+            dtoList.add(new AssetDto("NULS", balance));
+            return Result.getSuccess().setData(dtoList);
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(AccountErrorCode.FAILED);
         }
-        Result result = Result.getSuccess();
-        List<AssetDto> dtoList = new ArrayList<>();
-        dtoList.add(new AssetDto("NULS", balance));
-        result.setData(dtoList);
-        return result;
     }
 
     @POST
@@ -265,7 +265,7 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         try {
-            account.decrypt(password);
+            account.unlock(password);
             accountCacheService.putAccount(account);
             if (null == unlockTime || unlockTime > AccountConstant.ACCOUNT_MAX_UNLOCK_TIME) {
                 unlockTime = AccountConstant.ACCOUNT_MAX_UNLOCK_TIME;
@@ -377,21 +377,14 @@ public class AccountResource {
     })
     public Result importAccount(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
                                         AccountKeyStoreImportForm form) {
-        String keyStore = form.getAccountKeyStore();
-        if (null == keyStore) {
+
+        if (null == form || null == form.getAccountKeyStoreDto()) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
+        AccountKeyStoreDto accountKeyStoreDto = form.getAccountKeyStoreDto();
         String password = form.getPassword();
-
         if(StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)){
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-        }
-        AccountKeyStoreDto accountKeyStoreDto = null;
-        try {
-            accountKeyStoreDto = JSONUtils.json2pojo(keyStore, AccountKeyStoreDto.class);
-        } catch (Exception e) {
-            Log.error(e);
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Result result = accountService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), password);
         if (result.isFailed()) {
