@@ -50,6 +50,7 @@ import javax.xml.transform.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -85,65 +86,6 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
             //TODO
         }
 
-    }
-
-    @Override
-    public Result saveLocalTx(Transaction tx) {
-        if (tx == null) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
-        }
-        byte[] txHashBytes = new byte[0];
-        try {
-            txHashBytes = tx.getHash().serialize();
-        } catch (IOException e) {
-            throw new NulsRuntimeException(e);
-        }
-        CoinData coinData = tx.getCoinData();
-        if (coinData != null) {
-            // delete - from
-            List<Coin> froms = coinData.getFrom();
-            BatchOperation batch = dbService.createWriteBatch(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
-            for (Coin from : froms) {
-                byte[] fromSource = from.getOwner();
-                byte[] utxoFromSource = new byte[tx.getHash().size()];
-                byte[] fromIndex = new byte[fromSource.length - utxoFromSource.length];
-                System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
-                System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
-                Transaction sourceTx = null;
-                try {
-                    sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
-                } catch (Exception e) {
-                    throw new NulsRuntimeException(e);
-                }
-                if (sourceTx == null) {
-                    return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
-                }
-                byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
-                batch.delete(Arrays.concatenate(address, from.getOwner()));
-            }
-            // save utxo - to
-            List<Coin> tos = coinData.getTo();
-            byte[] indexBytes;
-            for (int i = 0, length = tos.size(); i < length; i++) {
-                try {
-                    byte[] outKey = Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                    batch.put(outKey, tos.get(i).serialize());
-                } catch (IOException e) {
-                    throw new NulsRuntimeException(e);
-                }
-            }
-
-            Result batchResult = batch.executeBatch();
-            if (batchResult.isFailed()) {
-                return batchResult;
-            }
-        }
-        return Result.getSuccess();
-    }
-
-    @Override
-    public Result deleteLocalTx(Transaction tx) {
-        return null;
     }
 
     @Override
@@ -238,12 +180,7 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     }
 
     @Override
-    public Transaction getLocalTx(NulsDigestData hash) {
-        return null;
-    }
-
-    @Override
-    public List<Coin> getCoinBytes(byte[] address) throws NulsException {
+    public List<Coin> getCoinList(byte[] address) throws NulsException {
         List<Coin> coinList = new ArrayList<>();
         List<byte[]> keyList = dbService.keyList(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
         byte[] addressOwner = new byte[AddressTool.HASH_LENGTH];
@@ -278,7 +215,40 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     }
 
     @Override
-    public Result saveOutPut(byte[] key, byte[] value){
-        return dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA,key,value);
+    public Result saveUTXO(byte[] key, byte[] value) {
+        return dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA, key, value);
+    }
+
+    @Override
+    public Result<Integer> batchSaveUTXO(Map<byte[], byte[]> utxos) {
+        BatchOperation batch = dbService.createWriteBatch(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
+        Set<byte[]> utxoKeySet = utxos.keySet();
+        for (byte[] key : utxoKeySet) {
+            batch.put(key,utxos.get(key));
+        }
+        Result batchResult = batch.executeBatch();
+        if (batchResult.isFailed()) {
+            return batchResult;
+        }
+        return Result.getSuccess().setData(new Integer(utxos.size()));
+    }
+
+    @Override
+    public Result deleteUTXO(byte[] key) {
+        dbService.delete(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA, key);
+        return Result.getSuccess();
+    }
+
+    @Override
+    public Result batchDeleteUTXO(Set<byte[]> utxos) {
+        BatchOperation batch = dbService.createWriteBatch(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
+        for (byte[] key : utxos) {
+            batch.delete(key);
+        }
+        Result batchResult = batch.executeBatch();
+        if (batchResult.isFailed()) {
+            return batchResult;
+        }
+        return Result.getSuccess().setData(new Integer(utxos.size()));
     }
 }

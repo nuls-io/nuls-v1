@@ -1,35 +1,12 @@
-/*
- * MIT License
- *
- * Copyright (c) 2017-2018 nuls.io
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- */
 package io.nuls.kernel.func;
 
-import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
-import io.nuls.core.tools.network.RequestUtil;
 import io.nuls.kernel.thread.manager.TaskManager;
 
-import java.util.Map;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 时间服务类：用于同步网络标准时间
@@ -40,27 +17,24 @@ import java.util.Map;
  */
 public class TimeService implements Runnable {
 
-    private static TimeService INSTANCE = new TimeService();
-
-    /**
-     * 初始化时间服务器列表
-     * Initialize the time server list.
-     */
-    //todo
     private TimeService() {
-        webTimeUrl = "http://time.inchain.org/now";
-        start();
+        urlList.add("http://time.inchain.org");         //inchain
+        urlList.add("https://www.baidu.com");           //baidu
+        urlList.add("https://www.alibaba.com");         //alibaba
+        urlList.add("https://github.com/");             //github
+        syncWebTime();
     }
+
+    private static TimeService instance = new TimeService();
 
     public static TimeService getInstance() {
-        return INSTANCE;
+        return instance;
     }
 
     /**
-     * 选择的时间服务器访问地址
-     * Select the time server to access the address.
+     * 网站url集合，用于同步网络时间
      */
-    private String webTimeUrl;
+    private List<String> urlList = new ArrayList<>();
 
     /**
      * 时间偏移差距触发点，超过该值会导致本地时间重设，单位毫秒
@@ -86,36 +60,50 @@ public class TimeService implements Runnable {
     private static long lastSyncTime;
 
     /**
+     * 同步网络时间
+     */
+    private void syncWebTime() {
+        long localBeforeTime = System.currentTimeMillis();
+
+        long netTime = getWebTime();
+
+        long localEndTime = System.currentTimeMillis();
+
+        netTimeOffset = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
+
+        lastSyncTime = currentTimeMillis();
+    }
+
+    /**
+     * 获取网络时间
+     * 连接公用网站，获取对方的网络时间，
+     * 有一个获取成功就立刻返回
+     *
+     * @return
+     */
+    private long getWebTime() {
+        for (int i = 0; i < urlList.size(); i++) {
+            try {
+                URL url = new URL(urlList.get(i));
+                URLConnection conn = url.openConnection();
+                conn.connect();
+                long time = conn.getDate();
+                return time;
+            } catch (Exception e) {
+                // try to connect next
+                continue;
+            }
+        }
+        return 0;
+    }
+
+    /**
      * 启动时间同步线程
      * Start the time synchronization thread.
      */
     public void start() {
-        Log.debug("----------- network timeService start -------------");
+        Log.debug("----------- TimeService start -------------");
         TaskManager.createAndRunThread((short) 1, "TimeService", this, true);
-    }
-
-    /**
-     * 同步网络时间
-     * Synchronous network time
-     */
-    private void syncWebTime() {
-        try {
-            long localBeforeTime = System.currentTimeMillis();
-
-            String response = RequestUtil.doGet(webTimeUrl, "utf-8");
-            Map<String, Object> resMap = JSONUtils.json2map(response);
-            long netTime = (long) resMap.get("time");
-
-            long localEndTime = System.currentTimeMillis();
-
-            netTimeOffset = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
-
-            lastSyncTime = currentTimeMillis();
-        } catch (Exception e) {
-            // 1 minute later try again
-            Log.error("sync net time error : " + e.getMessage());
-            lastSyncTime = lastSyncTime + 60000L;
-        }
     }
 
     /**
@@ -146,39 +134,24 @@ public class TimeService implements Runnable {
         }
     }
 
+
     /**
      * 获取当前网络时间毫秒数
      * Gets the current network time in milliseconds.
+     *
      * @return
      */
     public static long currentTimeMillis() {
         return System.currentTimeMillis() + netTimeOffset;
     }
-    /**
-     * 获取当前网络时间秒数
-     * Gets the current network time in seconds.
-     * @return
-     */
-    public static long currentTimeSeconds() {
-        return currentTimeMillis() / 1000;
-    }
 
     /**
      * 获取网络时间偏移值
      * Gets the network time offset.
+     *
      * @return
      */
     public static long getNetTimeOffset() {
         return netTimeOffset;
     }
-
-
-    /**
-     * 停止同步网络时间、并且停止服务
-     * Stop synchronizing network time and stop service.
-     */
-    public void shutdown() {
-       //todo
-    }
-
 }

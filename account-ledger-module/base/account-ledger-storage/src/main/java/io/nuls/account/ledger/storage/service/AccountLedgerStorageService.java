@@ -32,6 +32,8 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Facjas
@@ -39,11 +41,13 @@ import java.util.List;
  */
 public interface AccountLedgerStorageService {
 
-    Result saveOutPut(byte[] key, byte[] value);
+    Result saveUTXO(byte[] key, byte[] value);
 
-    Result saveLocalTx(Transaction tx);
+    Result batchSaveUTXO(Map<byte[],byte[]> utxos);
 
-    Result deleteLocalTx(Transaction tx);
+    Result deleteUTXO(byte[] key);
+
+    public Result batchDeleteUTXO(Set<byte[]> utxos);
 
     Result saveLocalTxInfo(TransactionInfoPo tx, List<byte[]> addresses);
 
@@ -51,9 +55,7 @@ public interface AccountLedgerStorageService {
 
     List<TransactionInfoPo> getTxInfoList(byte[] address) throws NulsException;
 
-    Transaction getLocalTx(NulsDigestData hash);
-
-    List<Coin> getCoinBytes(byte[] address) throws NulsException;
+    List<Coin> getCoinList(byte[] address) throws NulsException;
 
     byte[] getTxBytes(byte[] txBytes);
 
