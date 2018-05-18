@@ -160,7 +160,7 @@ public class BlockProcess {
                         if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
                             continue;
                         }
-                        ValidateResult result = ledgerService.verifyCoinData(tx.getCoinData(), verifiedList);
+                        ValidateResult result = ledgerService.verifyCoinData(tx, verifiedList);
                         if (result.isSuccess()) {
                             result = tx.verify();
                             if(result.isFailed()){
