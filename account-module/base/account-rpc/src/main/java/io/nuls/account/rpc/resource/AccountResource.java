@@ -343,7 +343,7 @@ public class AccountResource {
     }
 
     @PUT
-    @Path("/password/{address}")
+    @Path("/password/prikey/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "根据私钥修改账户密码")
     @ApiResponses(value = {
