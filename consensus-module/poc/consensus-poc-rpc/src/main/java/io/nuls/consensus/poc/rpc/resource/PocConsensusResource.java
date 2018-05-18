@@ -308,7 +308,7 @@ public class PocConsensusResource {
             return Result.getFailed(e.getMessage());
         }
         ValidateResult result1 = tx.verify();
-        if(result1.isFailed()){
+        if (result1.isFailed()) {
             return result1;
         }
         Result saveResult = accountLedgerService.saveUnconfirmedTransaction(tx);
@@ -361,7 +361,7 @@ public class PocConsensusResource {
         NulsDigestData createTxHash = agent.getTxHash();
         stopAgent.setCreateTxHash(createTxHash);
         tx.setTxData(stopAgent);
-         CoinData coinData = new CoinData();
+        CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
         toList.add(new Coin(stopAgent.getAddress(), agent.getDeposit(), 0));
         coinData.setTo(toList);
