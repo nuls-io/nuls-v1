@@ -68,7 +68,6 @@ public class TransactionInfoPo extends BaseNulsData {
 
         byte[] addresses = new byte[addressList.size() * AddressTool.HASH_LENGTH];
         for (int i = 0; i < addressList.size(); i++) {
-            System.out.println(tx.getBlockHeight());
             System.arraycopy(addressList.get(i), 0, addresses, AddressTool.HASH_LENGTH* i, AddressTool.HASH_LENGTH);
         }
         this.addresses = addresses;
