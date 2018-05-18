@@ -55,4 +55,9 @@ public class CancelDepositTransaction extends Transaction<CancelDeposit> {
     public boolean isFreeOfFee() {
         return true;
     }
+
+    @Override
+    public boolean isUnlockTx() {
+        return true;
+    }
 }
