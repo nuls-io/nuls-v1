@@ -40,10 +40,12 @@ import io.nuls.account.ledger.storage.service.AccountLedgerStorageService;
 
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.core.tools.crypto.Base58;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -65,10 +67,7 @@ import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Facjas
@@ -140,7 +139,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (result.isFailed()) {
             return result;
         }
-        result = storageService.deleteLocalTx(tx);
+        result = deleteLocalTx(tx);
 
         return result;
     }
@@ -186,7 +185,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public CoinDataResult getCoinData(byte[] address, Na amount, int size) throws NulsException {
         CoinDataResult coinDataResult = new CoinDataResult();
-        List<Coin> coinList = storageService.getCoinBytes(address);
+        List<Coin> coinList = storageService.getCoinList(address);
         if (coinList.isEmpty()) {
             coinDataResult.setEnough(false);
             return coinDataResult;
@@ -342,14 +341,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     tos.get(i).setLockTime(0);
                     try {
                         byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                        storageService.saveOutPut(outKey, tos.get(i).serialize());
+                        storageService.saveUTXO(outKey, tos.get(i).serialize());
                     } catch (IOException e) {
                         throw new NulsRuntimeException(e);
                     }
                     //todo , think about weather to add a transaction history
-                    //addresses.clear();
-                    //addresses.add(tos.get(i).getOwner());
-                    //Result result = storageService.saveLocalTxInfo(txInfoPo, addresses);
                 }
             }
         }
@@ -380,7 +376,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 if(tos.get(i).getLockTime() == -1) {
                     try {
                         byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                        storageService.saveOutPut(outKey, tos.get(i).serialize());
+                        storageService.saveUTXO(outKey, tos.get(i).serialize());
                     } catch (IOException e) {
                         throw new NulsRuntimeException(e);
                     }
@@ -454,7 +450,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (result.isFailed()) {
             return result;
         }
-        result = storageService.saveLocalTx(tx);
+        result = saveLocalTx(tx);
         if (result.isFailed()) {
             storageService.deleteLocalTxInfo(txInfoPo);
         }
@@ -484,7 +480,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (result.isFailed()) {
             return result;
         }
-        result = storageService.saveLocalTx(tx);
+        result = saveLocalTx(tx);
         if (result.isFailed()) {
             storageService.deleteLocalTxInfo(txInfoPo);
         }
@@ -574,4 +570,60 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         reloadAccount();
     }
 
+    public Result saveLocalTx(Transaction tx) {
+        if (tx == null) {
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+        }
+        byte[] txHashBytes = new byte[0];
+        try {
+            txHashBytes = tx.getHash().serialize();
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+        }
+        CoinData coinData = tx.getCoinData();
+
+        if (coinData != null) {
+            // delete - from
+            List<Coin> froms = coinData.getFrom();
+            Set<byte[]> fromsSet = new HashSet<>();
+            for (Coin from : froms) {
+                byte[] fromSource = from.getOwner();
+                byte[] utxoFromSource = new byte[tx.getHash().size()];
+                byte[] fromIndex = new byte[fromSource.length - utxoFromSource.length];
+                System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
+                System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
+                Transaction sourceTx = null;
+                try {
+                    sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
+                } catch (Exception e) {
+                    throw new NulsRuntimeException(e);
+                }
+                if (sourceTx == null) {
+                    return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
+                }
+                byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
+                fromsSet.add(org.spongycastle.util.Arrays.concatenate(address, from.getOwner()));
+            }
+            storageService.batchDeleteUTXO(fromsSet);
+            // save utxo - to
+            List<Coin> tos = coinData.getTo();
+            byte[] indexBytes;
+            Map<byte[],byte[]> toMap = new HashMap<>();
+            for (int i = 0, length = tos.size(); i < length; i++) {
+                try {
+                    byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                    toMap.put(outKey,tos.get(i).serialize());
+                } catch (IOException e) {
+                    throw new NulsRuntimeException(e);
+                }
+            }
+            storageService.batchSaveUTXO(toMap);
+        }
+        return Result.getSuccess();
+    }
+
+    public Result deleteLocalTx(Transaction tx) {
+        //todo
+        return Result.getSuccess();
+    }
 }

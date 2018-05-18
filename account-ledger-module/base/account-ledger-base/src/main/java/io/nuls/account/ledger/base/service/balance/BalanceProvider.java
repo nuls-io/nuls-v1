@@ -9,10 +9,7 @@ import io.nuls.account.ledger.storage.service.AccountLedgerStorageService;
 import io.nuls.account.service.AccountService;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Coin;
@@ -129,7 +126,7 @@ public class BalanceProvider extends Thread {
         if (!accountLedgerService.isLocalAccount(address)) {
             return null;
         }
-        List<Coin> coinList = storageService.getCoinBytes(address);
+        List<Coin> coinList = storageService.getCoinList(address);
         Collections.sort(coinList, CoinComparator.getInstance());
 
         Na usable = Na.ZERO;
