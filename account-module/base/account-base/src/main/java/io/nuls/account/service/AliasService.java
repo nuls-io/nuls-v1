@@ -22,6 +22,7 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.protocol.message.TransactionMessage;
+import io.nuls.protocol.service.TransactionService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +53,9 @@ public class AliasService {
 
     @Autowired
     private MessageBusService messageBusService;
+
+    @Autowired
+    private TransactionService transactionService;
 
     /**
      * 设置别名
@@ -117,10 +121,17 @@ public class AliasService {
             NulsSignData nulsSignData = accountService.signData(tx.serializeForHash(), account, password);
             P2PKHScriptSig scriptSig = new P2PKHScriptSig(nulsSignData, account.getPubKey());
             tx.setScriptSig(scriptSig.serialize());
-            TransactionMessage message = new TransactionMessage();
-            message.setMsgBody(tx);
-            messageBusService.receiveMessage(message, null);
-            return Result.getSuccess();
+            tx.verifyWithException();
+            Result saveResult = accountLedgerService.saveUnconfirmedTransaction(tx);
+            if (saveResult.isFailed()) {
+                return saveResult;
+            }
+            Result sendResult = this.transactionService.broadcastTx(tx);
+            if (sendResult.isFailed()) {
+                return sendResult;
+            }
+            String hash = tx.getHash().getDigestHex();
+            return Result.getSuccess().setData(hash);
         } catch (Exception e) {
             Log.error(e);
             return new Result(false, e.getMessage());
