@@ -46,6 +46,7 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -54,6 +55,7 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
+import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.constant.LedgerErrorCode;
 
 import io.nuls.ledger.service.LedgerService;
@@ -316,14 +318,76 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result unlockCoinData(Transaction tx) {
-        // todo auto-generated method stub
-        return null;
+        List<byte[]> addresses = getRelatedAddresses(tx);
+        if (addresses == null || addresses.size() == 0) {
+            return Result.getFailed().setData(new Integer(0));
+        }
+        byte status = TransactionInfo.CONFIRMED;
+        TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
+        txInfoPo.setStatus(status);
+
+        byte[] txHashBytes = new byte[0];
+        try {
+            txHashBytes = tx.getHash().serialize();
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+        }
+        CoinData coinData = tx.getCoinData();
+        if (coinData != null) {
+            // unlock utxo - to
+            List<Coin> tos = coinData.getTo();
+            byte[] indexBytes;
+            for (int i = 0, length = tos.size(); i < length; i++) {
+                if(tos.get(i).getLockTime() == -1) {
+                    tos.get(i).setLockTime(0);
+                    try {
+                        byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                        storageService.saveOutPut(outKey, tos.get(i).serialize());
+                    } catch (IOException e) {
+                        throw new NulsRuntimeException(e);
+                    }
+                    //todo , think about weather to add a transaction history
+                    //addresses.clear();
+                    //addresses.add(tos.get(i).getOwner());
+                    //Result result = storageService.saveLocalTxInfo(txInfoPo, addresses);
+                }
+            }
+        }
+        return Result.getSuccess();
     }
 
     @Override
     public Result rollbackUnlockTxCoinData(Transaction tx) {
-        // todo auto-generated method stub
-        return null;
+        List<byte[]> addresses = getRelatedAddresses(tx);
+        if (addresses == null || addresses.size() == 0) {
+            return Result.getFailed().setData(new Integer(0));
+        }
+        byte status = TransactionInfo.CONFIRMED;
+        TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
+        txInfoPo.setStatus(status);
+
+        byte[] txHashBytes = new byte[0];
+        try {
+            txHashBytes = tx.getHash().serialize();
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+        }
+        CoinData coinData = tx.getCoinData();
+        if (coinData != null) {
+            // lock utxo - to
+            List<Coin> tos = coinData.getTo();
+            for (int i = 0, length = tos.size(); i < length; i++) {
+                if(tos.get(i).getLockTime() == -1) {
+                    try {
+                        byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                        storageService.saveOutPut(outKey, tos.get(i).serialize());
+                    } catch (IOException e) {
+                        throw new NulsRuntimeException(e);
+                    }
+                }
+            }
+        }
+        return Result.getSuccess();
     }
 
     @Override
