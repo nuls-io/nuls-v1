@@ -1,6 +1,7 @@
 package io.nuls.account.rpc.model.form;
 
 import io.nuls.account.rpc.model.AccountKeyStoreDto;
+import io.nuls.core.tools.str.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -30,6 +31,6 @@ public class AccountKeyStoreImportForm {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = StringUtils.formatStringPara(password);
     }
 }

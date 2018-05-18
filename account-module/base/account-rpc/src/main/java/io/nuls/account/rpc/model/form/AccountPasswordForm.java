@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @author: Charlie
  * @date: 2018/4/18
  */
-@ApiModel(value = "密码单数据")
+@ApiModel(value = "密码表单数据")
 public class AccountPasswordForm {
 
     @ApiModelProperty(name = "password", value = "密码", required = true)

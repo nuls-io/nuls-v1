@@ -114,6 +114,7 @@ public class AccountServiceImpl implements AccountService {
         if (account == null) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
+        //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
         if (account.isEncrypted() && account.isLocked()) {
             if (!StringUtils.validPassword(password)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
@@ -135,11 +136,6 @@ public class AccountServiceImpl implements AccountService {
     public Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore, String password) {
         if (null == keyStore || null == keyStore.getAddress()) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
-        }
-        //maybe account has been imported
-        Account acc = this.getAccountByAddress(keyStore.getAddress());
-        if (null != acc) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST);
         }
         Account account;
         byte[] priKey = null;
@@ -191,10 +187,6 @@ public class AccountServiceImpl implements AccountService {
         } catch (NulsException e) {
             return Result.getFailed(AccountErrorCode.FAILED);
         }
-        Account accountDB = getAccountByAddress(account.getAddress().toString());
-        if (null != accountDB) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST);
-        }
         if (StringUtils.validPassword(password)) {
             try {
                 account.encrypt(password);
@@ -225,7 +217,8 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         AccountKeyStore accountKeyStore = new AccountKeyStore();
-        if (null != password) {
+        //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
+        if (account.isEncrypted() && account.isLocked()) {
             if (!StringUtils.validPassword(password)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
@@ -240,10 +233,6 @@ public class AccountServiceImpl implements AccountService {
             EncryptedData encryptedData = new EncryptedData(account.getEncryptedPriKey());
             accountKeyStore.setEncryptedPrivateKey(Hex.encode(encryptedData.getEncryptedBytes()));
         } else {
-            if (account.isEncrypted()) {
-                //账户已经加密,但是传入密码为空.The account is encrypted, but the pass password is empty.
-                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-            }
             accountKeyStore.setPrikey(account.getPriKey());
         }
         accountKeyStore.setAddress(account.getAddress().toString());
@@ -383,6 +372,9 @@ public class AccountServiceImpl implements AccountService {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
+        if (!account.isEncrypted()) {
+            return Result.getFailed(AccountErrorCode.FAILED, "No password has been set for this account");
+        }
         try {
             if (!account.unlock(password)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
@@ -410,9 +402,6 @@ public class AccountServiceImpl implements AccountService {
         }
         if (account == null) {
             throw new NulsException(AccountErrorCode.ACCOUNT_NOT_EXIST);
-        }
-        if (null == account.getPriKey() || account.getPriKey().length == 0) {
-            throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
         }
         return this.signDigest(NulsDigestData.calcDigestData(data).getDigestBytes(), account, password);
     }
@@ -447,7 +436,8 @@ public class AccountServiceImpl implements AccountService {
         if (null == digest || digest.length == 0) {
             throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
         }
-        if (account.isEncrypted()) {
+        //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
+        if (account.isEncrypted() && account.isLocked()) {
             AssertUtil.canNotEmpty(password, "password can not be empty");
             return this.signDigest(digest, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
         } else {
