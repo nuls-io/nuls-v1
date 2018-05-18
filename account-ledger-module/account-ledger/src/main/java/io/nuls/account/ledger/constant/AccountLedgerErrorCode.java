@@ -49,4 +49,5 @@ public interface AccountLedgerErrorCode {
     ErrorCode IO_ERROR = ErrorCode.init("AL013", 50013);
     ErrorCode SOURCE_TX_NOT_EXSITS = ErrorCode.init("AL014", 50014);
     ErrorCode UNKNOW_ERROR = ErrorCode.init("AL015", 50015);
+    ErrorCode UTXO_STATUS_CHANGE = ErrorCode.init("AL016", 50016);
 }
