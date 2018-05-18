@@ -333,11 +333,11 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The newPassword is required");
         }
         if (!StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"password Length between 8 and 20, the combination of characters and numbers");
 
         }
         if (!StringUtils.validPassword(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"newPassword Length between 8 and 20, the combination of characters and numbers");
         }
         return this.accountBaseService.changePassword(address, password, newPassword);
     }
