@@ -149,41 +149,48 @@ public class BlockProcess {
             Lockers.CHAIN_LOCK.unlock();
         }
         if (verifyAndAddBlockResult) {
-            boolean success = false;
+            boolean success = true;
             try {
-                // Verify that the block transaction is valid, save the block if the verification passes, and discard the block if it fails
-                // 验证区块交易是否合法，如果验证通过则保存区块，如果失败则丢弃该块
-                block.verifyWithException();
-                List<Transaction> verifiedList = new ArrayList<>();
-                for (Transaction tx : block.getTxs()) {
-                    if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
-                        continue;
+                do {
+                    // Verify that the block transaction is valid, save the block if the verification passes, and discard the block if it fails
+                    // 验证区块交易是否合法，如果验证通过则保存区块，如果失败则丢弃该块
+                    block.verifyWithException();
+                    List<Transaction> verifiedList = new ArrayList<>();
+                    for (Transaction tx : block.getTxs()) {
+                        if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
+                            continue;
+                        }
+                        ValidateResult result = ledgerService.verifyCoinData(tx.getCoinData(), verifiedList);
+                        if (result.isSuccess()) {
+                            tx.verifyWithException();
+                            verifiedList.add(tx);
+                        } else {
+                            success = false;
+                            Log.info(result.getMessage());
+                            break;
+                        }
                     }
-                    ValidateResult result = ledgerService.verifyCoinData(tx.getCoinData(), verifiedList);
-                    if (result.isSuccess()) {
-                        tx.verifyWithException();
-                        verifiedList.add(tx);
-                    } else {
-
-                        throw new NulsRuntimeException(result.getErrorCode(), result.getMessage());
+                    if (!success) {
+                        break;
                     }
-                }
-                ValidateResult validateResult1 = tansactionService.conflictDetect(block.getTxs());
-                if (validateResult1.isFailed()) {
-                    throw new NulsRuntimeException(validateResult1.getErrorCode(), validateResult1.getMessage());
-                }
-                // save block
-                Result result = blockService.saveBlock(block);
-                success = result.isSuccess();
-
-                if (!success) {
-                    Log.warn("save block fail : reason : " + result.getMessage() + ", block height : " + block.getHeader().getHeight() + ", hash : " + block.getHeader().getHash());
-                }
+                    ValidateResult validateResult1 = tansactionService.conflictDetect(block.getTxs());
+                    if (validateResult1.isFailed()) {
+                        success = false;
+                        Log.info(validateResult1.getMessage());
+                        break;
+                    }
+                    // save block
+                    Result result = blockService.saveBlock(block);
+                    success = result.isSuccess();
+                    if (!success) {
+                        Log.warn("save block fail : reason : " + result.getMessage() + ", block height : " + block.getHeader().getHeight() + ", hash : " + block.getHeader().getHash());
+                    }
+                } while (false);
             } catch (Exception e) {
                 Log.error("save block error : " + e.getMessage(), e);
             }
             if (success) {
-                //check .TODO need remove,代码稳定后删除
+                //check .TODO may need remove,代码稳定后判断是否需要删除下面代码
                 try {
                     Block tempBlock = blockService.getBlock(block.getHeader().getHash()).getData();
                     if (tempBlock.getHeader().getTxCount() != tempBlock.getTxs().size()) {

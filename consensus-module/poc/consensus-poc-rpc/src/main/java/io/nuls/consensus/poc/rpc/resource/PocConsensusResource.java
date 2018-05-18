@@ -379,9 +379,9 @@ public class PocConsensusResource {
             return Result.getFailed(KernelErrorCode.DATA_ERROR);
         }
         coinData.setFrom(fromList);
-        tx.setCoinData(coinData);
         Na fee = TransactionFeeCalculator.getFee(tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
+        tx.setCoinData(coinData);
         Result result1 = this.txProcessing(tx, null, account, form.getPassword());
         if (result1.isFailed()) {
             return result1;

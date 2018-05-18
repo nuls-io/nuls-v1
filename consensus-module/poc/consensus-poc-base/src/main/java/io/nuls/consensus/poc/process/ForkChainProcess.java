@@ -410,14 +410,20 @@ public class ForkChainProcess {
                     tx.verifyWithException();
                     verifiedList.add(tx);
                 } else {
-                    throw new NulsRuntimeException(result.getErrorCode(), result.getMessage());
+                    Log.info(result.getMessage());
+                    changeSuccess = false;
+                    break;
                 }
+            }
+            if (!changeSuccess) {
+                break;
             }
             ValidateResult validateResult1 = tansactionService.conflictDetect(newBlock.getTxs());
             if (validateResult1.isFailed()) {
-                throw new NulsRuntimeException(validateResult1.getErrorCode(), validateResult1.getMessage());
+                Log.info(validateResult1.getMessage());
+                changeSuccess = false;
+                break;
             }
-
 
             try {
                 Result result = blockService.saveBlock(newBlock);
