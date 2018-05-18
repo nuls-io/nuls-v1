@@ -134,7 +134,7 @@ public class AccountBaseService {
             return accountStorageService.updateAccount(po);
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(AccountErrorCode.FAILED, "change password failed");
+            return Result.getFailed(AccountErrorCode.FAILED, "The oldPassword is wrong, change password failed");
         }
     }
 
