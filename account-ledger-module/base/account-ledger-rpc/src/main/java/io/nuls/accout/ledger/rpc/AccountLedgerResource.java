@@ -113,7 +113,7 @@ public class AccountLedgerResource {
     public Result<Balance> transfer(@ApiParam(name = "form", value = "转账", required = true) TransferForm form) {
         Na value = Na.valueOf(form.getAmount());
         return accountLedgerService.transfer(AddressTool.getAddress(form.getAddress()),
-                AddressTool.getAddress(form.getAddress()),
+                AddressTool.getAddress(form.getToAddress()),
                 value, form.getPassword(), form.getRemark());
     }
 
