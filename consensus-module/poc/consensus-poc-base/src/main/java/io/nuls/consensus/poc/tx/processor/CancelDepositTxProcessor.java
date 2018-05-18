@@ -1,6 +1,7 @@
 package io.nuls.consensus.poc.tx.processor;
 
 import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
@@ -109,7 +110,8 @@ public class CancelDepositTxProcessor implements TransactionProcessor<CancelDepo
                 if (agentHashSet.contains(transaction.getTxData().getJoinTxHash())) {
                     return ValidateResult.getFailedResult(this.getClass().getName(), "The agent is stopped!");
                 }
-                AgentPo agentPo = agentStorageService.get(transaction.getTxData().getJoinTxHash());
+                DepositPo depositPo = depositStorageService.get(transaction.getTxData().getJoinTxHash());
+                AgentPo agentPo = agentStorageService.get(depositPo.getAgentHash());
                 if (null == agentPo) {
                     return ValidateResult.getFailedResult(this.getClass().getName(), "Can't find the agent!");
                 }
