@@ -308,7 +308,7 @@ public class PocConsensusResource {
             return Result.getFailed(e.getMessage());
         }
         ValidateResult result1 = tx.verify();
-        if(result1.isFailed()){
+        if (result1.isFailed()) {
             return result1;
         }
         Result saveResult = accountLedgerService.saveUnconfirmedTransaction(tx);

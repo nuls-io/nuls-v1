@@ -51,6 +51,7 @@ public final class PoConvertUtil {
         agent.setRewardAddress(agentPo.getRewardAddress());
         agent.setTxHash(agentPo.getHash());
         agent.setTime(agentPo.getTime());
+        agent.setDelHeight(agentPo.getDelHeight());
         return agent;
     }
 

@@ -72,6 +72,7 @@ public class CancelDepositTxProcessor implements TransactionProcessor<CancelDepo
         if (null == po) {
             return Result.getFailed("Can not find the deposit!");
         }
+        tx.getTxData().setAddress(po.getAddress());
         if (po.getDelHeight() > 0) {
             return Result.getFailed("The deposit was canceled before!");
         }

@@ -41,7 +41,7 @@ import java.util.Set;
  */
 public class CancelDeposit extends TransactionLogicData {
 
-    private transient byte[] address;
+    private byte[] address;
 
     private NulsDigestData joinTxHash;
 

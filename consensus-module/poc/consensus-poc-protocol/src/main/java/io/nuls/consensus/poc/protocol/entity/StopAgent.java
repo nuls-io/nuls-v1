@@ -41,7 +41,7 @@ import java.util.Set;
  */
 public class StopAgent extends TransactionLogicData {
 
-    private transient byte[] address;
+    private byte[] address;
 
     private NulsDigestData createTxHash;
     /**

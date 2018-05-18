@@ -49,6 +49,7 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
 
@@ -401,10 +402,10 @@ public class ForkChainProcess {
             newBlock.verifyWithException();
             List<Transaction> verifiedList = new ArrayList<>();
             for (Transaction tx : newBlock.getTxs()) {
-                if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
+                if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
                     continue;
                 }
-                ValidateResult result = ledgerService.verifyCoinData(tx.getCoinData(), verifiedList);
+                ValidateResult result = ledgerService.verifyCoinData(tx, verifiedList);
                 if (result.isSuccess()) {
                     result = tx.verify();
                     if (result.isFailed()) {

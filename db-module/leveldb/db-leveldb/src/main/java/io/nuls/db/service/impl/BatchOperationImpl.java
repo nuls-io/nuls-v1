@@ -109,11 +109,11 @@ public class BatchOperationImpl implements BatchOperation {
         WriteBatch batch = null;
         try {
             batch = db.createWriteBatch();
-            for(Entry<byte[], byte[]> entry : batchPut) {
-                batch.put(entry.getKey(), entry.getValue());
-            }
             for(byte[] key : batchDelete) {
                 batch.delete(key);
+            }
+            for(Entry<byte[], byte[]> entry : batchPut) {
+                batch.put(entry.getKey(), entry.getValue());
             }
             db.write(batch);
         } catch (Exception e) {

@@ -62,23 +62,16 @@ public interface LedgerService {
     Transaction getTx(NulsDigestData hash);
 
     /**
-     * Verify that a coindata is valid, verify 2 points, the first verification owner is legal (whether it can be used), the second verification amount is correct (output can not be greater than the input)
-     *
-     * 验证一笔coindata是否合法，验证2点，第一验证拥有者是否合法（是否可动用），第二验证金额是否正确（输出不能大于输入）
-     * @param coinData
-     * @return
-     */
-    ValidateResult verifyCoinData(Transaction tx);
-
-    /**
+     * Verify that a coindata is valid, the first verification owner is legal (whether it can be used), the second verification amount is correct (output can not be greater than the input)
      * Check whether every from one in the coinData exists in txList database, or if not, is to continue to check the from of the existence of the deal and if it exists, represents a double spend, does not exist, is the orphan transactions, finally throw an exception
      *
+     * 验证一笔coindata是否合法，验证拥有者是否合法（是否可动用），验证金额是否正确（输出不能大于输入）
      * 检查coinData里的每一笔from是否存在于txList或者数据库中，如果不存在，则继续检查from中那笔交易是否存在，如果存在，则代表双花，不存在，则是孤儿交易，最后抛出异常
-     * @param coinData
+     * @param transaction
      * @param txList
      * @return
      */
-    ValidateResult verifyCoinData(CoinData coinData, List<Transaction> txList);
+    ValidateResult verifyCoinData(Transaction transaction, List<Transaction> txList);
 
     /**
      * Verify that the from is repeated, and if repeated, it represents a double spend and throws an exception.
