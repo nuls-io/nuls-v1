@@ -120,7 +120,7 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
             throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "the agent is not exist or had deleted!");
         }
         agentPo.setDelHeight(tx.getBlockHeight());
-
+        tx.getTxData().setAddress(agentPo.getAgentAddress());
 //       解锁所有委托到该节点的委托金额
 //        Unlocks the amount of trust that is delegated to the node.
         List<DepositPo> depositPoList = depositStorageService.getList();
@@ -132,7 +132,7 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
             if (po.getDelHeight() >= 0) {
                 continue;
             }
-            if(po.getBlockHeight()>tx.getBlockHeight()){
+            if (po.getBlockHeight() > tx.getBlockHeight()) {
                 continue;
             }
             if (!po.getAgentHash().equals(agentPo.getHash())) {

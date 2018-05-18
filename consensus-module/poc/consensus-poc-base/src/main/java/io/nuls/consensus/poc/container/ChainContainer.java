@@ -124,10 +124,11 @@ public class ChainContainer implements Cloneable {
 
                 Iterator<Deposit> it = depositList.iterator();
                 while (it.hasNext()) {
-                    Deposit depositTx = it.next();
-                    if (depositTx.getTxHash().equals(joinHash)) {
-                        if (depositTx.getDelHeight() == -1L) {
-                            depositTx.setDelHeight(height);
+                    Deposit deposit = it.next();
+                    cancelDepositTx.getTxData().setAddress(deposit.getAddress());
+                    if (deposit.getTxHash().equals(joinHash)) {
+                        if (deposit.getDelHeight() == -1L) {
+                            deposit.setDelHeight(height);
                         }
                         break;
                     }
@@ -149,6 +150,7 @@ public class ChainContainer implements Cloneable {
                 Iterator<Agent> ita = agentList.iterator();
                 while (ita.hasNext()) {
                     Agent agent = ita.next();
+                    stopAgentTx.getTxData().setAddress(agent.getAgentAddress());
                     if (agent.getTxHash().equals(agentHash)) {
                         if (agent.getDelHeight() == -1L) {
                             agent.setDelHeight(height);
