@@ -32,13 +32,10 @@ import io.nuls.core.tools.crypto.Hex;
 import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Result;
-import io.protostuff.Tag;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
-
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
@@ -48,10 +45,10 @@ import static org.junit.Assert.assertEquals;
  */
 public class AccountServiceTest {
 
-    protected AccountService accountService;
+    protected static AccountService accountService;
 
-    @Before
-    public void beforeTest() {
+    @BeforeClass
+    public static void beforeTest() {
         MicroKernelBootstrap kernel = MicroKernelBootstrap.getInstance();
         kernel.init();
         kernel.start();
@@ -59,9 +56,8 @@ public class AccountServiceTest {
         db.init();
         db.start();
         accountService = SpringLiteContext.getBean(AccountService.class);
+
     }
-
-
 
     @Test
     public void createAccount() {
@@ -119,10 +115,8 @@ public class AccountServiceTest {
         List<Account> accounts = this.accountService.createAccount(2, "nuls123456").getData();
         Result result0 = accountService.removeAccount(accounts.get(0).getAddress().toString(), "nuls123456");
         assertTrue(result0.isSuccess());
-        assertNull(result0.getMessage());
         Result result1 = accountService.removeAccount(accounts.get(1).getAddress().toString(), "123456");
-        assertFalse(result1.isFailed());
-        assertNotNull(result0.getMessage());
+        assertTrue(result1.isFailed());
     }
 
     @Test
@@ -139,8 +133,39 @@ public class AccountServiceTest {
         Account acc2 = accountService.getAccount(account.getAddress().getBase58Bytes()).getData();
         assertNotNull(acc2);
         assertEquals(acc2.getAddress().toString(), account.getAddress().toString());
+    }
+
+    @Test
+    public void  getAccountlist(){
+        this.accountService.createAccount(50, "nuls123456").getData();
+        assertTrue(this.accountService.getAccountList().getData().size()==50);
+    }
+
+    @Test
+    public void exportAccountToKeyStore(){
+        assertNotNull("");
+    }
+
+    @Test
+    public void importAccount(){
 
     }
+
+    @Test
+    public void isEncypted(){
+
+    }
+
+    @Test
+    public void validPassword(){
+
+    }
+
+    @Test
+    public void signData(){
+
+    }
+
 
     public static void showAccount(Account account) {
         System.out.println("---- account info ----");

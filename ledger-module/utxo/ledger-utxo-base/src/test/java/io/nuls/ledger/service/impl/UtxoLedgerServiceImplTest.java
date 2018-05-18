@@ -177,6 +177,11 @@ public class UtxoLedgerServiceImplTest {
         Assert.assertNotNull(from3Coin0);
         Assert.assertNotNull(from3Coin1);
         Assert.assertNotNull(from3Coin2);
+        P2PKHScriptSig p2PKHScriptSig = P2PKHScriptSig.createFromBytes(tx3.getScriptSig());
+        byte[] fromAdress = AddressTool.getAddress(p2PKHScriptSig.getPublicKey());
+        tx3.getCoinData().getFrom().get(0).setOwner(fromAdress);
+        tx3.getCoinData().getFrom().get(1).setOwner(fromAdress);
+        tx3.getCoinData().getFrom().get(2).setOwner(fromAdress);
         Assert.assertEquals(new Slice(tx3.getCoinData().getFrom().get(0).serialize()), new Slice(from3Coin0));
         Assert.assertEquals(new Slice(tx3.getCoinData().getFrom().get(1).serialize()), new Slice(from3Coin1));
         Assert.assertEquals(new Slice(tx3.getCoinData().getFrom().get(2).serialize()), new Slice(from3Coin2));
@@ -298,10 +303,7 @@ public class UtxoLedgerServiceImplTest {
         Assert.assertEquals(LedgerErrorCode.UTXO_STATUS_CHANGE.getCode(), result.getErrorCode().getCode());
 
 
-        boolean flag = true;
-        if(flag) {
-            return;
-        }
+
         // 是否输出大于输入校验
         from3.getFrom().remove(from3.getFrom().size() - 1);
         ECKey ecKey2 = new ECKey();
@@ -310,50 +312,41 @@ public class UtxoLedgerServiceImplTest {
         System.out.println(result.getErrorCode().getCode());
         Assert.assertEquals(LedgerErrorCode.INVALID_AMOUNT.getCode(), result.getErrorCode().getCode());
 
+
         // 验证utxo是否属于交易发出者
         from3.getTo().remove(from3.getTo().size() - 1);
         // save 一笔 UTXO
-        byte[] owner = new byte[23];
-        owner[0] = (byte) 203;
-        owner[1] = (byte) 204;
-        owner[22] = (byte) 205;
-        System.arraycopy(user, 0, owner, 2, 20);
+        byte[] owner = AddressTool.getAddress(p2PKHScriptSig.getPublicKey());
         owner[2] = (byte) (owner[2] - 1);
-        from3.getFrom().get(0).setOwner(owner);
-        utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(0).getOwner(), from3.getFrom().get(0));
+        from3.getFrom().add(new Coin(Arrays.concatenate(preTxHashBytes, new VarInt(3).encode()), Na.parseNuls(10001), 0));
+        utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(3).getOwner(), new Coin(owner, Na.parseNuls(10001), 0));
         result = ledgerService.verifyCoinData(tx3, allList);
         System.out.println(result.getErrorCode().getCode());
         Assert.assertEquals(LedgerErrorCode.INVALID_INPUT.getCode(), result.getErrorCode().getCode());
-        utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(0).getOwner());
-        from3.getFrom().get(0).setOwner(owner0);
+        utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(3).getOwner());
 
         // 是否可花费，查数据库中或者txList中是否存在UTXO，不在toList又不在数据库中，但存在这笔交易，测试期望是失败 - 双花交易
-        from3.getTo().remove(from3.getTo().size() - 1);
-        Coin utxo = utxoLedgerUtxoStorageService.getUtxo(from3.getFrom().get(0).getOwner());
-        Coin utxo1 = utxoLedgerUtxoStorageService.getUtxo(from3.getFrom().get(1).getOwner());
-        Coin utxo2 = utxoLedgerUtxoStorageService.getUtxo(from3.getFrom().get(2).getOwner());
+        from3.getFrom().remove(from3.getFrom().size() - 1);
         ledgerService.saveTx(tx3);
-        // 数据库中删除保存的三笔UTXO
-        //utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(0).getOwner());
-        //utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(1).getOwner());
-        //utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(2).getOwner());
         result = ledgerService.verifyCoinData(tx3, allList);
         System.out.println(result.getErrorCode().getCode());
         Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), result.getErrorCode().getCode());
-        utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(0).getOwner(), utxo);
-        utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(1).getOwner(), utxo1);
-        utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(2).getOwner(), utxo2);
+        ledgerService.rollbackTx(tx3);
+
+
 
         // 是否可花费，查数据库中或者txList中是否存在UTXO，不在toList又不在数据库中，不存在这笔交易，测试期望是失败 - 孤儿交易
         // 数据库中删除保存的三笔UTXO
-        ledgerService.rollbackTx(tx3);
-        utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(0).getOwner());
-        utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(1).getOwner());
-        utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(2).getOwner());
+        from3.getFrom().add(new Coin(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(3).encode()), Na.parseNuls(10001), 0));
         result = ledgerService.verifyCoinData(tx3, allList);
         System.out.println(result.getErrorCode().getCode());
         Assert.assertEquals(LedgerErrorCode.ORPHAN_TX.getCode(), result.getErrorCode().getCode());
+        from3.getFrom().remove(from3.getFrom().size() - 1);
 
+        boolean flag = true;
+        if(flag) {
+            return;
+        }
     }
 
     @Test
@@ -383,33 +376,42 @@ public class UtxoLedgerServiceImplTest {
 
         // 有一条LockTime为-1的，测试期望是成功
         Transaction tx3 = allList.get(3);
-        Coin coin = allList.get(3).getCoinData().getFrom().get(0);
+        Coin coin = allList.get(3).getCoinData().getTo().get(0);
         coin.setOwner("abcd3".getBytes());
         coin.setNa(Na.parseNuls(10001));
         coin.setLockTime(-1);
         Result result = ledgerService.unlockTxCoinData(allList.get(3));
         //System.out.println(result);
         Assert.assertTrue(result.isSuccess());
-        byte[] to3Coin0 = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
+        Coin to3Coin0 = utxoLedgerUtxoStorageService.getUtxo(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
+        Assert.assertEquals(0, to3Coin0.getLockTime());
+        to3Coin0.setLockTime(-1);
         Assert.assertNotNull(to3Coin0);
-        Assert.assertEquals(new Slice(tx3.getCoinData().getTo().get(0).serialize()), new Slice(to3Coin0));
-        byte[] from3Coin0 = utxoLedgerUtxoStorageService.getUtxoBytes(tx3.getCoinData().getFrom().get(0).getOwner());
-        Assert.assertNull(from3Coin0);
+        Assert.assertEquals(new Slice(tx3.getCoinData().getTo().get(0).serialize()), new Slice(to3Coin0.serialize()));
+
+        // 回滚
+        result = ledgerService.rollbackUnlockTxCoinData(allList.get(3));
+        Assert.assertTrue(result.isSuccess());
+        to3Coin0 = utxoLedgerUtxoStorageService.getUtxo(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
+        Assert.assertNotNull(to3Coin0);
+        Assert.assertEquals(-1, to3Coin0.getLockTime());
+        Assert.assertEquals(new Slice(tx3.getCoinData().getTo().get(0).serialize()), new Slice(to3Coin0.serialize()));
+
 
 
         // 没有LockTime为-1的，测试期望是失败
-        coin = allList.get(3).getCoinData().getFrom().get(0);
+        coin = allList.get(3).getCoinData().getTo().get(0);
         coin.setLockTime(1000);
         result = ledgerService.unlockTxCoinData(allList.get(3));
         Assert.assertEquals(LedgerErrorCode.UTXO_STATUS_CHANGE.getCode(), result.getErrorCode().getCode());
 
-        // LockTime既有-1的，又有不是-1的，测试期望是失败
-        coin = allList.get(3).getCoinData().getFrom().get(0);
+        // LockTime既有-1的，又有不是-1的，测试期望是成功
+        coin = allList.get(3).getCoinData().getTo().get(0);
         coin.setLockTime(-1);
         CoinData coinData = allList.get(3).getCoinData();
-        coinData.getFrom().add(new Coin("abcd3.1".getBytes(), Na.parseNuls(10001), 0));
+        coinData.getTo().add(new Coin("abcd3.1".getBytes(), Na.parseNuls(10001), 0));
         result = ledgerService.unlockTxCoinData(allList.get(3));
-        Assert.assertEquals(LedgerErrorCode.UTXO_STATUS_CHANGE.getCode(), result.getErrorCode().getCode());
+        Assert.assertTrue(result.isSuccess());
     }
 
     @AfterClass
