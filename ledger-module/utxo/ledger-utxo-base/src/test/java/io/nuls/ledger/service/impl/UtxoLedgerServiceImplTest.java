@@ -45,7 +45,10 @@ import io.nuls.ledger.storage.service.UtxoLedgerUtxoStorageService;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import org.iq80.leveldb.util.Slice;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
@@ -180,55 +183,127 @@ public class UtxoLedgerServiceImplTest {
     }
 
     @Test
-    public void verifyCoinDataItself() throws IOException {
+    public void verifyCoinDataItself() throws IOException, NulsException {
         recoveryTx3Data();
 
-        CoinData from3 = allList.get(3).getCoinData();
-        from3.getFrom().get(0).setOwner("abcd3".getBytes());
-        from3.getFrom().add(new Coin("abcd3.1".getBytes(), Na.parseNuls(10001), 0));
-        from3.getFrom().add(new Coin("abcd3.2".getBytes(), Na.parseNuls(10001), 0));
+        Transaction tx3 = allList.get(3);
+        CoinData from3 = tx3.getCoinData();
+        P2PKHScriptSig p2PKHScriptSig = P2PKHScriptSig.createFromBytes(tx3.getScriptSig());
+        byte[] user = p2PKHScriptSig.getSignerHash160();
+        byte[] owner0 = new byte[23];
+        owner0[0] = (byte) 001;
+        owner0[1] = (byte) 002;
+        owner0[22] = (byte) 003;
+        System.arraycopy(user, 0, owner0, 2, 20);
+        byte[] owner1 = new byte[23];
+        owner1[0] = (byte) 101;
+        owner1[1] = (byte) 102;
+        owner1[22] = (byte) 103;
+        System.arraycopy(user, 0, owner1, 2, 20);
+        byte[] owner2 = new byte[23];
+        owner2[0] = (byte) 201;
+        owner2[1] = (byte) 202;
+        owner2[22] = (byte) 203;
+        System.arraycopy(user, 0, owner2, 2, 20);
+        byte[] owner3 = new byte[23];
+        owner3[0] = (byte) 301;
+        owner3[1] = (byte) 302;
+        owner3[22] = (byte) 303;
+        System.arraycopy(user, 0, owner3, 2, 20);
+
+        from3.getFrom().get(0).setOwner(owner0);
+        from3.getFrom().add(new Coin(owner1, Na.parseNuls(10001), 0));
+        from3.getFrom().add(new Coin(owner2, Na.parseNuls(10001), 0));
         // save 以上三笔 UTXO
         utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(0).getOwner(), from3.getFrom().get(0));
         utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(1).getOwner(), from3.getFrom().get(1));
         utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(2).getOwner(), from3.getFrom().get(2));
 
         // 普通校验
-        Result result = ledgerService.verifyCoinData(from3);
-        System.out.println(result.getErrorCode().getCode());
+        Result result = ledgerService.verifyCoinData(tx3);
         System.out.println(result);
         Assert.assertTrue(result.isSuccess());
 
         // 双花校验
-        from3.getFrom().add(new Coin("abcd3.2".getBytes(), Na.parseNuls(10001), 0));
-        result = ledgerService.verifyCoinData(from3);
+        from3.getFrom().add(new Coin(owner2, Na.parseNuls(10001), 0));
+        result = ledgerService.verifyCoinData(tx3);
         System.out.println(result.getErrorCode().getCode());
         Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), result.getErrorCode().getCode());
 
-        // 是否可用校验
+        // 非解锁交易，是否可用校验
         from3.getFrom().remove(from3.getFrom().size() - 1);
-        from3.getFrom().add(new Coin("abcd3.3".getBytes(), Na.parseNuls(10001), System.currentTimeMillis() + 1000 * 9));
-        result = ledgerService.verifyCoinData(from3);
+        from3.getFrom().add(new Coin(owner3, Na.parseNuls(10001), System.currentTimeMillis() + 1000 * 9));
+        utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(3).getOwner(), from3.getFrom().get(3));
+        result = ledgerService.verifyCoinData(tx3);
         System.out.println(result.getErrorCode().getCode());
         Assert.assertEquals(LedgerErrorCode.UTXO_UNUSABLE.getCode(), result.getErrorCode().getCode());
+        utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(3).getOwner());
+
+        // 解锁交易，状态校验，期望成功
+        CancelDepositTransaction txCancel = new CancelDepositTransaction();
+        ECKey ecKey1 = new ECKey();
+        this.setCommonFields(txCancel);
+        CancelDeposit txCancelData = new CancelDeposit();
+        txCancelData.setAddress(AddressTool.getAddress(ecKey1.getPubKey()));
+        txCancelData.setJoinTxHash(NulsDigestData.calcDigestData("1234567890".getBytes()));
+        this.signTransaction(txCancel, ecKey1);
+        P2PKHScriptSig p2PKHScriptSigCancel = P2PKHScriptSig.createFromBytes(txCancel.getScriptSig());
+        byte[] userCancel = p2PKHScriptSigCancel.getSignerHash160();
+        byte[] ownerCancel = new byte[23];
+        ownerCancel[0] = (byte) 001;
+        ownerCancel[1] = (byte) 002;
+        ownerCancel[22] = (byte) 003;
+        System.arraycopy(userCancel, 0, ownerCancel, 2, 20);
+        CoinData fromCancel = txCancel.getCoinData();
+        fromCancel = new CoinData();
+        txCancel.setCoinData(fromCancel);
+        fromCancel.getFrom().add(new Coin(ownerCancel, Na.parseNuls(10001), -1));
+        fromCancel.getTo().add(new Coin(ownerCancel, Na.parseNuls(10000), 0));
+        utxoLedgerUtxoStorageService.saveUtxo(fromCancel.getFrom().get(0).getOwner(), fromCancel.getFrom().get(0));
+        result = ledgerService.verifyCoinData(txCancel);
+        System.out.println(result.getErrorCode().getCode());
+        Assert.assertTrue(result.isSuccess());
+
+        // 解锁交易，状态校验，期望失败
+        fromCancel.getFrom().get(0).setLockTime(0);
+        result = ledgerService.verifyCoinData(txCancel);
+        System.out.println(result.getErrorCode().getCode());
+        Assert.assertEquals(LedgerErrorCode.UTXO_STATUS_CHANGE.getCode(), result.getErrorCode().getCode());
 
 
         // 是否输出大于输入校验
         from3.getFrom().remove(from3.getFrom().size() - 1);
-        from3.getTo().add(new Coin("abcd3.3".getBytes(), Na.parseNuls(90001), 0));
-        result = ledgerService.verifyCoinData(from3);
+        from3.getTo().add(new Coin(owner3, Na.parseNuls(90001), 0));
+        result = ledgerService.verifyCoinData(tx3);
         System.out.println(result.getErrorCode().getCode());
         Assert.assertEquals(LedgerErrorCode.INVALID_AMOUNT.getCode(), result.getErrorCode().getCode());
 
-        // 是否可花费
+        // 验证utxo是否属于交易发出者
+        from3.getTo().remove(from3.getTo().size() - 1);
+        // save 一笔 UTXO
+        byte[] owner = new byte[23];
+        owner[0] = (byte) 203;
+        owner[1] = (byte) 204;
+        owner[22] = (byte) 205;
+        System.arraycopy(user, 0, owner, 2, 20);
+        owner[2] = (byte) (owner[2] - 1);
+        from3.getFrom().get(0).setOwner(owner);
+        utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(0).getOwner(), from3.getFrom().get(0));
+        result = ledgerService.verifyCoinData(tx3);
+        System.out.println(result.getErrorCode().getCode());
+        Assert.assertEquals(LedgerErrorCode.INVALID_INPUT.getCode(), result.getErrorCode().getCode());
+        utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(0).getOwner());
+        from3.getFrom().get(0).setOwner(owner0);
+
+        // 是否可花费，查数据库中是否存在UTXO，期望失败
         from3.getTo().remove(from3.getTo().size() - 1);
         // 数据库中删除保存的三笔UTXO
         utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(0).getOwner());
         utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(1).getOwner());
         utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(2).getOwner());
-        result = ledgerService.verifyCoinData(from3);
+        result = ledgerService.verifyCoinData(tx3);
         System.out.println(result.getErrorCode().getCode());
         Assert.assertEquals(LedgerErrorCode.UTXO_NOT_FOUND.getCode(), result.getErrorCode().getCode());
-
 
     }
 
