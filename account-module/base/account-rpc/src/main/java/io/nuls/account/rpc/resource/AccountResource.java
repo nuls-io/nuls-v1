@@ -16,7 +16,6 @@ import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.core.tools.crypto.ECKey;
-import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
@@ -73,7 +72,7 @@ public class AccountResource {
         if(result.isFailed()){
             return result;
         }
-        List<Account> listAccount = accountService.createAccount(count, password).getData();
+        List<Account> listAccount = (List<Account>)result.getData();
         List<String> list = new ArrayList<>();
         for (Account account : listAccount) {
             list.add(account.getAddress().toString());
@@ -251,7 +250,7 @@ public class AccountResource {
     }
 
     @POST
-    @Path("/unlock{address}")
+    @Path("/unlock/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "解锁账户", notes = "")
     public Result unlock(@ApiParam(name = "address", value = "账户地址", required = true)
@@ -294,7 +293,7 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result updatePassword(@ApiParam(name = "address", value = "账户地址", required = true)
+    public Result setPassword(@ApiParam(name = "address", value = "账户地址", required = true)
                                      @PathParam("address") String address,
                                  @ApiParam(name = "form", value = "设置钱包密码表单数据", required = true)
                                          AccountPasswordForm form) {
@@ -312,13 +311,13 @@ public class AccountResource {
     }
 
     @PUT
-    @Path("/password{address}")
+    @Path("/password/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "修改账户密码")
+    @ApiOperation(value = "根据原密码修改账户密码")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result setPassword(@ApiParam(name = "address", value = "账户地址", required = true)
+    public Result updatePassword(@ApiParam(name = "address", value = "账户地址", required = true)
                                   @PathParam("address") String address,
                               @ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
                                       AccountUpdatePasswordForm form) {
@@ -341,6 +340,34 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
         }
         return this.accountBaseService.changePassword(address, password, newPassword);
+    }
+
+    @PUT
+    @Path("/password/prikey/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "根据私钥修改账户密码")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Result.class)
+    })
+    public Result updatePasswordByPriKey(@ApiParam(name = "address", value = "账户地址", required = true)
+                              @PathParam("address") String address,
+                              @ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
+                                      AccountPriKeyPasswordForm form) {
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        String prikey = form.getPriKey();
+        if (!ECKey.isValidPrivteHex(prikey)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The prikey is wrong");
+        }
+        String newPassword = form.getPassword();
+        if(StringUtils.isBlank(newPassword)){
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The newPassword is required");
+        }
+        if (!StringUtils.validPassword(newPassword)) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
+        }
+        return this.accountBaseService.changePasswordByPrikey(address, prikey, newPassword);
     }
 
     @POST
@@ -402,7 +429,7 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result<String> importAccountByPriKey(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
-                                                        AccountImportPrikeyForm form) {
+                                                        AccountPriKeyPasswordForm form) {
         String priKey = form.getPriKey();
         if (!ECKey.isValidPrivteHex(priKey)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);

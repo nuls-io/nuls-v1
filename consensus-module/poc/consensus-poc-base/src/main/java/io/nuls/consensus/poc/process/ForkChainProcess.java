@@ -407,8 +407,14 @@ public class ForkChainProcess {
                 }
                 ValidateResult result = ledgerService.verifyCoinData(tx.getCoinData(), verifiedList);
                 if (result.isSuccess()) {
-                    tx.verifyWithException();
-                    verifiedList.add(tx);
+                    result = tx.verify();
+                    if(result.isFailed()){
+                        Log.info(result.getMessage());
+                        changeSuccess = false;
+                        break;
+                    }else{
+                        verifiedList.add(tx);
+                    }
                 } else {
                     Log.info(result.getMessage());
                     changeSuccess = false;

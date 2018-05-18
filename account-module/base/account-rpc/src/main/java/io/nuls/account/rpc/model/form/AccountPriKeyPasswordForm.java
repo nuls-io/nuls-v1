@@ -1,5 +1,6 @@
 package io.nuls.account.rpc.model.form;
 
+import io.nuls.core.tools.str.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -7,8 +8,8 @@ import io.swagger.annotations.ApiModelProperty;
  * @author: Charlie
  * @date: 2018/4/19
  */
-@ApiModel(value = "导入账户表单数据")
-public class AccountImportPrikeyForm {
+@ApiModel(value = "私钥密码表单数据")
+public class AccountPriKeyPasswordForm {
 
     @ApiModelProperty(name = "priKey", value = "私钥", required = true)
     private String priKey;
@@ -29,7 +30,7 @@ public class AccountImportPrikeyForm {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = StringUtils.formatStringPara(password);
     }
 
 }

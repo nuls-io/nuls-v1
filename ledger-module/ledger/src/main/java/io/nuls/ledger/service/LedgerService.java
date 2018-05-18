@@ -68,7 +68,7 @@ public interface LedgerService {
      * @param coinData
      * @return
      */
-    ValidateResult verifyCoinData(CoinData coinData);
+    ValidateResult verifyCoinData(Transaction tx);
 
     /**
      * Check whether every from one in the coinData exists in txList database, or if not, is to continue to check the from of the existence of the deal and if it exists, represents a double spend, does not exist, is the orphan transactions, finally throw an exception

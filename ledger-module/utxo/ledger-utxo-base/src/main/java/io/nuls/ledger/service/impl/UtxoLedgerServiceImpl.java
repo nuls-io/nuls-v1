@@ -30,6 +30,7 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -193,27 +194,63 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public ValidateResult verifyCoinData(CoinData coinData) {
-        if (coinData == null) {
+    public ValidateResult verifyCoinData(Transaction tx) {
+        if (tx == null || tx.getCoinData() == null) {
             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.NULL_PARAMETER);
         }
+        CoinData coinData = tx.getCoinData();
+
         List<Coin> froms = coinData.getFrom();
-        HashSet set = new HashSet(froms.size());
+        int fromSize = froms.size();
+        P2PKHScriptSig p2PKHScriptSig = null;
+        // 公钥hash160
+        byte[] user = null;
+        // 获取交易的公钥及签名脚本
+        if(fromSize > 0) {
+            try {
+                p2PKHScriptSig = P2PKHScriptSig.createFromBytes(tx.getScriptSig());
+                user = p2PKHScriptSig.getSignerHash160();
+            } catch (NulsException e) {
+                return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.DATA_ERROR);
+            }
+        }
+        HashSet set = new HashSet(fromSize);
         Na fromTotal = Na.ZERO;
         byte[] fromBytes;
+        // 保存在数据中的utxo数据
+        Coin fromInDB = null;
+        byte[] fromAdressBytes = null;
+        int i = 0;
         for (Coin from : froms) {
             fromBytes = from.getOwner();
+            // 验证是否可花费, 检查数据中是否存在此UTXO
+            fromInDB = utxoLedgerUtxoStorageService.getUtxo(fromBytes);
+            if(null == fromInDB) {
+                return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_NOT_FOUND);
+            } else {
+                fromAdressBytes = fromInDB.getOwner();
+                // 验证地址中的公钥hash160和交易中的公钥hash160是否相等，不相等则说明这笔utxo不属于交易发出者
+                if(!checkPublicKeyHash(fromAdressBytes, user)) {
+                    Log.warn("public key hash160 check error.");
+                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_INPUT);
+                }
+            }
+            // 验证非解锁类型的交易及解锁类型的交易
+            if(!tx.isUnlockTx()) {
+                // 验证非解锁类型的交易，验证是否可用，检查是否还在锁定时间内
+                if (TimeService.currentTimeMillis() < from.getLockTime()) {
+                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_UNUSABLE);
+                }
+            } else {
+                // 验证解锁类型的交易
+                if(from.getLockTime() != -1) {
+                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_STATUS_CHANGE);
+                }
+            }
+
             // 验证双花
             if(!set.add(asString(fromBytes))) {
                 return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT);
-            }
-            // 验证是否可用，检查是否还在锁定时间内
-            if (TimeService.currentTimeMillis() < from.getLockTime()) {
-                return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_UNUSABLE);
-            }
-            // 验证是否可花费, 检查数据中是否存在此UTXO
-            if(null == utxoLedgerUtxoStorageService.getUtxoBytes(fromBytes)) {
-                return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_NOT_FOUND);
             }
             fromTotal = fromTotal.add(from.getNa());
         }
@@ -227,6 +264,22 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_AMOUNT);
         }
         return ValidateResult.getSuccessResult();
+    }
+
+    private boolean checkPublicKeyHash(byte[] address, byte[] pubKeyHash) {
+        if(address == null || pubKeyHash == null) {
+            return false;
+        }
+        int pubKeyHashLength = pubKeyHash.length;
+        if(address.length != 23 || pubKeyHashLength != 20) {
+            return  false;
+        }
+        for (int i = 0; i < pubKeyHashLength; i++) {
+            if (pubKeyHash[i] != address[i + 2]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

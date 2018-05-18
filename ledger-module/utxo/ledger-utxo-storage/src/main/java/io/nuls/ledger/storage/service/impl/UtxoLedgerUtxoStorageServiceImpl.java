@@ -32,7 +32,8 @@ import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
-import io.nuls.kernel.model.*;
+import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.model.Result;
 import io.nuls.ledger.storage.constant.LedgerStorageConstant;
 import io.nuls.ledger.storage.service.UtxoLedgerUtxoStorageService;
 
@@ -82,9 +83,12 @@ public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageSe
     @Override
     public Coin getUtxo(byte[] owner) {
         byte[] utxoBytes = getUtxoBytes(owner);
-        Coin coin = new Coin();
+        Coin coin = null;
         try {
-            coin.parse(utxoBytes);
+            if(utxoBytes != null) {
+                coin = new Coin();
+                coin.parse(utxoBytes);
+            }
         } catch (NulsException e) {
             Log.error(e);
             return null;
