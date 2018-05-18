@@ -200,7 +200,7 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
                     result.setData(transaction);
                     return result;
                 }
-                if (addressSet.contains(transaction.getTxData().getAddress())) {
+                if (addressSet.contains(Base58.encode(transaction.getTxData().getAddress()))) {
                     ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "The agent has stopped by Red Punish trnasaction!");
                     result.setData(transaction);
                     return result;
