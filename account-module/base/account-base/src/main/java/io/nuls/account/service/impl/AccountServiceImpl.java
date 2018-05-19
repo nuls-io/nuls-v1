@@ -277,12 +277,20 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Account> getAccount(byte[] address) {
-        return Result.getSuccess().setData(getAccountByAddress(Base58.encode(address)));
+        Account account = getAccountByAddress(Base58.encode(address));
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        return Result.getSuccess().setData(account);
     }
 
     @Override
     public Result<Account> getAccount(String address) {
-        return Result.getSuccess().setData(getAccountByAddress(address));
+        Account account = getAccountByAddress(address);
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        return Result.getSuccess().setData(account);
     }
 
     @Override
