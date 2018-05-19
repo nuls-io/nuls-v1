@@ -94,8 +94,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Autowired
     private BlockService blockService;
 
-    private static List<Account> localAccountList;
-
     @Override
     public void afterPropertiesSet() throws NulsException {
         init();
@@ -125,6 +123,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
         }
         return Result.getSuccess().setData(savedTxList.size());
+    }
+
+    @Override
+    public Result<Transaction> getUnconfirmedTransaction(NulsDigestData hash){
+        return null;
     }
 
     @Override
@@ -185,12 +188,20 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public CoinDataResult getCoinData(byte[] address, Na amount, int size) throws NulsException {
         CoinDataResult coinDataResult = new CoinDataResult();
-        List<Coin> coinList = storageService.getCoinList(address);
+        List<Coin> rawCoinList = storageService.getCoinList(address);
+        List<Coin> coinList = new ArrayList<>();
         if (coinList.isEmpty()) {
             coinDataResult.setEnough(false);
             return coinDataResult;
         }
         Collections.sort(coinList, CoinComparator.getInstance());
+
+        Set<byte[]> usedKeyset = getTmpUsedCoinKeySet();
+        for(Coin coin:rawCoinList){
+            if(!usedKeyset.contains(coin.getOwner())){
+                coinList.add(coin);
+            }
+        }
 
         boolean enough = false;
         List<Coin> coins = new ArrayList<>();
@@ -229,6 +240,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public boolean isLocalAccount(byte[] address) {
+        List<Account> localAccountList = accountService.getAccountList().getData();
         if (localAccountList == null || localAccountList.size() == 0) {
             return false;
         }
@@ -400,7 +412,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
 
         // 确认先刷新账户是否就不存在这个问题了 todo, when the node is downloading blocks, the txs in newly downloaded blocks will miss
-        reloadAccount();
 
         long height = NulsContext.getInstance().getBestHeight();
         for (int i = 0; i <= height; i++) {
@@ -457,6 +468,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
         if (status == TransactionInfo.UNCONFIRMED) {
             result = storageService.saveTempTx(tx);
+        }else {
+            storageService.deleteTempTx(tx);
         }
         for (int i = 0; i < addresses.size(); i++) {
             balanceProvider.refreshBalance(addresses.get(i));
@@ -493,6 +506,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (txs == null || txs.size() == 0) {
             return resultTxs;
         }
+        List<Account> localAccountList = accountService.getAccountList().getData();
         if (localAccountList == null || localAccountList.size() == 0) {
             return resultTxs;
         }
@@ -511,6 +525,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (tx == null) {
             return result;
         }
+        List<Account> localAccountList = accountService.getAccountList().getData();
         if (localAccountList == null || localAccountList.size() == 0) {
             return result;
         }
@@ -547,9 +562,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     protected boolean isLocalTransaction(Transaction tx) {
+
         if (tx == null) {
             return false;
         }
+        List<Account> localAccountList = accountService.getAccountList().getData();
         if (localAccountList == null || localAccountList.size() == 0) {
             return false;
         }
@@ -562,12 +579,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         return false;
     }
 
-    public void reloadAccount() {
-        localAccountList = accountService.getAccountList().getData();
-    }
-
     public void init() {
-        reloadAccount();
     }
 
     public Result saveLocalTx(Transaction tx) {
@@ -625,5 +637,21 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public Result deleteLocalTx(Transaction tx) {
         //todo
         return Result.getSuccess();
+    }
+
+    protected Set<byte[]> getTmpUsedCoinKeySet() {
+        List<Transaction> localTxList = storageService.loadAllTempList().getData();
+        Set<byte[]> coinKeys = new HashSet<>();
+        for (Transaction tx : localTxList) {
+            CoinData coinData = tx.getCoinData();
+            List<Coin> coins = coinData.getFrom();
+            for (Coin coin : coins) {
+                byte[] owner = coin.getOwner();
+                byte[] coinKey = new byte[owner.length - AddressTool.HASH_LENGTH];
+                System.arraycopy(owner, AddressTool.HASH_LENGTH, coinKey, 0, coinKey.length);
+                coinKeys.add(coin.getOwner());
+            }
+        }
+        return coinKeys;
     }
 }
