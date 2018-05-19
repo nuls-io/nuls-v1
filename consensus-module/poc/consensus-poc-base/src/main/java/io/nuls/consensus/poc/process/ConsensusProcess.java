@@ -316,7 +316,7 @@ public class ConsensusProcess {
                 Log.debug(result.getMessage());
                 continue;
             }
-            result = ledgerService.verifyCoinData(tx,packingTxList);
+            result = ledgerService.verifyCoinData(tx, packingTxList);
             if (result.isFailed()) {
                 if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
                     txMemoryPool.add(tx, true);
@@ -335,7 +335,13 @@ public class ConsensusProcess {
         while (null == validateResult || validateResult.isFailed()) {
             validateResult = transactionService.conflictDetect(packingTxList);
             if (validateResult.isFailed()) {
-                packingTxList.remove(validateResult.getData());
+                if (validateResult.getData() instanceof Transaction) {
+                    packingTxList.remove(validateResult.getData());
+                } else if (validateResult.getData() instanceof List) {
+                    packingTxList.removeAll((List<Transaction>) validateResult.getData());
+                } else if (validateResult.getData() == null) {
+                    Log.error("Cann't find the wrong transaction!");
+                }
             }
         }
         addConsensusTx(bestBlock, packingTxList, self, round);
