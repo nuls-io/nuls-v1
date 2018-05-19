@@ -30,7 +30,9 @@ import io.nuls.account.model.Account;
 import io.nuls.account.model.Balance;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 
@@ -76,6 +78,15 @@ public interface AccountLedgerService {
 
     /**
      * <p>
+     * get an .unconfirmed transaction
+     *
+     * @param hash transaction hash
+     * @return return the tx count saved,
+     */
+    Result<Transaction> getUnconfirmedTransaction(NulsDigestData hash);
+
+    /**
+     * <p>
      * rollback a tx in account ledger
      * save if the tx is relative to local accounts, or do nothing
      *
@@ -114,6 +125,8 @@ public interface AccountLedgerService {
      */
     CoinDataResult getCoinData(byte[] address, Na amount, int size) throws NulsException;
 
+    Transaction getTxByOwner(byte[] owner);
+
     /**
      * <p>
      * check weather address is a local address
@@ -150,6 +163,17 @@ public interface AccountLedgerService {
      */
     Result importAccountLedger(String address);
 
-
+    /**
+     * 查询交易列表
+     * @param address
+     * @return
+     */
     Result<List<TransactionInfo>> getTxInfoList(byte[] address);
+
+    /**
+     * 查询锁定的未花费交易
+     * @param address
+     * @return
+     */
+    Result<List<Coin>> getLockUtxo(byte[] address);
 }

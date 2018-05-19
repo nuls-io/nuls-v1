@@ -60,4 +60,8 @@ public interface AccountLedgerStorageService {
     byte[] getTxBytes(byte[] txBytes);
 
     Result saveTempTx(Transaction tx);
+
+    Result deleteTempTx(Transaction tx);
+
+    Result<List<Transaction>> loadAllTempList();
 }

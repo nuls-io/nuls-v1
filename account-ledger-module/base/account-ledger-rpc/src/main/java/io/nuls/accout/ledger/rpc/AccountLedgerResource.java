@@ -36,6 +36,7 @@ import io.nuls.account.service.AccountService;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.accout.ledger.rpc.dto.TransactionInfoDto;
+import io.nuls.accout.ledger.rpc.dto.UtxoDto;
 import io.nuls.accout.ledger.rpc.form.TransferForm;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.page.Page;
@@ -43,6 +44,7 @@ import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -191,6 +193,72 @@ public class AccountLedgerResource {
             infoDtoList.add(new TransactionInfoDto(result.getData().get(i)));
         }
         page.setList(infoDtoList);
+
+        dtoResult.setSuccess(true);
+        dtoResult.setData(page);
+        return dtoResult;
+    }
+
+
+    @GET
+    @Path("/utxo/lock/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "账户地址查询交易列表", notes = "result.data: balanceJson 返回账户相关的交易列表")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Page.class)
+    })
+    public Result getLockUtxo(@ApiParam(name = "pageNumber", value = "页码")
+                              @QueryParam("pageNumber") Integer pageNumber,
+                              @ApiParam(name = "pageSize", value = "每页条数")
+                              @QueryParam("pageSize") Integer pageSize,
+                              @ApiParam(name = "address", value = "地址")
+                              @QueryParam("address") String address) {
+        if (null == pageNumber || pageNumber == 0) {
+            pageNumber = 1;
+        }
+        if (null == pageSize || pageSize == 0) {
+            pageSize = 10;
+        }
+        if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
+        }
+
+        byte[] addressBytes = null;
+        Result dtoResult = new Result<>();
+
+        try {
+            addressBytes = Base58.decode(address);
+        } catch (Exception e) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
+
+        Result<List<Coin>> result = accountLedgerService.getLockUtxo(addressBytes);
+        if (result.isFailed()) {
+            dtoResult.setSuccess(false);
+            dtoResult.setErrorCode(result.getErrorCode());
+            return dtoResult;
+        }
+
+        Page<UtxoDto> page = new Page<>(pageNumber, pageSize, result.getData().size());
+        int start = pageNumber * pageSize - pageSize;
+        if (start >= page.getTotal()) {
+            dtoResult.setData(page);
+            return dtoResult;
+        }
+
+        int end = start + pageSize;
+        if (end > page.getTotal()) {
+            end = (int) page.getTotal();
+        }
+
+        List<UtxoDto> utxoDtoList = new ArrayList<>();
+
+        for (int i = start; i < end; i++) {
+            //todo  查询交易
+            //accountLedgerService.g
+            //utxoDtoList.add(new TransactionInfoDto(result.getData().get(i)));
+        }
+        page.setList(utxoDtoList);
 
         dtoResult.setSuccess(true);
         dtoResult.setData(page);

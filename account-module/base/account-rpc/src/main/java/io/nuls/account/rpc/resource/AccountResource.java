@@ -2,6 +2,7 @@ package io.nuls.account.rpc.resource;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.AccountKeyStore;
 import io.nuls.account.model.Address;
@@ -50,6 +51,9 @@ public class AccountResource {
 
     @Autowired
     private AccountBaseService accountBaseService;
+
+    @Autowired
+    private AccountLedgerService accountLedgerService;
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
@@ -140,25 +144,25 @@ public class AccountResource {
     }
 
     @POST
-    @Path("/alias/{alias}")
+    @Path("/alias/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("设置别名 [3.3.6]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result<Boolean> alias(@PathParam("alias") String alias,
+    public Result<Boolean> alias(@PathParam("address") String address,
                                  @ApiParam(name = "form", value = "设置别名表单数据", required = true)
                                          AccountAliasForm form) {
-        if (!Address.validAddress(form.getAddress())) {
+        if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        if (StringUtils.isBlank(alias)) {
+        if (StringUtils.isBlank(form.getAlias())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         if (StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        return aliasService.setAlias(form.getAddress(), form.getPassword(), alias);
+        return aliasService.setAlias(address, form.getPassword(), form.getAlias());
     }
 
     @GET
@@ -174,7 +178,8 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         try {
-            Result<Balance> result = accountService.getBalance(address);
+            Address addr = new Address(address);
+            Result<Balance> result = accountLedgerService.getBalance(addr.getBase58Bytes());
             if (result.isFailed()) {
                 return result;
             }
@@ -184,8 +189,34 @@ public class AccountResource {
             Log.error(e);
             return Result.getFailed(AccountErrorCode.FAILED);
         }
+    }
 
-
+    @GET
+    @Path("/assets/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "查询账户资产 [3.3.8]", notes = "result.data: List<AssetDto>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = AssetDto.class)
+    })
+    public Result getAssets(@ApiParam(name = "address", value = "账户地址", required = true)
+                            @PathParam("address") String address) {
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        try {
+            Address addr = new Address(address);
+            Result<Balance> result = accountLedgerService.getBalance(addr.getBase58Bytes());
+            if (result.isFailed()) {
+                return result;
+            }
+            Balance balance = result.getData();
+            List<AssetDto> dtoList = new ArrayList<>();
+            dtoList.add(new AssetDto("NULS", balance));
+            return Result.getSuccess().setData(dtoList);
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.FAILED);
+        }
     }
 
     @POST
@@ -204,33 +235,6 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         return accountBaseService.getPrivateKey(address, form.getPassword());
-    }
-
-    @GET
-    @Path("/assets/{address}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询账户资产 [3.3.8]", notes = "result.data: List<AssetDto>")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = AssetDto.class)
-    })
-    public Result getAssets(@ApiParam(name = "address", value = "账户地址", required = true)
-                            @PathParam("address") String address) {
-        if (!Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
-        }
-        try {
-            Result<Balance> result = accountService.getBalance(address);
-            if (result.isFailed()) {
-                return result;
-            }
-            Balance balance = result.getData();
-            List<AssetDto> dtoList = new ArrayList<>();
-            dtoList.add(new AssetDto("NULS", balance));
-            return Result.getSuccess().setData(dtoList);
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(AccountErrorCode.FAILED);
-        }
     }
 
     @POST

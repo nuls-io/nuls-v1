@@ -46,6 +46,7 @@ import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -94,8 +95,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Autowired
     private BlockService blockService;
 
-    private static List<Account> localAccountList;
-
     @Override
     public void afterPropertiesSet() throws NulsException {
         init();
@@ -125,6 +124,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
         }
         return Result.getSuccess().setData(savedTxList.size());
+    }
+
+    @Override
+    public Result<Transaction> getUnconfirmedTransaction(NulsDigestData hash){
+        return null;
     }
 
     @Override
@@ -185,16 +189,25 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public CoinDataResult getCoinData(byte[] address, Na amount, int size) throws NulsException {
         CoinDataResult coinDataResult = new CoinDataResult();
-        List<Coin> coinList = storageService.getCoinList(address);
-        if (coinList.isEmpty()) {
+        List<Coin> rawCoinList = storageService.getCoinList(address);
+        List<Coin> coinList = new ArrayList<>();
+        if (rawCoinList.isEmpty()) {
             coinDataResult.setEnough(false);
             return coinDataResult;
         }
-        Collections.sort(coinList, CoinComparator.getInstance());
+        Collections.sort(rawCoinList, CoinComparator.getInstance());
+
+        Set<byte[]> usedKeyset = getTmpUsedCoinKeySet();
+        for(Coin coin:rawCoinList){
+            if(!usedKeyset.contains(coin.getOwner())){
+                coinList.add(coin);
+            }
+        }
 
         boolean enough = false;
         List<Coin> coins = new ArrayList<>();
         Na values = Na.ZERO;
+        //将所有余额从小到大排序后，累计未花费的余额
         for (int i = 0; i < coinList.size(); i++) {
             Coin coin = coinList.get(i);
             if (!coin.usable()) {
@@ -202,21 +215,31 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             coins.add(coin);
             size += coin.size();
+            if (i == 127) {
+                size += 1;
+            }
+            //每次累加一条未花费余额时，需要重新计算手续费
             Na fee = TransactionFeeCalculator.getFee(size);
             values = values.add(coin.getNa());
             if (values.isGreaterOrEquals(amount.add(fee))) {
-                enough = true;
-                coinDataResult.setEnough(true);
-                coinDataResult.setFee(fee);
-                coinDataResult.setCoinList(coins);
-
+                //余额足够后，需要判断是否找零，如果有找零，则需要重新计算手续费
                 Na change = values.subtract(amount.add(fee));
                 if (change.isGreaterThan(Na.ZERO)) {
                     Coin changeCoin = new Coin();
                     changeCoin.setOwner(address);
                     changeCoin.setNa(change);
+
+                    fee = TransactionFeeCalculator.getFee(size + changeCoin.size());
+                    if (amount.add(fee).isLessThan(values)) {
+                        continue;
+                    }
                     coinDataResult.setChange(changeCoin);
                 }
+
+                enough = true;
+                coinDataResult.setEnough(true);
+                coinDataResult.setFee(fee);
+                coinDataResult.setCoinList(coins);
                 break;
             }
         }
@@ -228,7 +251,15 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
+    public Transaction getTxByOwner(byte[] owner) {
+        //todo
+        //byte[] txHash = new byte[NulsDigestData.
+        return null;
+    }
+
+    @Override
     public boolean isLocalAccount(byte[] address) {
+        List<Account> localAccountList = accountService.getAccountList().getData();
         if (localAccountList == null || localAccountList.size() == 0) {
             return false;
         }
@@ -400,7 +431,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
 
         // 确认先刷新账户是否就不存在这个问题了 todo, when the node is downloading blocks, the txs in newly downloaded blocks will miss
-        reloadAccount();
 
         long height = NulsContext.getInstance().getBestHeight();
         for (int i = 0; i <= height; i++) {
@@ -435,6 +465,27 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
     }
 
+    @Override
+    public Result<List<Coin>> getLockUtxo(byte[] address) {
+        Result<List<Coin>> result = new Result<>();
+        try {
+            result.setSuccess(true);
+            List<Coin> coinList = storageService.getCoinList(address);
+            List<Coin> lockCoinList = new ArrayList<>();
+            for (Coin coin : coinList) {
+                if (coin != null && !coin.usable()) {
+                    lockCoinList.add(coin);
+                }
+            }
+            Collections.sort(coinList, CoinComparator.getInstance());
+            result.setData(lockCoinList);
+        } catch (NulsException e) {
+            Log.error(e);
+            result.setSuccess(false);
+        }
+        return result;
+    }
+
     protected Result<Integer> saveTransaction(Transaction tx, byte status) {
 
         List<byte[]> addresses = getRelatedAddresses(tx);
@@ -457,6 +508,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
         if (status == TransactionInfo.UNCONFIRMED) {
             result = storageService.saveTempTx(tx);
+        }else {
+            storageService.deleteTempTx(tx);
         }
         for (int i = 0; i < addresses.size(); i++) {
             balanceProvider.refreshBalance(addresses.get(i));
@@ -493,6 +546,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (txs == null || txs.size() == 0) {
             return resultTxs;
         }
+        List<Account> localAccountList = accountService.getAccountList().getData();
         if (localAccountList == null || localAccountList.size() == 0) {
             return resultTxs;
         }
@@ -511,6 +565,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (tx == null) {
             return result;
         }
+        List<Account> localAccountList = accountService.getAccountList().getData();
         if (localAccountList == null || localAccountList.size() == 0) {
             return result;
         }
@@ -547,9 +602,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     protected boolean isLocalTransaction(Transaction tx) {
+
         if (tx == null) {
             return false;
         }
+        List<Account> localAccountList = accountService.getAccountList().getData();
         if (localAccountList == null || localAccountList.size() == 0) {
             return false;
         }
@@ -562,12 +619,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         return false;
     }
 
-    public void reloadAccount() {
-        localAccountList = accountService.getAccountList().getData();
-    }
-
     public void init() {
-        reloadAccount();
     }
 
     public Result saveLocalTx(Transaction tx) {
@@ -625,5 +677,21 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public Result deleteLocalTx(Transaction tx) {
         //todo
         return Result.getSuccess();
+    }
+
+    protected Set<byte[]> getTmpUsedCoinKeySet() {
+        List<Transaction> localTxList = storageService.loadAllTempList().getData();
+        Set<byte[]> coinKeys = new HashSet<>();
+        for (Transaction tx : localTxList) {
+            CoinData coinData = tx.getCoinData();
+            List<Coin> coins = coinData.getFrom();
+            for (Coin coin : coins) {
+                byte[] owner = coin.getOwner();
+                byte[] coinKey = new byte[owner.length - AddressTool.HASH_LENGTH];
+                System.arraycopy(owner, AddressTool.HASH_LENGTH, coinKey, 0, coinKey.length);
+                coinKeys.add(coin.getOwner());
+            }
+        }
+        return coinKeys;
     }
 }

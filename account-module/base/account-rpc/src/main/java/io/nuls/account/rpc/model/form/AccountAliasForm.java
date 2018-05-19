@@ -11,18 +11,18 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(value = "设置账户别名表单数据")
 public class AccountAliasForm {
 
-    @ApiModelProperty(name = "address", value = "账户地址", required = true)
-    private String address;
+    @ApiModelProperty(name = "alias", value = "别名", required = true)
+    private String alias;
 
     @ApiModelProperty(name = "password", value = "账户密码", required = true)
     private String password;
 
-    public String getAddress() {
-        return address;
+    public String getAlias() {
+        return alias;
     }
 
-    public void setAddress(String address) {
-        this.address = StringUtils.formatStringPara(address);
+    public void setAlias(String alias) {
+        this.alias = StringUtils.formatStringPara(alias);
     }
 
     public String getPassword() {

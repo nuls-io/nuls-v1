@@ -42,6 +42,8 @@ import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.TransactionManager;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
 import org.spongycastle.util.Arrays;
@@ -215,6 +217,37 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     }
 
     @Override
+    public Result deleteTempTx(Transaction tx){
+        try {
+            return dbService.delete(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, tx.getHash().serialize());
+        }catch (Exception e){
+            Log.info("deleteTempTx error");
+            return Result.getFailed();
+        }
+    }
+
+    @Override
+    public Result<List<Transaction>> loadAllTempList() {
+        Result result;
+        List<Transaction> tmpList = new ArrayList<>();
+        Set<byte[]> keySet = dbService.keySet(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX);
+        for (byte[] key : keySet) {
+            Transaction tmpTx = null;
+            byte[] txBytes = dbService.get(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, key);
+            try {
+                tmpTx = TransactionManager.getInstance(new NulsByteBuffer(txBytes));
+            } catch (Exception e) {
+                Log.info("Load local transaction Error,transaction key[" + Hex.encode(txBytes) + "]");
+            }
+            if (tmpTx != null) {
+                tmpList.add(tmpTx);
+            }
+        }
+
+        return Result.getSuccess().setData(tmpList);
+    }
+
+    @Override
     public Result saveUTXO(byte[] key, byte[] value) {
         return dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA, key, value);
     }
@@ -224,7 +257,7 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
         BatchOperation batch = dbService.createWriteBatch(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
         Set<byte[]> utxoKeySet = utxos.keySet();
         for (byte[] key : utxoKeySet) {
-            batch.put(key,utxos.get(key));
+            batch.put(key, utxos.get(key));
         }
         Result batchResult = batch.executeBatch();
         if (batchResult.isFailed()) {
