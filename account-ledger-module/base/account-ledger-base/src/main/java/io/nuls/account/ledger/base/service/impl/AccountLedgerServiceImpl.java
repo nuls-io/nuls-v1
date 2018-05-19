@@ -69,6 +69,8 @@ import io.nuls.protocol.service.TransactionService;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Facjas
@@ -94,6 +96,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Autowired
     private BlockService blockService;
+
+    private Lock lock = new ReentrantLock();
 
     @Override
     public void afterPropertiesSet() throws NulsException {
@@ -127,12 +131,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result<Transaction> getUnconfirmedTransaction(NulsDigestData hash){
+    public Result<Transaction> getUnconfirmedTransaction(NulsDigestData hash) {
         return null;
     }
 
     @Override
-    public Result<List<Transaction>> getAllUnconfirmedTransaction(){
+    public Result<List<Transaction>> getAllUnconfirmedTransaction() {
         List<Transaction> localTxList = storageService.loadAllTempList().getData();
         return Result.getSuccess().setData(localTxList);
     }
@@ -194,66 +198,71 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public CoinDataResult getCoinData(byte[] address, Na amount, int size) throws NulsException {
-        CoinDataResult coinDataResult = new CoinDataResult();
-        List<Coin> rawCoinList = storageService.getCoinList(address);
-        List<Coin> coinList = new ArrayList<>();
-        if (rawCoinList.isEmpty()) {
-            coinDataResult.setEnough(false);
-            return coinDataResult;
-        }
-        Collections.sort(rawCoinList, CoinComparator.getInstance());
-
-        Set<byte[]> usedKeyset = getTmpUsedCoinKeySet();
-        for(Coin coin:rawCoinList){
-            if(!usedKeyset.contains(coin.getOwner())){
-                coinList.add(coin);
+        lock.lock();
+        try {
+            CoinDataResult coinDataResult = new CoinDataResult();
+            List<Coin> rawCoinList = storageService.getCoinList(address);
+            List<Coin> coinList = new ArrayList<>();
+            if (rawCoinList.isEmpty()) {
+                coinDataResult.setEnough(false);
+                return coinDataResult;
             }
-        }
+            Collections.sort(rawCoinList, CoinComparator.getInstance());
 
-        boolean enough = false;
-        List<Coin> coins = new ArrayList<>();
-        Na values = Na.ZERO;
-        //将所有余额从小到大排序后，累计未花费的余额
-        for (int i = 0; i < coinList.size(); i++) {
-            Coin coin = coinList.get(i);
-            if (!coin.usable()) {
-                continue;
-            }
-            coins.add(coin);
-            size += coin.size();
-            if (i == 127) {
-                size += 1;
-            }
-            //每次累加一条未花费余额时，需要重新计算手续费
-            Na fee = TransactionFeeCalculator.getFee(size);
-            values = values.add(coin.getNa());
-            if (values.isGreaterOrEquals(amount.add(fee))) {
-                //余额足够后，需要判断是否找零，如果有找零，则需要重新计算手续费
-                Na change = values.subtract(amount.add(fee));
-                if (change.isGreaterThan(Na.ZERO)) {
-                    Coin changeCoin = new Coin();
-                    changeCoin.setOwner(address);
-                    changeCoin.setNa(change);
-
-                    fee = TransactionFeeCalculator.getFee(size + changeCoin.size());
-                    if ( values.isLessThan(amount.add(fee))) {
-                        continue;
-                    }
-                    coinDataResult.setChange(changeCoin);
+            Set<byte[]> usedKeyset = getTmpUsedCoinKeySet();
+            for (Coin coin : rawCoinList) {
+                if (!usedKeyset.contains(coin.getOwner())) {
+                    coinList.add(coin);
                 }
-
-                enough = true;
-                coinDataResult.setEnough(true);
-                coinDataResult.setFee(fee);
-                coinDataResult.setCoinList(coins);
-                break;
             }
-        }
-        if (!enough) {
-            coinDataResult.setEnough(false);
+
+            boolean enough = false;
+            List<Coin> coins = new ArrayList<>();
+            Na values = Na.ZERO;
+            //将所有余额从小到大排序后，累计未花费的余额
+            for (int i = 0; i < coinList.size(); i++) {
+                Coin coin = coinList.get(i);
+                if (!coin.usable()) {
+                    continue;
+                }
+                coins.add(coin);
+                size += coin.size();
+                if (i == 127) {
+                    size += 1;
+                }
+                //每次累加一条未花费余额时，需要重新计算手续费
+                Na fee = TransactionFeeCalculator.getFee(size);
+                values = values.add(coin.getNa());
+                if (values.isGreaterOrEquals(amount.add(fee))) {
+                    //余额足够后，需要判断是否找零，如果有找零，则需要重新计算手续费
+                    Na change = values.subtract(amount.add(fee));
+                    if (change.isGreaterThan(Na.ZERO)) {
+                        Coin changeCoin = new Coin();
+                        changeCoin.setOwner(address);
+                        changeCoin.setNa(change);
+
+                        fee = TransactionFeeCalculator.getFee(size + changeCoin.size());
+                        if (values.isLessThan(amount.add(fee))) {
+                            continue;
+                        }
+                        coinDataResult.setChange(changeCoin);
+                    }
+
+                    enough = true;
+                    coinDataResult.setEnough(true);
+                    coinDataResult.setFee(fee);
+                    coinDataResult.setCoinList(coins);
+                    break;
+                }
+            }
+            if (!enough) {
+                coinDataResult.setEnough(false);
+                return coinDataResult;
+            }
             return coinDataResult;
+        } finally {
+            lock.unlock();
         }
-        return coinDataResult;
     }
 
     @Override
@@ -436,15 +445,18 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
 
-        // 确认先刷新账户是否就不存在这个问题了 todo, when the node is downloading blocks, the txs in newly downloaded blocks will miss
-
-        long height = NulsContext.getInstance().getBestHeight();
-        for (int i = 0; i <= height; i++) {
-            List<NulsDigestData> txs = blockService.getBlock(i).getData().getTxHashList();
-            for (int j = 0; j < txs.size(); j++) {
-                Transaction tx = ledgerService.getTx(txs.get(j));
-                saveTransaction(tx, addressBytes, TransactionInfo.CONFIRMED);
+        long start = 0;
+        long end = NulsContext.getInstance().getBestHeight();
+        while (start < end) {
+            for (long i = start; i <= end; i++) {
+                List<NulsDigestData> txs = blockService.getBlock(i).getData().getTxHashList();
+                for (int j = 0; j < txs.size(); j++) {
+                    Transaction tx = ledgerService.getTx(txs.get(j));
+                    saveTransaction(tx, addressBytes, TransactionInfo.CONFIRMED);
+                }
             }
+            start = end;
+            end = NulsContext.getInstance().getBestHeight();
         }
         try {
             balanceProvider.refreshBalance(addressBytes);
@@ -514,7 +526,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
         if (status == TransactionInfo.UNCONFIRMED) {
             result = storageService.saveTempTx(tx);
-        }else {
+        } else {
             storageService.deleteTempTx(tx);
         }
         for (int i = 0; i < addresses.size(); i++) {

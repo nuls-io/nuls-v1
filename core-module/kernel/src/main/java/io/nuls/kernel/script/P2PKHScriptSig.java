@@ -44,7 +44,7 @@ import java.io.IOException;
 public class P2PKHScriptSig extends Script {
 
     //todo 确认该长度是否正确
-    public static final int DEFAULT_SERIALIZE_LENGTH = 68;
+    public static final int DEFAULT_SERIALIZE_LENGTH = 110;
 
     private NulsSignData signData;
 
