@@ -196,6 +196,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         boolean enough = false;
         List<Coin> coins = new ArrayList<>();
         Na values = Na.ZERO;
+        //将所有余额从小到大排序后，累计未花费的余额
         for (int i = 0; i < coinList.size(); i++) {
             Coin coin = coinList.get(i);
             if (!coin.usable()) {
@@ -203,21 +204,31 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             coins.add(coin);
             size += coin.size();
+            if (i == 127) {
+                size += 1;
+            }
+            //每次累加一条未花费余额时，需要重新计算手续费
             Na fee = TransactionFeeCalculator.getFee(size);
             values = values.add(coin.getNa());
             if (values.isGreaterOrEquals(amount.add(fee))) {
-                enough = true;
-                coinDataResult.setEnough(true);
-                coinDataResult.setFee(fee);
-                coinDataResult.setCoinList(coins);
-
+                //余额足够后，需要判断是否找零，如果有找零，则需要重新计算手续费
                 Na change = values.subtract(amount.add(fee));
                 if (change.isGreaterThan(Na.ZERO)) {
                     Coin changeCoin = new Coin();
                     changeCoin.setOwner(address);
                     changeCoin.setNa(change);
+
+                    fee = TransactionFeeCalculator.getFee(size + changeCoin.size());
+                    if (amount.add(fee).isLessThan(values)) {
+                        continue;
+                    }
                     coinDataResult.setChange(changeCoin);
                 }
+
+                enough = true;
+                coinDataResult.setEnough(true);
+                coinDataResult.setFee(fee);
+                coinDataResult.setCoinList(coins);
                 break;
             }
         }
