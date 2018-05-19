@@ -31,7 +31,7 @@ public class AccountBaseServiceTest {
     }
 
     @Test
-    public void getPrivateKey() {
+    public void getPrivateKeyTest() {
         List<Account> accounts = this.accountService.createAccount(1, "nuls123456").getData();
         Account account = accounts.get(0);
         Result result = accountBaseService.getPrivateKey(account.getAddress().toString(), "nuls123456");
@@ -52,16 +52,45 @@ public class AccountBaseServiceTest {
 
     @Test
     public void setPassword() {
-        List<Account> accounts = this.accountService.createAccount(1, "nuls123456").getData();
+        List<Account> accounts = this.accountService.createAccount(1, "").getData();
         Account account = accounts.get(0);
-
+        accountBaseService.setPassword(account.getAddress().toString(),"nuls123456");
+        Account acc = accountService.getAccount(account.getAddress()).getData();
+        try {
+            assertTrue(acc.decrypt("nuls123456"));
+            assertArrayEquals(acc.getPriKey(), account.getPriKey());
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     public void changePassword() {
+        List<Account> accounts = this.accountService.createAccount(1, "nuls123456").getData();
+        Account account = accounts.get(0);
+        accountBaseService.changePassword(account.getAddress().toString(),"nuls123456", "nuls111111");
+        Account acc = accountService.getAccount(account.getAddress()).getData();
+        try {
+            assertFalse(acc.decrypt("nuls123456"));
+            assertTrue(acc.decrypt("nuls111111"));
+            assertArrayEquals(acc.getPriKey(), account.getPriKey());
+        } catch (NulsException e) {
+
+        }
     }
 
     @Test
     public void changePasswordByPrikey() {
+        List<Account> accounts = this.accountService.createAccount(1, "nuls123456").getData();
+        Account account = accounts.get(0);
+        String prik = (String)accountBaseService.getPrivateKey(account.getAddress().toString(), "nuls123456").getData();
+        accountBaseService.changePasswordByPrikey(account.getAddress().toString(), prik, "nuls111111");
+        Account acc = accountService.getAccount(account.getAddress()).getData();
+        try {
+            assertTrue(acc.decrypt("nuls111111"));
+            assertArrayEquals(acc.getPriKey(), account.getPriKey());
+        } catch (NulsException e) {
+
+        }
     }
 }

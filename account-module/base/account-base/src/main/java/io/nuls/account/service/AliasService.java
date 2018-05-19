@@ -106,7 +106,6 @@ public class AliasService {
             tx.setTime(System.currentTimeMillis());
             Alias alias = new Alias(addressBytes, aliasName);
             tx.setTxData(alias);
-            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
 
             CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size());
             if(!coinDataResult.isEnough()){
@@ -122,6 +121,7 @@ public class AliasService {
                 coinData.setTo(toList);
             }
             tx.setCoinData(coinData);
+            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
             NulsSignData nulsSignData = accountService.signData(tx.serializeForHash(), account, password);
             P2PKHScriptSig scriptSig = new P2PKHScriptSig(nulsSignData, account.getPubKey());
             tx.setScriptSig(scriptSig.serialize());
