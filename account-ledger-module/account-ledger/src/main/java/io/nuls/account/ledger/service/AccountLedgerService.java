@@ -81,9 +81,17 @@ public interface AccountLedgerService {
      * get an .unconfirmed transaction
      *
      * @param hash transaction hash
-     * @return return the tx count saved,
+     * @return return the unconfirmed tx
      */
     Result<Transaction> getUnconfirmedTransaction(NulsDigestData hash);
+
+    /**
+     * <p>
+     * get all.unconfirmed transactions
+     *
+     * @return return all the unconfirmed txs
+     */
+    public Result<List<Transaction>> getAllUnconfirmedTransaction();
 
     /**
      * <p>
@@ -165,6 +173,7 @@ public interface AccountLedgerService {
 
     /**
      * 查询交易列表
+     *
      * @param address
      * @return
      */
@@ -172,6 +181,7 @@ public interface AccountLedgerService {
 
     /**
      * 查询锁定的未花费交易
+     *
      * @param address
      * @return
      */

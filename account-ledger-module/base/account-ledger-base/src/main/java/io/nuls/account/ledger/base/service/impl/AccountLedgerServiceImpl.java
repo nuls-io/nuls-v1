@@ -132,6 +132,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
+    public Result<List<Transaction>> getAllUnconfirmedTransaction(){
+        List<Transaction> localTxList = storageService.loadAllTempList().getData();
+        return Result.getSuccess().setData(localTxList);
+    }
+
+    @Override
     public Result<Integer> rollback(Transaction tx) {
         if (!isLocalTransaction(tx)) {
             return Result.getSuccess().setData(new Integer(0));
