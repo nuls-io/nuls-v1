@@ -34,13 +34,13 @@ public enum PunishType {
 
     YELLOW(0), RED(1);
 
-    private final int code;
+    private final byte code;
 
     PunishType(int code) {
-        this.code = code;
+        this.code = (byte) code;
     }
 
-    public int getCode() {
+    public byte getCode() {
         return code;
     }
 }

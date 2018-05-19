@@ -63,9 +63,9 @@ public class AgentPo extends BaseNulsData {
 
     private long time;
 
-    private long blockHeight;
+    private long blockHeight = -1L;
 
-    private long delHeight;
+    private long delHeight = -1L;
 
     /**
      * serialize important field

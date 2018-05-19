@@ -33,8 +33,10 @@ import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.util.ConsensusTool;
@@ -85,7 +87,7 @@ public class ChainContainer implements Cloneable {
         List<PunishLogPo> redList = chain.getRedPunishList();
 
         long height = block.getHeader().getHeight();
-
+        BlockRoundData roundData = new BlockRoundData(block.getHeader().getExtend());
         List<Transaction> txs = block.getTxs();
         for (Transaction tx : txs) {
             int txType = tx.getType();
@@ -158,6 +160,39 @@ public class ChainContainer implements Cloneable {
                         break;
                     }
                 }
+            } else if (txType == ConsensusConstant.TX_TYPE_RED_PUNISH) {
+                RedPunishTransaction transaction = (RedPunishTransaction) tx;
+                RedPunishData redPunishData = transaction.getTxData();
+                PunishLogPo po = new PunishLogPo();
+                po.setAddress(redPunishData.getAddress());
+                po.setHeight(height);
+                po.setRoundIndex(roundData.getRoundIndex());
+                po.setTime(tx.getTime());
+                po.setType(PunishType.RED.getCode());
+                redList.add(po);
+                for (Agent agent : agentList) {
+                    if (!Arrays.equals(agent.getAgentAddress(), po.getAddress())) {
+                       continue;
+                    }
+                    agent.setDelHeight(height);
+                    for(Deposit deposit:depositList){
+                        if(deposit.getAgentHash().equals(agent.getTxHash())){
+                            continue;
+                        }
+                        deposit.setDelHeight(height);
+                    }
+                }
+            } else if (txType == ConsensusConstant.TX_TYPE_YELLOW_PUNISH) {
+                YellowPunishTransaction transaction = (YellowPunishTransaction) tx;
+                for (byte[] bytes : transaction.getTxData().getAddressList()) {
+                    PunishLogPo po = new PunishLogPo();
+                    po.setAddress(bytes);
+                    po.setHeight(height);
+                    po.setRoundIndex(roundData.getRoundIndex());
+                    po.setTime(tx.getTime());
+                    po.setType(PunishType.YELLOW.getCode());
+                    yellowList.add(po);
+                }
             }
         }
 
@@ -180,7 +215,6 @@ public class ChainContainer implements Cloneable {
         }
 
         BlockHeader blockHeader = block.getHeader();
-
         if (blockHeader == null) {
             return false;
         }

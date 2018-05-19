@@ -26,10 +26,20 @@
 
 package io.nuls.consensus.poc.protocol.util;
 
+import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.consensus.poc.protocol.entity.RedPunishData;
+import io.nuls.consensus.poc.protocol.entity.YellowPunishData;
+import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.storage.po.DepositPo;
+import io.nuls.consensus.poc.storage.po.PunishLogPo;
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.BlockHeader;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ln on 2018/5/10.
