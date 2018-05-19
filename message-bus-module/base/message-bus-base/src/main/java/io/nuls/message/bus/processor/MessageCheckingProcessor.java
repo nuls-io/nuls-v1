@@ -37,8 +37,10 @@ public class MessageCheckingProcessor<E extends BaseMessage> implements EventHan
                 return;
             }
             if (commonDigestTx && messageCacheService.kownTheMessage(((CommonDigestMessage) message).getMsgBody())) {
+                System.out.println("discard:" + ((CommonDigestMessage) message).getMsgBody());
                 processDataDisruptorMessage.setStoped(true);
             } else if (messageCacheService.kownTheMessage(message.getHash())) {
+                System.out.println("discard2:" + message.getClass());
                 processDataDisruptorMessage.setStoped(true);
             } else {
                 messageCacheService.cacheRecievedMessageHash(message.getHash());

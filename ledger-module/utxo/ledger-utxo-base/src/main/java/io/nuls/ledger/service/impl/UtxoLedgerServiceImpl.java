@@ -299,7 +299,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 if(null == fromInDBorList) {
                     // 如果既不存在于txList的to中，又不存在于数据库中，那么这是一笔问题数据，进一步检查是否存在这笔交易，交易有就是双花，没有就是孤儿交易，则返回失败
                     if(null != utxoLedgerTransactionStorageService.getTxBytes(LedgerUtil.getTxHashBytes(fromBytes))) {
-                        return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT);
+                        return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT, "no UTXO in DB&&txList, had one tx.");
                     } else {
                         return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.ORPHAN_TX);
                     }
@@ -326,7 +326,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
                 // 验证双花
                 if(!set.add(asString(fromBytes))) {
-                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT);
+                    return ValidateResult.getFailedResult(CLASS_NAME , LedgerErrorCode.LEDGER_DOUBLE_SPENT, "duplicate utxo in itself.");
                 }
                 fromTotal = fromTotal.add(from.getNa());
             }
