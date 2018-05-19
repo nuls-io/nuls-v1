@@ -46,6 +46,7 @@ import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -190,11 +191,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         CoinDataResult coinDataResult = new CoinDataResult();
         List<Coin> rawCoinList = storageService.getCoinList(address);
         List<Coin> coinList = new ArrayList<>();
-        if (coinList.isEmpty()) {
+        if (rawCoinList.isEmpty()) {
             coinDataResult.setEnough(false);
             return coinDataResult;
         }
-        Collections.sort(coinList, CoinComparator.getInstance());
+        Collections.sort(rawCoinList, CoinComparator.getInstance());
 
         Set<byte[]> usedKeyset = getTmpUsedCoinKeySet();
         for(Coin coin:rawCoinList){
@@ -206,6 +207,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         boolean enough = false;
         List<Coin> coins = new ArrayList<>();
         Na values = Na.ZERO;
+        //将所有余额从小到大排序后，累计未花费的余额
         for (int i = 0; i < coinList.size(); i++) {
             Coin coin = coinList.get(i);
             if (!coin.usable()) {
@@ -213,21 +215,31 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             coins.add(coin);
             size += coin.size();
+            if (i == 127) {
+                size += 1;
+            }
+            //每次累加一条未花费余额时，需要重新计算手续费
             Na fee = TransactionFeeCalculator.getFee(size);
             values = values.add(coin.getNa());
             if (values.isGreaterOrEquals(amount.add(fee))) {
-                enough = true;
-                coinDataResult.setEnough(true);
-                coinDataResult.setFee(fee);
-                coinDataResult.setCoinList(coins);
-
+                //余额足够后，需要判断是否找零，如果有找零，则需要重新计算手续费
                 Na change = values.subtract(amount.add(fee));
                 if (change.isGreaterThan(Na.ZERO)) {
                     Coin changeCoin = new Coin();
                     changeCoin.setOwner(address);
                     changeCoin.setNa(change);
+
+                    fee = TransactionFeeCalculator.getFee(size + changeCoin.size());
+                    if (amount.add(fee).isLessThan(values)) {
+                        continue;
+                    }
                     coinDataResult.setChange(changeCoin);
                 }
+
+                enough = true;
+                coinDataResult.setEnough(true);
+                coinDataResult.setFee(fee);
+                coinDataResult.setCoinList(coins);
                 break;
             }
         }
@@ -236,6 +248,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return coinDataResult;
         }
         return coinDataResult;
+    }
+
+    @Override
+    public Transaction getTxByOwner(byte[] owner) {
+        //todo
+        //byte[] txHash = new byte[NulsDigestData.
+        return null;
     }
 
     @Override
@@ -444,6 +463,27 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
+    }
+
+    @Override
+    public Result<List<Coin>> getLockUtxo(byte[] address) {
+        Result<List<Coin>> result = new Result<>();
+        try {
+            result.setSuccess(true);
+            List<Coin> coinList = storageService.getCoinList(address);
+            List<Coin> lockCoinList = new ArrayList<>();
+            for (Coin coin : coinList) {
+                if (coin != null && !coin.usable()) {
+                    lockCoinList.add(coin);
+                }
+            }
+            Collections.sort(coinList, CoinComparator.getInstance());
+            result.setData(lockCoinList);
+        } catch (NulsException e) {
+            Log.error(e);
+            result.setSuccess(false);
+        }
+        return result;
     }
 
     protected Result<Integer> saveTransaction(Transaction tx, byte status) {
