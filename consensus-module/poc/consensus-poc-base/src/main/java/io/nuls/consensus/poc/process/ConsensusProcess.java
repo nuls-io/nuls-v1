@@ -27,8 +27,8 @@ package io.nuls.consensus.poc.process;
 
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
-import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.config.ConsensusConfig;
+import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
@@ -43,9 +43,9 @@ import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
+import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.util.ConsensusTool;
-import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
@@ -338,7 +338,12 @@ public class ConsensusProcess {
                 if (validateResult.getData() instanceof Transaction) {
                     packingTxList.remove(validateResult.getData());
                 } else if (validateResult.getData() instanceof List) {
-                    packingTxList.removeAll((List<Transaction>) validateResult.getData());
+                    List<Transaction> list = (List<Transaction>) validateResult.getData();
+                    if (list.size() == 2) {
+                        packingTxList.remove(list.get(1));
+                    } else {
+                        packingTxList.removeAll(list);
+                    }
                 } else if (validateResult.getData() == null) {
                     Log.error("Cann't find the wrong transaction!");
                 }

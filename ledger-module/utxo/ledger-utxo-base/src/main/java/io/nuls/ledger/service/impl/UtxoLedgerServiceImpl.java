@@ -67,10 +67,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER);
         }
         try {
-            //test
+            //TestLog+
             if("io.nuls.protocol.model.tx.TransferTransaction".equals(tx.getClass().getName())) {
-                Log.info("转账交易开始========================");
+                Log.info("==============转账交易开始");
             }
+            //TestLog-
             // 保存CoinData
             Result result = saveCoinData(tx);
             if(result.isFailed()) {
@@ -103,15 +104,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         byte[] txHashBytes = tx.getHash().serialize();
         BatchOperation batch = utxoLedgerUtxoStorageService.createWriteBatch();
         CoinData coinData = tx.getCoinData();
+        //TestLog+
         Log.info("=============="+tx.getClass().getSimpleName()+"交易：hash-"+tx.getHash().getDigestHex());
+        //TestLog-
         if (coinData != null) {
             // 删除utxo已花费 - from
             List<Coin> froms = coinData.getFrom();
             for (Coin from : froms) {
-                //Test
+                //TestLog+
                 Coin preFrom = utxoLedgerUtxoStorageService.getUtxo(from.getOwner());
                 if(preFrom != null)
                     Log.info("=============="+tx.getClass().getSimpleName()+"花费：address-"+ Base58.encode(preFrom.getOwner())+", amount-"+preFrom.getNa().getValue());
+                //TestLog-
                 batch.delete(from.getOwner());
             }
             // 保存utxo - to
@@ -119,9 +123,10 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             byte[] indexBytes;
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
-                    //System.out.println("saveCoinData: " + tx.getHash().getDigestHex() + ", " + i);
+                    //TestLog+
                     Coin to = tos.get(i);
                     Log.info("=============="+tx.getClass().getSimpleName()+"存入：address-"+ Base58.encode(to.getOwner())+", amount-"+to.getNa().getValue());
+                    //TestLog-
                     batch.put(Arrays.concatenate(txHashBytes, new VarInt(i).encode()), tos.get(i).serialize());
                 } catch (IOException e) {
                     Log.error(e);
@@ -302,7 +307,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             for (Coin from : froms) {
                 fromBytes = from.getOwner();
                 // 验证是否可花费, 校验的coinData的fromUTXO，检查数据库中或者txList中是否存在此UTXO
-                //System.out.println("getUTXO: hash-" + LedgerUtil.getTxHash(fromBytes) + ", index-" + LedgerUtil.getIndex(fromBytes));
+                //Log.info("getUTXO: hash-" + LedgerUtil.getTxHash(fromBytes) + ", index-" + LedgerUtil.getIndex(fromBytes));
                 fromInDBorList = utxoLedgerUtxoStorageService.getUtxo(fromBytes);
                 if(fromInDBorList == null) {
                     fromInDBorList = validateUtxoMap.get(asString(fromBytes));
@@ -421,7 +426,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     private String asString(byte[] bytes) {
         AssertUtil.canNotEmpty(bytes);
-        return Base58.encode(bytes);
+        return Base64.getEncoder().encodeToString(bytes);
     }
 
     @Override

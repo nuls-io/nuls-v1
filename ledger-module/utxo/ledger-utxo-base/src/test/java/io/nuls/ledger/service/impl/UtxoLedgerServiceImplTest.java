@@ -187,7 +187,8 @@ public class UtxoLedgerServiceImplTest {
         Assert.assertEquals(new Slice(tx3.getCoinData().getFrom().get(2).serialize()), new Slice(from3Coin2));
     }
 
-    private Transaction initTxData(Transaction tx) throws NulsException, IOException {
+    private Transaction initTxDataForTestVerifyCoinData(Transaction tx) throws NulsException, IOException {
+        allList.remove(3);
         ECKey ecKey1 = new ECKey();
         ECKey ecKey2 = new ECKey();
         TransferTransaction preTx = createTransferTransaction(ecKey1, null, ecKey2, Na.ZERO);
@@ -235,7 +236,7 @@ public class UtxoLedgerServiceImplTest {
     public void verifyCoinData() throws IOException, NulsException {
         recoveryTx3Data();
         Transaction tx3 = allList.get(3);
-        Transaction preTx = initTxData(tx3);
+        Transaction preTx = initTxDataForTestVerifyCoinData(tx3);
         byte[] preTxHashBytes = preTx.getHash().serialize();
 
         CoinData from3 = tx3.getCoinData();
@@ -325,14 +326,25 @@ public class UtxoLedgerServiceImplTest {
         Assert.assertEquals(LedgerErrorCode.INVALID_INPUT.getCode(), result.getErrorCode().getCode());
         utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(3).getOwner());
 
+
         // 是否可花费，查数据库中或者txList中是否存在UTXO，不在toList又不在数据库中，但存在这笔交易，测试期望是失败 - 双花交易
         from3.getFrom().remove(from3.getFrom().size() - 1);
-        ledgerService.saveTx(tx3);
+        Coin utxo = utxoLedgerUtxoStorageService.getUtxo(from3.getFrom().get(0).getOwner());
+        utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(0).getOwner());
         result = ledgerService.verifyCoinData(tx3, allList);
         System.out.println(result.getErrorCode().getCode());
         Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), result.getErrorCode().getCode());
-        ledgerService.rollbackTx(tx3);
+        utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(0).getOwner(), utxo);
 
+
+        // 是否可花费，查数据库中或者txList中是否存在UTXO，在数据库中不存在而在toList中存在，测试期望是成功
+        ledgerService.rollbackTx(preTx);
+        allList.add(preTx);
+        result = ledgerService.verifyCoinData(tx3, allList);
+        System.out.println(result);
+        Assert.assertTrue(result.isSuccess());
+        ledgerService.saveTx(preTx);
+        allList.remove(allList.size() - 1);
 
 
         // 是否可花费，查数据库中或者txList中是否存在UTXO，不在toList又不在数据库中，不存在这笔交易，测试期望是失败 - 孤儿交易
