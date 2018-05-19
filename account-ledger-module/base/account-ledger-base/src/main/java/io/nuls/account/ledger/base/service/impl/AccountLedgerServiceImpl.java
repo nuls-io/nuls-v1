@@ -136,7 +136,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result<List<Transaction>> getAllUnconfirmedTransaction(){
+    public Result<List<Transaction>> getAllUnconfirmedTransaction() {
         List<Transaction> localTxList = storageService.loadAllTempList().getData();
         return Result.getSuccess().setData(localTxList);
     }
@@ -445,15 +445,18 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
 
-        // 确认先刷新账户是否就不存在这个问题了 todo, when the node is downloading blocks, the txs in newly downloaded blocks will miss
-
-        long height = NulsContext.getInstance().getBestHeight();
-        for (int i = 0; i <= height; i++) {
-            List<NulsDigestData> txs = blockService.getBlock(i).getData().getTxHashList();
-            for (int j = 0; j < txs.size(); j++) {
-                Transaction tx = ledgerService.getTx(txs.get(j));
-                saveTransaction(tx, addressBytes, TransactionInfo.CONFIRMED);
+        long start = 0;
+        long end = NulsContext.getInstance().getBestHeight();
+        while (start < end) {
+            for (long i = start; i <= end; i++) {
+                List<NulsDigestData> txs = blockService.getBlock(i).getData().getTxHashList();
+                for (int j = 0; j < txs.size(); j++) {
+                    Transaction tx = ledgerService.getTx(txs.get(j));
+                    saveTransaction(tx, addressBytes, TransactionInfo.CONFIRMED);
+                }
             }
+            start = end;
+            end = NulsContext.getInstance().getBestHeight();
         }
         try {
             balanceProvider.refreshBalance(addressBytes);
