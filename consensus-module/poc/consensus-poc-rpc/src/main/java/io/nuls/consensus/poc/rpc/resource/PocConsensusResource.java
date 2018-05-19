@@ -311,6 +311,10 @@ public class PocConsensusResource {
         if (result1.isFailed()) {
             return result1;
         }
+        result1 = this.ledgerService.verifyCoinData(tx, this.accountLedgerService.getAllUnconfirmedTransaction().getData());
+        if (result1.isFailed()) {
+            return result1;
+        }
         Result saveResult = accountLedgerService.saveUnconfirmedTransaction(tx);
         if (saveResult.isFailed()) {
             return saveResult;
