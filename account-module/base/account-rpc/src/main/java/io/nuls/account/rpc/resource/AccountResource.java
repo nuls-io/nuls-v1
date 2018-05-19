@@ -61,7 +61,7 @@ public class AccountResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "创建账户 [3.3.1]", notes = "result.data: List<AccountDto>")
+    @ApiOperation(value = "[创建] 创建账户 ", notes = "result.data: List<AccountDto>")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = ArrayList.class)
     })
@@ -86,7 +86,7 @@ public class AccountResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询账户列表 [3.3.4]", notes = "result.data: Page<AccountDto>")
+    @ApiOperation(value = "[查询] 查询账户列表 [3.3.4]", notes = "result.data: Page<AccountDto>")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = AccountDto.class)
     })
@@ -127,7 +127,7 @@ public class AccountResource {
     @GET
     @Path("/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("查询账户信息 [3.3.2]")
+    @ApiOperation("[查询] 查询账户信息 [3.3.2]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = AccountDto.class)
     })
@@ -146,7 +146,7 @@ public class AccountResource {
     @POST
     @Path("/alias/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("设置别名 [3.3.6]")
+    @ApiOperation("[别名] 设置别名 [3.3.6]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
@@ -168,7 +168,7 @@ public class AccountResource {
     @GET
     @Path("/balance/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("查询账户余额 [3.3.3]")
+    @ApiOperation("[余额] 查询账户余额 [3.3.3]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = BalanceDto.class)
     })
@@ -194,7 +194,7 @@ public class AccountResource {
     @GET
     @Path("/assets/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询账户资产 [3.3.8]", notes = "result.data: List<AssetDto>")
+    @ApiOperation(value = "[资产] 查询账户资产 [3.3.8]", notes = "result.data: List<AssetDto>")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = AssetDto.class)
     })
@@ -222,7 +222,7 @@ public class AccountResource {
     @POST
     @Path("/prikey/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("查询账户私钥，只能查询本地创建或导入的账户 [3.3.7]")
+    @ApiOperation("[私钥查询] 查询账户私钥，只能查询本地创建或导入的账户 [3.3.7]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
@@ -240,7 +240,7 @@ public class AccountResource {
     @POST
     @Path("/lock/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "清除缓存的解锁账户", notes = "Clear the cache unlock account.")
+    @ApiOperation(value = "[锁账户] 清除缓存的锁定账户", notes = "Clear the cache unlock account.")
     public Result lock(@ApiParam(name = "address", value = "账户地址", required = true) @PathParam("address") String address) {
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
@@ -256,7 +256,7 @@ public class AccountResource {
     @POST
     @Path("/unlock/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "解锁账户", notes = "")
+    @ApiOperation(value = "[解锁] 解锁账户", notes = "")
     public Result unlock(@ApiParam(name = "address", value = "账户地址", required = true)
                          @PathParam("address") String address,
                          @ApiParam(name = "password", value = "账户密码", required = true)
@@ -293,7 +293,7 @@ public class AccountResource {
     @POST
     @Path("/password/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "设置账户密码")
+    @ApiOperation(value = "[设密码] 设置账户密码")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
@@ -317,7 +317,7 @@ public class AccountResource {
     @PUT
     @Path("/password/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "根据原密码修改账户密码")
+    @ApiOperation(value = "[修改密码] 根据原密码修改账户密码")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
@@ -349,7 +349,7 @@ public class AccountResource {
     @PUT
     @Path("/password/prikey/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "根据私钥修改账户密码")
+    @ApiOperation(value = "[修改密码] 根据私钥修改账户密码")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
@@ -377,7 +377,7 @@ public class AccountResource {
     @POST
     @Path("/export/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "账户备份，导出AccountKeyStore字符串 ")
+    @ApiOperation(value = "[导出] 账户备份，导出AccountKeyStore字符串 ")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
@@ -402,7 +402,7 @@ public class AccountResource {
     @POST
     @Path("/import")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "根据AccountKeyStore导入账户")
+    @ApiOperation(value = "[导入] 根据AccountKeyStore导入账户")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
@@ -428,7 +428,7 @@ public class AccountResource {
     @POST
     @Path("/import/pri")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "根据私钥导入账户", notes = "返回账户地址")
+    @ApiOperation(value = "[导入] 根据私钥导入账户", notes = "返回账户地址")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
@@ -453,7 +453,7 @@ public class AccountResource {
     @POST
     @Path("/remove/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "移除账户", notes = "Nuls_RPC_API文档[3.4.9]")
+    @ApiOperation(value = "[移除] 移除账户", notes = "Nuls_RPC_API文档[3.4.9]")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
