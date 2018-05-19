@@ -46,6 +46,7 @@ import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -228,6 +229,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
+    public Transaction getTxByOwner(byte[] owner) {
+        //todo
+        //byte[] txHash = new byte[NulsDigestData.
+        return null;
+    }
+
+    @Override
     public boolean isLocalAccount(byte[] address) {
         if (localAccountList == null || localAccountList.size() == 0) {
             return false;
@@ -337,7 +345,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             List<Coin> tos = coinData.getTo();
             byte[] indexBytes;
             for (int i = 0, length = tos.size(); i < length; i++) {
-                if(tos.get(i).getLockTime() == -1) {
+                if (tos.get(i).getLockTime() == -1) {
                     tos.get(i).setLockTime(0);
                     try {
                         byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
@@ -373,7 +381,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             // lock utxo - to
             List<Coin> tos = coinData.getTo();
             for (int i = 0, length = tos.size(); i < length; i++) {
-                if(tos.get(i).getLockTime() == -1) {
+                if (tos.get(i).getLockTime() == -1) {
                     try {
                         byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
                         storageService.saveUTXO(outKey, tos.get(i).serialize());
@@ -433,6 +441,27 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
+    }
+
+    @Override
+    public Result<List<Coin>> getLockUtxo(byte[] address) {
+        Result<List<Coin>> result = new Result<>();
+        try {
+            result.setSuccess(true);
+            List<Coin> coinList = storageService.getCoinList(address);
+            List<Coin> lockCoinList = new ArrayList<>();
+            for (Coin coin : coinList) {
+                if (coin != null && !coin.usable()) {
+                    lockCoinList.add(coin);
+                }
+            }
+            Collections.sort(coinList, CoinComparator.getInstance());
+            result.setData(lockCoinList);
+        } catch (NulsException e) {
+            Log.error(e);
+            result.setSuccess(false);
+        }
+        return result;
     }
 
     protected Result<Integer> saveTransaction(Transaction tx, byte status) {
@@ -608,11 +637,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             // save utxo - to
             List<Coin> tos = coinData.getTo();
             byte[] indexBytes;
-            Map<byte[],byte[]> toMap = new HashMap<>();
+            Map<byte[], byte[]> toMap = new HashMap<>();
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
                     byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                    toMap.put(outKey,tos.get(i).serialize());
+                    toMap.put(outKey, tos.get(i).serialize());
                 } catch (IOException e) {
                     throw new NulsRuntimeException(e);
                 }
