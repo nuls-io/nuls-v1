@@ -134,7 +134,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result<Integer> rollback(Transaction tx) {
         if (!isLocalTransaction(tx)) {
-            return Result.getFailed().setData(new Integer(0));
+            return Result.getSuccess().setData(new Integer(0));
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
@@ -490,7 +490,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
         List<byte[]> addresses = getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
-            return Result.getFailed().setData(new Integer(0));
+            return Result.getSuccess().setData(new Integer(0));
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
@@ -522,7 +522,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         destAddresses.add(address);
         List<byte[]> addresses = getRelatedAddresses(tx, destAddresses);
         if (addresses == null || addresses.size() == 0) {
-            return Result.getFailed().setData(new Integer(0));
+            return Result.getSuccess().setData(new Integer(0));
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
