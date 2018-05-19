@@ -66,12 +66,12 @@ public class AliasTxProcessor implements TransactionProcessor<AliasTransaction> 
                     AliasTransaction aliasTransaction = (AliasTransaction) transaction;
                     Alias alias = aliasTransaction.getTxData();
                     if (!aliasNames.add(alias.getAlias())) {
-                        return ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.FAILED,
-                                "There is another AliasTransaction set the same alias!");
+                        return (ValidateResult)ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.FAILED,
+                                "There is another AliasTransaction set the same alias!").setData(aliasTransaction);
                     }
                     if (!accountAddress.add(Hex.encode(alias.getAddress()))) {
-                        return ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.FAILED,
-                                "An account can only set one alias.!");
+                        return (ValidateResult)ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.FAILED,
+                                "An account can only set one alias.!").setData(aliasTransaction);
                     }
                     break;
             }

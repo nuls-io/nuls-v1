@@ -67,7 +67,7 @@ public class AccountServiceImpl implements AccountService {
             List<String> resultList = new ArrayList<>();
             for (int i = 0; i < count; i++) {
                 Account account = AccountTool.createAccount();
-                if (null != password) {
+                if (StringUtils.isNotBlank(password)) {
                     account.encrypt(password);
                 }
                 accounts.add(account);
