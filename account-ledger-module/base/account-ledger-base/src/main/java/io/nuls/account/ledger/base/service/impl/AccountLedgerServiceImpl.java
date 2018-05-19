@@ -230,7 +230,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     changeCoin.setNa(change);
 
                     fee = TransactionFeeCalculator.getFee(size + changeCoin.size());
-                    if (amount.add(fee).isLessThan(values)) {
+                    if ( values.isLessThan(amount.add(fee))) {
                         continue;
                     }
                     coinDataResult.setChange(changeCoin);
