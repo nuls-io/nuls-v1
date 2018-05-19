@@ -41,14 +41,16 @@ import java.util.Set;
  */
 public class CancelDeposit extends TransactionLogicData {
 
-    private transient byte[] address;
+    private byte[] address;
 
     private NulsDigestData joinTxHash;
 
     @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
-        addressSet.add(this.address);
+        if (null != address) {
+            addressSet.add(this.address);
+        }
         return addressSet;
     }
 

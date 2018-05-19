@@ -316,6 +316,14 @@ public class ConsensusProcess {
                 Log.debug(result.getMessage());
                 continue;
             }
+            result = ledgerService.verifyCoinData(tx,packingTxList);
+            if (result.isFailed()) {
+                if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
+                    txMemoryPool.add(tx, true);
+                }
+                Log.debug(result.getMessage());
+                continue;
+            }
             outHashList.add(tx.getHash());
 
             tx.setBlockHeight(bd.getHeight());

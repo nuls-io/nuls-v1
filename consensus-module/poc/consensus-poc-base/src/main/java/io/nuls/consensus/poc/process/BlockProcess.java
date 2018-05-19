@@ -52,6 +52,7 @@ import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
@@ -157,22 +158,22 @@ public class BlockProcess {
                     block.verifyWithException();
                     List<Transaction> verifiedList = new ArrayList<>();
                     for (Transaction tx : block.getTxs()) {
-                        if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
+                        if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
                             continue;
                         }
-                        ValidateResult result = ledgerService.verifyCoinData(tx.getCoinData(), verifiedList);
+                        ValidateResult result = ledgerService.verifyCoinData(tx, verifiedList);
                         if (result.isSuccess()) {
                             result = tx.verify();
-                            if(result.isFailed()){
-                                Log.info(result.getMessage());
+                            if (result.isFailed()) {
+                                Log.info("failed message:" + result.getMessage());
                                 success = false;
                                 break;
-                            }else{
+                            } else {
                                 verifiedList.add(tx);
                             }
                         } else {
                             success = false;
-                            Log.info(result.getMessage());
+                            Log.info("failed message:" + result.getMessage());
                             break;
                         }
                     }
@@ -182,7 +183,7 @@ public class BlockProcess {
                     ValidateResult validateResult1 = tansactionService.conflictDetect(block.getTxs());
                     if (validateResult1.isFailed()) {
                         success = false;
-                        Log.info(validateResult1.getMessage());
+                        Log.info("failed message:" + validateResult1.getMessage());
                         break;
                     }
                     // save block

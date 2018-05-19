@@ -327,7 +327,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public Result unlockCoinData(Transaction tx) {
         List<byte[]> addresses = getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
-            return Result.getFailed().setData(new Integer(0));
+            return Result.getSuccess();
         }
         byte status = TransactionInfo.CONFIRMED;
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
@@ -364,7 +364,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public Result rollbackUnlockTxCoinData(Transaction tx) {
         List<byte[]> addresses = getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
-            return Result.getFailed().setData(new Integer(0));
+            return Result.getSuccess();
         }
         byte status = TransactionInfo.CONFIRMED;
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
