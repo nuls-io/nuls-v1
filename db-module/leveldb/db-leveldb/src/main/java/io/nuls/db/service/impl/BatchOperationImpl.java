@@ -51,8 +51,7 @@ public class BatchOperationImpl implements BatchOperation {
         this.area = area;
     }
 
-    private final List<Entry<byte[], byte[]>> batchPut = new ArrayList<>();
-    private final List<byte[]> batchDelete = new ArrayList<>();
+    private final List<Entry<byte[], byte[]>> batchList = new ArrayList<>();
 
     /**
      * @param key
@@ -64,7 +63,7 @@ public class BatchOperationImpl implements BatchOperation {
         if(key == null || value == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
-        batchPut.add(Maps.immutableEntry(key, value));
+        batchList.add(Maps.immutableEntry(key, value));
         return Result.getSuccess();
     }
 
@@ -93,7 +92,7 @@ public class BatchOperationImpl implements BatchOperation {
         if(key == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
-        batchDelete.add(key);
+        batchList.add(Maps.immutableEntry(key, (byte[]) null));
         return Result.getSuccess();
     }
 
@@ -109,11 +108,15 @@ public class BatchOperationImpl implements BatchOperation {
         WriteBatch batch = null;
         try {
             batch = db.createWriteBatch();
-            for(byte[] key : batchDelete) {
-                batch.delete(key);
-            }
-            for(Entry<byte[], byte[]> entry : batchPut) {
-                batch.put(entry.getKey(), entry.getValue());
+            byte[] key = null, value = null;
+            for(Entry<byte[], byte[]> entry : batchList) {
+                key = entry.getKey();
+                value = entry.getValue();
+                if(value == null) {
+                    batch.delete(key);
+                } else {
+                    batch.put(key, value);
+                }
             }
             db.write(batch);
         } catch (Exception e) {
@@ -129,8 +132,7 @@ public class BatchOperationImpl implements BatchOperation {
                     // skip it
                 }
             }
-            batchPut.clear();
-            batchDelete.clear();
+            batchList.clear();
         }
         return Result.getSuccess();
     }

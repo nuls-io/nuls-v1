@@ -23,7 +23,9 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
@@ -43,8 +45,6 @@ import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
 import java.util.*;
-
-import static io.nuls.core.tools.str.StringUtils.asString;
 
 /**
  * @desription:
@@ -67,6 +67,10 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER);
         }
         try {
+            //test
+            if("io.nuls.protocol.model.tx.TransferTransaction".equals(tx.getClass().getName())) {
+                Log.info("转账交易开始========================");
+            }
             // 保存CoinData
             Result result = saveCoinData(tx);
             if(result.isFailed()) {
@@ -96,13 +100,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     private Result saveCoinData(Transaction tx) throws IOException {
-        byte[] txHashBytes = txHashBytes = tx.getHash().serialize();
+        byte[] txHashBytes = tx.getHash().serialize();
         BatchOperation batch = utxoLedgerUtxoStorageService.createWriteBatch();
         CoinData coinData = tx.getCoinData();
+        Log.info("=============="+tx.getClass().getSimpleName()+"交易：hash-"+tx.getHash().getDigestHex());
         if (coinData != null) {
             // 删除utxo已花费 - from
             List<Coin> froms = coinData.getFrom();
             for (Coin from : froms) {
+                //Test
+                Coin preFrom = utxoLedgerUtxoStorageService.getUtxo(from.getOwner());
+                if(preFrom != null)
+                    Log.info("=============="+tx.getClass().getSimpleName()+"花费：address-"+ Base58.encode(preFrom.getOwner())+", amount-"+preFrom.getNa().getValue());
                 batch.delete(from.getOwner());
             }
             // 保存utxo - to
@@ -111,6 +120,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
                     //System.out.println("saveCoinData: " + tx.getHash().getDigestHex() + ", " + i);
+                    Coin to = tos.get(i);
+                    Log.info("=============="+tx.getClass().getSimpleName()+"存入：address-"+ Base58.encode(to.getOwner())+", amount-"+to.getNa().getValue());
                     batch.put(Arrays.concatenate(txHashBytes, new VarInt(i).encode()), tos.get(i).serialize());
                 } catch (IOException e) {
                     Log.error(e);
@@ -294,7 +305,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 //System.out.println("getUTXO: hash-" + LedgerUtil.getTxHash(fromBytes) + ", index-" + LedgerUtil.getIndex(fromBytes));
                 fromInDBorList = utxoLedgerUtxoStorageService.getUtxo(fromBytes);
                 if(fromInDBorList == null) {
-                    fromInDBorList = validateUtxoMap.get(fromBytes);
+                    fromInDBorList = validateUtxoMap.get(asString(fromBytes));
                 }
                 if(null == fromInDBorList) {
                     // 如果既不存在于txList的to中，又不存在于数据库中，那么这是一笔问题数据，进一步检查是否存在这笔交易，交易有就是双花，没有就是孤儿交易，则返回失败
@@ -406,6 +417,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             }
         }
         return ValidateResult.getSuccessResult();
+    }
+
+    private String asString(byte[] bytes) {
+        AssertUtil.canNotEmpty(bytes);
+        return Base58.encode(bytes);
     }
 
     @Override
