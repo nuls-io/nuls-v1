@@ -32,6 +32,7 @@ import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 
@@ -74,6 +75,15 @@ public interface AccountLedgerService {
      */
     Result<Integer> saveConfirmedTransactionList(List<Transaction> txs);
 
+
+    /**
+     * <p>
+     * get an .unconfirmed transaction
+     *
+     * @param hash transaction hash
+     * @return return the tx count saved,
+     */
+    Result<Transaction> getUnconfirmedTransaction(NulsDigestData hash);
 
     /**
      * <p>
