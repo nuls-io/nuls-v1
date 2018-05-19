@@ -191,11 +191,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         CoinDataResult coinDataResult = new CoinDataResult();
         List<Coin> rawCoinList = storageService.getCoinList(address);
         List<Coin> coinList = new ArrayList<>();
-        if (coinList.isEmpty()) {
+        if (rawCoinList.isEmpty()) {
             coinDataResult.setEnough(false);
             return coinDataResult;
         }
-        Collections.sort(coinList, CoinComparator.getInstance());
+        Collections.sort(rawCoinList, CoinComparator.getInstance());
 
         Set<byte[]> usedKeyset = getTmpUsedCoinKeySet();
         for(Coin coin:rawCoinList){
