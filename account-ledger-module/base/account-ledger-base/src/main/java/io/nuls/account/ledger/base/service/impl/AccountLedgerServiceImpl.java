@@ -156,7 +156,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         } else {
             txListToRollback = txs;
         }
-        for (int i = 0; i < txListToRollback.size(); i++) {
+        for (int i = txListToRollback.size() - 1; i >= 0; i--) {
             rollback(txListToRollback.get(i));
         }
 
