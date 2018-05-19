@@ -32,7 +32,6 @@ import io.nuls.core.tools.crypto.Hex;
 import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Result;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import java.util.List;

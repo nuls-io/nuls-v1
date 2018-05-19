@@ -20,6 +20,7 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.protocol.message.TransactionMessage;
 import io.nuls.protocol.service.TransactionService;
@@ -56,6 +57,9 @@ public class AliasService {
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    private LedgerService ledgerService;
 
     /**
      * 设置别名
@@ -121,6 +125,10 @@ public class AliasService {
             NulsSignData nulsSignData = accountService.signData(tx.serializeForHash(), account, password);
             P2PKHScriptSig scriptSig = new P2PKHScriptSig(nulsSignData, account.getPubKey());
             tx.setScriptSig(scriptSig.serialize());
+            Result result = ledgerService.verifyCoinData(tx, accountLedgerService.getAllUnconfirmedTransaction().getData());
+            if(result.isFailed()){
+                Result.getFailed(AccountErrorCode.FAILED);
+            }
             tx.verifyWithException();
             Result saveResult = accountLedgerService.saveUnconfirmedTransaction(tx);
             if (saveResult.isFailed()) {
