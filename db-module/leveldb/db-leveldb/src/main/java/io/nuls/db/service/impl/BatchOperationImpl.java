@@ -127,6 +127,7 @@ public class BatchOperationImpl implements BatchOperation {
      */
     @Override
     public Result executeBatch() {
+        // 检查逻辑关闭
         if(checkClose()) {
             return FAILED_BATCH_CLOSE;
         }
