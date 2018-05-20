@@ -7,10 +7,10 @@ import io.nuls.kernel.validate.ValidateResult;
  * @author Niels
  * @date 2018/5/14
  */
-public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunishTransaction>{
+public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunishTransaction> {
     @Override
     public ValidateResult validate(RedPunishTransaction data) {
         // todo auto-generated method stub
-        return null;
+        return ValidateResult.getSuccessResult();
     }
 }

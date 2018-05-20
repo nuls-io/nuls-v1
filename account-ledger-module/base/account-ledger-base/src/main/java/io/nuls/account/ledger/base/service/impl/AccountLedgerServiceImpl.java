@@ -362,7 +362,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result unlockCoinData(Transaction tx) {
+    public Result unlockCoinData(Transaction tx, long newLockTime) {
         List<byte[]> addresses = getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
             return Result.getSuccess();
@@ -384,7 +384,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             byte[] indexBytes;
             for (int i = 0, length = tos.size(); i < length; i++) {
                 if (tos.get(i).getLockTime() == -1) {
-                    tos.get(i).setLockTime(0);
+                    tos.get(i).setLockTime(newLockTime);
                     try {
                         byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
                         storageService.saveUTXO(outKey, tos.get(i).serialize());
