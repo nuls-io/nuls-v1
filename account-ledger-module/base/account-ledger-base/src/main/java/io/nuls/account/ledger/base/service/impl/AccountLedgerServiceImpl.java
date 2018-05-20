@@ -132,7 +132,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result<Transaction> getUnconfirmedTransaction(NulsDigestData hash) {
-        return null;
+        return storageService.getTempTx(hash);
     }
 
     @Override
@@ -203,6 +203,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             CoinDataResult coinDataResult = new CoinDataResult();
             List<Coin> rawCoinList = storageService.getCoinList(address);
             List<Coin> coinList = new ArrayList<>();
+            for(Coin coin : rawCoinList){
+                byte[] ownerBytes = coin.getOwner();
+                byte[] hashBytes = new byte[34];
+                System.arraycopy(ownerBytes,0,hashBytes,0,34);
+                VarInt index = new VarInt(ownerBytes,+34);
+                Log.info("Coin_owner: "+Hex.encode(coin.getOwner())+" hash_index: "+ Hex.encode(hashBytes)+"_"+index.value+" Coin_Na: "+coin.getNa().toString());
+            }
+
             if (rawCoinList.isEmpty()) {
                 coinDataResult.setEnough(false);
                 return coinDataResult;
@@ -670,12 +678,16 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 Transaction sourceTx = null;
                 try {
                     sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
+                    if (sourceTx == null) {
+                        sourceTx = getUnconfirmedTransaction(NulsDigestData.fromDigestHex(Hex.encode(fromSource))).getData();
+                    }
                 } catch (Exception e) {
                     throw new NulsRuntimeException(e);
                 }
-                if (sourceTx == null) {
-                    return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
+                if(sourceTx == null){
+                    return Result.getFailed();
                 }
+
                 byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
                 fromsSet.add(org.spongycastle.util.Arrays.concatenate(address, from.getOwner()));
             }

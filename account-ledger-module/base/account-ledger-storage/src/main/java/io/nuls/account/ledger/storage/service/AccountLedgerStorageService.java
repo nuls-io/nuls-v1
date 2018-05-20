@@ -63,5 +63,7 @@ public interface AccountLedgerStorageService {
 
     Result deleteTempTx(Transaction tx);
 
+    Result<Transaction> getTempTx(NulsDigestData hash);
+
     Result<List<Transaction>> loadAllTempList();
 }

@@ -227,6 +227,18 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     }
 
     @Override
+    public Result<Transaction> getTempTx(NulsDigestData hash){
+        try{
+            byte[] txBytes = dbService.get(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, hash.serialize());
+            Transaction tx = TransactionManager.getInstances(new NulsByteBuffer(txBytes),1).get(0);
+            return Result.getSuccess().setData(tx);
+        }catch (Exception e){
+            Log.info("getTempTx error");
+            return Result.getFailed();
+        }
+    }
+
+    @Override
     public Result<List<Transaction>> loadAllTempList() {
         Result result;
         List<Transaction> tmpList = new ArrayList<>();
