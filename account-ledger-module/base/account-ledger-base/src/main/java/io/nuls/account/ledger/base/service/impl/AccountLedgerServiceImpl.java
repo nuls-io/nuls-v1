@@ -59,6 +59,7 @@ import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.utils.VarInt;
+import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 
 import io.nuls.ledger.service.LedgerService;
@@ -342,7 +343,15 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             sig.setSignData(accountService.signData(tx.getHash().serialize(), account, password));
             tx.setScriptSig(sig.serialize());
 
-            tx.verifyWithException();
+            ValidateResult result1 = tx.verify();
+            if (result1.isFailed()) {
+                return result1;
+            }
+            result1 = this.ledgerService.verifyCoinData(tx, this.getAllUnconfirmedTransaction().getData());
+            if (result1.isFailed()) {
+                return result1;
+            }
+
             Result saveResult = saveUnconfirmedTransaction(tx);
             if (saveResult.isFailed()) {
                 return saveResult;
