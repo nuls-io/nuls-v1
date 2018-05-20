@@ -1,5 +1,6 @@
 package io.nuls.consensus.poc.tx.processor;
 
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
@@ -31,15 +32,12 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
     @Autowired
     private PunishLogStorageService storageService;
 
-    @Autowired
-    private StopAgentTxProcessor stopAgentTxProcessor;
-
     @Override
     public Result onRollback(RedPunishTransaction tx, Object secondaryData) {
         RedPunishData punishData = tx.getTxData();
         List<byte[]> deletedList = new ArrayList<>();
         byte[] address = punishData.getAddress();
-        boolean result = storageService.delete(this.getPoKey(address, (byte) PunishType.RED.getCode(), tx.getBlockHeight()));
+        boolean result = storageService.delete(this.getPoKey(address, PunishType.RED.getCode(), tx.getBlockHeight()));
         if (!result) {
             BlockHeader header = (BlockHeader) secondaryData;
             BlockRoundData roundData = new BlockRoundData(header.getExtend());
@@ -74,17 +72,14 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
         boolean result = storageService.save(po);
         if (!result) {
             for (byte[] bytes : savedList) {
-                this.storageService.delete(getPoKey(bytes, (byte) PunishType.RED.getCode(), header.getHeight()));
+                this.storageService.delete(getPoKey(bytes, PunishType.RED.getCode(), header.getHeight()));
             }
             throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollback tx failed!");
         } else {
             savedList.add(punishData.getAddress());
         }
 
-
-
-
-
+        PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
 
 
         return Result.getSuccess();

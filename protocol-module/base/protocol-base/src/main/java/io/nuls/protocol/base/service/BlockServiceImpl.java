@@ -268,6 +268,7 @@ public class BlockServiceImpl implements BlockService {
         BlockHeaderPo po = new BlockHeaderPo();
         po.setHash(block.getHeader().getHash());
         po.setHeight(block.getHeader().getHeight());
+        po.setPreHash(block.getHeader().getPreHash());
         Result result = this.blockHeaderStorageService.removeBlockHerader(po);
         if (result.isFailed()) {
             return result;
