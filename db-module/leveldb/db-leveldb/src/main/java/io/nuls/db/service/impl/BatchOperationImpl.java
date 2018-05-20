@@ -45,13 +45,31 @@ import java.util.Map.Entry;
  */
 public class BatchOperationImpl implements BatchOperation {
 
+    private static final Result FAILED_NULL = Result.getFailed(DBErrorCode.NULL_PARAMETER);
+    private static final Result SUCCESS = Result.getSuccess();
+    private static final Result FAILED_BATCH_CLOSE = Result.getFailed(DBErrorCode.DB_BATCH_CLOSE);
     private String area;
+    private DB db;
+    private WriteBatch batch;
+    private volatile boolean isClose = false;
 
     BatchOperationImpl(String area) {
         this.area = area;
+        db = LevelDBManager.getArea(area);
+        if(db != null) {
+            batch = db.createWriteBatch();
+        }
     }
 
-    private final List<Entry<byte[], byte[]>> batchList = new ArrayList<>();
+    public Result checkBatch() {
+        if(db == null) {
+            return Result.getFailed(DBErrorCode.DB_AREA_NOT_EXIST);
+        }
+        if(batch == null) {
+            return Result.getFailed(DBErrorCode.DB_UNKOWN_EXCEPTION);
+        }
+        return SUCCESS;
+    }
 
     /**
      * @param key
@@ -61,10 +79,10 @@ public class BatchOperationImpl implements BatchOperation {
     @Override
     public Result put(byte[] key, byte[] value) {
         if(key == null || value == null) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+            return FAILED_NULL;
         }
-        batchList.add(Maps.immutableEntry(key, value));
-        return Result.getSuccess();
+        batch.put(key, value);
+        return SUCCESS;
     }
 
     /**
@@ -77,7 +95,7 @@ public class BatchOperationImpl implements BatchOperation {
     @Override
     public <T> Result putModel(byte[] key, T value) {
         if(key == null || value == null) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+            return FAILED_NULL;
         }
         byte[] bytes = LevelDBManager.getModelSerialize(value);
         return put(key, bytes);
@@ -90,10 +108,18 @@ public class BatchOperationImpl implements BatchOperation {
     @Override
     public Result delete(byte[] key) {
         if(key == null) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+            return FAILED_NULL;
         }
-        batchList.add(Maps.immutableEntry(key, (byte[]) null));
-        return Result.getSuccess();
+        batch.delete(key);
+        return SUCCESS;
+    }
+
+    private void close() {
+        this.isClose = true;
+    }
+
+    private boolean checkClose() {
+        return isClose;
     }
 
     /**
@@ -101,39 +127,26 @@ public class BatchOperationImpl implements BatchOperation {
      */
     @Override
     public Result executeBatch() {
-        DB db = LevelDBManager.getArea(area);
-        if(db == null) {
-            return Result.getFailed(DBErrorCode.DB_AREA_NOT_EXIST);
+        if(checkClose()) {
+            return FAILED_BATCH_CLOSE;
         }
-        WriteBatch batch = null;
         try {
-            batch = db.createWriteBatch();
-            byte[] key = null, value = null;
-            for(Entry<byte[], byte[]> entry : batchList) {
-                key = entry.getKey();
-                value = entry.getValue();
-                if(value == null) {
-                    batch.delete(key);
-                } else {
-                    batch.put(key, value);
-                }
-            }
             db.write(batch);
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(KernelErrorCode.DB_UNKOWN_EXCEPTION, e.getMessage());
+            return Result.getFailed(DBErrorCode.DB_UNKOWN_EXCEPTION, e.getMessage());
         } finally {
             // Make sure you close the batch to avoid resource leaks.
-            // 貌似LevelDB未实现此close方法
+            // 貌似LevelDB未实现此close方法, 所以加入一个逻辑关闭
             if(batch != null) {
                 try {
+                    this.close();
                     batch.close();
                 } catch (IOException e) {
                     // skip it
                 }
             }
-            batchList.clear();
         }
-        return Result.getSuccess();
+        return SUCCESS;
     }
 }
