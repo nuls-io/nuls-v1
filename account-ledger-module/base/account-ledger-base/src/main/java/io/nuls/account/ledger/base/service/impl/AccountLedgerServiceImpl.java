@@ -382,16 +382,20 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             // unlock utxo - to
             List<Coin> tos = coinData.getTo();
             byte[] indexBytes;
+            Coin to, needUnLockUtxo;
             for (int i = 0, length = tos.size(); i < length; i++) {
-                if (tos.get(i).getLockTime() == -1) {
-                    tos.get(i).setLockTime(newLockTime);
+                to = tos.get(i);
+                if (to.getLockTime() == -1) {
+                    Coin needUnLockUtxoNew = new Coin(to.getOwner(), to.getNa(), newLockTime);
+                    needUnLockUtxoNew.setFrom(to.getFrom());
                     try {
-                        byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                        storageService.saveUTXO(outKey, tos.get(i).serialize());
+                        byte[] outKey = org.spongycastle.util.Arrays.concatenate(to.getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                        storageService.saveUTXO(outKey, needUnLockUtxoNew.serialize());
                     } catch (IOException e) {
                         throw new NulsRuntimeException(e);
                     }
                     //todo , think about weather to add a transaction history
+                    break;
                 }
             }
         }
@@ -426,6 +430,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     } catch (IOException e) {
                         throw new NulsRuntimeException(e);
                     }
+                    break;
                 }
             }
         }
