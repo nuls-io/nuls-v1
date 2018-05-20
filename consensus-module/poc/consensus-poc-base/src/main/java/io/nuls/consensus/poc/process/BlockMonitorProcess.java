@@ -5,6 +5,7 @@ import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.service.impl.ConsensusPocServiceImpl;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
 
 import java.util.HashSet;
@@ -34,7 +35,8 @@ public class BlockMonitorProcess {
                 break;
             }
         }
-        if (addressSet.size() == 1 && ConsensusConfig.getSeedNodeList().size() > 1) {
+        if ((addressSet.size() == 1 && ConsensusConfig.getSeedNodeList().size() > 1)||
+        NulsContext.getInstance().getBestBlock().getHeader().getTime() < (TimeService.currentTimeMillis() - 120000L)) {
             NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
         }
     }

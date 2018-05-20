@@ -125,7 +125,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 try {
                     //TestLog+
                     Coin to = tos.get(i);
-                    Log.info("=============="+tx.getClass().getSimpleName()+"存入：address-"+ Base58.encode(to.getOwner())+", amount-"+to.getNa().getValue());
                     //TestLog-
                     batch.put(Arrays.concatenate(txHashBytes, new VarInt(i).encode()), tos.get(i).serialize());
                 } catch (IOException e) {
