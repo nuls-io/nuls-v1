@@ -125,7 +125,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 try {
                     //TestLog+
                     Coin to = tos.get(i);
-                    Log.info("=============="+tx.getClass().getSimpleName()+"存入：address-"+ Base58.encode(to.getOwner())+", amount-"+to.getNa().getValue());
                     //TestLog-
                     batch.put(Arrays.concatenate(txHashBytes, new VarInt(i).encode()), tos.get(i).serialize());
                 } catch (IOException e) {
@@ -430,7 +429,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public Result unlockTxCoinData(Transaction tx) throws NulsException {
+    public Result unlockTxCoinData(Transaction tx, long newockTime) throws NulsException {
         if (tx == null || tx.getCoinData() == null) {
             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.NULL_PARAMETER);
         }
@@ -452,7 +451,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_STATUS_CHANGE);
             }
             byte[] txHashBytes = txHashBytes = tx.getHash().serialize();
-            Coin needUnLockUtxoNew = new Coin(needUnLockUtxo.getOwner(), needUnLockUtxo.getNa(), 0);
+            Coin needUnLockUtxoNew = new Coin(needUnLockUtxo.getOwner(), needUnLockUtxo.getNa(), newockTime);
             needUnLockUtxoNew.setFrom(needUnLockUtxo.getFrom());
             Result result = utxoLedgerUtxoStorageService.saveUtxo(Arrays.concatenate(txHashBytes, new VarInt(needUnLockUtxoIndex).encode()), needUnLockUtxoNew);
             if(result.isFailed()) {

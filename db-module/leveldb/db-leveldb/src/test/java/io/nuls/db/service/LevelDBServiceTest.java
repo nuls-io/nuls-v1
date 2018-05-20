@@ -28,6 +28,7 @@ package io.nuls.db.service;
 
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.log.Log;
+import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.entity.DBTestEntity;
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.model.Entry;
@@ -177,6 +178,11 @@ public class LevelDBServiceTest {
         Assert.assertEquals("red1", asString(dbService.get(area, bytes("London1"))));
         Assert.assertEquals("red2", asString(dbService.get(area, bytes("London2"))));
         Assert.assertNull(dbService.get(area, bytes("Qweqwe")));
+
+        // 校验重复执行，期望失败
+        Result result = batch.executeBatch();
+        Assert.assertTrue(result.isFailed());
+        Assert.assertEquals(DBErrorCode.DB_BATCH_CLOSE.getCode(), result.getErrorCode().getCode());
         LevelDBManager.destroyArea(area);
     }
 

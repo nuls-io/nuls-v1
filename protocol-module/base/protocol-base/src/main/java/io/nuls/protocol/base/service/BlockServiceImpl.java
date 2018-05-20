@@ -268,6 +268,7 @@ public class BlockServiceImpl implements BlockService {
         BlockHeaderPo po = new BlockHeaderPo();
         po.setHash(block.getHeader().getHash());
         po.setHeight(block.getHeader().getHeight());
+        po.setPreHash(block.getHeader().getPreHash());
         Result result = this.blockHeaderStorageService.removeBlockHerader(po);
         if (result.isFailed()) {
             return result;
@@ -304,7 +305,13 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public Result broadcastBlock(SmallBlock smallBlock) {
         SmallBlockMessage message = fillSmallBlockMessage(smallBlock);
-        return messageBusService.broadcastHashAndCache(message, null, false);
+        Result<List<String>> result = messageBusService.broadcastHashAndCache(message, null, false);
+        StringBuilder str = new StringBuilder("broadcast to: ");
+        for (String node : result.getData()) {
+            str.append(", " + node);
+        }
+        Log.info(str.toString());
+        return result;
     }
 
     /**

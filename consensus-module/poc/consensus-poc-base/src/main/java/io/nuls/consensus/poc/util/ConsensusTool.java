@@ -204,7 +204,7 @@ public class ConsensusTool {
                 return Arrays.hashCode(o1.getOwner()) > Arrays.hashCode(o2.getOwner()) ? 1 : -1;
             }
         });
-
+        //todo 有问题
         Coin agentReword = new Coin(self.getRewardAddress(), Na.valueOf(DoubleUtils.longValue(caReward)), unlockHeight);
         rewardList.add(0, agentReword);
 

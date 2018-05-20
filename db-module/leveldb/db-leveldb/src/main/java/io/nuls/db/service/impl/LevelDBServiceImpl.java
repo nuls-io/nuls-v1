@@ -23,6 +23,7 @@
  */
 package io.nuls.db.service.impl;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.model.Entry;
@@ -141,6 +142,12 @@ public class LevelDBServiceImpl implements DBService {
         if(StringUtils.isBlank(area)) {
             return null;
         }
-        return new BatchOperationImpl(area);
+        BatchOperationImpl batchOperation = new BatchOperationImpl(area);
+        Result result = batchOperation.checkBatch();
+        if(result.isFailed()) {
+            Log.error("DB batch create error: " + result.getMessage());
+            return null;
+        }
+        return batchOperation;
     }
 }

@@ -125,11 +125,6 @@ public class AliasService {
             NulsSignData nulsSignData = accountService.signData(tx.serializeForHash(), account, password);
             P2PKHScriptSig scriptSig = new P2PKHScriptSig(nulsSignData, account.getPubKey());
             tx.setScriptSig(scriptSig.serialize());
-            Result result = ledgerService.verifyCoinData(tx, accountLedgerService.getAllUnconfirmedTransaction().getData());
-            if(result.isFailed()){
-                Result.getFailed(AccountErrorCode.FAILED);
-            }
-            tx.verifyWithException();
             Result saveResult = accountLedgerService.saveUnconfirmedTransaction(tx);
             if (saveResult.isFailed()) {
                 return saveResult;

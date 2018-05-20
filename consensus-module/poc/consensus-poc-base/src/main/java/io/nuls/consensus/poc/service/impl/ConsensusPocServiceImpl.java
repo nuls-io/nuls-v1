@@ -34,14 +34,18 @@ import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
 import io.nuls.consensus.service.ConsensusService;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.network.model.Node;
+import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.service.BlockService;
+import io.nuls.protocol.service.DownloadService;
 
 import java.util.List;
 
@@ -125,7 +129,12 @@ public class ConsensusPocServiceImpl implements ConsensusService {
      * @return Result
      */
     public Result reset() {
+        Log.warn("Consensus restart...");
         boolean success = ConsensusScheduler.getInstance().restart();
+        if (success) {
+            NulsContext.getServiceBean(NetworkService.class).reset();
+            NulsContext.getServiceBean(DownloadService.class).reset();
+        }
         return new Result(success, null);
     }
 }

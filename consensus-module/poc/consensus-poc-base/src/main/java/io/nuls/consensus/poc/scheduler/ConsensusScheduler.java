@@ -97,7 +97,7 @@ public class ConsensusScheduler {
 
 //        ScheduledThreadPoolExecutor executor = TaskManager.createScheduledThreadPool(new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS,"Block-Monitor"));
 
-        threadPool.scheduleAtFixedRate(new BlockMonitorProcessTask(new BlockMonitorProcess()), 120, 120, TimeUnit.SECONDS);
+        threadPool.scheduleAtFixedRate(new BlockMonitorProcessTask(new BlockMonitorProcess(chainManager)), 120, 120, TimeUnit.SECONDS);
         return true;
     }
 

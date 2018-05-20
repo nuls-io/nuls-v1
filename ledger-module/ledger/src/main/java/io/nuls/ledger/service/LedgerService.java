@@ -100,7 +100,7 @@ public interface LedgerService {
      * @param tx
      * @return boolean
      */
-    Result unlockTxCoinData(Transaction tx) throws NulsException;
+    Result unlockTxCoinData(Transaction tx, long newockTime) throws NulsException;
 
     /**
      * rollback unlockTxCoinData

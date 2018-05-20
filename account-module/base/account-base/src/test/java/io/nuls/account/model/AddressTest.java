@@ -44,7 +44,7 @@ public class AddressTest {
         while (true) {
             ECKey ecKey = new ECKey();
             String address = getAddress(chainId, ecKey.getPubKey());
-            if (address.endsWith("Niels") || address.endsWith("Nuls")|| address.endsWith("NULS")|| address.endsWith("Charlie")|| address.endsWith("Pierre")) {
+            if (address.endsWith("Niels") || address.endsWith("Charlie")|| address.endsWith("Pierre")) {
                 System.out.println(address + ":::::::" + ecKey.getPrivateKeyAsHex());
             }
         }

@@ -392,11 +392,11 @@ public class UtxoLedgerServiceImplTest {
         coin.setOwner("abcd3".getBytes());
         coin.setNa(Na.parseNuls(10001));
         coin.setLockTime(-1);
-        Result result = ledgerService.unlockTxCoinData(allList.get(3));
+        Result result = ledgerService.unlockTxCoinData(allList.get(3), 123);
         //System.out.println(result);
         Assert.assertTrue(result.isSuccess());
         Coin to3Coin0 = utxoLedgerUtxoStorageService.getUtxo(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
-        Assert.assertEquals(0, to3Coin0.getLockTime());
+        Assert.assertEquals(123, to3Coin0.getLockTime());
         to3Coin0.setLockTime(-1);
         Assert.assertNotNull(to3Coin0);
         Assert.assertEquals(new Slice(tx3.getCoinData().getTo().get(0).serialize()), new Slice(to3Coin0.serialize()));
@@ -414,7 +414,7 @@ public class UtxoLedgerServiceImplTest {
         // 没有LockTime为-1的，测试期望是失败
         coin = allList.get(3).getCoinData().getTo().get(0);
         coin.setLockTime(1000);
-        result = ledgerService.unlockTxCoinData(allList.get(3));
+        result = ledgerService.unlockTxCoinData(allList.get(3), 123);
         Assert.assertEquals(LedgerErrorCode.UTXO_STATUS_CHANGE.getCode(), result.getErrorCode().getCode());
 
         // LockTime既有-1的，又有不是-1的，测试期望是成功
@@ -422,7 +422,7 @@ public class UtxoLedgerServiceImplTest {
         coin.setLockTime(-1);
         CoinData coinData = allList.get(3).getCoinData();
         coinData.getTo().add(new Coin("abcd3.1".getBytes(), Na.parseNuls(10001), 0));
-        result = ledgerService.unlockTxCoinData(allList.get(3));
+        result = ledgerService.unlockTxCoinData(allList.get(3), 123);
         Assert.assertTrue(result.isSuccess());
     }
 

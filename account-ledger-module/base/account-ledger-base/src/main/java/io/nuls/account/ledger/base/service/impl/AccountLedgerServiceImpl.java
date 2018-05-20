@@ -60,6 +60,7 @@ import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.utils.VarInt;
+import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 
 import io.nuls.ledger.service.LedgerService;
@@ -99,6 +100,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     private BlockService blockService;
 
     private Lock lock = new ReentrantLock();
+    private Lock saveLock = new ReentrantLock();
 
     @Override
     public void afterPropertiesSet() throws NulsException {
@@ -112,7 +114,20 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result<Integer> saveUnconfirmedTransaction(Transaction tx) {
-        return saveTransaction(tx, TransactionInfo.UNCONFIRMED);
+        saveLock.lock();
+        try {
+            ValidateResult result1 = tx.verify();
+            if (result1.isFailed()) {
+                return result1;
+            }
+            result1 = this.ledgerService.verifyCoinData(tx, this.getAllUnconfirmedTransaction().getData());
+            if (result1.isFailed()) {
+                return result1;
+            }
+            return saveTransaction(tx, TransactionInfo.UNCONFIRMED);
+        } finally {
+            saveLock.unlock();
+        }
     }
 
     @Override
@@ -133,7 +148,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result<Transaction> getUnconfirmedTransaction(NulsDigestData hash) {
-        return null;
+        return storageService.getTempTx(hash);
     }
 
     @Override
@@ -343,7 +358,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             sig.setSignData(accountService.signData(tx.getHash().serialize(), account, password));
             tx.setScriptSig(sig.serialize());
 
-            tx.verifyWithException();
+
             Result saveResult = saveUnconfirmedTransaction(tx);
             if (saveResult.isFailed()) {
                 return saveResult;
@@ -363,7 +378,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result unlockCoinData(Transaction tx) {
+    public Result unlockCoinData(Transaction tx, long newLockTime) {
         List<byte[]> addresses = getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
             return Result.getSuccess();
@@ -383,16 +398,20 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             // unlock utxo - to
             List<Coin> tos = coinData.getTo();
             byte[] indexBytes;
+            Coin to, needUnLockUtxo;
             for (int i = 0, length = tos.size(); i < length; i++) {
-                if (tos.get(i).getLockTime() == -1) {
-                    tos.get(i).setLockTime(0);
+                to = tos.get(i);
+                if (to.getLockTime() == -1) {
+                    Coin needUnLockUtxoNew = new Coin(to.getOwner(), to.getNa(), newLockTime);
+                    needUnLockUtxoNew.setFrom(to.getFrom());
                     try {
-                        byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                        storageService.saveUTXO(outKey, tos.get(i).serialize());
+                        byte[] outKey = org.spongycastle.util.Arrays.concatenate(to.getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                        storageService.saveUTXO(outKey, needUnLockUtxoNew.serialize());
                     } catch (IOException e) {
                         throw new NulsRuntimeException(e);
                     }
                     //todo , think about weather to add a transaction history
+                    break;
                 }
             }
         }
@@ -427,6 +446,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     } catch (IOException e) {
                         throw new NulsRuntimeException(e);
                     }
+                    break;
                 }
             }
         }

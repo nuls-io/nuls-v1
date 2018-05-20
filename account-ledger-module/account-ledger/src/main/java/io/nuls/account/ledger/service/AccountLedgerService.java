@@ -155,10 +155,9 @@ public interface AccountLedgerService {
      * <p>
      * get local address list
      *
-     * @param tx
      * @return true if a address is a local address
      */
-    Result unlockCoinData(Transaction tx);
+    Result unlockCoinData(Transaction tx, long newLockTime);
 
     Result rollbackUnlockTxCoinData(Transaction tx);
 
@@ -166,24 +165,17 @@ public interface AccountLedgerService {
      * <p>
      * load the local ledger of a account when an account imported
      *
-     * @param address
      * @return true if a address is a local address
      */
     Result importAccountLedger(String address);
 
     /**
      * 查询交易列表
-     *
-     * @param address
-     * @return
      */
     Result<List<TransactionInfo>> getTxInfoList(byte[] address);
 
     /**
      * 查询锁定的未花费交易
-     *
-     * @param address
-     * @return
      */
     Result<List<Coin>> getLockUtxo(byte[] address);
 }

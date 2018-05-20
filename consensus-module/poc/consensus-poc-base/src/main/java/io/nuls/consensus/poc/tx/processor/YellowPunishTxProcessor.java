@@ -36,7 +36,7 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
         YellowPunishData punishData = tx.getTxData();
         List<byte[]> deletedList = new ArrayList<>();
         for (byte[] address : punishData.getAddressList()) {
-            boolean result = storageService.delete(this.getPoKey(address, (byte) PunishType.YELLOW.getCode(), tx.getBlockHeight()));
+            boolean result = storageService.delete(this.getPoKey(address, PunishType.YELLOW.getCode(), tx.getBlockHeight()));
             if (!result) {
                 BlockHeader header = (BlockHeader) secondaryData;
                 BlockRoundData roundData = new BlockRoundData(header.getExtend());
@@ -46,7 +46,7 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
                     po.setHeight(tx.getBlockHeight());
                     po.setRoundIndex(roundData.getRoundIndex());
                     po.setTime(tx.getTime());
-                    po.setType((byte) PunishType.YELLOW.getCode());
+                    po.setType(PunishType.YELLOW.getCode());
                     this.storageService.save(po);
                 }
                 throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollback tx failed!");
@@ -69,11 +69,11 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
             po.setHeight(tx.getBlockHeight());
             po.setRoundIndex(roundData.getRoundIndex());
             po.setTime(tx.getTime());
-            po.setType((byte) PunishType.YELLOW.getCode());
+            po.setType(PunishType.YELLOW.getCode());
             boolean result = storageService.save(po);
             if (!result) {
                 for (byte[] bytes : savedList) {
-                    this.storageService.delete(getPoKey(bytes, (byte) PunishType.YELLOW.getCode(), header.getHeight()));
+                    this.storageService.delete(getPoKey(bytes, PunishType.YELLOW.getCode(), header.getHeight()));
                 }
                 throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollback tx failed!");
             } else {

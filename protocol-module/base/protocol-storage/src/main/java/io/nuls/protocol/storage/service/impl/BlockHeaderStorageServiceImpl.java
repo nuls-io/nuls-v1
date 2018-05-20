@@ -194,7 +194,7 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
      */
     @Override
     public Result removeBlockHerader(BlockHeaderPo po) {
-        if (null == po || po.getHeight() < 0 || po.getHash() == null) {
+        if (null == po || po.getHeight() < 0 || po.getHash() == null || po.getPreHash() == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         dbService.delete(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, new VarInt(po.getHeight()).encode());
