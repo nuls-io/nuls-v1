@@ -18,6 +18,11 @@
       "unlockHeight": 0
     },
     {
+      "address": "NsJPpBy7Lb9phQ9Lkr66seaLRsBXing",
+      "nuls": 10000000,
+      "unlockHeight": 0
+    },
+    {
       "address": "NsHQHGsAHYWJqAhsMPYfukSp8Z8Chao",
       "nuls": 10000000,
       "unlockHeight": 0
@@ -34,7 +39,7 @@
     },
     {
       "address": "NsETKiASPLWEPPMQETVbH6LvwXXNULS",
-      "nuls": 40000000,
+      "nuls": 30000000,
       "unlockHeight": 0
     }
   ]
