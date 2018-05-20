@@ -22,20 +22,12 @@ public class Alias extends TransactionLogicData {
     private String alias;
 
 
-    private int status;
-
     public Alias() {
     }
 
     public Alias(byte[] address, String alias) {
         this.address = address;
         this.alias = alias;
-    }
-
-    public Alias(byte[] address, String alias, int status) {
-        this.address = address;
-        this.alias = alias;
-        this.status = status;
     }
 
     public byte[] getAddress() {
@@ -54,13 +46,6 @@ public class Alias extends TransactionLogicData {
         this.alias = alias;
     }
 
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
 
     @Override
     public Set<byte[]> getAddresses() {

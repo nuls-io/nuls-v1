@@ -20,6 +20,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
@@ -33,7 +34,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author: Charlie
  * @date: 2018/5/9
  */
-@Component
+@Service
 public class AccountServiceImpl implements AccountService {
 
     private Lock locker = new ReentrantLock();

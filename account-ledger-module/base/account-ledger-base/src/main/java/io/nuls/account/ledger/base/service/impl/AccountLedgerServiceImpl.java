@@ -53,6 +53,7 @@ import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
@@ -76,7 +77,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Facjas
  * @date 2018/5/10.
  */
-@Component
+@Service
 public class AccountLedgerServiceImpl implements AccountLedgerService, InitializingBean {
 
     @Autowired

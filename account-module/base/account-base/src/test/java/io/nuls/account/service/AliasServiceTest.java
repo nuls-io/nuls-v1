@@ -1,28 +1,70 @@
 package io.nuls.account.service;
 
+import io.nuls.account.model.Account;
+import io.nuls.account.model.Alias;
+import io.nuls.account.storage.po.AliasPo;
+import io.nuls.account.storage.service.AccountStorageService;
+import io.nuls.kernel.MicroKernelBootstrap;
+import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.lite.core.SpringLiteContext;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.List;
+
+import static org.junit.Assert.assertTrue;
 
 public class AliasServiceTest {
 
+    protected static AccountService accountService;
+
+    protected static AliasService aliasService;
+
+    protected static AccountStorageService accountStorageService;
+
+    protected static AccountCacheService accountCacheService;
+
+    @BeforeClass
+    public static void beforeClass(){
+        MicroKernelBootstrap kernel = MicroKernelBootstrap.getInstance();
+        kernel.init();
+        kernel.start();
+        /*LevelDbModuleBootstrap db = new LevelDbModuleBootstrap();
+        db.init();
+        db.start();*/
+
+        aliasService = SpringLiteContext.getBean(AliasService.class);
+        accountService = SpringLiteContext.getBean(AccountService.class);
+    }
+
+
     @Test
     public void setAlias() {
+        List<Account> accounts = accountService.createAccount(1, "nuls123456").getData();
+        Account account = accounts.get(0);
+
     }
 
     @Test
     public void saveAlias() {
+        List<Account> accounts = accountService.createAccount(1, "nuls123456").getData();
+        Account account = accounts.get(0);
+        Alias alias = new Alias(account.getAddress().getBase58Bytes(), "lichao");
+        assertTrue(aliasService.saveAlias(new AliasPo(alias)).isSuccess());
     }
 
     @Test
     public void getAlias() {
+
     }
 
     @Test
     public void isAliasExist() {
+
     }
 
     @Test
     public void rollbackAlias() {
+
     }
 }

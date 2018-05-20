@@ -6,6 +6,7 @@ import io.nuls.account.model.Address;
 import io.nuls.cache.CacheMap;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.lite.annotation.Service;
 
 import java.util.List;
 

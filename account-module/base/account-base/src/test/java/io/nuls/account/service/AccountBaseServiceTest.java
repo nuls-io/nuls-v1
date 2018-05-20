@@ -23,11 +23,12 @@ public class AccountBaseServiceTest {
         MicroKernelBootstrap kernel = MicroKernelBootstrap.getInstance();
         kernel.init();
         kernel.start();
-        LevelDbModuleBootstrap db = new LevelDbModuleBootstrap();
+       /* LevelDbModuleBootstrap db = new LevelDbModuleBootstrap();
         db.init();
-        db.start();
+        db.start();*/
         accountService = SpringLiteContext.getBean(AccountService.class);
         accountBaseService = SpringLiteContext.getBean(AccountBaseService.class);
+
     }
 
     @Test

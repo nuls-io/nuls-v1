@@ -14,31 +14,21 @@ import java.io.IOException;
  */
 public class AliasPo extends BaseNulsData {
 
-
-
     private byte[] address;
-
 
     private String alias;
 
-    // 0: locked   1:confirm
-
-    private int status;
-
-
-    public AliasPo(){
-
+    public AliasPo() {
     }
 
-    public AliasPo(Alias alias){
+    public AliasPo(Alias alias) {
         this.address = alias.getAddress();
         this.alias = alias.getAlias().trim();
-        this.status = alias.getStatus();
 
     }
 
-    public Alias toAlias(){
-        return new Alias(this.address, this.getAlias().trim(), this.getStatus());
+    public Alias toAlias() {
+        return new Alias(this.address, this.getAlias().trim());
     }
 
     public String getAlias() {
@@ -55,14 +45,6 @@ public class AliasPo extends BaseNulsData {
 
     public void setAddress(byte[] address) {
         this.address = address;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
     }
 
     @Override

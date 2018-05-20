@@ -13,6 +13,7 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.utils.SerializeUtils;
 
@@ -23,7 +24,7 @@ import java.math.BigInteger;
  * @author: Charlie
  * @date: 2018/5/14
  */
-@Component
+@Service
 public class AccountBaseService {
 
     @Autowired
