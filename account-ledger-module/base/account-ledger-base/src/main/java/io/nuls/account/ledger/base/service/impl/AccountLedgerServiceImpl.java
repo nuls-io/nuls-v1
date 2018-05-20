@@ -99,6 +99,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     private BlockService blockService;
 
     private Lock lock = new ReentrantLock();
+    private Lock saveLock = new ReentrantLock();
 
     @Override
     public void afterPropertiesSet() throws NulsException {
@@ -112,7 +113,20 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result<Integer> saveUnconfirmedTransaction(Transaction tx) {
-        return saveTransaction(tx, TransactionInfo.UNCONFIRMED);
+        saveLock.lock();
+        try {
+            ValidateResult result1 = tx.verify();
+            if (result1.isFailed()) {
+                return result1;
+            }
+            result1 = this.ledgerService.verifyCoinData(tx, this.getAllUnconfirmedTransaction().getData());
+            if (result1.isFailed()) {
+                return result1;
+            }
+            return saveTransaction(tx, TransactionInfo.UNCONFIRMED);
+        } finally {
+            saveLock.unlock();
+        }
     }
 
     @Override
@@ -204,14 +218,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             CoinDataResult coinDataResult = new CoinDataResult();
             List<Coin> rawCoinList = storageService.getCoinList(address);
             List<Coin> coinList = new ArrayList<>();
-            for(Coin coin : rawCoinList){
-                byte[] ownerBytes = coin.getOwner();
-                byte[] hashBytes = new byte[34];
-                System.arraycopy(ownerBytes,0,hashBytes,0,34);
-                VarInt index = new VarInt(ownerBytes,+34);
-                Log.info("Coin_owner: "+Hex.encode(coin.getOwner())+" hash_index: "+ Hex.encode(hashBytes)+"_"+index.value+" Coin_Na: "+coin.getNa().toString());
-            }
-
             if (rawCoinList.isEmpty()) {
                 coinDataResult.setEnough(false);
                 return coinDataResult;
@@ -351,14 +357,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             sig.setSignData(accountService.signData(tx.getHash().serialize(), account, password));
             tx.setScriptSig(sig.serialize());
 
-            ValidateResult result1 = tx.verify();
-            if (result1.isFailed()) {
-                return result1;
-            }
-            result1 = this.ledgerService.verifyCoinData(tx, this.getAllUnconfirmedTransaction().getData());
-            if (result1.isFailed()) {
-                return result1;
-            }
 
             Result saveResult = saveUnconfirmedTransaction(tx);
             if (saveResult.isFailed()) {
@@ -687,16 +685,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 Transaction sourceTx = null;
                 try {
                     sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
-                    if (sourceTx == null) {
-                        sourceTx = getUnconfirmedTransaction(NulsDigestData.fromDigestHex(Hex.encode(fromSource))).getData();
-                    }
                 } catch (Exception e) {
                     throw new NulsRuntimeException(e);
                 }
-                if(sourceTx == null){
-                    return Result.getFailed();
+                if (sourceTx == null) {
+                    return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
                 }
-
                 byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
                 fromsSet.add(org.spongycastle.util.Arrays.concatenate(address, from.getOwner()));
             }
