@@ -31,6 +31,9 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
     @Autowired
     private PunishLogStorageService storageService;
 
+    @Autowired
+    private StopAgentTxProcessor stopAgentTxProcessor;
+
     @Override
     public Result onRollback(RedPunishTransaction tx, Object secondaryData) {
         RedPunishData punishData = tx.getTxData();
@@ -46,7 +49,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
                 po.setHeight(tx.getBlockHeight());
                 po.setRoundIndex(roundData.getRoundIndex());
                 po.setTime(tx.getTime());
-                po.setType((byte) PunishType.RED.getCode());
+                po.setType(PunishType.RED.getCode());
                 this.storageService.save(po);
             }
             throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollback tx failed!");
@@ -67,7 +70,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
         po.setHeight(tx.getBlockHeight());
         po.setRoundIndex(roundData.getRoundIndex());
         po.setTime(tx.getTime());
-        po.setType((byte) PunishType.RED.getCode());
+        po.setType(PunishType.RED.getCode());
         boolean result = storageService.save(po);
         if (!result) {
             for (byte[] bytes : savedList) {
@@ -77,6 +80,13 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
         } else {
             savedList.add(punishData.getAddress());
         }
+
+
+
+
+
+
+
         return Result.getSuccess();
     }
 

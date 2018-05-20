@@ -46,7 +46,7 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
                     po.setHeight(tx.getBlockHeight());
                     po.setRoundIndex(roundData.getRoundIndex());
                     po.setTime(tx.getTime());
-                    po.setType((byte) PunishType.YELLOW.getCode());
+                    po.setType(PunishType.YELLOW.getCode());
                     this.storageService.save(po);
                 }
                 throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollback tx failed!");
@@ -69,7 +69,7 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
             po.setHeight(tx.getBlockHeight());
             po.setRoundIndex(roundData.getRoundIndex());
             po.setTime(tx.getTime());
-            po.setType((byte) PunishType.YELLOW.getCode());
+            po.setType(PunishType.YELLOW.getCode());
             boolean result = storageService.save(po);
             if (!result) {
                 for (byte[] bytes : savedList) {

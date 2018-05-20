@@ -105,8 +105,8 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
     private void unlock(List<Transaction> rollbackedList) {
         for (Transaction depositTx : rollbackedList) {
             try {
-                ledgerService.unlockTxCoinData(depositTx);
-                accountLedgerService.unlockCoinData(depositTx);
+                ledgerService.unlockTxCoinData(depositTx, 0L);
+                accountLedgerService.unlockCoinData(depositTx, 0L);
             } catch (NulsException e) {
                 Log.error(e);
             }
@@ -141,12 +141,12 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
             po.setDelHeight(tx.getBlockHeight());
             Transaction depositTx = ledgerService.getTx(po.getTxHash());
             try {
-                Result result = ledgerService.unlockTxCoinData(depositTx);
+                Result result = ledgerService.unlockTxCoinData(depositTx, 0L);
                 if (result.isFailed()) {
                     this.rollbackUnlock(unlockedList);
                     return result;
                 }
-                result = accountLedgerService.unlockCoinData(depositTx);
+                result = accountLedgerService.unlockCoinData(depositTx, 0L);
                 if (result.isFailed()) {
                     this.rollbackUnlock(unlockedList);
                     return result;
