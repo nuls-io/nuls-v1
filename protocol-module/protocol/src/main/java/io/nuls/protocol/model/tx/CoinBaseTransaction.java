@@ -66,7 +66,7 @@ public class CoinBaseTransaction extends Transaction {
                 to = to.add(coin.getNa());
             }
         }
-        return "+" + to.getValue();
+        return "+" + to.toText();
     }
 
     @Override

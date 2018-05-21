@@ -170,7 +170,7 @@ public class AccountLedgerResource {
         }
 
         byte[] addressBytes = null;
-        Result dtoResult = new Result<>();
+        Result dtoResult = Result.getSuccess();
 
         try {
             addressBytes = Base58.decode(address);
