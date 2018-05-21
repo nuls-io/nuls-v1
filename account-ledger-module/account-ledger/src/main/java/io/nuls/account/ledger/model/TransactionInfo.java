@@ -32,8 +32,8 @@ import io.nuls.kernel.model.NulsDigestData;
  */
 public class TransactionInfo {
 
-    public static byte CONFIRMED = 0;
-    public static byte UNCONFIRMED = 1;
+    public static byte CONFIRMED = 1;
+    public static byte UNCONFIRMED = 0;
 
     private NulsDigestData txHash;
 

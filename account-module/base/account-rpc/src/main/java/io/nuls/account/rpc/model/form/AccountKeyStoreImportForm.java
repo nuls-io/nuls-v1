@@ -19,7 +19,7 @@ public class AccountKeyStoreImportForm {
     private String password;
 
     @ApiModelProperty(name = "overwrite", value = "是否覆盖账户: false:不覆盖导入, true:覆盖导入")
-    private Boolean overwrite;
+    private Boolean overwrite = false;
 
     public AccountKeyStoreDto getAccountKeyStoreDto() {
         return accountKeyStoreDto;

@@ -298,8 +298,9 @@ public final class Na implements Comparable<Na>, Serializable {
     }
 
     public String toCoinString() {
-        double d = new BigDecimal(value).movePointLeft(8).doubleValue();
-        return numberFormat.format(d);
+//        double d = new BigDecimal(value).movePointLeft(8).doubleValue();
+//        return numberFormat.format(d);
+        return toText();
     }
 
 }

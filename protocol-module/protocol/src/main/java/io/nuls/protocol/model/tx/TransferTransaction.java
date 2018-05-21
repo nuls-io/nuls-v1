@@ -24,6 +24,7 @@
  */
 package io.nuls.protocol.model.tx;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;
@@ -50,23 +51,16 @@ public class TransferTransaction extends Transaction {
     @Override
     public String getInfo(byte[] address) {
         boolean isTransfer = false;
-        Na to = Na.ZERO;
         byte[] addressOwner = new byte[AddressTool.HASH_LENGTH];
-
-        for (int i = 0; i < coinData.getTo().size(); i++) {
-            Coin coin = coinData.getTo().get(i);
-            System.arraycopy(coin.getOwner(), 0, addressOwner, 0, AddressTool.HASH_LENGTH);
-            if (i == 0 && !Arrays.equals(address, addressOwner)) {
-                isTransfer = true;
-            }
-            if (Arrays.equals(address, addressOwner)) {
-                to = to.add(coin.getNa());
-            }
+        Coin to = coinData.getTo().get(0);
+        System.arraycopy(to.getOwner(), 0, addressOwner, 0, AddressTool.HASH_LENGTH);
+        if (!Arrays.equals(address, addressOwner)) {
+            isTransfer = true;
         }
         if (isTransfer) {
-            return "-" + to.toCoinString();
+            return "-" + to.getNa().toCoinString();
         } else {
-            return "+" + to.toCoinString();
+            return "+" + to.getNa().toCoinString();
         }
     }
 

@@ -28,6 +28,7 @@ import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author: Charlie
@@ -37,7 +38,7 @@ import java.util.Arrays;
 public class AliasTransactionValidator implements NulsDataValidator<AliasTransaction> {
 
     @Autowired
-    private AliasService accountBaseService;
+    private AliasService aliasService;
 
     @Autowired
     private AliasStorageService alisaStorageService;
@@ -51,14 +52,16 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
     @Override
     public ValidateResult validate(AliasTransaction tx) {
         Alias alias = tx.getTxData();
-        Account account = accountService.getAccount(alias.getAddress()).getData();
-        if(null == account){
-            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ACCOUNT_NOT_EXIST);
-        }
-        if(alias.getAlias().equals(account.getAlias())){
+        Alias aliasDb = aliasService.getAlias(alias.getAlias());
+        if(null != aliasDb){
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_EXIST);
         }
-
+        List<Account> list =  accountService.getAccountList().getData();
+        for (Account account : list){
+            if(alias.getAlias().equals(account.getAlias())){
+                return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_EXIST);
+            }
+        }
         if (!Address.validAddress(alias.getAddress())) {
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
         }
