@@ -49,6 +49,7 @@ import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.ledger.service.LedgerService;
 import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
@@ -71,6 +72,9 @@ public class AccountLedgerResource {
 
     @Autowired
     private AccountLedgerService accountLedgerService;
+
+    @Autowired
+    private LedgerService ledgerService;
 
     @GET
     @Path("/balance/{address}")
@@ -190,7 +194,11 @@ public class AccountLedgerResource {
 
         List<TransactionInfoDto> infoDtoList = new ArrayList<>();
         for (int i = start; i < end; i++) {
-            infoDtoList.add(new TransactionInfoDto(result.getData().get(i)));
+            TransactionInfo info = result.getData().get(i);
+            Transaction tx = ledgerService.getTx(info.getTxHash());
+            info.setInfo(tx.getInfo(addressBytes));
+            infoDtoList.add(new TransactionInfoDto(info));
+
         }
         page.setList(infoDtoList);
 

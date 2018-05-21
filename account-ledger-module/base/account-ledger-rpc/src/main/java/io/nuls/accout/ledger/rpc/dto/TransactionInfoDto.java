@@ -14,6 +14,8 @@ public class TransactionInfoDto {
 
     private byte status;
 
+    private String info;
+
     public TransactionInfoDto() {
 
     }
@@ -24,6 +26,7 @@ public class TransactionInfoDto {
         this.time = info.getTime();
         this.status = info.getStatus();
         this.txType = info.getTxType();
+        this.info = info.getInfo();
     }
 
     public String getTxHash() {
@@ -64,5 +67,13 @@ public class TransactionInfoDto {
 
     public void setStatus(byte status) {
         this.status = status;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
     }
 }

@@ -96,14 +96,28 @@ public class BalanceManager {
                     Log.info("getbalance of address[" + Base58.encode(address) + "] error");
                 }
             }
-            if (balance == null) {
-                balance = new Balance();
-            }
             return Result.getSuccess().setData(balance);
         } finally {
             lock.unlock();
         }
     }
+
+    /**
+     * 刷新余额，其实就是删除缓存，下次获取时再重新计算
+     *
+     * @param address
+     */
+    public void refreshBalance(byte[] address) {
+        lock.lock();
+        try {
+            if (address != null) {
+                balanceMap.remove(new String(address));
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
 
     /**
      * 计算账户的余额，这个方法应该和获取余额方法互斥，避免并发导致数据不准确

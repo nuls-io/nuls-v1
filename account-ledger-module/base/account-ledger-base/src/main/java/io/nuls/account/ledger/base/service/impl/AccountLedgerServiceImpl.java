@@ -25,7 +25,7 @@
 
 package io.nuls.account.ledger.base.service.impl;
 
-import io.nuls.account.ledger.base.service.balance.BalanceProvider;
+import io.nuls.account.ledger.base.manager.BalanceManager;
 import io.nuls.account.ledger.base.util.CoinComparator;
 import io.nuls.account.ledger.base.util.TxInfoComparator;
 import io.nuls.account.ledger.service.AccountLedgerService;
@@ -86,7 +86,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     private AccountService accountService;
 
     @Autowired
-    private BalanceProvider balanceProvider;
+    private BalanceManager balanceManager;
 
     @Autowired
     private TransactionService transactionService;
@@ -201,7 +201,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
         }
 
-        Balance balance = balanceProvider.getBalance(address).getData();
+        Balance balance = balanceManager.getBalance(address).getData();
 
         if (balance == null) {
             return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
@@ -478,7 +478,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             end = NulsContext.getInstance().getBestHeight();
         }
         try {
-            balanceProvider.refreshBalance(addressBytes);
+            balanceManager.refreshBalance(addressBytes);
         } catch (Exception e) {
             Log.info(address);
         }
@@ -492,7 +492,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             List<TransactionInfo> infoList = new ArrayList<>();
             for (TransactionInfoPo po : infoPoList) {
                 infoList.add(po.toTransactionInfo());
-                Transaction tx = ledgerService.getTx(po.getTxHash());
             }
 
             Collections.sort(infoList, TxInfoComparator.getInstance());
@@ -550,7 +549,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             storageService.deleteTempTx(tx);
         }
         for (int i = 0; i < addresses.size(); i++) {
-            balanceProvider.refreshBalance(addresses.get(i));
+            balanceManager.refreshBalance(addresses.get(i));
         }
         return result;
     }
@@ -685,6 +684,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 Transaction sourceTx = null;
                 try {
                     sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
+                    if (sourceTx == null) {
+                        sourceTx = getUnconfirmedTransaction(NulsDigestData.fromDigestHex(Hex.encode(fromSource))).getData();
+                    }
                 } catch (Exception e) {
                     throw new NulsRuntimeException(e);
                 }

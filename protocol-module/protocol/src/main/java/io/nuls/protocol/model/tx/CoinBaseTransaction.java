@@ -26,10 +26,15 @@ package io.nuls.protocol.model.tx;
 
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.protocol.constant.ProtocolConstant;
+
+import java.util.Arrays;
 
 /**
  * @author Niels
@@ -53,8 +58,15 @@ public class CoinBaseTransaction extends Transaction {
 
     @Override
     public String getInfo(byte[] address) {
-        // todo auto-generated method stub
-        return null;
+        Na to = Na.ZERO;
+        byte[] addressOwner = new byte[AddressTool.HASH_LENGTH];
+        for (Coin coin : coinData.getTo()) {
+            System.arraycopy(coin.getOwner(), 0, addressOwner, 0, AddressTool.HASH_LENGTH);
+            if (Arrays.equals(address, addressOwner)) {
+                to = to.add(coin.getNa());
+            }
+        }
+        return "+" + to.getValue();
     }
 
     @Override
