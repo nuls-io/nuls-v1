@@ -26,7 +26,7 @@ public class MessageCheckingProcessor<E extends BaseMessage> implements EventHan
             if (null == message || message.getHeader() == null) {
                 return;
             }
-            messageCacheService.cacheRecievedMessageHash(message.getHash());
+
             //todo test
             if (message.getHeader().getModuleId() == ProtocolConstant.MODULE_ID_PROTOCOL && message.getHeader().getMsgType() == ProtocolConstant.MESSAGE_TYPE_NEW_BLOCK) {
                 SmallBlockMessage smallBlockMessage = (SmallBlockMessage) message;
@@ -37,6 +37,7 @@ public class MessageCheckingProcessor<E extends BaseMessage> implements EventHan
                     message.getHeader().getModuleId() == MessageBusConstant.MODULE_ID_MESSAGE_BUS;
 
             if (!commonDigestTx) {
+                messageCacheService.cacheRecievedMessageHash(message.getHash());
                 return;
             }
             if (messageCacheService.kownTheMessage(((CommonDigestMessage) message).getMsgBody())) {
@@ -45,6 +46,8 @@ public class MessageCheckingProcessor<E extends BaseMessage> implements EventHan
             } else if (messageCacheService.kownTheMessage(message.getHash())) {
                 Log.info("discard2:{}," + message.getClass(), processDataDisruptorMessage.getData().getNode().getId());
                 processDataDisruptorMessage.setStoped(true);
+            } else {
+                messageCacheService.cacheRecievedMessageHash(message.getHash());
             }
         } catch (Exception e) {
             Log.error(e);
