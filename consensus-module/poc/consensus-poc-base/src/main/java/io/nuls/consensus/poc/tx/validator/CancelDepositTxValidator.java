@@ -31,7 +31,7 @@ public class CancelDepositTxValidator implements NulsDataValidator<CancelDeposit
     public ValidateResult validate(CancelDepositTransaction data) {
         DepositPo depositPo = depositStorageService.get(data.getTxData().getJoinTxHash());
         if(null==depositPo||depositPo.getDelHeight()>0){
-            return ValidateResult.getFailedResult(this.getClass().getName(),"The agent is deleted or never created!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),"The deposit is deleted or never created!");
         }
         P2PKHScriptSig sig = new P2PKHScriptSig();
         try {

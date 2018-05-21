@@ -126,7 +126,7 @@ public final class Na implements Comparable<Na>, Serializable {
     }
 
     public double toDouble() {
-        return new BigDecimal(this.value).movePointLeft(SMALLEST_UNIT_EXPONENT).toBigIntegerExact().doubleValue();
+        return new BigDecimal(this.value).movePointLeft(SMALLEST_UNIT_EXPONENT).setScale(SMALLEST_UNIT_EXPONENT, RoundingMode.HALF_DOWN).doubleValue();
     }
 
     public Na add(final Na value) {
