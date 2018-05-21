@@ -28,6 +28,7 @@ package io.nuls.consensus.poc.model;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
@@ -95,7 +96,7 @@ public class MeetingRound {
             member.setPackingIndexOfRound(i + 1);
             member.setPackStartTime(startTime + i * ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS);
             member.setPackEndTime(member.getPackStartTime() + ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS);
-            totalWeight += member.getTotalDeposit().toDouble() + member.getOwnDeposit().toDouble();
+            totalWeight +=DoubleUtils.mul( DoubleUtils.sum(member.getTotalDeposit().getValue() , member.getOwnDeposit().getValue()),member.getCalcCreditVal()) ;
         }
         endTime = startTime + memberCount * ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS;
     }
