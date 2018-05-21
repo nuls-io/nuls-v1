@@ -23,20 +23,15 @@
  */
 package io.nuls.db.service.impl;
 
-import com.google.common.collect.Maps;
 import io.nuls.core.tools.log.Log;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.service.BatchOperation;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Result;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
 
 /**
  * @desription:

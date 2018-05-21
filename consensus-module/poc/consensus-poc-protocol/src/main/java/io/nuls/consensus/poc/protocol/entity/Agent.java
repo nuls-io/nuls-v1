@@ -67,6 +67,7 @@ public class Agent extends TransactionLogicData {
     private transient double creditVal;
     private transient long totalDeposit;
     private transient NulsDigestData txHash;
+    private transient int memberCount;
 
     @Override
     public int size() {
@@ -212,6 +213,14 @@ public class Agent extends TransactionLogicData {
 
     public void setRewardAddress(byte[] rewardAddress) {
         this.rewardAddress = rewardAddress;
+    }
+
+    public int getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(int memberCount) {
+        this.memberCount = memberCount;
     }
 
     @Override

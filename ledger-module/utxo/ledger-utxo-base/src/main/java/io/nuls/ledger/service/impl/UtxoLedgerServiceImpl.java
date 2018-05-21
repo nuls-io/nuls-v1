@@ -105,16 +105,16 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         BatchOperation batch = utxoLedgerUtxoStorageService.createWriteBatch();
         CoinData coinData = tx.getCoinData();
         //TestLog+
-        Log.info("=============="+tx.getClass().getSimpleName()+"交易：hash-"+tx.getHash().getDigestHex());
+//        Log.info("=============="+tx.getClass().getSimpleName()+"交易：hash-"+tx.getHash().getDigestHex());
         //TestLog-
         if (coinData != null) {
             // 删除utxo已花费 - from
             List<Coin> froms = coinData.getFrom();
             for (Coin from : froms) {
                 //TestLog+
-                Coin preFrom = utxoLedgerUtxoStorageService.getUtxo(from.getOwner());
-                if(preFrom != null)
-                    Log.info("=============="+tx.getClass().getSimpleName()+"花费：address-"+ Base58.encode(preFrom.getOwner())+", amount-"+preFrom.getNa().getValue());
+//                Coin preFrom = utxoLedgerUtxoStorageService.getUtxo(from.getOwner());
+//                if(preFrom != null)
+//                    Log.info("=============="+tx.getClass().getSimpleName()+"花费：address-"+ Base58.encode(preFrom.getOwner())+", amount-"+preFrom.getNa().getValue());
                 //TestLog-
                 batch.delete(from.getOwner());
             }
