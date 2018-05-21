@@ -47,7 +47,7 @@ public final class Na implements Comparable<Na>, Serializable {
 
     public static final int SMALLEST_UNIT_EXPONENT = 8;
 
-    private static final NumberFormat numberFormat = new DecimalFormat("###.########");
+    private static final NumberFormat numberFormat = new DecimalFormat("###.00######");
 
     public static final long NA_VALUE = (long) Math.pow(10, SMALLEST_UNIT_EXPONENT);
 

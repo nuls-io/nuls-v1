@@ -39,6 +39,7 @@ import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.account.ledger.storage.service.AccountLedgerStorageService;
 
 import io.nuls.account.ledger.model.CoinDataResult;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
@@ -491,6 +492,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             List<TransactionInfoPo> infoPoList = storageService.getTxInfoList(address);
             List<TransactionInfo> infoList = new ArrayList<>();
             for (TransactionInfoPo po : infoPoList) {
+                if (po.getTxType() == ConsensusConstant.TX_TYPE_RED_PUNISH || po.getTxType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH) {
+                    continue;
+                }
                 infoList.add(po.toTransactionInfo());
             }
 

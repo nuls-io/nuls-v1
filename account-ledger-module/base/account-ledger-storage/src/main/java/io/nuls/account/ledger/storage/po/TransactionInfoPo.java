@@ -158,4 +158,28 @@ public class TransactionInfoPo extends BaseNulsData {
     public void setStatus(byte status) {
         this.status = status;
     }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public int getTxType() {
+        return txType;
+    }
+
+    public void setTxType(int txType) {
+        this.txType = txType;
+    }
 }
