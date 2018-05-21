@@ -21,6 +21,7 @@ public class MessageDispatchThread extends BaseThread implements WorkHandler<Dis
 
     @Override
     public void onEvent(DisruptorData<ProcessData> disruptorData) throws Exception {
+        Log.info("-=-=-=-=-=-=-=-on-event:"+disruptorData.hashCode());
         if (null == disruptorData || disruptorData.getData() == null || disruptorData.isStoped()) {
             Log.warn("there is null data in disruptorData!");
             return;

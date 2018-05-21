@@ -115,6 +115,7 @@ public class DisruptorUtil<T extends DisruptorData> {
         try {
             //获取该序号对应的事件对象；
             DisruptorData event = ringBuffer.get(sequence);
+            Log.info("-=-=-=-=-=-=-=-offer:"+obj.hashCode());
             event.setData(obj);
         } catch (Exception e) {
             Log.error(e);
