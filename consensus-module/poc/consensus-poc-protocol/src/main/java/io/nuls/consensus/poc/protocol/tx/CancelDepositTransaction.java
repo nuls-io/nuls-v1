@@ -53,8 +53,8 @@ public class CancelDepositTransaction extends Transaction<CancelDeposit> {
 
     @Override
     public String getInfo(byte[] address) {
-        // todo auto-generated method stub
-        return null;
+        //todo
+        return "";
     }
 
     @Override
