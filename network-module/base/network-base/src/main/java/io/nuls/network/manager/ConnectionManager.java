@@ -12,8 +12,10 @@ import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
+import io.nuls.protocol.message.SmallBlockMessage;
 import io.nuls.protocol.message.base.BaseMessage;
 import io.nuls.protocol.message.base.MessageHeader;
+import io.nuls.protocol.model.SmallBlock;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -93,6 +95,11 @@ public class ConnectionManager {
                 header.parse(bytes);
                 BaseMessage message = getMessageBusService().getMessageInstance(header.getModuleId(), header.getMsgType()).getData();
                 message.parse(bytes);
+                //todo temp
+                if(message instanceof SmallBlockMessage){
+                    SmallBlockMessage smallBlockMessage = (SmallBlockMessage) message;
+                    Log.error("{}-small-block:"+smallBlockMessage.getMsgBody().getHeader().getHeight()+":::"+smallBlockMessage.getMsgBody().getHeader().getHash(),node.getId());
+                }
                 list.add(message);
                 offset = message.serialize().length;
                 if (bytes.length > offset) {
@@ -113,7 +120,6 @@ public class ConnectionManager {
                     processMessage(message, node);
                 } else {
                     node.setStatus(Node.BAD);
-                    Log.info("-------------------- receive message filter remove node ---------------------------" + node.getId());
                     Log.info("-------------------- receive message filter remove node ---------------------------" + node.getId());
                     nodeManager.removeNode(node.getId());
                 }
