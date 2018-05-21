@@ -52,23 +52,22 @@ public class TransferTransaction extends Transaction {
         boolean isTransfer = false;
         Na to = Na.ZERO;
         byte[] addressOwner = new byte[AddressTool.HASH_LENGTH];
-        for (Coin coin : coinData.getFrom()) {
-            System.arraycopy(coin.getFrom().getOwner(), 0, addressOwner, 0, AddressTool.HASH_LENGTH);
-            if (Arrays.equals(address, addressOwner)) {
-                isTransfer = true;
-                break;
-            }
-        }
-        for (Coin coin : coinData.getTo()) {
-            System.arraycopy(coin.getOwner(), 0, addressOwner, 0, AddressTool.HASH_LENGTH);
-            if (isTransfer && !Arrays.equals(address, addressOwner)) {
-                to = to.add(coin.getNa());
-            } else if (Arrays.equals(address, addressOwner)) {
-                to = to.add(coin.getNa());
-            }
-        }
 
-        return isTransfer ? "-" : "+" + to.getValue();
+        for (int i = 0; i < coinData.getTo().size(); i++) {
+            Coin coin = coinData.getTo().get(i);
+            System.arraycopy(coin.getOwner(), 0, addressOwner, 0, AddressTool.HASH_LENGTH);
+            if (i == 0 && !Arrays.equals(address, addressOwner)) {
+                isTransfer = true;
+            }
+            if (Arrays.equals(address, addressOwner)) {
+                to = to.add(coin.getNa());
+            }
+        }
+        if(isTransfer) {
+            return "-" + to.getValue();
+        }else {
+            return "+" + to.getValue();
+        }
     }
 
     @Override
