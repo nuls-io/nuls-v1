@@ -33,6 +33,8 @@ import io.nuls.kernel.exception.NulsRuntimeException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 /**
  * Nuls unit
@@ -45,10 +47,12 @@ public final class Na implements Comparable<Na>, Serializable {
 
     public static final int SMALLEST_UNIT_EXPONENT = 8;
 
+    private static final NumberFormat numberFormat = new DecimalFormat("###.########");
+
     public static final long NA_VALUE = (long) Math.pow(10, SMALLEST_UNIT_EXPONENT);
 
     public static final long TOTAL_VALUE = 100000000L;
-    public static final long MAX_NA_VALUE = LongUtils.mul(TOTAL_VALUE ,((long) Math.pow(10, SMALLEST_UNIT_EXPONENT)));
+    public static final long MAX_NA_VALUE = LongUtils.mul(TOTAL_VALUE, ((long) Math.pow(10, SMALLEST_UNIT_EXPONENT)));
 
     /**
      * Total amount of token
@@ -130,7 +134,7 @@ public final class Na implements Comparable<Na>, Serializable {
     }
 
     public Na add(final Na value) {
-        return new Na(LongUtils.add(this.value , value.value));
+        return new Na(LongUtils.add(this.value, value.value));
     }
 
     /**
@@ -141,7 +145,7 @@ public final class Na implements Comparable<Na>, Serializable {
     }
 
     public Na subtract(final Na value) {
-        return new Na(LongUtils.sub(this.value , value.value));
+        return new Na(LongUtils.sub(this.value, value.value));
     }
 
     /**
@@ -152,7 +156,7 @@ public final class Na implements Comparable<Na>, Serializable {
     }
 
     public Na multiply(final long factor) {
-        return new Na(LongUtils.mul(this.value , factor));
+        return new Na(LongUtils.mul(this.value, factor));
     }
 
     /**
@@ -170,7 +174,7 @@ public final class Na implements Comparable<Na>, Serializable {
     }
 
     public Na divide(final long divisor) {
-        return new Na(LongUtils.div(this.value , divisor));
+        return new Na(LongUtils.div(this.value, divisor));
     }
 
     /**
@@ -188,11 +192,11 @@ public final class Na implements Comparable<Na>, Serializable {
     }
 
     public Na[] divideAndRemainder(final long divisor) {
-        return new Na[]{new Na(LongUtils.div(this.value , divisor)), new Na(LongUtils.mod(this.value , divisor))};
+        return new Na[]{new Na(LongUtils.div(this.value, divisor)), new Na(LongUtils.mod(this.value, divisor))};
     }
 
     public long divide(final Na divisor) {
-        return LongUtils.div(this.value , divisor.value);
+        return LongUtils.div(this.value, divisor.value);
     }
 
     /**
@@ -291,6 +295,11 @@ public final class Na implements Comparable<Na>, Serializable {
     @Override
     public int compareTo(final Na other) {
         return Long.compare(this.value, other.value);
+    }
+
+    public String toCoinString() {
+        double d = new BigDecimal(value).movePointLeft(8).doubleValue();
+        return numberFormat.format(d);
     }
 
 }

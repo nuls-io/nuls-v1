@@ -63,10 +63,10 @@ public class TransferTransaction extends Transaction {
                 to = to.add(coin.getNa());
             }
         }
-        if(isTransfer) {
-            return "-" + to.getValue();
-        }else {
-            return "+" + to.getValue();
+        if (isTransfer) {
+            return "-" + to.toCoinString();
+        } else {
+            return "+" + to.toCoinString();
         }
     }
 

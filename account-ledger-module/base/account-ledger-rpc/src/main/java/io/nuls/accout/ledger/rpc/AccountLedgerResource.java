@@ -148,12 +148,12 @@ public class AccountLedgerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
-    public Result getTxInfoList(@ApiParam(name = "pageNumber", value = "页码")
+    public Result getTxInfoList(@ApiParam(name = "address", value = "账户地址", required = true)
+                                @PathParam("address") String address,
+                                @ApiParam(name = "pageNumber", value = "页码")
                                 @QueryParam("pageNumber") Integer pageNumber,
                                 @ApiParam(name = "pageSize", value = "每页条数")
-                                @QueryParam("pageSize") Integer pageSize,
-                                @ApiParam(name = "address", value = "地址")
-                                @QueryParam("address") String address) {
+                                @QueryParam("pageSize") Integer pageSize) {
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
         }
