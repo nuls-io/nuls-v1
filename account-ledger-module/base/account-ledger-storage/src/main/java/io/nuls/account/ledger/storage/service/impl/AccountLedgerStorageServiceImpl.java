@@ -31,6 +31,7 @@ import io.nuls.account.ledger.storage.service.AccountLedgerStorageService;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
+import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -91,7 +92,7 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     }
 
     @Override
-    public Result<Integer> saveLocalTxInfo(TransactionInfoPo infoPo, List<byte[]> addresses) {
+    public Result<Integer> saveTxInfo(TransactionInfoPo infoPo, List<byte[]> addresses) {
         if (infoPo == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
@@ -121,7 +122,7 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     }
 
     @Override
-    public Result deleteLocalTxInfo(TransactionInfoPo infoPo) {
+    public Result deleteTxInfo(TransactionInfoPo infoPo) {
         byte[] infoBytes = null;
         if (infoPo == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
@@ -242,20 +243,19 @@ public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageServ
     public Result<List<Transaction>> loadAllTempList() {
         Result result;
         List<Transaction> tmpList = new ArrayList<>();
-        Set<byte[]> keySet = dbService.keySet(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX);
-        for (byte[] key : keySet) {
+        List<Entry<byte[], byte[]>> txs = dbService.entryList(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX);
+
+        for (Entry txEntry : txs) {
             Transaction tmpTx = null;
-            byte[] txBytes = dbService.get(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, key);
             try {
-                tmpTx = TransactionManager.getInstance(new NulsByteBuffer(txBytes));
+                tmpTx = TransactionManager.getInstance(new NulsByteBuffer((byte[])txEntry.getValue()));
             } catch (Exception e) {
-                Log.info("Load local transaction Error,transaction key[" + Hex.encode(txBytes) + "]");
+                Log.info("Load local transaction Error,transaction key[" + Hex.encode((byte[])txEntry.getKey()) + "]");
             }
             if (tmpTx != null) {
                 tmpList.add(tmpTx);
             }
         }
-
         return Result.getSuccess().setData(tmpList);
     }
 
