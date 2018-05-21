@@ -29,7 +29,7 @@ public class MessageCheckingProcessor<E extends BaseMessage> implements EventHan
 
             //todo test
             if (message.getClass().getSimpleName().equals("GetMessageBodyMessage")) {
-                Log.warn("rcv-msg:" + message.getMsgBody());
+                Log.warn("{}-rcv-msg:" + message.getMsgBody(),processDataDisruptorMessage.getData().getNode().getId());
             }
 
             boolean commonDigestTx = message.getHeader().getMsgType() == MessageBusConstant.MSG_TYPE_COMMON_MSG_HASH_MSG &&
