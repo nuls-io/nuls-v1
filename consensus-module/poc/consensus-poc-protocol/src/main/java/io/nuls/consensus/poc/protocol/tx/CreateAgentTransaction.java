@@ -71,4 +71,10 @@ public class CreateAgentTransaction extends Transaction<Agent> {
     protected Agent parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readNulsData(new Agent());
     }
+
+    @Override
+    public String getInfo(byte[] address) {
+        // todo auto-generated method stub
+        return null;
+    }
 }

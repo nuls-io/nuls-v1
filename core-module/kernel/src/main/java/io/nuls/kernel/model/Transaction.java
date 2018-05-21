@@ -274,4 +274,6 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
             }
         }
     }
+
+    public abstract String getInfo(byte[] address);
 }

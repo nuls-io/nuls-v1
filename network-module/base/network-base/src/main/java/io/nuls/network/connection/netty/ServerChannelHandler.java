@@ -130,6 +130,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 //        Log.error("----------------ServerChannelHandler exceptionCaught-----------");
         Log.info("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage());
+        cause.printStackTrace();
 //        SocketChannel channel = (SocketChannel) ctx.channel();
 //        InetSocketAddress localAddress = channel.localAddress();
 //        InetSocketAddress remoteAddress = channel.remoteAddress();
@@ -144,17 +145,24 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.info(" ---------------------- server channelRead ------------------------- " + nodeId);
-        Node node = nodeManager.getNode(nodeId);
-        if (node != null && node.isAlive()) {
-            ByteBuf buf = (ByteBuf) msg;
-            byte[] bytes = new byte[buf.readableBytes()];
-            buf.readBytes(bytes);
-            buf.release();
-            ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
-            buffer.put(bytes);
-            connectionManager.receiveMessage(buffer, node);
+        try {
+            Node node = nodeManager.getNode(nodeId);
+            if (node != null && node.isAlive()) {
+                ByteBuf buf = (ByteBuf) msg;
+                byte[] bytes = new byte[buf.readableBytes()];
+                buf.readBytes(bytes);
+                buf.release();
+                ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
+                buffer.put(bytes);
+                connectionManager.receiveMessage(buffer, node);
+            }
+        } catch (Exception e) {
+            Log.info(" ---------------------- server channelRead exception------------------------- " + nodeId);
+            e.printStackTrace();
+            throw e;
         }
+//
+
     }
 
 }

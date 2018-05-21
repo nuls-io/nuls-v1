@@ -52,6 +52,12 @@ public class CoinBaseTransaction extends Transaction {
     }
 
     @Override
+    public String getInfo(byte[] address) {
+        // todo auto-generated method stub
+        return null;
+    }
+
+    @Override
     public boolean isFreeOfFee() {
         return true;
     }

@@ -113,12 +113,13 @@ public class ConnectionManager {
                     processMessage(message, node);
                 } else {
                     node.setStatus(Node.BAD);
-//                    System.out.println("-------------------- receive message filter remove node ---------------------------");
+                    Log.info("-------------------- receive message filter remove node ---------------------------" + node.getId());
+                    Log.info("-------------------- receive message filter remove node ---------------------------" + node.getId());
                     nodeManager.removeNode(node.getId());
                 }
             }
         } catch (Exception e) {
-            Log.error("remoteAddress: " + node.getId());
+            Log.error("--------------------------receive message exception remoteAddress: " + node.getId());
             Log.error(e);
             return;
         } finally {

@@ -66,7 +66,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             node.setChannelId(channelId);
             node.setStatus(Node.CONNECT);
             boolean result = nodeManager.processConnectedNode(node);
-            if(!result) {
+            if (!result) {
                 channel.close();
             }
         } catch (Exception e) {
@@ -99,23 +99,31 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws UnsupportedEncodingException {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.info(" ---------------------- client channelRead ---------------------- " + nodeId);
-        Node node = nodeManager.getNode(nodeId);
-        if (node != null && node.isAlive()) {
-            ByteBuf buf = (ByteBuf) msg;
-            byte[] bytes = new byte[buf.readableBytes()];
-            buf.readBytes(bytes);
-            buf.release();
-            ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
-            buffer.put(bytes);
 
-            connectionManager.receiveMessage(buffer, node);
+        try {
+            Node node = nodeManager.getNode(nodeId);
+            if (node != null && node.isAlive()) {
+                ByteBuf buf = (ByteBuf) msg;
+                byte[] bytes = new byte[buf.readableBytes()];
+                buf.readBytes(bytes);
+                buf.release();
+                ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
+                buffer.put(bytes);
+
+                connectionManager.receiveMessage(buffer, node);
+            }
+        } catch (Exception e) {
+            Log.info(" ---------------------- client channelRead exception---------------------- " + nodeId);
+            e.printStackTrace();
+            throw e;
         }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         Log.info("--------------- ClientChannelHandler exceptionCaught :" + cause.getMessage());
+        cause.printStackTrace();
+
         ctx.channel().close();
     }
 

@@ -36,11 +36,18 @@ public class TransactionInfo {
     public static byte UNCONFIRMED = 1;
 
     private NulsDigestData txHash;
+
     private long blockHeight;
+
     private long time;
+
     private byte[] addresses;
+
     private int txType;
+
     private byte status;
+
+    private String info;
 
     public NulsDigestData getTxHash() {
         return txHash;
@@ -88,5 +95,13 @@ public class TransactionInfo {
 
     public void setStatus(byte status) {
         this.status = status;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
     }
 }
