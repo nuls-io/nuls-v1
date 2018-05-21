@@ -40,7 +40,6 @@ import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.utils.VarInt;
-import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.service.TransactionService;
 import io.swagger.annotations.*;
@@ -439,7 +438,7 @@ public class PocConsensusResource {
             result.setData(page);
             return result;
         }
-        fillAgentList(agentList);
+        fillAgentList(agentList, null);
         int type = AgentComparator.COMMISSION_RATE;
         if ("owndeposit".equals(sortType)) {
             type = AgentComparator.DEPOSIT;
@@ -460,14 +459,32 @@ public class PocConsensusResource {
         return result;
     }
 
-    private void fillAgentList(List<Agent> agentList) {
+    private void fillAgentList(List<Agent> agentList, List<Deposit> depositList) {
         MeetingRound round = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
         for (Agent agent : agentList) {
-            fillAgent(agent, round);
+            fillAgent(agent, round, depositList);
         }
     }
 
-    private void fillAgent(Agent agent, MeetingRound round) {
+    private void fillAgent(Agent agent, MeetingRound round, List<Deposit> depositList) {
+        if (null == depositList || depositList.isEmpty()) {
+            depositList = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
+        }
+        Set<String> memberSet = new HashSet<>();
+        Na total = Na.ZERO;
+        for (Deposit deposit : depositList) {
+            if (!agent.getTxHash().equals(deposit.getAgentHash())) {
+                continue;
+            }
+            if (deposit.getDelHeight() >= 0) {
+                continue;
+            }
+            total = total.add(deposit.getDeposit());
+            memberSet.add(Base58.encode(deposit.getAddress()));
+        }
+        agent.setMemberCount(memberSet.size());
+        agent.setTotalDeposit(total.getValue());
+
         if (round == null) {
             return;
         }
@@ -478,12 +495,7 @@ public class PocConsensusResource {
         }
         agent.setStatus(1);
         agent.setCreditVal(member.getCreditVal());
-        agent.setTotalDeposit(member.getTotalDeposit().getValue());
-        Set<String> memberSet = new HashSet<>();
-        for (Deposit deposit : member.getDepositList()) {
-            memberSet.add(Base58.encode(deposit.getAddress()));
-        }
-        agent.setMemberCount(memberSet.size());
+
     }
 
     @GET
@@ -504,7 +516,7 @@ public class PocConsensusResource {
         for (Agent agent : agentList) {
             if (Arrays.equals(agent.getAgentAddress(), AddressTool.getAddress(agentAddress))) {
                 MeetingRound round = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
-                this.fillAgent(agent, round);
+                this.fillAgent(agent, round, null);
                 AgentDTO dto = new AgentDTO(agent);
                 result.setData(dto);
                 return result;
@@ -577,7 +589,7 @@ public class PocConsensusResource {
             result.setData(page);
             return result;
         }
-        fillAgentList(agentList);
+        fillAgentList(agentList, allList);
         List<AgentDTO> resultList = new ArrayList<>();
         for (int i = start; i < agentList.size() && i < (start + pageSize); i++) {
             resultList.add(new AgentDTO(agentList.get(i)));
