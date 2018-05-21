@@ -26,12 +26,12 @@ package io.nuls.protocol.model.tx;
 
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.CoinData;
-import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.model.*;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.protocol.constant.ProtocolConstant;
+
+import java.util.Arrays;
 
 /**
  * @author Niels
@@ -51,11 +51,28 @@ public class TransferTransaction extends Transaction {
     public String getInfo(byte[] address) {
         CoinData coinData = this.getCoinData();
 
-        for(Coin coin : coinData.getFrom()) {
-
+        boolean isTransfer = false;
+        Na to = Na.ZERO;
+        byte[] addressOwner = new byte[AddressTool.HASH_LENGTH];
+        for (Coin coin : coinData.getFrom()) {
+            System.arraycopy(coin.getFrom().getOwner(), 0, addressOwner, 0, AddressTool.HASH_LENGTH);
+            if (Arrays.equals(address, addressOwner)) {
+                isTransfer = true;
+                break;
+            }
         }
-        // todo auto-generated method stub
-        return null;
+        for (Coin coin : coinData.getTo()) {
+            System.arraycopy(coin.getFrom().getOwner(), 0, addressOwner, 0, AddressTool.HASH_LENGTH);
+            if (isTransfer && !Arrays.equals(address, addressOwner)) {
+                to = to.add(coin.getNa());
+            } else if (Arrays.equals(address, addressOwner)) {
+                to = to.add(coin.getNa());
+            }
+        }
+        if (isTransfer) {
+            return "" + (-1 * to.getValue());
+        }
+        return "" + to.getValue();
     }
 
     @Override
