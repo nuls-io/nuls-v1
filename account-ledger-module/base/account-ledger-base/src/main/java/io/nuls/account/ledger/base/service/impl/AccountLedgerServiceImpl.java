@@ -684,6 +684,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 Transaction sourceTx = null;
                 try {
                     sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
+                    if (sourceTx == null) {
+                        sourceTx = getUnconfirmedTransaction(NulsDigestData.fromDigestHex(Hex.encode(fromSource))).getData();
+                    }
                 } catch (Exception e) {
                     throw new NulsRuntimeException(e);
                 }
