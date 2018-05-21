@@ -49,8 +49,6 @@ public class TransferTransaction extends Transaction {
 
     @Override
     public String getInfo(byte[] address) {
-        CoinData coinData = this.getCoinData();
-
         boolean isTransfer = false;
         Na to = Na.ZERO;
         byte[] addressOwner = new byte[AddressTool.HASH_LENGTH];
@@ -62,17 +60,15 @@ public class TransferTransaction extends Transaction {
             }
         }
         for (Coin coin : coinData.getTo()) {
-            System.arraycopy(coin.getFrom().getOwner(), 0, addressOwner, 0, AddressTool.HASH_LENGTH);
+            System.arraycopy(coin.getOwner(), 0, addressOwner, 0, AddressTool.HASH_LENGTH);
             if (isTransfer && !Arrays.equals(address, addressOwner)) {
                 to = to.add(coin.getNa());
             } else if (Arrays.equals(address, addressOwner)) {
                 to = to.add(coin.getNa());
             }
         }
-        if (isTransfer) {
-            return "" + (-1 * to.getValue());
-        }
-        return "" + to.getValue();
+
+        return isTransfer ? "-" : "+" + to.getValue();
     }
 
     @Override

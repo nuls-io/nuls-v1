@@ -492,7 +492,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             List<TransactionInfo> infoList = new ArrayList<>();
             for (TransactionInfoPo po : infoPoList) {
                 infoList.add(po.toTransactionInfo());
-                Transaction tx = ledgerService.getTx(po.getTxHash());
             }
 
             Collections.sort(infoList, TxInfoComparator.getInstance());
