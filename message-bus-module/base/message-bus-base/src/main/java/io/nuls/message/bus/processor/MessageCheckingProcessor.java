@@ -28,9 +28,8 @@ public class MessageCheckingProcessor<E extends BaseMessage> implements EventHan
             }
 
             //todo test
-            if (message.getHeader().getModuleId() == ProtocolConstant.MODULE_ID_PROTOCOL && message.getHeader().getMsgType() == ProtocolConstant.MESSAGE_TYPE_NEW_BLOCK) {
-                SmallBlockMessage smallBlockMessage = (SmallBlockMessage) message;
-                Log.warn("rcv-msg:" + smallBlockMessage.getMsgBody().getHeader().getHash().toString());
+            if (message.getClass().getSimpleName().equals("GetMessageBodyMessage")) {
+                Log.warn("rcv-msg:" + message.getMsgBody());
             }
 
             boolean commonDigestTx = message.getHeader().getMsgType() == MessageBusConstant.MSG_TYPE_COMMON_MSG_HASH_MSG &&
@@ -41,10 +40,10 @@ public class MessageCheckingProcessor<E extends BaseMessage> implements EventHan
                 return;
             }
             if (messageCacheService.kownTheMessage(((CommonDigestMessage) message).getMsgBody())) {
-                Log.info("discard:{}," + ((CommonDigestMessage) message).getMsgBody(), processDataDisruptorMessage.getData().getNode().getId());
+//                Log.info("discard:{}," + ((CommonDigestMessage) message).getMsgBody(), processDataDisruptorMessage.getData().getNode().getId());
                 processDataDisruptorMessage.setStoped(true);
             } else if (messageCacheService.kownTheMessage(message.getHash())) {
-                Log.info("discard2:{}," + message.getClass(), processDataDisruptorMessage.getData().getNode().getId());
+//                Log.info("discard2:{}," + message.getClass(), processDataDisruptorMessage.getData().getNode().getId());
                 processDataDisruptorMessage.setStoped(true);
             } else {
                 messageCacheService.cacheRecievedMessageHash(message.getHash());

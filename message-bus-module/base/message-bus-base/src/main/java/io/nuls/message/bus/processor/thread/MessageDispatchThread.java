@@ -22,7 +22,7 @@ public class MessageDispatchThread extends BaseThread implements WorkHandler<Dis
     @Override
     public void onEvent(DisruptorData<ProcessData> disruptorData) throws Exception {
         if (null == disruptorData || disruptorData.getData() == null || disruptorData.isStoped()) {
-            Log.debug("did sth ....");
+            Log.warn("there is null data in disruptorData!");
             return;
         }
         try {
