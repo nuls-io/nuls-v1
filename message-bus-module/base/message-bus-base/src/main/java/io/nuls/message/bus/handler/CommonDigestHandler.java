@@ -19,19 +19,9 @@ import io.nuls.network.model.Node;
 public class CommonDigestHandler extends AbstractMessageHandler<CommonDigestMessage> {
 
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
-    private MessageCacheService messageCacheService = MessageCacheService.getInstance();
 
     @Override
     public void onMessage(CommonDigestMessage message, Node fromNode) throws NulsException {
-        if (messageCacheService.kownTheMessage(message.getMsgBody())) {
-            Log.info("discard:{}," + (message).getMsgBody(), fromNode.getId());
-            return;
-        } else if (messageCacheService.kownTheMessage(message.getHash())) {
-            Log.info("discard2:{}," + message.getClass(), fromNode.getId());
-            return;
-        } else {
-            messageCacheService.cacheRecievedMessageHash(message.getHash());
-        }
         GetMessageBodyMessage getMessageBodyMessage = new GetMessageBodyMessage();
         getMessageBodyMessage.setMsgBody(message.getMsgBody());
         messageBusService.sendToNode(getMessageBodyMessage, fromNode, false);
