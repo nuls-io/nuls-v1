@@ -398,6 +398,9 @@ public class ConsensusProcess {
             }
             for (byte[] addressBytes : yellowPunishTransaction.getTxData().getAddressList()) {
                 String address = Base58.encode(addressBytes);
+                if (ConsensusConfig.getSeedNodeList().contains(addressBytes)) {
+                    continue;
+                }
                 Integer count = countMap.get(address);
                 if (null != count && count >= PocConsensusConstant.MAXINUM_CONTINUOUS_YELLOW_NUMBER) {
                     RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
@@ -405,11 +408,12 @@ public class ConsensusProcess {
                     redPunishData.setAddress(addressBytes);
                     redPunishData.setReasonCode(PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode());
                     redPunishTransaction.setTxData(redPunishData);
+                    redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction));
                     txList.add(redPunishTransaction);
                 }
             }
         }
-//todo
+//todo 是否还有其他红牌处理
 //        List<RedPunishTransaction> redTxList = ConsensusTool.createRedPunishTxList(bestBlock, self, );
     }
 

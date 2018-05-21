@@ -8,7 +8,7 @@ import io.nuls.kernel.model.Na;
  */
 public class TransactionFeeCalculator {
 
-    public static final Na PRECE_PRE_100_bytes = Na.valueOf(100000);
+    public static final Na PRECE_PRE_1000_bytes = Na.valueOf(1000000);
 
     /**
      * 根据交易大小计算需要交纳的手续费
@@ -18,9 +18,9 @@ public class TransactionFeeCalculator {
      * @return
      */
     public static final Na getFee(int size) {
-        Na fee = PRECE_PRE_100_bytes.multiply(size / 100);
-        if (size % 100 > 0) {
-            fee = fee.add(PRECE_PRE_100_bytes);
+        Na fee = PRECE_PRE_1000_bytes.multiply(size / 1000);
+        if (size % 1000 > 0) {
+            fee = fee.add(PRECE_PRE_1000_bytes);
         }
         return fee;
     }

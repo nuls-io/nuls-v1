@@ -5,6 +5,7 @@ import io.nuls.account.model.Alias;
 import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.kernel.MicroKernelBootstrap;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import org.junit.BeforeClass;
@@ -50,7 +51,11 @@ public class AliasServiceTest {
         List<Account> accounts = accountService.createAccount(1, "nuls123456").getData();
         Account account = accounts.get(0);
         Alias alias = new Alias(account.getAddress().getBase58Bytes(), "lichao");
-        assertTrue(aliasService.saveAlias(new AliasPo(alias)).isSuccess());
+        try {
+            assertTrue(aliasService.saveAlias(new AliasPo(alias)).isSuccess());
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test

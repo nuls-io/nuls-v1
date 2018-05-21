@@ -7,6 +7,8 @@ import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.tx.AliasTransaction;
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
@@ -33,13 +35,23 @@ public class AliasTxProcessor implements TransactionProcessor<AliasTransaction> 
     @Override
     public Result onRollback(AliasTransaction tx, Object secondaryData) {
         Alias alias = tx.getTxData();
-        return aliasService.rollbackAlias(new AliasPo(alias));
+        try {
+            return aliasService.rollbackAlias(new AliasPo(alias));
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
+        }
     }
 
     @Override
     public Result onCommit(AliasTransaction tx, Object secondaryData) {
         Alias alias = tx.getTxData();
-        return aliasService.saveAlias(new AliasPo(alias));
+        try {
+            return aliasService.saveAlias(new AliasPo(alias));
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.FAILED);
+        }
     }
 
     /**

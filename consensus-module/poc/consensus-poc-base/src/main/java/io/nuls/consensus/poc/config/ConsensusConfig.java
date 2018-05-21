@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
  * @author ln
  * @date 2018/4/13
  */
@@ -48,7 +47,8 @@ public class ConsensusConfig {
     private final static String SEED_NODES_DELIMITER = ",";
 
     private static boolean partakePacking = false;
-    private static List<byte[]> seedNodeList = new ArrayList<>();
+    private static List<byte[]> seedNodeBytesList = new ArrayList<>();
+    private static List<String> seedNodeStringList = new ArrayList<>();
 
     public static void initConfiguration() throws Exception {
 
@@ -68,8 +68,9 @@ public class ConsensusConfig {
         for (String address : array) {
             seedAddressSet.add(address);
         }
-        for(String address : seedAddressSet) {
-            seedNodeList.add(AddressTool.getAddress(address));
+        for (String address : seedAddressSet) {
+            seedNodeBytesList.add(AddressTool.getAddress(address));
+            seedNodeStringList.add(address);
         }
     }
 
@@ -78,6 +79,10 @@ public class ConsensusConfig {
     }
 
     public static List<byte[]> getSeedNodeList() {
-        return seedNodeList;
+        return seedNodeBytesList;
+    }
+
+    public static List<String> getSeedNodeStringList() {
+        return seedNodeStringList;
     }
 }
