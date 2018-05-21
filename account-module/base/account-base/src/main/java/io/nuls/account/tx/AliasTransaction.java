@@ -21,6 +21,12 @@ public class AliasTransaction extends Transaction<Alias> {
     }
 
     @Override
+    public String getInfo(byte[] address) {
+        // todo auto-generated method stub
+        return null;
+    }
+
+    @Override
     protected Alias parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readNulsData(new Alias());
     }

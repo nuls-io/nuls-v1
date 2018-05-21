@@ -42,4 +42,10 @@ public class CacheTestTx extends Transaction {
     protected TransactionLogicData parseTxData(NulsByteBuffer byteBuffer) {
         return null;
     }
+
+    @Override
+    public String getInfo(byte[] address) {
+        // todo auto-generated method stub
+        return null;
+    }
 }

@@ -42,6 +42,7 @@ import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.consensus.service.ConsensusService;
+import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
@@ -191,6 +192,8 @@ public class BlockProcess {
                     success = result.isSuccess();
                     if (!success) {
                         Log.warn("save block fail : reason : " + result.getMessage() + ", block height : " + block.getHeader().getHeight() + ", hash : " + block.getHeader().getHash());
+                    } else {
+                        BlockLog.debug("save block height : " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                     }
                 } while (false);
             } catch (Exception e) {

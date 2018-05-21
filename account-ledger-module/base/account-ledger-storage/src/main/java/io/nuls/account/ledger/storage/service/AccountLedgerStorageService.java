@@ -49,9 +49,9 @@ public interface AccountLedgerStorageService {
 
     public Result batchDeleteUTXO(Set<byte[]> utxos);
 
-    Result saveLocalTxInfo(TransactionInfoPo tx, List<byte[]> addresses);
+    Result saveTxInfo(TransactionInfoPo tx, List<byte[]> addresses);
 
-    Result deleteLocalTxInfo(TransactionInfoPo tx);
+    Result deleteTxInfo(TransactionInfoPo tx);
 
     List<TransactionInfoPo> getTxInfoList(byte[] address) throws NulsException;
 

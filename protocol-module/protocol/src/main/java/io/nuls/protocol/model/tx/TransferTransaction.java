@@ -26,6 +26,8 @@ package io.nuls.protocol.model.tx;
 
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.model.TransactionLogicData;
 import io.nuls.kernel.utils.NulsByteBuffer;
@@ -43,6 +45,17 @@ public class TransferTransaction extends Transaction {
 
     protected TransferTransaction(int type) {
         super(type);
+    }
+
+    @Override
+    public String getInfo(byte[] address) {
+        CoinData coinData = this.getCoinData();
+
+        for(Coin coin : coinData.getFrom()) {
+
+        }
+        // todo auto-generated method stub
+        return null;
     }
 
     @Override

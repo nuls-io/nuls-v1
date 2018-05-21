@@ -46,13 +46,11 @@ import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
-import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.*;
@@ -164,7 +162,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
-        Result result = storageService.deleteLocalTxInfo(txInfoPo);
+        Result result = storageService.deleteTxInfo(txInfoPo);
 
         if (result.isFailed()) {
             return result;
@@ -494,6 +492,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             List<TransactionInfo> infoList = new ArrayList<>();
             for (TransactionInfoPo po : infoPoList) {
                 infoList.add(po.toTransactionInfo());
+                Transaction tx = ledgerService.getTx(po.getTxHash());
             }
 
             Collections.sort(infoList, TxInfoComparator.getInstance());
@@ -535,14 +534,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
         txInfoPo.setStatus(status);
 
-        Result result = storageService.saveLocalTxInfo(txInfoPo, addresses);
+        Result result = storageService.saveTxInfo(txInfoPo, addresses);
 
         if (result.isFailed()) {
             return result;
         }
         result = saveLocalTx(tx);
         if (result.isFailed()) {
-            storageService.deleteLocalTxInfo(txInfoPo);
+            storageService.deleteTxInfo(txInfoPo);
         }
 
         if (status == TransactionInfo.UNCONFIRMED) {
@@ -567,14 +566,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
         txInfoPo.setStatus(status);
 
-        Result result = storageService.saveLocalTxInfo(txInfoPo, addresses);
+        Result result = storageService.saveTxInfo(txInfoPo, addresses);
 
         if (result.isFailed()) {
             return result;
         }
         result = saveLocalTx(tx);
         if (result.isFailed()) {
-            storageService.deleteLocalTxInfo(txInfoPo);
+            storageService.deleteTxInfo(txInfoPo);
         }
         return result;
     }
@@ -714,7 +713,58 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     public Result deleteLocalTx(Transaction tx) {
-        //todo
+        if (tx == null) {
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+        }
+        byte[] txHashBytes = new byte[0];
+        try {
+            txHashBytes = tx.getHash().serialize();
+        } catch (IOException e) {
+            throw new NulsRuntimeException(e);
+        }
+        CoinData coinData = tx.getCoinData();
+
+        if (coinData != null) {
+            // delete - from
+            List<Coin> froms = coinData.getFrom();
+            Map<byte[], byte[]> fromMap = new HashMap<>();
+            for (Coin from : froms) {
+                byte[] fromSource = from.getOwner();
+                byte[] utxoFromSource = new byte[tx.getHash().size()];
+                byte[] fromIndex = new byte[fromSource.length - utxoFromSource.length];
+                System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
+                System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
+                Transaction sourceTx = null;
+                try {
+                    sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
+                } catch (Exception e) {
+                    throw new NulsRuntimeException(e);
+                }
+                if (sourceTx == null) {
+                    return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
+                }
+                byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
+                try {
+                    fromMap.put(org.spongycastle.util.Arrays.concatenate(address, from.getOwner()), sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).serialize());
+                } catch (IOException e) {
+                    throw new NulsRuntimeException(e);
+                }
+            }
+            storageService.batchSaveUTXO(fromMap);
+            // save utxo - to
+            List<Coin> tos = coinData.getTo();
+            byte[] indexBytes;
+            Set<byte[]> toSet = new HashSet<>();
+            for (int i = 0, length = tos.size(); i < length; i++) {
+                try {
+                    byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                    toSet.add(outKey);
+                } catch (IOException e) {
+                    throw new NulsRuntimeException(e);
+                }
+            }
+            storageService.batchDeleteUTXO(toSet);
+        }
         return Result.getSuccess();
     }
 

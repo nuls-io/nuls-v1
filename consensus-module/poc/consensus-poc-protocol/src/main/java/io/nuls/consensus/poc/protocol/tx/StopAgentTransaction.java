@@ -52,6 +52,12 @@ public class StopAgentTransaction extends Transaction<StopAgent> {
     }
 
     @Override
+    public String getInfo(byte[] address) {
+        // todo auto-generated method stub
+        return null;
+    }
+
+    @Override
     public boolean isUnlockTx() {
         return true;
     }

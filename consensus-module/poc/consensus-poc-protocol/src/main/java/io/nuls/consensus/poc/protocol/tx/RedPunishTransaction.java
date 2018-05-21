@@ -45,6 +45,12 @@ public class RedPunishTransaction extends Transaction<RedPunishData> {
     }
 
     @Override
+    public String getInfo(byte[] address) {
+        // todo auto-generated method stub
+        return null;
+    }
+
+    @Override
     public boolean isFreeOfFee() {
         return true;
     }
