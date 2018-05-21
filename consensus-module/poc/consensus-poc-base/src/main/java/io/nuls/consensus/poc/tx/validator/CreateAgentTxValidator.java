@@ -48,6 +48,8 @@ import java.util.Arrays;
 @Component
 public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<CreateAgentTransaction> {
 
+    //todo 节点介绍最大长度
+
     private static int AGENT_NAME_MAS_LENGTH = 32;
 
     @Override

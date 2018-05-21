@@ -65,13 +65,13 @@ public class MessageBusServiceImpl implements MessageBusService {
     @Override
     public Result<List<String>> broadcastAndCache(BaseMessage message, Node excludeNode, boolean aysn) {
         messageCacheService.cacheSendedMessage(message);
-        BroadcastResult result = networkService.sendToAllNode(message, excludeNode, false);
+        BroadcastResult result = networkService.sendToAllNode(message, excludeNode, aysn);
         return getNodeIdListResult(result);
     }
 
     @Override
     public Result sendToNode(BaseMessage message, Node node, boolean aysn) {
-        BroadcastResult result = networkService.sendToNode(message, node, false);
+        BroadcastResult result = networkService.sendToNode(message, node, aysn);
         if (!result.isSuccess()) {
             Log.error("send to node fail reason: " + result.getErrorCode().getMsg());
         }
