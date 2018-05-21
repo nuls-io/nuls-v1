@@ -12,6 +12,7 @@ import java.io.UnsupportedEncodingException;
  * @date 2018/5/16
  */
 public class AgentDTO {
+
     public AgentDTO(Agent agent) {
         this.agentAddress = Base58.encode(agent.getAgentAddress());
         this.packingAddress = Base58.encode(agent.getPackingAddress());
@@ -31,6 +32,7 @@ public class AgentDTO {
         this.creditVal = agent.getCreditVal();
         this.totalDeposit = agent.getTotalDeposit();
         this.txHash = agent.getTxHash().getDigestHex();
+        this.memberCount = agent.getMemberCount();
     }
 
     private String agentAddress;
@@ -54,6 +56,7 @@ public class AgentDTO {
     private double creditVal;
     private long totalDeposit;
     private String txHash;
+    private final int memberCount;
 
     public String getAgentAddress() {
         return agentAddress;
@@ -165,5 +168,9 @@ public class AgentDTO {
 
     public void setTxHash(String txHash) {
         this.txHash = txHash;
+    }
+
+    public int getMemberCount() {
+        return memberCount;
     }
 }

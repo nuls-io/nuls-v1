@@ -479,6 +479,11 @@ public class PocConsensusResource {
         agent.setStatus(1);
         agent.setCreditVal(member.getCreditVal());
         agent.setTotalDeposit(member.getTotalDeposit().getValue());
+        Set<String> memberSet = new HashSet<>();
+        for (Deposit deposit : member.getDepositList()) {
+            memberSet.add(Base58.encode(deposit.getAddress()));
+        }
+        agent.setMemberCount(memberSet.size());
     }
 
     @GET
