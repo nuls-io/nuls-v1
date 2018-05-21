@@ -306,7 +306,7 @@ public class BlockServiceImpl implements BlockService {
     public Result broadcastBlock(SmallBlock smallBlock) {
         SmallBlockMessage message = fillSmallBlockMessage(smallBlock);
         Result<List<String>> result = messageBusService.broadcastAndCache(message, null, false);
-        StringBuilder str = new StringBuilder("broadcast " + smallBlock.getHeader().getHeight() + " to: ");
+        StringBuilder str = new StringBuilder("broadcast to: ");
         for (String node : result.getData()) {
             str.append(", " + node);
         }
