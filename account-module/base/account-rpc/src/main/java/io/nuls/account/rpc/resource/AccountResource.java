@@ -16,18 +16,23 @@ import io.nuls.account.service.AccountBaseService;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
+import io.nuls.account.util.AccountTool;
 import io.nuls.core.tools.crypto.ECKey;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.utils.SerializeUtils;
 import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -409,10 +414,16 @@ public class AccountResource {
     public Result importAccount(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
                                         AccountKeyStoreImportForm form) {
 
-        if (null == form || null == form.getAccountKeyStoreDto()) {
+        if (null == form || null == form.getAccountKeyStoreDto() || null == form.getOverwrite()) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         AccountKeyStoreDto accountKeyStoreDto = form.getAccountKeyStoreDto();
+        if(!form.getOverwrite()){
+            Account account = accountService.getAccount(accountKeyStoreDto.getAddress()).getData();
+            if(null != account) {
+                return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST);
+            }
+        }
         String password = form.getPassword();
         if(StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)){
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
@@ -432,8 +443,24 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result<String> importAccountByPriKey(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
-                                                        AccountPriKeyPasswordForm form) {
+    public Result<String> importAccountByPriKey(@ApiParam(name = "form", value = "导入账户表单数据", required = true) AccountPriKeyPasswordForm form) {
+
+        if (null == form || null == form.getOverwrite()) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        if(!form.getOverwrite()){
+            ECKey key = null ;
+            try {
+                key = ECKey.fromPrivate(new BigInteger(Hex.decode(form.getPriKey())));
+            } catch (Exception e) {
+                return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            }
+            Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, SerializeUtils.sha256hash160(key.getPubKey()));
+            Account account = accountService.getAccount(address).getData();
+            if(null != account) {
+                return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST);
+            }
+        }
         String priKey = form.getPriKey();
         if (!ECKey.isValidPrivteHex(priKey)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
