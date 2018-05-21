@@ -81,6 +81,9 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
 
     @Override
     public Result updateAccount(AccountPo po) {
+        if(null == po.getAddressObj()){
+            po.setAddressObj(new Address(po.getAddress()));
+        }
         AccountPo account = dbService.getModel(AccountStorageConstant.DB_NAME_ACCOUNT, po.getAddressObj().getBase58Bytes(), AccountPo.class);
         if(null == account){
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);

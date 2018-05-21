@@ -12,6 +12,7 @@ import io.nuls.account.storage.service.AliasStorageService;
 import io.nuls.account.tx.AliasTransaction;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.service.AccountLedgerService;
+import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.exception.NulsException;
@@ -68,36 +69,33 @@ public class AliasService {
      * @param addr      Address of account
      * @param password  password of account
      * @param aliasName the alias to set
-     * @return
+     * @return txhash
      */
-    public Result<Boolean> setAlias(String addr, String password, String aliasName) {
+    public Result<String> setAlias(String addr, String password, String aliasName) {
         if (!Address.validAddress(addr)) {
             Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        Account account = accountCacheService.getAccountByAddress(addr);
+        Account account = accountService.getAccount(addr).getData();
         if (null == account) {
-            account = accountService.getAccount(addr).getData();
-            if(null == account){
-                return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
-            }
-            try {
-                if(account.isEncrypted()){
-                    if(!account.unlock(password)){
-                        return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-                    }
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        try {
+            if (account.isEncrypted()) {
+                if (!account.unlock(password)) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
-            } catch (NulsException e) {
-                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
+        } catch (NulsException e) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         if (StringUtils.isNotBlank(account.getAlias())) {
-            return new Result(false, AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS, "Alias has been set up");
+            return Result.getFailed(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS, "Alias has been set up");
         }
         if (!StringUtils.validAlias(aliasName)) {
-            return new Result(false, "The alias is between 3 to 20 characters");
+            return Result.getFailed("The alias is between 3 to 20 characters");
         }
         if (isAliasExist(aliasName)) {
-            Result.getFailed(AccountErrorCode.ALIAS_EXIST);
+            return Result.getFailed(AccountErrorCode.ALIAS_EXIST);
         }
         byte[] addressBytes = account.getAddress().getBase58Bytes();
         try {
@@ -108,8 +106,8 @@ public class AliasService {
             tx.setTxData(alias);
 
             CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-            if(!coinDataResult.isEnough()){
-                Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
+            if (!coinDataResult.isEnough()) {
+                return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
             CoinData coinData = new CoinData();
             coinData.setFrom(coinDataResult.getCoinList());
@@ -137,7 +135,7 @@ public class AliasService {
             return Result.getSuccess().setData(hash);
         } catch (Exception e) {
             Log.error(e);
-            return new Result(false, e.getMessage());
+            return Result.getFailed(e.getMessage());
         }
     }
 
@@ -154,18 +152,25 @@ public class AliasService {
      * @param aliaspo
      * @return
      */
-    public Result saveAlias(AliasPo aliaspo) {
+    public Result saveAlias(AliasPo aliaspo) throws NulsException {
         try {
-            aliasStorageService.saveAlias(aliaspo);
+            Result result = aliasStorageService.saveAlias(aliaspo);
+            if (result.isFailed()) {
+                this.rollbackAlias(aliaspo);
+            }
             AccountPo po = accountStorageService.getAccount(aliaspo.getAddress()).getData();
             if (null == po) {
                 return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
             }
             po.setAlias(aliaspo.getAlias());
-            accountStorageService.updateAccount(po);
-            accountCacheService.putAccount(po.toAccount());
+            Result resultAcc = accountStorageService.updateAccount(po);
+            if (resultAcc.isFailed()) {
+                this.rollbackAlias(aliaspo);
+            }
         } catch (Exception e) {
-            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+            this.rollbackAlias(aliaspo);
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.FAILED);
         }
         return Result.getSuccess();
     }
@@ -192,18 +197,18 @@ public class AliasService {
      * @param aliasPo
      * @return
      */
-    public Result rollbackAlias(AliasPo aliasPo) {
+    public Result rollbackAlias(AliasPo aliasPo) throws NulsException {
         try {
             AliasPo po = aliasStorageService.getAlias(aliasPo.getAlias()).getData();
-            if (po != null && po.getAddress().equals(aliasPo.getAddress())) {
+            if (po != null && Base58.encode(po.getAddress()).equals(Base58.encode(aliasPo.getAddress()))) {
                 aliasStorageService.removeAlias(aliasPo.getAlias());
                 AccountPo accountPo = accountStorageService.getAccount(aliasPo.getAddress()).getData();
                 accountPo.setAlias("");
                 accountStorageService.updateAccount(accountPo);
-                accountCacheService.putAccount(accountPo.toAccount());
             }
         } catch (Exception e) {
-            throw new NulsRuntimeException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
+            Log.error(e);
+            throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
         }
         return Result.getSuccess();
     }

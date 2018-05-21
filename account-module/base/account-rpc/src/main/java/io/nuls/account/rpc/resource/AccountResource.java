@@ -150,7 +150,7 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result<Boolean> alias(@PathParam("address") String address,
+    public Result<String> alias(@PathParam("address") String address,
                                  @ApiParam(name = "form", value = "设置别名表单数据", required = true)
                                          AccountAliasForm form) {
         if (!Address.validAddress(address)) {
