@@ -44,10 +44,7 @@ import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.Na;
-import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.ledger.service.LedgerService;
 import io.swagger.annotations.*;
@@ -260,7 +257,7 @@ public class AccountLedgerResource {
         }
 
         List<UtxoDto> utxoDtoList = new ArrayList<>();
-
+//        byte[] txHash  = new byte[NulsDigestData.H];
         for (int i = start; i < end; i++) {
             //todo  查询交易
             //accountLedgerService.g

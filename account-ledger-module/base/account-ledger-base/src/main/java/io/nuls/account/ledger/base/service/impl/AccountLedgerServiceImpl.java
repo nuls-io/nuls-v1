@@ -523,6 +523,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         } catch (NulsException e) {
             Log.error(e);
             result.setSuccess(false);
+            result.setErrorCode(e.getErrorCode());
         }
         return result;
     }
