@@ -29,6 +29,7 @@ package io.nuls.consensus.poc.storage.service;
 import io.nuls.consensus.poc.storage.BaseTest;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.kernel.lite.core.SpringLiteContext;
+import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,16 +49,25 @@ public class AgentStorageServiceTest extends BaseTest {
     @Before
     public void init() {
         agentStorageService = SpringLiteContext.getBean(AgentStorageService.class);
+        List<AgentPo> list = agentStorageService.getList();
+        if(list != null) {
+            for (AgentPo agentPo : list) {
+                agentStorageService.delete(agentPo.getHash());
+            }
+        }
     }
 
     @Test
     public void testSave() {
         assertNotNull(agentStorageService);
 
-        NulsDigestData hash = NulsDigestData.calcDigestData(new byte[20]);
+        NulsDigestData hash = NulsDigestData.calcDigestData(new byte[23]);
 
         AgentPo agentPo = new AgentPo();
-        agentPo.setAgentAddress(new byte[20]);
+        agentPo.setAgentAddress(new byte[23]);
+        agentPo.setRewardAddress(new byte[23]);
+        agentPo.setPackingAddress(new byte[23]);
+        agentPo.setDeposit(Na.ZERO);
         agentPo.setHash(hash);
 
         boolean success = agentStorageService.save(agentPo);
@@ -71,13 +81,13 @@ public class AgentStorageServiceTest extends BaseTest {
 
         testSave();
 
-        NulsDigestData hash = NulsDigestData.calcDigestData(new byte[20]);
+        NulsDigestData hash = NulsDigestData.calcDigestData(new byte[23]);
 
         AgentPo agentPo = agentStorageService.get(hash);
 
         assertNotNull(agentPo);
 
-        assert(Arrays.equals(agentPo.getAgentAddress(), new byte[20]));
+        assert(Arrays.equals(agentPo.getAgentAddress(), new byte[23]));
     }
 
     @Test
@@ -86,7 +96,7 @@ public class AgentStorageServiceTest extends BaseTest {
 
         testSave();
 
-        NulsDigestData hash = NulsDigestData.calcDigestData(new byte[20]);
+        NulsDigestData hash = NulsDigestData.calcDigestData(new byte[23]);
 
         boolean success = agentStorageService.delete(hash);
 
@@ -103,10 +113,13 @@ public class AgentStorageServiceTest extends BaseTest {
 
         testSave();
 
-        NulsDigestData hash = NulsDigestData.calcDigestData(new byte[22]);
+        NulsDigestData hash = NulsDigestData.calcDigestData(new byte[20]);
 
         AgentPo agentPo = new AgentPo();
-        agentPo.setAgentAddress(new byte[22]);
+        agentPo.setAgentAddress(new byte[23]);
+        agentPo.setRewardAddress(new byte[23]);
+        agentPo.setPackingAddress(new byte[23]);
+        agentPo.setDeposit(Na.ZERO);
         agentPo.setHash(hash);
 
         boolean success = agentStorageService.save(agentPo);
@@ -117,10 +130,10 @@ public class AgentStorageServiceTest extends BaseTest {
 
         assertEquals(list.size(), 2);
 
-        NulsDigestData hash1 = NulsDigestData.calcDigestData(new byte[20]);
+        NulsDigestData hash1 = NulsDigestData.calcDigestData(new byte[23]);
 
-        assertEquals(hash, list.get(0).getHash());
-        assertEquals(hash1, list.get(1).getHash());
+        assertEquals(hash1, list.get(0).getHash());
+        assertEquals(hash, list.get(1).getHash());
 
         int size = agentStorageService.size();
         assertEquals(size, 2);

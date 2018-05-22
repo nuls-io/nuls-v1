@@ -233,12 +233,7 @@ public class ChainContainerTest extends BaseChainTest {
         agentTx.setTime(agent.getTime());
         agentTx.setBlockHeight(blockHeader.getHeight());
 
-        NulsSignData signData = null;
-        try {
-            signData = accountService.signData(agentTx.getHash().getDigestBytes(), ecKey);
-        } catch (NulsException e) {
-            e.printStackTrace();
-        }
+        NulsSignData signData = signDigest(agentTx.getHash().getDigestBytes(), ecKey);
 
         agentTx.setScriptSig(signData.getSignBytes());
 

@@ -80,7 +80,7 @@ public class ConsensusPocServiceTest extends BaseTest {
 
         assertNotNull(tx);
         assertNotNull(tx.getHash());
-        assertEquals(tx.getHash().getDigestHex(), "08001220b9ab6a1e5ab8e2b09758d6143bb9b66b8fe0c2c4bf49f2bfb74709ef2bf1d02f");
+        assertEquals(tx.getHash().getDigestHex(), "00204a54f8b12b75c3c1fe5f261416adaf1a1b906ccf5673bb7a133ede5a0a4c56f8");
 
         Result result = service.newTx(tx);
         assertNotNull(result);
@@ -91,7 +91,7 @@ public class ConsensusPocServiceTest extends BaseTest {
         NulsDataValidator<TestTransaction> testValidator = new NulsDataValidator<TestTransaction>() {
             @Override
             public ValidateResult validate(TestTransaction data) {
-                if (data.getHash().getDigestHex().equals("08001220328876d03b50feba0ac58d3fcb4638a2fb95847315a88c8de7105408d931999a")) {
+                if (data.getHash().getDigestHex().equals("0020e27ee243921bf482d7b62b6ee63c7ab1938953c834318b79fa3204c5c869e26b")) {
                     return ValidateResult.getFailedResult("test.transaction", TransactionErrorCode.ORPHAN_TX);
                 } else {
                     return ValidateResult.getSuccessResult();
@@ -102,6 +102,8 @@ public class ConsensusPocServiceTest extends BaseTest {
 
         tx = new TestTransaction();
         tx.setTime(2l);
+        assertEquals(tx.getHash().getDigestHex(), "0020e27ee243921bf482d7b62b6ee63c7ab1938953c834318b79fa3204c5c869e26b");
+
         result = service.newTx(tx);
         assertNotNull(result);
         assertTrue(result.isSuccess());
@@ -137,7 +139,7 @@ public class ConsensusPocServiceTest extends BaseTest {
         Transaction tx = new TestTransaction();
         tx.setTime(0l);
 
-        assertEquals(tx.getHash().getDigestHex(), "08001220d194faf5b314f54c3a299ca9ea086f3f8856c75dc44a1e0c43bcc4d80b47909c");
+        assertEquals(tx.getHash().getDigestHex(), "0020c7f397ae78f2c1d12b3edc916e8112bcac576a98444c4c26034c207c9a7ad281");
 
         Result result = service.newTx(tx);
         assertNotNull(result);
@@ -151,7 +153,7 @@ public class ConsensusPocServiceTest extends BaseTest {
 
         tx = memoryTxs.get(0);
         assertNotNull(tx);
-        assertEquals(tx.getHash().getDigestHex(), "08001220d194faf5b314f54c3a299ca9ea086f3f8856c75dc44a1e0c43bcc4d80b47909c");
+        assertEquals(tx.getHash().getDigestHex(), "0020c7f397ae78f2c1d12b3edc916e8112bcac576a98444c4c26034c207c9a7ad281");
     }
 
     @Test

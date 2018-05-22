@@ -42,7 +42,6 @@ import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.core.tools.log.ConsensusLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
@@ -58,7 +57,7 @@ import java.util.*;
  */
 public class RoundManager {
 
-    private AccountService accountService = NulsContext.getServiceBean(AccountService.class);
+    private AccountService accountService;
 
     private List<MeetingRound> roundList = new ArrayList<>();
 
@@ -257,7 +256,7 @@ public class RoundManager {
 
         setMemberList(round, startBlockHeader);
 
-        round.calcLocalPacker(accountService.getAccountList().getData());
+        round.calcLocalPacker(getAccountService().getAccountList().getData());
 
         ConsensusLog.debug("calculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n" + sb.toString(), index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
@@ -480,5 +479,12 @@ public class RoundManager {
 
     public List<MeetingRound> getRoundList() {
         return roundList;
+    }
+
+    public AccountService getAccountService() {
+        if(accountService == null) {
+            accountService = NulsContext.getServiceBean(AccountService.class);
+        }
+        return accountService;
     }
 }

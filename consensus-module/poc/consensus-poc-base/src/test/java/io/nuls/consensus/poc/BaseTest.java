@@ -26,14 +26,11 @@
 
 package io.nuls.consensus.poc;
 
-import io.nuls.account.service.AccountService;
-import io.nuls.account.service.impl.AccountServiceImpl;
 import io.nuls.consensus.poc.customer.ConsensusBlockServiceImpl;
 import io.nuls.consensus.poc.customer.ConsensusDownloadServiceImpl;
 import io.nuls.consensus.poc.customer.ConsensusNetworkService;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.core.tools.crypto.ECKey;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.*;
@@ -52,7 +49,6 @@ import java.util.List;
  */
 public class BaseTest {
 
-    protected static AccountService accountService;
     protected static BlockService blockService;
     protected ECKey ecKey = new ECKey();
 
@@ -68,12 +64,6 @@ public class BaseTest {
                 SpringLiteContext.getBean(DownloadService.class);
             } catch (Exception e) {
                 SpringLiteContext.putBean(ConsensusDownloadServiceImpl.class, false);
-            }
-            try {
-                accountService = SpringLiteContext.getBean(AccountService.class);
-            } catch (Exception e) {
-                //SpringLiteContext.putBean(AccountServiceImpl.class, false);
-                //accountService = SpringLiteContext.getBean(AccountService.class);
             }
             try {
                 SpringLiteContext.getBean(NetworkService.class);
@@ -120,12 +110,7 @@ public class BaseTest {
 
         blockHeader.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
 
-        NulsSignData signData = null;
-        try {
-            signData = accountService.signData(blockHeader.getHash().getDigestBytes(), ecKey);
-        } catch (NulsException e) {
-            e.printStackTrace();
-        }
+        NulsSignData signData = signDigest(blockHeader.getHash().getDigestBytes(), ecKey);
 
         P2PKHScriptSig sig = new P2PKHScriptSig();
         sig.setSignData(signData);
@@ -134,5 +119,14 @@ public class BaseTest {
         blockHeader.setScriptSig(sig);
 
         return block;
+    }
+
+    protected NulsSignData signDigest(byte[] digest, ECKey ecKey) {
+        byte[] signbytes = ecKey.sign(digest);
+        NulsSignData nulsSignData = new NulsSignData();
+        nulsSignData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);
+        nulsSignData.setSignBytes(signbytes);
+
+        return nulsSignData;
     }
 }

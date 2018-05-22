@@ -108,14 +108,10 @@ public class BaseChainTest extends BaseTest {
         agentTx.setTime(agent.getTime());
         agentTx.setBlockHeight(blockHeader.getHeight());
 
-        NulsSignData signData = null;
-        try {
-            signData = accountService.signData(agentTx.getHash().getDigestBytes(), ecKey);
-        } catch (NulsException e) {
-            e.printStackTrace();
-        }
+        NulsSignData signData = signDigest(agentTx.getHash().getDigestBytes(), ecKey);
 
         agentTx.setScriptSig(signData.getSignBytes());
+        agentTx.getTxData().setTxHash(agentTx.getHash());
 
         // add the agent tx into agent list
         agentList.add(agentTx.getTxData());
@@ -193,12 +189,7 @@ public class BaseChainTest extends BaseTest {
 
         blockHeader.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
 
-        NulsSignData signData = null;
-        try {
-            signData = accountService.signData(blockHeader.getHash().getDigestBytes(), ecKey);
-        } catch (NulsException e) {
-            e.printStackTrace();
-        }
+        NulsSignData signData = signDigest(blockHeader.getHash().getDigestBytes(), ecKey);
 
         P2PKHScriptSig sig = new P2PKHScriptSig();
         sig.setSignData(signData);

@@ -60,7 +60,7 @@ public class BlockHeader extends BaseNulsData {
         if (null != this.hash) {
             return;
         }
-        forceCalcHash();
+        hash = forceCalcHash();
     }
 
     @Override
