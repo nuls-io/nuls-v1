@@ -24,6 +24,8 @@
 
 package io.nuls.account.service;
 
+import io.nuls.account.model.AccountKeyStore;
+import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.db.module.impl.LevelDbModuleBootstrap;
 import io.nuls.account.model.Account;
 import io.nuls.core.tools.crypto.ECKey;
@@ -142,27 +144,53 @@ public class AccountServiceTest {
 
     @Test
     public void exportAccountToKeyStore(){
-        assertNotNull("");
+        List<Account> accounts = this.accountService.createAccount(1, "nuls123456").getData();
+        Account account = accounts.get(0);
+        Result<AccountKeyStore> result = accountService.exportAccountToKeyStore(account.getAddress().toString(), "nuls123456");
+        try {
+            System.out.println(JSONUtils.obj2PrettyJson(result.getData()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        assertNotNull(result.getData());
+
     }
 
     @Test
     public void importAccount(){
-
+        AccountKeyStore accountKeyStore = new AccountKeyStore();
+        accountKeyStore.setAddress("Ns5fRyLX5Z6aNrxSGijUcR9SwjnVivi");
+        accountKeyStore.setAlias(null);
+        accountKeyStore.setEncryptedPrivateKey("8fd44822ecf4589c02722f2b8f8e8636cd3106c8b85f0fbc87c78bdef64512f7c604e42e3d829fdbe981fb135ed46dc8");
+        accountKeyStore.setPrikey(null);
+        accountKeyStore.setPubKey(Hex.decode("025e11c5bba00490c15ff9f0c5e24c7141204282fec3ef9b179cc77d947161c4cc"));
+        Result<Account> result = accountService.importAccountFormKeyStore(accountKeyStore, "nuls123456");
+        assertTrue(result.isSuccess());
+        assertNotNull(accountService.getAccount(result.getData().getAddress()));
     }
 
     @Test
     public void isEncypted(){
+        List<Account> accounts = this.accountService.createAccount(1, "nuls123456").getData();
+        Account account = accounts.get(0);
+        assertTrue(accountService.isEncrypted(account).isSuccess());
+        assertTrue(accountService.isEncrypted(account.getAddress()).isSuccess());
+        assertTrue(accountService.isEncrypted(account.getAddress().toString()).isSuccess());
 
+        List<Account> accounts2 = this.accountService.createAccount(1, "").getData();
+        Account account2 = accounts2.get(0);
+        assertTrue(accountService.isEncrypted(account2).isFailed());
+        assertTrue(accountService.isEncrypted(account2.getAddress()).isFailed());
+        assertTrue(accountService.isEncrypted(account2.getAddress().toString()).isFailed());
     }
 
     @Test
     public void validPassword(){
-
-    }
-
-    @Test
-    public void signData(){
-
+        List<Account> accounts = this.accountService.createAccount(1, "nuls123456").getData();
+        Account account = accounts.get(0);
+        assertTrue(accountService.validPassword(account, "nuls123456").isSuccess());
+        assertFalse(accountService.validPassword(account, "nuls111111").isSuccess());
+        assertFalse(accountService.validPassword(account, "").isSuccess());
     }
 
 
