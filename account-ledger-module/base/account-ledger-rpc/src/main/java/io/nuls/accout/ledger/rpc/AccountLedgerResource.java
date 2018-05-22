@@ -44,10 +44,7 @@ import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.Na;
-import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.ledger.service.LedgerService;
 import io.swagger.annotations.*;
@@ -189,8 +186,8 @@ public class AccountLedgerResource {
         if (type == -1) {
             result = rawResult.getData();
         } else {
-            for(TransactionInfo txInfo : rawResult.getData()){
-                if(txInfo.getTxType() == type ){
+            for (TransactionInfo txInfo : rawResult.getData()) {
+                if (txInfo.getTxType() == type) {
                     result.add(txInfo);
                 }
             }
@@ -227,16 +224,16 @@ public class AccountLedgerResource {
     @GET
     @Path("/utxo/lock/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "账户地址查询交易列表", notes = "result.data: balanceJson 返回账户相关的交易列表")
+    @ApiOperation(value = "查询用户冻结列表", notes = "result.data: balanceJson 返回账户相关的冻结UTXO列表")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
-    public Result getLockUtxo(@ApiParam(name = "pageNumber", value = "页码")
+    public Result getLockUtxo(@ApiParam(name = "address", value = "地址")
+                              @PathParam("address") String address,
+                              @ApiParam(name = "pageNumber", value = "页码")
                               @QueryParam("pageNumber") Integer pageNumber,
                               @ApiParam(name = "pageSize", value = "每页条数")
-                              @QueryParam("pageSize") Integer pageSize,
-                              @ApiParam(name = "address", value = "地址")
-                              @QueryParam("address") String address) {
+                              @QueryParam("pageSize") Integer pageSize) {
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
         }
@@ -256,7 +253,7 @@ public class AccountLedgerResource {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
 
-        Result<List<Coin>> result = accountLedgerService.getLockUtxo(addressBytes);
+        Result<List<Coin>> result = accountLedgerService.getLockedUtxo(addressBytes);
         if (result.isFailed()) {
             dtoResult.setSuccess(false);
             dtoResult.setErrorCode(result.getErrorCode());
@@ -276,11 +273,12 @@ public class AccountLedgerResource {
         }
 
         List<UtxoDto> utxoDtoList = new ArrayList<>();
-
+        byte[] txHash = new byte[NulsDigestData.HASH_LENGTH];
         for (int i = start; i < end; i++) {
-            //todo  查询交易
-            //accountLedgerService.g
-            //utxoDtoList.add(new TransactionInfoDto(result.getData().get(i)));
+            Coin coin = result.getData().get(i);
+            System.arraycopy(coin.getOwner(), 0, txHash, 0, NulsDigestData.HASH_LENGTH);
+            Transaction tx = ledgerService.getTx(txHash);
+            utxoDtoList.add(new UtxoDto(coin, tx));
         }
         page.setList(utxoDtoList);
 

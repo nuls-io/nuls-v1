@@ -148,6 +148,13 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
     }
 
     public NulsDigestData getHash() {
+        if(hash == null) {
+            try {
+                hash = NulsDigestData.calcDigestData(serialize());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         return hash;
     }
 
