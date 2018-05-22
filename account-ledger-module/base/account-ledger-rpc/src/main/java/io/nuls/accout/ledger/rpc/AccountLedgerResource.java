@@ -186,8 +186,8 @@ public class AccountLedgerResource {
         if (type == -1) {
             result = rawResult.getData();
         } else {
-            for(TransactionInfo txInfo : rawResult.getData()){
-                if(txInfo.getTxType() == type ){
+            for (TransactionInfo txInfo : rawResult.getData()) {
+                if (txInfo.getTxType() == type) {
                     result.add(txInfo);
                 }
             }
@@ -228,12 +228,12 @@ public class AccountLedgerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
-    public Result getLockUtxo(@ApiParam(name = "pageNumber", value = "页码")
+    public Result getLockUtxo(@ApiParam(name = "address", value = "地址")
+                              @PathParam("address") String address,
+                              @ApiParam(name = "pageNumber", value = "页码")
                               @QueryParam("pageNumber") Integer pageNumber,
                               @ApiParam(name = "pageSize", value = "每页条数")
-                              @QueryParam("pageSize") Integer pageSize,
-                              @ApiParam(name = "address", value = "地址")
-                              @QueryParam("address") String address) {
+                              @QueryParam("pageSize") Integer pageSize) {
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
         }
@@ -273,13 +273,12 @@ public class AccountLedgerResource {
         }
 
         List<UtxoDto> utxoDtoList = new ArrayList<>();
-        byte[] txHash  = new byte[NulsDigestData.HASH_LENGTH];
+        byte[] txHash = new byte[NulsDigestData.HASH_LENGTH];
         for (int i = start; i < end; i++) {
             Coin coin = result.getData().get(i);
-            System.arraycopy(coin.getOwner(), AddressTool.HASH_LENGTH, txHash, 0, NulsDigestData.HASH_LENGTH);
-//            ledgerService.getTx()
-            //accountLedgerService.g
-            //utxoDtoList.add(new TransactionInfoDto(result.getData().get(i)));
+            System.arraycopy(coin.getOwner(), 0, txHash, 0, NulsDigestData.HASH_LENGTH);
+            Transaction tx = ledgerService.getTx(txHash);
+            utxoDtoList.add(new UtxoDto(coin, tx));
         }
         page.setList(utxoDtoList);
 
