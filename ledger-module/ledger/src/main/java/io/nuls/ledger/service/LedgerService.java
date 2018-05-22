@@ -60,6 +60,7 @@ public interface LedgerService {
      * @return
      */
     Transaction getTx(NulsDigestData hash);
+    Transaction getTx(byte[] txHashBytes);
 
     /**
      * Verify that a coindata is valid, the first verification owner is legal (whether it can be used), the second verification amount is correct (output can not be greater than the input)

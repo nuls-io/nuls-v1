@@ -69,7 +69,7 @@ public class DisruptorUtil<T extends DisruptorData> {
         }
 
         Disruptor<DisruptorData> disruptor = new Disruptor<DisruptorData>(EVENT_FACTORY,
-                ringBufferSize, factory, ProducerType.MULTI,
+                ringBufferSize, factory, ProducerType.SINGLE,
                 new BlockingWaitStrategy());
         disruptor.setDefaultExceptionHandler(new NulsExceptionHandler());
         //SleepingWaitStrategy
@@ -106,7 +106,7 @@ public class DisruptorUtil<T extends DisruptorData> {
     /**
      * add the data obj to the disruptor named the field name
      */
-    public void offer(String name, Object obj) {
+    public synchronized void offer(String name, Object obj) {
         Disruptor<DisruptorData> disruptor = DISRUPTOR_MAP.get(name);
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
         RingBuffer<DisruptorData> ringBuffer = disruptor.getRingBuffer();
