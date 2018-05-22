@@ -74,6 +74,7 @@ public final class TxMemoryPool {
             } else {
                 container.put(hash, tx);
                 txHashQueue.offer(hash);
+                System.out.println();
             }
             return true;
         } finally {
