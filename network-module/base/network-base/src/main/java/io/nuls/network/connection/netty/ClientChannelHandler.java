@@ -114,15 +114,15 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             }
         } catch (Exception e) {
             Log.info(" ---------------------- client channelRead exception---------------------- " + nodeId);
-            e.printStackTrace();
+//            e.printStackTrace();
             throw e;
         }
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        Log.info("--------------- ClientChannelHandler exceptionCaught :" + cause.getMessage());
-        cause.printStackTrace();
+//        Log.info("--------------- ClientChannelHandler exceptionCaught :" + cause.getMessage());
+//        cause.printStackTrace();
 
         ctx.channel().close();
     }
