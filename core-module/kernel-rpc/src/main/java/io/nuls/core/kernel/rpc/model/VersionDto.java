@@ -22,41 +22,34 @@
  * SOFTWARE.
  *
  */
-package io.nuls.consensus.poc.protocol.tx;
 
-import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.consensus.poc.protocol.entity.RedPunishData;
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.utils.NulsByteBuffer;
+package io.nuls.core.kernel.rpc.model;
 
-/**
- * @author Niels
- * @date 2017/12/4
- */
-public class RedPunishTransaction extends Transaction<RedPunishData> {
-    public RedPunishTransaction() {
-        super(ConsensusConstant.TX_TYPE_RED_PUNISH);
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel(value = "versionJSON")
+public class VersionDto {
+
+    @ApiModelProperty(name = "myVersion", value = "当前版本号")
+    private String myVersion;
+
+    @ApiModelProperty(name = "newestVersion", value = "可更新的最新版本号")
+    private String newestVersion;
+
+    public String getMyVersion() {
+        return myVersion;
     }
 
-    @Override
-    protected RedPunishData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new RedPunishData());
+    public void setMyVersion(String myVersion) {
+        this.myVersion = myVersion;
     }
 
-    @Override
-    public String getInfo(byte[] address) {
-        // todo auto-generated method stub
-        return null;
+    public String getNewestVersion() {
+        return newestVersion;
     }
 
-    @Override
-    public boolean isFreeOfFee() {
-        return true;
-    }
-
-    @Override
-    public boolean isNoSignature() {
-        return true;
+    public void setNewestVersion(String newestVersion) {
+        this.newestVersion = newestVersion;
     }
 }

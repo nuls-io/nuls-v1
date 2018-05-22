@@ -39,6 +39,7 @@ import io.nuls.accout.ledger.rpc.dto.TransactionInfoDto;
 import io.nuls.accout.ledger.rpc.dto.UtxoDto;
 import io.nuls.accout.ledger.rpc.form.TransferForm;
 import io.nuls.core.tools.crypto.Base58;
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
@@ -209,6 +210,9 @@ public class AccountLedgerResource {
         for (int i = start; i < end; i++) {
             TransactionInfo info = result.get(i);
             Transaction tx = ledgerService.getTx(info.getTxHash());
+            if (tx == null) {
+                tx = accountLedgerService.getUnconfirmedTransaction(info.getTxHash()).getData();
+            }
             info.setInfo(tx.getInfo(addressBytes));
             infoDtoList.add(new TransactionInfoDto(info));
 
@@ -278,6 +282,15 @@ public class AccountLedgerResource {
             Coin coin = result.getData().get(i);
             System.arraycopy(coin.getOwner(), 0, txHash, 0, NulsDigestData.HASH_LENGTH);
             Transaction tx = ledgerService.getTx(txHash);
+            if (tx == null) {
+                NulsDigestData hash = new NulsDigestData();
+                try {
+                    hash.parse(txHash);
+                    tx = accountLedgerService.getUnconfirmedTransaction(hash).getData();
+                } catch (NulsException e) {
+                    Log.error(e);
+                }
+            }
             utxoDtoList.add(new UtxoDto(coin, tx));
         }
         page.setList(utxoDtoList);

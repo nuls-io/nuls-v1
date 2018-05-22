@@ -1,10 +1,8 @@
 package io.nuls.consensus.poc.tx.processor;
 
 import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
-import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
@@ -17,7 +15,6 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.TransactionProcessor;
-import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 
@@ -95,8 +92,8 @@ public class CancelDepositTxProcessor implements TransactionProcessor<CancelDepo
 
         for (Transaction tx : txList) {
             if (tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
-                RedPunishTransaction transaction = (RedPunishTransaction) tx;
-                addressSet.add(Base58.encode(transaction.getTxData().getAddress()));
+// todo               RedPunishTransaction transaction = (RedPunishTransaction) tx;
+//                addressSet.add(Base58.encode(transaction.getTxData().getAddress()));
             } else if (tx.getType() == ConsensusConstant.TX_TYPE_STOP_AGENT) {
                 StopAgentTransaction transaction = (StopAgentTransaction) tx;
                 agentHashSet.add(transaction.getTxData().getCreateTxHash());
