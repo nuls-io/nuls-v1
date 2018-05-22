@@ -219,6 +219,7 @@ public class LevelDBServiceTest {
         Assert.assertEquals(55555, dbService.getModel(area, bytes("entity5"), DBTestEntity.class).getType());
 
 
+        batch = dbService.createWriteBatch(area);
         batch.delete(bytes("entity4"));
         batch.delete(bytes("entity5"));
         batch.executeBatch();
