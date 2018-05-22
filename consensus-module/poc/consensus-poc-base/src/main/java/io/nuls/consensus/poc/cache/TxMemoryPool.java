@@ -30,6 +30,7 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -50,10 +51,10 @@ public final class TxMemoryPool {
 
     private TxMemoryPool() {
         txHashQueue = new LinkedBlockingDeque<>();
-        container = new HashMap<>();
+        container = new ConcurrentHashMap<>();
 
         orphanTxHashQueue = new LinkedBlockingDeque<>();
-        orphanContainer = new HashMap<>();
+        orphanContainer = new ConcurrentHashMap<>();
     }
 
     public static TxMemoryPool getInstance() {

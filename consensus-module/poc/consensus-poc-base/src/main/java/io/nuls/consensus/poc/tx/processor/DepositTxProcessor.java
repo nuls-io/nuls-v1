@@ -181,6 +181,9 @@ public class DepositTxProcessor implements TransactionProcessor<DepositTransacti
             if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
                 continue;
             }
+            if (!deposit.getAgentHash().equals(hash)) {
+                continue;
+            }
             na = na.add(deposit.getDeposit());
         }
         return na;
