@@ -69,7 +69,7 @@ public class DisruptorUtil<T extends DisruptorData> {
         }
 
         Disruptor<DisruptorData> disruptor = new Disruptor<DisruptorData>(EVENT_FACTORY,
-                ringBufferSize, factory, ProducerType.MULTI,
+                ringBufferSize, factory, ProducerType.SINGLE,
                 new BlockingWaitStrategy());
         disruptor.setDefaultExceptionHandler(new NulsExceptionHandler());
         //SleepingWaitStrategy
