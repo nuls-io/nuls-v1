@@ -22,22 +22,38 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.base.handler;
 
-import io.nuls.message.bus.handler.AbstractMessageHandler;
+package io.nuls.protocol.base.utils;
+
+import io.nuls.kernel.func.TimeService;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.base.utils.BlockSendThread;
 import io.nuls.protocol.message.GetBlockRequest;
+import org.spongycastle.util.Times;
 
 /**
- * @author facjas
- * @date 2017/11/16
+ * @author: Niels Wang
+ * @date: 2018/5/22
  */
-public class GetBlockHandler extends AbstractMessageHandler<GetBlockRequest> {
+public class BlockRequest {
+    private GetBlockRequest message;
+    private Node node;
+    private long time;
 
+    public BlockRequest(GetBlockRequest message, Node node) {
+        this.message = message;
+        this.node = node;
+        this.time = TimeService.currentTimeMillis();
+    }
 
-    @Override
-    public void onMessage(GetBlockRequest message, Node fromNode) {
-        BlockSendThread.offer(message, fromNode);
+    public GetBlockRequest getMessage() {
+        return message;
+    }
+
+    public Node getNode() {
+        return node;
+    }
+
+    public long getTime() {
+        return time;
     }
 }

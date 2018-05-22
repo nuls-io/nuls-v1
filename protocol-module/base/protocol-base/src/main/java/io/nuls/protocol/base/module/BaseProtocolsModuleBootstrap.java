@@ -40,6 +40,8 @@ import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.protocol.base.handler.*;
 import io.nuls.protocol.base.service.DownloadServiceImpl;
+import io.nuls.protocol.base.utils.BlockSendThread;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.*;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.model.tx.TransferTransaction;
@@ -88,6 +90,8 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         NulsContext.getInstance().setBestBlock(block);
         this.initHandlers();
         ((DownloadServiceImpl) NulsContext.getServiceBean(DownloadService.class)).start();
+        TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "Block-Request-Handler", new BlockSendThread());
+
     }
 
     private void initHandlers() {
