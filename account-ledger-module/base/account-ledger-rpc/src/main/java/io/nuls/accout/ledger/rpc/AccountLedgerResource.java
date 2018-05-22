@@ -209,6 +209,9 @@ public class AccountLedgerResource {
         for (int i = start; i < end; i++) {
             TransactionInfo info = result.get(i);
             Transaction tx = ledgerService.getTx(info.getTxHash());
+            if (tx == null) {
+                tx = accountLedgerService.getUnconfirmedTransaction(info.getTxHash()).getData();
+            }
             info.setInfo(tx.getInfo(addressBytes));
             infoDtoList.add(new TransactionInfoDto(info));
 
