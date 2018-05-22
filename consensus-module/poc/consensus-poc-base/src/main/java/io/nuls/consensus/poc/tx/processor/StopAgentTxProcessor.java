@@ -2,8 +2,6 @@ package io.nuls.consensus.poc.tx.processor;
 
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.consensus.poc.protocol.entity.Agent;
-import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
@@ -191,8 +189,8 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
         Set<String> addressSet = new HashSet<>();
         for (Transaction tx : txList) {
             if (tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
-                RedPunishTransaction transaction = (RedPunishTransaction) tx;
-                addressSet.add(Base58.encode(transaction.getTxData().getAddress()));
+//todo                RedPunishTransaction transaction = (RedPunishTransaction) tx;
+//                addressSet.add(Base58.encode(transaction.getTxData().getAddress()));
             } else if (tx.getType() == ConsensusConstant.TX_TYPE_STOP_AGENT) {
                 StopAgentTransaction transaction = (StopAgentTransaction) tx;
                 if (!hashSet.add(transaction.getTxData().getCreateTxHash())) {

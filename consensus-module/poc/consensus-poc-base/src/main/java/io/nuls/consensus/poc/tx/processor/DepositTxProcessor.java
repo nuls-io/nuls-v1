@@ -31,9 +31,7 @@ import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
-import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
-import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.consensus.poc.storage.po.DepositPo;
@@ -142,13 +140,13 @@ public class DepositTxProcessor implements TransactionProcessor<DepositTransacti
                     }
                     break;
                 case ConsensusConstant.TX_TYPE_RED_PUNISH:
-                    RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
-                    RedPunishData redPunishData = redPunishTransaction.getTxData();
-                    Agent agent = this.getAgentByAddress(redPunishData.getAddress());
-                    if (null != agent) {
-                        outAgentHash.add(agent.getTxHash());
-                    }
-                    break;
+//todo                    RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
+//                    RedPunishData redPunishData = redPunishTransaction.getTxData();
+//                    Agent agent = this.getAgentByAddress(redPunishData.getAddress());
+//                    if (null != agent) {
+//                        outAgentHash.add(agent.getTxHash());
+//                    }
+//                    break;
             }
         }
 

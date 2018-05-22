@@ -161,27 +161,27 @@ public class ChainContainer implements Cloneable {
                     }
                 }
             } else if (txType == ConsensusConstant.TX_TYPE_RED_PUNISH) {
-                RedPunishTransaction transaction = (RedPunishTransaction) tx;
-                RedPunishData redPunishData = transaction.getTxData();
-                PunishLogPo po = new PunishLogPo();
-                po.setAddress(redPunishData.getAddress());
-                po.setHeight(height);
-                po.setRoundIndex(roundData.getRoundIndex());
-                po.setTime(tx.getTime());
-                po.setType(PunishType.RED.getCode());
-                redList.add(po);
-                for (Agent agent : agentList) {
-                    if (!Arrays.equals(agent.getAgentAddress(), po.getAddress())) {
-                       continue;
-                    }
-                    agent.setDelHeight(height);
-                    for(Deposit deposit:depositList){
-                        if(deposit.getAgentHash().equals(agent.getTxHash())){
-                            continue;
-                        }
-                        deposit.setDelHeight(height);
-                    }
-                }
+//                RedPunishTransaction transaction = (RedPunishTransaction) tx;
+//                RedPunishData redPunishData = transaction.getTxData();
+//                PunishLogPo po = new PunishLogPo();
+//                po.setAddress(redPunishData.getAddress());
+//                po.setHeight(height);
+//                po.setRoundIndex(roundData.getRoundIndex());
+//                po.setTime(tx.getTime());
+//                po.setType(PunishType.RED.getCode());
+//                redList.add(po);
+//                for (Agent agent : agentList) {
+//                    if (!Arrays.equals(agent.getAgentAddress(), po.getAddress())) {
+//                       continue;
+//                    }
+//                    agent.setDelHeight(height);
+//                    for(Deposit deposit:depositList){
+//                        if(deposit.getAgentHash().equals(agent.getTxHash())){
+//                            continue;
+//                        }
+//                        deposit.setDelHeight(height);
+//                    }
+//                }
             } else if (txType == ConsensusConstant.TX_TYPE_YELLOW_PUNISH) {
                 YellowPunishTransaction transaction = (YellowPunishTransaction) tx;
                 for (byte[] bytes : transaction.getTxData().getAddressList()) {

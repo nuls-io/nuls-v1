@@ -153,8 +153,8 @@ public class TransactionServiceImplTest {
         Transaction yellowPunishTx = createYellowPunishTx(ecKey1, ecKey2, ecKey3, ecKey4, ecKey5, ecKey6);
         list.add(yellowPunishTx);
 
-        RedPunishTransaction redPunishTransaction = createRedPunishTx(ecKey1, ecKey4, ecKey5, ecKey6);
-        list.add(redPunishTransaction);
+//        RedPunishTransaction redPunishTransaction = createRedPunishTx(ecKey1, ecKey4, ecKey5, ecKey6);
+//        list.add(redPunishTransaction);
 
         TransferTransaction transferTransaction1 = createTransferTransaction(ecKey1, null, ecKey2, Na.ZERO);
         TransferTransaction transferTransaction2 = createTransferTransaction(ecKey1, null, ecKey3, Na.ZERO);
@@ -206,16 +206,16 @@ public class TransactionServiceImplTest {
         this.allList = list;
     }
 
-    private RedPunishTransaction createRedPunishTx(ECKey ecKey, ECKey... ecKeys) {
-        RedPunishTransaction tx = new RedPunishTransaction();
-        setCommonFields(tx);
-        RedPunishData data = new RedPunishData();
-        data.setAddress(AddressTool.getAddress(ecKeys[0].getPubKey()));
-        data.setEvidence("for test".getBytes());
-        data.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
-        tx.setTxData(data);
-        return tx;
-    }
+//    private RedPunishTransaction createRedPunishTx(ECKey ecKey, ECKey... ecKeys) {
+//        RedPunishTransaction tx = new RedPunishTransaction();
+//        setCommonFields(tx);
+//        RedPunishData data = new RedPunishData();
+//        data.setAddress(AddressTool.getAddress(ecKeys[0].getPubKey()));
+//        data.setEvidence("for test".getBytes());
+//        data.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
+//        tx.setTxData(data);
+//        return tx;
+//    }
 
     private YellowPunishTransaction createYellowPunishTx(ECKey ecKey, ECKey... ecKeys) {
         YellowPunishTransaction tx = new YellowPunishTransaction();

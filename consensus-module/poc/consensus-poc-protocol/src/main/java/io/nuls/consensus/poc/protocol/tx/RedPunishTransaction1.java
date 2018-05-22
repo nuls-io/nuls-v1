@@ -34,8 +34,8 @@ import io.nuls.kernel.utils.NulsByteBuffer;
  * @author Niels
  * @date 2017/12/4
  */
-public class RedPunishTransaction extends Transaction<RedPunishData> {
-    public RedPunishTransaction() {
+public class RedPunishTransaction1 extends Transaction<RedPunishData> {
+    public RedPunishTransaction1() {
         super(ConsensusConstant.TX_TYPE_RED_PUNISH);
     }
 

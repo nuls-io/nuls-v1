@@ -7,7 +7,7 @@ import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
-import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
+import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction1;
 import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
@@ -39,7 +39,7 @@ import java.util.List;
  * @date 2018/5/14
  */
 @Component
-public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTransaction> {
+public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTransaction1> {
 
     @Autowired
     private PunishLogStorageService storageService;
@@ -57,7 +57,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
     private AccountLedgerService accountLedgerService;
 
     @Override
-    public Result onRollback(RedPunishTransaction tx, Object secondaryData) {
+    public Result onRollback(RedPunishTransaction1 tx, Object secondaryData) {
         RedPunishData punishData = tx.getTxData();
 
         List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
@@ -159,7 +159,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
     }
 
     @Override
-    public Result onCommit(RedPunishTransaction tx, Object secondaryData) {
+    public Result onCommit(RedPunishTransaction1 tx, Object secondaryData) {
         RedPunishData punishData = tx.getTxData();
         BlockHeader header = (BlockHeader) secondaryData;
         BlockRoundData roundData = new BlockRoundData(header.getExtend());
