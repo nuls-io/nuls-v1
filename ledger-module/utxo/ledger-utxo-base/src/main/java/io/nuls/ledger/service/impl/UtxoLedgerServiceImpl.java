@@ -223,7 +223,13 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         if(txHashBytes == null) {
             return null;
         }
-        return getTx(NulsDigestData.calcDigestData(txHashBytes));
+        NulsDigestData digestData = new NulsDigestData();
+        try {
+            digestData.parse(txHashBytes);
+        }catch (Exception e){
+            return null;
+        }
+        return getTx(digestData);
     }
 
     private boolean checkPublicKeyHash(byte[] address, byte[] pubKeyHash) {
