@@ -273,9 +273,11 @@ public class AccountLedgerResource {
         }
 
         List<UtxoDto> utxoDtoList = new ArrayList<>();
-//        byte[] txHash  = new byte[NulsDigestData.H];
+        byte[] txHash  = new byte[NulsDigestData.HASH_LENGTH];
         for (int i = start; i < end; i++) {
-            //todo  查询交易
+            Coin coin = result.getData().get(i);
+            System.arraycopy(coin.getOwner(), AddressTool.HASH_LENGTH, txHash, 0, NulsDigestData.HASH_LENGTH);
+//            ledgerService.getTx()
             //accountLedgerService.g
             //utxoDtoList.add(new TransactionInfoDto(result.getData().get(i)));
         }

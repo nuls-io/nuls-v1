@@ -44,6 +44,8 @@ import java.util.List;
  */
 public class NulsDigestData extends BaseNulsData {
 
+    public static final int HASH_LENGTH = 34;
+
     protected byte digestAlgType = DIGEST_ALG_SHA256;
 
     protected byte[] digestBytes;
