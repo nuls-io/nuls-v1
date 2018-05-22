@@ -129,8 +129,8 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 //        Log.error("----------------ServerChannelHandler exceptionCaught-----------");
-        Log.info("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage());
-        cause.printStackTrace();
+//        Log.info("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage());
+//        cause.printStackTrace();
 //        SocketChannel channel = (SocketChannel) ctx.channel();
 //        InetSocketAddress localAddress = channel.localAddress();
 //        InetSocketAddress remoteAddress = channel.remoteAddress();
@@ -158,7 +158,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             }
         } catch (Exception e) {
             Log.info(" ---------------------- server channelRead exception------------------------- " + nodeId);
-            e.printStackTrace();
+//            e.printStackTrace();
             throw e;
         }
 //
