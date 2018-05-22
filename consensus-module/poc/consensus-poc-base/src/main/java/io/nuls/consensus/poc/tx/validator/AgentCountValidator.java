@@ -66,6 +66,10 @@ public class AgentCountValidator implements NulsDataValidator<CreateAgentTransac
                 if (ca.getHash().equals(tx.getHash())) {
                     return ValidateResult.getFailedResult(this.getClass().getName(), "agent tx repeated!");
                 }
+                if (ca.getDelHeight() > 0L) {
+                    continue;
+                }
+
                 set.add(Hex.encode(ca.getAgentAddress()));
                 set.add(Hex.encode(ca.getPackingAddress()));
                 try {
