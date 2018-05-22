@@ -147,6 +147,8 @@ public class AccountLedgerResource {
     })
     public Result getTxInfoList(@ApiParam(name = "address", value = "账户地址", required = true)
                                 @PathParam("address") String address,
+                                @ApiParam(name = "type", value = "类型")
+                                @QueryParam("type") Integer type,
                                 @ApiParam(name = "pageNumber", value = "页码")
                                 @QueryParam("pageNumber") Integer pageNumber,
                                 @ApiParam(name = "pageSize", value = "每页条数")
@@ -160,9 +162,12 @@ public class AccountLedgerResource {
         if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
+        if (type == null) {
+            type = -1;
+        }
 
         byte[] addressBytes = null;
-        Result dtoResult = new Result<>();
+        Result dtoResult = Result.getSuccess();
 
         try {
             addressBytes = Base58.decode(address);
@@ -170,14 +175,25 @@ public class AccountLedgerResource {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
 
-        Result<List<TransactionInfo>> result = accountLedgerService.getTxInfoList(addressBytes);
-        if (result.isFailed()) {
+        Result<List<TransactionInfo>> rawResult = accountLedgerService.getTxInfoList(addressBytes);
+        if (rawResult.isFailed()) {
             dtoResult.setSuccess(false);
-            dtoResult.setErrorCode(result.getErrorCode());
+            dtoResult.setErrorCode(rawResult.getErrorCode());
             return dtoResult;
         }
 
-        Page<TransactionInfoDto> page = new Page<>(pageNumber, pageSize, result.getData().size());
+        List<TransactionInfo> result = new ArrayList<TransactionInfo>();
+        if (type == -1) {
+            result = rawResult.getData();
+        } else {
+            for(TransactionInfo txInfo : rawResult.getData()){
+                if(txInfo.getTxType() == type ){
+                    result.add(txInfo);
+                }
+            }
+        }
+
+        Page<TransactionInfoDto> page = new Page<>(pageNumber, pageSize, result.size());
         int start = pageNumber * pageSize - pageSize;
         if (start >= page.getTotal()) {
             dtoResult.setData(page);
@@ -191,7 +207,7 @@ public class AccountLedgerResource {
 
         List<TransactionInfoDto> infoDtoList = new ArrayList<>();
         for (int i = start; i < end; i++) {
-            TransactionInfo info = result.getData().get(i);
+            TransactionInfo info = result.get(i);
             Transaction tx = ledgerService.getTx(info.getTxHash());
             info.setInfo(tx.getInfo(addressBytes));
             infoDtoList.add(new TransactionInfoDto(info));

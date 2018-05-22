@@ -17,6 +17,9 @@ public class AccountPriKeyPasswordForm {
     @ApiModelProperty(name = "password", value = "密码")
     private String password;
 
+    @ApiModelProperty(name = "overwrite", value = "是否覆盖账户: false:不覆盖导入, true:覆盖导入")
+    private Boolean overwrite = false;
+
     public String getPriKey() {
         return priKey;
     }
@@ -33,4 +36,11 @@ public class AccountPriKeyPasswordForm {
         this.password = StringUtils.formatStringPara(password);
     }
 
+    public Boolean getOverwrite() {
+        return overwrite;
+    }
+
+    public void setOverwrite(Boolean overwrite) {
+        this.overwrite = overwrite;
+    }
 }

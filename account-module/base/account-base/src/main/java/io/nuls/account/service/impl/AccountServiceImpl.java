@@ -19,7 +19,6 @@ import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
-import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.NulsSignData;
@@ -328,7 +327,7 @@ public class AccountServiceImpl implements AccountService {
             return Result.getSuccess().setData(address);
         } catch (NulsException e) {
             Log.error(e);
-            return null;
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
     }
 
@@ -340,7 +339,7 @@ public class AccountServiceImpl implements AccountService {
             return Result.getSuccess().setData(address);
         } catch (NulsException e) {
             Log.error(e);
-            return null;
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
     }
 

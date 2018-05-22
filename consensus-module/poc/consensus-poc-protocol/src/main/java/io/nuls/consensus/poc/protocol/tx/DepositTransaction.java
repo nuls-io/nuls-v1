@@ -49,8 +49,7 @@ public class DepositTransaction extends Transaction<Deposit> {
 
     @Override
     public String getInfo(byte[] address) {
-        // todo auto-generated method stub
-        return null;
+        return "lock "+ getTxData().getDeposit().toText();
     }
 
     @Override

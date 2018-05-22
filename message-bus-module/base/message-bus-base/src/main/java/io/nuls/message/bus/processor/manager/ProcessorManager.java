@@ -59,6 +59,7 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
         }
         WorkHandler[] arrayHandler = handlerList.toArray(new MessageDispatchThread[handlerList.size()]);
         disruptorService.handleEventWith(disruptorName, new MessageCheckingProcessor()).thenHandleEventsWithWorkerPool(arrayHandler);
+//        disruptorService.handleEventsWithWorkerPool(disruptorName,arrayHandler);
 
         disruptorService.start(disruptorName);
     }
