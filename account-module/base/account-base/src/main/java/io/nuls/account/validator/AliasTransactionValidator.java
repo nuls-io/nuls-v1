@@ -11,6 +11,7 @@ import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AliasStorageService;
 import io.nuls.account.tx.AliasTransaction;
 import io.nuls.account.ledger.service.AccountLedgerService;
+import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.SeverityLevelEnum;
@@ -41,7 +42,7 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
     private AliasService aliasService;
 
     @Autowired
-    private AliasStorageService alisaStorageService;
+    private AliasStorageService aliasStorageService;
 
     @Autowired
     private AccountLedgerService accountledgerService;
@@ -56,9 +57,9 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
         if(null != aliasDb){
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_EXIST);
         }
-        List<Account> list =  accountService.getAccountList().getData();
-        for (Account account : list){
-            if(alias.getAlias().equals(account.getAlias())){
+        List<AliasPo> list = aliasStorageService.getAliasList().getData();
+        for (AliasPo aliasPo : list) {
+            if (Base58.encode(aliasPo.getAddress()).equals(Base58.encode(alias.getAddress()))) {
                 return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_EXIST);
             }
         }
@@ -68,7 +69,7 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
         if (!StringUtils.validAlias(alias.getAlias())) {
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_ERROR);
         }
-        AliasPo aliasPo = alisaStorageService.getAlias(alias.getAlias()).getData();
+        AliasPo aliasPo = aliasStorageService.getAlias(alias.getAlias()).getData();
         if (aliasPo != null) {
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_EXIST);
         }

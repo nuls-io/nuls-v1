@@ -164,21 +164,20 @@ public class AccountServiceImpl implements AccountService {
         }
         account.setAddress(new Address(keyStore.getAddress()));
 
-        String alias = keyStore.getAlias();
-        if (StringUtils.isNotBlank(alias)) {
-            Alias aliasDb = aliasService.getAlias(alias);
-            if (null == aliasDb) {
-                List<Account> list = this.getAccountList().getData();
-                for (Account acc : list) {
-                    if (account.getAddress().toString().equals(acc.getAddress().toString())) {
-                        alias = acc.getAlias();
+        if (StringUtils.isNotBlank(keyStore.getAlias())) {
+            Alias aliasDb = aliasService.getAlias(keyStore.getAlias());
+            if (null != aliasDb && Base58.encode(aliasDb.getAddress()).equals(account.getAddress().toString())) {
+                account.setAlias(aliasDb.getAlias());
+            } else {
+                List<AliasPo> list = aliasStorageService.getAliasList().getData();
+                for (AliasPo aliasPo : list) {
+                    //如果全网别名中的地址有和当前导入的账户地址相同,则赋值别名到账户中
+                    if (Base58.encode(aliasPo.getAddress()).equals(account.getAddress().toString())) {
+                        account.setAlias(aliasPo.getAlias());
                         break;
                     }
                 }
-            } else {
-                alias = aliasDb.getAlias();
             }
-            account.setAlias(alias);
         }
         account.setPubKey(keyStore.getPubKey());
         if (StringUtils.validPassword(password)) {
