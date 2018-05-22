@@ -29,10 +29,7 @@ package io.nuls.consensus.poc.storage.po;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
-import io.nuls.kernel.utils.AddressTool;
-import io.nuls.kernel.utils.NulsByteBuffer;
-import io.nuls.kernel.utils.NulsOutputStreamBuffer;
-import io.nuls.kernel.utils.SerializeUtils;
+import io.nuls.kernel.utils.*;
 
 import java.io.IOException;
 
@@ -48,6 +45,7 @@ public class PunishLogPo extends BaseNulsData {
     private long roundIndex;
     private short reasonCode;
     private byte[] evidence;
+    private int index;
 
     /**
      * serialize important field
@@ -127,8 +125,16 @@ public class PunishLogPo extends BaseNulsData {
         this.height = height;
     }
 
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
     public byte[] getKey() {
-        return ArraysTool.joinintTogether(address, new byte[]{type}, SerializeUtils.uint64ToByteArray(height));
+        return ArraysTool.joinintTogether(address, new byte[]{type}, SerializeUtils.uint64ToByteArray(height), new VarInt(index).encode());
     }
 
 }

@@ -23,21 +23,23 @@
  *
  */
 
-package io.nuls.consensus.poc.storage.service;
+package io.nuls.consensus.poc.protocol.util;
 
-import io.nuls.consensus.poc.storage.po.PunishLogPo;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
 
-import java.util.List;
+import java.util.Comparator;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/10
+ * @date: 2018/5/22
  */
-public interface PunishLogStorageService {
+public class DepositComparator implements Comparator<Deposit> {
 
-    boolean save(PunishLogPo po);
-
-    boolean delete(byte[] key);
-
-    List<PunishLogPo> getPunishList();
+    @Override
+    public int compare(Deposit o1, Deposit o2) {
+        if (o1.getBlockHeight() == o2.getBlockHeight()) {
+            return (int) (o1.getTime() - o2.getTime());
+        }
+        return (int) (o1.getBlockHeight() - o2.getBlockHeight());
+    }
 }

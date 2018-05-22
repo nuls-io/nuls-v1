@@ -23,6 +23,8 @@ public class DepositDTO {
 
     private Long delHeight;
 
+    private int status;
+
     public DepositDTO(Deposit deposit) {
         this.deposit = deposit.getDeposit().getValue();
         this.agentHash = deposit.getAgentHash().getDigestHex();
@@ -31,6 +33,7 @@ public class DepositDTO {
         this.txHash = deposit.getTxHash().getDigestHex();
         this.blockHeight = deposit.getBlockHeight();
         this.delHeight = deposit.getDelHeight();
+        this.status = deposit.getStatus();
     }
 
     public Long getDeposit() {
@@ -87,5 +90,13 @@ public class DepositDTO {
 
     public void setDelHeight(Long delHeight) {
         this.delHeight = delHeight;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

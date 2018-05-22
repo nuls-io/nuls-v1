@@ -40,12 +40,14 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
             if (!result) {
                 BlockHeader header = (BlockHeader) secondaryData;
                 BlockRoundData roundData = new BlockRoundData(header.getExtend());
+                int index = 1;
                 for (byte[] bytes : deletedList) {
                     PunishLogPo po = new PunishLogPo();
                     po.setAddress(bytes);
                     po.setHeight(tx.getBlockHeight());
                     po.setRoundIndex(roundData.getRoundIndex());
                     po.setTime(tx.getTime());
+                    po.setIndex(index++);
                     po.setType(PunishType.YELLOW.getCode());
                     this.storageService.save(po);
                 }
@@ -63,12 +65,14 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
         BlockHeader header = (BlockHeader) secondaryData;
         BlockRoundData roundData = new BlockRoundData(header.getExtend());
         List<byte[]> savedList = new ArrayList<>();
+        int index = 1;
         for (byte[] address : punishData.getAddressList()) {
             PunishLogPo po = new PunishLogPo();
             po.setAddress(address);
             po.setHeight(tx.getBlockHeight());
             po.setRoundIndex(roundData.getRoundIndex());
             po.setTime(tx.getTime());
+            po.setIndex(index++);
             po.setType(PunishType.YELLOW.getCode());
             boolean result = storageService.save(po);
             if (!result) {

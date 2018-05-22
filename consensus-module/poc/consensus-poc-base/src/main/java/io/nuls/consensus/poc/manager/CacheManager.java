@@ -33,8 +33,10 @@ import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
+import io.nuls.consensus.poc.storage.service.PunishLogStorageService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Block;
@@ -71,8 +73,9 @@ public class CacheManager {
         }
         List<Agent> agentList = cacheLoader.loadAgents();
         List<Deposit> depositList = cacheLoader.loadDepositList();
-        List<PunishLogPo> yellowPunishList = cacheLoader.loadYellowPunishList();
-        List<PunishLogPo> redPunishList = cacheLoader.loadRedPunishList();
+        List<PunishLogPo> allPunishList = NulsContext.getServiceBean(PunishLogStorageService.class).getPunishList();
+        List<PunishLogPo> yellowPunishList = cacheLoader.loadYellowPunishList(allPunishList,PocConsensusConstant.INIT_HEADERS_OF_ROUND_COUNT);
+        List<PunishLogPo> redPunishList = cacheLoader.loadRedPunishList(allPunishList);
 
         Chain masterChain = new Chain();
 

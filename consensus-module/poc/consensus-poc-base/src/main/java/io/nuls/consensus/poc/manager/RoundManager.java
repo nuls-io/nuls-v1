@@ -276,9 +276,8 @@ public class RoundManager {
             member.setAgentAddress(address);
             member.setPackingAddress(address);
             member.setRewardAddress(address);
-            member.setCreditVal(1);
+            member.setCreditVal(0);
             member.setRoundStartTime(round.getStartTime());
-
             memberList.add(member);
         }
 
@@ -303,17 +302,14 @@ public class RoundManager {
                 member.setTotalDeposit(member.getTotalDeposit().add(dtx.getDeposit()));
                 depositTempList.add(dtx);
             }
-
             member.setDepositList(cdlist);
-            member.setCreditVal(calcCreditVal(member, startBlockHeader));
-            agent.setCreditVal(member.getRealCreditVal());
             agent.setTotalDeposit(member.getTotalDeposit().getValue());
-
             boolean isItIn = member.getTotalDeposit().isGreaterOrEquals(PocConsensusProtocolConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT);
             if (isItIn) {
+                member.setCreditVal(calcCreditVal(member, startBlockHeader));
+                agent.setCreditVal(member.getRealCreditVal());
                 totalWeight = DoubleUtils.sum(totalWeight, DoubleUtils.mul(agent.getDeposit().getValue(), member.getCalcCreditVal()));
                 totalWeight = DoubleUtils.sum(totalWeight, DoubleUtils.mul(member.getTotalDeposit().getValue(), member.getCalcCreditVal()));
-
                 memberList.add(member);
             }
         }
@@ -462,6 +458,10 @@ public class RoundManager {
                 }
                 if (currentRoundIndex < startRoundIndex) {
                     firstBlockHeader = blockHeaderList.get(i + 1);
+                    BlockRoundData roundData = new BlockRoundData(firstBlockHeader.getExtend());
+                    if (roundData.getPackingIndexOfRound() > 1) {
+                        firstBlockHeader = blockHeader;
+                    }
                     break;
                 }
             }

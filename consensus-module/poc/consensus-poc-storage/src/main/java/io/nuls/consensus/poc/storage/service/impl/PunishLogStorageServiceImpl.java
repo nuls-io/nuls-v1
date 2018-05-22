@@ -29,14 +29,18 @@ import io.nuls.consensus.poc.storage.constant.ConsensusStorageConstant;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.storage.service.PunishLogStorageService;
 import io.nuls.core.tools.log.Log;
+import io.nuls.db.model.Entry;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Result;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author: Niels Wang
@@ -70,6 +74,22 @@ public class PunishLogStorageServiceImpl implements PunishLogStorageService, Ini
         }
         Result result = dbService.delete(ConsensusStorageConstant.DB_NAME_CONSENSUS_PUNISH_LOG, key);
         return result.isSuccess();
+    }
+
+    @Override
+    public List<PunishLogPo> getPunishList() {
+        List<Entry<byte[], byte[]>> list = dbService.entryList(ConsensusStorageConstant.DB_NAME_CONSENSUS_PUNISH_LOG);
+        List<PunishLogPo> polist = new ArrayList<>();
+        for (Entry<byte[], byte[]> entry : list) {
+            PunishLogPo po = new PunishLogPo();
+            try {
+                po.parse(entry.getValue());
+            } catch (NulsException e) {
+                throw new NulsRuntimeException(e);
+            }
+            polist.add(po);
+        }
+        return polist;
     }
 
     @Override

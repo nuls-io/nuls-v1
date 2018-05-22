@@ -26,14 +26,20 @@
 
 package io.nuls.consensus.poc.cache;
 
+import io.nuls.consensus.poc.model.BlockRoundData;
+import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.consensus.poc.protocol.util.AgentComparator;
+import io.nuls.consensus.poc.protocol.util.DepositComparator;
 import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.consensus.poc.storage.service.DepositStorageService;
+import io.nuls.consensus.poc.storage.service.PunishLogStorageService;
+import io.nuls.consensus.poc.storage.utils.PunishLogComparator;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -44,6 +50,7 @@ import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.service.BlockService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -60,6 +67,7 @@ public class CacheLoader {
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private AgentStorageService agentStorageService = NulsContext.getServiceBean(AgentStorageService.class);
     private DepositStorageService depositStorageService = NulsContext.getServiceBean(DepositStorageService.class);
+
 
     /**
      * 从数据存储中加载指定个数的最新块
@@ -84,7 +92,7 @@ public class CacheLoader {
                 break;
             }
 
-            blockList.add(0,block);
+            blockList.add(0, block);
 
             if (block.getHeader().getHeight() == 0L) {
                 break;
@@ -114,14 +122,14 @@ public class CacheLoader {
         if (null == blockHeader) {
             return blockHeaderList;
         }
-
-        for (int i = size; i >= 0; i--) {
-
+        BlockRoundData roundData = new BlockRoundData(blockHeader.getExtend());
+        long breakRoundIndex = roundData.getRoundIndex() - size;
+        while (true) {
             if (blockHeader == null) {
                 break;
             }
 
-            blockHeaderList.add(0,blockHeader);
+            blockHeaderList.add(0, blockHeader);
 
             if (blockHeader.getHeight() == 0L) {
                 break;
@@ -129,6 +137,10 @@ public class CacheLoader {
 
             NulsDigestData preHash = blockHeader.getPreHash();
             blockHeader = blockService.getBlockHeader(preHash).getData();
+            BlockRoundData blockRoundData = new BlockRoundData(blockHeader.getExtend());
+            if (blockRoundData.getRoundIndex() <= breakRoundIndex) {
+                break;
+            }
         }
 
         return blockHeaderList;
@@ -142,25 +154,50 @@ public class CacheLoader {
             Agent agent = PoConvertUtil.poToAgent(po);
             agentList.add(agent);
         }
+        Collections.sort(agentList, new AgentComparator());
         return agentList;
     }
 
     public List<Deposit> loadDepositList() {
         List<Deposit> depositList = new ArrayList<>();
-        List<DepositPo> poList  = depositStorageService.getList();
-        for(DepositPo po:poList){
-            depositList .add(PoConvertUtil.poToDeposit(po));
+        List<DepositPo> poList = depositStorageService.getList();
+        for (DepositPo po : poList) {
+            depositList.add(PoConvertUtil.poToDeposit(po));
         }
+        Collections.sort(depositList, new DepositComparator());
         return depositList;
     }
 
-    public List<PunishLogPo> loadYellowPunishList() {
+    public List<PunishLogPo> loadYellowPunishList(List<PunishLogPo> allPunishList, int roundSize) {
         List<PunishLogPo> list = new ArrayList<>();
+        BlockHeader blockHeader = blockService.getBestBlockHeader().getData();
+
+        if (null == blockHeader) {
+            return list;
+        }
+        BlockRoundData roundData = new BlockRoundData(blockHeader.getExtend());
+        long breakRoundIndex = roundData.getRoundIndex() - roundSize;
+        for (PunishLogPo po : allPunishList) {
+            if (po.getType() == PunishType.RED.getCode()) {
+                continue;
+            }
+            if (po.getRoundIndex() <= breakRoundIndex) {
+                continue;
+            }
+            list.add(po);
+        }
+        Collections.sort(list, new PunishLogComparator());
         return list;
     }
 
-    public List<PunishLogPo> loadRedPunishList() {
+    public List<PunishLogPo> loadRedPunishList(List<PunishLogPo> allPunishList) {
         List<PunishLogPo> list = new ArrayList<>();
+        for (PunishLogPo po : allPunishList) {
+            if (po.getType() == PunishType.RED.getCode()) {
+                list.add(po);
+            }
+        }
+        Collections.sort(list, new PunishLogComparator());
         return list;
     }
 }

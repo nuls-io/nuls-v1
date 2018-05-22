@@ -654,9 +654,17 @@ public class PocConsensusResource {
             result.setData(page);
             return result;
         }
+        Map<NulsDigestData, Integer> map = new HashMap<>();
+        for (MeetingMember member : PocConsensusContext.getChainManager().getMasterChain().getCurrentRound().getMemberList()) {
+            if (null != member.getAgent()) {
+                map.put(member.getAgent().getTxHash(), 1);
+            }
+        }
         List<DepositDTO> resultList = new ArrayList<>();
         for (int i = start; i < depositList.size() && i < (start + pageSize); i++) {
-            resultList.add(new DepositDTO(depositList.get(i)));
+            Deposit deposit = depositList.get(i);
+            deposit.setStatus(map.get(deposit.getAgentHash()) == null ? 0 : 1);
+            resultList.add(new DepositDTO(deposit));
         }
         page.setList(resultList);
         result.setData(page);
@@ -710,9 +718,18 @@ public class PocConsensusResource {
             result.setData(page);
             return result;
         }
+        Map<NulsDigestData, Integer> map = new HashMap<>();
+        for (MeetingMember member : PocConsensusContext.getChainManager().getMasterChain().getCurrentRound().getMemberList()) {
+            if (null != member.getAgent()) {
+                map.put(member.getAgent().getTxHash(), 1);
+            }
+        }
+
         List<DepositDTO> resultList = new ArrayList<>();
         for (int i = start; i < depositList.size() && i < (start + pageSize); i++) {
-            resultList.add(new DepositDTO(depositList.get(i)));
+            Deposit deposit = depositList.get(i);
+            deposit.setStatus(map.get(deposit.getAgentHash()) == null ? 0 : 1);
+            resultList.add(new DepositDTO(deposit));
         }
         page.setList(resultList);
         result.setData(page);
