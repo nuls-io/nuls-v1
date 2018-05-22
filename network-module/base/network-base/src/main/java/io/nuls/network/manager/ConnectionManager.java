@@ -95,11 +95,7 @@ public class ConnectionManager {
                 header.parse(bytes);
                 BaseMessage message = getMessageBusService().getMessageInstance(header.getModuleId(), header.getMsgType()).getData();
                 message.parse(bytes);
-                //todo temp
-                if(message instanceof SmallBlockMessage){
-                    SmallBlockMessage smallBlockMessage = (SmallBlockMessage) message;
-                    Log.error("{}-small-block:"+smallBlockMessage.getMsgBody().getHeader().getHeight()+":::"+smallBlockMessage.getMsgBody().getHeader().getHash(),node.getId());
-                }
+
                 list.add(message);
                 offset = message.serialize().length;
                 if (bytes.length > offset) {
