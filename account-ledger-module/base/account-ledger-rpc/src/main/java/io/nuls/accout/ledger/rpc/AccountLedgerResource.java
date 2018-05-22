@@ -224,7 +224,7 @@ public class AccountLedgerResource {
     @GET
     @Path("/utxo/lock/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "账户地址查询交易列表", notes = "result.data: balanceJson 返回账户相关的交易列表")
+    @ApiOperation(value = "查询用户冻结列表", notes = "result.data: balanceJson 返回账户相关的冻结UTXO列表")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
