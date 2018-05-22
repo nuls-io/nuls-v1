@@ -53,8 +53,7 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
     @Override
     public ValidateResult validate(AliasTransaction tx) {
         Alias alias = tx.getTxData();
-        Alias aliasDb = aliasService.getAlias(alias.getAlias());
-        if(null != aliasDb){
+        if(aliasService.isAliasExist(alias.getAlias())){
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_EXIST);
         }
         List<AliasPo> list = aliasStorageService.getAliasList().getData();

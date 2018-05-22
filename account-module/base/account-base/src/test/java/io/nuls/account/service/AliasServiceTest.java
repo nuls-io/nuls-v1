@@ -8,45 +8,39 @@ import io.nuls.db.module.impl.LevelDbModuleBootstrap;
 import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
+import io.nuls.kernel.model.Result;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.List;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class AliasServiceTest {
 
     protected static AccountService accountService;
-
-    protected static AccountStorageService accountStorageService;
-
-    protected static AccountCacheService accountCacheService;
-
     protected static AliasService aliasService;
 
-    protected static AccountBaseService accountBaseService;
-
-    @BeforeClass
-    public static void beforeClass(){
+    @Before
+    public void beforeClass(){
         MicroKernelBootstrap kernel = MicroKernelBootstrap.getInstance();
         kernel.init();
         kernel.start();
         LevelDbModuleBootstrap db = new LevelDbModuleBootstrap();
         db.init();
         db.start();
-        aliasService = SpringLiteContext.getBean(AliasService.class);
-        accountBaseService = SpringLiteContext.getBean(AccountBaseService.class);
         accountService = SpringLiteContext.getBean(AccountService.class);
-
+        aliasService = SpringLiteContext.getBean(AliasService.class);
     }
-
 
     @Test
     public void setAlias() {
         List<Account> accounts = accountService.createAccount(1, "nuls123456").getData();
         Account account = accounts.get(0);
-
+        Result result = aliasService.setAlias(account.getAddress().toString(), "nuls123456", "Charlie555");
+        assertTrue(result.isSuccess());
     }
 
     @Test
@@ -59,20 +53,5 @@ public class AliasServiceTest {
         } catch (NulsException e) {
             e.printStackTrace();
         }
-    }
-
-    @Test
-    public void getAlias() {
-
-    }
-
-    @Test
-    public void isAliasExist() {
-
-    }
-
-    @Test
-    public void rollbackAlias() {
-
     }
 }
