@@ -34,12 +34,17 @@ import io.nuls.core.tools.param.AssertUtil;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Niels
  * @date 2017/10/10
  */
 public class DisruptorUtil<T extends DisruptorData> {
+
+    private Lock locker = new ReentrantLock();
+
     private static final DisruptorUtil INSTANCE = new DisruptorUtil();
     private static final Map<String, Disruptor<DisruptorData>> DISRUPTOR_MAP = new HashMap<>();
 
@@ -106,10 +111,14 @@ public class DisruptorUtil<T extends DisruptorData> {
     /**
      * add the data obj to the disruptor named the field name
      */
-    public synchronized void offer(String name, Object obj) {
+    public void offer(String name, Object obj) {
+
         Disruptor<DisruptorData> disruptor = DISRUPTOR_MAP.get(name);
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
         RingBuffer<DisruptorData> ringBuffer = disruptor.getRingBuffer();
+
+        locker.lock();
+
         //请求下一个事件序号；
         long sequence = ringBuffer.next();
         try {
@@ -119,6 +128,7 @@ public class DisruptorUtil<T extends DisruptorData> {
         } catch (Exception e) {
             Log.error(e);
         } finally {
+            locker.unlock();
             //发布事件；
             ringBuffer.publish(sequence);
         }
