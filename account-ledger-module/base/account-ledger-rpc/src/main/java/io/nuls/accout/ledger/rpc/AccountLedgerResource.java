@@ -253,7 +253,7 @@ public class AccountLedgerResource {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
 
-        Result<List<Coin>> result = accountLedgerService.getLockUtxo(addressBytes);
+        Result<List<Coin>> result = accountLedgerService.getLockedUtxo(addressBytes);
         if (result.isFailed()) {
             dtoResult.setSuccess(false);
             dtoResult.setErrorCode(result.getErrorCode());

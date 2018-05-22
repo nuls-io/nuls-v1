@@ -177,5 +177,5 @@ public interface AccountLedgerService {
     /**
      * 查询锁定的未花费交易
      */
-    Result<List<Coin>> getLockUtxo(byte[] address);
+    Result<List<Coin>> getLockedUtxo(byte[] address);
 }

@@ -25,30 +25,20 @@
 package io.nuls.account.ledger.storage.service;
 
 import io.nuls.account.ledger.storage.po.TransactionInfoPo;
-import io.nuls.db.model.Entry;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
- * @author Facjas
- * @date 2018/5/10.
+ * author Facjas
+ * date 2018/5/22.
  */
-public interface AccountLedgerStorageService {
+public interface TransactionInfoStorageService {
 
-    Result saveUTXO(byte[] key, byte[] value);
+    Result saveTransactionInfo(TransactionInfoPo tx, List<byte[]> addresses);
 
-    Result batchSaveUTXO(Map<byte[],byte[]> utxos);
+    Result deleteTransactionInfo(TransactionInfoPo tx);
 
-    Result deleteUTXO(byte[] key);
-
-    Result batchDeleteUTXO(Set<byte[]> utxos);
-
-    List<Entry<byte[],byte[]>> loadAllCoinList();
+    List<TransactionInfoPo> getTransactionInfoListByAddress(byte[] address) throws NulsException;
 }

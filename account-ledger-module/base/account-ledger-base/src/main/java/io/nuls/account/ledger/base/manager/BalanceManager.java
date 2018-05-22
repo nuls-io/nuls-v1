@@ -9,6 +9,7 @@ import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
+import io.nuls.db.model.Entry;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -17,10 +18,7 @@ import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.utils.AddressTool;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -32,7 +30,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BalanceManager {
 
     @Autowired
-    private AccountLedgerStorageService storageService;
+    private AccountLedgerStorageService accountLedgerStorageService;
     @Autowired
     private AccountService accountService;
 
@@ -132,7 +130,7 @@ public class BalanceManager {
             if (accountService.getAccount(address).isFailed()) {
                 return null;
             }
-            List<Coin> coinList = storageService.getCoinList(address);
+            List<Coin> coinList = getCoinListByAddress(address);
             Collections.sort(coinList, CoinComparator.getInstance());
 
             Na usable = Na.ZERO;
@@ -155,5 +153,29 @@ public class BalanceManager {
         } finally {
             lock.unlock();
         }
+    }
+
+    public List<Coin> getCoinListByAddress(byte[] address) {
+        List<Coin> coinList = new ArrayList<>();
+        List<Entry<byte[], byte[]>> rawList = accountLedgerStorageService.loadAllCoinList();
+        byte[] addressOwner = new byte[AddressTool.HASH_LENGTH];
+        for (Entry coinEntry : rawList) {
+            byte[] key = (byte[]) coinEntry.getKey();
+            System.arraycopy(key, 0, addressOwner, 0, AddressTool.HASH_LENGTH);
+            if (java.util.Arrays.equals(addressOwner, address)) {
+                Coin coin = new Coin();
+                try {
+                    coin.parse((byte[]) coinEntry.getValue());
+                } catch (NulsException e) {
+                    Log.info("parse coin form db error");
+                    continue;
+                }
+                byte[] fromOwner = new byte[key.length - AddressTool.HASH_LENGTH];
+                System.arraycopy(key, AddressTool.HASH_LENGTH, fromOwner, 0, key.length - AddressTool.HASH_LENGTH);
+                coin.setOwner(fromOwner);
+                coinList.add(coin);
+            }
+        }
+        return coinList;
     }
 }

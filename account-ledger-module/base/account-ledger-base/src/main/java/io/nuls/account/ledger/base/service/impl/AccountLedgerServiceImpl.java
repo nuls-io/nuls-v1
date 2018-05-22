@@ -29,7 +29,10 @@ import io.nuls.account.ledger.base.manager.BalanceManager;
 import io.nuls.account.ledger.base.util.CoinComparator;
 import io.nuls.account.ledger.base.util.TxInfoComparator;
 import io.nuls.account.ledger.service.AccountLedgerService;
+import io.nuls.account.ledger.storage.constant.AccountLedgerStorageConstant;
 import io.nuls.account.ledger.storage.po.TransactionInfoPo;
+import io.nuls.account.ledger.storage.service.TransactionInfoStorageService;
+import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
@@ -45,6 +48,7 @@ import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.db.model.Entry;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
@@ -81,7 +85,13 @@ import java.util.concurrent.locks.ReentrantLock;
 public class AccountLedgerServiceImpl implements AccountLedgerService, InitializingBean {
 
     @Autowired
-    private AccountLedgerStorageService storageService;
+    private AccountLedgerStorageService accountLedgerStorageService;
+
+    @Autowired
+    TransactionInfoStorageService transactionInfoStorageService;
+
+    @Autowired
+    UnconfirmedTransactionStorageService unconfirmedTransactionStorageService;
 
     @Autowired
     private AccountService accountService;
@@ -147,12 +157,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result<Transaction> getUnconfirmedTransaction(NulsDigestData hash) {
-        return storageService.getTempTx(hash);
+        return unconfirmedTransactionStorageService.getUnconfirmedTx(hash);
     }
 
     @Override
     public Result<List<Transaction>> getAllUnconfirmedTransaction() {
-        List<Transaction> localTxList = storageService.loadAllTempList().getData();
+        List<Transaction> localTxList = unconfirmedTransactionStorageService.loadAllUnconfirmedList().getData();
         return Result.getSuccess().setData(localTxList);
     }
 
@@ -163,7 +173,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
-        Result result = storageService.deleteTxInfo(txInfoPo);
+        Result result = transactionInfoStorageService.deleteTransactionInfo(txInfoPo);
 
         if (result.isFailed()) {
             return result;
@@ -216,7 +226,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         lock.lock();
         try {
             CoinDataResult coinDataResult = new CoinDataResult();
-            List<Coin> rawCoinList = storageService.getCoinList(address);
+            List<Coin> rawCoinList = balanceManager.getCoinListByAddress(address);
             List<Coin> coinList = new ArrayList<>();
             if (rawCoinList.isEmpty()) {
                 coinDataResult.setEnough(false);
@@ -405,7 +415,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     needUnLockUtxoNew.setFrom(to.getFrom());
                     try {
                         byte[] outKey = org.spongycastle.util.Arrays.concatenate(to.getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                        storageService.saveUTXO(outKey, needUnLockUtxoNew.serialize());
+                        accountLedgerStorageService.saveUTXO(outKey, needUnLockUtxoNew.serialize());
                     } catch (IOException e) {
                         throw new NulsRuntimeException(e);
                     }
@@ -441,7 +451,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 if (tos.get(i).getLockTime() == -1) {
                     try {
                         byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                        storageService.saveUTXO(outKey, tos.get(i).serialize());
+                        accountLedgerStorageService.saveUTXO(outKey, tos.get(i).serialize());
                     } catch (IOException e) {
                         throw new NulsRuntimeException(e);
                     }
@@ -489,7 +499,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result<List<TransactionInfo>> getTxInfoList(byte[] address) {
         try {
-            List<TransactionInfoPo> infoPoList = storageService.getTxInfoList(address);
+            List<TransactionInfoPo> infoPoList = transactionInfoStorageService.getTransactionInfoListByAddress(address);
             List<TransactionInfo> infoList = new ArrayList<>();
             for (TransactionInfoPo po : infoPoList) {
                 if (po.getTxType() == ConsensusConstant.TX_TYPE_RED_PUNISH || po.getTxType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH) {
@@ -507,24 +517,18 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result<List<Coin>> getLockUtxo(byte[] address) {
+    public Result<List<Coin>> getLockedUtxo(byte[] address) {
         Result<List<Coin>> result = new Result<>();
-        try {
-            result.setSuccess(true);
-            List<Coin> coinList = storageService.getCoinList(address);
-            List<Coin> lockCoinList = new ArrayList<>();
-            for (Coin coin : coinList) {
-                if (coin != null && !coin.usable()) {
-                    lockCoinList.add(coin);
-                }
+        result.setSuccess(true);
+        List<Coin> coinList = balanceManager.getCoinListByAddress(address);
+        List<Coin> lockCoinList = new ArrayList<>();
+        for (Coin coin : coinList) {
+            if (coin != null && !coin.usable()) {
+                lockCoinList.add(coin);
             }
-            Collections.sort(coinList, CoinComparator.getInstance());
-            result.setData(lockCoinList);
-        } catch (NulsException e) {
-            Log.error(e);
-            result.setSuccess(false);
-            result.setErrorCode(e.getErrorCode());
         }
+        Collections.sort(coinList, CoinComparator.getInstance());
+        result.setData(lockCoinList);
         return result;
     }
 
@@ -538,20 +542,20 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
         txInfoPo.setStatus(status);
 
-        Result result = storageService.saveTxInfo(txInfoPo, addresses);
+        Result result = transactionInfoStorageService.saveTransactionInfo(txInfoPo, addresses);
 
         if (result.isFailed()) {
             return result;
         }
         result = saveLocalTx(tx);
         if (result.isFailed()) {
-            storageService.deleteTxInfo(txInfoPo);
+            transactionInfoStorageService.deleteTransactionInfo(txInfoPo);
         }
 
         if (status == TransactionInfo.UNCONFIRMED) {
-            result = storageService.saveTempTx(tx);
+            result = unconfirmedTransactionStorageService.saveUnconfirmedTx(tx.getHash(), tx);
         } else {
-            storageService.deleteTempTx(tx);
+            unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
         }
         for (int i = 0; i < addresses.size(); i++) {
             balanceManager.refreshBalance(addresses.get(i));
@@ -570,18 +574,17 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
         txInfoPo.setStatus(status);
 
-        Result result = storageService.saveTxInfo(txInfoPo, addresses);
+        Result result = transactionInfoStorageService.saveTransactionInfo(txInfoPo, addresses);
 
         if (result.isFailed()) {
             return result;
         }
         result = saveLocalTx(tx);
         if (result.isFailed()) {
-            storageService.deleteTxInfo(txInfoPo);
+            transactionInfoStorageService.deleteTransactionInfo(txInfoPo);
         }
         return result;
     }
-
 
     protected List<Transaction> getLocalTransaction(List<Transaction> txs) {
         List<Transaction> resultTxs = new ArrayList<>();
@@ -701,7 +704,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
                 fromsSet.add(org.spongycastle.util.Arrays.concatenate(address, from.getOwner()));
             }
-            storageService.batchDeleteUTXO(fromsSet);
+            accountLedgerStorageService.batchDeleteUTXO(fromsSet);
             // save utxo - to
             List<Coin> tos = coinData.getTo();
             byte[] indexBytes;
@@ -714,7 +717,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     throw new NulsRuntimeException(e);
                 }
             }
-            storageService.batchSaveUTXO(toMap);
+            accountLedgerStorageService.batchSaveUTXO(toMap);
         }
         return Result.getSuccess();
     }
@@ -757,7 +760,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     throw new NulsRuntimeException(e);
                 }
             }
-            storageService.batchSaveUTXO(fromMap);
+            accountLedgerStorageService.batchSaveUTXO(fromMap);
             // save utxo - to
             List<Coin> tos = coinData.getTo();
             byte[] indexBytes;
@@ -770,13 +773,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     throw new NulsRuntimeException(e);
                 }
             }
-            storageService.batchDeleteUTXO(toSet);
+            accountLedgerStorageService.batchDeleteUTXO(toSet);
         }
         return Result.getSuccess();
     }
 
     protected Set<byte[]> getTmpUsedCoinKeySet() {
-        List<Transaction> localTxList = storageService.loadAllTempList().getData();
+        List<Transaction> localTxList = unconfirmedTransactionStorageService.loadAllUnconfirmedList().getData();
         Set<byte[]> coinKeys = new HashSet<>();
         for (Transaction tx : localTxList) {
             CoinData coinData = tx.getCoinData();
