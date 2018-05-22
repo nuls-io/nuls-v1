@@ -67,10 +67,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER);
         }
         try {
-            //TestLog+
-            if("io.nuls.protocol.model.tx.TransferTransaction".equals(tx.getClass().getName())) {
-                Log.info("==============转账交易开始");
-            }
             //TestLog-
             // 保存CoinData
             Result result = saveCoinData(tx);

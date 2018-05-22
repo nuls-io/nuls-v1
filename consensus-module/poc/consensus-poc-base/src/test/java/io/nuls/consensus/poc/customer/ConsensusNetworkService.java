@@ -62,7 +62,6 @@ public class ConsensusNetworkService implements NetworkService {
 
     @Override
     public NodeGroup getNodeGroup(String groupName) {
-        // todo auto-generated method stub
         return null;
     }
 

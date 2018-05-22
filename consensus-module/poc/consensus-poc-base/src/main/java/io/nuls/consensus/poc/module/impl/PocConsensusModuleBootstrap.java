@@ -59,7 +59,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     }
 
     private void registerHandlers() {
-        //todo 确认是否需要删除
+
     }
 
     @Override

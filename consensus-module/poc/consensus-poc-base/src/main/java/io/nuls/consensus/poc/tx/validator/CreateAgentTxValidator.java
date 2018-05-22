@@ -25,13 +25,11 @@
 
 package io.nuls.consensus.poc.tx.validator;
 
-import io.nuls.account.model.Address;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Component;
@@ -48,9 +46,10 @@ import java.util.Arrays;
 @Component
 public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<CreateAgentTransaction> {
 
-    //todo 节点介绍最大长度
+    //节点介绍最大长度
+    private static final int INSTRACTION_MAX_LENGTH = 100;
 
-    private static int AGENT_NAME_MAS_LENGTH = 32;
+    private static final int AGENT_NAME_MAX_LENGTH = 32;
 
     @Override
     public ValidateResult validate(CreateAgentTransaction tx) {
@@ -70,8 +69,12 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
             return ValidateResult.getFailedResult(getClass().getName(), "agent name can not be null!");
         }
 
-        if (agent.getAgentName().length > AGENT_NAME_MAS_LENGTH) {
+        if (agent.getAgentName().length > AGENT_NAME_MAX_LENGTH) {
             return ValidateResult.getFailedResult(getClass().getName(), "agent name is too long!");
+        }
+
+        if(agent.getIntroduction().length>INSTRACTION_MAX_LENGTH){
+            return ValidateResult.getFailedResult(getClass().getName(),"The instruduction is too long!");
         }
 
         if (tx.getTime() <= 0) {

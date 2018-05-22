@@ -130,6 +130,11 @@ public class PocConsensusResource {
         if (!Address.validAddress(StringUtils.formatStringPara(address))) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
+        Result accountResult = accountService.getAccount(address);
+        if(accountResult.isFailed()){
+            return accountResult;
+        }
+        Account account = (Account) accountResult.getData();
         Result result = Result.getSuccess();
         AccountConsensusInfoDTO dto = new AccountConsensusInfoDTO();
         List<Agent> allAgentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();

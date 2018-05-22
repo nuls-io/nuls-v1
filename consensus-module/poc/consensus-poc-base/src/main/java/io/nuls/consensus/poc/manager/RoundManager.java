@@ -258,15 +258,12 @@ public class RoundManager {
 
         round.calcLocalPacker(getAccountService().getAccountList().getData());
 
-        ConsensusLog.debug("calculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n" + sb.toString(), index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
+        ConsensusLog.debug("calculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
     }
 
-    StringBuilder sb = null;
 
     private void setMemberList(MeetingRound round, BlockHeader startBlockHeader) {
-
-        sb = new StringBuilder();
 
         List<MeetingMember> memberList = new ArrayList<>();
         double totalWeight = 0;
@@ -281,7 +278,6 @@ public class RoundManager {
             memberList.add(member);
         }
 
-        //TODO removeSmallBlock the test code in future
         List<Deposit> depositTempList = new ArrayList<>();
 
         List<Agent> agentList = getAliveAgentList(startBlockHeader.getHeight());
@@ -330,16 +326,6 @@ public class RoundManager {
                 return o1.getTxHash().getDigestHex().compareTo(o2.getTxHash().getDigestHex());
             }
         });
-
-        for (Deposit deposit : depositTempList) {
-            sb.append("------------------------ agent hash : " + deposit.getAgentHash());
-            sb.append("dep address : " + deposit.getAddress());
-            sb.append(" , amount : " + deposit.getDeposit());
-            sb.append(" , hash : " + deposit.getTxHash());
-            sb.append(" , height : " + deposit.getBlockHeight());
-            sb.append(" , del height : " + deposit.getDelHeight());
-            sb.append("\n");
-        }
     }
 
     private List<Deposit> getDepositListByAgentId(NulsDigestData agentHash, long startBlockHeight) {
@@ -393,9 +379,6 @@ public class RoundManager {
 
         double penalty = DoubleUtils.div(DoubleUtils.mul(PocConsensusProtocolConstant.CREDIT_MAGIC_NUM, sumRoundVal),
                 DoubleUtils.mul(PocConsensusProtocolConstant.RANGE_OF_CAPACITY_COEFFICIENT, PocConsensusProtocolConstant.RANGE_OF_CAPACITY_COEFFICIENT));
-
-//        BlockLog.debug(")))))))))))))creditVal:" + DoubleUtils.sub(ability, penalty) + ",member:" + member.getAgentAddress());
-//        BlockLog.debug(")))))))))))))blockCount:" + blockCount + ", start:" + roundStart + ",end:" + calcRoundIndex + ", yellowCount:" + sumRoundVal);
 
         return DoubleUtils.round(DoubleUtils.sub(ability, penalty), 4);
     }
