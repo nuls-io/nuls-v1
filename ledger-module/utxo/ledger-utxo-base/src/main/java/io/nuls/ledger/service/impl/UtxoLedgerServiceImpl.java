@@ -212,7 +212,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
     @Override
     public Transaction getTx(NulsDigestData hash) {
+        if(hash == null) {
+            return null;
+        }
         return utxoLedgerTransactionStorageService.getTx(hash);
+    }
+
+    @Override
+    public Transaction getTx(byte[] txHashBytes) {
+        if(txHashBytes == null) {
+            return null;
+        }
+        return getTx(NulsDigestData.calcDigestData(txHashBytes));
     }
 
     private boolean checkPublicKeyHash(byte[] address, byte[] pubKeyHash) {
