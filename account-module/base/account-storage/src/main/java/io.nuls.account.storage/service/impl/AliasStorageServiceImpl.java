@@ -15,6 +15,7 @@ import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Result;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 /**
  * @author: Charlie
@@ -36,6 +37,12 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
+    }
+
+    @Override
+    public Result<List<AliasPo>> getAliasList() {
+        List<AliasPo> list = dbService.values(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS, AliasPo.class);
+        return Result.getSuccess().setData(list);
     }
 
     @Override

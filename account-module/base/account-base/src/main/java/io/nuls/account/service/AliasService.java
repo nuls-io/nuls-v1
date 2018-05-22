@@ -16,14 +16,12 @@ import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.service.MessageBusService;
-import io.nuls.protocol.message.TransactionMessage;
 import io.nuls.protocol.service.TransactionService;
 
 import java.util.ArrayList;
@@ -40,18 +38,16 @@ import java.util.List;
 public class AliasService {
 
     @Autowired
-    public AccountService accountService;
+    private AccountService accountService;
 
     @Autowired
-    public AccountStorageService accountStorageService;
+    private AccountStorageService accountStorageService;
 
     @Autowired
     private AccountLedgerService accountLedgerService;
 
     @Autowired
     private AliasStorageService aliasStorageService;
-
-    private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
     @Autowired
     private MessageBusService messageBusService;
@@ -61,6 +57,8 @@ public class AliasService {
 
     @Autowired
     private LedgerService ledgerService;
+
+    private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
     /**
      * 设置别名
@@ -140,7 +138,7 @@ public class AliasService {
     }
 
     /**
-     * 保存别名
+     * 保存别名(全网)
      * 1.保存别名alias至数据库
      * 2.从数据库取出对应的account账户,将别名设置进account然后保存至数据库
      * 3.将修改后的account重新进行缓存
@@ -159,13 +157,12 @@ public class AliasService {
                 this.rollbackAlias(aliaspo);
             }
             AccountPo po = accountStorageService.getAccount(aliaspo.getAddress()).getData();
-            if (null == po) {
-                return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
-            }
-            po.setAlias(aliaspo.getAlias());
-            Result resultAcc = accountStorageService.updateAccount(po);
-            if (resultAcc.isFailed()) {
-                this.rollbackAlias(aliaspo);
+            if (null != po) {
+                po.setAlias(aliaspo.getAlias());
+                Result resultAcc = accountStorageService.updateAccount(po);
+                if (resultAcc.isFailed()) {
+                    this.rollbackAlias(aliaspo);
+                }
             }
         } catch (Exception e) {
             this.rollbackAlias(aliaspo);
@@ -185,7 +182,7 @@ public class AliasService {
     }
 
     /**
-     * 回滚别名操作(删除别名)
+     * 回滚别名操作(删除别名(全网))
      * 1.从数据库删除别名对象数据
      * 2.取出对应的account将别名清除,重新存入数据库
      * 3.重新缓存account
@@ -202,9 +199,12 @@ public class AliasService {
             AliasPo po = aliasStorageService.getAlias(aliasPo.getAlias()).getData();
             if (po != null && Base58.encode(po.getAddress()).equals(Base58.encode(aliasPo.getAddress()))) {
                 aliasStorageService.removeAlias(aliasPo.getAlias());
-                AccountPo accountPo = accountStorageService.getAccount(aliasPo.getAddress()).getData();
-                accountPo.setAlias("");
-                accountStorageService.updateAccount(accountPo);
+                Result<AccountPo> rs = accountStorageService.getAccount(aliasPo.getAddress());
+                if(rs.isSuccess()) {
+                    AccountPo accountPo = rs.getData();
+                    accountPo.setAlias("");
+                    accountStorageService.updateAccount(accountPo);
+                }
             }
         } catch (Exception e) {
             Log.error(e);

@@ -1,14 +1,14 @@
 package io.nuls.account.service.impl;
 
 import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.model.Account;
-import io.nuls.account.model.AccountKeyStore;
-import io.nuls.account.model.Address;
-import io.nuls.account.model.Balance;
+import io.nuls.account.model.*;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
+import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.po.AccountPo;
+import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AccountStorageService;
+import io.nuls.account.storage.service.AliasStorageService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.core.tools.crypto.*;
@@ -23,6 +23,7 @@ import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
+
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,6 +44,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     private AccountLedgerService accountLedgerService;
+
+    @Autowired
+    private AliasService aliasService;
+
+    @Autowired
+    private AliasStorageService aliasStorageService;
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
@@ -132,6 +139,7 @@ public class AccountServiceImpl implements AccountService {
         return Result.getSuccess();
     }
 
+
     @Override
     public Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore, String password) {
         if (null == keyStore || null == keyStore.getAddress()) {
@@ -155,7 +163,23 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed(AccountErrorCode.FAILED);
         }
         account.setAddress(new Address(keyStore.getAddress()));
-        account.setAlias(keyStore.getAlias());
+
+        String alias = keyStore.getAlias();
+        if (StringUtils.isNotBlank(alias)) {
+            Alias aliasDb = aliasService.getAlias(alias);
+            if (null == aliasDb) {
+                List<Account> list = this.getAccountList().getData();
+                for (Account acc : list) {
+                    if (account.getAddress().toString().equals(acc.getAddress().toString())) {
+                        alias = acc.getAlias();
+                        break;
+                    }
+                }
+            } else {
+                alias = aliasDb.getAlias();
+            }
+            account.setAlias(alias);
+        }
         account.setPubKey(keyStore.getPubKey());
         if (StringUtils.validPassword(password)) {
             try {
@@ -193,6 +217,21 @@ public class AccountServiceImpl implements AccountService {
             } catch (NulsException e) {
                 Log.error(e);
             }
+        }
+        //扫所全网别名对比地址符合就设置
+        //String alias = null;
+        Account acc = getAccountByAddress(account.getAddress().toString());
+        if (null == acc) {
+            List<AliasPo> list = aliasStorageService.getAliasList().getData();
+            for (AliasPo aliasPo : list) {
+                //如果全网别名中的地址有和当前导入的账户地址相同,则赋值别名到账户中
+                if (Base58.encode(aliasPo.getAddress()).equals(account.getAddress().toString())) {
+                    account.setAlias(aliasPo.getAlias());
+                    break;
+                }
+            }
+        } else {
+            account.setAlias(acc.getAlias());
         }
         AccountPo po = new AccountPo(account);
         accountStorageService.saveAccount(po);
@@ -254,8 +293,8 @@ public class AccountServiceImpl implements AccountService {
             return null;
         }
         //如果账户已经解锁,则直接返回解锁后的账户. If the account is unlocked, return directly to the unlocked account
-        Account accountCache =  accountCacheService.getAccountByAddress(address);
-        if(null != accountCache){
+        Account accountCache = accountCacheService.getAccountByAddress(address);
+        if (null != accountCache) {
             return accountCache;
         }
         AccountPo accountPo = null;

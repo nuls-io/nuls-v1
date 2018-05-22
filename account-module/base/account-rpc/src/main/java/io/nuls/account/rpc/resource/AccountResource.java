@@ -16,7 +16,6 @@ import io.nuls.account.service.AccountBaseService;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
-import io.nuls.account.util.AccountTool;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;

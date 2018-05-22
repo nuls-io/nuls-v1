@@ -76,6 +76,9 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
     @Override
     public Result<AccountPo> getAccount(byte[] address) {
         AccountPo account = dbService.getModel(AccountStorageConstant.DB_NAME_ACCOUNT, address, AccountPo.class);
+        if(null == account){
+            return Result.getFailed();
+        }
         return Result.getSuccess().setData(account);
     }
 
