@@ -445,11 +445,11 @@ public class PocConsensusResource {
         }
         fillAgentList(agentList, null);
         int type = AgentComparator.COMMISSION_RATE;
-        if ("owndeposit".equals(sortType)) {
+        if ("deposit".equals(sortType)) {
             type = AgentComparator.DEPOSIT;
         } else if ("commissionRate".equals(sortType)) {
             type = AgentComparator.COMMISSION_RATE;
-        } else if ("creditRatio".equals(sortType)) {
+        } else if ("creditVal".equals(sortType)) {
             type = AgentComparator.CREDIT_VALUE;
         } else if ("totalDeposit".equals(sortType)) {
             type = AgentComparator.DEPOSITABLE;
