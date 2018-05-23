@@ -674,6 +674,7 @@ public class PocConsensusResource {
             for(Agent a : agentList) {
                 if(a.getTxHash().equals(deposit.getAgentHash())) {
                     agent = a;
+                    break;
                 }
             }
             deposit.setStatus(agent == null ? 0 : 1);
