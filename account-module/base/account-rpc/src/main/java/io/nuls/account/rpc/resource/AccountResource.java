@@ -351,19 +351,15 @@ public class AccountResource {
     }
 
     @PUT
-    @Path("/password/prikey/{address}")
+    @Path("/password/prikey")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[修改密码] 根据私钥修改账户密码")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result updatePasswordByPriKey(@ApiParam(name = "address", value = "账户地址", required = true)
-                              @PathParam("address") String address,
-                              @ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
-                                      AccountPriKeyPasswordForm form) {
-        if (!Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
-        }
+    public Result updatePasswordByPriKey(@ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
+                                      AccountPriKeyChangePasswordForm form) {
+
         String prikey = form.getPriKey();
         if (!ECKey.isValidPrivteHex(prikey)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The prikey is wrong");
@@ -375,7 +371,12 @@ public class AccountResource {
         if (!StringUtils.validPassword(newPassword)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
         }
-        return this.accountBaseService.changePasswordByPrikey(address, prikey, newPassword);
+        Result result = accountService.importAccount(prikey, newPassword);
+        if (result.isFailed()) {
+            return result;
+        }
+        Account account = (Account) result.getData();
+        return Result.getSuccess().setData(account.getAddress().toString());
     }
 
     @POST
