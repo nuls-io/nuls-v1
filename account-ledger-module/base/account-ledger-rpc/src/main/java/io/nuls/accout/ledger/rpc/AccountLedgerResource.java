@@ -38,6 +38,7 @@ import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.accout.ledger.rpc.dto.TransactionInfoDto;
 import io.nuls.accout.ledger.rpc.dto.UtxoDto;
 import io.nuls.accout.ledger.rpc.form.TransferForm;
+import io.nuls.accout.ledger.rpc.util.UtxoDtoComparator;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
@@ -53,6 +54,7 @@ import io.swagger.annotations.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -271,15 +273,9 @@ public class AccountLedgerResource {
             return dtoResult;
         }
 
-        int end = start + pageSize;
-        if (end > page.getTotal()) {
-            end = (int) page.getTotal();
-        }
-
         List<UtxoDto> utxoDtoList = new ArrayList<>();
         byte[] txHash = new byte[NulsDigestData.HASH_LENGTH];
-        for (int i = start; i < end; i++) {
-            Coin coin = result.getData().get(i);
+        for (Coin coin : result.getData()) {
             System.arraycopy(coin.getOwner(), 0, txHash, 0, NulsDigestData.HASH_LENGTH);
             Transaction tx = ledgerService.getTx(txHash);
             if (tx == null) {
@@ -293,8 +289,15 @@ public class AccountLedgerResource {
             }
             utxoDtoList.add(new UtxoDto(coin, tx));
         }
-        page.setList(utxoDtoList);
 
+        Collections.sort(utxoDtoList, UtxoDtoComparator.getInstance());
+
+        int end = start + pageSize;
+        if (end > page.getTotal()) {
+            end = (int) page.getTotal();
+        }
+
+        page.setList(utxoDtoList.subList(start, end));
         dtoResult.setSuccess(true);
         dtoResult.setData(page);
         return dtoResult;
