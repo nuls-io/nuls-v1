@@ -1,5 +1,6 @@
 package io.nuls.consensus.poc.rpc.model;
 
+import io.nuls.account.model.Address;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.core.tools.crypto.Base58;
@@ -49,7 +50,7 @@ public class DepositDTO {
         this(deposit);
         if (agent != null) {
             try {
-                this.agentAddress = new String(agent.getAgentAddress(), NulsConfig.DEFAULT_ENCODING);
+                this.agentAddress = Base58.encode(agent.getAgentAddress());
                 this.agentName = new String(agent.getAgentName(), NulsConfig.DEFAULT_ENCODING);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
