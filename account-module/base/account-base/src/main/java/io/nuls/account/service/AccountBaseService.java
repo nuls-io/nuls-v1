@@ -169,7 +169,7 @@ public class AccountBaseService {
         try {
             ECKey key = ECKey.fromPrivate(new BigInteger(Hex.decode(prikey)));
             Address addr = new Address(NulsContext.DEFAULT_CHAIN_ID, SerializeUtils.sha256hash160(key.getPubKey()));
-            if(addr.toString().equals(account.getAddress().toString())) {
+            if(!addr.toString().equals(account.getAddress().toString())) {
                 return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The prikey is wrong");
             }
             account.encrypt(newPassword, true);
