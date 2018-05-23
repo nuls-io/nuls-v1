@@ -117,7 +117,7 @@ public class AccountLedgerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
-    public Result<Balance> transfer(@ApiParam(name = "form", value = "转账", required = true) TransferForm form) {
+    public Result transfer(@ApiParam(name = "form", value = "转账", required = true) TransferForm form) {
 
         if (form == null) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);

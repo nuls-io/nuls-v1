@@ -372,7 +372,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             if (saveResult.isFailed()) {
                 return saveResult;
             }
-            Result sendResult = this.transactionService.broadcastTx(tx);
+            Result sendResult = transactionService.broadcastTx(tx);
             if (sendResult.isFailed()) {
                 return sendResult;
             }
@@ -487,7 +487,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             start = end;
             end = NulsContext.getInstance().getBestHeight();
-            if(start == end) {
+            if (start == end) {
                 break;
             }
         }
@@ -713,6 +713,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             byte[] indexBytes;
             Map<byte[], byte[]> toMap = new HashMap<>();
             for (int i = 0, length = tos.size(); i < length; i++) {
+                if (!isLocalAccount(tos.get(i).getOwner())) {
+                    continue;
+                }
                 try {
                     byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
                     toMap.put(outKey, tos.get(i).serialize());
