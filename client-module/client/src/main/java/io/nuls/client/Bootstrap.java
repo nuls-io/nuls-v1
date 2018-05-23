@@ -34,6 +34,8 @@ import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.module.service.ModuleService;
 import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
@@ -70,13 +72,14 @@ public class Bootstrap {
         while (true) {
             try {
                 //todo 后续启动一个系统监视线程
-                Thread.sleep(10000L);
+                Thread.sleep(5000L);
             } catch (InterruptedException e) {
                 Log.error(e);
             }
             if (null != NulsContext.getInstance().getBestBlock()) {
                 Log.info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-  netTime : " + (DateUtil.convertDate(new Date(TimeService.currentTimeMillis()))));
-                Log.info("bestHeight:" + NulsContext.getInstance().getBestHeight());
+                Block bestBlock = NulsContext.getInstance().getBestBlock();
+                Log.info("bestHeight:" + bestBlock.getHeader().getHeight() + " , txCount : " + bestBlock.getHeader().getTxCount());
 //                Log.info("node: " + NulsContext.getServiceBean(NetworkService.class).getAvailableNodes().size() + "), height:{}, threadCount:{}, consensusStatus: {}, downloadStatus: {}", NulsContext.getInstance().getBestBlock().getHeader().getHeight(), Thread.activeCount(), NulsContext.getServiceBean(ConsensusService.class).getConsensusStatus(), NulsContext.getServiceBean(DownloadService.class).getStatus());
                 Collection<Node> nodes = NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
                 for (Node node : nodes) {
