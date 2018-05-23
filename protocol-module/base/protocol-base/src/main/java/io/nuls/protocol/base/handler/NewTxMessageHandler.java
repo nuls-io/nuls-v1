@@ -60,7 +60,9 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
     public void onMessage(TransactionMessage event, Node fromNode) {
 
         Transaction tx = event.getMsgBody();
-        //Log.info("receive new tx {} from {}", tx.getHash().getDigestHex(), fromId);
+
+        Log.info("receive new tx {} from {} , tx count {}", tx.getHash().getDigestHex(), fromNode.getId(), temporaryCacheManager.getTxCount());
+
         if (null == tx) {
             return;
         }
