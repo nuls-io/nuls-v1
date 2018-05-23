@@ -17,10 +17,10 @@ public class BlockMonitorProcessTask implements Runnable {
 
     @Override
     public void run() {
-        try {
-            process.doProcess();
-        } catch (Exception e) {
-            Log.error(e);
-        }
+//        try {
+//            process.doProcess();
+//        } catch (Exception e) {
+//            Log.error(e);
+//        }
     }
 }

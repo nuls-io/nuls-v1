@@ -1,4 +1,4 @@
-package io.nuls.message.bus.processor.manager;
+package io.nuls.message.bus.model;
 
 import io.nuls.network.model.Node;
 import io.nuls.protocol.message.base.BaseMessage;

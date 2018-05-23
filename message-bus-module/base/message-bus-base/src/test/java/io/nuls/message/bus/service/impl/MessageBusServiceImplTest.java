@@ -3,7 +3,7 @@ package io.nuls.message.bus.service.impl;
 import TestHandler.BlockMessageHandler;
 import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
-import io.nuls.message.bus.processor.manager.ProcessorManager;
+import io.nuls.message.bus.manager.DispatchManager;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
@@ -62,7 +62,7 @@ public class MessageBusServiceImplTest {
         assertNotNull(handlerId);
         Field field = messageBusService.getClass().getDeclaredField("processorManager");
         field.setAccessible(true);
-        ProcessorManager processorManager = (ProcessorManager) field.get(messageBusService);
+        DispatchManager processorManager = (DispatchManager) field.get(messageBusService);
 
         //验证订阅后handlerMap中的值
         Class processorManagerClass = processorManager.getClass();
@@ -92,7 +92,7 @@ public class MessageBusServiceImplTest {
 
         Field field = messageBusService.getClass().getDeclaredField("processorManager");
         field.setAccessible(true);
-        ProcessorManager processorManager = (ProcessorManager) field.get(messageBusService);
+        DispatchManager processorManager = (DispatchManager) field.get(messageBusService);
 
         //验证取消订阅后handlerMap中的值
         Class processorManagerClass = processorManager.getClass();

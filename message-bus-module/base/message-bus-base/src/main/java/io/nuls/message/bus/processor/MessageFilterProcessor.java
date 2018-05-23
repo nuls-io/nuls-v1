@@ -5,17 +5,15 @@ import io.nuls.core.tools.disruptor.DisruptorData;
 import io.nuls.core.tools.log.Log;
 import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.message.bus.message.CommonDigestMessage;
-import io.nuls.message.bus.processor.manager.ProcessData;
+import io.nuls.message.bus.model.ProcessData;
 import io.nuls.message.bus.service.impl.MessageCacheService;
-import io.nuls.protocol.constant.ProtocolConstant;
-import io.nuls.protocol.message.SmallBlockMessage;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**
  * @author: Charlie
  * @date: 2018/5/6
  */
-public class MessageCheckingProcessor<E extends BaseMessage> implements EventHandler<DisruptorData<ProcessData<E>>> {
+public class MessageFilterProcessor<E extends BaseMessage> implements EventHandler<DisruptorData<ProcessData<E>>> {
 
     private MessageCacheService messageCacheService = MessageCacheService.getInstance();
 
