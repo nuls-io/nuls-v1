@@ -2,7 +2,7 @@ package io.nuls.message.bus.processor.thread;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
-import io.nuls.message.bus.processor.manager.ProcessData;
+import io.nuls.message.bus.model.ProcessData;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**
