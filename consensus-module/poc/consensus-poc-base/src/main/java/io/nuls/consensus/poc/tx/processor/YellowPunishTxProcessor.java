@@ -16,6 +16,7 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.TransactionProcessor;
 import io.nuls.kernel.utils.SerializeUtils;
+import io.nuls.kernel.utils.VarInt;
 import io.nuls.kernel.validate.ValidateResult;
 
 import java.util.ArrayList;
@@ -29,14 +30,15 @@ import java.util.List;
 public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunishTransaction> {
 
     @Autowired
-    private PunishLogStorageService storageService;
+    private PunishLogStorageService punishLogStorageService;
 
     @Override
     public Result onRollback(YellowPunishTransaction tx, Object secondaryData) {
         YellowPunishData punishData = tx.getTxData();
         List<byte[]> deletedList = new ArrayList<>();
+        int deleteIndex = 1;
         for (byte[] address : punishData.getAddressList()) {
-            boolean result = storageService.delete(this.getPoKey(address, PunishType.YELLOW.getCode(), tx.getBlockHeight()));
+            boolean result = punishLogStorageService.delete(this.getPoKey(address, PunishType.YELLOW.getCode(), tx.getBlockHeight(), deleteIndex++));
             if (!result) {
                 BlockHeader header = (BlockHeader) secondaryData;
                 BlockRoundData roundData = new BlockRoundData(header.getExtend());
@@ -49,7 +51,7 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
                     po.setTime(tx.getTime());
                     po.setIndex(index++);
                     po.setType(PunishType.YELLOW.getCode());
-                    this.storageService.save(po);
+                    punishLogStorageService.save(po);
                 }
                 throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollback tx failed!");
             } else {
@@ -64,7 +66,7 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
         YellowPunishData punishData = tx.getTxData();
         BlockHeader header = (BlockHeader) secondaryData;
         BlockRoundData roundData = new BlockRoundData(header.getExtend());
-        List<byte[]> savedList = new ArrayList<>();
+        List<PunishLogPo> savedList = new ArrayList<>();
         int index = 1;
         for (byte[] address : punishData.getAddressList()) {
             PunishLogPo po = new PunishLogPo();
@@ -74,14 +76,14 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
             po.setTime(tx.getTime());
             po.setIndex(index++);
             po.setType(PunishType.YELLOW.getCode());
-            boolean result = storageService.save(po);
+            boolean result = punishLogStorageService.save(po);
             if (!result) {
-                for (byte[] bytes : savedList) {
-                    this.storageService.delete(getPoKey(bytes, PunishType.YELLOW.getCode(), header.getHeight()));
+                for (PunishLogPo punishLogPo : savedList) {
+                    punishLogStorageService.delete(getPoKey(punishLogPo.getAddress(), PunishType.YELLOW.getCode(), punishLogPo.getHeight(), punishLogPo.getIndex()));
                 }
                 throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollback tx failed!");
             } else {
-                savedList.add(address);
+                savedList.add(po);
             }
         }
         return Result.getSuccess();
@@ -95,7 +97,7 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
     /**
      * 获取固定格式的key
      */
-    private byte[] getPoKey(byte[] address, byte type, long blockHeight) {
-        return ArraysTool.joinintTogether(address, new byte[]{type}, SerializeUtils.uint64ToByteArray(blockHeight));
+    private byte[] getPoKey(byte[] address, byte type, long blockHeight, int index) {
+        return ArraysTool.joinintTogether(address, new byte[]{type}, SerializeUtils.uint64ToByteArray(blockHeight), new VarInt(index).encode());
     }
 }
