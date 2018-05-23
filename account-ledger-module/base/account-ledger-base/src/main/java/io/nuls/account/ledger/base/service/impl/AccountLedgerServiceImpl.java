@@ -125,13 +125,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public Result<Integer> saveUnconfirmedTransaction(Transaction tx) {
         saveLock.lock();
         try {
-            ValidateResult result1 = tx.verify();
-            if (result1.isFailed()) {
-                return result1;
+            ValidateResult result = tx.verify();
+            if (result.isFailed()) {
+                return result;
             }
-            result1 = this.ledgerService.verifyCoinData(tx, this.getAllUnconfirmedTransaction().getData());
-            if (result1.isFailed()) {
-                return result1;
+            result = this.ledgerService.verifyCoinData(tx, this.getAllUnconfirmedTransaction().getData());
+            if (result.isFailed()) {
+                return result;
             }
             return saveTransaction(tx, TransactionInfo.UNCONFIRMED);
         } finally {
