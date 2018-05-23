@@ -312,7 +312,7 @@ public class ConsensusProcess {
                 if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
                     txMemoryPool.add(tx, true);
                 }
-                Log.debug(result.getMessage());
+                Log.warn(result.getMessage());
                 continue;
             }
             result = ledgerService.verifyCoinData(tx, packingTxList);
@@ -320,7 +320,7 @@ public class ConsensusProcess {
                 if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
                     txMemoryPool.add(tx, true);
                 }
-                Log.debug(result.getMessage());
+                Log.warn(result.getMessage());
                 continue;
             }
             outHashList.add(tx.getHash());
@@ -353,7 +353,7 @@ public class ConsensusProcess {
 
         Block newBlock = ConsensusTool.createBlock(bd, round.getLocalPacker());
 
-        Log.debug("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + ", time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
+        Log.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + ", time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtil.convertDate(new Date(self.getPackEndTime())));
 
         return newBlock;

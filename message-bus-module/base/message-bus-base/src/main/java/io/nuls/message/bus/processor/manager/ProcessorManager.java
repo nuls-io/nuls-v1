@@ -3,6 +3,7 @@ package io.nuls.message.bus.processor.manager;
 import com.lmax.disruptor.WorkHandler;
 import io.nuls.core.tools.disruptor.DisruptorData;
 import io.nuls.core.tools.disruptor.DisruptorUtil;
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -17,6 +18,7 @@ import io.nuls.message.bus.constant.MessageBusErrorCode;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.module.MessageBusModuleBootstrap;
 import io.nuls.message.bus.processor.MessageCheckingProcessor;
+import io.nuls.message.bus.processor.MessageClassificationProcessor;
 import io.nuls.message.bus.processor.thread.MessageDispatchThread;
 import io.nuls.message.bus.processor.thread.NulsMessageCall;
 import io.nuls.protocol.message.SmallBlockMessage;
@@ -73,8 +75,8 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
             handlerList.add(handler);
         }
         WorkHandler[] arrayHandler = handlerList.toArray(new MessageDispatchThread[handlerList.size()]);
-        disruptorService.handleEventWith(disruptorName, new MessageCheckingProcessor()).thenHandleEventsWithWorkerPool(arrayHandler);
-//        disruptorService.handleEventsWithWorkerPool(disruptorName,arrayHandler);
+        disruptorService.handleEventWith(disruptorName, new MessageCheckingProcessor()).
+                handleEventsWith(new MessageClassificationProcessor(this)).thenHandleEventsWithWorkerPool(arrayHandler);
 
         disruptorService.start(disruptorName);
     }
@@ -85,6 +87,11 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
     }
 
     public void offer(ProcessData<M> data) {
+        BaseMessage message = data.getData();
+        if(message instanceof TransactionMessage) {
+            TransactionMessage txMessage = (TransactionMessage) message;
+            System.out.println(txMessage.getMsgBody().getHash());
+        }
         disruptorService.offer(disruptorName, data);
     }
 
@@ -147,6 +154,7 @@ public class ProcessorManager<M extends BaseMessage, H extends NulsMessageHandle
         Set<NulsMessageHandler> handlerSet = this.getHandlerList((Class<M>) data.getData().getClass());
 
         if(message instanceof TransactionMessage) {
+            Log.info("---  " + ((TransactionMessage) message).getMsgBody().getHash());
             for (NulsMessageHandler handler : handlerSet) {
                 txHandlerPool.execute(new NulsMessageCall(data, handler));
             }
