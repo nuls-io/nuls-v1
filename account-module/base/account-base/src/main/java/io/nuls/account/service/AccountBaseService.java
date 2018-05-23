@@ -138,46 +138,4 @@ public class AccountBaseService {
         }
     }
 
-    /**
-     * 根据私钥修改账户密码
-     * Modify the account password based on the private key
-     *
-     * @param prikey
-     * @param newPassword
-     * @return
-     */
-    public Result changePasswordByPrikey(String address, String prikey, String newPassword) {
-        if (!Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
-        }
-        if(StringUtils.isBlank(prikey)){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The prikey is required");
-        }
-        if(StringUtils.isBlank(newPassword)){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The newPassword is required");
-        }
-        if (!StringUtils.validPassword(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "newPassword Length between 8 and 20, the combination of characters and numbers");
-        }
-        Account account = accountService.getAccount(address).getData();
-        if (null == account) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST, "The account not exist, address:" + address);
-        }
-        if (!ECKey.isValidPrivteHex(prikey)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The prikey is wrong");
-        }
-        try {
-            ECKey key = ECKey.fromPrivate(new BigInteger(Hex.decode(prikey)));
-            Address addr = new Address(NulsContext.DEFAULT_CHAIN_ID, SerializeUtils.sha256hash160(key.getPubKey()));
-            if(!addr.toString().equals(account.getAddress().toString())) {
-                return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The prikey is wrong");
-            }
-            account.encrypt(newPassword, true);
-            AccountPo po = new AccountPo(account);
-            return accountStorageService.updateAccount(po);
-        } catch (Exception e) {
-            Log.error(e);
-            return Result.getFailed(AccountErrorCode.FAILED, "change password failed");
-        }
-    }
 }
