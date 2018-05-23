@@ -131,7 +131,7 @@ public class PocConsensusResource {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Result accountResult = accountService.getAccount(address);
-        if(accountResult.isFailed()){
+        if (accountResult.isFailed()) {
             return accountResult;
         }
         Account account = (Account) accountResult.getData();
@@ -659,17 +659,18 @@ public class PocConsensusResource {
             result.setData(page);
             return result;
         }
-        Map<NulsDigestData, Integer> map = new HashMap<>();
+        Map<NulsDigestData, Agent> map = new HashMap<>();
         for (MeetingMember member : PocConsensusContext.getChainManager().getMasterChain().getCurrentRound().getMemberList()) {
             if (null != member.getAgent()) {
-                map.put(member.getAgent().getTxHash(), 1);
+                map.put(member.getAgent().getTxHash(), member.getAgent());
             }
         }
         List<DepositDTO> resultList = new ArrayList<>();
         for (int i = start; i < depositList.size() && i < (start + pageSize); i++) {
             Deposit deposit = depositList.get(i);
-            deposit.setStatus(map.get(deposit.getAgentHash()) == null ? 0 : 1);
-            resultList.add(new DepositDTO(deposit));
+            Agent agent = map.get(deposit.getAgentHash());
+            deposit.setStatus(agent == null ? 0 : 1);
+            resultList.add(new DepositDTO(deposit, agent));
         }
         page.setList(resultList);
         result.setData(page);

@@ -1,14 +1,19 @@
 package io.nuls.consensus.poc.rpc.model;
 
+import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.core.tools.crypto.Base58;
+import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.context.NulsContext;
+
+import java.io.UnsupportedEncodingException;
 
 /**
  * @author Niels
  * @date 2018/5/16
  */
 public class DepositDTO {
-    
+
     private Long deposit;
 
     private String agentHash;
@@ -25,6 +30,10 @@ public class DepositDTO {
 
     private int status;
 
+    private String agentName;
+
+    private String agentAddress;
+
     public DepositDTO(Deposit deposit) {
         this.deposit = deposit.getDeposit().getValue();
         this.agentHash = deposit.getAgentHash().getDigestHex();
@@ -34,6 +43,18 @@ public class DepositDTO {
         this.blockHeight = deposit.getBlockHeight();
         this.delHeight = deposit.getDelHeight();
         this.status = deposit.getStatus();
+    }
+
+    public DepositDTO(Deposit deposit, Agent agent) {
+        this(deposit);
+        if (agent != null) {
+            try {
+                this.agentAddress = new String(agent.getAgentAddress(), NulsConfig.DEFAULT_ENCODING);
+                this.agentName = new String(agent.getAgentName(), NulsConfig.DEFAULT_ENCODING);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public Long getDeposit() {
@@ -98,5 +119,21 @@ public class DepositDTO {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
+    }
+
+    public String getAgentAddress() {
+        return agentAddress;
+    }
+
+    public void setAgentAddress(String agentAddress) {
+        this.agentAddress = agentAddress;
     }
 }
