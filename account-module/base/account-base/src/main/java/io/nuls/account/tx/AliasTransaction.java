@@ -22,8 +22,7 @@ public class AliasTransaction extends Transaction<Alias> {
 
     @Override
     public String getInfo(byte[] address) {
-        // todo auto-generated method stub
-        return null;
+        return "Set the alias: " + this.getTxData().getAlias();
     }
 
     @Override
