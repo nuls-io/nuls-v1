@@ -666,9 +666,16 @@ public class PocConsensusResource {
             }
         }
         List<DepositDTO> resultList = new ArrayList<>();
+
         for (int i = start; i < depositList.size() && i < (start + pageSize); i++) {
             Deposit deposit = depositList.get(i);
-            Agent agent = map.get(deposit.getAgentHash());
+            List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+            Agent agent = null;
+            for(Agent a : agentList) {
+                if(a.getTxHash().equals(deposit.getAgentHash())) {
+                    agent = a;
+                }
+            }
             deposit.setStatus(agent == null ? 0 : 1);
             resultList.add(new DepositDTO(deposit, agent));
         }
