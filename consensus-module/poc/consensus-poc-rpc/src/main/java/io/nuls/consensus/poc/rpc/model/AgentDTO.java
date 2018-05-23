@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 public class AgentDTO {
 
     public AgentDTO(Agent agent) {
+        this.agentHash = agent.getTxHash().getDigestHex();
         this.agentAddress = Base58.encode(agent.getAgentAddress());
         this.packingAddress = Base58.encode(agent.getPackingAddress());
         this.rewardAddress = Base58.encode(agent.getRewardAddress());
@@ -34,6 +35,8 @@ public class AgentDTO {
         this.txHash = agent.getTxHash().getDigestHex();
         this.memberCount = agent.getMemberCount();
     }
+
+    private String agentHash;
 
     private String agentAddress;
 
@@ -172,5 +175,13 @@ public class AgentDTO {
 
     public int getMemberCount() {
         return memberCount;
+    }
+
+    public String getAgentHash() {
+        return agentHash;
+    }
+
+    public void setAgentHash(String agentHash) {
+        this.agentHash = agentHash;
     }
 }
