@@ -3,14 +3,13 @@ package io.nuls.message.bus.service.impl;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
-import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.message.bus.manager.DispatchManager;
+import io.nuls.message.bus.manager.HandlerManager;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.manager.MessageManager;
 import io.nuls.message.bus.message.CommonDigestMessage;
-import io.nuls.message.bus.processor.manager.ProcessData;
-import io.nuls.message.bus.processor.manager.ProcessorManager;
+import io.nuls.message.bus.model.ProcessData;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.BroadcastResult;
 import io.nuls.network.model.Node;
@@ -29,18 +28,19 @@ public class MessageBusServiceImpl implements MessageBusService {
 
     @Autowired
     private NetworkService networkService;
-    private ProcessorManager processorManager = ProcessorManager.getInstance();
+    private HandlerManager handlerManager = HandlerManager.getInstance();
+    private DispatchManager processorManager = DispatchManager.getInstance();
     private MessageCacheService messageCacheService = MessageCacheService.getInstance();
 
     @Override
     public String subscribeMessage(Class<? extends BaseMessage> messageClass, NulsMessageHandler<? extends BaseMessage> messageHandler) {
         MessageManager.putMessage(messageClass);
-        return processorManager.registerMessageHandler(null, messageClass, messageHandler);
+        return handlerManager.registerMessageHandler(null, messageClass, messageHandler);
     }
 
     @Override
     public void unsubscribeMessage(String subscribeId) {
-        this.processorManager.removeMessageHandler(subscribeId);
+        this.handlerManager.removeMessageHandler(subscribeId);
     }
 
     @Override
@@ -99,7 +99,6 @@ public class MessageBusServiceImpl implements MessageBusService {
 
         return Result.getSuccess().setData(message);
     }
-
 
     private Result<List<String>> getNodeIdListResult(BroadcastResult result) {
         List<String> list = new ArrayList<>();
