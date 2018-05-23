@@ -3,7 +3,9 @@ package io.nuls.message.bus.service.impl;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
+import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.Transaction;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.manager.MessageManager;
 import io.nuls.message.bus.message.CommonDigestMessage;
@@ -48,7 +50,6 @@ public class MessageBusServiceImpl implements MessageBusService {
         } catch (Exception e) {
             Log.error(e);
         }
-
     }
 
     public void shutdown() {
