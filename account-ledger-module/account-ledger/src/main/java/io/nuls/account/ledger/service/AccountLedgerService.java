@@ -91,7 +91,7 @@ public interface AccountLedgerService {
      *
      * @return return all the unconfirmed txs
      */
-    public Result<List<Transaction>> getAllUnconfirmedTransaction();
+    Result<List<Transaction>> getAllUnconfirmedTransaction();
 
     /**
      * <p>
