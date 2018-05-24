@@ -215,6 +215,13 @@ public class PocConsensusResource {
         }
         if (account.isEncrypted()) {
             AssertUtil.canNotEmpty(form.getPassword());
+            try {
+                if (!account.decrypt(form.getPassword())) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            } catch (NulsException e) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
         }
         CreateAgentTransaction tx = new CreateAgentTransaction();
         tx.setTime(TimeService.currentTimeMillis());
@@ -253,7 +260,7 @@ public class PocConsensusResource {
     @POST
     @Path("/deposit")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "deposit nuls to a bank! 申请参与共识 [3.6.4]", notes = "返回申请成功交易hash")
+    @ApiOperation(value = "deposit nuls to a bank! 申请参与共识 ", notes = "返回申请成功交易hash")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
@@ -272,7 +279,15 @@ public class PocConsensusResource {
         }
         if (account.isEncrypted()) {
             AssertUtil.canNotEmpty(form.getPassword());
+            try {
+                if (!account.decrypt(form.getPassword())) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            } catch (NulsException e) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
         }
+
         DepositTransaction tx = new DepositTransaction();
         Deposit deposit = new Deposit();
         deposit.setAddress(AddressTool.getAddress(form.getAddress()));
@@ -346,6 +361,13 @@ public class PocConsensusResource {
         }
         if (account.isEncrypted()) {
             AssertUtil.canNotEmpty(form.getPassword());
+            try {
+                if (!account.decrypt(form.getPassword())) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            } catch (NulsException e) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
         }
         StopAgentTransaction tx = new StopAgentTransaction();
         StopAgent stopAgent = new StopAgent();
@@ -773,6 +795,13 @@ public class PocConsensusResource {
         }
         if (account.isEncrypted()) {
             AssertUtil.canNotEmpty(form.getPassword());
+            try {
+                if (!account.decrypt(form.getPassword())) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            } catch (NulsException e) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
         }
         CancelDepositTransaction tx = new CancelDepositTransaction();
         CancelDeposit cancelDeposit = new CancelDeposit();
