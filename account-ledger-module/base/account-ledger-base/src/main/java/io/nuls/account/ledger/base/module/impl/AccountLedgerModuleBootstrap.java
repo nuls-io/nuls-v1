@@ -29,8 +29,12 @@ import io.nuls.account.ledger.base.task.CheckUnConfirmTxThread;
 import io.nuls.account.ledger.constant.AccountLedgerConstant;
 import io.nuls.account.ledger.module.AbstractAccountLedgerModule;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.protocol.constant.ProtocolConstant;
+
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -50,7 +54,8 @@ public class AccountLedgerModuleBootstrap extends AbstractAccountLedgerModule {
         this.waitForDependencyRunning(AccountConstant.MODULE_ID_ACCOUNT, ProtocolConstant.MODULE_ID_PROTOCOL);
         BalanceManager balanceManager = NulsContext.getServiceBean(BalanceManager.class);
         balanceManager.initAccountBalance();
-        TaskManager.createAndRunThread(AccountLedgerConstant.MODULE_ID_ACCOUNTLEDGER,"CheckUnConfirmTxThread", NulsContext.getServiceBean(CheckUnConfirmTxThread.class));
+        ScheduledThreadPoolExecutor executor = TaskManager.createScheduledThreadPool(1, new NulsThreadFactory(AccountLedgerConstant.MODULE_ID_ACCOUNTLEDGER, "CheckUnConfirmTxThread"));
+        executor.scheduleAtFixedRate(NulsContext.getServiceBean(CheckUnConfirmTxThread.class), 120, 60, TimeUnit.SECONDS);
     }
 
     @Override

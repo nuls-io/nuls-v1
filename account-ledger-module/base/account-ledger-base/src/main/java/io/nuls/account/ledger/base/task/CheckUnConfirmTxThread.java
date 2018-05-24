@@ -67,32 +67,26 @@ public class CheckUnConfirmTxThread implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
-            try {
-                Thread.sleep(60000L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            List<Transaction> list = accountLedgerService.getAllUnconfirmedTransaction().getData();
-            Collections.sort(list, TransactionTimeComparator.getInstance());
+        List<Transaction> list = accountLedgerService.getAllUnconfirmedTransaction().getData();
+        Collections.sort(list, TransactionTimeComparator.getInstance());
 
-            if (list != null || list.size() > 0) {
-                if (list.get(0).getTime() - TimeService.currentTimeMillis() > 120000L) {
-                    Log.info("earliest unconfirmed tx :" + (list.get(0).getTime() - TimeService.currentTimeMillis()));
-                    continue;
-                }
+        if (list == null || list.size() == 0) {
+            return;
+        }
+        if (list.get(0).getTime() - TimeService.currentTimeMillis() > 120000L) {
+            Log.info("earliest unconfirmed tx :" + (list.get(0).getTime() - TimeService.currentTimeMillis()));
+            return;
+        }
 
-                for (Transaction tx : list) {
-                    Result result = verifyTransaction(tx);
-                    if (result.isSuccess()) {
-                        result = reBroadcastTransaction(tx);
-                        if (result.isFailed()) {
-                            Log.info("reBroadcastTransaction tx error");
-                        }
-                    } else {
-                        deleteUnconfirmedTransaction(tx);
-                    }
+        for (Transaction tx : list) {
+            Result result = verifyTransaction(tx);
+            if (result.isSuccess()) {
+                result = reBroadcastTransaction(tx);
+                if (result.isFailed()) {
+                    Log.info("reBroadcastTransaction tx error");
                 }
+            } else {
+                deleteUnconfirmedTransaction(tx);
             }
         }
     }
