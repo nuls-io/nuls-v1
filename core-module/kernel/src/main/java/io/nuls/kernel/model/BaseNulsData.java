@@ -104,7 +104,7 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
     public final void verifyWithException() throws NulsVerificationException {
         ValidateResult result = this.verify();
         if (result.isFailed()) {
-            throw new NulsVerificationException(result.getMessage());
+            throw new NulsVerificationException(result.getMsg());
         }
     }
 

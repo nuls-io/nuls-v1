@@ -48,7 +48,7 @@ public class ValidateResult<T> extends Result<T> {
         ValidateResult result = new ValidateResult();
         result.setSuccess(false);
         result.setErrorCode(KernelErrorCode.VERIFICATION_FAILD);
-        result.setMessage(msg);
+        result.setMsg(msg);
         result.setLevel(level);
         result.setClassName(className);
         return result;
@@ -57,7 +57,7 @@ public class ValidateResult<T> extends Result<T> {
     public static ValidateResult getSuccessResult() {
         ValidateResult result = new ValidateResult();
         result.setSuccess(true);
-        result.setMessage("");
+        result.setMsg("");
         return result;
     }
 
@@ -85,7 +85,7 @@ public class ValidateResult<T> extends Result<T> {
 
     public static ValidateResult getFailedResult(String className, ErrorCode errorCode, String msg) {
         ValidateResult vr = getFailedResult(className, errorCode);
-        vr.setMessage(msg);
+        vr.setMsg(msg);
         return vr;
     }
 

@@ -145,7 +145,7 @@ public class LevelDBServiceImpl implements DBService {
         BatchOperationImpl batchOperation = new BatchOperationImpl(area);
         Result result = batchOperation.checkBatch();
         if(result.isFailed()) {
-            Log.error("DB batch create error: " + result.getMessage());
+            Log.error("DB batch create error: " + result.getMsg());
             return null;
         }
         return batchOperation;

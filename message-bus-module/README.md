@@ -1,1 +1,1 @@
-# message bus module
+# msg bus module

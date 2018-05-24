@@ -39,7 +39,7 @@ public class Result<T> implements Serializable{
 
     private boolean success;
 
-    private String message;
+    private String msg;
 
     private ErrorCode errorCode;
 
@@ -47,7 +47,7 @@ public class Result<T> implements Serializable{
 
     public Result(boolean success, String message, ErrorCode errorCode, T data) {
         this.success = success;
-        this.message = message;
+        this.msg = message;
         this.errorCode = errorCode;
         this.data = data;
     }
@@ -84,15 +84,15 @@ public class Result<T> implements Serializable{
         return this;
     }
 
-    public String getMessage() {
-        if (StringUtils.isBlank(message)) {
+    public String getMsg() {
+        if (StringUtils.isBlank(msg)) {
             return errorCode.getMsg();
         }
-        return message;
+        return msg;
     }
 
-    public Result<T> setMessage(String message) {
-        this.message = message;
+    public Result<T> setMsg(String msg) {
+        this.msg = msg;
         return this;
     }
 
@@ -109,7 +109,7 @@ public class Result<T> implements Serializable{
         StringBuffer buffer = new StringBuffer();
         buffer.append("result:{");
         buffer.append("success: " + success + ",");
-        buffer.append("validator: " + message + ",");
+        buffer.append("validator: " + msg + ",");
         if (errorCode == null) {
             buffer.append("errorCode: ");
         } else {

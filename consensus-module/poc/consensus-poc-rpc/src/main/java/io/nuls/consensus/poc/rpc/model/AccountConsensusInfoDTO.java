@@ -11,6 +11,7 @@ public class AccountConsensusInfoDTO {
     private long usableBalance;
     private long reward;
     private long rewardOfDay;
+    private String agentHash;
 
     public int getAgentCount() {
         return agentCount;
@@ -58,5 +59,13 @@ public class AccountConsensusInfoDTO {
 
     public void setRewardOfDay(long rewardOfDay) {
         this.rewardOfDay = rewardOfDay;
+    }
+
+    public void setAgentHash(String agentHash) {
+        this.agentHash = agentHash;
+    }
+
+    public String getAgentHash() {
+        return agentHash;
     }
 }
