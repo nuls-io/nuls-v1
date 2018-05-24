@@ -146,7 +146,7 @@ public class Account extends BaseNulsData {
     }
 
     /**
-     * 账户是否被锁定(是否有明文私钥)
+     * 账户是否被锁定(是否有明文私钥) 有私钥表示解锁
      * Whether the account is locked (is there a cleartext private key)
      * @return true: Locked, false: not Locked
      */

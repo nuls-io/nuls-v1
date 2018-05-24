@@ -123,11 +123,8 @@ public class AccountServiceImpl implements AccountService {
         }
         //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
         if (account.isEncrypted() && account.isLocked()) {
-            if (!StringUtils.validPassword(password)) {
-                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-            }
             try {
-                if (!account.decrypt(password)) {
+                if (StringUtils.isBlank(password) || !StringUtils.validPassword(password) || !account.decrypt(password)) {
                     return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
             } catch (NulsException e) {
@@ -255,19 +252,18 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         AccountKeyStore accountKeyStore = new AccountKeyStore();
-        //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
+        //只要加过密(且没解锁),就验证密码
         if (account.isEncrypted() && account.isLocked()) {
-            if (!StringUtils.validPassword(password)) {
-                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-            }
             try {
-                if (!account.decrypt(password)) {
+                if (StringUtils.isBlank(password) || !StringUtils.validPassword(password) || !account.decrypt(password)) {
                     return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
-                account.encrypt(password);
             } catch (NulsException e) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
+        }
+        //只要加过密(不管是否解锁)都不导出明文私钥, If the account is encrypted (regardless of unlocked), the plaintext private key is not exported
+        if (account.isEncrypted()) {
             EncryptedData encryptedData = new EncryptedData(account.getEncryptedPriKey());
             accountKeyStore.setEncryptedPrivateKey(Hex.encode(encryptedData.getEncryptedBytes()));
         } else {

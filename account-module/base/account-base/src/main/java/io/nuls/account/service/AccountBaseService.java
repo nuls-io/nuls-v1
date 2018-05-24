@@ -5,18 +5,13 @@ import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.service.AccountStorageService;
-import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.utils.SerializeUtils;
-
-import java.math.BigInteger;
 
 
 /**
@@ -49,7 +44,7 @@ public class AccountBaseService {
         //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
         if (account.isEncrypted() && account.isLocked()) {
             try {
-                if (!account.unlock(password)) {
+                if (StringUtils.isBlank(password) || !StringUtils.validPassword(password) || !account.unlock(password)) {
                     return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
                 byte[] priKeyBytes = account.getPriKey();
