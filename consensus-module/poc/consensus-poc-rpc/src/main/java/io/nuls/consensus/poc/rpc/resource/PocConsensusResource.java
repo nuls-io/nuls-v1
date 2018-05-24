@@ -213,7 +213,7 @@ public class PocConsensusResource {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        if (account.isEncrypted()) {
+        if (account.isEncrypted() && account.isLocked()) {
             AssertUtil.canNotEmpty(form.getPassword());
             try {
                 if (!account.decrypt(form.getPassword())) {
@@ -277,7 +277,7 @@ public class PocConsensusResource {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        if (account.isEncrypted()) {
+        if (account.isEncrypted() && account.isLocked()) {
             AssertUtil.canNotEmpty(form.getPassword());
             try {
                 if (!account.decrypt(form.getPassword())) {
@@ -359,7 +359,7 @@ public class PocConsensusResource {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        if (account.isEncrypted()) {
+        if (account.isEncrypted() && account.isLocked()) {
             AssertUtil.canNotEmpty(form.getPassword());
             try {
                 if (!account.decrypt(form.getPassword())) {
@@ -793,7 +793,7 @@ public class PocConsensusResource {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        if (account.isEncrypted()) {
+        if (account.isEncrypted() && account.isLocked()) {
             AssertUtil.canNotEmpty(form.getPassword());
             try {
                 if (!account.decrypt(form.getPassword())) {

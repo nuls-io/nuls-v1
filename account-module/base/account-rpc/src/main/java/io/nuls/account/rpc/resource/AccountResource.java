@@ -33,10 +33,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * @author: Charlie
@@ -61,7 +61,9 @@ public class AccountResource {
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
+    private ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
 
+    private Map<String, ScheduledFuture> accountUnlockSchedulerMap = new HashMap<>();
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -77,10 +79,10 @@ public class AccountResource {
             password = null;
         }
         Result result = accountService.createAccount(count, password);
-        if(result.isFailed()){
+        if (result.isFailed()) {
             return result;
         }
-        List<Account> listAccount = (List<Account>)result.getData();
+        List<Account> listAccount = (List<Account>) result.getData();
         List<String> list = new ArrayList<>();
         for (Account account : listAccount) {
             list.add(account.getAddress().toString());
@@ -155,8 +157,8 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result<String> alias(@PathParam("address") String address,
-                                 @ApiParam(name = "form", value = "设置别名表单数据", required = true)
-                                         AccountAliasForm form) {
+                                @ApiParam(name = "form", value = "设置别名表单数据", required = true)
+                                        AccountAliasForm form) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
@@ -174,7 +176,7 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = BalanceDto.class)
     })
     public Result getBalance(@ApiParam(name = "address", value = "账户地址", required = true)
-                                         @PathParam("address") String address) {
+                             @PathParam("address") String address) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
@@ -228,11 +230,10 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
     public Result getPrikey(@PathParam("address") String address, @ApiParam(name = "form", value = "查询私钥表单数据", required = true)
-                                    AccountPasswordForm form) {
+            AccountPasswordForm form) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-
         return accountBaseService.getPrivateKey(address, form.getPassword());
     }
 
@@ -246,12 +247,17 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         accountCacheService.removeAccount(account.getAddress());
-       /* if (null != scheduler && !scheduler.isShutdown()) {
-            scheduler.shutdownNow();
-        }*/
+        BlockingQueue<Runnable> queue = scheduler.getQueue();
+        String addr = account.getAddress().toString();
+        Runnable scheduledFuture = (Runnable) accountUnlockSchedulerMap.get(addr);
+        if (queue.contains(scheduledFuture)) {
+            scheduler.remove(scheduledFuture);
+            accountUnlockSchedulerMap.remove(addr);
+        }
         return Result.getSuccess();
     }
-    private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1);
+
+
     @POST
     @Path("/unlock/{address}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -266,6 +272,16 @@ public class AccountResource {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
+        String addr = account.getAddress().toString();
+        //如果存在定时加锁任务, 先删除之前的任务
+        if (accountUnlockSchedulerMap.containsKey(addr)) {
+            BlockingQueue<Runnable> queue = scheduler.getQueue();
+            Runnable sf = (Runnable) accountUnlockSchedulerMap.get(addr);
+            if (queue.contains(sf)) {
+                scheduler.remove(sf);
+                accountUnlockSchedulerMap.remove(addr);
+            }
+        }
         try {
             account.unlock(password);
             accountCacheService.putAccount(account);
@@ -276,9 +292,10 @@ public class AccountResource {
                 unlockTime = 0;
             }
             // 一定时间后自动锁定
-            scheduler.schedule(() -> {
+            ScheduledFuture scheduledFuture = scheduler.schedule(() -> {
                 accountCacheService.removeAccount(account.getAddress());
             }, unlockTime, TimeUnit.SECONDS);
+            accountUnlockSchedulerMap.put(addr, scheduledFuture);
         } catch (NulsException e) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
@@ -294,18 +311,18 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result setPassword(@ApiParam(name = "address", value = "账户地址", required = true)
-                                     @PathParam("address") String address,
-                                 @ApiParam(name = "form", value = "设置钱包密码表单数据", required = true)
-                                         AccountPasswordForm form) {
+                              @PathParam("address") String address,
+                              @ApiParam(name = "form", value = "设置钱包密码表单数据", required = true)
+                                      AccountPasswordForm form) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         String password = form.getPassword();
-        if(StringUtils.isBlank(password)){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The password is required");
+        if (StringUtils.isBlank(password)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The password is required");
         }
         if (!StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "Length between 8 and 20, the combination of characters and numbers");
         }
         return accountBaseService.setPassword(address, password);
     }
@@ -318,25 +335,25 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result updatePassword(@ApiParam(name = "address", value = "账户地址", required = true)
-                                  @PathParam("address") String address,
-                              @ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
-                                      AccountUpdatePasswordForm form) {
+                                 @PathParam("address") String address,
+                                 @ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
+                                         AccountUpdatePasswordForm form) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         String password = form.getPassword();
         String newPassword = form.getNewPassword();
-        if(StringUtils.isBlank(password)){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The password is required");
+        if (StringUtils.isBlank(password)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The password is required");
         }
-        if(StringUtils.isBlank(newPassword)){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The newPassword is required");
+        if (StringUtils.isBlank(newPassword)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The newPassword is required");
         }
         if (!StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"password Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "password Length between 8 and 20, the combination of characters and numbers");
         }
         if (!StringUtils.validPassword(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"newPassword Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "newPassword Length between 8 and 20, the combination of characters and numbers");
         }
         return this.accountBaseService.changePassword(address, password, newPassword);
     }
@@ -349,18 +366,18 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result updatePasswordByPriKey(@ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
-                                      AccountPriKeyChangePasswordForm form) {
+                                                 AccountPriKeyChangePasswordForm form) {
 
         String prikey = form.getPriKey();
         if (!ECKey.isValidPrivteHex(prikey)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The prikey is wrong");
         }
         String newPassword = form.getPassword();
-        if(StringUtils.isBlank(newPassword)){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The newPassword is required");
+        if (StringUtils.isBlank(newPassword)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The newPassword is required");
         }
         if (!StringUtils.validPassword(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "Length between 8 and 20, the combination of characters and numbers");
         }
         Result result = accountService.importAccount(prikey, newPassword);
         if (result.isFailed()) {
@@ -378,7 +395,7 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result<AccountKeyStore> export(@ApiParam(name = "address", value = "账户地址", required = true)
-                                              @PathParam("address") String address,
+                                          @PathParam("address") String address,
                                           @ApiParam(name = "form", value = "钱包备份表单数据")
                                                   AccountPasswordForm form) {
         if (StringUtils.isNotBlank(address) && !Address.validAddress(address)) {
@@ -406,14 +423,14 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         AccountKeyStoreDto accountKeyStoreDto = form.getAccountKeyStoreDto();
-        if(!form.getOverwrite()){
+        if (!form.getOverwrite()) {
             Account account = accountService.getAccount(accountKeyStoreDto.getAddress()).getData();
-            if(null != account) {
+            if (null != account) {
                 return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST);
             }
         }
         String password = form.getPassword();
-        if(StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)){
+        if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         Result result = accountService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), password);
@@ -436,8 +453,8 @@ public class AccountResource {
         if (null == form || null == form.getOverwrite()) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        if(!form.getOverwrite()){
-            ECKey key = null ;
+        if (!form.getOverwrite()) {
+            ECKey key = null;
             try {
                 key = ECKey.fromPrivate(new BigInteger(Hex.decode(form.getPriKey())));
             } catch (Exception e) {
@@ -445,7 +462,7 @@ public class AccountResource {
             }
             Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, SerializeUtils.sha256hash160(key.getPubKey()));
             Account account = accountService.getAccount(address).getData();
-            if(null != account) {
+            if (null != account) {
                 return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST);
             }
         }
@@ -473,14 +490,11 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result removeAccount(@ApiParam(name = "address", value = "账户地址", required = true)
-                                    @PathParam("address") String address,
+                                @PathParam("address") String address,
                                 @ApiParam(name = "钱包移除账户表单数据", value = "JSONFormat", required = true)
                                         AccountPasswordForm form) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
-        }
-        if (StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         return accountService.removeAccount(address, form.getPassword());
     }
