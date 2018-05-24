@@ -329,7 +329,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             Account account = accountResult.getData();
 
-            if (accountService.isEncrypted(account).isSuccess()) {
+            if (accountService.isEncrypted(account).isSuccess() && account.isLocked()) {
                 AssertUtil.canNotEmpty(password, "the password can not be empty");
 
                 Result passwordResult = accountService.validPassword(account, password);
