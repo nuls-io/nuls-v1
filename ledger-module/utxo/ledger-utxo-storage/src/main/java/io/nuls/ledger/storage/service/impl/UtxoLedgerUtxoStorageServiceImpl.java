@@ -38,6 +38,7 @@ import io.nuls.ledger.storage.constant.LedgerStorageConstant;
 import io.nuls.ledger.storage.service.UtxoLedgerUtxoStorageService;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @desription:
@@ -107,6 +108,11 @@ public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageSe
             return null;
         }
         return dbService.get(LedgerStorageConstant.DB_NAME_LEDGER_UTXO, owner);
+    }
+
+    @Override
+    public List<byte[]> getAllUtxoBytes() {
+        return dbService.valueList(LedgerStorageConstant.DB_NAME_LEDGER_UTXO);
     }
 
 
