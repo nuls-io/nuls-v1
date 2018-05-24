@@ -2,6 +2,9 @@ package io.nuls.account.tx;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.Alias;
+import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.NulsByteBuffer;
@@ -22,7 +25,7 @@ public class AliasTransaction extends Transaction<Alias> {
 
     @Override
     public String getInfo(byte[] address) {
-        return "Set the alias: " + this.getTxData().getAlias();
+        return "-" + AccountConstant.ALIAS_NA.toCoinString();
     }
 
     @Override
