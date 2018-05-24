@@ -83,7 +83,10 @@ public class AccountBaseService {
         }
         try {
             account.encrypt(password);
-            accountStorageService.updateAccount(new AccountPo(account));
+            Result result = accountStorageService.updateAccount(new AccountPo(account));
+            if(result.isFailed()){
+                return Result.getFailed(AccountErrorCode.FAILED);
+            }
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed();

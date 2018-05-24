@@ -85,7 +85,10 @@ public class AccountServiceImpl implements AccountService {
             if (accountStorageService == null) {
                 Log.info("accountStorageService is null");
             }
-            accountStorageService.saveAccountList(accountPos);
+            Result result = accountStorageService.saveAccountList(accountPos);
+            if(result.isFailed()){
+                return result;
+            }
             LOCAL_ADDRESS_LIST.addAll(resultList);
             return Result.getSuccess().setData(accounts);
         } catch (Exception e) {
@@ -124,18 +127,76 @@ public class AccountServiceImpl implements AccountService {
         //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
         if (account.isEncrypted() && account.isLocked()) {
             try {
-                if (StringUtils.isBlank(password) || !StringUtils.validPassword(password) || !account.decrypt(password)) {
+                if (StringUtils.isBlank(password) || !StringUtils.validPassword(password) || !account.unlock(password)) {
                     return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
             } catch (NulsException e) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         }
-        accountStorageService.removeAccount(account.getAddress());
+        Result result = accountStorageService.removeAccount(account.getAddress());
+        if(result.isFailed()){
+            return result;
+        }
         LOCAL_ADDRESS_LIST.remove(address);
         return Result.getSuccess();
     }
 
+    @Override
+    public Result<Account> updatePasswordByAccountKeyStore(AccountKeyStore keyStore, String password) {
+        AssertUtil.canNotEmpty(keyStore,AccountErrorCode.PARAMETER_ERROR.getMsg());
+        AssertUtil.canNotEmpty(keyStore.getAddress(),AccountErrorCode.PARAMETER_ERROR.getMsg());
+        AssertUtil.canNotEmpty(password,AccountErrorCode.PARAMETER_ERROR.getMsg());
+        Account account;
+        byte[] priKey = null;
+        if (null != keyStore.getPrikey() && keyStore.getPrikey().length > 0) {
+            if (!ECKey.isValidPrivteHex(Hex.encode(keyStore.getPrikey()))) {
+                return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            }
+            priKey = keyStore.getPrikey();
+            try {
+                account = AccountTool.createAccount(Hex.encode(priKey));
+            } catch (NulsException e) {
+                return Result.getFailed(AccountErrorCode.FAILED);
+            }
+        }else{
+            try {
+                account = AccountTool.createAccount();
+            } catch (NulsException e) {
+                return Result.getFailed(AccountErrorCode.FAILED);
+            }
+            account.setAddress(new Address(keyStore.getAddress()));
+        }
+        try {
+            account.encrypt(password);
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        if (StringUtils.isNotBlank(keyStore.getAlias())) {
+            Alias aliasDb = aliasService.getAlias(keyStore.getAlias());
+            if (null != aliasDb && Base58.encode(aliasDb.getAddress()).equals(account.getAddress().toString())) {
+                account.setAlias(aliasDb.getAlias());
+            } else {
+                List<AliasPo> list = aliasStorageService.getAliasList().getData();
+                for (AliasPo aliasPo : list) {
+                    //如果全网别名中的地址有和当前导入的账户地址相同,则赋值别名到账户中
+                    if (Base58.encode(aliasPo.getAddress()).equals(account.getAddress().toString())) {
+                        account.setAlias(aliasPo.getAlias());
+                        break;
+                    }
+                }
+            }
+        }
+
+        AccountPo po = new AccountPo(account);
+        Result result =  accountStorageService.saveAccount(po);
+        if(result.isFailed()){
+            return result;
+        }
+        LOCAL_ADDRESS_LIST.add(keyStore.getAddress());
+        accountLedgerService.importAccountLedger(account.getAddress().getBase58());
+        return Result.getSuccess().setData(account);
+    }
 
     @Override
     public Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore, String password) {
@@ -149,8 +210,15 @@ public class AccountServiceImpl implements AccountService {
                 return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
             }
             priKey = keyStore.getPrikey();
-        } else if (null == keyStore.getPrikey() && null != keyStore.getEncryptedPrivateKey() && StringUtils.validPassword(password)) {
-            priKey = AESEncrypt.decrypt(Hex.decode(keyStore.getEncryptedPrivateKey()), password);
+        } else if (null == keyStore.getPrikey() && null != keyStore.getEncryptedPrivateKey()) {
+            if (!StringUtils.validPassword(password)) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
+            try {
+                priKey = AESEncrypt.decrypt(Hex.decode(keyStore.getEncryptedPrivateKey()), password);
+            } catch (Exception e) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
         } else {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
@@ -185,7 +253,10 @@ public class AccountServiceImpl implements AccountService {
             }
         }
         AccountPo po = new AccountPo(account);
-        accountStorageService.saveAccount(po);
+        Result result =  accountStorageService.saveAccount(po);
+        if(result.isFailed()){
+            return result;
+        }
         LOCAL_ADDRESS_LIST.add(keyStore.getAddress());
         accountLedgerService.importAccountLedger(account.getAddress().getBase58());
         return Result.getSuccess().setData(account);
@@ -230,7 +301,10 @@ public class AccountServiceImpl implements AccountService {
             account.setAlias(acc.getAlias());
         }
         AccountPo po = new AccountPo(account);
-        accountStorageService.saveAccount(po);
+        Result result =  accountStorageService.saveAccount(po);
+        if(result.isFailed()){
+            return result;
+        }
         LOCAL_ADDRESS_LIST.add(account.getAddress().toString());
         accountLedgerService.importAccountLedger(account.getAddress().getBase58());
         return Result.getSuccess().setData(account);
@@ -294,7 +368,11 @@ public class AccountServiceImpl implements AccountService {
         }
         AccountPo accountPo = null;
         try {
-            accountPo = accountStorageService.getAccount(Base58.decode(address)).getData();
+            Result<AccountPo> result = accountStorageService.getAccount(Base58.decode(address));
+            if(result.isFailed()){
+                return null;
+            }
+            accountPo = result.getData();
         } catch (Exception e) {
             Log.error(e);
             return null;
@@ -339,7 +417,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<List<Account>> getAccountList() {
         List<Account> list = new ArrayList<>();
-        List<AccountPo> poList = this.accountStorageService.getAccountList().getData();
+        Result<List<AccountPo>> result = accountStorageService.getAccountList();
+        if(result.isFailed()){
+            return Result.getFailed().setData(list);
+        }
+        List<AccountPo> poList = result.getData();
         Set<String> addressList = new HashSet<>();
         if (null == poList || poList.isEmpty()) {
             return Result.getSuccess().setData(list);
@@ -408,11 +490,11 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result validPassword(Account account, String password) {
-        if (!StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-        }
         if (null == account) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        if (!StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         if (!account.isEncrypted()) {
             return Result.getFailed(AccountErrorCode.FAILED, "No password has been set for this account");
@@ -428,7 +510,6 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed();
         }
     }
-
     @Override
     public Result<Boolean> verifyAddressFormat(String address) {
         if (!Address.validAddress(address)) {
@@ -539,7 +620,12 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<Balance> getBalance() throws NulsException {
         List<Account> list = new ArrayList<>();
-        List<AccountPo> poList = this.accountStorageService.getAccountList().getData();
+        Balance balance = new Balance();
+        Result<List<AccountPo>> result = accountStorageService.getAccountList();
+        if(result.isFailed()){
+            return Result.getFailed().setData(balance);
+        }
+        List<AccountPo> poList = result.getData();
         if (null == poList || poList.isEmpty()) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
@@ -547,11 +633,11 @@ public class AccountServiceImpl implements AccountService {
             Account account = po.toAccount();
             list.add(account);
         }
-        Balance balance = new Balance();
+
         for (Account account : list) {
-            Result<Balance> result = accountLedgerService.getBalance(account.getAddress().getBase58Bytes());
-            if (result.isSuccess()) {
-                Balance temp = result.getData();
+            Result<Balance> resultBalance = accountLedgerService.getBalance(account.getAddress().getBase58Bytes());
+            if (resultBalance.isSuccess()) {
+                Balance temp = resultBalance.getData();
                 if (null == temp) {
                     continue;
                 }

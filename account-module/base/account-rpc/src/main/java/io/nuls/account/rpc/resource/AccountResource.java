@@ -388,6 +388,34 @@ public class AccountResource {
     }
 
     @POST
+    @Path("/password/keystore")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "[修改密码] 根据AccountKeyStore修改账户密码")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Result.class)
+    })
+    public Result updatePasswordByAccountKeyStore(@ApiParam(name = "form", value = "重置密码表单数据", required = true)
+                                                              AccountKeyStoreResetPasswordForm form) {
+
+        if (null == form || null == form.getAccountKeyStoreDto() ) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        AccountKeyStoreDto accountKeyStoreDto = form.getAccountKeyStoreDto();
+
+        String password = form.getPassword();
+        if (!StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+        }
+        Result result = accountService.updatePasswordByAccountKeyStore(accountKeyStoreDto.toAccountKeyStore(), password);
+        if (result.isFailed()) {
+            return result;
+        }
+        Account account = (Account) result.getData();
+        return Result.getSuccess().setData(account.getAddress().toString());
+    }
+
+
+    @POST
     @Path("/export/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[导出] 账户备份，导出AccountKeyStore字符串 ")

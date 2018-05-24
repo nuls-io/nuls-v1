@@ -97,8 +97,24 @@ public interface AccountService {
      */
     Result<Boolean> removeAccount(String address, String password);
 
+
+    /**
+     * 根据keyStore重置密码
+     * <p>
+     * Reset password according to keyStore
+     *
+     * @param keyStore the keyStore of the account;
+     * @return the result of the opration
+     */
+    Result<Account> updatePasswordByAccountKeyStore(AccountKeyStore keyStore, String password);
+
     /**
      * 从keyStore导入账户
+     * 1.从keyStore获取明文私钥(如果没有明文私钥,则通过密码从keyStore中的encryptedPrivateKey解出来)
+     * 2.通过keyStore创建新账户,加密账户
+     * 3.从数据库搜索此账户的别名,没有搜到则不设置(别名不从keyStore中获取,因为可能被更改)
+     * 4.保存账户
+     * 5.导入账户账本交易等信息
      * <p>
      * import an account form account key store.
      *
@@ -109,6 +125,11 @@ public interface AccountService {
 
     /**
      * 从keyStore导入账户
+     * 1.从keyStore获取明文私钥
+     * 2.通过keyStore创建新账户,不加密账户
+     * 3.从数据库搜索此账户的别名,没有搜到则不设置(别名不从keyStore中获取,因为可能被更改)
+     * 4.保存账户
+     * 5.导入账户账本交易等信息
      * <p>
      * import an account form account key store.
      *

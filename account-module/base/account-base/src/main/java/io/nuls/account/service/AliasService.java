@@ -203,7 +203,10 @@ public class AliasService {
                 if(rs.isSuccess()) {
                     AccountPo accountPo = rs.getData();
                     accountPo.setAlias("");
-                    accountStorageService.updateAccount(accountPo);
+                    Result result = accountStorageService.updateAccount(accountPo);
+                    if(result.isFailed()){
+                        return Result.getFailed(AccountErrorCode.FAILED);
+                    }
                 }
             }
         } catch (Exception e) {
