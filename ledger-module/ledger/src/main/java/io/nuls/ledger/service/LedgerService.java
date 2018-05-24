@@ -118,5 +118,5 @@ public interface LedgerService {
      * 获取全网UTXO
      * @return
      */
-    Na getWholeUTXO();
+    long getWholeUTXO();
 }

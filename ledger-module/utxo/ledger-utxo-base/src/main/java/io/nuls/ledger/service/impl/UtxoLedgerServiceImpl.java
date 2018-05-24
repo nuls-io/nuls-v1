@@ -519,8 +519,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     @Override
-    public Na getWholeUTXO() {
-        Na result = Na.ZERO;
+    public long getWholeUTXO() {
+        long result = 0L;
         List<byte[]> list = utxoLedgerUtxoStorageService.getAllUtxoBytes();
         if (list == null || list.size() == 0) {
             return result;
@@ -531,13 +531,13 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 if (utxoBytes != null) {
                     coin = new Coin();
                     coin.parse(utxoBytes);
-                    result = result.add(coin.getNa());
+                    //result = result.add(coin.getNa());
                 }
             }
             return result;
         } catch (NulsException e) {
             Log.error(e);
-            return Na.ZERO;
+            return 0L;
         }
     }
 }
