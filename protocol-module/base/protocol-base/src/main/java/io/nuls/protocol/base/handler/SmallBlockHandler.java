@@ -90,10 +90,10 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
         boolean isOrphan = result.getErrorCode() == TransactionErrorCode.ORPHAN_TX || result.getErrorCode() == TransactionErrorCode.ORPHAN_BLOCK;
 
         BlockLog.debug("recieve new block from(" + fromNode.getId() + "), tx count : " + header.getTxCount() + " , tx pool count : " + consensusService.getMemoryTxs().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", addressHex:" + Hex.encode(header.getPackingAddress()) +
-                "\n and verify block result: " + result.isSuccess() + " , verify message : " + result.getMessage() + " , isOrphan : " + isOrphan);
+                "\n and verify block result: " + result.isSuccess() + " , verify message : " + result.getMsg() + " , isOrphan : " + isOrphan);
 
         if (result.isFailed() && !isOrphan) {
-            BlockLog.debug("discard a SmallBlock:" + smallBlock.getHeader().getHash() + ", from:" + fromNode.getId() + " ,reason:" + result.getMessage());
+            BlockLog.debug("discard a SmallBlock:" + smallBlock.getHeader().getHash() + ", from:" + fromNode.getId() + " ,reason:" + result.getMsg());
             return;
         }
         Map<NulsDigestData, Transaction> txMap = new HashMap<>();

@@ -61,7 +61,7 @@ public class AccountResource {
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
-    private ScheduledExecutorService scheduler;
+
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -163,9 +163,6 @@ public class AccountResource {
         if (StringUtils.isBlank(form.getAlias())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        if (StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-        }
         return aliasService.setAlias(address, form.getPassword(), form.getAlias());
     }
 
@@ -235,9 +232,7 @@ public class AccountResource {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        if(StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())){
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-        }
+
         return accountBaseService.getPrivateKey(address, form.getPassword());
     }
 
@@ -251,12 +246,12 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         accountCacheService.removeAccount(account.getAddress());
-        if (!scheduler.isShutdown()) {
+       /* if (null != scheduler && !scheduler.isShutdown()) {
             scheduler.shutdownNow();
-        }
+        }*/
         return Result.getSuccess();
     }
-
+    private ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(1);
     @POST
     @Path("/unlock/{address}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -281,12 +276,9 @@ public class AccountResource {
                 unlockTime = 0;
             }
             // 一定时间后自动锁定
-            scheduler = new ScheduledThreadPoolExecutor(1);
             scheduler.schedule(() -> {
                 accountCacheService.removeAccount(account.getAddress());
-                scheduler.shutdown();
             }, unlockTime, TimeUnit.SECONDS);
-
         } catch (NulsException e) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
@@ -342,7 +334,6 @@ public class AccountResource {
         }
         if (!StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"password Length between 8 and 20, the combination of characters and numbers");
-
         }
         if (!StringUtils.validPassword(newPassword)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,"newPassword Length between 8 and 20, the combination of characters and numbers");
@@ -386,15 +377,12 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result<AccountKeyStore> backup(@ApiParam(name = "address", value = "账户地址", required = true)
+    public Result<AccountKeyStore> export(@ApiParam(name = "address", value = "账户地址", required = true)
                                               @PathParam("address") String address,
                                           @ApiParam(name = "form", value = "钱包备份表单数据")
                                                   AccountPasswordForm form) {
         if (StringUtils.isNotBlank(address) && !Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
-        }
-        if (StringUtils.isNotBlank(form.getPassword()) && !StringUtils.validPassword(form.getPassword())) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         Result<AccountKeyStore> result = accountService.exportAccountToKeyStore(address, form.getPassword());
         if (result.isFailed()) {

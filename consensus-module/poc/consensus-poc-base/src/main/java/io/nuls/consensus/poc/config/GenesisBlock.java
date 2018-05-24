@@ -105,7 +105,7 @@ public final class GenesisBlock extends Block {
         this.fillHeader(jsonMap);
         ValidateResult validateResult = this.verify();
         if (validateResult.isFailed()) {
-            throw new NulsRuntimeException(validateResult.getErrorCode(), validateResult.getMessage());
+            throw new NulsRuntimeException(validateResult.getErrorCode(), validateResult.getMsg());
         }
         this.status = 1;
     }

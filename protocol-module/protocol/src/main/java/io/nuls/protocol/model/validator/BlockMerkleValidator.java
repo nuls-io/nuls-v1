@@ -30,8 +30,6 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 
-import java.util.List;
-
 /**
  * @author Niels
  * @date 2017/11/17
@@ -45,7 +43,7 @@ public class BlockMerkleValidator implements NulsDataValidator<Block> {
         ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), ERROR_MESSAGE);
         do {
             if (null == data) {
-                result.setMessage("Data is null!");
+                result.setMsg("Data is null!");
                 break;
             }
             if (data.getHeader().getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(data.getTxHashList()))) {

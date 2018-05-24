@@ -409,14 +409,14 @@ public class ForkChainProcess {
                 if (result.isSuccess()) {
                     result = tx.verify();
                     if (result.isFailed()) {
-                        Log.info("failed message:" + result.getMessage());
+                        Log.info("failed message:" + result.getMsg());
                         changeSuccess = false;
                         break;
                     } else {
                         verifiedList.add(tx);
                     }
                 } else {
-                    Log.info("failed message:" + result.getMessage());
+                    Log.info("failed message:" + result.getMsg());
                     changeSuccess = false;
                     break;
                 }
@@ -426,7 +426,7 @@ public class ForkChainProcess {
             }
             ValidateResult validateResult1 = tansactionService.conflictDetect(newBlock.getTxs());
             if (validateResult1.isFailed()) {
-                Log.info("failed message:" + validateResult1.getMessage());
+                Log.info("failed message:" + validateResult1.getMsg());
                 changeSuccess = false;
                 break;
             }
@@ -437,7 +437,7 @@ public class ForkChainProcess {
                 if (success) {
                     successList.add(newBlock);
                 } else {
-                    ChainLog.debug("save block error : " + result.getMessage() + " , block height : " + newBlock.getHeader().getHeight() + " , hash: " + newBlock.getHeader().getHash());
+                    ChainLog.debug("save block error : " + result.getMsg() + " , block height : " + newBlock.getHeader().getHeight() + " , hash: " + newBlock.getHeader().getHash());
                     changeSuccess = false;
                     break;
                 }

@@ -78,8 +78,8 @@ public class AliasService {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         try {
-            if (account.isEncrypted()) {
-                if (!account.unlock(password)) {
+            if (account.isEncrypted() && account.isLocked()) {
+                if (StringUtils.isBlank(password) || !StringUtils.validPassword(password) || !account.unlock(password)) {
                     return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
             }
