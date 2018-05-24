@@ -31,10 +31,7 @@ import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Result;
-import org.glassfish.grizzly.http.server.Request;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -72,7 +69,7 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
     @Override
     public Response toResponse(Exception e) {
         Log.error(e);
-        Result result = Result.getFailed().setMessage(e.getMessage());
+        Result result = Result.getFailed().setMsg(e.getMessage());
         return Response.ok(result, MediaType.APPLICATION_JSON).build();
     }
 

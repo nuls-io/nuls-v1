@@ -65,7 +65,7 @@ public class AccountServiceTest {
 
         Result<List<Account>> result = this.accountService.createAccount(0, null);
         assertTrue(result.isFailed());
-        assertNotNull(result.getMessage());
+        assertNotNull(result.getMsg());
 
         //无密码时
         result = this.accountService.createAccount(1, null);
@@ -83,13 +83,13 @@ public class AccountServiceTest {
         //测试最大一次生成账户数量
         result = this.accountService.createAccount(10000, null);
         assertTrue(result.isFailed());
-        assertNotNull(result.getMessage());
+        assertNotNull(result.getMsg());
 
 
         //todo 设置钱包密码
         result = this.accountService.createAccount(1, null);
         assertTrue(result.isSuccess());
-        assertNotNull(result.getMessage());
+        assertNotNull(result.getMsg());
 
         //todo 设置钱包密码为nuls123456
         result = this.accountService.createAccount(1, "nuls123456");
@@ -107,7 +107,7 @@ public class AccountServiceTest {
 
         result = this.accountService.createAccount(10000, null);
         assertTrue(result.isFailed());
-        assertNotNull(result.getMessage());
+        assertNotNull(result.getMsg());
 
     }
 

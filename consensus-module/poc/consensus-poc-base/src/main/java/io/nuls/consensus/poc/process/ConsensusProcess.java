@@ -33,19 +33,14 @@ import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
-import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.BlockData;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
-import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
-import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
-import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.util.ConsensusTool;
-import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
@@ -312,7 +307,7 @@ public class ConsensusProcess {
                 if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
                     txMemoryPool.add(tx, true);
                 }
-                Log.warn(result.getMessage());
+                Log.warn(result.getMsg());
                 continue;
             }
             result = ledgerService.verifyCoinData(tx, packingTxList);
@@ -320,7 +315,7 @@ public class ConsensusProcess {
                 if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
                     txMemoryPool.add(tx, true);
                 }
-                Log.warn(result.getMessage());
+                Log.warn(result.getMsg());
                 continue;
             }
             outHashList.add(tx.getHash());

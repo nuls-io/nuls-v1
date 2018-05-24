@@ -160,7 +160,7 @@ public class BlockProcess {
                         if (result.isSuccess()) {
                             result = tx.verify();
                             if (result.isFailed()) {
-                                Log.info("failed message:" + result.getMessage());
+                                Log.info("failed message:" + result.getMsg());
                                 success = false;
                                 break;
                             } else {
@@ -168,7 +168,7 @@ public class BlockProcess {
                             }
                         } else {
                             success = false;
-                            Log.info("failed message:" + result.getMessage());
+                            Log.info("failed message:" + result.getMsg());
                             break;
                         }
                     }
@@ -178,14 +178,14 @@ public class BlockProcess {
                     ValidateResult validateResult1 = tansactionService.conflictDetect(block.getTxs());
                     if (validateResult1.isFailed()) {
                         success = false;
-                        Log.info("failed message:" + validateResult1.getMessage());
+                        Log.info("failed message:" + validateResult1.getMsg());
                         break;
                     }
                     // save block
                     Result result = blockService.saveBlock(block);
                     success = result.isSuccess();
                     if (!success) {
-                        Log.warn("save block fail : reason : " + result.getMessage() + ", block height : " + block.getHeader().getHeight() + ", hash : " + block.getHeader().getHash());
+                        Log.warn("save block fail : reason : " + result.getMsg() + ", block height : " + block.getHeader().getHeight() + ", hash : " + block.getHeader().getHash());
                     } else {
                         BlockLog.debug("save block height : " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                     }
