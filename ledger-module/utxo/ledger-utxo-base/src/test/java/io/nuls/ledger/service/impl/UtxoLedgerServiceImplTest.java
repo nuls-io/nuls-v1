@@ -23,7 +23,6 @@
  */
 package io.nuls.ledger.service.impl;
 
-import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.*;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.core.tools.crypto.ECKey;
@@ -91,6 +90,38 @@ public class UtxoLedgerServiceImplTest {
         Coin coinTemp = allList.get(3).getCoinData().getTo().remove(0);
         allList.get(3).getCoinData().getTo().clear();
         allList.get(3).getCoinData().getTo().add(coinTemp);
+    }
+
+    @Test
+    public void testGetWholeUTXO() throws NulsException, IOException {
+        LevelDBManager.destroyArea(LedgerStorageConstant.DB_NAME_LEDGER_TX);
+        LevelDBManager.destroyArea(LedgerStorageConstant.DB_NAME_LEDGER_UTXO);
+        LevelDBManager.createArea(LedgerStorageConstant.DB_NAME_LEDGER_UTXO);
+        LevelDBManager.createArea(LedgerStorageConstant.DB_NAME_LEDGER_TX);
+        Transaction tx8 = allList.get(8);
+        ECKey ecKey1 = new ECKey();
+        ECKey ecKey2 = new ECKey();
+        TransferTransaction preTx = createTransferTransaction(ecKey1, null, ecKey2, Na.ZERO);
+        P2PKHScriptSig preTxScript = P2PKHScriptSig.createFromBytes(preTx.getScriptSig());
+        P2PKHScriptSig txScript = P2PKHScriptSig.createFromBytes(tx8.getScriptSig());
+        byte[] preTxHashBytes = preTx.getHash().serialize();
+        CoinData preTxCoinData = preTx.getCoinData();
+        preTxCoinData.getFrom().clear();
+        preTxCoinData.getTo().clear();
+        preTxCoinData.getFrom().add(new Coin(Arrays.concatenate(preTxHashBytes, new VarInt(88).encode()), Na.parseNuls(30031), 0));
+        preTxCoinData.getTo().add(new Coin(AddressTool.getAddress(txScript.getPublicKey()), Na.parseNuls(10001), 0));
+        preTxCoinData.getTo().add(new Coin(AddressTool.getAddress(txScript.getPublicKey()), Na.parseNuls(10001), 0));
+        preTxCoinData.getTo().add(new Coin(AddressTool.getAddress(txScript.getPublicKey()), Na.parseNuls(10001), 0));
+
+        Result result = ledgerService.saveTx(preTx);
+        Assert.assertTrue(result.isSuccess());
+        long total = ledgerService.getWholeUTXO();
+        Assert.assertEquals(Na.parseNuls(10001 + 10001 + 10001).getValue(), total);
+        result = ledgerService.rollbackTx(preTx);
+        total = ledgerService.getWholeUTXO();
+        Assert.assertEquals(Na.parseNuls(30031).getValue(), total);
+
+
     }
 
     @Test
@@ -232,6 +263,74 @@ public class UtxoLedgerServiceImplTest {
         return preTx;
 
     }
+
+
+    @Test
+    public void verifyDoubleSpend() {
+        // 无双花，测试期望是成功
+        allList.get(3).getCoinData().getFrom().get(0).setOwner("abcd3".getBytes());
+        allList.get(3).getCoinData().getFrom().get(0).setLockTime(3);
+        allList.get(4).getCoinData().getFrom().get(0).setOwner("abcd4".getBytes());
+        allList.get(4).getCoinData().getFrom().get(0).setLockTime(4);
+        ValidateResult result = ledgerService.verifyDoubleSpend(allList);
+        Assert.assertTrue(result.isSuccess());
+
+        // 存在双花，测试期望是失败
+        allList.get(4).getCoinData().getFrom().get(0).setOwner("abcd3".getBytes());
+        ValidateResult<List<Transaction>> validateResult = ledgerService.verifyDoubleSpend(allList);
+        List<Transaction> resultList = validateResult.getData();
+        Assert.assertNotNull(resultList);
+        Assert.assertEquals(2, resultList.size());
+        Assert.assertEquals(7, resultList.get(0).getCoinData().getFrom().get(0).getLockTime() + resultList.get(1).getCoinData().getFrom().get(0).getLockTime());
+
+        Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), validateResult.getErrorCode().getCode());
+    }
+
+    @Test
+    public void unlockTxCoinData() throws IOException, NulsException {
+        recoveryTx3Data();
+
+        // 有一条LockTime为-1的，测试期望是成功
+        Transaction tx3 = allList.get(3);
+        Coin coin = allList.get(3).getCoinData().getTo().get(0);
+        coin.setOwner("abcd3".getBytes());
+        coin.setNa(Na.parseNuls(10001));
+        coin.setLockTime(-1);
+        Result result = ledgerService.unlockTxCoinData(allList.get(3), 123);
+        //System.out.println(result);
+        Assert.assertTrue(result.isSuccess());
+        Coin to3Coin0 = utxoLedgerUtxoStorageService.getUtxo(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
+        Assert.assertEquals(123, to3Coin0.getLockTime());
+        to3Coin0.setLockTime(-1);
+        Assert.assertNotNull(to3Coin0);
+        Assert.assertEquals(new Slice(tx3.getCoinData().getTo().get(0).serialize()), new Slice(to3Coin0.serialize()));
+
+        // 回滚
+        result = ledgerService.rollbackUnlockTxCoinData(allList.get(3));
+        Assert.assertTrue(result.isSuccess());
+        to3Coin0 = utxoLedgerUtxoStorageService.getUtxo(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
+        Assert.assertNotNull(to3Coin0);
+        Assert.assertEquals(-1, to3Coin0.getLockTime());
+        Assert.assertEquals(new Slice(tx3.getCoinData().getTo().get(0).serialize()), new Slice(to3Coin0.serialize()));
+
+
+
+        // 没有LockTime为-1的，测试期望是失败
+        coin = allList.get(3).getCoinData().getTo().get(0);
+        coin.setLockTime(1000);
+        result = ledgerService.unlockTxCoinData(allList.get(3), 123);
+        Assert.assertEquals(LedgerErrorCode.UTXO_STATUS_CHANGE.getCode(), result.getErrorCode().getCode());
+
+        // LockTime既有-1的，又有不是-1的，测试期望是成功
+        coin = allList.get(3).getCoinData().getTo().get(0);
+        coin.setLockTime(-1);
+        CoinData coinData = allList.get(3).getCoinData();
+        coinData.getTo().add(new Coin("abcd3.1".getBytes(), Na.parseNuls(10001), 0));
+        result = ledgerService.unlockTxCoinData(allList.get(3), 123);
+        Assert.assertTrue(result.isSuccess());
+    }
+
+
     @Test
     public void verifyCoinData() throws IOException, NulsException {
         recoveryTx3Data();
@@ -361,71 +460,6 @@ public class UtxoLedgerServiceImplTest {
         }
     }
 
-    @Test
-    public void verifyDoubleSpend() {
-        // 无双花，测试期望是成功
-        allList.get(3).getCoinData().getFrom().get(0).setOwner("abcd3".getBytes());
-        allList.get(3).getCoinData().getFrom().get(0).setLockTime(3);
-        allList.get(4).getCoinData().getFrom().get(0).setOwner("abcd4".getBytes());
-        allList.get(4).getCoinData().getFrom().get(0).setLockTime(4);
-        ValidateResult result = ledgerService.verifyDoubleSpend(allList);
-        Assert.assertTrue(result.isSuccess());
-
-        // 存在双花，测试期望是失败
-        allList.get(4).getCoinData().getFrom().get(0).setOwner("abcd3".getBytes());
-        ValidateResult<List<Transaction>> validateResult = ledgerService.verifyDoubleSpend(allList);
-        List<Transaction> resultList = validateResult.getData();
-        Assert.assertNotNull(resultList);
-        Assert.assertEquals(2, resultList.size());
-        Assert.assertEquals(7, resultList.get(0).getCoinData().getFrom().get(0).getLockTime() + resultList.get(1).getCoinData().getFrom().get(0).getLockTime());
-
-        Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), validateResult.getErrorCode().getCode());
-    }
-
-    @Test
-    public void unlockTxCoinData() throws IOException, NulsException {
-        recoveryTx3Data();
-
-        // 有一条LockTime为-1的，测试期望是成功
-        Transaction tx3 = allList.get(3);
-        Coin coin = allList.get(3).getCoinData().getTo().get(0);
-        coin.setOwner("abcd3".getBytes());
-        coin.setNa(Na.parseNuls(10001));
-        coin.setLockTime(-1);
-        Result result = ledgerService.unlockTxCoinData(allList.get(3), 123);
-        //System.out.println(result);
-        Assert.assertTrue(result.isSuccess());
-        Coin to3Coin0 = utxoLedgerUtxoStorageService.getUtxo(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
-        Assert.assertEquals(123, to3Coin0.getLockTime());
-        to3Coin0.setLockTime(-1);
-        Assert.assertNotNull(to3Coin0);
-        Assert.assertEquals(new Slice(tx3.getCoinData().getTo().get(0).serialize()), new Slice(to3Coin0.serialize()));
-
-        // 回滚
-        result = ledgerService.rollbackUnlockTxCoinData(allList.get(3));
-        Assert.assertTrue(result.isSuccess());
-        to3Coin0 = utxoLedgerUtxoStorageService.getUtxo(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
-        Assert.assertNotNull(to3Coin0);
-        Assert.assertEquals(-1, to3Coin0.getLockTime());
-        Assert.assertEquals(new Slice(tx3.getCoinData().getTo().get(0).serialize()), new Slice(to3Coin0.serialize()));
-
-
-
-        // 没有LockTime为-1的，测试期望是失败
-        coin = allList.get(3).getCoinData().getTo().get(0);
-        coin.setLockTime(1000);
-        result = ledgerService.unlockTxCoinData(allList.get(3), 123);
-        Assert.assertEquals(LedgerErrorCode.UTXO_STATUS_CHANGE.getCode(), result.getErrorCode().getCode());
-
-        // LockTime既有-1的，又有不是-1的，测试期望是成功
-        coin = allList.get(3).getCoinData().getTo().get(0);
-        coin.setLockTime(-1);
-        CoinData coinData = allList.get(3).getCoinData();
-        coinData.getTo().add(new Coin("abcd3.1".getBytes(), Na.parseNuls(10001), 0));
-        result = ledgerService.unlockTxCoinData(allList.get(3), 123);
-        Assert.assertTrue(result.isSuccess());
-    }
-
     @AfterClass
     public static void tearDown() throws Exception {
         LevelDBManager.destroyArea(LedgerStorageConstant.DB_NAME_LEDGER_TX);
@@ -447,9 +481,11 @@ public class UtxoLedgerServiceImplTest {
 
         Transaction yellowPunishTx = createYellowPunishTx(ecKey1, ecKey2, ecKey3, ecKey4, ecKey5, ecKey6);
         list.add(yellowPunishTx);
+        Transaction yellowPunishTx1 = createYellowPunishTx(ecKey1, ecKey2, ecKey3, ecKey4, ecKey5, ecKey6);
+        list.add(yellowPunishTx1);
 
-//        RedPunishTransaction redPunishTransaction = createRedPunishTx(ecKey1, ecKey4, ecKey5, ecKey6);
-//        list.add(redPunishTransaction);
+        //RedPunishTransaction redPunishTransaction = createRedPunishTx(ecKey1, ecKey4, ecKey5, ecKey6);
+        //list.add(redPunishTransaction);
 
         TransferTransaction transferTransaction1 = createTransferTransaction(ecKey1, null, ecKey2, Na.ZERO);
         TransferTransaction transferTransaction2 = createTransferTransaction(ecKey1, null, ecKey3, Na.ZERO);

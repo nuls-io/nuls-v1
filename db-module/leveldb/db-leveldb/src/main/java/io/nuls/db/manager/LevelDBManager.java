@@ -910,8 +910,54 @@ public class LevelDBManager {
         return list;
     }
 
+    public static List<byte[]> valueListInner(String area) {
+        if (!baseCheckArea(area)) {
+            return null;
+        }
+        DBIterator iterator = null;
+        List<byte[]> list = null;
+        try {
+            DB db = AREAS.get(area);
+            list = new ArrayList<>();
+            iterator = db.iterator();
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+                list.add(iterator.peekNext().getValue());
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        } finally {
+            // Make sure you close the iterator to avoid resource leaks.
+            if (iterator != null) {
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
+            }
+        }
+        return list;
+    }
+
     public static List<byte[]> valueList(String area) {
-        //TODO pierre
-        return null;
+        if (!baseCheckArea(area)) {
+            return null;
+        }
+        try {
+            Comparator<byte[]> comparator = AREAS_COMPARATOR.get(area);
+            if(comparator == null) {
+                return valueListInner(area);
+            } else {
+                List<Entry<byte[], byte[]>> entryList = entryList(area);
+                List<byte[]> resultList = new ArrayList<>();
+                if(entryList != null) {
+                    entryList.stream().forEach(entry -> resultList.add(entry.getValue()));
+                }
+                return resultList;
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
     }
 }

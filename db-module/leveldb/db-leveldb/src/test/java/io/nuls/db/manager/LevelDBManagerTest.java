@@ -26,7 +26,6 @@ package io.nuls.db.manager;
 import io.nuls.db.entity.DBTestEntity;
 import io.nuls.db.model.Entry;
 import io.nuls.kernel.cfg.NulsConfig;
-import org.iq80.leveldb.DBComparator;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.junit.After;
 import org.junit.Assert;
@@ -82,6 +81,7 @@ public class LevelDBManagerTest {
         testEntryList();
         testEntryListByClass();
         testValuesByClass();
+        testValueList();
     }
 
     public void testFullCreateArea() {
@@ -364,6 +364,58 @@ public class LevelDBManagerTest {
         putModel(area, bytes("entity5"), entity);
         List<DBTestEntity> list = values(area, DBTestEntity.class);
         Assert.assertEquals(5, list.size());
+        destroyArea(area);
+    }
+
+    public void testValueList() {
+        String area = "testValueList";
+        createArea(area, new Comparator<byte[]>() {
+            @Override
+            public int compare(byte[] o1, byte[] o2) {
+                String s1 = asString(o1);
+                String s2 = asString(o2);
+                if ("set3".equals(s1)) {
+                    return 1;
+                }
+                if("set3".equals(s2)) {
+                    return -1;
+                }
+                return s1.compareTo(s2);
+            }
+        });
+        put(area, bytes("set5"), bytes("set5value"));
+        put(area, bytes("set6"), bytes("set6value"));
+        put(area, bytes("set2"), bytes("set2value"));
+        put(area, bytes("set1"), bytes("set1value"));
+        put(area, bytes("set4"), bytes("set4value"));
+        put(area, bytes("set3"), bytes("set3value"));
+        List<byte[]> list = valueList(area);
+        Assert.assertEquals(6, list.size());
+
+        String contact = "";
+        for (byte[] value : list) {
+            System.out.println(asString(value));
+            contact += asString(value);
+        }
+        Assert.assertEquals("set1valueset2valueset4valueset5valueset6valueset3value", contact);
+        destroyArea(area);
+
+        createArea(area);
+        put(area, bytes("set5"), bytes("set5value"));
+        put(area, bytes("set6"), bytes("set6value"));
+        put(area, bytes("set2"), bytes("set2value"));
+        put(area, bytes("set1"), bytes("set1value"));
+        put(area, bytes("set4"), bytes("set4value"));
+        put(area, bytes("set3"), bytes("set3value"));
+        list = valueList(area);
+        Assert.assertEquals(6, list.size());
+
+        contact = "";
+        for (byte[] value : list) {
+            System.out.println(asString(value));
+            contact += asString(value);
+        }
+        Assert.assertEquals("set1valueset2valueset3valueset4valueset5valueset6value", contact);
         destroyArea(area);
     }
 

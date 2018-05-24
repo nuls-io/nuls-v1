@@ -23,7 +23,7 @@
  */
 package io.nuls.ledger.service.impl;
 
-import io.nuls.core.tools.crypto.Base58;
+import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.db.service.BatchOperation;
@@ -531,7 +531,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 if (utxoBytes != null) {
                     coin = new Coin();
                     coin.parse(utxoBytes);
-                    //result = result.add(coin.getNa());
+                    result = LongUtils.add(result, coin.getNa().getValue());
                 }
             }
             return result;
