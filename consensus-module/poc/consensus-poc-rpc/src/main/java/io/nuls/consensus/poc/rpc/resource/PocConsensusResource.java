@@ -140,6 +140,7 @@ public class PocConsensusResource {
         List<Agent> allAgentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
         long startBlockHeight = NulsContext.getInstance().getBestHeight();
         int agentCount = 0;
+        String agentHash = null;
         byte[] addressBytes = AddressTool.getAddress(address);
         for (int i = allAgentList.size() - 1; i >= 0; i--) {
             Agent agent = allAgentList.get(i);
@@ -150,6 +151,7 @@ public class PocConsensusResource {
             }
             if (Arrays.equals(agent.getAgentAddress(), addressBytes)) {
                 agentCount = 1;
+                agentHash = agent.getTxHash().getDigestHex();
                 break;
             }
         }
@@ -172,6 +174,7 @@ public class PocConsensusResource {
 
 
         dto.setAgentCount(agentCount);
+        dto.setAgentHash(agentHash);
         dto.setJoinAgentCount(agentSet.size());
         //todo 需要添加计算奖励的机制
         dto.setReward(201800000000L);
