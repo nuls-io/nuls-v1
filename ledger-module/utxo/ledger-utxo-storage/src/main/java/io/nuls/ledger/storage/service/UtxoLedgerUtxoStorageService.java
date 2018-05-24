@@ -29,6 +29,8 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 
+import java.util.List;
+
 /**
  * @desription:
  * @author: PierreLuo
@@ -45,4 +47,7 @@ public interface UtxoLedgerUtxoStorageService {
     Result deleteUtxo(byte[] owner);
 
     byte[] getUtxoBytes(byte[] owner);
+
+    List<byte[]> getAllUtxoBytes();
+
 }

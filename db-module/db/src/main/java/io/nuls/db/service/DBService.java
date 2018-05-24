@@ -175,6 +175,15 @@ public interface DBService {
     List<byte[]> keyList(String area);
 
     /**
+     * 获取数据区域的所有value的有序集合
+     * Gets an ordered collection of all values in the data area.
+     *
+     * @param area
+     * @return
+     */
+    List<byte[]> valueList(String area);
+
+    /**
      * 获取数据区域的所有key-value的无序集合
      * Gets an unordered collection of all key-value in the data area.
      *
@@ -191,6 +200,7 @@ public interface DBService {
      * @return
      */
     List<Entry<byte[], byte[]>> entryList(String area);
+
 
     /**
      * 获取数据区域的所有key-value的有序集合，并指定返回的value对象

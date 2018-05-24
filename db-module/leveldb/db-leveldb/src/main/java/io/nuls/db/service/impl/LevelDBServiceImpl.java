@@ -118,6 +118,11 @@ public class LevelDBServiceImpl implements DBService {
     }
 
     @Override
+    public List<byte[]> valueList(String area) {
+        return LevelDBManager.valueList(area);
+    }
+
+    @Override
     public Set<Entry<byte[], byte[]>> entrySet(String area) {
         return LevelDBManager.entrySet(area);
     }
