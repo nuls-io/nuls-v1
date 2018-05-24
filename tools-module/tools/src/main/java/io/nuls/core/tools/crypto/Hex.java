@@ -24,8 +24,6 @@
  */
 package io.nuls.core.tools.crypto;
 
-import sun.applet.Main;
-
 /**
  * 16进制编码解码类
  */
