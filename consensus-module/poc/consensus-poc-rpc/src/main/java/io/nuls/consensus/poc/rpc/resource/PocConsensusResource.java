@@ -504,22 +504,20 @@ public class PocConsensusResource {
     }
 
     @GET
-    @Path("/agent/{agentAddress}")
+    @Path("/agent/{agentHash}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "查询共识节点详细信息 [3.6.7]", notes = "result.data: Map<String, Object>")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Map.class)
     })
-    public Result<AgentDTO> getAgentByAddress(@ApiParam(name = "agentAddress", value = "节点地址", required = true)
-                                              @PathParam("agentAddress") String agentAddress) {
-        if (!Address.validAddress(agentAddress)) {
-            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
-        }
+    public Result<AgentDTO> getAgentByAddress(@ApiParam(name = "agentHash", value = "节点标识", required = true)
+                                              @PathParam("agentHash") String agentHash) throws NulsException {
+        AssertUtil.canNotEmpty(agentHash);
         Result result = Result.getSuccess();
         List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
-
+        NulsDigestData agentHashData = NulsDigestData.fromDigestHex(agentHash);
         for (Agent agent : agentList) {
-            if (Arrays.equals(agent.getAgentAddress(), AddressTool.getAddress(agentAddress))) {
+            if (agent.getTxHash().equals(agentHashData)) {
                 MeetingRound round = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
                 this.fillAgent(agent, round, null);
                 AgentDTO dto = new AgentDTO(agent);
@@ -671,8 +669,8 @@ public class PocConsensusResource {
             Deposit deposit = depositList.get(i);
             List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
             Agent agent = null;
-            for(Agent a : agentList) {
-                if(a.getTxHash().equals(deposit.getAgentHash())) {
+            for (Agent a : agentList) {
+                if (a.getTxHash().equals(deposit.getAgentHash())) {
                     agent = a;
                     break;
                 }
