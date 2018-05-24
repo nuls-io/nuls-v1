@@ -96,7 +96,7 @@ public class DepositTxValidator extends BaseConsensusProtocolValidator<DepositTr
         }
         Deposit deposit = tx.getTxData();
         AgentPo agentPo = agentStorageService.get(deposit.getAgentHash());
-        if (null == agentPo) {
+        if (null == agentPo || agentPo.getDelHeight() > 0) {
             return ValidateResult.getFailedResult(this.getClass().getName(), "Agent is not exist!");
         }
         long count = 0;
