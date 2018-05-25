@@ -1,8 +1,12 @@
 package io.nuls.account.rpc.processor;
 
+import io.nuls.account.service.AccountService;
 import io.nuls.core.tools.cmd.CommandBuilder;
 import io.nuls.core.tools.cmd.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.lite.annotation.Autowired;
+import io.nuls.kernel.lite.annotation.Cmd;
+import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 
@@ -10,7 +14,13 @@ import io.nuls.kernel.processor.CommandProcessor;
  * @author: Charlie
  * @date: 2018/5/25
  */
+@Cmd
+@Component
 public class CreateAccountProcessor implements CommandProcessor {
+
+    @Autowired
+    private AccountService accountService;
+
     @Override
     public String getCommand() {
         return "createaccount";
@@ -47,6 +57,11 @@ public class CreateAccountProcessor implements CommandProcessor {
     @Override
     public Result execute(String[] args) {
         // todo auto-generated method stub
+        String password = null;
+        if(args.length == 2){
+            password = args[1];
+        }
+        accountService.createAccount(password);
         return null;
     }
 }

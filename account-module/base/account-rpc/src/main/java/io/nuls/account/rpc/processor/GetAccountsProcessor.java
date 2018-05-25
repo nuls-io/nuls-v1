@@ -2,6 +2,8 @@ package io.nuls.account.rpc.processor;
 
 import io.nuls.core.tools.cmd.CommandBuilder;
 import io.nuls.core.tools.cmd.CommandHelper;
+import io.nuls.kernel.lite.annotation.Cmd;
+import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 
@@ -9,6 +11,8 @@ import io.nuls.kernel.processor.CommandProcessor;
  * @author: Charlie
  * @date: 2018/5/25
  */
+@Cmd
+@Component
 public class GetAccountsProcessor implements CommandProcessor {
 
     @Override
