@@ -732,7 +732,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
                     if(to.getLockTime() == -1) {
                         byte[] toKey = org.spongycastle.util.Arrays.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
-                        to = ledgerService.getUtxo(toKey);
+
+                        Coin ledgerCoin = ledgerService.getUtxo(toKey);
+                        if(null != ledgerCoin){
+                            to = ledgerCoin;
+                        }
                     }
                     toMap.put(outKey, to.serialize());
                 } catch (IOException e) {
