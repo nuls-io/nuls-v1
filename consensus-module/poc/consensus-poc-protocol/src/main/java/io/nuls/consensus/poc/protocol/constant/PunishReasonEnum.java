@@ -35,22 +35,22 @@ public enum PunishReasonEnum {
     /**
      * Bifurcate block chain
      */
-    BIFURCATION((byte) 1, 69980),
+    BIFURCATION((byte) 1, "69980"),
 
     /**
      * double spend
      */
-    DOUBLE_SPEND((byte) 2, 69981),
+    DOUBLE_SPEND((byte) 2, "69981"),
 
     /**
      * 连续x轮黄牌
      * Continuous x round yellow card.
      */
-    TOO_MUCH_YELLOW_PUNISH((byte) 3, 69982),;
+    TOO_MUCH_YELLOW_PUNISH((byte) 3, "69982"),;
     private final byte code;
-    private final int msgCode;
+    private final String msgCode;
 
-    private PunishReasonEnum(byte code, int msgCode) {
+    private PunishReasonEnum(byte code, String msgCode) {
         this.code = code;
         this.msgCode = msgCode;
     }

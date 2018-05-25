@@ -62,7 +62,7 @@ public class ResetPasswordProcessor implements CommandProcessor {
     }
 
     @Override
-    public RpcClientResult execute(String[] args) {
+    public Result execute(String[] args) {
         return null;
     }
 }

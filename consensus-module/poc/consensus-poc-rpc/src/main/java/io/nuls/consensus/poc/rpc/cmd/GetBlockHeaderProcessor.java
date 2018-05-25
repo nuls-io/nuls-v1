@@ -51,7 +51,7 @@ public class GetBlockHeaderProcessor implements CommandProcessor {
     }
 
     @Override
-    public RpcClientResult execute(String[] args) {
+    public Result execute(String[] args) {
         NulsDigestData blockHash = null;
         long blockHeight = 0;
 
