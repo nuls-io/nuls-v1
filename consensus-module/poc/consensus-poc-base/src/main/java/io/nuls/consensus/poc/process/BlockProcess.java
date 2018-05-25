@@ -187,6 +187,7 @@ public class BlockProcess {
                     if (!success) {
                         Log.warn("save block fail : reason : " + result.getMsg() + ", block height : " + block.getHeader().getHeight() + ", hash : " + block.getHeader().getHash());
                     } else {
+                        RewardStatisticsProcess.addBlock(block);
                         BlockLog.debug("save block height : " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                     }
                 } while (false);

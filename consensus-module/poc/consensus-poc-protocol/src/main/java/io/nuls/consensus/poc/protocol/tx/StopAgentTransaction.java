@@ -27,10 +27,13 @@ package io.nuls.consensus.poc.protocol.tx;
 
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.StopAgent;
+import io.nuls.core.tools.calc.DoubleUtils;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.ledger.service.LedgerService;
 
 /**
  * @author Niels
@@ -53,8 +56,14 @@ public class StopAgentTransaction extends Transaction<StopAgent> {
 
     @Override
     public String getInfo(byte[] address) {
-        // todo auto-generated method stub
-        return null;
+        if (null != this.txData) {
+            LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+            CreateAgentTransaction tx = (CreateAgentTransaction) ledgerService.getTx(this.txData.getCreateTxHash());
+            if (null != tx) {
+                return "unlock " +tx.getTxData().getDeposit().toCoinString();
+            }
+        }
+        return "--";
     }
 
     @Override
