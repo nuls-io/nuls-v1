@@ -175,7 +175,7 @@ public class Account extends BaseNulsData {
     public void encrypt(String password, boolean isForce) throws NulsException {
         if (this.isEncrypted() && !isForce) {
             if (!unlock(password)) {
-                throw new NulsException(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED);
+                throw new NulsException(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         }
         ECKey eckey = this.getEcKey();

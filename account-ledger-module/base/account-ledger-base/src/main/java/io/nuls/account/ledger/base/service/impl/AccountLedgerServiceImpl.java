@@ -561,7 +561,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (result.isFailed()) {
             return result;
         }
-        result = saveLocalTx(tx,null);
+        result = saveLocalTx(tx, null);
         if (result.isFailed()) {
             transactionInfoStorageService.deleteTransactionInfo(txInfoPo);
         }
@@ -593,7 +593,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (result.isFailed()) {
             return result;
         }
-        result = saveLocalTx(tx,addresses);
+        result = saveLocalTx(tx, addresses);
         if (result.isFailed()) {
             transactionInfoStorageService.deleteTransactionInfo(txInfoPo);
         }
@@ -681,7 +681,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public void init() {
     }
 
-    public Result saveLocalTx(Transaction tx,List<byte[]> addresses) {
+    public Result saveLocalTx(Transaction tx, List<byte[]> addresses) {
         if (tx == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
@@ -725,22 +725,22 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Map<byte[], byte[]> toMap = new HashMap<>();
             for (int i = 0, length = tos.size(); i < length; i++) {
                 Coin to = tos.get(i);
-                if(addresses == null) {
+                if (addresses == null) {
                     if (!isLocalAccount(to.getOwner())) {
                         continue;
                     }
-                }else {
-                    if(!Arrays.equals(to.getOwner(),addresses.get(0))){
+                } else {
+                    if (!Arrays.equals(to.getOwner(), addresses.get(0))) {
                         continue;
                     }
                 }
                 try {
                     byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                    if(to.getLockTime() == -1) {
+                    if (to.getLockTime() == -1) {
                         byte[] toKey = org.spongycastle.util.Arrays.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
 
                         Coin ledgerCoin = ledgerService.getUtxo(toKey);
-                        if(null != ledgerCoin){
+                        if (null != ledgerCoin) {
                             to = ledgerCoin;
                         }
                     }
