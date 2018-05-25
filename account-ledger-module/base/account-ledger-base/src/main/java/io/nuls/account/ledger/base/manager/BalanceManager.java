@@ -159,13 +159,13 @@ public class BalanceManager {
         List<Coin> coinList = new ArrayList<>();
         List<Entry<byte[], byte[]>> rawList = accountLedgerStorageService.loadAllCoinList();
         byte[] addressOwner = new byte[AddressTool.HASH_LENGTH];
-        for (Entry coinEntry : rawList) {
-            byte[] key = (byte[]) coinEntry.getKey();
+        for (Entry<byte[], byte[]> coinEntry : rawList) {
+            byte[] key = coinEntry.getKey();
             System.arraycopy(key, 0, addressOwner, 0, AddressTool.HASH_LENGTH);
             if (java.util.Arrays.equals(addressOwner, address)) {
                 Coin coin = new Coin();
                 try {
-                    coin.parse((byte[]) coinEntry.getValue());
+                    coin.parse(coinEntry.getValue());
                 } catch (NulsException e) {
                     Log.info("parse coin form db error");
                     continue;

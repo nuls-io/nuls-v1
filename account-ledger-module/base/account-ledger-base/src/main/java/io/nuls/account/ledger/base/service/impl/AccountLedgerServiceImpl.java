@@ -228,20 +228,19 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         lock.lock();
         try {
             CoinDataResult coinDataResult = new CoinDataResult();
-            List<Coin> rawCoinList = balanceManager.getCoinListByAddress(address);
-            List<Coin> coinList = new ArrayList<>();
-            if (rawCoinList.isEmpty()) {
+            List<Coin> coinList = balanceManager.getCoinListByAddress(address);
+            if (coinList.isEmpty()) {
                 coinDataResult.setEnough(false);
                 return coinDataResult;
             }
-            Collections.sort(rawCoinList, CoinComparator.getInstance());
+            Collections.sort(coinList, CoinComparator.getInstance());
 
-            Set<byte[]> usedKeyset = getTmpUsedCoinKeySet();
-            for (Coin coin : rawCoinList) {
-                if (!usedKeyset.contains(coin.getOwner())) {
-                    coinList.add(coin);
-                }
-            }
+//            Set<byte[]> usedKeyset = getTmpUsedCoinKeySet();
+//            for (Coin coin : rawCoinList) {
+//                if (!usedKeyset.contains(coin.getOwner())) {
+//                    coinList.add(coin);
+//                }
+//            }
 
             boolean enough = false;
             List<Coin> coins = new ArrayList<>();
@@ -342,6 +341,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
             TransferTransaction tx = new TransferTransaction();
             if (StringUtils.isNotBlank(remark)) {
+                // TODO 判断remark的大小
                 try {
                     tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
                 } catch (UnsupportedEncodingException e) {
@@ -557,18 +557,23 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         txInfoPo.setStatus(status);
 
         Result result = transactionInfoStorageService.saveTransactionInfo(txInfoPo, addresses);
-
         if (result.isFailed()) {
             return result;
         }
-        result = saveLocalTx(tx, null);
-        if (result.isFailed()) {
-            transactionInfoStorageService.deleteTransactionInfo(txInfoPo);
+
+        // 判断交易是否已经存在，如果存在则不处理coin
+        Transaction unconfirmedTx = unconfirmedTransactionStorageService.getUnconfirmedTx(tx.getHash()).getData();
+
+        if(unconfirmedTx == null) {
+            result = saveLocalTx(tx, null);
+            if (result.isFailed()) {
+                transactionInfoStorageService.deleteTransactionInfo(txInfoPo);
+            }
         }
 
         if (status == TransactionInfo.UNCONFIRMED) {
             result = unconfirmedTransactionStorageService.saveUnconfirmedTx(tx.getHash(), tx);
-        } else {
+        } else if(unconfirmedTx != null) {
             unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
         }
         for (int i = 0; i < addresses.size(); i++) {
