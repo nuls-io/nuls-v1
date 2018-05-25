@@ -73,8 +73,8 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
             return ValidateResult.getFailedResult(getClass().getName(), "agent name is too long!");
         }
 
-        if(agent.getIntroduction().length>INSTRACTION_MAX_LENGTH){
-            return ValidateResult.getFailedResult(getClass().getName(),"The instruduction is too long!");
+        if (agent.getIntroduction().length > INSTRACTION_MAX_LENGTH) {
+            return ValidateResult.getFailedResult(getClass().getName(), "The instruduction is too long!");
         }
 
         if (tx.getTime() <= 0) {
@@ -87,6 +87,9 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
 
         if (PocConsensusProtocolConstant.AGENT_DEPOSIT_LOWER_LIMIT.isGreaterThan(agent.getDeposit())) {
             return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.DEPOSIT_NOT_ENOUGH);
+        }
+        if (PocConsensusProtocolConstant.AGENT_DEPOSIT_UPPER_LIMIT.isLessThan(agent.getDeposit())) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.DEPOSIT_TOO_MUCH);
         }
 
         if (!isDepositOk(agent.getDeposit(), tx.getCoinData())) {

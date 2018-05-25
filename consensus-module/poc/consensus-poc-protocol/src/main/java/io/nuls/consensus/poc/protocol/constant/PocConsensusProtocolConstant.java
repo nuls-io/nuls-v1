@@ -66,6 +66,7 @@ public interface PocConsensusProtocolConstant {
     long MAX_BLOCK_SIZE = 2 << 21;
 
     Na AGENT_DEPOSIT_LOWER_LIMIT = Na.parseNuls(20000);
+    Na AGENT_DEPOSIT_UPPER_LIMIT = Na.parseNuls(200000);
     Na ENTRUSTER_DEPOSIT_LOWER_LIMIT = Na.parseNuls(2000);
     /**
      * Maximum acceptable number of delegate

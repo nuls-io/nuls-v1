@@ -313,18 +313,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             HashSet set = new HashSet(fromSize);
             Na fromTotal = Na.ZERO;
             byte[] fromBytes;
-            // 保存在数据中的utxo数据
-            Coin fromInDBorList = null;
+            // 保存在数据库中或者txList中的utxo数据
+            Coin dbOrListFromUtxo = null;
             byte[] fromAdressBytes = null;
             for (Coin from : froms) {
                 fromBytes = from.getOwner();
                 // 验证是否可花费, 校验的coinData的fromUTXO，检查数据库中或者txList中是否存在此UTXO
                 //Log.info("getUTXO: hash-" + LedgerUtil.getTxHash(fromBytes) + ", index-" + LedgerUtil.getIndex(fromBytes));
-                fromInDBorList = utxoLedgerUtxoStorageService.getUtxo(fromBytes);
-                if (fromInDBorList == null) {
-                    fromInDBorList = validateUtxoMap.get(asString(fromBytes));
+                dbOrListFromUtxo = utxoLedgerUtxoStorageService.getUtxo(fromBytes);
+                if (dbOrListFromUtxo == null) {
+                    dbOrListFromUtxo = validateUtxoMap.get(asString(fromBytes));
                 }
-                if (null == fromInDBorList) {
+                if (null == dbOrListFromUtxo) {
                     // 如果既不存在于txList的to中，又不存在于数据库中，那么这是一笔问题数据，进一步检查是否存在这笔交易，交易有就是双花，没有就是孤儿交易，则返回失败
                     if (null != utxoLedgerTransactionStorageService.getTxBytes(LedgerUtil.getTxHashBytes(fromBytes))) {
                         return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT, "no UTXO in DB&&txList, had one tx.");
@@ -332,7 +332,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                         return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.ORPHAN_TX);
                     }
                 } else {
-                    fromAdressBytes = fromInDBorList.getOwner();
+                    fromAdressBytes = dbOrListFromUtxo.getOwner();
                     // 验证地址中的公钥hash160和交易中的公钥hash160是否相等，不相等则说明这笔utxo不属于交易发出者
                     if (!checkPublicKeyHash(fromAdressBytes, user)) {
                         Log.warn("public key hash160 check error.");
