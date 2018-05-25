@@ -481,11 +481,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
 
-        Result<Account> result = accountService.getAccount(address);
-        if (result.getData() != null) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST);
-        }
-
         long start = 0;
         long end = NulsContext.getInstance().getBestHeight();
         while (start < end) {
@@ -735,8 +730,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 }
                 try {
                     byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                    byte[] toKey = org.spongycastle.util.Arrays.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
-                    to = ledgerService.getUtxo(toKey);
+                    if(to.getLockTime() == -1) {
+                        byte[] toKey = org.spongycastle.util.Arrays.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
+                        to = ledgerService.getUtxo(toKey);
+                    }
                     toMap.put(outKey, to.serialize());
                 } catch (IOException e) {
                     throw new NulsRuntimeException(e);
