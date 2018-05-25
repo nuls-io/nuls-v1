@@ -1,12 +1,17 @@
 package io.nuls.account.rpc.processor;
 
+import io.nuls.account.rpc.model.AccountKeyStoreDto;
 import io.nuls.core.tools.cmd.CommandBuilder;
 import io.nuls.core.tools.cmd.CommandHelper;
+import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
+
+import java.io.*;
 
 /**
  * @author: Charlie
@@ -51,7 +56,47 @@ public class ImportByKeyStoreProcessor implements CommandProcessor {
     }
 
     @Override
+
     public Result execute(String[] args) {
+        return null;
+    }
+
+    private static String testPath1 = "/Users/lichao/Documents/工作文档/测试数据/AccountKeystore.ks";
+    private static String testPath2 = "/Users/lichao/Downloads/AccountKeystore.ks";
+
+    public static void main(String[] args) {
+        getAccountKeystoreDto(testPath2);
+    }
+
+    private static Result getAccountKeystoreDto(String path) {
+        File file = new File(path);
+        System.out.println(file);
+        if (null != file && file.isFile()) {
+            StringBuilder ks = new StringBuilder();
+            BufferedReader reader = null;
+            String str = null;
+
+            try {
+                reader = new BufferedReader(new FileReader(file));
+                while ((str = reader.readLine()) != null) {
+                    if (!str.isEmpty()) {
+                        ks.append(str);
+                    }
+                }
+                //String jsonStr = ks.toString();
+                //ystem.out.println(jsonStr);
+                AccountKeyStoreDto accountKeyStoreDto = JSONUtils.json2pojo(ks.toString(), AccountKeyStoreDto.class);
+                //System.out.println(JSONUtils.obj2json(accountKeyStoreDto));
+                Result.getSuccess().setData(accountKeyStoreDto);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
         return null;
     }
 }

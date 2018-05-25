@@ -39,7 +39,6 @@ public class RewardStatisticsProcessTask implements Runnable {
 
     public RewardStatisticsProcessTask(RewardStatisticsProcess process) {
         this.process = process;
-        this.process.initProcess();
     }
 
     @Override

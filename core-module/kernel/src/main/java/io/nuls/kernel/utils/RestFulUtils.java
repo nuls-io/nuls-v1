@@ -37,10 +37,8 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
- *
  * @author Niels
  * @date 2017/10/31
- *
  */
 public class RestFulUtils {
 
@@ -76,6 +74,7 @@ public class RestFulUtils {
                 target = target.queryParam(key, params.get(key));
             }
         }
+
         return target.request(APPLICATION_JSON).get(Result.class);
     }
 

@@ -29,6 +29,8 @@ import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Account;
 import io.nuls.account.service.AccountService;
+import io.nuls.consensus.poc.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.model.RewardItem;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
@@ -46,10 +48,7 @@ import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.service.BlockService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author: Niels Wang
@@ -82,29 +81,26 @@ public class PocRewardCacheService {
         if (null == accountList || accountList.isEmpty()) {
             return;
         }
-        Block block = blockService.getBestBlock().getData();
-        if (null == block || block.getHeader().getHeight() == 0) {
-            Log.error("Data Error!");
-            return;
-        }
-        List<Block> blockList = new ArrayList<>();
+
         long startTime = TimeService.currentTimeMillis() - 24 * 3600000L;
+        long startHeight = NulsContext.getInstance().getBestHeight() - (24 * 3600 / ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND);
+
+        if (startHeight <= 0) {
+            startHeight = 1;
+        }
+        long index = startHeight;
         while (true) {
+            Block block = blockService.getBlock(index++).getData();
+            if (null == block) {
+                break;
+            }
+            if (block.getHeader().getHeight() < 1) {
+                break;
+            }
             if (block.getHeader().getTime() < startTime) {
-                break;
+                continue;
             }
-            blockList.add(0, block);
-            if (block.getHeader().getHeight() == 1) {
-                break;
-            }
-            block = blockService.getBlock(block.getHeader().getPreHash()).getData();
-        }
-        if (blockList.isEmpty()) {
-            Log.warn("The block data is wrong!");
-            return;
-        }
-        for (Block b : blockList) {
-            this.addBlock(b);
+            this.addBlock(block);
         }
         //本地账户的历史收益累计
         for (Account account : accountList) {
@@ -112,7 +108,7 @@ public class PocRewardCacheService {
             if (list == null || list.isEmpty()) {
                 continue;
             }
-            calcRewardHistory(account.getAddress().getBase58(), list, blockList.get(0).getHeader().getHeight());
+            calcRewardHistory(account.getAddress().getBase58(), list, startHeight);
         }
 
         long totalValue = ledgerService.getWholeUTXO();
@@ -121,18 +117,38 @@ public class PocRewardCacheService {
     }
 
     private void calcRewardHistory(String address, List<TransactionInfo> list, long startHeight) {
+        byte[] addressByte = new byte[0];
+        try {
+            addressByte = Base58.decode(address);
+        } catch (Exception e) {
+            Log.error(e);
+            return;
+        }
         for (TransactionInfo info : list) {
             if (info.getTxType() != ProtocolConstant.TX_TYPE_COINBASE) {
-                continue;
-            }
-            if (info.getBlockHeight() >= startHeight) {
                 continue;
             }
             CoinBaseTransaction tx = (CoinBaseTransaction) ledgerService.getTx(info.getTxHash());
             if (null == tx) {
                 continue;
             }
-            calcReward(info.getBlockHeight(), tx);
+            if (info.getBlockHeight() >= startHeight) {
+                continue;
+            }
+            if (null == tx.getCoinData().getTo() || tx.getCoinData().getTo().isEmpty()) {
+                continue;
+            }
+            for (Coin coin : tx.getCoinData().getTo()) {
+                if (!Arrays.equals(addressByte, coin.getOwner())) {
+                    continue;
+                }
+                Na na = totalMap.get(address);
+                if (na == null) {
+                    na = Na.ZERO;
+                }
+                na = na.add(coin.getNa());
+                totalMap.put(address, na);
+            }
         }
 
     }
@@ -171,12 +187,18 @@ public class PocRewardCacheService {
             map.put(height, new RewardItem(time, coin.getNa()));
         }
 
+        Na tna = todayMap.get(address);
+        if (tna == null) {
+            tna = Na.ZERO;
+        }
+        tna = tna.add(coin.getNa());
+        todayMap.put(address, tna);
         Na na = totalMap.get(address);
         if (na == null) {
             na = Na.ZERO;
         }
         na = na.add(coin.getNa());
-        todayMap.put(address, na);
+        totalMap.put(address, na);
         if (height > totalRewardHeight) {
             totalReward = totalReward.add(coin.getNa());
         }
@@ -196,7 +218,6 @@ public class PocRewardCacheService {
                     continue;
                 }
                 map.remove(block.getHeader().getHeight());
-
 
                 Na na = totalMap.get(address);
                 if (na == null) {

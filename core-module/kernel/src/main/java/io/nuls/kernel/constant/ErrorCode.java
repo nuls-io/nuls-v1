@@ -40,15 +40,19 @@ public class ErrorCode {
      * 消息内容的国际化编码
      * Internationalized encoding of message content.
      */
-    private final int msg;
+    private String msg;
 
     /**
      * 返回码，用于标记唯一的结果
      * The return code is used to mark the unique result.
      */
-    private final String code;
+    private String code;
 
-    protected ErrorCode(String code, int msg) {
+    public ErrorCode() {
+
+    }
+
+    protected ErrorCode(String code, String msg) {
         this.code = code;
         this.msg = msg;
         if (null == code) {
@@ -68,7 +72,7 @@ public class ErrorCode {
         return code;
     }
 
-    public static final ErrorCode init(String code, int msg) {
+    public static final ErrorCode init(String code, String msg) {
         return new ErrorCode(code, msg);
     }
 

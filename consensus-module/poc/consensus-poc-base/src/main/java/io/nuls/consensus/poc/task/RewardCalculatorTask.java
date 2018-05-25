@@ -23,28 +23,23 @@
  *
  */
 
-package io.nuls.account.constant;
+package io.nuls.consensus.poc.task;
 
-import io.nuls.kernel.constant.ErrorCode;
-
-/**
+import io.nuls.consensus.poc.process.RewardStatisticsProcess; /**
  * @author: Niels Wang
- * @date: 2018/5/5
+ * @date: 2018/5/25
  */
-public interface AccountErrorCode {
+public class RewardCalculatorTask implements Runnable {
 
-    ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("ACT000", "50000");
-    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("ACT001", "50001");
-    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED = ErrorCode.init("ACT002", "50002");
-    ErrorCode ACCOUNT_EXIST = ErrorCode.init("ACT003", "50003");
-    ErrorCode ADDRESS_ERROR = ErrorCode.init("ACT004", "50004");
-    ErrorCode ALIAS_EXIST = ErrorCode.init("ACT005", "50005");
-    ErrorCode ALIAS_ERROR = ErrorCode.init("ACT006", "50006");
-    ErrorCode ACCOUNT_ALREADY_SET_ALIAS = ErrorCode.init("ACT007", "50007");
-    ErrorCode PARAMETER_ERROR = ErrorCode.init("ACT008", "50008");
-    ErrorCode DATA_PARSE_ERROR = ErrorCode.init("ACT009", "50009");
-    ErrorCode SUCCESS = ErrorCode.init("ACT010", "50010");
-    ErrorCode FAILED = ErrorCode.init("ACT011", "50011");
-    ErrorCode INSUFFICIENT_BALANCE = ErrorCode.init("ACT012", "50012");
-    ErrorCode ALIAS_ROLLBACK_ERROR = ErrorCode.init("ACT013", "50013");
+    private final RewardStatisticsProcess process;
+
+    public RewardCalculatorTask(RewardStatisticsProcess process) {
+        this.process = process;
+
+    }
+
+    @Override
+    public void run() {
+        process.calculate();
+    }
 }
