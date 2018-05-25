@@ -10,35 +10,37 @@ import io.nuls.kernel.processor.CommandProcessor;
  * @author: Charlie
  * @date: 2018/5/25
  */
-public class CreateAccountProcessor implements CommandProcessor {
+public class ImportByKeyStoreProcessor implements CommandProcessor {
+
     @Override
     public String getCommand() {
-        return "createaccount";
+        return "importkeystore";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t[password] The password for the account, the password is between 8 and 20 inclusive of numbers and letters, not encrypted by default");
+                .newLine("\t<path> The path to the AccountKeystore file ")
+                .newLine("\t[password] the password is between 8 and 20 inclusive of numbers and letters, not encrypted by default");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "createaccount [password] --create a account, encrypted by [password] | not encrypted by default";
+        return "importkeystore <path> [password] -- Import accounts according to AccountKeystore files";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length < 1 || length > 2) {
+        if (length < 2 || length > 3) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (length == 2 && !StringUtils.validPassword(args[1])) {
+        if (length == 3 && !StringUtils.validPassword(args[2])) {
             return false;
         }
         return true;
@@ -46,7 +48,6 @@ public class CreateAccountProcessor implements CommandProcessor {
 
     @Override
     public Result execute(String[] args) {
-        // todo auto-generated method stub
         return null;
     }
 }
