@@ -10,6 +10,7 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.ledger.service.LedgerService;
@@ -77,18 +78,18 @@ public class GetAccountTxListProcessor implements CommandProcessor {
     }
 
     @Override
-    public Result execute(String[] args) {
+    public RpcClientResult execute(String[] args) {
         Result<List<TransactionInfoDto>> dtoResult = Result.getSuccess();
         byte[] addressBytes = null;
         int type = 0;
         int start = 0;
         int limit = 0;
 
-        try {
-            addressBytes = Base58.decode(args[1]);
-        } catch (Exception e) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
-        }
+//        try {
+//            addressBytes = Base58.decode(args[1]);
+//        } catch (Exception e) {
+//            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+//        }
 
         if (args.length == 4) {
             start = Integer.parseInt(args[2]);
@@ -100,11 +101,11 @@ public class GetAccountTxListProcessor implements CommandProcessor {
         }
 
         Result<List<TransactionInfo>> rawResult = accountLedgerService.getTxInfoList(addressBytes);
-        if (rawResult.isFailed()) {
-            dtoResult.setSuccess(false);
-            dtoResult.setErrorCode(rawResult.getErrorCode());
-            return dtoResult;
-        }
+//        if (rawResult.isFailed()) {
+//            dtoResult.setSuccess(false);
+//            dtoResult.setErrorCode(rawResult.getErrorCode());
+//            return dtoResult;
+//        }
         List<TransactionInfo> infoList = rawResult.getData();
         if (type != 0) {
             for (int i = infoList.size() - 1; i >= 0; i--) {
@@ -114,9 +115,9 @@ public class GetAccountTxListProcessor implements CommandProcessor {
             }
         }
 
-        if (start > infoList.size() || infoList.size() == 0) {
-            return dtoResult;
-        }
+//        if (start > infoList.size() || infoList.size() == 0) {
+//            return dtoResult;
+//        }
         int end = start + limit;
         if (end > infoList.size()) {
             end = infoList.size();
@@ -135,6 +136,7 @@ public class GetAccountTxListProcessor implements CommandProcessor {
         }
 
         dtoResult.setData(infoDtoList);
-        return dtoResult;
+//        return dtoResult;
+        return null;
     }
 }

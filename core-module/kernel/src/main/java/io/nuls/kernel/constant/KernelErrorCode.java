@@ -116,4 +116,6 @@ public interface KernelErrorCode {
     ErrorCode CANCEL_CONSENSUS = ErrorCode.init("MSG013", 80013);
     ErrorCode BALANCE_CHANGE = ErrorCode.init("MSG014", 80014);
 
+
+
 }

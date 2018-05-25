@@ -69,7 +69,6 @@ public class Bootstrap {
             String ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP, RpcConstant.DEFAULT_IP);
             int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);
             RpcServerManager.getInstance().startServer(ip, port);
-            CommandHandler.getInstance().init();
             Thread.sleep(3000);
         } while (false);
         while (true) {
