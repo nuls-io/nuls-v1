@@ -495,6 +495,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 List<NulsDigestData> txs = blockService.getBlock(i).getData().getTxHashList();
                 for (int j = 0; j < txs.size(); j++) {
                     Transaction tx = ledgerService.getTx(txs.get(j));
+                    if (tx == null) {
+                        return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+                    }
                     saveTransaction(tx, addressBytes, TransactionInfo.CONFIRMED);
                 }
             }
@@ -549,7 +552,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     protected Result<Integer> saveTransaction(Transaction tx, byte status) {
-
+        if (tx == null) {
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+        }
         List<byte[]> addresses = getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
             return Result.getSuccess().setData(new Integer(0));
@@ -580,7 +585,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     protected Result<Integer> saveTransaction(Transaction tx, byte[] address, byte status) {
-        List<byte[]> destAddresses = new ArrayList<byte[]>();
+        List<byte[]> destAddresses = new ArrayList<>();
         destAddresses.add(address);
         List<byte[]> addresses = getRelatedAddresses(tx, destAddresses);
         if (addresses == null || addresses.size() == 0) {
@@ -726,12 +731,15 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             byte[] indexBytes;
             Map<byte[], byte[]> toMap = new HashMap<>();
             for (int i = 0, length = tos.size(); i < length; i++) {
-                if (!isLocalAccount(tos.get(i).getOwner())) {
+                Coin to = tos.get(i);
+                if (!isLocalAccount(to.getOwner())) {
                     continue;
                 }
                 try {
                     byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                    toMap.put(outKey, tos.get(i).serialize());
+                    byte[] toKey = org.spongycastle.util.Arrays.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
+                    to = ledgerService.getUtxo(toKey);
+                    toMap.put(outKey, to.serialize());
                 } catch (IOException e) {
                     throw new NulsRuntimeException(e);
                 }
