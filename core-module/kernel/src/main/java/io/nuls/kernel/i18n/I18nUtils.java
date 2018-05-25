@@ -113,7 +113,7 @@ public class I18nUtils {
      * @param id 信息编码
      * @return String 翻译后的字符串/The translated string.
      */
-    public static String get(int id) {
+    public static String get(String id) {
         if (nowMapping == null) {
             nowMapping = ALL_MAPPING.get(key);
         }

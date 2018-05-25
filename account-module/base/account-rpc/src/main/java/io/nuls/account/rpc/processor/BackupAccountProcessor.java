@@ -57,7 +57,7 @@ public class BackupAccountProcessor implements CommandProcessor {
     }
 
     @Override
-    public RpcClientResult execute(String[] args) {
+    public Result execute(String[] args) {
         //获取输入密码
         //导出文件
         return null;

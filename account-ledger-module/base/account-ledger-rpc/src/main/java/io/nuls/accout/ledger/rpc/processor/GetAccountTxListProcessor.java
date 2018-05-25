@@ -78,7 +78,7 @@ public class GetAccountTxListProcessor implements CommandProcessor {
     }
 
     @Override
-    public RpcClientResult execute(String[] args) {
+    public Result execute(String[] args) {
         Result<List<TransactionInfoDto>> dtoResult = Result.getSuccess();
         byte[] addressBytes = null;
         int type = 0;

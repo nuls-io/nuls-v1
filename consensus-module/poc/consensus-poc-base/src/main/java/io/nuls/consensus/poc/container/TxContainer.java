@@ -23,26 +23,41 @@
  *  * SOFTWARE.
  *
  */
+package io.nuls.consensus.poc.container;
 
-package io.nuls.kernel.constant;
+import io.nuls.kernel.model.Transaction;
 
 /**
- * Created by ln on 2018/5/6.
+ * @author ln
+ * @date 2018/5/25
  */
-public interface TransactionErrorCode {
+public class TxContainer {
 
-    /*
-     * ------------  transaction Exception code   -------------
-     */
-    ErrorCode UTXO_UNUSABLE = ErrorCode.init("LED001", "12001");
-    ErrorCode UTXO_STATUS_CHANGE = ErrorCode.init("LED002", "12002");
-    ErrorCode BALANCE_NOT_ENOUGH = ErrorCode.init("LED003", "12003");
-    ErrorCode INVALID_INPUT = ErrorCode.init("LED004", "12004");
-    ErrorCode INVALID_AMOUNT = ErrorCode.init("LED005", "12005");
-    ErrorCode ORPHAN_TX = ErrorCode.init("LED006", "12006");
-    ErrorCode ORPHAN_BLOCK = ErrorCode.init("LED007", "12007");
-    ErrorCode UTXO_NOT_FOUND = ErrorCode.init("LED008", "12008");
-    ErrorCode FEE_NOT_RIGHT = ErrorCode.init("LED009", "12009");
+    private Transaction tx;
+    private int packageCount;
 
+    public TxContainer(Transaction tx) {
+        this.tx = tx;
+    }
 
+    public TxContainer(Transaction tx, int packageCount) {
+        this.tx = tx;
+        this.packageCount = packageCount;
+    }
+
+    public Transaction getTx() {
+        return tx;
+    }
+
+    public void setTx(Transaction tx) {
+        this.tx = tx;
+    }
+
+    public int getPackageCount() {
+        return packageCount;
+    }
+
+    public void setPackageCount(int packageCount) {
+        this.packageCount = packageCount;
+    }
 }

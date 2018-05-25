@@ -53,7 +53,7 @@ public class CreateAccountProcessor implements CommandProcessor {
     }
 
     @Override
-    public RpcClientResult execute(String[] args) {
+    public Result execute(String[] args) {
         String password = null;
         if(args.length == 2){
             password = args[1];
