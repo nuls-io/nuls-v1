@@ -88,14 +88,9 @@ public class UnconfiredmTransactionStorageImpl implements UnconfirmedTransaction
     public Result<Transaction> getUnconfirmedTx(NulsDigestData hash){
         try{
             byte[] txBytes = dbService.get(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, hash.serialize());
-            if(txBytes == null) {
-                return Result.getSuccess();
-            }
             Transaction tx = TransactionManager.getInstances(new NulsByteBuffer(txBytes),1).get(0);
             return Result.getSuccess().setData(tx);
         }catch (Exception e){
-            e.printStackTrace();
-            Log.info("getUnconfirmedTx error");
             return Result.getFailed();
         }
     }
