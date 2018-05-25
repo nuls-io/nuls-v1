@@ -25,6 +25,7 @@
 
 package io.nuls.account.ledger.base.service.impl;
 
+import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.base.manager.BalanceManager;
 import io.nuls.account.ledger.base.util.CoinComparator;
 import io.nuls.account.ledger.base.util.TxInfoComparator;
@@ -50,6 +51,7 @@ import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.model.Entry;
 import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -462,6 +464,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         return Result.getSuccess();
     }
 
+    /**
+     * 导入账户
+     *
+     * @param address
+     * @return
+     */
     @Override
     public Result importAccountLedger(String address) {
         if (address == null || !Address.validAddress(address)) {
@@ -475,9 +483,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
 
+        Result<Account> result = accountService.getAccount(address);
+        if (result.getData() != null) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST);
+        }
+
         long start = 0;
         long end = NulsContext.getInstance().getBestHeight();
-        while (start <= end) {
+        while (start < end) {
             for (long i = start; i <= end; i++) {
                 List<NulsDigestData> txs = blockService.getBlock(i).getData().getTxHashList();
                 for (int j = 0; j < txs.size(); j++) {
