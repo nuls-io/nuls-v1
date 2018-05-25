@@ -540,4 +540,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             return 0L;
         }
     }
+
+    @Override
+    public Coin getUtxo(byte[] owner) {
+        if (owner == null) {
+            return null;
+        }
+        return utxoLedgerUtxoStorageService.getUtxo(owner);
+    }
 }

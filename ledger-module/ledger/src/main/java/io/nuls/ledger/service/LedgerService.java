@@ -119,4 +119,13 @@ public interface LedgerService {
      * @return
      */
     long getWholeUTXO();
+
+    /**
+     * get UTXO by key
+     *
+     * 根据key获取UTXO
+     * @param owner
+     * @return
+     */
+    Coin getUtxo(byte[] owner);
 }
