@@ -1,9 +1,11 @@
 package io.nuls.account.rpc.processor;
 
+import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.rpc.model.AccountKeyStoreDto;
 import io.nuls.core.tools.cmd.CommandBuilder;
 import io.nuls.core.tools.cmd.CommandHelper;
 import io.nuls.core.tools.json.JSONUtils;
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
@@ -58,45 +60,59 @@ public class ImportByKeyStoreProcessor implements CommandProcessor {
     @Override
 
     public Result execute(String[] args) {
+        String path = args[1];
+        String password = args.length == 3 ? args[2] : null;
+        Result result = getAccountKeystoreDto(path);
+        if(result.isFailed()){
+            return result;
+        }
+        AccountKeyStoreDto accountKeyStoreDto = (AccountKeyStoreDto)result.getData();
+        //todo 调RPC
+
         return null;
     }
 
-    private static String testPath1 = "/Users/lichao/Documents/工作文档/测试数据/AccountKeystore.ks";
-    private static String testPath2 = "/Users/lichao/Downloads/AccountKeystore.ks";
 
-    public static void main(String[] args) {
-        getAccountKeystoreDto(testPath2);
-    }
-
-    private static Result getAccountKeystoreDto(String path) {
+    /**
+     * 根据文件地址获取AccountKeystoreDto对象
+     * Gets the AccountKeystoreDto object based on the file address
+     * @param path
+     * @return
+     */
+    private Result<AccountKeyStoreDto> getAccountKeystoreDto(String path) {
         File file = new File(path);
-        System.out.println(file);
         if (null != file && file.isFile()) {
             StringBuilder ks = new StringBuilder();
-            BufferedReader reader = null;
-            String str = null;
-
+            BufferedReader bufferedReader = null;
+            String str;
             try {
-                reader = new BufferedReader(new FileReader(file));
-                while ((str = reader.readLine()) != null) {
+                bufferedReader = new BufferedReader(new FileReader(file));
+                while ((str = bufferedReader.readLine()) != null) {
                     if (!str.isEmpty()) {
                         ks.append(str);
                     }
                 }
-                //String jsonStr = ks.toString();
-                //ystem.out.println(jsonStr);
                 AccountKeyStoreDto accountKeyStoreDto = JSONUtils.json2pojo(ks.toString(), AccountKeyStoreDto.class);
-                //System.out.println(JSONUtils.obj2json(accountKeyStoreDto));
-                Result.getSuccess().setData(accountKeyStoreDto);
+                return Result.getSuccess().setData(accountKeyStoreDto);
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                Log.error(e);
+                return Result.getFailed(AccountErrorCode.ACCOUNTKEYSTORE_FILE_NOT_EXIST);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.error(e);
+                return Result.getFailed(AccountErrorCode.ACCOUNTKEYSTORE_FILE_DAMAGED);
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.error(e);
+                return Result.getFailed(AccountErrorCode.ACCOUNTKEYSTORE_FILE_DAMAGED);
+            } finally {
+                if (bufferedReader != null) {
+                    try {
+                        bufferedReader.close();
+                    } catch (IOException e) {
+                        Log.error(e);
+                    }
+                }
             }
-
         }
-        return null;
+        return Result.getFailed(AccountErrorCode.ACCOUNTKEYSTORE_FILE_NOT_EXIST);
     }
 }

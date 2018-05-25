@@ -47,4 +47,6 @@ public interface AccountErrorCode {
     ErrorCode FAILED = ErrorCode.init("ACT011", "50011");
     ErrorCode INSUFFICIENT_BALANCE = ErrorCode.init("ACT012", "50012");
     ErrorCode ALIAS_ROLLBACK_ERROR = ErrorCode.init("ACT013", "50013");
+    ErrorCode ACCOUNTKEYSTORE_FILE_NOT_EXIST = ErrorCode.init("ACT014", "50014");
+    ErrorCode ACCOUNTKEYSTORE_FILE_DAMAGED = ErrorCode.init("ACT015", "50015");
 }
