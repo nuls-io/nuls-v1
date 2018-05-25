@@ -16,10 +16,15 @@ public class CommandHandler {
 
     public static final Map<String, CommandProcessor> PROCESSOR_MAP = new TreeMap<>();
 
-    public CommandHandler() {
+    private CommandHandler() {
 
     }
 
+    private static CommandHandler instance = new CommandHandler();
+
+    public static CommandHandler getInstance() {
+        return instance;
+    }
     /**
      * 初始化加载所有命令行实现
      */
@@ -36,8 +41,6 @@ public class CommandHandler {
 
 
     public static void main(String[] args) {
-        CommandHandler instance = new CommandHandler();
-        instance.init();
         System.out.print(CommandConstant.COMMAND_PS1);
         Scanner scan = new Scanner(System.in);
         while (scan.hasNextLine()) {

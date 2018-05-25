@@ -25,6 +25,7 @@
 
 package io.nuls.client;
 
+import io.nuls.client.cmd.CommandHandler;
 import io.nuls.client.rpc.RpcServerManager;
 import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
@@ -68,6 +69,7 @@ public class Bootstrap {
             String ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP, RpcConstant.DEFAULT_IP);
             int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);
             RpcServerManager.getInstance().startServer(ip, port);
+            CommandHandler.getInstance().init();
             Thread.sleep(3000);
         } while (false);
         while (true) {
