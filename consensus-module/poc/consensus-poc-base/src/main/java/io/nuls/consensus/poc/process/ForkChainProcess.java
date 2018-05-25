@@ -464,11 +464,13 @@ public class ForkChainProcess {
             Collections.reverse(successList);
             for (Block rollBlock : successList) {
                 blockService.rollbackBlock(rollBlock);
+                RewardStatisticsProcess.rollbackBlock(rollBlock);
             }
 
             Collections.reverse(rollbackBlockList);
             for (Block addBlock : rollbackBlockList) {
                 blockService.saveBlock(addBlock);
+                RewardStatisticsProcess.addBlock(addBlock);
             }
         }
         return changeSuccess;
@@ -481,11 +483,13 @@ public class ForkChainProcess {
             try {
                 boolean success = blockService.rollbackBlock(rollbackBlock).isSuccess();
                 if (success) {
+                    RewardStatisticsProcess.rollbackBlock(rollbackBlock);
                     rollbackList.add(rollbackBlock);
                 } else {
                     for (Block block : rollbackList) {
                         try {
                             blockService.saveBlock(block);
+                            RewardStatisticsProcess.addBlock(block);
                         } catch (Exception ex) {
                             Log.error("Rollback failed, failed to save block during recovery", ex);
                             break;
@@ -499,6 +503,7 @@ public class ForkChainProcess {
                 for (Block block : rollbackList) {
                     try {
                         blockService.saveBlock(block);
+                        RewardStatisticsProcess.addBlock(block);
                     } catch (Exception ex) {
                         Log.error("Rollback failed, failed to save block during recovery", ex);
                         break;

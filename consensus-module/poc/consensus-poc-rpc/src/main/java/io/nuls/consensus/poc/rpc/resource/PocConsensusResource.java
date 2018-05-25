@@ -19,6 +19,7 @@ import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.rpc.model.*;
 import io.nuls.consensus.poc.rpc.utils.AgentComparator;
+import io.nuls.consensus.poc.service.impl.PocRewardCacheService;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Base58;
@@ -74,6 +75,9 @@ public class PocConsensusResource {
     @Autowired
     private LedgerService ledgerService;
 
+    @Autowired
+    private PocRewardCacheService rewardCacheService;
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("Get the whole network consensus infomation! 查询全网共识总体信息 [3.6.1]")
@@ -109,8 +113,7 @@ public class PocConsensusResource {
         }
 
         dto.setAgentCount(agentList.size());
-        //todo 需要添加计算奖励的机制
-        dto.setRewardOfDay(201800000000L);
+        dto.setRewardOfDay(this.rewardCacheService.getAllReward().getValue());
         dto.setTotalDeposit(totalDeposit);
         dto.setConsensusAccountNumber(memberCount);
         result.setData(dto);
@@ -176,9 +179,8 @@ public class PocConsensusResource {
         dto.setAgentCount(agentCount);
         dto.setAgentHash(agentHash);
         dto.setJoinAgentCount(agentSet.size());
-        //todo 需要添加计算奖励的机制
-        dto.setReward(201800000000L);
-        dto.setRewardOfDay(201800000000L);
+        dto.setReward(this.rewardCacheService.getReward(address).getValue());
+        dto.setRewardOfDay(rewardCacheService.getRewardToday(address).getValue());
         dto.setTotalDeposit(totalDeposit);
         try {
             dto.setUsableBalance(accountLedgerService.getBalance(addressBytes).getData().getUsable().getValue());

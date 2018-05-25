@@ -31,6 +31,7 @@ import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.locker.Lockers;
+import io.nuls.consensus.poc.process.RewardStatisticsProcess;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
 import io.nuls.consensus.service.ConsensusService;
@@ -111,7 +112,10 @@ public class ConsensusPocServiceImpl implements ConsensusService {
             success = blockService.rollbackBlock(block).isSuccess();
             if (!success) {
                 PocConsensusContext.getChainManager().getMasterChain().addBlock(block);
+            } else {
+                RewardStatisticsProcess.rollbackBlock(block);
             }
+
         }
         return new Result(success, null);
     }

@@ -34,14 +34,14 @@ import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.process.*;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
-import io.nuls.consensus.poc.task.BlockMonitorProcessTask;
-import io.nuls.consensus.poc.task.BlockProcessTask;
-import io.nuls.consensus.poc.task.ConsensusProcessTask;
-import io.nuls.consensus.poc.task.ForkChainProcessTask;
+import io.nuls.consensus.poc.task.*;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -95,9 +95,9 @@ public class ConsensusScheduler {
         orphanBlockProcess = new OrphanBlockProcess(chainManager, orphanBlockProvider);
         orphanBlockProcess.start();
 
-//        ScheduledThreadPoolExecutor executor = TaskManager.createScheduledThreadPool(new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS,"Block-Monitor"));
-
         threadPool.scheduleAtFixedRate(new BlockMonitorProcessTask(new BlockMonitorProcess(chainManager)), 120, 120, TimeUnit.SECONDS);
+
+        threadPool.scheduleAtFixedRate(new RewardStatisticsProcessTask(NulsContext.getServiceBean(RewardStatisticsProcess.class)), ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND, ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND, TimeUnit.SECONDS);
         return true;
     }
 
