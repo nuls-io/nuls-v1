@@ -6,6 +6,7 @@ import io.nuls.core.tools.cmd.CommandHelper;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
 
 /**
@@ -51,7 +52,7 @@ public class GetAssetProcessor implements CommandProcessor {
     }
 
     @Override
-    public Result execute(String[] args) {
+    public RpcClientResult execute(String[] args) {
         return null;
     }
 }
