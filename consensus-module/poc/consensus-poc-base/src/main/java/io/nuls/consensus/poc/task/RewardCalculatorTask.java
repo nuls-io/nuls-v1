@@ -25,28 +25,21 @@
 
 package io.nuls.consensus.poc.task;
 
-import io.nuls.consensus.poc.process.RewardStatisticsProcess;
-import io.nuls.core.tools.log.Log;
-
-/**
- * @author Niels
- * @date 2018/5/18
+import io.nuls.consensus.poc.process.RewardStatisticsProcess; /**
+ * @author: Niels Wang
+ * @date: 2018/5/25
  */
-public class RewardStatisticsProcessTask implements Runnable {
-
+public class RewardCalculatorTask implements Runnable {
 
     private final RewardStatisticsProcess process;
 
-    public RewardStatisticsProcessTask(RewardStatisticsProcess process) {
+    public RewardCalculatorTask(RewardStatisticsProcess process) {
         this.process = process;
+
     }
 
     @Override
     public void run() {
-        try {
-            process.doProcess();
-        } catch (Exception e) {
-            Log.error(e);
-        }
+        process.calculate();
     }
 }
