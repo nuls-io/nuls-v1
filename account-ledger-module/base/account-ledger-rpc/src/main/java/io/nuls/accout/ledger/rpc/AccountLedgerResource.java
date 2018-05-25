@@ -215,6 +215,9 @@ public class AccountLedgerResource {
             if (tx == null) {
                 tx = accountLedgerService.getUnconfirmedTransaction(info.getTxHash()).getData();
             }
+            if(tx == null) {
+                continue;
+            }
             info.setInfo(tx.getInfo(addressBytes));
             infoDtoList.add(new TransactionInfoDto(info));
 
@@ -286,6 +289,9 @@ public class AccountLedgerResource {
                 } catch (NulsException e) {
                     Log.error(e);
                 }
+            }
+            if(tx == null) {
+                continue;
             }
             utxoDtoList.add(new UtxoDto(coin, tx));
         }
