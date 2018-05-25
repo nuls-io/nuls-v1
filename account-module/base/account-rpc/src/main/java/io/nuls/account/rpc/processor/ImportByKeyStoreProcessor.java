@@ -65,16 +65,17 @@ public class ImportByKeyStoreProcessor implements CommandProcessor {
     private static String testPath2 = "/Users/lichao/Downloads/AccountKeystore.ks";
 
     public static void main(String[] args) {
-        getFile(testPath2);
+        getAccountKeystoreDto(testPath2);
     }
 
-    private static void getFile(String path) {
+    private static Result getAccountKeystoreDto(String path) {
         File file = new File(path);
         System.out.println(file);
         if (null != file && file.isFile()) {
             StringBuilder ks = new StringBuilder();
             BufferedReader reader = null;
             String str = null;
+
             try {
                 reader = new BufferedReader(new FileReader(file));
                 while ((str = reader.readLine()) != null) {
@@ -82,7 +83,11 @@ public class ImportByKeyStoreProcessor implements CommandProcessor {
                         ks.append(str);
                     }
                 }
+                //String jsonStr = ks.toString();
+                //ystem.out.println(jsonStr);
                 AccountKeyStoreDto accountKeyStoreDto = JSONUtils.json2pojo(ks.toString(), AccountKeyStoreDto.class);
+                //System.out.println(JSONUtils.obj2json(accountKeyStoreDto));
+                Result.getSuccess().setData(accountKeyStoreDto);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -92,5 +97,6 @@ public class ImportByKeyStoreProcessor implements CommandProcessor {
             }
 
         }
+        return null;
     }
 }
