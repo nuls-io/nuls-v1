@@ -115,25 +115,25 @@ public class ForkChainProcess {
 
             ChainLog.debug("discover the fork chain {} : start {} - {} , end {} - {} , exceed the master {} - {} - {}, start verify the fork chian", newChain.getChain().getId(), newChain.getChain().getStartBlockHeader().getHeight(), newChain.getChain().getStartBlockHeader().getHash(), newChain.getChain().getEndBlockHeader().getHeight(), newChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlockHeight(), chainManager.getBestBlock().getHeader().getHash());
 
-            ChainContainer resultChain = verifyNewChain(newChain);
+            Lockers.CHAIN_LOCK.lock();
+            try {
+                ChainContainer resultChain = verifyNewChain(newChain);
 
-            if (resultChain == null) {
-                ChainLog.debug("verify the fork chain fail {} remove it", newChain.getChain().getId());
+                if (resultChain == null) {
+                    ChainLog.debug("verify the fork chain fail {} remove it", newChain.getChain().getId());
 
-                chainManager.getChains().remove(newChain);
-            } else {
-                //Verify pass, try to switch chain
-                Lockers.CHAIN_LOCK.lock();
-                try {
-                    //验证通过，尝试切换链
-                    boolean success = changeChain(resultChain, newChain);
-                    if (success) {
-                        chainManager.getChains().remove(newChain);
-                    }
-                    ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", newChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
-                } finally {
-                    Lockers.CHAIN_LOCK.unlock();
+                    chainManager.getChains().remove(newChain);
+                } else {
+                    //Verify pass, try to switch chain
+                        //验证通过，尝试切换链
+                        boolean success = changeChain(resultChain, newChain);
+                        if (success) {
+                            chainManager.getChains().remove(newChain);
+                        }
+                        ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", newChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
                 }
+            } finally {
+                Lockers.CHAIN_LOCK.unlock();
             }
         }
 
