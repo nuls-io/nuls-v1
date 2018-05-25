@@ -74,9 +74,8 @@ public class RestFulUtils {
                 target = target.queryParam(key, params.get(key));
             }
         }
-        Result result = target.request(APPLICATION_JSON).get(Result.class);
 
-        return result;
+        return target.request(APPLICATION_JSON).get(Result.class);
     }
 
     public Result post(String path, Map<String, String> paramsMap) {
