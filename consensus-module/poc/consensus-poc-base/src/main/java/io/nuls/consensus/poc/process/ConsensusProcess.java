@@ -32,6 +32,7 @@ import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
+import io.nuls.consensus.poc.container.TxContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.BlockData;
@@ -165,7 +166,7 @@ public class ConsensusProcess {
                     if (txHashList.contains(transaction.getHash())) {
                         continue;
                     }
-                    txMemoryPool.add(transaction, false);
+                    txMemoryPool.add(new TxContainer(transaction), false);
                 }
                 block = doPacking(self, round);
             }
@@ -280,9 +281,9 @@ public class ConsensusProcess {
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 500L) {
                 break;
             }
-            Transaction tx = txMemoryPool.get();
+            TxContainer txContainer = txMemoryPool.get();
 
-            if (tx == null) {
+            if (txContainer == null) {
                 try {
                     Thread.sleep(100L);
                 } catch (InterruptedException e) {
@@ -290,9 +291,14 @@ public class ConsensusProcess {
                 }
                 continue;
             }
+            if(txContainer.getTx() == null || txContainer.getPackageCount() >= 3) {
+                continue;
+            }
+
+            Transaction tx = txContainer.getTx();
 
             if ((totalSize + tx.size()) > ProtocolConstant.MAX_BLOCK_SIZE) {
-                txMemoryPool.add(tx, false);
+                txMemoryPool.add(txContainer, false);
                 break;
             }
             if (outHashList.contains(tx.getHash())) {
@@ -305,7 +311,8 @@ public class ConsensusProcess {
             ValidateResult result = tx.verify();
             if (result.isFailed()) {
                 if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
-                    txMemoryPool.add(tx, true);
+                    txContainer.setPackageCount(txContainer.getPackageCount() + 1);
+                    txMemoryPool.add(txContainer, true);
                 }
                 Log.warn(result.getMsg());
                 continue;
@@ -313,7 +320,8 @@ public class ConsensusProcess {
             result = ledgerService.verifyCoinData(tx, packingTxList);
             if (result.isFailed()) {
                 if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
-                    txMemoryPool.add(tx, true);
+                    txMemoryPool.add(txContainer, true);
+                    txContainer.setPackageCount(txContainer.getPackageCount() + 1);
                 }
                 Log.warn(result.getMsg());
                 continue;

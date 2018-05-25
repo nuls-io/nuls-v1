@@ -25,6 +25,7 @@
 package io.nuls.kernel.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -35,7 +36,7 @@ import java.io.Serializable;
  * @author vivi
  * @date 2017/12/12.
  */
-public class Result<T> implements Serializable{
+public class Result<T> implements Serializable {
 
     private boolean success;
 
@@ -108,12 +109,19 @@ public class Result<T> implements Serializable{
     public String toString() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("result:{");
-        buffer.append("success: " + success + ",");
-        buffer.append("validator: " + msg + ",");
+        buffer.append("\"success\": " + success + ",");
+        buffer.append("\"validator\": \"" + msg + "\",");
         if (errorCode == null) {
-            buffer.append("errorCode: ");
+            buffer.append("\"errorCode\": \"\",");
         } else {
-            buffer.append("errorCode: " + errorCode.getCode());
+            buffer.append("\"errorCode\": \"" + errorCode.getCode() + "\",");
+        }
+        if (data != null) {
+            try {
+                buffer.append("\"data\":" + JSONUtils.obj2json(data));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         buffer.append("}");
         return buffer.toString();

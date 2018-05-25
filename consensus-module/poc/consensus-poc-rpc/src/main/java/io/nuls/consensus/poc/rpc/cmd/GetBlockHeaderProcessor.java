@@ -2,23 +2,22 @@ package io.nuls.consensus.poc.rpc.cmd;
 
 import io.nuls.core.tools.cmd.CommandBuilder;
 import io.nuls.core.tools.cmd.CommandHelper;
+import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
-import io.nuls.protocol.service.BlockService;
+import io.nuls.kernel.utils.RestFulUtils;
 
 @Cmd
 @Component
 public class GetBlockHeaderProcessor implements CommandProcessor {
 
-    @Autowired
-    private BlockService blockService;
+    private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
@@ -52,26 +51,25 @@ public class GetBlockHeaderProcessor implements CommandProcessor {
 
     @Override
     public Result execute(String[] args) {
-        NulsDigestData blockHash = null;
-        long blockHeight = 0;
+        String hash = null;
+        long height = 0;
+
+        if (StringUtils.isBlank(args[1])) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR.getMsg());
+        }
 
         try {
-            blockHeight = Long.parseLong(args[1]);
+            height = Long.parseLong(args[1]);
         } catch (Exception e) {
-            try {
-                blockHash = NulsDigestData.fromDigestHex(args[1]);
-            } catch (NulsException e1) {
-                e1.printStackTrace();
-            }
+            hash = args[1];
         }
 
         Result<BlockHeader> result = null;
-        if(blockHash != null) {
-            result = blockService.getBlockHeader(blockHash);
-        }else {
-            result = blockService.getBlockHeader(blockHeight);
+        if (hash != null) {
+            result = restFul.get("/block/header/hash/" + hash, null);
+        } else {
+            result = restFul.get("/block/header/height/" + height, null);
         }
-
-        return null;
+        return result;
     }
 }

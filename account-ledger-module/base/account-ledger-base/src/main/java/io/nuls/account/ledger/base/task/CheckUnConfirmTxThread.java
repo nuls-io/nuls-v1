@@ -111,28 +111,28 @@ public class CheckUnConfirmTxThread implements Runnable {
 
         if (coinData != null) {
             // save - from
-            List<Coin> froms = coinData.getFrom();
-            Map<byte[], byte[]> fromMap = new HashMap<>();
-            for (Coin from : froms) {
-                byte[] fromSource = from.getOwner();
-                byte[] utxoFromSource = new byte[tx.getHash().size()];
-                byte[] fromIndex = new byte[fromSource.length - utxoFromSource.length];
-                System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
-                System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
-                Transaction sourceTx = null;
-                try {
-                    sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
-                } catch (Exception e) {
-                    continue;
-                }
-                byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
-                try {
-                    fromMap.put(org.spongycastle.util.Arrays.concatenate(address, from.getOwner()), sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).serialize());
-                } catch (IOException e) {
-                    throw new NulsRuntimeException(e);
-                }
-            }
-            accountLedgerStorageService.batchSaveUTXO(fromMap);
+//            List<Coin> froms = coinData.getFrom();
+//            Map<byte[], byte[]> fromMap = new HashMap<>();
+//            for (Coin from : froms) {
+//                byte[] fromSource = from.getOwner();
+//                byte[] utxoFromSource = new byte[tx.getHash().size()];
+//                byte[] fromIndex = new byte[fromSource.length - utxoFromSource.length];
+//                System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
+//                System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
+//                Transaction sourceTx = null;
+//                try {
+//                    sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
+//                } catch (Exception e) {
+//                    continue;
+//                }
+//                byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
+//                try {
+//                    fromMap.put(org.spongycastle.util.Arrays.concatenate(address, from.getOwner()), sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).serialize());
+//                } catch (IOException e) {
+//                    throw new NulsRuntimeException(e);
+//                }
+//            }
+//            accountLedgerStorageService.batchSaveUTXO(fromMap);
             // delete utxo - to
             List<Coin> tos = coinData.getTo();
             byte[] indexBytes;
