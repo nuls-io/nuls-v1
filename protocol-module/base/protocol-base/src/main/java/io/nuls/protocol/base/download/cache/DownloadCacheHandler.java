@@ -25,6 +25,7 @@
 
 package io.nuls.protocol.base.download.cache;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.protocol.constant.NotFoundType;
@@ -48,6 +49,8 @@ public class DownloadCacheHandler {
 
     public static CompletableFuture<Block> addGetBlockRequest(NulsDigestData blockHash) {
 
+        Log.error("add get block request : " + blockHash);
+
         CompletableFuture<Block> future = new CompletableFuture<>();
 
         blockCacher.put(blockHash, future);
@@ -56,10 +59,13 @@ public class DownloadCacheHandler {
     }
 
     public static void receiveBlock(Block block) {
+        Log.error("receive get block request : " + block.getHeader().getHash());
         CompletableFuture<Block> future = blockCacher.get(block.getHeader().getHash());
         if (future != null) {
             future.complete(block);
             blockCacher.remove(block.getHeader().getHash());
+        } else {
+            Log.error("========receive get block request " );
         }
     }
 
@@ -81,6 +87,7 @@ public class DownloadCacheHandler {
     }
 
     public static void notFoundBlock(NotFound data) {
+        Log.error("receive data not found message : " + data.getType() + " , "+ data.getHash());
         if (data.getType() == NotFoundType.BLOCK) {
             CompletableFuture<Block> future = blockCacher.get(data.getHash());
             if (future != null) {
@@ -107,10 +114,13 @@ public class DownloadCacheHandler {
         if (null != future) {
             future.complete(txGroup);
             txGroupCacher.remove(txGroup.getRequestHash());
+        } else {
+            Log.error("=======  receive error tx group :  " + txGroup.getRequestHash());
         }
     }
 
     public static Future<TxGroup> addGetTxGroupRequest(NulsDigestData hash) {
+        Log.error("=======  add tx group :  " + hash);
         CompletableFuture<TxGroup> future = new CompletableFuture<>();
         txGroupCacher.put(hash, future);
         return future;
