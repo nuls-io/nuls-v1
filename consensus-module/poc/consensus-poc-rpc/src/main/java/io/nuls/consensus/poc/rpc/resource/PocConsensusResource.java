@@ -337,6 +337,7 @@ public class PocConsensusResource {
         }
         Result sendResult = this.transactionService.broadcastTx(tx);
         if (sendResult.isFailed()) {
+            accountLedgerService.rollback(tx);
             return sendResult;
         }
         return Result.getSuccess();
@@ -377,7 +378,7 @@ public class PocConsensusResource {
         List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
         Agent agent = null;
         for (Agent a : agentList) {
-            if(a.getDelHeight()>0){
+            if (a.getDelHeight() > 0) {
                 continue;
             }
             if (Arrays.equals(a.getAgentAddress(), account.getAddress().getBase58Bytes())) {

@@ -376,6 +376,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             Result sendResult = transactionService.broadcastTx(tx);
             if (sendResult.isFailed()) {
+                this.rollback(tx);
                 return sendResult;
             }
             return Result.getSuccess().setData(tx.getHash().getDigestHex());
@@ -466,9 +467,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     /**
      * 导入账户
-     *
-     * @param address
-     * @return
      */
     @Override
     public Result importAccountLedger(String address) {

@@ -127,6 +127,7 @@ public class AliasService {
             }
             Result sendResult = this.transactionService.broadcastTx(tx);
             if (sendResult.isFailed()) {
+                accountLedgerService.rollback(tx);
                 return sendResult;
             }
             String hash = tx.getHash().getDigestHex();
