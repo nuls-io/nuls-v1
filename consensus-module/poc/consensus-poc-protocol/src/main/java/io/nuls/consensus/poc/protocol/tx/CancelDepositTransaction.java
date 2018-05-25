@@ -27,10 +27,13 @@ package io.nuls.consensus.poc.protocol.tx;
 
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.CancelDeposit;
+import io.nuls.core.tools.calc.DoubleUtils;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.ledger.service.LedgerService;
 
 /**
  * @author Niels
@@ -53,8 +56,14 @@ public class CancelDepositTransaction extends Transaction<CancelDeposit> {
 
     @Override
     public String getInfo(byte[] address) {
-        //todo
-        return "";
+        if (null != this.txData) {
+            LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+            DepositTransaction tx = (DepositTransaction) ledgerService.getTx(this.txData.getJoinTxHash());
+            if (null != tx) {
+                return "unlock " +tx.getTxData().getDeposit().toCoinString();
+            }
+        }
+        return "--";
     }
 
     @Override
