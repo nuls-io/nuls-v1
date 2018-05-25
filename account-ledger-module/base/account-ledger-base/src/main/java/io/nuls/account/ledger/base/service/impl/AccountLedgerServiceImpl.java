@@ -561,7 +561,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (result.isFailed()) {
             return result;
         }
-        result = saveLocalTx(tx);
+        result = saveLocalTx(tx,null);
         if (result.isFailed()) {
             transactionInfoStorageService.deleteTransactionInfo(txInfoPo);
         }
@@ -593,7 +593,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (result.isFailed()) {
             return result;
         }
-        result = saveLocalTx(tx);
+        result = saveLocalTx(tx,addresses);
         if (result.isFailed()) {
             transactionInfoStorageService.deleteTransactionInfo(txInfoPo);
         }
@@ -681,7 +681,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public void init() {
     }
 
-    public Result saveLocalTx(Transaction tx) {
+    public Result saveLocalTx(Transaction tx,List<byte[]> addresses) {
         if (tx == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
@@ -725,8 +725,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Map<byte[], byte[]> toMap = new HashMap<>();
             for (int i = 0, length = tos.size(); i < length; i++) {
                 Coin to = tos.get(i);
-                if (!isLocalAccount(to.getOwner())) {
-                    continue;
+                if(addresses == null) {
+                    if (!isLocalAccount(to.getOwner())) {
+                        continue;
+                    }
+                }else {
+                    if(!Arrays.equals(to.getOwner(),addresses.get(0))){
+                        continue;
+                    }
                 }
                 try {
                     byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
@@ -761,7 +767,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         CoinData coinData = tx.getCoinData();
 
         if (coinData != null) {
-            // delete - from
+            // save - from
             List<Coin> froms = coinData.getFrom();
             Map<byte[], byte[]> fromMap = new HashMap<>();
             for (Coin from : froms) {
@@ -774,7 +780,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 try {
                     sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
                 } catch (Exception e) {
-                    throw new NulsRuntimeException(e);
+                    continue;
                 }
                 if (sourceTx == null) {
                     return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
@@ -787,7 +793,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 }
             }
             accountLedgerStorageService.batchSaveUTXO(fromMap);
-            // save utxo - to
+            // delete utxo - to
             List<Coin> tos = coinData.getTo();
             byte[] indexBytes;
             Set<byte[]> toSet = new HashSet<>();
