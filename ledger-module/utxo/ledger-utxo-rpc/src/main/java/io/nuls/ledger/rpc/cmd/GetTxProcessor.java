@@ -1,24 +1,17 @@
 package io.nuls.ledger.rpc.cmd;
 
+import com.sun.org.apache.regexp.internal.RE;
 import io.nuls.core.tools.cmd.CommandBuilder;
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.lite.annotation.Autowired;
-import io.nuls.kernel.lite.annotation.Cmd;
-import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.CommandProcessor;
+import io.nuls.kernel.utils.RestFulUtils;
 import io.nuls.ledger.constant.LedgerErrorCode;
-import io.nuls.ledger.rpc.model.TransactionDto;
-import io.nuls.ledger.service.LedgerService;
 
-@Cmd
-@Component
 public class GetTxProcessor implements CommandProcessor {
 
-    @Autowired
-    private LedgerService ledgerService;
+    private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
@@ -49,21 +42,11 @@ public class GetTxProcessor implements CommandProcessor {
 
     @Override
     public Result execute(String[] args) {
-        NulsDigestData txHash = null;
-        try {
-            txHash = NulsDigestData.fromDigestHex(args[1]);
-        } catch (NulsException e) {
-            return Result.getFailed(LedgerErrorCode.PARAMETER_ERROR);
+        String hash = args[1];
+        if(StringUtils.isBlank(hash)) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
-
-        Transaction tx = ledgerService.getTx(txHash);
-        if (tx == null) {
-            return Result.getFailed(LedgerErrorCode.DATA_NOT_FOUND);
-        }
-        TransactionDto dto = new TransactionDto(tx);
-        Result result = Result.getSuccess();
-        result.setData(dto);
-
+        Result result = restFul.get("/tx/hash/" + hash, null);
         return result;
     }
 }
