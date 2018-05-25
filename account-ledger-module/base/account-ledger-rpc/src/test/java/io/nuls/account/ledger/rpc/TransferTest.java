@@ -1,7 +1,11 @@
 package io.nuls.account.ledger.rpc;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import org.glassfish.jersey.server.JSONP;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -11,8 +15,8 @@ public class TransferTest {
 
     public static void main(String[] args) {
 
-        String address = "NsETKiASPLWEPPMQETVbH6LvwXXNULS";
-        String toAddress = "NsHqBAAHeQBfineFx37vBedYrHYdrpW";
+        String address = "2CYqLxMgdSK5XaK9yBv43g6iEtpiAKJ";
+        String toAddress = "2Cjsa6wpKyowbVjM9oBrSeo7muEuu4w";
         long amount = 100000000;
         String password = "nuls123456";
         String remark = "test";
@@ -21,15 +25,21 @@ public class TransferTest {
 
         String url = "http://127.0.0.1:8001/accountledger/transfer";
 
-        for(int i = 0 ; i < 1000 ; i ++) {
-            String res = post(url, param, "utf-8");
-            System.out.println(res);
+        int successCount = 0;
 
-            try {
-                Thread.sleep(100L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        for(int i = 0 ; i < 10000 ; i ++) {
+            String res = post(url, param, "utf-8");
+
+            if(res.indexOf("true") != -1) {
+                successCount++;
             }
+            System.out.println(successCount + "  " + res);
+
+//            try {
+//                Thread.sleep(100L);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 

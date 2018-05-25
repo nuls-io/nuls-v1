@@ -26,6 +26,7 @@
 
 package io.nuls.consensus.poc.service.impl;
 
+import io.nuls.consensus.poc.container.TxContainer;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
@@ -72,9 +73,9 @@ public class ConsensusPocServiceImpl implements ConsensusService {
         ValidateResult verifyResult = tx.verify();
         boolean success = false;
         if (verifyResult.isSuccess()) {
-            success = txMemoryPool.add(tx, false);
+            success = txMemoryPool.add(new TxContainer(tx), false);
         } else if (verifyResult.isFailed() && TransactionErrorCode.ORPHAN_TX == verifyResult.getErrorCode()) {
-            success = txMemoryPool.add(tx, true);
+            success = txMemoryPool.add(new TxContainer(tx), true);
         }
         return new Result(success, null);
     }
