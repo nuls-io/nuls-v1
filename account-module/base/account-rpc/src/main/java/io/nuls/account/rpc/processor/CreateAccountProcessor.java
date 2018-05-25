@@ -18,9 +18,6 @@ import io.nuls.kernel.processor.CommandProcessor;
 @Component
 public class CreateAccountProcessor implements CommandProcessor {
 
-    @Autowired
-    private AccountService accountService;
-
     @Override
     public String getCommand() {
         return "createaccount";
@@ -56,12 +53,11 @@ public class CreateAccountProcessor implements CommandProcessor {
 
     @Override
     public Result execute(String[] args) {
-        // todo auto-generated method stub
         String password = null;
         if(args.length == 2){
             password = args[1];
         }
-        accountService.createAccount(password);
+        // todo
         return null;
     }
 }
