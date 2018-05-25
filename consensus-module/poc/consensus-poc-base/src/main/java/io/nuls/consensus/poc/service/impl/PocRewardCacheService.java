@@ -102,9 +102,6 @@ public class PocRewardCacheService {
             }
             this.addBlock(block);
         }
-        if (startHeight == 1) {
-            return;
-        }
         //本地账户的历史收益累计
         for (Account account : accountList) {
             List<TransactionInfo> list = accountLedgerService.getTxInfoList(account.getAddress().getBase58Bytes()).getData();
