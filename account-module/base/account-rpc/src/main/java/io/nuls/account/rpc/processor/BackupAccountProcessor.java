@@ -1,5 +1,6 @@
 package io.nuls.account.rpc.processor;
 
+import io.nuls.account.model.Address;
 import io.nuls.core.tools.cmd.CommandBuilder;
 import io.nuls.core.tools.cmd.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
@@ -10,35 +11,41 @@ import io.nuls.kernel.processor.CommandProcessor;
  * @author: Charlie
  * @date: 2018/5/25
  */
-public class CreateAccountProcessor implements CommandProcessor {
+public class BackupAccountProcessor implements CommandProcessor {
+
     @Override
     public String getCommand() {
-        return "createaccount";
+        return "backup";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t[password] The password for the account, the password is between 8 and 20 inclusive of numbers and letters, not encrypted by default");
+                .newLine("\t<address> the account you want to back up - Required")
+                .newLine("\t[path] The address of the export file defaults to the current directory");
+                //.newLine("\t[password] The password of the account, if the account does not have a password, this entry is not required");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "createaccount [password] --create a account, encrypted by [password] | not encrypted by default";
+        return "backup <address> [password] --backup the account key store";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length < 1 || length > 2) {
+        if (length < 2 || length > 3) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (length == 2 && !StringUtils.validPassword(args[1])) {
+        if (!Address.validAddress(args[1])) {
+            return false;
+        }
+        if (!StringUtils.validPassword(args[2])) {
             return false;
         }
         return true;
@@ -46,7 +53,8 @@ public class CreateAccountProcessor implements CommandProcessor {
 
     @Override
     public Result execute(String[] args) {
-        // todo auto-generated method stub
+        //获取输入密码
+        //导出文件
         return null;
     }
 }

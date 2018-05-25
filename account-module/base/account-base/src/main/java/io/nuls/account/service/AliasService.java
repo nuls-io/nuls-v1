@@ -69,7 +69,7 @@ public class AliasService {
      * @param aliasName the alias to set
      * @return txhash
      */
-    public Result<String> setAlias(String addr, String password, String aliasName) {
+    public Result<String> setAlias(String addr, String aliasName, String password) {
         if (!Address.validAddress(addr)) {
             Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }

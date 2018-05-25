@@ -165,7 +165,7 @@ public class AccountResource {
         if (StringUtils.isBlank(form.getAlias())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        return aliasService.setAlias(address, form.getPassword(), form.getAlias());
+        return aliasService.setAlias(address, form.getAlias(), form.getPassword());
     }
 
     @GET
@@ -190,6 +190,21 @@ public class AccountResource {
             return Result.getSuccess().setData(new BalanceDto(balance));
         } catch (NulsException e) {
             Log.error(e);
+            return Result.getFailed(AccountErrorCode.FAILED);
+        }
+    }
+
+    @GET
+    @Path("/balance")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("[余额] 查询本地所有账户总余额")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = BalanceDto.class)
+    })
+    public Result getTotalBalance() {
+        try {
+            return accountService.getBalance();
+        } catch (NulsException e) {
             return Result.getFailed(AccountErrorCode.FAILED);
         }
     }
@@ -395,9 +410,9 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public Result updatePasswordByAccountKeyStore(@ApiParam(name = "form", value = "重置密码表单数据", required = true)
-                                                              AccountKeyStoreResetPasswordForm form) {
+                                                          AccountKeyStoreResetPasswordForm form) {
 
-        if (null == form || null == form.getAccountKeyStoreDto() ) {
+        if (null == form || null == form.getAccountKeyStoreDto()) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         AccountKeyStoreDto accountKeyStoreDto = form.getAccountKeyStoreDto();
