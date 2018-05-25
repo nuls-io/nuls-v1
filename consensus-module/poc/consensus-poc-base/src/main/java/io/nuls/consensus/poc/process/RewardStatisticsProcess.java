@@ -62,7 +62,7 @@ public class RewardStatisticsProcess {
     @Autowired
     private PocRewardCacheService service;
 
-    public void initProcess() {
+    private void initProcess() {
         if (downloadService.isDownloadSuccess().isFailed()) {
             try {
                 Thread.sleep(ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS);
@@ -73,6 +73,12 @@ public class RewardStatisticsProcess {
             return;
         }
         service.initCache();
+
+
+    }
+
+    public void doProcess() {
+        this.initProcess();
         while (true) {
             try {
                 RewardStatisticsParam param = queue.take();
@@ -85,11 +91,6 @@ public class RewardStatisticsProcess {
                 Log.error(e);
             }
         }
-
-    }
-
-    public void doProcess() {
-        service.calcRewards();
     }
 
 
@@ -104,4 +105,7 @@ public class RewardStatisticsProcess {
         queue.add(new RewardStatisticsParam(1, block));
     }
 
+    public void calculate() {
+        service.calcRewards();
+    }
 }
