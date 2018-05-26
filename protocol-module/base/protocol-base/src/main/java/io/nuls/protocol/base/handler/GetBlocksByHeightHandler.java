@@ -68,6 +68,9 @@ public class GetBlocksByHeightHandler extends AbstractMessageHandler<GetBlocksBy
         if(param.getStartHeight() < 0L || param.getStartHeight() > param.getEndHeight()) {
             return;
         }
+        if( param.getEndHeight() - param.getStartHeight() >= MAX_SIZE) {
+            return;
+        }
 
         NulsDigestData requestHash = null;
         try {
@@ -84,9 +87,6 @@ public class GetBlocksByHeightHandler extends AbstractMessageHandler<GetBlocksBy
         Block endBlock = blockService.getBlock(param.getEndHeight()).getData();
         if(endBlock == null) {
             sendNotFound(requestHash, fromNode);
-            return;
-        }
-        if(endBlock.getHeader().getHeight() - startBlockHeader.getHeight() >= MAX_SIZE) {
             return;
         }
 
