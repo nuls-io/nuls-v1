@@ -67,7 +67,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER);
         }
         try {
-            //TestLog-
             // 保存CoinData
             Result result = saveCoinData(tx);
             if (result.isFailed()) {
@@ -119,9 +118,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             byte[] indexBytes;
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
-                    //TestLog+
-                    Coin to = tos.get(i);
-                    //TestLog-
                     batch.put(Arrays.concatenate(txHashBytes, new VarInt(i).encode()), tos.get(i).serialize());
                 } catch (IOException e) {
                     Log.error(e);
@@ -342,7 +338,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 // 验证非解锁类型的交易及解锁类型的交易
                 if (!transaction.isUnlockTx()) {
                     // 验证非解锁类型的交易，验证是否可用，检查是否还在锁定时间内
-                    if (TimeService.currentTimeMillis() < from.getLockTime()) {
+                    if (!from.usable()) {
                         return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_UNUSABLE);
                     }
                 } else {
