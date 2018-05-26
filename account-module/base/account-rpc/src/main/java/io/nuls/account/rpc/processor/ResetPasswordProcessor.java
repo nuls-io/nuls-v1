@@ -71,11 +71,11 @@ public class ResetPasswordProcessor implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        String oldpassword = args[2];
-        String newpassword = args[3];
+        String password = args[2];
+        String newPassword = args[3];
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("oldpassword", oldpassword);
-        parameters.put("newpassword", newpassword);
+        parameters.put("password", password);
+        parameters.put("newPassword", newPassword);
         Result result = restFul.put("/account/password/" + address, parameters);
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());
