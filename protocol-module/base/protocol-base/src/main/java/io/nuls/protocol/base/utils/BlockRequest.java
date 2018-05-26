@@ -27,25 +27,24 @@ package io.nuls.protocol.base.utils;
 
 import io.nuls.kernel.func.TimeService;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.message.GetBlockRequest;
-import org.spongycastle.util.Times;
+import io.nuls.protocol.message.GetBlockMessage;
 
 /**
  * @author: Niels Wang
  * @date: 2018/5/22
  */
 public class BlockRequest {
-    private GetBlockRequest message;
+    private GetBlockMessage message;
     private Node node;
     private long time;
 
-    public BlockRequest(GetBlockRequest message, Node node) {
+    public BlockRequest(GetBlockMessage message, Node node) {
         this.message = message;
         this.node = node;
         this.time = TimeService.currentTimeMillis();
     }
 
-    public GetBlockRequest getMessage() {
+    public GetBlockMessage getMessage() {
         return message;
     }
 

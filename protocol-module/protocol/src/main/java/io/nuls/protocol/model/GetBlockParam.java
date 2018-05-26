@@ -22,11 +22,11 @@
  * SOFTWARE.
  *
  */
-
 package io.nuls.protocol.model;
 
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -34,69 +34,44 @@ import io.nuls.kernel.utils.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 请求区块摘要的数据封装
- * Request block hashes data encapsulation.
+ * 请求区块或者请求区块头的数据封装
+ * Request block or request block header data encapsulation.
  *
  * @author Niels
- * @date 2018/2/8
+ * @date 2017/12/18
  */
-public class GetBlocksHashParam extends BaseNulsData {
+public class GetBlockParam extends BaseNulsData {
 
-    /**
-     * 请求的起始高度，即需要返回的第一个高度
-     * The starting height of the request is the first height to be returned.
-     */
+    private NulsDigestData blockHash;
 
-    private long startHeight;
-
-    /**
-     * 请求的结束高度，即需要返回的最后一个高度
-     * end of the blocks request
-     */
-
-    private long endHeight;
-
-    public GetBlocksHashParam() {
+    public GetBlockParam() {
     }
-
-    public GetBlocksHashParam(long startHeight, long endHeight) {
-        this.startHeight = startHeight;
-        this.endHeight = endHeight;
+    public GetBlockParam(NulsDigestData blockHash) {
+        this.blockHash = blockHash;
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfInt48();
-        size += SerializeUtils.sizeOfInt48();
+        size += SerializeUtils.sizeOfNulsData(blockHash);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeInt48(startHeight);
-        stream.writeInt48(endHeight);
+        stream.writeNulsData(blockHash);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        startHeight = byteBuffer.readInt48();
-        endHeight = byteBuffer.readInt48();
+        this.blockHash = byteBuffer.readHash();
     }
 
-    public long getStartHeight() {
-        return startHeight;
+    public NulsDigestData getBlockHash() {
+        return blockHash;
     }
 
-    public void setStartHeight(long startHeight) {
-        this.startHeight = startHeight;
-    }
-
-    public long getEndHeight() {
-        return endHeight;
-    }
-
-    public void setEndHeight(long endHeight) {
-        this.endHeight = endHeight;
+    public void setBlockHash(NulsDigestData blockHash) {
+        this.blockHash = blockHash;
     }
 }

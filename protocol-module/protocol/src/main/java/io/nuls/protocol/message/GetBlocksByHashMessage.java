@@ -20,31 +20,36 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
-package io.nuls.protocol.base.handler;
+package io.nuls.protocol.message;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.message.bus.handler.AbstractMessageHandler;
-import io.nuls.network.model.Node;
-import io.nuls.protocol.base.download.cache.DownloadCacheHandler;
-import io.nuls.protocol.message.TxGroupMessage;
-import io.nuls.protocol.model.TxGroup;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.model.GetBlocksByHashParam;
 
 /**
- * @author facjas
- * @date 2017/11/16
+ * 获取区块的消息
+ * The message for get block or blocks
+ *
+ * @author Niels
+ * @date 2017/11/13
  */
-public class TxGroupHandler extends AbstractMessageHandler<TxGroupMessage> {
+public class GetBlocksByHashMessage extends BaseProtocolMessage<GetBlocksByHashParam> {
+
+    public GetBlocksByHashMessage() {
+        super(ProtocolConstant.MESSAGE_TYPE_GET_BLOCKS_BY_HASH);
+    }
+
+    public GetBlocksByHashMessage(NulsDigestData startHash, NulsDigestData endHash) {
+        this();
+        GetBlocksByHashParam param = new GetBlocksByHashParam(startHash, endHash);
+        setMsgBody(param);
+    }
 
     @Override
-    public void onMessage(TxGroupMessage message, Node fromNode) throws NulsException {
-        TxGroup txGroup = message.getMsgBody();
-        if (null == txGroup) {
-            Log.warn("recieved a null txGroup form " + fromNode.getId());
-            return;
-        }
-        DownloadCacheHandler.receiveTxGroup(txGroup);
+    protected GetBlocksByHashParam parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new GetBlocksByHashParam());
     }
 }

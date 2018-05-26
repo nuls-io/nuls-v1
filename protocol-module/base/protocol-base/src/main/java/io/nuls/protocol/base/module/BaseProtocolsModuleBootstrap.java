@@ -40,8 +40,6 @@ import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.protocol.base.handler.*;
 import io.nuls.protocol.base.service.DownloadServiceImpl;
-import io.nuls.protocol.base.utils.BlockSendThread;
-import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.*;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.model.tx.TransferTransaction;
@@ -90,21 +88,22 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         NulsContext.getInstance().setBestBlock(block);
         this.initHandlers();
         ((DownloadServiceImpl) NulsContext.getServiceBean(DownloadService.class)).start();
-        TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "Block-Request-Handler", new BlockSendThread());
-
     }
 
     private void initHandlers() {
         MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
         messageBusService.subscribeMessage(BlockMessage.class, new BlockMessageHandler());
         messageBusService.subscribeMessage(BlocksHashMessage.class, new BlocksHashHandler());
-        messageBusService.subscribeMessage(GetBlocksHashRequest.class, new GetBlocksHashHandler());
+        messageBusService.subscribeMessage(GetBlocksHashMessage.class, new GetBlocksHashHandler());
         messageBusService.subscribeMessage(NotFoundMessage.class, new NotFoundHander());
-        messageBusService.subscribeMessage(GetBlockRequest.class, new GetBlockHandler());
+        messageBusService.subscribeMessage(GetBlockMessage.class, new GetBlockHandler());
+        messageBusService.subscribeMessage(GetBlocksByHashMessage.class, new GetBlocksByHashHandler());
+        messageBusService.subscribeMessage(GetBlocksByHeightMessage.class, new GetBlocksByHeightHandler());
         messageBusService.subscribeMessage(GetTxGroupRequest.class, new GetTxGroupHandler());
         messageBusService.subscribeMessage(TxGroupMessage.class, new TxGroupHandler());
         messageBusService.subscribeMessage(TransactionMessage.class, new NewTxMessageHandler());
         messageBusService.subscribeMessage(SmallBlockMessage.class, new SmallBlockHandler());
+        messageBusService.subscribeMessage(CompleteMessage.class, new CompleteHandler());
     }
 
     @Override

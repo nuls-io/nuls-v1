@@ -66,6 +66,7 @@ public class TxGroup extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
+        size += requestHash.size();
         size += VarInt.sizeOf(txList.size());
         size += this.getTxListLength();
         return size;
@@ -73,6 +74,7 @@ public class TxGroup extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(requestHash);
         stream.writeVarInt(txList.size());
         for (Transaction data : txList) {
             stream.writeNulsData(data);
@@ -81,6 +83,7 @@ public class TxGroup extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        requestHash = byteBuffer.readHash();
         long txCount = byteBuffer.readVarInt();
         this.txList = new ArrayList<>();
         for (int i = 0; i < txCount; i++) {

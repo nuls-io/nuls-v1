@@ -24,49 +24,85 @@
  */
 package io.nuls.protocol.base.handler;
 
+import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
 import io.nuls.protocol.constant.NotFoundType;
-import io.nuls.protocol.message.BlockMessage;
-import io.nuls.protocol.message.GetBlockMessage;
-import io.nuls.protocol.message.NotFoundMessage;
+import io.nuls.protocol.message.*;
+import io.nuls.protocol.model.CompleteParam;
+import io.nuls.protocol.model.GetBlocksByHashParam;
+import io.nuls.protocol.model.GetBlocksByHeightParam;
 import io.nuls.protocol.model.NotFound;
 import io.nuls.protocol.service.BlockService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author facjas
  * @date 2017/11/16
  */
-public class GetBlockHandler extends AbstractMessageHandler<GetBlockMessage> {
+public class GetBlocksByHeightHandler extends AbstractMessageHandler<GetBlocksByHeightMessage> {
 
+    private static final int MAX_SIZE = 1000;
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
     @Override
-    public void onMessage(GetBlockMessage message, Node fromNode) {
+    public void onMessage(GetBlocksByHeightMessage message, Node fromNode) {
 
         if(message == null || message.getMsgBody() == null || fromNode == null) {
             return;
         }
 
-        Block block= null;
-        Result<Block> result = blockService.getBlock(message.getBlockHash());
-        if (result.isFailed() || (block = result.getData()) == null) {
+        GetBlocksByHeightParam param = message.getMsgBody();
+        if(param.getStartHeight() < 0L || param.getStartHeight() > param.getEndHeight()) {
+            return;
+        }
+
+        BlockHeader startBlockHeader = blockService.getBlockHeader(param.getStartHeight()).getData();
+        if(startBlockHeader == null) {
             sendNotFound(message.getHash(), fromNode);
             return;
         }
-        sendBlock(block, fromNode);
+        Block endBlock = blockService.getBlock(param.getEndHeight()).getData();
+        if(endBlock == null) {
+            sendNotFound(message.getHash(), fromNode);
+            return;
+        }
+        if(endBlock.getHeader().getHeight() - startBlockHeader.getHeight() >= MAX_SIZE) {
+            return;
+        }
+
+        Block block = endBlock;
+        while(true) {
+            sendBlock(block, fromNode);
+            if(block.getHeader().getHash().equals(startBlockHeader.getHash())) {
+                break;
+            }
+            Result<Block> result = blockService.getBlock(block.getHeader().getPreHash());
+            if (result.isFailed() || (block = result.getData()) == null) {
+                sendNotFound(message.getHash(), fromNode);
+                return;
+            }
+        }
+
+        CompleteMessage completeMessage = new CompleteMessage();
+        completeMessage.setMsgBody(new CompleteParam(message.getHash(), true));
+        messageBusService.sendToNode(completeMessage, fromNode, true);
     }
 
     private void sendNotFound(NulsDigestData hash, Node node) {
         NotFoundMessage message = new NotFoundMessage();
-        NotFound data = new NotFound(NotFoundType.BLOCK, hash);
+        NotFound data = new NotFound(NotFoundType.BLOCKS, hash);
         message.setMsgBody(data);
         Result result = this.messageBusService.sendToNode(message, node, true);
         if (result.isFailed()) {

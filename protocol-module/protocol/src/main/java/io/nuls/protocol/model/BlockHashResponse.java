@@ -50,12 +50,7 @@ public class BlockHashResponse extends BaseNulsData {
      */
 
     private NulsDigestData requestMessageHash;
-    /**
-     * 返回的高度列表
-     * Returns a list of heights.
-     */
 
-    private List<Long> heightList = new ArrayList<>();
     /**
      * 返回的hash列表
      * Returns a list of hashes.
@@ -63,24 +58,10 @@ public class BlockHashResponse extends BaseNulsData {
 
     private List<NulsDigestData> hashList = new ArrayList<>();
 
-
-    /**
-     * 返回的高度列表
-     * Returns a list of heights.
-     */
-    public List<Long> getHeightList() {
-        return heightList;
-    }
-
-
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(requestMessageHash);
-        size += SerializeUtils.sizeOfVarInt(heightList.size());
-        for (Long height : heightList) {
-            size += SerializeUtils.sizeOfVarInt(height);
-        }
         size += SerializeUtils.sizeOfVarInt(hashList.size());
         for (NulsDigestData hash : hashList) {
             size += SerializeUtils.sizeOfNulsData(hash);
@@ -91,10 +72,6 @@ public class BlockHashResponse extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(requestMessageHash);
-        stream.writeVarInt(heightList.size());
-        for (Long height : heightList) {
-            stream.writeVarInt(height);
-        }
         stream.writeVarInt(hashList.size());
         for (NulsDigestData hash : hashList) {
             stream.writeNulsData(hash);
@@ -104,13 +81,6 @@ public class BlockHashResponse extends BaseNulsData {
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.requestMessageHash = byteBuffer.readHash();
-        long heightListSize = byteBuffer.readVarInt();
-        if (heightListSize > 0) {
-            this.heightList = new ArrayList<>();
-            for (int i = 0; i < heightListSize; i++) {
-                heightList.add(byteBuffer.readVarInt());
-            }
-        }
         long hashListSize = byteBuffer.readVarInt();
         if (hashListSize <= 0) {
             return;
@@ -139,13 +109,11 @@ public class BlockHashResponse extends BaseNulsData {
         }
     }
 
-    public void put(long height, NulsDigestData hash) {
-        heightList.add(height);
+    public void put(NulsDigestData hash) {
         hashList.add(hash);
     }
 
-    public void putFront(long height, NulsDigestData hash) {
-        heightList.add(0, height);
+    public void putFront(NulsDigestData hash) {
         hashList.add(0, hash);
     }
 
@@ -155,28 +123,5 @@ public class BlockHashResponse extends BaseNulsData {
 
     public void setRequestMessageHash(NulsDigestData requestMessageHash) {
         this.requestMessageHash = requestMessageHash;
-    }
-
-    public void merge(BlockHashResponse response) {
-        long lastEnd = this.heightList.get(heightList.size() - 1);
-        long nowStart = response.getHeightList().get(0);
-        if (nowStart == lastEnd + 1) {
-            this.heightList.addAll(response.getHeightList());
-            this.hashList.addAll(response.getHashList());
-        }
-    }
-
-    public NulsDigestData getBestHash() {
-        if (null == hashList || hashList.isEmpty()) {
-            return null;
-        }
-        return hashList.get(hashList.size() - 1);
-    }
-
-    public long getBestHeight() {
-        if (null == heightList || heightList.isEmpty()) {
-            return 0L;
-        }
-        return heightList.get(heightList.size() - 1);
     }
 }
