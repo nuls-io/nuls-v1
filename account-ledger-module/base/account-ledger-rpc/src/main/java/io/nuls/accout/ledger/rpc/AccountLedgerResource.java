@@ -37,6 +37,7 @@ import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.accout.ledger.rpc.dto.TransactionInfoDto;
 import io.nuls.accout.ledger.rpc.dto.UtxoDto;
+import io.nuls.accout.ledger.rpc.form.TransferFeeForm;
 import io.nuls.accout.ledger.rpc.form.TransferForm;
 import io.nuls.accout.ledger.rpc.util.UtxoDtoComparator;
 import io.nuls.core.tools.crypto.Base58;
@@ -132,7 +133,7 @@ public class AccountLedgerResource {
         if (form.getAmount() <= 0) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
-        if (validTxRemark(form.getRemark())) {
+        if (!validTxRemark(form.getRemark())) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
 
@@ -150,9 +151,9 @@ public class AccountLedgerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
-    public Result transferFee(@ApiParam(name = "form", value = "转账手续费", required = true) TransferForm form) {
+    public Result transferFee(@BeanParam() TransferFeeForm form) {
         if (form == null) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
@@ -161,15 +162,15 @@ public class AccountLedgerResource {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
         if (form.getAmount() <= 0) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
-        if (validTxRemark(form.getRemark())) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        if (!validTxRemark(form.getRemark())) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
 
         Na value = Na.valueOf(form.getAmount());
-
-        return null;
+        return accountLedgerService.transferFee(AddressTool.getAddress(form.getAddress()),
+                            AddressTool.getAddress(form.getToAddress()),value, form.getRemark());
     }
 
 

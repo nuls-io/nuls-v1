@@ -412,7 +412,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result transferFee(byte[] from, byte[] to, Na values, String password, String remark) {
+    public Result transferFee(byte[] from, byte[] to, Na values, String remark) {
         Result<Account> accountResult = accountService.getAccount(from);
         if (accountResult.isFailed()) {
             return accountResult;
@@ -428,8 +428,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         Coin toCoin = new Coin(to, values);
         coinData.getTo().add(toCoin);
 
-
-        return null;
+        Na fee = getTxFee(from, values, tx.size());
+        return Result.getSuccess().setData(fee);
     }
 
     @Override
