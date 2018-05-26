@@ -41,16 +41,22 @@ public enum NotFoundType {
      * When the block cannot be Found, the returned Not Found type.
      */
     BLOCK(1),
+
+    /**
+     * 获取区块列表找不到时，返回的Not Found 类型
+     * When the block cannot be Found, the returned Not Found type.
+     */
+    BLOCKS(2),
     /**
      * 获取交易找不到时，返回的Not Found 类型
      * When the transaction cannot be Found, the returned Not Found type.
      */
-    TRANSACTION(2),
+    TRANSACTION(3),
     /**
      * 获取区块头摘要找不到时，返回的Not Found 类型
      * When the block header digest data cannot be Found, the returned Not Found type.
      */
-    HASHES(3);
+    HASHES(4);
 
     /**
      * 对应的code，用于{@link io.nuls.protocol.model.NotFound}类序列化使用
@@ -84,8 +90,10 @@ public enum NotFoundType {
             case 1:
                 return BLOCK;
             case 2:
-                return TRANSACTION;
+                return BLOCKS;
             case 3:
+                return TRANSACTION;
+            case 4:
                 return HASHES;
             default:
                 return null;

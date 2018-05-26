@@ -17,7 +17,7 @@ public class TransferTest {
 
         String address = "2CYqLxMgdSK5XaK9yBv43g6iEtpiAKJ";
         String toAddress = "2Cjsa6wpKyowbVjM9oBrSeo7muEuu4w";
-        long amount = 100000000;
+        long amount = 10000000000L;
         String password = "nuls123456";
         String remark = "test";
 
@@ -27,7 +27,7 @@ public class TransferTest {
 
         int successCount = 0;
 
-        for(int i = 0 ; i < 10000 ; i ++) {
+        for(int i = 0 ; i < 1000 ; i ++) {
             String res = post(url, param, "utf-8");
 
             if(res.indexOf("true") != -1) {

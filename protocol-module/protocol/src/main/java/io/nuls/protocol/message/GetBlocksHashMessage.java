@@ -22,29 +22,34 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.base.handler;
+package io.nuls.protocol.message;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.message.bus.handler.AbstractMessageHandler;
-import io.nuls.network.model.Node;
-import io.nuls.protocol.base.download.cache.DownloadCacheHandler;
-import io.nuls.protocol.message.TxGroupMessage;
-import io.nuls.protocol.model.TxGroup;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.model.GetBlocksHashParam;
 
 /**
- * @author facjas
- * @date 2017/11/16
+ * 从对等节点处获取区块头摘要列表的消息
+ * The message of gets the block header summary list from the peer node.
+ *
+ * @author Niels
+ * @date 2018/1/15
  */
-public class TxGroupHandler extends AbstractMessageHandler<TxGroupMessage> {
+public class GetBlocksHashMessage extends BaseProtocolMessage<GetBlocksHashParam> {
+
+    public GetBlocksHashMessage() {
+        super(ProtocolConstant.MESSAGE_TYPE_GET_BLOCKS_HASH);
+    }
 
     @Override
-    public void onMessage(TxGroupMessage message, Node fromNode) throws NulsException {
-        TxGroup txGroup = message.getMsgBody();
-        if (null == txGroup) {
-            Log.warn("recieved a null txGroup form " + fromNode.getId());
-            return;
-        }
-        DownloadCacheHandler.receiveTxGroup(txGroup);
+    protected GetBlocksHashParam parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new GetBlocksHashParam());
+    }
+
+    public GetBlocksHashMessage(long startHeight, long endHeight) {
+        this();
+        GetBlocksHashParam param = new GetBlocksHashParam(startHeight, endHeight);
+        this.setMsgBody(param);
     }
 }

@@ -192,6 +192,20 @@ public class PocConsensusResource {
         return result;
     }
 
+
+    @GET
+    @Path("/agent/fee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "get the fee of create agent! 获取创建共识(代理)节点的手续费", notes = "返回创建的节点成功的交易手续费")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public Result<Long> getCreateAgentFee(@ApiParam(name = "form", value = "创建节点表单数据", required = true)
+                                          @BeanParam() GetCreateAgentFeeForm form) throws NulsException {
+        return Result.getSuccess();
+    }
+
+
     @POST
     @Path("/agent")
     @Produces(MediaType.APPLICATION_JSON)
