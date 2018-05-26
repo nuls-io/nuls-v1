@@ -41,6 +41,7 @@ import io.nuls.protocol.model.CompleteParam;
 import io.nuls.protocol.model.GetTxGroupParam;
 import io.nuls.protocol.model.TxGroup;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,7 +90,14 @@ public class DownloadUtils {
 
         GetBlocksByHeightMessage message = new GetBlocksByHeightMessage(startHeight, endHeight);
 
-        Future<CompleteParam> taskFuture = DownloadCacheHandler.addTaskRequest(message.getHash());
+        NulsDigestData requestHash = null;
+        try {
+            requestHash = NulsDigestData.calcDigestData(message.getMsgBody().serialize());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Future<CompleteParam> taskFuture = DownloadCacheHandler.addTaskRequest(requestHash);
 
         List<Map<NulsDigestData, Future<Block>>> blockFutures = new ArrayList<>();
         for(long i = startHeight ; i <= endHeight ; i++) {
@@ -114,7 +122,7 @@ public class DownloadUtils {
         }
 
         try {
-            CompleteParam taskResult = taskFuture.get();
+            CompleteParam taskResult = taskFuture.get(60L, TimeUnit.SECONDS);
             if(taskResult.isSuccess()) {
                 for(Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
                     for (Map.Entry<NulsDigestData, Future<Block>> entry : blockFutureMap.entrySet()) {
@@ -128,7 +136,7 @@ public class DownloadUtils {
             Log.error(e.getMessage());
             return new ArrayList<>();
         } finally {
-            DownloadCacheHandler.removeTaskFuture(message.getHash());
+            DownloadCacheHandler.removeTaskFuture(requestHash);
 
             for(Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
                 for (Map.Entry<NulsDigestData, Future<Block>> entry : blockFutureMap.entrySet()) {
@@ -151,7 +159,12 @@ public class DownloadUtils {
         }
 
         GetBlocksHashMessage message = new GetBlocksHashMessage(startHeight, endHeight);
-        NulsDigestData requestHash = message.getHash();
+        NulsDigestData requestHash = null;
+        try {
+            requestHash = NulsDigestData.calcDigestData(message.getMsgBody().serialize());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Future<BlockHashResponse> future = DownloadCacheHandler.addGetBlockHashesRequest(requestHash);
         Result hashesResult = messageBusService.sendToNode(message, node, false);
         if (!hashesResult.isSuccess()) {

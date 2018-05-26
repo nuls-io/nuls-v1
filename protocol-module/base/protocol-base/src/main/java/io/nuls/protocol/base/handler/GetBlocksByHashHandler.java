@@ -43,6 +43,7 @@ import io.nuls.protocol.model.GetBlocksByHashParam;
 import io.nuls.protocol.model.NotFound;
 import io.nuls.protocol.service.BlockService;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,14 +69,21 @@ public class GetBlocksByHashHandler extends AbstractMessageHandler<GetBlocksByHa
             return;
         }
 
+        NulsDigestData requestHash = null;
+        try {
+            requestHash = NulsDigestData.calcDigestData(param.serialize());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         BlockHeader startBlockHeader = blockService.getBlockHeader(param.getStartHash()).getData();
         if(startBlockHeader == null) {
-            sendNotFound(message.getHash(), fromNode);
+            sendNotFound(requestHash, fromNode);
             return;
         }
         Block endBlock = blockService.getBlock(param.getEndHash()).getData();
         if(endBlock == null) {
-            sendNotFound(message.getHash(), fromNode);
+            sendNotFound(requestHash, fromNode);
             return;
         }
         if(endBlock.getHeader().getHeight() - startBlockHeader.getHeight() >= MAX_SIZE) {
@@ -90,13 +98,13 @@ public class GetBlocksByHashHandler extends AbstractMessageHandler<GetBlocksByHa
             }
             Result<Block> result = blockService.getBlock(block.getHeader().getPreHash());
             if (result.isFailed() || (block = result.getData()) == null) {
-                sendNotFound(message.getHash(), fromNode);
+                sendNotFound(requestHash, fromNode);
                 return;
             }
         }
 
         CompleteMessage completeMessage = new CompleteMessage();
-        completeMessage.setMsgBody(new CompleteParam(message.getHash(), true));
+        completeMessage.setMsgBody(new CompleteParam(requestHash, true));
         messageBusService.sendToNode(completeMessage, fromNode, true);
     }
 

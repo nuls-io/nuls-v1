@@ -45,7 +45,7 @@ public class CompleteParam extends BaseNulsData {
     public CompleteParam() {
     }
 
-    public CompleteParam(NulsDigestData requestHash, boolean result) {
+    public CompleteParam(NulsDigestData requestHash, boolean success) {
         this.requestHash = requestHash;
         this.success = success;
     }

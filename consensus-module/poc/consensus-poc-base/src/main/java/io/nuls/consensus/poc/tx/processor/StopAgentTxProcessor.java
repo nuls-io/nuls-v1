@@ -81,7 +81,7 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
                     return result;
                 }
                 boolean b = depositStorageService.save(po);
-                if (!b) {
+                    if (!b) {
                     this.unlock(rollbackedList);
                     return ValidateResult.getFailedResult(this.getClass().getName(), "update deposit failed!");
                 }
