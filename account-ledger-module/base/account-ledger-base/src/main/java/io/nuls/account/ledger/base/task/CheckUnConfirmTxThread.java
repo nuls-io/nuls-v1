@@ -123,7 +123,6 @@ public class CheckUnConfirmTxThread implements Runnable {
             throw new NulsRuntimeException(e);
         }
         CoinData coinData = tx.getCoinData();
-        Set<byte[]> usedKeyset = getTmpUsedCoinKeySet();
         if (coinData != null) {
             // save - from
             List<Coin> froms = coinData.getFrom();
@@ -141,9 +140,6 @@ public class CheckUnConfirmTxThread implements Runnable {
                     continue;
                 }
                 if (sourceTx == null) {
-                    continue;
-                }
-                if (usedKeyset.contains(from.getOwner())) {
                     continue;
                 }
                 byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
@@ -209,18 +205,5 @@ public class CheckUnConfirmTxThread implements Runnable {
             return result;
         }
         return Result.getSuccess();
-    }
-
-    protected Set<byte[]> getTmpUsedCoinKeySet() {
-        List<Transaction> localTxList = unconfirmedTransactionStorageService.loadAllUnconfirmedList().getData();
-        Set<byte[]> coinKeys = new HashSet<>();
-        for (Transaction tx : localTxList) {
-            CoinData coinData = tx.getCoinData();
-            List<Coin> coins = coinData.getFrom();
-            for (Coin coin : coins) {
-                coinKeys.add(coin.getOwner());
-            }
-        }
-        return coinKeys;
     }
 }
