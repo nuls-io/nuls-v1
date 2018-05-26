@@ -112,11 +112,7 @@
             <artifactId>disruptor</artifactId>
             <version>3.4.2</version>
         </dependency>
-        <dependency>
-            <groupId>io.nuls.core-module</groupId>
-            <artifactId>kernel</artifactId>
-            <version>0.9.6</version>
-        </dependency>
+
     </dependencies>
 
 </project>

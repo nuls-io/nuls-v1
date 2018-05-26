@@ -23,9 +23,7 @@
  *
  */
 package io.nuls.core.tools.str;
-
-import io.nuls.kernel.cfg.NulsConfig;
-
+ 
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -109,20 +107,7 @@ public class StringUtils {
         return true;
     }
 
-    public static boolean validTxRemark(String remark) {
-        if (isBlank(remark)) {
-            return true;
-        }
-        try {
-            byte[] bytes = remark.getBytes(NulsConfig.DEFAULT_ENCODING);
-            if (bytes.length > 100) {
-                return false;
-            }
-            return true;
-        } catch (UnsupportedEncodingException e) {
-            return false;
-        }
-    }
+
 
 
     public static byte caculateXor(byte[] data) {

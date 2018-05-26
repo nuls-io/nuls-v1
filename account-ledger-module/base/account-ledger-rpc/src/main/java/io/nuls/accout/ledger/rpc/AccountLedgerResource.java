@@ -43,6 +43,7 @@ import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -54,6 +55,7 @@ import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -130,7 +132,7 @@ public class AccountLedgerResource {
         if (form.getAmount() <= 0) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
-        if(StringUtils.validTxRemark(form.getRemark())) {
+        if (validTxRemark(form.getRemark())) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
 
@@ -161,7 +163,7 @@ public class AccountLedgerResource {
         if (form.getAmount() <= 0) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
-        if(StringUtils.validTxRemark(form.getRemark())) {
+        if (validTxRemark(form.getRemark())) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
 
@@ -245,7 +247,7 @@ public class AccountLedgerResource {
             if (tx == null) {
                 tx = accountLedgerService.getUnconfirmedTransaction(info.getTxHash()).getData();
             }
-            if(tx == null) {
+            if (tx == null) {
                 continue;
             }
             info.setInfo(tx.getInfo(addressBytes));
@@ -320,7 +322,7 @@ public class AccountLedgerResource {
                     Log.error(e);
                 }
             }
-            if(tx == null) {
+            if (tx == null) {
                 continue;
             }
             utxoDtoList.add(new UtxoDto(coin, tx));
@@ -337,5 +339,20 @@ public class AccountLedgerResource {
         dtoResult.setSuccess(true);
         dtoResult.setData(page);
         return dtoResult;
+    }
+
+    private boolean validTxRemark(String remark) {
+        if (StringUtils.isBlank(remark)) {
+            return true;
+        }
+        try {
+            byte[] bytes = remark.getBytes(NulsConfig.DEFAULT_ENCODING);
+            if (bytes.length > 100) {
+                return false;
+            }
+            return true;
+        } catch (UnsupportedEncodingException e) {
+            return false;
+        }
     }
 }
