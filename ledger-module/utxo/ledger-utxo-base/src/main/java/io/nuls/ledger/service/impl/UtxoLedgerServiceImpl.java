@@ -273,7 +273,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 initialCapacity += validateCoinData.getTo().size();
             }
             // txList中所有的to存放于HashMap中
-            Map<String, Coin> validateUtxoMap = new HashMap<>(initialCapacity);
+            Map<String, Coin> validateUtxoMap = new HashMap<>(initialCapacity, 1);
             Transaction tx;
             byte[] txHashBytes;
             Coin toOfValidate;
@@ -310,7 +310,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.DATA_ERROR);
                 }
             }
-            HashSet set = new HashSet(fromSize);
+            HashSet<String> set = new HashSet<>(fromSize, 1);
             Na fromTotal = Na.ZERO;
             byte[] fromBytes;
             // 保存在数据库中或者txList中的utxo数据
@@ -400,7 +400,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         if (txList == null) {
             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.NULL_PARAMETER);
         }
-        // 计算HashSet容量
+        // 计算HashMap容量
         int initialCapacity = 0;
         CoinData coinData;
         for (Transaction tx : txList) {
@@ -410,7 +410,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             }
             initialCapacity += tx.getCoinData().getFrom().size();
         }
-        HashMap<String, Transaction> fromMap = new HashMap<>(initialCapacity);
+        HashMap<String, Transaction> fromMap = new HashMap<>(initialCapacity, 1);
         List<Coin> froms;
         Transaction prePutTx;
         // 判断是否有重复的fromCoin存在，如果存在，则是双花
