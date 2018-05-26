@@ -22,36 +22,29 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.message;
+package io.nuls.protocol.base.handler;
 
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.utils.NulsByteBuffer;
-import io.nuls.protocol.constant.ProtocolConstant;
-import io.nuls.protocol.model.GetBlocksHashParam;
+import io.nuls.message.bus.handler.AbstractMessageHandler;
+import io.nuls.network.model.Node;
+import io.nuls.protocol.base.download.cache.DownloadCacheHandler;
+import io.nuls.protocol.message.CompleteMessage;
+import io.nuls.protocol.model.CompleteParam;
 
 /**
- * 从对等节点处获取区块头摘要列表的消息
- * The message of gets the block header summary list from the peer node.
- *
- * @author Niels
- * @date 2018/1/15
+ * @author ln
+ * @date 2018/05/26
  */
-public class GetBlocksHashRequest extends BaseProtocolMessage<GetBlocksHashParam> {
-
-    public GetBlocksHashRequest() {
-        super(ProtocolConstant.MESSAGE_TYPE_GET_BLOCKS_HASH);
-    }
+public class CompleteHandler extends AbstractMessageHandler<CompleteMessage> {
 
     @Override
-    protected GetBlocksHashParam parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new GetBlocksHashParam());
-    }
+    public void onMessage(CompleteMessage message, Node fromNode) {
 
-    public GetBlocksHashRequest(long start, long size) {
-        this();
-        GetBlocksHashParam param = new GetBlocksHashParam();
-        param.setStart(start);
-        param.setSize(size);
-        this.setMsgBody(param);
+        if(message == null || message.getMsgBody() == null || fromNode == null) {
+            return;
+        }
+
+        CompleteParam param = message.getMsgBody();
+
+        DownloadCacheHandler.taskComplete(param);
     }
 }

@@ -40,7 +40,7 @@ import java.io.IOException;
  * @author Niels
  * @date 2017/12/18
  */
-public class GetBlockDataParam extends BaseNulsData {
+public class GetBlocksByHashParam extends BaseNulsData {
     /**
      * 起始摘要，当只请求一个时，就是目标摘要，当请求多个时，是第一个的前一个摘要
      * The initial hash, when only one request is requested,
@@ -55,18 +55,17 @@ public class GetBlockDataParam extends BaseNulsData {
 
     private NulsDigestData endHash;
 
-    private long start;
+    public GetBlocksByHashParam() {
+    }
 
-    private long size;
-
-    public GetBlockDataParam() {
+    public GetBlocksByHashParam(NulsDigestData startHash, NulsDigestData endHash) {
+        this.startHash = startHash;
+        this.endHash = endHash;
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfVarInt(this.size);
-        size += SerializeUtils.sizeOfVarInt(start);
         size += SerializeUtils.sizeOfNulsData(startHash);
         size += SerializeUtils.sizeOfNulsData(endHash);
         return size;
@@ -74,16 +73,12 @@ public class GetBlockDataParam extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(size);
-        stream.writeVarInt(start);
         stream.writeNulsData(startHash);
         stream.writeNulsData(endHash);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.size = byteBuffer.readVarInt();
-        this.start = byteBuffer.readVarInt();
         this.startHash = byteBuffer.readHash();
         this.endHash = byteBuffer.readHash();
     }
@@ -113,21 +108,5 @@ public class GetBlockDataParam extends BaseNulsData {
 
     public void setEndHash(NulsDigestData endHash) {
         this.endHash = endHash;
-    }
-
-    public long getStart() {
-        return start;
-    }
-
-    public void setStart(long start) {
-        this.start = start;
-    }
-
-    public long getSize() {
-        return size;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
     }
 }

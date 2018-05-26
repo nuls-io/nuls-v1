@@ -151,6 +151,7 @@ public interface AccountLedgerService {
      */
     Result transfer(byte[] from, byte[] to, Na values, String password, String remark);
 
+    Result transferFee(byte[] from, byte[] to, Na values, String password, String remark);
     /**
      * <p>
      * get local address list

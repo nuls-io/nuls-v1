@@ -129,6 +129,9 @@ public class GetAccountTxListProcessor implements CommandProcessor {
             if (tx == null) {
                 tx = accountLedgerService.getUnconfirmedTransaction(info.getTxHash()).getData();
             }
+            if(tx == null) {
+                continue;
+            }
             info.setInfo(tx.getInfo(addressBytes));
             infoDtoList.add(new TransactionInfoDto(info));
         }

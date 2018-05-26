@@ -68,43 +68,59 @@ public interface ProtocolConstant extends NulsConstant {
      */
     short MESSAGE_TYPE_BLOCK = 4;
     /**
+     * 根据区块hash获取区块列表的消息类型
+     * The type of message to get the blocks by hash.
+     */
+    short MESSAGE_TYPE_GET_BLOCKS_BY_HASH = 5;
+
+    /**
+     * 根据区块高度获取区块列表的消息类型
+     * The type of message to get the blocks by height.
+     */
+    short MESSAGE_TYPE_GET_BLOCKS_BY_HEIGHT = 6;
+    /**
      * 获取区块头的消息的类型
      * Gets the type of message for the block-header.
      */
-    short MESSAGE_TYPE_GET_BLOCK_HEADER = 5;
+    short MESSAGE_TYPE_GET_BLOCK_HEADER = 7;
     /**
      * 发送区块头的消息的类型
      * The type of message to send the block-header.
      */
-    short MESSAGE_TYPE_BLOCK_HEADER = 6;
+    short MESSAGE_TYPE_BLOCK_HEADER = 8;
     /**
      * 获取交易或交易列表的消息的类型
      * Gets the type of message for the transactions.
      */
-    short MESSAGE_TYPE_GET_TX_GROUP = 7;
+    short MESSAGE_TYPE_GET_TX_GROUP = 9;
     /**
-     * 发送区块头的消息的类型
+     * 发送交易或交易列表的消息的类型
      * The type of message to send the transactions.
      */
-    short MESSAGE_TYPE_TX_GROUP = 8;
+    short MESSAGE_TYPE_TX_GROUP = 10;
     /**
      * 新区块发送及转发的消息类型
      * The type of message that the new SmallBlock sends and forwards.
      */
-    short MESSAGE_TYPE_NEW_BLOCK = 9;
+    short MESSAGE_TYPE_NEW_BLOCK = 11;
     /**
      * 获取区块hash或hash列表的消息的类型
      * Gets the type of message for the Blocks hashes.
      */
-    short MESSAGE_TYPE_GET_BLOCKS_HASH = 10;
+    short MESSAGE_TYPE_GET_BLOCKS_HASH = 12;
     /**
      * 发送区块hash的消息的类型
      * The type of message to send the Blocks hashes.
      */
-    short MESSAGE_TYPE_BLOCKS_HASH = 11;
+    short MESSAGE_TYPE_BLOCKS_HASH = 13;
     /**
      * 发送字符串给对等节点的消息的类型
      * The type of message that is sent to a peer.
      */
-    short MESSAGE_TYPE_STRING = 12;
+    short MESSAGE_TYPE_STRING = 14;
+    /**
+     * 任务完成的消息类型
+     * task complete message
+     */
+    short MESSAGE_TYPE_COMPLETE = 15;
 }

@@ -42,6 +42,8 @@ import io.nuls.accout.ledger.rpc.util.UtxoDtoComparator;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
+import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -53,6 +55,7 @@ import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -91,7 +94,6 @@ public class AccountLedgerResource {
         } catch (Exception e) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
-
         if (addressBytes.length != AddressTool.HASH_LENGTH) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
@@ -118,20 +120,19 @@ public class AccountLedgerResource {
             @ApiResponse(code = 200, message = "success")
     })
     public Result transfer(@ApiParam(name = "form", value = "转账", required = true) TransferForm form) {
-
         if (form == null) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
-
         if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
-
         if (!Address.validAddress(form.getToAddress())) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
-
         if (form.getAmount() <= 0) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
+        if (validTxRemark(form.getRemark())) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
 
@@ -140,6 +141,37 @@ public class AccountLedgerResource {
                 AddressTool.getAddress(form.getToAddress()),
                 value, form.getPassword(), form.getRemark());
     }
+
+
+    @POST
+    @Path("/transfer/fee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "转账手续费", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public Result transferFee(@ApiParam(name = "form", value = "转账手续费", required = true) TransferForm form) {
+        if (form == null) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
+        if (!Address.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+        }
+        if (!Address.validAddress(form.getToAddress())) {
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+        }
+        if (form.getAmount() <= 0) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
+        if (validTxRemark(form.getRemark())) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
+
+        Na value = Na.valueOf(form.getAmount());
+
+        return null;
+    }
+
 
     @GET
     @Path("/tx/list/{address}")
@@ -215,6 +247,9 @@ public class AccountLedgerResource {
             if (tx == null) {
                 tx = accountLedgerService.getUnconfirmedTransaction(info.getTxHash()).getData();
             }
+            if (tx == null) {
+                continue;
+            }
             info.setInfo(tx.getInfo(addressBytes));
             infoDtoList.add(new TransactionInfoDto(info));
 
@@ -287,6 +322,9 @@ public class AccountLedgerResource {
                     Log.error(e);
                 }
             }
+            if (tx == null) {
+                continue;
+            }
             utxoDtoList.add(new UtxoDto(coin, tx));
         }
 
@@ -301,5 +339,20 @@ public class AccountLedgerResource {
         dtoResult.setSuccess(true);
         dtoResult.setData(page);
         return dtoResult;
+    }
+
+    private boolean validTxRemark(String remark) {
+        if (StringUtils.isBlank(remark)) {
+            return true;
+        }
+        try {
+            byte[] bytes = remark.getBytes(NulsConfig.DEFAULT_ENCODING);
+            if (bytes.length > 100) {
+                return false;
+            }
+            return true;
+        } catch (UnsupportedEncodingException e) {
+            return false;
+        }
     }
 }

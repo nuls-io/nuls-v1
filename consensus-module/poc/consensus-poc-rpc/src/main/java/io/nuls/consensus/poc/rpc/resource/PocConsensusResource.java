@@ -192,6 +192,61 @@ public class PocConsensusResource {
         return result;
     }
 
+
+    @GET
+    @Path("/agent/fee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "get the fee of create agent! 获取创建共识(代理)节点的手续费", notes = "返回创建的节点成功的交易手续费")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public Result<Long> getCreateAgentFee(
+                                          @BeanParam() GetCreateAgentFeeForm form) throws NulsException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAgentAddress(), "agent address can not be null");
+        AssertUtil.canNotEmpty(form.getAgentName(), "agent name can not be null");
+        AssertUtil.canNotEmpty(form.getCommissionRate(), "commission rate can not be null");
+        AssertUtil.canNotEmpty(form.getDeposit(), "deposit can not be null");
+        AssertUtil.canNotEmpty(form.getPackingAddress(), "packing address can not be null");
+        AssertUtil.canNotEmpty(form.getRemark(), "agent instraction can not be null");
+        if (StringUtils.isBlank(form.getRewardAddress())) {
+            form.setRewardAddress(form.getAgentAddress());
+        }
+        CreateAgentTransaction tx = new CreateAgentTransaction();
+        tx.setTime(TimeService.currentTimeMillis());
+        Agent agent = new Agent();
+        agent.setAgentAddress(AddressTool.getAddress(form.getAgentAddress()));
+        agent.setPackingAddress(AddressTool.getAddress(form.getPackingAddress()));
+        if (StringUtils.isBlank(form.getRewardAddress())) {
+            agent.setRewardAddress(agent.getAgentAddress());
+        } else {
+            agent.setRewardAddress(AddressTool.getAddress(form.getRewardAddress()));
+        }
+        try {
+            agent.setIntroduction(form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING));
+            agent.setAgentName(form.getAgentName().getBytes(NulsConfig.DEFAULT_ENCODING));
+        } catch (UnsupportedEncodingException e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
+        agent.setDeposit(Na.valueOf(form.getDeposit()));
+        agent.setCommissionRate(form.getCommissionRate());
+        tx.setTxData(agent);
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), -1));
+        coinData.setTo(toList);
+        tx.setCoinData(coinData);
+        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        tx.getCoinData().setFrom(result.getCoinList());
+        if (null != result.getChange()) {
+            tx.getCoinData().getTo().add(result.getChange());
+        }
+        Na fee = TransactionFeeCalculator.getFee(tx.size());
+        return Result.getSuccess().setData(fee.getValue());
+    }
+
+
     @POST
     @Path("/agent")
     @Produces(MediaType.APPLICATION_JSON)
@@ -202,11 +257,12 @@ public class PocConsensusResource {
     public Result<String> createAgent(@ApiParam(name = "form", value = "创建节点表单数据", required = true)
                                               CreateAgentForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
-        AssertUtil.canNotEmpty(form.getAgentAddress());
-        AssertUtil.canNotEmpty(form.getAgentName());
-        AssertUtil.canNotEmpty(form.getPackingAddress());
-        AssertUtil.canNotEmpty(form.getDeposit());
-        AssertUtil.canNotEmpty(form.getRemark());
+        AssertUtil.canNotEmpty(form.getAgentAddress(), "agent address can not be null");
+        AssertUtil.canNotEmpty(form.getAgentName(), "agent name can not be null");
+        AssertUtil.canNotEmpty(form.getCommissionRate(), "commission rate can not be null");
+        AssertUtil.canNotEmpty(form.getDeposit(), "deposit can not be null");
+        AssertUtil.canNotEmpty(form.getPackingAddress(), "packing address can not be null");
+        AssertUtil.canNotEmpty(form.getRemark(), "agent instraction can not be null");
 
         if (!AddressTool.validAddress(form.getPackingAddress()) || !AddressTool.validAddress(form.getAgentAddress())) {
             throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);

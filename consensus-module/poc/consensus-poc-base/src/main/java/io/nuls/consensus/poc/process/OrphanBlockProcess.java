@@ -46,6 +46,7 @@ import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.service.DownloadService;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -153,7 +154,8 @@ public class OrphanBlockProcess implements Runnable {
      */
     private boolean checkHasExist(NulsDigestData blockHash) {
 
-        for (ChainContainer chainContainer : chainManager.getOrphanChains()) {
+        for (Iterator<ChainContainer> it = chainManager.getOrphanChains().iterator() ; it.hasNext() ; ) {
+            ChainContainer chainContainer = it.next();
             for (BlockHeader header : chainContainer.getChain().getBlockHeaderList()) {
                 if (header.getHash().equals(blockHash)) {
                     return true;
@@ -161,7 +163,8 @@ public class OrphanBlockProcess implements Runnable {
             }
         }
 
-        for (ChainContainer chainContainer : chainManager.getChains()) {
+        for (Iterator<ChainContainer> it = chainManager.getChains().iterator() ; it.hasNext() ; ) {
+            ChainContainer chainContainer = it.next();
             for (BlockHeader header : chainContainer.getChain().getBlockHeaderList()) {
                 if (header.getHash().equals(blockHash)) {
                     return true;
@@ -202,7 +205,7 @@ public class OrphanBlockProcess implements Runnable {
         } else {
             ChainLog.debug("get pre block fail {} - {}", blockHeader.getHeight() - 1, blockHeader.getPreHash());
 
-            //失败情况的处理，从其它所以可用的节点去获取，如果都不成功，那么就失败，包括本次失败的节点，再次获取一次
+            //失败情况的处理，从其它所有可用的节点去获取，如果都不成功，那么就失败，包括本次失败的节点，再次获取一次
             for (Node node : networkService.getAvailableNodes()) {
                 preBlock = downloadService.downloadBlock(blockHeader.getPreHash(), node).getData();
                 if (preBlock != null) {

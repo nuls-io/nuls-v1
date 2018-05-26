@@ -23,7 +23,7 @@
  *
  */
 package io.nuls.core.tools.str;
-
+ 
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -81,7 +81,6 @@ public class StringUtils {
         }
     }
 
-
     public static boolean validAlias(String alias) {
         try {
             if (isBlank(alias)) {
@@ -107,6 +106,8 @@ public class StringUtils {
         }
         return true;
     }
+
+
 
 
     public static byte caculateXor(byte[] data) {

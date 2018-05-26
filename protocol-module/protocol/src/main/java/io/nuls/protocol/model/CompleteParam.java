@@ -22,11 +22,11 @@
  * SOFTWARE.
  *
  */
-
 package io.nuls.protocol.model;
 
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -34,69 +34,55 @@ import io.nuls.kernel.utils.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 请求区块摘要的数据封装
- * Request block hashes data encapsulation.
- *
- * @author Niels
- * @date 2018/2/8
+ * @author ln
+ * @date 2018/05/26
  */
-public class GetBlocksHashParam extends BaseNulsData {
+public class CompleteParam extends BaseNulsData {
 
-    /**
-     * 请求的起始高度，即需要返回的第一个高度
-     * The starting height of the request is the first height to be returned.
-     */
+    private NulsDigestData requestHash;
+    private boolean success;
 
-    private long startHeight;
-
-    /**
-     * 请求的结束高度，即需要返回的最后一个高度
-     * end of the blocks request
-     */
-
-    private long endHeight;
-
-    public GetBlocksHashParam() {
+    public CompleteParam() {
     }
 
-    public GetBlocksHashParam(long startHeight, long endHeight) {
-        this.startHeight = startHeight;
-        this.endHeight = endHeight;
+    public CompleteParam(NulsDigestData requestHash, boolean success) {
+        this.requestHash = requestHash;
+        this.success = success;
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfInt48();
-        size += SerializeUtils.sizeOfInt48();
+        size += SerializeUtils.sizeOfNulsData(requestHash);
+        size += SerializeUtils.sizeOfBoolean(success);
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeInt48(startHeight);
-        stream.writeInt48(endHeight);
+        stream.writeNulsData(requestHash);
+        stream.writeBoolean(success);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        startHeight = byteBuffer.readInt48();
-        endHeight = byteBuffer.readInt48();
+        this.requestHash = byteBuffer.readHash();
+        this.success = byteBuffer.readBoolean();
     }
 
-    public long getStartHeight() {
-        return startHeight;
+    public NulsDigestData getRequestHash() {
+        return requestHash;
     }
 
-    public void setStartHeight(long startHeight) {
-        this.startHeight = startHeight;
+    public void setRequestHash(NulsDigestData requestHash) {
+        this.requestHash = requestHash;
     }
 
-    public long getEndHeight() {
-        return endHeight;
+    public boolean isSuccess() {
+        return success;
     }
 
-    public void setEndHeight(long endHeight) {
-        this.endHeight = endHeight;
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 }
