@@ -91,7 +91,6 @@ public class AccountLedgerResource {
         } catch (Exception e) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
-
         if (addressBytes.length != AddressTool.HASH_LENGTH) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
@@ -118,19 +117,15 @@ public class AccountLedgerResource {
             @ApiResponse(code = 200, message = "success")
     })
     public Result transfer(@ApiParam(name = "form", value = "转账", required = true) TransferForm form) {
-
         if (form == null) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
-
         if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
-
         if (!Address.validAddress(form.getToAddress())) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
-
         if (form.getAmount() <= 0) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
@@ -140,6 +135,33 @@ public class AccountLedgerResource {
                 AddressTool.getAddress(form.getToAddress()),
                 value, form.getPassword(), form.getRemark());
     }
+
+
+    @POST
+    @Path("/transfer/fee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "转账手续费", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public Result transferFee(@ApiParam(name = "form", value = "转账手续费", required = true) TransferForm form) {
+        if (form == null) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
+        if (!Address.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+        }
+        if (!Address.validAddress(form.getToAddress())) {
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+        }
+        if (form.getAmount() <= 0) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
+        Na value = Na.valueOf(form.getAmount());
+
+        return null;
+    }
+
 
     @GET
     @Path("/tx/list/{address}")
