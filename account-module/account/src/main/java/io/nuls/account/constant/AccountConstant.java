@@ -38,4 +38,10 @@ public interface AccountConstant extends NulsConstant {
      * Account unlock time maximum (unit: second)
      */
     int ACCOUNT_MAX_UNLOCK_TIME = 120;
+
+    /**
+     * 导出accountkeystore文件的后缀名
+     * The suffix of the accountkeystore file
+     */
+    String ACCOUNTKEYSTORE_FILE_SUFFIX=".accountkeystore";
 }

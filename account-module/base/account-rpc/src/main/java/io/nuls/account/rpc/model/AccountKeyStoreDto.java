@@ -5,6 +5,8 @@ import io.nuls.core.tools.crypto.Hex;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.Map;
+
 /**
  * @author: Charlie
  * @date: 2018/5/15
@@ -24,8 +26,8 @@ public class AccountKeyStoreDto {
     private String prikey;
 
     public AccountKeyStoreDto() {
-    }
 
+    }
     public AccountKeyStoreDto(AccountKeyStore accountKeyStore) {
         this.address = accountKeyStore.getAddress();
         this.encryptedPrivateKey = null == accountKeyStore.getEncryptedPrivateKey() ? null : accountKeyStore.getEncryptedPrivateKey();
@@ -42,6 +44,14 @@ public class AccountKeyStoreDto {
         accountKeyStore.setPrikey(null == this.prikey ? null : Hex.decode(this.prikey));
         accountKeyStore.setPubKey(Hex.decode(this.pubKey));
         return accountKeyStore;
+    }
+
+    public AccountKeyStoreDto(Map<String, Object> map) {
+        this.address = (String)map.get("address");
+        this.encryptedPrivateKey = null == map.get("encryptedPrivateKey") ? null : (String)map.get("encryptedPrivateKey");
+        this.alias = null == map.get("alias") ? null : (String)map.get("alias");
+        this.pubKey = null == map.get("pubKey") ? null : (String)map.get("pubKey");
+        this.prikey = null == map.get("prikey") ? null : (String)map.get("prikey");
     }
 
     public String getAddress() {
