@@ -22,29 +22,25 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.base.handler;
+package io.nuls.protocol.message;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.message.bus.handler.AbstractMessageHandler;
-import io.nuls.network.model.Node;
-import io.nuls.protocol.base.download.cache.DownloadCacheHandler;
-import io.nuls.protocol.message.TxGroupMessage;
-import io.nuls.protocol.model.TxGroup;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.model.CompleteParam;
 
 /**
- * @author facjas
- * @date 2017/11/16
+ * @author ln
+ * @date 2018/05/26
  */
-public class TxGroupHandler extends AbstractMessageHandler<TxGroupMessage> {
+public class CompleteMessage extends BaseProtocolMessage<CompleteParam> {
+
+    public CompleteMessage() {
+        super(ProtocolConstant.MESSAGE_TYPE_COMPLETE);
+    }
 
     @Override
-    public void onMessage(TxGroupMessage message, Node fromNode) throws NulsException {
-        TxGroup txGroup = message.getMsgBody();
-        if (null == txGroup) {
-            Log.warn("recieved a null txGroup form " + fromNode.getId());
-            return;
-        }
-        DownloadCacheHandler.receiveTxGroup(txGroup);
+    protected CompleteParam parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new CompleteParam());
     }
 }

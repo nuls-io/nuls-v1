@@ -27,7 +27,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.protocol.constant.ProtocolConstant;
-import io.nuls.protocol.model.GetBlockDataParam;
+import io.nuls.protocol.model.GetBlockParam;
 
 /**
  * 获取区块的消息
@@ -36,62 +36,28 @@ import io.nuls.protocol.model.GetBlockDataParam;
  * @author Niels
  * @date 2017/11/13
  */
-public class GetBlockRequest extends BaseProtocolMessage<GetBlockDataParam> {
+public class GetBlockMessage extends BaseProtocolMessage<GetBlockParam> {
 
-    public GetBlockRequest() {
+    public GetBlockMessage() {
         super(ProtocolConstant.MESSAGE_TYPE_GET_BLOCK);
     }
 
     @Override
-    protected GetBlockDataParam parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new GetBlockDataParam());
+    protected GetBlockParam parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new GetBlockParam());
     }
 
-    public GetBlockRequest(long start, long size) {
+    public GetBlockMessage(NulsDigestData hash) {
         this();
-        GetBlockDataParam param = new GetBlockDataParam();
-        param.setSize(size);
-        param.setStart(start);
+        GetBlockParam param = new GetBlockParam();
+        param.setBlockHash(hash);
         this.setMsgBody(param);
     }
 
-    public GetBlockRequest(long start, long size, NulsDigestData startHash, NulsDigestData endHash) {
-        this();
-        GetBlockDataParam param = new GetBlockDataParam();
-        param.setSize(size);
-        param.setStart(start);
-        param.setStartHash(startHash);
-        param.setEndHash(endHash);
-        this.setMsgBody(param);
-    }
-
-    public long getStart() {
-        if (null == this.getMsgBody()) {
-            return -1;
-        }
-        return this.getMsgBody().getStart();
-    }
-
-    public long getSize() {
-        if (null == this.getMsgBody()) {
-            return -1;
-        }
-        return this.getMsgBody().getSize();
-    }
-
-
-    public NulsDigestData getStartHash() {
+    public NulsDigestData getBlockHash() {
         if (null == this.getMsgBody()) {
             return null;
         }
-        return this.getMsgBody().getStartHash();
+        return this.getMsgBody().getBlockHash();
     }
-
-    public NulsDigestData getEndHash() {
-        if (null == this.getMsgBody()) {
-            return null;
-        }
-        return this.getMsgBody().getEndHash();
-    }
-
 }

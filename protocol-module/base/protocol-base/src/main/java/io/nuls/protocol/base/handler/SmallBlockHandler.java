@@ -81,7 +81,7 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
         }
 
         //checkIt
-        if ((TimeService.currentTimeMillis() - header.getTime()) > ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L) {
+        if ((TimeService.currentTimeMillis() - header.getTime()) > ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS) {
             Log.info("It's too late:hash:" + header.getHash() + ", height:" + header.getHeight() + ", packerHex:" + Hex.encode(header.getPackingAddress()));
             return;
         }
@@ -134,8 +134,6 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
         }
 
         Block block = AssemblyBlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-//        boolean needForward = blockManager.addBlock(block, true, fromId);
-
         consensusService.newBlock(block, fromNode);
     }
 }

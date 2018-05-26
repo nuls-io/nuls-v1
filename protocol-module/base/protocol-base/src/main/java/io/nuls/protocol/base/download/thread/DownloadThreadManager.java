@@ -123,9 +123,9 @@ public class DownloadThreadManager implements Callable<Boolean> {
 
                 DownloadThread downloadThread = new DownloadThread(localBestHash, netBestHash, start, size, nodes.get(j));
 
-                FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<ResultMessage>(downloadThread);
+                FutureTask<ResultMessage> downloadThreadFuture = new FutureTask<>(downloadThread);
 
-                executor.execute(factory.newThread(factory.newThread(downloadThreadFuture)));
+                executor.execute(factory.newThread(downloadThreadFuture));
 
                 futures.add(downloadThreadFuture);
 

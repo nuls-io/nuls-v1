@@ -37,6 +37,7 @@ import io.nuls.protocol.constant.NotFoundType;
 import io.nuls.protocol.message.GetTxGroupRequest;
 import io.nuls.protocol.message.NotFoundMessage;
 import io.nuls.protocol.message.TxGroupMessage;
+import io.nuls.protocol.model.GetTxGroupParam;
 import io.nuls.protocol.model.NotFound;
 import io.nuls.protocol.model.TxGroup;
 
@@ -55,25 +56,28 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
 
     @Override
     public void onMessage(GetTxGroupRequest message, Node fromNode) {
-//        GetTxGroupParam eventBody = message.getMsgBody();
 
-        if (message.getMsgBody().getTxHashList() == null || message.getMsgBody().getTxHashList().size() > 10000) {
+        if(message == null || fromNode == null) {
+            return;
+        }
+
+        GetTxGroupParam getTxGroupParam = message.getMsgBody();
+        if (getTxGroupParam == null || getTxGroupParam.getTxHashList() == null || getTxGroupParam.getTxHashList().size() > 10000) {
             return;
         }
         NulsDigestData requestHash = null;
         try {
-            requestHash = NulsDigestData.calcDigestData(message.getMsgBody().serialize());
+            requestHash = NulsDigestData.calcDigestData(getTxGroupParam.serialize());
         } catch (IOException e) {
             Log.error(e);
             return;
         }
 
-
         TxGroupMessage txGroupMessage = new TxGroupMessage();
         TxGroup txGroup = new TxGroup();
         List<Transaction> txList = new ArrayList<>();
 
-        for (NulsDigestData hash : message.getMsgBody().getTxHashList()) {
+        for (NulsDigestData hash : getTxGroupParam.getTxHashList()) {
             Transaction tx = temporaryCacheManager.getTx(hash);
             if (tx == null) {
                 tx = ledgerService.getTx(hash);
@@ -82,16 +86,17 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
                 txList.add(tx);
             } else {
                 this.sendNotFound(requestHash, fromNode);
+                return;
             }
         }
         if (txList.isEmpty()) {
-            Log.error("ASK:{}, {}", fromNode, message.getMsgBody().getTxHashList().get(0));
+            Log.error("ASK:{}, {}", fromNode, getTxGroupParam.getTxHashList().get(0));
             return;
         }
 
         txGroup.setTxList(txList);
-
         txGroup.setRequestHash(requestHash);
+
         txGroupMessage.setMsgBody(txGroup);
         messageBusService.sendToNode(txGroupMessage, fromNode, true);
     }

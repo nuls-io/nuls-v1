@@ -35,7 +35,7 @@ import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
 import io.nuls.protocol.constant.NotFoundType;
 import io.nuls.protocol.message.BlocksHashMessage;
-import io.nuls.protocol.message.GetBlocksHashRequest;
+import io.nuls.protocol.message.GetBlocksHashMessage;
 import io.nuls.protocol.message.NotFoundMessage;
 import io.nuls.protocol.model.BlockHashResponse;
 import io.nuls.protocol.model.GetBlocksHashParam;
@@ -48,7 +48,7 @@ import java.io.IOException;
  * @author Niels
  * @date 2018/1/16
  */
-public class GetBlocksHashHandler extends AbstractMessageHandler<GetBlocksHashRequest> {
+public class GetBlocksHashHandler extends AbstractMessageHandler<GetBlocksHashMessage> {
 
     private static final int MAX_SIZE = 10000;
 
@@ -56,19 +56,14 @@ public class GetBlocksHashHandler extends AbstractMessageHandler<GetBlocksHashRe
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
     @Override
-    public void onMessage(GetBlocksHashRequest message, Node fromNode) {
+    public void onMessage(GetBlocksHashMessage message, Node fromNode) {
         GetBlocksHashParam param = message.getMsgBody();
-        if (param.getSize() > MAX_SIZE) {
+        if (param.getEndHeight() - param.getStartHeight() >= MAX_SIZE) {
             return;
         }
-        NulsDigestData requestHash = null;
-        try {
-            requestHash = NulsDigestData.calcDigestData(message.getMsgBody().serialize());
-        } catch (IOException e) {
-            Log.error(e);
-            return;
-        }
-        BlockHeader endHeader = blockService.getBlockHeader(param.getStart() + param.getSize() - 1).getData();
+        NulsDigestData requestHash = message.getHash();
+
+        BlockHeader endHeader = blockService.getBlockHeader(param.getEndHeight()).getData();
         if (null == endHeader) {
             sendNotFound(fromNode, requestHash);
             return;
@@ -77,9 +72,12 @@ public class GetBlocksHashHandler extends AbstractMessageHandler<GetBlocksHashRe
 
         response.setRequestMessageHash(requestHash);
         BlockHeader header = endHeader;
-        while (header.getHeight() >= param.getStart()) {
-            response.putFront(header.getHeight(), header.getHash());
+        while (header.getHeight() >= param.getStartHeight()) {
+            response.putFront(header.getHash());
             header = blockService.getBlockHeader(header.getPreHash()).getData();
+            if(header == null) {
+                break;
+            }
         }
         sendResponse(response, fromNode);
     }
