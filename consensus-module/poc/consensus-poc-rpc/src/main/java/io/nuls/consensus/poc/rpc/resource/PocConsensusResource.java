@@ -123,7 +123,7 @@ public class PocConsensusResource {
     @GET
     @Path("/address/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("获取钱包内某个账户参与共识信息 [3.6.2a]")
+    @ApiOperation("获取钱包内某个账户参与共识信息")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Map.class)
     })
@@ -201,7 +201,7 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
     public Result<Long> getCreateAgentFee(
-                                          @BeanParam() GetCreateAgentFeeForm form) throws NulsException {
+            @BeanParam() GetCreateAgentFeeForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAgentAddress(), "agent address can not be null");
         AssertUtil.canNotEmpty(form.getAgentName(), "agent name can not be null");
@@ -242,8 +242,102 @@ public class PocConsensusResource {
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
         }
-        Na fee = TransactionFeeCalculator.getFee(tx.size());
+        Na fee = TransactionFeeCalculator.getFee(tx.size()+ P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
         return Result.getSuccess().setData(fee.getValue());
+    }
+
+    @GET
+    @Path("/deposit/fee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "get the fee of create agent! 获取加入共识的手续费", notes = "返回加入共识交易手续费")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public Result<Long> getDepositFee(@BeanParam() GetDepositFeeForm form) throws NulsException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAddress(), "address can not be null");
+        AssertUtil.canNotEmpty(form.getAgentHash(), "agent hash can not be null");
+        AssertUtil.canNotEmpty(form.getDeposit(), "deposit can not be null");
+        DepositTransaction tx = new DepositTransaction();
+        Deposit deposit = new Deposit();
+        deposit.setAddress(AddressTool.getAddress(form.getAddress()));
+        deposit.setAgentHash(NulsDigestData.fromDigestHex(form.getAgentHash()));
+        deposit.setDeposit(Na.valueOf(form.getDeposit()));
+        tx.setTxData(deposit);
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), -1));
+        coinData.setTo(toList);
+        tx.setCoinData(coinData);
+        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        tx.getCoinData().setFrom(result.getCoinList());
+        if (null != result.getChange()) {
+            tx.getCoinData().getTo().add(result.getChange());
+        }
+        Na fee = TransactionFeeCalculator.getFee(tx.size()+ P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        return Result.getSuccess().setData(fee.getValue());
+    }
+
+    @GET
+    @Path("/agent/stop/fee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "get the fee of stop agent! 获取停止节点的手续费", notes = "返回停止节点交易手续费")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public Result<Long> getStopAgentFee(@ApiParam(name = "address", value = "创建节点的账户地址", required = true)
+                                        @QueryParam("address") String address) throws NulsException, IOException {
+        AssertUtil.canNotEmpty(address, "address can not be null");
+        if (!AddressTool.validAddress(address)) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
+        }
+
+        StopAgentTransaction tx = new StopAgentTransaction();
+        StopAgent stopAgent = new StopAgent();
+        stopAgent.setAddress(AddressTool.getAddress(address));
+        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+        Agent agent = null;
+        for (Agent a : agentList) {
+            if (a.getDelHeight() > 0) {
+                continue;
+            }
+            if (Arrays.equals(a.getAgentAddress(), stopAgent.getAddress())) {
+                agent = a;
+                break;
+            }
+        }
+        if (agent == null || agent.getDelHeight() > 0) {
+            return Result.getFailed("Can not found any agent!");
+        }
+        NulsDigestData createTxHash = agent.getTxHash();
+        stopAgent.setCreateTxHash(createTxHash);
+        tx.setTxData(stopAgent);
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        toList.add(new Coin(stopAgent.getAddress(), agent.getDeposit(), 0));
+        coinData.setTo(toList);
+        CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);
+        if (null == transaction) {
+            return Result.getFailed("Can not find the create agent transaction!");
+        }
+        List<Coin> fromList = new ArrayList<>();
+        for (int index = 0; index < transaction.getCoinData().getTo().size(); index++) {
+            Coin coin = transaction.getCoinData().getTo().get(index);
+            if (coin.getLockTime() == -1L && coin.getNa().equals(agent.getDeposit())) {
+                coin.setOwner(ArraysTool.joinintTogether(transaction.getHash().serialize(), new VarInt(index).encode()));
+                fromList.add(coin);
+                break;
+            }
+        }
+        if (fromList.isEmpty()) {
+            return Result.getFailed(KernelErrorCode.DATA_ERROR);
+        }
+        coinData.setFrom(fromList);
+        Na fee = TransactionFeeCalculator.getFee(tx.size());
+        coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
+        tx.setCoinData(coinData);
+        Na resultFee = TransactionFeeCalculator.getFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        return Result.getSuccess().setData(resultFee.getValue());
     }
 
 
