@@ -194,7 +194,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         for (int i = txListToRollback.size() - 1; i >= 0; i--) {
             rollback(txListToRollback.get(i));
         }
-
+        Collections.reverse(txListToRollback);
+        for (int i = txListToRollback.size() - 1; i >= 0; i--) {
+            saveUnconfirmedTransaction(txListToRollback.get(i));
+        }
         return Result.getSuccess().setData(new Integer(txListToRollback.size()));
     }
 
@@ -228,13 +231,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 return coinDataResult;
             }
             Collections.sort(coinList, CoinComparator.getInstance());
-
-//            Set<byte[]> usedKeyset = getTmpUsedCoinKeySet();
-//            for (Coin coin : rawCoinList) {
-//                if (!usedKeyset.contains(coin.getOwner())) {
-//                    coinList.add(coin);
-//                }
-//            }
 
             boolean enough = false;
             List<Coin> coins = new ArrayList<>();
@@ -817,7 +813,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             throw new NulsRuntimeException(e);
         }
         CoinData coinData = tx.getCoinData();
-
+        Set<byte[]> usedKeyset = getTmpUsedCoinKeySet();
         if (coinData != null) {
             // save - from
             List<Coin> froms = coinData.getFrom();
@@ -836,6 +832,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 }
                 if (sourceTx == null) {
                     return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
+                }
+                if (usedKeyset.contains(from.getOwner())) {
+                    continue;
                 }
                 byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
                 try {
