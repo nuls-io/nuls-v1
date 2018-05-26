@@ -25,6 +25,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.map.MapUtil;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.kernel.exception.NulsException;
@@ -268,8 +269,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 // 此txList是待打包的块中的交易，所以toList是下一步的UTXO，应该校验它
                 initialCapacity += validateCoinData.getTo().size();
             }
+            initialCapacity = MapUtil.tableSizeFor(initialCapacity) << 1;
             // txList中所有的to存放于HashMap中
-            Map<String, Coin> validateUtxoMap = new HashMap<>(initialCapacity, 1);
+            Map<String, Coin> validateUtxoMap = new HashMap<>(initialCapacity);
             Transaction tx;
             byte[] txHashBytes;
             Coin toOfValidate;
@@ -306,7 +308,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.DATA_ERROR);
                 }
             }
-            HashSet<String> set = new HashSet<>(fromSize, 1);
+            int initialSetCapacity = MapUtil.tableSizeFor(fromSize) << 1;
+            HashSet<String> set = new HashSet<>(initialSetCapacity);
             Na fromTotal = Na.ZERO;
             byte[] fromBytes;
             // 保存在数据库中或者txList中的utxo数据
@@ -406,7 +409,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             }
             initialCapacity += tx.getCoinData().getFrom().size();
         }
-        HashMap<String, Transaction> fromMap = new HashMap<>(initialCapacity, 1);
+        initialCapacity = MapUtil.tableSizeFor(initialCapacity) << 1;
+        HashMap<String, Transaction> fromMap = new HashMap<>(initialCapacity);
         List<Coin> froms;
         Transaction prePutTx;
         // 判断是否有重复的fromCoin存在，如果存在，则是双花
