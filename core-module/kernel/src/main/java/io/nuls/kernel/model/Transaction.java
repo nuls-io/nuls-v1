@@ -26,21 +26,16 @@ package io.nuls.kernel.model;
 
 import io.nuls.core.tools.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.TxStatusEnum;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Niels
@@ -235,21 +230,13 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         if (coinData != null) {
             Set<byte[]> coinAddressSet = coinData.getAddresses();
             if (null != coinAddressSet) {
-                for(byte[] address : coinAddressSet){
-                    if(address != null && address.length == AddressTool.HASH_LENGTH){
-                        addresses.add(address);
-                    }
-                }
+                addresses.addAll(coinAddressSet);
             }
         }
         if (txData != null) {
             Set<byte[]> txAddressSet = txData.getAddresses();
             if (null != txAddressSet) {
-                for(byte[] address : txAddressSet){
-                    if(address != null && address.length == AddressTool.HASH_LENGTH){
-                        addresses.add(address);
-                    }
-                }
+                addresses.addAll(txAddressSet);
             }
         }
         if(scriptSig != null) {
@@ -257,9 +244,20 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
             try {
                 sig.parse(scriptSig);
                 byte[] address = AddressTool.getAddress(sig);
-                addresses.add(address);
+
+                boolean hasExist = false;
+                for(byte[] as : addresses) {
+                    if(Arrays.equals(as, address)) {
+                        hasExist = true;
+                        break;
+                    }
+                }
+
+                if(!hasExist) {
+                    addresses.add(address);
+                }
             } catch (NulsException e) {
-                e.printStackTrace();
+                Log.error(e);
             }
         }
         return new ArrayList<>(addresses);

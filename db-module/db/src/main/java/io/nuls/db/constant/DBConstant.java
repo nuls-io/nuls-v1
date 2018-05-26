@@ -34,4 +34,6 @@ public interface DBConstant extends NulsConstant {
 
     short MODULE_ID_DB = 2;
 
+    String BASE_AREA_NAME = "base";
+
 }
