@@ -133,7 +133,7 @@ public class DownloadUtils {
             }
         } catch (Exception e) {
             Log.error(node.getId() + ",start:" + startHeight + " , endHeight:" + endHeight);
-            Log.error(e.getMessage());
+            e.printStackTrace();
             return new ArrayList<>();
         } finally {
             DownloadCacheHandler.removeTaskFuture(requestHash);
