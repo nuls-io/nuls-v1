@@ -14,7 +14,6 @@ import java.io.IOException;
 
 public class NetworkMessageBody extends BaseNulsData {
 
-
     private int handshakeType;
 
     private int severPort;
@@ -25,20 +24,17 @@ public class NetworkMessageBody extends BaseNulsData {
 
     private long networkTime;
 
-    private String nodeIp;
-
 
     public NetworkMessageBody() {
 
     }
 
-    public NetworkMessageBody(int handshakeType, int severPort, long bestBlockHeight, NulsDigestData bestBlockHash, String ip) {
+    public NetworkMessageBody(int handshakeType, int severPort, long bestBlockHeight, NulsDigestData bestBlockHash) {
         this.handshakeType = handshakeType;
         this.severPort = severPort;
         this.bestBlockHeight = bestBlockHeight;
         this.bestBlockHash = bestBlockHash;
         this.networkTime = TimeService.currentTimeMillis();
-        this.nodeIp = ip;
     }
 
     @Override
@@ -49,7 +45,6 @@ public class NetworkMessageBody extends BaseNulsData {
         s += VarInt.sizeOf(bestBlockHeight);
         s += bestBlockHash.size();
         s += VarInt.sizeOf(networkTime);
-        s += SerializeUtils.sizeOfString(nodeIp);
         return s;
     }
 
@@ -63,7 +58,6 @@ public class NetworkMessageBody extends BaseNulsData {
         stream.write(new VarInt(bestBlockHeight).encode());
         stream.write(bestBlockHash.serialize());
         stream.write(new VarInt(networkTime).encode());
-        stream.writeString(nodeIp);
     }
 
     @Override
@@ -73,7 +67,6 @@ public class NetworkMessageBody extends BaseNulsData {
         bestBlockHeight = (int) buffer.readVarInt();
         bestBlockHash = buffer.readHash();
         networkTime = buffer.readVarInt();
-        nodeIp = new String(buffer.readByLengthByte());
     }
 
     public int getHandshakeType() {
@@ -116,11 +109,4 @@ public class NetworkMessageBody extends BaseNulsData {
         this.networkTime = networkTime;
     }
 
-    public String getNodeIp() {
-        return nodeIp;
-    }
-
-    public void setNodeIp(String nodeIp) {
-        this.nodeIp = nodeIp;
-    }
 }

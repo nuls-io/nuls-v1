@@ -43,7 +43,7 @@ public class GetVersionMessageHandler implements BaseNetworkMeesageHandler {
         node.setBestBlockHash(body.getBestBlockHash());
 
         NetworkMessageBody myVersionBody = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
-                NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash(), null);
+                NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash());
         return new NetworkEventResult(true, new VersionMessage(myVersionBody));
     }
 

@@ -58,7 +58,7 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
             }
         }
         //握手成功时，更新自己的外网ip地址
-        networkParam.getLocalIps().add(body.getNodeIp());
+      //  networkParam.getLocalIps().add(body.getNodeIp());
         node.setFailCount(0);
         node.setSeverPort(body.getSeverPort());
         node.setBestBlockHash(body.getBestBlockHash());
@@ -67,8 +67,9 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 
         if (!isServer) {
             body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
-                    NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash(),
-                    socketChannel.remoteAddress().getHostString());
+                    NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash()
+//                    socketChannel.remoteAddress().getHostString()
+            );
             return new NetworkEventResult(true, new HandshakeMessage(body));
         }
         return null;

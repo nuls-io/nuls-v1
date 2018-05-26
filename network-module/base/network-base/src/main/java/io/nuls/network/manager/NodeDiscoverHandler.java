@@ -103,7 +103,7 @@ public class NodeDiscoverHandler implements Runnable {
 
             Collection<Node> nodeList = nodesManager.getAvailableNodes();
             NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
-                    NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash(), null);
+                    NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash());
             GetVersionMessage getVersionMessage = new GetVersionMessage(body);
             NodeMessageBody nodeMessageBody = new NodeMessageBody();
             GetNodesIpMessage getNodesIpMessage = new GetNodesIpMessage(nodeMessageBody);
