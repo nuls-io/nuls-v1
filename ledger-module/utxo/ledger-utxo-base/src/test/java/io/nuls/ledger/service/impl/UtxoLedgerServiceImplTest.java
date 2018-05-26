@@ -29,6 +29,7 @@ import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.module.impl.LevelDbModuleBootstrap;
 import io.nuls.kernel.MicroKernelBootstrap;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.*;
@@ -73,6 +74,12 @@ public class UtxoLedgerServiceImplTest {
         MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
         mk.init();
         mk.start();
+
+        Block block = new Block();
+        BlockHeader header = new BlockHeader();
+        header.setHeight(1);
+        block.setHeader(header);
+        NulsContext.getInstance().setBestBlock(block);
 
         LevelDbModuleBootstrap bootstrap = new LevelDbModuleBootstrap();
         bootstrap.init();
