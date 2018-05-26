@@ -6,7 +6,12 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.CommandResult;
+import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
+import io.nuls.kernel.utils.RestFulUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -15,6 +20,8 @@ import io.nuls.kernel.processor.CommandProcessor;
 @Cmd
 @Component
 public class CreateAccountProcessor implements CommandProcessor {
+
+    private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
@@ -51,11 +58,14 @@ public class CreateAccountProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        String password = null;
-        if(args.length == 2){
-            password = args[1];
+        String password = args.length == 2 ? args[1] : null;
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("password", password);
+        parameters.put("count", 1);
+        Result result = restFul.post("/account", parameters);
+        if(result.isFailed()){
+            return CommandResult.getFailed(result.getMsg());
         }
-        // todo
-        return null;
+        return CommandResult.getResult(result);
     }
 }

@@ -194,7 +194,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         for (int i = txListToRollback.size() - 1; i >= 0; i--) {
             rollback(txListToRollback.get(i));
         }
-
+        Collections.reverse(txListToRollback);
+        for (int i = txListToRollback.size() - 1; i >= 0; i--) {
+            saveUnconfirmedTransaction(txListToRollback.get(i));
+        }
         return Result.getSuccess().setData(new Integer(txListToRollback.size()));
     }
 
@@ -228,13 +231,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 return coinDataResult;
             }
             Collections.sort(coinList, CoinComparator.getInstance());
-
-//            Set<byte[]> usedKeyset = getTmpUsedCoinKeySet();
-//            for (Coin coin : rawCoinList) {
-//                if (!usedKeyset.contains(coin.getOwner())) {
-//                    coinList.add(coin);
-//                }
-//            }
 
             boolean enough = false;
             List<Coin> coins = new ArrayList<>();
@@ -817,7 +813,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             throw new NulsRuntimeException(e);
         }
         CoinData coinData = tx.getCoinData();
-
         if (coinData != null) {
             // save - from
             List<Coin> froms = coinData.getFrom();
@@ -860,21 +855,5 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             accountLedgerStorageService.batchDeleteUTXO(toSet);
         }
         return Result.getSuccess();
-    }
-
-    protected Set<byte[]> getTmpUsedCoinKeySet() {
-        List<Transaction> localTxList = unconfirmedTransactionStorageService.loadAllUnconfirmedList().getData();
-        Set<byte[]> coinKeys = new HashSet<>();
-        for (Transaction tx : localTxList) {
-            CoinData coinData = tx.getCoinData();
-            List<Coin> coins = coinData.getFrom();
-            for (Coin coin : coins) {
-                byte[] owner = coin.getOwner();
-                byte[] coinKey = new byte[owner.length - AddressTool.HASH_LENGTH];
-                System.arraycopy(owner, AddressTool.HASH_LENGTH, coinKey, 0, coinKey.length);
-                coinKeys.add(coin.getOwner());
-            }
-        }
-        return coinKeys;
     }
 }

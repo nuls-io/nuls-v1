@@ -94,8 +94,6 @@ public class UnconfiredmTransactionStorageImpl implements UnconfirmedTransaction
             Transaction tx = TransactionManager.getInstances(new NulsByteBuffer(txBytes),1).get(0);
             return Result.getSuccess().setData(tx);
         }catch (Exception e){
-            e.printStackTrace();
-            Log.info("getUnconfirmedTx error");
             return Result.getFailed();
         }
     }

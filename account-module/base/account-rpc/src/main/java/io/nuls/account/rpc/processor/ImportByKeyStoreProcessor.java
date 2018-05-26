@@ -27,6 +27,7 @@ import java.util.Map;
 public class ImportByKeyStoreProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
+
     @Override
     public String getCommand() {
         return "importkeystore";
