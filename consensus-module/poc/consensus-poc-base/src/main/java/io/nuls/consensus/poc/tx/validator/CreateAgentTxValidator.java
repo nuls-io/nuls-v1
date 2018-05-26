@@ -47,7 +47,7 @@ import java.util.Arrays;
 public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<CreateAgentTransaction> {
 
     //节点介绍最大长度
-    private static final int INSTRACTION_MAX_LENGTH = 100;
+    private static final int INSTRACTION_MAX_LENGTH = 200;
 
     private static final int AGENT_NAME_MAX_LENGTH = 32;
 

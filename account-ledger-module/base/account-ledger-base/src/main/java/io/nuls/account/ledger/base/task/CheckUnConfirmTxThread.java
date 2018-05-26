@@ -24,19 +24,23 @@
 package io.nuls.account.ledger.base.task;
 
 
+import io.nuls.account.ledger.base.manager.BalanceManager;
 import io.nuls.account.ledger.base.util.TransactionTimeComparator;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.ledger.storage.service.AccountLedgerStorageService;
 import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
+import io.nuls.account.model.Balance;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.service.TransactionService;
@@ -65,6 +69,9 @@ public class CheckUnConfirmTxThread implements Runnable {
     @Autowired
     private AccountLedgerStorageService accountLedgerStorageService;
 
+    @Autowired
+    private BalanceManager balanceManager;
+
     @Override
     public void run() {
         List<Transaction> list = accountLedgerService.getAllUnconfirmedTransaction().getData();
@@ -87,6 +94,13 @@ public class CheckUnConfirmTxThread implements Runnable {
                 }
             } else {
                 deleteUnconfirmedTransaction(tx);
+                List<byte[]> addresses = tx.getAllRelativeAddress();
+                for (byte[] address : addresses) {
+                    if (accountLedgerService.isLocalAccount(address)) {
+                        balanceManager.refreshBalance(address);
+                    }
+                }
+
             }
         }
     }
@@ -94,6 +108,7 @@ public class CheckUnConfirmTxThread implements Runnable {
     private void deleteUnconfirmedTransaction(Transaction tx) {
 
         unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
+
         rollbackUtxo(tx);
     }
 
@@ -108,31 +123,45 @@ public class CheckUnConfirmTxThread implements Runnable {
             throw new NulsRuntimeException(e);
         }
         CoinData coinData = tx.getCoinData();
-
+        Set<byte[]> usedKeyset = getTmpUsedCoinKeySet();
         if (coinData != null) {
             // save - from
-//            List<Coin> froms = coinData.getFrom();
-//            Map<byte[], byte[]> fromMap = new HashMap<>();
-//            for (Coin from : froms) {
-//                byte[] fromSource = from.getOwner();
-//                byte[] utxoFromSource = new byte[tx.getHash().size()];
-//                byte[] fromIndex = new byte[fromSource.length - utxoFromSource.length];
-//                System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
-//                System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
-//                Transaction sourceTx = null;
-//                try {
-//                    sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
-//                } catch (Exception e) {
-//                    continue;
-//                }
-//                byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
-//                try {
-//                    fromMap.put(org.spongycastle.util.Arrays.concatenate(address, from.getOwner()), sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).serialize());
-//                } catch (IOException e) {
-//                    throw new NulsRuntimeException(e);
-//                }
-//            }
-//            accountLedgerStorageService.batchSaveUTXO(fromMap);
+            List<Coin> froms = coinData.getFrom();
+            Map<byte[], byte[]> fromMap = new HashMap<>();
+            for (Coin from : froms) {
+                byte[] fromSource = from.getOwner();
+                byte[] utxoFromSource = new byte[tx.getHash().size()];
+                byte[] fromIndex = new byte[fromSource.length - utxoFromSource.length];
+                System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
+                System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
+                Transaction sourceTx = null;
+                try {
+                    sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(utxoFromSource)));
+                } catch (Exception e) {
+                    continue;
+                }
+                if (sourceTx == null) {
+                    continue;
+                }
+                if (usedKeyset.contains(from.getOwner())) {
+                    continue;
+                }
+                byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
+                try {
+                    fromMap.put(org.spongycastle.util.Arrays.concatenate(address, from.getOwner()), sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).serialize());
+                } catch (IOException e) {
+                    throw new NulsRuntimeException(e);
+                }
+            }
+            accountLedgerStorageService.batchSaveUTXO(fromMap);
+            for (byte[] key : fromMap.keySet()) {
+                Coin coin = null;
+                try {
+                    coin.parse(fromMap.get(key));
+                } catch (NulsException e) {
+                    e.printStackTrace();
+                }
+            }
             // delete utxo - to
             List<Coin> tos = coinData.getTo();
             byte[] indexBytes;
@@ -180,5 +209,18 @@ public class CheckUnConfirmTxThread implements Runnable {
             return result;
         }
         return Result.getSuccess();
+    }
+
+    protected Set<byte[]> getTmpUsedCoinKeySet() {
+        List<Transaction> localTxList = unconfirmedTransactionStorageService.loadAllUnconfirmedList().getData();
+        Set<byte[]> coinKeys = new HashSet<>();
+        for (Transaction tx : localTxList) {
+            CoinData coinData = tx.getCoinData();
+            List<Coin> coins = coinData.getFrom();
+            for (Coin coin : coins) {
+                coinKeys.add(coin.getOwner());
+            }
+        }
+        return coinKeys;
     }
 }
