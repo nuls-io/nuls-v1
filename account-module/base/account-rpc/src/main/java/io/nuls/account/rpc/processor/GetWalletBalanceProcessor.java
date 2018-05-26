@@ -5,7 +5,11 @@ import io.nuls.core.tools.cmd.CommandHelper;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.CommandResult;
+import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
+import io.nuls.kernel.utils.RestFulUtils;
+
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -14,6 +18,9 @@ import io.nuls.kernel.processor.CommandProcessor;
 @Cmd
 @Component
 public class GetWalletBalanceProcessor implements CommandProcessor {
+
+    private RestFulUtils restFul = RestFulUtils.getInstance();
+
     @Override
     public String getCommand() {
         return "getwalletbalance";
@@ -44,6 +51,10 @@ public class GetWalletBalanceProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        return null;
+        Result result = restFul.get("/account/balance", null);
+        if(result.isFailed()){
+            return CommandResult.getFailed(result.getMsg());
+        }
+        return CommandResult.getResult(result);
     }
 }
