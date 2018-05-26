@@ -813,7 +813,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             throw new NulsRuntimeException(e);
         }
         CoinData coinData = tx.getCoinData();
-        Set<byte[]> usedKeyset = getTmpUsedCoinKeySet();
         if (coinData != null) {
             // save - from
             List<Coin> froms = coinData.getFrom();
@@ -832,9 +831,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 }
                 if (sourceTx == null) {
                     return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
-                }
-                if (usedKeyset.contains(from.getOwner())) {
-                    continue;
                 }
                 byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
                 try {
@@ -859,21 +855,5 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             accountLedgerStorageService.batchDeleteUTXO(toSet);
         }
         return Result.getSuccess();
-    }
-
-    protected Set<byte[]> getTmpUsedCoinKeySet() {
-        List<Transaction> localTxList = unconfirmedTransactionStorageService.loadAllUnconfirmedList().getData();
-        Set<byte[]> coinKeys = new HashSet<>();
-        for (Transaction tx : localTxList) {
-            CoinData coinData = tx.getCoinData();
-            List<Coin> coins = coinData.getFrom();
-            for (Coin coin : coins) {
-                byte[] owner = coin.getOwner();
-                byte[] coinKey = new byte[owner.length - AddressTool.HASH_LENGTH];
-                System.arraycopy(owner, AddressTool.HASH_LENGTH, coinKey, 0, coinKey.length);
-                coinKeys.add(coin.getOwner());
-            }
-        }
-        return coinKeys;
     }
 }
