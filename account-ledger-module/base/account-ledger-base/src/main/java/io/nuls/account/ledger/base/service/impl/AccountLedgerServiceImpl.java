@@ -526,7 +526,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
         long start = 0;
         long end = NulsContext.getInstance().getBestHeight();
-        while (start < end) {
+        while (start <= end) {
             for (long i = start; i <= end; i++) {
                 List<NulsDigestData> txs = blockService.getBlock(i).getData().getTxHashList();
                 for (int j = 0; j < txs.size(); j++) {

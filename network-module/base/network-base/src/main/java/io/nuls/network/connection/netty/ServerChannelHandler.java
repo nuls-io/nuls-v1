@@ -97,8 +97,11 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             ctx.channel().close();
             return;
         }
+        //握手成功时，告诉对方对方的外网ip地址
         NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
-                NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash());
+                NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash()
+        //        channel.remoteAddress().getHostString()
+        );
         HandshakeMessage handshakeMessage = new HandshakeMessage(body);
         broadcastHandler.broadcastToNode(handshakeMessage, node, false);
     }

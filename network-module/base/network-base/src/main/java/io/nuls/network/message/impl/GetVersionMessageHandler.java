@@ -27,6 +27,8 @@ public class GetVersionMessageHandler implements BaseNetworkMeesageHandler {
 
     private NodeManager nodeManager = NodeManager.getInstance();
 
+    private NetworkParam networkParam = NetworkParam.getInstance();
+
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
         GetVersionMessage getVersionMessage = (GetVersionMessage) message;
@@ -40,8 +42,7 @@ public class GetVersionMessageHandler implements BaseNetworkMeesageHandler {
         node.setBestBlockHeight(body.getBestBlockHeight());
         node.setBestBlockHash(body.getBestBlockHash());
 
-
-        NetworkMessageBody myVersionBody = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, NetworkParam.getInstance().getPort(),
+        NetworkMessageBody myVersionBody = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
                 NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash());
         return new NetworkEventResult(true, new VersionMessage(myVersionBody));
     }

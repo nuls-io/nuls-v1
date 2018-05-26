@@ -15,6 +15,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.nuls.network.protocol.message.NetworkMessageBody;
 import io.nuls.protocol.message.base.BaseMessage;
 
+import java.util.Map;
+
 public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 
     private NodeManager nodeManager = NodeManager.getInstance();
@@ -51,12 +53,12 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
             if (socketChannel != null) {
                 Log.debug("localInfo: " + socketChannel.localAddress().getHostString() + ":" + socketChannel.localAddress().getPort());
                 Log.debug("handshake failed, close the connetion.");
-
                 socketChannel.close();
                 return null;
             }
         }
-
+        //握手成功时，更新自己的外网ip地址
+      //  networkParam.getLocalIps().add(body.getNodeIp());
         node.setFailCount(0);
         node.setSeverPort(body.getSeverPort());
         node.setBestBlockHash(body.getBestBlockHash());
@@ -65,7 +67,9 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 
         if (!isServer) {
             body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
-                    NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash());
+                    NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash()
+//                    socketChannel.remoteAddress().getHostString()
+            );
             return new NetworkEventResult(true, new HandshakeMessage(body));
         }
         return null;

@@ -6,13 +6,13 @@ import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.VarInt;
 import io.protostuff.Tag;
 
 import java.io.IOException;
 
 public class NetworkMessageBody extends BaseNulsData {
-
 
     private int handshakeType;
 
