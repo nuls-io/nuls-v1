@@ -6,7 +6,9 @@ import io.nuls.core.tools.cmd.CommandHelper;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.CommandResult;
+import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
+import io.nuls.kernel.utils.RestFulUtils;
 
 /**
  * @author: Charlie
@@ -15,6 +17,9 @@ import io.nuls.kernel.processor.CommandProcessor;
 @Cmd
 @Component
 public class GetAccountProcessor implements CommandProcessor {
+
+    private RestFulUtils restFul = RestFulUtils.getInstance();
+
     @Override
     public String getCommand() {
         return "getaccount";
@@ -49,6 +54,11 @@ public class GetAccountProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        return null;
+        String address = args[1];
+        Result result = restFul.get("/account/" + address, null);
+        if(result.isFailed()){
+            return CommandResult.getFailed(result.getMsg());
+        }
+        return CommandResult.getResult(result);
     }
 }
