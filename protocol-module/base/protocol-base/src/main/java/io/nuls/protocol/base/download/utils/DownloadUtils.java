@@ -68,6 +68,8 @@ public class DownloadUtils {
 
     public static List<Block> getBlocks(Node node, NulsDigestData startHash, NulsDigestData endHash, long startHeight, int size) throws Exception {
 
+        Log.info("download block " + startHash + " , " + startHeight + " from : " + node.getId());
+
         List<Block> resultList = new ArrayList<Block>();
 
         if (startHash.equals(endHash)) {
