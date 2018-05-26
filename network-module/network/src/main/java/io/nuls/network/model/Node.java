@@ -71,6 +71,8 @@ public class Node extends BaseNulsData {
 
     private long timeOffset;
 
+    private String externalIp;
+
     @Override
     public int size() {
         int s = 0;
@@ -330,5 +332,13 @@ public class Node extends BaseNulsData {
 
     public void setTimeOffset(long timeOffset) {
         this.timeOffset = timeOffset;
+    }
+
+    public String getExternalIp() {
+        return externalIp;
+    }
+
+    public void setExternalIp(String externalIp) {
+        this.externalIp = externalIp;
     }
 }

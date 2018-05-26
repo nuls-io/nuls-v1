@@ -19,7 +19,7 @@ public class CommandHelper {
 
 
     public static void confirmPwd(String newPwd) {
-        System.out.print("Please enter your password:");
+        System.out.print("Please enter your password again:");
         Scanner scanner = new Scanner(System.in);
         String confirmed = scanner.nextLine();
         while (!newPwd.equals(confirmed)) {
