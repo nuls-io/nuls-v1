@@ -35,7 +35,7 @@ import javax.ws.rs.QueryParam;
  * @author Niels
  * @date 2018/3/14
  */
-@ApiModel(value = "创建共识(代理)节点表单数据")
+@ApiModel(value = "获取创建共识(代理)节点表单数据")
 public class GetCreateAgentFeeForm {
 
     @ApiModelProperty(name = "agentAddress", value = "申请账户的地址", required = true)
