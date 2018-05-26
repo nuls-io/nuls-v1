@@ -62,7 +62,7 @@ public class DownloadCacheHandler {
     }
 
     public static void receiveBlock(Block block) {
-        Log.error("receive get block request : " + block.getHeader().getHash());
+//        Log.error("receive get block request :({}) " + block.getHeader().getHash(),block.getHeader().getHeight());
 
         NulsDigestData hash = NulsDigestData.calcDigestData(SerializeUtils.uint64ToByteArray(block.getHeader().getHeight()));
         CompletableFuture<Block> future = blockCacher.get(hash);
@@ -75,9 +75,9 @@ public class DownloadCacheHandler {
             future.complete(block);
             blockCacher.remove(hash);
         }  else {
-            Log.info("========================");
+//            Log.info("========================");
             Log.info("Block null : " + block.getHeader().getHash());
-            Log.info("========================");
+//            Log.info("========================");
         }
     }
 
@@ -96,9 +96,9 @@ public class DownloadCacheHandler {
             future.complete(hashes);
             blockHashesCacher.remove(hashes.getRequestMessageHash());
         } else {
-            Log.info("========================");
+//            Log.info("========================");
             Log.info("hashes null : " + hashes.getRequestMessageHash());
-            Log.info("========================");
+//            Log.info("========================");
         }
     }
 
@@ -108,36 +108,36 @@ public class DownloadCacheHandler {
             future.complete(txGroup);
             txGroupCacher.remove(txGroup.getRequestHash());
         } else {
-            Log.info("========================");
+//            Log.info("========================");
             Log.info("txGroup null : " + txGroup.getRequestHash());
-            Log.info("========================");
+//            Log.info("========================");
         }
     }
 
     public static Future<TxGroup> addGetTxGroupRequest(NulsDigestData hash) {
-        Log.error("=======  add tx group :  " + hash);
+//        Log.error("=======  add tx group :  " + hash);
         CompletableFuture<TxGroup> future = new CompletableFuture<>();
         txGroupCacher.put(hash, future);
         return future;
     }
     public static Future<CompleteParam> addTaskRequest(NulsDigestData hash) {
-        Log.error("=======  add task :  " + hash);
+//        Log.error("=======  add task :  " + hash);
         CompletableFuture<CompleteParam> future = new CompletableFuture<>();
         taskCacher.put(hash, future);
         return future;
     }
 
     public static void notFoundBlock(NotFound data) {
-        Log.error("receive data not found message : " + data.getType() + " , "+ data.getHash());
+//        Log.error("receive data not found message : " + data.getType() + " , "+ data.getHash());
         if (data.getType() == NotFoundType.BLOCK) {
             CompletableFuture<Block> future = blockCacher.get(data.getHash());
             if (future != null) {
                 future.complete(null);
                 blockCacher.remove(data.getHash());
             } else {
-                Log.info("========================");
+//                Log.info("========================");
                 Log.info("BLOCK NotFound null : " + data.getHash());
-                Log.info("========================");
+//                Log.info("========================");
             }
         } else if (data.getType() == NotFoundType.BLOCKS) {
             CompletableFuture<CompleteParam> future = taskCacher.get(data.getHash());
@@ -145,9 +145,9 @@ public class DownloadCacheHandler {
                 future.complete(new CompleteParam(data.getHash(), false));
                 taskCacher.remove(data.getHash());
             } else {
-                Log.info("========================");
+//                Log.info("========================");
                 Log.info("BLOCKS NotFound null : " + data.getHash());
-                Log.info("========================");
+//                Log.info("========================");
             }
         } else if (data.getType() == NotFoundType.TRANSACTION) {
             CompletableFuture<TxGroup> future = txGroupCacher.get(data.getHash());
@@ -155,9 +155,9 @@ public class DownloadCacheHandler {
                 future.complete(null);
                 txGroupCacher.remove(data.getHash());
             } else {
-                Log.info("========================");
+//                Log.info("========================");
                 Log.info("TRANSACTION NotFound null : " + data.getHash());
-                Log.info("========================");
+//                Log.info("========================");
             }
         } else if (data.getType() == NotFoundType.HASHES) {
             CompletableFuture<BlockHashResponse> future = blockHashesCacher.get(data.getHash());
@@ -165,9 +165,9 @@ public class DownloadCacheHandler {
                 future.complete(null);
                 blockHashesCacher.remove(data.getHash());
             } else {
-                Log.info("========================");
+//                Log.info("========================");
                 Log.info("HASHES NotFound null : " + data.getHash());
-                Log.info("========================");
+//                Log.info("========================");
             }
         }
     }
@@ -177,13 +177,16 @@ public class DownloadCacheHandler {
             future.complete(param);
             taskCacher.remove(param.getRequestHash());
         } else {
-            Log.info("========================");
+//            Log.info("========================");
             Log.info("BLOCKS NotFound null : " + param.getRequestHash());
-            Log.info("========================");
+//            Log.info("========================");
         }
     }
 
     public static void removeBlockFuture(NulsDigestData hash) {
+
+//        Log.error("remove block request : " + hash);
+
         blockCacher.remove(hash);
     }
 

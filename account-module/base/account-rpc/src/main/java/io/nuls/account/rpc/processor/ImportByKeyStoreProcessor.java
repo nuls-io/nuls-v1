@@ -9,11 +9,14 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
+import io.nuls.kernel.utils.RestFulUtils;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -23,6 +26,7 @@ import java.io.*;
 @Component
 public class ImportByKeyStoreProcessor implements CommandProcessor {
 
+    private RestFulUtils restFul = RestFulUtils.getInstance();
     @Override
     public String getCommand() {
         return "importkeystore";
@@ -58,18 +62,23 @@ public class ImportByKeyStoreProcessor implements CommandProcessor {
     }
 
     @Override
-
-    public Result execute(String[] args) {
+    public CommandResult execute(String[] args) {
         String path = args[1];
         String password = args.length == 3 ? args[2] : null;
-        Result result = getAccountKeystoreDto(path);
-        if(result.isFailed()){
-            return result;
+        Result rs = getAccountKeystoreDto(path);
+        if(rs.isFailed()){
+            return CommandResult.getFailed(rs.getMsg());
         }
-        AccountKeyStoreDto accountKeyStoreDto = (AccountKeyStoreDto)result.getData();
-        //todo 调RPC
-
-        return null;
+        AccountKeyStoreDto accountKeyStoreDto = (AccountKeyStoreDto)rs.getData();
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("accountKeyStoreDto", accountKeyStoreDto);
+        parameters.put("password", password);
+        parameters.put("overwrite", false);
+        Result result = restFul.post("/account/import", parameters);
+        if(result.isFailed()){
+            return CommandResult.getFailed(result.getMsg());
+        }
+        return CommandResult.getResult(result);
     }
 
 
@@ -95,13 +104,10 @@ public class ImportByKeyStoreProcessor implements CommandProcessor {
                 AccountKeyStoreDto accountKeyStoreDto = JSONUtils.json2pojo(ks.toString(), AccountKeyStoreDto.class);
                 return Result.getSuccess().setData(accountKeyStoreDto);
             } catch (FileNotFoundException e) {
-                Log.error(e);
                 return Result.getFailed(AccountErrorCode.ACCOUNTKEYSTORE_FILE_NOT_EXIST);
             } catch (IOException e) {
-                Log.error(e);
                 return Result.getFailed(AccountErrorCode.ACCOUNTKEYSTORE_FILE_DAMAGED);
             } catch (Exception e) {
-                Log.error(e);
                 return Result.getFailed(AccountErrorCode.ACCOUNTKEYSTORE_FILE_DAMAGED);
             } finally {
                 if (bufferedReader != null) {

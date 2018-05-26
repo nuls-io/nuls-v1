@@ -8,6 +8,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
@@ -50,12 +51,12 @@ public class GetBlockHeaderProcessor implements CommandProcessor {
     }
 
     @Override
-    public Result execute(String[] args) {
+    public CommandResult execute(String[] args) {
         String hash = null;
         long height = 0;
 
         if (StringUtils.isBlank(args[1])) {
-            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR.getMsg());
+            return CommandResult.getFailed(KernelErrorCode.PARAMETER_ERROR.getMsg());
         }
 
         try {
@@ -70,6 +71,6 @@ public class GetBlockHeaderProcessor implements CommandProcessor {
         } else {
             result = restFul.get("/block/header/height/" + height, null);
         }
-        return result;
+        return CommandResult.getResult(result);
     }
 }

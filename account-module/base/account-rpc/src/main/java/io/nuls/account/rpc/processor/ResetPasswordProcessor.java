@@ -6,8 +6,8 @@ import io.nuls.core.tools.cmd.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
 
 /**
@@ -62,7 +62,7 @@ public class ResetPasswordProcessor implements CommandProcessor {
     }
 
     @Override
-    public Result execute(String[] args) {
+    public CommandResult execute(String[] args) {
         return null;
     }
 }

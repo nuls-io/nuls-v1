@@ -29,6 +29,8 @@ import io.nuls.core.tools.str.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.ws.rs.QueryParam;
+
 /**
  * @author Niels
  * @date 2018/3/14
@@ -37,27 +39,31 @@ import io.swagger.annotations.ApiModelProperty;
 public class GetCreateAgentFeeForm {
 
     @ApiModelProperty(name = "agentAddress", value = "申请账户的地址", required = true)
+    @QueryParam("agentAddress")
     private String agentAddress;
 
     @ApiModelProperty(name = "packingAddress", value = "打包地址", required = true)
+    @QueryParam("packingAddress")
     private String packingAddress;
-    @ApiModelProperty(name = "rewardAddress", value = "结算地址", required = true)
+    @ApiModelProperty(name = "rewardAddress", value = "结算地址", required = false)
+    @QueryParam("rewardAddress")
     private String rewardAddress;
 
     @ApiModelProperty(name = "commissionRate", value = "佣金比例", required = true)
+    @QueryParam("commissionRate")
     private double commissionRate;
 
     @ApiModelProperty(name = "deposit", value = "参与共识需要的总金额", required = true)
+    @QueryParam("deposit")
     private long deposit;
 
     @ApiModelProperty(name = "remark", value = "节点备注", required = true)
+    @QueryParam("remark")
     private String remark;
 
     @ApiModelProperty(name = "agentName", value = "节点名称", required = true)
+    @QueryParam("agentName")
     private String agentName;
-
-    @ApiModelProperty(name = "password", value = "密码", required = true)
-    private String password;
 
     public double getCommissionRate() {
         return commissionRate;
@@ -65,14 +71,6 @@ public class GetCreateAgentFeeForm {
 
     public void setCommissionRate(double commissionRate) {
         this.commissionRate = commissionRate;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = StringUtils.formatStringPara(password);
     }
 
     public String getAgentAddress() {

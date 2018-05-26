@@ -3,6 +3,7 @@ package io.nuls.ledger.rpc.cmd;
 import io.nuls.core.tools.cmd.CommandBuilder;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
@@ -39,12 +40,12 @@ public class GetTxProcessor implements CommandProcessor {
     }
 
     @Override
-    public Result execute(String[] args) {
+    public CommandResult execute(String[] args) {
         String hash = args[1];
         if(StringUtils.isBlank(hash)) {
-            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR.getMsg());
+            return CommandResult.getFailed(KernelErrorCode.PARAMETER_ERROR.getMsg());
         }
         Result result = restFul.get("/tx/hash/" + hash, null);
-        return result;
+        return CommandResult.getResult(result);
     }
 }

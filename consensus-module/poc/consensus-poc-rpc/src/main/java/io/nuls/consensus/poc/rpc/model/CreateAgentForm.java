@@ -42,7 +42,7 @@ public class CreateAgentForm {
 
     @ApiModelProperty(name = "packingAddress", value = "打包地址", required = true)
     private String packingAddress;
-    @ApiModelProperty(name = "rewardAddress", value = "结算地址", required = true)
+    @ApiModelProperty(name = "rewardAddress", value = "结算地址", required = false)
     private String rewardAddress;
 
     @ApiModelProperty(name = "commissionRate", value = "佣金比例", required = true)
