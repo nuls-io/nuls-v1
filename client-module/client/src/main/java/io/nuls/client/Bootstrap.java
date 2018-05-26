@@ -39,8 +39,15 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.module.service.ModuleService;
+import io.nuls.message.bus.service.MessageBusService;
+import io.nuls.network.model.BroadcastResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.message.GetBlocksHashRequest;
+import io.nuls.protocol.model.GetBlockDataParam;
+import io.nuls.protocol.model.GetBlocksHashParam;
+import io.nuls.protocol.model.basic.NulsLongData;
+import io.nuls.protocol.model.basic.NulsStringData;
 
 import java.util.*;
 
@@ -69,7 +76,7 @@ public class Bootstrap {
             String ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP, RpcConstant.DEFAULT_IP);
             int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);
             RpcServerManager.getInstance().startServer(ip, port);
-            Thread.sleep(3000);
+            Thread.sleep(30000);
         } while (false);
         while (true) {
             try {
