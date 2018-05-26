@@ -64,7 +64,7 @@ public class RestFulUtils {
 
     private Client client = ClientBuilder.newClient();
 
-    public Result get(String path, Map<String, String> params) {
+    public Result get(String path, Map<String, Object> params) {
         if (null == serverUri) {
             throw new RuntimeException("service url is null");
         }
@@ -78,7 +78,7 @@ public class RestFulUtils {
         return target.request(APPLICATION_JSON).get(Result.class);
     }
 
-    public Result post(String path, Map<String, String> paramsMap) {
+    public Result post(String path, Map<String, Object> paramsMap) {
         try {
             return post(path, JSONUtils.obj2json(paramsMap));
         } catch (Exception e) {

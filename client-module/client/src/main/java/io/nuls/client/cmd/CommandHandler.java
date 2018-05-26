@@ -1,5 +1,6 @@
 package io.nuls.client.cmd;
 
+import io.nuls.account.rpc.processor.*;
 import io.nuls.accout.ledger.rpc.processor.GetAccountTxListProcessor;
 import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.rpc.constant.RpcConstant;
@@ -13,6 +14,7 @@ import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.i18n.I18nUtils;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.processor.CommandProcessor;
@@ -55,6 +57,21 @@ public class CommandHandler {
          * block cmd
          */
         register(new GetBlockHeaderProcessor());
+        register(new BackupAccountProcessor());
+        register(new CreateAccountProcessor());
+        register(new CreateAccountsProcessor());
+        register(new GetAccountProcessor());
+        register(new GetAccountsProcessor());
+        register(new GetAssetProcessor());
+        register(new GetBalanceProcessor());
+        register(new GetWalletBalanceProcessor());
+        register(new GetPrivateKeyProcessor());
+        register(new ImportByKeyStoreProcessor());
+        register(new ImportByPrivateKeyProcessor());
+        register(new RemoveAccountProcessor());
+        register(new ResetPasswordProcessor());
+        register(new SetAliasProcessor());
+        register(new SetPasswordProcessor());
 
         sdkInit();
     }
@@ -86,6 +103,11 @@ public class CommandHandler {
     public static void main(String[] args) {
         CommandHandler instance = new CommandHandler();
         instance.init();
+        try {
+            I18nUtils.setLanguage("en");
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
         System.out.print(CommandConstant.COMMAND_PS1);
         Scanner scan = new Scanner(System.in);
         while (scan.hasNextLine()) {

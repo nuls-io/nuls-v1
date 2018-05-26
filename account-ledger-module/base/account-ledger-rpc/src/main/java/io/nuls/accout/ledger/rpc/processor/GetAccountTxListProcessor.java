@@ -1,16 +1,14 @@
 package io.nuls.accout.ledger.rpc.processor;
 
-import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.accout.ledger.rpc.dto.TransactionInfoDto;
 import io.nuls.core.tools.cmd.CommandBuilder;
-import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.ledger.service.LedgerService;
@@ -78,7 +76,7 @@ public class GetAccountTxListProcessor implements CommandProcessor {
     }
 
     @Override
-    public Result execute(String[] args) {
+    public CommandResult execute(String[] args) {
         Result<List<TransactionInfoDto>> dtoResult = Result.getSuccess();
         byte[] addressBytes = null;
         int type = 0;
