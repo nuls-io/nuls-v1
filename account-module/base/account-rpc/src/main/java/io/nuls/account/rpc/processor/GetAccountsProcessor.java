@@ -2,11 +2,17 @@ package io.nuls.account.rpc.processor;
 
 import io.nuls.core.tools.cmd.CommandBuilder;
 import io.nuls.core.tools.cmd.CommandHelper;
+import io.nuls.core.tools.page.Page;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
+import io.nuls.kernel.utils.RestFulUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -15,6 +21,8 @@ import io.nuls.kernel.processor.CommandProcessor;
 @Cmd
 @Component
 public class GetAccountsProcessor implements CommandProcessor {
+
+    private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
@@ -46,6 +54,11 @@ public class GetAccountsProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        return null;
+        Result result = restFul.get("/account", null);
+        if(result.isFailed()){
+            return CommandResult.getFailed(result.getMsg());
+        }
+        result.setData(((Map)result.getData()).get("list"));
+        return CommandResult.getResult(result);
     }
 }

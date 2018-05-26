@@ -54,8 +54,10 @@ public class ImportByPrivateKeyProcessor implements CommandProcessor {
         if (length == 3 && !StringUtils.validPassword(args[2])) {
             return false;
         }
-        String newPwd = args[2];
-        CommandHelper.confirmPwd(newPwd);
+        if (length == 3) {
+            String newPwd = args[2];
+            CommandHelper.confirmPwd(newPwd);
+        }
         return true;
     }
 
@@ -68,7 +70,7 @@ public class ImportByPrivateKeyProcessor implements CommandProcessor {
         parameters.put("password", password);
         parameters.put("overwrite", false);
         Result result = restFul.post("/account/import/pri", parameters);
-        if(result.isFailed()){
+        if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
         return CommandResult.getResult(result);
