@@ -2,6 +2,7 @@ package io.nuls.consensus.poc.tx.processor;
 
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
@@ -197,6 +198,15 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
                     ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "transactions repeated!");
                     result.setData(transaction);
                     return result;
+                }
+                if(transaction.getTxData().getAddress() == null){
+                    CreateAgentTransaction agentTransaction = (CreateAgentTransaction) ledgerService.getTx(transaction.getTxData().getCreateTxHash());
+                    if(null==agentTransaction){
+                        ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "agent transaction not exist!");
+                        result.setData(transaction);
+                        return result;
+                    }
+                    transaction.getTxData().setAddress(agentTransaction.getTxData().getAgentAddress());
                 }
                 if (addressSet.contains(Base58.encode(transaction.getTxData().getAddress()))) {
                     ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "The agent has stopped by Red Punish trnasaction!");
