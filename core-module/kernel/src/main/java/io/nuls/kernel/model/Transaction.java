@@ -32,6 +32,7 @@ import io.nuls.kernel.constant.TxStatusEnum;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
+import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.*;
 
 import java.io.ByteArrayOutputStream;
@@ -249,6 +250,16 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
                         addresses.add(address);
                     }
                 }
+            }
+        }
+        if(scriptSig != null) {
+            P2PKHScriptSig sig = new P2PKHScriptSig();
+            try {
+                sig.parse(scriptSig);
+                byte[] address = AddressTool.getAddress(sig);
+                addresses.add(address);
+            } catch (NulsException e) {
+                e.printStackTrace();
             }
         }
         return new ArrayList<>(addresses);
