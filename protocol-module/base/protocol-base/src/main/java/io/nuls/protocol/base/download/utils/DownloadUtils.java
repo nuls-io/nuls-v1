@@ -122,7 +122,7 @@ public class DownloadUtils {
         }
 
         try {
-            CompleteParam taskResult = taskFuture.get();
+            CompleteParam taskResult = taskFuture.get(60L, TimeUnit.SECONDS);
             if(taskResult.isSuccess()) {
                 for(Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
                     for (Map.Entry<NulsDigestData, Future<Block>> entry : blockFutureMap.entrySet()) {
