@@ -285,6 +285,45 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
     }
 
+
+    public Na getTxFee(byte[] address, Na amount, int size) {
+        List<Coin> coinList = balanceManager.getCoinListByAddress(address);
+        if (coinList.isEmpty()) {
+            return Na.ZERO;
+        }
+        Collections.sort(coinList, CoinComparator.getInstance());
+
+        Na values = Na.ZERO;
+        Na fee = null;
+        for (int i = 0; i < coinList.size(); i++) {
+            Coin coin = coinList.get(i);
+            if (!coin.usable()) {
+                continue;
+            }
+            size += coin.size();
+            if (i == 127) {
+                size += 1;
+            }
+            fee = TransactionFeeCalculator.getFee(size);
+            values = values.add(coin.getNa());
+
+            if (values.isGreaterOrEquals(amount.add(fee))) {
+                Na change = values.subtract(amount.add(fee));
+                if (change.isGreaterThan(Na.ZERO)) {
+                    Coin changeCoin = new Coin();
+                    changeCoin.setOwner(address);
+                    changeCoin.setNa(change);
+
+                    fee = TransactionFeeCalculator.getFee(size + changeCoin.size());
+                    if (values.isLessThan(amount.add(fee))) {
+                        continue;
+                    }
+                }
+            }
+        }
+        return fee;
+    }
+
     @Override
     public Transaction getTxByOwner(byte[] owner) {
         //todo
@@ -326,13 +365,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
 
             TransferTransaction tx = new TransferTransaction();
-            if (StringUtils.isNotBlank(remark)) {
-                // TODO 判断remark的大小
-                try {
-                    tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
+            try {
+                tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             }
             tx.setTime(TimeService.currentTimeMillis());
             CoinData coinData = new CoinData();
@@ -381,6 +417,17 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (accountResult.isFailed()) {
             return accountResult;
         }
+        TransferTransaction tx = new TransferTransaction();
+        try {
+            tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        tx.setTime(TimeService.currentTimeMillis());
+        CoinData coinData = new CoinData();
+        Coin toCoin = new Coin(to, values);
+        coinData.getTo().add(toCoin);
+
 
         return null;
     }
