@@ -524,23 +524,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
 
-        long start = 0;
-        long end = NulsContext.getInstance().getBestHeight();
-        while (start < end) {
-            for (long i = start; i <= end; i++) {
-                List<NulsDigestData> txs = blockService.getBlock(i).getData().getTxHashList();
-                for (int j = 0; j < txs.size(); j++) {
-                    Transaction tx = ledgerService.getTx(txs.get(j));
-                    if (tx == null) {
-                        return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
-                    }
-                    saveTransaction(tx, addressBytes, TransactionInfo.CONFIRMED);
-                }
-            }
-            start = end;
-            end = NulsContext.getInstance().getBestHeight();
-            if (start == end) {
-                break;
+        for (long i = 0; i <= NulsContext.getInstance().getBestHeight(); i++) {
+            List<Transaction> txs = blockService.getBlock(i).getData().getTxs();
+            for (Transaction tx : txs) {
+                saveTransaction(tx, addressBytes, TransactionInfo.CONFIRMED);
             }
         }
         try {
