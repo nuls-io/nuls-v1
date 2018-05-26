@@ -42,6 +42,7 @@ import io.nuls.accout.ledger.rpc.util.UtxoDtoComparator;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -129,6 +130,9 @@ public class AccountLedgerResource {
         if (form.getAmount() <= 0) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
+        if(StringUtils.validTxRemark(form.getRemark())) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
 
         Na value = Na.valueOf(form.getAmount());
         return accountLedgerService.transfer(AddressTool.getAddress(form.getAddress()),
@@ -157,6 +161,10 @@ public class AccountLedgerResource {
         if (form.getAmount() <= 0) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
         }
+        if(StringUtils.validTxRemark(form.getRemark())) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+        }
+
         Na value = Na.valueOf(form.getAmount());
 
         return null;
