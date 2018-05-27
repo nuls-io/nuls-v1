@@ -1,6 +1,7 @@
 package io.nuls.network.storage.service.impl;
 
 
+import io.nuls.db.constant.DBConstant;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -20,7 +21,7 @@ import java.util.Set;
 import static io.nuls.core.tools.str.StringUtils.bytes;
 
 @Component
-public class NetworkStorageServiceImpl implements NetworkStorageService , InitializingBean {
+public class NetworkStorageServiceImpl implements NetworkStorageService, InitializingBean {
 
     @Autowired
     private DBService dbService;
@@ -75,6 +76,20 @@ public class NetworkStorageServiceImpl implements NetworkStorageService , Initia
 
     public void deleteNode(String nodeId) {
         getDbService().delete(NetworkStorageConstant.DB_NAME_NETWORK_NODE, bytes(nodeId));
+    }
+
+    @Override
+    public void saveExternalIp(String ip) {
+        getDbService().put(DBConstant.BASE_AREA_NAME, NetworkStorageConstant.DB_NAME_EXTERNAL_IP.getBytes(), ip.getBytes());
+    }
+
+    @Override
+    public String getExternalIp() {
+        byte[] bytes = getDbService().get(DBConstant.BASE_AREA_NAME, NetworkStorageConstant.DB_NAME_EXTERNAL_IP.getBytes());
+        if(bytes != null) {
+            return new String(bytes);
+        }
+        return null;
     }
 
 

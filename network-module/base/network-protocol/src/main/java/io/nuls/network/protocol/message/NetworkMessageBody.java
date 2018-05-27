@@ -24,6 +24,7 @@ public class NetworkMessageBody extends BaseNulsData {
 
     private long networkTime;
 
+    private String nodeIp;
 
     public NetworkMessageBody() {
 
@@ -37,6 +38,11 @@ public class NetworkMessageBody extends BaseNulsData {
         this.networkTime = TimeService.currentTimeMillis();
     }
 
+    public NetworkMessageBody(int handshakeType, int severPort, long bestBlockHeight, NulsDigestData bestBlockHash, String ip) {
+        this(handshakeType, severPort, bestBlockHeight, bestBlockHash);
+        this.nodeIp = ip;
+    }
+
     @Override
     public int size() {
         int s = 0;
@@ -45,6 +51,7 @@ public class NetworkMessageBody extends BaseNulsData {
         s += VarInt.sizeOf(bestBlockHeight);
         s += bestBlockHash.size();
         s += VarInt.sizeOf(networkTime);
+        s += SerializeUtils.sizeOfString(nodeIp);
         return s;
     }
 
@@ -58,6 +65,7 @@ public class NetworkMessageBody extends BaseNulsData {
         stream.write(new VarInt(bestBlockHeight).encode());
         stream.write(bestBlockHash.serialize());
         stream.write(new VarInt(networkTime).encode());
+        stream.writeString(nodeIp);
     }
 
     @Override
@@ -67,6 +75,7 @@ public class NetworkMessageBody extends BaseNulsData {
         bestBlockHeight = (int) buffer.readVarInt();
         bestBlockHash = buffer.readHash();
         networkTime = buffer.readVarInt();
+        nodeIp = buffer.readString();
     }
 
     public int getHandshakeType() {
@@ -109,4 +118,11 @@ public class NetworkMessageBody extends BaseNulsData {
         this.networkTime = networkTime;
     }
 
+    public String getNodeIp() {
+        return nodeIp;
+    }
+
+    public void setNodeIp(String nodeIp) {
+        this.nodeIp = nodeIp;
+    }
 }
