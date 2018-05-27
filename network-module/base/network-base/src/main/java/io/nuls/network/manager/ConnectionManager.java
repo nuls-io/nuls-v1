@@ -1,7 +1,10 @@
 package io.nuls.network.manager;
 
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.connection.netty.NettyClient;
@@ -77,7 +80,7 @@ public class ConnectionManager {
         }, true);
     }
 
-    public void receiveMessage(ByteBuffer buffer, Node node) {
+    public void receiveMessage(ByteBuffer buffer, Node node) throws NulsException {
         List<BaseMessage> list;
         try {
             buffer.flip();
@@ -119,9 +122,7 @@ public class ConnectionManager {
                 }
             }
         } catch (Exception e) {
-            Log.error("--------------------------receive message exception remoteAddress: " + node.getId());
-            Log.error(e);
-            return;
+            throw new NulsException(KernelErrorCode.DATA_ERROR);
         } finally {
             buffer.clear();
         }

@@ -96,7 +96,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws UnsupportedEncodingException {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
 
@@ -114,7 +114,6 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             }
         } catch (Exception e) {
             Log.info(" ---------------------- client channelRead exception---------------------- " + nodeId);
-//            e.printStackTrace();
             throw e;
         }
     }
