@@ -125,4 +125,17 @@ public class NetworkMessageBody extends BaseNulsData {
     public void setNodeIp(String nodeIp) {
         this.nodeIp = nodeIp;
     }
+
+    public static void main(String[] args) throws IOException, NulsException {
+        NetworkMessageBody networkMessageBody = new NetworkMessageBody();
+        networkMessageBody.setSeverPort(1001);
+        networkMessageBody.setNetworkTime(20003L);
+        networkMessageBody.setHandshakeType(1);
+        networkMessageBody.setBestBlockHeight(4003L);
+        networkMessageBody.setBestBlockHash(new NulsDigestData());
+
+        byte[] bytes = networkMessageBody.serialize();
+        NetworkMessageBody n2 = new NetworkMessageBody();
+        n2.parse(bytes);
+    }
 }
