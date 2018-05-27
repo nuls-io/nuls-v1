@@ -31,19 +31,20 @@ public class GetNodesMessageHandler implements BaseNetworkMeesageHandler {
         GetNodesMessage getNodesMessage = (GetNodesMessage) message;
 
         NodeMessageBody body = getNodesMessage.getMsgBody();
-        List<Node> nodeList = getAvailableNodes(body.getLength(), node.getIp());
+        body.getIpList().add(node.getIp());
+        List<Node> nodeList = getAvailableNodes(body.getLength(), body.getIpList());
         body = new NodeMessageBody();
         body.setNodeList(nodeList);
         NodesMessage nodesMessage = new NodesMessage(body);
         return new NetworkEventResult(true, nodesMessage);
     }
 
-    private List<Node> getAvailableNodes(int length, String nodeIp) {
+    private List<Node> getAvailableNodes(int length, List<String> ipList) {
         List<Node> nodeList = new ArrayList<>();
         List<Node> availableNodes = new ArrayList<>(nodeManager.getAvailableNodes());
         Collections.shuffle(availableNodes);
         Set<String> ipSet = new HashSet<>();
-        ipSet.add(nodeIp);
+        ipSet.addAll(ipList);
         for (Node node : availableNodes) {
             if (ipSet.contains(node.getIp())) {
                 continue;
