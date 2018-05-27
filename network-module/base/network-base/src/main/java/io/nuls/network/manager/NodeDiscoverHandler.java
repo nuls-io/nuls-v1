@@ -71,6 +71,12 @@ public class NodeDiscoverHandler implements Runnable {
     public void findOtherNode(int size) {
         NodeMessageBody messageBody = new NodeMessageBody();
         messageBody.setLength(size);
+        //将自己已经连接节点的ip地址发送给对方，避免对方节点重复给相同ip
+        List<String> ipList = new ArrayList<>();
+        for (Node node : nodesManager.getAvailableNodes()) {
+            ipList.add(node.getIp());
+        }
+        messageBody.setIpList(ipList);
         GetNodesMessage message = new GetNodesMessage(messageBody);
         List<Node> nodeList = new ArrayList<>(nodesManager.getAvailableNodes());
         Collections.shuffle(nodeList);
