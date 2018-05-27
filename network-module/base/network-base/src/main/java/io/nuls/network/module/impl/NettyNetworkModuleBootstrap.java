@@ -40,8 +40,9 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
         networkParam.setLocalIps(IpUtil.getIps());
         String seedIp = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SEED_IP, "192.168.1.131:8003");
         List<String> ipList = new ArrayList<>();
-        for (String ip : seedIp.split(",")) {
-            ipList.add(ip);
+        for (String ipPort : seedIp.split(",")) {
+            String[] ips = ipPort.split(":");
+            ipList.add(ips[0]);
         }
         networkParam.setSeedIpList(ipList);
     }
