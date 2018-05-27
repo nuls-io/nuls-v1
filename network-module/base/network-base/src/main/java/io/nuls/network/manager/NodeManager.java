@@ -81,6 +81,11 @@ public class NodeManager implements Runnable {
      * 同时开启获取对方最新信息的线程
      */
     public void start() {
+        String externalIp = getNetworkStorage().getExternalIp();
+        if (externalIp != null) {
+            networkParam.getLocalIps().add(externalIp);
+        }
+
         List<Node> nodeList = getNetworkStorage().getLocalNodeList(20);
         nodeList.addAll(getSeedNodes());
         for (Node node : nodeList) {
@@ -335,14 +340,17 @@ public class NodeManager implements Runnable {
     }
 
     public void saveNode(Node node) {
-//        NodePo po = NodeTransferTool.toPojo(node);
-//        getNodeDao().saveChange(po);
         getNetworkStorage().saveNode(node);
     }
 
     public void deleteNode(String nodeId) {
         outNodeIdSet.remove(nodeId);
         disConnectNodes.remove(nodeId);
+    }
+
+    public void saveExternalIp(String ip) {
+        NetworkParam.getInstance().getLocalIps().add(ip);
+        networkStorageService.saveExternalIp(ip);
     }
 
     private void removeNodeFromGroup(Node node, String groupName) {
@@ -511,7 +519,12 @@ public class NodeManager implements Runnable {
     }
 
     public boolean isSeedNode(String ip) {
-        return networkParam.getSeedIpList().contains(ip);
+        for (String seedIp : networkParam.getSeedIpList()) {
+            if (seedIp.indexOf(ip) != -1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public NodeGroup getNodeGroup(String groupName) {
