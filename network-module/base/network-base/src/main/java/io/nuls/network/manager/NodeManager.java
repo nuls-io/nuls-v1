@@ -82,7 +82,7 @@ public class NodeManager implements Runnable {
      */
     public void start() {
         String externalIp = getNetworkStorage().getExternalIp();
-        if(externalIp != null) {
+        if (externalIp != null) {
             networkParam.getLocalIps().add(externalIp);
         }
 
@@ -519,7 +519,12 @@ public class NodeManager implements Runnable {
     }
 
     public boolean isSeedNode(String ip) {
-        return networkParam.getSeedIpList().contains(ip);
+        for (String seedIp : networkParam.getSeedIpList()) {
+            if (seedIp.indexOf(ip) != -1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public NodeGroup getNodeGroup(String groupName) {
