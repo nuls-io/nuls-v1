@@ -94,6 +94,14 @@ public class RestFulUtils {
         return target.request().buildPost(Entity.entity(content, MediaType.APPLICATION_JSON)).invoke(Result.class);
     }
 
+    public Result put(String path, Map<String, Object> paramsMap) {
+        try {
+            return put(path, JSONUtils.obj2json(paramsMap));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public Result put(String path, String content) {
         if (null == serverUri) {
             throw new RuntimeException("service url is null");

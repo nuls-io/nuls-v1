@@ -7,7 +7,12 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.CommandResult;
+import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
+import io.nuls.kernel.utils.RestFulUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -16,6 +21,9 @@ import io.nuls.kernel.processor.CommandProcessor;
 @Cmd
 @Component
 public class GetPrivateKeyProcessor implements CommandProcessor {
+
+    private RestFulUtils restFul = RestFulUtils.getInstance();
+
     @Override
     public String getCommand() {
         return "getprikey";
@@ -55,6 +63,14 @@ public class GetPrivateKeyProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        return null;
+        String address = args[1];
+        String password = args.length == 3 ? args[2] : null;
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("password", password);
+        Result result = restFul.post("/account/prikey/" + address, parameters);
+        if(result.isFailed()){
+            return CommandResult.getFailed(result.getMsg());
+        }
+        return CommandResult.getResult(result);
     }
 }

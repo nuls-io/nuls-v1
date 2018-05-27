@@ -68,7 +68,6 @@ public class BackupAccountProcessor implements CommandProcessor {
     public CommandResult execute(String[] args) {
         String address = args[1];
         String path = args.length == 3 ? args[2] : System.getProperty("user.dir");
-        ;
         String password = CommandHelper.getPwd();
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("password", password);

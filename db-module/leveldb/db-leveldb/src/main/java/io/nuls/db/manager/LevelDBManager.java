@@ -48,6 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static io.nuls.core.tools.str.StringUtils.bytes;
+import static io.nuls.db.constant.DBConstant.BASE_AREA_NAME;
 
 /**
  * @desription:
@@ -64,7 +65,6 @@ public class LevelDBManager {
     private static final Map<Class, RuntimeSchema> SCHEMA_MAP = new ConcurrentHashMap<>();
 
     private static final String BASE_DB_NAME = "leveldb";
-    private static final String BASE_AREA_NAME = "base";
 
     private static volatile boolean isInit = false;
 

@@ -32,13 +32,9 @@ import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
- *
  * @author ln
  * @date 2018/5/5
  */
@@ -158,14 +154,26 @@ public class CoinData extends BaseNulsData {
 
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
-        if(from != null && from.size()!= 0){
+        if (from != null && from.size() != 0) {
             //todo
         }
-        if(to != null && to.size() != 0){
-            for(int i = 0; i<to.size(); i++) {
-                addressSet.add(to.get(i).getOwner());
+        if (to != null && to.size() != 0) {
+            for (int i = 0; i < to.size(); i++) {
+                byte[] owner = to.get(i).getOwner();
+
+                boolean hasExist = false;
+                for(byte[] address : addressSet) {
+                    if(Arrays.equals(owner, address)) {
+                        hasExist = true;
+                        break;
+                    }
+                }
+
+                if(!hasExist) {
+                    addressSet.add(owner);
+                }
             }
         }
-       return  addressSet;
+        return addressSet;
     }
 }
