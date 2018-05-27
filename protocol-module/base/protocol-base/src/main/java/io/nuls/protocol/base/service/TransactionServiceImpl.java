@@ -153,10 +153,10 @@ public class TransactionServiceImpl implements TransactionService {
         if (null == txList || txList.size() <= 1) {
             return ValidateResult.getSuccessResult();
         }
-        ValidateResult result = ledgerService.verifyDoubleSpend(txList);
-        if (result.isFailed()) {
-            return result;
-        }
+//        ValidateResult result = ledgerService.verifyDoubleSpend(txList);
+//        if (result.isFailed()) {
+//            return result;
+//        }
         List<Transaction> newTxList = new ArrayList<>();
         for (Transaction tx : txList) {
             if (tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ProtocolConstant.TX_TYPE_TRANSFER) {
@@ -165,6 +165,7 @@ public class TransactionServiceImpl implements TransactionService {
             newTxList.add(tx);
         }
         List<TransactionProcessor> processorList = TransactionManager.getAllProcessorList();
+        ValidateResult result = ValidateResult.getSuccessResult();
         for (TransactionProcessor processor : processorList) {
             result = processor.conflictDetect(newTxList);
             if (result.isFailed()) {
