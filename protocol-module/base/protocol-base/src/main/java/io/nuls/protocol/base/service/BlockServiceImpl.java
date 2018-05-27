@@ -245,7 +245,8 @@ public class BlockServiceImpl implements BlockService {
      * When you fail to save the block, you need to roll back the already stored transaction.
      */
     private void rollbackTxList(List<Transaction> savedList, BlockHeader blockHeader) throws NulsException {
-        for (Transaction tx : savedList) {
+        for(int i = savedList.size() - 1 ; i >= 0 ; i --) {
+            Transaction tx = savedList.get(i);
             transactionService.rollbackTx(tx, blockHeader);
             ledgerService.rollbackTx(tx);
         }

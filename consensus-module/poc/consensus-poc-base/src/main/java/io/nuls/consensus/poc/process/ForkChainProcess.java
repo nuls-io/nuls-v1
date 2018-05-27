@@ -486,6 +486,7 @@ public class ForkChainProcess {
                     RewardStatisticsProcess.rollbackBlock(rollbackBlock);
                     rollbackList.add(rollbackBlock);
                 } else {
+                    Collections.reverse(rollbackList);
                     for (Block block : rollbackList) {
                         try {
                             blockService.saveBlock(block);

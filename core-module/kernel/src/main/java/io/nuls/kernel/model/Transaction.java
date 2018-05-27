@@ -240,9 +240,8 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
             }
         }
         if(scriptSig != null) {
-            P2PKHScriptSig sig = new P2PKHScriptSig();
             try {
-                sig.parse(scriptSig);
+                P2PKHScriptSig sig = P2PKHScriptSig.createFromBytes(scriptSig);
                 byte[] address = AddressTool.getAddress(sig);
 
                 boolean hasExist = false;
