@@ -275,9 +275,9 @@ public class BlockServiceImpl implements BlockService {
             return result;
         }
         try {
-            accountLedgerService.rollback(block.getTxs());
+            accountLedgerService.rollbackTransaction(block.getTxs());
         } catch (Exception e) {
-            Log.warn("rollback local tx failed", e);
+            Log.warn("rollbackTransaction local tx failed", e);
         }
         return result;
     }

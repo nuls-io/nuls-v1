@@ -40,7 +40,7 @@ import java.util.Set;
  * @author Facjas
  * @date 2018/5/10.
  */
-public interface AccountLedgerStorageService {
+public interface LocalUtxoStorageService {
 
     Result saveUTXO(byte[] key, byte[] value);
 

@@ -62,7 +62,7 @@ public interface AccountLedgerService {
      * @param tx transaction to save
      * @return return the tx count saved,
      */
-    Result<Integer> saveUnconfirmedTransaction(Transaction tx);
+    Result<Integer> verifyAndSaveUnconfirmedTransaction(Transaction tx);
 
 
     /**
@@ -95,23 +95,23 @@ public interface AccountLedgerService {
 
     /**
      * <p>
-     * rollback a tx in account ledger
+     * rollbackTransaction a tx in account ledger
      * save if the tx is relative to local accounts, or do nothing
      *
-     * @param tx transaction to rollback
+     * @param tx transaction to rollbackTransaction
      * @return return the tx count rollbacked
      */
-    Result<Integer> rollback(Transaction tx);
+    Result<Integer> rollbackTransaction(Transaction tx);
 
     /**
      * <p>
-     * rollback a tx list in account ledger.
+     * rollbackTransaction a tx list in account ledger.
      * save if the tx is relative to local accounts, or do nothing
      *
-     * @param txs transactions to rollback
+     * @param txs transactions to rollbackTransaction
      * @return return the tx count rollbacked
      */
-    Result<Integer> rollback(List<Transaction> txs);
+    Result<Integer> rollbackTransaction(List<Transaction> txs);
 
     /**
      * <p>
@@ -132,17 +132,6 @@ public interface AccountLedgerService {
      * @return return balance of account, return 0 if  account is not a local account
      */
     CoinDataResult getCoinData(byte[] address, Na amount, int size) throws NulsException;
-
-    Transaction getTxByOwner(byte[] owner);
-
-    /**
-     * <p>
-     * check weather address is a local address
-     *
-     * @param address account address
-     * @return true if a address is a local address
-     */
-    boolean isLocalAccount(byte[] address);
 
     /**
      * @param from
@@ -168,7 +157,7 @@ public interface AccountLedgerService {
      *
      * @return true if a address is a local address
      */
-    Result importAccountLedger(String address);
+    Result importLedgerByAddress(String address);
 
     /**
      * 查询交易列表

@@ -141,7 +141,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
             this.unlockTxList(rollbackedList,tx.getBlockHeight());
             agentPo.setDelHeight(tx.getBlockHeight());
             agentStorageService.save(agentPo);
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollback tx failed!");
+            throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollbackTransaction tx failed!");
         }
 
         return Result.getSuccess();
@@ -243,7 +243,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
         boolean success = storageService.save(punishLogPo);
         if (!success) {
             this.rollbackUnlockTxList(unlockedList);
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollback tx failed!");
+            throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollbackTransaction tx failed!");
         }
         AgentPo agentPo = PoConvertUtil.agentToPo(agent);
         agentPo.setDelHeight(tx.getBlockHeight());

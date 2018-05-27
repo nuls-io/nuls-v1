@@ -24,34 +24,18 @@
  */
 package io.nuls.account.ledger.storage.service.impl;
 
-import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.storage.constant.AccountLedgerStorageConstant;
-import io.nuls.account.ledger.storage.po.TransactionInfoPo;
-import io.nuls.account.ledger.storage.service.AccountLedgerStorageService;
-import io.nuls.core.tools.array.ArraysTool;
-import io.nuls.core.tools.crypto.Hex;
-import io.nuls.core.tools.log.Log;
+import io.nuls.account.ledger.storage.service.LocalUtxoStorageService;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
-import io.nuls.kernel.model.*;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.utils.AddressTool;
-import io.nuls.kernel.utils.NulsByteBuffer;
-import io.nuls.kernel.utils.TransactionManager;
-import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
-import org.spongycastle.util.Arrays;
 
-import javax.xml.transform.*;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,7 +45,7 @@ import java.util.Set;
  * @date 2018/5/10.
  */
 @Component
-public class AccountLedgerStorageServiceImpl implements AccountLedgerStorageService, InitializingBean {
+public class LocalUtxoStorageServiceImpl implements LocalUtxoStorageService, InitializingBean {
     /**
      * 通用数据存储服务
      * Universal data storage services.

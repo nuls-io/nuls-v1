@@ -53,7 +53,7 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
                     po.setType(PunishType.YELLOW.getCode());
                     punishLogStorageService.save(po);
                 }
-                throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollback tx failed!");
+                throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollbackTransaction tx failed!");
             } else {
                 deletedList.add(address);
             }
@@ -81,7 +81,7 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
                 for (PunishLogPo punishLogPo : savedList) {
                     punishLogStorageService.delete(getPoKey(punishLogPo.getAddress(), PunishType.YELLOW.getCode(), punishLogPo.getHeight(), punishLogPo.getIndex()));
                 }
-                throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollback tx failed!");
+                throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollbackTransaction tx failed!");
             } else {
                 savedList.add(po);
             }

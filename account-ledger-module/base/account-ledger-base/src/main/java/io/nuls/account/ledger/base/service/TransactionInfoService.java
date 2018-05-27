@@ -22,23 +22,26 @@
  * SOFTWARE.
  *
  */
-package io.nuls.account.ledger.storage.service;
 
+package io.nuls.account.ledger.base.service;
+
+import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.account.ledger.storage.po.TransactionInfoPo;
-import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
 
 import java.util.List;
 
 /**
  * author Facjas
- * date 2018/5/22.
+ * date 2018/5/27.
  */
-public interface TransactionInfoStorageService {
 
-    Result saveTransactionInfo(byte[] key, TransactionInfoPo tx);
+public interface TransactionInfoService {
 
-    Result deleteTransactionInfo(byte[] infoKey);
+    Result<List<TransactionInfo>> getTxInfoList(byte[] address);
 
-    List<TransactionInfoPo> getTransactionInfoListByAddress(byte[] address) throws NulsException;
+    Result<Integer> saveTransactionInfo(TransactionInfoPo infoPo, List<byte[]> addresses);
+
+    Result deleteTransactionInfo(TransactionInfoPo infoPo);
 }

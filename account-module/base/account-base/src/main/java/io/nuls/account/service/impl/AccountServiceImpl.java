@@ -194,7 +194,7 @@ public class AccountServiceImpl implements AccountService {
             return result;
         }
         LOCAL_ADDRESS_LIST.add(keyStore.getAddress());
-        accountLedgerService.importAccountLedger(account.getAddress().getBase58());
+        accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
         return Result.getSuccess().setData(account);
     }
 
@@ -258,7 +258,7 @@ public class AccountServiceImpl implements AccountService {
             return result;
         }
         LOCAL_ADDRESS_LIST.add(keyStore.getAddress());
-        accountLedgerService.importAccountLedger(account.getAddress().getBase58());
+        accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
         return Result.getSuccess().setData(account);
     }
 
@@ -306,7 +306,7 @@ public class AccountServiceImpl implements AccountService {
             return result;
         }
         LOCAL_ADDRESS_LIST.add(account.getAddress().toString());
-        accountLedgerService.importAccountLedger(account.getAddress().getBase58());
+        accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
         return Result.getSuccess().setData(account);
     }
 

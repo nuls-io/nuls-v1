@@ -2,7 +2,7 @@ package io.nuls.account.ledger.base.manager;
 
 import io.nuls.account.ledger.base.util.CoinComparator;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
-import io.nuls.account.ledger.storage.service.AccountLedgerStorageService;
+import io.nuls.account.ledger.storage.service.LocalUtxoStorageService;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
@@ -30,7 +30,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BalanceManager {
 
     @Autowired
-    private AccountLedgerStorageService accountLedgerStorageService;
+    private LocalUtxoStorageService localUtxoStorageService;
     @Autowired
     private AccountService accountService;
 
@@ -157,7 +157,7 @@ public class BalanceManager {
 
     public List<Coin> getCoinListByAddress(byte[] address) {
         List<Coin> coinList = new ArrayList<>();
-        List<Entry<byte[], byte[]>> rawList = accountLedgerStorageService.loadAllCoinList();
+        List<Entry<byte[], byte[]>> rawList = localUtxoStorageService.loadAllCoinList();
         byte[] addressOwner = new byte[AddressTool.HASH_LENGTH];
         for (Entry<byte[], byte[]> coinEntry : rawList) {
             byte[] key = coinEntry.getKey();

@@ -25,22 +25,19 @@ package io.nuls.account.ledger.base.task;
 
 
 import io.nuls.account.ledger.base.manager.BalanceManager;
+import io.nuls.account.ledger.base.util.AccountLegerUtils;
 import io.nuls.account.ledger.base.util.TransactionTimeComparator;
-import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.account.ledger.storage.service.AccountLedgerStorageService;
+import io.nuls.account.ledger.storage.service.LocalUtxoStorageService;
 import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
-import io.nuls.account.model.Balance;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.service.TransactionService;
@@ -67,7 +64,7 @@ public class CheckUnConfirmTxThread implements Runnable {
     UnconfirmedTransactionStorageService unconfirmedTransactionStorageService;
 
     @Autowired
-    private AccountLedgerStorageService accountLedgerStorageService;
+    private LocalUtxoStorageService localUtxoStorageService;
 
     @Autowired
     private BalanceManager balanceManager;
@@ -78,6 +75,7 @@ public class CheckUnConfirmTxThread implements Runnable {
         Collections.sort(list, TransactionTimeComparator.getInstance());
 
         if (list == null || list.size() == 0) {
+            Log.info("there is no unconfirmed transaction");
             return;
         }
         if (list.get(0).getTime() - TimeService.currentTimeMillis() > 120000L) {
@@ -96,7 +94,7 @@ public class CheckUnConfirmTxThread implements Runnable {
                 deleteUnconfirmedTransaction(tx);
                 List<byte[]> addresses = tx.getAllRelativeAddress();
                 for (byte[] address : addresses) {
-                    if (accountLedgerService.isLocalAccount(address)) {
+                    if (AccountLegerUtils.isLocalAccount(address)) {
                         balanceManager.refreshBalance(address);
                     }
                 }
@@ -149,7 +147,7 @@ public class CheckUnConfirmTxThread implements Runnable {
                     throw new NulsRuntimeException(e);
                 }
             }
-            accountLedgerStorageService.batchSaveUTXO(fromMap);
+            localUtxoStorageService.batchSaveUTXO(fromMap);
             for (byte[] key : fromMap.keySet()) {
                 Coin coin = null;
                 try {
@@ -170,7 +168,7 @@ public class CheckUnConfirmTxThread implements Runnable {
                     throw new NulsRuntimeException(e);
                 }
             }
-            accountLedgerStorageService.batchDeleteUTXO(toSet);
+            localUtxoStorageService.batchDeleteUTXO(toSet);
         }
 
         List<Coin> tos = tx.getCoinData().getTo();
@@ -178,7 +176,7 @@ public class CheckUnConfirmTxThread implements Runnable {
             Coin to = tos.get(i);
             try {
                 byte[] outKey = org.spongycastle.util.Arrays.concatenate(to.getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                accountLedgerStorageService.deleteUTXO(outKey);
+                localUtxoStorageService.deleteUTXO(outKey);
             } catch (IOException e) {
                 Log.info("delete unconfirmed output error");
             }

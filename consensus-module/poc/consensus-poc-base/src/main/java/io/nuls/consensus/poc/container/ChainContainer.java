@@ -396,7 +396,7 @@ public class ChainContainer implements Cloneable {
         Block bestBlock = chain.getBestBlock();
 
         if (block == null || !block.getHeader().getHash().equals(bestBlock.getHeader().getHash())) {
-            Log.warn("rollback block is not best block");
+            Log.warn("rollbackTransaction block is not best block");
             return false;
         }
 

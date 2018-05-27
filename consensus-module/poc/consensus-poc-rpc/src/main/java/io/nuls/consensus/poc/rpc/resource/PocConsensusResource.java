@@ -481,13 +481,13 @@ public class PocConsensusResource {
             Log.error(e);
             return Result.getFailed(e.getMessage());
         }
-        Result saveResult = accountLedgerService.saveUnconfirmedTransaction(tx);
+        Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
         if (saveResult.isFailed()) {
             return saveResult;
         }
         Result sendResult = this.transactionService.broadcastTx(tx);
         if (sendResult.isFailed()) {
-            accountLedgerService.rollback(tx);
+            accountLedgerService.rollbackTransaction(tx);
             return sendResult;
         }
         return Result.getSuccess();

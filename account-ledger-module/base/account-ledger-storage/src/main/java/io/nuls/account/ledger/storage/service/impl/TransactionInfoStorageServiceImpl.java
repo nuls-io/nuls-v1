@@ -39,6 +39,7 @@ import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.utils.AddressTool;
 
+import javax.naming.PartialResultException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,33 +63,13 @@ public class TransactionInfoStorageServiceImpl implements TransactionInfoStorage
     }
 
     @Override
-    public Result<Integer> saveTransactionInfo(TransactionInfoPo infoPo, List<byte[]> addresses) {
-        if (infoPo == null) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
-        }
-
-        if (addresses == null || addresses.size() == 0) {
-            return Result.getSuccess().setData(new Integer(0));
-        }
-
-        List<byte[]> savedKeyList = new ArrayList<>();
-
+    public Result saveTransactionInfo(byte[] infoKey, TransactionInfoPo infoPo) {
         try {
-            for (int i = 0; i < addresses.size(); i++) {
-                byte[] infoKey = new byte[AddressTool.HASH_LENGTH + infoPo.getTxHash().size()];
-                System.arraycopy(addresses.get(i), 0, infoKey, 0, AddressTool.HASH_LENGTH);
-                System.arraycopy(infoPo.getTxHash().serialize(), 0, infoKey, AddressTool.HASH_LENGTH, infoPo.getTxHash().size());
-                dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, infoKey, infoPo.serialize());
-                savedKeyList.add(infoKey);
-            }
-        } catch (IOException e) {
-            for (int i = 0; i < savedKeyList.size(); i++) {
-                dbService.delete(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, savedKeyList.get(i));
-            }
-
-            return Result.getFailed(AccountLedgerErrorCode.IO_ERROR);
+            dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, infoKey, infoPo.serialize());
+            return Result.getSuccess();
+        }catch (Exception e){
+            return Result.getFailed();
         }
-        return Result.getSuccess().setData(new Integer(addresses.size()));
     }
 
     @Override
@@ -113,41 +94,7 @@ public class TransactionInfoStorageServiceImpl implements TransactionInfoStorage
     }
 
     @Override
-    public Result deleteTransactionInfo(TransactionInfoPo infoPo) {
-        byte[] infoBytes = null;
-        if (infoPo == null) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
-        }
-
-        try {
-            infoBytes = infoPo.serialize();
-        } catch (IOException e) {
-            return Result.getFailed(AccountLedgerErrorCode.IO_ERROR);
-        }
-
-        if (ArraysTool.isEmptyOrNull(infoBytes)) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
-        }
-
-        byte[] addresses = infoPo.getAddresses();
-        if (addresses.length % AddressTool.HASH_LENGTH != 0) {
-            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
-        }
-
-        int addressCount = addresses.length / AddressTool.HASH_LENGTH;
-
-        for (int i = 0; i < addressCount; i++) {
-
-            byte[] infoKey = new byte[AddressTool.HASH_LENGTH + infoPo.getTxHash().size()];
-            System.arraycopy(addresses, i * AddressTool.HASH_LENGTH, infoKey, 0, AddressTool.HASH_LENGTH);
-            try {
-                System.arraycopy(infoPo.getTxHash().serialize(), 0, infoKey, AddressTool.HASH_LENGTH, infoPo.getTxHash().size());
-            } catch (IOException e) {
-                Log.info(e.getMessage());
-            }
-            dbService.delete(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, infoKey);
-        }
-
-        return Result.getSuccess().setData(new Integer(addressCount));
+    public Result deleteTransactionInfo(byte[] infoKey){
+        return dbService.delete(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, infoKey);
     }
 }
