@@ -29,8 +29,8 @@ import io.nuls.account.ledger.base.util.AccountLegerUtils;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.storage.service.LocalUtxoStorageService;
 import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
+import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Hex;
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -77,26 +77,39 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 byte[] fromIndex = new byte[fromSource.length - utxoFromSource.length];
                 System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
                 System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
-                Transaction sourceTx = null;
-                try {
-                    sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
-                    if (sourceTx == null) {
-                        sourceTx = unconfirmedTransactionStorageService.getUnconfirmedTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource))).getData();
+
+                Coin fromOfFromCoin = from.getFrom();
+
+                if(fromOfFromCoin == null) {
+                    Transaction sourceTx = null;
+                    try {
+                        sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
+                        if (sourceTx == null) {
+                            sourceTx = unconfirmedTransactionStorageService.getUnconfirmedTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource))).getData();
+                        }
+                    } catch (Exception e) {
+                        throw new NulsRuntimeException(e);
                     }
-                } catch (Exception e) {
-                    throw new NulsRuntimeException(e);
+                    if (sourceTx == null) {
+                        return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
+                    }
+                    fromOfFromCoin = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value);
                 }
-                if (sourceTx == null) {
-                    return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
+
+                byte[] address = fromOfFromCoin.getOwner();
+
+                if (!AccountLegerUtils.isLocalAccount(address)) {
+                    continue;
                 }
-                byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
-                fromsSet.add(org.spongycastle.util.Arrays.concatenate(address, from.getOwner()));
-                if(fromsSet.size() == 0){
-                    Log.info("??????????????????????????????????? delete utxo error");
-                }
+
+                fromsSet.add(ArraysTool.joinintTogether(address, from.getOwner()));
             }
 
-            localUtxoStorageService.batchDeleteUTXO(fromsSet);
+            Result result = localUtxoStorageService.batchDeleteUTXO(fromsSet);
+            if(!result.isSuccess() || result.getData() == null || ((Integer) result.getData()) != fromsSet.size()) {
+                return result;
+            }
+
             // save utxo - to
             List<Coin> tos = coinData.getTo();
             Map<byte[], byte[]> toMap = new HashMap<>();
@@ -107,15 +120,8 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 }
 
                 try {
-                    byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                    if (to.getLockTime() == -1) {
-                        byte[] toKey = org.spongycastle.util.Arrays.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
+                    byte[] outKey = ArraysTool.joinintTogether(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
 
-                        Coin ledgerCoin = ledgerService.getUtxo(toKey);
-                        if (null != ledgerCoin) {
-                            to = ledgerCoin;
-                        }
-                    }
                     toMap.put(outKey, to.serialize());
                 } catch (IOException e) {
                     throw new NulsRuntimeException(e);
@@ -160,7 +166,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
                 }
                 byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
-                fromsSet.add(org.spongycastle.util.Arrays.concatenate(address, from.getOwner()));
+                fromsSet.add(ArraysTool.joinintTogether(address, from.getOwner()));
             }
 
             localUtxoStorageService.batchDeleteUTXO(fromsSet);
@@ -175,9 +181,9 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 }
 
                 try {
-                    byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                    if (to.getLockTime() == -1) {
-                        byte[] toKey = org.spongycastle.util.Arrays.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
+                    byte[] outKey = ArraysTool.joinintTogether(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                    if (to.getLockTime() == -1L) {
+                        byte[] toKey = ArraysTool.joinintTogether(tx.getHash().serialize(), new VarInt(i).encode());
 
                         Coin ledgerCoin = ledgerService.getUtxo(toKey);
                         if (null != ledgerCoin) {
@@ -209,7 +215,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             Set<byte[]> toSet = new HashSet<>();
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
-                    byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                    byte[] outKey = ArraysTool.joinintTogether(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
                     toSet.add(outKey);
                 } catch (IOException e) {
                     throw new NulsRuntimeException(e);
@@ -237,7 +243,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 }
                 byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
                 try {
-                    fromMap.put(org.spongycastle.util.Arrays.concatenate(address, from.getOwner()), sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).serialize());
+                    fromMap.put(ArraysTool.joinintTogether(address, from.getOwner()), sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).serialize());
                 } catch (IOException e) {
                     throw new NulsRuntimeException(e);
                 }
@@ -256,11 +262,11 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             Coin to;
             for (int i = 0, length = tos.size(); i < length; i++) {
                 to = tos.get(i);
-                if (to.getLockTime() == -1) {
+                if (to.getLockTime() == -1L) {
                     Coin needUnLockUtxoNew = new Coin(to.getOwner(), to.getNa(), newLockTime);
                     needUnLockUtxoNew.setFrom(to.getFrom());
                     try {
-                        byte[] outKey = org.spongycastle.util.Arrays.concatenate(to.getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                        byte[] outKey = ArraysTool.joinintTogether(to.getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
                         saveUTXO(outKey, needUnLockUtxoNew.serialize());
                         addresses.add(to.getOwner());
                     } catch (IOException e) {
@@ -283,9 +289,9 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             List<Coin> tos = coinData.getTo();
             for (int i = 0, length = tos.size(); i < length; i++) {
                 Coin to = tos.get(i);
-                if (to.getLockTime() == -1) {
+                if (to.getLockTime() == -1L) {
                     try {
-                        byte[] outKey = org.spongycastle.util.Arrays.concatenate(to.getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                        byte[] outKey = ArraysTool.joinintTogether(to.getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
                         saveUTXO(outKey, to.serialize());
                         addresses.add(to.getOwner());
                     } catch (IOException e) {

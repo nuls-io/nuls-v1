@@ -147,6 +147,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             result = localUtxoService.saveUtxoForLocalAccount(tx);
             if (result.isFailed()) {
                 transactionInfoService.deleteTransactionInfo(txInfoPo);
+                return result;
             }
         } else {
             unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
