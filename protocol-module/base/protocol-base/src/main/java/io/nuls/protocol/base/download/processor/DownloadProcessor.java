@@ -61,8 +61,8 @@ public class DownloadProcessor extends Thread {
 
     private ScheduledThreadPoolExecutor threadPool;
 
-    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
-    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private NetworkService networkService;
+    private BlockService blockService;
 
     private DownloadProcessor() {
     }
@@ -73,7 +73,8 @@ public class DownloadProcessor extends Thread {
 
     @Override
     public void run() {
-
+        networkService = NulsContext.getServiceBean(NetworkService.class);
+        blockService = NulsContext.getServiceBean(BlockService.class);
         boolean isContinue = checkNetworkAndStatus();
 
         if (!isContinue) {
