@@ -1,4 +1,4 @@
-package io.nuls.consensus.poc.rpc.cmd;
+package io.nuls.protocol.rpc.cmd;
 
 import io.nuls.core.tools.cmd.CommandBuilder;
 import io.nuls.core.tools.cmd.CommandHelper;

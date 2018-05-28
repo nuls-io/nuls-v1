@@ -6,7 +6,8 @@ import io.nuls.accout.ledger.rpc.cmd.GetUTXOProcessor;
 import io.nuls.accout.ledger.rpc.cmd.TransferProcessor;
 import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.rpc.constant.RpcConstant;
-import io.nuls.consensus.poc.rpc.cmd.GetBlockHeaderProcessor;
+import io.nuls.consensus.poc.rpc.cmd.CreateAgentProcessor;
+import io.nuls.consensus.poc.rpc.cmd.GetConsensusProcessor;
 import io.nuls.core.tools.cfg.ConfigLoader;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
@@ -19,6 +20,9 @@ import io.nuls.kernel.i18n.I18nUtils;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 import io.nuls.ledger.rpc.cmd.GetTxProcessor;
+import io.nuls.protocol.rpc.cmd.GetBestBlockHeaderProcessor;
+import io.nuls.protocol.rpc.cmd.GetBlockHeaderProcessor;
+import io.nuls.protocol.rpc.cmd.GetBlockProcessor;
 
 import java.util.Map;
 import java.util.Scanner;
@@ -37,18 +41,17 @@ public class CommandHandler {
      */
     private void init() {
         /**
-         * account cmd
-         */
-
-        /**
-         * tx cmd
+         * ledger
          */
         register(new GetTxProcessor());
 
         /**
-         * block cmd
+         * block
          */
         register(new GetBlockHeaderProcessor());
+        register(new GetBlockProcessor());
+        register(new GetBestBlockHeaderProcessor());
+
         /**
          * account
          */
@@ -74,6 +77,13 @@ public class CommandHandler {
         register(new TransferProcessor());
         register(new GetAccountTxListProcessor());
         register(new GetUTXOProcessor());
+
+        /**
+         * consensus
+         */
+        register(new CreateAgentProcessor());
+        register(new GetConsensusProcessor());
+
 
         sdkInit();
     }
