@@ -80,7 +80,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
 
                 Coin fromOfFromCoin = from.getFrom();
 
-                if(fromOfFromCoin == null) {
+                if (fromOfFromCoin == null) {
                     Transaction sourceTx = null;
                     try {
                         sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(fromSource)));
@@ -106,7 +106,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             }
 
             Result result = localUtxoStorageService.batchDeleteUTXO(fromsSet);
-            if(!result.isSuccess() || result.getData() == null || ((Integer) result.getData()) != fromsSet.size()) {
+            if (!result.isSuccess() || result.getData() == null || ((Integer) result.getData()) != fromsSet.size()) {
                 return result;
             }
 
@@ -134,7 +134,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
 
     @Override
     public Result saveUtxoForAccount(Transaction tx, byte[] addresses) {
-        if(AddressTool.validAddress(addresses)){
+        if (!AddressTool.validAddress(addresses)) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
         if (tx == null) {
@@ -305,6 +305,6 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
     }
 
     protected void saveUTXO(byte[] outKey, byte[] serialize) {
-        localUtxoStorageService.saveUTXO(outKey,serialize);
+        localUtxoStorageService.saveUTXO(outKey, serialize);
     }
 }
