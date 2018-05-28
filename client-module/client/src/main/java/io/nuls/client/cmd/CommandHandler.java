@@ -7,6 +7,7 @@ import io.nuls.accout.ledger.rpc.cmd.TransferProcessor;
 import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.consensus.poc.rpc.cmd.CreateAgentProcessor;
+import io.nuls.consensus.poc.rpc.cmd.GetConsensusAddressProcessor;
 import io.nuls.consensus.poc.rpc.cmd.GetConsensusProcessor;
 import io.nuls.core.tools.cfg.ConfigLoader;
 import io.nuls.core.tools.log.Log;
@@ -83,6 +84,7 @@ public class CommandHandler {
          */
         register(new CreateAgentProcessor());
         register(new GetConsensusProcessor());
+        register(new GetConsensusAddressProcessor());
 
 
         sdkInit();
