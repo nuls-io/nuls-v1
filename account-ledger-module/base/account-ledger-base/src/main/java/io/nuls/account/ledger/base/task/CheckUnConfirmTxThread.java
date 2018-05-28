@@ -25,9 +25,12 @@ package io.nuls.account.ledger.base.task;
 
 
 import io.nuls.account.ledger.base.manager.BalanceManager;
+import io.nuls.account.ledger.base.service.LocalUtxoService;
+import io.nuls.account.ledger.base.service.TransactionInfoService;
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
 import io.nuls.account.ledger.base.util.TransactionTimeComparator;
 import io.nuls.account.ledger.service.AccountLedgerService;
+import io.nuls.account.ledger.storage.po.TransactionInfoPo;
 import io.nuls.account.ledger.storage.service.LocalUtxoStorageService;
 import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
 import io.nuls.core.tools.crypto.Hex;
@@ -69,17 +72,19 @@ public class CheckUnConfirmTxThread implements Runnable {
     @Autowired
     private BalanceManager balanceManager;
 
+    @Autowired
+    TransactionInfoService transactionInfoService;
+
     @Override
     public void run() {
         List<Transaction> list = accountLedgerService.getAllUnconfirmedTransaction().getData();
         Collections.sort(list, TransactionTimeComparator.getInstance());
 
         if (list == null || list.size() == 0) {
-            Log.info("there is no unconfirmed transaction");
             return;
         }
-        if (list.get(0).getTime() - TimeService.currentTimeMillis() > 120000L) {
-            Log.info("earliest unconfirmed tx :" + (list.get(0).getTime() - TimeService.currentTimeMillis()));
+
+        if (TimeService.currentTimeMillis() - list.get(0).getTime() < 120000L) {
             return;
         }
 
@@ -104,9 +109,9 @@ public class CheckUnConfirmTxThread implements Runnable {
     }
 
     private void deleteUnconfirmedTransaction(Transaction tx) {
-
         unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
-
+        TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
+        transactionInfoService.deleteTransactionInfo(txInfoPo);
         rollbackUtxo(tx);
     }
 

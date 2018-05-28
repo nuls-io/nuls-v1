@@ -168,6 +168,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             result = this.ledgerService.verifyCoinData(tx, this.getAllUnconfirmedTransaction().getData());
             if (result.isFailed()) {
+                Log.info("verifyCoinData failed");
                 return result;
             }
             return saveUnconfirmedTransaction(tx);
@@ -326,11 +327,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 coinDataResult.setEnough(false);
                 return coinDataResult;
             }
-            //todo
-//            for(Coin coin : coinDataResult.getCoinList()) {
-//                coin.setNa(Na.ZERO);
-//                coin.setLockTime(0L);
-//            }
+            for(Coin coin : coinDataResult.getCoinList()) {
+                coin.setNa(Na.ZERO);
+                coin.setLockTime(0L);
+            }
             return coinDataResult;
         } finally {
             lock.unlock();
