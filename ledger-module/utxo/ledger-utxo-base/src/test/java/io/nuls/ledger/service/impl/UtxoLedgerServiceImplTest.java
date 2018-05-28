@@ -35,6 +35,7 @@ import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -45,10 +46,7 @@ import io.nuls.ledger.storage.service.UtxoLedgerUtxoStorageService;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import org.iq80.leveldb.util.Slice;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
@@ -62,8 +60,8 @@ import java.util.List;
  */
 public class UtxoLedgerServiceImplTest {
 
-    private static List<Transaction> allList;
-    private static List<Transaction> txList;
+    private List<Transaction> allList;
+    private List<Transaction> txList;
 
     private static LedgerService ledgerService;
     private static UtxoLedgerUtxoStorageService utxoLedgerUtxoStorageService;
@@ -88,6 +86,10 @@ public class UtxoLedgerServiceImplTest {
         ledgerService = SpringLiteContext.getBean(LedgerService.class);
         utxoLedgerUtxoStorageService = SpringLiteContext.getBean(UtxoLedgerUtxoStorageService.class);
         utxoLedgerTransactionStorageService = SpringLiteContext.getBean(UtxoLedgerTransactionStorageService.class);
+
+    }
+    @Before
+    public void start() throws IOException, NulsException {
         initAllList();
     }
 
@@ -106,16 +108,33 @@ public class UtxoLedgerServiceImplTest {
         LevelDBManager.createArea(LedgerStorageConstant.DB_NAME_LEDGER_UTXO);
         LevelDBManager.createArea(LedgerStorageConstant.DB_NAME_LEDGER_TX);
         Transaction tx8 = allList.get(8);
+
+        ECKey ecKeyPre0 = new ECKey();
+        ECKey ecKey0 = new ECKey();
         ECKey ecKey1 = new ECKey();
         ECKey ecKey2 = new ECKey();
+
+        TransferTransaction prePrePreTx = createTransferTransaction(ecKeyPre0, null, ecKey0, Na.ZERO);
+        TransferTransaction prePreTx = createTransferTransaction(ecKey0, null, ecKey1, Na.ZERO);
         TransferTransaction preTx = createTransferTransaction(ecKey1, null, ecKey2, Na.ZERO);
+
         P2PKHScriptSig preTxScript = P2PKHScriptSig.createFromBytes(preTx.getScriptSig());
         P2PKHScriptSig txScript = P2PKHScriptSig.createFromBytes(tx8.getScriptSig());
+
+        byte[] prePreTxHashBytes = prePreTx.getHash().serialize();
         byte[] preTxHashBytes = preTx.getHash().serialize();
+
+        CoinData prePreTxCoinData = prePreTx.getCoinData();
+        prePreTxCoinData.getFrom().clear();
+        prePreTxCoinData.getTo().clear();
+        prePreTxCoinData.getFrom().add(new Coin(Arrays.concatenate(prePrePreTx.getHash().serialize(), new VarInt(0).encode()), Na.parseNuls(30031), 0));
+        prePreTxCoinData.getTo().add(new Coin(AddressTool.getAddress(preTxScript.getPublicKey()), Na.parseNuls(30031), 0));
+        ledgerService.saveTx(prePreTx);
+
         CoinData preTxCoinData = preTx.getCoinData();
         preTxCoinData.getFrom().clear();
         preTxCoinData.getTo().clear();
-        preTxCoinData.getFrom().add(new Coin(Arrays.concatenate(preTxHashBytes, new VarInt(88).encode()), Na.parseNuls(30031), 0));
+        preTxCoinData.getFrom().add(new Coin(Arrays.concatenate(prePreTxHashBytes, new VarInt(0).encode()), Na.parseNuls(30031), 0));
         preTxCoinData.getTo().add(new Coin(AddressTool.getAddress(txScript.getPublicKey()), Na.parseNuls(10001), 0));
         preTxCoinData.getTo().add(new Coin(AddressTool.getAddress(txScript.getPublicKey()), Na.parseNuls(10001), 0));
         preTxCoinData.getTo().add(new Coin(AddressTool.getAddress(txScript.getPublicKey()), Na.parseNuls(10001), 0));
@@ -186,11 +205,16 @@ public class UtxoLedgerServiceImplTest {
 
     @Test
     public void rollbackTx() throws IOException, NulsException {
-        saveTx();
+        recoveryTx3Data();
+        Transaction tx03 = allList.get(3);
+        Transaction preTx = initTxDataForTestVerifyCoinData(tx03);
+        byte[] preTxHashBytes = preTx.getHash().serialize();
+
         // 无from的交易
         Transaction tx = allList.get(0);
-        System.out.println("tx: " + new Slice(tx.serialize()));
-        Result result = ledgerService.rollbackTx(tx);
+        Result result = ledgerService.saveTx(tx);
+        Assert.assertTrue(result.isSuccess());
+        result = ledgerService.rollbackTx(tx);
         Assert.assertTrue(result.isSuccess());
         byte[] toCoin = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(tx.getHash().serialize(), new VarInt(0).encode()));
         Assert.assertNull(toCoin);
@@ -199,36 +223,31 @@ public class UtxoLedgerServiceImplTest {
         Assert.assertNull(txFromDB);
 
         // 有from的交易, 检验交易和coindata
-        Transaction tx3 = allList.get(3);
-        CoinData from3 = tx3.getCoinData();
-        result = ledgerService.rollbackTx(tx3);
+        CoinData from3 = preTx.getCoinData();
+        result = ledgerService.rollbackTx(preTx);
         Assert.assertTrue(result.isSuccess());
-        byte[] to3Coin0 = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(0).encode()));
-        byte[] to3Coin1 = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(1).encode()));
-        byte[] to3Coin2 = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(2).encode()));
+        byte[] to3Coin0 = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(preTx.getHash().serialize(), new VarInt(0).encode()));
+        byte[] to3Coin1 = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(preTx.getHash().serialize(), new VarInt(1).encode()));
+        byte[] to3Coin2 = utxoLedgerUtxoStorageService.getUtxoBytes(Arrays.concatenate(preTx.getHash().serialize(), new VarInt(2).encode()));
         Assert.assertNull(to3Coin0);
         Assert.assertNull(to3Coin1);
         Assert.assertNull(to3Coin2);
         byte[] from3Coin0 = utxoLedgerUtxoStorageService.getUtxoBytes(from3.getFrom().get(0).getOwner());
-        byte[] from3Coin1 = utxoLedgerUtxoStorageService.getUtxoBytes(from3.getFrom().get(1).getOwner());
-        byte[] from3Coin2 = utxoLedgerUtxoStorageService.getUtxoBytes(from3.getFrom().get(2).getOwner());
         Assert.assertNotNull(from3Coin0);
-        Assert.assertNotNull(from3Coin1);
-        Assert.assertNotNull(from3Coin2);
-        P2PKHScriptSig p2PKHScriptSig = P2PKHScriptSig.createFromBytes(tx3.getScriptSig());
+        P2PKHScriptSig p2PKHScriptSig = P2PKHScriptSig.createFromBytes(preTx.getScriptSig());
         byte[] fromAdress = AddressTool.getAddress(p2PKHScriptSig.getPublicKey());
-        tx3.getCoinData().getFrom().get(0).setOwner(fromAdress);
-        tx3.getCoinData().getFrom().get(1).setOwner(fromAdress);
-        tx3.getCoinData().getFrom().get(2).setOwner(fromAdress);
-        Assert.assertEquals(new Slice(tx3.getCoinData().getFrom().get(0).serialize()), new Slice(from3Coin0));
-        Assert.assertEquals(new Slice(tx3.getCoinData().getFrom().get(1).serialize()), new Slice(from3Coin1));
-        Assert.assertEquals(new Slice(tx3.getCoinData().getFrom().get(2).serialize()), new Slice(from3Coin2));
+        preTx.getCoinData().getFrom().get(0).setOwner(fromAdress);
+        Assert.assertEquals(new Slice(preTx.getCoinData().getFrom().get(0).serialize()), new Slice(from3Coin0));
     }
 
     private Transaction initTxDataForTestVerifyCoinData(Transaction tx) throws NulsException, IOException {
         allList.remove(3);
+        ECKey ecKeyPre0 = new ECKey();
+        ECKey ecKey0 = new ECKey();
         ECKey ecKey1 = new ECKey();
         ECKey ecKey2 = new ECKey();
+        TransferTransaction prePrePreTx = createTransferTransaction(ecKeyPre0, null, ecKey0, Na.ZERO);
+        TransferTransaction prePreTx = createTransferTransaction(ecKey0, null, ecKey1, Na.ZERO);
         TransferTransaction preTx = createTransferTransaction(ecKey1, null, ecKey2, Na.ZERO);
         P2PKHScriptSig preTxScript = P2PKHScriptSig.createFromBytes(preTx.getScriptSig());
         P2PKHScriptSig txScript = P2PKHScriptSig.createFromBytes(tx.getScriptSig());
@@ -248,11 +267,29 @@ public class UtxoLedgerServiceImplTest {
         //owner2[1] = (byte) 202;
         //owner2[22] = (byte) 203;
         //System.arraycopy(user, 0, owner2, 2, 20);
+        byte[] prePreTxHashBytes = prePreTx.getHash().serialize();
         byte[] preTxHashBytes = preTx.getHash().serialize();
+        //utxoLedgerUtxoStorageService.saveUtxo(Arrays.concatenate(prePreTxHashBytes, new VarInt(0).encode()),
+        //        new Coin(AddressTool.getAddress(preTxScript.getPublicKey()), Na.parseNuls(30031), 0));
+
+        //byte[] user = SerializeUtils.sha256hash160(new ECKey().getPubKey());
+        //byte[] owner3 = new byte[23];
+        //owner3[0] = (byte) 31;
+        //owner3[1] = (byte) 32;
+        //owner3[22] = (byte) 33;
+        //System.arraycopy(user, 0, owner3, 2, 20);
+
+        CoinData prePreTxCoinData = prePreTx.getCoinData();
+        prePreTxCoinData.getFrom().clear();
+        prePreTxCoinData.getTo().clear();
+        prePreTxCoinData.getFrom().add(new Coin(Arrays.concatenate(prePrePreTx.getHash().serialize(), new VarInt(0).encode()), Na.parseNuls(30031), 0));
+        prePreTxCoinData.getTo().add(new Coin(AddressTool.getAddress(preTxScript.getPublicKey()), Na.parseNuls(30031), 0));
+        ledgerService.saveTx(prePreTx);
+
         CoinData preTxCoinData = preTx.getCoinData();
         preTxCoinData.getFrom().clear();
         preTxCoinData.getTo().clear();
-        preTxCoinData.getFrom().add(new Coin(Arrays.concatenate(preTxHashBytes, new VarInt(99).encode()), Na.parseNuls(30031), 0));
+        preTxCoinData.getFrom().add(new Coin(Arrays.concatenate(prePreTxHashBytes, new VarInt(0).encode()), Na.parseNuls(30031), 0));
         preTxCoinData.getTo().add(new Coin(AddressTool.getAddress(txScript.getPublicKey()), Na.parseNuls(10001), 0));
         preTxCoinData.getTo().add(new Coin(AddressTool.getAddress(txScript.getPublicKey()), Na.parseNuls(10001), 0));
         preTxCoinData.getTo().add(new Coin(AddressTool.getAddress(txScript.getPublicKey()), Na.parseNuls(10001), 0));
@@ -350,30 +387,52 @@ public class UtxoLedgerServiceImplTest {
         byte[] user = p2PKHScriptSig.getSignerHash160();
         byte[] owner0 = from3.getFrom().get(0).getOwner();
         byte[] owner2 = from3.getFrom().get(2).getOwner();
-        //byte[] owner3 = new byte[23];
-        //owner3[0] = (byte) 301;
-        //owner3[1] = (byte) 302;
-        //owner3[22] = (byte) 303;
-        //System.arraycopy(user, 0, owner3, 2, 20);
+        byte[] owner3 = new byte[23];
+        owner3[0] = (byte) 31;
+        owner3[1] = (byte) 32;
+        owner3[22] = (byte) 33;
+        System.arraycopy(user, 0, owner3, 2, 20);
 
+        allList.get(3).getCoinData().getFrom().get(0).setOwner(owner3);
 
         // 普通校验
         Result result = ledgerService.verifyCoinData(tx3, allList);
         System.out.println(result);
         Assert.assertTrue(result.isSuccess());
 
-        // 双花校验
+        // txList为空的校验
+        result = ledgerService.verifyCoinData(tx3, null);
+        System.out.println(result);
+        Assert.assertTrue(result.isSuccess());
+
+        // 双花校验 - 自身双花
         from3.getFrom().add(new Coin(owner2, Na.parseNuls(10001), 0));
         result = ledgerService.verifyCoinData(tx3, allList);
-        System.out.println(result.getErrorCode().getCode());
+        System.out.println(result);
         Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), result.getErrorCode().getCode());
 
-        // 非解锁交易，是否可用校验
+        result = ledgerService.verifyCoinData(tx3, null);
+        System.out.println(result);
+        Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), result.getErrorCode().getCode());
+
+        // 双花校验 - 验证与待确认交易列表中是否有双花
         from3.getFrom().remove(from3.getFrom().size() - 1);
-        from3.getFrom().add(new Coin(Arrays.concatenate(preTxHashBytes, new VarInt(3).encode()), Na.parseNuls(10001), System.currentTimeMillis() + 1000 * 9));
-        utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(3).getOwner(), new Coin(AddressTool.getAddress(p2PKHScriptSig.getPublicKey()), Na.parseNuls(10001), 0));
+        allList.get(3).getCoinData().getFrom().get(0).setOwner(owner2);
         result = ledgerService.verifyCoinData(tx3, allList);
-        System.out.println(result.getErrorCode().getCode());
+        System.out.println(result);
+        Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), result.getErrorCode().getCode());
+        allList.get(3).getCoinData().getFrom().get(0).setOwner(owner3);
+
+
+        // 非解锁交易，是否可用校验
+        from3.getFrom().add(new Coin(Arrays.concatenate(preTxHashBytes, new VarInt(3).encode()), Na.parseNuls(10001), System.currentTimeMillis() + 1000 * 9));
+        utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(3).getOwner(), new Coin(AddressTool.getAddress(p2PKHScriptSig.getPublicKey()), Na.parseNuls(10001), System.currentTimeMillis() + 1000 * 9));
+        result = ledgerService.verifyCoinData(tx3, allList);
+        System.out.println(result);
+        Assert.assertEquals(LedgerErrorCode.UTXO_UNUSABLE.getCode(), result.getErrorCode().getCode());
+
+        result = ledgerService.verifyCoinData(tx3, null);
+        System.out.println(result);
         Assert.assertEquals(LedgerErrorCode.UTXO_UNUSABLE.getCode(), result.getErrorCode().getCode());
         utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(3).getOwner());
 
@@ -399,14 +458,23 @@ public class UtxoLedgerServiceImplTest {
         fromCancel.getTo().add(new Coin(ownerCancel, Na.parseNuls(10000), 0));
         utxoLedgerUtxoStorageService.saveUtxo(fromCancel.getFrom().get(0).getOwner(), fromCancel.getFrom().get(0));
         result = ledgerService.verifyCoinData(txCancel, allList);
-        System.out.println(result.getErrorCode().getCode());
+        System.out.println(result);
+        Assert.assertTrue(result.isSuccess());
+
+        result = ledgerService.verifyCoinData(txCancel, null);
+        System.out.println(result);
         Assert.assertTrue(result.isSuccess());
 
 
         // 解锁交易，状态校验，期望失败
         fromCancel.getFrom().get(0).setLockTime(0);
+        utxoLedgerUtxoStorageService.saveUtxo(fromCancel.getFrom().get(0).getOwner(), fromCancel.getFrom().get(0));
         result = ledgerService.verifyCoinData(txCancel, allList);
-        System.out.println(result.getErrorCode().getCode());
+        System.out.println(result);
+        Assert.assertEquals(LedgerErrorCode.UTXO_STATUS_CHANGE.getCode(), result.getErrorCode().getCode());
+
+        result = ledgerService.verifyCoinData(txCancel, null);
+        System.out.println(result);
         Assert.assertEquals(LedgerErrorCode.UTXO_STATUS_CHANGE.getCode(), result.getErrorCode().getCode());
 
 
@@ -416,7 +484,11 @@ public class UtxoLedgerServiceImplTest {
         ECKey ecKey2 = new ECKey();
         from3.getTo().add(new Coin(AddressTool.getAddress(ecKey2.getPubKey()), Na.parseNuls(90001), 0));
         result = ledgerService.verifyCoinData(tx3, allList);
-        System.out.println(result.getErrorCode().getCode());
+        System.out.println(result);
+        Assert.assertEquals(LedgerErrorCode.INVALID_AMOUNT.getCode(), result.getErrorCode().getCode());
+
+        result = ledgerService.verifyCoinData(tx3, null);
+        System.out.println(result);
         Assert.assertEquals(LedgerErrorCode.INVALID_AMOUNT.getCode(), result.getErrorCode().getCode());
 
 
@@ -428,7 +500,11 @@ public class UtxoLedgerServiceImplTest {
         from3.getFrom().add(new Coin(Arrays.concatenate(preTxHashBytes, new VarInt(3).encode()), Na.parseNuls(10001), 0));
         utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(3).getOwner(), new Coin(owner, Na.parseNuls(10001), 0));
         result = ledgerService.verifyCoinData(tx3, allList);
-        System.out.println(result.getErrorCode().getCode());
+        System.out.println(result);
+        Assert.assertEquals(LedgerErrorCode.INVALID_INPUT.getCode(), result.getErrorCode().getCode());
+
+        result = ledgerService.verifyCoinData(tx3, null);
+        System.out.println(result);
         Assert.assertEquals(LedgerErrorCode.INVALID_INPUT.getCode(), result.getErrorCode().getCode());
         utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(3).getOwner());
 
@@ -438,7 +514,11 @@ public class UtxoLedgerServiceImplTest {
         Coin utxo = utxoLedgerUtxoStorageService.getUtxo(from3.getFrom().get(0).getOwner());
         utxoLedgerUtxoStorageService.deleteUtxo(from3.getFrom().get(0).getOwner());
         result = ledgerService.verifyCoinData(tx3, allList);
-        System.out.println(result.getErrorCode().getCode());
+        System.out.println(result);
+        Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), result.getErrorCode().getCode());
+
+        result = ledgerService.verifyCoinData(tx3, null);
+        System.out.println(result);
         Assert.assertEquals(LedgerErrorCode.LEDGER_DOUBLE_SPENT.getCode(), result.getErrorCode().getCode());
         utxoLedgerUtxoStorageService.saveUtxo(from3.getFrom().get(0).getOwner(), utxo);
 
@@ -455,9 +535,16 @@ public class UtxoLedgerServiceImplTest {
 
         // 是否可花费，查数据库中或者txList中是否存在UTXO，不在toList又不在数据库中，不存在这笔交易，测试期望是失败 - 孤儿交易
         // 数据库中删除保存的三笔UTXO
-        from3.getFrom().add(new Coin(Arrays.concatenate(tx3.getHash().serialize(), new VarInt(3).encode()), Na.parseNuls(10001), 0));
+        ECKey ecKeyPre0 = new ECKey();
+        ECKey ecKey0 = new ECKey();
+        TransferTransaction prePrePreTx = createTransferTransaction(ecKeyPre0, null, ecKey0, Na.ZERO);
+        from3.getFrom().add(new Coin(Arrays.concatenate(prePrePreTx.getHash().serialize(), new VarInt(3).encode()), Na.parseNuls(10001), 0));
         result = ledgerService.verifyCoinData(tx3, allList);
-        System.out.println(result.getErrorCode().getCode());
+        System.out.println(result);
+        Assert.assertEquals(LedgerErrorCode.ORPHAN_TX.getCode(), result.getErrorCode().getCode());
+
+        result = ledgerService.verifyCoinData(tx3, null);
+        System.out.println(result);
         Assert.assertEquals(LedgerErrorCode.ORPHAN_TX.getCode(), result.getErrorCode().getCode());
         from3.getFrom().remove(from3.getFrom().size() - 1);
 
@@ -473,7 +560,7 @@ public class UtxoLedgerServiceImplTest {
         LevelDBManager.destroyArea(LedgerStorageConstant.DB_NAME_LEDGER_UTXO);
     }
 
-    private static void initAllList() throws NulsException, IOException {
+    private void initAllList() throws NulsException, IOException {
         List<Transaction> list = new ArrayList<>();
         ECKey ecKey1 = new ECKey();
         ECKey ecKey2 = new ECKey();
