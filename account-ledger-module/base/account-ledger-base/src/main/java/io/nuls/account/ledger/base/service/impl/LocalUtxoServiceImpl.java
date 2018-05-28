@@ -64,12 +64,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
         if (tx == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
-        byte[] txHashBytes = new byte[0];
-        try {
-            txHashBytes = tx.getHash().serialize();
-        } catch (IOException e) {
-            throw new NulsRuntimeException(e);
-        }
+
         CoinData coinData = tx.getCoinData();
 
         if (coinData != null) {
@@ -104,7 +99,6 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             localUtxoStorageService.batchDeleteUTXO(fromsSet);
             // save utxo - to
             List<Coin> tos = coinData.getTo();
-            byte[] indexBytes;
             Map<byte[], byte[]> toMap = new HashMap<>();
             for (int i = 0, length = tos.size(); i < length; i++) {
                 Coin to = tos.get(i);
@@ -140,12 +134,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
         if (tx == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
-        byte[] txHashBytes = new byte[0];
-        try {
-            txHashBytes = tx.getHash().serialize();
-        } catch (IOException e) {
-            throw new NulsRuntimeException(e);
-        }
+
         CoinData coinData = tx.getCoinData();
 
         if (coinData != null) {
@@ -177,7 +166,6 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             localUtxoStorageService.batchDeleteUTXO(fromsSet);
             // save utxo - to
             List<Coin> tos = coinData.getTo();
-            byte[] indexBytes;
             Map<byte[], byte[]> toMap = new HashMap<>();
             for (int i = 0, length = tos.size(); i < length; i++) {
                 Coin to = tos.get(i);
@@ -212,11 +200,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         byte[] txHashBytes = new byte[0];
-        try {
-            txHashBytes = tx.getHash().serialize();
-        } catch (IOException e) {
-            throw new NulsRuntimeException(e);
-        }
+
         CoinData coinData = tx.getCoinData();
         if (coinData != null) {
             // delete utxo - to
@@ -283,7 +267,6 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                         throw new NulsRuntimeException(e);
                     }
                     //todo , think about weather to add a transaction history
-
                     break;
                 }
             }
