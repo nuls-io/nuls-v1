@@ -1,4 +1,4 @@
-package io.nuls.account.rpc.processor;
+package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.model.Address;
 import io.nuls.core.tools.cmd.CommandBuilder;
@@ -16,32 +16,31 @@ import io.nuls.kernel.utils.RestFulUtils;
  */
 @Cmd
 @Component
-public class GetAssetProcessor implements CommandProcessor {
+public class GetAccountProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
-        return "getasset";
+        return "getaccount";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<address> address - Required");
+                .newLine("\t<address> the account address - Required");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return  "getasset <address> --get your assets";
+        return "getaccount <address> --get account information";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if(length != 2) {
+        if (args.length != 2) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
@@ -56,7 +55,7 @@ public class GetAssetProcessor implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        Result result = restFul.get("/account/assets/" + address, null);
+        Result result = restFul.get("/account/" + address, null);
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());
         }

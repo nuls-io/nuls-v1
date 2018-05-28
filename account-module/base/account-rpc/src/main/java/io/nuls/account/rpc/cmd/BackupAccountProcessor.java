@@ -1,4 +1,4 @@
-package io.nuls.account.rpc.processor;
+package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.Address;

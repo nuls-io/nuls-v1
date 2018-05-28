@@ -1,4 +1,4 @@
-package io.nuls.account.rpc.processor;
+package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.model.Address;
 import io.nuls.core.tools.cmd.CommandBuilder;
@@ -20,46 +20,42 @@ import java.util.Map;
  */
 @Cmd
 @Component
-public class SetAliasProcessor implements CommandProcessor {
+public class GetPrivateKeyProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
-        return "setalias";
+        return "getprikey";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<alias> The alias of the account, the bytes for the alias is between 3 and 64, - Required")
-                .newLine("\t<address> The address of the account, - Required")
+                .newLine("\t<address> address of the account - Required")
                 .newLine("\t[password] The password of the account, if the account does not have a password, this entry is not required");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "setalias <alias> <address> [password] --Set an alias for the account ";
+        return "getprikey <address> [password] --get the private key of your account";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length < 3 || length > 4) {
+        if (length < 2 || length > 3) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (!StringUtils.validAlias(args[1])) {
+        if (!Address.validAddress(args[1])) {
             return false;
         }
-        if (!Address.validAddress(args[2])) {
-            return false;
-        }
-        if (length == 4 && !StringUtils.validPassword(args[3])) {
+        if (length == 3 && !StringUtils.validPassword(args[2])) {
             return false;
         }
         return true;
@@ -67,13 +63,11 @@ public class SetAliasProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        String alias = args[1];
-        String address = args[2];
-        String password = args.length == 4 ? args[3] : null;
+        String address = args[1];
+        String password = args.length == 3 ? args[2] : null;
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("alias", alias);
         parameters.put("password", password);
-        Result result = restFul.post("/account/alias/" + address, parameters);
+        Result result = restFul.post("/account/prikey/" + address, parameters);
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());
         }

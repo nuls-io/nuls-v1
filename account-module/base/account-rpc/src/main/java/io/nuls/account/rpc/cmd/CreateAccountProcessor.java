@@ -1,9 +1,7 @@
-package io.nuls.account.rpc.processor;
+package io.nuls.account.rpc.cmd;
 
-import io.nuls.account.model.Address;
 import io.nuls.core.tools.cmd.CommandBuilder;
 import io.nuls.core.tools.cmd.CommandHelper;
-import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
@@ -21,62 +19,50 @@ import java.util.Map;
  */
 @Cmd
 @Component
-public class ResetPasswordProcessor implements CommandProcessor {
+public class CreateAccountProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
-        return "resetpwd";
+        return "createaccount";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<address> address of the account - Required")
-                .newLine("\t<oldpassword> account password")
-                .newLine("\t<newpassword> new password (8-20 characters, letters and numbers) - Required");
+                .newLine("\t[password] The password for the account, the password is between 8 and 20 inclusive of numbers and letters, not encrypted by default");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "resetpwd <address> <oldpassword> <newpassword> --reset password for account";
+        return "createaccount [password] --create a account, encrypted by [password] | not encrypted by default";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length != 4) {
+        if (length < 1 || length > 2) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (!Address.validAddress(args[1])) {
+        if (length == 2 && !StringUtils.validPassword(args[1])) {
             return false;
         }
-        if (!StringUtils.validPassword(args[2])) {
-            return false;
-        }
-        if (!StringUtils.validPassword(args[3])) {
-            return false;
-        }
-        String newPwd = args[3];
-        CommandHelper.confirmPwd(newPwd);
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        String address = args[1];
-        String password = args[2];
-        String newPassword = args[3];
+        String password = args.length == 2 ? args[1] : null;
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("password", password);
-        parameters.put("newPassword", newPassword);
-        Result result = restFul.put("/account/password/" + address, parameters);
+        parameters.put("count", 1);
+        Result result = restFul.post("/account", parameters);
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());
         }

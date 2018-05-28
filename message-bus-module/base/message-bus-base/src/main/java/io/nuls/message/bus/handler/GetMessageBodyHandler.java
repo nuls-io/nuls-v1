@@ -11,7 +11,7 @@ import io.nuls.protocol.message.base.BaseMessage;
 
 /**
  * 获取消息体的处理器
- * The processor used to get the message body.
+ * The cmd used to get the message body.
  *
  * @author: Charlie
  * @date: 2018/5/8

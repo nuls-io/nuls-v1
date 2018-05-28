@@ -198,7 +198,7 @@ public class AccountLedgerResource {
         if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
-        if (type == null) {
+        if (type == null || type <= 0) {
             type = -1;
         }
 

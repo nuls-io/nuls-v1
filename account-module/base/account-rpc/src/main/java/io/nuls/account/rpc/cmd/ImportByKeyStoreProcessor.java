@@ -1,4 +1,4 @@
-package io.nuls.account.rpc.processor;
+package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.rpc.model.AccountKeyStoreDto;
