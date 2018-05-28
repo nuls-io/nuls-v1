@@ -79,7 +79,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     private LocalUtxoService localUtxoService;
 
     @Autowired
-    UnconfirmedTransactionStorageService unconfirmedTransactionStorageService;
+    private UnconfirmedTransactionStorageService unconfirmedTransactionStorageService;
 
     @Autowired
     private AccountService accountService;
@@ -147,6 +147,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             result = localUtxoService.saveUtxoForLocalAccount(tx);
             if (result.isFailed()) {
                 transactionInfoService.deleteTransactionInfo(txInfoPo);
+                return result;
             }
         } else {
             unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
@@ -197,6 +198,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         result = localUtxoService.saveUtxoForLocalAccount(tx);
         if (result.isFailed()) {
             transactionInfoService.deleteTransactionInfo(txInfoPo);
+            return result;
         }
 
         result = unconfirmedTransactionStorageService.saveUnconfirmedTx(tx.getHash(), tx);
@@ -327,10 +329,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 coinDataResult.setEnough(false);
                 return coinDataResult;
             }
-            for(Coin coin : coinDataResult.getCoinList()) {
-                coin.setNa(Na.ZERO);
-                coin.setLockTime(0L);
-            }
+//            for(Coin coin : coinDataResult.getCoinList()) {
+//                coin.setNa(Na.ZERO);
+//                coin.setLockTime(0L);
+//            }
             return coinDataResult;
         } finally {
             lock.unlock();
