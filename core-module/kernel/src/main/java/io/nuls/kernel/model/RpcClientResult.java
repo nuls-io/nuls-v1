@@ -25,6 +25,7 @@ package io.nuls.kernel.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 
 /**
@@ -32,10 +33,48 @@ import io.nuls.kernel.constant.KernelErrorCode;
  * @date 2017/10/31
  */
 public class RpcClientResult {
+
     private boolean success;
+
     private String code;
+
     private String msg;
+
     private Object data;
+
+    public RpcClientResult() {
+
+    }
+
+    public RpcClientResult(boolean success, String code, String msg) {
+        this.success = success;
+        this.code = code;
+        this.msg = msg;
+    }
+
+    public RpcClientResult(boolean success, ErrorCode errorCode) {
+        this.success = success;
+        this.code = errorCode.getCode();
+        this.msg = errorCode.getMsg();
+    }
+
+    public static RpcClientResult getFailed(String message) {
+        RpcClientResult result = new RpcClientResult();
+        result.setSuccess(false);
+        result.setMsg(message);
+        result.setCode(KernelErrorCode.FAILED.getCode());
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+
+    }
 
     public String getCode() {
         return code;
@@ -61,29 +100,11 @@ public class RpcClientResult {
         this.data = data;
     }
 
-    @Override
-    public String toString() {
-        try {
-            return new ObjectMapper().writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
-
-    }
-
     public boolean isSuccess() {
         return success;
     }
 
     public void setSuccess(boolean success) {
         this.success = success;
-    }
-
-    public static RpcClientResult getFailed(String message) {
-        RpcClientResult result = new RpcClientResult();
-        result.setSuccess(false);
-        result.setMsg(message);
-        result.setCode(KernelErrorCode.FAILED.getCode());
-        return result;
     }
 }

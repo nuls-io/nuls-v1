@@ -244,6 +244,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return Result.getSuccess().setData(new Integer(0));
         }
 
+        List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx);
+        if (addresses == null || addresses.size() == 0) {
+            return Result.getSuccess().setData(new Integer(0));
+        }
+
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
         Result result = transactionInfoService.deleteTransactionInfo(txInfoPo);
 
@@ -251,6 +256,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return result;
         }
         result = localUtxoService.deleteUtxoOfTransaction(tx);
+
+        for (int i = 0; i < addresses.size(); i++) {
+            balanceManager.refreshBalance(addresses.get(i));
+        }
 
         return result;
     }

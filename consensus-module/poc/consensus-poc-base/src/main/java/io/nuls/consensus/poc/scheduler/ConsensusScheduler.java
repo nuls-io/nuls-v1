@@ -95,7 +95,7 @@ public class ConsensusScheduler {
         orphanBlockProcess = new OrphanBlockProcess(chainManager, orphanBlockProvider);
         orphanBlockProcess.start();
 
-        threadPool.scheduleAtFixedRate(new BlockMonitorProcessTask(new BlockMonitorProcess(chainManager)), 120, 120, TimeUnit.SECONDS);
+        threadPool.scheduleAtFixedRate(new BlockMonitorProcessTask(new BlockMonitorProcess(chainManager)), 60, 60, TimeUnit.SECONDS);
 
         TaskManager.createAndRunThread(ConsensusConstant.MODULE_ID_CONSENSUS, "poc-reward-cache", new RewardStatisticsProcessTask(NulsContext.getServiceBean(RewardStatisticsProcess.class)));
 

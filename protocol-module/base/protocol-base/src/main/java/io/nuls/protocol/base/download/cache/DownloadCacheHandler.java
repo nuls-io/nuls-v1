@@ -30,10 +30,7 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.protocol.constant.NotFoundType;
-import io.nuls.protocol.model.BlockHashResponse;
-import io.nuls.protocol.model.CompleteParam;
-import io.nuls.protocol.model.NotFound;
-import io.nuls.protocol.model.TxGroup;
+import io.nuls.protocol.model.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,6 +46,7 @@ public class DownloadCacheHandler {
     private static Map<NulsDigestData, CompletableFuture<TxGroup>> txGroupCacher = new HashMap<>();
     private static Map<NulsDigestData, CompletableFuture<BlockHashResponse>> blockHashesCacher = new HashMap<>();
     private static Map<NulsDigestData, CompletableFuture<CompleteParam>> taskCacher = new HashMap<>();
+    private static Map<NulsDigestData, CompletableFuture<NulsDigestData>> reactCacher = new HashMap<>();
 
     public static CompletableFuture<Block> addGetBlockRequest(NulsDigestData blockHash) {
 
@@ -160,6 +158,21 @@ public class DownloadCacheHandler {
         }
     }
 
+    public static Future<NulsDigestData> addRequest(NulsDigestData requesetId) {
+        CompletableFuture<NulsDigestData> future = new CompletableFuture<>();
+        reactCacher.put(requesetId, future);
+        return future;
+
+    }
+
+    public static void requestReact(NulsDigestData requesetId) {
+        CompletableFuture<NulsDigestData> future = reactCacher.get(requesetId);
+        if (future != null) {
+            future.complete(requesetId);
+            reactCacher.remove(requesetId);
+        }
+    }
+
     public static void removeBlockFuture(NulsDigestData hash) {
         blockCacher.remove(hash);
     }
@@ -175,4 +188,5 @@ public class DownloadCacheHandler {
     public static void removeTaskFuture(NulsDigestData hash) {
         taskCacher.remove(hash);
     }
+
 }

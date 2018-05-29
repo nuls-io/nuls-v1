@@ -25,7 +25,6 @@
 
 package io.nuls.protocol.base.download.utils;
 
-import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Block;

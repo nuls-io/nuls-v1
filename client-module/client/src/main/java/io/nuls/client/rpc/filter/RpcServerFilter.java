@@ -29,8 +29,10 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.RpcClientResult;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -61,15 +63,26 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext){
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
 //        Log.info("url:{},IP:{},useTime:{}, params:{},result:{}", requestContext.getUriInfo().getRequestUri().getPath() + "?" + requestContext.getUriInfo().getRequestUri().getQuery(), grizzlyRequestProvider.get().getRemoteAddr()
 //                , (System.currentTimeMillis() - Long.parseLong(requestContext.getProperty("start").toString())), null, responseContext.getEntity());
     }
 
     @Override
     public Response toResponse(Exception e) {
+        System.out.println("---------------" + request.getRequestURI());
         Log.error(e);
-        Result result = Result.getFailed().setMsg(e.getMessage());
+        RpcClientResult result;
+        if (e instanceof NulsException) {
+            NulsException exception = (NulsException) e;
+            result = new RpcClientResult(false, exception.getErrorCode());
+        } else if (e instanceof NulsRuntimeException) {
+            NulsRuntimeException exception = (NulsRuntimeException) e;
+            result = new RpcClientResult(false, exception.getCode(), exception.getMessage());
+        } else {
+            result = Result.getFailed().setMsg(e.getMessage()).toRpcClientResult();
+        }
+
         return Response.ok(result, MediaType.APPLICATION_JSON).build();
     }
 

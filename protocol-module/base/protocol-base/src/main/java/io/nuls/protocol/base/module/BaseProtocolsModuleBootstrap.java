@@ -104,6 +104,7 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         messageBusService.subscribeMessage(TransactionMessage.class, new NewTxMessageHandler());
         messageBusService.subscribeMessage(SmallBlockMessage.class, new SmallBlockHandler());
         messageBusService.subscribeMessage(CompleteMessage.class, new CompleteHandler());
+        messageBusService.subscribeMessage(ReactMessage.class, new ReactMessageHandler());
     }
 
     @Override

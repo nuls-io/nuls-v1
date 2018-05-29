@@ -91,4 +91,9 @@ public interface PocConsensusConstant {
      * The maximum continuous number of yellow punish log.
      */
     int MAXINUM_CONTINUOUS_YELLOW_NUMBER = 100;
+
+    /**
+     * reset system time interval , unit minutes
+     */
+    int RESET_SYSTEM_TIME_INTERVAL = 5;
 }

@@ -74,10 +74,10 @@ public class TransactionResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = TransactionDto.class)
     })
-    public Result<TransactionDto> getTxByHash(@ApiParam(name="hash", value="交易hash", required = true)
+    public RpcClientResult getTxByHash(@ApiParam(name="hash", value="交易hash", required = true)
                           @PathParam("hash") String hash) {
         if (StringUtils.isBlank(hash)) {
-            return Result.getFailed(LedgerErrorCode.NULL_PARAMETER);
+            return Result.getFailed(LedgerErrorCode.NULL_PARAMETER).toRpcClientResult();
         }
         Result result = null;
         try {
@@ -157,7 +157,7 @@ public class TransactionResource {
             Log.error(e);
             result = Result.getFailed(LedgerErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        return result;
+        return result.toRpcClientResult();
     }
 
     /**
