@@ -49,5 +49,5 @@ public interface ProtocolStorageConstant {
      * 数据库中存储的最新区块hash的索引值
      * The index value of the latest block hash stored in the database.
      */
-    long BEST_BLOCK_HASH_INDEX = -1L;
+    String BEST_BLOCK_HASH_INDEX = "best_block_hash_index";
 }
