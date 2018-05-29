@@ -32,9 +32,13 @@ import io.nuls.kernel.constant.KernelErrorCode;
  * @date 2017/10/31
  */
 public class RpcClientResult {
+
     private boolean success;
+
     private String code;
+
     private String msg;
+
     private Object data;
 
     public String getCode() {

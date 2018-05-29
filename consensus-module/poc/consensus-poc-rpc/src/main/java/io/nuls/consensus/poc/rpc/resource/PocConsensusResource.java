@@ -359,7 +359,7 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getRemark(), "agent instraction can not be null");
 
         if (!AddressTool.validAddress(form.getPackingAddress()) || !AddressTool.validAddress(form.getAgentAddress())) {
-            throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
+            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         Account account = accountService.getAccount(form.getAgentAddress()).getData();
         if (null == account) {

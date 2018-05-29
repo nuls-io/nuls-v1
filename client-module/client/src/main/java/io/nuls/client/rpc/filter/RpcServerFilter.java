@@ -31,6 +31,7 @@ import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.RpcClientResult;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -68,8 +69,9 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
 
     @Override
     public Response toResponse(Exception e) {
+        System.out.println("---------------" +  request.getRequestURI());
         Log.error(e);
-        Result result = Result.getFailed().setMsg(e.getMessage());
+        RpcClientResult result = Result.getFailed().setMsg(e.getMessage()).toRpcClientResult();
         return Response.ok(result, MediaType.APPLICATION_JSON).build();
     }
 

@@ -36,6 +36,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.protocol.rpc.model.BlockDto;
 import io.nuls.protocol.rpc.model.BlockHeaderDto;
 import io.nuls.protocol.service.BlockService;
@@ -67,21 +68,22 @@ public class BlockResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = BlockDto.class)
     })
-    public Result<BlockHeaderDto> getHeaderByHeight(@ApiParam(name = "height", value = "区块高度", required = true)
-                                                    @PathParam("height") Integer height) {
+    public RpcClientResult getHeaderByHeight(@ApiParam(name = "height", value = "区块高度", required = true)
+                                             @PathParam("height") Integer height) {
+        System.out.println("----------进来了---------");
         AssertUtil.canNotEmpty(height);
         Result<Block> blockResult = blockService.getBlock(height);
         if (blockResult.isFailed()) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND).toRpcClientResult();
         }
         BlockHeaderDto dto = null;
         try {
             dto = new BlockHeaderDto(blockResult.getData());
         } catch (IOException e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(e.getMessage()).toRpcClientResult();
         }
-        return Result.getSuccess().setData(dto);
+        return Result.getSuccess().setData(dto).toRpcClientResult();
     }
 
 
