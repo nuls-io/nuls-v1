@@ -29,6 +29,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
@@ -62,16 +63,23 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext){
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
 //        Log.info("url:{},IP:{},useTime:{}, params:{},result:{}", requestContext.getUriInfo().getRequestUri().getPath() + "?" + requestContext.getUriInfo().getRequestUri().getQuery(), grizzlyRequestProvider.get().getRemoteAddr()
 //                , (System.currentTimeMillis() - Long.parseLong(requestContext.getProperty("start").toString())), null, responseContext.getEntity());
     }
 
     @Override
     public Response toResponse(Exception e) {
-        System.out.println("---------------" +  request.getRequestURI());
+        System.out.println("---------------" + request.getRequestURI());
         Log.error(e);
-        RpcClientResult result = Result.getFailed().setMsg(e.getMessage()).toRpcClientResult();
+        RpcClientResult result;
+        if (e instanceof NulsException) {
+            NulsException nulsException = (NulsException) e;
+            result = new RpcClientResult(false, nulsException.getErrorCode());
+        } else {
+            result = Result.getFailed().setMsg(e.getMessage()).toRpcClientResult();
+        }
+
         return Response.ok(result, MediaType.APPLICATION_JSON).build();
     }
 

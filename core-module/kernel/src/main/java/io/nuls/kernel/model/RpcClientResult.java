@@ -25,6 +25,7 @@ package io.nuls.kernel.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 
 /**
@@ -63,6 +64,16 @@ public class RpcClientResult {
 
     public void setData(Object data) {
         this.data = data;
+    }
+
+    public RpcClientResult() {
+
+    }
+
+    public RpcClientResult(boolean success, ErrorCode errorCode) {
+        this.success = success;
+        this.code = errorCode.getCode();
+        this.msg = errorCode.getMsg();
     }
 
     @Override
