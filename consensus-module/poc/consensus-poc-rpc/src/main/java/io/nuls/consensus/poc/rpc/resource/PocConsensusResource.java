@@ -857,7 +857,7 @@ public class PocConsensusResource {
                     break;
                 }
             }
-            deposit.setStatus(agent == null ? 0 : 1);
+            deposit.setStatus(agent == null ? 0 : agent.getStatus());
             resultList.add(new DepositDTO(deposit, agent));
         }
         page.setList(resultList);
