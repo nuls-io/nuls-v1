@@ -58,7 +58,7 @@ public class GetBlockHandler extends AbstractMessageHandler<GetBlockMessage> {
         Block block= null;
         Result<Block> result = blockService.getBlock(message.getBlockHash());
         if (result.isFailed() || (block = result.getData()) == null) {
-            sendNotFound(message.getHash(), fromNode);
+            sendNotFound(message.getBlockHash(), fromNode);
             return;
         }
         sendBlock(block, fromNode);
