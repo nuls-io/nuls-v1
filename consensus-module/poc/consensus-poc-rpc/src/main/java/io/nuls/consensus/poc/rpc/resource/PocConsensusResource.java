@@ -430,7 +430,7 @@ public class PocConsensusResource {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         if (account.isEncrypted() && account.isLocked()) {
-            AssertUtil.canNotEmpty(form.getPassword());
+            AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
             try {
                 if (!account.decrypt(form.getPassword())) {
                     return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);

@@ -1,12 +1,17 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
-import io.nuls.core.tools.cmd.CommandBuilder;
-import io.nuls.core.tools.cmd.CommandHelper;
+import io.nuls.core.tools.date.DateUtil;
+import io.nuls.kernel.utils.CommandBuilder;
+import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
+import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
+
+import java.util.Date;
+import java.util.Map;
 
 /**
  * 根据节点hash获取单个共识节点信息
@@ -58,6 +63,11 @@ public class GetAgentProcessor implements CommandProcessor {
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
+        Map<String, Object> map = (Map)result.getData();
+        map.put("deposit",  Na.valueOf((long)map.get("deposit")).toText());
+        map.put("totalDeposit", CommandHelper.naToNuls(map.get("totalDeposit")));
+        map.put("time",  DateUtil.convertDate(new Date((Long)map.get("time"))));
+        result.setData(map);
         return CommandResult.getResult(result);
     }
 }

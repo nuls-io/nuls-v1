@@ -1,6 +1,6 @@
 package io.nuls.protocol.rpc.cmd;
 
-import io.nuls.core.tools.cmd.CommandBuilder;
+import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;

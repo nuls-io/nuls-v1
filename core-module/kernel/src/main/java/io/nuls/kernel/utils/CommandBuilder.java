@@ -1,5 +1,5 @@
 
-package io.nuls.core.tools.cmd;
+package io.nuls.kernel.utils;
 
 import io.nuls.core.tools.str.StringUtils;
 

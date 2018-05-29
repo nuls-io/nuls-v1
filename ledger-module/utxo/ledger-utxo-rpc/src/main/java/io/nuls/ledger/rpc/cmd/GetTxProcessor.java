@@ -1,6 +1,6 @@
 package io.nuls.ledger.rpc.cmd;
 
-import io.nuls.core.tools.cmd.CommandBuilder;
+import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.CommandResult;

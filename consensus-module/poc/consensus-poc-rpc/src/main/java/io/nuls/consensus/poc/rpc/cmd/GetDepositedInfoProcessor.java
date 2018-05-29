@@ -1,15 +1,12 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
-import io.nuls.core.tools.cmd.CommandBuilder;
-import io.nuls.core.tools.cmd.CommandHelper;
+import io.nuls.kernel.utils.CommandBuilder;
+import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 根据账户地址获取该账户参与的所有委托(共识)信息的统计
