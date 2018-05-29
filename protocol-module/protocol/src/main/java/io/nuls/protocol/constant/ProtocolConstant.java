@@ -123,4 +123,9 @@ public interface ProtocolConstant extends NulsConstant {
      * task complete message
      */
     short MESSAGE_TYPE_COMPLETE = 15;
+    /**
+     * 请求回复消息类型，用于需要立刻知道目标节点是否接收到本次请求的情况
+     * Request reply message type, used to immediately know if the target node received this request
+     */
+    short REQUEST_REACT = 16;
 }
