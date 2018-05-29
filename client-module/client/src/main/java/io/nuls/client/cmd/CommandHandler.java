@@ -86,6 +86,11 @@ public class CommandHandler {
         register(new DepositProcessor());
         register(new WithdrawProcessor());
         register(new StopAgentProcessor());
+        register(new GetAgentProcessor());
+        register(new GetAgentsProcessor());
+        register(new GetDepositedAgentsProcessor());
+        register(new GetDepositedsProcessor());
+        register(new GetDepositedInfoProcessor());
 
 
         sdkInit();

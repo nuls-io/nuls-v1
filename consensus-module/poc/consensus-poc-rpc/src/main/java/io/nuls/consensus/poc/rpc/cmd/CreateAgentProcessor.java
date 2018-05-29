@@ -50,6 +50,9 @@ public class CreateAgentProcessor implements CommandProcessor {
         if(length < 7 || length > 8){
             return false;
         }
+        if (!CommandHelper.checkArgsIsNull(args)) {
+            return false;
+        }
         if(!StringUtils.validAddressSimple(args[1]) || !StringUtils.validAddressSimple(args[2]) || StringUtils.isBlank(args[3])
                 || StringUtils.isBlank(args[4]) || StringUtils.isBlank(args[5]) || StringUtils.isBlank(args[6])){
             return false;
