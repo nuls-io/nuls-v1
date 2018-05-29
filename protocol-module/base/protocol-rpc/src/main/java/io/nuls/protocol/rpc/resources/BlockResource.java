@@ -94,12 +94,12 @@ public class BlockResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = BlockDto.class)
     })
-    public Result<BlockHeaderDto> getHeader(@ApiParam(name = "hash", value = "区块hash", required = true)
+    public RpcClientResult getHeader(@ApiParam(name = "hash", value = "区块hash", required = true)
                                             @PathParam("hash") String hash) {
         AssertUtil.canNotEmpty(hash);
         hash = StringUtils.formatStringPara(hash);
         if (!StringUtils.validHash(hash)) {
-            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Result result = Result.getSuccess();
         Block block = null;
@@ -109,15 +109,15 @@ public class BlockResource {
             Log.error(e);
         }
         if (block == null) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND).toRpcClientResult();
         }
         try {
             result.setData(new BlockHeaderDto(block));
         } catch (IOException e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(e.getMessage()).toRpcClientResult();
         }
-        return result;
+        return result.toRpcClientResult();
     }
 
     @GET
@@ -127,12 +127,12 @@ public class BlockResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = BlockDto.class)
     })
-    public Result<BlockDto> loadBlock(@ApiParam(name = "hash", value = "区块hash", required = true)
+    public RpcClientResult loadBlock(@ApiParam(name = "hash", value = "区块hash", required = true)
                                       @PathParam("hash") String hash) throws IOException {
         AssertUtil.canNotEmpty(hash);
         Result result;
         if (!StringUtils.validHash(hash)) {
-            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Block block = null;
         try {
@@ -147,7 +147,7 @@ public class BlockResource {
             result.setData(new BlockDto(block));
 
         }
-        return result;
+        return result.toRpcClientResult();
     }
 
     @GET
@@ -157,12 +157,12 @@ public class BlockResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = BlockDto.class)
     })
-    public Result<BlockDto> getBlock(@ApiParam(name = "height", value = "区块高度", required = true)
+    public RpcClientResult getBlock(@ApiParam(name = "height", value = "区块高度", required = true)
                                      @PathParam("height") Long height) throws IOException {
         AssertUtil.canNotEmpty(height);
         Result result = Result.getSuccess();
         if (height < 0) {
-            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
 
         Block block = blockService.getBlock(height).getData();
@@ -171,7 +171,7 @@ public class BlockResource {
         } else {
             result.setData(new BlockDto(block));
         }
-        return result;
+        return result.toRpcClientResult();
     }
 
     @GET
@@ -181,9 +181,9 @@ public class BlockResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = BlockDto.class)
     })
-    public Result getBestBlockHash() throws IOException {
+    public RpcClientResult getBestBlockHash() throws IOException {
         Result result = Result.getSuccess();
         result.setData(new BlockHeaderDto(NulsContext.getInstance().getBestBlock()));
-        return result;
+        return result.toRpcClientResult();
     }
 }
