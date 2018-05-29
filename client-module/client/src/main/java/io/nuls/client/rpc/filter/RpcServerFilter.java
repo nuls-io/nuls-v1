@@ -74,8 +74,11 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
         Log.error(e);
         RpcClientResult result;
         if (e instanceof NulsException) {
-            NulsException nulsException = (NulsException) e;
-            result = new RpcClientResult(false, nulsException.getErrorCode());
+            NulsException exception = (NulsException) e;
+            result = new RpcClientResult(false, exception.getErrorCode());
+        } else if (e instanceof NulsRuntimeException) {
+            NulsRuntimeException exception = (NulsRuntimeException) e;
+            result = new RpcClientResult(false, exception.getCode(), exception.getMessage());
         } else {
             result = Result.getFailed().setMsg(e.getMessage()).toRpcClientResult();
         }

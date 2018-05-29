@@ -42,6 +42,40 @@ public class RpcClientResult {
 
     private Object data;
 
+    public RpcClientResult() {
+
+    }
+
+    public RpcClientResult(boolean success, String code, String msg) {
+        this.success = success;
+        this.code = code;
+        this.msg = msg;
+    }
+
+    public RpcClientResult(boolean success, ErrorCode errorCode) {
+        this.success = success;
+        this.code = errorCode.getCode();
+        this.msg = errorCode.getMsg();
+    }
+
+    public static RpcClientResult getFailed(String message) {
+        RpcClientResult result = new RpcClientResult();
+        result.setSuccess(false);
+        result.setMsg(message);
+        result.setCode(KernelErrorCode.FAILED.getCode());
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+
+    }
+
     public String getCode() {
         return code;
     }
@@ -66,39 +100,11 @@ public class RpcClientResult {
         this.data = data;
     }
 
-    public RpcClientResult() {
-
-    }
-
-    public RpcClientResult(boolean success, ErrorCode errorCode) {
-        this.success = success;
-        this.code = errorCode.getCode();
-        this.msg = errorCode.getMsg();
-    }
-
-    @Override
-    public String toString() {
-        try {
-            return new ObjectMapper().writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
-
-    }
-
     public boolean isSuccess() {
         return success;
     }
 
     public void setSuccess(boolean success) {
         this.success = success;
-    }
-
-    public static RpcClientResult getFailed(String message) {
-        RpcClientResult result = new RpcClientResult();
-        result.setSuccess(false);
-        result.setMsg(message);
-        result.setCode(KernelErrorCode.FAILED.getCode());
-        return result;
     }
 }
