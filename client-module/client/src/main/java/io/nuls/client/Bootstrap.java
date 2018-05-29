@@ -72,11 +72,11 @@ public class Bootstrap {
         } while (false);
 
         // test code begin TODO
-        Log.info("开始验证····");
-        testHash();
-        Log.info("验证hash成功····");
-        testHeight();
-        Log.info("验证结束！！！");
+//        Log.info("开始验证····");
+//        testHash();
+//        Log.info("验证hash成功····");
+//        testHeight();
+//        Log.info("验证结束！！！");
         // test code end TODO
 
         while (true) {
