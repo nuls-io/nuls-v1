@@ -25,11 +25,9 @@ public class NulsMessageCall<T extends BaseMessage> implements Runnable {
             return;
         }
         try {
-            //filter&message is the same level
-            boolean ok = handler.getFilterChian().startDoFilter(data.getData());
-            if (ok) {
-                long start = System.currentTimeMillis();
-                handler.onMessage(data.getData(), data.getNode());
+            long start = System.currentTimeMillis();
+            handler.onMessage(data.getData(), data.getNode());
+            if(Log.isDebugEnabled()) {
                 Log.debug(data.getData().getClass() + ",use:" + (System.currentTimeMillis() - start));
             }
         } catch (Exception e) {
