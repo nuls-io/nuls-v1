@@ -1,6 +1,7 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
 import io.nuls.core.tools.cmd.CommandBuilder;
+import io.nuls.core.tools.cmd.CommandHelper;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
@@ -34,6 +35,9 @@ public class GetConsensusProcessor implements CommandProcessor {
     @Override
     public boolean argsValidate(String[] args) {
         if(args.length != 1){
+            return false;
+        }
+        if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
         return true;

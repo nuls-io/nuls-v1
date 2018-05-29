@@ -513,7 +513,7 @@ public class PocConsensusResource {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         if (account.isEncrypted() && account.isLocked()) {
-            AssertUtil.canNotEmpty(form.getPassword());
+            AssertUtil.canNotEmpty(form.getPassword(),"password is wrong");
             try {
                 if (!account.decrypt(form.getPassword())) {
                     return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
@@ -712,7 +712,7 @@ public class PocConsensusResource {
     @GET
     @Path("/agent/address/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "根据地址查询其委托的节点列表 [3.6.12]",
+    @ApiOperation(value = "根据地址查询其委托的节点信息列表 [3.6.12]",
             notes = "result.data.page.list: List<Map<String, Object>>")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Page.class)
