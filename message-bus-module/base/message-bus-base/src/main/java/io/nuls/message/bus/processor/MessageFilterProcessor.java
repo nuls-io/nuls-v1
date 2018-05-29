@@ -7,6 +7,7 @@ import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.message.bus.message.CommonDigestMessage;
 import io.nuls.message.bus.model.ProcessData;
 import io.nuls.message.bus.service.impl.MessageCacheService;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**
@@ -29,14 +30,22 @@ public class MessageFilterProcessor<E extends BaseMessage> implements EventHandl
                     message.getHeader().getModuleId() == MessageBusConstant.MODULE_ID_MESSAGE_BUS;
 
             if (!commonDigestTx) {
-                messageCacheService.cacheRecievedMessageHash(message.getHash());
+                boolean needCache = message.getHeader().getMsgType() == ProtocolConstant.MESSAGE_TYPE_NEW_BLOCK &&
+                        message.getHeader().getModuleId() == ProtocolConstant.MODULE_ID_PROTOCOL;
+                if(!needCache) {
+                    needCache = message.getHeader().getMsgType() == ProtocolConstant.MESSAGE_TYPE_NEW_TX &&
+                            message.getHeader().getModuleId() == ProtocolConstant.MODULE_ID_PROTOCOL;
+                }
+                if(needCache) {
+                    messageCacheService.cacheRecievedMessageHash(message.getHash());
+                }
                 return;
             }
-            if (messageCacheService.kownTheMessage(((CommonDigestMessage) message).getMsgBody())) {
-//                Log.info("discard:{}," + ((CommonDigestMessage) message).getMsgBody(), processDataDisruptorMessage.getData().getNode().getId());
-                processDataDisruptorMessage.setStoped(true);
-            } else if (messageCacheService.kownTheMessage(message.getHash())) {
+            if (messageCacheService.kownTheMessage(message.getHash())) {
 //                Log.info("discard2:{}," + message.getClass(), processDataDisruptorMessage.getData().getNode().getId());
+                processDataDisruptorMessage.setStoped(true);
+            }else if (messageCacheService.kownTheMessage(((CommonDigestMessage) message).getMsgBody())) {
+//                Log.info("discard:{}," + ((CommonDigestMessage) message).getMsgBody(), processDataDisruptorMessage.getData().getNode().getId());
                 processDataDisruptorMessage.setStoped(true);
             } else {
                 messageCacheService.cacheRecievedMessageHash(message.getHash());

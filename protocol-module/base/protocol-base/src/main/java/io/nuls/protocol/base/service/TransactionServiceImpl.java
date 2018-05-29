@@ -35,6 +35,7 @@ import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
+import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.TransactionMessage;
 import io.nuls.protocol.service.TransactionService;
@@ -48,6 +49,8 @@ import java.util.List;
  */
 @Service
 public class TransactionServiceImpl implements TransactionService {
+
+    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
     @Autowired
     private MessageBusService messageBusService;
@@ -133,6 +136,7 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Result broadcastTx(Transaction tx) {
+        temporaryCacheManager.cacheTx(tx);
         TransactionMessage message = new TransactionMessage();
         message.setMsgBody(tx);
         return messageBusService.broadcastAndCache(message, null, true);
