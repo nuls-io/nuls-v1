@@ -118,8 +118,8 @@ public class AliasService {
                 coinData.setTo(toList);
             }
             tx.setCoinData(coinData);
-            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-            NulsSignData nulsSignData = accountService.signData(tx.serializeForHash(), account, password);
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            NulsSignData nulsSignData = accountService.signData(tx.getHash().serialize(), account, password);
             P2PKHScriptSig scriptSig = new P2PKHScriptSig(nulsSignData, account.getPubKey());
             tx.setScriptSig(scriptSig.serialize());
             Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);

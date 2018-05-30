@@ -426,7 +426,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             tx.setCoinData(coinData);
 
-            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             P2PKHScriptSig sig = new P2PKHScriptSig();
             sig.setPublicKey(account.getPubKey());
             sig.setSignData(accountService.signData(tx.getHash().serialize(), account, password));

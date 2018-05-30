@@ -135,7 +135,7 @@ public final class GenesisBlock extends Block {
         CoinBaseTransaction tx = new CoinBaseTransaction();
         tx.setTime(this.blockTime);
         tx.setCoinData(coinData);
-        tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         List<Transaction> txlist = new ArrayList<>();
         txlist.add(tx);
         setTxs(txlist);
