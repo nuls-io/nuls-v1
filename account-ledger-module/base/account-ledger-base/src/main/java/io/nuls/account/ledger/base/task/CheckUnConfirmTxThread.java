@@ -77,6 +77,14 @@ public class CheckUnConfirmTxThread implements Runnable {
 
     @Override
     public void run() {
+        try {
+            doTask();
+        } catch (Exception e) {
+            Log.error(e);
+        }
+    }
+
+    private void doTask() {
         List<Transaction> list = accountLedgerService.getAllUnconfirmedTransaction().getData();
         Collections.sort(list, TransactionTimeComparator.getInstance());
 
