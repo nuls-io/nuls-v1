@@ -28,6 +28,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.VarInt;
 import io.protostuff.Tag;
 
@@ -47,13 +48,13 @@ public class MessageHeader extends BaseNulsData {
      * Magic parameters used in the isolation section.
      */
 
-    private int magicNumber;
+    private long magicNumber;
     /**
      * 消息体大小
      * the length of the msgBody
      */
 
-    private int length;
+    private long length;
     /**
      * 校验位，用于消息体的奇偶校验
      * Parity bit for the parity of the message body.
@@ -90,33 +91,33 @@ public class MessageHeader extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(new VarInt(magicNumber).encode());
-        stream.write(new VarInt(length).encode());
+        stream.writeUint32(magicNumber);
+        stream.writeUint32(length);
         stream.write(xor);
         stream.write(arithmetic);
-        stream.write(new VarInt(moduleId).encode());
-        stream.write(new VarInt(msgType).encode());
+        stream.writeUint16(moduleId);
+        stream.writeUint16(msgType);
     }
 
     @Override
     protected void parse(NulsByteBuffer buffer) throws NulsException {
-        magicNumber = (int) buffer.readVarInt();
-        length = (int) buffer.readVarInt();
+        magicNumber = buffer.readUint32();
+        length = buffer.readUint32();
         xor = buffer.readByte();
         arithmetic = buffer.readByte();
-        moduleId = (short) buffer.readVarInt();
-        msgType = (short) buffer.readVarInt();
+        moduleId = (short) buffer.readUint16();
+        msgType = (short) buffer.readUint16();
     }
 
     @Override
     public int size() {
         int s = 0;
-        s += VarInt.sizeOf(magicNumber);
-        s += VarInt.sizeOf(length);
+        s += SerializeUtils.sizeOfUint32();
+        s += SerializeUtils.sizeOfUint32();
         s += 1;
         s += 1;
-        s += VarInt.sizeOf(moduleId);
-        s += VarInt.sizeOf(msgType);
+        s += SerializeUtils.sizeOfUint16();
+        s += SerializeUtils.sizeOfUint16();
         return s;
     }
 
@@ -136,19 +137,19 @@ public class MessageHeader extends BaseNulsData {
         this.moduleId = moduleId;
     }
 
-    public int getMagicNumber() {
+    public long getMagicNumber() {
         return magicNumber;
     }
 
-    public void setMagicNumber(int magicNumber) {
+    public void setMagicNumber(long magicNumber) {
         this.magicNumber = magicNumber;
     }
 
-    public int getLength() {
+    public long getLength() {
         return length;
     }
 
-    public void setLength(int length) {
+    public void setLength(long length) {
         this.length = length;
     }
 

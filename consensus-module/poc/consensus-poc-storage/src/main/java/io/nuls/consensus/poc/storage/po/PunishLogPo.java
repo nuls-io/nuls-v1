@@ -54,7 +54,7 @@ public class PunishLogPo extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write(type);
         stream.write(address);
-        stream.writeInt48(time);
+        stream.writeUint48(time);
         stream.writeVarInt(height);
         stream.writeVarInt(roundIndex);
         stream.writeShort(reasonCode);
@@ -65,7 +65,7 @@ public class PunishLogPo extends BaseNulsData {
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.type = byteBuffer.readByte();
         this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
-        this.time = byteBuffer.readInt48();
+        this.time = byteBuffer.readUint48();
         this.height = byteBuffer.readVarInt();
         this.roundIndex = byteBuffer.readVarInt();
         this.reasonCode = byteBuffer.readShort();
@@ -77,7 +77,7 @@ public class PunishLogPo extends BaseNulsData {
         int size = 0;
         size += 1;
         size += AddressTool.HASH_LENGTH;
-        size += SerializeUtils.sizeOfInt48();
+        size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfVarInt(height);
         size += SerializeUtils.sizeOfVarInt(roundIndex);
         size += 2;

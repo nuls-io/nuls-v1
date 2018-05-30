@@ -13,7 +13,7 @@ public class Int48Test {
     @Test
     public void test() {
         long time = -1L;
-        byte[] bytes = SerializeUtils.int48ToBytes(time);
+        byte[] bytes = SerializeUtils.uint48ToBytes(time);
         long value = readInt48(bytes);
 //        assertEquals(value, time);
     }

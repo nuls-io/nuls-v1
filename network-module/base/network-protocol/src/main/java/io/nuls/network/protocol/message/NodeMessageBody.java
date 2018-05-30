@@ -49,7 +49,7 @@ public class NodeMessageBody extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(length);
+        stream.writeUint16(length);
         int count = ipList == null ? 0 : ipList.size();
         stream.writeVarInt(count);
         if (null != ipList) {
@@ -68,7 +68,7 @@ public class NodeMessageBody extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        length = (int) byteBuffer.readVarInt();
+        length = byteBuffer.readUint16();
 
         List<String> ipList = new ArrayList<>();
         int count = (int) byteBuffer.readVarInt();
@@ -88,7 +88,7 @@ public class NodeMessageBody extends BaseNulsData {
     @Override
     public int size() {
         int s = 0;
-        s += VarInt.sizeOf(length);
+        s += SerializeUtils.sizeOfUint16(); //length
         s += SerializeUtils.sizeOfVarInt(ipList == null ? 0 : ipList.size());
         if (null != ipList) {
             for (String ip : ipList) {

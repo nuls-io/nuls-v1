@@ -46,11 +46,11 @@ public class NetworkMessageBody extends BaseNulsData {
     @Override
     public int size() {
         int s = 0;
-        s += VarInt.sizeOf(handshakeType);
-        s += VarInt.sizeOf(severPort);
-        s += VarInt.sizeOf(bestBlockHeight);
+        s += SerializeUtils.sizeOfUint16(); // handshakeType
+        s += SerializeUtils.sizeOfUint16(); // severPort
+        s += SerializeUtils.sizeOfUint32(); // bestBlockHeight
         s += bestBlockHash.size();
-        s += VarInt.sizeOf(networkTime);
+        s += SerializeUtils.sizeOfUint48(); // networkTime
         s += SerializeUtils.sizeOfString(nodeIp);
         return s;
     }
@@ -60,21 +60,21 @@ public class NetworkMessageBody extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(new VarInt(handshakeType).encode());
-        stream.write(new VarInt(severPort).encode());
-        stream.write(new VarInt(bestBlockHeight).encode());
+        stream.writeUint16(handshakeType);
+        stream.writeUint16(severPort);
+        stream.writeUint32(bestBlockHeight);
         stream.write(bestBlockHash.serialize());
-        stream.write(new VarInt(networkTime).encode());
+        stream.writeUint48(networkTime);
         stream.writeString(nodeIp);
     }
 
     @Override
     protected void parse(NulsByteBuffer buffer) throws NulsException {
-        handshakeType = (int) buffer.readVarInt();
-        severPort = (int) buffer.readVarInt();
-        bestBlockHeight = (int) buffer.readVarInt();
+        handshakeType = buffer.readUint16();
+        severPort = buffer.readUint16();
+        bestBlockHeight = buffer.readUint32();
         bestBlockHash = buffer.readHash();
-        networkTime = buffer.readVarInt();
+        networkTime = buffer.readUint48();
         nodeIp = buffer.readString();
     }
 

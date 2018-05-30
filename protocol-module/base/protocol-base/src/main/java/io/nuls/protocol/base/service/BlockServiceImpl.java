@@ -308,7 +308,7 @@ public class BlockServiceImpl implements BlockService {
         SmallBlockMessage message = fillSmallBlockMessage(smallBlock);
         //todo test
         Result<List<String>> result = messageBusService.broadcastHashAndCache(message, null, false);
-        StringBuilder str = new StringBuilder("broadcast to: ");
+        StringBuilder str = new StringBuilder("broadcast " + smallBlock.getHeader().getHash() + " to: ");
         for (String node : result.getData()) {
             str.append(", " + node);
         }

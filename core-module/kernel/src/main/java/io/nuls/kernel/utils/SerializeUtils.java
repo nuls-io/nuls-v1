@@ -185,9 +185,9 @@ public class SerializeUtils {
                 ((bytes[offset + 3] & 0xffL) << 24);
     }
 
-    public static short readInt16LE(byte[] bytes, int offset) {
-        return (short) ((bytes[offset] & 0xff) |
-                ((bytes[offset + 1] & 0xff) << 8));
+    public static int readUint16LE(byte[] bytes, int offset) {
+        return (bytes[offset] & 0xff) |
+                ((bytes[offset + 1] & 0xff) << 8);
     }
 
     public static int readInt32LE(byte[] bytes, int offset) {
@@ -269,9 +269,10 @@ public class SerializeUtils {
         out[offset + 3] = (byte) (0xFF & val);
     }
 
-    public static void uint16ToByteArrayLE(short val, byte[] out, int offset) {
-        out[offset] = (byte) (0xFF & val);
-        out[offset + 1] = (byte) (0xFF & (val >> 8));
+    /** Write 2 bytes to the output stream as unsigned 16-bit integer in little endian format. */
+    public static void uint16ToByteStreamLE(int val, OutputStream stream) throws IOException {
+        stream.write((int) (0xFF & val));
+        stream.write((int) (0xFF & (val >> 8)));
     }
 
     public static void int16ToByteArrayLE(short val, byte[] out, int offset) {
@@ -326,7 +327,6 @@ public class SerializeUtils {
         stream.write((int) (0xFF & (val >> 48)));
         stream.write((int) (0xFF & (val >> 56)));
     }
-
 
     public static void uint64ToByteStreamLE(BigInteger val, OutputStream stream) throws IOException {
         byte[] bytes = val.toByteArray();
@@ -407,13 +407,19 @@ public class SerializeUtils {
         return bb;
     }
 
+    public static byte[] int16ToBytes(int x) {
+        byte[] bb = new byte[2];
+        bb[1] = (byte) (0xFF & x >> 8);
+        bb[0] = (byte) (0xFF & x >> 0);
+        return bb;
+    }
+
     public static long randomLong() {
         return (long) (Math.random() * Long.MAX_VALUE);
     }
 
     public static int sizeOfDouble(Double val) {
-        byte[] bytes = SerializeUtils.double2Bytes(val);
-        return VarInt.sizeOf(bytes.length) + bytes.length;
+        return MAGIC_8;
     }
 
     public static int sizeOfString(String val) {
@@ -434,8 +440,28 @@ public class SerializeUtils {
         return VarInt.sizeOf(val);
     }
 
-    public static int sizeOfInt48() {
+    public static int sizeOfUint48() {
         return NulsConstant.INT48_VALUE_LENGTH;
+    }
+
+    public static int sizeOfInt32() {
+        return 4;
+    }
+
+    public static int sizeOfUint32() {
+        return 4;
+    }
+
+    public static int sizeOfInt16() {
+        return 2;
+    }
+
+    public static int sizeOfUint16() {
+        return 2;
+    }
+
+    public static int sizeOfInt64() {
+        return 8;
     }
 
     public static int sizeOfVarInt(Integer val) {
@@ -474,14 +500,40 @@ public class SerializeUtils {
         return out;
     }
 
-    public static byte[] int48ToBytes(long time) {
-        byte[] bytes = new byte[SerializeUtils.sizeOfInt48()];
-        bytes[0] = (byte) (0xFF & time);
-        bytes[1] = (byte) (0xFF & (time >> 8));
-        bytes[2] = (byte) (0xFF & (time >> 16));
-        bytes[3] = (byte) (0xFF & (time >> 24));
-        bytes[4] = (byte) (0xFF & (time >> 32));
-        bytes[5] = (byte) (0xFF & (time >> 40));
+    public static byte[] uint48ToBytes(long val) {
+        byte[] bytes = new byte[SerializeUtils.sizeOfUint48()];
+        bytes[0] = (byte) (0xFF & val);
+        bytes[1] = (byte) (0xFF & (val >> 8));
+        bytes[2] = (byte) (0xFF & (val >> 16));
+        bytes[3] = (byte) (0xFF & (val >> 24));
+        bytes[4] = (byte) (0xFF & (val >> 32));
+        bytes[5] = (byte) (0xFF & (val >> 40));
         return bytes;
     }
+
+    /** Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in little endian format. */
+    public static int readUint16(byte[] bytes, int offset) {
+        return (bytes[offset] & 0xff) |
+                ((bytes[offset + 1] & 0xff) << 8);
+    }
+
+    /** Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format. */
+    public static long readUint32(byte[] bytes, int offset) {
+        return (bytes[offset] & 0xffl) |
+                ((bytes[offset + 1] & 0xffl) << 8) |
+                ((bytes[offset + 2] & 0xffl) << 16) |
+                ((bytes[offset + 3] & 0xffl) << 24);
+    }
+
+    public static long readInt64(byte[] bytes, int offset) {
+        return (bytes[offset] & 0xffl) |
+                ((bytes[offset + 1] & 0xffl) << 8) |
+                ((bytes[offset + 2] & 0xffl) << 16) |
+                ((bytes[offset + 3] & 0xffl) << 24) |
+                ((bytes[offset + 4] & 0xffl) << 32) |
+                ((bytes[offset + 5] & 0xffl) << 40) |
+                ((bytes[offset + 6] & 0xffl) << 48) |
+                ((bytes[offset + 7] & 0xffl) << 56);
+    }
+
 }

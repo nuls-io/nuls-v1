@@ -68,23 +68,23 @@ public class Coin extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBytesWithLength(owner);
-        stream.writeVarInt(na.getValue());
-        stream.writeInt48(lockTime);
+        stream.writeInt64(na.getValue());
+        stream.writeUint48(lockTime);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.owner = byteBuffer.readByLengthByte();
-        this.na = Na.valueOf(byteBuffer.readVarInt());
-        this.lockTime = byteBuffer.readInt48();
+        this.na = Na.valueOf(byteBuffer.readInt64());
+        this.lockTime = byteBuffer.readUint48();
     }
 
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfBytes(owner);
-        size += SerializeUtils.sizeOfVarInt(na.getValue());
-        size += SerializeUtils.sizeOfInt48();
+        size += SerializeUtils.sizeOfInt64();
+        size += SerializeUtils.sizeOfUint48();
         return size;
     }
 

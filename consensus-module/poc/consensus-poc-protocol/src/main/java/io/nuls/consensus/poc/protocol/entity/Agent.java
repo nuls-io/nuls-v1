@@ -72,7 +72,7 @@ public class Agent extends TransactionLogicData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfVarInt(deposit.getValue());
+        size += SerializeUtils.sizeOfInt64();  // deposit.getValue()
         size += this.agentAddress.length;
         size += this.rewardAddress.length;
         size += this.packingAddress.length;
@@ -84,7 +84,7 @@ public class Agent extends TransactionLogicData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(deposit.getValue());
+        stream.writeInt64(deposit.getValue());
         stream.write(agentAddress);
         stream.write(packingAddress);
         stream.write(rewardAddress);
@@ -95,7 +95,7 @@ public class Agent extends TransactionLogicData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.deposit = Na.valueOf(byteBuffer.readVarInt());
+        this.deposit = Na.valueOf(byteBuffer.readInt64());
         this.agentAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.packingAddress =  byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.rewardAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);

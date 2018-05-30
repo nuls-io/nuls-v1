@@ -33,7 +33,6 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
-import io.nuls.kernel.utils.VarInt;
 
 import java.io.IOException;
 import java.util.Set;
@@ -53,7 +52,7 @@ public class Node extends BaseNulsData {
 
     private Integer severPort = 0;
 
-    private int magicNumber;
+    private long magicNumber;
 
     private String channelId;
 
@@ -76,25 +75,25 @@ public class Node extends BaseNulsData {
     @Override
     public int size() {
         int s = 0;
-        s += VarInt.sizeOf(magicNumber);
-        s += VarInt.sizeOf(severPort);
+        s += SerializeUtils.sizeOfUint32();
+        s += SerializeUtils.sizeOfUint16();
         s += SerializeUtils.sizeOfString(ip);
         return s;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(new VarInt(magicNumber).encode());
-        stream.write(new VarInt(severPort).encode());
+        stream.writeUint32(magicNumber);
+        stream.writeUint16(port);
         stream.writeString(ip);
     }
 
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
-        magicNumber = (int) buffer.readVarInt();
-        severPort = (int) buffer.readVarInt();
+        magicNumber = buffer.readUint32();
+        severPort = buffer.readUint16();
         port = severPort;
-        ip = new String(buffer.readByLengthByte());
+        ip = buffer.readString();
         this.groupSet = ConcurrentHashMap.newKeySet();
     }
 
@@ -250,11 +249,11 @@ public class Node extends BaseNulsData {
         this.port = port;
     }
 
-    public int getMagicNumber() {
+    public long getMagicNumber() {
         return magicNumber;
     }
 
-    public void setMagicNumber(int magicNumber) {
+    public void setMagicNumber(long magicNumber) {
         this.magicNumber = magicNumber;
     }
 
