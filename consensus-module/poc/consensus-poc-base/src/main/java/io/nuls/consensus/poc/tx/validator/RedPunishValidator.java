@@ -2,7 +2,7 @@ package io.nuls.consensus.poc.tx.validator;
 
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
-import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction1;
+import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Component;
@@ -14,9 +14,9 @@ import io.nuls.protocol.model.SmallBlock;
  * @date 2018/5/14
  */
 @Component
-public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunishTransaction1> {
+public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunishTransaction> {
     @Override
-    public ValidateResult validate(RedPunishTransaction1 data) {
+    public ValidateResult validate(RedPunishTransaction data) {
         RedPunishData punishData = data.getTxData();
         if (punishData.getReasonCode() == PunishReasonEnum.DOUBLE_SPEND.getCode()) {
             SmallBlock smallBlock = new SmallBlock();

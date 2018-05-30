@@ -25,6 +25,7 @@
 package io.nuls.kernel.validate;
 
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsData;
 
 import java.util.ArrayList;
@@ -68,7 +69,13 @@ public class DataValidatorChain {
             return ValidateResult.getSuccessResult();
         }
         NulsDataValidator validator = list.get(index.get());
-        ValidateResult result = validator.validate(data);
+        ValidateResult result = null;
+        try {
+            result = validator.validate(data);
+        } catch (NulsException e) {
+            Log.error(e);
+            return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode(), e.getMessage());
+        }
         if (null == result) {
             Log.error(validator.getClass() + " has null result!");
         }
