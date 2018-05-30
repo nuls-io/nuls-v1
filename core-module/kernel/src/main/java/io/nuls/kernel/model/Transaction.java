@@ -108,7 +108,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         return false;
     }
 
-    public boolean isNoSignature() {
+    public boolean needVerifySignature() {
         return false;
     }
 

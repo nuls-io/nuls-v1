@@ -60,7 +60,7 @@ public class StopAgentTransaction extends Transaction<StopAgent> {
             LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
             CreateAgentTransaction tx = (CreateAgentTransaction) ledgerService.getTx(this.txData.getCreateTxHash());
             if (null != tx) {
-                return "unlock " +tx.getTxData().getDeposit().toCoinString();
+                return "unlock " + tx.getTxData().getDeposit().toCoinString();
             }
         }
         return "--";
@@ -68,6 +68,11 @@ public class StopAgentTransaction extends Transaction<StopAgent> {
 
     @Override
     public boolean isUnlockTx() {
+        return true;
+    }
+
+    @Override
+    public boolean needVerifySignature() {
         return true;
     }
 }

@@ -39,10 +39,7 @@ import io.nuls.kernel.validate.ValidateResult;
 public class TxSignValidator implements NulsDataValidator<Transaction> {
     @Override
     public ValidateResult validate(Transaction tx) {
-        if (tx.isNoSignature()) {
-            if (tx.getScriptSig() != null) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
-            }
+        if (tx.needVerifySignature()) {
             return ValidateResult.getSuccessResult();
         }
         byte[] scriptSig = tx.getScriptSig();
