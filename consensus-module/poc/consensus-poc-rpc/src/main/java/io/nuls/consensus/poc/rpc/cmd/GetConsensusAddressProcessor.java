@@ -1,5 +1,6 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
+import io.nuls.core.tools.date.DateUtil;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -7,6 +8,9 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
+
+import java.util.Date;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -56,6 +60,12 @@ public class GetConsensusAddressProcessor implements CommandProcessor {
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
+        Map<String, Object> map = (Map)result.getData();
+        map.put("reward", CommandHelper.naToNuls(map.get("reward")));
+        map.put("rewardOfDay", CommandHelper.naToNuls(map.get("rewardOfDay")));
+        map.put("usableBalance", CommandHelper.naToNuls(map.get("usableBalance")));
+        map.put("totalDeposit", CommandHelper.naToNuls(map.get("totalDeposit")));
+        result.setData(map);
         return CommandResult.getResult(result);
     }
 }

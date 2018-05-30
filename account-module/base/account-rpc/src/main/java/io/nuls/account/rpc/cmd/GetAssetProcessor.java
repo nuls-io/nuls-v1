@@ -1,12 +1,17 @@
 package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.model.Address;
+import io.nuls.core.tools.date.DateUtil;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -56,6 +61,13 @@ public class GetAssetProcessor implements CommandProcessor {
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());
         }
+        List<Map<String, Object>> list = (List<Map<String, Object>>)((Map)result.getData()).get("list");
+        for(Map<String, Object> map : list){
+            map.put("balance",  CommandHelper.naToNuls(map.get("balance")));
+            map.put("usable", CommandHelper.naToNuls(map.get("usable")));
+            map.put("locked", CommandHelper.naToNuls(map.get("locked")));
+        }
+        result.setData(list);
         return CommandResult.getResult(result);
     }
 }
