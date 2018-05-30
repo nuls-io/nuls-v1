@@ -16,6 +16,7 @@ import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
@@ -99,7 +100,7 @@ public class AliasService {
         try {
             //创建一笔设置别名的交易
             AliasTransaction tx = new AliasTransaction();
-            tx.setTime(System.currentTimeMillis());
+            tx.setTime(TimeService.currentTimeMillis());
             Alias alias = new Alias(addressBytes, aliasName);
             tx.setTxData(alias);
 
@@ -117,8 +118,8 @@ public class AliasService {
                 coinData.setTo(toList);
             }
             tx.setCoinData(coinData);
-            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
-            NulsSignData nulsSignData = accountService.signData(tx.serializeForHash(), account, password);
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            NulsSignData nulsSignData = accountService.signData(tx.getHash().serialize(), account, password);
             P2PKHScriptSig scriptSig = new P2PKHScriptSig(nulsSignData, account.getPubKey());
             tx.setScriptSig(scriptSig.serialize());
             Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);

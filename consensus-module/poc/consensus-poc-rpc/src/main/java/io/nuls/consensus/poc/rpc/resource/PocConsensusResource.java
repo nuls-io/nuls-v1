@@ -473,7 +473,7 @@ public class PocConsensusResource {
             }
         }
         try {
-            tx.setHash(NulsDigestData.calcDigestData(tx.serialize()));
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             P2PKHScriptSig sig = new P2PKHScriptSig();
             sig.setPublicKey(account.getPubKey());
             sig.setSignData(accountService.signDigest(tx.getHash().serialize(), account, password));

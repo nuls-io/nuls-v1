@@ -166,7 +166,7 @@ public class AccountResource {
         if (StringUtils.isBlank(form.getAlias())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        return aliasService.setAlias(address, form.getAlias(), form.getPassword()).toRpcClientResult();
+        return aliasService.setAlias(address, form.getAlias().trim(), form.getPassword()).toRpcClientResult();
     }
 
     @GET
