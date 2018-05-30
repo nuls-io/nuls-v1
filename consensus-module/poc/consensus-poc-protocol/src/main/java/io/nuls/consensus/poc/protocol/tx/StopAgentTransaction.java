@@ -73,6 +73,6 @@ public class StopAgentTransaction extends Transaction<StopAgent> {
 
     @Override
     public boolean needVerifySignature() {
-        return true;
+        return false;
     }
 }

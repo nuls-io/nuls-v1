@@ -34,8 +34,8 @@ import io.nuls.kernel.utils.NulsByteBuffer;
  * @author Niels
  * @date 2017/12/4
  */
-public class RedPunishTransaction1 extends Transaction<RedPunishData> {
-    public RedPunishTransaction1() {
+public class RedPunishTransaction extends Transaction<RedPunishData> {
+    public RedPunishTransaction() {
         super(ConsensusConstant.TX_TYPE_RED_PUNISH);
     }
 
@@ -46,8 +46,7 @@ public class RedPunishTransaction1 extends Transaction<RedPunishData> {
 
     @Override
     public String getInfo(byte[] address) {
-        // todo auto-generated method stub
-        return null;
+        return "--";
     }
 
     @Override

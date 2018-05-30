@@ -96,4 +96,6 @@ public interface PocConsensusConstant {
      * reset system time interval , unit minutes
      */
     int RESET_SYSTEM_TIME_INTERVAL = 5;
+    long CONSENSUS_LOCK_TIME = -1;
+    long STOP_AGENT_LOCK_TIME = 3 * 24 * 3600000L;
 }

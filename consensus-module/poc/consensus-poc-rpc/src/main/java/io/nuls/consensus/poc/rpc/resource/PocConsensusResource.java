@@ -6,6 +6,7 @@ import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.service.AccountService;
+import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
@@ -398,7 +399,7 @@ public class PocConsensusResource {
         tx.setTxData(agent);
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
-        toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), -1));
+        toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
         CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
@@ -449,7 +450,7 @@ public class PocConsensusResource {
         tx.setTxData(deposit);
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
-        toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), -1));
+        toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
         CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
@@ -503,7 +504,7 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
     public RpcClientResult stopAgent(@ApiParam(name = "form", value = "注销共识节点表单数据", required = true)
-                                    StopAgentForm form) throws NulsException, IOException {
+                                             StopAgentForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         if (!AddressTool.validAddress(form.getAddress())) {
@@ -545,7 +546,7 @@ public class PocConsensusResource {
         tx.setTxData(stopAgent);
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
-        toList.add(new Coin(stopAgent.getAddress(), agent.getDeposit(), 0));
+        toList.add(new Coin(stopAgent.getAddress(), agent.getDeposit(), TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME));
         coinData.setTo(toList);
         CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);
         if (null == transaction) {
@@ -554,7 +555,7 @@ public class PocConsensusResource {
         List<Coin> fromList = new ArrayList<>();
         for (int index = 0; index < transaction.getCoinData().getTo().size(); index++) {
             Coin coin = transaction.getCoinData().getTo().get(index);
-            if (coin.getLockTime() == -1L && coin.getNa().equals(agent.getDeposit())) {
+            if (coin.getNa().equals(agent.getDeposit()) && coin.getLockTime() == -1L) {
                 coin.setOwner(ArraysTool.joinintTogether(transaction.getHash().serialize(), new VarInt(index).encode()));
                 fromList.add(coin);
                 break;
@@ -564,6 +565,32 @@ public class PocConsensusResource {
             return Result.getFailed(KernelErrorCode.DATA_ERROR).toRpcClientResult();
         }
         coinData.setFrom(fromList);
+
+        List<Deposit> deposits = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
+        List<String> addressList = new ArrayList<>();
+        Map<String, Coin> toMap = new HashMap<>();
+        for (Deposit deposit : deposits) {
+            if (deposit.getDelHeight() > 0) {
+                continue;
+            }
+            DepositTransaction dtx = (DepositTransaction) ledgerService.getTx(deposit.getTxHash());
+            Coin fromCoin = dtx.getCoinData().getTo().get(0);
+            fromCoin.setLockTime(0);
+            fromCoin.setOwner(ArraysTool.joinintTogether(dtx.getHash().serialize(), new VarInt(0).encode()));
+            fromList.add(fromCoin);
+            String address = Base58.encode(deposit.getAddress());
+            Coin coin = toMap.get(address);
+            if (null == coin) {
+                coin = new Coin(deposit.getAddress(), deposit.getDeposit(), 0);
+                addressList.add(address);
+                toMap.put(address, coin);
+            } else {
+                coin.setNa(coin.getNa().add(fromCoin.getNa()));
+            }
+        }
+        for (String address : addressList) {
+            tx.getCoinData().getTo().add(toMap.get(address));
+        }
         Na fee = TransactionFeeCalculator.getFee(tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         tx.setCoinData(coinData);
@@ -582,13 +609,13 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
     public RpcClientResult getAgentList(@ApiParam(name = "pageNumber", value = "页码")
-                               @QueryParam("pageNumber") Integer pageNumber,
-                               @ApiParam(name = "pageSize", value = "每页条数")
-                               @QueryParam("pageSize") Integer pageSize,
-                               @ApiParam(name = "keyword", value = "搜索关键字")
-                               @QueryParam("keyword") String keyword,
-                               @ApiParam(name = "sortType", value = "排序字段名")
-                               @QueryParam("sortType") String sortType) throws UnsupportedEncodingException {
+                                        @QueryParam("pageNumber") Integer pageNumber,
+                                        @ApiParam(name = "pageSize", value = "每页条数")
+                                        @QueryParam("pageSize") Integer pageSize,
+                                        @ApiParam(name = "keyword", value = "搜索关键字")
+                                        @QueryParam("keyword") String keyword,
+                                        @ApiParam(name = "sortType", value = "排序字段名")
+                                        @QueryParam("sortType") String sortType) throws UnsupportedEncodingException {
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
         }
@@ -693,7 +720,7 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = Map.class)
     })
     public RpcClientResult getAgentByAddress(@ApiParam(name = "agentHash", value = "节点标识", required = true)
-                                              @PathParam("agentHash") String agentHash) throws NulsException {
+                                             @PathParam("agentHash") String agentHash) throws NulsException {
         AssertUtil.canNotEmpty(agentHash);
         Result result = Result.getSuccess();
         List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
@@ -719,11 +746,11 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
     public RpcClientResult getAgentListByDepositAddress(@ApiParam(name = "pageNumber", value = "页码")
-                                                               @QueryParam("pageNumber") Integer pageNumber,
-                                                               @ApiParam(name = "pageSize", value = "每页条数")
-                                                               @QueryParam("pageSize") Integer pageSize,
-                                                               @ApiParam(name = "address", value = "账户地址", required = true)
-                                                               @PathParam("address") String address) {
+                                                        @QueryParam("pageNumber") Integer pageNumber,
+                                                        @ApiParam(name = "pageSize", value = "每页条数")
+                                                        @QueryParam("pageSize") Integer pageSize,
+                                                        @ApiParam(name = "address", value = "账户地址", required = true)
+                                                        @PathParam("address") String address) {
         AssertUtil.canNotEmpty(address);
         if (!AddressTool.validAddress(address)) {
             return Result.getFailed("The address is wrong!").toRpcClientResult();
@@ -793,13 +820,13 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
     public RpcClientResult getDepositListByAddress(@ApiParam(name = "address", value = "账户地址", required = true)
-                                          @PathParam("address") String address,
-                                          @ApiParam(name = "pageNumber", value = "页码")
-                                          @QueryParam("pageNumber") Integer pageNumber,
-                                          @ApiParam(name = "pageSize", value = "每页条数")
-                                          @QueryParam("pageSize") Integer pageSize,
-                                          @ApiParam(name = "agentHash", value = "指定代理节点标识(不传查所有)")
-                                          @QueryParam("agentHash") String agentHash) {
+                                                   @PathParam("address") String address,
+                                                   @ApiParam(name = "pageNumber", value = "页码")
+                                                   @QueryParam("pageNumber") Integer pageNumber,
+                                                   @ApiParam(name = "pageSize", value = "每页条数")
+                                                   @QueryParam("pageSize") Integer pageSize,
+                                                   @ApiParam(name = "agentHash", value = "指定代理节点标识(不传查所有)")
+                                                   @QueryParam("agentHash") String agentHash) {
         AssertUtil.canNotEmpty(address);
         if (!AddressTool.validAddress(address)) {
             return Result.getFailed("The address is wrong!").toRpcClientResult();
@@ -874,11 +901,11 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
     public RpcClientResult queryDepositListByAgentAddress(@ApiParam(name = "agentHash", value = "指定代理节点标识", required = true)
-                                                 @PathParam("agentHash") String agentHash,
-                                                 @ApiParam(name = "pageNumber", value = "页码")
-                                                 @QueryParam("pageNumber") Integer pageNumber,
-                                                 @ApiParam(name = "pageSize", value = "每页条数")
-                                                 @QueryParam("pageSize") Integer pageSize) throws NulsException {
+                                                          @PathParam("agentHash") String agentHash,
+                                                          @ApiParam(name = "pageNumber", value = "页码")
+                                                          @QueryParam("pageNumber") Integer pageNumber,
+                                                          @ApiParam(name = "pageSize", value = "每页条数")
+                                                          @QueryParam("pageSize") Integer pageSize) throws NulsException {
         AssertUtil.canNotEmpty(agentHash);
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
@@ -939,7 +966,7 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
     public RpcClientResult exitConsensus(@ApiParam(name = "form", value = "退出共识表单数据", required = true)
-                                        WithdrawForm form) throws NulsException, IOException {
+                                                 WithdrawForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
         AssertUtil.canNotEmpty(form.getAddress());

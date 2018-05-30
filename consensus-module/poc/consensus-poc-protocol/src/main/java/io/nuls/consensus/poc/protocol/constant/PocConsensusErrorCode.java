@@ -41,4 +41,5 @@ public interface PocConsensusErrorCode {
     ErrorCode LACK_OF_CREDIT = ErrorCode.init("cs006", "70006");
     ErrorCode DEPOSIT_OVER_COUNT = ErrorCode.init("cs007", "70007");
     ErrorCode DEPOSIT_TOO_MUCH = ErrorCode.init("cs008", "70008");
+    ErrorCode AGENT_STOPPED = ErrorCode.init("cs009","70009");
 }

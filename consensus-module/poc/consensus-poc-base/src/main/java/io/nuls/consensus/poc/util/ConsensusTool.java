@@ -132,7 +132,11 @@ public class ConsensusTool {
         CoinBaseTransaction tx = new CoinBaseTransaction();
         tx.setTime(member.getPackEndTime());
         tx.setCoinData(coinData);
-        tx.setHash(NulsDigestData.calcDigestData(tx));
+        try {
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        } catch (IOException e) {
+            Log.error(e);
+        }
         return tx;
     }
 
@@ -249,7 +253,7 @@ public class ConsensusTool {
         data.setAddressList(addressList);
         punishTx.setTxData(data);
         punishTx.setTime(self.getPackEndTime());
-        punishTx.setHash(NulsDigestData.calcDigestData(punishTx));
+        punishTx.setHash(NulsDigestData.calcDigestData(punishTx.serializeForHash()));
         return punishTx;
     }
 

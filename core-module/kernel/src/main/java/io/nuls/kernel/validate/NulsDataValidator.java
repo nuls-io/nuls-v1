@@ -24,6 +24,7 @@
  */
 package io.nuls.kernel.validate;
 
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsData;
 
 /**
@@ -36,5 +37,5 @@ public interface NulsDataValidator<T extends NulsData> {
      * @param data
      * @return
      */
-    ValidateResult validate(T data);
+    ValidateResult validate(T data) throws NulsException;
 }

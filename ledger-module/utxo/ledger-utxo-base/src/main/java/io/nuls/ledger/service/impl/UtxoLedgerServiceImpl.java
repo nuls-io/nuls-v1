@@ -232,6 +232,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     private boolean checkPublicKeyHash(byte[] address, byte[] pubKeyHash) {
+
         if (address == null || pubKeyHash == null) {
             return false;
         }
@@ -252,8 +253,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
      * coinData的交易和txList同处一个块中，txList中的to可能是coinData的from，
      * 也就是可能存在，在同一个块中，下一笔输入就是上一笔的输出，所以需要校验它
      *
-     * @param transaction
-     * @param txList
      * @return ValidateResult
      */
     @Override
@@ -265,12 +264,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         try {
             CoinData coinData = transaction.getCoinData();
             int initialToUtxoCapacity = 0,
-            initialFromUtxoCapacity = 0;
+                    initialFromUtxoCapacity = 0;
 
             // 与txList相关的校验准备数据
             Map<String, Coin> validateToUtxoMap = null;
             Set<String> validateFromUtxoSet = null;
-            if(!isEmptyTxList) {
+            if (!isEmptyTxList) {
                 CoinData validateCoinData;
                 // 计算HashMap容量
                 for (Transaction tx : txList) {
@@ -347,7 +346,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 //Log.info("getUTXO: hash-" + LedgerUtil.getTxHash(fromBytes) + ", index-" + LedgerUtil.getIndex(fromBytes));
                 fromOfFromCoin = utxoLedgerUtxoStorageService.getUtxo(fromBytes);
                 // 检查txList中是否存在此UTXO
-                if (!isEmptyTxList && fromOfFromCoin == null ) {
+                if (!isEmptyTxList && fromOfFromCoin == null) {
                     fromOfFromCoin = validateToUtxoMap.get(asString(fromBytes));
                 }
                 if (null == fromOfFromCoin) {
@@ -360,7 +359,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 } else {
                     fromAdressBytes = fromOfFromCoin.getOwner();
                     // 验证地址中的公钥hash160和交易中的公钥hash160是否相等，不相等则说明这笔utxo不属于交易发出者
-                    if (!checkPublicKeyHash(fromAdressBytes, user)) {
+                    if (transaction.needVerifySignature() && !checkPublicKeyHash(fromAdressBytes, user)) {
                         Log.warn("public key hash160 check error.");
                         return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_INPUT);
                     }
@@ -409,8 +408,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     /**
      * 双花验证不通过的交易需要放入result的data中，一次只验证一对双花的交易
      *
-     * @param block
-     * @return ValidateResult<List<Transaction>>
+     * @return ValidateResult<List   <   Transaction>>
      */
     @Override
     public ValidateResult<List<Transaction>> verifyDoubleSpend(Block block) {
@@ -423,8 +421,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     /**
      * 双花验证不通过的交易需要放入result的data中，一次只验证一对双花的交易
      *
-     * @param txList
-     * @return ValidateResult<List<Transaction>>
+     * @return ValidateResult<List   <   Transaction>>
      */
     @Override
     public ValidateResult<List<Transaction>> verifyDoubleSpend(List<Transaction> txList) {

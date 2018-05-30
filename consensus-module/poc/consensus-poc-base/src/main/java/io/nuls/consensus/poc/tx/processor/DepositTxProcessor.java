@@ -31,7 +31,9 @@ import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
+import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.consensus.poc.storage.po.DepositPo;
@@ -114,6 +116,7 @@ public class DepositTxProcessor implements TransactionProcessor<DepositTransacti
 
         Set<NulsDigestData> outAgentHash = new HashSet<>();
         Map<NulsDigestData, Na> naMap = new HashMap<>();
+        List<DepositTransaction> dTxList = new ArrayList<>();
         for (Transaction transaction : txList) {
             switch (transaction.getType()) {
                 case ConsensusConstant.TX_TYPE_STOP_AGENT:
@@ -138,18 +141,29 @@ public class DepositTxProcessor implements TransactionProcessor<DepositTransacti
                     } else {
                         naMap.put(depositTransaction.getTxData().getAgentHash(), na);
                     }
+                    dTxList.add(depositTransaction);
                     break;
                 case ConsensusConstant.TX_TYPE_RED_PUNISH:
-//todo                    RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
-//                    RedPunishData redPunishData = redPunishTransaction.getTxData();
-//                    Agent agent = this.getAgentByAddress(redPunishData.getAddress());
-//                    if (null != agent) {
-//                        outAgentHash.add(agent.getTxHash());
-//                    }
-//                    break;
+                    RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
+                    RedPunishData redPunishData = redPunishTransaction.getTxData();
+                    Agent agent = this.getAgentByAddress(redPunishData.getAddress());
+                    if (null != agent) {
+                        outAgentHash.add(agent.getTxHash());
+                    }
+                    break;
             }
         }
 
+        if (dTxList.isEmpty() || outAgentHash.isEmpty()) {
+            return ValidateResult.getSuccessResult();
+        }
+        for (DepositTransaction depositTransaction : dTxList) {
+            if (outAgentHash.contains(depositTransaction.getTxData().getAgentHash())) {
+                ValidateResult validateResult = ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_STOPPED);
+                validateResult.setData(depositTransaction);
+                return validateResult;
+            }
+        }
         return ValidateResult.getSuccessResult();
     }
 
