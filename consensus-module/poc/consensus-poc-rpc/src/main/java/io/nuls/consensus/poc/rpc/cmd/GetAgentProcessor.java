@@ -1,12 +1,12 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
 import io.nuls.core.tools.date.DateUtil;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Na;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
@@ -59,12 +59,12 @@ public class GetAgentProcessor implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String agentHash = args[1];
-        Result result = restFul.get("/consensus/agent/" + agentHash, null);
+        RpcClientResult result = restFul.get("/consensus/agent/" + agentHash, null);
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
         Map<String, Object> map = (Map)result.getData();
-        map.put("deposit",  Na.valueOf((long)map.get("deposit")).toText());
+        map.put("deposit", CommandHelper.naToNuls(map.get("deposit")));
         map.put("totalDeposit", CommandHelper.naToNuls(map.get("totalDeposit")));
         map.put("time",  DateUtil.convertDate(new Date((Long)map.get("time"))));
         result.setData(map);

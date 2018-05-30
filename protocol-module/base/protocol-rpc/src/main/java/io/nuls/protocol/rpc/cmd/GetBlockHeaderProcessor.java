@@ -1,19 +1,19 @@
 package io.nuls.protocol.rpc.cmd;
 
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.lite.annotation.Cmd;
-import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.CommandResult;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
-@Cmd
-@Component
+
+/**
+ * @author: Charlie
+ * @date: 2018/5/28
+ */
 public class GetBlockHeaderProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
@@ -63,7 +63,7 @@ public class GetBlockHeaderProcessor implements CommandProcessor {
             hash = args[1];
         }
 
-        Result<BlockHeader> result = null;
+        RpcClientResult result = null;
         if (hash != null) {
             result = restFul.get("/block/header/hash/" + hash, null);
         } else {

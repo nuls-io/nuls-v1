@@ -1,11 +1,11 @@
 package io.nuls.accout.ledger.rpc.cmd;
 
 import io.nuls.account.model.Address;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
@@ -66,7 +66,7 @@ public class GetUTXOProcessor implements CommandProcessor {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("pageNumber", pageNumber);
         parameters.put("pageSize", pageSize);
-        Result result = restFul.get("/accountledger/utxo/lock/" + address, parameters);
+        RpcClientResult result = restFul.get("/accountledger/utxo/lock/" + address, parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }

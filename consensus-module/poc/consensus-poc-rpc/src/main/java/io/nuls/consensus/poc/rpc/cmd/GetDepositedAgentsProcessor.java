@@ -1,14 +1,17 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
+import io.nuls.core.tools.date.DateUtil;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -64,10 +67,17 @@ public class GetDepositedAgentsProcessor implements CommandProcessor {
         Map<String, Object> parameters = new HashMap<>(4);
         parameters.put("pageNumber", pageNumber);
         parameters.put("pageSize", pageSize);
-        Result result = restFul.get("/consensus/agent/address/" + address, parameters);
+        RpcClientResult result = restFul.get("/consensus/agent/address/" + address, parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
+        List<Map<String, Object>> list = (List<Map<String, Object>>)((Map)result.getData()).get("list");
+        for(Map<String, Object> map : list){
+            map.put("deposit",  CommandHelper.naToNuls(map.get("deposit")));
+            map.put("totalDeposit", CommandHelper.naToNuls(map.get("totalDeposit")));
+            map.put("time",  DateUtil.convertDate(new Date((Long)map.get("time"))));
+        }
+        result.setData(list);
         return CommandResult.getResult(result);
     }
 }

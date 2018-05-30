@@ -14,11 +14,13 @@ public class CommandBuilder {
     private int i = 0;
 
     public CommandBuilder newLine(String content) {
-        if(StringUtils.isBlank(content))
+        if(StringUtils.isBlank(content)) {
             return this.newLine();
+        }
         builder.append(content).append(System.getProperty(LINE_SEPARATOR));
-        if(i++ == 0)
+        if(i++ == 0) {
             this.newLine("\tOPTIONS:");
+        }
         return this;
     }
 
@@ -27,9 +29,11 @@ public class CommandBuilder {
         return this;
     }
 
+    @Override
     public String toString() {
-        if(i == 2)
+        if(i == 2) {
             this.newLine("\tnone");
+        }
         return builder.toString();
     }
 }
