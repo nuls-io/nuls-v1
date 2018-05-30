@@ -40,7 +40,7 @@ public class GetAgentsProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "getagents <pageNumber> <pageSize> --Get agent list";
+        return "getagents <pageNumber> <pageSize> --get agent list";
     }
 
     @Override

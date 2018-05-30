@@ -35,7 +35,7 @@ public class ImportByPrivateKeyProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "import <privatekey> [password] --Import the account according to the private key ";
+        return "import <privatekey> [password] --import the account according to the private key ";
     }
 
     @Override

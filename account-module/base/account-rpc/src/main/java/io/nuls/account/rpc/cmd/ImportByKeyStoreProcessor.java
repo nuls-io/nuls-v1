@@ -41,7 +41,7 @@ public class ImportByKeyStoreProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "importkeystore <path> [password] -- Import accounts according to AccountKeystore files";
+        return "importkeystore <path> [password] -- import accounts according to AccountKeystore files";
     }
 
     @Override

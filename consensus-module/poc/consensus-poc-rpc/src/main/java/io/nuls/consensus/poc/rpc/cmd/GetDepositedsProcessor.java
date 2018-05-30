@@ -43,7 +43,7 @@ public class GetDepositedsProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "getdepositeds <address> <pageNumber> <pageSize> [agentHash] --Get a list of deposited info based on your account";
+        return "getdepositeds <address> <pageNumber> <pageSize> [agentHash] --get a list of deposited info based on your account";
     }
 
     @Override

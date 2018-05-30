@@ -38,7 +38,7 @@ public class GetAgentProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "getagent <agentHash>  -- Get an agent node information According to agent hash";
+        return "getagent <agentHash>  -- get an agent node information According to agent hash";
     }
 
     @Override

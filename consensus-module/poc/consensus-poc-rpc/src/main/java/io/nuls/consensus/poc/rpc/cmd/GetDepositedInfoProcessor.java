@@ -1,7 +1,5 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
-import io.nuls.core.tools.date.DateUtil;
-import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -9,8 +7,6 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
-
-import java.util.Date;
 import java.util.Map;
 
 /**
@@ -38,7 +34,7 @@ public class GetDepositedInfoProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "getdepositedinfo <address>  --According to the account address to obtain overview on the deposited of the account";
+        return "getdepositedinfo <address>  --according to the account address to obtain overview on the deposited of the account";
     }
 
     @Override

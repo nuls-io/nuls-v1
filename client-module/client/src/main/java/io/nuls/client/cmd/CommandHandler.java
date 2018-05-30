@@ -19,6 +19,8 @@ import io.nuls.kernel.i18n.I18nUtils;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 import io.nuls.ledger.rpc.cmd.GetTxProcessor;
+import io.nuls.network.rpc.cmd.GetNetInfoProcessor;
+import io.nuls.network.rpc.cmd.GetNetNodesProcessor;
 import io.nuls.protocol.rpc.cmd.GetBestBlockHeaderProcessor;
 import io.nuls.protocol.rpc.cmd.GetBlockHeaderProcessor;
 import io.nuls.protocol.rpc.cmd.GetBlockProcessor;
@@ -92,6 +94,18 @@ public class CommandHandler {
         register(new GetDepositedsProcessor());
         register(new GetDepositedInfoProcessor());
 
+        /**
+         * network
+         */
+        register(new GetNetInfoProcessor());
+        register(new GetNetNodesProcessor());
+
+        /**
+         * system
+         */
+        register(new ExitProcessor());
+        register(new HelpProcessor());
+        register(new VersionProcessor());
 
         sdkInit();
     }
