@@ -40,6 +40,7 @@ import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
@@ -58,6 +59,7 @@ import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
@@ -167,10 +169,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             if (result.isFailed()) {
                 return result;
             }
-            result = this.ledgerService.verifyCoinData(tx, this.getAllUnconfirmedTransaction().getData());
-            if (result.isFailed()) {
-                Log.info("verifyCoinData failed");
-                return result;
+            if (!(tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH)) {
+                result = this.ledgerService.verifyCoinData(tx, this.getAllUnconfirmedTransaction().getData());
+                if (result.isFailed()) {
+                    Log.info("verifyCoinData failed");
+                    return result;
+                }
             }
             return saveUnconfirmedTransaction(tx);
         } finally {
