@@ -110,7 +110,7 @@ public class ConnectionManager {
                 if (MessageFilterChain.getInstance().doFilter(message)) {
                     MessageHeader header = message.getHeader();
 
-                    if (node.getMagicNumber() == 0) {
+                    if (node.getMagicNumber() == 0L) {
                         node.setMagicNumber(header.getMagicNumber());
                     }
 

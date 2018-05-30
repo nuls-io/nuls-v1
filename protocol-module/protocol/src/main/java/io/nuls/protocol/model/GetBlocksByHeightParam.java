@@ -55,21 +55,21 @@ public class GetBlocksByHeightParam extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfInt48();
-        size += SerializeUtils.sizeOfInt48();
+        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfUint32();
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeInt48(startHeight);
-        stream.writeInt48(endHeight);
+        stream.writeUint32(startHeight);
+        stream.writeUint32(endHeight);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.startHeight = byteBuffer.readInt48();
-        this.endHeight = byteBuffer.readInt48();
+        this.startHeight = byteBuffer.readUint32();
+        this.endHeight = byteBuffer.readUint32();
     }
 
     public long getStartHeight() {

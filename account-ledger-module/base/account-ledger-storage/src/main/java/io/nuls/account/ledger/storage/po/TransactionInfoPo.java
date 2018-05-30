@@ -106,20 +106,20 @@ public class TransactionInfoPo extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(this.txHash);
-        stream.writeVarInt(blockHeight);
-        stream.writeInt48(time);
+        stream.writeUint32(blockHeight);
+        stream.writeUint48(time);
         stream.writeBytesWithLength(addresses);
-        stream.writeVarInt(txType);
+        stream.writeUint16(txType);
         stream.write(status);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.txHash = byteBuffer.readHash();
-        this.blockHeight = byteBuffer.readVarInt();
-        this.time = byteBuffer.readInt48();
+        this.blockHeight = byteBuffer.readUint32();
+        this.time = byteBuffer.readUint48();
         this.addresses = byteBuffer.readByLengthByte();
-        this.txType = (int)byteBuffer.readVarInt();
+        this.txType = byteBuffer.readUint16();
         this.status = byteBuffer.readByte();
     }
 
@@ -127,10 +127,10 @@ public class TransactionInfoPo extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(txHash);
-        size += VarInt.sizeOf(blockHeight);
-        size += SerializeUtils.sizeOfInt48();
+        size += SerializeUtils.sizeOfUint32(); // blockHeight
+        size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfBytes(addresses);
-        size += VarInt.sizeOf(txType);
+        size += SerializeUtils.sizeOfUint16(); // txType
         size += 1;
         return size;
     }

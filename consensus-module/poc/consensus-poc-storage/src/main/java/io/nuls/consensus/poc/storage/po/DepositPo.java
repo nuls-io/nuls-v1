@@ -56,10 +56,10 @@ public class DepositPo extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(deposit.getValue());
+        stream.writeInt64(deposit.getValue());
         stream.writeNulsData(agentHash);
         stream.write(address);
-        stream.writeInt48(time);
+        stream.writeUint48(time);
         stream.writeNulsData(txHash);
         stream.writeVarInt(blockHeight);
         stream.writeVarInt(delHeight);
@@ -67,25 +67,25 @@ public class DepositPo extends BaseNulsData {
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.deposit = Na.valueOf(byteBuffer.readVarInt());
+        this.deposit = Na.valueOf(byteBuffer.readInt64());
         this.agentHash = byteBuffer.readHash();
         this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
-        this.time = byteBuffer.readInt48();
+        this.time = byteBuffer.readUint48();
         this.txHash = byteBuffer.readHash();
-        this.blockHeight = byteBuffer.readVarInt();
-        this.delHeight = byteBuffer.readVarInt();
+        this.blockHeight = byteBuffer.readUint32();
+        this.delHeight = byteBuffer.readUint32();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfVarInt(deposit.getValue());
+        size += SerializeUtils.sizeOfInt64(); // deposit.getValue()
         size += SerializeUtils.sizeOfNulsData(agentHash);
         size += address.length;
-        size += SerializeUtils.sizeOfInt48();
+        size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfNulsData(txHash);
-        size += SerializeUtils.sizeOfVarInt(blockHeight);
-        size += SerializeUtils.sizeOfVarInt(delHeight);
+        size += SerializeUtils.sizeOfUint32();  // blockHeight
+        size += SerializeUtils.sizeOfUint32();  // delHeight
         return size;
     }
 

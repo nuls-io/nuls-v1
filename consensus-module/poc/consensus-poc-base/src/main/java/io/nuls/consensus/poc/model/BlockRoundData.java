@@ -103,26 +103,26 @@ public class BlockRoundData extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += VarInt.sizeOf(roundIndex);
-        size += VarInt.sizeOf(consensusMemberCount);
-        size += SerializeUtils.sizeOfInt48();
-        size += VarInt.sizeOf(packingIndexOfRound);
+        size += SerializeUtils.sizeOfUint32(); // roundIndex
+        size += SerializeUtils.sizeOfUint16(); // consensusMemberCount
+        size += SerializeUtils.sizeOfUint48();  //roundStartTime
+        size += SerializeUtils.sizeOfUint16();  // packingIndexOfRound
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(roundIndex);
-        stream.writeVarInt(consensusMemberCount);
-        stream.writeInt48(roundStartTime);
-        stream.writeVarInt(packingIndexOfRound);
+        stream.writeUint32(roundIndex);
+        stream.writeUint16(consensusMemberCount);
+        stream.writeUint48(roundStartTime);
+        stream.writeUint16(packingIndexOfRound);
     }
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.roundIndex = byteBuffer.readVarInt();
-        this.consensusMemberCount = (int) byteBuffer.readVarInt();
-        this.roundStartTime = byteBuffer.readInt48();
-        this.packingIndexOfRound = (int) byteBuffer.readVarInt();
+        this.roundIndex = byteBuffer.readUint32();
+        this.consensusMemberCount = byteBuffer.readUint16();
+        this.roundStartTime = byteBuffer.readUint48();
+        this.packingIndexOfRound = byteBuffer.readUint16();
     }
 }

@@ -68,9 +68,9 @@ public class BlockHeader extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(preHash);
         size += SerializeUtils.sizeOfNulsData(merkleHash);
-        size += SerializeUtils.sizeOfVarInt(time);
-        size += SerializeUtils.sizeOfVarInt(height);
-        size += SerializeUtils.sizeOfVarInt(txCount);
+        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBytes(extend);
         size += SerializeUtils.sizeOfNulsData(scriptSign);
         return size;
@@ -80,9 +80,9 @@ public class BlockHeader extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(preHash);
         stream.writeNulsData(merkleHash);
-        stream.writeVarInt(time);
-        stream.writeVarInt(height);
-        stream.writeVarInt(txCount);
+        stream.writeUint48(time);
+        stream.writeUint32(height);
+        stream.writeUint32(txCount);
         stream.writeBytesWithLength(extend);
         stream.writeNulsData(scriptSign);
     }
@@ -91,9 +91,9 @@ public class BlockHeader extends BaseNulsData {
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.preHash = byteBuffer.readHash();
         this.merkleHash = byteBuffer.readHash();
-        this.time = byteBuffer.readVarInt();
-        this.height = byteBuffer.readVarInt();
-        this.txCount = byteBuffer.readVarInt();
+        this.time = byteBuffer.readUint48();
+        this.height = byteBuffer.readUint32();
+        this.txCount = byteBuffer.readUint32();
         this.extend = byteBuffer.readByLengthByte();
         try {
             this.hash = NulsDigestData.calcDigestData(this.serialize());

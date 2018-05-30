@@ -80,7 +80,11 @@ public class NulsOutputStreamBuffer {
         SerializeUtils.int16ToByteStreamLE(val, out);
     }
 
-    public void writeInt32(int val) throws IOException {
+    public void writeUint16(int val) throws IOException {
+        SerializeUtils.uint16ToByteStreamLE(val, out);
+    }
+
+    public void writeUint32(long val) throws IOException {
         SerializeUtils.uint32ToByteStreamLE(val, out);
     }
 
@@ -89,7 +93,7 @@ public class NulsOutputStreamBuffer {
     }
 
     public void writeDouble(double val) throws IOException {
-        this.writeBytesWithLength(SerializeUtils.double2Bytes(val));
+        out.write(SerializeUtils.double2Bytes(val));
     }
 
     public void writeString(String val) {
@@ -118,8 +122,8 @@ public class NulsOutputStreamBuffer {
         }
     }
 
-    public void writeInt48(long time) throws IOException {
-        byte[] bytes = SerializeUtils.int48ToBytes(time);
+    public void writeUint48(long time) throws IOException {
+        byte[] bytes = SerializeUtils.uint48ToBytes(time);
         this.write(bytes);
     }
 }

@@ -70,17 +70,17 @@ public class NulsByteBuffer {
         }
     }
 
-    public short readInt16LE() throws NulsException {
+    public int readUint16() throws NulsException {
         try {
-            short s = SerializeUtils.readInt16LE(payload, cursor);
+            int val = SerializeUtils.readUint16LE(payload, cursor);
             cursor += 2;
-            return s;
+            return val;
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
         }
     }
 
-    public int readInt32LE() throws NulsException {
+    public int readInt32() throws NulsException {
         try {
             int u = SerializeUtils.readInt32LE(payload, cursor);
             cursor += 4;
@@ -91,7 +91,13 @@ public class NulsByteBuffer {
     }
 
     public long readUint32() throws NulsException {
-        return (long) readInt32LE();
+        try {
+            long val = SerializeUtils.readUint32LE(payload, cursor);
+            cursor += 4;
+            return val;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new NulsException(KernelErrorCode.DATA_PARSE_ERROR, e);
+        }
     }
 
     public long readInt64() throws NulsException {
@@ -184,7 +190,7 @@ public class NulsByteBuffer {
     }
 
     public double readDouble() throws NulsException {
-        byte[] bytes = this.readByLengthByte();
+        byte[] bytes = this.readBytes(8);
         if (null == bytes) {
             return 0;
         }
@@ -232,7 +238,7 @@ public class NulsByteBuffer {
         return this.readNulsData(new NulsSignData());
     }
 
-    public long readInt48() {
+    public long readUint48() {
         long value = (payload[cursor + 0] & 0xffL) |
                 ((payload[cursor + 1] & 0xffL) << 8) |
                 ((payload[cursor + 2] & 0xffL) << 16) |

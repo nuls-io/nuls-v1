@@ -66,8 +66,8 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
     @Override
     public int size() {
         int size = 0;
-        size += VarInt.sizeOf(type);
-        size += VarInt.sizeOf(time);
+        size += SerializeUtils.sizeOfUint16(); // type
+        size += SerializeUtils.sizeOfUint48(); // time
         size += SerializeUtils.sizeOfBytes(remark);
         size += SerializeUtils.sizeOfNulsData(txData);
         size += SerializeUtils.sizeOfNulsData(coinData);
@@ -77,8 +77,8 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeVarInt(type);
-        stream.writeVarInt(time);
+        stream.writeUint16(type);
+        stream.writeUint48(time);
         stream.writeBytesWithLength(remark);
         stream.writeNulsData(txData);
         stream.writeNulsData(coinData);
@@ -87,8 +87,8 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
 
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        type = (int) byteBuffer.readVarInt();
-        time = byteBuffer.readVarInt();
+        type = byteBuffer.readUint16();
+        time = byteBuffer.readUint48();
         this.remark = byteBuffer.readByLengthByte();
         txData = this.parseTxData(byteBuffer);
         this.coinData = byteBuffer.readNulsData(new CoinData());
