@@ -573,6 +573,9 @@ public class PocConsensusResource {
             if (deposit.getDelHeight() > 0) {
                 continue;
             }
+            if (!deposit.getAgentHash().equals(agent.getTxHash())) {
+                continue;
+            }
             DepositTransaction dtx = (DepositTransaction) ledgerService.getTx(deposit.getTxHash());
             Coin fromCoin = dtx.getCoinData().getTo().get(0);
             fromCoin.setLockTime(0);
@@ -589,7 +592,7 @@ public class PocConsensusResource {
             }
         }
         for (String address : addressList) {
-            tx.getCoinData().getTo().add(toMap.get(address));
+            coinData.getTo().add(toMap.get(address));
         }
         Na fee = TransactionFeeCalculator.getFee(tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));

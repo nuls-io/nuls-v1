@@ -51,19 +51,15 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
             return result;
         }
-        if (data.getCoinData().getTo() == null || data.getCoinData().getTo().size() > 1) {
+        if (data.getCoinData().getTo() == null || data.getCoinData().getTo().isEmpty()) {
             return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR, "The coindata is wrong.");
         }
-        if (!Arrays.equals(agentPo.getAgentAddress(), data.getCoinData().getTo().get(0).getOwner())) {
-            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "The address is wrong!");
-            return result;
-        }
-
         List<Deposit> allDepositList = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
         Map<NulsDigestData, Deposit> depositMap = new HashMap<>();
         Na totalNa = agentPo.getDeposit();
         Deposit ownDeposit = new Deposit();
-        ownDeposit.setDeposit(agentPo.getDeposit().subtract(data.getFee()));
+        ownDeposit.setDeposit(agentPo.getDeposit());
+        ownDeposit.setAddress(agentPo.getAgentAddress());
         depositMap.put(data.getTxData().getCreateTxHash(), ownDeposit);
         for (Deposit deposit : allDepositList) {
             if (deposit.getDelHeight() > 0) {
@@ -97,6 +93,9 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
                 na = deposit.getDeposit();
             } else {
                 na = na.add(deposit.getDeposit());
+            }
+            if (deposit.getAgentHash() == null) {
+                na = na.subtract(data.getFee());
             }
             verifyToMap.put(address, na);
         }
