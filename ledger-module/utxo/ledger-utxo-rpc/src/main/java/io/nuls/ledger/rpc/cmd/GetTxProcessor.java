@@ -28,7 +28,7 @@ public class GetTxProcessor implements CommandProcessor {
     public String getHelp() {
         CommandBuilder bulider = new CommandBuilder();
         bulider.newLine(getCommandDescription())
-                .newLine("\t<hash>   transaction hash -required");
+                .newLine("\t<hash>  transaction hash -required");
         return bulider.toString();
     }
 

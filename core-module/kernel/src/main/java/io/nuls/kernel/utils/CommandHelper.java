@@ -61,10 +61,9 @@ public class CommandHelper {
         return (Na.valueOf(na)).toText();
     }
 
-
     public static String txTypeExplain(Integer type){
         if(null == type){
-            return "unknown";
+            return null;
         }
         switch (type){
             case 1:
@@ -86,13 +85,13 @@ public class CommandHelper {
             case 95:
                 return "stop_agent";
             default:
-                return "unknown" + type;
+                return null;
         }
     }
 
     public static String consensusExplain(Integer status){
         if(null == status){
-            return "unknown";
+            return null;
         }
         switch (status){
             case 0:
@@ -101,8 +100,22 @@ public class CommandHelper {
                 return "consensus";
 
             default:
-                return "unknown:" + status;
+                return null;
         }
     }
 
+    public static String statusConfirmExplain(Integer status){
+        if(null == status){
+            return null;
+        }
+        switch (status){
+            case 0:
+                return "confirm";
+            case 1:
+                return "unConfirm";
+
+            default:
+                return null;
+        }
+    }
 }

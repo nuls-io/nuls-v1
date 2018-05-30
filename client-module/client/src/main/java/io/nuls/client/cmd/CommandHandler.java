@@ -22,6 +22,7 @@ import io.nuls.ledger.rpc.cmd.GetTxProcessor;
 import io.nuls.network.rpc.cmd.GetNetInfoProcessor;
 import io.nuls.network.rpc.cmd.GetNetNodesProcessor;
 import io.nuls.protocol.rpc.cmd.GetBestBlockHeaderProcessor;
+import io.nuls.protocol.rpc.cmd.GetBlockHeaderListProcessor;
 import io.nuls.protocol.rpc.cmd.GetBlockHeaderProcessor;
 import io.nuls.protocol.rpc.cmd.GetBlockProcessor;
 

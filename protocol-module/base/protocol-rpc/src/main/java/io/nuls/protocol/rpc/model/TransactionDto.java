@@ -77,7 +77,7 @@ public class TransactionDto {
     @ApiModelProperty(name = "scriptSig", value = "签名")
     private String scriptSig;
 
-    @ApiModelProperty(name = "status", value = "交易状态 0:unConfirm(待确认), 1:confirm(已确认)")
+    @ApiModelProperty(name = "status", value = "交易状态 0:confirm(已确认), 1:unConfirm(待确认)")
     private Integer status;
 
     @ApiModelProperty(name = "confirmCount", value = "确认次数")
