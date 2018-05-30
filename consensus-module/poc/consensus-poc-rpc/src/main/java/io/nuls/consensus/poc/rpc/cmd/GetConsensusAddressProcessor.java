@@ -1,10 +1,10 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
@@ -52,7 +52,7 @@ public class GetConsensusAddressProcessor implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        Result result = restFul.get("/consensus/address/" + address,null);
+        RpcClientResult result = restFul.get("/consensus/address/" + address,null);
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }

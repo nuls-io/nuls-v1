@@ -1,11 +1,11 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Na;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
@@ -69,7 +69,7 @@ public class DepositProcessor implements CommandProcessor {
         parameters.put("agentHash", args[2]);
         parameters.put("deposit", amount);
         parameters.put("password", password);
-        Result result = restFul.post("/consensus/deposit", parameters);
+        RpcClientResult result = restFul.post("/consensus/deposit", parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }

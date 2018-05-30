@@ -146,7 +146,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
     public NulsDigestData getHash() {
         if(hash == null) {
             try {
-                hash = NulsDigestData.calcDigestData(serialize());
+                hash = NulsDigestData.calcDigestData(serializeForHash());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -266,7 +266,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         ByteArrayOutputStream bos = null;
         try {
             int size = size() - SerializeUtils.sizeOfBytes(scriptSig);
-            ;
+
             bos = new UnsafeByteArrayOutputStream(size);
             NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
             if (size == 0) {

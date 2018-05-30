@@ -74,7 +74,7 @@ public class CommandResult {
         return result;
     }
 
-    public static CommandResult getResult(Result rpcResult) {
+    public static CommandResult getResult(RpcClientResult rpcResult) {
         if (null == rpcResult) {
             return CommandResult.getFailed("Result is null!");
         }

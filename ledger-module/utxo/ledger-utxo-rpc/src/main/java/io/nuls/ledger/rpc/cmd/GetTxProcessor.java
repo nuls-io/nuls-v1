@@ -1,5 +1,6 @@
 package io.nuls.ledger.rpc.cmd;
 
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -45,7 +46,7 @@ public class GetTxProcessor implements CommandProcessor {
         if(StringUtils.isBlank(hash)) {
             return CommandResult.getFailed(KernelErrorCode.PARAMETER_ERROR.getMsg());
         }
-        Result result = restFul.get("/tx/hash/" + hash, null);
+        RpcClientResult result = restFul.get("/tx/hash/" + hash, null);
         return CommandResult.getResult(result);
     }
 }

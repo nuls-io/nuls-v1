@@ -1,5 +1,6 @@
 package io.nuls.protocol.rpc.cmd;
 
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
@@ -54,7 +55,7 @@ public class GetBlockProcessor implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String arg = args[1];
-        Result result = null;
+        RpcClientResult result = null;
         if(StringUtils.isNumeric(arg)){
             result = restFul.get("/block/height/" + arg, null);
         }else{

@@ -1,12 +1,10 @@
 package io.nuls.account.rpc.cmd;
 
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.lite.annotation.Cmd;
-import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.CommandResult;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
@@ -17,8 +15,6 @@ import java.util.Map;
  * @author: Charlie
  * @date: 2018/5/25
  */
-@Cmd
-@Component
 public class ImportByPrivateKeyProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
@@ -69,7 +65,7 @@ public class ImportByPrivateKeyProcessor implements CommandProcessor {
         parameters.put("priKey", prikey);
         parameters.put("password", password);
         parameters.put("overwrite", false);
-        Result result = restFul.post("/account/import/pri", parameters);
+        RpcClientResult result = restFul.post("/account/import/pri", parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
