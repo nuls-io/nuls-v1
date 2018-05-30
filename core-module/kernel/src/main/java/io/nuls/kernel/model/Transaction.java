@@ -93,7 +93,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         txData = this.parseTxData(byteBuffer);
         this.coinData = byteBuffer.readNulsData(new CoinData());
         try {
-            hash = NulsDigestData.calcDigestData(this.serialize());
+            hash = NulsDigestData.calcDigestData(this.serializeForHash());
         } catch (IOException e) {
             Log.error(e);
         }
