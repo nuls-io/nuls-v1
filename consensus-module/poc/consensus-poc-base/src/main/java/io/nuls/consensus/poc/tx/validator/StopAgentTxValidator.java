@@ -87,15 +87,15 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
                 return ValidateResult.getFailedResult(this.getClass().getName(), "The stop agent tx used a wrong deposit coin!");
             }
             fromTotal = fromTotal.add(coin.getNa());
+            if (deposit.getAgentHash() == null) {
+                continue;
+            }
             String address = Base58.encode(deposit.getAddress());
             Na na = verifyToMap.get(address);
             if (null == na) {
                 na = deposit.getDeposit();
             } else {
                 na = na.add(deposit.getDeposit());
-            }
-            if (deposit.getAgentHash() == null) {
-                na = na.subtract(data.getFee());
             }
             verifyToMap.put(address, na);
         }
@@ -105,15 +105,31 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
         if (!totalNa.equals(fromTotal)) {
             return ValidateResult.getFailedResult(this.getClass().getName(), "The stop agent tx used wrong coin!");
         }
+        Na ownToCoin = ownDeposit.getDeposit().subtract(data.getFee());
+        long ownLockTime = 0L;
         for (Coin coin : data.getCoinData().getTo()) {
             String address = Base58.encode(coin.getOwner());
-            Na na = verifyToMap.remove(address);
-            if (null == na || !na.equals(coin.getNa())) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), "The stop agent tx used wrong coin!");
+            Na na = verifyToMap.get(address);
+            if (null == na) {
+                return ValidateResult.getFailedResult(this.getClass().getName(), "The stop agent tx produced wrong coin!");
+            }
+            if (na.equals(coin.getNa())) {
+                verifyToMap.remove(address);
+                continue;
+            }
+            if (ownToCoin != null && Arrays.equals(coin.getOwner(), ownDeposit.getAddress()) && coin.getNa().equals(ownToCoin)) {
+                ownToCoin = null;
+                ownLockTime = coin.getLockTime();
+                continue;
+            } else {
+                return ValidateResult.getFailedResult(this.getClass().getName(), "The stop agent tx produced wrong coin!");
             }
         }
+        if (ownLockTime < (data.getTime() + PocConsensusConstant.STOP_AGENT_LOCK_TIME)) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), "The lock time is not so long!");
+        }
         if (!verifyToMap.isEmpty()) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), "The tr produced wrong coins!");
+            return ValidateResult.getFailedResult(this.getClass().getName(), "The tx produced wrong coins!");
         }
 
         return ValidateResult.getSuccessResult();

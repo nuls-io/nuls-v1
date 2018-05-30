@@ -16,6 +16,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -61,6 +62,10 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
 
     @Override
     public Result onCommit(StopAgentTransaction tx, Object secondaryData) {
+        BlockHeader header = (BlockHeader) secondaryData;
+        if(tx.getTime()<(header.getTime()-300000L)){
+            return Result.getFailed("Stop agent must lock the coin 3 days");
+        }
         AgentPo agentPo = agentStorageService.get(tx.getTxData().getCreateTxHash());
         if (null == agentPo || agentPo.getDelHeight() > 0) {
             throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "the agent is not exist or had deleted!");
