@@ -62,7 +62,7 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
         ownDeposit.setAddress(agentPo.getAgentAddress());
         depositMap.put(data.getTxData().getCreateTxHash(), ownDeposit);
         for (Deposit deposit : allDepositList) {
-            if (deposit.getDelHeight() > 0L) {
+            if (deposit.getDelHeight() > -1L && (data.getBlockHeight() == -1L || deposit.getDelHeight() < data.getBlockHeight())) {
                 continue;
             }
             if (!deposit.getAgentHash().equals(agentPo.getHash())) {
