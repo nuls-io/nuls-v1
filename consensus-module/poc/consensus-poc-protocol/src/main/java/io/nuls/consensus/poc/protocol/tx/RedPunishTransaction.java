@@ -56,6 +56,6 @@ public class RedPunishTransaction extends Transaction<RedPunishData> {
 
     @Override
     public boolean needVerifySignature() {
-        return true;
+        return false;
     }
 }

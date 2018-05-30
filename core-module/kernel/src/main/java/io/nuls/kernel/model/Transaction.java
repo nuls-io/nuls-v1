@@ -109,7 +109,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
     }
 
     public boolean needVerifySignature() {
-        return false;
+        return true;
     }
 
     protected abstract T parseTxData(NulsByteBuffer byteBuffer) throws NulsException;
