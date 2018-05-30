@@ -72,8 +72,8 @@ public class DepositPo extends BaseNulsData {
         this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.time = byteBuffer.readUint48();
         this.txHash = byteBuffer.readHash();
-        this.blockHeight = byteBuffer.readUint32();
-        this.delHeight = byteBuffer.readUint32();
+        this.blockHeight = byteBuffer.readVarInt();
+        this.delHeight = byteBuffer.readVarInt();
     }
 
     @Override
@@ -84,8 +84,8 @@ public class DepositPo extends BaseNulsData {
         size += address.length;
         size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfNulsData(txHash);
-        size += SerializeUtils.sizeOfUint32();  // blockHeight
-        size += SerializeUtils.sizeOfUint32();  // delHeight
+        size += SerializeUtils.sizeOfVarInt(blockHeight);  // blockHeight
+        size += SerializeUtils.sizeOfVarInt(delHeight);  // delHeight
         return size;
     }
 

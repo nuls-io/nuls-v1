@@ -81,8 +81,8 @@ public class AgentPo extends BaseNulsData {
         stream.writeBytesWithLength(agentName);
         stream.writeBytesWithLength(introduction);
         stream.writeUint48(time);
-        stream.writeUint32(blockHeight);
-        stream.writeUint32(delHeight);
+        stream.writeVarInt(blockHeight);
+        stream.writeVarInt(delHeight);
     }
 
     @Override
@@ -96,8 +96,8 @@ public class AgentPo extends BaseNulsData {
         this.agentName = byteBuffer.readByLengthByte();
         this.introduction = byteBuffer.readByLengthByte();
         this.time = byteBuffer.readUint48();
-        this.blockHeight = byteBuffer.readUint32();
-        this.delHeight = byteBuffer.readUint32();
+        this.blockHeight = byteBuffer.readVarInt();
+        this.delHeight = byteBuffer.readVarInt();
     }
 
     @Override
@@ -109,8 +109,8 @@ public class AgentPo extends BaseNulsData {
         size += SerializeUtils.sizeOfBytes(agentName);
         size += SerializeUtils.sizeOfBytes(introduction);
         size += SerializeUtils.sizeOfUint48();
-        size += SerializeUtils.sizeOfUint32(); // blockHeight
-        size += SerializeUtils.sizeOfUint32(); // delHeight
+        size += SerializeUtils.sizeOfVarInt(blockHeight); // blockHeight
+        size += SerializeUtils.sizeOfVarInt(delHeight); // delHeight
         return size;
     }
 
