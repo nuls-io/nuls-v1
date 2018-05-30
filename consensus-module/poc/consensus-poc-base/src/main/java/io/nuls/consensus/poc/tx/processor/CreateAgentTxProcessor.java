@@ -58,9 +58,8 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
     @Override
     public Result onRollback(CreateAgentTransaction tx, Object secondaryData) {
         Agent agent = tx.getTxData();
-        if (agent.getTxHash() == null) {
-            agent.setTxHash(tx.getHash());
-        }
+        agent.setTxHash(tx.getHash());
+
         boolean success = agentStorageService.delete(agent.getTxHash());
         return new Result(success, null);
     }
@@ -69,11 +68,10 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
     public Result onCommit(CreateAgentTransaction tx, Object secondaryData) {
         Agent agent = tx.getTxData();
         BlockHeader header = (BlockHeader) secondaryData;
-        if (agent.getTxHash() == null) {
-            agent.setTxHash(tx.getHash());
-            agent.setBlockHeight(header.getHeight());
-            agent.setTime(tx.getTime());
-        }
+        agent.setTxHash(tx.getHash());
+        agent.setBlockHeight(header.getHeight());
+        agent.setTime(tx.getTime());
+
         AgentPo agentPo = PoConvertUtil.agentToPo(agent);
 
         boolean success = agentStorageService.save(agentPo);

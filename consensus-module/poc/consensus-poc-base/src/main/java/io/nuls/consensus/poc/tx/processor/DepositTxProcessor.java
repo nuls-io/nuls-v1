@@ -67,9 +67,8 @@ public class DepositTxProcessor implements TransactionProcessor<DepositTransacti
     @Override
     public Result onRollback(DepositTransaction tx, Object secondaryData) {
         Deposit deposit = tx.getTxData();
-        if (deposit.getTxHash() == null) {
-            deposit.setTxHash(tx.getHash());
-        }
+        deposit.setTxHash(tx.getHash());
+
         boolean success = depositStorageService.delete(deposit.getTxHash());
         return new Result(success, null);
     }
@@ -85,11 +84,10 @@ public class DepositTxProcessor implements TransactionProcessor<DepositTransacti
     public Result onCommit(DepositTransaction tx, Object secondaryData) {
         Deposit deposit = tx.getTxData();
         BlockHeader header = (BlockHeader) secondaryData;
-        if (deposit.getTxHash() == null) {
-            deposit.setTxHash(tx.getHash());
-            deposit.setTime(tx.getTime());
-            deposit.setBlockHeight(header.getHeight());
-        }
+        deposit.setTxHash(tx.getHash());
+        deposit.setTime(tx.getTime());
+        deposit.setBlockHeight(header.getHeight());
+
         DepositPo depositPo = PoConvertUtil.depositToPo(deposit);
 
         boolean success = depositStorageService.save(depositPo);
