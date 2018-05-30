@@ -46,7 +46,7 @@ public class CommandHelper {
         }
     }
 
-    public static Double naToNuls(Object object){
+    public static String naToNuls(Object object){
         if(null == object){
             return null;
         }
@@ -58,7 +58,51 @@ public class CommandHelper {
         }else{
             return null;
         }
-        return Na.valueOf(na).toDouble();
+        return (Na.valueOf(na)).toText();
+    }
+
+
+    public static String txTypeExplain(Integer type){
+        if(null == type){
+            return "unknown";
+        }
+        switch (type){
+            case 1:
+                return "coinbase";
+            case 2:
+                return "transfer";
+            case 51:
+                return "account_alias";
+            case 90:
+                return "register_agent";
+            case 91:
+                return "join_consensus";
+            case 92:
+                return "cancel_deposit";
+            case 93:
+                return "yellow_punish";
+            case 94:
+                return "red_punish";
+            case 95:
+                return "stop_agent";
+            default:
+                return "unknown" + type;
+        }
+    }
+
+    public static String consensusExplain(Integer status){
+        if(null == status){
+            return "unknown";
+        }
+        switch (status){
+            case 0:
+                return "unconsensus";
+            case 1:
+                return "consensus";
+
+            default:
+                return "unknown:" + status;
+        }
     }
 
 }

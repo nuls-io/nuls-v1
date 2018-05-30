@@ -16,6 +16,7 @@ import java.util.Map;
 /**
  * 根据节点hash获取单个共识节点信息
  * Get a consensus node information According to agent hash
+ *
  * @author: Charlie
  * @date: 2018/5/29
  */
@@ -44,13 +45,13 @@ public class GetAgentProcessor implements CommandProcessor {
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if(length != 2){
+        if (length != 2) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if(!StringUtils.validHash(args[1])){
+        if (!StringUtils.validHash(args[1])) {
             return false;
         }
         return true;
@@ -63,10 +64,11 @@ public class GetAgentProcessor implements CommandProcessor {
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
-        Map<String, Object> map = (Map)result.getData();
+        Map<String, Object> map = (Map) result.getData();
         map.put("deposit", CommandHelper.naToNuls(map.get("deposit")));
         map.put("totalDeposit", CommandHelper.naToNuls(map.get("totalDeposit")));
-        map.put("time",  DateUtil.convertDate(new Date((Long)map.get("time"))));
+        map.put("time", DateUtil.convertDate(new Date((Long) map.get("time"))));
+        map.put("status", CommandHelper.consensusExplain((Integer) map.get("status")));
         result.setData(map);
         return CommandResult.getResult(result);
     }

@@ -94,6 +94,7 @@ public class GetAccountTxListProcessor implements CommandProcessor {
         List<Map<String, Object>> list = (List<Map<String, Object>>)((Map)result.getData()).get("list");
         for(Map<String, Object> map : list){
             map.put("time",  DateUtil.convertDate(new Date((Long)map.get("time"))));
+            map.put("txType", CommandHelper.txTypeExplain((Integer)map.get("txType")));
         }
         result.setData(list);
         return CommandResult.getResult(result);

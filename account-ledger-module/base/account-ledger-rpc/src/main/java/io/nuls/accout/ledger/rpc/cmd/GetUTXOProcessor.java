@@ -75,9 +75,9 @@ public class GetUTXOProcessor implements CommandProcessor {
         }
         List<Map<String, Object>> list = (List<Map<String, Object>>)((Map)result.getData()).get("list");
         for(Map<String, Object> map : list){
-            map.put("value",  CommandHelper.naToNuls(map.get("value")));
-            map.put("lockTime",  DateUtil.convertDate(new Date((Long)map.get("lockTime"))));
-            map.put("createTime",  DateUtil.convertDate(new Date((Long)map.get("createTime"))));
+            map.put("value", CommandHelper.naToNuls(map.get("value")));
+            map.put("createTime", DateUtil.convertDate(new Date((Long)map.get("createTime"))));
+            map.put("txType", CommandHelper.txTypeExplain((Integer)map.get("txType")));
         }
         result.setData(list);
         return CommandResult.getResult(result);

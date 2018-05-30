@@ -17,6 +17,7 @@ import java.util.Map;
 /**
  * 获取共识节点列表
  * Get all the agent nodes
+ *
  * @author: Charlie
  * @date: 2018/5/29
  */
@@ -46,7 +47,7 @@ public class GetAgentsProcessor implements CommandProcessor {
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if(length != 3) {
+        if (length != 3) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
@@ -69,12 +70,12 @@ public class GetAgentsProcessor implements CommandProcessor {
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
-        List<Map<String, Object>> list = (List<Map<String, Object>>)((Map)result.getData()).get("list");
-        for(Map<String, Object> map : list){
-            map.put("deposit",  CommandHelper.naToNuls(map.get("deposit")));
+        List<Map<String, Object>> list = (List<Map<String, Object>>) ((Map) result.getData()).get("list");
+        for (Map<String, Object> map : list) {
+            map.put("deposit", CommandHelper.naToNuls(map.get("deposit")));
             map.put("totalDeposit", CommandHelper.naToNuls(map.get("totalDeposit")));
-            map.put("time",  DateUtil.convertDate(new Date((Long)map.get("time"))));
-
+            map.put("time", DateUtil.convertDate(new Date((Long) map.get("time"))));
+            map.put("status", CommandHelper.consensusExplain((Integer) map.get("status")));
         }
         result.setData(list);
         return CommandResult.getResult(result);

@@ -83,6 +83,7 @@ public class GetDepositedsProcessor implements CommandProcessor {
         List<Map<String, Object>> list = (List<Map<String, Object>>)((Map)result.getData()).get("list");
         for(Map<String, Object> map : list){
             map.put("deposit",  CommandHelper.naToNuls(map.get("deposit")));
+            map.put("status", CommandHelper.consensusExplain((Integer) map.get("status")));
             map.put("time",  DateUtil.convertDate(new Date((Long)map.get("time"))));
         }
         result.setData(list);

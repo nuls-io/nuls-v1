@@ -84,7 +84,6 @@ public class CommandHandler {
          */
         register(new CreateAgentProcessor());
         register(new GetConsensusProcessor());
-        register(new GetConsensusAddressProcessor());
         register(new DepositProcessor());
         register(new WithdrawProcessor());
         register(new StopAgentProcessor());

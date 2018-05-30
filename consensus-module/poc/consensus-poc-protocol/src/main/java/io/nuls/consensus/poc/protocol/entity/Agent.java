@@ -63,6 +63,9 @@ public class Agent extends TransactionLogicData {
     private transient long time;
     private transient long blockHeight = -1L;
     private transient long delHeight = -1L;
+    /**
+     * 0:待共识 unconsensus, 1:共识中 consensus
+     */
     private transient int status;
     private transient double creditVal;
     private transient long totalDeposit;

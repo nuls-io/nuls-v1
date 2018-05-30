@@ -29,6 +29,9 @@ public class DepositDTO {
 
     private Long delHeight;
 
+    /**
+     * 0:待共识, 1:已共识
+     */
     private int status;
 
     private String agentName;

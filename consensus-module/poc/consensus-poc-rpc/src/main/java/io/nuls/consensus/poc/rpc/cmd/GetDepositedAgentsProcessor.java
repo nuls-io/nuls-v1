@@ -75,6 +75,7 @@ public class GetDepositedAgentsProcessor implements CommandProcessor {
         for(Map<String, Object> map : list){
             map.put("deposit",  CommandHelper.naToNuls(map.get("deposit")));
             map.put("totalDeposit", CommandHelper.naToNuls(map.get("totalDeposit")));
+            map.put("status", CommandHelper.consensusExplain((Integer) map.get("status")));
             map.put("time",  DateUtil.convertDate(new Date((Long)map.get("time"))));
         }
         result.setData(list);
