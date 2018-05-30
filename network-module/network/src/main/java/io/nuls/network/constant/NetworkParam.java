@@ -18,7 +18,7 @@ public class NetworkParam {
 
     private int port;
 
-    private int packetMagic;
+    private long packetMagic;
 
     private int maxInCount;
 
@@ -38,11 +38,11 @@ public class NetworkParam {
         this.port = port;
     }
 
-    public int getPacketMagic() {
+    public long getPacketMagic() {
         return packetMagic;
     }
 
-    public void setPacketMagic(int packetMagic) {
+    public void setPacketMagic(long packetMagic) {
         this.packetMagic = packetMagic;
     }
 

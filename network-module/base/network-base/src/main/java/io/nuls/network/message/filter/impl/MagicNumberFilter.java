@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class MagicNumberFilter implements NulsMessageFilter{
 
-    private Set<Integer> magicSet = new HashSet<>();
+    private Set<Long> magicSet = new HashSet<>();
 
     private static MagicNumberFilter instance = new MagicNumberFilter();
 
@@ -27,11 +27,11 @@ public class MagicNumberFilter implements NulsMessageFilter{
         return magicSet.contains(header.getMagicNumber());
     }
 
-    public void addMagicNum(Integer magicNum) {
+    public void addMagicNum(Long magicNum) {
         magicSet.add(magicNum);
     }
 
-    public void removeMagicNum(Integer magicNum) {
+    public void removeMagicNum(Long magicNum) {
         magicSet.remove(magicNum);
     }
 }
