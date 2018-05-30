@@ -61,7 +61,7 @@ public class GetAssetProcessor implements CommandProcessor {
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());
         }
-        List<Map<String, Object>> list = (List<Map<String, Object>>)((Map)result.getData()).get("list");
+        List<Map<String, Object>> list = (List<Map<String, Object>>)result.getData();
         for(Map<String, Object> map : list){
             map.put("balance",  CommandHelper.naToNuls(map.get("balance")));
             map.put("usable", CommandHelper.naToNuls(map.get("usable")));

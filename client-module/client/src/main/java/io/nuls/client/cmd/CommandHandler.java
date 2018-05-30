@@ -57,16 +57,16 @@ public class CommandHandler {
         /**
          * account
          */
-        register(new BackupAccountProcessor());
+        //register(new BackupAccountProcessor());
         register(new CreateAccountProcessor());
         register(new CreateAccountsProcessor());
         register(new GetAccountProcessor());
         register(new GetAccountsProcessor());
-        register(new GetAssetProcessor());
+        register(new GetAssetProcessor());//
         register(new GetBalanceProcessor());
-        register(new GetWalletBalanceProcessor());
+        //register(new GetWalletBalanceProcessor());
         register(new GetPrivateKeyProcessor());
-        register(new ImportByKeyStoreProcessor());
+        //register(new ImportByKeyStoreProcessor());
         register(new ImportByPrivateKeyProcessor());
         register(new RemoveAccountProcessor());
         register(new ResetPasswordProcessor());
@@ -78,7 +78,7 @@ public class CommandHandler {
          */
         register(new TransferProcessor());
         register(new GetAccountTxListProcessor());
-        register(new GetUTXOProcessor());
+        //register(new GetUTXOProcessor());
 
         /**
          * consensus
