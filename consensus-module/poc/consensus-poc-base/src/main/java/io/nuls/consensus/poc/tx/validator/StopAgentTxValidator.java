@@ -4,6 +4,7 @@ import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -29,8 +30,8 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
     public ValidateResult validate(StopAgentTransaction data) {
 
         AgentPo agentPo = agentStorageService.get(data.getTxData().getCreateTxHash());
-        if(null==agentPo||agentPo.getDelHeight()>0){
-            return ValidateResult.getFailedResult(this.getClass().getName(),"The agent is deleted or never created!");
+        if (null == agentPo || agentPo.getDelHeight() > 0) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), "The agent is deleted or never created!");
         }
         P2PKHScriptSig sig = new P2PKHScriptSig();
         try {
@@ -42,6 +43,13 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
         if (!Arrays.equals(agentPo.getAgentAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
             ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "The agent does not belong to this address.");
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
+            return result;
+        }
+        if (data.getCoinData().getTo() == null || data.getCoinData().getTo().size() > 1) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR, "The coindata is wrong.");
+        }
+        if (!Arrays.equals(agentPo.getAgentAddress(), data.getCoinData().getTo().get(0).getOwner())) {
+            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "The address is wrong!");
             return result;
         }
         return ValidateResult.getSuccessResult();

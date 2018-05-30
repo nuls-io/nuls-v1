@@ -6,6 +6,7 @@ import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.service.DepositStorageService;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -43,6 +44,13 @@ public class CancelDepositTxValidator implements NulsDataValidator<CancelDeposit
         if (!Arrays.equals(depositPo.getAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
             ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "The deposit does not belong to this address.");
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
+            return result;
+        }
+        if(data.getCoinData().getTo()==null||data.getCoinData().getTo().size()>1){
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR,"The coindata is wrong.");
+        }
+        if(!Arrays.equals(depositPo.getAddress(),data.getCoinData().getTo().get(0).getOwner())){
+            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "The address is wrong!");
             return result;
         }
         return ValidateResult.getSuccessResult();
