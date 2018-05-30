@@ -7,6 +7,8 @@ import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
+import java.util.Map;
+
 /**
  * @author: Charlie
  * @date: 2018/5/28
@@ -49,6 +51,10 @@ public class GetConsensusProcessor implements CommandProcessor {
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
+        Map<String, Object> map = (Map)result.getData();
+        map.put("rewardOfDay", CommandHelper.naToNuls(map.get("rewardOfDay")));
+        map.put("totalDeposit", CommandHelper.naToNuls(map.get("totalDeposit")));
+        result.setData(map);
         return CommandResult.getResult(result);
     }
 }

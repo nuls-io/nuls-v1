@@ -1,6 +1,7 @@
 package io.nuls.accout.ledger.rpc.cmd;
 
 import io.nuls.account.model.Address;
+import io.nuls.core.tools.date.DateUtil;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -11,7 +12,9 @@ import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -88,7 +91,11 @@ public class GetAccountTxListProcessor implements CommandProcessor {
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
-        result.setData(((Map) result.getData()).get("list"));
+        List<Map<String, Object>> list = (List<Map<String, Object>>)((Map)result.getData()).get("list");
+        for(Map<String, Object> map : list){
+            map.put("time",  DateUtil.convertDate(new Date((Long)map.get("time"))));
+        }
+        result.setData(list);
         return CommandResult.getResult(result);
     }
 }

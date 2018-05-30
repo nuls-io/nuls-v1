@@ -1,11 +1,16 @@
 package io.nuls.account.rpc.cmd;
 
+import io.nuls.core.tools.date.DateUtil;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -49,6 +54,11 @@ public class GetWalletBalanceProcessor implements CommandProcessor {
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());
         }
+        Map<String, Object> map = (Map)result.getData();
+        map.put("balance",  CommandHelper.naToNuls(map.get("balance")));
+        map.put("usable", CommandHelper.naToNuls(map.get("usable")));
+        map.put("locked", CommandHelper.naToNuls(map.get("locked")));
+        result.setData(map);
         return CommandResult.getResult(result);
     }
 }
