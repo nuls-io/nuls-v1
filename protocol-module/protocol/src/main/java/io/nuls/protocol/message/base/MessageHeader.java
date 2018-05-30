@@ -54,7 +54,7 @@ public class MessageHeader extends BaseNulsData {
      * the length of the msgBody
      */
 
-    private long length;
+    private int length;
     /**
      * 校验位，用于消息体的奇偶校验
      * Parity bit for the parity of the message body.
@@ -102,7 +102,7 @@ public class MessageHeader extends BaseNulsData {
     @Override
     protected void parse(NulsByteBuffer buffer) throws NulsException {
         magicNumber = buffer.readUint32();
-        length = buffer.readUint32();
+        length = (int) buffer.readUint32();
         xor = buffer.readByte();
         arithmetic = buffer.readByte();
         moduleId = (short) buffer.readUint16();
@@ -145,11 +145,11 @@ public class MessageHeader extends BaseNulsData {
         this.magicNumber = magicNumber;
     }
 
-    public long getLength() {
+    public int getLength() {
         return length;
     }
 
-    public void setLength(long length) {
+    public void setLength(int length) {
         this.length = length;
     }
 
