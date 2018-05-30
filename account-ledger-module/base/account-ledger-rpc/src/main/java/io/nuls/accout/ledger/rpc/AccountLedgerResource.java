@@ -87,16 +87,16 @@ public class AccountLedgerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Balance.class)
     })
-    public Result<Balance> getBalance(@ApiParam(name = "address", value = "账户地址", required = true)
+    public RpcClientResult getBalance(@ApiParam(name = "address", value = "账户地址", required = true)
                                       @PathParam("address") String address) {
         byte[] addressBytes = null;
         try {
             addressBytes = Base58.decode(address);
         } catch (Exception e) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (addressBytes.length != AddressTool.HASH_LENGTH) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
 
         Result result = null;
@@ -104,13 +104,13 @@ public class AccountLedgerResource {
             result = accountLedgerService.getBalance(addressBytes);
         } catch (NulsException e) {
             e.printStackTrace();
-            return Result.getFailed(AccountLedgerErrorCode.UNKNOW_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.UNKNOW_ERROR).toRpcClientResult();
         }
 
         if (result == null) {
-            return Result.getFailed(AccountLedgerErrorCode.UNKNOW_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.UNKNOW_ERROR).toRpcClientResult();
         }
-        return result;
+        return result.toRpcClientResult();
     }
 
     @POST
@@ -120,27 +120,27 @@ public class AccountLedgerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
-    public Result transfer(@ApiParam(name = "form", value = "转账", required = true) TransferForm form) {
+    public RpcClientResult transfer(@ApiParam(name = "form", value = "转账", required = true) TransferForm form) {
         if (form == null) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (!Address.validAddress(form.getAddress())) {
-            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if (!Address.validAddress(form.getToAddress())) {
-            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if (form.getAmount() <= 0) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (!validTxRemark(form.getRemark())) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
 
         Na value = Na.valueOf(form.getAmount());
         return accountLedgerService.transfer(AddressTool.getAddress(form.getAddress()),
                 AddressTool.getAddress(form.getToAddress()),
-                value, form.getPassword(), form.getRemark());
+                value, form.getPassword(), form.getRemark()).toRpcClientResult();
     }
 
 
@@ -151,26 +151,26 @@ public class AccountLedgerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
-    public Result transferFee(@BeanParam() TransferFeeForm form) {
+    public RpcClientResult transferFee(@BeanParam() TransferFeeForm form) {
         if (form == null) {
-            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (!Address.validAddress(form.getAddress())) {
-            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if (!Address.validAddress(form.getToAddress())) {
-            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if (form.getAmount() <= 0) {
-            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (!validTxRemark(form.getRemark())) {
-            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
 
         Na value = Na.valueOf(form.getAmount());
         return accountLedgerService.transferFee(AddressTool.getAddress(form.getAddress()),
-                            AddressTool.getAddress(form.getToAddress()),value, form.getRemark());
+                            AddressTool.getAddress(form.getToAddress()),value, form.getRemark()).toRpcClientResult();
     }
 
 
@@ -181,7 +181,7 @@ public class AccountLedgerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
-    public Result getTxInfoList(@ApiParam(name = "address", value = "账户地址", required = true)
+    public RpcClientResult getTxInfoList(@ApiParam(name = "address", value = "账户地址", required = true)
                                 @PathParam("address") String address,
                                 @ApiParam(name = "type", value = "类型")
                                 @QueryParam("type") Integer type,
@@ -196,9 +196,9 @@ public class AccountLedgerResource {
             pageSize = 10;
         }
         if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
-            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        if (type == null) {
+        if (type == null || type <= 0) {
             type = -1;
         }
 
@@ -208,14 +208,14 @@ public class AccountLedgerResource {
         try {
             addressBytes = Base58.decode(address);
         } catch (Exception e) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
 
         Result<List<TransactionInfo>> rawResult = accountLedgerService.getTxInfoList(addressBytes);
         if (rawResult.isFailed()) {
             dtoResult.setSuccess(false);
             dtoResult.setErrorCode(rawResult.getErrorCode());
-            return dtoResult;
+            return dtoResult.toRpcClientResult();
         }
 
         List<TransactionInfo> result = new ArrayList<TransactionInfo>();
@@ -233,7 +233,7 @@ public class AccountLedgerResource {
         int start = pageNumber * pageSize - pageSize;
         if (start >= page.getTotal()) {
             dtoResult.setData(page);
-            return dtoResult;
+            return dtoResult.toRpcClientResult();
         }
 
         int end = start + pageSize;
@@ -259,7 +259,7 @@ public class AccountLedgerResource {
 
         dtoResult.setSuccess(true);
         dtoResult.setData(page);
-        return dtoResult;
+        return dtoResult.toRpcClientResult();
     }
 
 
@@ -270,7 +270,7 @@ public class AccountLedgerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
-    public Result getLockUtxo(@ApiParam(name = "address", value = "地址")
+    public RpcClientResult getLockUtxo(@ApiParam(name = "address", value = "地址")
                               @PathParam("address") String address,
                               @ApiParam(name = "pageNumber", value = "页码")
                               @QueryParam("pageNumber") Integer pageNumber,
@@ -283,7 +283,7 @@ public class AccountLedgerResource {
             pageSize = 10;
         }
         if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
-            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
 
         byte[] addressBytes = null;
@@ -292,21 +292,21 @@ public class AccountLedgerResource {
         try {
             addressBytes = Base58.decode(address);
         } catch (Exception e) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
 
         Result<List<Coin>> result = accountLedgerService.getLockedUtxo(addressBytes);
         if (result.isFailed()) {
             dtoResult.setSuccess(false);
             dtoResult.setErrorCode(result.getErrorCode());
-            return dtoResult;
+            return dtoResult.toRpcClientResult();
         }
 
         Page<UtxoDto> page = new Page<>(pageNumber, pageSize, result.getData().size());
         int start = pageNumber * pageSize - pageSize;
         if (start >= page.getTotal()) {
             dtoResult.setData(page);
-            return dtoResult;
+            return dtoResult.toRpcClientResult();
         }
 
         List<UtxoDto> utxoDtoList = new ArrayList<>();
@@ -339,7 +339,7 @@ public class AccountLedgerResource {
         page.setList(utxoDtoList.subList(start, end));
         dtoResult.setSuccess(true);
         dtoResult.setData(page);
-        return dtoResult;
+        return dtoResult.toRpcClientResult();
     }
 
     private boolean validTxRemark(String remark) {

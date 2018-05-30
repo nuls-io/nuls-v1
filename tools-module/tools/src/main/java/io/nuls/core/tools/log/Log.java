@@ -310,4 +310,8 @@ public final class Log {
     public static void removeId() {
         THREAD_LOCAL.remove();
     }
+
+    public static boolean isDebugEnabled() {
+        return LOG.isDebugEnabled();
+    }
 }

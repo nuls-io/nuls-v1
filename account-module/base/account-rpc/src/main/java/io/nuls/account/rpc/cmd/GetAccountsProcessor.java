@@ -1,8 +1,7 @@
-package io.nuls.account.rpc.processor;
+package io.nuls.account.rpc.cmd;
 
-import io.nuls.account.model.Address;
-import io.nuls.core.tools.cmd.CommandBuilder;
-import io.nuls.core.tools.cmd.CommandHelper;
+import io.nuls.kernel.utils.CommandBuilder;
+import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
@@ -20,42 +19,39 @@ import java.util.Map;
  */
 @Cmd
 @Component
-public class RemoveAccountProcessor implements CommandProcessor {
+public class GetAccountsProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
-        return "remove";
+        return "getaccounts";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<address> The account address - Required")
-                .newLine("\t[password] The password of the account, if the account does not have a password, this entry is not required");
+                .newLine("\t<pageNumber>   pageNumber -required")
+                .newLine("\t<pageSize>     pageSize -required");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "remove <address> [password] --remove an account";
+        return "getaccounts <pageNumber> <pageSize> --get all account info list int the wallet";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length < 2 || length > 3) {
+        if(length != 3) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (!Address.validAddress(args[1])) {
-            return false;
-        }
-        if (length == 3 && !StringUtils.validPassword(args[2])) {
+        if(!StringUtils.isNumeric(args[1]) || !StringUtils.isNumeric(args[2])){
             return false;
         }
         return true;
@@ -63,14 +59,16 @@ public class RemoveAccountProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        String address = args[1];
-        String password = args.length == 3 ? args[2] : null;
+        int pageNumber = Integer.parseInt(args[1]);
+        int pageSize = Integer.parseInt(args[2]);
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("password", password);
-        Result result = restFul.post("/account/remove/" + address, parameters);
+        parameters.put("pageNumber", pageNumber);
+        parameters.put("pageSize", pageSize);
+        Result result = restFul.get("/account", parameters);
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());
         }
+        result.setData(((Map)result.getData()).get("list"));
         return CommandResult.getResult(result);
     }
 }

@@ -26,6 +26,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.swagger.annotations.*;
 
@@ -71,8 +72,8 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = ArrayList.class)
     })
-    public Result<List<String>> create(@ApiParam(name = "form", value = "账户表单数据", required = true)
-                                               AccountCreateForm form) {
+    public RpcClientResult create(@ApiParam(name = "form", value = "账户表单数据", required = true)
+                                          AccountCreateForm form) {
         int count = form.getCount() < 1 ? 1 : form.getCount();
         String password = form.getPassword();
         if (StringUtils.isBlank(password)) {
@@ -80,14 +81,14 @@ public class AccountResource {
         }
         Result result = accountService.createAccount(count, password);
         if (result.isFailed()) {
-            return result;
+            return result.toRpcClientResult();
         }
         List<Account> listAccount = (List<Account>) result.getData();
         List<String> list = new ArrayList<>();
         for (Account account : listAccount) {
             list.add(account.getAddress().toString());
         }
-        return Result.getSuccess().setData(list);
+        return Result.getSuccess().setData(list).toRpcClientResult();
     }
 
     @GET
@@ -96,12 +97,12 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = AccountDto.class)
     })
-    public Result accountList(@ApiParam(name = "pageNumber", value = "页码")
-                              @QueryParam("pageNumber") int pageNumber,
-                              @ApiParam(name = "pageSize", value = "每页条数")
-                              @QueryParam("pageSize") int pageSize) {
+    public RpcClientResult accountList(@ApiParam(name = "pageNumber", value = "页码")
+                                       @QueryParam("pageNumber") int pageNumber,
+                                       @ApiParam(name = "pageSize", value = "每页条数")
+                                       @QueryParam("pageSize") int pageSize) {
         if (pageNumber < 0 || pageSize < 0) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (pageNumber == 0) {
             pageNumber = 1;
@@ -114,7 +115,7 @@ public class AccountResource {
         page.setTotal(accountList.size());
         int start = (pageNumber - 1) * pageSize;
         if (start >= accountList.size()) {
-            return Result.getSuccess().setData(page);
+            return Result.getSuccess().setData(page).toRpcClientResult();
         }
         int end = pageNumber * pageSize;
         if (end > accountList.size()) {
@@ -127,7 +128,7 @@ public class AccountResource {
             dtoList.add(new AccountDto(account));
         }
         resultPage.setList(dtoList);
-        return Result.getSuccess().setData(resultPage);
+        return Result.getSuccess().setData(resultPage).toRpcClientResult();
     }
 
     @GET
@@ -137,16 +138,16 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = AccountDto.class)
     })
-    public Result<AccountDto> get(@ApiParam(name = "address", value = "账户地址", required = true)
-                                  @PathParam("address") String address) {
+    public RpcClientResult get(@ApiParam(name = "address", value = "账户地址", required = true)
+                               @PathParam("address") String address) {
         if (!Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
-        return Result.getSuccess().setData(new AccountDto(account));
+        return Result.getSuccess().setData(new AccountDto(account)).toRpcClientResult();
     }
 
     @POST
@@ -156,16 +157,16 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result<String> alias(@PathParam("address") String address,
-                                @ApiParam(name = "form", value = "设置别名表单数据", required = true)
-                                        AccountAliasForm form) {
+    public RpcClientResult alias(@PathParam("address") String address,
+                                 @ApiParam(name = "form", value = "设置别名表单数据", required = true)
+                                         AccountAliasForm form) {
         if (!Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if (StringUtils.isBlank(form.getAlias())) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        return aliasService.setAlias(address, form.getAlias(), form.getPassword());
+        return aliasService.setAlias(address, form.getAlias().trim(), form.getPassword()).toRpcClientResult();
     }
 
     @GET
@@ -175,22 +176,22 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = BalanceDto.class)
     })
-    public Result getBalance(@ApiParam(name = "address", value = "账户地址", required = true)
-                             @PathParam("address") String address) {
+    public RpcClientResult getBalance(@ApiParam(name = "address", value = "账户地址", required = true)
+                                      @PathParam("address") String address) {
         if (!Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         try {
             Address addr = new Address(address);
             Result<Balance> result = accountLedgerService.getBalance(addr.getBase58Bytes());
             if (result.isFailed()) {
-                return result;
+                return result.toRpcClientResult();
             }
             Balance balance = result.getData();
-            return Result.getSuccess().setData(new BalanceDto(balance));
+            return Result.getSuccess().setData(new BalanceDto(balance)).toRpcClientResult();
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(AccountErrorCode.FAILED);
+            return Result.getFailed(AccountErrorCode.FAILED).toRpcClientResult();
         }
     }
 
@@ -201,11 +202,11 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = BalanceDto.class)
     })
-    public Result getTotalBalance() {
+    public RpcClientResult getTotalBalance() {
         try {
-            return accountService.getBalance();
+            return accountService.getBalance().toRpcClientResult();
         } catch (NulsException e) {
-            return Result.getFailed(AccountErrorCode.FAILED);
+            return Result.getFailed(AccountErrorCode.FAILED).toRpcClientResult();
         }
     }
 
@@ -216,24 +217,24 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = AssetDto.class)
     })
-    public Result getAssets(@ApiParam(name = "address", value = "账户地址", required = true)
-                            @PathParam("address") String address) {
+    public RpcClientResult getAssets(@ApiParam(name = "address", value = "账户地址", required = true)
+                                     @PathParam("address") String address) {
         if (!Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         try {
             Address addr = new Address(address);
             Result<Balance> result = accountLedgerService.getBalance(addr.getBase58Bytes());
             if (result.isFailed()) {
-                return result;
+                return result.toRpcClientResult();
             }
             Balance balance = result.getData();
             List<AssetDto> dtoList = new ArrayList<>();
             dtoList.add(new AssetDto("NULS", balance));
-            return Result.getSuccess().setData(dtoList);
+            return Result.getSuccess().setData(dtoList).toRpcClientResult();
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(AccountErrorCode.FAILED);
+            return Result.getFailed(AccountErrorCode.FAILED).toRpcClientResult();
         }
     }
 
@@ -244,22 +245,22 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
-    public Result getPrikey(@PathParam("address") String address, @ApiParam(name = "form", value = "查询私钥表单数据", required = true)
+    public RpcClientResult getPrikey(@PathParam("address") String address, @ApiParam(name = "form", value = "查询私钥表单数据", required = true)
             AccountPasswordForm form) {
         if (!Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        return accountBaseService.getPrivateKey(address, form.getPassword());
+        return accountBaseService.getPrivateKey(address, form.getPassword()).toRpcClientResult();
     }
 
     @POST
     @Path("/lock/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[锁账户] 清除缓存的锁定账户", notes = "Clear the cache unlock account.")
-    public Result lock(@ApiParam(name = "address", value = "账户地址", required = true) @PathParam("address") String address) {
+    public RpcClientResult lock(@ApiParam(name = "address", value = "账户地址", required = true) @PathParam("address") String address) {
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
         accountCacheService.removeAccount(account.getAddress());
         BlockingQueue<Runnable> queue = scheduler.getQueue();
@@ -269,7 +270,7 @@ public class AccountResource {
             scheduler.remove(scheduledFuture);
             accountUnlockSchedulerMap.remove(addr);
         }
-        return Result.getSuccess();
+        return Result.getSuccess().toRpcClientResult();
     }
 
 
@@ -277,15 +278,15 @@ public class AccountResource {
     @Path("/unlock/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[解锁] 解锁账户", notes = "")
-    public Result unlock(@ApiParam(name = "address", value = "账户地址", required = true)
-                         @PathParam("address") String address,
-                         @ApiParam(name = "password", value = "账户密码", required = true)
-                         @QueryParam("password") String password,
-                         @ApiParam(name = "unlockTime", value = "解锁时间默认120秒(单位:秒)")
-                         @QueryParam("unlockTime") Integer unlockTime) {
+    public RpcClientResult unlock(@ApiParam(name = "address", value = "账户地址", required = true)
+                                  @PathParam("address") String address,
+                                  @ApiParam(name = "password", value = "账户密码", required = true)
+                                  @QueryParam("password") String password,
+                                  @ApiParam(name = "unlockTime", value = "解锁时间默认120秒(单位:秒)")
+                                  @QueryParam("unlockTime") Integer unlockTime) {
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
         String addr = account.getAddress().toString();
         //如果存在定时加锁任务, 先删除之前的任务
@@ -312,9 +313,9 @@ public class AccountResource {
             }, unlockTime, TimeUnit.SECONDS);
             accountUnlockSchedulerMap.put(addr, scheduledFuture);
         } catch (NulsException e) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
         }
-        return Result.getSuccess();
+        return Result.getSuccess().toRpcClientResult();
     }
 
 
@@ -325,21 +326,21 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result setPassword(@ApiParam(name = "address", value = "账户地址", required = true)
-                              @PathParam("address") String address,
-                              @ApiParam(name = "form", value = "设置钱包密码表单数据", required = true)
-                                      AccountPasswordForm form) {
+    public RpcClientResult setPassword(@ApiParam(name = "address", value = "账户地址", required = true)
+                                       @PathParam("address") String address,
+                                       @ApiParam(name = "form", value = "设置钱包密码表单数据", required = true)
+                                               AccountPasswordForm form) {
         if (!Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         String password = form.getPassword();
         if (StringUtils.isBlank(password)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The password is required");
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The password is required").toRpcClientResult();
         }
         if (!StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "Length between 8 and 20, the combination of characters and numbers").toRpcClientResult();
         }
-        return accountBaseService.setPassword(address, password);
+        return accountBaseService.setPassword(address, password).toRpcClientResult();
     }
 
     @PUT
@@ -349,28 +350,28 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result updatePassword(@ApiParam(name = "address", value = "账户地址", required = true)
-                                 @PathParam("address") String address,
-                                 @ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
-                                         AccountUpdatePasswordForm form) {
+    public RpcClientResult updatePassword(@ApiParam(name = "address", value = "账户地址", required = true)
+                                          @PathParam("address") String address,
+                                          @ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
+                                                  AccountUpdatePasswordForm form) {
         if (!Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         String password = form.getPassword();
         String newPassword = form.getNewPassword();
         if (StringUtils.isBlank(password)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The password is required");
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The password is required").toRpcClientResult();
         }
         if (StringUtils.isBlank(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The newPassword is required");
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The newPassword is required").toRpcClientResult();
         }
         if (!StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "password Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "password Length between 8 and 20, the combination of characters and numbers").toRpcClientResult();
         }
         if (!StringUtils.validPassword(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "newPassword Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "newPassword Length between 8 and 20, the combination of characters and numbers").toRpcClientResult();
         }
-        return this.accountBaseService.changePassword(address, password, newPassword);
+        return this.accountBaseService.changePassword(address, password, newPassword).toRpcClientResult();
     }
 
     @PUT
@@ -380,26 +381,26 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result updatePasswordByPriKey(@ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
-                                                 AccountPriKeyChangePasswordForm form) {
+    public RpcClientResult updatePasswordByPriKey(@ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
+                                                          AccountPriKeyChangePasswordForm form) {
 
         String prikey = form.getPriKey();
         if (!ECKey.isValidPrivteHex(prikey)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The prikey is wrong");
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The prikey is wrong").toRpcClientResult();
         }
         String newPassword = form.getPassword();
         if (StringUtils.isBlank(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The newPassword is required");
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The newPassword is required").toRpcClientResult();
         }
         if (!StringUtils.validPassword(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "Length between 8 and 20, the combination of characters and numbers").toRpcClientResult();
         }
         Result result = accountService.importAccount(prikey, newPassword);
         if (result.isFailed()) {
-            return result;
+            return result.toRpcClientResult();
         }
         Account account = (Account) result.getData();
-        return Result.getSuccess().setData(account.getAddress().toString());
+        return Result.getSuccess().setData(account.getAddress().toString()).toRpcClientResult();
     }
 
     @POST
@@ -409,24 +410,24 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result updatePasswordByAccountKeyStore(@ApiParam(name = "form", value = "重置密码表单数据", required = true)
-                                                          AccountKeyStoreResetPasswordForm form) {
+    public RpcClientResult updatePasswordByAccountKeyStore(@ApiParam(name = "form", value = "重置密码表单数据", required = true)
+                                                                   AccountKeyStoreResetPasswordForm form) {
 
         if (null == form || null == form.getAccountKeyStoreDto()) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         AccountKeyStoreDto accountKeyStoreDto = form.getAccountKeyStoreDto();
 
         String password = form.getPassword();
         if (!StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
         }
         Result result = accountService.updatePasswordByAccountKeyStore(accountKeyStoreDto.toAccountKeyStore(), password);
         if (result.isFailed()) {
-            return result;
+            return result.toRpcClientResult();
         }
         Account account = (Account) result.getData();
-        return Result.getSuccess().setData(account.getAddress().toString());
+        return Result.getSuccess().setData(account.getAddress().toString()).toRpcClientResult();
     }
 
 
@@ -437,19 +438,19 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result<AccountKeyStore> export(@ApiParam(name = "address", value = "账户地址", required = true)
-                                          @PathParam("address") String address,
-                                          @ApiParam(name = "form", value = "钱包备份表单数据")
-                                                  AccountPasswordForm form) {
+    public RpcClientResult export(@ApiParam(name = "address", value = "账户地址", required = true)
+                                  @PathParam("address") String address,
+                                  @ApiParam(name = "form", value = "钱包备份表单数据")
+                                          AccountPasswordForm form) {
         if (StringUtils.isNotBlank(address) && !Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         Result<AccountKeyStore> result = accountService.exportAccountToKeyStore(address, form.getPassword());
         if (result.isFailed()) {
-            return result;
+            return result.toRpcClientResult();
         }
         AccountKeyStore accountKeyStore = result.getData();
-        return Result.getSuccess().setData(new AccountKeyStoreDto(accountKeyStore));
+        return Result.getSuccess().setData(new AccountKeyStoreDto(accountKeyStore)).toRpcClientResult();
     }
 
     @POST
@@ -459,29 +460,29 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result importAccount(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
-                                        AccountKeyStoreImportForm form) {
+    public RpcClientResult importAccount(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
+                                                 AccountKeyStoreImportForm form) {
 
         if (null == form || null == form.getAccountKeyStoreDto() || null == form.getOverwrite()) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         AccountKeyStoreDto accountKeyStoreDto = form.getAccountKeyStoreDto();
         if (!form.getOverwrite()) {
             Account account = accountService.getAccount(accountKeyStoreDto.getAddress()).getData();
             if (null != account) {
-                return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST);
+                return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST).toRpcClientResult();
             }
         }
         String password = form.getPassword();
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
         }
         Result result = accountService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), password);
         if (result.isFailed()) {
-            return result;
+            return result.toRpcClientResult();
         }
         Account account = (Account) result.getData();
-        return Result.getSuccess().setData(account.getAddress().toString());
+        return Result.getSuccess().setData(account.getAddress().toString()).toRpcClientResult();
     }
 
     @POST
@@ -491,38 +492,38 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result<String> importAccountByPriKey(@ApiParam(name = "form", value = "导入账户表单数据", required = true) AccountPriKeyPasswordForm form) {
+    public RpcClientResult importAccountByPriKey(@ApiParam(name = "form", value = "导入账户表单数据", required = true) AccountPriKeyPasswordForm form) {
 
         if (null == form || null == form.getOverwrite()) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (!form.getOverwrite()) {
             ECKey key = null;
             try {
                 key = ECKey.fromPrivate(new BigInteger(Hex.decode(form.getPriKey())));
             } catch (Exception e) {
-                return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+                return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
             }
             Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, SerializeUtils.sha256hash160(key.getPubKey()));
             Account account = accountService.getAccount(address).getData();
             if (null != account) {
-                return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST);
+                return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST).toRpcClientResult();
             }
         }
         String priKey = form.getPriKey();
         if (!ECKey.isValidPrivteHex(priKey)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         String password = form.getPassword();
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
         }
         Result result = accountService.importAccount(priKey, password);
         if (result.isFailed()) {
-            return result;
+            return result.toRpcClientResult();
         }
         Account account = (Account) result.getData();
-        return Result.getSuccess().setData(account.getAddress().toString());
+        return Result.getSuccess().setData(account.getAddress().toString()).toRpcClientResult();
     }
 
     @POST
@@ -532,13 +533,13 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public Result removeAccount(@ApiParam(name = "address", value = "账户地址", required = true)
-                                @PathParam("address") String address,
-                                @ApiParam(name = "钱包移除账户表单数据", value = "JSONFormat", required = true)
-                                        AccountPasswordForm form) {
+    public RpcClientResult removeAccount(@ApiParam(name = "address", value = "账户地址", required = true)
+                                         @PathParam("address") String address,
+                                         @ApiParam(name = "钱包移除账户表单数据", value = "JSONFormat", required = true)
+                                                 AccountPasswordForm form) {
         if (!Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        return accountService.removeAccount(address, form.getPassword());
+        return accountService.removeAccount(address, form.getPassword()).toRpcClientResult();
     }
 }

@@ -55,7 +55,7 @@ import java.util.List;
 
 /**
  * 系统启动时加载缓存的处理器
- * The processor that loads the cache when the system starts.
+ * The cmd that loads the cache when the system starts.
  *
  * @author ln
  * @date 2018/4/13

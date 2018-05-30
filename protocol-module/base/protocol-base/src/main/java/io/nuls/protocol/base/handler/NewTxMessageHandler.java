@@ -27,18 +27,17 @@ package io.nuls.protocol.base.handler;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.validate.ValidateResult;
-import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.TransactionMessage;
+import io.nuls.protocol.service.TransactionService;
 
 /**
  * @author Niels
@@ -46,19 +45,19 @@ import io.nuls.protocol.message.TransactionMessage;
  */
 public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessage> {
 
-
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
     private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
+    private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
 
     public NewTxMessageHandler() {
     }
 
     @Override
-    public void onMessage(TransactionMessage event, Node fromNode) {
+    public void onMessage(TransactionMessage message, Node fromNode) {
 
-        Transaction tx = event.getMsgBody();
+        Transaction tx = message.getMsgBody();
         if (null == tx) {
             return;
         }
@@ -80,11 +79,10 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
             consensusService.newTx(tx);
             return;
         }
-        temporaryCacheManager.cacheTx(tx);
-
         try {
+            temporaryCacheManager.cacheTx(tx);
             consensusService.newTx(tx);
-            messageBusService.broadcastHashAndCache(event, fromNode, true);
+            transactionService.forwardTx(message.getMsgBody(), fromNode);
         } catch (Exception e) {
             Log.error(e);
         }

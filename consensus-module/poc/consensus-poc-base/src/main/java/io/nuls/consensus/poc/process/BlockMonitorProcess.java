@@ -1,6 +1,7 @@
 package io.nuls.consensus.poc.process;
 
 import io.nuls.consensus.poc.config.ConsensusConfig;
+import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.service.impl.ConsensusPocServiceImpl;
 import io.nuls.core.tools.crypto.Base58;
@@ -17,6 +18,8 @@ import java.util.Set;
  * @date 2018/5/18
  */
 public class BlockMonitorProcess {
+
+    private final static long RESET_TIME_INTERVAL =  PocConsensusConstant.RESET_SYSTEM_TIME_INTERVAL * 60 * 1000L;
 
     private final ChainManager chainManager;
 
@@ -35,8 +38,8 @@ public class BlockMonitorProcess {
                 break;
             }
         }
-        if ((addressSet.size() == 1 && ConsensusConfig.getSeedNodeList().size() > 1)||
-        NulsContext.getInstance().getBestBlock().getHeader().getTime() < (TimeService.currentTimeMillis() - 120000L)) {
+        if ((addressSet.size() == 1 && ConsensusConfig.getSeedNodeList().size() > 1) ||
+                NulsContext.getInstance().getBestBlock().getHeader().getTime() < (TimeService.currentTimeMillis() - RESET_TIME_INTERVAL)) {
             NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
         }
     }

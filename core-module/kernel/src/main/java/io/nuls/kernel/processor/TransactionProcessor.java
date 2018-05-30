@@ -34,7 +34,7 @@ import java.util.List;
  * 交易处理器，每个交易需要实现自己的交易处理器，处理交易本身的业务，交易不同的生命周期会调用不同的业务方法
  * 实现该接口的类，需要添加{@link io.nuls.kernel.lite.annotation.Service} 注解
  * <p>
- * Transaction processors, each transaction needs to implement its own transaction processor,
+ * Transaction processors, each transaction needs to implement its own transaction cmd,
  * deal with the business of the transaction itself, and different business methods are invoked by different life cycles.
  * Implement this interface class, you need to add {@link io.nuls.kernel.lite.annotation.Service} annotation
  *

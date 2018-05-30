@@ -1,7 +1,8 @@
-package io.nuls.account.rpc.processor;
+package io.nuls.account.rpc.cmd;
 
-import io.nuls.core.tools.cmd.CommandBuilder;
-import io.nuls.core.tools.cmd.CommandHelper;
+import io.nuls.account.model.Address;
+import io.nuls.kernel.utils.CommandBuilder;
+import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
@@ -19,56 +20,56 @@ import java.util.Map;
  */
 @Cmd
 @Component
-public class CreateAccountsProcessor implements CommandProcessor {
+public class SetPasswordProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
-        return "createaccounts";
+        return "setpwd";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
-
         builder.newLine(getCommandDescription())
-                .newLine("\t<count> The count of accounts you want to create, - Required")
-                .newLine("\t[password] The password for the account, the password is between 8 and 20 inclusive of numbers and letters , not encrypted by default");
+                .newLine("\t<address> address of the account - Required")
+                .newLine("\t<password> account password (8-20 characters, letters and numbers) - Required");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "createaccounts <count> [password] --create <count> accounts , encrypted by [password]";
+        return "setpwd <address> <password> --set password for the account";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length < 2 || length > 3) {
+        if (length != 3) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (!StringUtils.isNumeric(args[1])) {
+        if (!Address.validAddress(args[1])) {
             return false;
         }
-        if (length == 3 && !StringUtils.validPassword(args[2])) {
+        if (!StringUtils.validPassword(args[2])) {
             return false;
         }
+        String newPwd = args[2];
+        CommandHelper.confirmPwd(newPwd);
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        String password = args.length == 3 ? args[2] : null;
-        int count = Integer.parseInt(args[1]);
+        String address = args[1];
+        String password = args[2];
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("password", password);
-        parameters.put("count", count);
-        Result result = restFul.post("/account", parameters);
+        Result result = restFul.post("/account/password/" + address, parameters);
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());
         }

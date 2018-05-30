@@ -79,7 +79,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     private LocalUtxoService localUtxoService;
 
     @Autowired
-    UnconfirmedTransactionStorageService unconfirmedTransactionStorageService;
+    private UnconfirmedTransactionStorageService unconfirmedTransactionStorageService;
 
     @Autowired
     private AccountService accountService;
@@ -147,6 +147,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             result = localUtxoService.saveUtxoForLocalAccount(tx);
             if (result.isFailed()) {
                 transactionInfoService.deleteTransactionInfo(txInfoPo);
+                return result;
             }
         } else {
             unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
@@ -168,6 +169,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             result = this.ledgerService.verifyCoinData(tx, this.getAllUnconfirmedTransaction().getData());
             if (result.isFailed()) {
+                Log.info("verifyCoinData failed");
                 return result;
             }
             return saveUnconfirmedTransaction(tx);
@@ -196,6 +198,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         result = localUtxoService.saveUtxoForLocalAccount(tx);
         if (result.isFailed()) {
             transactionInfoService.deleteTransactionInfo(txInfoPo);
+            return result;
         }
 
         result = unconfirmedTransactionStorageService.saveUnconfirmedTx(tx.getHash(), tx);
@@ -241,6 +244,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return Result.getSuccess().setData(new Integer(0));
         }
 
+        List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx);
+        if (addresses == null || addresses.size() == 0) {
+            return Result.getSuccess().setData(new Integer(0));
+        }
+
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
         Result result = transactionInfoService.deleteTransactionInfo(txInfoPo);
 
@@ -248,6 +256,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return result;
         }
         result = localUtxoService.deleteUtxoOfTransaction(tx);
+
+        for (int i = 0; i < addresses.size(); i++) {
+            balanceManager.refreshBalance(addresses.get(i));
+        }
 
         return result;
     }
@@ -326,7 +338,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 coinDataResult.setEnough(false);
                 return coinDataResult;
             }
-            //todo
 //            for(Coin coin : coinDataResult.getCoinList()) {
 //                coin.setNa(Na.ZERO);
 //                coin.setLockTime(0L);

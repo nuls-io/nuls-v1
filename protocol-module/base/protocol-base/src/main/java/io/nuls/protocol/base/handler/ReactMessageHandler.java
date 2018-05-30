@@ -1,3 +1,4 @@
+
 /*
  * MIT License
  *
@@ -23,31 +24,31 @@
  *
  */
 
-package io.nuls.protocol.storage.constant;
+package io.nuls.protocol.base.handler;
+
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.message.bus.handler.AbstractMessageHandler;
+import io.nuls.network.model.Node;
+import io.nuls.protocol.base.download.cache.DownloadCacheHandler;
+import io.nuls.protocol.message.ReactMessage;
+import io.nuls.protocol.model.CompleteParam;
+import io.nuls.protocol.model.ReactParam;
 
 /**
- * 协议模块存储功能相关常量集合
- * The protocol module stores a collection of related constants.
- *
- * @author: Niels Wang
- * @date: 2018/5/8
+ * @author ln
+ * @date 2018/05/29
  */
-public interface ProtocolStorageConstant {
-    /**
-     * 区块头高度索引表名称
-     * Block header height index table.
-     */
-    String DB_NAME_BLOCK_HEADER_INDEX = "block_header_index";
+public class ReactMessageHandler extends AbstractMessageHandler<ReactMessage> {
 
-    /**
-     * 区块头表名称
-     * Block header table name.
-     */
-    String DB_NAME_BLOCK_HEADER = "block_header";
-
-    /**
-     * 数据库中存储的最新区块hash的索引值
-     * The index value of the latest block hash stored in the database.
-     */
-    String BEST_BLOCK_HASH_INDEX = "best_block_hash_index";
+    @Override
+    public void onMessage(ReactMessage message, Node fromNode) throws NulsException {
+        if(message == null || message.getMsgBody() == null || fromNode == null) {
+            return;
+        }
+        ReactParam param = message.getMsgBody();
+        if(param.getRequestId() == null) {
+            return;
+        }
+        DownloadCacheHandler.requestReact(param.getRequestId());
+    }
 }

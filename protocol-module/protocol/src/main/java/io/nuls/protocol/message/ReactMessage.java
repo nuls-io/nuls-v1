@@ -23,31 +23,26 @@
  *
  */
 
-package io.nuls.protocol.storage.constant;
+package io.nuls.protocol.message;
+
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.model.CompleteParam;
+import io.nuls.protocol.model.ReactParam;
 
 /**
- * 协议模块存储功能相关常量集合
- * The protocol module stores a collection of related constants.
- *
- * @author: Niels Wang
- * @date: 2018/5/8
+ * @author ln
+ * @date 2018/05/29
  */
-public interface ProtocolStorageConstant {
-    /**
-     * 区块头高度索引表名称
-     * Block header height index table.
-     */
-    String DB_NAME_BLOCK_HEADER_INDEX = "block_header_index";
+public class ReactMessage extends BaseProtocolMessage<ReactParam> {
 
-    /**
-     * 区块头表名称
-     * Block header table name.
-     */
-    String DB_NAME_BLOCK_HEADER = "block_header";
+    public ReactMessage() {
+        super(ProtocolConstant.REQUEST_REACT);
+    }
 
-    /**
-     * 数据库中存储的最新区块hash的索引值
-     * The index value of the latest block hash stored in the database.
-     */
-    String BEST_BLOCK_HASH_INDEX = "best_block_hash_index";
+    @Override
+    protected ReactParam parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new ReactParam());
+    }
 }

@@ -1,8 +1,8 @@
-package io.nuls.account.rpc.processor;
+package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.model.Address;
-import io.nuls.core.tools.cmd.CommandBuilder;
-import io.nuls.core.tools.cmd.CommandHelper;
+import io.nuls.kernel.utils.CommandBuilder;
+import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
@@ -20,60 +20,62 @@ import java.util.Map;
  */
 @Cmd
 @Component
-public class SetAliasProcessor implements CommandProcessor {
+public class ResetPasswordProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
-        return "setalias";
+        return "resetpwd";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<alias> The alias of the account, the bytes for the alias is between 3 and 64, - Required")
-                .newLine("\t<address> The address of the account, - Required")
-                .newLine("\t[password] The password of the account, if the account does not have a password, this entry is not required");
+                .newLine("\t<address> address of the account - Required")
+                .newLine("\t<oldpassword> account password")
+                .newLine("\t<newpassword> new password (8-20 characters, letters and numbers) - Required");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "setalias <alias> <address> [password] --Set an alias for the account ";
+        return "resetpwd <address> <oldpassword> <newpassword> --reset password for account";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length < 3 || length > 4) {
+        if (length != 4) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (!StringUtils.validAlias(args[1])) {
+        if (!Address.validAddress(args[1])) {
             return false;
         }
-        if (!Address.validAddress(args[2])) {
+        if (!StringUtils.validPassword(args[2])) {
             return false;
         }
-        if (length == 4 && !StringUtils.validPassword(args[3])) {
+        if (!StringUtils.validPassword(args[3])) {
             return false;
         }
+        String newPwd = args[3];
+        CommandHelper.confirmPwd(newPwd);
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        String alias = args[1];
-        String address = args[2];
-        String password = args.length == 4 ? args[3] : null;
+        String address = args[1];
+        String password = args[2];
+        String newPassword = args[3];
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("alias", alias);
         parameters.put("password", password);
-        Result result = restFul.post("/account/alias/" + address, parameters);
+        parameters.put("newPassword", newPassword);
+        Result result = restFul.put("/account/password/" + address, parameters);
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());
         }

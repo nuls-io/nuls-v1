@@ -1,4 +1,6 @@
-package io.nuls.core.tools.cmd;
+package io.nuls.kernel.utils;
+
+import io.nuls.kernel.model.Na;
 
 import java.util.Scanner;
 
@@ -33,4 +35,30 @@ public class CommandHelper {
         Scanner scanner = new Scanner(System.in);
         return scanner.nextLine();
     }
+
+    public static Long getLongAmount(String arg) {
+        Na na = null;
+        try {
+            na = Na.parseNuls(arg);
+            return na.getValue();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static Double naToNuls(Object object){
+        if(null == object){
+            return null;
+        }
+        Long na = null;
+        if(object instanceof Long){
+            na = (Long)object;
+        }else if(object instanceof Integer){
+            na = ((Integer)object).longValue();
+        }else{
+            return null;
+        }
+        return Na.valueOf(na).toDouble();
+    }
+
 }

@@ -1,28 +1,28 @@
 package io.nuls.client.cmd;
 
-import io.nuls.account.rpc.processor.*;
-import io.nuls.accout.ledger.rpc.processor.GetAccountTxListProcessor;
+import io.nuls.account.rpc.cmd.*;
+import io.nuls.accout.ledger.rpc.cmd.GetAccountTxListProcessor;
+import io.nuls.accout.ledger.rpc.cmd.GetUTXOProcessor;
+import io.nuls.accout.ledger.rpc.cmd.TransferProcessor;
 import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.rpc.constant.RpcConstant;
-import io.nuls.consensus.poc.rpc.cmd.GetBlockHeaderProcessor;
+import io.nuls.consensus.poc.rpc.cmd.*;
 import io.nuls.core.tools.cfg.ConfigLoader;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.i18n.I18nUtils;
-import io.nuls.kernel.lite.annotation.Cmd;
-import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 import io.nuls.ledger.rpc.cmd.GetTxProcessor;
+import io.nuls.protocol.rpc.cmd.GetBestBlockHeaderProcessor;
+import io.nuls.protocol.rpc.cmd.GetBlockHeaderProcessor;
+import io.nuls.protocol.rpc.cmd.GetBlockProcessor;
 
-import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
@@ -40,23 +40,20 @@ public class CommandHandler {
      */
     private void init() {
         /**
-         * account cmd
-         */
-
-
-        /**
-         * account ledger cmd
-         */
-        register(new GetAccountTxListProcessor());
-        /**
-         * tx cmd
+         * ledger
          */
         register(new GetTxProcessor());
 
         /**
-         * block cmd
+         * block
          */
         register(new GetBlockHeaderProcessor());
+        register(new GetBlockProcessor());
+        register(new GetBestBlockHeaderProcessor());
+
+        /**
+         * account
+         */
         register(new BackupAccountProcessor());
         register(new CreateAccountProcessor());
         register(new CreateAccountsProcessor());
@@ -72,6 +69,29 @@ public class CommandHandler {
         register(new ResetPasswordProcessor());
         register(new SetAliasProcessor());
         register(new SetPasswordProcessor());
+
+        /**
+         * accountLedger
+         */
+        register(new TransferProcessor());
+        register(new GetAccountTxListProcessor());
+        register(new GetUTXOProcessor());
+
+        /**
+         * consensus
+         */
+        register(new CreateAgentProcessor());
+        register(new GetConsensusProcessor());
+        register(new GetConsensusAddressProcessor());
+        register(new DepositProcessor());
+        register(new WithdrawProcessor());
+        register(new StopAgentProcessor());
+        register(new GetAgentProcessor());
+        register(new GetAgentsProcessor());
+        register(new GetDepositedAgentsProcessor());
+        register(new GetDepositedsProcessor());
+        register(new GetDepositedInfoProcessor());
+
 
         sdkInit();
     }

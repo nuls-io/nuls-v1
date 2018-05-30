@@ -1,8 +1,8 @@
-package io.nuls.account.rpc.processor;
+package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.model.Address;
-import io.nuls.core.tools.cmd.CommandBuilder;
-import io.nuls.core.tools.cmd.CommandHelper;
+import io.nuls.kernel.utils.CommandBuilder;
+import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.CommandResult;
@@ -16,37 +16,37 @@ import io.nuls.kernel.utils.RestFulUtils;
  */
 @Cmd
 @Component
-public class GetAccountProcessor implements CommandProcessor {
+public class GetBalanceProcessor  implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
-        return "getaccount";
+        return "getbalance";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<address> the account address - Required");
+                .newLine("\t<address> the account address - require");
         return builder.toString();
     }
-
     @Override
     public String getCommandDescription() {
-        return "getaccount <address> --get account information";
+        return "getbalance <address> --get the balance of a address";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        if (args.length != 2) {
+        int length = args.length;
+        if(length != 2) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (!Address.validAddress(args[1])) {
+        if(!Address.validAddress(args[1])){
             return false;
         }
         return true;
@@ -55,7 +55,7 @@ public class GetAccountProcessor implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        Result result = restFul.get("/account/" + address, null);
+        Result result = restFul.get("/account/balance/" + address, null);
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());
         }

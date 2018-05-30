@@ -1,39 +1,43 @@
-package io.nuls.ledger.rpc.cmd;
+package io.nuls.consensus.poc.rpc.cmd;
 
 import io.nuls.kernel.utils.CommandBuilder;
-import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
-public class GetTxProcessor implements CommandProcessor {
+/**
+ * @author: Charlie
+ * @date: 2018/5/28
+ */
+public class GetConsensusProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
-        return "gettx";
+        return "getconsensus";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder bulider = new CommandBuilder();
-        bulider.newLine(getCommandDescription())
-                .newLine("\t<hash>   transaction hash -required");
+        bulider.newLine(getCommandDescription());
         return bulider.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "gettx <hash> --get the transaction information by txhash";
+        return "getconsensus --Get the whole network consensus infomation";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        int length = args.length;
-        if (length != 2) {
+        if(args.length != 1){
+            return false;
+        }
+        if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
         return true;
@@ -41,11 +45,10 @@ public class GetTxProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        String hash = args[1];
-        if(StringUtils.isBlank(hash)) {
-            return CommandResult.getFailed(KernelErrorCode.PARAMETER_ERROR.getMsg());
+        Result result = restFul.get("/consensus",null);
+        if (result.isFailed()) {
+            return CommandResult.getFailed(result.getMsg());
         }
-        Result result = restFul.get("/tx/hash/" + hash, null);
         return CommandResult.getResult(result);
     }
 }

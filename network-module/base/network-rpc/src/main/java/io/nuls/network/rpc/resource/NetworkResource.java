@@ -5,6 +5,7 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
@@ -37,7 +38,7 @@ public class NetworkResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = NetworkInfoDto.class)
     })
-    public Result<NetworkInfoDto> getNetworkInfo() {
+    public RpcClientResult getNetworkInfo() {
         NetworkInfoDto info = new NetworkInfoDto(NulsContext.getInstance().getBestBlock().getHeader().getHeight(),
                 NulsContext.getInstance().getNetBestBlockHeight(), TimeService.getNetTimeOffset());
 
@@ -61,7 +62,7 @@ public class NetworkResource {
 
         Result result = Result.getSuccess();
         result.setData(info);
-        return result;
+        return result.toRpcClientResult();
     }
 
     @GET
@@ -71,10 +72,10 @@ public class NetworkResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = String[].class)
     })
-    public Result getNode() {
+    public RpcClientResult getNode() {
         Set<String> ipSet = NetworkParam.getInstance().getIpMap().keySet();
         Result result = Result.getSuccess();
         result.setData(ipSet);
-        return result;
+        return result.toRpcClientResult();
     }
 }
