@@ -76,6 +76,6 @@ public class CoinBaseTransaction extends Transaction {
 
     @Override
     public boolean needVerifySignature() {
-        return true;
+        return false;
     }
 }

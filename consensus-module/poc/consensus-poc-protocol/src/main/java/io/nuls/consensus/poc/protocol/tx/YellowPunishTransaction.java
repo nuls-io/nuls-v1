@@ -57,6 +57,6 @@ public class YellowPunishTransaction extends Transaction<YellowPunishData> {
 
     @Override
     public boolean needVerifySignature() {
-        return true;
+        return false;
     }
 }
