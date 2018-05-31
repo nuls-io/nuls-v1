@@ -91,7 +91,7 @@ public class AliasService {
             return Result.getFailed(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS, "Alias has been set up");
         }
         if (!StringUtils.validAlias(aliasName)) {
-            return Result.getFailed("The alias is between 3 to 20 characters");
+            return Result.getFailed("The alias is between 3 to 64 characters");
         }
         if (isAliasExist(aliasName)) {
             return Result.getFailed(AccountErrorCode.ALIAS_EXIST);
