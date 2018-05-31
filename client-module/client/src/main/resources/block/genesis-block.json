@@ -3,53 +3,33 @@
   "time": "1525104000000",
   "txs": [
     {
-      "address": "2CeEHGEomH7o3CbXMGk1huTPN3sXKyB",
+      "address": "2Cht55uh8JR5ZAQkp1CVyNPwmFvNuLS",
       "nuls": 10000000,
       "unlockHeight": 0
     },
     {
-      "address": "2CbqMHi9hFJ1NZsSsX45XyWCo7ssPgT",
+      "address": "2ChDcC1nvki521xXhYAUzYXt4RLNuLs",
       "nuls": 10000000,
       "unlockHeight": 0
     },
     {
-      "address": "2CjPVMKST7h4Q5Dqa8Q9P9CwYSmN7mG",
+      "address": "2CiU1CmB6c9jmSLDNBe6PouA7NgNULS",
+      "nuls": 10000000,
+      "unlockHeight": 0
+    },
+    {
+      "address": "2CcGuvxdR5R8SBU3hvg1WE9XV1UNuLS",
+      "nuls": 10000000,
+      "unlockHeight": 0
+    },
+    {
+      "address": "2CXQkBgR32xH9ULEkzcN8zpS6sQNULS",
       "nuls": 10000000,
       "unlockHeight": 0
     },
     {
       "address": "2CXz2tsMrfDuMA92ZVDVdnw92Ws5jnN",
-      "nuls": 10000000,
-      "unlockHeight": 0
-    },
-    {
-      "address": "2CX4AaWCeqrz3qdJ6dmPYNcbPSUEy4F",
-      "nuls": 10000000,
-      "unlockHeight": 0
-    },
-    {
-      "address": "2Cc9t3rEJKZ3dvCqGZmFGWMDeiJ1TZs",
-      "nuls": 10000000,
-      "unlockHeight": 0
-    },
-    {
-      "address": "2CYqLxMgdSK5XaK9yBv43g6iEtpiAKJ",
-      "nuls": 10000000,
-      "unlockHeight": 0
-    },
-    {
-      "address": "2CXJEuoXZMajeTEgL6TgiSxTRRMwiMM",
-      "nuls": 10000000,
-      "unlockHeight": 0
-    },
-    {
-      "address": "2CY9pyK3cgKVBBTPpAKHW1Mv9gGNjM1",
-      "nuls": 10000000,
-      "unlockHeight": 0
-    },
-    {
-      "address": "2CfL6FRhyHHUsB5xnCCV11pPv6dEryy",
-      "nuls": 10000000,
+      "nuls": 50000000,
       "unlockHeight": 0
     }
   ]
