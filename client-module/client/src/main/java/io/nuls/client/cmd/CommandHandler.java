@@ -25,7 +25,10 @@ import io.nuls.protocol.rpc.cmd.GetBestBlockHeaderProcessor;
 import io.nuls.protocol.rpc.cmd.GetBlockHeaderListProcessor;
 import io.nuls.protocol.rpc.cmd.GetBlockHeaderProcessor;
 import io.nuls.protocol.rpc.cmd.GetBlockProcessor;
+import jline.Terminal;
+import jline.console.ConsoleReader;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
@@ -134,7 +137,7 @@ public class CommandHandler {
     }
 
 
-    public static void main(String[] args) {
+   /* public static void main(String[] args) {
         CommandHandler instance = new CommandHandler();
         instance.init();
         try {
@@ -152,8 +155,41 @@ public class CommandHandler {
             }
             System.out.print(instance.processCommand(read.split("\\s+")) + "\n" + CommandConstant.COMMAND_PS1);
         }
-    }
+    }*/
 
+    public static void main(String[] args) {
+        CommandHandler instance = new CommandHandler();
+        instance.init();
+        try {
+            I18nUtils.setLanguage("en");
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+        ConsoleReader reader = null;
+        try {
+            reader = new ConsoleReader();
+            String line = null;
+            do {
+                System.out.print(CommandConstant.COMMAND_PS1);
+                line = reader.readLine();
+                if (StringUtils.isBlank(line)) {
+                    continue;
+                }
+                System.out.print(instance.processCommand(line.split("\\s+")) + "\n");
+            } while (line != null);
+        } catch (IOException e) {
+
+        }finally {
+            try {
+                if(!reader.delete()){
+                    reader.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
 
     private String processCommand(String[] args) {
         int length = args.length;
