@@ -36,7 +36,9 @@ import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
+import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
+import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.consensus.poc.storage.service.DepositStorageService;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -56,6 +58,9 @@ public class DepositTxProcessor implements TransactionProcessor<DepositTransacti
 
     @Autowired
     private DepositStorageService depositStorageService;
+
+    @Autowired
+    private AgentStorageService agentStorageService;
 
     /**
      * 交易回滚时调用该方法
@@ -144,9 +149,9 @@ public class DepositTxProcessor implements TransactionProcessor<DepositTransacti
                 case ConsensusConstant.TX_TYPE_RED_PUNISH:
                     RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
                     RedPunishData redPunishData = redPunishTransaction.getTxData();
-                    Agent agent = this.getAgentByAddress(redPunishData.getAddress());
+                    AgentPo agent = this.getAgentByAddress(redPunishData.getAddress());
                     if (null != agent) {
-                        outAgentHash.add(agent.getTxHash());
+                        outAgentHash.add(agent.getHash());
                     }
                     break;
             }
@@ -165,10 +170,10 @@ public class DepositTxProcessor implements TransactionProcessor<DepositTransacti
         return ValidateResult.getSuccessResult();
     }
 
-    private Agent getAgentByAddress(byte[] address) {
-        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+    private AgentPo getAgentByAddress(byte[] address) {
+        List<AgentPo> agentList = agentStorageService.getList();
         long startBlockHeight = NulsContext.getInstance().getBestHeight();
-        for (Agent agent : agentList) {
+        for (AgentPo agent : agentList) {
             if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
                 continue;
             }
@@ -183,10 +188,10 @@ public class DepositTxProcessor implements TransactionProcessor<DepositTransacti
     }
 
     private Na getAgentTotalDeposit(NulsDigestData hash) {
-        List<Deposit> depositList = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
+        List<DepositPo> depositList = depositStorageService.getList();
         long startBlockHeight = NulsContext.getInstance().getBestHeight();
         Na na = Na.ZERO;
-        for (Deposit deposit : depositList) {
+        for (DepositPo deposit : depositList) {
             if (deposit.getDelHeight() != -1L && deposit.getDelHeight() <= startBlockHeight) {
                 continue;
             }
