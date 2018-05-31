@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.nuls</groupId>
         <artifactId>tools-module</artifactId>
-        <version>0.9.6</version>
+        <version>0.9.8</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -21,7 +21,7 @@
         <dependency>
             <groupId>io.nuls.tools-module</groupId>
             <artifactId>tools</artifactId>
-            <version>0.9.6</version>
+            <version>0.9.8</version>
         </dependency>
         <dependency>
             <groupId>io.protostuff</groupId>

@@ -5,7 +5,9 @@ import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.storage.po.AgentPo;
+import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
+import io.nuls.consensus.poc.storage.service.DepositStorageService;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -33,6 +35,9 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
     @Autowired
     private AgentStorageService agentStorageService;
 
+    @Autowired
+    private DepositStorageService depositStorageService;
+
     @Override
     public ValidateResult validate(StopAgentTransaction data) throws NulsException {
         AgentPo agentPo = agentStorageService.get(data.getTxData().getCreateTxHash());
@@ -54,14 +59,14 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
         if (data.getCoinData().getTo() == null || data.getCoinData().getTo().isEmpty()) {
             return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR, "The coindata is wrong.");
         }
-        List<Deposit> allDepositList = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
-        Map<NulsDigestData, Deposit> depositMap = new HashMap<>();
+        List<DepositPo> allDepositList = depositStorageService.getList();
+        Map<NulsDigestData, DepositPo> depositMap = new HashMap<>();
         Na totalNa = agentPo.getDeposit();
-        Deposit ownDeposit = new Deposit();
+        DepositPo ownDeposit = new DepositPo();
         ownDeposit.setDeposit(agentPo.getDeposit());
         ownDeposit.setAddress(agentPo.getAgentAddress());
         depositMap.put(data.getTxData().getCreateTxHash(), ownDeposit);
-        for (Deposit deposit : allDepositList) {
+        for (DepositPo deposit : allDepositList) {
             if (deposit.getDelHeight() > -1L && (data.getBlockHeight() == -1L || deposit.getDelHeight() < data.getBlockHeight())) {
                 continue;
             }
@@ -77,7 +82,7 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
         for (Coin coin : data.getCoinData().getFrom()) {
             NulsDigestData txHash = new NulsDigestData();
             txHash.parse(coin.getOwner());
-            Deposit deposit = depositMap.remove(txHash);
+            DepositPo deposit = depositMap.remove(txHash);
             if (deposit == null) {
                 return ValidateResult.getFailedResult(this.getClass().getName(), "The stop agent tx used a wrong coin!");
             }
