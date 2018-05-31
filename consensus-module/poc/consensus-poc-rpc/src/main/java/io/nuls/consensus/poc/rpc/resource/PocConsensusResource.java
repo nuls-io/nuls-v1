@@ -492,7 +492,6 @@ public class PocConsensusResource {
             accountLedgerService.rollbackTransaction(tx);
             return sendResult.toRpcClientResult();
         }
-        this.consensusService.newTx(tx);
         return Result.getSuccess().toRpcClientResult();
     }
 
