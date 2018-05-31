@@ -1,7 +1,11 @@
 package io.nuls.kernel.utils;
 
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.Na;
+import jline.console.ConsoleReader;
 
+import java.io.Console;
+import java.io.IOException;
 import java.util.Scanner;
 
 /**
@@ -20,20 +24,65 @@ public class CommandHelper {
         return true;
     }
 
-    public static void confirmPwd(String newPwd) {
+/*  public static void confirmPwd(String newPwd) {
         System.out.print("Please enter your password again:");
         Scanner scanner = new Scanner(System.in);
         String confirmed = scanner.nextLine();
         while (!newPwd.equals(confirmed)) {
-            System.out.print("The password you entered did not match.\nPlease confirm the new password:");
+            System.out.print("The password you entered did not match.\nEnter your new password: ");
             confirmed = scanner.nextLine();
         }
     }
 
-    public static String getPwd(){
+   public static String getPwd(){
         System.out.print("Please enter the password, if the account has no password directly return.\npassword:");
         Scanner scanner = new Scanner(System.in);
         return scanner.nextLine();
+    }*/
+
+    public static void confirmPwd(String newPwd) {
+        System.out.print("Please enter your new password again:");
+        ConsoleReader reader = null;
+        try {
+            reader = new ConsoleReader();
+            String confirmed = null;
+            do {
+                confirmed = reader.readLine('*');
+                if(!newPwd.equals(confirmed)){
+                    System.out.print("The password you entered did not match.\nEnter your new password: ");
+                }
+            } while (!newPwd.equals(confirmed));
+        } catch (IOException e) {
+
+        }finally {
+            try {
+                if(!reader.delete()){
+                    reader.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static String getPwd(){
+        System.out.print("Please enter the password, if the account has no password directly return.\nEnter your password:");
+        ConsoleReader reader = null;
+        try {
+            reader = new ConsoleReader();
+            String pwd = reader.readLine('*');
+            return pwd;
+        } catch (IOException e) {
+            return null;
+        }finally {
+            try {
+                if(!reader.delete()){
+                    reader.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static Long getLongAmount(String arg) {

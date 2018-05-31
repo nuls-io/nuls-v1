@@ -27,11 +27,12 @@ import io.nuls.protocol.rpc.cmd.GetBlockHeaderProcessor;
 import io.nuls.protocol.rpc.cmd.GetBlockProcessor;
 import jline.Terminal;
 import jline.console.ConsoleReader;
+import jline.console.completer.ArgumentCompleter;
+import jline.console.completer.Completer;
+import jline.console.completer.StringsCompleter;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.TreeMap;
+import java.util.*;
 
 public class CommandHandler {
 
@@ -168,6 +169,9 @@ public class CommandHandler {
         ConsoleReader reader = null;
         try {
             reader = new ConsoleReader();
+            List<Completer> completers = new ArrayList<Completer>();
+            completers.add(new StringsCompleter(PROCESSOR_MAP.keySet()));
+            reader.addCompleter(new ArgumentCompleter(completers));
             String line = null;
             do {
                 System.out.print(CommandConstant.COMMAND_PS1);
