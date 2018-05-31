@@ -41,7 +41,7 @@ public class CreateAgentProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "agent <agentAddress> <packingAddress> <commissionRate> <deposit> <agentName> <remark> [rewardAddress] --create a agent";
+        return "createagent <agentAddress> <packingAddress> <commissionRate> <deposit> <agentName> <remark> [rewardAddress] --create a agent";
     }
 
     @Override
