@@ -15,10 +15,10 @@ public class TransferTest {
 
     public static void main(String[] args) {
 
-        String address = "2CYqLxMgdSK5XaK9yBv43g6iEtpiAKJ";
-        String toAddress = "2Cjsa6wpKyowbVjM9oBrSeo7muEuu4w";
-        long amount = 10000000000L;
-        String password = "nuls123456";
+        String address = "2CXJEuoXZMajeTEgL6TgiSxTRRMwiMM";
+        String toAddress = "2ChhZeHncAcv9C9qQn2GDK2GBpD7X9k";
+        long amount = 1000000000L;
+        String password = "";
         String remark = "test";
 
         String param = "{\"address\": \"" + address + "\", \"toAddress\": \"" + toAddress + "\", \"password\": \"" + password + "\", \"amount\": \"" + amount + "\", \"remark\": \"" + remark + "\"}";
@@ -27,7 +27,7 @@ public class TransferTest {
 
         int successCount = 0;
 
-        for(int i = 0 ; i < 1000 ; i ++) {
+        for(int i = 0 ; i < 100000 ; i ++) {
             String res = post(url, param, "utf-8");
 
             if(res.indexOf("true") != -1) {
