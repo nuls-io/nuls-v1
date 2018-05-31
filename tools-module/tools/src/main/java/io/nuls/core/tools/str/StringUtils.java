@@ -88,7 +88,7 @@ public class StringUtils {
             }
             alias = alias.trim();
             byte[] aliasBytes = alias.getBytes("UTF-8");
-            if (aliasBytes.length < 3 || aliasBytes.length > 64) {
+            if (aliasBytes.length < 1 || aliasBytes.length > 30) {
                 return false;
             }
         } catch (UnsupportedEncodingException e) {
