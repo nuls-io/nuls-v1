@@ -161,14 +161,14 @@ public class CheckUnConfirmTxThread implements Runnable {
                 }
             }
             localUtxoStorageService.batchSaveUTXO(fromMap);
-            for (byte[] key : fromMap.keySet()) {
-                Coin coin = null;
-                try {
-                    coin.parse(fromMap.get(key));
-                } catch (NulsException e) {
-                    e.printStackTrace();
-                }
-            }
+//            for (byte[] key : fromMap.keySet()) {
+//                Coin coin = null;
+//                try {
+//                    coin.parse(fromMap.get(key));
+//                } catch (NulsException e) {
+//                    e.printStackTrace();
+//                }
+//            }
             // delete utxo - to
             List<Coin> tos = coinData.getTo();
             byte[] indexBytes;
