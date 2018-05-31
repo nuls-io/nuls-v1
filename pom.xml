@@ -4,7 +4,7 @@
 
     <groupId>io.nuls</groupId>
     <artifactId>nuls</artifactId>
-    <version>0.9.2</version>
+    <version>0.9.8</version>
     <packaging>pom</packaging>
 
     <name>nuls</name>
@@ -17,33 +17,38 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     <modules>
-        <module>core</module>
-        <module>cache</module>
-        <module>cache-impl</module>
-        <module>db</module>
-        <module>db-impl</module>
-        <module>rpc</module>
-        <module>rpc-impl</module>
-        <module>rpc-sdk</module>
-        <module>account</module>
-        <module>account-impl</module>
-        <module>ledger</module>
-        <module>ledger-impl</module>
-        <module>network</module>
-        <module>network-impl</module>
-        <module>node</module>
-        <module>event-bus</module>
-        <module>event-bus-impl</module>
-        <module>notify</module>
-        <module>consensus</module>
-        <module>consensus-impl/poc/poc-consensus</module>
-        <module>consensus-impl/poc/poc-consensus-impl</module>
-        <module>consensus-impl/poc/poc-consensus-protocol</module>
-        <module>consensus-impl/poc/poc-consensus-protocol-impl</module>
-        <module>protocol</module>
-        <module>protocol-impl/protocol-base</module>
+        <module>account-module</module>
+        <module>account-ledger-module</module>
+        <module>core-module</module>
+        <module>protocol-module</module>
+        <module>consensus-module</module>
+        <module>ledger-module</module>
+        <module>db-module</module>
+        <module>network-module</module>
+        <module>contract-module</module>
+        <module>client-module</module>
+        <module>tools-module</module>
+        <module>message-bus-module</module>
     </modules>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+        </dependency>
+    </dependencies>
     <build>
         <finalName>nuls</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <forkCount>3</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <argLine>-Xms1024m -Xmx4096m  -XX:NewSize=256m -XX:MaxNewSize=256m</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>

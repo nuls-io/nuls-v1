@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>nuls</artifactId>
+        <groupId>io.nuls</groupId>
+        <version>0.9.8</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.nuls</groupId>
+    <artifactId>db-module</artifactId>
+    <version>0.9.8</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <modules>
+        <module>db</module>
+        <module>leveldb/db-leveldb</module>
+    </modules>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+        </dependency>
+        <dependency>
+            <groupId>io.nuls.core-module</groupId>
+            <artifactId>kernel</artifactId>
+            <version>0.9.8</version>
+        </dependency>
+    </dependencies>
+
+
+</project>
