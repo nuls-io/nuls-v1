@@ -49,5 +49,11 @@
             <artifactId>consensus-poc-base</artifactId>
             <version>0.9.8</version>
         </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.inject</groupId>
+            <artifactId>jersey-hk2</artifactId>
+            <version>2.26</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
