@@ -42,7 +42,7 @@ public class TransferProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "transfer <address> <toAddress> <amount> <password> [remark] --transfer";
+        return "transfer <address> <toAddress> <amount> [remark] --transfer";
     }
 
     @Override
