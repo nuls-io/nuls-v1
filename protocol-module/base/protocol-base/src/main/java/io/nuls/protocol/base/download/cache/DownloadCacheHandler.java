@@ -189,4 +189,8 @@ public class DownloadCacheHandler {
         taskCacher.remove(hash);
     }
 
+    public static void removeRequest(NulsDigestData requesetId) {
+        reactCacher.remove(requesetId);
+    }
+
 }

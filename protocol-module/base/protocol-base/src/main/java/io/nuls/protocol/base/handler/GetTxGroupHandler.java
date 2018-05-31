@@ -36,6 +36,7 @@ import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.NotFoundType;
 import io.nuls.protocol.message.GetTxGroupRequest;
 import io.nuls.protocol.message.NotFoundMessage;
+import io.nuls.protocol.message.ReactMessage;
 import io.nuls.protocol.message.TxGroupMessage;
 import io.nuls.protocol.model.GetTxGroupParam;
 import io.nuls.protocol.model.NotFound;
@@ -72,6 +73,9 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
             Log.error(e);
             return;
         }
+
+        // react request
+        messageBusService.sendToNode(new ReactMessage(requestHash), fromNode, true);
 
         TxGroupMessage txGroupMessage = new TxGroupMessage();
         TxGroup txGroup = new TxGroup();

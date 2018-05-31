@@ -36,6 +36,7 @@ import io.nuls.protocol.constant.NotFoundType;
 import io.nuls.protocol.message.BlockMessage;
 import io.nuls.protocol.message.GetBlockMessage;
 import io.nuls.protocol.message.NotFoundMessage;
+import io.nuls.protocol.message.ReactMessage;
 import io.nuls.protocol.model.NotFound;
 import io.nuls.protocol.service.BlockService;
 
@@ -55,10 +56,15 @@ public class GetBlockHandler extends AbstractMessageHandler<GetBlockMessage> {
             return;
         }
 
+        NulsDigestData blockHash = message.getBlockHash();
+
+        // react request
+        messageBusService.sendToNode(new ReactMessage(blockHash), fromNode, true);
+
         Block block= null;
-        Result<Block> result = blockService.getBlock(message.getBlockHash());
+        Result<Block> result = blockService.getBlock(blockHash);
         if (result.isFailed() || (block = result.getData()) == null) {
-            sendNotFound(message.getBlockHash(), fromNode);
+            sendNotFound(blockHash, fromNode);
             return;
         }
         sendBlock(block, fromNode);

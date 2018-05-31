@@ -79,6 +79,9 @@ public class GetBlocksByHeightHandler extends AbstractMessageHandler<GetBlocksBy
             e.printStackTrace();
         }
 
+        // react request
+        messageBusService.sendToNode(new ReactMessage(requestHash), fromNode, true);
+
         BlockHeader startBlockHeader = blockService.getBlockHeader(param.getStartHeight()).getData();
         if(startBlockHeader == null) {
             sendNotFound(requestHash, fromNode);

@@ -61,12 +61,15 @@ public class DownloadUtils {
         }
         GetBlockMessage message = new GetBlockMessage(hash);
         Future<Block> future = DownloadCacheHandler.addGetBlockRequest(hash);
+        Future<NulsDigestData> reactFuture = DownloadCacheHandler.addRequest(hash);
         Result result = messageBusService.sendToNode(message, node, false);
         if (!result.isSuccess()) {
             DownloadCacheHandler.removeBlockFuture(hash);
+            DownloadCacheHandler.removeRequest(hash);
             return null;
         }
         try {
+            reactFuture.get(1L, TimeUnit.SECONDS);
             Block block = future.get(30L, TimeUnit.SECONDS);
             return block;
         } catch (Exception e) {
@@ -74,6 +77,7 @@ public class DownloadUtils {
             return null;
         } finally {
             DownloadCacheHandler.removeBlockFuture(hash);
+            DownloadCacheHandler.removeRequest(hash);
         }
     }
 
@@ -97,6 +101,7 @@ public class DownloadUtils {
         }
 
         Future<CompleteParam> taskFuture = DownloadCacheHandler.addTaskRequest(requestHash);
+        Future<NulsDigestData> reactFuture = DownloadCacheHandler.addRequest(requestHash);
 
         List<Map<NulsDigestData, Future<Block>>> blockFutures = new ArrayList<>();
         for(long i = startHeight ; i <= endHeight ; i++) {
@@ -111,6 +116,7 @@ public class DownloadUtils {
         Result result = messageBusService.sendToNode(message, node, false);
         if (!result.isSuccess()) {
             DownloadCacheHandler.removeTaskFuture(message.getHash());
+            DownloadCacheHandler.removeRequest(requestHash);
 
             for(Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
                 for (Map.Entry<NulsDigestData, Future<Block>> entry : blockFutureMap.entrySet()) {
@@ -121,6 +127,7 @@ public class DownloadUtils {
         }
 
         try {
+            reactFuture.get(1L, TimeUnit.SECONDS);
             CompleteParam taskResult = taskFuture.get(60L, TimeUnit.SECONDS);
             if(taskResult.isSuccess()) {
                 for(Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
@@ -132,10 +139,11 @@ public class DownloadUtils {
             }
         } catch (Exception e) {
             Log.error(node.getId() + ",start:" + startHeight + " , endHeight:" + endHeight);
-            e.printStackTrace();
+            Log.error(e.getMessage());
             return new ArrayList<>();
         } finally {
             DownloadCacheHandler.removeTaskFuture(requestHash);
+            DownloadCacheHandler.removeRequest(requestHash);
 
             for(Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
                 for (Map.Entry<NulsDigestData, Future<Block>> entry : blockFutureMap.entrySet()) {
@@ -197,18 +205,23 @@ public class DownloadUtils {
         request.setMsgBody(param);
         NulsDigestData requestHash = NulsDigestData.calcDigestData(request.getMsgBody().serialize());
         Future<TxGroup> future = DownloadCacheHandler.addGetTxGroupRequest(requestHash);
+        Future<NulsDigestData> reactFuture = DownloadCacheHandler.addRequest(requestHash);
+
         Result result = messageBusService.sendToNode(request, node, false);
         if (result.isFailed()) {
             DownloadCacheHandler.removeTxGroupFuture(requestHash);
+            DownloadCacheHandler.removeRequest(requestHash);
             return null;
         }
         try {
+            reactFuture.get(1L, TimeUnit.SECONDS);
             TxGroup txGroup = future.get(30L, TimeUnit.SECONDS);
             return txGroup;
         } catch (Exception e) {
             Log.error(node.getId() + ",get txgroup failed!");
             Log.error(e.getMessage());
             DownloadCacheHandler.removeTxGroupFuture(request.getHash());
+            DownloadCacheHandler.removeRequest(requestHash);
             throw e;
         }
     }

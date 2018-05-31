@@ -34,10 +34,7 @@ import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
 import io.nuls.protocol.constant.NotFoundType;
-import io.nuls.protocol.message.BlockMessage;
-import io.nuls.protocol.message.CompleteMessage;
-import io.nuls.protocol.message.GetBlocksByHashMessage;
-import io.nuls.protocol.message.NotFoundMessage;
+import io.nuls.protocol.message.*;
 import io.nuls.protocol.model.CompleteParam;
 import io.nuls.protocol.model.GetBlocksByHashParam;
 import io.nuls.protocol.model.NotFound;
@@ -75,6 +72,9 @@ public class GetBlocksByHashHandler extends AbstractMessageHandler<GetBlocksByHa
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // react request
+        messageBusService.sendToNode(new ReactMessage(requestHash), fromNode, true);
 
         BlockHeader startBlockHeader = blockService.getBlockHeader(param.getStartHash()).getData();
         if(startBlockHeader == null) {
