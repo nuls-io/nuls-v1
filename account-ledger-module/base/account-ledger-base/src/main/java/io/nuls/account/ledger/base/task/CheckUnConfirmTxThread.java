@@ -127,12 +127,7 @@ public class CheckUnConfirmTxThread implements Runnable {
         if (tx == null) {
             return;
         }
-        byte[] txHashBytes = new byte[0];
-        try {
-            txHashBytes = tx.getHash().serialize();
-        } catch (IOException e) {
-            throw new NulsRuntimeException(e);
-        }
+
         CoinData coinData = tx.getCoinData();
         if (coinData != null) {
             // save - from
@@ -161,14 +156,7 @@ public class CheckUnConfirmTxThread implements Runnable {
                 }
             }
             localUtxoStorageService.batchSaveUTXO(fromMap);
-//            for (byte[] key : fromMap.keySet()) {
-//                Coin coin = null;
-//                try {
-//                    coin.parse(fromMap.get(key));
-//                } catch (NulsException e) {
-//                    e.printStackTrace();
-//                }
-//            }
+
             // delete utxo - to
             List<Coin> tos = coinData.getTo();
             byte[] indexBytes;
