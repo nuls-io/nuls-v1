@@ -1,25 +1,26 @@
 package io.nuls.accout.ledger.rpc.cmd;
 
 import io.nuls.account.model.Address;
+import io.nuls.core.tools.date.DateUtil;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.lite.annotation.Cmd;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.CommandResult;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author: Charlie
  * @date: 2018/05/28
  */
-@Cmd
-@Component
 public class GetAccountTxListProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
@@ -86,11 +87,16 @@ public class GetAccountTxListProcessor implements CommandProcessor {
         parameters.put("type", type);
         parameters.put("pageNumber", pageNumber);
         parameters.put("pageSize", pageSize);
-        Result result = restFul.get("/accountledger/tx/list/" + address, parameters);
+        RpcClientResult result = restFul.get("/accountledger/tx/list/" + address, parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
-        result.setData(((Map) result.getData()).get("list"));
+        List<Map<String, Object>> list = (List<Map<String, Object>>)((Map)result.getData()).get("list");
+        for(Map<String, Object> map : list){
+            map.put("time",  DateUtil.convertDate(new Date((Long)map.get("time"))));
+            map.put("txType", CommandHelper.txTypeExplain((Integer)map.get("txType")));
+        }
+        result.setData(list);
         return CommandResult.getResult(result);
     }
 }

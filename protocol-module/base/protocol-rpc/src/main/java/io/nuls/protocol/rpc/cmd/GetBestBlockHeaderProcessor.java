@@ -1,10 +1,15 @@
 package io.nuls.protocol.rpc.cmd;
 
+import io.nuls.core.tools.date.DateUtil;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.model.CommandResult;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
+import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.utils.RestFulUtils;
+
+import java.util.Date;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -42,10 +47,16 @@ public class GetBestBlockHeaderProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        Result result = restFul.get("/block/newest/",null);
+        RpcClientResult result = restFul.get("/block/newest/",null);
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
+        Map<String, Object> map = (Map) result.getData();
+        map.put("reward", CommandHelper.naToNuls(map.get("reward")));
+        map.put("fee", CommandHelper.naToNuls(map.get("fee")));
+        map.put("time", DateUtil.convertDate(new Date((Long) map.get("time"))));
+        map.put("roundStartTime", DateUtil.convertDate(new Date((Long) map.get("roundStartTime"))));
+        result.setData(map);
         return CommandResult.getResult(result);
     }
 }

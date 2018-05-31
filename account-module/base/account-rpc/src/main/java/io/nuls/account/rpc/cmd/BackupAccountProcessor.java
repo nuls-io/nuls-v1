@@ -3,12 +3,11 @@ package io.nuls.account.rpc.cmd;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.Address;
 import io.nuls.account.rpc.model.AccountKeyStoreDto;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.lite.annotation.Cmd;
-import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
@@ -24,8 +23,6 @@ import java.util.Map;
  * @author: Charlie
  * @date: 2018/5/25
  */
-@Cmd
-@Component
 public class BackupAccountProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
@@ -71,7 +68,7 @@ public class BackupAccountProcessor implements CommandProcessor {
         String password = CommandHelper.getPwd();
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("password", password);
-        Result result = restFul.post("/account/export/" + address, parameters);
+        RpcClientResult result = restFul.post("/account/export/" + address, parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
@@ -80,7 +77,7 @@ public class BackupAccountProcessor implements CommandProcessor {
         if (rs.isFailed()) {
             return CommandResult.getFailed(rs.getMsg());
         }
-        return CommandResult.getResult(rs);
+        return CommandResult.getResult(rs.toRpcClientResult());
     }
 
     /**

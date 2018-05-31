@@ -2,12 +2,12 @@ package io.nuls.accout.ledger.rpc.cmd;
 
 import io.nuls.account.model.Address;
 import io.nuls.accout.ledger.rpc.form.TransferForm;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Na;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
@@ -119,7 +119,7 @@ public class TransferProcessor implements CommandProcessor {
         parameters.put("password", password);
         parameters.put("amount", form.getAmount());
         parameters.put("remark", form.getRemark());
-        Result result = restFul.post("/accountledger/transfer", parameters);
+        RpcClientResult result = restFul.post("/accountledger/transfer", parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }

@@ -19,13 +19,20 @@ import io.nuls.kernel.i18n.I18nUtils;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 import io.nuls.ledger.rpc.cmd.GetTxProcessor;
+import io.nuls.network.rpc.cmd.GetNetInfoProcessor;
+import io.nuls.network.rpc.cmd.GetNetNodesProcessor;
 import io.nuls.protocol.rpc.cmd.GetBestBlockHeaderProcessor;
+import io.nuls.protocol.rpc.cmd.GetBlockHeaderListProcessor;
 import io.nuls.protocol.rpc.cmd.GetBlockHeaderProcessor;
 import io.nuls.protocol.rpc.cmd.GetBlockProcessor;
+import jline.Terminal;
+import jline.console.ConsoleReader;
+import jline.console.completer.ArgumentCompleter;
+import jline.console.completer.Completer;
+import jline.console.completer.StringsCompleter;
 
-import java.util.Map;
-import java.util.Scanner;
-import java.util.TreeMap;
+import java.io.IOException;
+import java.util.*;
 
 public class CommandHandler {
 
@@ -54,16 +61,16 @@ public class CommandHandler {
         /**
          * account
          */
-        register(new BackupAccountProcessor());
+        //register(new BackupAccountProcessor());
         register(new CreateAccountProcessor());
         register(new CreateAccountsProcessor());
         register(new GetAccountProcessor());
         register(new GetAccountsProcessor());
-        register(new GetAssetProcessor());
+        //register(new GetAssetProcessor());
         register(new GetBalanceProcessor());
-        register(new GetWalletBalanceProcessor());
+        //register(new GetWalletBalanceProcessor());
         register(new GetPrivateKeyProcessor());
-        register(new ImportByKeyStoreProcessor());
+        //register(new ImportByKeyStoreProcessor());
         register(new ImportByPrivateKeyProcessor());
         register(new RemoveAccountProcessor());
         register(new ResetPasswordProcessor());
@@ -75,14 +82,13 @@ public class CommandHandler {
          */
         register(new TransferProcessor());
         register(new GetAccountTxListProcessor());
-        register(new GetUTXOProcessor());
+        //register(new GetUTXOProcessor());
 
         /**
          * consensus
          */
         register(new CreateAgentProcessor());
         register(new GetConsensusProcessor());
-        register(new GetConsensusAddressProcessor());
         register(new DepositProcessor());
         register(new WithdrawProcessor());
         register(new StopAgentProcessor());
@@ -92,6 +98,18 @@ public class CommandHandler {
         register(new GetDepositedsProcessor());
         register(new GetDepositedInfoProcessor());
 
+        /**
+         * network
+         */
+        register(new GetNetInfoProcessor());
+        register(new GetNetNodesProcessor());
+
+        /**
+         * system
+         */
+        register(new ExitProcessor());
+        register(new HelpProcessor());
+        register(new VersionProcessor());
 
         sdkInit();
     }
@@ -120,7 +138,7 @@ public class CommandHandler {
     }
 
 
-    public static void main(String[] args) {
+   /* public static void main(String[] args) {
         CommandHandler instance = new CommandHandler();
         instance.init();
         try {
@@ -138,8 +156,44 @@ public class CommandHandler {
             }
             System.out.print(instance.processCommand(read.split("\\s+")) + "\n" + CommandConstant.COMMAND_PS1);
         }
-    }
+    }*/
 
+    public static void main(String[] args) {
+        CommandHandler instance = new CommandHandler();
+        instance.init();
+        try {
+            I18nUtils.setLanguage("en");
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+        ConsoleReader reader = null;
+        try {
+            reader = new ConsoleReader();
+            List<Completer> completers = new ArrayList<Completer>();
+            completers.add(new StringsCompleter(PROCESSOR_MAP.keySet()));
+            reader.addCompleter(new ArgumentCompleter(completers));
+            String line = null;
+            do {
+                System.out.print(CommandConstant.COMMAND_PS1);
+                line = reader.readLine();
+                if (StringUtils.isBlank(line)) {
+                    continue;
+                }
+                System.out.print(instance.processCommand(line.split("\\s+")) + "\n");
+            } while (line != null);
+        } catch (IOException e) {
+
+        }finally {
+            try {
+                if(!reader.delete()){
+                    reader.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
 
     private String processCommand(String[] args) {
         int length = args.length;

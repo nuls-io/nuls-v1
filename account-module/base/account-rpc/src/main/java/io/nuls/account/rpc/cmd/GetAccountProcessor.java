@@ -1,21 +1,21 @@
 package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.model.Address;
+import io.nuls.core.tools.date.DateUtil;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
-import io.nuls.kernel.lite.annotation.Cmd;
-import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.CommandResult;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
+
+import java.util.Date;
+import java.util.Map;
 
 /**
  * @author: Charlie
  * @date: 2018/5/25
  */
-@Cmd
-@Component
 public class GetAccountProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
@@ -55,10 +55,13 @@ public class GetAccountProcessor implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        Result result = restFul.get("/account/" + address, null);
+        RpcClientResult result = restFul.get("/account/" + address, null);
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());
         }
+        Map<String, Object> map = (Map)result.getData();
+        map.put("createTime",  DateUtil.convertDate(new Date((Long)map.get("createTime"))));
+        result.setData(map);
         return CommandResult.getResult(result);
     }
 }

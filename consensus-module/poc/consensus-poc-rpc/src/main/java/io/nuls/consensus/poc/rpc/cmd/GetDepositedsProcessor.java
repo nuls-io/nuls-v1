@@ -1,14 +1,17 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
+import io.nuls.core.tools.date.DateUtil;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,7 +43,7 @@ public class GetDepositedsProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "getdepositeds <address> <pageNumber> <pageSize> [agentHash] --Get a list of deposited info based on your account";
+        return "getdepositeds <address> <pageNumber> <pageSize> [agentHash] --get a list of deposited info based on your account";
     }
 
     @Override
@@ -73,10 +76,17 @@ public class GetDepositedsProcessor implements CommandProcessor {
         if(args.length == 5){
             parameters.put("agentHash", args[4]);
         }
-        Result result = restFul.get("/consensus/deposit/address/" + address, parameters);
+        RpcClientResult result = restFul.get("/consensus/deposit/address/" + address, parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
+        List<Map<String, Object>> list = (List<Map<String, Object>>)((Map)result.getData()).get("list");
+        for(Map<String, Object> map : list){
+            map.put("deposit",  CommandHelper.naToNuls(map.get("deposit")));
+            map.put("status", CommandHelper.consensusExplain((Integer) map.get("status")));
+            map.put("time",  DateUtil.convertDate(new Date((Long)map.get("time"))));
+        }
+        result.setData(list);
         return CommandResult.getResult(result);
     }
 }

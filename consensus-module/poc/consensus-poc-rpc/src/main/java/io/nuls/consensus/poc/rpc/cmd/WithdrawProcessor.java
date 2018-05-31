@@ -1,10 +1,10 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
@@ -64,7 +64,7 @@ public class WithdrawProcessor implements CommandProcessor {
         parameters.put("address", args[1]);
         parameters.put("txHash", args[2]);
         parameters.put("password", password);
-        Result result = restFul.post("/consensus/withdraw", parameters);
+        RpcClientResult result = restFul.post("/consensus/withdraw", parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }

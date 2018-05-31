@@ -1,19 +1,23 @@
 package io.nuls.protocol.rpc.cmd;
 
+import io.nuls.core.tools.date.DateUtil;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.lite.annotation.Cmd;
-import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.CommandResult;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
-@Cmd
-@Component
+import java.util.Date;
+import java.util.Map;
+
+
+/**
+ * @author: Charlie
+ * @date: 2018/5/28
+ */
 public class GetBlockHeaderProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
@@ -63,12 +67,21 @@ public class GetBlockHeaderProcessor implements CommandProcessor {
             hash = args[1];
         }
 
-        Result<BlockHeader> result = null;
+        RpcClientResult result = null;
         if (hash != null) {
             result = restFul.get("/block/header/hash/" + hash, null);
         } else {
             result = restFul.get("/block/header/height/" + height, null);
         }
+        if(result.isFailed()){
+            return CommandResult.getFailed(result.getMsg());
+        }
+        Map<String, Object> map = (Map) result.getData();
+        map.put("reward", CommandHelper.naToNuls(map.get("reward")));
+        map.put("fee", CommandHelper.naToNuls(map.get("fee")));
+        map.put("time", DateUtil.convertDate(new Date((Long) map.get("time"))));
+        map.put("roundStartTime", DateUtil.convertDate(new Date((Long) map.get("roundStartTime"))));
+        result.setData(map);
         return CommandResult.getResult(result);
     }
 }

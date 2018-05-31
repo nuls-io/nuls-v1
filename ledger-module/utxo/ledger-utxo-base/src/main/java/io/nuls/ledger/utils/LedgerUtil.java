@@ -24,6 +24,7 @@
 package io.nuls.ledger.utils;
 
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.VarInt;
 
 import java.util.Arrays;
@@ -35,7 +36,7 @@ import java.util.Arrays;
  */
 public class LedgerUtil {
 
-    private final static int TX_HASH_LENGTH = 34;
+    private final static int TX_HASH_LENGTH = NulsDigestData.HASH_LENGTH;
 
     public static byte[] getTxHashBytes(byte[] fromBytes) {
         if(fromBytes == null || fromBytes.length < TX_HASH_LENGTH) {

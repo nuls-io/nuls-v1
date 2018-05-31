@@ -35,6 +35,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.i18n.I18nUtils;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.RpcClientResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -56,11 +57,11 @@ public class SystemResource {
     @Path("/lang/{language}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "设置系统语言")
-    public Result setLanguage(@PathParam("language") String language) {
+    public RpcClientResult setLanguage(@PathParam("language") String language) {
         AssertUtil.canNotEmpty(language);
         boolean b = I18nUtils.hasLanguage(language);
         if(!b){
-            return Result.getFailed(KernelErrorCode.DATA_ERROR,"language unkown!");
+            return Result.getFailed(KernelErrorCode.DATA_ERROR,"language unkown!").toRpcClientResult();
         }
         try {
             I18nUtils.setLanguage(language);
@@ -68,7 +69,7 @@ public class SystemResource {
             Log.error(e);
             Result.getFailed(e.getMessage());
         }
-        return Result.getSuccess();
+        return Result.getSuccess().toRpcClientResult();
     }
 
     @GET
@@ -78,14 +79,14 @@ public class SystemResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success",response = VersionDto.class)
     })
-    public Result getVersion() {
+    public RpcClientResult getVersion() {
         VersionDto rpcVersion = new VersionDto();
         rpcVersion.setMyVersion(NulsConfig.VERSION);
         rpcVersion.setNewestVersion(NulsConfig.NEWEST_VERSION);
         if(StringUtils.isBlank(NulsConfig.NEWEST_VERSION)){
             rpcVersion.setNewestVersion(NulsConfig.VERSION);
         }
-        return Result.getSuccess().setData(rpcVersion);
+        return Result.getSuccess().setData(rpcVersion).toRpcClientResult();
     }
 
 }
