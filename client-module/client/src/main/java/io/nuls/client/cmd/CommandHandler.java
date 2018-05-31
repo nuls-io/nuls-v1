@@ -174,8 +174,7 @@ public class CommandHandler {
             reader.addCompleter(new ArgumentCompleter(completers));
             String line = null;
             do {
-                System.out.print(CommandConstant.COMMAND_PS1);
-                line = reader.readLine();
+                line = reader.readLine(CommandConstant.COMMAND_PS1);
                 if (StringUtils.isBlank(line)) {
                     continue;
                 }
