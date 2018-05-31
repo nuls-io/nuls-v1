@@ -44,6 +44,7 @@ import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
@@ -212,7 +213,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
         return result;
     }
-
 
 
     @Override
@@ -410,10 +410,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
 
             TransferTransaction tx = new TransferTransaction();
-            try {
-                tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+            if (StringUtils.isNotBlank(remark)) {
+                try {
+                    tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
+                } catch (UnsupportedEncodingException e) {
+                    Log.error(e);
+                }
             }
             tx.setTime(TimeService.currentTimeMillis());
             CoinData coinData = new CoinData();
@@ -539,11 +541,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     protected Result<Integer> importConfirmedTransaction(Transaction tx, byte[] address) {
 
-        if(!AddressTool.validAddress(address)){
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
 
-        if(!AccountLegerUtils.isTxRelatedToAddress(tx, address)){
+        if (!AccountLegerUtils.isTxRelatedToAddress(tx, address)) {
             return Result.getSuccess().setData(new Integer(0));
         }
 
@@ -593,8 +595,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
         txInfoPo.setStatus(status);
 
-        List<byte[]> addresses1 = localUtxoService.unlockCoinData(tx,newLockTime).getData();
-        for(byte[] address: addresses1) {
+        List<byte[]> addresses1 = localUtxoService.unlockCoinData(tx, newLockTime).getData();
+        for (byte[] address : addresses1) {
             balanceManager.refreshBalance(address);
         }
         return Result.getSuccess();
@@ -611,7 +613,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         txInfoPo.setStatus(status);
 
         List<byte[]> addresses1 = localUtxoService.rollbackUnlockTxCoinData(tx).getData();
-        for(byte[] address: addresses1) {
+        for (byte[] address : addresses1) {
             balanceManager.refreshBalance(address);
         }
 

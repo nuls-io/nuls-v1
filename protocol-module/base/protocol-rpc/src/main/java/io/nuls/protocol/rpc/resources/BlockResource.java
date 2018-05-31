@@ -42,10 +42,7 @@ import io.nuls.protocol.rpc.model.BlockHeaderDto;
 import io.nuls.protocol.service.BlockService;
 import io.swagger.annotations.*;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 
@@ -95,7 +92,7 @@ public class BlockResource {
             @ApiResponse(code = 200, message = "success", response = BlockDto.class)
     })
     public RpcClientResult getHeader(@ApiParam(name = "hash", value = "区块hash", required = true)
-                                            @PathParam("hash") String hash) {
+                                     @PathParam("hash") String hash) {
         AssertUtil.canNotEmpty(hash);
         hash = StringUtils.formatStringPara(hash);
         if (!StringUtils.validHash(hash)) {
@@ -128,7 +125,7 @@ public class BlockResource {
             @ApiResponse(code = 200, message = "success", response = BlockDto.class)
     })
     public RpcClientResult loadBlock(@ApiParam(name = "hash", value = "区块hash", required = true)
-                                      @PathParam("hash") String hash) throws IOException {
+                                     @PathParam("hash") String hash) throws IOException {
         AssertUtil.canNotEmpty(hash);
         Result result;
         if (!StringUtils.validHash(hash)) {
@@ -158,7 +155,7 @@ public class BlockResource {
             @ApiResponse(code = 200, message = "success", response = BlockDto.class)
     })
     public RpcClientResult getBlock(@ApiParam(name = "height", value = "区块高度", required = true)
-                                     @PathParam("height") Long height) throws IOException {
+                                    @PathParam("height") Long height) throws IOException {
         AssertUtil.canNotEmpty(height);
         Result result = Result.getSuccess();
         if (height < 0) {
@@ -185,5 +182,16 @@ public class BlockResource {
         Result result = Result.getSuccess();
         result.setData(new BlockHeaderDto(NulsContext.getInstance().getBestBlock()));
         return result.toRpcClientResult();
+    }
+
+    @GET
+    @Path("/bytes")
+    @Produces(MediaType.APPLICATION_JSON)
+    public byte[] getBlockBytes(@QueryParam("height") long height) throws IOException {
+        Block block = blockService.getBlock(height).getData();
+        if (block == null) {
+            return null;
+        }
+        return block.serialize();
     }
 }
