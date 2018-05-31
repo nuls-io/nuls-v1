@@ -61,7 +61,7 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
         if (null == tx) {
             return;
         }
-        if(null!=fromNode){
+        if (null != fromNode) {
             Log.debug("receive new tx {} from {} , tx count {}", tx.getHash().getDigestHex(), fromNode.getId(), temporaryCacheManager.getTxCount());
         }
 

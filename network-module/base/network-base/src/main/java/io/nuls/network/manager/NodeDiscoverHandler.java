@@ -93,7 +93,7 @@ public class NodeDiscoverHandler implements Runnable {
      * 每10秒询问一次当前连接的节点的最新高度和最新区块信息
      * 每30秒询问一次已连接的节点，向他们询问其他更多可连接的节点的IP地址
      */
-    private int count = 2;
+    private int count = 19;
 
     @Override
     public void run() {
@@ -118,11 +118,11 @@ public class NodeDiscoverHandler implements Runnable {
                 if (node.getType() == Node.OUT) {
                     broadcastHandler.broadcastToNode(getVersionMessage, node, true);
                 }
-                if (count == 3) {
+                if (count == 20) {
                     broadcastHandler.broadcastToNode(getNodesIpMessage, node, true);
                 }
             }
-            if (count == 3) {
+            if (count == 20) {
                 count = 0;
             }
         }

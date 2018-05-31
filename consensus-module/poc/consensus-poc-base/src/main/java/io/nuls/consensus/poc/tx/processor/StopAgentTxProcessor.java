@@ -45,6 +45,9 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
     @Autowired
     private AccountLedgerService accountLedgerService;
 
+    @Autowired
+    private DepositStorageService depositStorageService;
+
     @Override
     public Result onRollback(StopAgentTransaction tx, Object secondaryData) {
         AgentPo agentPo = agentStorageService.get(tx.getTxData().getCreateTxHash());
@@ -52,7 +55,17 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
             throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "the agent is not exist or it's never stopped!");
         }
         agentPo.setDelHeight(-1L);
-
+        List<DepositPo> depositPoList = depositStorageService.getList();
+        for (DepositPo depositPo : depositPoList) {
+            if (depositPo.getDelHeight() != tx.getBlockHeight()) {
+                continue;
+            }
+            if (!depositPo.getAgentHash().equals(agentPo.getHash())) {
+                continue;
+            }
+            depositPo.setDelHeight(-1L);
+            depositStorageService.save(depositPo);
+        }
         boolean b = agentStorageService.save(agentPo);
         if (!b) {
             return Result.getFailed("update agent failed!");
@@ -63,12 +76,23 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
     @Override
     public Result onCommit(StopAgentTransaction tx, Object secondaryData) {
         BlockHeader header = (BlockHeader) secondaryData;
-        if(tx.getTime()<(header.getTime()-300000L)){
+        if (tx.getTime() < (header.getTime() - 300000L)) {
             return Result.getFailed("Stop agent must lock the coin 3 days");
         }
         AgentPo agentPo = agentStorageService.get(tx.getTxData().getCreateTxHash());
         if (null == agentPo || agentPo.getDelHeight() > 0) {
             throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "the agent is not exist or had deleted!");
+        }
+        List<DepositPo> depositPoList = depositStorageService.getList();
+        for (DepositPo depositPo : depositPoList) {
+            if (depositPo.getDelHeight() > -1L) {
+                continue;
+            }
+            if (!depositPo.getAgentHash().equals(agentPo.getHash())) {
+                continue;
+            }
+            depositPo.setDelHeight(tx.getBlockHeight());
+            depositStorageService.save(depositPo);
         }
         agentPo.setDelHeight(tx.getBlockHeight());
         tx.getTxData().setAddress(agentPo.getAgentAddress());
