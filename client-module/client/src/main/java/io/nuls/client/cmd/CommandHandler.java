@@ -66,7 +66,7 @@ public class CommandHandler {
         register(new CreateAccountsProcessor());
         register(new GetAccountProcessor());
         register(new GetAccountsProcessor());
-        register(new GetAssetProcessor());//
+        //register(new GetAssetProcessor());
         register(new GetBalanceProcessor());
         //register(new GetWalletBalanceProcessor());
         register(new GetPrivateKeyProcessor());
