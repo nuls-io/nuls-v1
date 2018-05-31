@@ -170,7 +170,7 @@ public class AccountLedgerResource {
 
         Na value = Na.valueOf(form.getAmount());
         return accountLedgerService.transferFee(AddressTool.getAddress(form.getAddress()),
-                            AddressTool.getAddress(form.getToAddress()),value, form.getRemark()).toRpcClientResult();
+                AddressTool.getAddress(form.getToAddress()), value, form.getRemark()).toRpcClientResult();
     }
 
 
@@ -182,13 +182,13 @@ public class AccountLedgerResource {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
     public RpcClientResult getTxInfoList(@ApiParam(name = "address", value = "账户地址", required = true)
-                                @PathParam("address") String address,
-                                @ApiParam(name = "type", value = "类型")
-                                @QueryParam("type") Integer type,
-                                @ApiParam(name = "pageNumber", value = "页码")
-                                @QueryParam("pageNumber") Integer pageNumber,
-                                @ApiParam(name = "pageSize", value = "每页条数")
-                                @QueryParam("pageSize") Integer pageSize) {
+                                         @PathParam("address") String address,
+                                         @ApiParam(name = "type", value = "类型")
+                                         @QueryParam("type") Integer type,
+                                         @ApiParam(name = "pageNumber", value = "页码")
+                                         @QueryParam("pageNumber") Integer pageNumber,
+                                         @ApiParam(name = "pageSize", value = "每页条数")
+                                         @QueryParam("pageSize") Integer pageSize) {
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
         }
@@ -262,7 +262,6 @@ public class AccountLedgerResource {
         return dtoResult.toRpcClientResult();
     }
 
-
     @GET
     @Path("/utxo/lock/{address}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -271,11 +270,11 @@ public class AccountLedgerResource {
             @ApiResponse(code = 200, message = "success", response = Page.class)
     })
     public RpcClientResult getLockUtxo(@ApiParam(name = "address", value = "地址")
-                              @PathParam("address") String address,
-                              @ApiParam(name = "pageNumber", value = "页码")
-                              @QueryParam("pageNumber") Integer pageNumber,
-                              @ApiParam(name = "pageSize", value = "每页条数")
-                              @QueryParam("pageSize") Integer pageSize) {
+                                       @PathParam("address") String address,
+                                       @ApiParam(name = "pageNumber", value = "页码")
+                                       @QueryParam("pageNumber") Integer pageNumber,
+                                       @ApiParam(name = "pageSize", value = "每页条数")
+                                       @QueryParam("pageSize") Integer pageSize) {
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
         }
@@ -292,9 +291,9 @@ public class AccountLedgerResource {
         try {
             addressBytes = Base58.decode(address);
         } catch (Exception e) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-
+        //获取所有锁定的utxo
         Result<List<Coin>> result = accountLedgerService.getLockedUtxo(addressBytes);
         if (result.isFailed()) {
             dtoResult.setSuccess(false);
@@ -302,16 +301,18 @@ public class AccountLedgerResource {
             return dtoResult.toRpcClientResult();
         }
 
+        List<Coin> coinList = result.getData();
         Page<UtxoDto> page = new Page<>(pageNumber, pageSize, result.getData().size());
         int start = pageNumber * pageSize - pageSize;
-        if (start >= page.getTotal()) {
+        if (start >= coinList.size()) {
             dtoResult.setData(page);
             return dtoResult.toRpcClientResult();
         }
 
         List<UtxoDto> utxoDtoList = new ArrayList<>();
         byte[] txHash = new byte[NulsDigestData.HASH_LENGTH];
-        for (Coin coin : result.getData()) {
+        for (Coin coin : coinList) {
+            //找到每一条uxto，对应的交易类型与时间
             System.arraycopy(coin.getOwner(), 0, txHash, 0, NulsDigestData.HASH_LENGTH);
             Transaction tx = ledgerService.getTx(txHash);
             if (tx == null) {
@@ -321,19 +322,27 @@ public class AccountLedgerResource {
                     tx = accountLedgerService.getUnconfirmedTransaction(hash).getData();
                 } catch (NulsException e) {
                     Log.error(e);
+                    return Result.getFailed(KernelErrorCode.DATA_PARSE_ERROR).toRpcClientResult();
                 }
             }
+            //考虑到数据回滚，会出现找不到的情况
             if (tx == null) {
                 continue;
             }
             utxoDtoList.add(new UtxoDto(coin, tx));
         }
 
-        Collections.sort(utxoDtoList, UtxoDtoComparator.getInstance());
+        //重新赋值page对象
+        page = new Page<>(pageNumber, pageSize, utxoDtoList.size());
+        if (start >= page.getTotal()) {
+            dtoResult.setData(page);
+            return dtoResult.toRpcClientResult();
+        }
 
+        Collections.sort(utxoDtoList, UtxoDtoComparator.getInstance());
         int end = start + pageSize;
-        if (end > page.getTotal()) {
-            end = (int) page.getTotal();
+        if (end > utxoDtoList.size()) {
+            end = utxoDtoList.size();
         }
 
         page.setList(utxoDtoList.subList(start, end));
