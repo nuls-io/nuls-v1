@@ -40,6 +40,7 @@ import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.consensus.poc.storage.service.DepositStorageService;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -75,7 +76,11 @@ public class DepositTxProcessor implements TransactionProcessor<DepositTransacti
         deposit.setTxHash(tx.getHash());
 
         boolean success = depositStorageService.delete(deposit.getTxHash());
-        return new Result(success, null);
+
+        if(success){
+            return Result.getSuccess();
+        }
+        return  Result.getFailed(KernelErrorCode.FAILED);
     }
 
     /**
@@ -96,7 +101,11 @@ public class DepositTxProcessor implements TransactionProcessor<DepositTransacti
         DepositPo depositPo = PoConvertUtil.depositToPo(deposit);
 
         boolean success = depositStorageService.save(depositPo);
-        return new Result(success, null);
+
+        if(success){
+            return Result.getSuccess();
+        }
+        return  Result.getFailed(KernelErrorCode.FAILED);
     }
 
     /**

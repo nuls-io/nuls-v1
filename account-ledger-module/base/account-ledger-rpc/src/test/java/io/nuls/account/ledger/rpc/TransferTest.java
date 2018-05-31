@@ -16,7 +16,7 @@ public class TransferTest {
     public static void main(String[] args) {
 
         String address = "2CXJEuoXZMajeTEgL6TgiSxTRRMwiMM";
-        String toAddress = "2ChhZeHncAcv9C9qQn2GDK2GBpD7X9k";
+        String toAddress = "2Cg7BLHWBSxMhq3FpjR9BrkyxXp4m4j";
         long amount = 1000000000L;
         String password = "";
         String remark = "test";

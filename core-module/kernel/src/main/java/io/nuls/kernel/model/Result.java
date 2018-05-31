@@ -49,6 +49,13 @@ public class Result<T> implements Serializable {
     public Result(boolean success, String message, ErrorCode errorCode, T data) {
         this.success = success;
         this.msg = message;
+
+        if (null == errorCode) {
+            errorCode = KernelErrorCode.FAILED;
+            if (success) {
+                errorCode = KernelErrorCode.SUCCESS;
+            }
+        }
         this.errorCode = errorCode;
         this.data = data;
     }
@@ -57,8 +64,8 @@ public class Result<T> implements Serializable {
         this(false, "", KernelErrorCode.SUCCESS, null);
     }
 
-    public Result(boolean success, ErrorCode code, String message) {
-        this(success, message, code, null);
+    public Result(boolean success, String message) {
+        this(success, message, null, null);
     }
 
     public Result(boolean success, ErrorCode errorCode, T data) {
@@ -132,11 +139,11 @@ public class Result<T> implements Serializable {
     }
 
     public static Result getFailed(String msg) {
-        return new Result(false, KernelErrorCode.FAILED, msg);
+        return new Result(false, msg);
     }
 
     public static Result getSuccess() {
-        return new Result(true, KernelErrorCode.SUCCESS, "");
+        return new Result(true, "");
     }
 
     public static Result getFailed(ErrorCode errorCode) {
@@ -144,7 +151,7 @@ public class Result<T> implements Serializable {
     }
 
     public static Result getFailed(ErrorCode errorCode, String msg) {
-        Result result = new Result(false, KernelErrorCode.FAILED, msg);
+        Result result = new Result(false, msg);
         result.setErrorCode(errorCode);
         return result;
     }
