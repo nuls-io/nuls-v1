@@ -25,6 +25,7 @@
 
 package io.nuls.protocol.rpc.resources;
 
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
@@ -187,11 +188,24 @@ public class BlockResource {
     @GET
     @Path("/bytes")
     @Produces(MediaType.APPLICATION_JSON)
-    public byte[] getBlockBytes(@QueryParam("height") long height) throws IOException {
-        Block block = blockService.getBlock(height).getData();
-        if (block == null) {
-            return null;
+    public RpcClientResult getBlockBytes(@QueryParam("hash") String hash) throws IOException {
+        Result result;
+        if (!StringUtils.validHash(hash)) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        return block.serialize();
+        Block block = null;
+        try {
+            block = blockService.getBlock(NulsDigestData.fromDigestHex(hash)).getData();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        if (block == null) {
+            result = Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+        } else {
+            result = Result.getSuccess();
+            result.setData(Hex.encode(block.serialize()));
+
+        }
+        return result.toRpcClientResult();
     }
 }
