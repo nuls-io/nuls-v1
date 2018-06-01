@@ -13,6 +13,6 @@ set _MAINCLASS=io.nuls.client.Bootstrap
 goto doExec
 
 :doExec
-%_EXECJAVA% %_JAVA_OPTS% -classpath "%CLASSPATH%" %_MAINCLASS% %*
+%_EXECJAVA% %_JAVA_OPTS% -classpath "%CLASSPATH%" %_MAINCLASS% 
 
 :end
