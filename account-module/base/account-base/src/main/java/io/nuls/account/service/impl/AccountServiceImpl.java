@@ -650,4 +650,16 @@ public class AccountServiceImpl implements AccountService {
         }
         return Result.getSuccess().setData(balance);
     }
+
+    @Override
+    public Result<String> getAlias(byte[] address) {
+        // todo auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Result<String> getAlias(String address) {
+        // todo auto-generated method stub
+        return null;
+    }
 }

@@ -145,10 +145,16 @@ public class CoinData extends BaseNulsData {
     }
 
     public void addTo(Coin coin) {
+        if(null==to){
+            to = new ArrayList<>();
+        }
         to.add(coin);
     }
 
     public void addFrom(Coin coin) {
+        if(null==from){
+            from = new ArrayList<>();
+        }
         from.add(coin);
     }
 

@@ -93,16 +93,31 @@ public class RpcServerManager {
 
         try {
             ClassLoader loader = this.getClass().getClassLoader();
-            CLStaticHttpHandler docsHandler = new CLStaticHttpHandler(loader, "swagger-ui/");
-            docsHandler.setFileCacheEnabled(false);
-            ServerConfiguration cfg = httpServer.getServerConfiguration();
-            cfg.addHttpHandler(docsHandler, "/docs/");
+
+
+            addSwagerUi(loader);
+            addClientUi(loader);
+
             httpServer.start();
             Log.info("http restFul server is started!url is " + serverURI.toString());
         } catch (IOException e) {
             Log.error(e);
             httpServer.shutdownNow();
         }
+    }
+
+    private void addClientUi(ClassLoader loader) {
+        CLStaticHttpHandler docsHandler = new CLStaticHttpHandler(loader, "client-web/");
+        docsHandler.setFileCacheEnabled(false);
+        ServerConfiguration cfg = httpServer.getServerConfiguration();
+        cfg.addHttpHandler(docsHandler, "/client/");
+    }
+
+    private void addSwagerUi(ClassLoader loader) {
+        CLStaticHttpHandler docsHandler = new CLStaticHttpHandler(loader, "swagger-ui/");
+        docsHandler.setFileCacheEnabled(false);
+        ServerConfiguration cfg = httpServer.getServerConfiguration();
+        cfg.addHttpHandler(docsHandler, "/docs/");
     }
 
     public void shutdown() {

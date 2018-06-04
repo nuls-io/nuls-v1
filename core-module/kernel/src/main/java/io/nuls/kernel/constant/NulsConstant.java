@@ -24,6 +24,8 @@
  */
 package io.nuls.kernel.constant;
 
+import io.nuls.kernel.utils.AddressTool;
+
 /**
  * 系统常量集合
  * SYSTEM CONSTANT
@@ -32,6 +34,8 @@ package io.nuls.kernel.constant;
  * @date 2017/9/26
  */
 public interface NulsConstant {
+
+    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Ns83QHMELPuDfrjfpbpBKaKXjL9gNeB");
 
     /**
      * 系统配置文件名称

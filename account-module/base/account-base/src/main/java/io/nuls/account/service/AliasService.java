@@ -15,12 +15,14 @@ import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.protocol.service.TransactionService;
@@ -104,7 +106,7 @@ public class AliasService {
             Alias alias = new Alias(addressBytes, aliasName);
             tx.setTxData(alias);
 
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1000_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -117,6 +119,10 @@ public class AliasService {
                 toList.add(change);
                 coinData.setTo(toList);
             }
+
+            Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
+            coinData.addTo(coin);
+
             tx.setCoinData(coinData);
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             NulsSignData nulsSignData = accountService.signData(tx.getHash().serialize(), account, password);
@@ -148,9 +154,6 @@ public class AliasService {
      * 1. Save the alias to the database.
      * 2. Take the corresponding account from the database, set the alias to account and save it to the database.
      * 3. Re-cache the modified account.
-     *
-     * @param aliaspo
-     * @return
      */
     public Result saveAlias(AliasPo aliaspo) throws NulsException {
         try {
@@ -192,9 +195,6 @@ public class AliasService {
      * 1.Delete the alias data from the database.
      * 2. Remove the corresponding account to clear the alias and restore it in the database.
      * 3. Recache the account.
-     *
-     * @param aliasPo
-     * @return
      */
     public Result rollbackAlias(AliasPo aliasPo) throws NulsException {
         try {
@@ -202,11 +202,11 @@ public class AliasService {
             if (po != null && Base58.encode(po.getAddress()).equals(Base58.encode(aliasPo.getAddress()))) {
                 aliasStorageService.removeAlias(aliasPo.getAlias());
                 Result<AccountPo> rs = accountStorageService.getAccount(aliasPo.getAddress());
-                if(rs.isSuccess()) {
+                if (rs.isSuccess()) {
                     AccountPo accountPo = rs.getData();
                     accountPo.setAlias("");
                     Result result = accountStorageService.updateAccount(accountPo);
-                    if(result.isFailed()){
+                    if (result.isFailed()) {
                         return Result.getFailed(AccountErrorCode.FAILED);
                     }
                 }

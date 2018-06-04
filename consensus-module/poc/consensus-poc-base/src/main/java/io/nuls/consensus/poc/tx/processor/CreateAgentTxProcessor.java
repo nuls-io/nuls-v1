@@ -25,6 +25,7 @@
 
 package io.nuls.consensus.poc.tx.processor;
 
+import io.nuls.account.service.AccountService;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
@@ -32,9 +33,12 @@ import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -50,10 +54,31 @@ import java.util.Set;
  * @date 2018/5/10
  */
 @Component
-public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentTransaction> {
+public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentTransaction>, InitializingBean {
 
     @Autowired
     private AgentStorageService agentStorageService;
+
+    @Autowired
+    private AccountService accountService;
+
+    private Integer nextId;
+
+    /**
+     * 该方法在所有属性被设置之后调用，用于辅助对象初始化
+     * This method is invoked after all properties are set, and is used to assist object initialization.
+     */
+    @Override
+    public void afterPropertiesSet() throws NulsException {
+        List<AgentPo> poList = this.agentStorageService.getList();
+        int maxId = 0;
+        for (AgentPo po : poList) {
+            if (po.getAgentId() > maxId) {
+                maxId = po.getAgentId();
+            }
+        }
+        nextId = maxId + 1;
+    }
 
     @Override
     public Result onRollback(CreateAgentTransaction tx, Object secondaryData) {
@@ -66,11 +91,23 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
 
     @Override
     public Result onCommit(CreateAgentTransaction tx, Object secondaryData) {
+        while (null == nextId) {
+            Log.debug("wait for init agent id index!");
+            try {
+                Thread.sleep(50L);
+            } catch (InterruptedException e) {
+                Log.error(e);
+            }
+        }
         Agent agent = tx.getTxData();
         BlockHeader header = (BlockHeader) secondaryData;
         agent.setTxHash(tx.getHash());
         agent.setBlockHeight(header.getHeight());
         agent.setTime(tx.getTime());
+        agent.setAgentId(nextId++);
+
+        String alias = accountService.getAlias(agent.getAgentAddress()).getData();
+        agent.setAlias(alias);
 
         AgentPo agentPo = PoConvertUtil.agentToPo(agent);
 

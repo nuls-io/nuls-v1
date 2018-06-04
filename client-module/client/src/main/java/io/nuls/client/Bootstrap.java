@@ -27,6 +27,7 @@ package io.nuls.client;
 
 import io.nuls.client.rpc.RpcServerManager;
 import io.nuls.client.rpc.constant.RpcConstant;
+import io.nuls.client.web.view.WebViewBootstrap;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
@@ -71,14 +72,7 @@ public class Bootstrap {
             RpcServerManager.getInstance().startServer(ip, port);
         } while (false);
 
-        // test code begin TODO
-//        Log.info("开始验证····");
-//        testHash();
-//        Log.info("验证hash成功····");
-//        testHeight();
-//        Log.info("验证结束！！！");
-        // test code end TODO
-
+        WebViewBootstrap.startWebView();
         while (true) {
             try {
                 //todo 后续启动一个系统监视线程
@@ -103,30 +97,30 @@ public class Bootstrap {
     private static void testHeight() throws Exception {
         BlockService blockService = NulsContext.getServiceBean(BlockService.class);
         Block bestBlock = blockService.getBestBlock().getData();
-        if(bestBlock == null) {
+        if (bestBlock == null) {
             return;
         }
         NulsDigestData preHash = null;
         long lastheight = 0L;
-        while(true) {
+        while (true) {
             lastheight = bestBlock.getHeader().getHeight();
             verifyBlcok(bestBlock, preHash);
             boolean isFirstBlock = false;
-            if(bestBlock.getHeader().getHeight() == 0L) {
+            if (bestBlock.getHeader().getHeight() == 0L) {
                 isFirstBlock = true;
             }
-            if(lastheight == 0L) {
+            if (lastheight == 0L) {
                 isFirstBlock = true;
             }
             preHash = bestBlock.getHeader().getPreHash();
             bestBlock = blockService.getBlock(lastheight - 1L).getData();
-            if(bestBlock == null) {
-                if(!isFirstBlock) {
+            if (bestBlock == null) {
+                if (!isFirstBlock) {
                     throw new Exception("出错了");
                 }
                 break;
             }
-            if(lastheight - bestBlock.getHeader().getHeight() != 1L) {
+            if (lastheight - bestBlock.getHeader().getHeight() != 1L) {
                 throw new Exception("高度不正确");
             }
         }
@@ -135,20 +129,20 @@ public class Bootstrap {
     private static void testHash() throws Exception {
         BlockService blockService = NulsContext.getServiceBean(BlockService.class);
         Block bestBlock = blockService.getBestBlock().getData();
-        if(bestBlock == null) {
+        if (bestBlock == null) {
             return;
         }
         NulsDigestData preHash = null;
-        while(true) {
+        while (true) {
             verifyBlcok(bestBlock, preHash);
             boolean isFirstBlock = false;
-            if(bestBlock.getHeader().getHeight() == 0L) {
+            if (bestBlock.getHeader().getHeight() == 0L) {
                 isFirstBlock = true;
             }
             preHash = bestBlock.getHeader().getPreHash();
             bestBlock = blockService.getBlock(preHash).getData();
-            if(bestBlock == null) {
-                if(!isFirstBlock) {
+            if (bestBlock == null) {
+                if (!isFirstBlock) {
                     throw new Exception("出错了");
                 }
                 break;
@@ -158,12 +152,12 @@ public class Bootstrap {
 
     private static void verifyBlcok(Block block, NulsDigestData hash) throws Exception {
         block.getHeader().verifyWithException();
-        if(block.getTxs().size() != block.getHeader().getTxCount()) {
+        if (block.getTxs().size() != block.getHeader().getTxCount()) {
             throw new Exception("交易数量不正确, height: " + block.getHeader().getHeight());
         }
-        if(hash != null) {
+        if (hash != null) {
             block.getHeader().setHash(null);
-            if(!hash.equals(block.getHeader().getHash())) {
+            if (!hash.equals(block.getHeader().getHash())) {
                 throw new Exception("hash不正确, height: " + block.getHeader().getHeight());
             }
         }

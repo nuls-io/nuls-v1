@@ -1,18 +1,18 @@
-/**
+/*
  * MIT License
- * *
+ *
  * Copyright (c) 2017-2018 nuls.io
- * *
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * *
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * *
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,44 +20,43 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
+
 package io.nuls.protocol.model.validator;
 
-import io.nuls.kernel.constant.TransactionErrorCode;
-import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.CoinData;
-import io.nuls.kernel.model.Na;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
-import io.nuls.protocol.constant.ProtocolConstant;
+
+import java.util.List;
 
 /**
- * @author Niels
- * @date 2017/11/20
+ * @author: Niels Wang
+ * @date: 2018/6/4
  */
-@Component
-public class TxFeeValidator implements NulsDataValidator<Transaction> {
+public class BlackHoleValidator implements NulsDataValidator<Transaction> {
+    /**
+     * @param tx
+     * @return
+     */
     @Override
-    public ValidateResult validate(Transaction tx) {
-        if (tx.isFreeOfFee()) {
+    public ValidateResult validate(Transaction tx) throws NulsException {
+        if (tx.getCoinData() == null) {
             return ValidateResult.getSuccessResult();
         }
-        CoinData coinData = tx.getCoinData();
-        if (null == coinData) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
-        }
-        Na realFee = tx.getFee();
-        Na fee = null;
-        if(tx.getType() == ProtocolConstant.TX_TYPE_TRANSFER){
-            fee = TransactionFeeCalculator.getTransferFee(tx.size());
-        }else{
-            fee =TransactionFeeCalculator.getOtherFee(tx.size());
-        }
-        if (realFee.isGreaterOrEquals(fee)) {
+        List<Coin> from = tx.getCoinData().getFrom();
+        if (from == null || from.isEmpty()) {
             return ValidateResult.getSuccessResult();
         }
-        return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
+        for(Coin coin:from){
+
+
+
+        }
+
+        return ValidateResult.getSuccessResult();
     }
 }

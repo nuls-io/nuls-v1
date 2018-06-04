@@ -26,23 +26,15 @@
 
 package io.nuls.consensus.poc.protocol.util;
 
-import io.nuls.consensus.poc.protocol.constant.PunishType;
-import io.nuls.consensus.poc.protocol.entity.Deposit;
-import io.nuls.consensus.poc.protocol.entity.RedPunishData;
-import io.nuls.consensus.poc.protocol.entity.YellowPunishData;
-import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
-import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.protocol.entity.Deposit;
+import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
-import io.nuls.consensus.poc.storage.po.PunishLogPo;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.BlockHeader;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Created by ln on 2018/5/10.
+ *
+ * @author ln
+ * @date 2018/5/10
  */
 public final class PoConvertUtil {
 
@@ -52,16 +44,16 @@ public final class PoConvertUtil {
         }
         Agent agent = new Agent();
         agent.setAgentAddress(agentPo.getAgentAddress());
-        agent.setAgentName(agentPo.getAgentName());
         agent.setBlockHeight(agentPo.getBlockHeight());
         agent.setCommissionRate(agentPo.getCommissionRate());
         agent.setDeposit(agentPo.getDeposit());
-        agent.setIntroduction(agentPo.getIntroduction());
         agent.setPackingAddress(agentPo.getPackingAddress());
         agent.setRewardAddress(agentPo.getRewardAddress());
         agent.setTxHash(agentPo.getHash());
         agent.setTime(agentPo.getTime());
+        agent.setAgentId(agentPo.getAgentId());
         agent.setDelHeight(agentPo.getDelHeight());
+        agent.setAlias(agentPo.getAlias());
         return agent;
     }
 
@@ -72,15 +64,15 @@ public final class PoConvertUtil {
         }
         AgentPo agentPo = new AgentPo();
         agentPo.setAgentAddress(agent.getAgentAddress());
-        agentPo.setAgentName(agent.getAgentName());
         agentPo.setBlockHeight(agent.getBlockHeight());
         agentPo.setCommissionRate(agent.getCommissionRate());
         agentPo.setDeposit(agent.getDeposit());
-        agentPo.setIntroduction(agent.getIntroduction());
         agentPo.setPackingAddress(agent.getPackingAddress());
         agentPo.setRewardAddress(agent.getRewardAddress());
         agentPo.setHash(agent.getTxHash());
         agentPo.setTime(agent.getTime());
+        agentPo.setAgentId(agent.getAgentId());
+        agentPo.setAlias(agent.getAlias());
         return agentPo;
     }
 
@@ -107,5 +99,9 @@ public final class PoConvertUtil {
         po.setDeposit(deposit.getDeposit());
         po.setTime(deposit.getTime());
         return po;
+    }
+
+    public static String getAgentId(int id){
+        return String.format("%06d", id);
     }
 }

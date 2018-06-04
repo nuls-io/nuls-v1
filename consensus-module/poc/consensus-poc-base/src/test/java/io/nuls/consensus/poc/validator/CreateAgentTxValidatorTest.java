@@ -70,7 +70,6 @@ public class CreateAgentTxValidatorTest extends BaseTest {
         result = validator.validate(tx);
         assertFalse(result.isSuccess());
 
-        agent.setAgentName("test".getBytes());
         agent.setDeposit(PocConsensusProtocolConstant.AGENT_DEPOSIT_LOWER_LIMIT);
 
         tx.setTime(System.currentTimeMillis());

@@ -697,10 +697,8 @@ public class UtxoLedgerServiceImplTest {
         agent.setDelHeight(0);
         agent.setTime(System.currentTimeMillis());
         agent.setAgentAddress(AddressTool.getAddress(ecKey1.getPubKey()));
-        agent.setAgentName("test-agent-1".getBytes());
         agent.setCommissionRate(10);
         agent.setDeposit(Na.parseNuls(20000));
-        agent.setIntroduction("说明".getBytes());
         agent.setPackingAddress(AddressTool.getAddress(ecKey2.getPubKey()));
         agent.setRewardAddress(agent.getAgentAddress());
         tx.setTxData(agent);
