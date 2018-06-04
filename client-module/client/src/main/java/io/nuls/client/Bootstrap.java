@@ -76,7 +76,7 @@ public class Bootstrap {
         while (true) {
             try {
                 //todo 后续启动一个系统监视线程
-                Thread.sleep(5000L);
+                Thread.sleep(10000L);
             } catch (InterruptedException e) {
                 Log.error(e);
             }

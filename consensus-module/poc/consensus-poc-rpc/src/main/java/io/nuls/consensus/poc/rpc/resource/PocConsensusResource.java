@@ -238,7 +238,9 @@ public class PocConsensusResource {
             tx.getCoinData().getTo().add(result.getChange());
         }
         Na fee = TransactionFeeCalculator.getOtherFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        return Result.getSuccess().setData(fee.getValue()).toRpcClientResult();
+        Map<String,Long> valueMap = new HashMap<>();
+        valueMap.put("value",fee.getValue());
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 
     @GET
@@ -270,7 +272,9 @@ public class PocConsensusResource {
             tx.getCoinData().getTo().add(result.getChange());
         }
         Na fee = TransactionFeeCalculator.getOtherFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        return Result.getSuccess().setData(fee.getValue()).toRpcClientResult();
+        Map<String,Long> valueMap = new HashMap<>();
+        valueMap.put("value",fee.getValue());
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 
     @GET
@@ -332,7 +336,9 @@ public class PocConsensusResource {
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         tx.setCoinData(coinData);
         Na resultFee = TransactionFeeCalculator.getOtherFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        return Result.getSuccess().setData(resultFee.getValue()).toRpcClientResult();
+        Map<String,Long> valueMap = new HashMap<>();
+        valueMap.put("value",resultFee.getValue());
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 
 
@@ -646,7 +652,7 @@ public class PocConsensusResource {
             return result.toRpcClientResult();
         }
         fillAgentList(agentList, null);
-        int type = AgentComparator.COMMISSION_RATE;
+        int type = AgentComparator.COMPREHENSIVE;
         if ("deposit".equals(sortType)) {
             type = AgentComparator.DEPOSIT;
         } else if ("commissionRate".equals(sortType)) {

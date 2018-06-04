@@ -25,6 +25,8 @@
  */
 package io.nuls.consensus.poc.protocol.entity;
 
+import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
+import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
@@ -218,6 +220,14 @@ public class Agent extends TransactionLogicData {
 
     public void setMemberCount(int memberCount) {
         this.memberCount = memberCount;
+    }
+
+    public long getAvailableDepositAmount() {
+        return LongUtils.sub(PocConsensusProtocolConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT.getValue(), this.getTotalDeposit());
+    }
+
+    public boolean canDeposit() {
+        return getAvailableDepositAmount() >= PocConsensusProtocolConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT.getValue();
     }
 
     @Override

@@ -654,12 +654,12 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<String> getAlias(byte[] address) {
         // todo auto-generated method stub
-        return null;
+        return Result.getSuccess();
     }
 
     @Override
     public Result<String> getAlias(String address) {
         // todo auto-generated method stub
-        return null;
+        return Result.getSuccess();
     }
 }
