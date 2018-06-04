@@ -653,13 +653,18 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<String> getAlias(byte[] address) {
-        // todo auto-generated method stub
-        return null;
+        if(Address.validAddress(address)){
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        return getAlias(Base58.encode(address));
     }
 
     @Override
     public Result<String> getAlias(String address) {
-        // todo auto-generated method stub
-        return null;
+        Account account = getAccountByAddress(address);
+        if(null == account){
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        return Result.getSuccess().setData(account.getAlias());
     }
 }

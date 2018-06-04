@@ -360,7 +360,19 @@ public interface AccountService {
     Result<Balance> getBalance(String address) throws NulsException;
 
 
+    /**
+     * 根据账户地址字节数组获取账户别名
+     * Get an account alias based on the array of account address bytes
+     * @param address
+     * @return alias string
+     */
     Result<String> getAlias(byte[] address);
 
+    /**
+     * 根据账户地址获取账户别名
+     * Get account alias according to account address
+     * @param address
+     * @return alias string
+     */
     Result<String> getAlias(String address);
 }

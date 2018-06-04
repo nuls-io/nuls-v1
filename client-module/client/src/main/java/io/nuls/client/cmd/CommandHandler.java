@@ -66,7 +66,7 @@ public class CommandHandler {
         register(new GetBalanceProcessor());
         //register(new GetWalletBalanceProcessor());
         register(new GetPrivateKeyProcessor());
-        register(new ImportByKeyStoreProcessor());//
+        //register(new ImportByKeyStoreProcessor());
         register(new ImportByPrivateKeyProcessor());
         register(new ImportForcedByPrivateKeyProcessor());
         register(new RemoveAccountProcessor());
@@ -133,27 +133,6 @@ public class CommandHandler {
             RestFulUtils.getInstance().setServerUri("http://" + ip + ":" + port);
         }
     }
-
-
-   /* public static void main(String[] args) {
-        CommandHandler instance = new CommandHandler();
-        instance.init();
-        try {
-            I18nUtils.setLanguage("en");
-        } catch (NulsException e) {
-            e.printStackTrace();
-        }
-        System.out.print(CommandConstant.COMMAND_PS1);
-        Scanner scan = new Scanner(System.in);
-        while (scan.hasNextLine()) {
-            String read = scan.nextLine().trim();
-            if (StringUtils.isBlank(read)) {
-                System.out.print(CommandConstant.COMMAND_PS1);
-                continue;
-            }
-            System.out.print(instance.processCommand(read.split("\\s+")) + "\n" + CommandConstant.COMMAND_PS1);
-        }
-    }*/
 
     public static void main(String[] args) {
         CommandHandler instance = new CommandHandler();

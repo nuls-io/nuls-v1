@@ -72,7 +72,8 @@ public class AccountBaseService {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The password is required");
         }
         if (!StringUtils.validPassword(password)) {
-            return new Result(false, "Length between 8 and 20, the combination of letters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG);
+
         }
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
@@ -111,10 +112,10 @@ public class AccountBaseService {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The newPassword is required");
         }
         if (!StringUtils.validPassword(oldPassword)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "oldPassword Length between 8 and 20, the combination of letters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
         if (!StringUtils.validPassword(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "newPassword Length between 8 and 20, the combination of letters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
