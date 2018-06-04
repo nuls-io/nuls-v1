@@ -90,10 +90,10 @@ public class AliasService {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         if (StringUtils.isNotBlank(account.getAlias())) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS, "Alias has been set up");
+            return Result.getFailed(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
         }
         if (!StringUtils.validAlias(aliasName)) {
-            return Result.getFailed("The alias is between 1 to 30 bytes");
+            return Result.getFailed(AccountErrorCode.ALIAS_FORMAT_WRONG);
         }
         if (isAliasExist(aliasName)) {
             return Result.getFailed(AccountErrorCode.ALIAS_EXIST);

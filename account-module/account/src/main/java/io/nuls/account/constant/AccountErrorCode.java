@@ -49,4 +49,6 @@ public interface AccountErrorCode {
     ErrorCode ALIAS_ROLLBACK_ERROR = ErrorCode.init("ACT013", "50013");
     ErrorCode ACCOUNTKEYSTORE_FILE_NOT_EXIST = ErrorCode.init("ACT014", "50014");
     ErrorCode ACCOUNTKEYSTORE_FILE_DAMAGED = ErrorCode.init("ACT015", "50015");
+    ErrorCode ALIAS_FORMAT_WRONG = ErrorCode.init("ACT016", "50016");
+    ErrorCode PASSWORD_FORMAT_WRONG = ErrorCode.init("ACT017", "50017");
 }

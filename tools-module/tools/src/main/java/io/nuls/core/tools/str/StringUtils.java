@@ -62,8 +62,8 @@ public class StringUtils {
     }
 
     /**
-     * Check the difficulty of the password
-     * length between 8 and 20, letters and numbers
+     *  Check the difficulty of the password
+     *  length between 8 and 20, the combination of characters and numbers
      *
      * @return boolean
      */
@@ -71,14 +71,24 @@ public class StringUtils {
         if (isBlank(password)) {
             return false;
         }
-        if (password.matches("[a-zA-z0-9]{8,20}") && password.matches("(.*)[a-zA-z](.*)")
-                && password.matches("(.*)[0-9](.*)")) {
-                return true;
+        if (password.length() < 8 || password.length() > 20) {
+            return false;
+        }
+        if (password.matches("(.*)[a-zA-z](.*)")
+                && password.matches("(.*)\\d+(.*)")
+                && !password.matches("(.*)\\s+(.*)")
+                && !password.matches("(.*)[\u4e00-\u9fa5\u3000]+(.*)")) {
+            return true;
         } else {
             return false;
         }
     }
 
+    /**
+     * 别名规则:只允许使用小写字母、数字、下划线（下划线不能在两端）1~30字节
+     * @param alias
+     * @return
+     */
     public static boolean validAlias(String alias) {
         try {
             if (isBlank(alias)) {
@@ -89,11 +99,17 @@ public class StringUtils {
             if (aliasBytes.length < 1 || aliasBytes.length > 30) {
                 return false;
             }
+            if (alias.matches("^([a-z0-9]+[a-z0-9_]*[a-z0-9]+)|[a-z0-9]+${1,30}")) {
+                return true;
+            } else {
+                return false;
+            }
         } catch (UnsupportedEncodingException e) {
             return false;
         }
-        return true;
     }
+
+
 
     public static boolean validHash(String hash) {
         if (isBlank(hash)) {
