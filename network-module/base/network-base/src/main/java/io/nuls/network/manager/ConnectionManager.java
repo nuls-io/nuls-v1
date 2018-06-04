@@ -122,7 +122,7 @@ public class ConnectionManager {
                 }
             }
         } catch (Exception e) {
-            throw new NulsException(KernelErrorCode.DATA_ERROR);
+            throw new NulsException(KernelErrorCode.DATA_ERROR,e);
         } finally {
             buffer.clear();
         }
