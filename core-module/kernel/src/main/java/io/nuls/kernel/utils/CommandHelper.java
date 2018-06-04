@@ -23,6 +23,10 @@ public class CommandHelper {
         return true;
     }
 
+    /**
+     * 获取用户的新密码 必填
+     * @return
+     */
     public static String getNewPwd() {
         System.out.print("Please enter the new password(8-20 characters, the combination of letters and numbers).\nEnter your new password:");
         ConsoleReader reader = null;
@@ -50,6 +54,10 @@ public class CommandHelper {
     }
 
 
+    /**
+     * 确认新密码
+     * @param newPwd
+     */
     public static void confirmPwd(String newPwd) {
         System.out.print("Please confirm new password:");
         ConsoleReader reader = null;
@@ -74,13 +82,24 @@ public class CommandHelper {
             }
         }
     }
+
+    /**
+     * 得到用户输入的密码,必须输入
+     * 提示信息为默认
+     * @return
+     */
     public static String getPwd() {
         return getPwd(null);
     }
 
+    /**
+     * 得到用户输入的密码,必须输入
+     * @param prompt 提示信息
+     * @return
+     */
     public static String getPwd(String prompt) {
         if(StringUtils.isBlank(prompt)){
-            prompt = "Please enter the password, if the account has no password directly return.\nEnter your password:";
+            prompt = "Please enter the password.\nEnter your password:";
         }
         System.out.print(prompt);
         ConsoleReader reader = null;
@@ -106,6 +125,51 @@ public class CommandHelper {
             }
         }
     }
+
+    /**
+     * 得到用户输入的密码,允许不输入
+     * @param prompt
+     * @return
+     */
+    public static String getPwdOptional(String prompt) {
+        if(StringUtils.isBlank(prompt)){
+            prompt = "Please enter the password (password is between 8 and 20 inclusive of numbers and letters), " +
+                    "If you do not want to set a password, return directly.\nEnter your password:";
+        }
+        System.out.print(prompt);
+        ConsoleReader reader = null;
+        try {
+            reader = new ConsoleReader();
+            String npwd = null;
+            do {
+                npwd = reader.readLine('*');
+                if (!"".equals(npwd) && !StringUtils.validPassword(npwd)) {
+                    System.out.print("Password invalid, password is between 8 and 20 inclusive of numbers and letters.\nEnter your password:");
+                }
+            } while (!"".equals(npwd) && !StringUtils.validPassword(npwd));
+            return npwd;
+        } catch (IOException e) {
+            return null;
+        } finally {
+            try {
+                if (!reader.delete()) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     *  得到用户输入的密码,允许不输入
+     *  提示信息为默认
+     * @return
+     */
+    public static String getPwdOptional() {
+        return getPwdOptional(null);
+    }
+
 
     public static Long getLongAmount(String arg) {
         Na na = null;

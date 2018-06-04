@@ -79,7 +79,7 @@ public class AccountBaseService {
             return Result.getFailed(AccountErrorCode.FAILED, "The account not exist, address:" + address);
         }
         if(account.isEncrypted()){
-            return Result.getFailed(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED, "The account has been set to password.");
+            return Result.getFailed(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED, "This account already has a password.");
         }
         try {
             account.encrypt(password);

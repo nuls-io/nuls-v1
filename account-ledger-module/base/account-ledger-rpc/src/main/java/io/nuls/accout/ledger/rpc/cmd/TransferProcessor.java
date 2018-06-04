@@ -2,6 +2,7 @@ package io.nuls.accout.ledger.rpc.cmd;
 
 import io.nuls.account.model.Address;
 import io.nuls.accout.ledger.rpc.form.TransferForm;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -112,7 +113,12 @@ public class TransferProcessor implements CommandProcessor {
         if (null == form) {
             form = getTransferForm(args);
         }
-        String password = CommandHelper.getPwd();
+        String address = form.getAddress();
+        RpcClientResult res = CommandHelper.getPassword(address, restFul);
+        if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
+            return CommandResult.getFailed(res.getMsg());
+        }
+        String password = (String)res.getData();
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("address", form.getAddress());
         parameters.put("toAddress", form.getToAddress());

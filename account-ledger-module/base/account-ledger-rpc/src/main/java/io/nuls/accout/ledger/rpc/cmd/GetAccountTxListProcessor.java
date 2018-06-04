@@ -34,16 +34,15 @@ public class GetAccountTxListProcessor implements CommandProcessor {
     public String getHelp() {
         CommandBuilder bulider = new CommandBuilder();
         bulider.newLine(getCommandDescription())
-                .newLine("\t<address>   address -required")
-                .newLine("\t[txType]    transaction type -default 0")
-                .newLine("\t<pageNumber>     pageNumber -required")
+                .newLine("\t<address>      address -required")
+                .newLine("\t<pageNumber>   pageNumber -required")
                 .newLine("\t<pageSize>     pageSize -required");
         return bulider.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "gettxlist <address> [txType] <pageNumber> <pageSize> --get the transaction information list by address";
+        return "gettxlist <address> <pageNumber> <pageSize> --get the transaction information list by address";
     }
 
     @Override

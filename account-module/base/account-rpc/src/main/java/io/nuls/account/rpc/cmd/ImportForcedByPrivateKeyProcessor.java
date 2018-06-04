@@ -1,57 +1,51 @@
 package io.nuls.account.rpc.cmd;
 
-import io.nuls.kernel.model.RpcClientResult;
-import io.nuls.kernel.utils.CommandBuilder;
-import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
+import io.nuls.kernel.utils.CommandBuilder;
+import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.utils.RestFulUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 覆盖导入
+ * Overwrite import
  * @author: Charlie
- * @date: 2018/5/25
+ * @date: 2018/6/4
  */
-public class CreateAccountsProcessor implements CommandProcessor {
+public class ImportForcedByPrivateKeyProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
-        return "createaccounts";
+        return "importforced";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
-
         builder.newLine(getCommandDescription())
-                .newLine("\t<count> The count of accounts you want to create, - Required")
-                .newLine("\t[password] The password for the account, the password is between 8 and 20 inclusive of numbers and letters , not encrypted by default");
+                .newLine("\t<privatekey> private key - Required");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "createaccounts <count> [password] --create <count> accounts , encrypted by [password]";
+        return "importforced <privatekey> --import the account according to the private key, if the account exists, it will be overwritten";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length < 2 || length > 3) {
+        if (length != 2) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
-            return false;
-        }
-        if (!StringUtils.isNumeric(args[1])) {
-            return false;
-        }
-        if (length == 3 && !StringUtils.validPassword(args[2])) {
             return false;
         }
         return true;
@@ -59,15 +53,20 @@ public class CreateAccountsProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        String password = args.length == 3 ? args[2] : null;
-        int count = Integer.parseInt(args[1]);
+        String prikey = args[1];
+        String password = CommandHelper.getPwdOptional();
+        if(StringUtils.isNotBlank(password)){
+            CommandHelper.confirmPwd(password);
+        }
         Map<String, Object> parameters = new HashMap<>();
+        parameters.put("priKey", prikey);
         parameters.put("password", password);
-        parameters.put("count", count);
-        RpcClientResult result = restFul.post("/account", parameters);
-        if(result.isFailed()){
+        parameters.put("overwrite", true);
+        RpcClientResult result = restFul.post("/account/import/pri", parameters);
+        if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
         return CommandResult.getResult(result);
     }
+
 }
