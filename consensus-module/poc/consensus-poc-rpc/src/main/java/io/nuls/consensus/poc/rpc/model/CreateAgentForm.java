@@ -73,7 +73,7 @@ public class CreateAgentForm {
     }
 
     public void setPassword(String password) {
-        this.password = StringUtils.formatStringPara(password);
+        this.password = password;
     }
 
     public String getAgentAddress() {

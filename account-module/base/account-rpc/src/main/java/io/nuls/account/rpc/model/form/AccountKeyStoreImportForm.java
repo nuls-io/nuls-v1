@@ -34,7 +34,7 @@ public class AccountKeyStoreImportForm {
     }
 
     public void setPassword(String password) {
-        this.password = StringUtils.formatStringPara(password);
+        this.password = password;
     }
 
     public Boolean getOverwrite() {
