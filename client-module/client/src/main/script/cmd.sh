@@ -1,6 +1,7 @@
 #!/bin/sh
-
+cd ..
 rootdir=$PWD
+cd bin
 
 LIBS=$rootdir/libs
 PUB_LIB=""

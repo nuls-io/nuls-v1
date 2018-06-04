@@ -22,7 +22,7 @@ public class AccountUpdatePasswordForm {
     }
 
     public void setPassword(String password) {
-        this.password = StringUtils.formatStringPara(password);
+        this.password = password;
     }
 
     public String getNewPassword() {
@@ -30,6 +30,6 @@ public class AccountUpdatePasswordForm {
     }
 
     public void setNewPassword(String newPassword) {
-        this.newPassword = StringUtils.formatStringPara(newPassword);
+        this.newPassword = newPassword;
     }
 }

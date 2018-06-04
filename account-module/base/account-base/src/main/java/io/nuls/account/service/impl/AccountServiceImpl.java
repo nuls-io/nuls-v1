@@ -485,7 +485,9 @@ public class AccountServiceImpl implements AccountService {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        return new Result(account.isEncrypted(), null);
+        Result result = new Result();
+        result.setSuccess(account.isEncrypted());
+        return result;
     }
 
     @Override

@@ -52,7 +52,7 @@ public class AccountParamForm {
     }
 
     public void setPassword(String password) {
-        this.password = StringUtils.formatStringPara(password);
+        this.password = password;
     }
 
     public int getCount() {
@@ -92,6 +92,6 @@ public class AccountParamForm {
     }
 
     public void setNewPassword(String newPassword) {
-        this.newPassword = StringUtils.formatStringPara(newPassword);
+        this.newPassword = newPassword;
     }
 }

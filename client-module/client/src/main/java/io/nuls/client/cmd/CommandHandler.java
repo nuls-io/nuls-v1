@@ -74,42 +74,42 @@ public class CommandHandler {
         register(new ImportByPrivateKeyProcessor());
         register(new RemoveAccountProcessor());
         register(new ResetPasswordProcessor());
-        ///register(new SetAliasProcessor());
+        register(new SetAliasProcessor());
         register(new SetPasswordProcessor());
 
         /**
          * accountLedger
          */
         register(new TransferProcessor());
-        ///register(new GetAccountTxListProcessor());
+        register(new GetAccountTxListProcessor());
         //register(new GetUTXOProcessor());
 
         /**
          * consensus
          */
-        ///register(new CreateAgentProcessor());
-        ///register(new GetConsensusProcessor());
-        ///register(new DepositProcessor());
-        ///register(new WithdrawProcessor());
-        ///register(new StopAgentProcessor());
-        ///register(new GetAgentProcessor());
-        ///register(new GetAgentsProcessor());
-        ///register(new GetDepositedAgentsProcessor());
-        ///register(new GetDepositedsProcessor());
-        ///register(new GetDepositedInfoProcessor());
+        register(new CreateAgentProcessor());
+        register(new GetConsensusProcessor());
+        register(new DepositProcessor());
+        register(new WithdrawProcessor());
+        register(new StopAgentProcessor());
+        register(new GetAgentProcessor());
+        register(new GetAgentsProcessor());
+        register(new GetDepositedAgentsProcessor());
+        register(new GetDepositedsProcessor());
+        register(new GetDepositedInfoProcessor());
 
         /**
          * network
          */
-        //register(new GetNetInfoProcessor());
-        //register(new GetNetNodesProcessor());
+        register(new GetNetInfoProcessor());
+        register(new GetNetNodesProcessor());
 
         /**
          * system
          */
         register(new ExitProcessor());
         register(new HelpProcessor());
-        ///register(new VersionProcessor());
+        register(new VersionProcessor());
 
         sdkInit();
     }

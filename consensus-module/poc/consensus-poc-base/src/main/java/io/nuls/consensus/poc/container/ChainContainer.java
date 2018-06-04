@@ -407,6 +407,12 @@ public class ChainContainer implements Cloneable {
         }
         if (blockList.size() <= 2) {
             addBlockInBlockList(blockList);
+            if(blockList.size() > 0) {
+                Block startBlock = blockList.get(0);
+                if (startBlock != null && chain.getStartBlockHeader().getHeight() > startBlock.getHeader().getHeight()) {
+                    chain.setStartBlockHeader(startBlock.getHeader());
+                }
+            }
         }
 
         blockList.remove(blockList.size() - 1);
