@@ -59,8 +59,6 @@ public class InputDto {
         } catch (Exception e) {
             throw new NulsRuntimeException(e);
         }
-
-        this.address = Base58.encode(input.getFrom().getOwner());
         this.value = input.getNa().getValue();
     }
 
