@@ -24,7 +24,7 @@
 		</fileSet>
 		<fileSet>
 			<directory>src/main/script</directory>
-			<outputDirectory>/</outputDirectory>
+			<outputDirectory>/bin</outputDirectory>
 			<directoryMode>0755</directoryMode>
             <fileMode>0755</fileMode>
 			<lineEnding>unix</lineEnding>
