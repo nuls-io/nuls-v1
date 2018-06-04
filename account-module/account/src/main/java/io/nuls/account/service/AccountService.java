@@ -145,19 +145,12 @@ public interface AccountService {
     /**
      * 根据私钥和密码导入账户
      * import an account from plant private key and encrypt the account.
-     *
-     * @param prikey
-     * @param password
-     * @return
      */
     Result<Account> importAccount(String prikey, String password);
 
     /**
      * 据私钥和密码导入账户
      * import an unencrypted account by plant private key.
-     *
-     * @param prikey
-     * @return
      */
     Result<Account> importAccount(String prikey);
 
@@ -248,10 +241,6 @@ public interface AccountService {
 
     /**
      * Verify the account password.
-     *
-     * @param account
-     * @param password
-     * @return
      */
     Result validPassword(Account account, String password);
 
@@ -280,7 +269,6 @@ public interface AccountService {
      * @param account  Signed account
      * @param password Account password
      * @return The NulsSignData object.
-     * @throws NulsException
      */
     NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
 
@@ -291,7 +279,6 @@ public interface AccountService {
      * @param data    Data to be signed.
      * @param account Signed account
      * @return The NulsSignData object.
-     * @throws NulsException
      */
     NulsSignData signData(byte[] data, Account account) throws NulsException;
 
@@ -302,18 +289,17 @@ public interface AccountService {
      * @param data  Data to be signed.
      * @param ecKey eckey.
      * @return The NulsSignData object.
-     * @throws NulsException
      */
     NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException;
 
     /**
      * 数据签名
      * Sign data.
-     * @param digest data digest.
-     * @param account account to sign.
+     *
+     * @param digest   data digest.
+     * @param account  account to sign.
      * @param password password of account.
      * @return the NulsSignData object.
-     * @throws NulsException
      */
     NulsSignData signDigest(byte[] digest, Account account, String password) throws NulsException;
 
@@ -324,7 +310,6 @@ public interface AccountService {
      * @param digest to be signed.
      * @param ecKey  eckey
      * @return The NulsSignData object.
-     * @throws NulsException
      */
     NulsSignData signDigest(byte[] digest, ECKey ecKey);
 
@@ -373,4 +358,9 @@ public interface AccountService {
      * @return Balance object.
      */
     Result<Balance> getBalance(String address) throws NulsException;
+
+
+    Result<String> getAlias(byte[] address);
+
+    Result<String> getAlias(String address);
 }

@@ -51,12 +51,6 @@ public class CreateAgentForm {
     @ApiModelProperty(name = "deposit", value = "参与共识需要的总金额", required = true)
     private long deposit;
 
-    @ApiModelProperty(name = "remark", value = "节点备注", required = true)
-    private String remark;
-
-    @ApiModelProperty(name = "agentName", value = "节点名称", required = true)
-    private String agentName;
-
     @ApiModelProperty(name = "password", value = "密码", required = true)
     private String password;
 
@@ -108,19 +102,4 @@ public class CreateAgentForm {
         this.deposit = deposit;
     }
 
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = StringUtils.formatStringPara(remark);
-    }
-
-    public String getAgentName() {
-        return agentName;
-    }
-
-    public void setAgentName(String agentName) {
-        this.agentName = StringUtils.formatStringPara(agentName);
-    }
 }

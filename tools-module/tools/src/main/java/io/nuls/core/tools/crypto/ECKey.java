@@ -438,17 +438,14 @@ public class ECKey {
     }
 
     public static boolean isValidPrivteHex(String privateHex) {
-        byte[] privateKey;
-        try {
-            privateKey = Hex.decode(privateHex);
-        } catch (Exception e) {
+        int len = privateHex.length();
+        if (len % 2 == 1) {
             return false;
         }
 
-        if (privateKey.length < 32 || privateKey.length > 34) {
+        if (len < 60 || len > 66) {
             return false;
         }
-
         return true;
     }
 }

@@ -1,6 +1,8 @@
 #!/bin/sh
-
+cd ..
 rootdir=$PWD
+cd bin
+
 export logdir="$rootdir/logs"
 
 LIBS=$rootdir/libs

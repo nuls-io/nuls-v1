@@ -1,6 +1,7 @@
 package io.nuls.protocol.constant;
 
 import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.utils.AddressTool;
 
 /**
  * 协议相关的常量和一些通用的常量定义在这里
@@ -10,6 +11,7 @@ import io.nuls.kernel.constant.NulsConstant;
  * @date: 2018/4/17
  */
 public interface ProtocolConstant extends NulsConstant {
+
     /**
      * 出块间隔时间（秒）
      * Block interval time.

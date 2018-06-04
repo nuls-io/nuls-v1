@@ -99,8 +99,6 @@ public class BaseChainTest extends BaseTest {
         agent.setRewardAddress(AddressTool.getAddress(ecKey.getPubKey()));
         agent.setTime(System.currentTimeMillis());
         agent.setDeposit(Na.NA.multiply(20000));
-        agent.setAgentName("test".getBytes());
-        agent.setIntroduction("test agent".getBytes());
         agent.setCommissionRate(0.3d);
         agent.setBlockHeight(blockHeader.getHeight());
 

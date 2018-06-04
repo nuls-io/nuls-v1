@@ -1,8 +1,10 @@
 package io.nuls.consensus.poc.rpc.model;
 
 import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 
 import java.io.UnsupportedEncodingException;
@@ -20,12 +22,7 @@ public class AgentDTO {
         this.rewardAddress = Base58.encode(agent.getRewardAddress());
         this.deposit = agent.getDeposit().getValue();
         this.commissionRate = agent.getCommissionRate();
-        try {
-            this.agentName = new String(agent.getAgentName(), NulsConfig.DEFAULT_ENCODING);
-            this.introduction = new String(agent.getIntroduction(), NulsConfig.DEFAULT_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            Log.error(e);
-        }
+        this.agentName = StringUtils.isBlank(agent.getAlias()) ? PoConvertUtil.getAgentId(agent.getAgentId()) : agent.getAlias();
         this.time = agent.getTime();
         this.blockHeight = agent.getBlockHeight();
         this.delHeight = agent.getDelHeight();
