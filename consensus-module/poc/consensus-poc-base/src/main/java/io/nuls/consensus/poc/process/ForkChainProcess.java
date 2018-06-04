@@ -396,6 +396,7 @@ public class ForkChainProcess {
 
         List<Block> successList = new ArrayList<>();
 
+        Long newBestHeight = addBlockList.get(addBlockList.size() - 1).getHeader().getHeight();
         //Need to sort in ascending order, the default is
         //需要升序排列，默认就是
         for (Block newBlock : addBlockList) {
@@ -405,7 +406,7 @@ public class ForkChainProcess {
                 if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
                     continue;
                 }
-                ValidateResult result = ledgerService.verifyCoinData(tx, verifiedList);
+                ValidateResult result = ledgerService.verifyCoinData(tx, verifiedList, newBestHeight);
                 if (result.isSuccess()) {
                     result = tx.verify();
                     if (result.isFailed()) {
