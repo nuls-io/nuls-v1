@@ -115,10 +115,7 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
         for (Coin coin : data.getCoinData().getTo()) {
             String address = Base58.encode(coin.getOwner());
             Na na = verifyToMap.get(address);
-            if (null == na) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), "The stop agent tx produced wrong coin!");
-            }
-            if (na.equals(coin.getNa())) {
+            if (null != na && na.equals(coin.getNa())) {
                 verifyToMap.remove(address);
                 continue;
             }
