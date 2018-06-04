@@ -3,6 +3,7 @@ package io.nuls.account.rpc.cmd;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.Address;
 import io.nuls.account.rpc.model.AccountKeyStoreDto;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -65,7 +66,11 @@ public class BackupAccountProcessor implements CommandProcessor {
     public CommandResult execute(String[] args) {
         String address = args[1];
         String path = args.length == 3 ? args[2] : System.getProperty("user.dir");
-        String password = CommandHelper.getPwd();
+        RpcClientResult res = CommandHelper.getPassword(address, restFul);
+        if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
+            return CommandResult.getFailed(res.getMsg());
+        }
+        String password = (String)res.getData();
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("password", password);
         RpcClientResult result = restFul.post("/account/export/" + address, parameters);

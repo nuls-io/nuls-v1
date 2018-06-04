@@ -1,5 +1,6 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -29,20 +30,19 @@ public class WithdrawProcessor implements CommandProcessor {
         CommandBuilder bulider = new CommandBuilder();
         bulider.newLine(getCommandDescription())
                 .newLine("\t<address>   address -required")
-                .newLine("\t<txHash>    your deposit transaction hash  -required")
-                .newLine("\t[password]  The password of the account, if the account does not have a password, this entry is not required");
+                .newLine("\t<txHash>    your deposit transaction hash  -required");
         return bulider.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "withdraw <address> <txHash> [password] -- withdraw the agent";
+        return "withdraw <address> <txHash> -- withdraw the agent";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if(length < 3 || length > 4){
+        if(length != 3){
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
@@ -51,17 +51,19 @@ public class WithdrawProcessor implements CommandProcessor {
         if(!StringUtils.validAddressSimple(args[1]) || !StringUtils.validHash(args[2])){
             return false;
         }
-        if(length == 4 && !StringUtils.validPassword(args[3])){
-            return false;
-        }
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        String password = args.length == 4 ? args[3] : null;
+        String address = args[1];
+        RpcClientResult res = CommandHelper.getPassword(address, restFul);
+        if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
+            return CommandResult.getFailed(res.getMsg());
+        }
+        String password = (String)res.getData();
         Map<String, Object> parameters = new HashMap<>(3);
-        parameters.put("address", args[1]);
+        parameters.put("address", address);
         parameters.put("txHash", args[2]);
         parameters.put("password", password);
         RpcClientResult result = restFul.post("/consensus/withdraw", parameters);

@@ -1,5 +1,6 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -31,20 +32,19 @@ public class DepositProcessor implements CommandProcessor {
         bulider.newLine(getCommandDescription())
                 .newLine("\t<address>   Your own account address -required")
                 .newLine("\t<agentHash>   The agent hash you want to deposit  -required")
-                .newLine("\t<deposit>   the amount you want to deposit -required")
-                .newLine("\t[password]  The password of the account, if the account does not have a password, this entry is not required");
+                .newLine("\t<deposit>   the amount you want to deposit -required");
         return bulider.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "deposit <address> <agentHash> <deposit> [password] --apply for deposit";
+        return "deposit <address> <agentHash> <deposit> --apply for deposit";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if(length < 4 || length > 5){
+        if(length != 4){
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
@@ -54,18 +54,20 @@ public class DepositProcessor implements CommandProcessor {
                 || StringUtils.isBlank(args[3]) || !StringUtils.isNumberGtZero(args[3])){
             return false;
         }
-        if(length == 5 && !StringUtils.validPassword(args[4])){
-            return false;
-        }
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        String password = args.length == 5 ? args[4] : null;
+        String address = args[1];
+        RpcClientResult res = CommandHelper.getPassword(address, restFul);
+        if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
+            return CommandResult.getFailed(res.getMsg());
+        }
+        String password = (String)res.getData();
         Long amount = Na.parseNuls(args[3]).getValue();
         Map<String, Object> parameters = new HashMap<>(4);
-        parameters.put("address", args[1]);
+        parameters.put("address", address);
         parameters.put("agentHash", args[2]);
         parameters.put("deposit", amount);
         parameters.put("password", password);

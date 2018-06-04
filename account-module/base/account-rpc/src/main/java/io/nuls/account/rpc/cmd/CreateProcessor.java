@@ -15,26 +15,26 @@ import java.util.Map;
  * @author: Charlie
  * @date: 2018/5/25
  */
-public class CreateAccountProcessor implements CommandProcessor {
+public class CreateProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
-        return "createaccount";
+        return "create";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t[password] The password for the account, the password is between 8 and 20 inclusive of numbers and letters, not encrypted by default");
+                .newLine("\t[count] The count of accounts you want to create, - default 1");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "createaccount [password] --create a account, encrypted by [password] | not encrypted by default";
+        return "create [count] --create account, [count] the count of accounts you want to create, - default 1";
     }
 
     @Override
@@ -46,7 +46,10 @@ public class CreateAccountProcessor implements CommandProcessor {
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (length == 2 && !StringUtils.validPassword(args[1])) {
+        if (length == 2 && !StringUtils.isNumeric(args[1])) {
+            return false;
+        }
+        if(length == 2 && Integer.parseInt(args[1]) < 1 ){
             return false;
         }
         return true;
@@ -54,10 +57,14 @@ public class CreateAccountProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        String password = args.length == 2 ? args[1] : null;
+        String password = CommandHelper.getPwdOptional();
+        int count = 1;
+        if(args.length == 2){
+            count = Integer.parseInt(args[1]);
+        }
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("password", password);
-        parameters.put("count", 1);
+        parameters.put("count", count);
         RpcClientResult result = restFul.post("/account", parameters);
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());

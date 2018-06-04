@@ -1,5 +1,6 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -71,9 +72,14 @@ public class CreateAgentProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        String password = CommandHelper.getPwd();
+        String address = args[1];
+        RpcClientResult res = CommandHelper.getPassword(address, restFul);
+        if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
+            return CommandResult.getFailed(res.getMsg());
+        }
+        String password = (String)res.getData();
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("agentAddress", args[1]);
+        parameters.put("agentAddress", address);
         parameters.put("packingAddress", args[2]);
         parameters.put("commissionRate", Double.valueOf(args[3]));
         Long deposit = null;

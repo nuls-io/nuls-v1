@@ -1,6 +1,7 @@
 package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.model.Address;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -29,20 +30,19 @@ public class RemoveAccountProcessor implements CommandProcessor {
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<address> The account address - Required")
-                .newLine("\t[password] The password of the account, if the account does not have a password, this entry is not required");
+                .newLine("\t<address> The account address - Required");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "remove <address> [password] --remove an account";
+        return "remove <address> --remove an account";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length < 2 || length > 3) {
+        if (length != 2) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
@@ -51,16 +51,17 @@ public class RemoveAccountProcessor implements CommandProcessor {
         if (!Address.validAddress(args[1])) {
             return false;
         }
-        if (length == 3 && !StringUtils.validPassword(args[2])) {
-            return false;
-        }
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        String password = args.length == 3 ? args[2] : null;
+        RpcClientResult res = CommandHelper.getPassword(address, restFul);
+        if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
+            return CommandResult.getFailed(res.getMsg());
+        }
+        String password = (String)res.getData();
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("password", password);
         RpcClientResult result = restFul.post("/account/remove/" + address, parameters);

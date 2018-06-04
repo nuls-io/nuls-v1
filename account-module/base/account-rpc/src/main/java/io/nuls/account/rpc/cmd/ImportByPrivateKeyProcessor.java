@@ -28,31 +28,23 @@ public class ImportByPrivateKeyProcessor implements CommandProcessor {
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<privatekey> private key - Required")
-                .newLine("\t[password] the password is between 8 and 20 inclusive of numbers and letters, not encrypted by default");
+                .newLine("\t<privatekey> private key - Required");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "import <privatekey> [password] --import the account according to the private key ";
+        return "import <privatekey> --import the account according to the private key, if the account exists, it will not be executed ";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length < 2 || length > 3) {
+        if (length != 2) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
-        }
-        if (length == 3 && !StringUtils.validPassword(args[2])) {
-            return false;
-        }
-        if (length == 3) {
-            String newPwd = args[2];
-            CommandHelper.confirmPwd(newPwd);
         }
         return true;
     }
@@ -60,7 +52,10 @@ public class ImportByPrivateKeyProcessor implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String prikey = args[1];
-        String password = args.length == 3 ? args[2] : null;
+        String password = CommandHelper.getPwdOptional();
+        if(StringUtils.isNotBlank(password)){
+            CommandHelper.confirmPwd(password);
+        }
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("priKey", prikey);
         parameters.put("password", password);
