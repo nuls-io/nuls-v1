@@ -42,7 +42,7 @@ public class AccountTool {
             try {
                 key = ECKey.fromPrivate(new BigInteger(Hex.decode(prikey)));
             } catch (Exception e) {
-                throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
+                throw new NulsException(AccountErrorCode.PARAMETER_ERROR,e);
             }
         }
         Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, SerializeUtils.sha256hash160(key.getPubKey()));

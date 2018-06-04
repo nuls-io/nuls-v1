@@ -624,14 +624,15 @@ public class PocConsensusResource {
             } else if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
                 agentList.remove(i);
             } else if (StringUtils.isNotBlank(keyword)) {
-                String agentAddress = Base58.encode(agent.getAgentAddress());
-                String packingAddress = Base58.encode(agent.getPackingAddress());
-                String agentId = PoConvertUtil.getAgentId(agent.getAgentId());
+                keyword = keyword.toUpperCase();
+                String agentAddress = Base58.encode(agent.getAgentAddress()).toUpperCase();
+                String packingAddress = Base58.encode(agent.getPackingAddress()).toUpperCase();
+                String agentId = PoConvertUtil.getAgentId(agent.getAgentId()).toUpperCase();
                 String alias = agent.getAlias();
                 boolean b = agentId.indexOf(keyword) >= 0;
                 b = b || agentAddress.equals(keyword) || packingAddress.equals(keyword);
                 if (StringUtils.isNotBlank(alias)) {
-                    b = b || alias.indexOf(keyword) >= 0;
+                    b = b || alias.toUpperCase().indexOf(keyword) >= 0;
                 }
                 if (!b) {
                     agentList.remove(i);

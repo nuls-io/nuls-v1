@@ -54,7 +54,7 @@ import java.util.Set;
  * @date 2018/5/10
  */
 @Component
-public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentTransaction>, InitializingBean {
+public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentTransaction> {
 
     @Autowired
     private AgentStorageService agentStorageService;
@@ -64,12 +64,10 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
 
     private Integer nextId;
 
-    /**
-     * 该方法在所有属性被设置之后调用，用于辅助对象初始化
-     * This method is invoked after all properties are set, and is used to assist object initialization.
-     */
-    @Override
-    public void afterPropertiesSet() throws NulsException {
+    private synchronized void init() {
+        if (nextId != null) {
+            return;
+        }
         List<AgentPo> poList = this.agentStorageService.getList();
         int maxId = 0;
         for (AgentPo po : poList) {
@@ -92,12 +90,7 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
     @Override
     public Result onCommit(CreateAgentTransaction tx, Object secondaryData) {
         while (null == nextId) {
-            Log.debug("wait for init agent id index!");
-            try {
-                Thread.sleep(50L);
-            } catch (InterruptedException e) {
-                Log.error(e);
-            }
+           this.init();
         }
         Agent agent = tx.getTxData();
         BlockHeader header = (BlockHeader) secondaryData;
