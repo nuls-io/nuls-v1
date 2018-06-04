@@ -63,7 +63,7 @@ public class StringUtils {
 
     /**
      * Check the difficulty of the password
-     * length between 8 and 20, the combination of characters and numbers
+     * length between 8 and 20, letters and numbers
      *
      * @return boolean
      */
@@ -71,11 +71,9 @@ public class StringUtils {
         if (isBlank(password)) {
             return false;
         }
-        if (password.length() < 8 || password.length() > 20) {
-            return false;
-        }
-        if (password.matches("(.*)[a-zA-z](.*)") && password.matches("(.*)\\d+(.*)")) {
-            return true;
+        if (password.matches("[a-zA-z0-9]{8,20}") && password.matches("(.*)[a-zA-z](.*)")
+                && password.matches("(.*)[0-9](.*)")) {
+                return true;
         } else {
             return false;
         }

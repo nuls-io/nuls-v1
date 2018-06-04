@@ -150,6 +150,21 @@ public class AccountResource {
         return Result.getSuccess().setData(new AccountDto(account)).toRpcClientResult();
     }
 
+    @GET
+    @Path("/encrypted/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("[是否加密] 根据账户地址获取账户是否加密")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult isEncrypted(@ApiParam(name = "address", value = "账户地址", required = true)
+                               @PathParam("address") String address) {
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        return accountService.isEncrypted(address).setData(address).toRpcClientResult();
+    }
+
     @POST
     @Path("/alias/{address}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -338,7 +353,7 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The password is required").toRpcClientResult();
         }
         if (!StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "Length between 8 and 20, the combination of characters and numbers").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "Length between 8 and 20, the combination of letters and numbers").toRpcClientResult();
         }
         return accountBaseService.setPassword(address, password).toRpcClientResult();
     }
@@ -366,10 +381,10 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The newPassword is required").toRpcClientResult();
         }
         if (!StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "password Length between 8 and 20, the combination of characters and numbers").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "password Length between 8 and 20, the combination of letters and numbers").toRpcClientResult();
         }
         if (!StringUtils.validPassword(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "newPassword Length between 8 and 20, the combination of characters and numbers").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "newPassword Length between 8 and 20, the combination of letters and numbers").toRpcClientResult();
         }
         return this.accountBaseService.changePassword(address, password, newPassword).toRpcClientResult();
     }
@@ -393,7 +408,7 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The newPassword is required").toRpcClientResult();
         }
         if (!StringUtils.validPassword(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "Length between 8 and 20, the combination of characters and numbers").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "Length between 8 and 20, the combination of letters and numbers").toRpcClientResult();
         }
         Result result = accountService.importAccount(prikey, newPassword);
         if (result.isFailed()) {
