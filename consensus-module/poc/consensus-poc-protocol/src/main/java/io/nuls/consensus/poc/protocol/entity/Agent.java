@@ -26,6 +26,7 @@
 package io.nuls.consensus.poc.protocol.entity;
 
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
+import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Na;
@@ -46,8 +47,6 @@ import java.util.Set;
  * @date 2017/12/10
  */
 public class Agent extends TransactionLogicData {
-
-    private int agentId;
 
     private String alias;
 
@@ -100,14 +99,6 @@ public class Agent extends TransactionLogicData {
         this.packingAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.rewardAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.commissionRate = byteBuffer.readDouble();
-    }
-
-    public int getAgentId() {
-        return agentId;
-    }
-
-    public void setAgentId(int agentId) {
-        this.agentId = agentId;
     }
 
     public String getAlias() {

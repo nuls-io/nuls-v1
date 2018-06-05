@@ -82,7 +82,7 @@ public class DepositDTO {
             this.agentAddress = Base58.encode(agent.getAgentAddress());
             this.agentName = agent.getAlias();
             if (StringUtils.isBlank(agentName)) {
-                this.agentName = PoConvertUtil.getAgentId(agent.getAgentId());
+                this.agentName = PoConvertUtil.getAgentId(agent.getTxHash());
             }
         }
     }
