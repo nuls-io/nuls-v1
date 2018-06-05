@@ -59,7 +59,7 @@ public class UnconfiredmTransactionStorageImpl implements UnconfirmedTransaction
     public void afterPropertiesSet() throws NulsException {
         Result result = dbService.createArea(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX);
         if (result.isFailed()) {
-            //TODO
+            throw new NulsRuntimeException(result.getErrorCode());
         }
     }
 

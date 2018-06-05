@@ -30,6 +30,7 @@ import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
@@ -61,7 +62,7 @@ public class LocalUtxoStorageServiceImpl implements LocalUtxoStorageService, Ini
 
         Result result = dbService.createArea(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
         if (result.isFailed()) {
-            //TODO
+            throw new NulsRuntimeException(result.getErrorCode());
         }
     }
 
