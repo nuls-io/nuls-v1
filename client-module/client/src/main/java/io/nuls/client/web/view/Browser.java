@@ -47,6 +47,7 @@ public class Browser extends Region {
     public Browser(String url) {
         // load the web page
         webEngine.load(url);
+
         //add the web view to the scene
         getChildren().add(browser);
 
