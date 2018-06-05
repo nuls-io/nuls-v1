@@ -29,6 +29,8 @@ import io.nuls.client.rpc.RpcServerManager;
 import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.client.web.view.WebViewBootstrap;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
+import io.nuls.consensus.poc.config.ConsensusConfig;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.MicroKernelBootstrap;
@@ -83,87 +85,15 @@ public class Bootstrap {
             if (null != NulsContext.getInstance().getBestBlock()) {
                 Log.info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-  netTime : " + (DateUtil.convertDate(new Date(TimeService.currentTimeMillis()))));
                 Block bestBlock = NulsContext.getInstance().getBestBlock();
-                Log.info("bestHeight:" + bestBlock.getHeader().getHeight() + " , txCount : " + bestBlock.getHeader().getTxCount() + " , tx memory pool count : " + TxMemoryPool.getInstance().getAll().size() + " , hash : " + bestBlock.getHeader().getHash());
-//                Log.info("node: " + NulsContext.getServiceBean(NetworkService.class).getAvailableNodes().size() + "), height:{}, threadCount:{}, consensusStatus: {}, downloadStatus: {}", NulsContext.getInstance().getBestBlock().getHeader().getHeight(), Thread.activeCount(), NulsContext.getServiceBean(ConsensusService.class).getConsensusStatus(), NulsContext.getServiceBean(DownloadService.class).getStatus());
                 Collection<Node> nodes = NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
+
+                Log.info("bestHeight:" + bestBlock.getHeader().getHeight() + " , txCount : " + bestBlock.getHeader().getTxCount() + " , tx memory pool count : " + TxMemoryPool.getInstance().getAll().size() + " , hash : " + bestBlock.getHeader().getHash() + ",nodeCount:" + nodes.size());
                 for (Node node : nodes) {
                     Log.info(node.getBestBlockHeight() + ", " + node.getId() + ", " + node.getBestBlockHash());
                 }
             }
         }
     }
-
-    /*=====  test code begin TODO ====*/
-    private static void testHeight() throws Exception {
-        BlockService blockService = NulsContext.getServiceBean(BlockService.class);
-        Block bestBlock = blockService.getBestBlock().getData();
-        if (bestBlock == null) {
-            return;
-        }
-        NulsDigestData preHash = null;
-        long lastheight = 0L;
-        while (true) {
-            lastheight = bestBlock.getHeader().getHeight();
-            verifyBlcok(bestBlock, preHash);
-            boolean isFirstBlock = false;
-            if (bestBlock.getHeader().getHeight() == 0L) {
-                isFirstBlock = true;
-            }
-            if (lastheight == 0L) {
-                isFirstBlock = true;
-            }
-            preHash = bestBlock.getHeader().getPreHash();
-            bestBlock = blockService.getBlock(lastheight - 1L).getData();
-            if (bestBlock == null) {
-                if (!isFirstBlock) {
-                    throw new Exception("出错了");
-                }
-                break;
-            }
-            if (lastheight - bestBlock.getHeader().getHeight() != 1L) {
-                throw new Exception("高度不正确");
-            }
-        }
-    }
-
-    private static void testHash() throws Exception {
-        BlockService blockService = NulsContext.getServiceBean(BlockService.class);
-        Block bestBlock = blockService.getBestBlock().getData();
-        if (bestBlock == null) {
-            return;
-        }
-        NulsDigestData preHash = null;
-        while (true) {
-            verifyBlcok(bestBlock, preHash);
-            boolean isFirstBlock = false;
-            if (bestBlock.getHeader().getHeight() == 0L) {
-                isFirstBlock = true;
-            }
-            preHash = bestBlock.getHeader().getPreHash();
-            bestBlock = blockService.getBlock(preHash).getData();
-            if (bestBlock == null) {
-                if (!isFirstBlock) {
-                    throw new Exception("出错了");
-                }
-                break;
-            }
-        }
-    }
-
-    private static void verifyBlcok(Block block, NulsDigestData hash) throws Exception {
-        block.getHeader().verifyWithException();
-        if (block.getTxs().size() != block.getHeader().getTxCount()) {
-            throw new Exception("交易数量不正确, height: " + block.getHeader().getHeight());
-        }
-        if (hash != null) {
-            block.getHeader().setHash(null);
-            if (!hash.equals(block.getHeader().getHash())) {
-                throw new Exception("hash不正确, height: " + block.getHeader().getHeight());
-            }
-        }
-    }
-    /*=====  test code end TODO ====*/
-
 
     private static void initModules() {
         Map<String, String> bootstrapClasses = null;

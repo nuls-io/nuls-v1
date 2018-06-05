@@ -378,5 +378,12 @@ public interface AccountService {
     Result<String> getAlias(String address);
 
 
+    /**
+     * 获取设置别名交易手续费
+     * @param addr
+     * @param aliasName
+     * @return
+     */
     Result<Na> getAliasFee(String addr, String aliasName);
+
 }

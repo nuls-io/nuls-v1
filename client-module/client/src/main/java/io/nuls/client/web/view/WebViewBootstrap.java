@@ -25,12 +25,19 @@
 
 package io.nuls.client.web.view;
 
+import io.nuls.core.tools.log.Log;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 /**
  * @author: Niels Wang
@@ -50,22 +57,42 @@ public class WebViewBootstrap extends Application {
 //        top.setPrefSize(800, 50);
 //        new TestDragListener(stage).enableDrag(top);
 
+        String url = "http://192.168.1.103:8001/docs";
 
         VBox root = new VBox();
         root.setId("root");
-        root.getChildren().addAll(  new Browser());
+        root.getChildren().addAll(new Browser(url));
 
 //        Region root = new Browser();
 //        new TestDragListener(stage).enableDrag(root);
         scene = new Scene(root, 800, 560, Color.web("#666970"));
         stage.setScene(scene);
 
+        stage.getIcons().add(new Image(
+                WebViewBootstrap.class.getResourceAsStream("/image/icon.ico")));
+
+        //添加系统托盘图标.
+        SystemTray tray = SystemTray.getSystemTray();
+        BufferedImage image = null;
+        try {
+            image = ImageIO.read(WebViewBootstrap.class
+                    .getResourceAsStream("/image/icon.ico"));
+        } catch (IOException e) {
+            Log.error(e);
+        }
+        TrayIcon trayIcon = new TrayIcon(image, "自动备份工具");
+        trayIcon.setToolTip("自动备份工具");
+        try {
+            tray.add(trayIcon);
+        } catch (AWTException e) {
+            Log.error(e);
+        }
 
         stage.show();
     }
 
 
     public static void startWebView() {
-        //todo launch(new String[]{});
+        launch(new String[]{});
     }
 }

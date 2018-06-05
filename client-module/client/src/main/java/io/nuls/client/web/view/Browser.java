@@ -44,9 +44,9 @@ public class Browser extends Region {
     final WebView browser = new WebView();
     final WebEngine webEngine = browser.getEngine();
 
-    public Browser() {
+    public Browser(String url) {
         // load the web page
-        webEngine.load("http://127.0.0.1:8001/client");
+        webEngine.load(url);
         //add the web view to the scene
         getChildren().add(browser);
 

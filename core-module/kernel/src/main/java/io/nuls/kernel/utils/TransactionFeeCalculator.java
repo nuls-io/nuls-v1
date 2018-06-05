@@ -33,8 +33,8 @@ import io.nuls.kernel.model.Na;
  */
 public class TransactionFeeCalculator {
 
-    public static final Na MIN_PRECE_PRE_1000_BYTES = Na.valueOf(1000000);
-    public static final Na OTHER_PRECE_PRE_1000_BYTES = Na.valueOf(5000000);
+    public static final Na MIN_PRECE_PRE_1000_BYTES = Na.valueOf(100000);
+    public static final Na OTHER_PRECE_PRE_1000_BYTES = Na.valueOf(500000);
 
     /**
      * 根据交易大小计算需要交纳的手续费
