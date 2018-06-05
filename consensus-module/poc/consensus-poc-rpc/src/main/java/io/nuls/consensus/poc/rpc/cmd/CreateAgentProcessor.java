@@ -42,20 +42,20 @@ public class CreateAgentProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "createagent <agentAddress> <packingAddress> <commissionRate> <deposit> <agentName> <remark> [rewardAddress] --create a agent";
+        return "createagent <agentAddress> <packingAddress> <commissionRate> <deposit> [rewardAddress] --create a agent";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if(length < 7 || length > 8){
+        if(length < 5 || length > 6){
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
         if(!StringUtils.validAddressSimple(args[1]) || !StringUtils.validAddressSimple(args[2]) || StringUtils.isBlank(args[3])
-                || StringUtils.isBlank(args[4]) || StringUtils.isBlank(args[5]) || StringUtils.isBlank(args[6])){
+                || StringUtils.isBlank(args[4])){
             return false;
         }
         if(!StringUtils.isNumberGtZero(args[3])){
@@ -64,7 +64,7 @@ public class CreateAgentProcessor implements CommandProcessor {
         if(!StringUtils.isNumberGtZero(args[4])){
             return false;
         }
-        if(length == 8 && !StringUtils.validAddressSimple(args[7])){
+        if(length == 6 && !StringUtils.validAddressSimple(args[5])){
             return false;
         }
         return true;
@@ -90,11 +90,9 @@ public class CreateAgentProcessor implements CommandProcessor {
             return CommandResult.getFailed("Parameter deposit error");
         }
         parameters.put("deposit", deposit);
-        parameters.put("agentName", args[5]);
-        parameters.put("remark", args[6]);
         parameters.put("password", password);
-        if(args.length == 8){
-            parameters.put("rewardAddress", args[7]);
+        if(args.length == 6){
+            parameters.put("rewardAddress", args[5]);
         }
         RpcClientResult result = restFul.post("/consensus/agent",parameters);
         if (result.isFailed()) {

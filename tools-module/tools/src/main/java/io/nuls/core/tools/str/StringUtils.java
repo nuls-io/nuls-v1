@@ -85,7 +85,7 @@ public class StringUtils {
     }
 
     /**
-     * 别名规则:只允许使用小写字母、数字、下划线（下划线不能在两端）1~30字节
+     * 别名规则:只允许使用小写字母、数字、下划线（下划线不能在两端）1~20字节
      * @param alias
      * @return
      */
@@ -96,10 +96,10 @@ public class StringUtils {
             }
             alias = alias.trim();
             byte[] aliasBytes = alias.getBytes("UTF-8");
-            if (aliasBytes.length < 1 || aliasBytes.length > 30) {
+            if (aliasBytes.length < 1 || aliasBytes.length > 20) {
                 return false;
             }
-            if (alias.matches("^([a-z0-9]+[a-z0-9_]*[a-z0-9]+)|[a-z0-9]+${1,30}")) {
+            if (alias.matches("^([a-z0-9]+[a-z0-9_]*[a-z0-9]+)|[a-z0-9]+${1,20}")) {
                 return true;
             } else {
                 return false;
