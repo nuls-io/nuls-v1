@@ -141,6 +141,14 @@ public class BalanceManager {
         }
     }
 
+    public void refreshBalance() {
+        lock.lock();
+        try {
+            balanceMap.clear();
+        } finally {
+            lock.unlock();
+        }
+    }
 
     /**
      * 计算账户的余额，这个方法应该和获取余额方法互斥，避免并发导致数据不准确

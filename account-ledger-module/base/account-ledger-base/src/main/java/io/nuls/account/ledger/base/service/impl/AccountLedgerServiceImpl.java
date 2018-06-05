@@ -124,6 +124,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 return result;
             }
         }
+        balanceManager.refreshBalance();
         return Result.getSuccess().setData(savedTxList.size());
     }
 
@@ -225,7 +226,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result<Integer> rollbackTransaction(List<Transaction> txs) {
-        return rollbackTransaction(txs, true);
+        Result result = Result.getSuccess().setData(txs.size());
+        result = rollbackTransaction(txs, true);
+        if(result.isSuccess()){
+            balanceManager.refreshBalance();
+        }
+        return result;
     }
 
     public Result<Integer> rollbackTransaction(List<Transaction> txs, boolean isCheckMine) {
