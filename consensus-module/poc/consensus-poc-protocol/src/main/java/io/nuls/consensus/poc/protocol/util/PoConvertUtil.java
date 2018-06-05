@@ -30,9 +30,9 @@ import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
+import io.nuls.kernel.model.NulsDigestData;
 
 /**
- *
  * @author ln
  * @date 2018/5/10
  */
@@ -51,7 +51,6 @@ public final class PoConvertUtil {
         agent.setRewardAddress(agentPo.getRewardAddress());
         agent.setTxHash(agentPo.getHash());
         agent.setTime(agentPo.getTime());
-        agent.setAgentId(agentPo.getAgentId());
         agent.setDelHeight(agentPo.getDelHeight());
         agent.setAlias(agentPo.getAlias());
         return agent;
@@ -71,7 +70,6 @@ public final class PoConvertUtil {
         agentPo.setRewardAddress(agent.getRewardAddress());
         agentPo.setHash(agent.getTxHash());
         agentPo.setTime(agent.getTime());
-        agentPo.setAgentId(agent.getAgentId());
         agentPo.setAlias(agent.getAlias());
         return agentPo;
     }
@@ -101,7 +99,8 @@ public final class PoConvertUtil {
         return po;
     }
 
-    public static String getAgentId(int id){
-        return String.format("%06d", id);
+    public static String getAgentId(NulsDigestData hash) {
+        String hashHex = hash.getDigestHex();
+        return hashHex.substring(hashHex.length() - 8);
     }
 }

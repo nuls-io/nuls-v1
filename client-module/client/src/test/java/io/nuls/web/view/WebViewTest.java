@@ -23,24 +23,17 @@
  *
  */
 
-package io.nuls.consensus.poc.protocol.util;
+package io.nuls.web.view;
 
-import io.nuls.kernel.model.NulsDigestData;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import io.nuls.client.web.view.WebViewBootstrap;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/4
+ * @date: 2018/6/5
  */
-public class PoConvertUtilTest {
+public class WebViewTest {
 
-    @Test
-    public void getAgentId() {
-        NulsDigestData hash = NulsDigestData.calcDigestData("123123".getBytes());
-        System.out.println(PoConvertUtil.getAgentId(hash));
-        System.out.println(hash);
-        assertTrue(true);
+    public static void main(String[] args) {
+        WebViewBootstrap.startWebView();
     }
 }

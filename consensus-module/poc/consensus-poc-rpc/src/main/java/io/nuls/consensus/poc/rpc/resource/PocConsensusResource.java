@@ -658,7 +658,7 @@ public class PocConsensusResource {
                 keyword = keyword.toUpperCase();
                 String agentAddress = Base58.encode(agent.getAgentAddress()).toUpperCase();
                 String packingAddress = Base58.encode(agent.getPackingAddress()).toUpperCase();
-                String agentId = PoConvertUtil.getAgentId(agent.getAgentId()).toUpperCase();
+                String agentId = PoConvertUtil.getAgentId(agent.getTxHash()).toUpperCase();
                 String alias = agent.getAlias();
                 boolean b = agentId.indexOf(keyword) >= 0;
                 b = b || agentAddress.equals(keyword) || packingAddress.equals(keyword);

@@ -45,8 +45,6 @@ public class AgentPo extends BaseNulsData {
 
     private transient NulsDigestData hash;
 
-    private int agentId;
-
     private String alias;
 
     private byte[] agentAddress;
@@ -71,7 +69,6 @@ public class AgentPo extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(hash);
-        stream.writeUint32(this.getAgentId());
         stream.write(agentAddress);
         stream.write(packingAddress);
         stream.write(rewardAddress);
@@ -86,7 +83,6 @@ public class AgentPo extends BaseNulsData {
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.hash = byteBuffer.readHash();
-        this.agentId = (int) byteBuffer.readUint32();
         this.agentAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.packingAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.rewardAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
@@ -102,7 +98,6 @@ public class AgentPo extends BaseNulsData {
     public int size() {
         int size = SerializeUtils.sizeOfNulsData(hash);
         size += AddressTool.HASH_LENGTH * 3;
-        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfInt64();
         size += SerializeUtils.sizeOfDouble(commissionRate);
         size += SerializeUtils.sizeOfUint48();
@@ -110,14 +105,6 @@ public class AgentPo extends BaseNulsData {
         size += SerializeUtils.sizeOfVarInt(delHeight);
         size += SerializeUtils.sizeOfString(alias);
         return size;
-    }
-
-    public int getAgentId() {
-        return agentId;
-    }
-
-    public void setAgentId(int agentId) {
-        this.agentId = agentId;
     }
 
     public String getAlias() {

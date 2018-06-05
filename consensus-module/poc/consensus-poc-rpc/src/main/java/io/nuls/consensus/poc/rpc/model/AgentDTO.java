@@ -47,7 +47,7 @@ public class AgentDTO {
         this.rewardAddress = Base58.encode(agent.getRewardAddress());
         this.deposit = agent.getDeposit().getValue();
         this.commissionRate = agent.getCommissionRate();
-        this.agentName = StringUtils.isBlank(agent.getAlias()) ? PoConvertUtil.getAgentId(agent.getAgentId()) : agent.getAlias();
+        this.agentName = StringUtils.isBlank(agent.getAlias()) ? PoConvertUtil.getAgentId(agent.getTxHash()) : agent.getAlias();
         this.time = agent.getTime();
         this.blockHeight = agent.getBlockHeight();
         this.delHeight = agent.getDelHeight();

@@ -63,21 +63,6 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
     @Autowired
     private AccountService accountService;
 
-    private Integer nextId;
-
-    private synchronized void init() {
-        if (nextId != null) {
-            return;
-        }
-        List<AgentPo> poList = this.agentStorageService.getList();
-        int maxId = 0;
-        for (AgentPo po : poList) {
-            if (po.getAgentId() > maxId) {
-                maxId = po.getAgentId();
-            }
-        }
-        nextId = maxId + 1;
-    }
 
     @Override
     public Result onRollback(CreateAgentTransaction tx, Object secondaryData) {
@@ -90,15 +75,12 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
 
     @Override
     public Result onCommit(CreateAgentTransaction tx, Object secondaryData) {
-        while (null == nextId) {
-            this.init();
-        }
+
         Agent agent = tx.getTxData();
         BlockHeader header = (BlockHeader) secondaryData;
         agent.setTxHash(tx.getHash());
         agent.setBlockHeight(header.getHeight());
         agent.setTime(tx.getTime());
-        agent.setAgentId(nextId++);
 
         String alias = accountService.getAlias(agent.getAgentAddress()).getData();
         agent.setAlias(alias);
@@ -111,7 +93,6 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
             for (Agent item : agentList) {
                 if (item.getTxHash().equals(agent.getTxHash())) {
                     item.setAlias(agent.getAlias());
-                    item.setAgentId(agent.getAgentId());
                     break;
                 }
             }
