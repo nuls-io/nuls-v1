@@ -184,6 +184,25 @@ public class AccountResource {
         return aliasService.setAlias(address, form.getAlias().trim(), form.getPassword()).toRpcClientResult();
     }
 
+    @POST
+    @Path("/alias/fee/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("[别名手续费] 获取设置别名手续 ")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Result.class)
+    })
+    public RpcClientResult aliasFee(@PathParam("address") String address,
+                                 @ApiParam(name = "form", value = "别名手续费表单数据", required = true)
+                                         AccountAliasFeeForm form) {
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (StringUtils.isBlank(form.getAlias())) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        return accountService.getAliasFee(address, form.getAlias()).toRpcClientResult();
+    }
+
     @GET
     @Path("/balance/{address}")
     @Produces(MediaType.APPLICATION_JSON)
