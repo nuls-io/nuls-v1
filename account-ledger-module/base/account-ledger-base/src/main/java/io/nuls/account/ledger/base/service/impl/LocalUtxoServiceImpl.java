@@ -105,11 +105,6 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 fromsSet.add(ArraysTool.joinintTogether(address, from.getOwner()));
             }
 
-            Result result = localUtxoStorageService.batchDeleteUTXO(fromsSet);
-            if (!result.isSuccess() || result.getData() == null || ((Integer) result.getData()) != fromsSet.size()) {
-                return result;
-            }
-
             // save utxo - to
             List<Coin> tos = coinData.getTo();
             Map<byte[], byte[]> toMap = new HashMap<>();
@@ -127,7 +122,10 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     throw new NulsRuntimeException(e);
                 }
             }
-            localUtxoStorageService.batchSaveUTXO(toMap);
+            Result result = localUtxoStorageService.batchSaveAndDeleteUTXO(toMap, fromsSet);
+            if (result.isFailed() || result.getData() == null || (int) result.getData() != toMap.size() + fromsSet.size()) {
+                return Result.getFailed();
+            }
         }
         return Result.getSuccess();
     }
@@ -197,7 +195,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             }
             //localUtxoStorageService.batchSaveUTXO(toMap);
             Result result = localUtxoStorageService.batchSaveAndDeleteUTXO(toMap, fromsSet);
-            if (result.isFailed() || (int) result.getData() != toMap.size() + fromsSet.size()) {
+            if (result.isFailed() || result.getData() == null || (int) result.getData() != toMap.size() + fromsSet.size()) {
                 return Result.getFailed();
             }
         }
@@ -254,7 +252,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             }
             //localUtxoStorageService.batchSaveUTXO(fromMap);
             Result result = localUtxoStorageService.batchSaveAndDeleteUTXO(fromMap, toSet);
-            if (result.isFailed() || (int) result.getData() != fromMap.size() + toSet.size()) {
+            if (result.isFailed() || result.getData() == null || (int) result.getData() != fromMap.size() + toSet.size()) {
                 return Result.getFailed();
             }
         }
