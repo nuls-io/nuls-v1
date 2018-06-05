@@ -5,7 +5,7 @@
     <parent>
         <artifactId>protocol-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>0.9.8</version>
+        <version>0.9.9</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -16,55 +16,55 @@
         <dependency>
             <groupId>io.nuls.protocol-module</groupId>
             <artifactId>protocol</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.protocol-module</groupId>
             <artifactId>protocol-storage</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.message-bus-module</groupId>
             <artifactId>message-bus</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.consensus-module</groupId>
             <artifactId>consensus</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.account-ledger-module</groupId>
             <artifactId>account-ledger</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db-leveldb</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger-utxo-base</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.nuls.consensus-module</groupId>
             <artifactId>consensus-poc-protocol</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.nuls.network-module</groupId>
             <artifactId>network-base</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
