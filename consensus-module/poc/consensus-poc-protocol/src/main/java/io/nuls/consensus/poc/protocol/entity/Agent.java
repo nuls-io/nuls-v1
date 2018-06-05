@@ -48,8 +48,6 @@ import java.util.Set;
  */
 public class Agent extends TransactionLogicData {
 
-    private String alias;
-
     private byte[] agentAddress;
 
     private byte[] packingAddress;
@@ -99,14 +97,6 @@ public class Agent extends TransactionLogicData {
         this.packingAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.rewardAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.commissionRate = byteBuffer.readDouble();
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
     }
 
     public Na getDeposit() {

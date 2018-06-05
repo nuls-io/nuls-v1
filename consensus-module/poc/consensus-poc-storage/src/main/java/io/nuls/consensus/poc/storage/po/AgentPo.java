@@ -45,8 +45,6 @@ public class AgentPo extends BaseNulsData {
 
     private transient NulsDigestData hash;
 
-    private String alias;
-
     private byte[] agentAddress;
 
     private byte[] packingAddress;
@@ -77,7 +75,6 @@ public class AgentPo extends BaseNulsData {
         stream.writeUint48(time);
         stream.writeVarInt(blockHeight);
         stream.writeVarInt(delHeight);
-        stream.writeString(alias);
     }
 
     @Override
@@ -91,7 +88,6 @@ public class AgentPo extends BaseNulsData {
         this.time = byteBuffer.readUint48();
         this.blockHeight = byteBuffer.readVarInt();
         this.delHeight = byteBuffer.readVarInt();
-        this.alias = byteBuffer.readString();
     }
 
     @Override
@@ -103,16 +99,7 @@ public class AgentPo extends BaseNulsData {
         size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfVarInt(blockHeight);
         size += SerializeUtils.sizeOfVarInt(delHeight);
-        size += SerializeUtils.sizeOfString(alias);
         return size;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
     }
 
     public NulsDigestData getHash() {

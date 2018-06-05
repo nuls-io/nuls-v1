@@ -60,10 +60,6 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
     @Autowired
     private AgentStorageService agentStorageService;
 
-    @Autowired
-    private AccountService accountService;
-
-
     @Override
     public Result onRollback(CreateAgentTransaction tx, Object secondaryData) {
         Agent agent = tx.getTxData();
@@ -82,21 +78,10 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
         agent.setBlockHeight(header.getHeight());
         agent.setTime(tx.getTime());
 
-        String alias = accountService.getAlias(agent.getAgentAddress()).getData();
-        agent.setAlias(alias);
-
         AgentPo agentPo = PoConvertUtil.agentToPo(agent);
 
         boolean success = agentStorageService.save(agentPo);
-        if (success) {
-            List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
-            for (Agent item : agentList) {
-                if (item.getTxHash().equals(agent.getTxHash())) {
-                    item.setAlias(agent.getAlias());
-                    break;
-                }
-            }
-        }
+
         return new Result(success, null);
     }
 

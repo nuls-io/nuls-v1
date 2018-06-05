@@ -68,7 +68,7 @@ public class RpcServerManager {
         ServletRegistration servletRegistration = webappContext.addServlet("jersey-servlet", ServletContainer.class);
 
         servletRegistration.setInitParameter("javax.ws.rs.Application","io.nuls.client.rpc.config.NulsResourceConfig");
-        servletRegistration.addMapping("/*");
+        servletRegistration.addMapping("/api/*");
 
         httpServer = new HttpServer();
         NetworkListener listener = new NetworkListener("grizzly2", ip, port);
@@ -110,7 +110,7 @@ public class RpcServerManager {
         CLStaticHttpHandler docsHandler = new CLStaticHttpHandler(loader, "client-web/");
         docsHandler.setFileCacheEnabled(false);
         ServerConfiguration cfg = httpServer.getServerConfiguration();
-        cfg.addHttpHandler(docsHandler, "/client/");
+        cfg.addHttpHandler(docsHandler, "/");
     }
 
     private void addSwagerUi(ClassLoader loader) {

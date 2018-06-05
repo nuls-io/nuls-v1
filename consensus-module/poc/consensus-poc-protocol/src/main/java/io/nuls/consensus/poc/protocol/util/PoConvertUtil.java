@@ -52,7 +52,6 @@ public final class PoConvertUtil {
         agent.setTxHash(agentPo.getHash());
         agent.setTime(agentPo.getTime());
         agent.setDelHeight(agentPo.getDelHeight());
-        agent.setAlias(agentPo.getAlias());
         return agent;
     }
 
@@ -70,7 +69,6 @@ public final class PoConvertUtil {
         agentPo.setRewardAddress(agent.getRewardAddress());
         agentPo.setHash(agent.getTxHash());
         agentPo.setTime(agent.getTime());
-        agentPo.setAlias(agent.getAlias());
         return agentPo;
     }
 

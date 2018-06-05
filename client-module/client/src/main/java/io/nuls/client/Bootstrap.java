@@ -74,7 +74,7 @@ public class Bootstrap {
             RpcServerManager.getInstance().startServer(ip, port);
         } while (false);
 
-        WebViewBootstrap.startWebView();
+        WebViewBootstrap.startWebView(null);
         while (true) {
             try {
                 //todo 后续启动一个系统监视线程

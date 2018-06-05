@@ -657,7 +657,7 @@ public class PocConsensusResource {
                 String agentAddress = Base58.encode(agent.getAgentAddress()).toUpperCase();
                 String packingAddress = Base58.encode(agent.getPackingAddress()).toUpperCase();
                 String agentId = PoConvertUtil.getAgentId(agent.getTxHash()).toUpperCase();
-                String alias = agent.getAlias();
+                String alias = accountService.getAlias(agent.getAgentAddress()).getData();
                 boolean b = agentId.indexOf(keyword) >= 0;
                 b = b || agentAddress.equals(keyword) || packingAddress.equals(keyword);
                 if (StringUtils.isNotBlank(alias)) {
@@ -688,7 +688,8 @@ public class PocConsensusResource {
         Collections.sort(agentList, AgentComparator.getInstance(type));
         List<AgentDTO> resultList = new ArrayList<>();
         for (int i = start; i < agentList.size() && i < (start + pageSize); i++) {
-            resultList.add(new AgentDTO(agentList.get(i)));
+            Agent agent = agentList.get(i);
+            resultList.add(new AgentDTO(agent, accountService.getAlias(agent.getAgentAddress()).getData()));
         }
         page.setList(resultList);
         result.setData(page);
@@ -751,7 +752,8 @@ public class PocConsensusResource {
             if (agent.getTxHash().equals(agentHashData)) {
                 MeetingRound round = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
                 this.fillAgent(agent, round, null);
-                AgentDTO dto = new AgentDTO(agent);
+                String alias = accountService.getAlias(agent.getAgentAddress()).getData();
+                AgentDTO dto = new AgentDTO(agent, alias);
                 result.setData(dto);
                 return result.toRpcClientResult();
             }
@@ -834,7 +836,8 @@ public class PocConsensusResource {
         fillAgentList(agentList, allList);
         List<AgentDTO> resultList = new ArrayList<>();
         for (int i = start; i < agentList.size() && i < (start + pageSize); i++) {
-            resultList.add(new AgentDTO(agentList.get(i)));
+            Agent agent = agentList.get(i);
+            resultList.add(new AgentDTO(agent, accountService.getAlias(agent.getAgentAddress()).getData()));
         }
         page.setList(resultList);
         result.setData(page);

@@ -40,14 +40,14 @@ import java.io.UnsupportedEncodingException;
  */
 public class AgentDTO {
 
-    public AgentDTO(Agent agent) {
+    public AgentDTO(Agent agent,String alias) {
         this.agentHash = agent.getTxHash().getDigestHex();
         this.agentAddress = Base58.encode(agent.getAgentAddress());
         this.packingAddress = Base58.encode(agent.getPackingAddress());
         this.rewardAddress = Base58.encode(agent.getRewardAddress());
         this.deposit = agent.getDeposit().getValue();
         this.commissionRate = agent.getCommissionRate();
-        this.agentName = StringUtils.isBlank(agent.getAlias()) ? PoConvertUtil.getAgentId(agent.getTxHash()) : agent.getAlias();
+        this.agentName = StringUtils.isBlank(alias) ? PoConvertUtil.getAgentId(agent.getTxHash()) : alias;
         this.time = agent.getTime();
         this.blockHeight = agent.getBlockHeight();
         this.delHeight = agent.getDelHeight();

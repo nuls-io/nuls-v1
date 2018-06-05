@@ -23,17 +23,17 @@
  *
  */
 
-package io.nuls.web.view;
+package io.nuls.client.web.view.listener;
 
-import io.nuls.client.web.view.WebViewBootstrap;
+import javafx.event.ActionEvent;
 
 /**
- * @author: Niels Wang
- * @date: 2018/6/5
+ * 窗口关闭按钮事件
+ * @author ln
+ *
  */
-public class WebViewTest {
+public class WindowCloseEvent extends ActionEvent {
 
-    public static void main(String[] args) {
-        WebViewBootstrap.startWebView(null);
-    }
+	private static final long serialVersionUID = -9068803516227503080L;
+
 }
