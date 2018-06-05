@@ -46,6 +46,7 @@ import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -224,6 +225,21 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         return accountService.getAliasFee(form.getAddress(), form.getAlias()).toRpcClientResult();
+    }
+
+    @GET
+    @Path("/alias")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("[验证别名是否存在] 验证别名是否存在 ")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Result.class)
+    })
+    public RpcClientResult getIsAliasExist(@ApiParam(name = "aliasName", value = "别名", required = true) @QueryParam("aliasName") String aliasName) {
+        if (StringUtils.isBlank(aliasName)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        RpcClientResult result = new RpcClientResult(aliasService.isAliasExist(aliasName), KernelErrorCode.SUCCESS);
+        return result;
     }
 
     @GET

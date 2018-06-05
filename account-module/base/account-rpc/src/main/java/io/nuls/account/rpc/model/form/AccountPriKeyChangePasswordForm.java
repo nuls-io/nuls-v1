@@ -25,7 +25,6 @@
 
 package io.nuls.account.rpc.model.form;
 
-import io.nuls.core.tools.str.StringUtils;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
