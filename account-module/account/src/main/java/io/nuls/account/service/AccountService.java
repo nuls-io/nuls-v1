@@ -30,6 +30,7 @@ import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
 
@@ -375,4 +376,7 @@ public interface AccountService {
      * @return alias string
      */
     Result<String> getAlias(String address);
+
+
+    Result<Na> getAliasFee(String addr, String aliasName);
 }

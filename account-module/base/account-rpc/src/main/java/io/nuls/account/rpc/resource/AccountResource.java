@@ -185,6 +185,23 @@ public class AccountResource {
     }
 
     @GET
+    @Path("/alias/fee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("[别名手续费] 获取设置别名手续 ")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Result.class)
+    })
+    public RpcClientResult aliasFee(@BeanParam() AccountAliasFeeForm form) {
+        if (!Address.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (StringUtils.isBlank(form.getAlias())) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        return accountService.getAliasFee(form.getAddress(), form.getAlias()).toRpcClientResult();
+    }
+
+    @GET
     @Path("/balance/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("[余额] 查询账户余额 [3.3.3]")

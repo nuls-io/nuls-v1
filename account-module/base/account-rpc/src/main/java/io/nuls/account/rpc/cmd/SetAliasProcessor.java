@@ -31,7 +31,7 @@ public class SetAliasProcessor implements CommandProcessor {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
                 .newLine("\t<address> The address of the account, - Required")
-                .newLine("\t<alias> The alias of the account, the bytes for the alias is between 1 and 30 " +
+                .newLine("\t<alias> The alias of the account, the bytes for the alias is between 1 and 20 " +
                         "(only lower case letters, Numbers and underline, the underline should not be at the begin and end), - Required");
         return builder.toString();
     }

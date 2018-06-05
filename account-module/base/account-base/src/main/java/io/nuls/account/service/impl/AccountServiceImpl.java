@@ -1,6 +1,8 @@
 package io.nuls.account.service.impl;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.model.*;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
@@ -9,6 +11,7 @@ import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.account.storage.service.AliasStorageService;
+import io.nuls.account.tx.AliasTransaction;
 import io.nuls.account.util.AccountTool;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.core.tools.crypto.*;
@@ -16,13 +19,15 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.NulsSignData;
-import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.*;
+import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.utils.TransactionFeeCalculator;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -666,5 +671,45 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         return Result.getSuccess().setData(account.getAlias());
+    }
+
+    @Override
+    public Result<Na> getAliasFee(String addr, String aliasName) {
+        if (!Address.validAddress(addr)) {
+            Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        Account account = this.getAccount(addr).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        byte[] addressBytes = account.getAddress().getBase58Bytes();
+        try {
+            //创建一笔设置别名的交易
+            AliasTransaction tx = new AliasTransaction();
+            tx.setTime(TimeService.currentTimeMillis());
+            Alias alias = new Alias(addressBytes, aliasName);
+            tx.setTxData(alias);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1000_BYTES);
+            if (!coinDataResult.isEnough()) {
+                return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
+            }
+            CoinData coinData = new CoinData();
+            coinData.setFrom(coinDataResult.getCoinList());
+            Coin change = coinDataResult.getChange();
+            if (null != change) {
+                //创建toList
+                List<Coin> toList = new ArrayList<>();
+                toList.add(change);
+                coinData.setTo(toList);
+            }
+            Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
+            coinData.addTo(coin);
+            tx.setCoinData(coinData);
+            Na fee = TransactionFeeCalculator.getOtherFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+            return Result.getSuccess().setData(fee);
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
     }
 }
