@@ -147,7 +147,7 @@ public class CommandHandler {
             throw new NulsRuntimeException(KernelErrorCode.FAILED, "CommandHandler start failed");
         }
         if (StringUtils.isBlank(port)) {
-            RestFulUtils.getInstance().setServerUri("http://" + RpcConstant.DEFAULT_IP + ":" + RpcConstant.DEFAULT_PORT);
+            RestFulUtils.getInstance().setServerUri("http://" + RpcConstant.DEFAULT_IP + ":" + RpcConstant.DEFAULT_PORT + RpcConstant.PREFIX);
         } else {
             String ip = null;
             try {
@@ -155,7 +155,7 @@ public class CommandHandler {
             } catch (Exception e) {
                 ip = RpcConstant.DEFAULT_IP;
             }
-            RestFulUtils.getInstance().setServerUri("http://" + ip + ":" + port);
+            RestFulUtils.getInstance().setServerUri("http://" + ip + ":" + port + RpcConstant.PREFIX);
         }
     }
 

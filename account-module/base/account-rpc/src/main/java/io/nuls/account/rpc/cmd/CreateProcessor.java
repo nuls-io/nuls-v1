@@ -83,6 +83,9 @@ public class CreateProcessor implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String password = CommandHelper.getPwdOptional();
+        if(StringUtils.isNotBlank(password)){
+            CommandHelper.confirmPwd(password);
+        }
         int count = 1;
         if(args.length == 2){
             count = Integer.parseInt(args[1]);
