@@ -160,6 +160,9 @@ public class CommandHandler {
     }
 
     public static void main(String[] args) {
+        if(System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1) {
+            System.setProperty("jline.WindowsTerminal.directConsole", "false");
+        }
         CommandHandler instance = new CommandHandler();
         instance.init();
         try {

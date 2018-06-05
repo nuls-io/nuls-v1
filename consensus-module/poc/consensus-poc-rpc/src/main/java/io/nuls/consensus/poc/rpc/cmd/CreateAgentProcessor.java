@@ -59,8 +59,6 @@ public class CreateAgentProcessor implements CommandProcessor {
                 .newLine("\t<packingAddress>    packing address    -required")
                 .newLine("\t<commissionRate>    commission rate (10~100)   -required")
                 .newLine("\t<deposit>   amount you want to deposit -required")
-                .newLine("\t<agentName>  your agent name    -required")
-                .newLine("\t<remark>    introduction to your agent -required")
                 .newLine("\t[rewardAddress]  Billing address    -not required");
         return bulider.toString();
     }
