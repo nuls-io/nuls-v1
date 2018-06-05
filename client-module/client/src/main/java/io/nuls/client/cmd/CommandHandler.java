@@ -160,6 +160,11 @@ public class CommandHandler {
     }
 
     public static void main(String[] args) {
+        /**
+         * 如果操作系统是windows, 可能会使控制台读取部分处于死循环，可以设置为false，绕过本地Windows API，直接使用Java IO流输出
+         * If the operating system is windows, it may cause the console to read part of the loop, can be set to false,
+         * bypass the native Windows API, use the Java IO stream output directly
+         */
         if(System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1) {
             System.setProperty("jline.WindowsTerminal.directConsole", "false");
         }
