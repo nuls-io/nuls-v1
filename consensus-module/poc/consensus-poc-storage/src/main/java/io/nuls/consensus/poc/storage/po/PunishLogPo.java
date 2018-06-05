@@ -32,6 +32,8 @@ import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.utils.*;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * @author Niels
@@ -137,4 +139,11 @@ public class PunishLogPo extends BaseNulsData {
         return ArraysTool.joinintTogether(address, new byte[]{type}, SerializeUtils.uint64ToByteArray(height), new VarInt(index).encode());
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof PunishLogPo)) {
+            return false;
+        }
+        return Arrays.equals(this.getKey(), ((PunishLogPo) obj).getKey());
+    }
 }

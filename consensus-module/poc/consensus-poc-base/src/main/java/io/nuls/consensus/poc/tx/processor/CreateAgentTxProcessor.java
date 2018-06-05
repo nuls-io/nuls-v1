@@ -27,6 +27,7 @@ package io.nuls.consensus.poc.tx.processor;
 
 import io.nuls.account.service.AccountService;
 import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
@@ -90,7 +91,7 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
     @Override
     public Result onCommit(CreateAgentTransaction tx, Object secondaryData) {
         while (null == nextId) {
-           this.init();
+            this.init();
         }
         Agent agent = tx.getTxData();
         BlockHeader header = (BlockHeader) secondaryData;
@@ -105,6 +106,16 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
         AgentPo agentPo = PoConvertUtil.agentToPo(agent);
 
         boolean success = agentStorageService.save(agentPo);
+        if (success) {
+            List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+            for (Agent item : agentList) {
+                if (item.getTxHash().equals(agent.getTxHash())) {
+                    item.setAlias(agent.getAlias());
+                    item.setAgentId(agent.getAgentId());
+                    break;
+                }
+            }
+        }
         return new Result(success, null);
     }
 

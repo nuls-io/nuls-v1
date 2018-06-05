@@ -36,6 +36,7 @@ import io.nuls.kernel.model.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -52,7 +53,7 @@ public class Chain implements Cloneable {
     private List<Block> blockList;
     private List<Agent> agentList;
     private List<Deposit> depositList;
-    private List<PunishLogPo> yellowPunishList;
+    private Set<PunishLogPo> yellowPunishList;
     private List<PunishLogPo> redPunishList;
 
     public Chain() {
@@ -126,10 +127,10 @@ public class Chain implements Cloneable {
     }
 
     public List<PunishLogPo> getYellowPunishList() {
-        return yellowPunishList;
+        return new ArrayList<>(yellowPunishList);
     }
 
-    public void setYellowPunishList(List<PunishLogPo> yellowPunishList) {
+    public void setYellowPunishList(Set<PunishLogPo> yellowPunishList) {
         this.yellowPunishList = yellowPunishList;
     }
 

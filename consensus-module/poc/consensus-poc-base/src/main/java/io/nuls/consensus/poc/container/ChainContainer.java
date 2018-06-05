@@ -52,10 +52,7 @@ import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.service.BlockService;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author ln
@@ -539,7 +536,7 @@ public class ChainContainer implements Cloneable {
             newChain.setDepositList(depositList);
         }
         if (chain.getYellowPunishList() != null) {
-            newChain.setYellowPunishList(new ArrayList<>(chain.getYellowPunishList()));
+            newChain.setYellowPunishList(new HashSet<>(chain.getYellowPunishList()));
         }
         if (chain.getRedPunishList() != null) {
             newChain.setRedPunishList(new ArrayList<>(chain.getRedPunishList()));

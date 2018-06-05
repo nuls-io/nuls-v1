@@ -44,6 +44,7 @@ import io.nuls.kernel.utils.AddressTool;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
@@ -136,7 +137,7 @@ public class BaseChainTest extends BaseTest {
 
         chain.setDepositList(depositList);
 
-        chain.setYellowPunishList(new ArrayList<>());
+        chain.setYellowPunishList(new HashSet<>());
         chain.setRedPunishList(new ArrayList<>());
 
         chainContainer = new ChainContainer(chain);
