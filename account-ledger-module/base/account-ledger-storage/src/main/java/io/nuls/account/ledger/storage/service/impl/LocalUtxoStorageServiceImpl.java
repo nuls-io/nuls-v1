@@ -66,8 +66,8 @@ public class LocalUtxoStorageServiceImpl implements LocalUtxoStorageService, Ini
     }
 
     @Override
-    public List<Entry<byte[],byte[]>> loadAllCoinList(){
-        List<Entry<byte[],byte[]>> coinList = dbService.entryList(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
+    public List<Entry<byte[], byte[]>> loadAllCoinList() {
+        List<Entry<byte[], byte[]>> coinList = dbService.entryList(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
         return coinList;
     }
 
@@ -107,5 +107,22 @@ public class LocalUtxoStorageServiceImpl implements LocalUtxoStorageService, Ini
             return batchResult;
         }
         return Result.getSuccess().setData(new Integer(utxos.size()));
+    }
+
+    @Override
+    public Result batchSaveAndDeleteUTXO(Map<byte[], byte[]> utxosToSave, Set<byte[]> utxosToDelete) {
+        BatchOperation batch = dbService.createWriteBatch(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
+        Set<byte[]> utxoKeySet = utxosToSave.keySet();
+        for (byte[] key : utxoKeySet) {
+            batch.put(key, utxosToSave.get(key));
+        }
+        for (byte[] key : utxosToDelete) {
+            batch.delete(key);
+        }
+        Result batchResult = batch.executeBatch();
+        if (batchResult.isFailed()) {
+            return batchResult;
+        }
+        return Result.getSuccess().setData(new Integer(utxosToSave.size() + utxosToDelete.size()));
     }
 }

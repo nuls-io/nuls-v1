@@ -64,7 +64,7 @@ public class CheckUnConfirmTxThread implements Runnable {
     private AccountLedgerService AccountLedgerService;
 
     @Autowired
-    UnconfirmedTransactionStorageService unconfirmedTransactionStorageService;
+    private UnconfirmedTransactionStorageService unconfirmedTransactionStorageService;
 
     @Autowired
     private LocalUtxoStorageService localUtxoStorageService;
@@ -73,7 +73,7 @@ public class CheckUnConfirmTxThread implements Runnable {
     private BalanceManager balanceManager;
 
     @Autowired
-    TransactionInfoService transactionInfoService;
+    private TransactionInfoService transactionInfoService;
 
     @Override
     public void run() {
