@@ -714,7 +714,7 @@ public class AccountServiceImpl implements AccountService {
             tx.setTime(TimeService.currentTimeMillis());
             Alias alias = new Alias(addressBytes, aliasName);
             tx.setTxData(alias);
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1000_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -730,7 +730,7 @@ public class AccountServiceImpl implements AccountService {
             Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
             coinData.addTo(coin);
             tx.setCoinData(coinData);
-            Na fee = TransactionFeeCalculator.getOtherFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+            Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
             return Result.getSuccess().setData(fee);
         } catch (Exception e) {
             Log.error(e);

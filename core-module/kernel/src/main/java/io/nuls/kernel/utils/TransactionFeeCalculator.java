@@ -25,6 +25,8 @@
 
 package io.nuls.kernel.utils;
 
+import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Na;
 
 /**
@@ -33,8 +35,10 @@ import io.nuls.kernel.model.Na;
  */
 public class TransactionFeeCalculator {
 
-    public static final Na MIN_PRECE_PRE_1000_BYTES = Na.valueOf(100000);
-    public static final Na OTHER_PRECE_PRE_1000_BYTES = Na.valueOf(500000);
+    public static final Na MIN_PRECE_PRE_1024_BYTES = Na.valueOf(100000);
+    public static final Na OTHER_PRECE_PRE_1024_BYTES = Na.valueOf(1000000);
+
+    public static final int KB = 1024;
 
     /**
      * 根据交易大小计算需要交纳的手续费
@@ -43,9 +47,9 @@ public class TransactionFeeCalculator {
      * @param size 交易大小/size of the transaction
      */
     public static final Na getTransferFee(int size) {
-        Na fee = MIN_PRECE_PRE_1000_BYTES.multiply(size / 1000);
-        if (size % 1000 > 0) {
-            fee = fee.add(MIN_PRECE_PRE_1000_BYTES);
+        Na fee = MIN_PRECE_PRE_1024_BYTES.multiply(size / KB);
+        if (size % KB > 0) {
+            fee = fee.add(MIN_PRECE_PRE_1024_BYTES);
         }
         return fee;
     }
@@ -56,10 +60,10 @@ public class TransactionFeeCalculator {
      *
      * @param size 交易大小/size of the transaction
      */
-    public static final Na getOtherFee(int size) {
-        Na fee = OTHER_PRECE_PRE_1000_BYTES.multiply(size / 1000);
-        if (size % 1000 > 0) {
-            fee = fee.add(OTHER_PRECE_PRE_1000_BYTES);
+    public static final Na getMaxFee(int size) {
+        Na fee = OTHER_PRECE_PRE_1024_BYTES.multiply(size / KB);
+        if (size % KB > 0) {
+            fee = fee.add(OTHER_PRECE_PRE_1024_BYTES);
         }
         return fee;
     }
@@ -71,11 +75,14 @@ public class TransactionFeeCalculator {
      * @param size 交易大小/size of the transaction
      */
     public static final Na getFee(int size, Na price) {
-        if (price.isLessThan(MIN_PRECE_PRE_1000_BYTES)) {
-            return Na.MAX;
+        if (price.isLessThan(MIN_PRECE_PRE_1024_BYTES)) {
+            throw new NulsRuntimeException(KernelErrorCode.FAILED, "The price is too low!");
         }
-        Na fee = price.multiply(size / 1000);
-        if (size % 1000 > 0) {
+        if (price.isGreaterThan(OTHER_PRECE_PRE_1024_BYTES)) {
+            throw new NulsRuntimeException(KernelErrorCode.FAILED, "The price is too high!");
+        }
+        Na fee = price.multiply(size / KB);
+        if (size % KB > 0) {
             fee = fee.add(price);
         }
         return fee;

@@ -53,7 +53,7 @@ public class TxFeeValidator implements NulsDataValidator<Transaction> {
         if(tx.getType() == ProtocolConstant.TX_TYPE_TRANSFER){
             fee = TransactionFeeCalculator.getTransferFee(tx.size());
         }else{
-            fee =TransactionFeeCalculator.getOtherFee(tx.size());
+            fee =TransactionFeeCalculator.getMaxFee(tx.size());
         }
         if (realFee.isGreaterOrEquals(fee)) {
             return ValidateResult.getSuccessResult();

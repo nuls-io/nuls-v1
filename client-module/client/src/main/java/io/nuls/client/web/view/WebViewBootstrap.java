@@ -57,7 +57,7 @@ public class WebViewBootstrap extends Application {
 //        top.setPrefSize(800, 50);
 //        new TestDragListener(stage).enableDrag(top);
 
-        String url = "http://192.168.1.103:8001/docs";
+        String url = "http://127.0.0.1:8001/client";
 
         VBox root = new VBox();
         root.setId("root");
@@ -69,14 +69,14 @@ public class WebViewBootstrap extends Application {
         stage.setScene(scene);
 
         stage.getIcons().add(new Image(
-                WebViewBootstrap.class.getResourceAsStream("/image/icon.ico")));
+                WebViewBootstrap.class.getResourceAsStream("/image/icon.png")));
 
         //添加系统托盘图标.
         SystemTray tray = SystemTray.getSystemTray();
         BufferedImage image = null;
         try {
             image = ImageIO.read(WebViewBootstrap.class
-                    .getResourceAsStream("/image/icon.ico"));
+                    .getResourceAsStream("/image/icon.png"));
         } catch (IOException e) {
             Log.error(e);
         }

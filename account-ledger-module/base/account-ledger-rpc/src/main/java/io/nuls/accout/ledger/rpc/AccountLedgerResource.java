@@ -141,7 +141,7 @@ public class AccountLedgerResource {
         Na value = Na.valueOf(form.getAmount());
         return accountLedgerService.transfer(AddressTool.getAddress(form.getAddress()),
                 AddressTool.getAddress(form.getToAddress()),
-                value, form.getPassword(), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1000_BYTES).toRpcClientResult();
+                value, form.getPassword(), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES).toRpcClientResult();
     }
 
 
@@ -171,7 +171,7 @@ public class AccountLedgerResource {
 
         Na value = Na.valueOf(form.getAmount());
         return accountLedgerService.transferFee(AddressTool.getAddress(form.getAddress()),
-                AddressTool.getAddress(form.getToAddress()), value, form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1000_BYTES).toRpcClientResult();
+                AddressTool.getAddress(form.getToAddress()), value, form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES).toRpcClientResult();
     }
 
 

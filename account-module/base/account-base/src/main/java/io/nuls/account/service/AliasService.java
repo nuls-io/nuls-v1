@@ -131,7 +131,7 @@ public class AliasService {
             Alias alias = new Alias(addressBytes, aliasName);
             tx.setTxData(alias);
 
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1000_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
