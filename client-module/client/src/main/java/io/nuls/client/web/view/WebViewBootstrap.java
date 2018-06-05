@@ -142,7 +142,7 @@ public class WebViewBootstrap extends Application implements ActionListener {
 //        new TestDragListener(stage).enableDrag(root);
         Scene scene = new Scene(root, 800, 560, Color.web("#666970"));
         stage.setScene(scene);
-        stage.show();
+        show();
     }
 
     /*

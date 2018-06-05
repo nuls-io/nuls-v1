@@ -213,7 +213,6 @@ public class BlockResource {
     }
 
     @GET
-    @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("根据区块高度查询区块列表，包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用")
     @ApiResponses(value = {
