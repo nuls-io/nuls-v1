@@ -29,6 +29,8 @@ import io.nuls.client.rpc.RpcServerManager;
 import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.client.web.view.WebViewBootstrap;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
+import io.nuls.consensus.poc.config.ConsensusConfig;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.MicroKernelBootstrap;
@@ -83,9 +85,8 @@ public class Bootstrap {
             if (null != NulsContext.getInstance().getBestBlock()) {
                 Log.info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-  netTime : " + (DateUtil.convertDate(new Date(TimeService.currentTimeMillis()))));
                 Block bestBlock = NulsContext.getInstance().getBestBlock();
-                Log.info("bestHeight:" + bestBlock.getHeader().getHeight() + " , txCount : " + bestBlock.getHeader().getTxCount() + " , tx memory pool count : " + TxMemoryPool.getInstance().getAll().size() + " , hash : " + bestBlock.getHeader().getHash());
-//                Log.info("node: " + NulsContext.getServiceBean(NetworkService.class).getAvailableNodes().size() + "), height:{}, threadCount:{}, consensusStatus: {}, downloadStatus: {}", NulsContext.getInstance().getBestBlock().getHeader().getHeight(), Thread.activeCount(), NulsContext.getServiceBean(ConsensusService.class).getConsensusStatus(), NulsContext.getServiceBean(DownloadService.class).getStatus());
                 Collection<Node> nodes = NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
+                Log.info("bestHeight:" + bestBlock.getHeader().getHeight() + " , txCount : " + bestBlock.getHeader().getTxCount() + " , tx memory pool count : " + TxMemoryPool.getInstance().getAll().size() + " , hash : " + bestBlock.getHeader().getHash() + ",nodeCount:" + nodes.size());
                 for (Node node : nodes) {
                     Log.info(node.getBestBlockHeight() + ", " + node.getId() + ", " + node.getBestBlockHash());
                 }
