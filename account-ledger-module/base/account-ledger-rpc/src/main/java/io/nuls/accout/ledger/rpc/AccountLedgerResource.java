@@ -145,7 +145,7 @@ public class AccountLedgerResource {
     }
 
 
-    @POST
+    @GET
     @Path("/transfer/fee")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "转账手续费", notes = "result.data: resultJson 返回转账结果")

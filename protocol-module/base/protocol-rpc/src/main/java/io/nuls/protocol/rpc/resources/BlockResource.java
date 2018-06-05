@@ -46,6 +46,8 @@ import io.swagger.annotations.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author: Niels Wang
@@ -202,10 +204,40 @@ public class BlockResource {
         if (block == null) {
             result = Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         } else {
+            //todo why?
             result = Result.getSuccess();
             result.setData(Hex.encode(block.serialize()));
 
         }
         return result.toRpcClientResult();
+    }
+
+    @GET
+    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("根据区块高度查询区块列表，包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = BlockDto.class)
+    })
+    public RpcClientResult getBlockList(@QueryParam("startHeight") Long startHeight, @QueryParam("size") Long size) throws IOException {
+        if (size > 100) {
+            return RpcClientResult.getFailed("the size is too big");
+        }
+        long bestHeight = NulsContext.getInstance().getBestHeight();
+        if (startHeight > bestHeight) {
+            return RpcClientResult.getFailed("The start height is to high!");
+        }
+        List<BlockDto> list = new ArrayList<>();
+
+        for (int i = 0; i < size && (startHeight + i) <= bestHeight; i++) {
+            Block block = blockService.getBlock(startHeight + i).getData();
+            if (null == block) {
+                break;
+            }
+            list.add(new BlockDto(block));
+        }
+
+        return Result.getSuccess().setData(list).toRpcClientResult();
+
     }
 }
