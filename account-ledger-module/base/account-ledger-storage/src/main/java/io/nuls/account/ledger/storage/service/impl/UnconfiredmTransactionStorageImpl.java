@@ -28,6 +28,7 @@ import io.nuls.account.ledger.storage.constant.AccountLedgerStorageConstant;
 import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
+import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.exception.NulsException;
@@ -58,7 +59,7 @@ public class UnconfiredmTransactionStorageImpl implements UnconfirmedTransaction
     @Override
     public void afterPropertiesSet() throws NulsException {
         Result result = dbService.createArea(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX);
-        if (result.isFailed()) {
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
     }

@@ -26,6 +26,7 @@ package io.nuls.account.ledger.storage.service.impl;
 
 import io.nuls.account.ledger.storage.constant.AccountLedgerStorageConstant;
 import io.nuls.account.ledger.storage.service.LocalUtxoStorageService;
+import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
@@ -61,7 +62,7 @@ public class LocalUtxoStorageServiceImpl implements LocalUtxoStorageService, Ini
     public void afterPropertiesSet() throws NulsException {
 
         Result result = dbService.createArea(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
-        if (result.isFailed()) {
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
     }
