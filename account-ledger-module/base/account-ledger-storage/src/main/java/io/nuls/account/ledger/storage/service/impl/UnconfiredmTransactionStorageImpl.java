@@ -50,7 +50,7 @@ import java.util.List;
  * date 2018/5/22.
  */
 @Component
-public class UnconfiredmTransactionStorageImpl implements UnconfirmedTransactionStorageService,InitializingBean {
+public class UnconfiredmTransactionStorageImpl implements UnconfirmedTransactionStorageService, InitializingBean {
 
     @Autowired
     private DBService dbService;
@@ -64,7 +64,7 @@ public class UnconfiredmTransactionStorageImpl implements UnconfirmedTransaction
     }
 
     @Override
-    public Result saveUnconfirmedTx(NulsDigestData hash,Transaction tx) {
+    public Result saveUnconfirmedTx(NulsDigestData hash, Transaction tx) {
         Result result;
         try {
             result = dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, hash.serialize(), tx.serialize());
@@ -75,25 +75,25 @@ public class UnconfiredmTransactionStorageImpl implements UnconfirmedTransaction
     }
 
     @Override
-    public Result deleteUnconfirmedTx(NulsDigestData hash){
+    public Result deleteUnconfirmedTx(NulsDigestData hash) {
         try {
             return dbService.delete(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, hash.serialize());
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.info("deleteUnconfirmedTx error");
             return Result.getFailed();
         }
     }
 
     @Override
-    public Result<Transaction> getUnconfirmedTx(NulsDigestData hash){
-        try{
+    public Result<Transaction> getUnconfirmedTx(NulsDigestData hash) {
+        try {
             byte[] txBytes = dbService.get(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, hash.serialize());
-            if(txBytes == null) {
+            if (txBytes == null) {
                 return Result.getSuccess();
             }
             Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(txBytes));
             return Result.getSuccess().setData(tx);
-        }catch (Exception e){
+        } catch (Exception e) {
             return Result.getFailed();
         }
     }
@@ -107,9 +107,9 @@ public class UnconfiredmTransactionStorageImpl implements UnconfirmedTransaction
         for (Entry txEntry : txs) {
             Transaction tmpTx = null;
             try {
-                tmpTx = TransactionManager.getInstance(new NulsByteBuffer((byte[])txEntry.getValue()));
+                tmpTx = TransactionManager.getInstance(new NulsByteBuffer((byte[]) txEntry.getValue()));
             } catch (Exception e) {
-                Log.info("Load local transaction Error,transaction key[" + Hex.encode((byte[])txEntry.getKey()) + "]");
+                Log.info("Load local transaction Error,transaction key[" + Hex.encode((byte[]) txEntry.getKey()) + "]");
             }
             if (tmpTx != null) {
                 tmpList.add(tmpTx);

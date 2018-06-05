@@ -50,7 +50,7 @@ import java.util.Set;
  * date 2018/5/22.
  */
 @Component
-public class TransactionInfoStorageServiceImpl implements TransactionInfoStorageService,InitializingBean {
+public class TransactionInfoStorageServiceImpl implements TransactionInfoStorageService, InitializingBean {
     @Autowired
     private DBService dbService;
 
@@ -67,7 +67,7 @@ public class TransactionInfoStorageServiceImpl implements TransactionInfoStorage
         try {
             dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, infoKey, infoPo.serialize());
             return Result.getSuccess();
-        }catch (Exception e){
+        } catch (Exception e) {
             return Result.getFailed();
         }
     }
@@ -94,7 +94,7 @@ public class TransactionInfoStorageServiceImpl implements TransactionInfoStorage
     }
 
     @Override
-    public Result deleteTransactionInfo(byte[] infoKey){
+    public Result deleteTransactionInfo(byte[] infoKey) {
         return dbService.delete(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, infoKey);
     }
 }

@@ -44,11 +44,13 @@ public interface LocalUtxoStorageService {
 
     Result saveUTXO(byte[] key, byte[] value);
 
-    Result batchSaveUTXO(Map<byte[],byte[]> utxos);
+    Result batchSaveUTXO(Map<byte[], byte[]> utxos);
 
     Result deleteUTXO(byte[] key);
 
     Result batchDeleteUTXO(Set<byte[]> utxos);
 
-    List<Entry<byte[],byte[]>> loadAllCoinList();
+    List<Entry<byte[], byte[]>> loadAllCoinList();
+
+    Result batchSaveAndDeleteUTXO(Map<byte[], byte[]> utxosToSave, Set<byte[]> utxosToDelete);
 }

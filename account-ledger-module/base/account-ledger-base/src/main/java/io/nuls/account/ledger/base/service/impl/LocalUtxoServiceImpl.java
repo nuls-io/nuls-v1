@@ -169,7 +169,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 fromsSet.add(ArraysTool.joinintTogether(address, from.getOwner()));
             }
 
-            localUtxoStorageService.batchDeleteUTXO(fromsSet);
+            //localUtxoStorageService.batchDeleteUTXO(fromsSet);
             // save utxo - to
             List<Coin> tos = coinData.getTo();
             Map<byte[], byte[]> toMap = new HashMap<>();
@@ -195,7 +195,11 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     throw new NulsRuntimeException(e);
                 }
             }
-            localUtxoStorageService.batchSaveUTXO(toMap);
+            //localUtxoStorageService.batchSaveUTXO(toMap);
+            Result result = localUtxoStorageService.batchSaveAndDeleteUTXO(toMap, fromsSet);
+            if (result.isFailed() || (int) result.getData() != toMap.size() + fromsSet.size()) {
+                return Result.getFailed();
+            }
         }
         return Result.getSuccess();
     }
@@ -221,7 +225,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     throw new NulsRuntimeException(e);
                 }
             }
-            localUtxoStorageService.batchDeleteUTXO(toSet);
+            //localUtxoStorageService.batchDeleteUTXO(toSet);
 
             // save - from
             List<Coin> froms = coinData.getFrom();
@@ -248,8 +252,13 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     throw new NulsRuntimeException(e);
                 }
             }
-            localUtxoStorageService.batchSaveUTXO(fromMap);
+            //localUtxoStorageService.batchSaveUTXO(fromMap);
+            Result result = localUtxoStorageService.batchSaveAndDeleteUTXO(fromMap, toSet);
+            if (result.isFailed() || (int) result.getData() != fromMap.size() + toSet.size()) {
+                return Result.getFailed();
+            }
         }
+
         return Result.getSuccess();
     }
 
