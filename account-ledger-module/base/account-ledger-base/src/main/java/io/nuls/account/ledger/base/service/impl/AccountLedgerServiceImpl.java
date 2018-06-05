@@ -116,7 +116,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         Result result;
         for (int i = 0; i < txs.size(); i++) {
             result = saveConfirmedTransaction(txs.get(i));
-            if (result.isSuccess()) {
+            if (result.isSuccess() && (int)result.getData() == 1) {
                 savedTxList.add(txs.get(i));
             } else {
                 rollbackTransaction(savedTxList, false);
@@ -161,6 +161,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         for (int i = 0; i < addresses.size(); i++) {
             balanceManager.refreshBalance(addresses.get(i));
         }
+        result.setData(new Integer(1));
         return result;
     }
 
