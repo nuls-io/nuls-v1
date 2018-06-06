@@ -108,6 +108,12 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             // save utxo - to
             List<Coin> tos = coinData.getTo();
             Map<byte[], byte[]> toMap = new HashMap<>();
+            byte[] txHashBytes = null;
+            try {
+                txHashBytes = tx.getHash().serialize();
+            } catch (IOException e) {
+                throw new NulsRuntimeException(e);
+            }
             for (int i = 0, length = tos.size(); i < length; i++) {
                 Coin to = tos.get(i);
                 if (!AccountLegerUtils.isLocalAccount(to.getOwner())) {
@@ -115,11 +121,10 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 }
 
                 try {
-                    byte[] outKey = ArraysTool.joinintTogether(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-
+                    byte[] outKey = ArraysTool.joinintTogether(tos.get(i).getOwner(), txHashBytes, new VarInt(i).encode());
                     toMap.put(outKey, to.serialize());
                 } catch (IOException e) {
-                    throw new NulsRuntimeException(e);
+
                 }
             }
             Result result = localUtxoStorageService.batchSaveAndDeleteUTXO(toMap, fromsSet);

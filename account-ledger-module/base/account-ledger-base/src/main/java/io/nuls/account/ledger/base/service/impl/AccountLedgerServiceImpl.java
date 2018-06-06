@@ -116,10 +116,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         Result result;
         for (int i = 0; i < txs.size(); i++) {
             result = saveConfirmedTransaction(txs.get(i));
-            if (result.isSuccess() && result.getData() != null && (int) result.getData() == 1) {
-                savedTxList.add(txs.get(i));
-            } else if (result.isSuccess() && result.getData() != null && (int) result.getData() == 0) {
-                continue;
+            if (result.isSuccess()) {
+                if(result.getData() != null && (int) result.getData() == 1) {
+                    savedTxList.add(txs.get(i));
+                }
             } else {
                 rollbackTransaction(savedTxList, false);
                 return result;
