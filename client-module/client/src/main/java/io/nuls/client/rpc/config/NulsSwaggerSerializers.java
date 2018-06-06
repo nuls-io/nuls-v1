@@ -23,46 +23,37 @@
  *
  */
 
-package io.nuls.client.web.view;
+package io.nuls.client.rpc.config;
 
-import javafx.event.EventHandler;
-import javafx.scene.Node;
-import javafx.scene.input.MouseEvent;
-import javafx.stage.Stage;
+import io.swagger.jaxrs.listing.SwaggerSerializers;
+import io.swagger.models.Path;
+import io.swagger.models.Swagger;
 
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * 拖拽监听器
- * @author Light
+ * @author: Niels Wang
+ * @date: 2018/6/6
  */
-public class TestDragListener implements EventHandler<MouseEvent> {
-
-    private double xOffset = 0;
-    private double yOffset = 0;
-    private final Stage stage;
-
-    public TestDragListener(Stage stage) {
-        this.stage = stage;
-    }
+public class NulsSwaggerSerializers extends SwaggerSerializers {
 
     @Override
-    public void handle(MouseEvent event) {
-        event.consume();
-        if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
-            xOffset = event.getSceneX();
-            yOffset = event.getSceneY();
-        } else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-            stage.setX(event.getScreenX() - xOffset);
-            if(event.getScreenY() - yOffset < 0) {
-                stage.setY(0);
-            }else {
-                stage.setY(event.getScreenY() - yOffset);
-            }
+    public void writeTo(Swagger data, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> headers, OutputStream out) throws IOException {
+        Map<String, Path> map = data.getPaths();
+        Set<String> keyset = new HashSet<>(map.keySet());
+        for (String key : keyset) {
+            Path path = map.get(key);
+            map.remove(key);
+            map.put("/api" + key, path);
         }
-    }
-
-    public void enableDrag(Node node) {
-        node.setOnMousePressed(this);
-        node.setOnMouseDragged(this);
+        super.writeTo(data, type, genericType, annotations, mediaType, headers, out);
     }
 }
