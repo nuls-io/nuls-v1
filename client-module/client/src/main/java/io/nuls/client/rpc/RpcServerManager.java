@@ -93,7 +93,7 @@ public class RpcServerManager {
         try {
             ClassLoader loader = this.getClass().getClassLoader();
 
-//            addSwagerUi(loader);
+            addSwagerUi(loader);
             addClientUi(loader);
 
             httpServer.start();

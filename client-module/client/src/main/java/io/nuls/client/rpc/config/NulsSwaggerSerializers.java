@@ -22,39 +22,38 @@
  * SOFTWARE.
  *
  */
+
 package io.nuls.client.rpc.config;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-import io.nuls.client.rpc.filter.RpcServerFilter;
-import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.lite.core.SpringLiteContext;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.server.ResourceConfig;
+import io.swagger.jaxrs.listing.SwaggerSerializers;
+import io.swagger.models.Path;
+import io.swagger.models.Swagger;
 
-import javax.ws.rs.Path;
-import java.util.Collection;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * @author Niels
- * @date 2017/9/28
+ * @author: Niels Wang
+ * @date: 2018/6/6
  */
-public class NulsResourceConfig extends ResourceConfig {
+public class NulsSwaggerSerializers extends SwaggerSerializers {
 
-    public NulsResourceConfig() {
-        register(io.swagger.jaxrs.listing.ApiListingResource.class);
-        register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
-        register(NulsSwaggerSerializers.class);
-        register(MultiPartFeature.class);
-        register(RpcServerFilter.class);
-        register(JacksonJsonProvider.class);
-
-        Collection<Object> list = SpringLiteContext.getAllBeanList();
-        for (Object object : list) {
-            if (object.getClass().getAnnotation(Path.class) != null) {
-                Log.debug("register restFul resource:{}", object.getClass());
-                register(object);
-            }
+    @Override
+    public void writeTo(Swagger data, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> headers, OutputStream out) throws IOException {
+        Map<String, Path> map = data.getPaths();
+        Set<String> keyset = new HashSet<>(map.keySet());
+        for (String key : keyset) {
+            Path path = map.get(key);
+            map.remove(key);
+            map.put("/api" + key, path);
         }
+        super.writeTo(data, type, genericType, annotations, mediaType, headers, out);
     }
-
 }
