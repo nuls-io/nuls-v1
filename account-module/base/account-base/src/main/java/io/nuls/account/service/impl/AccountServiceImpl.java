@@ -53,6 +53,7 @@ import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
+import io.nuls.kernel.validate.ValidateResult;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -683,7 +684,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<String> getAlias(byte[] address) {
-        if(Address.validAddress(address)){
+        if(!Address.validAddress(address)){
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         return getAlias(Base58.encode(address));
@@ -692,10 +693,19 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<String> getAlias(String address) {
         Account account = getAccountByAddress(address);
-        if(null == account){
-            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        if(null != account){
+            return Result.getSuccess().setData(account.getAlias());
         }
-        return Result.getSuccess().setData(account.getAlias());
+        String alias = null;
+        List<AliasPo> list = aliasStorageService.getAliasList().getData();
+        for (AliasPo aliasPo : list) {
+            if (Base58.encode(aliasPo.getAddress()).equals(address)) {
+                alias = aliasPo.getAlias();
+                break;
+            }
+        }
+        return Result.getSuccess().setData(alias);
+
     }
 
     @Override

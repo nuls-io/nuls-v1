@@ -53,13 +53,13 @@ public class CreateProcessor implements CommandProcessor {
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t[count] The count of accounts you want to create, - default 1");
+                .newLine("\t[number] The count of accounts you want to create, - default 1");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "create [count] --create account, [count] the count of accounts you want to create, - default 1";
+        return "create [number] --create account, [number] the number of accounts you want to create, - default 1";
     }
 
     @Override
@@ -67,6 +67,7 @@ public class CreateProcessor implements CommandProcessor {
         int length = args.length;
         if (length < 1 || length > 2) {
             return false;
+
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;

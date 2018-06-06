@@ -58,7 +58,7 @@ public class DepositProcessor implements CommandProcessor {
         bulider.newLine(getCommandDescription())
                 .newLine("\t<address>   Your own account address -required")
                 .newLine("\t<agentHash>   The agent hash you want to deposit  -required")
-                .newLine("\t<deposit>   the amount you want to deposit -required");
+                .newLine("\t<deposit>   the amount you want to deposit, you can have up to 8 valid digits after the decimal point -required");
         return bulider.toString();
     }
 
