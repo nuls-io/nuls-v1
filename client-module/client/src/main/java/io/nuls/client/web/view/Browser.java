@@ -45,6 +45,7 @@ public class Browser extends Region {
     final WebEngine webEngine = browser.getEngine();
 
     public Browser(String url) {
+
         // load the web page
         webEngine.load(url);
 
@@ -74,5 +75,13 @@ public class Browser extends Region {
     @Override
     protected double computePrefHeight(double width) {
         return 600;
+    }
+
+    public WebEngine getWebEngine() {
+        return webEngine;
+    }
+
+    public WebView getWebView() {
+        return browser;
     }
 }

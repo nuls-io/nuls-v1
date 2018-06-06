@@ -25,9 +25,12 @@
 
 package io.nuls.client.web.view;
 
+import io.nuls.client.web.view.controller.WebController;
 import io.nuls.client.web.view.listener.WindowCloseEvent;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Worker;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
@@ -35,6 +38,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import netscape.javascript.JSObject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -114,12 +118,6 @@ public class WebViewBootstrap extends Application implements ActionListener {
 
     }
 
-
-    private void showRealPage() throws IOException {
-        //显示界面
-        show();
-    }
-
     /**
      * 停止
      */
@@ -136,10 +134,19 @@ public class WebViewBootstrap extends Application implements ActionListener {
 
         VBox root = new VBox();
         root.setId("root");
-        root.getChildren().addAll(new Browser(url));
+        Browser browser = new Browser(url);
+        WebController controller = new WebController(stage);
+        browser.getWebEngine().getLoadWorker().stateProperty().addListener(
+                (ObservableValue<? extends Worker.State> ov, Worker.State oldState,
+                 Worker.State newState) -> {
+                    if (newState == Worker.State.SUCCEEDED) {
+                        JSObject win = (JSObject) browser.getWebEngine().executeScript("window");
+                        win.setMember("javaUtil",controller);
+                    }
+                });
 
-//        Region root = new Browser();
-//        new TestDragListener(stage).enableDrag(root);
+        root.getChildren().addAll(browser);
+
         Scene scene = new Scene(root, 800, 560, Color.web("#666970"));
         stage.setScene(scene);
         show();
