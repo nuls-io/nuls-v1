@@ -154,13 +154,71 @@ public class StringUtils {
         return true;
     }
 
+
     private static final Pattern GT_ZERO_NUMBER_PATTERN = Pattern.compile("([1-9][0-9]*(\\.\\d+)?)|(0\\.\\d*[1-9]+0*)");
 
+    /**
+     * 验证是大于0的数(包含小数,不限位数)
+     * @param str
+     * @return
+     */
     public static boolean isNumberGtZero(String str) {
         if (StringUtils.isBlank(str)) {
             return false;
         }
         Matcher isNum = GT_ZERO_NUMBER_PATTERN.matcher(str);
+        if (!isNum.matches()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 去掉小数多余的.与0
+     * @param s
+     * @return
+     */
+    private static String subZeroAndDot(String s){
+        if(s.indexOf(".") > 0){
+            s = s.replaceAll("0+?$", "");
+            s = s.replaceAll("[.]$", "");
+        }
+        return s;
+    }
+
+    private static final Pattern NULS_PATTERN = Pattern.compile("([1-9]\\d*(\\.\\d{1,8})?)|(0\\.\\d{1,8})");
+
+    /**
+     * 匹配是否是nuls
+     * 验证是大于0的数(包括小数, 小数点后有效位超过8位则不合法)
+     * @param str
+     * @return
+     */
+    public static boolean isNuls(String str) {
+        if (StringUtils.isBlank(str)) {
+            return false;
+        }
+        str = subZeroAndDot(str);
+        Matcher isNum = NULS_PATTERN.matcher(str);
+        if (!isNum.matches()) {
+            return false;
+        }
+        return true;
+    }
+
+    private static final Pattern GT_ZERO_NUMBER_LIMIT_2_PATTERN = Pattern.compile("([1-9]\\d*(\\.\\d{1,2})?)|(0\\.\\d{1,2})");
+
+    /**
+     * 验证是大于0的数(包括小数, 小数点后有效位超过2位则不合法)
+     * @param str
+     * @return
+     */
+    public static boolean isNumberGtZeroLimitTwo(String str) {
+        if (StringUtils.isBlank(str)) {
+            return false;
+        }
+        str = subZeroAndDot(str);
+        Matcher isNum = GT_ZERO_NUMBER_LIMIT_2_PATTERN.matcher(str);
         if (!isNum.matches()) {
             return false;
         }
