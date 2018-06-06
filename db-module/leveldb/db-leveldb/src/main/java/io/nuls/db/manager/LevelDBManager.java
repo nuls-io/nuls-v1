@@ -80,36 +80,38 @@ public class LevelDBManager {
         return BASE_AREA_NAME;
     }
 
-    public static synchronized void init() throws Exception {
-        if (!isInit) {
-            isInit = true;
-            File dir = loadDataPath();
-            dataPath = dir.getPath();
-            Log.info("LevelDBManager dataPath is " + dataPath);
+    public static void init() throws Exception {
+        synchronized(LevelDBManager.class) {
+            if (!isInit) {
+                isInit = true;
+                File dir = loadDataPath();
+                dataPath = dir.getPath();
+                Log.info("LevelDBManager dataPath is " + dataPath);
 
-            initSchema();
-            initBaseDB(dataPath);
+                initSchema();
+                initBaseDB(dataPath);
 
-            File[] areaFiles = dir.listFiles();
-            DB db = null;
-            String dbPath = null;
-            for (File areaFile : areaFiles) {
-                if (BASE_AREA_NAME.equals(areaFile.getName())) {
-                    continue;
-                }
-                if (!areaFile.isDirectory()) {
-                    continue;
-                }
-                try {
-                    dbPath = areaFile.getPath() + File.separator + BASE_DB_NAME;
-                    db = initOpenDB(dbPath);
-                    if (db != null) {
-                        AREAS.put(areaFile.getName(), db);
+                File[] areaFiles = dir.listFiles();
+                DB db = null;
+                String dbPath = null;
+                for (File areaFile : areaFiles) {
+                    if (BASE_AREA_NAME.equals(areaFile.getName())) {
+                        continue;
                     }
-                } catch (Exception e) {
-                    Log.warn("load area failed, areaName: " + areaFile.getName() + ", dbPath: " + dbPath, e);
-                }
+                    if (!areaFile.isDirectory()) {
+                        continue;
+                    }
+                    try {
+                        dbPath = areaFile.getPath() + File.separator + BASE_DB_NAME;
+                        db = initOpenDB(dbPath);
+                        if (db != null) {
+                            AREAS.put(areaFile.getName(), db);
+                        }
+                    } catch (Exception e) {
+                        Log.warn("load area failed, areaName: " + areaFile.getName() + ", dbPath: " + dbPath, e);
+                    }
 
+                }
             }
         }
     }
