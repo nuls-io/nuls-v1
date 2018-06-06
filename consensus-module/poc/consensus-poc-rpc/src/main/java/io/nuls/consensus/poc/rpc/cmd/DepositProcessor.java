@@ -26,6 +26,7 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -75,7 +76,7 @@ public class DepositProcessor implements CommandProcessor {
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if(!StringUtils.validAddressSimple(args[1]) || !StringUtils.validHash(args[2])
+        if(!StringUtils.validAddressSimple(args[1]) || !NulsDigestData.validHash(args[2])
                 || StringUtils.isBlank(args[3]) || !StringUtils.isNumberGtZero(args[3])){
             return false;
         }

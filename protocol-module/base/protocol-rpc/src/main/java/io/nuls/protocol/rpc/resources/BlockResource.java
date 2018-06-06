@@ -98,7 +98,7 @@ public class BlockResource {
                                      @PathParam("hash") String hash) {
         AssertUtil.canNotEmpty(hash);
         hash = StringUtils.formatStringPara(hash);
-        if (!StringUtils.validHash(hash)) {
+        if (!NulsDigestData.validHash(hash)) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Result result = Result.getSuccess();
@@ -131,7 +131,7 @@ public class BlockResource {
                                      @PathParam("hash") String hash) throws IOException {
         AssertUtil.canNotEmpty(hash);
         Result result;
-        if (!StringUtils.validHash(hash)) {
+        if (!NulsDigestData.validHash(hash)) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Block block = null;
@@ -192,7 +192,7 @@ public class BlockResource {
     @Produces(MediaType.APPLICATION_JSON)
     public RpcClientResult getBlockBytes(@QueryParam("hash") String hash) throws IOException {
         Result result;
-        if (!StringUtils.validHash(hash)) {
+        if (!NulsDigestData.validHash(hash)) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Block block = null;

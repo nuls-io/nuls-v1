@@ -50,6 +50,7 @@ import io.nuls.consensus.poc.service.impl.PocRewardCacheService;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Base58;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.param.AssertUtil;
@@ -437,6 +438,9 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getAgentHash());
+        if (!NulsDigestData.validHash(form.getAgentHash())) {
+            return Result.getFailed("Can not find agent!").toRpcClientResult();
+        }
         AssertUtil.canNotEmpty(form.getDeposit());
         if (!AddressTool.validAddress(form.getAddress())) {
             throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
@@ -744,7 +748,10 @@ public class PocConsensusResource {
     })
     public RpcClientResult getAgent(@ApiParam(name = "agentHash", value = "节点标识", required = true)
                                     @PathParam("agentHash") String agentHash) throws NulsException {
-        AssertUtil.canNotEmpty(agentHash);
+
+        if (!NulsDigestData.validHash(agentHash)) {
+            return Result.getFailed("Can not find agent!").toRpcClientResult();
+        }
         Result result = Result.getSuccess();
         List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
         NulsDigestData agentHashData = NulsDigestData.fromDigestHex(agentHash);
@@ -872,6 +879,9 @@ public class PocConsensusResource {
         }
         if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        if (null != agentHash && !NulsDigestData.validHash(agentHash)) {
+            return Result.getFailed("Can not find agent!").toRpcClientResult();
         }
         Result result = Result.getSuccess();
         List<Deposit> allList = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
@@ -1002,6 +1012,9 @@ public class PocConsensusResource {
                                                  WithdrawForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
+        if (!NulsDigestData.validHash(form.getTxHash())) {
+            return Result.getFailed("Cann't find the deposit transaction!").toRpcClientResult();
+        }
         AssertUtil.canNotEmpty(form.getAddress());
         if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();

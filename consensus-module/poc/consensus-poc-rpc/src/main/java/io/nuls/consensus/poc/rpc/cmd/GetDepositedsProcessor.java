@@ -26,6 +26,7 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
 import io.nuls.core.tools.date.DateUtil;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -84,7 +85,7 @@ public class GetDepositedsProcessor implements CommandProcessor {
         if (!StringUtils.validAddressSimple(args[1]) || !StringUtils.isNumeric(args[2]) || !StringUtils.isNumeric(args[3])) {
             return false;
         }
-        if(length == 5 && !StringUtils.validHash(args[4])){
+        if(length == 5 && !NulsDigestData.validHash(args[4])){
             return false;
         }
         return true;

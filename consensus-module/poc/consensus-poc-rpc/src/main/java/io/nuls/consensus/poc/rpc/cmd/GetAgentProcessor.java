@@ -26,6 +26,7 @@
 package io.nuls.consensus.poc.rpc.cmd;
 
 import io.nuls.core.tools.date.DateUtil;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -76,7 +77,7 @@ public class GetAgentProcessor implements CommandProcessor {
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (!StringUtils.validHash(args[1])) {
+        if (!NulsDigestData.validHash(args[1])) {
             return false;
         }
         return true;

@@ -75,11 +75,7 @@ public class NulsDigestData extends BaseNulsData {
     @Override
     protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
         digestAlgType = byteBuffer.readByte();
-        try {
-            this.digestBytes = byteBuffer.readByLengthByte();
-        } catch (Exception e) {
-            Log.error(e);
-        }
+        this.digestBytes = byteBuffer.readByLengthByte();
     }
 
     public byte getDigestAlgType() {
@@ -105,6 +101,15 @@ public class NulsDigestData extends BaseNulsData {
         NulsDigestData hash = new NulsDigestData();
         hash.parse(bytes);
         return hash;
+    }
+
+    public static boolean validHash(String hex){
+        try {
+            fromDigestHex(hex);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public static NulsDigestData calcDigestData(BaseNulsData data) {

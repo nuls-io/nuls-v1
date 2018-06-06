@@ -79,6 +79,9 @@ public class TransactionResource {
         if (StringUtils.isBlank(hash)) {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER).toRpcClientResult();
         }
+        if (!NulsDigestData.validHash(hash)) {
+            return Result.getFailed(LedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
         Result result = null;
         try {
             Transaction tx = ledgerService.getTx(NulsDigestData.fromDigestHex(hash));

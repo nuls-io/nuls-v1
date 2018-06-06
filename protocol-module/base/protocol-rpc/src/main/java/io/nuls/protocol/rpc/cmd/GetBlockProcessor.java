@@ -26,6 +26,7 @@
 package io.nuls.protocol.rpc.cmd;
 
 import io.nuls.core.tools.date.DateUtil;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -75,7 +76,7 @@ public class GetBlockProcessor implements CommandProcessor {
             return false;
         }
         if(!StringUtils.isNumeric(args[1])){
-            if(!StringUtils.validHash(args[1])){
+            if(!NulsDigestData.validHash(args[1])){
                 return false;
             }
         }

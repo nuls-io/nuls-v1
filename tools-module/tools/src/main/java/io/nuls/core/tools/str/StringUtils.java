@@ -24,6 +24,8 @@
  */
 package io.nuls.core.tools.str;
  
+import io.nuls.core.tools.crypto.Hex;
+
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -108,21 +110,6 @@ public class StringUtils {
             return false;
         }
     }
-
-
-
-    public static boolean validHash(String hash) {
-        if (isBlank(hash)) {
-            return false;
-        }
-        if (hash.length() > 73) {
-            return false;
-        }
-        return true;
-    }
-
-
-
 
     public static byte caculateXor(byte[] data) {
         byte xor = 0x00;
