@@ -81,10 +81,10 @@ public class CreateAgentProcessor implements CommandProcessor {
                 || StringUtils.isBlank(args[4])){
             return false;
         }
-        if(!StringUtils.isNumberGtZero(args[3])){
+        if(!StringUtils.isNumberGtZeroLimitTwo(args[3])){
             return false;
         }
-        if(!StringUtils.isNumberGtZero(args[4])){
+        if(!StringUtils.isNuls(args[4])){
             return false;
         }
         if(length == 6 && !StringUtils.validAddressSimple(args[5])){

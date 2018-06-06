@@ -77,7 +77,7 @@ public class DepositProcessor implements CommandProcessor {
             return false;
         }
         if(!StringUtils.validAddressSimple(args[1]) || !NulsDigestData.validHash(args[2])
-                || StringUtils.isBlank(args[3]) || !StringUtils.isNumberGtZero(args[3])){
+                || StringUtils.isBlank(args[3]) || !StringUtils.isNuls(args[3])){
             return false;
         }
         return true;

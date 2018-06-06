@@ -91,7 +91,7 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
         }
         if (!StringUtils.validAlias(alias.getAlias())) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_FORMAT_WRONG);
         }
         AliasPo aliasPo = aliasStorageService.getAlias(alias.getAlias()).getData();
         if (aliasPo != null) {

@@ -28,10 +28,7 @@ package io.nuls.account.rpc.resource;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.account.model.Account;
-import io.nuls.account.model.AccountKeyStore;
-import io.nuls.account.model.Address;
-import io.nuls.account.model.Balance;
+import io.nuls.account.model.*;
 import io.nuls.account.rpc.model.AccountDto;
 import io.nuls.account.rpc.model.AccountKeyStoreDto;
 import io.nuls.account.rpc.model.AssetDto;
@@ -41,6 +38,7 @@ import io.nuls.account.service.AccountBaseService;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
+import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
@@ -53,6 +51,7 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.swagger.annotations.*;
 
@@ -240,6 +239,24 @@ public class AccountResource {
         }
         RpcClientResult result = new RpcClientResult(aliasService.isAliasExist(aliasName), KernelErrorCode.SUCCESS);
         return result;
+    }
+
+    @GET
+    @Path("/alias/address")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("[别名获取地址] 根据别名获取账户地址地址 ")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Result.class)
+    })
+    public RpcClientResult getAddressByAlias(@ApiParam(name = "aliasName", value = "别名", required = true) @QueryParam("aliasName") String aliasName) {
+        if (StringUtils.isBlank(aliasName)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Alias alias = aliasService.getAlias(aliasName);
+        if(null == alias){
+            return  new RpcClientResult(false, AccountErrorCode.ALIAS_NOT_EXIST);
+        }
+        return Result.getSuccess().setData(Base58.encode(alias.getAddress())).toRpcClientResult();
     }
 
     @GET
