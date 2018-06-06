@@ -236,7 +236,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         return result;
     }
 
-    public Result<Integer> rollbackTransaction(List<Transaction> txs, boolean isCheckMine) {
+    private Result<Integer> rollbackTransaction(List<Transaction> txs, boolean isCheckMine) {
         List<Transaction> txListToRollback;
         if (isCheckMine) {
             txListToRollback = filterLocalTransaction(txs);
