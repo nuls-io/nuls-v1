@@ -60,15 +60,10 @@ public class CancelDepositTransaction extends Transaction<CancelDeposit> {
             LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
             DepositTransaction tx = (DepositTransaction) ledgerService.getTx(this.txData.getJoinTxHash());
             if (null != tx) {
-                return "unlock " +tx.getTxData().getDeposit().toCoinString();
+                return "unlock " + tx.getTxData().getDeposit().toCoinString();
             }
         }
         return "--";
-    }
-
-    @Override
-    public boolean isFreeOfFee() {
-        return true;
     }
 
     @Override

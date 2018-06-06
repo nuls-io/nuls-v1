@@ -70,7 +70,6 @@ public class BlockResource {
     })
     public RpcClientResult getHeaderByHeight(@ApiParam(name = "height", value = "区块高度", required = true)
                                              @PathParam("height") Integer height) {
-        System.out.println("----------进来了---------");
         AssertUtil.canNotEmpty(height);
         Result<Block> blockResult = blockService.getBlock(height);
         if (blockResult.isFailed()) {
