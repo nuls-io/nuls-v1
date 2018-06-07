@@ -138,19 +138,25 @@ public class TransactionResource {
                                 outputDto.setStatus(3);
                             } else {
                                 lockTime = temp.getLockTime();
-                                if (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE) {
-                                    // 判定是否时间锁定
+                                if (lockTime < 0) {
+                                    // 共识锁定
+                                    outputDto.setStatus(2);
+                                } else if (lockTime == 0) {
+                                    // 正常未花费
+                                    outputDto.setStatus(0);
+                                } else if (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE) {
+                                    // 判定是否时间高度锁定
                                     if (lockTime > currentTime) {
-                                        // 时间锁定
-                                        outputDto.setStatus(2);
+                                        // 时间高度锁定
+                                        outputDto.setStatus(1);
                                     } else {
                                         // 正常未花费
                                         outputDto.setStatus(0);
                                     }
                                 } else {
-                                    // 判定是否高度锁定
+                                    // 判定是否区块高度锁定
                                     if (lockTime > bestHeight) {
-                                        // 高度锁定
+                                        // 区块高度锁定
                                         outputDto.setStatus(1);
                                     } else {
                                         // 正常未花费
