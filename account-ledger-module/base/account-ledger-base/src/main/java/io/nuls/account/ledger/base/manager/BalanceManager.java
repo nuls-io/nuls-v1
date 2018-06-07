@@ -191,21 +191,16 @@ public class BalanceManager {
     public List<Coin> getCoinListByAddress(byte[] address) {
         List<Coin> coinList = new ArrayList<>();
         List<Entry<byte[], byte[]>> rawList = localUtxoStorageService.loadAllCoinList();
-        byte[] addressOwner = new byte[AddressTool.HASH_LENGTH];
         for (Entry<byte[], byte[]> coinEntry : rawList) {
-            byte[] key = coinEntry.getKey();
-            System.arraycopy(key, 0, addressOwner, 0, AddressTool.HASH_LENGTH);
-            if (java.util.Arrays.equals(addressOwner, address)) {
-                Coin coin = new Coin();
-                try {
-                    coin.parse(coinEntry.getValue());
-                } catch (NulsException e) {
-                    Log.info("parse coin form db error");
-                    continue;
-                }
-                byte[] fromOwner = new byte[key.length - AddressTool.HASH_LENGTH];
-                System.arraycopy(key, AddressTool.HASH_LENGTH, fromOwner, 0, key.length - AddressTool.HASH_LENGTH);
-                coin.setOwner(fromOwner);
+            Coin coin = new Coin();
+            try {
+                coin.parse(coinEntry.getValue());
+            } catch (NulsException e) {
+                Log.info("parse coin form db error");
+                continue;
+            }
+            if (Arrays.equals(coin.getOwner(), address)) {
+                coin.setOwner(coinEntry.getKey());
                 coinList.add(coin);
             }
         }

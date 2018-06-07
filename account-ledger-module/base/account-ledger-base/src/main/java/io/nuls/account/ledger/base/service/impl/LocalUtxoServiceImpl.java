@@ -62,8 +62,18 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
 
     @Override
     public Result saveUtxoForLocalAccount(Transaction tx) {
+        return saveUtxoForAccount(tx, null);
+    }
+
+    @Override
+    public Result saveUtxoForAccount(Transaction tx, byte[] addresses) {
+
         if (tx == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+        }
+
+        if (addresses != null && !AddressTool.validAddress(addresses)) {
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
 
         CoinData coinData = tx.getCoinData();
@@ -73,42 +83,43 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             List<Coin> froms = coinData.getFrom();
             Set<byte[]> fromsSet = new HashSet<>();
             byte[] fromSource;
-            byte[] utxoFromSource;
-            byte[] fromIndex;
-            Coin fromOfFromCoin;
-            Transaction sourceTx;
-            byte[] address;
             for (Coin from : froms) {
                 fromSource = from.getOwner();
-                utxoFromSource = new byte[tx.getHash().size()];
-                fromIndex = new byte[fromSource.length - utxoFromSource.length];
-                System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
-                System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
 
-                fromOfFromCoin = from.getFrom();
+                Coin fromOfFromCoin = from.getFrom();
+                if(fromOfFromCoin == null) {
+                    byte[] utxoFromSource = new byte[tx.getHash().size()];
+                    byte[] fromIndex = new byte[fromSource.length - utxoFromSource.length];
 
-                if (fromOfFromCoin == null) {
+                    System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
+                    System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
+
+                    Transaction sourceTx;
                     try {
                         sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(utxoFromSource)));
-                        if (sourceTx == null) {
-                            sourceTx = unconfirmedTransactionStorageService.getUnconfirmedTx(NulsDigestData.fromDigestHex(Hex.encode(utxoFromSource))).getData();
-                        }
                     } catch (Exception e) {
-                        throw new NulsRuntimeException(e);
+                        continue;
                     }
                     if (sourceTx == null) {
                         return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
                     }
-                    fromOfFromCoin = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value);
+                    int index = (int) new VarInt(fromIndex, 0).value;
+                    fromOfFromCoin = sourceTx.getCoinData().getTo().get(index);
                 }
 
-                address = fromOfFromCoin.getOwner();
-
-                if (!AccountLegerUtils.isLocalAccount(address)) {
+                if(fromOfFromCoin == null) {
+                    Log.warn("from coin not found!");
                     continue;
                 }
 
-                fromsSet.add(ArraysTool.joinintTogether(address, fromSource));
+                byte[] toAddress = fromOfFromCoin.getOwner();
+                if(addresses != null && !Arrays.equals(toAddress, addresses)) {
+                    continue;
+                } else if(addresses == null && !AccountLegerUtils.isLocalAccount(toAddress)) {
+                    continue;
+                }
+
+                fromsSet.add(fromSource);
             }
 
             // save utxo - to
@@ -127,12 +138,14 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 to = tos.get(i);
                 toAddress = to.getOwner();
 
-                if (!AccountLegerUtils.isLocalAccount(toAddress)) {
+                if(addresses != null && !Arrays.equals(toAddress, addresses)) {
+                    continue;
+                } else if(addresses == null && !AccountLegerUtils.isLocalAccount(toAddress)) {
                     continue;
                 }
 
                 try {
-                    outKey = ArraysTool.joinintTogether(toAddress, txHashBytes, new VarInt(i).encode());
+                    outKey = ArraysTool.joinintTogether(txHashBytes, new VarInt(i).encode());
                     toMap.put(outKey, to.serialize());
                 } catch (IOException e) {
                     Log.error(e);
@@ -147,140 +160,71 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
     }
 
     @Override
-    public Result saveUtxoForAccount(Transaction tx, byte[] addresses) {
-        if (!AddressTool.validAddress(addresses)) {
-            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
-        }
-        if (tx == null) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
-        }
-
-        CoinData coinData = tx.getCoinData();
-
-        if (coinData != null) {
-            // delete - from
-            List<Coin> froms = coinData.getFrom();
-            Set<byte[]> fromsSet = new HashSet<>();
-            byte[] fromSource;
-            byte[] utxoFromSource;
-            byte[] fromIndex;
-            Transaction sourceTx;
-            byte[] address;
-            for (Coin from : froms) {
-                fromSource = from.getOwner();
-                utxoFromSource = new byte[tx.getHash().size()];
-                fromIndex = new byte[fromSource.length - utxoFromSource.length];
-                System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
-                System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
-                try {
-                    sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(utxoFromSource)));
-                    if (sourceTx == null) {
-                        sourceTx = unconfirmedTransactionStorageService.getUnconfirmedTx(NulsDigestData.fromDigestHex(Hex.encode(utxoFromSource))).getData();
-                    }
-                } catch (Exception e) {
-                    throw new NulsRuntimeException(e);
-                }
-                if (sourceTx == null) {
-                    return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
-                }
-                address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
-                fromsSet.add(ArraysTool.joinintTogether(address, from.getOwner()));
-            }
-
-            //localUtxoStorageService.batchDeleteUTXO(fromsSet);
-            // save utxo - to
-            List<Coin> tos = coinData.getTo();
-            Map<byte[], byte[]> toMap = new HashMap<>();
-            byte[] txHashBytes = null;
-            try {
-                txHashBytes = tx.getHash().serialize();
-            } catch (IOException e) {
-                throw new NulsRuntimeException(e);
-            }
-            byte[] outKey;
-            Coin to;
-            byte[] toAddress;
-            for (int i = 0, length = tos.size(); i < length; i++) {
-                to = tos.get(i);
-                toAddress = to.getOwner();
-
-                if (!Arrays.equals(toAddress, addresses)) {
-                    continue;
-                }
-
-                try {
-                    outKey = ArraysTool.joinintTogether(toAddress, txHashBytes, new VarInt(i).encode());
-                    toMap.put(outKey, to.serialize());
-                } catch (IOException e) {
-                    throw new NulsRuntimeException(e);
-                }
-            }
-            //localUtxoStorageService.batchSaveUTXO(toMap);
-            Result result = localUtxoStorageService.batchSaveAndDeleteUTXO(toMap, fromsSet);
-            if (result.isFailed() || result.getData() == null || (int) result.getData() != toMap.size() + fromsSet.size()) {
-                return Result.getFailed();
-            }
-        }
-        return Result.getSuccess();
-    }
-
-    @Override
     public Result deleteUtxoOfTransaction(Transaction tx) {
         if (tx == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
-        byte[] txHashBytes = new byte[0];
 
         CoinData coinData = tx.getCoinData();
         if (coinData != null) {
             // delete utxo - to
             List<Coin> tos = coinData.getTo();
-            byte[] indexBytes;
             Set<byte[]> toSet = new HashSet<>();
             byte[] outKey;
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
-                    outKey = ArraysTool.joinintTogether(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                    if(!AccountLegerUtils.isLocalAccount(tos.get(i).getOwner())) {
+                        continue;
+                    }
+                    outKey = ArraysTool.joinintTogether(tx.getHash().serialize(), new VarInt(i).encode());
                     toSet.add(outKey);
                 } catch (IOException e) {
                     throw new NulsRuntimeException(e);
                 }
             }
-            //localUtxoStorageService.batchDeleteUTXO(toSet);
 
             // save - from
             List<Coin> froms = coinData.getFrom();
             Map<byte[], byte[]> fromMap = new HashMap<>();
-            byte[] fromSource;
-            byte[] utxoFromSource;
-            byte[] fromIndex;
-            Transaction sourceTx;
-            Coin sourceTxCoinTo;
-            byte[] address;
-            for (Coin from : froms) {
-                fromSource = from.getOwner();
-                utxoFromSource = new byte[tx.getHash().size()];
-                fromIndex = new byte[fromSource.length - utxoFromSource.length];
-                System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
-                System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
 
-                try {
-                    sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(utxoFromSource)));
-                } catch (Exception e) {
+            for (Coin from : froms) {
+                byte[] fromSource = from.getOwner();
+
+                Coin fromOfFromCoin = from.getFrom();
+                if(fromOfFromCoin == null) {
+                    byte[] utxoFromSource = new byte[tx.getHash().size()];
+                    byte[] fromIndex = new byte[fromSource.length - utxoFromSource.length];
+                    System.arraycopy(fromSource, 0, utxoFromSource, 0, tx.getHash().size());
+                    System.arraycopy(fromSource, tx.getHash().size(), fromIndex, 0, fromIndex.length);
+
+                    Transaction sourceTx;
+                    try {
+                        sourceTx = ledgerService.getTx(NulsDigestData.fromDigestHex(Hex.encode(utxoFromSource)));
+                    } catch (Exception e) {
+                        continue;
+                    }
+                    if (sourceTx == null) {
+                        return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
+                    }
+                    fromOfFromCoin = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value);
+                }
+
+                if(fromOfFromCoin == null) {
+                    Log.warn("from coin not found!");
                     continue;
                 }
-                if (sourceTx == null) {
-                    return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
+
+                byte[] address = fromOfFromCoin.getOwner();
+                if(!AccountLegerUtils.isLocalAccount(address)) {
+                    continue;
                 }
-                sourceTxCoinTo = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value);
-                address = sourceTxCoinTo.getOwner();
                 try {
-                    fromMap.put(ArraysTool.joinintTogether(address, fromSource), sourceTxCoinTo.serialize());
+                    fromMap.put(fromSource, fromOfFromCoin.serialize());
                 } catch (IOException e) {
                     throw new NulsRuntimeException(e);
                 }
             }
-            //localUtxoStorageService.batchSaveUTXO(fromMap);
+
             Result result = localUtxoStorageService.batchSaveAndDeleteUTXO(fromMap, toSet);
             if (result.isFailed() || result.getData() == null || (int) result.getData() != fromMap.size() + toSet.size()) {
                 return Result.getFailed();
@@ -303,7 +247,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     Coin needUnLockUtxoNew = new Coin(to.getOwner(), to.getNa(), newLockTime);
                     needUnLockUtxoNew.setFrom(to.getFrom());
                     try {
-                        byte[] outKey = ArraysTool.joinintTogether(to.getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                        byte[] outKey = ArraysTool.joinintTogether(tx.getHash().serialize(), new VarInt(i).encode());
                         saveUTXO(outKey, needUnLockUtxoNew.serialize());
                         addresses.add(to.getOwner());
                     } catch (IOException e) {
@@ -328,7 +272,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 Coin to = tos.get(i);
                 if (to.getLockTime() == -1L) {
                     try {
-                        byte[] outKey = ArraysTool.joinintTogether(to.getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                        byte[] outKey = ArraysTool.joinintTogether(tx.getHash().serialize(), new VarInt(i).encode());
                         saveUTXO(outKey, to.serialize());
                         addresses.add(to.getOwner());
                     } catch (IOException e) {
