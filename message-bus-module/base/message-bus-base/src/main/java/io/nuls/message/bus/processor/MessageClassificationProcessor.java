@@ -28,6 +28,9 @@ package io.nuls.message.bus.processor;
 import com.lmax.disruptor.EventHandler;
 import io.nuls.core.tools.disruptor.DisruptorData;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.thread.manager.NulsThreadFactory;
+import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.manager.HandlerManager;
 import io.nuls.message.bus.model.ProcessData;
@@ -41,7 +44,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Created by ln on 2018-05-23.
+ * @author ln
+ * @date 2018-05-23
  */
 public class MessageClassificationProcessor<E extends BaseMessage> implements EventHandler<DisruptorData<ProcessData<E>>> {
 
@@ -56,6 +60,7 @@ public class MessageClassificationProcessor<E extends BaseMessage> implements Ev
             return;
         }
         if (disruptorData.isStoped()) {
+            disruptorData.setStoped(false);
             return;
         }
 
@@ -63,20 +68,20 @@ public class MessageClassificationProcessor<E extends BaseMessage> implements Ev
         Class<? extends BaseMessage> serviceId = processData.getData().getClass();
         Set<NulsMessageHandler> handlers = handlerManager.getHandlerList(serviceId);
         ExecutorService handlerExecutor = handlerService.get(serviceId);
-        if(handlerExecutor == null) {
-            handlerExecutor = Executors.newSingleThreadExecutor();
+        if (handlerExecutor == null) {
+            handlerExecutor = TaskManager.createThreadPool(1, Integer.MAX_VALUE, new NulsThreadFactory(MessageBusConstant.MODULE_ID_MESSAGE_BUS, "disruptor-processor"));
             handlerService.put(serviceId, handlerExecutor);
         }
-        for(NulsMessageHandler handler : handlers) {
+        for (NulsMessageHandler handler : handlers) {
             handlerExecutor.execute(new NulsMessageCall(processData, handler));
         }
     }
 
     public void shutdown() {
-        if(handlerService == null) {
+        if (handlerService == null) {
             return;
         }
-        for (Map.Entry<Class<? extends BaseMessage>, ExecutorService> entry: handlerService.entrySet()) {
+        for (Map.Entry<Class<? extends BaseMessage>, ExecutorService> entry : handlerService.entrySet()) {
             entry.getValue().shutdown();
         }
     }

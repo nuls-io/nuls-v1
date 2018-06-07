@@ -25,8 +25,10 @@
 
 package io.nuls.client.web.view;
 
+import io.nuls.client.web.view.controller.IpAddressThread;
 import io.nuls.client.web.view.controller.WebController;
 import io.nuls.client.web.view.listener.WindowCloseEvent;
+import io.nuls.kernel.thread.manager.TaskManager;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
@@ -136,12 +138,13 @@ public class WebViewBootstrap extends Application implements ActionListener {
         root.setId("root");
         Browser browser = new Browser(url);
         WebController controller = new WebController(stage);
+        TaskManager.createAndRunThread((short) 0, "web-view-helper", IpAddressThread.getInstance());
         browser.getWebEngine().getLoadWorker().stateProperty().addListener(
                 (ObservableValue<? extends Worker.State> ov, Worker.State oldState,
                  Worker.State newState) -> {
                     if (newState == Worker.State.SUCCEEDED) {
                         JSObject win = (JSObject) browser.getWebEngine().executeScript("window");
-                        win.setMember("javaUtil",controller);
+                        win.setMember("javaUtil", controller);
                     }
                 });
 
