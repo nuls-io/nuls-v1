@@ -88,36 +88,11 @@ public class WebController {
     }
 
     public String httpGet(String url) {
-        System.out.println(url);
-        BufferedReader in = null;
-        try {
-            URL realUrl = new URL(url);
-            URLConnection connection = realUrl.openConnection();
-            connection.setRequestProperty("accept", "*/*");
-            connection.setRequestProperty("connection", "Keep-Alive");
-            connection.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(5000);
-            connection.connect();
-            in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuffer sb = new StringBuffer();
-            String line;
-            while ((line = in.readLine()) != null) {
-                sb.append(line);
-            }
-            System.out.println(sb.toString());
-            return sb.toString();
-        } catch (Exception e) {
-            Log.error("Exception occur when send http get request!", e);
-        } finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-            } catch (Exception e2) {
-                Log.error(e2);
-            }
+        IpAddressThread thread = IpAddressThread.getInstance();
+        String result = thread.getResult(url);
+        if (null == result) {
+            thread.addRequest(url);
         }
-        return null;
+        return result;
     }
 }
