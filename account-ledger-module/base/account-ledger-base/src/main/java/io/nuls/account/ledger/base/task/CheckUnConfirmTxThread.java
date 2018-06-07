@@ -92,12 +92,11 @@ public class CheckUnConfirmTxThread implements Runnable {
             return;
         }
 
-        if (TimeService.currentTimeMillis() - list.get(0).getTime() < 120000L) {
-            return;
-        }
-
         for (Transaction tx : list) {
-            Result result = verifyTransaction(tx);
+            if (TimeService.currentTimeMillis() - tx.getTime() < 120000L) {
+                return;
+            }
+            Result result = verifyTransaction(tx, list);
             if (result.isSuccess()) {
                 result = reBroadcastTransaction(tx);
                 if (result.isFailed()) {
@@ -190,12 +189,12 @@ public class CheckUnConfirmTxThread implements Runnable {
         return Result.getSuccess();
     }
 
-    private Result verifyTransaction(Transaction tx) {
+    private Result verifyTransaction(Transaction tx, List<Transaction> txs) {
         Result result = tx.verify();
         if (result.isFailed()) {
             return result;
         }
-        result = ledgerService.verifyCoinData(tx, AccountLedgerService.getAllUnconfirmedTransaction().getData());
+        result = ledgerService.verifyCoinData(tx, txs);
 
         if (result.isFailed()) {
             return result;
