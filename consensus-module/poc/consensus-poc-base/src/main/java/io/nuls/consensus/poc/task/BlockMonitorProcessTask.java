@@ -49,7 +49,7 @@ public class BlockMonitorProcessTask implements Runnable {
             if(!downloadService.isDownloadSuccess().isSuccess()) {
                 return;
             }
-            process.doProcess();
+//            process.doProcess();
         } catch (Exception e) {
             Log.error(e);
         }
