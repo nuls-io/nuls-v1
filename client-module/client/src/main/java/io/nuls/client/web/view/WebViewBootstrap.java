@@ -25,29 +25,20 @@
 
 package io.nuls.client.web.view;
 
-import io.nuls.client.web.view.controller.IpAddressThread;
-import io.nuls.client.web.view.controller.WebController;
 import io.nuls.client.web.view.listener.WindowCloseEvent;
-import io.nuls.kernel.thread.manager.TaskManager;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Worker;
-import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import netscape.javascript.JSObject;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URL;
 
 /**
@@ -112,10 +103,10 @@ public class WebViewBootstrap extends Application implements ActionListener {
         //初始化系统托盘
         initSystemTray();
 
-        show();
-
         //初始化监听器
         initListener();
+
+        openBrowse();
 
     }
 
@@ -195,7 +186,7 @@ public class WebViewBootstrap extends Application implements ActionListener {
         itemShow.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                show();
+                openBrowse();
             }
         });
 
@@ -232,7 +223,7 @@ public class WebViewBootstrap extends Application implements ActionListener {
             if (stage.isShowing()) {
                 hide();
             } else {
-                show();
+                openBrowse();
             }
         }
     }
@@ -240,34 +231,55 @@ public class WebViewBootstrap extends Application implements ActionListener {
     /**
      * 显示窗口
      */
-    public void show() {
-//        Platform.setImplicitExit(false);
-//        Platform.runLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                stage.show();
-//            }
-//        });
+    public void openBrowse() {
         String url = "http://127.0.0.1:8001/";
-        //判断当前系统是否支持Java AWT Desktop扩展
-        if (java.awt.Desktop.isDesktopSupported()) {
-            try {
-                //创建一个URI实例
-                java.net.URI uri = java.net.URI.create(url);
-                //获取当前系统桌面扩展
-                java.awt.Desktop dp = java.awt.Desktop.getDesktop();
-                //判断系统桌面是否支持要执行的功能
-                if (dp.isSupported(java.awt.Desktop.Action.BROWSE)) {
-                    //获取系统默认浏览器打开链接
-                    dp.browse(uri);
+        openURL(url);
+    }
+
+    public static void openURL(String url) {
+        try {
+            browse(url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void browse(String url) throws Exception {
+        // 获取操作系统的名字
+        String osName = System.getProperty("os.name", "");
+        if (osName.startsWith("Mac OS")) {
+            // 苹果
+            Class fileMgr = Class.forName("com.apple.eio.FileManager");
+            Method openURL = fileMgr.getDeclaredMethod("openURL",
+                    new Class[] { String.class });
+            openURL.invoke(null, new Object[] { url });
+        } else if (osName.startsWith("Windows")) {
+            // windows
+            Runtime.getRuntime().exec(
+                    "rundll32 url.dll,FileProtocolHandler " + url);
+        } else {
+            // Unix or Linux
+            String[] browsers = { "firefox", "opera", "konqueror", "epiphany",
+                    "mozilla", "netscape" };
+            String browser = null;
+            for (int count = 0; count < browsers.length && browser == null; count++) {
+                // 执行代码，在brower有值后跳出，
+                // 这里是如果进程创建成功了，==0是表示正常结束。
+                if (Runtime.getRuntime()
+                        .exec(new String[]{"which", browsers[count]})
+                        .waitFor() == 0) {
+                    browser = browsers[count];
                 }
-            } catch (java.lang.NullPointerException e) {
-                //此为uri为空时抛出异常
-            } catch (java.io.IOException e) {
-                //此为无法获取系统默认浏览器
+            }
+            if (browser == null) {
+                throw new Exception("Could not find web browser");
+            } else {
+                // 这个值在上面已经成功的得到了一个进程。
+                Runtime.getRuntime().exec(new String[]{browser, url});
             }
         }
     }
+
 
     /**
      * 隐藏窗口
