@@ -46,7 +46,7 @@ import java.net.URL;
  *
  * @author ln
  */
-public class WebViewBootstrap extends Application implements ActionListener {
+public class WebViewBootstrap extends Application implements Runnable, ActionListener {
 
     private static final Logger log = LoggerFactory.getLogger(WebViewBootstrap.class);
 
@@ -58,10 +58,15 @@ public class WebViewBootstrap extends Application implements ActionListener {
     private TrayIcon trayIcon;
     private Stage stage;
 
+    @Override
+    public void run() {
+        startWebView(null);
+    }
+
     /**
      * 程序入口
      */
-    public static void startWebView(String[] args) {
+    public void startWebView(String[] args) {
         String os = System.getProperty("os.name").toUpperCase();
         if (!os.startsWith("WINDOWS") && !os.startsWith("MAC OS")) {
             return;
