@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
  * @author ln
  * @date 2018/4/13
  */
@@ -53,7 +52,7 @@ public class Chain implements Cloneable {
     private List<Block> blockList;
     private List<Agent> agentList;
     private List<Deposit> depositList;
-    private Set<PunishLogPo> yellowPunishList;
+    private List<PunishLogPo> yellowPunishList;
     private List<PunishLogPo> redPunishList;
 
     public Chain() {
@@ -127,10 +126,10 @@ public class Chain implements Cloneable {
     }
 
     public List<PunishLogPo> getYellowPunishList() {
-        return new ArrayList<>(yellowPunishList);
+        return yellowPunishList;
     }
 
-    public void setYellowPunishList(Set<PunishLogPo> yellowPunishList) {
+    public void setYellowPunishList(List<PunishLogPo> yellowPunishList) {
         this.yellowPunishList = yellowPunishList;
     }
 
@@ -148,7 +147,7 @@ public class Chain implements Cloneable {
     }
 
     public Block getBestBlock() {
-        if(blockList == null || blockList.size() == 0) {
+        if (blockList == null || blockList.size() == 0) {
             return null;
         }
         return blockList.get(blockList.size() - 1);

@@ -54,10 +54,7 @@ import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author ln
@@ -125,12 +122,12 @@ public class ForkChainProcess {
                     chainManager.getChains().remove(newChain);
                 } else {
                     //Verify pass, try to switch chain
-                        //验证通过，尝试切换链
-                        boolean success = changeChain(resultChain, newChain);
-                        if (success) {
-                            chainManager.getChains().remove(newChain);
-                        }
-                        ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", newChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
+                    //验证通过，尝试切换链
+                    boolean success = changeChain(resultChain, newChain);
+                    if (success) {
+                        chainManager.getChains().remove(newChain);
+                    }
+                    ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", newChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
                 }
             } finally {
                 Lockers.CHAIN_LOCK.unlock();

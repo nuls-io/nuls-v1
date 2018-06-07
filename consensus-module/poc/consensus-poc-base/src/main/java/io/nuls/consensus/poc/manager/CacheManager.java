@@ -86,7 +86,7 @@ public class CacheManager {
         masterChain.setEndBlockHeader(blockList.get(blockList.size() - 1).getHeader());
         masterChain.setAgentList(agentList);
         masterChain.setDepositList(depositList);
-        masterChain.setYellowPunishList(new HashSet<>(yellowPunishList));
+        masterChain.setYellowPunishList(yellowPunishList);
         masterChain.setRedPunishList(redPunishList);
 
         ChainContainer masterChainContainer = new ChainContainer(masterChain);

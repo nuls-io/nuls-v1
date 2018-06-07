@@ -404,7 +404,7 @@ public class ChainContainer implements Cloneable {
         }
         if (blockList.size() <= 2) {
             addBlockInBlockList(blockList);
-            if(blockList.size() > 0) {
+            if (blockList.size() > 0) {
                 Block startBlock = blockList.get(0);
                 if (startBlock != null && chain.getStartBlockHeader().getHeight() > startBlock.getHeader().getHeight()) {
                     chain.setStartBlockHeader(startBlock.getHeader());
@@ -536,7 +536,7 @@ public class ChainContainer implements Cloneable {
             newChain.setDepositList(depositList);
         }
         if (chain.getYellowPunishList() != null) {
-            newChain.setYellowPunishList(new HashSet<>(chain.getYellowPunishList()));
+            newChain.setYellowPunishList(new ArrayList<>(chain.getYellowPunishList()));
         }
         if (chain.getRedPunishList() != null) {
             newChain.setRedPunishList(new ArrayList<>(chain.getRedPunishList()));

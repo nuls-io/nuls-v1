@@ -137,7 +137,7 @@ public class BaseChainTest extends BaseTest {
 
         chain.setDepositList(depositList);
 
-        chain.setYellowPunishList(new HashSet<>());
+        chain.setYellowPunishList(new ArrayList<>());
         chain.setRedPunishList(new ArrayList<>());
 
         chainContainer = new ChainContainer(chain);
