@@ -22,7 +22,6 @@
  * SOFTWARE.
  *
  */
-
 package io.nuls.message.bus.processor;
 
 import com.lmax.disruptor.EventHandler;
@@ -41,7 +40,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * @author ln

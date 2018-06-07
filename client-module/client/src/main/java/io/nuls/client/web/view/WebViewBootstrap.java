@@ -112,8 +112,7 @@ public class WebViewBootstrap extends Application implements ActionListener {
         //初始化系统托盘
         initSystemTray();
 
-        //初始化容器
-        initContainer();
+        show();
 
         //初始化监听器
         initListener();
@@ -128,32 +127,6 @@ public class WebViewBootstrap extends Application implements ActionListener {
         System.exit(0);
     }
 
-    /*
-     * 初始化界面容器
-     */
-    private void initContainer() throws IOException {
-        String url = "http://127.0.0.1:8001";
-
-        VBox root = new VBox();
-        root.setId("root");
-        Browser browser = new Browser(url);
-        WebController controller = new WebController(stage);
-        TaskManager.createAndRunThread((short) 0, "web-view-helper", IpAddressThread.getInstance());
-        browser.getWebEngine().getLoadWorker().stateProperty().addListener(
-                (ObservableValue<? extends Worker.State> ov, Worker.State oldState,
-                 Worker.State newState) -> {
-                    if (newState == Worker.State.SUCCEEDED) {
-                        JSObject win = (JSObject) browser.getWebEngine().executeScript("window");
-                        win.setMember("javaUtil", controller);
-                    }
-                });
-
-        root.getChildren().addAll(browser);
-
-        Scene scene = new Scene(root, 800, 560, Color.web("#666970"));
-        stage.setScene(scene);
-        show();
-    }
 
     /*
      * 初始化监听器
@@ -171,7 +144,7 @@ public class WebViewBootstrap extends Application implements ActionListener {
                     hideTip = true;
                     TrayIcon[] trayIcons = SystemTray.getSystemTray().getTrayIcons();
                     if (trayIcons != null && trayIcons.length > 0) {
-                        trayIcons[0].displayMessage("温馨提示", "印链客户端已最小化到系统托盘，双击可再次显示", MessageType.INFO);
+                        trayIcons[0].displayMessage("prompt", "double click will show NULS web page", MessageType.INFO);
                     }
                 }
             } else {
@@ -268,13 +241,32 @@ public class WebViewBootstrap extends Application implements ActionListener {
      * 显示窗口
      */
     public void show() {
-        Platform.setImplicitExit(false);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                stage.show();
+//        Platform.setImplicitExit(false);
+//        Platform.runLater(new Runnable() {
+//            @Override
+//            public void run() {
+//                stage.show();
+//            }
+//        });
+        String url = "http://127.0.0.1:8001/";
+        //判断当前系统是否支持Java AWT Desktop扩展
+        if (java.awt.Desktop.isDesktopSupported()) {
+            try {
+                //创建一个URI实例
+                java.net.URI uri = java.net.URI.create(url);
+                //获取当前系统桌面扩展
+                java.awt.Desktop dp = java.awt.Desktop.getDesktop();
+                //判断系统桌面是否支持要执行的功能
+                if (dp.isSupported(java.awt.Desktop.Action.BROWSE)) {
+                    //获取系统默认浏览器打开链接
+                    dp.browse(uri);
+                }
+            } catch (java.lang.NullPointerException e) {
+                //此为uri为空时抛出异常
+            } catch (java.io.IOException e) {
+                //此为无法获取系统默认浏览器
             }
-        });
+        }
     }
 
     /**
