@@ -72,7 +72,7 @@ public class WebViewBootstrap extends Application implements ActionListener {
      */
     public static void startWebView(String[] args) {
         String os = System.getProperty("os.name").toUpperCase();
-        if (!os.startsWith("WINDOWS") && !os.startsWith("Mac OS")) {
+        if (!os.startsWith("WINDOWS") && !os.startsWith("MAC OS")) {
             return;
         }
         launch(args);
