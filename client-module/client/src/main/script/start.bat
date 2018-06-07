@@ -1,7 +1,10 @@
 ﻿@ECHO OFF 
 
 if "%OS%" == "Windows_NT" setlocal
-set SERVER_HOME=.
+pushd "%cd%"
+cd ..
+set SERVER_HOME=%cd%
+cd bin
 set CLASSPATH=%JAVA_HOME%\lib\tools.jar
 set CLASSPATH=%CLASSPATH%;%SERVER_HOME%
 set CLASSPATH=%CLASSPATH%;%SERVER_HOME%\conf;%SERVER_HOME%\libs\*

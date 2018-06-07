@@ -187,7 +187,7 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         PopupMenu popupMenu = new PopupMenu(); //创建弹出菜单对象
 
         //创建弹出菜单中的显示主窗体项.
-        MenuItem itemShow = new MenuItem("Show");
+        MenuItem itemShow = new MenuItem("Show Wallet");
         itemShow.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
