@@ -134,7 +134,7 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         //判断系统是否支持托盘功能
         if (SystemTray.isSupported()) {
             //获得托盘图标图片路径
-            URL resource = this.getClass().getResource("/image/icon.png");
+            URL resource = this.getClass().getResource("/image/tray.png");
             trayIcon = new TrayIcon(new ImageIcon(resource).getImage(), "NULS", createMenu());
             //设置双击动作标识
             trayIcon.setActionCommand("db_click_tray");
