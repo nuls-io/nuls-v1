@@ -25,7 +25,9 @@
 
 package io.nuls.client.web.view;
 
+import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.client.web.view.listener.WindowCloseEvent;
+import io.nuls.kernel.cfg.NulsConfig;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
@@ -108,9 +110,6 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         //初始化系统托盘
         initSystemTray();
 
-        //初始化监听器
-        initListener();
-
         openBrowse();
 
     }
@@ -121,33 +120,6 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
     @Override
     public void stop() throws Exception {
         System.exit(0);
-    }
-
-
-    /*
-     * 初始化监听器
-     */
-    private void initListener() {
-        //当点击"X"关闭窗口按钮时，如果系统支持托盘，则最小化到托盘，否则关闭
-        stage.addEventHandler(WindowCloseEvent.ACTION, event -> {
-            if (!(event instanceof WindowCloseEvent)) {
-                return;
-            }
-            if (SystemTray.isSupported()) {
-                //隐藏，可双击托盘恢复
-                hide();
-                if (!hideTip && !isMac()) {
-                    hideTip = true;
-                    TrayIcon[] trayIcons = SystemTray.getSystemTray().getTrayIcons();
-                    if (trayIcons != null && trayIcons.length > 0) {
-                        trayIcons[0].displayMessage("prompt", "double click will show NULS web page", MessageType.INFO);
-                    }
-                }
-            } else {
-                //退出程序
-                exit();
-            }
-        });
     }
 
     private boolean isMac() {
@@ -162,7 +134,7 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         //判断系统是否支持托盘功能
         if (SystemTray.isSupported()) {
             //获得托盘图标图片路径
-            URL resource = this.getClass().getResource("/image/icon.png");
+            URL resource = this.getClass().getResource("/image/tray.png");
             trayIcon = new TrayIcon(new ImageIcon(resource).getImage(), "NULS", createMenu());
             //设置双击动作标识
             trayIcon.setActionCommand("db_click_tray");
@@ -237,7 +209,8 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
      * 显示窗口
      */
     public void openBrowse() {
-        String url = "http://127.0.0.1:8001/";
+        int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);
+        String url = "http://127.0.0.1:" + port;
         openURL(url);
     }
 
@@ -256,16 +229,16 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
             // 苹果
             Class fileMgr = Class.forName("com.apple.eio.FileManager");
             Method openURL = fileMgr.getDeclaredMethod("openURL",
-                    new Class[] { String.class });
-            openURL.invoke(null, new Object[] { url });
+                    new Class[]{String.class});
+            openURL.invoke(null, new Object[]{url});
         } else if (osName.startsWith("Windows")) {
             // windows
             Runtime.getRuntime().exec(
                     "rundll32 url.dll,FileProtocolHandler " + url);
         } else {
             // Unix or Linux
-            String[] browsers = { "firefox", "opera", "konqueror", "epiphany",
-                    "mozilla", "netscape" };
+            String[] browsers = {"firefox", "opera", "konqueror", "epiphany",
+                    "mozilla", "netscape"};
             String browser = null;
             for (int count = 0; count < browsers.length && browser == null; count++) {
                 // 执行代码，在brower有值后跳出，
