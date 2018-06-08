@@ -90,7 +90,7 @@ public final class Na implements Comparable<Na>, Serializable {
     private final long value;
 
     private Na(final long na) {
-        if (MAX_NA_VALUE < na) {
+        if (MAX_NA_VALUE < na || na < 0) {
             throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
         this.value = na;
