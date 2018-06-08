@@ -50,7 +50,7 @@ public class InputDto {
         this.fromHash = LedgerUtil.getTxHash(input.getOwner());
         this.fromIndex = LedgerUtil.getIndex(input.getOwner());
         this.address = Base58.encode(input.getFrom().getOwner());
-        this.value = input.getNa().getValue();
+        this.value = input.getFrom().getNa().getValue();
     }
 
     public String getAddress() {
