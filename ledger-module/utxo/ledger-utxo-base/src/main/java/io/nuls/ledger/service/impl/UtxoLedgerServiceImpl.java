@@ -309,6 +309,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 List<Coin> validateFromList;
                 for (int i = 0, length = txList.size(); i < length; i++) {
                     tx = txList.get(i);
+                    if(tx.getHash().equals(transaction.getHash())) {
+                        continue;
+                    }
                     validateCoinData = tx.getCoinData();
                     if (validateCoinData == null) {
                         continue;

@@ -92,12 +92,11 @@ public class CheckUnConfirmTxThread implements Runnable {
             return;
         }
 
-        if (TimeService.currentTimeMillis() - list.get(0).getTime() < 120000L) {
-            return;
-        }
-
         for (Transaction tx : list) {
-            Result result = verifyTransaction(tx);
+            if (TimeService.currentTimeMillis() - tx.getTime() < 120000L) {
+                return;
+            }
+            Result result = verifyTransaction(tx, list);
             if (result.isSuccess()) {
                 result = reBroadcastTransaction(tx);
                 if (result.isFailed()) {
@@ -148,39 +147,36 @@ public class CheckUnConfirmTxThread implements Runnable {
                 if (sourceTx == null) {
                     continue;
                 }
-                byte[] address = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).getOwner();
                 try {
-                    fromMap.put(org.spongycastle.util.Arrays.concatenate(address, from.getOwner()), sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value).serialize());
+                    Coin fromCoin = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value);
+
+                    if (!AccountLegerUtils.isLocalAccount(fromCoin.getOwner())) {
+                        continue;
+                    }
+
+                    fromMap.put(from.getOwner(), fromCoin.serialize());
                 } catch (IOException e) {
                     throw new NulsRuntimeException(e);
                 }
             }
-            localUtxoStorageService.batchSaveUTXO(fromMap);
 
             // delete utxo - to
             List<Coin> tos = coinData.getTo();
-            byte[] indexBytes;
             Set<byte[]> toSet = new HashSet<>();
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
-                    byte[] outKey = org.spongycastle.util.Arrays.concatenate(tos.get(i).getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
+                    Coin toCoin = tos.get(i);
+                    if (!AccountLegerUtils.isLocalAccount(toCoin.getOwner())) {
+                        continue;
+                    }
+                    byte[] outKey = org.spongycastle.util.Arrays.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
                     toSet.add(outKey);
                 } catch (IOException e) {
+                    Log.info("delete unconfirmed output error");
                     throw new NulsRuntimeException(e);
                 }
             }
-            localUtxoStorageService.batchDeleteUTXO(toSet);
-        }
-
-        List<Coin> tos = tx.getCoinData().getTo();
-        for (int i = 0; i < tos.size(); i++) {
-            Coin to = tos.get(i);
-            try {
-                byte[] outKey = org.spongycastle.util.Arrays.concatenate(to.getOwner(), tx.getHash().serialize(), new VarInt(i).encode());
-                localUtxoStorageService.deleteUTXO(outKey);
-            } catch (IOException e) {
-                Log.info("delete unconfirmed output error");
-            }
+            localUtxoStorageService.batchSaveAndDeleteUTXO(fromMap, toSet);
         }
     }
 
@@ -193,12 +189,12 @@ public class CheckUnConfirmTxThread implements Runnable {
         return Result.getSuccess();
     }
 
-    private Result verifyTransaction(Transaction tx) {
+    private Result verifyTransaction(Transaction tx, List<Transaction> txs) {
         Result result = tx.verify();
         if (result.isFailed()) {
             return result;
         }
-        result = ledgerService.verifyCoinData(tx, AccountLedgerService.getAllUnconfirmedTransaction().getData());
+        result = ledgerService.verifyCoinData(tx, txs);
 
         if (result.isFailed()) {
             return result;

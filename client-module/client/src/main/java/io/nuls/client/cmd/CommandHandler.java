@@ -83,7 +83,7 @@ public class CommandHandler {
         /**
          * account
          */
-        //register(new BackupAccountProcessor());
+//        register(new BackupAccountProcessor());
         register(new CreateProcessor());
         register(new GetAccountProcessor());
         register(new GetAccountsProcessor());
@@ -91,7 +91,7 @@ public class CommandHandler {
         register(new GetBalanceProcessor());
         //register(new GetWalletBalanceProcessor());
         register(new GetPrivateKeyProcessor());
-        //register(new ImportByKeyStoreProcessor());
+//        register(new ImportByKeyStoreProcessor());
         register(new ImportByPrivateKeyProcessor());
         register(new ImportForcedByPrivateKeyProcessor());
         register(new RemoveAccountProcessor());

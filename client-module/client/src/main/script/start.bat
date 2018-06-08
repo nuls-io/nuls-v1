@@ -1,4 +1,4 @@
-﻿@echo off
+@echo off
 if "%OS%" == "Windows_NT" setlocal
 
 rem --------------------------------------------------------------------------
@@ -8,7 +8,7 @@ rem $Id: start.bat,v 1.0 2016/11/17 ln$
 rem ---------------------------------------------------------------------------
 
 rem 设置java运行环境
-rem Make sure prerequisite environment variables are set
+rem Make sure prerequisite environment variables are set 
 set NULS_JAVA_HOME=..\jre
 if not "%NULS_JAVA_HOME%" == "" goto gotJavaHome
 echo The NULS_JAVA_HOME environment variable is not defined
@@ -17,11 +17,11 @@ goto end
 :gotJavaHome
 if not exist "%NULS_JAVA_HOME%\bin\java.exe" goto noJavaHome
 goto okJavaHome
-:noJavaHome
+:noJavaHome 
 if not "%JAVA_HOME%" == "" goto useSysJavaHome
 echo The NULS_JAVA_HOME environment variable is not defined correctly
 echo This environment variable is needed to run this program
-goto end
+goto end 
 :useSysJavaHome
 set NULS_JAVA_HOME=%JAVA_HOME%
 goto okJavaHome
