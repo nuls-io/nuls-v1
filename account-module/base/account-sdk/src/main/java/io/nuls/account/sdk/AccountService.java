@@ -25,7 +25,7 @@
 
 package io.nuls.account.sdk;
 
-import io.nuls.account.sdk.model.Account;
+import io.nuls.account.sdk.model.AccountDto;
 
 import java.util.List;
 
@@ -40,6 +40,6 @@ public interface AccountService {
      * @param count
      * @return
      */
-    List<Account> createAccount(int count);
-    List<Account> createLocalAccount(int count);
+    List<AccountDto> createAccount(int count);
+    List<AccountDto> createLocalAccount(int count);
 }
