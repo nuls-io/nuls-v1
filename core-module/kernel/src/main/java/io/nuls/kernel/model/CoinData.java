@@ -26,7 +26,9 @@
 
 package io.nuls.kernel.model;
 
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -139,7 +141,14 @@ public class CoinData extends BaseNulsData {
         }
         Na fromNa = Na.ZERO;
         for (Coin coin : from) {
-            fromNa = fromNa.add(coin.getNa());
+            if(coin.getNa().equals(Na.ZERO)) {
+                if(coin.getFrom() == null) {
+                    throw new NulsRuntimeException(KernelErrorCode.DATA_NOT_FOUND, "can not get tx fee");
+                }
+                fromNa = fromNa.add(coin.getFrom().getNa());
+            } else {
+                fromNa = fromNa.add(coin.getNa());
+            }
         }
         return fromNa.subtract(toNa);
     }
