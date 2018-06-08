@@ -5,19 +5,19 @@
     <parent>
         <artifactId>account-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>0.9.9</version>
+        <version>0.9.10</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.account-module</groupId>
     <artifactId>account-sdk</artifactId>
-    <version>0.9.9</version>
+    <version>0.9.10</version>
     <dependencies>
         <dependency>
             <groupId>io.nuls.core-module</groupId>
             <artifactId>kernel-sdk</artifactId>
-            <version>0.9.9</version>
+            <version>0.9.10</version>
         </dependency>
     </dependencies>
 

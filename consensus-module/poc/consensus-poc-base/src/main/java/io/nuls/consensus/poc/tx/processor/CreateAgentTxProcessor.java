@@ -28,8 +28,11 @@ package io.nuls.consensus.poc.tx.processor;
 import io.nuls.account.service.AccountService;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.context.PocConsensusContext;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.entity.Agent;
+import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
+import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
@@ -110,13 +113,13 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
                     }
                     break;
                 case ConsensusConstant.TX_TYPE_RED_PUNISH:
-//todo                    RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
-//                    RedPunishData redPunishData = redPunishTransaction.getTxData();
-//                    String addressHex = Hex.encode(redPunishData.getAddress());
-//                    if (!addressHexSet.add(addressHex)) {
-//                        return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT, "there is a new Red Punish Transaction!").setData(transaction);
-//                    }
-//                    break;
+                    RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
+                    RedPunishData redPunishData = redPunishTransaction.getTxData();
+                    String addressHex = Hex.encode(redPunishData.getAddress());
+                    if (!addressHexSet.add(addressHex)) {
+                        return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT, "there is a new Red Punish Transaction!").setData(transaction);
+                    }
+                    break;
             }
         }
 

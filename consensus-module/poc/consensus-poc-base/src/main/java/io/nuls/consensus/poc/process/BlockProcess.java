@@ -36,14 +36,19 @@ import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.Chain;
+import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
+import io.nuls.consensus.poc.protocol.entity.RedPunishData;
+import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.consensus.poc.util.ConsensusTool;
+import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
@@ -97,9 +102,7 @@ public class BlockProcess {
      * 4、保存区块头信息，保存区块交易信息
      * 5、转发区块
      *
-     * @param blockContainer
      * @return boolean
-     * @throws IOException
      */
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
@@ -119,19 +122,19 @@ public class BlockProcess {
 
         ValidateResult<List<Transaction>> validateResult = ledgerService.verifyDoubleSpend(block);
         if (validateResult.isFailed() && validateResult.getErrorCode().equals(LedgerErrorCode.LEDGER_DOUBLE_SPENT)) {
-//todo            RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
-//            RedPunishData redPunishData = new RedPunishData();
-//            redPunishData.setAddress(AddressTool.getAddress(block.getHeader().getScriptSig()));
-//            SmallBlock smallBlock = new SmallBlock();
-//            smallBlock.setHeader(block.getHeader());
-//            smallBlock.setTxHashList(block.getTxHashList());
-//            for (Transaction tx : validateResult.getData()) {
-//                smallBlock.addBaseTx(tx);
-//            }
-//            redPunishData.setEvidence(smallBlock.serialize());
-//            redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
-//            redPunishTransaction.setTxData(redPunishData);
-//            NulsContext.getServiceBean(ConsensusService.class).newTx(redPunishTransaction);
+            RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
+            RedPunishData redPunishData = new RedPunishData();
+            redPunishData.setAddress(AddressTool.getAddress(block.getHeader().getScriptSig()));
+            SmallBlock smallBlock = new SmallBlock();
+            smallBlock.setHeader(block.getHeader());
+            smallBlock.setTxHashList(block.getTxHashList());
+            for (Transaction tx : validateResult.getData()) {
+                smallBlock.addBaseTx(tx);
+            }
+            redPunishData.setEvidence(smallBlock.serialize());
+            redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
+            redPunishTransaction.setTxData(redPunishData);
+            NulsContext.getServiceBean(ConsensusService.class).newTx(redPunishTransaction);
             return false;
         }
 
@@ -148,9 +151,6 @@ public class BlockProcess {
             boolean success = true;
             try {
                 do {
-                    // Verify that the block transaction is valid, save the block if the verification passes, and discard the block if it fails
-                    // 验证区块交易是否合法，如果验证通过则保存区块，如果失败则丢弃该块
-                    block.verifyWithException();
                     List<Transaction> verifiedList = new ArrayList<>();
                     for (Transaction tx : block.getTxs()) {
                         if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
@@ -195,16 +195,6 @@ public class BlockProcess {
                 Log.error("save block error : " + e.getMessage(), e);
             }
             if (success) {
-                //check .TODO may need remove,代码稳定后判断是否需要删除下面代码
-                try {
-                    Block tempBlock = blockService.getBlock(block.getHeader().getHash()).getData();
-                    if (tempBlock.getHeader().getTxCount() != tempBlock.getTxs().size()) {
-                        Log.error("end save block tx count is error block : " + block.getHeader().getHash());
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
                 NulsContext.getInstance().setBestBlock(block);
                 //remove tx from memory pool
                 removeTxFromMemoryPool(block);
@@ -244,8 +234,6 @@ public class BlockProcess {
      * forwarding block
      * <p>
      * 转发区块
-     *
-     * @param blockContainer
      */
     private void forwardingBlock(BlockContainer blockContainer) {
         if (blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING) {
@@ -271,7 +259,6 @@ public class BlockProcess {
      * <p>
      * 交易被确认，移除内存池里面存在的交易
      *
-     * @param block
      * @return boolean
      */
     public boolean removeTxFromMemoryPool(Block block) {
@@ -293,7 +280,6 @@ public class BlockProcess {
      * 当一个新的区块，不能被添加进主链时，那么它有可能存在于一条分叉链上，也有可能是本地主链不是最新的网络主链
      * 出现这种情况时，需要检测该区块是否与主链分叉或者与已经存在的分叉链相连，如果能组合成一条新的分叉链，则添加新的分叉链
      *
-     * @param block
      * @return boolean
      */
     protected boolean checkAndAddForkChain(Block block) {
@@ -311,7 +297,6 @@ public class BlockProcess {
      * <p>
      * 当一个区块不能与主链相连时，检查是否是主链的分支，如果是主链的分支，则产生一条分叉链，然后把该分叉链添加进待验证的分叉链池里
      *
-     * @param block
      * @return boolean
      */
     protected boolean checkForkChainFromMasterChain(Block block) {
@@ -360,7 +345,6 @@ public class BlockProcess {
      * <p>
      * 当一个区块不能与主链相连时，检查是否是分叉链的分支，或者与分叉链相连，如果是，则产生一条分叉链，然后把该分叉链添加进待验证的分叉链池里；或者把该块直接添加到对应的分叉链上
      *
-     * @param block
      * @return boolean
      */
     protected boolean checkForkChainFromForkChains(Block block) {

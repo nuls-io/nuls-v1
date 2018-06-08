@@ -46,8 +46,7 @@ public class YellowPunishTransaction extends Transaction<YellowPunishData> {
 
     @Override
     public String getInfo(byte[] address) {
-        // todo auto-generated method stub
-        return null;
+        return "--";
     }
 
     @Override

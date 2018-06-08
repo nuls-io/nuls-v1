@@ -5,13 +5,13 @@
     <parent>
         <artifactId>db-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>0.9.9</version>
+        <version>0.9.10</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.db-module</groupId>
     <artifactId>db</artifactId>
-    <version>0.9.9</version>
+    <version>0.9.10</version>
     <packaging>jar</packaging>
     <name>db</name>
 

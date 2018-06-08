@@ -28,6 +28,7 @@ package io.nuls.consensus.poc.tx.processor;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
+import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
@@ -117,8 +118,8 @@ public class CancelDepositTxProcessor implements TransactionProcessor<CancelDepo
 
         for (Transaction tx : txList) {
             if (tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
-// todo               RedPunishTransaction transaction = (RedPunishTransaction) tx;
-//                addressSet.add(Base58.encode(transaction.getTxData().getAddress()));
+                RedPunishTransaction transaction = (RedPunishTransaction) tx;
+                addressSet.add(Base58.encode(transaction.getTxData().getAddress()));
             } else if (tx.getType() == ConsensusConstant.TX_TYPE_STOP_AGENT) {
                 StopAgentTransaction transaction = (StopAgentTransaction) tx;
                 agentHashSet.add(transaction.getTxData().getCreateTxHash());

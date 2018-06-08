@@ -39,6 +39,9 @@ import io.nuls.consensus.poc.model.BlockData;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
+import io.nuls.consensus.poc.protocol.entity.RedPunishData;
+import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.util.ConsensusTool;
@@ -291,7 +294,7 @@ public class ConsensusProcess {
                 }
                 continue;
             }
-            if(txContainer.getTx() == null || txContainer.getPackageCount() >= 3) {
+            if (txContainer.getTx() == null || txContainer.getPackageCount() >= 3) {
                 continue;
             }
 
@@ -376,50 +379,25 @@ public class ConsensusProcess {
     }
 
     private void punishTx(Block bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
-        redPunishTx(bestBlock, txList, round);
         YellowPunishTransaction yellowPunishTransaction = ConsensusTool.createYellowPunishTx(bestBlock, self, round);
-        if (null != yellowPunishTransaction) {
-            txList.add(yellowPunishTransaction);
-            //当连续100个黄牌时，给出一个红牌
-            //When 100 yellow CARDS in a row, give a red card.
-//            List<PunishLogPo> yellowPunishList = PocConsensusContext.getChainManager().getMasterChain().getChain().getYellowPunishList();
-//            Map<String, Integer> countMap = new HashMap<>();
-//            long startRoundIndex = round.getIndex() - PocConsensusConstant.MAXINUM_CONTINUOUS_YELLOW_NUMBER;
-//            for (PunishLogPo po : yellowPunishList) {
-//                if (startRoundIndex > po.getRoundIndex()) {
-//                    continue;
-//                }
-//                String address = Base58.encode(po.getAddress());
-//                Integer count = countMap.get(address);
-//                if (null == count) {
-//                    count = 1;
-//                } else {
-//                    count++;
-//                }
-//                countMap.put(address, count);
-//            }
-//            for (byte[] addressBytes : yellowPunishTransaction.getTxData().getAddressList()) {
-//                String address = Base58.encode(addressBytes);
-//                if (ConsensusConfig.getSeedNodeList().contains(addressBytes)) {
-//                    continue;
-//                }
-//                Integer count = countMap.get(address);
-//                if (null != count && count >= PocConsensusConstant.MAXINUM_CONTINUOUS_YELLOW_NUMBER) {
-//                    RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
-//                    RedPunishData redPunishData = new RedPunishData();
-//                    redPunishData.setAddress(addressBytes);
-//                    redPunishData.setReasonCode(PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode());
-//                    redPunishTransaction.setTxData(redPunishData);
-//                    redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction));
-//                    txList.add(redPunishTransaction);
-//                }
-//            }
+        if (null == yellowPunishTransaction) {
+            return;
         }
-//todo 是否还有其他红牌处理
-//        List<RedPunishTransaction> redTxList = ConsensusTool.createRedPunishTxList(bestBlock, self, );
-    }
-
-    private void redPunishTx(Block bestBlock, List<Transaction> txList, MeetingRound round) throws NulsException, IOException {
-        // todo implement
+        txList.add(yellowPunishTransaction);
+        //当连续100个黄牌时，给出一个红牌
+        //When 100 yellow CARDS in a row, give a red card.
+        List<byte[]> addressList = yellowPunishTransaction.getTxData().getAddressList();
+        for (byte[] address : addressList) {
+            MeetingMember member = round.getMember(address);
+            if (member.getCreditVal() <= -1) {
+                RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
+                RedPunishData redPunishData = new RedPunishData();
+                redPunishData.setAddress(address);
+                redPunishData.setReasonCode(PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode());
+                redPunishTransaction.setTxData(redPunishData);
+                redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction));
+                txList.add(redPunishTransaction);
+            }
+        }
     }
 }

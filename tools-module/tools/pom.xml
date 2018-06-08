@@ -30,7 +30,7 @@
     <parent>
         <artifactId>tools-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>0.9.9</version>
+        <version>0.9.10</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
