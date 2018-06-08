@@ -262,32 +262,6 @@ public class AccountResource {
     }
 
     @GET
-    @Path("/balance/{address}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("[余额] 查询账户余额 [3.3.3]")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = BalanceDto.class)
-    })
-    public RpcClientResult getBalance(@ApiParam(name = "address", value = "账户地址", required = true)
-                                      @PathParam("address") String address) {
-        if (!Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
-        }
-        try {
-            Address addr = new Address(address);
-            Result<Balance> result = accountLedgerService.getBalance(addr.getBase58Bytes());
-            if (result.isFailed()) {
-                return result.toRpcClientResult();
-            }
-            Balance balance = result.getData();
-            return Result.getSuccess().setData(new BalanceDto(balance)).toRpcClientResult();
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(AccountErrorCode.FAILED).toRpcClientResult();
-        }
-    }
-
-    @GET
     @Path("/balance")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("[余额] 查询本地所有账户总余额")

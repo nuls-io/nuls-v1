@@ -80,14 +80,14 @@ public class GetBalanceProcessor  implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        RpcClientResult result = restFul.get("/account/balance/" + address, null);
+        RpcClientResult result = restFul.get("/accountledger/balance/" + address, null);
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());
         }
         Map<String, Object> map = (Map)result.getData();
-        map.put("balance",  CommandHelper.naToNuls(map.get("balance")));
-        map.put("usable", CommandHelper.naToNuls(map.get("usable")));
-        map.put("locked", CommandHelper.naToNuls(map.get("locked")));
+        map.put("balance",  CommandHelper.naToNuls(((Map)map.get("balance")).get("value")));
+        map.put("usable",  CommandHelper.naToNuls(((Map)map.get("usable")).get("value")));
+        map.put("locked",  CommandHelper.naToNuls(((Map)map.get("locked")).get("value")));
         result.setData(map);
         return CommandResult.getResult(result);
     }
