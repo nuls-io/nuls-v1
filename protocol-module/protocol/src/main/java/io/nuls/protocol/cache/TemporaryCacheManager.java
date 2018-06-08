@@ -29,6 +29,9 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.model.SmallBlock;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Used for sharing temporary data between multiple hander.
  * 用于不同的handler之间共享交易数据，交易缓存池中的数据已经放入，直到自动销毁前，不做清理
@@ -40,7 +43,9 @@ public class TemporaryCacheManager {
     private static final TemporaryCacheManager INSTANCE = new TemporaryCacheManager();
 
     private CacheMap<NulsDigestData, SmallBlock> smallBlockCacheMap = new CacheMap<>("temp-small-block-cache", 16, NulsDigestData.class, SmallBlock.class, 1000, 0, null);
-    private CacheMap<NulsDigestData, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 64, NulsDigestData.class, Transaction.class, 3600, 0, null);
+//    private CacheMap<NulsDigestData, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 128, NulsDigestData.class, Transaction.class, 0, 3600);
+
+    private Map<NulsDigestData, Transaction> txCacheMap = new HashMap<>();
 
     private TemporaryCacheManager() {
     }
@@ -124,7 +129,7 @@ public class TemporaryCacheManager {
      */
     public void destroy() {
         this.smallBlockCacheMap.destroy();
-        this.txCacheMap.destroy();
+        this.txCacheMap.clear();
     }
 
     public int getSmallBlockCount() {

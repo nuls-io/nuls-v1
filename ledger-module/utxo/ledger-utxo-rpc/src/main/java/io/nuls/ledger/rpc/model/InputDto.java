@@ -27,7 +27,7 @@ package io.nuls.ledger.rpc.model;
 
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.model.Coin;
-import io.nuls.ledger.utils.LedgerUtil;
+import io.nuls.ledger.util.LedgerUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 

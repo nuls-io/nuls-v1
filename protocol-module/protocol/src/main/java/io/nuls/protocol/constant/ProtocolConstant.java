@@ -26,7 +26,6 @@
 package io.nuls.protocol.constant;
 
 import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.kernel.utils.AddressTool;
 
 /**
  * 协议相关的常量和一些通用的常量定义在这里
@@ -69,7 +68,7 @@ public interface ProtocolConstant extends NulsConstant {
      * 最大区块大小（不包含区块头）
      * Maximum block size (excluding block headers)
      */
-    long MAX_BLOCK_SIZE = 2 << 21;
+    long MAX_BLOCK_SIZE = 2 * 1024 * 1024L;
 
     /**
      * 协议模块的所有消息类型定义

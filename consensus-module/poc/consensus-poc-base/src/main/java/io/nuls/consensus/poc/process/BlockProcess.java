@@ -53,8 +53,7 @@ import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author ln
@@ -102,6 +101,7 @@ public class BlockProcess {
      * @throws IOException
      */
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
+
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
         Block block = blockContainer.getBlock();
 
@@ -144,27 +144,28 @@ public class BlockProcess {
         } finally {
             Lockers.CHAIN_LOCK.unlock();
         }
+
         if (verifyAndAddBlockResult) {
             boolean success = true;
             try {
                 do {
                     // Verify that the block transaction is valid, save the block if the verification passes, and discard the block if it fails
                     // 验证区块交易是否合法，如果验证通过则保存区块，如果失败则丢弃该块
-                    block.verifyWithException();
-                    List<Transaction> verifiedList = new ArrayList<>();
+
+                    Map<String, Coin> toMaps = new HashMap<>();
+                    Set<String> fromSet = new HashSet<>();
+
                     for (Transaction tx : block.getTxs()) {
                         if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
                             continue;
                         }
-                        ValidateResult result = ledgerService.verifyCoinData(tx, verifiedList);
+                        ValidateResult result = tx.verify();
                         if (result.isSuccess()) {
-                            result = tx.verify();
+                            result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
                             if (result.isFailed()) {
                                 Log.info("failed message:" + result.getMsg());
                                 success = false;
                                 break;
-                            } else {
-                                verifiedList.add(tx);
                             }
                         } else {
                             success = false;
@@ -172,6 +173,7 @@ public class BlockProcess {
                             break;
                         }
                     }
+
                     if (!success) {
                         break;
                     }
@@ -195,16 +197,6 @@ public class BlockProcess {
                 Log.error("save block error : " + e.getMessage(), e);
             }
             if (success) {
-                //check .TODO may need remove,代码稳定后判断是否需要删除下面代码
-                try {
-                    Block tempBlock = blockService.getBlock(block.getHeader().getHash()).getData();
-                    if (tempBlock.getHeader().getTxCount() != tempBlock.getTxs().size()) {
-                        Log.error("end save block tx count is error block : " + block.getHeader().getHash());
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
                 NulsContext.getInstance().setBestBlock(block);
                 //remove tx from memory pool
                 removeTxFromMemoryPool(block);

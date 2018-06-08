@@ -59,6 +59,28 @@ public final class TxMemoryPool {
         return INSTANCE;
     }
 
+    public boolean addInFirst(TxContainer tx, boolean isOrphan) {
+        try {
+            if(tx == null || tx.getTx() == null) {
+                return false;
+            }
+            //check Repeatability
+            NulsDigestData hash = tx.getTx().getHash();
+            if (orphanContainer.containsKey(hash) || container.containsKey(hash)) {
+                return false;
+            }
+            if (isOrphan) {
+                orphanContainer.put(hash, tx);
+                ((LinkedBlockingDeque) orphanTxHashQueue).addFirst(hash);
+            } else {
+                container.put(hash, tx);
+                ((LinkedBlockingDeque) txHashQueue).addFirst(hash);
+            }
+            return true;
+        } finally {
+        }
+    }
+
     public boolean add(TxContainer tx, boolean isOrphan) {
         try {
             if(tx == null || tx.getTx() == null) {
@@ -109,17 +131,13 @@ public final class TxMemoryPool {
         TxContainer tx = null;
         NulsDigestData hash = txHashQueue.poll();
         if(hash != null) {
-            tx = container.get(hash);
+            tx = container.remove(hash);
         } else {
             hash = orphanTxHashQueue.poll();
             if (hash != null) {
-                tx = orphanContainer.get(hash);
+                tx = orphanContainer.remove(hash);
             }
         }
-        if(tx != null) {
-            remove(tx.getTx().getHash());
-        }
-
         return tx;
     }
 
@@ -130,9 +148,9 @@ public final class TxMemoryPool {
      * @return TxContainer
      */
     public TxContainer getAndRemove(NulsDigestData hash) {
-        TxContainer tx = get(hash);
-        if(tx != null) {
-            remove(hash);
+        TxContainer tx = container.remove(hash);
+        if (tx == null) {
+            tx = orphanContainer.remove(hash);
         }
         return tx;
     }
