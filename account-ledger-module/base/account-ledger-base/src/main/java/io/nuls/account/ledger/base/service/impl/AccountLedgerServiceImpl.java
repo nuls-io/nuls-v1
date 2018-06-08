@@ -356,10 +356,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 coinDataResult.setEnough(false);
                 return coinDataResult;
             }
-            for(Coin coin : coinDataResult.getCoinList()) {
-                coin.setNa(Na.ZERO);
-                coin.setLockTime(0L);
-            }
             return coinDataResult;
         } finally {
             lock.unlock();
