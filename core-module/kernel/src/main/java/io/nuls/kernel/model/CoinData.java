@@ -141,14 +141,7 @@ public class CoinData extends BaseNulsData {
         }
         Na fromNa = Na.ZERO;
         for (Coin coin : from) {
-            if(coin.getNa().equals(Na.ZERO)) {
-                if(coin.getFrom() == null) {
-                    throw new NulsRuntimeException(KernelErrorCode.DATA_NOT_FOUND, "can not get tx fee");
-                }
-                fromNa = fromNa.add(coin.getFrom().getNa());
-            } else {
-                fromNa = fromNa.add(coin.getNa());
-            }
+            fromNa = fromNa.add(coin.getNa());
         }
         return fromNa.subtract(toNa);
     }

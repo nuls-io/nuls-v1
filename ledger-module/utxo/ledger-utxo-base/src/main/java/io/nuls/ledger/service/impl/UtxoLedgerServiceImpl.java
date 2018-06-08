@@ -411,6 +411,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 if (!isEmptyTxList && validateFromUtxoSet.contains(asString(fromBytes))) {
                     return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT, "duplicate utxo in tx and txList.");
                 }
+
+                // 验证from的锁定时间和金额
+                if(!(fromOfFromCoin.getNa().equals(from.getNa()) && fromOfFromCoin.getLockTime() == from.getLockTime())) {
+                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.DATA_ERROR, "tx from coin data na and lock time error.");
+                }
+
                 fromTotal = fromTotal.add(fromOfFromCoin.getNa());
                 from.setFrom(fromOfFromCoin);
             }
