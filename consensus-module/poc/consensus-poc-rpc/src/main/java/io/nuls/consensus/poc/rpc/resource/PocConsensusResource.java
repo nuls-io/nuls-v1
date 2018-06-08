@@ -687,6 +687,8 @@ public class PocConsensusResource {
             type = AgentComparator.CREDIT_VALUE;
         } else if ("totalDeposit".equals(sortType)) {
             type = AgentComparator.DEPOSITABLE;
+        }else if("comprehensive".equals(sortType)){
+            type = AgentComparator.COMPREHENSIVE;
         }
         Collections.sort(agentList, AgentComparator.getInstance(type));
         List<AgentDTO> resultList = new ArrayList<>();

@@ -410,7 +410,6 @@ public class AccountResource {
         return Result.getSuccess().toRpcClientResult();
     }
 
-
     @POST
     @Path("/password/{address}")
     @Produces(MediaType.APPLICATION_JSON)

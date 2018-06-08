@@ -47,6 +47,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -203,10 +204,8 @@ public class BlockResource {
         if (block == null) {
             result = Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         } else {
-            //todo why?
             result = Result.getSuccess();
-            result.setData(Hex.encode(block.serialize()));
-
+            result.setData(Base64.getEncoder().encodeToString(block.serialize()));
         }
         return result.toRpcClientResult();
     }
