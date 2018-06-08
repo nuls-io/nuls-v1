@@ -392,9 +392,11 @@ public class AccountLedgerResource {
         if (!NulsDigestData.validHash(hash)) {
             return Result.getFailed(LedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-
-        //return result.toRpcClientResult();
-        return null;
+        Result result = getUnconfirmedTx(hash);
+        if(result.isSuccess()){
+            return result.toRpcClientResult();
+        }
+        return getConfirmedTx(hash).toRpcClientResult();
     }
 
     /**
