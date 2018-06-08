@@ -21,13 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.ledger.utils;
+package io.nuls.ledger.util;
 
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.VarInt;
 
 import java.util.Arrays;
+import java.util.Base64;
 
 /**
  * @desription:
@@ -74,4 +76,8 @@ public class LedgerUtil {
         return null;
     }
 
+    public static String asString(byte[] bytes) {
+        AssertUtil.canNotEmpty(bytes);
+        return Base64.getEncoder().encodeToString(bytes);
+    }
 }

@@ -48,10 +48,7 @@ import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.network.service.NetworkService;
@@ -195,13 +192,9 @@ public class ConsensusProcess {
             while (!hasReceiveNewestBlock) {
                 hasReceiveNewestBlock = hasReceiveNewestBlock(self, round);
                 if (hasReceiveNewestBlock) {
-                    long sleepTime = endTime - TimeService.currentTimeMillis();
-                    if (sleepTime > 0) {
-                        Thread.sleep(sleepTime);
-                    }
                     break;
                 }
-                Thread.sleep(500L);
+                Thread.sleep(100L);
                 if (TimeService.currentTimeMillis() >= endTime) {
                     break;
                 }
@@ -219,8 +212,7 @@ public class ConsensusProcess {
 
         int thisIndex = self.getPackingIndexOfRound();
 
-        byte[] preBlockPackingAddress = null;
-
+        MeetingMember preMember;
         if (thisIndex == 1) {
             MeetingRound preRound = round.getPreRound();
             if (preRound == null) {
@@ -228,12 +220,22 @@ public class ConsensusProcess {
                 Log.error("这里完成前必须处理掉");
                 return true;
             }
-            preBlockPackingAddress = preRound.getMember(preRound.getMemberCount()).getPackingAddress();
+            preMember = preRound.getMember(preRound.getMemberCount());
         } else {
-            preBlockPackingAddress = round.getMember(self.getPackingIndexOfRound()).getPackingAddress();
+            preMember = round.getMember(self.getPackingIndexOfRound() - 1);
         }
+        if(preMember == null) {
+            return true;
+        }
+        byte[] preBlockPackingAddress = preMember.getPackingAddress();
+        long thisRoundIndex = preMember.getRoundIndex();
+        int thisPackageIndex = preMember.getPackingIndexOfRound();
 
-        if (Arrays.equals(packingAddress, preBlockPackingAddress)) {
+        BlockRoundData blockRoundData = new BlockRoundData(bestBlockHeader.getExtend());
+        long roundIndex = blockRoundData.getRoundIndex();
+        int packageIndex = blockRoundData.getPackingIndexOfRound();
+
+        if (Arrays.equals(packingAddress, preBlockPackingAddress) && thisRoundIndex == roundIndex && thisPackageIndex == packageIndex) {
             return true;
         } else {
             return false;
@@ -273,9 +275,12 @@ public class ConsensusProcess {
         bd.setRoundData(roundData);
 
         List<Transaction> packingTxList = new ArrayList<>();
-        List<NulsDigestData> outHashList = new ArrayList<>();
+        Set<NulsDigestData> outHashSet = new HashSet<>();
 
         long totalSize = 0L;
+
+        Map<String, Coin> toMaps = new HashMap<>();
+        Set<String> fromSet = new HashSet<>();
 
         while (true) {
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 500L) {
@@ -298,16 +303,16 @@ public class ConsensusProcess {
             Transaction tx = txContainer.getTx();
 
             if ((totalSize + tx.size()) > ProtocolConstant.MAX_BLOCK_SIZE) {
-                txMemoryPool.add(txContainer, false);
+                txMemoryPool.addInFirst(txContainer, false);
                 break;
             }
-            if (outHashList.contains(tx.getHash())) {
-                continue;
-            }
+
             Transaction repeatTx = ledgerService.getTx(tx.getHash());
+
             if (repeatTx != null) {
                 continue;
             }
+
             ValidateResult result = tx.verify();
             if (result.isFailed()) {
                 if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
@@ -317,7 +322,9 @@ public class ConsensusProcess {
                 Log.warn(result.getMsg());
                 continue;
             }
-            result = ledgerService.verifyCoinData(tx, packingTxList);
+
+            result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
+
             if (result.isFailed()) {
                 if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
                     txMemoryPool.add(txContainer, true);
@@ -326,7 +333,11 @@ public class ConsensusProcess {
                 Log.warn(result.getMsg());
                 continue;
             }
-            outHashList.add(tx.getHash());
+
+            if(!outHashSet.add(tx.getHash())) {
+                Log.warn("重复的交易");
+                continue;
+            }
 
             tx.setBlockHeight(bd.getHeight());
             packingTxList.add(tx);
@@ -356,7 +367,7 @@ public class ConsensusProcess {
 
         Block newBlock = ConsensusTool.createBlock(bd, round.getLocalPacker());
 
-        Log.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + ", time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
+        Log.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtil.convertDate(new Date(self.getPackEndTime())));
 
         return newBlock;

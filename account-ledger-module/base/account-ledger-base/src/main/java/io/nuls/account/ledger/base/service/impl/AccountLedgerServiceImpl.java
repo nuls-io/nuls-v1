@@ -61,6 +61,7 @@ import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.ledger.util.LedgerUtil;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.service.BlockService;
@@ -176,7 +177,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 return result;
             }
             if (!(tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH)) {
-                result = this.ledgerService.verifyCoinData(tx, this.getAllUnconfirmedTransaction().getData());
+                Map<String, Coin> toCoinMap = addToCoinMap(tx);
+                result = this.ledgerService.verifyCoinData(tx, toCoinMap, null);
                 if (result.isFailed()) {
                     Log.info("verifyCoinData failed");
                     return result;
@@ -186,6 +188,36 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         } finally {
             saveLock.unlock();
         }
+    }
+
+    private Map<String,Coin> addToCoinMap(Transaction transaction) {
+        Map<String,Coin> toMap = new HashMap<>();
+
+        CoinData coinData = transaction.getCoinData();
+        if(coinData == null) {
+            return toMap;
+        }
+
+        List<Coin> froms = coinData.getFrom();
+
+        if(froms == null || froms.size() == 0) {
+            return toMap;
+        }
+
+        for(Coin coin : froms) {
+            byte[] keyBytes = coin.getOwner();
+            try {
+                Transaction unconfirmedTx = getUnconfirmedTransaction(NulsDigestData.fromDigestHex(LedgerUtil.getTxHash(keyBytes))).getData();
+                if(unconfirmedTx != null) {
+                    int index = LedgerUtil.getIndex(keyBytes);
+                    Coin toCoin = unconfirmedTx.getCoinData().getTo().get(index);
+                    toMap.put(LedgerUtil.asString(keyBytes), toCoin);
+                }
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+        }
+        return toMap;
     }
 
     protected Result saveUnconfirmedTransaction(Transaction tx) {
@@ -406,6 +438,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result transfer(byte[] from, byte[] to, Na values, String password, String remark, Na price) {
         try {
+            long time = System.nanoTime();
+
             Result<Account> accountResult = accountService.getAccount(from);
             if (accountResult.isFailed()) {
                 return accountResult;
@@ -452,11 +486,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             sig.setSignData(accountService.signData(tx.getHash().serialize(), account, password));
             tx.setScriptSig(sig.serialize());
 
-
             Result saveResult = verifyAndSaveUnconfirmedTransaction(tx);
             if (saveResult.isFailed()) {
                 return saveResult;
             }
+
             Result sendResult = transactionService.broadcastTx(tx);
             if (sendResult.isFailed()) {
                 this.rollbackTransaction(tx);

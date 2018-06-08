@@ -38,7 +38,7 @@ import io.nuls.ledger.rpc.model.OutputDto;
 import io.nuls.ledger.rpc.model.TransactionDto;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.ledger.storage.service.UtxoLedgerUtxoStorageService;
-import io.nuls.ledger.utils.LedgerUtil;
+import io.nuls.ledger.util.LedgerUtil;
 import io.swagger.annotations.*;
 import org.spongycastle.util.Arrays;
 

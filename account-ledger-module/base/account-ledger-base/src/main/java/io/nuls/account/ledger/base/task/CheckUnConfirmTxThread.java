@@ -25,7 +25,6 @@ package io.nuls.account.ledger.base.task;
 
 
 import io.nuls.account.ledger.base.manager.BalanceManager;
-import io.nuls.account.ledger.base.service.LocalUtxoService;
 import io.nuls.account.ledger.base.service.TransactionInfoService;
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
 import io.nuls.account.ledger.base.util.TransactionTimeComparator;
@@ -35,7 +34,6 @@ import io.nuls.account.ledger.storage.service.LocalUtxoStorageService;
 import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -92,11 +90,14 @@ public class CheckUnConfirmTxThread implements Runnable {
             return;
         }
 
+        Map<String, Coin> toMaps = new HashMap<>();
+        Set<String> fromSet = new HashSet<>();
+
         for (Transaction tx : list) {
             if (TimeService.currentTimeMillis() - tx.getTime() < 120000L) {
                 return;
             }
-            Result result = verifyTransaction(tx, list);
+            Result result = verifyTransaction(tx, toMaps, fromSet);
             if (result.isSuccess()) {
                 result = reBroadcastTransaction(tx);
                 if (result.isFailed()) {
@@ -189,12 +190,12 @@ public class CheckUnConfirmTxThread implements Runnable {
         return Result.getSuccess();
     }
 
-    private Result verifyTransaction(Transaction tx, List<Transaction> txs) {
+    private Result verifyTransaction(Transaction tx, Map<String, Coin> toMaps, Set<String> fromSet) {
         Result result = tx.verify();
         if (result.isFailed()) {
             return result;
         }
-        result = ledgerService.verifyCoinData(tx, txs);
+        result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
 
         if (result.isFailed()) {
             return result;
