@@ -24,6 +24,7 @@
  */
 package io.nuls.account.ledger.base.service;
 
+import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 
@@ -44,4 +45,6 @@ public interface LocalUtxoService {
     Result<List<byte[]>> unlockCoinData(Transaction tx, long newLockTime);
 
     Result<List<byte[]>> rollbackUnlockTxCoinData(Transaction tx);
+
+    Result getUtxo(byte[] owner);
 }

@@ -29,14 +29,15 @@
  */
 package io.nuls.accout.ledger.rpc;
 
+import io.nuls.account.ledger.base.service.LocalUtxoService;
+import io.nuls.account.ledger.base.util.AccountLegerUtils;
+import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.model.TransactionInfo;
+import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
-import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
-import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.accout.ledger.rpc.dto.TransactionInfoDto;
-import io.nuls.accout.ledger.rpc.dto.UtxoDto;
+import io.nuls.accout.ledger.rpc.dto.*;
 import io.nuls.accout.ledger.rpc.form.TransferFeeForm;
 import io.nuls.accout.ledger.rpc.form.TransferForm;
 import io.nuls.accout.ledger.rpc.util.UtxoDtoComparator;
@@ -46,21 +47,27 @@ import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.constant.TxStatusEnum;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
+import io.nuls.kernel.utils.VarInt;
+import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
 import io.swagger.annotations.*;
+import org.spongycastle.util.Arrays;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * author Facjas
@@ -80,6 +87,9 @@ public class AccountLedgerResource {
 
     @Autowired
     private LedgerService ledgerService;
+
+    @Autowired
+    private LocalUtxoService localUtxoService;
 
     @GET
     @Path("/balance/{address}")
@@ -366,4 +376,270 @@ public class AccountLedgerResource {
             return false;
         }
     }
+
+    @GET
+    @Path("/tx/{hash}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "根据hash查询交易")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = TransactionDto.class)
+    })
+    public RpcClientResult getTxByHash(@ApiParam(name="hash", value="交易hash", required = true)
+                                       @PathParam("hash") String hash) {
+        if (StringUtils.isBlank(hash)) {
+            return Result.getFailed(LedgerErrorCode.NULL_PARAMETER).toRpcClientResult();
+        }
+        if (!NulsDigestData.validHash(hash)) {
+            return Result.getFailed(LedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+
+        //return result.toRpcClientResult();
+        return null;
+    }
+
+    /**
+     * 获取未确认的交易
+     * @param hash
+     * @return
+     */
+    private Result getUnconfirmedTx(String hash){
+        Result result = null;
+        try {
+            Result<Transaction> txResult = accountLedgerService.getUnconfirmedTransaction(NulsDigestData.fromDigestHex(hash));
+            if (txResult.isFailed() || null == txResult.getData()) {
+                result = Result.getFailed(LedgerErrorCode.DATA_NOT_FOUND);
+            } else {
+                Transaction tx = txResult.getData();
+                tx.setStatus(TxStatusEnum.CONFIRMED);
+                TransactionDto txDto = null;
+                CoinData coinData = tx.getCoinData();
+                if(coinData != null) {
+                    // 组装from数据
+                    List<Coin> froms = coinData.getFrom();
+                    if(froms != null && froms.size() > 0) {
+                        byte[] fromHash, owner;
+                        int fromIndex;
+                        NulsDigestData fromHashObj;
+                        Transaction fromTx;
+                        Coin fromUtxo;
+                        for(Coin from : froms) {
+                            owner = from.getOwner();
+                            // owner拆分出txHash和index
+                            fromHash = AccountLegerUtils.getTxHashBytes(owner);
+                            fromIndex = AccountLegerUtils.getIndex(owner);
+                            // 查询from UTXO
+                            fromHashObj = new NulsDigestData();
+                            fromHashObj.parse(fromHash);
+                            //获取上一笔的to,先查未确认,如果没有再查已确认
+                            fromTx = accountLedgerService.getUnconfirmedTransaction(fromHashObj).getData();
+                            if(null == fromTx){
+                                fromTx = ledgerService.getTx(fromHashObj);
+                            }
+                            fromUtxo = fromTx.getCoinData().getTo().get(fromIndex);
+                            from.setFrom(fromUtxo);
+                        }
+                    }
+                    txDto = new TransactionDto(tx);
+                    List<OutputDto> outputDtoList = new ArrayList<>();
+                    // 组装to数据
+                    List<Coin> tos = coinData.getTo();
+                    if(tos != null && tos.size() > 0) {
+                        byte[] txHashBytes = tx.getHash().serialize();
+                        String txHash = hash;
+                        OutputDto outputDto = null;
+                        Coin to, temp;
+                        long bestHeight = NulsContext.getInstance().getBestHeight();
+                        long currentTime = TimeService.currentTimeMillis();
+                        long lockTime;
+                        for(int i = 0, length = tos.size(); i < length; i++) {
+                            to = tos.get(i);
+                            outputDto = new OutputDto(to);
+                            outputDto.setTxHash(txHash);
+                            outputDto.setIndex(i);
+                            temp = ledgerService.getUtxo(Arrays.concatenate(txHashBytes, new VarInt(i).encode()));
+                            if(temp == null) {
+                                // 已花费
+                                outputDto.setStatus(3);
+                            } else {
+                                lockTime = temp.getLockTime();
+                                if (lockTime < 0) {
+                                    // 共识锁定
+                                    outputDto.setStatus(2);
+                                } else if (lockTime == 0) {
+                                    // 正常未花费
+                                    outputDto.setStatus(0);
+                                } else if (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE) {
+                                    // 判定是否时间高度锁定
+                                    if (lockTime > currentTime) {
+                                        // 时间高度锁定
+                                        outputDto.setStatus(1);
+                                    } else {
+                                        // 正常未花费
+                                        outputDto.setStatus(0);
+                                    }
+                                } else {
+                                    // 判定是否区块高度锁定
+                                    if (lockTime > bestHeight) {
+                                        // 区块高度锁定
+                                        outputDto.setStatus(1);
+                                    } else {
+                                        // 正常未花费
+                                        outputDto.setStatus(0);
+                                    }
+                                }
+                            }
+                            outputDtoList.add(outputDto);
+                        }
+                    }
+                    txDto.setOutputs(outputDtoList);
+                    // 计算交易实际发生的金额
+                    calTransactionValue(txDto);
+                }
+                result = Result.getSuccess();
+                result.setData(txDto);
+            }
+        } catch (NulsRuntimeException re) {
+            Log.error(re);
+            result = new Result(false, re.getCode(), re.getMessage());
+        } catch (Exception e) {
+            Log.error(e);
+            result = Result.getFailed(LedgerErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        return result;
+    }
+
+    /**
+     * 获取已确认的交易
+     * @param hash
+     * @return
+     */
+    private Result getConfirmedTx(String hash){
+        Result result = null;
+        try {
+            Transaction tx = ledgerService.getTx(NulsDigestData.fromDigestHex(hash));
+            if (tx == null) {
+                result = Result.getFailed(LedgerErrorCode.DATA_NOT_FOUND);
+            } else {
+                tx.setStatus(TxStatusEnum.CONFIRMED);
+                TransactionDto txDto = null;
+                CoinData coinData = tx.getCoinData();
+                if(coinData != null) {
+                    // 组装from数据
+                    List<Coin> froms = coinData.getFrom();
+                    if(froms != null && froms.size() > 0) {
+                        byte[] fromHash, owner;
+                        int fromIndex;
+                        NulsDigestData fromHashObj;
+                        Transaction fromTx;
+                        Coin fromUtxo;
+                        for(Coin from : froms) {
+                            owner = from.getOwner();
+                            // owner拆分出txHash和index
+                            fromHash = AccountLegerUtils.getTxHashBytes(owner);
+                            fromIndex = AccountLegerUtils.getIndex(owner);
+                            // 查询from UTXO
+                            fromHashObj = new NulsDigestData();
+                            fromHashObj.parse(fromHash);
+                            fromTx = ledgerService.getTx(fromHashObj);
+                            fromUtxo = fromTx.getCoinData().getTo().get(fromIndex);
+                            from.setFrom(fromUtxo);
+                        }
+                    }
+                    txDto = new TransactionDto(tx);
+                    List<OutputDto> outputDtoList = new ArrayList<>();
+                    // 组装to数据
+                    List<Coin> tos = coinData.getTo();
+                    if(tos != null && tos.size() > 0) {
+                        byte[] txHashBytes = tx.getHash().serialize();
+                        String txHash = hash;
+                        OutputDto outputDto = null;
+                        Coin to, temp;
+                        long bestHeight = NulsContext.getInstance().getBestHeight();
+                        long currentTime = TimeService.currentTimeMillis();
+                        long lockTime;
+                        for(int i = 0, length = tos.size(); i < length; i++) {
+                            to = tos.get(i);
+                            outputDto = new OutputDto(to);
+                            outputDto.setTxHash(txHash);
+                            outputDto.setIndex(i);
+                            temp = (Coin) localUtxoService.getUtxo(Arrays.concatenate(txHashBytes, new VarInt(i).encode())).getData();
+                            if(temp == null) {
+                                // 已花费
+                                outputDto.setStatus(3);
+                            } else {
+                                lockTime = temp.getLockTime();
+                                if (lockTime < 0) {
+                                    // 共识锁定
+                                    outputDto.setStatus(2);
+                                } else if (lockTime == 0) {
+                                    // 正常未花费
+                                    outputDto.setStatus(0);
+                                } else if (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE) {
+                                    // 判定是否时间高度锁定
+                                    if (lockTime > currentTime) {
+                                        // 时间高度锁定
+                                        outputDto.setStatus(1);
+                                    } else {
+                                        // 正常未花费
+                                        outputDto.setStatus(0);
+                                    }
+                                } else {
+                                    // 判定是否区块高度锁定
+                                    if (lockTime > bestHeight) {
+                                        // 区块高度锁定
+                                        outputDto.setStatus(1);
+                                    } else {
+                                        // 正常未花费
+                                        outputDto.setStatus(0);
+                                    }
+                                }
+                            }
+                            outputDtoList.add(outputDto);
+                        }
+                    }
+                    txDto.setOutputs(outputDtoList);
+                    // 计算交易实际发生的金额
+                    calTransactionValue(txDto);
+                }
+                result = Result.getSuccess();
+                result.setData(txDto);
+            }
+        } catch (NulsRuntimeException re) {
+            Log.error(re);
+            result = new Result(false, re.getCode(), re.getMessage());
+        } catch (Exception e) {
+            Log.error(e);
+            result = Result.getFailed(LedgerErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        return result;
+    }
+
+
+
+    /**
+     * 计算交易实际发生的金额
+     * Calculate the actual amount of the transaction.
+     *
+     * @param txDto
+     */
+    private void calTransactionValue(TransactionDto txDto) {
+        if(txDto == null) {
+            return;
+        }
+        List<InputDto> inputDtoList = txDto.getInputs();
+        Set<String> inputAdressSet = new HashSet<>(inputDtoList.size());
+        for(InputDto inputDto : inputDtoList) {
+            inputAdressSet.add(inputDto.getAddress());
+        }
+        Na value = Na.ZERO;
+        List<OutputDto> outputDtoList = txDto.getOutputs();
+        for(OutputDto outputDto : outputDtoList) {
+            if(inputAdressSet.contains(outputDto.getAddress())) {
+                continue;
+            }
+            value = value.add(Na.valueOf(outputDto.getValue()));
+        }
+        txDto.setValue(value.getValue());
+    }
+
 }

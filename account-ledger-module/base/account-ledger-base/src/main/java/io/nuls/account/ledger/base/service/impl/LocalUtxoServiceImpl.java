@@ -288,4 +288,18 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
     protected void saveUTXO(byte[] outKey, byte[] serialize) {
         localUtxoStorageService.saveUTXO(outKey, serialize);
     }
+
+
+
+    @Override
+    public Result getUtxo(byte[] owner) {
+        if (owner == null) {
+            return null;
+        }
+        Coin coin = localUtxoStorageService.getUtxo(owner);
+        if (coin == null) {
+            return Result.getFailed();
+        }
+        return Result.getSuccess().setData(coin);
+    }
 }

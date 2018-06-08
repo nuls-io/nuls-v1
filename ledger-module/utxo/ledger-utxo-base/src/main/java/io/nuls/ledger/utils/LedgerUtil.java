@@ -38,6 +38,7 @@ public class LedgerUtil {
 
     private final static int TX_HASH_LENGTH = NulsDigestData.HASH_LENGTH;
 
+
     public static byte[] getTxHashBytes(byte[] fromBytes) {
         if(fromBytes == null || fromBytes.length < TX_HASH_LENGTH) {
             return null;

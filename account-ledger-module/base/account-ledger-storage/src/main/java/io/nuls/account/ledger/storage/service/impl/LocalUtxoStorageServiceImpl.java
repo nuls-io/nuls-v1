@@ -26,6 +26,7 @@ package io.nuls.account.ledger.storage.service.impl;
 
 import io.nuls.account.ledger.storage.constant.AccountLedgerStorageConstant;
 import io.nuls.account.ledger.storage.service.LocalUtxoStorageService;
+import io.nuls.core.tools.log.Log;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
@@ -35,6 +36,7 @@ import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
+import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Result;
 import io.nuls.ledger.service.LedgerService;
 
@@ -126,5 +128,29 @@ public class LocalUtxoStorageServiceImpl implements LocalUtxoStorageService, Ini
             return batchResult;
         }
         return Result.getSuccess().setData(new Integer(utxosToSave.size() + utxosToDelete.size()));
+    }
+
+    @Override
+    public byte[] getUtxoBytes(byte[] owner) {
+        if (owner == null) {
+            return null;
+        }
+        return dbService.get(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA, owner);
+    }
+
+    @Override
+    public Coin getUtxo(byte[] owner) {
+        byte[] utxoBytes = getUtxoBytes(owner);
+        Coin coin = null;
+        try {
+            if(utxoBytes != null) {
+                coin = new Coin();
+                coin.parse(utxoBytes);
+            }
+        } catch (NulsException e) {
+            Log.error(e);
+            return null;
+        }
+        return coin;
     }
 }
