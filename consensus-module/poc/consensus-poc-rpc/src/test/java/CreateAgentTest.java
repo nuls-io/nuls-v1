@@ -23,10 +23,9 @@
  *
  */
 
-package io.nuls.account.ledger.rpc;
-
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import org.junit.Test;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -34,11 +33,32 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TransferTest {
+/**
+ * @author: Niels Wang
+ * @date: 2018/6/9
+ */
+public class CreateAgentTest {
 
-    public static List<String> getAddressList() {
+    @Test
+    public void test() {
+        List<String> agentAddressList = getAgentAddressList();
+        List<String> packingAddressList = getPackingAddressList();
+        for (int x = 0; x < agentAddressList.size(); x++) {
+            String address = agentAddressList.get(x);
+            String toAddress = packingAddressList.get(x);
+
+            String param = "{\"agentAddress\": \"" + address + "\",\"packingAddress\": \"" + toAddress + "\", \"rewardAddress\": \""+address+"\", \"commissionRate\": 10,\"deposit\": 2000000000000, \"password\": \"\"}";
+
+            String url = "http://127.0.0.1:8001/api/consensus/agent";
+
+            String res = post(url, param, "utf-8");
+
+            System.out.println(res);
+        }
+    }
+
+    public List<String> getAgentAddressList() {
         List<String> list = new ArrayList<>();
-        list.add("2CbBjRyj4PdoRiDEVTZyk38QwohZRPr");
         list.add("2CVjhThvuH8rrduoiUaUZTrUE3JUiHA");
         list.add("2CYC8jkDW8hPNPUy6VTMK1SnzJ6S4nD");
         list.add("2ChJgymEZeuiCAD2bq2gJPG1xgSEmE1");
@@ -141,40 +161,111 @@ public class TransferTest {
         return list;
     }
 
-
-    public static void main(String[] args) {
-        List<String> addressList = getAddressList();
-        for (String toAddress : addressList) {
-            String address = "2CXJEuoXZMajeTEgL6TgiSxTRRMwiMM";
-//            String toAddress = "2Cg7BLHWBSxMhq3FpjR9BrkyxXp4m4j";
-            long amount = 2000200000000L;
-            String password = "";
-            String remark = "test";
-
-            String param = "{\"address\": \"" + address + "\", \"toAddress\": \"" + toAddress + "\", \"password\": \"" + password + "\", \"amount\": \"" + amount + "\", \"remark\": \"" + remark + "\"}";
-
-            String url = "http://127.0.0.1:8001/api/accountledger/transfer";
-
-            int successCount = 0;
-
-            for (int i = 0; i < 1; i++) {
-                String res = post(url, param, "utf-8");
-
-                if (res.indexOf("true") != -1) {
-                    successCount++;
-                }
-                System.out.println(successCount + "  " + res);
-
-//            try {
-//                Thread.sleep(100L);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-            }
-        }
+    public List<String> getPackingAddressList() {
+        List<String> list = new ArrayList<>();
+        list.add("2Ck4ZpGavtaXtgdBx8NTTZyHpNGoWer");
+        list.add("2CZYnwNfMba7inw22p74QSaWQ4QRfD5");
+        list.add("2CcHvoKqmUUJB6Fi7ykWg1buzT7fKez");
+        list.add("2CVtTnX17jw4gPGkCbkmdqom97JvRFW");
+        list.add("2Cc22xksbES2PQko37tPyoxho8RUEnW");
+        list.add("2Cj7JT1FW1HHnt8VFLutoWAmG9wWcZ7");
+        list.add("2CZde4pbCQwLZ4jU5DseptXoJSPG3zc");
+        list.add("2CffA9fq7yVFaovFH8jJh5toV5d3X5K");
+        list.add("2CYF21KHdXBXVwQg8PJTbSNLjZpht7g");
+        list.add("2CgyVBoRmgNquHkxJTi3vzFWfLto5c9");
+        list.add("2CdAeu8Xn4v1NEra1CZsU3xwccDQXcY");
+        list.add("2CezK5q6or6z6qoSZCKnARckSLwvWW5");
+        list.add("2CbZupjHbjpWxAr6yu6Ruoqu3r4gYNa");
+        list.add("2CgT4swe1XHEy3VaqqTCKZUNLM1FTuN");
+        list.add("2CisF4qfWZVbZqvsb5xdwCb3z6ELfDB");
+        list.add("2CkKdr8yaN1fwDiEti4ezScFbo1RhqV");
+        list.add("2CiDg37ubkPWX2R8DRBpNnWpRgFSF4E");
+        list.add("2CW4VJyzpw8ZwE8QdFDiH47NVSUj5UG");
+        list.add("2CbEQ1eB3n16sBCp9tKddW1cAyWxvfH");
+        list.add("2CaafwmH2MuTxjUaPbE92W3Uh3bxH6v");
+        list.add("2CWoJCkqw6yGAYvAjsgWTEhS2GK9F5Z");
+        list.add("2CbNvcKS3JUeWv6bdiWm9MhMp3be11d");
+        list.add("2CXMFnaAHKVA2THQiqBxvj2MaYr9uaM");
+        list.add("2CjJTpBs16jpfV9sR2NAgkT8XXzNPug");
+        list.add("2Ca2Ke8FGWQHrnVP8H5BYi2XMgkJWD5");
+        list.add("2CiHwohP7Fb9rgKPvJ546nEyBwh72Pw");
+        list.add("2ChhfPDBAuXBQ5f2G5dRqZmwykvTgPL");
+        list.add("2CbiWEkFcGyjRFW4VDNmAVt1J5TY315");
+        list.add("2CiEHcrAygtoq7txuCZQ6c93NARz4oD");
+        list.add("2CdoJ5TDQj2JTveNHwefiRSAvmqYfXt");
+        list.add("2CY5YZpQkfBCpY3qjoAwL5tPmTs7id3");
+        list.add("2ChwoeVtnrzJ7MhKeUVFoGb7kviizcN");
+        list.add("2CaJPyNAwzW6PfabztHtjwTtYPLdF7A");
+        list.add("2CbB7LbZL9F6ZBCfRZfZM9Xe92iDaEf");
+        list.add("2Cg6yNqc4QUxorNRtnt2DW7zdfRL6Ef");
+        list.add("2CeGcWE2iMhGy6MAMKvmoDAkbxiWsDb");
+        list.add("2Ceh7WJmBwQEJmn86vr21fYPpBJe4Vk");
+        list.add("2CfccNBRkWbFMHcWEBo6nkJjJ3o8L1h");
+        list.add("2CbEPiz7xigbDQwgFD89t2yUTbPWxLR");
+        list.add("2CfCUVXNBWzUvRFGSUmhMyr5ebopkue");
+        list.add("2Cdcj2trBX7j7fLLBmHSMPX4qXonwPz");
+        list.add("2CWeYLSWW5C3gawfYqc7Gd5KwJVyQbQ");
+        list.add("2CaqGzmQVR6crzWjXRLJASRLE6GswzC");
+        list.add("2CgJvCSoekj2CPADL1Um4Fdfdf5PJw2");
+        list.add("2CeW8toTYsvpF8RWJASZXCiqUu5jyCD");
+        list.add("2CVeBwK6s21ABdsstRcfB7NLBaZ1ipA");
+        list.add("2Cdvo8LJxWYE7DEgB3R62D5Wf5hDkHH");
+        list.add("2CWfKD2Lx56cUtAZWTv1XUosJwCTPeG");
+        list.add("2CfsNtmZ7h5bgCKhManD8EVgLzATctT");
+        list.add("2CVU8kut2DVtLX8UhCx8Bd9cdLTbs84");
+        list.add("2CcPoF8VsSwkYHY45PKrXuviKyaXL3E");
+        list.add("2CV71AkLjfTmGGbfRAdRks354mtagAt");
+        list.add("2CYDL8DyTS6NSTRonXtgeMkcEkdtYLP");
+        list.add("2CZKbvmEGjqhEKJHvtQUwpZqURNiVsy");
+        list.add("2CdvmDyH8BZERtqFxyzBMYci6Lb1o2f");
+        list.add("2CiXuVmydsN91XRFoXWb96MbQxN1r95");
+        list.add("2CVYi8FG19yevLGMA4aWip66FXa1yPM");
+        list.add("2CYtphwb563mkWRSqHasn6PdDA7quMF");
+        list.add("2CXoVMETRuTr9AiHKNVPNTidw9zaKxq");
+        list.add("2CWr2XPBMCjR2cn7fTfBTHMWCBDrLpX");
+        list.add("2CiX199ak2wJ7KyAW7heBmShZdNTRci");
+        list.add("2CXRjvKPUtHAHGUb4k87f7Q4MCmbGSk");
+        list.add("2CeagHhjeQ3yvoj4hr9j8WLPi666PgQ");
+        list.add("2ChFonnG83efYYtLUsfJDgF7nq6FX5b");
+        list.add("2CgiJ4VPVzJpcdzaLU7cX9Tqg2X3WYS");
+        list.add("2ChGvFBJB2QwHwViD64cxtE4p73ivBc");
+        list.add("2CkZweBpnWYnoseyScLdiWc77RYTkCk");
+        list.add("2CXnobsnFebExBZN63JmzMF8UNCp9HE");
+        list.add("2CjziRzR8hWesf5z5TBahaJXvFWgbCH");
+        list.add("2Ci6ZBtnXHNJrGAbWwHwgSWJWxrB98R");
+        list.add("2CfvNnddxUz4kV7VtjYiwzfcJ3PCodo");
+        list.add("2CaSYqYXADQqpMU5SkqFxpzFJeMSZcJ");
+        list.add("2Cj1iAztSFGRTY4eX7pjQ6uk3gJhkzo");
+        list.add("2CYrbFKfmuk5sihkGWg75GtYfrq8AtX");
+        list.add("2ChpyEHB2eTU3Jhdq6jAWm1rKG5RNr2");
+        list.add("2CVpkMQ7ewLbHLHqAqKcxLqt7Ba35rm");
+        list.add("2CkJxvgxcaPPnPVgBFcewHdHdfVFpKn");
+        list.add("2CVrEftP4XoyUWKFdZgMoA5JQhbm2yF");
+        list.add("2ChgHHrW81zxiv4v96sNgYRMnr4rjXD");
+        list.add("2Cbm57iGZUDCfh4uKc1Vpb9JPJVBNuy");
+        list.add("2Cgp3SWYWoFefyPKniRLMwjCA5WMeHx");
+        list.add("2CcJn7Bg9hknLzRp62BSzWzrcL95LWo");
+        list.add("2CWnMRAKYUjd7r4vMMaDbVvFEcF7pz3");
+        list.add("2ChmWVLCgzp5CB6mTRmy3vJV2KXwCQe");
+        list.add("2CaiUxt4g8NZW6JTj7yzsZiGHFSjNYu");
+        list.add("2Cf2HtK8ATiFQ5XZN8PvHvj1UXZBYPY");
+        list.add("2CauS5Zc7M5hQuCeJXyhmMiTNnq77fB");
+        list.add("2CgTPo8nYobx4T2sqQer9X4eeewwhxf");
+        list.add("2CcjKN7bGr2mXzWTLhHXZEUtMU96ZA8");
+        list.add("2CW4AiPggkRipHw3PHWig112LDEUGfC");
+        list.add("2CVLibmSAx8cK3iwB3Uk8X7tJJJKhJF");
+        list.add("2Ce94xXZ7sTKCrUNgQL3NN8F7NhdLsB");
+        list.add("2CY8ZghBG7Q18rgmFxuPmw7Yf2mYyB6");
+        list.add("2CenDwftmMXfFi2xf3ccydD7SVoG1tp");
+        list.add("2CiYUrAGmd5S3PNSBt8ERJKPqZizZZd");
+        list.add("2CeYeDfvfwBXL9PnLykdAW3K9ox7Nam");
+        list.add("2CkTtW9n9ZQXVE5CLUyweVpkj4XuDTy");
+        list.add("2CfwW5B2crpXx7GL6v35vybFN4XWMyH");
+        list.add("2ChJhikdEQ1YPevk77Wxcfa79qUyU2y");
+        return list;
     }
 
-    public static String post(String url, final String param, String encoding) {
+    public String post(String url, final String param, String encoding) {
         StringBuffer sb = new StringBuffer();
         OutputStream os = null;
         InputStream is = null;
@@ -203,10 +294,10 @@ public class TransferTest {
             String line;
             while ((line = br.readLine()) != null) {
                 sb.append(line);
-                sb.append("\n");
+                sb.append("");
             }
         } catch (Exception ex) {
-            System.err.println(ex);
+            ex.printStackTrace();
         } finally {
             if (is != null) {
                 try {

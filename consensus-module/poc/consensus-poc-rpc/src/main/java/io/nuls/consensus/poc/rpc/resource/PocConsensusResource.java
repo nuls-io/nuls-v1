@@ -594,10 +594,16 @@ public class PocConsensusResource {
                 continue;
             }
             DepositTransaction dtx = (DepositTransaction) ledgerService.getTx(deposit.getTxHash());
-            Coin fromCoin = dtx.getCoinData().getTo().get(0);
-            fromCoin.setLockTime(0);
-            fromCoin.setOwner(ArraysTool.joinintTogether(dtx.getHash().serialize(), new VarInt(0).encode()));
-            fromList.add(fromCoin);
+            Coin fromCoin = null;
+            for (Coin coin : dtx.getCoinData().getTo()) {
+                if (!coin.getNa().equals(deposit.getDeposit()) || coin.getLockTime() != -1L) {
+                    continue;
+                }
+                fromCoin = new Coin(ArraysTool.joinintTogether(dtx.getHash().serialize(), new VarInt(0).encode()), coin.getNa(), coin.getLockTime());
+                fromCoin.setLockTime(-1L);
+                fromList.add(fromCoin);
+                break;
+            }
             String address = Base58.encode(deposit.getAddress());
             Coin coin = toMap.get(address);
             if (null == coin) {
@@ -687,7 +693,7 @@ public class PocConsensusResource {
             type = AgentComparator.CREDIT_VALUE;
         } else if ("totalDeposit".equals(sortType)) {
             type = AgentComparator.DEPOSITABLE;
-        }else if("comprehensive".equals(sortType)){
+        } else if ("comprehensive".equals(sortType)) {
             type = AgentComparator.COMPREHENSIVE;
         }
         Collections.sort(agentList, AgentComparator.getInstance(type));
@@ -1037,7 +1043,12 @@ public class PocConsensusResource {
         CancelDepositTransaction tx = new CancelDepositTransaction();
         CancelDeposit cancelDeposit = new CancelDeposit();
         NulsDigestData hash = NulsDigestData.fromDigestHex(form.getTxHash());
-        DepositTransaction depositTransaction = (DepositTransaction) ledgerService.getTx(hash);
+        DepositTransaction depositTransaction = null;
+        try {
+            depositTransaction = (DepositTransaction) ledgerService.getTx(hash);
+        } catch (Exception e) {
+            return Result.getFailed("The deposit hash is wrong!").toRpcClientResult();
+        }
         if (null == depositTransaction) {
             return Result.getFailed("Cann't find the deposit transaction!").toRpcClientResult();
         }
