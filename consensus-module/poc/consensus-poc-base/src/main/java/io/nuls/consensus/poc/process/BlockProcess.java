@@ -156,7 +156,7 @@ public class BlockProcess {
                     Set<String> fromSet = new HashSet<>();
 
                     for (Transaction tx : block.getTxs()) {
-                        if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
+                        if (tx.isSystemTx()) {
                             continue;
                         }
                         ValidateResult result = tx.verify();

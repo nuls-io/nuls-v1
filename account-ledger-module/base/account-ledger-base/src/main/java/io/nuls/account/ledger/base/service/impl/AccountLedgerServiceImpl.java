@@ -483,7 +483,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             P2PKHScriptSig sig = new P2PKHScriptSig();
             sig.setPublicKey(account.getPubKey());
-            sig.setSignData(accountService.signData(tx.getHash().serialize(), account, password));
+            sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
             tx.setScriptSig(sig.serialize());
 
             Result saveResult = verifyAndSaveUnconfirmedTransaction(tx);

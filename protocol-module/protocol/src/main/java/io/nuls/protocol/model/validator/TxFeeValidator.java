@@ -41,7 +41,7 @@ import io.nuls.protocol.constant.ProtocolConstant;
 public class TxFeeValidator implements NulsDataValidator<Transaction> {
     @Override
     public ValidateResult validate(Transaction tx) {
-        if (tx.isFreeOfFee()) {
+        if (tx.isSystemTx()) {
             return ValidateResult.getSuccessResult();
         }
         CoinData coinData = tx.getCoinData();

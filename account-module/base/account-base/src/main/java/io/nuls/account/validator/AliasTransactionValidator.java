@@ -92,7 +92,7 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
         if (aliasPo != null) {
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_EXIST);
         }
-        if (tx.isFreeOfFee()) {
+        if (tx.isSystemTx()) {
             return ValidateResult.getFailedResult(alias.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
         }
         CoinData coinData = tx.getCoinData();

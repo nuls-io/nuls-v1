@@ -23,6 +23,7 @@
  */
 package io.nuls.protocol.model.validator;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Transaction;
@@ -31,12 +32,15 @@ import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 
+import java.io.IOException;
+
 /**
  * @author Niels
  * @date 2017/11/20
  */
 @Component
 public class TxSignValidator implements NulsDataValidator<Transaction> {
+
     @Override
     public ValidateResult validate(Transaction tx) {
         if (!tx.needVerifySignature()) {
@@ -49,6 +53,11 @@ public class TxSignValidator implements NulsDataValidator<Transaction> {
         } catch (Exception e) {
             return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
         }
-        return p2PKHScriptSig.verifySign(tx.getHash());
+        try {
+            return p2PKHScriptSig.verifySign(tx.getHash().getDigestBytes());
+        } catch (Exception e) {
+            Log.error(e);
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
+        }
     }
 }
