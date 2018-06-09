@@ -114,13 +114,12 @@ public class LocalUtxoStorageServiceImpl implements LocalUtxoStorageService, Ini
     }
 
     @Override
-    public Result batchSaveAndDeleteUTXO(Map<byte[], byte[]> utxosToSave, Set<byte[]> utxosToDelete) {
+    public Result batchSaveAndDeleteUTXO(List<Entry<byte[], byte[]>> utxosToSave, List<byte[]> utxosToDelete) {
         BatchOperation batch = dbService.createWriteBatch(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
         for (byte[] key : utxosToDelete) {
             batch.delete(key);
         }
-        Set<Map.Entry<byte[], byte[]>> utxosToSaveEntries = utxosToSave.entrySet();
-        for(Map.Entry<byte[], byte[]> entry : utxosToSaveEntries) {
+        for(Entry<byte[], byte[]> entry : utxosToSave) {
             batch.put(entry.getKey(), entry.getValue());
         }
         Result batchResult = batch.executeBatch();

@@ -48,7 +48,7 @@ public interface LocalUtxoStorageService {
 
     List<Entry<byte[], byte[]>> loadAllCoinList();
 
-    Result batchSaveAndDeleteUTXO(Map<byte[], byte[]> utxosToSave, Set<byte[]> utxosToDelete);
+    Result batchSaveAndDeleteUTXO(List<Entry<byte[], byte[]>> utxosToSave, List<byte[]> utxosToDelete);
 
     byte[] getUtxoBytes(byte[] owner);
 
