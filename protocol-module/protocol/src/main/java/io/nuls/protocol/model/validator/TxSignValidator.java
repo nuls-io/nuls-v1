@@ -54,7 +54,7 @@ public class TxSignValidator implements NulsDataValidator<Transaction> {
             return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
         }
         try {
-            return p2PKHScriptSig.verifySign(tx.getHash().getDigestBytes());
+            return p2PKHScriptSig.verifySign(tx.getHash());
         } catch (Exception e) {
             Log.error(e);
             return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
