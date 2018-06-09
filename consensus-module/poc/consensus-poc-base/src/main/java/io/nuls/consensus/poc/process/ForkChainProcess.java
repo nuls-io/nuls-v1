@@ -395,24 +395,21 @@ public class ForkChainProcess {
         //需要升序排列，默认就是
         for (Block newBlock : addBlockList) {
             newBlock.verifyWithException();
-            List<Transaction> verifiedList = new ArrayList<>();
 
             Map<String, Coin> toMaps = new HashMap<>();
             Set<String> fromSet = new HashSet<>();
 
             for (Transaction tx : newBlock.getTxs()) {
-                if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
+                if (tx.isSystemTx()) {
                     continue;
                 }
-                ValidateResult result = ledgerService.verifyCoinData(tx, toMaps, fromSet, newBestHeight);
+                ValidateResult result = tx.verify();
                 if (result.isSuccess()) {
-                    result = tx.verify();
+                    result = ledgerService.verifyCoinData(tx, toMaps, fromSet, newBestHeight);
                     if (result.isFailed()) {
                         Log.info("failed message:" + result.getMsg());
                         changeSuccess = false;
                         break;
-                    } else {
-                        verifiedList.add(tx);
                     }
                 } else {
                     Log.info("failed message:" + result.getMsg());

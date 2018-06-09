@@ -26,7 +26,6 @@
 
 package io.nuls.consensus.poc.process;
 
-import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
@@ -47,13 +46,16 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
-import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * @author ln
@@ -69,6 +71,8 @@ public class BlockProcess {
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
+
+    private ExecutorService signExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     public BlockProcess(ChainManager chainManager, OrphanBlockProvider orphanBlockProvider) {
         this.chainManager = chainManager;
@@ -152,6 +156,19 @@ public class BlockProcess {
                     // Verify that the block transaction is valid, save the block if the verification passes, and discard the block if it fails
                     // 验证区块交易是否合法，如果验证通过则保存区块，如果失败则丢弃该块
 
+                    long time = System.currentTimeMillis();
+                    List<Future<Boolean>> futures = new ArrayList<>();
+
+                    for (Transaction tx : block.getTxs()) {
+                        Future<Boolean> res = signExecutor.submit(new Callable<Boolean>() {
+                            @Override
+                            public Boolean call() throws Exception {
+                                return tx.verify().isSuccess();
+                            }
+                        });
+                        futures.add(res);
+                    }
+
                     Map<String, Coin> toMaps = new HashMap<>();
                     Set<String> fromSet = new HashSet<>();
 
@@ -159,17 +176,10 @@ public class BlockProcess {
                         if (tx.isSystemTx()) {
                             continue;
                         }
-                        ValidateResult result = tx.verify();
-                        if (result.isSuccess()) {
-                            result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
-                            if (result.isFailed()) {
-                                Log.info("failed message:" + result.getMsg());
-                                success = false;
-                                break;
-                            }
-                        } else {
-                            success = false;
+                        ValidateResult result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
+                        if (result.isFailed()) {
                             Log.info("failed message:" + result.getMsg());
+                            success = false;
                             break;
                         }
                     }
@@ -183,6 +193,20 @@ public class BlockProcess {
                         Log.info("failed message:" + validateResult1.getMsg());
                         break;
                     }
+
+                    for(Future<Boolean> future : futures) {
+                        if(!future.get()) {
+                            success = false;
+                            Log.info("verify failed!");
+                            break;
+                        }
+                    }
+                    Log.info("验证交易耗时：" + (System.currentTimeMillis() - time));
+                    if (!success) {
+                        break;
+                    }
+                    time = System.currentTimeMillis();
+
                     // save block
                     Result result = blockService.saveBlock(block);
                     success = result.isSuccess();
@@ -192,6 +216,7 @@ public class BlockProcess {
                         RewardStatisticsProcess.addBlock(block);
                         BlockLog.debug("save block height : " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                     }
+                    Log.info("保存耗时：" + (System.currentTimeMillis() - time));
                 } while (false);
             } catch (Exception e) {
                 Log.error("save block error : " + e.getMessage(), e);

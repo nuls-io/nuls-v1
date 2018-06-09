@@ -40,7 +40,6 @@ import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
-import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
@@ -62,7 +61,6 @@ import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.ledger.util.LedgerUtil;
-import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
@@ -113,31 +111,52 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result<Integer> saveConfirmedTransactionList(List<Transaction> txs) {
+        if(txs == null || txs.size() == 0) {
+            Result.getSuccess().setData(0);
+        }
+
+        List<byte[]> localAddresses = AccountLegerUtils.getLocalAddresses();
+
         List<Transaction> savedTxList = new ArrayList<>();
         Result result;
         for (int i = 0; i < txs.size(); i++) {
-            result = saveConfirmedTransaction(txs.get(i));
+
+            Transaction tx = txs.get(i);
+            List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx, localAddresses);
+            if (addresses == null || addresses.size() == 0) {
+                continue;
+            }
+
+            result = saveConfirmedTransaction(tx, addresses);
             if (result.isSuccess()) {
                 if(result.getData() != null && (int) result.getData() == 1) {
-                    savedTxList.add(txs.get(i));
+                    savedTxList.add(tx);
                 }
             } else {
                 rollbackTransaction(savedTxList, false);
                 return result;
             }
         }
-        balanceManager.refreshBalance();
         return Result.getSuccess().setData(savedTxList.size());
     }
 
     @Override
     public Result<Integer> saveConfirmedTransaction(Transaction tx) {
-        if (tx == null) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+
+        if(tx == null) {
+            Result.getSuccess().setData(0);
         }
+
         List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
-            return Result.getSuccess().setData(new Integer(0));
+            Result.getSuccess().setData(0);
+        }
+        return saveConfirmedTransaction(tx, addresses);
+    }
+
+    private Result<Integer> saveConfirmedTransaction(Transaction tx, List<byte[]> addresses) {
+        if (tx == null) {
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
@@ -176,7 +195,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             if (result.isFailed()) {
                 return result;
             }
-            if (!(tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH)) {
+            if (!tx.isSystemTx()) {
                 Map<String, Coin> toCoinMap = addToCoinMap(tx);
                 result = this.ledgerService.verifyCoinData(tx, toCoinMap, null);
                 if (result.isFailed()) {
