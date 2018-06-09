@@ -114,6 +114,14 @@ public interface AccountService {
     Result createLocalAccount(int count, String password);
 
 
+    /**
+     * Backup an account
+     * Generate a keystore backup file
+     *
+     * @param address
+     * @param password
+     * @return
+     */
     Result backupAccount(String address, String password);
 
     /**
@@ -130,11 +138,12 @@ public interface AccountService {
 
     Result getAccountList(int pageNUmber, int pageSize);
 
-
     Result getAssets(String address);
+
     Result getAddressByAlias(String aliasName);
 
     Result getPrikey(String address, String password);
+
     Result getLocalTotalBalance();
 
     Result isAliasExist(String aliasName);
@@ -144,6 +153,21 @@ public interface AccountService {
 
     Result importAccountByPriKey(String privateKey, boolean overwrite, String password);
 
+    Result isEncrypted(String address);
+
+    Result lockAccount(String address);
+
+    Result unlockAccount(String address, String password, int unlockTime);
+
+    Result removeAccount(String address, String password);
+
+    Result setPassword(String address, String password);
+
+    Result updatePassword(String address, String oldPassword, String password);
+
+    Result updatePasswordByKeystore(AccountKeyStoreDto accountKeyStoreDto, String password);
+
+    Result updatePasswordByPriKey(String priKey, String password);
 
     /**
      * set alias
