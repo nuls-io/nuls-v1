@@ -24,7 +24,7 @@
  */
 
 package io.nuls.sdk.utils;
-import io.nuls.sdk.model.RpcClientResult;
+import io.nuls.sdk.model.Result;
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJsonProvider;
 
 import javax.ws.rs.client.Client;
@@ -66,7 +66,7 @@ public class RestFulUtils {
 
     private Client client = ClientBuilder.newClient();
 
-    public RpcClientResult get(String path, Map<String, Object> params) {
+    public Result get(String path, Map<String, Object> params) {
         if (null == serverUri) {
             throw new RuntimeException("service url is null");
         }
@@ -77,10 +77,10 @@ public class RestFulUtils {
             }
         }
 
-        return target.request(APPLICATION_JSON).get(RpcClientResult.class);
+        return target.request(APPLICATION_JSON).get(Result.class);
     }
 
-    public RpcClientResult post(String path, Map<String, Object> paramsMap) {
+    public Result post(String path, Map<String, Object> paramsMap) {
         try {
             return post(path, JSONUtils.obj2json(paramsMap));
         } catch (Exception e) {
@@ -88,15 +88,15 @@ public class RestFulUtils {
         }
     }
 
-    public RpcClientResult post(String path, String content) {
+    public Result post(String path, String content) {
         if (null == serverUri) {
             throw new RuntimeException("service url is null");
         }
         WebTarget target = client.target(serverUri).path(path);
-        return target.request().buildPost(Entity.entity(content, MediaType.APPLICATION_JSON)).invoke(RpcClientResult.class);
+        return target.request().buildPost(Entity.entity(content, MediaType.APPLICATION_JSON)).invoke(Result.class);
     }
 
-    public RpcClientResult put(String path, Map<String, Object> paramsMap) {
+    public Result put(String path, Map<String, Object> paramsMap) {
         try {
             return put(path, JSONUtils.obj2json(paramsMap));
         } catch (Exception e) {
@@ -104,15 +104,15 @@ public class RestFulUtils {
         }
     }
 
-    public RpcClientResult put(String path, String content) {
+    public Result put(String path, String content) {
         if (null == serverUri) {
             throw new RuntimeException("service url is null");
         }
         WebTarget target = client.target(serverUri).path(path);
-        return target.request().buildPut(Entity.entity(content, MediaType.APPLICATION_JSON)).invoke(RpcClientResult.class);
+        return target.request().buildPut(Entity.entity(content, MediaType.APPLICATION_JSON)).invoke(Result.class);
     }
 
-//    public RpcClientResult delete(String path, Map<String, String> params) {
+//    public Result delete(String path, Map<String, String> params) {
 //        if (null == serverUri) {
 //            throw new RuntimeException("service url is null");
 //        }
@@ -122,6 +122,6 @@ public class RestFulUtils {
 //                target = target.queryParam(key, params.get(key));
 //            }
 //        }
-//        return target.request().delete(RpcClientResult.class);
+//        return target.request().delete(Result.class);
 //    }
 }

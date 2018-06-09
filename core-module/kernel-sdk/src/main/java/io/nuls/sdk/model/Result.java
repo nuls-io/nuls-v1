@@ -29,10 +29,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * @author Niels
- * @date 2017/10/31
+ * Mapping RpcClientResult
+ * @author Charlie
+ * @date 2018/6/8
  */
-public class RpcClientResult {
+public class Result {
 
     private boolean success;
 
@@ -42,11 +43,11 @@ public class RpcClientResult {
 
     private Object data;
 
-    public RpcClientResult() {
+    public Result() {
 
     }
 
-    public RpcClientResult(boolean success, String code, String msg) {
+    public Result(boolean success, String code, String msg) {
         this.success = success;
         this.code = code;
         this.msg = msg;
