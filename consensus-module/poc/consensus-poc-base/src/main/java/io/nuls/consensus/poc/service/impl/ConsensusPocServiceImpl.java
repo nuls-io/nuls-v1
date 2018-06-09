@@ -70,13 +70,15 @@ public class ConsensusPocServiceImpl implements ConsensusService {
         // Validate the transaction. If the verification is passed, it will be put into the transaction memory pool.
         // If the verification is an isolated transaction, it will be put in the isolated transaction pool. Other failures will directly discard the transaction.
         // 验证交易，验证通过则放入交易内存池中，如果验证到是孤立交易，则放入孤立交易池里，其它失败情况则直接丢弃交易
-        ValidateResult verifyResult = tx.verify();
-        boolean success = false;
-        if (verifyResult.isSuccess()) {
-            success = txMemoryPool.add(new TxContainer(tx), false);
-        } else if (verifyResult.isFailed() && TransactionErrorCode.ORPHAN_TX == verifyResult.getErrorCode()) {
-            success = txMemoryPool.add(new TxContainer(tx), true);
-        }
+//        ValidateResult verifyResult = tx.verify();
+//        boolean success = false;
+//        if (verifyResult.isSuccess()) {
+//            success = txMemoryPool.add(new TxContainer(tx), false);
+//        } else if (verifyResult.isFailed() && TransactionErrorCode.ORPHAN_TX == verifyResult.getErrorCode()) {
+//            success = txMemoryPool.add(new TxContainer(tx), true);
+//        }
+
+        boolean success = txMemoryPool.add(new TxContainer(tx), false);
         return new Result(success, null);
     }
 

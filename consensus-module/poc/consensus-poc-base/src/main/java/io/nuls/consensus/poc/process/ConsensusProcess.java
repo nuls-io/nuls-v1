@@ -282,6 +282,10 @@ public class ConsensusProcess {
         Map<String, Coin> toMaps = new HashMap<>();
         Set<String> fromSet = new HashSet<>();
 
+        long t1 = 0, t2 = 0;
+
+        long time = System.currentTimeMillis();
+
         while (true) {
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 500L) {
                 break;
@@ -313,17 +317,22 @@ public class ConsensusProcess {
                 continue;
             }
 
-            ValidateResult result = tx.verify();
-            if (result.isFailed()) {
-                if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
-                    txContainer.setPackageCount(txContainer.getPackageCount() + 1);
-                    txMemoryPool.add(txContainer, true);
-                }
-                Log.warn(result.getMsg());
-                continue;
-            }
+            long t = System.currentTimeMillis();
 
-            result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
+//            ValidateResult result = tx.verify();
+//
+//            t1 += (System.currentTimeMillis() - t);
+//
+//            if (result.isFailed()) {
+//                if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
+//                    txContainer.setPackageCount(txContainer.getPackageCount() + 1);
+//                    txMemoryPool.add(txContainer, true);
+//                }
+//                Log.warn(result.getMsg());
+//                continue;
+//            }
+
+            ValidateResult result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
 
             if (result.isFailed()) {
                 if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
@@ -369,6 +378,10 @@ public class ConsensusProcess {
 
         Log.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtil.convertDate(new Date(self.getPackEndTime())));
+
+        t2 = System.currentTimeMillis() - time;
+        Log.info("打包总耗时：" + t2 + " ms");
+//        Log.info("验证交易总耗时：" + t1 + " ms");
 
         return newBlock;
     }
