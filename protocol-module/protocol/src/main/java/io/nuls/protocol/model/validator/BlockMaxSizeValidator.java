@@ -51,7 +51,7 @@ public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
             }
             length += tx.size();
         }
-        if (length >= ProtocolConstant.MAX_BLOCK_SIZE) {
+        if (length > ProtocolConstant.MAX_BLOCK_SIZE) {
             return ValidateResult.getFailedResult(this.getClass().getName(), ERROR_MESSAGE);
         }
         return ValidateResult.getSuccessResult();
