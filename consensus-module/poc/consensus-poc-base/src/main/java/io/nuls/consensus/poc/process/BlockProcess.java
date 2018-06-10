@@ -201,7 +201,7 @@ public class BlockProcess {
                             break;
                         }
                     }
-                    Log.info("验证交易耗时：" + (System.currentTimeMillis() - time));
+                    Log.debug("验证交易耗时：" + (System.currentTimeMillis() - time));
                     if (!success) {
                         break;
                     }
@@ -216,7 +216,7 @@ public class BlockProcess {
                         RewardStatisticsProcess.addBlock(block);
                         BlockLog.debug("save block height : " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                     }
-                    Log.info("保存耗时：" + (System.currentTimeMillis() - time));
+                    Log.debug("保存耗时：" + (System.currentTimeMillis() - time));
                 } while (false);
             } catch (Exception e) {
                 Log.error("save block error : " + e.getMessage(), e);
