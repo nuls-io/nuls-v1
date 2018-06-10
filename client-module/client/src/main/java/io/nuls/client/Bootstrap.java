@@ -27,10 +27,7 @@ package io.nuls.client;
 
 import io.nuls.client.rpc.RpcServerManager;
 import io.nuls.client.rpc.constant.RpcConstant;
-import io.nuls.client.web.view.WebViewBootstrap;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
-import io.nuls.consensus.poc.config.ConsensusConfig;
-import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.MicroKernelBootstrap;
@@ -39,12 +36,9 @@ import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.module.service.ModuleService;
-import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
-import io.nuls.protocol.service.BlockService;
 
 import java.util.*;
 
@@ -74,8 +68,6 @@ public class Bootstrap {
             int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);
             RpcServerManager.getInstance().startServer(ip, port);
         } while (false);
-
-        TaskManager.asynExecuteRunnable(new WebViewBootstrap());
 
         while (true) {
             try {

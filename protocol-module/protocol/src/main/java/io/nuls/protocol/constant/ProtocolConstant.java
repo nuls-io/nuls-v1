@@ -41,8 +41,7 @@ public interface ProtocolConstant extends NulsConstant {
      * Block interval time.
      * unit:second
      */
-    //todo
-    long BLOCK_TIME_INTERVAL_SECOND = 5;
+    long BLOCK_TIME_INTERVAL_SECOND = 10;
 
     /**
      * 出块间隔时间（毫秒）
@@ -61,8 +60,7 @@ public interface ProtocolConstant extends NulsConstant {
      * 系统运行的最小连接节点数量
      * The number of minimum connection nodes that the system runs.
      */
-    //todo
-    int ALIVE_MIN_NODE_COUNT = 1;
+    int ALIVE_MIN_NODE_COUNT = 2;
 
     /**
      * 最大区块大小（不包含区块头）

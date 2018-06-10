@@ -26,7 +26,6 @@
 package io.nuls.client.web.view;
 
 import io.nuls.client.rpc.constant.RpcConstant;
-import io.nuls.client.web.view.listener.WindowCloseEvent;
 import io.nuls.kernel.cfg.NulsConfig;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -37,7 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.Method;

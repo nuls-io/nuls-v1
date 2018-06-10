@@ -23,6 +23,6 @@ if [ ! -d "$logdir" ]; then
 fi
 1>${rootdir}/logs/stdout.log 0>${rootdir}/logs/stderr.log &
 
-    nohup java -Xms1024m -Xmx8192m  -XX:NewSize=256m -XX:MaxNewSize=256m -XX:PermSize=256M -XX:MaxPermSize=256M -classpath $CLASSPATH $MAIN_CLASS 1>${rootdir}/logs/stdout.log 0>${rootdir}/logs/stderr.log 2>&1 &
+nohup $rootdir/jre/bin/java -Xms1024m -Xmx8192m  -XX:NewSize=256m -XX:MaxNewSize=256m -classpath $CLASSPATH $MAIN_CLASS 1>${rootdir}/logs/stdout.log 0>${rootdir}/logs/stderr.log 2>&1 &
 
 

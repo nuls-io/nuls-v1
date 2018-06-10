@@ -202,6 +202,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     Log.info("verifyCoinData failed");
                     return result;
                 }
+                List<Transaction> list = new ArrayList<>(this.getAllUnconfirmedTransaction().getData());
+                list.add(tx);
+                result = transactionService.conflictDetect(list);
+                if (result.isFailed()) {
+                    Log.info("verifyCoinData failed");
+                    return result;
+                }
             }
             return saveUnconfirmedTransaction(tx);
         } finally {

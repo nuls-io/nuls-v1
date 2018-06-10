@@ -380,7 +380,7 @@ public class ConsensusProcess {
                 DateUtil.convertDate(new Date(self.getPackEndTime())));
 
         t2 = System.currentTimeMillis() - time;
-        Log.info("打包总耗时：" + t2 + " ms");
+        Log.debug("打包总耗时：" + t2 + " ms");
 //        Log.info("验证交易总耗时：" + t1 + " ms");
 
         return newBlock;

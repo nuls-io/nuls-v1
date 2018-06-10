@@ -127,7 +127,7 @@ public class CancelDepositTxProcessor implements TransactionProcessor<CancelDepo
         for (Transaction tx : txList) {
             if (tx.getType() == ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT) {
                 CancelDepositTransaction transaction = (CancelDepositTransaction) tx;
-                if (hashSet.contains(transaction.getTxData().getJoinTxHash())) {
+                if (!hashSet.add(transaction.getTxData().getJoinTxHash())) {
                     return ValidateResult.getFailedResult(this.getClass().getName(), "transaction repeated!");
                 }
                 if (agentHashSet.contains(transaction.getTxData().getJoinTxHash())) {
