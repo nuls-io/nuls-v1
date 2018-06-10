@@ -24,9 +24,9 @@
  */
 
 package io.nuls.account.sdk;
-
-import io.nuls.account.sdk.model.AccountKeyStoreDto;
 import io.nuls.sdk.model.Result;
+
+import java.io.FileReader;
 
 /**
  * @author: Charlie
@@ -66,7 +66,8 @@ public interface AccountService {
     /**
      * Create encrypted accounts
      *
-     * @param count The number of accounts you want to create
+     * @param count    The number of accounts you want to create
+     * @param password The password of the account
      * @return Result
      * If the operation is successful, 'success' is true and data is AccountDto Object;
      * If the operation fails, "success" is false and the result has error information
@@ -126,56 +127,187 @@ public interface AccountService {
 
     /**
      * Get the fee for setting the alias (The fee don't include the fixed 1 NULS to be destroyed)
+     *
      * @param address The address of account to set an alias for
-     * @param alias The alias value to be set
-     * @return
-     * If the operation is successful, 'success' is true and data is fee;
+     * @param alias   The alias value to be set
+     * @return If the operation is successful, 'success' is true and data is fee;
      * If the operation fails, "success" is false and the result has error information
      */
     Result getAliasFee(String address, String alias);
 
+    /**
+     * Get the account information
+     *
+     * @param address The address of account
+     * @return If the operation is successful, 'success' is true and data is AccountDto;
+     * If the operation fails, "success" is false and the result has error information
+     */
     Result getAccount(String address);
 
-    Result getAccountList(int pageNUmber, int pageSize);
+    /**
+     * Get the account information list
+     *
+     * @param pageNumber
+     * @param pageSize
+     * @return If the operation is successful, 'success' is true and data is List<AccountDto>;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result getAccountList(int pageNumber, int pageSize);
 
+    /**
+     * Get account assets
+     *
+     * @param address The address of account
+     * @return If the operation is successful, 'success' is true and data is List<AccountDto>;
+     * If the operation fails, "success" is false and the result has error information
+     */
     Result getAssets(String address);
 
-    Result getAddressByAlias(String aliasName);
+    /**
+     * Get the account address by alias
+     *
+     * @param alias the alias of account
+     * @return If the operation is successful, 'success' is true and data is address string;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result getAddressByAlias(String alias);
 
+    /**
+     * Get the private key
+     *
+     * @param address  The address of account
+     * @param password The password of account
+     * @return If the operation is successful, 'success' is true and data is address string;
+     * If the operation fails, "success" is false and the result has error information
+     */
     Result getPrikey(String address, String password);
 
+    /**
+     * Get the total balance of all accounts in the wallet
+     *
+     * @return If the operation is successful, 'success' is true and data is BalanceDto;
+     * If the operation fails, "success" is false and the result has error information
+     */
     Result getLocalTotalBalance();
 
-    Result isAliasExist(String aliasName);
+    /**
+     * Verify that the alias is already occupied
+     *
+     * @param alias
+     * @return If the alias is already occupied, 'success' is true;
+     * If the alias is not occupied, "success" is false;
+     */
+    Result isAliasExist(String alias);
 
-    //overwrite:true if the account exists, it will not be executed
-    Result importAccountByKeystore(AccountKeyStoreDto accountKeyStoreDto, boolean overwrite, String password);
+    /**
+     * Import account according to KeyStore file path
+     *
+     * @param path      Exported keystore file address during backup
+     * @param password  The password of account, if the account is unencrypted, pass null
+     * @param overwrite true: Always perform an override import; false: if the account exists, it will not be executed and return fails
+     * @return If the operation is successful, 'success' is true;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result importAccountByKeystore(String path, String password, boolean overwrite);
 
-    Result importAccountByPriKey(String privateKey, boolean overwrite, String password);
+    /**
+     * Import account according to KeyStore file path
+     *
+     * @param fileReader The fileReader of KeyStore file
+     * @param password   The password of account, if the account is unencrypted, pass null
+     * @param overwrite  true: Always perform an override import; false: if the account exists, it will not be executed and return fails
+     * @return If the operation is successful, 'success' is true;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result importAccountByKeystore(FileReader fileReader, String password, boolean overwrite);
 
+    /**
+     * Import account according to privateKey
+     *
+     * @param privateKey The privateKey of account
+     * @param password   The new password of account, if you do not want to set a password, pass null
+     * @param overwrite  true: Always perform an override import; false: if the account exists, it will not be executed and return fails
+     * @return If the operation is successful, 'success' is true;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result importAccountByPriKey(String privateKey, String password, boolean overwrite);
+
+    /**
+     * Verify that the account is encrypted
+     *
+     * @param address The address of the account
+     * @return If the account is encrypted, 'success' is true;
+     * If the account is unencrypted, "success" is false;
+     */
     Result isEncrypted(String address);
 
+    /**
+     * Lock the account
+     *
+     * @param address The address of the account
+     * @return If the operation is successful, 'success' is true;
+     * If the operation fails, "success" is false and the result has error information
+     */
     Result lockAccount(String address);
 
+    /**
+     * Unlock the account
+     *
+     * @param address    The address of account you want to unlock
+     * @param password   The password of account
+     * @param unlockTime Unlock time (seconds), maximum 120 seconds
+     * @return If the operation is successful, 'success' is true;
+     * If the operation fails, "success" is false and the result has error information
+     */
     Result unlockAccount(String address, String password, int unlockTime);
 
+    /**
+     * Remove the account
+     *
+     * @param address  The address of account you want to remove
+     * @param password The password of account
+     * @return If the operation is successful, 'success' is true;
+     * If the operation fails, "success" is false and the result has error information
+     */
     Result removeAccount(String address, String password);
 
+    /**
+     * Set a password for your account(encrypt account)
+     *
+     * @param address  The address of account you want to remove
+     * @param password The password of account
+     * @return If the operation is successful, 'success' is true;
+     * If the operation fails, "success" is false and the result has error information
+     */
     Result setPassword(String address, String password);
 
+    /**
+     * Change the account password by current passowrd
+     *
+     * @param address     The address of account you want to change
+     * @param oldPassword The current password of account
+     * @param password    The new password
+     * @return If the operation is successful, 'success' is true;
+     * If the operation fails, "success" is false and the result has error information
+     */
     Result updatePassword(String address, String oldPassword, String password);
 
-    Result updatePasswordByKeystore(AccountKeyStoreDto accountKeyStoreDto, String password);
-
-    Result updatePasswordByPriKey(String priKey, String password);
+    /**
+     * Change the account password by keystore file
+     * @param fileReader The fileReader of KeyStore file
+     * @param password The new password
+     * @return If the operation is successful, 'success' is true;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result updatePasswordByKeystore(FileReader fileReader, String password);
 
     /**
      * set alias
-     * @param address The address of account to set an alias for
-     * @param alias The alias value to be set
+     *
+     * @param address  The address of account to set an alias for
+     * @param alias    The alias value to be set
      * @param password The password of account, this parameter can be passed null if the account is unencrypted
-     * @return
-     * If the operation is successful, 'success' is true;
+     * @return If the operation is successful, 'success' is true;
      * If the operation fails, "success" is false and the result has error information
      */
     Result setAlias(String address, String alias, String password);

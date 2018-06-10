@@ -24,6 +24,8 @@
  */
 package io.nuls.sdk.utils;
 
+import io.nuls.sdk.model.Na;
+
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -245,4 +247,5 @@ public class StringUtils {
             return 0L;
         }
     }
+
 }
