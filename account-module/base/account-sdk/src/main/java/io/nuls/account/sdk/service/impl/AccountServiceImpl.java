@@ -4,6 +4,7 @@ import io.nuls.account.sdk.constant.AccountConstant;
 import io.nuls.account.sdk.constant.AccountErrorCode;
 import io.nuls.account.sdk.model.Account;
 import io.nuls.account.sdk.model.Address;
+import io.nuls.account.sdk.model.dto.AccountDto;
 import io.nuls.account.sdk.model.dto.AccountKeyStoreDto;
 import io.nuls.account.sdk.service.AccountService;
 import io.nuls.account.sdk.util.AccountTool;
@@ -127,11 +128,7 @@ public class AccountServiceImpl implements AccountService {
             return result;
         }
         AccountKeyStoreDto accountKeyStoreDto = new AccountKeyStoreDto((Map<String, Object>) result.getData());
-        Result rs = backUpFile(path, accountKeyStoreDto);
-        if (rs.isFailed()) {
-            return Result.getFailed(rs.getMsg());
-        }
-        return Result.getSuccess();
+        return backUpFile(path, accountKeyStoreDto);
     }
 
     /**
@@ -180,6 +177,8 @@ public class AccountServiceImpl implements AccountService {
         return Result.getSuccess().setData("The path to the backup file is " +  path + File.separator + fileName);
     }
 
+
+    //未测试
     @Override
     public Result getAliasFee(String address, String alias) {
         if (!Address.validAddress(address)) {
@@ -192,9 +191,6 @@ public class AccountServiceImpl implements AccountService {
         parameters.put("address", address);
         parameters.put("alias", alias);
         Result<Na> result = restFul.get("/account/alias/fee", parameters);
-        if(result.isFailed()){
-            return result;
-        }
         try {
             System.out.println(JSONUtils.obj2json(result));
         } catch (Exception e) {
@@ -211,12 +207,23 @@ public class AccountServiceImpl implements AccountService {
         //as.createLocalAccount(3, "nuls123456");
         //as.createAccount("nuls123456");
         //as.backupAccount("2ChqBTvFXttQsghj8zQpcdv76TQU8G5", "/Users/lichao/Downloads", "nuls123456");
-        as.getAliasFee("2CX4AaWCeqrz3qdJ6dmPYNcbPSUEy4F", "charlie");
+//        as.getAliasFee("2CX4AaWCeqrz3qdJ6dmPYNcbPSUEy4F", "charlie");
+        as.getAccount("2CX4AaWCeqrz3qdJ6dmPYNcbPSUEy4F");
     }
     /** ---------------------------------------------------------------------*/
     @Override
     public Result getAccount(String address) {
-        return null;
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        Result<AccountDto> result = restFul.get("/account/" + address, null);
+        System.out.println(result);
+        try {
+            System.out.println(JSONUtils.obj2json(result));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     @Override
