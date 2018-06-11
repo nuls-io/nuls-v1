@@ -136,7 +136,6 @@ public class CommandHandler {
         sdkInit();
     }
 
-
     private void sdkInit() {
         String port = null;
         try {

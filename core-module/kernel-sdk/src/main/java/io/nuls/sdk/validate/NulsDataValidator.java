@@ -22,62 +22,20 @@
  * SOFTWARE.
  *
  */
+package io.nuls.sdk.validate;
 
-package io.nuls.account.sdk.model;
-
-import io.nuls.sdk.model.Na;
-
-import java.util.Map;
+import io.nuls.sdk.exception.NulsException;
+import io.nuls.sdk.model.NulsData;
 
 /**
- * @author: Charlie
- * @date: 2018/6/10
+ * @author Niels
+ * @date 2017/11/16
  */
-public class BalanceDto {
+public interface NulsDataValidator<T extends NulsData> {
 
     /**
-     * 余额
+     * @param data
+     * @return
      */
-    private double balance;
-
-    /**
-     * 可用余额
-     */
-    private double usable;
-
-    /**
-     * 锁定余额
-     */
-    private double locked;
-
-    public BalanceDto(Map<String, Object> map) {
-        this.balance = Na.naToNuls(map.get("balance"));
-        this.usable = Na.naToNuls(map.get("usable"));
-        this.locked = Na.naToNuls(map.get("locked"));
-    }
-
-    public double getBalance() {
-        return balance;
-    }
-
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
-
-    public double getUsable() {
-        return usable;
-    }
-
-    public void setUsable(double usable) {
-        this.usable = usable;
-    }
-
-    public double getLocked() {
-        return locked;
-    }
-
-    public void setLocked(double locked) {
-        this.locked = locked;
-    }
-
+    ValidateResult validate(T data) throws NulsException;
 }

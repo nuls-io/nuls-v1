@@ -27,6 +27,8 @@ package io.nuls.sdk.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.nuls.sdk.constant.ErrorCode;
+import io.nuls.sdk.constant.KernelErrorCode;
 
 /**
  * Mapping RpcClientResult
@@ -45,6 +47,11 @@ public class Result {
 
     public Result() {
 
+    }
+    public Result(boolean success, ErrorCode errorCode) {
+        this.success = success;
+        this.code = errorCode.getCode();
+        this.msg = errorCode.getMsg();
     }
 
     public Result(boolean success, String code, String msg) {
@@ -83,8 +90,9 @@ public class Result {
         return data;
     }
 
-    public void setData(Object data) {
+    public Result setData(Object data) {
         this.data = data;
+        return this;
     }
 
     @JsonIgnore
@@ -98,5 +106,28 @@ public class Result {
 
     public void setSuccess(boolean success) {
         this.success = success;
+    }
+
+
+    public static Result getFailed() {
+        return getFailed(KernelErrorCode.FAILED);
+    }
+
+    public static Result getFailed(String msg) {
+        return new Result(false, KernelErrorCode.FAILED.getCode(), msg);
+    }
+
+    public static Result getSuccess() {
+        return new Result(true, KernelErrorCode.SUCCESS);
+    }
+
+    public static Result getFailed(ErrorCode errorCode) {
+        return getFailed(errorCode, errorCode.getMsg());
+    }
+    public static Result getFailed(ErrorCode errorCode, String msg) {
+        Result result = new Result(false, errorCode);
+        result.setCode(errorCode.getCode());
+        result.setMsg(errorCode.getMsg());
+        return result;
     }
 }

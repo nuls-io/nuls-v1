@@ -23,48 +23,43 @@
  *
  */
 
-package io.nuls.account.sdk.model;
+package io.nuls.account.sdk.model.dto;
+
+
+import io.nuls.sdk.utils.StringUtils;
 
 import java.util.Map;
 
 /**
  * @author: Charlie
- * @date: 2018/5/15
+ * @date: 2018/6/8
  */
-public class AccountKeyStoreDto {
+public class AccountDto {
 
-    /**
-     * 账户地址
-     */
     private String address;
 
-    /**
-     * 加密后的私钥
-     */
-    private String encryptedPrivateKey;
-    /**
-     * 账户别名
-     */
     private String alias;
-    /**
-     * 公钥 public key
-     */
+
     private String pubKey;
+
+    private String extend;
+
+    private Long createTime;
     /**
-     * 私钥 private key
+     * isEncrypted
      */
-    private String prikey;
+    private boolean encrypted;
 
-    public AccountKeyStoreDto() {
-
+    public AccountDto() {
     }
 
-    public AccountKeyStoreDto(Map<String, Object> map) {
-        this.address = (String)map.get("address");
-        this.encryptedPrivateKey = null == map.get("encryptedPrivateKey") ? null : (String)map.get("encryptedPrivateKey");
-        this.alias = null == map.get("alias") ? null : (String)map.get("alias");
-        this.pubKey = null == map.get("pubKey") ? null : (String)map.get("pubKey");
-        this.prikey = null == map.get("prikey") ? null : (String)map.get("prikey");
+    public AccountDto(Map<String, Object> map) {
+        this.address = (String) map.get("address");
+        this.alias = (String) map.get("alias");
+        this.pubKey = (String) map.get("pubKey");
+        this.extend = (String) map.get("extend");
+        this.createTime = StringUtils.parseLong(map.get("createTime"));
+        this.encrypted = (boolean) map.get("encrypted");
     }
 
     public String getAddress() {
@@ -73,14 +68,6 @@ public class AccountKeyStoreDto {
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public String getEncryptedPrivateKey() {
-        return encryptedPrivateKey;
-    }
-
-    public void setEncryptedPrivateKey(String encryptedPrivateKey) {
-        this.encryptedPrivateKey = encryptedPrivateKey;
     }
 
     public String getAlias() {
@@ -99,11 +86,27 @@ public class AccountKeyStoreDto {
         this.pubKey = pubKey;
     }
 
-    public String getPrikey() {
-        return prikey;
+    public String getExtend() {
+        return extend;
     }
 
-    public void setPrikey(String prikey) {
-        this.prikey = prikey;
+    public void setExtend(String extend) {
+        this.extend = extend;
+    }
+
+    public Long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
+    }
+
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

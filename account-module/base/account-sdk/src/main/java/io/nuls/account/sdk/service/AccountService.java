@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.account.sdk;
+package io.nuls.account.sdk.service;
 import io.nuls.sdk.model.Result;
 
 import java.io.FileReader;
@@ -38,7 +38,7 @@ public interface AccountService {
      * Create an unencrypted account
      *
      * @return Result
-     * If the operation is successful, 'success' is true, and data is AccountDto Object;
+     * If the operation is successful, 'success' is true, and data is List<String> (address);
      * If the operation fails, "success" is false and the result has error information
      */
     Result createAccount();
@@ -48,7 +48,7 @@ public interface AccountService {
      *
      * @param password The password of the account
      * @return Result
-     * If the operation is successful, 'success' is true and data is AccountDto Object;
+     * If the operation is successful, 'success' is true and data is List<String> (address);
      * If the operation fails, "success" is false and the result has error information
      */
     Result createAccount(String password);
@@ -58,7 +58,7 @@ public interface AccountService {
      *
      * @param count The number of accounts you want to create
      * @return Result
-     * If the operation is successful, 'success' is true and data is AccountDto Object;
+     * If the operation is successful, 'success' is true and data is List<String> (address);
      * If the operation fails, "success" is false and the result has error information
      */
     Result createAccount(int count);
@@ -69,7 +69,7 @@ public interface AccountService {
      * @param count    The number of accounts you want to create
      * @param password The password of the account
      * @return Result
-     * If the operation is successful, 'success' is true and data is AccountDto Object;
+     * If the operation is successful, 'success' is true and data is List<String> (address);
      * If the operation fails, "success" is false and the result has error information
      */
     Result createAccount(int count, String password);
@@ -79,7 +79,7 @@ public interface AccountService {
      * Create an unencrypted local account (Not saved to the database)
      *
      * @return Result
-     * If the operation is successful, 'success' is true, and data is AccountDto Object;
+     * If the operation is successful, 'success' is true, and data is List<String> (address);
      * If the operation fails, "success" is false and the result has error information
      */
     Result createLocalAccount();
@@ -89,7 +89,7 @@ public interface AccountService {
      *
      * @param password The password of the account
      * @return Result
-     * If the operation is successful, 'success' is true and data is AccountDto Object;
+     * If the operation is successful, 'success' is true and data is List<String> (address);
      * If the operation fails, "success" is false and the result has error information
      */
     Result createLocalAccount(String password);
@@ -99,7 +99,7 @@ public interface AccountService {
      *
      * @param count The number of accounts you want to create
      * @return Result
-     * If the operation is successful, 'success' is true and data is AccountDto Object;
+     * If the operation is successful, 'success' is true and data is List<String> (address);
      * If the operation fails, "success" is false and the result has error information
      */
     Result createLocalAccount(int count);
@@ -109,7 +109,7 @@ public interface AccountService {
      *
      * @param count The number of accounts you want to create
      * @return Result
-     * If the operation is successful, 'success' is true and data is AccountDto Object;
+     * If the operation is successful, 'success' is true and data is List<String> (address);
      * If the operation fails, "success" is false and the result has error information
      */
     Result createLocalAccount(int count, String password);

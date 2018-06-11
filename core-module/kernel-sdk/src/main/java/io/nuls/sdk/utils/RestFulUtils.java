@@ -24,6 +24,8 @@
  */
 
 package io.nuls.sdk.utils;
+import io.nuls.sdk.constant.KernelErrorCode;
+import io.nuls.sdk.constant.RpcConstant;
 import io.nuls.sdk.model.Result;
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJsonProvider;
 
