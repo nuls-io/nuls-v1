@@ -509,7 +509,8 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         Result result = new Result();
-        result.setSuccess(account.isEncrypted());
+        boolean rs = account.isEncrypted();
+        result.setSuccess(rs).setData(rs);
         return result;
     }
 

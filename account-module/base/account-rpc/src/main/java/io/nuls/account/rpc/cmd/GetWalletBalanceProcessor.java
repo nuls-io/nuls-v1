@@ -77,9 +77,9 @@ public class GetWalletBalanceProcessor implements CommandProcessor {
             return CommandResult.getFailed(result.getMsg());
         }
         Map<String, Object> map = (Map)result.getData();
-        map.put("balance",  CommandHelper.naToNuls(map.get("balance")));
-        map.put("usable", CommandHelper.naToNuls(map.get("usable")));
-        map.put("locked", CommandHelper.naToNuls(map.get("locked")));
+        map.put("balance",  CommandHelper.naToNuls(((Map)map.get("balance")).get("value")));
+        map.put("usable",  CommandHelper.naToNuls(((Map)map.get("usable")).get("value")));
+        map.put("locked",  CommandHelper.naToNuls(((Map)map.get("locked")).get("value")));
         result.setData(map);
         return CommandResult.getResult(result);
     }

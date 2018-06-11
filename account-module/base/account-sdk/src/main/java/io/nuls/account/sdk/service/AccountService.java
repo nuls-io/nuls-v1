@@ -178,7 +178,7 @@ public interface AccountService {
      *
      * @param address  The address of account
      * @param password The password of account
-     * @return If the operation is successful, 'success' is true and data is address string;
+     * @return If the operation is successful, 'success' is true and data is private key;
      * If the operation fails, "success" is false and the result has error information
      */
     Result getPrikey(String address, String password);
@@ -189,7 +189,7 @@ public interface AccountService {
      * @return If the operation is successful, 'success' is true and data is BalanceDto;
      * If the operation fails, "success" is false and the result has error information
      */
-    Result getLocalTotalBalance();
+    Result getWalletTotalBalance();
 
     /**
      * Verify that the alias is already occupied
@@ -239,6 +239,7 @@ public interface AccountService {
      * @param address The address of the account
      * @return If the account is encrypted, 'success' is true;
      * If the account is unencrypted, "success" is false;
+     * If the operation fails, "success" is false and the result has error information
      */
     Result isEncrypted(String address);
 

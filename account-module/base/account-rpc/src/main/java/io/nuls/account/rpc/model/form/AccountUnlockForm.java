@@ -32,11 +32,14 @@ import io.swagger.annotations.ApiModelProperty;
  * @author: Charlie
  * @date: 2018/4/18
  */
-@ApiModel(value = "密码表单数据")
-public class AccountPasswordForm {
+@ApiModel(value = "解锁表单数据")
+public class AccountUnlockForm {
 
     @ApiModelProperty(name = "password", value = "密码", required = true)
     private String password;
+
+    @ApiModelProperty(name = "unlockTime", value = "解锁时间", required = true)
+    private Integer unlockTime;
 
     public String getPassword() {
         return password;
@@ -46,4 +49,11 @@ public class AccountPasswordForm {
         this.password = password;
     }
 
+    public Integer getUnlockTime() {
+        return unlockTime;
+    }
+
+    public void setUnlockTime(Integer unlockTime) {
+        this.unlockTime = unlockTime;
+    }
 }

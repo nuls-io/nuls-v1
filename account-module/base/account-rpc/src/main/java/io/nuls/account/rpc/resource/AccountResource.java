@@ -187,7 +187,7 @@ public class AccountResource {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        return accountService.isEncrypted(address).setData(address).toRpcClientResult();
+        return accountService.isEncrypted(address).toRpcClientResult();
     }
 
     @POST
@@ -233,11 +233,11 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public RpcClientResult getIsAliasExist(@ApiParam(name = "aliasName", value = "别名", required = true) @QueryParam("aliasName") String aliasName) {
-        if (StringUtils.isBlank(aliasName)) {
+    public RpcClientResult isAliasExist(@ApiParam(name = "alias", value = "别名", required = true) @QueryParam("alias") String alias) {
+        if (StringUtils.isBlank(alias)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        RpcClientResult result = new RpcClientResult(aliasService.isAliasExist(aliasName), KernelErrorCode.SUCCESS);
+        RpcClientResult result = new RpcClientResult(aliasService.isAliasExist(alias), KernelErrorCode.SUCCESS);
         return result;
     }
 
@@ -248,15 +248,15 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public RpcClientResult getAddressByAlias(@ApiParam(name = "aliasName", value = "别名", required = true) @QueryParam("aliasName") String aliasName) {
-        if (StringUtils.isBlank(aliasName)) {
+    public RpcClientResult getAddressByAlias(@ApiParam(name = "alias", value = "别名", required = true) @QueryParam("alias") String alias) {
+        if (StringUtils.isBlank(alias)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        Alias alias = aliasService.getAlias(aliasName);
-        if(null == alias){
+        Alias aliasObj = aliasService.getAlias(alias);
+        if(null == aliasObj){
             return  new RpcClientResult(false, AccountErrorCode.ALIAS_NOT_EXIST);
         }
-        return Result.getSuccess().setData(Base58.encode(alias.getAddress())).toRpcClientResult();
+        return Result.getSuccess().setData(Base58.encode(aliasObj.getAddress())).toRpcClientResult();
     }
 
     @GET
@@ -344,10 +344,8 @@ public class AccountResource {
     @ApiOperation(value = "[解锁] 解锁账户", notes = "")
     public RpcClientResult unlock(@ApiParam(name = "address", value = "账户地址", required = true)
                                   @PathParam("address") String address,
-                                  @ApiParam(name = "password", value = "账户密码", required = true)
-                                  @QueryParam("password") String password,
-                                  @ApiParam(name = "unlockTime", value = "解锁时间默认120秒(单位:秒)")
-                                  @QueryParam("unlockTime") Integer unlockTime) {
+                                  @ApiParam(name = "form", value = "解锁表单数据", required = true)
+                                  AccountUnlockForm form) {
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
@@ -362,6 +360,8 @@ public class AccountResource {
                 accountUnlockSchedulerMap.remove(addr);
             }
         }
+        String password = form.getPassword();
+        Integer unlockTime = form.getUnlockTime();
         try {
             account.unlock(password);
             accountCacheService.putAccount(account);
@@ -560,6 +560,12 @@ public class AccountResource {
         if (null == form || null == form.getOverwrite()) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
+
+        String priKey = form.getPriKey();
+        if (!ECKey.isValidPrivteHex(priKey)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+
         if (!form.getOverwrite()) {
             ECKey key = null;
             try {
@@ -573,10 +579,7 @@ public class AccountResource {
                 return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST).toRpcClientResult();
             }
         }
-        String priKey = form.getPriKey();
-        if (!ECKey.isValidPrivteHex(priKey)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
-        }
+
         String password = form.getPassword();
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();

@@ -301,6 +301,7 @@ public final class Na implements Comparable<Na>, Serializable {
 
     /**
      * Long 或者 Integer Na 转成 NUSL(double)
+     * 如果是double类型说明已经是NUSL 则直接返回
      * @param object
      * @return
      */
@@ -313,11 +314,14 @@ public final class Na implements Comparable<Na>, Serializable {
             na = (Long) object;
         } else if (object instanceof Integer) {
             na = ((Integer) object).longValue();
+        } else if (object instanceof Double){
+            return (Double) object;
+        }else if (object instanceof Float){
+            return Double.parseDouble(String.valueOf(object)) ;
         } else {
             return 0;
         }
         return (Na.valueOf(na)).toDouble();
     }
-
 
 }
