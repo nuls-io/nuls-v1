@@ -27,7 +27,6 @@ package io.nuls.account.ledger.base.task;
 import io.nuls.account.ledger.base.manager.BalanceManager;
 import io.nuls.account.ledger.base.service.TransactionInfoService;
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
-import io.nuls.account.ledger.base.util.TransactionTimeComparator;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.ledger.storage.po.TransactionInfoPo;
 import io.nuls.account.ledger.storage.service.LocalUtxoStorageService;
@@ -85,15 +84,12 @@ public class CheckUnConfirmTxThread implements Runnable {
 
     private void doTask() {
         List<Transaction> list = accountLedgerService.getAllUnconfirmedTransaction().getData();
-        Collections.sort(list, TransactionTimeComparator.getInstance());
-
         if (list == null || list.size() == 0) {
             return;
         }
 
         Map<String, Coin> toMaps = new HashMap<>();
         Set<String> fromSet = new HashSet<>();
-
         for (Transaction tx : list) {
             if (TimeService.currentTimeMillis() - tx.getTime() < 120000L) {
                 return;
