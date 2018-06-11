@@ -411,8 +411,9 @@ public class ConsensusProcess {
         //当连续100个黄牌时，给出一个红牌
         //When 100 yellow CARDS in a row, give a red card.
         List<byte[]> addressList = yellowPunishTransaction.getTxData().getAddressList();
+
         for (byte[] address : addressList) {
-            MeetingMember member = round.getMember(address);
+            MeetingMember member = round.getMemberByAgentAddress(address);
             if (member.getCreditVal() <= -1) {
                 RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
                 RedPunishData redPunishData = new RedPunishData();
