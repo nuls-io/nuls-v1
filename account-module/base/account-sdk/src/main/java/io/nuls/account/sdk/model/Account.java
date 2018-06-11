@@ -23,6 +23,7 @@
  */
 package io.nuls.account.sdk.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.account.sdk.constant.AccountErrorCode;
 import io.nuls.sdk.crypto.AESEncrypt;
 import io.nuls.sdk.crypto.ECKey;
@@ -91,7 +92,6 @@ public class Account {
     /**
      * local field
      */
-
     private ECKey ecKey;
 
 

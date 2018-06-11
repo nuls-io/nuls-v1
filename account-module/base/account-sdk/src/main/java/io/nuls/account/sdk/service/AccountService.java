@@ -119,11 +119,12 @@ public interface AccountService {
      * Backup an account
      * Generate a keystore backup file
      *
-     * @param address
+     * @param address The number of accounts you want to backup
+     * @param path Folder path to save backup files, if you pass null to save to the current directory
      * @param password
      * @return
      */
-    Result backupAccount(String address, String password);
+    Result backupAccount(String address, String path, String password);
 
     /**
      * Get the fee for setting the alias (The fee don't include the fixed 1 NULS to be destroyed)

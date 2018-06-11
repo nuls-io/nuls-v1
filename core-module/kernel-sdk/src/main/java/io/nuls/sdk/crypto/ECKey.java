@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.sdk.utils.AssertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -201,6 +202,7 @@ public class ECKey {
      *
      * @return BigInteger
      */
+    @JsonIgnore
     public BigInteger getPrivKey() {
         if (priv == null) {
             throw new MissingPrivateKeyException();
@@ -213,6 +215,7 @@ public class ECKey {
      *
      * @return byte[]
      */
+    @JsonIgnore
     public byte[] getPrivKeyBytes() {
         return getPrivKey().toByteArray();
     }
@@ -222,6 +225,7 @@ public class ECKey {
      *
      * @return String
      */
+    @JsonIgnore
     public String getPrivateKeyAsHex() {
         return Hex.encode(getPrivKeyBytes());
     }

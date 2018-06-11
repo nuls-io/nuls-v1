@@ -26,6 +26,7 @@
 package io.nuls.account.sdk.model.dto;
 
 
+import io.nuls.account.sdk.model.Account;
 import io.nuls.sdk.utils.StringUtils;
 
 import java.util.Map;
@@ -60,6 +61,10 @@ public class AccountDto {
         this.extend = (String) map.get("extend");
         this.createTime = StringUtils.parseLong(map.get("createTime"));
         this.encrypted = (boolean) map.get("encrypted");
+    }
+
+    public AccountDto(Account account){
+
     }
 
     public String getAddress() {
