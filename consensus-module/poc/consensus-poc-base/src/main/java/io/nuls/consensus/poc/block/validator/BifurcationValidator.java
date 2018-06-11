@@ -34,21 +34,17 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
-import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author: Niels Wang
  * @date: 2018/6/8
  */
+@Component
 public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
 
     @Autowired
@@ -59,6 +55,9 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
 
     @Override
     public ValidateResult validate(BlockHeader header) {
+        if (header.getHeight() == 0L) {
+            return ValidateResult.getSuccessResult();
+        }
         ValidateResult result = ValidateResult.getSuccessResult();
         if (header.getHeight() > NulsContext.getInstance().getBestHeight()) {
             return result;
