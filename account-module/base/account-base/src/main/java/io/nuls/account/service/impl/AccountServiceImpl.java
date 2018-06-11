@@ -55,10 +55,7 @@ import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -90,7 +87,7 @@ public class AccountServiceImpl implements AccountService {
      * 本地账户集合
      * Collection of local accounts
      */
-    public static Set<String> LOCAL_ADDRESS_LIST = ConcurrentHashMap.newKeySet();
+    public Map<String, Account> localAccountMaps;
 
     @Override
     public Result<List<Account>> createAccount(int count, String password) {
@@ -104,7 +101,6 @@ public class AccountServiceImpl implements AccountService {
         try {
             List<Account> accounts = new ArrayList<>();
             List<AccountPo> accountPos = new ArrayList<>();
-            List<String> resultList = new ArrayList<>();
             for (int i = 0; i < count; i++) {
                 Account account = AccountTool.createAccount();
                 if (StringUtils.isNotBlank(password)) {
@@ -113,7 +109,6 @@ public class AccountServiceImpl implements AccountService {
                 accounts.add(account);
                 AccountPo po = new AccountPo(account);
                 accountPos.add(po);
-                resultList.add(account.getAddress().toString());
             }
             if (accountStorageService == null) {
                 Log.info("accountStorageService is null");
@@ -122,7 +117,9 @@ public class AccountServiceImpl implements AccountService {
             if (result.isFailed()) {
                 return result;
             }
-            LOCAL_ADDRESS_LIST.addAll(resultList);
+            for(Account account : accounts) {
+                localAccountMaps.put(account.getAddress().getBase58(), account);
+            }
             return Result.getSuccess().setData(accounts);
         } catch (Exception e) {
             Log.error(e);
@@ -171,7 +168,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        LOCAL_ADDRESS_LIST.remove(address);
+        localAccountMaps.remove(account.getAddress().getBase58());
         return Result.getSuccess();
     }
 
@@ -226,7 +223,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        LOCAL_ADDRESS_LIST.add(keyStore.getAddress());
+        localAccountMaps.put(account.getAddress().getBase58(), account);
         accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
         return Result.getSuccess().setData(account);
     }
@@ -290,7 +287,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        LOCAL_ADDRESS_LIST.add(keyStore.getAddress());
+        localAccountMaps.put(account.getAddress().getBase58(), account);
         accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
         return Result.getSuccess().setData(account);
     }
@@ -338,7 +335,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        LOCAL_ADDRESS_LIST.add(account.getAddress().toString());
+        localAccountMaps.put(account.getAddress().getBase58(), account);
         accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
         return Result.getSuccess().setData(account);
     }
@@ -399,25 +396,10 @@ public class AccountServiceImpl implements AccountService {
         if (null != accountCache) {
             return accountCache;
         }
-        AccountPo accountPo = null;
-        try {
-            Result<AccountPo> result = accountStorageService.getAccount(Base58.decode(address));
-            if (result.isFailed()) {
-                return null;
-            }
-            accountPo = result.getData();
-        } catch (Exception e) {
-            Log.error(e);
-            return null;
+        if(localAccountMaps == null) {
+            getAccountList();
         }
-        if (accountPo == null) {
-            return null;
-        }
-        Account account = accountPo.toAccount();
-        if (!LOCAL_ADDRESS_LIST.contains(account.getAddress().toString())) {
-            LOCAL_ADDRESS_LIST.add(account.getAddress().toString());
-        }
-        return account;
+        return localAccountMaps.get(address);
     }
 
     @Override
@@ -448,7 +430,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<List<Account>> getAccountList() {
+    public Result<Collection<Account>> getAccountList() {
+
+        if(localAccountMaps != null) {
+            return Result.getSuccess().setData(localAccountMaps.values());
+        }
+        localAccountMaps = new ConcurrentHashMap<>();
+
         List<Account> list = new ArrayList<>();
         Result<List<AccountPo>> result = accountStorageService.getAccountList();
         if (result.isFailed()) {
@@ -464,7 +452,9 @@ public class AccountServiceImpl implements AccountService {
             list.add(account);
             addressList.add(account.getAddress().getBase58());
         }
-        LOCAL_ADDRESS_LIST = addressList;
+        for(Account account : list) {
+            localAccountMaps.put(account.getAddress().getBase58(), account);
+        }
         return Result.getSuccess().setData(list);
     }
 
@@ -749,5 +739,4 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed(e.getMessage());
         }
     }
-
 }

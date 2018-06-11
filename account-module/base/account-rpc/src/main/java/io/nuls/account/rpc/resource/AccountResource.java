@@ -57,10 +57,7 @@ import io.swagger.annotations.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -137,7 +134,8 @@ public class AccountResource {
         if (pageSize == 0) {
             pageSize = 100;
         }
-        List<Account> accountList = accountService.getAccountList().getData();
+        Collection<Account> accounts = accountService.getAccountList().getData();
+        List<Account> accountList = new ArrayList<>(accounts);
         Page<Account> page = new Page<>(pageNumber, pageSize);
         page.setTotal(accountList.size());
         int start = (pageNumber - 1) * pageSize;
