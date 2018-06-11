@@ -105,7 +105,10 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
         Na fromTotal = Na.ZERO;
         Map<String, Na> verifyToMap = new HashMap<>();
         for (Coin coin : data.getCoinData().getFrom()) {
-            NulsDigestData txHash = new NulsDigestData();
+            if (coin.getLockTime() != -1L){
+                return ValidateResult.getFailedResult(this.getClass().getName(),"The from coin is wrong");
+            }
+                NulsDigestData txHash = new NulsDigestData();
             txHash.parse(coin.getOwner());
             DepositPo deposit = depositMap.remove(txHash);
             if (deposit == null) {

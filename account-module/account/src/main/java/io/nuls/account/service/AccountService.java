@@ -34,6 +34,7 @@ import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -260,7 +261,7 @@ public interface AccountService {
      *
      * @return account list of all accounts.
      */
-    Result<List<Account>> getAccountList();
+    Result<Collection<Account>> getAccountList();
 
     /**
      * 数据签名

@@ -26,7 +26,6 @@
 package io.nuls.client.web.view;
 
 import io.nuls.client.rpc.constant.RpcConstant;
-import io.nuls.client.web.view.listener.WindowCloseEvent;
 import io.nuls.kernel.cfg.NulsConfig;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -37,7 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.TrayIcon.MessageType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.Method;
@@ -52,7 +50,7 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
 
     private static final Logger log = LoggerFactory.getLogger(WebViewBootstrap.class);
 
-    private static final String APP_ICON = "/image/icon.png";
+    private static final String APP_ICON = "/image/tray.png";
     private static final String APP_TITLE = "NULS";
 
     private boolean hideTip;
@@ -134,7 +132,7 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         //判断系统是否支持托盘功能
         if (SystemTray.isSupported()) {
             //获得托盘图标图片路径
-            URL resource = this.getClass().getResource("/image/tray.png");
+            URL resource = this.getClass().getResource(APP_ICON);
             trayIcon = new TrayIcon(new ImageIcon(resource).getImage(), "NULS", createMenu());
             //设置双击动作标识
             trayIcon.setActionCommand("db_click_tray");

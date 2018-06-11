@@ -50,6 +50,9 @@ public class NulsSwaggerSerializers extends SwaggerSerializers {
         Map<String, Path> map = data.getPaths();
         Set<String> keyset = new HashSet<>(map.keySet());
         for (String key : keyset) {
+            if(key.startsWith("/api")){
+                continue;
+            }
             Path path = map.get(key);
             map.remove(key);
             map.put("/api" + key, path);

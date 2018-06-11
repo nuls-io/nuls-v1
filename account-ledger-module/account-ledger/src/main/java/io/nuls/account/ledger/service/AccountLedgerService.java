@@ -26,7 +26,6 @@
 package io.nuls.account.ledger.service;
 
 import io.nuls.account.ledger.model.TransactionInfo;
-import io.nuls.account.model.Account;
 import io.nuls.account.model.Balance;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.kernel.exception.NulsException;

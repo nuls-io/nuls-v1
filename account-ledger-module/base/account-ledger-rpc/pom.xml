@@ -39,6 +39,11 @@
             <version>0.9.10</version>
         </dependency>
         <dependency>
+            <groupId>io.nuls.account-ledger-module</groupId>
+            <artifactId>account-ledger-base</artifactId>
+            <version>0.9.9</version>
+        </dependency>
+        <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger</artifactId>
             <version>0.9.10</version>

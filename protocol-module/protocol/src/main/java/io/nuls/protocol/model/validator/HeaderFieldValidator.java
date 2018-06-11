@@ -36,7 +36,7 @@ import io.nuls.kernel.validate.ValidateResult;
 @Component
 public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
 
-    private static final int HEADER_EXTENDS_MAS_SIZE = 32;
+    private static final int HEADER_EXTENDS_MAS_SIZE = 64;
 
     private static final String ERROR_MESSAGE = "block header field check failed";
 

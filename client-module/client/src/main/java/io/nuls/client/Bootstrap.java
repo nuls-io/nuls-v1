@@ -75,7 +75,7 @@ public class Bootstrap {
             RpcServerManager.getInstance().startServer(ip, port);
         } while (false);
 
-        TaskManager.asynExecuteRunnable(new WebViewBootstrap());
+//        TaskManager.asynExecuteRunnable(new WebViewBootstrap());
 
         while (true) {
             try {

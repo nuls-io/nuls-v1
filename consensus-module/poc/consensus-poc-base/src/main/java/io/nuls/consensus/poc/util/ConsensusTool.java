@@ -68,9 +68,7 @@ public class ConsensusTool {
         List<NulsDigestData> txHashList = new ArrayList<>();
         for (Transaction tx : block.getTxs()) {
             txHashList.add(tx.getHash());
-            if (tx.getType() == ProtocolConstant.TX_TYPE_COINBASE ||
-                    tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH ||
-                    tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
+            if (tx.isSystemTx()) {
                 smallBlock.addBaseTx(tx);
             }
         }

@@ -145,7 +145,7 @@ public class MeetingRound {
         return myMember;
     }
 
-    public void calcLocalPacker(List<Account> accountList) {
+    public void calcLocalPacker(Collection<Account> accountList) {
         for (Account account : accountList) {
             if(account.isEncrypted()) {
                 continue;

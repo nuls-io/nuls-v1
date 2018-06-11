@@ -215,7 +215,7 @@ public class ChainContainer implements Cloneable {
         if (blockHeader == null) {
             return false;
         }
-
+//todo 是否是重复验证
         block.verifyWithException();
 
         // Verify that the block is properly connected
