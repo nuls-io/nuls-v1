@@ -39,6 +39,12 @@ import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.TransactionMessage;
 import io.nuls.protocol.service.TransactionService;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Niels
  * @date 2018/1/8
@@ -51,6 +57,8 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
     private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
 
+    private List<Transaction> txs = new ArrayList<>();
+
     public NewTxMessageHandler() {
     }
 
@@ -61,6 +69,25 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
         if (null == tx) {
             return;
         }
+
+        txs.add(tx);
+        int size = txs.size();
+        if(size % 1000 == 0) {
+            Log.info("tx size is : " + size);
+        }
+//        if(size == 30000) {
+//            ObjectOutputStream objOutputStream = null;
+//            try {
+//                objOutputStream = new ObjectOutputStream(new FileOutputStream("./obj.txt"));
+//                objOutputStream.writeObject(txs);
+//                objOutputStream.flush();
+//                objOutputStream.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+
         if (null != fromNode) {
             Log.debug("receive new tx {} from {} , tx count {}", tx.getHash().getDigestHex(), fromNode.getId(), temporaryCacheManager.getTxCount());
         }
@@ -81,6 +108,7 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
             consensusService.newTx(tx);
             return;
         }
+
         try {
             temporaryCacheManager.cacheTx(tx);
             consensusService.newTx(tx);

@@ -40,7 +40,6 @@ import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
-import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
@@ -61,12 +60,14 @@ import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
-import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.ledger.util.LedgerUtil;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -112,31 +113,52 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result<Integer> saveConfirmedTransactionList(List<Transaction> txs) {
+        if(txs == null || txs.size() == 0) {
+            Result.getSuccess().setData(0);
+        }
+
+        List<byte[]> localAddresses = AccountLegerUtils.getLocalAddresses();
+
         List<Transaction> savedTxList = new ArrayList<>();
         Result result;
         for (int i = 0; i < txs.size(); i++) {
-            result = saveConfirmedTransaction(txs.get(i));
+
+            Transaction tx = txs.get(i);
+            List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx, localAddresses);
+            if (addresses == null || addresses.size() == 0) {
+                continue;
+            }
+
+            result = saveConfirmedTransaction(tx, addresses);
             if (result.isSuccess()) {
                 if(result.getData() != null && (int) result.getData() == 1) {
-                    savedTxList.add(txs.get(i));
+                    savedTxList.add(tx);
                 }
             } else {
                 rollbackTransaction(savedTxList, false);
                 return result;
             }
         }
-        balanceManager.refreshBalance();
         return Result.getSuccess().setData(savedTxList.size());
     }
 
     @Override
     public Result<Integer> saveConfirmedTransaction(Transaction tx) {
-        if (tx == null) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+
+        if(tx == null) {
+            Result.getSuccess().setData(0);
         }
+
         List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
-            return Result.getSuccess().setData(new Integer(0));
+            Result.getSuccess().setData(0);
+        }
+        return saveConfirmedTransaction(tx, addresses);
+    }
+
+    private Result<Integer> saveConfirmedTransaction(Transaction tx, List<byte[]> addresses) {
+        if (tx == null) {
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
 
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
@@ -175,8 +197,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             if (result.isFailed()) {
                 return result;
             }
-            if (!(tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH)) {
-                result = this.ledgerService.verifyCoinData(tx, this.getAllUnconfirmedTransaction().getData());
+            if (!tx.isSystemTx()) {
+                Map<String, Coin> toCoinMap = addToCoinMap(tx);
+                result = this.ledgerService.verifyCoinData(tx, toCoinMap, null);
                 if (result.isFailed()) {
                     Log.info("verifyCoinData failed");
                     return result;
@@ -186,6 +209,36 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         } finally {
             saveLock.unlock();
         }
+    }
+
+    private Map<String,Coin> addToCoinMap(Transaction transaction) {
+        Map<String,Coin> toMap = new HashMap<>();
+
+        CoinData coinData = transaction.getCoinData();
+        if(coinData == null) {
+            return toMap;
+        }
+
+        List<Coin> froms = coinData.getFrom();
+
+        if(froms == null || froms.size() == 0) {
+            return toMap;
+        }
+
+        for(Coin coin : froms) {
+            byte[] keyBytes = coin.getOwner();
+            try {
+                Transaction unconfirmedTx = getUnconfirmedTransaction(NulsDigestData.fromDigestHex(LedgerUtil.getTxHash(keyBytes))).getData();
+                if(unconfirmedTx != null) {
+                    int index = LedgerUtil.getIndex(keyBytes);
+                    Coin toCoin = unconfirmedTx.getCoinData().getTo().get(index);
+                    toMap.put(LedgerUtil.asString(keyBytes), toCoin);
+                }
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+        }
+        return toMap;
     }
 
     protected Result saveUnconfirmedTransaction(Transaction tx) {
@@ -356,10 +409,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 coinDataResult.setEnough(false);
                 return coinDataResult;
             }
-            for(Coin coin : coinDataResult.getCoinList()) {
-                coin.setNa(Na.ZERO);
-                coin.setLockTime(0L);
-            }
             return coinDataResult;
         } finally {
             lock.unlock();
@@ -410,6 +459,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result transfer(byte[] from, byte[] to, Na values, String password, String remark, Na price) {
         try {
+            if(true) {
+                loadAndSend();
+                return Result.getSuccess().setData(NulsDigestData.calcDigestData(new byte[2]));
+            }
+
             Result<Account> accountResult = accountService.getAccount(from);
             if (accountResult.isFailed()) {
                 return accountResult;
@@ -453,14 +507,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             P2PKHScriptSig sig = new P2PKHScriptSig();
             sig.setPublicKey(account.getPubKey());
-            sig.setSignData(accountService.signData(tx.getHash().serialize(), account, password));
+            sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
             tx.setScriptSig(sig.serialize());
-
 
             Result saveResult = verifyAndSaveUnconfirmedTransaction(tx);
             if (saveResult.isFailed()) {
                 return saveResult;
             }
+
             Result sendResult = transactionService.broadcastTx(tx);
             if (sendResult.isFailed()) {
                 this.rollbackTransaction(tx);
@@ -473,6 +527,25 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    private void loadAndSend() {
+        try {
+            ObjectInputStream objInputStream = new ObjectInputStream(new FileInputStream("./obj.txt"));
+            List<Transaction> txs = (List<Transaction>) objInputStream.readObject();
+            objInputStream.close();
+
+            Log.info("read txs size is " + txs.size());
+
+            for(Transaction tx : txs) {
+                transactionService.broadcastTx(tx);
+            }
+
+            Log.info("txs of size is " + txs.size() + " broadcast success !");
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -641,4 +714,5 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public Result<Transaction> getUnconfirmedTransaction(NulsDigestData hash) {
         return unconfirmedTransactionStorageService.getUnconfirmedTx(hash);
     }
+
 }
