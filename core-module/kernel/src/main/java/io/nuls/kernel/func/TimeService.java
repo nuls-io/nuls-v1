@@ -47,7 +47,7 @@ public class TimeService implements Runnable {
         urlList.add("https://www.baidu.com");           //baidu
         urlList.add("https://www.alibaba.com");         //alibaba
         urlList.add("https://github.com/");             //github
-        syncWebTime();
+//        syncWebTime();
     }
 
     private static TimeService instance = new TimeService();

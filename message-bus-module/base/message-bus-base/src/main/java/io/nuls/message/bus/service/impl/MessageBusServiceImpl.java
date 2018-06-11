@@ -84,7 +84,7 @@ public class MessageBusServiceImpl implements MessageBusService {
     @Override
     public Result<List<String>> broadcastHashAndCache(BaseMessage message, Node excludeNode, boolean aysn) {
         messageCacheService.cacheSendedMessage(message);
-        BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestMessage(message.getHash()), aysn);
+        BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestMessage(message.getHash()), excludeNode, aysn);
         return getNodeIdListResult(result);
     }
 

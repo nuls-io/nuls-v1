@@ -47,7 +47,7 @@ public class LevelDbModuleBootstrap extends AbstractDBModule {
     }
 
     private void initLevelDBStorage() throws Exception {
-        LevelDBManager.init();
+//        LevelDBManager.init();
     }
 
     @Override

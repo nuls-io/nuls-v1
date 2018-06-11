@@ -114,6 +114,7 @@ public class LevelDBManager {
                 }
             }
         }
+
     }
 
     private static void initSchema() {

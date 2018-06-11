@@ -119,6 +119,14 @@ public class MeetingRound {
         }
         return null;
     }
+    public MeetingMember getMemberByAgentAddress(byte[] address) {
+        for (MeetingMember member : memberList) {
+            if (Arrays.equals(address, member.getAgentAddress())) {
+                return member;
+            }
+        }
+        return null;
+    }
 
     public Account getLocalPacker() {
         return localPacker;
