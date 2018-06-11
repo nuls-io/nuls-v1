@@ -1,3 +1,28 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package io.nuls.consensus.poc.rpc.resource;
 
 import io.nuls.account.constant.AccountErrorCode;
@@ -18,6 +43,7 @@ import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
+import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.consensus.poc.rpc.model.*;
 import io.nuls.consensus.poc.rpc.utils.AgentComparator;
 import io.nuls.consensus.poc.service.impl.PocRewardCacheService;
@@ -28,7 +54,6 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
@@ -44,7 +69,6 @@ import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.service.TransactionService;
-import io.protostuff.Rpc;
 import io.swagger.annotations.*;
 
 import javax.ws.rs.*;
@@ -206,11 +230,9 @@ public class PocConsensusResource {
             @BeanParam() GetCreateAgentFeeForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAgentAddress(), "agent address can not be null");
-        AssertUtil.canNotEmpty(form.getAgentName(), "agent name can not be null");
         AssertUtil.canNotEmpty(form.getCommissionRate(), "commission rate can not be null");
         AssertUtil.canNotEmpty(form.getDeposit(), "deposit can not be null");
         AssertUtil.canNotEmpty(form.getPackingAddress(), "packing address can not be null");
-        AssertUtil.canNotEmpty(form.getRemark(), "agent instraction can not be null");
         if (StringUtils.isBlank(form.getRewardAddress())) {
             form.setRewardAddress(form.getAgentAddress());
         }
@@ -224,13 +246,7 @@ public class PocConsensusResource {
         } else {
             agent.setRewardAddress(AddressTool.getAddress(form.getRewardAddress()));
         }
-        try {
-            agent.setIntroduction(form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING));
-            agent.setAgentName(form.getAgentName().getBytes(NulsConfig.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            Log.error(e);
-            return Result.getFailed(e.getMessage()).toRpcClientResult();
-        }
+
         agent.setDeposit(Na.valueOf(form.getDeposit()));
         agent.setCommissionRate(form.getCommissionRate());
         tx.setTxData(agent);
@@ -239,13 +255,15 @@ public class PocConsensusResource {
         toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), -1));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         tx.getCoinData().setFrom(result.getCoinList());
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
         }
-        Na fee = TransactionFeeCalculator.getFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        return Result.getSuccess().setData(fee.getValue()).toRpcClientResult();
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        Map<String, Long> valueMap = new HashMap<>();
+        valueMap.put("value", fee.getValue());
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 
     @GET
@@ -271,13 +289,15 @@ public class PocConsensusResource {
         toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), -1));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         tx.getCoinData().setFrom(result.getCoinList());
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
         }
-        Na fee = TransactionFeeCalculator.getFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        return Result.getSuccess().setData(fee.getValue()).toRpcClientResult();
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        Map<String, Long> valueMap = new HashMap<>();
+        valueMap.put("value", fee.getValue());
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 
     @GET
@@ -335,11 +355,13 @@ public class PocConsensusResource {
             return Result.getFailed(KernelErrorCode.DATA_ERROR).toRpcClientResult();
         }
         coinData.setFrom(fromList);
-        Na fee = TransactionFeeCalculator.getFee(tx.size());
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         tx.setCoinData(coinData);
-        Na resultFee = TransactionFeeCalculator.getFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        return Result.getSuccess().setData(resultFee.getValue()).toRpcClientResult();
+        Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        Map<String, Long> valueMap = new HashMap<>();
+        valueMap.put("value", resultFee.getValue());
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 
 
@@ -354,11 +376,9 @@ public class PocConsensusResource {
                                                CreateAgentForm form) throws NulsException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAgentAddress(), "agent address can not be null");
-        AssertUtil.canNotEmpty(form.getAgentName(), "agent name can not be null");
         AssertUtil.canNotEmpty(form.getCommissionRate(), "commission rate can not be null");
         AssertUtil.canNotEmpty(form.getDeposit(), "deposit can not be null");
         AssertUtil.canNotEmpty(form.getPackingAddress(), "packing address can not be null");
-        AssertUtil.canNotEmpty(form.getRemark(), "agent instraction can not be null");
 
         if (!AddressTool.validAddress(form.getPackingAddress()) || !AddressTool.validAddress(form.getAgentAddress())) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
@@ -387,13 +407,7 @@ public class PocConsensusResource {
         } else {
             agent.setRewardAddress(AddressTool.getAddress(form.getRewardAddress()));
         }
-        try {
-            agent.setAgentName(form.getAgentName().getBytes(NulsConfig.DEFAULT_ENCODING));
-            agent.setIntroduction(form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            Log.error(e);
-            return Result.getFailed(e.getMessage()).toRpcClientResult();
-        }
+
         agent.setDeposit(Na.valueOf(form.getDeposit()));
         agent.setCommissionRate(form.getCommissionRate());
         tx.setTxData(agent);
@@ -402,7 +416,7 @@ public class PocConsensusResource {
         toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         RpcClientResult result1 = this.txProcessing(tx, result, account, form.getPassword());
         if (!result1.isSuccess()) {
             return result1;
@@ -423,6 +437,9 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getAgentHash());
+        if (!NulsDigestData.validHash(form.getAgentHash())) {
+            return Result.getFailed("Can not find agent!").toRpcClientResult();
+        }
         AssertUtil.canNotEmpty(form.getDeposit());
         if (!AddressTool.validAddress(form.getAddress())) {
             throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
@@ -453,7 +470,7 @@ public class PocConsensusResource {
         toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
 
         RpcClientResult result1 = this.txProcessing(tx, result, account, form.getPassword());
         if (!result1.isSuccess()) {
@@ -477,7 +494,7 @@ public class PocConsensusResource {
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             P2PKHScriptSig sig = new P2PKHScriptSig();
             sig.setPublicKey(account.getPubKey());
-            sig.setSignData(accountService.signDigest(tx.getHash().serialize(), account, password));
+            sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
             tx.setScriptSig(sig.serialize());
         } catch (Exception e) {
             Log.error(e);
@@ -577,10 +594,16 @@ public class PocConsensusResource {
                 continue;
             }
             DepositTransaction dtx = (DepositTransaction) ledgerService.getTx(deposit.getTxHash());
-            Coin fromCoin = dtx.getCoinData().getTo().get(0);
-            fromCoin.setLockTime(0);
-            fromCoin.setOwner(ArraysTool.joinintTogether(dtx.getHash().serialize(), new VarInt(0).encode()));
-            fromList.add(fromCoin);
+            Coin fromCoin = null;
+            for (Coin coin : dtx.getCoinData().getTo()) {
+                if (!coin.getNa().equals(deposit.getDeposit()) || coin.getLockTime() != -1L) {
+                    continue;
+                }
+                fromCoin = new Coin(ArraysTool.joinintTogether(dtx.getHash().serialize(), new VarInt(0).encode()), coin.getNa(), coin.getLockTime());
+                fromCoin.setLockTime(-1L);
+                fromList.add(fromCoin);
+                break;
+            }
             String address = Base58.encode(deposit.getAddress());
             Coin coin = toMap.get(address);
             if (null == coin) {
@@ -594,9 +617,9 @@ public class PocConsensusResource {
         for (String address : addressList) {
             coinData.getTo().add(toMap.get(address));
         }
-        Na fee = TransactionFeeCalculator.getFee(tx.size());
-        coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         tx.setCoinData(coinData);
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         RpcClientResult result1 = this.txProcessing(tx, null, account, form.getPassword());
         if (!result1.isSuccess()) {
             return result1;
@@ -639,11 +662,16 @@ public class PocConsensusResource {
             } else if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
                 agentList.remove(i);
             } else if (StringUtils.isNotBlank(keyword)) {
-                String agentName = new String(agent.getAgentName(), NulsConfig.DEFAULT_ENCODING);
-                String agentAddress = Base58.encode(agent.getAgentAddress());
-                String packingAddress = Base58.encode(agent.getPackingAddress());
-                boolean b = agentName.indexOf(keyword) >= 0;
+                keyword = keyword.toUpperCase();
+                String agentAddress = Base58.encode(agent.getAgentAddress()).toUpperCase();
+                String packingAddress = Base58.encode(agent.getPackingAddress()).toUpperCase();
+                String agentId = PoConvertUtil.getAgentId(agent.getTxHash()).toUpperCase();
+                String alias = accountService.getAlias(agent.getAgentAddress()).getData();
+                boolean b = agentId.indexOf(keyword) >= 0;
                 b = b || agentAddress.equals(keyword) || packingAddress.equals(keyword);
+                if (StringUtils.isNotBlank(alias)) {
+                    b = b || alias.toUpperCase().indexOf(keyword) >= 0;
+                }
                 if (!b) {
                     agentList.remove(i);
                 }
@@ -656,7 +684,7 @@ public class PocConsensusResource {
             return result.toRpcClientResult();
         }
         fillAgentList(agentList, null);
-        int type = AgentComparator.COMMISSION_RATE;
+        int type = AgentComparator.COMPREHENSIVE;
         if ("deposit".equals(sortType)) {
             type = AgentComparator.DEPOSIT;
         } else if ("commissionRate".equals(sortType)) {
@@ -665,11 +693,14 @@ public class PocConsensusResource {
             type = AgentComparator.CREDIT_VALUE;
         } else if ("totalDeposit".equals(sortType)) {
             type = AgentComparator.DEPOSITABLE;
+        } else if ("comprehensive".equals(sortType)) {
+            type = AgentComparator.COMPREHENSIVE;
         }
         Collections.sort(agentList, AgentComparator.getInstance(type));
         List<AgentDTO> resultList = new ArrayList<>();
         for (int i = start; i < agentList.size() && i < (start + pageSize); i++) {
-            resultList.add(new AgentDTO(agentList.get(i)));
+            Agent agent = agentList.get(i);
+            resultList.add(new AgentDTO(agent, accountService.getAlias(agent.getAgentAddress()).getData()));
         }
         page.setList(resultList);
         result.setData(page);
@@ -722,9 +753,12 @@ public class PocConsensusResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Map.class)
     })
-    public RpcClientResult getAgentByAddress(@ApiParam(name = "agentHash", value = "节点标识", required = true)
-                                             @PathParam("agentHash") String agentHash) throws NulsException {
-        AssertUtil.canNotEmpty(agentHash);
+    public RpcClientResult getAgent(@ApiParam(name = "agentHash", value = "节点标识", required = true)
+                                    @PathParam("agentHash") String agentHash) throws NulsException {
+
+        if (!NulsDigestData.validHash(agentHash)) {
+            return Result.getFailed("Can not find agent!").toRpcClientResult();
+        }
         Result result = Result.getSuccess();
         List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
         NulsDigestData agentHashData = NulsDigestData.fromDigestHex(agentHash);
@@ -732,7 +766,8 @@ public class PocConsensusResource {
             if (agent.getTxHash().equals(agentHashData)) {
                 MeetingRound round = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
                 this.fillAgent(agent, round, null);
-                AgentDTO dto = new AgentDTO(agent);
+                String alias = accountService.getAlias(agent.getAgentAddress()).getData();
+                AgentDTO dto = new AgentDTO(agent, alias);
                 result.setData(dto);
                 return result.toRpcClientResult();
             }
@@ -786,6 +821,7 @@ public class PocConsensusResource {
         }
         List<Agent> allAgentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
         List<Agent> agentList = new ArrayList<>();
+        Agent ownAgent = null;
         for (int i = allAgentList.size() - 1; i >= 0; i--) {
             Agent agent = allAgentList.get(i);
             if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
@@ -793,10 +829,17 @@ public class PocConsensusResource {
             } else if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
                 continue;
             }
+            if (Arrays.equals(agent.getAgentAddress(), addressBytes)) {
+                ownAgent = agent;
+                continue;
+            }
             if (!agentHashSet.contains(agent.getTxHash())) {
                 continue;
             }
             agentList.add(agent);
+        }
+        if (null != ownAgent) {
+            agentList.add(0, ownAgent);
         }
         int start = pageNumber * pageSize - pageSize;
         Page<AgentDTO> page = new Page<>(pageNumber, pageSize, agentList.size());
@@ -807,7 +850,8 @@ public class PocConsensusResource {
         fillAgentList(agentList, allList);
         List<AgentDTO> resultList = new ArrayList<>();
         for (int i = start; i < agentList.size() && i < (start + pageSize); i++) {
-            resultList.add(new AgentDTO(agentList.get(i)));
+            Agent agent = agentList.get(i);
+            resultList.add(new AgentDTO(agent, accountService.getAlias(agent.getAgentAddress()).getData()));
         }
         page.setList(resultList);
         result.setData(page);
@@ -842,6 +886,9 @@ public class PocConsensusResource {
         }
         if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        if (null != agentHash && !NulsDigestData.validHash(agentHash)) {
+            return Result.getFailed("Can not find agent!").toRpcClientResult();
         }
         Result result = Result.getSuccess();
         List<Deposit> allList = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
@@ -968,10 +1015,13 @@ public class PocConsensusResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
-    public RpcClientResult exitConsensus(@ApiParam(name = "form", value = "退出共识表单数据", required = true)
-                                                 WithdrawForm form) throws NulsException, IOException {
+    public RpcClientResult withdraw(@ApiParam(name = "form", value = "退出共识表单数据", required = true)
+                                            WithdrawForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
+        if (!NulsDigestData.validHash(form.getTxHash())) {
+            return Result.getFailed("Cann't find the deposit transaction!").toRpcClientResult();
+        }
         AssertUtil.canNotEmpty(form.getAddress());
         if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
@@ -993,7 +1043,12 @@ public class PocConsensusResource {
         CancelDepositTransaction tx = new CancelDepositTransaction();
         CancelDeposit cancelDeposit = new CancelDeposit();
         NulsDigestData hash = NulsDigestData.fromDigestHex(form.getTxHash());
-        DepositTransaction depositTransaction = (DepositTransaction) ledgerService.getTx(hash);
+        DepositTransaction depositTransaction = null;
+        try {
+            depositTransaction = (DepositTransaction) ledgerService.getTx(hash);
+        } catch (Exception e) {
+            return Result.getFailed("The deposit hash is wrong!").toRpcClientResult();
+        }
         if (null == depositTransaction) {
             return Result.getFailed("Cann't find the deposit transaction!").toRpcClientResult();
         }
@@ -1018,10 +1073,72 @@ public class PocConsensusResource {
         }
         coinData.setFrom(fromList);
         tx.setCoinData(coinData);
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         RpcClientResult result1 = this.txProcessing(tx, null, account, form.getPassword());
         if (!result1.isSuccess()) {
             return result1;
         }
         return Result.getSuccess().setData(tx.getHash().getDigestHex()).toRpcClientResult();
+    }
+
+
+    @GET
+    @Path("/withdraw/fee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "get the fee of cancel deposit! 获取撤销委托的手续费", notes = "返回撤销委托交易手续费")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public RpcClientResult getWithdrawFee(@ApiParam(name = "address", value = "委托账户地址", required = true)
+                                          @QueryParam("address") String address,
+                                          @ApiParam(name = "depositTxHash", value = "委托交易摘要", required = true)
+                                          @QueryParam("depositTxHash") String depositTxHash) throws NulsException, IOException {
+        AssertUtil.canNotEmpty(depositTxHash);
+        if (!NulsDigestData.validHash(depositTxHash)) {
+            return Result.getFailed("Cann't find the deposit transaction!").toRpcClientResult();
+        }
+        AssertUtil.canNotEmpty(address);
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        Account account = accountService.getAccount(address).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        CancelDepositTransaction tx = new CancelDepositTransaction();
+        CancelDeposit cancelDeposit = new CancelDeposit();
+        NulsDigestData hash = NulsDigestData.fromDigestHex(depositTxHash);
+        DepositTransaction depositTransaction = (DepositTransaction) ledgerService.getTx(hash);
+        if (null == depositTransaction) {
+            return Result.getFailed("Cann't find the deposit transaction!").toRpcClientResult();
+        }
+        cancelDeposit.setAddress(AddressTool.getAddress(depositTxHash));
+        cancelDeposit.setJoinTxHash(hash);
+        tx.setTxData(cancelDeposit);
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        toList.add(new Coin(cancelDeposit.getAddress(), depositTransaction.getTxData().getDeposit(), 0));
+        coinData.setTo(toList);
+        List<Coin> fromList = new ArrayList<>();
+        for (int index = 0; index < depositTransaction.getCoinData().getTo().size(); index++) {
+            Coin coin = depositTransaction.getCoinData().getTo().get(index);
+            if (coin.getLockTime() == -1L && coin.getNa().equals(depositTransaction.getTxData().getDeposit())) {
+                coin.setOwner(ArraysTool.joinintTogether(hash.serialize(), new VarInt(index).encode()));
+                fromList.add(coin);
+                break;
+            }
+        }
+        if (fromList.isEmpty()) {
+            return Result.getFailed(KernelErrorCode.DATA_ERROR).toRpcClientResult();
+        }
+        coinData.setFrom(fromList);
+        tx.setCoinData(coinData);
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
+        Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        Map<String, Long> valueMap = new HashMap<>();
+        valueMap.put("value", resultFee.getValue());
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 }

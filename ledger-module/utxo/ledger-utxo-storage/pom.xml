@@ -29,7 +29,7 @@
     <parent>
         <artifactId>ledger-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>0.9.8</version>
+        <version>0.9.9</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -41,7 +41,7 @@
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
     </dependencies>
 

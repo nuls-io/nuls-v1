@@ -43,7 +43,7 @@ public class NulsResourceConfig extends ResourceConfig {
     public NulsResourceConfig() {
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
-        register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+        register(NulsSwaggerSerializers.class);
         register(MultiPartFeature.class);
         register(RpcServerFilter.class);
         register(JacksonJsonProvider.class);
@@ -51,7 +51,7 @@ public class NulsResourceConfig extends ResourceConfig {
         Collection<Object> list = SpringLiteContext.getAllBeanList();
         for (Object object : list) {
             if (object.getClass().getAnnotation(Path.class) != null) {
-                Log.debug("register restFul resource:{}",object.getClass());
+                Log.debug("register restFul resource:{}", object.getClass());
                 register(object);
             }
         }

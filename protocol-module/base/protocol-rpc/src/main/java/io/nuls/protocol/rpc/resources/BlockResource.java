@@ -25,6 +25,7 @@
 
 package io.nuls.protocol.rpc.resources;
 
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
@@ -45,6 +46,9 @@ import io.swagger.annotations.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
 
 /**
  * @author: Niels Wang
@@ -67,7 +71,6 @@ public class BlockResource {
     })
     public RpcClientResult getHeaderByHeight(@ApiParam(name = "height", value = "区块高度", required = true)
                                              @PathParam("height") Integer height) {
-        System.out.println("----------进来了---------");
         AssertUtil.canNotEmpty(height);
         Result<Block> blockResult = blockService.getBlock(height);
         if (blockResult.isFailed()) {
@@ -95,7 +98,7 @@ public class BlockResource {
                                      @PathParam("hash") String hash) {
         AssertUtil.canNotEmpty(hash);
         hash = StringUtils.formatStringPara(hash);
-        if (!StringUtils.validHash(hash)) {
+        if (!NulsDigestData.validHash(hash)) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Result result = Result.getSuccess();
@@ -128,7 +131,7 @@ public class BlockResource {
                                      @PathParam("hash") String hash) throws IOException {
         AssertUtil.canNotEmpty(hash);
         Result result;
-        if (!StringUtils.validHash(hash)) {
+        if (!NulsDigestData.validHash(hash)) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Block block = null;
@@ -187,11 +190,51 @@ public class BlockResource {
     @GET
     @Path("/bytes")
     @Produces(MediaType.APPLICATION_JSON)
-    public byte[] getBlockBytes(@QueryParam("height") long height) throws IOException {
-        Block block = blockService.getBlock(height).getData();
-        if (block == null) {
-            return null;
+    public RpcClientResult getBlockBytes(@QueryParam("hash") String hash) throws IOException {
+        Result result;
+        if (!NulsDigestData.validHash(hash)) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        return block.serialize();
+        Block block = null;
+        try {
+            block = blockService.getBlock(NulsDigestData.fromDigestHex(hash)).getData();
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        if (block == null) {
+            result = Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+        } else {
+            result = Result.getSuccess();
+            result.setData(Base64.getEncoder().encodeToString(block.serialize()));
+        }
+        return result.toRpcClientResult();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("根据区块高度查询区块列表，包含区块打包的所有交易信息，此接口返回数据量较多，谨慎调用")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = BlockDto.class)
+    })
+    public RpcClientResult getBlockList(@QueryParam("startHeight") Long startHeight, @QueryParam("size") Long size) throws IOException {
+        if (size > 100) {
+            return RpcClientResult.getFailed("the size is too big");
+        }
+        long bestHeight = NulsContext.getInstance().getBestHeight();
+        if (startHeight > bestHeight) {
+            return RpcClientResult.getFailed("The start height is to high!");
+        }
+        List<BlockDto> list = new ArrayList<>();
+
+        for (int i = 0; i < size && (startHeight + i) <= bestHeight; i++) {
+            Block block = blockService.getBlock(startHeight + i).getData();
+            if (null == block) {
+                break;
+            }
+            list.add(new BlockDto(block));
+        }
+
+        return Result.getSuccess().setData(list).toRpcClientResult();
+
     }
 }

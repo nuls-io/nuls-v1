@@ -30,6 +30,7 @@ import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
 
@@ -112,7 +113,7 @@ public interface AccountService {
     Result<Account> updatePasswordByAccountKeyStore(AccountKeyStore keyStore, String password);
 
     /**
-     * 从keyStore导入账户
+     * 从keyStore导入账户(密码用来验证keystore)
      * 1.从keyStore获取明文私钥(如果没有明文私钥,则通过密码从keyStore中的encryptedPrivateKey解出来)
      * 2.通过keyStore创建新账户,加密账户
      * 3.从数据库搜索此账户的别名,没有搜到则不设置(别名不从keyStore中获取,因为可能被更改)
@@ -145,19 +146,12 @@ public interface AccountService {
     /**
      * 根据私钥和密码导入账户
      * import an account from plant private key and encrypt the account.
-     *
-     * @param prikey
-     * @param password
-     * @return
      */
     Result<Account> importAccount(String prikey, String password);
 
     /**
      * 据私钥和密码导入账户
      * import an unencrypted account by plant private key.
-     *
-     * @param prikey
-     * @return
      */
     Result<Account> importAccount(String prikey);
 
@@ -248,10 +242,6 @@ public interface AccountService {
 
     /**
      * Verify the account password.
-     *
-     * @param account
-     * @param password
-     * @return
      */
     Result validPassword(Account account, String password);
 
@@ -280,7 +270,6 @@ public interface AccountService {
      * @param account  Signed account
      * @param password Account password
      * @return The NulsSignData object.
-     * @throws NulsException
      */
     NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
 
@@ -291,7 +280,6 @@ public interface AccountService {
      * @param data    Data to be signed.
      * @param account Signed account
      * @return The NulsSignData object.
-     * @throws NulsException
      */
     NulsSignData signData(byte[] data, Account account) throws NulsException;
 
@@ -302,18 +290,17 @@ public interface AccountService {
      * @param data  Data to be signed.
      * @param ecKey eckey.
      * @return The NulsSignData object.
-     * @throws NulsException
      */
     NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException;
 
     /**
      * 数据签名
      * Sign data.
-     * @param digest data digest.
-     * @param account account to sign.
+     *
+     * @param digest   data digest.
+     * @param account  account to sign.
      * @param password password of account.
      * @return the NulsSignData object.
-     * @throws NulsException
      */
     NulsSignData signDigest(byte[] digest, Account account, String password) throws NulsException;
 
@@ -324,7 +311,6 @@ public interface AccountService {
      * @param digest to be signed.
      * @param ecKey  eckey
      * @return The NulsSignData object.
-     * @throws NulsException
      */
     NulsSignData signDigest(byte[] digest, ECKey ecKey);
 
@@ -373,4 +359,31 @@ public interface AccountService {
      * @return Balance object.
      */
     Result<Balance> getBalance(String address) throws NulsException;
+
+
+    /**
+     * 根据账户地址字节数组获取账户别名
+     * Get an account alias based on the array of account address bytes
+     * @param address
+     * @return alias string
+     */
+    Result<String> getAlias(byte[] address);
+
+    /**
+     * 根据账户地址获取账户别名
+     * Get account alias according to account address
+     * @param address
+     * @return alias string
+     */
+    Result<String> getAlias(String address);
+
+
+    /**
+     * 获取设置别名交易手续费
+     * @param addr
+     * @param aliasName
+     * @return
+     */
+    Result<Na> getAliasFee(String addr, String aliasName);
+
 }

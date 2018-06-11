@@ -21,13 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.ledger.utils;
+package io.nuls.ledger.util;
 
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.VarInt;
 
 import java.util.Arrays;
+import java.util.Base64;
 
 /**
  * @desription:
@@ -37,6 +39,7 @@ import java.util.Arrays;
 public class LedgerUtil {
 
     private final static int TX_HASH_LENGTH = NulsDigestData.HASH_LENGTH;
+
 
     public static byte[] getTxHashBytes(byte[] fromBytes) {
         if(fromBytes == null || fromBytes.length < TX_HASH_LENGTH) {
@@ -74,4 +77,8 @@ public class LedgerUtil {
         return null;
     }
 
+    public static String asString(byte[] bytes) {
+        AssertUtil.canNotEmpty(bytes);
+        return Base64.getEncoder().encodeToString(bytes);
+    }
 }

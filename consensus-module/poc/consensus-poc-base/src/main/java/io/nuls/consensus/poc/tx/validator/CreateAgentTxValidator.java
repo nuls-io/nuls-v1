@@ -71,18 +71,6 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
             return ValidateResult.getFailedResult(getClass().getName(), "It's not safe:agentAddress equals packingAddress");
         }
 
-        if (agent.getAgentName() == null) {
-            return ValidateResult.getFailedResult(getClass().getName(), "agent name can not be null!");
-        }
-
-        if (agent.getAgentName().length > AGENT_NAME_MAX_LENGTH) {
-            return ValidateResult.getFailedResult(getClass().getName(), "agent name is too long!");
-        }
-
-        if (agent.getIntroduction().length > INSTRACTION_MAX_LENGTH) {
-            return ValidateResult.getFailedResult(getClass().getName(), "The instruduction is too long!");
-        }
-
         if (tx.getTime() <= 0) {
             return ValidateResult.getFailedResult(getClass().getName(), "tx time cannot be 0!");
         }

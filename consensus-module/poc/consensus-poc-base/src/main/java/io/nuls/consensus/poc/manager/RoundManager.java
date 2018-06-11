@@ -385,7 +385,7 @@ public class RoundManager {
 
     private long getPunishCountByAddress(byte[] address, long roundStart, long roundEnd, int code) {
         long count = 0;
-        List<PunishLogPo> punishList = chain.getYellowPunishList();
+        List<PunishLogPo> punishList = new ArrayList<>(chain.getYellowPunishList());
 
         if (code == PunishType.RED.getCode()) {
             punishList = chain.getRedPunishList();
@@ -403,6 +403,13 @@ public class RoundManager {
             if (Arrays.equals(punish.getAddress(), address)) {
                 count++;
             }
+        }
+        //每一轮的惩罚都有可能包含上一轮次的惩罚记录，即计算从a到a+99轮的惩罚记录时，a轮的惩罚中可能是惩罚某个地址在a-1轮未出块，导致100轮最多可能有101个惩罚记录，在这里处理下
+        //Each round of punishment is likely to contain a rounds punishment record, calculated from a to a + 99 rounds of punishment record,
+        // a round of punishment is likely to be punished in an address in a - 1 round not out of the blocks,
+        // lead to round up to 100 May be 101 punishment record, treatment here
+        if (count > 100) {
+            return 100;
         }
         return count;
     }
@@ -465,7 +472,7 @@ public class RoundManager {
     }
 
     public AccountService getAccountService() {
-        if(accountService == null) {
+        if (accountService == null) {
             accountService = NulsContext.getServiceBean(AccountService.class);
         }
         return accountService;

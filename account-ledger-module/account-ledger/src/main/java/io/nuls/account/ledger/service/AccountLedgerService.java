@@ -26,7 +26,6 @@
 package io.nuls.account.ledger.service;
 
 import io.nuls.account.ledger.model.TransactionInfo;
-import io.nuls.account.model.Account;
 import io.nuls.account.model.Balance;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.kernel.exception.NulsException;
@@ -131,16 +130,17 @@ public interface AccountLedgerService {
      * @param size    size of transaction ,to calc the fee
      * @return return balance of account, return 0 if  account is not a local account
      */
-    CoinDataResult getCoinData(byte[] address, Na amount, int size) throws NulsException;
+    CoinDataResult getCoinData(byte[] address, Na amount, int size, Na price) throws NulsException;
 
     /**
      * @param from
      * @param to
      * @param values
      */
-    Result transfer(byte[] from, byte[] to, Na values, String password, String remark);
+    Result transfer(byte[] from, byte[] to, Na values, String password, String remark, Na price);
 
-    Result transferFee(byte[] from, byte[] to, Na values, String remark);
+    Result transferFee(byte[] from, byte[] to, Na values, String remark, Na price);
+
     /**
      * <p>
      * get local address list

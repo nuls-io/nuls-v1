@@ -1,3 +1,28 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package io.nuls.account.ledger.base.manager;
 
 import io.nuls.account.ledger.base.util.CoinComparator;
@@ -116,6 +141,14 @@ public class BalanceManager {
         }
     }
 
+    public void refreshBalance() {
+        lock.lock();
+        try {
+            balanceMap.clear();
+        } finally {
+            lock.unlock();
+        }
+    }
 
     /**
      * 计算账户的余额，这个方法应该和获取余额方法互斥，避免并发导致数据不准确
@@ -158,21 +191,16 @@ public class BalanceManager {
     public List<Coin> getCoinListByAddress(byte[] address) {
         List<Coin> coinList = new ArrayList<>();
         List<Entry<byte[], byte[]>> rawList = localUtxoStorageService.loadAllCoinList();
-        byte[] addressOwner = new byte[AddressTool.HASH_LENGTH];
         for (Entry<byte[], byte[]> coinEntry : rawList) {
-            byte[] key = coinEntry.getKey();
-            System.arraycopy(key, 0, addressOwner, 0, AddressTool.HASH_LENGTH);
-            if (java.util.Arrays.equals(addressOwner, address)) {
-                Coin coin = new Coin();
-                try {
-                    coin.parse(coinEntry.getValue());
-                } catch (NulsException e) {
-                    Log.info("parse coin form db error");
-                    continue;
-                }
-                byte[] fromOwner = new byte[key.length - AddressTool.HASH_LENGTH];
-                System.arraycopy(key, AddressTool.HASH_LENGTH, fromOwner, 0, key.length - AddressTool.HASH_LENGTH);
-                coin.setOwner(fromOwner);
+            Coin coin = new Coin();
+            try {
+                coin.parse(coinEntry.getValue());
+            } catch (NulsException e) {
+                Log.info("parse coin form db error");
+                continue;
+            }
+            if (Arrays.equals(coin.getOwner(), address)) {
+                coin.setOwner(coinEntry.getKey());
                 coinList.add(coin);
             }
         }

@@ -1,6 +1,34 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package io.nuls.account.service.impl;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.ledger.model.CoinDataResult;
+import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.*;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
@@ -9,23 +37,28 @@ import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.account.storage.service.AliasStorageService;
+import io.nuls.account.tx.AliasTransaction;
 import io.nuls.account.util.AccountTool;
-import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.core.tools.crypto.*;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.NulsSignData;
-import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.*;
+import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.utils.TransactionFeeCalculator;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -485,7 +518,9 @@ public class AccountServiceImpl implements AccountService {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        return new Result(account.isEncrypted(), null);
+        Result result = new Result();
+        result.setSuccess(account.isEncrypted());
+        return result;
     }
 
     @Override
@@ -648,4 +683,71 @@ public class AccountServiceImpl implements AccountService {
         }
         return Result.getSuccess().setData(balance);
     }
+
+    @Override
+    public Result<String> getAlias(byte[] address) {
+        if(!Address.validAddress(address)){
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        return getAlias(Base58.encode(address));
+    }
+
+    @Override
+    public Result<String> getAlias(String address) {
+        Account account = getAccountByAddress(address);
+        if(null != account){
+            return Result.getSuccess().setData(account.getAlias());
+        }
+        String alias = null;
+        List<AliasPo> list = aliasStorageService.getAliasList().getData();
+        for (AliasPo aliasPo : list) {
+            if (Base58.encode(aliasPo.getAddress()).equals(address)) {
+                alias = aliasPo.getAlias();
+                break;
+            }
+        }
+        return Result.getSuccess().setData(alias);
+
+    }
+
+    @Override
+    public Result<Na> getAliasFee(String addr, String aliasName) {
+        if (!Address.validAddress(addr)) {
+            Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        Account account = this.getAccount(addr).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        byte[] addressBytes = account.getAddress().getBase58Bytes();
+        try {
+            //创建一笔设置别名的交易
+            AliasTransaction tx = new AliasTransaction();
+            tx.setTime(TimeService.currentTimeMillis());
+            Alias alias = new Alias(addressBytes, aliasName);
+            tx.setTxData(alias);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            if (!coinDataResult.isEnough()) {
+                return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
+            }
+            CoinData coinData = new CoinData();
+            coinData.setFrom(coinDataResult.getCoinList());
+            Coin change = coinDataResult.getChange();
+            if (null != change) {
+                //创建toList
+                List<Coin> toList = new ArrayList<>();
+                toList.add(change);
+                coinData.setTo(toList);
+            }
+            Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
+            coinData.addTo(coin);
+            tx.setCoinData(coinData);
+            Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+            return Result.getSuccess().setData(fee);
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
+    }
+
 }

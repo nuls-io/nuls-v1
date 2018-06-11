@@ -43,10 +43,10 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Transaction;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
- *
  * @author ln
  * @date 2018/4/13
  */
@@ -74,7 +74,7 @@ public class CacheManager {
         List<Agent> agentList = cacheLoader.loadAgents();
         List<Deposit> depositList = cacheLoader.loadDepositList();
         List<PunishLogPo> allPunishList = NulsContext.getServiceBean(PunishLogStorageService.class).getPunishList();
-        List<PunishLogPo> yellowPunishList = cacheLoader.loadYellowPunishList(allPunishList,PocConsensusConstant.INIT_HEADERS_OF_ROUND_COUNT);
+        List<PunishLogPo> yellowPunishList = cacheLoader.loadYellowPunishList(allPunishList, PocConsensusConstant.INIT_HEADERS_OF_ROUND_COUNT);
         List<PunishLogPo> redPunishList = cacheLoader.loadRedPunishList(allPunishList);
 
         Chain masterChain = new Chain();

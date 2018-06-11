@@ -36,9 +36,9 @@ import io.nuls.kernel.model.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
- *
  * @author ln
  * @date 2018/4/13
  */
@@ -147,7 +147,7 @@ public class Chain implements Cloneable {
     }
 
     public Block getBestBlock() {
-        if(blockList == null || blockList.size() == 0) {
+        if (blockList == null || blockList.size() == 0) {
             return null;
         }
         return blockList.get(blockList.size() - 1);

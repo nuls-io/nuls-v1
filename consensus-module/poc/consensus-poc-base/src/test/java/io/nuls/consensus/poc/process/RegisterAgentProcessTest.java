@@ -116,7 +116,6 @@ public class RegisterAgentProcessTest extends BaseTest {
         agent.setRewardAddress(address);
         agent.setPackingAddress(address1);
         agent.setAgentAddress(address2);
-        agent.setAgentName("test".getBytes());
         agent.setDeposit(PocConsensusProtocolConstant.AGENT_DEPOSIT_LOWER_LIMIT);
 
         tx.setTime(System.currentTimeMillis());

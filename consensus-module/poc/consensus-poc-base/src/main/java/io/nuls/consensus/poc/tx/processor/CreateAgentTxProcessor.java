@@ -25,16 +25,21 @@
 
 package io.nuls.consensus.poc.tx.processor;
 
+import io.nuls.account.service.AccountService;
 import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -66,6 +71,7 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
 
     @Override
     public Result onCommit(CreateAgentTransaction tx, Object secondaryData) {
+
         Agent agent = tx.getTxData();
         BlockHeader header = (BlockHeader) secondaryData;
         agent.setTxHash(tx.getHash());
@@ -75,6 +81,7 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
         AgentPo agentPo = PoConvertUtil.agentToPo(agent);
 
         boolean success = agentStorageService.save(agentPo);
+
         return new Result(success, null);
     }
 

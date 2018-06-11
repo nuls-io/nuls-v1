@@ -26,7 +26,9 @@
 
 package io.nuls.kernel.model;
 
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -145,10 +147,16 @@ public class CoinData extends BaseNulsData {
     }
 
     public void addTo(Coin coin) {
+        if(null==to){
+            to = new ArrayList<>();
+        }
         to.add(coin);
     }
 
     public void addFrom(Coin coin) {
+        if(null==from){
+            from = new ArrayList<>();
+        }
         from.add(coin);
     }
 

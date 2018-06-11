@@ -35,6 +35,7 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -53,6 +54,8 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
 
     @Context
     private HttpServletRequest request;
+    @Context
+    private HttpServletResponse response;
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -66,6 +69,11 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
 //        Log.info("url:{},IP:{},useTime:{}, params:{},result:{}", requestContext.getUriInfo().getRequestUri().getPath() + "?" + requestContext.getUriInfo().getRequestUri().getQuery(), grizzlyRequestProvider.get().getRemoteAddr()
 //                , (System.currentTimeMillis() - Long.parseLong(requestContext.getProperty("start").toString())), null, responseContext.getEntity());
+        //todo
+        response.setHeader("Access-control-Allow-Origin", request.getHeader("Origin"));
+        response.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE");
+        response.setHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"));
+
     }
 
     @Override

@@ -34,12 +34,10 @@ import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
-import io.protostuff.Tag;
 
 import java.io.IOException;
 
 /**
- *
  * @author ln
  * @date 2018/5/10
  */
@@ -56,10 +54,6 @@ public class AgentPo extends BaseNulsData {
     private Na deposit;
 
     private double commissionRate;
-
-    private byte[] agentName;
-
-    private byte[] introduction;
 
     private long time;
 
@@ -78,8 +72,6 @@ public class AgentPo extends BaseNulsData {
         stream.write(rewardAddress);
         stream.writeInt64(deposit.getValue());
         stream.writeDouble(commissionRate);
-        stream.writeBytesWithLength(agentName);
-        stream.writeBytesWithLength(introduction);
         stream.writeUint48(time);
         stream.writeVarInt(blockHeight);
         stream.writeVarInt(delHeight);
@@ -93,8 +85,6 @@ public class AgentPo extends BaseNulsData {
         this.rewardAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.deposit = Na.valueOf(byteBuffer.readInt64());
         this.commissionRate = byteBuffer.readDouble();
-        this.agentName = byteBuffer.readByLengthByte();
-        this.introduction = byteBuffer.readByLengthByte();
         this.time = byteBuffer.readUint48();
         this.blockHeight = byteBuffer.readVarInt();
         this.delHeight = byteBuffer.readVarInt();
@@ -104,13 +94,11 @@ public class AgentPo extends BaseNulsData {
     public int size() {
         int size = SerializeUtils.sizeOfNulsData(hash);
         size += AddressTool.HASH_LENGTH * 3;
-        size += SerializeUtils.sizeOfInt64(); // deposit.getValue()
+        size += SerializeUtils.sizeOfInt64();
         size += SerializeUtils.sizeOfDouble(commissionRate);
-        size += SerializeUtils.sizeOfBytes(agentName);
-        size += SerializeUtils.sizeOfBytes(introduction);
         size += SerializeUtils.sizeOfUint48();
-        size += SerializeUtils.sizeOfVarInt(blockHeight); // blockHeight
-        size += SerializeUtils.sizeOfVarInt(delHeight); // delHeight
+        size += SerializeUtils.sizeOfVarInt(blockHeight);
+        size += SerializeUtils.sizeOfVarInt(delHeight);
         return size;
     }
 
@@ -160,22 +148,6 @@ public class AgentPo extends BaseNulsData {
 
     public void setCommissionRate(double commissionRate) {
         this.commissionRate = commissionRate;
-    }
-
-    public byte[] getAgentName() {
-        return agentName;
-    }
-
-    public void setAgentName(byte[] agentName) {
-        this.agentName = agentName;
-    }
-
-    public byte[] getIntroduction() {
-        return introduction;
-    }
-
-    public void setIntroduction(byte[] introduction) {
-        this.introduction = introduction;
     }
 
     public long getTime() {

@@ -52,10 +52,7 @@ import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.service.BlockService;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author ln
@@ -218,7 +215,7 @@ public class ChainContainer implements Cloneable {
         if (blockHeader == null) {
             return false;
         }
-
+//todo 是否是重复验证
         block.verifyWithException();
 
         // Verify that the block is properly connected
@@ -407,6 +404,12 @@ public class ChainContainer implements Cloneable {
         }
         if (blockList.size() <= 2) {
             addBlockInBlockList(blockList);
+            if (blockList.size() > 0) {
+                Block startBlock = blockList.get(0);
+                if (startBlock != null && chain.getStartBlockHeader().getHeight() > startBlock.getHeader().getHeight()) {
+                    chain.setStartBlockHeader(startBlock.getHeader());
+                }
+            }
         }
 
         blockList.remove(blockList.size() - 1);

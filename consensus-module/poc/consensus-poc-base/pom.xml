@@ -29,7 +29,7 @@
     <parent>
         <artifactId>consensus-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>0.9.8</version>
+        <version>0.9.9</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -40,37 +40,37 @@
         <dependency>
             <groupId>io.nuls.consensus-module</groupId>
             <artifactId>consensus</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.consensus-module</groupId>
             <artifactId>consensus-poc-protocol</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.consensus-module</groupId>
             <artifactId>consensus-poc-storage</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.account-module</groupId>
             <artifactId>account</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.core-module</groupId>
             <artifactId>kernel</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.account-ledger-module</groupId>
             <artifactId>account-ledger</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.9</version>
         </dependency>
     </dependencies>
 

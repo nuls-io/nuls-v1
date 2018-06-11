@@ -24,12 +24,21 @@
 		</fileSet>
 		<fileSet>
 			<directory>src/main/script</directory>
-			<outputDirectory>/</outputDirectory>
+			<outputDirectory>/bin</outputDirectory>
 			<directoryMode>0755</directoryMode>
-            <fileMode>0755</fileMode>
+			<fileMode>0755</fileMode>
 			<lineEnding>unix</lineEnding>
 			<includes>
 				<include>*.sh</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<directory>src/main/script</directory>
+			<outputDirectory>/bin</outputDirectory>
+			<directoryMode>0755</directoryMode>
+			<fileMode>0755</fileMode>
+			<lineEnding>dos</lineEnding>
+			<includes>
 				<include>*.bat</include>
 			</includes>
 		</fileSet>

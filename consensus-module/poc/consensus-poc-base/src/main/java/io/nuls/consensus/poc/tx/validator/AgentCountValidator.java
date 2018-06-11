@@ -57,7 +57,6 @@ public class AgentCountValidator implements NulsDataValidator<CreateAgentTransac
     public ValidateResult validate(CreateAgentTransaction tx) {
         ValidateResult result = ValidateResult.getSuccessResult();
         Agent agent = tx.getTxData();
-        byte[] agentName = agent.getAgentName();
 
         List<AgentPo> caList = agentStorageService.getList();
         if (caList != null) {
@@ -72,19 +71,6 @@ public class AgentCountValidator implements NulsDataValidator<CreateAgentTransac
 
                 set.add(Hex.encode(ca.getAgentAddress()));
                 set.add(Hex.encode(ca.getPackingAddress()));
-                try {
-                    set.add(new String(ca.getAgentName(), NulsConfig.DEFAULT_ENCODING));
-                } catch (UnsupportedEncodingException e) {
-                    throw new NulsRuntimeException(e);
-                }
-            }
-            try {
-                boolean b = set.add(new String(agentName, NulsConfig.DEFAULT_ENCODING));
-                if (!b) {
-                    return ValidateResult.getFailedResult(this.getClass().getName(), "need change the agent name.");
-                }
-            } catch (UnsupportedEncodingException e) {
-                throw new NulsRuntimeException(e);
             }
             boolean b = set.add(Hex.encode(agent.getAgentAddress()));
             if (!b) {

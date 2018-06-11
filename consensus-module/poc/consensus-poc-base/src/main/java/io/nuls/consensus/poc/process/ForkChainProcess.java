@@ -43,10 +43,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.constant.ProtocolConstant;
@@ -54,10 +51,7 @@ import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author ln
@@ -125,12 +119,12 @@ public class ForkChainProcess {
                     chainManager.getChains().remove(newChain);
                 } else {
                     //Verify pass, try to switch chain
-                        //验证通过，尝试切换链
-                        boolean success = changeChain(resultChain, newChain);
-                        if (success) {
-                            chainManager.getChains().remove(newChain);
-                        }
-                        ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", newChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
+                    //验证通过，尝试切换链
+                    boolean success = changeChain(resultChain, newChain);
+                    if (success) {
+                        chainManager.getChains().remove(newChain);
+                    }
+                    ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", newChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
                 }
             } finally {
                 Lockers.CHAIN_LOCK.unlock();
@@ -396,24 +390,26 @@ public class ForkChainProcess {
 
         List<Block> successList = new ArrayList<>();
 
+        Long newBestHeight = addBlockList.get(addBlockList.size() - 1).getHeader().getHeight();
         //Need to sort in ascending order, the default is
         //需要升序排列，默认就是
         for (Block newBlock : addBlockList) {
             newBlock.verifyWithException();
-            List<Transaction> verifiedList = new ArrayList<>();
+
+            Map<String, Coin> toMaps = new HashMap<>();
+            Set<String> fromSet = new HashSet<>();
+
             for (Transaction tx : newBlock.getTxs()) {
-                if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
+                if (tx.isSystemTx()) {
                     continue;
                 }
-                ValidateResult result = ledgerService.verifyCoinData(tx, verifiedList);
+                ValidateResult result = tx.verify();
                 if (result.isSuccess()) {
-                    result = tx.verify();
+                    result = ledgerService.verifyCoinData(tx, toMaps, fromSet, newBestHeight);
                     if (result.isFailed()) {
                         Log.info("failed message:" + result.getMsg());
                         changeSuccess = false;
                         break;
-                    } else {
-                        verifiedList.add(tx);
                     }
                 } else {
                     Log.info("failed message:" + result.getMsg());

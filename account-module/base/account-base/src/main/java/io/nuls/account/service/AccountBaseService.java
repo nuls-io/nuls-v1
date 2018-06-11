@@ -1,3 +1,28 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package io.nuls.account.service;
 
 import io.nuls.account.constant.AccountErrorCode;
@@ -72,14 +97,15 @@ public class AccountBaseService {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The password is required");
         }
         if (!StringUtils.validPassword(password)) {
-            return new Result(false, "Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG);
+
         }
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.FAILED, "The account not exist, address:" + address);
         }
         if(account.isEncrypted()){
-            return Result.getFailed(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED, "The account has been set to password.");
+            return Result.getFailed(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED, "This account already has a password.");
         }
         try {
             account.encrypt(password);
@@ -111,10 +137,10 @@ public class AccountBaseService {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The newPassword is required");
         }
         if (!StringUtils.validPassword(oldPassword)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "oldPassword Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
         if (!StringUtils.validPassword(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "newPassword Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
         Account account = accountService.getAccount(address).getData();
         if (null == account) {

@@ -28,9 +28,13 @@ package io.nuls.kernel.validate;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
+import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsData;
+import io.nuls.kernel.model.NulsDigestData;
+import jdk.nashorn.internal.ir.BaseNode;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,7 +61,7 @@ public class ValidatorManager {
             for (Method method : methods) {
                 if ("validate".equals(method.getName())) {
                     Class paramType = method.getParameterTypes()[0];
-                    if(paramType.equals(NulsData.class)){
+                    if (paramType.equals(NulsData.class)) {
                         continue;
                     }
                     addValidator(paramType, validator);
@@ -85,11 +89,22 @@ public class ValidatorManager {
         if (data == null) {
             return ValidateResult.getFailedResult(ValidatorManager.class.getName(), KernelErrorCode.NULL_PARAMETER);
         }
-        DataValidatorChain chain = chainMap.get(data.getClass());
-        if (null == chain) {
-            return ValidateResult.getSuccessResult();
+        List<DataValidatorChain> chainList = new ArrayList<>();
+        Class<NulsData> clazz = (Class<NulsData>) data.getClass();
+        while (!clazz.equals(BaseNulsData.class)) {
+            DataValidatorChain chain = chainMap.get(clazz);
+            if (null != chain) {
+                chainList.add(chain);
+            }
+            clazz = (Class<NulsData>) clazz.getSuperclass();
         }
-        return chain.startDoValidator(data);
+        for (DataValidatorChain chain : chainList) {
+            ValidateResult result = chain.startDoValidator(data);
+            if (result.isFailed()) {
+                return result;
+            }
+        }
+        return ValidateResult.getSuccessResult();
     }
 
 }

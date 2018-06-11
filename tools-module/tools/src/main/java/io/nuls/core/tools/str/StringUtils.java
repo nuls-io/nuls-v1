@@ -24,6 +24,8 @@
  */
 package io.nuls.core.tools.str;
  
+import io.nuls.core.tools.crypto.Hex;
+
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -62,8 +64,8 @@ public class StringUtils {
     }
 
     /**
-     * Check the difficulty of the password
-     * length between 8 and 20, the combination of characters and numbers
+     *  Check the difficulty of the password
+     *  length between 8 and 20, the combination of characters and numbers
      *
      * @return boolean
      */
@@ -74,13 +76,21 @@ public class StringUtils {
         if (password.length() < 8 || password.length() > 20) {
             return false;
         }
-        if (password.matches("(.*)[a-zA-z](.*)") && password.matches("(.*)\\d+(.*)")) {
+        if (password.matches("(.*)[a-zA-z](.*)")
+                && password.matches("(.*)\\d+(.*)")
+                && !password.matches("(.*)\\s+(.*)")
+                && !password.matches("(.*)[\u4e00-\u9fa5\u3000]+(.*)")) {
             return true;
         } else {
             return false;
         }
     }
 
+    /**
+     * 别名规则:只允许使用小写字母、数字、下划线（下划线不能在两端）1~20字节
+     * @param alias
+     * @return
+     */
     public static boolean validAlias(String alias) {
         try {
             if (isBlank(alias)) {
@@ -88,27 +98,18 @@ public class StringUtils {
             }
             alias = alias.trim();
             byte[] aliasBytes = alias.getBytes("UTF-8");
-            if (aliasBytes.length < 1 || aliasBytes.length > 30) {
+            if (aliasBytes.length < 1 || aliasBytes.length > 20) {
+                return false;
+            }
+            if (alias.matches("^([a-z0-9]+[a-z0-9_]*[a-z0-9]+)|[a-z0-9]+${1,20}")) {
+                return true;
+            } else {
                 return false;
             }
         } catch (UnsupportedEncodingException e) {
             return false;
         }
-        return true;
     }
-
-    public static boolean validHash(String hash) {
-        if (isBlank(hash)) {
-            return false;
-        }
-        if (hash.length() > 73) {
-            return false;
-        }
-        return true;
-    }
-
-
-
 
     public static byte caculateXor(byte[] data) {
         byte xor = 0x00;
@@ -153,13 +154,71 @@ public class StringUtils {
         return true;
     }
 
+
     private static final Pattern GT_ZERO_NUMBER_PATTERN = Pattern.compile("([1-9][0-9]*(\\.\\d+)?)|(0\\.\\d*[1-9]+0*)");
 
+    /**
+     * 验证是大于0的数(包含小数,不限位数)
+     * @param str
+     * @return
+     */
     public static boolean isNumberGtZero(String str) {
         if (StringUtils.isBlank(str)) {
             return false;
         }
         Matcher isNum = GT_ZERO_NUMBER_PATTERN.matcher(str);
+        if (!isNum.matches()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 去掉小数多余的.与0
+     * @param s
+     * @return
+     */
+    private static String subZeroAndDot(String s){
+        if(s.indexOf(".") > 0){
+            s = s.replaceAll("0+?$", "");
+            s = s.replaceAll("[.]$", "");
+        }
+        return s;
+    }
+
+    private static final Pattern NULS_PATTERN = Pattern.compile("([1-9]\\d*(\\.\\d{1,8})?)|(0\\.\\d{1,8})");
+
+    /**
+     * 匹配是否是nuls
+     * 验证是大于0的数(包括小数, 小数点后有效位超过8位则不合法)
+     * @param str
+     * @return
+     */
+    public static boolean isNuls(String str) {
+        if (StringUtils.isBlank(str)) {
+            return false;
+        }
+        str = subZeroAndDot(str);
+        Matcher isNum = NULS_PATTERN.matcher(str);
+        if (!isNum.matches()) {
+            return false;
+        }
+        return true;
+    }
+
+    private static final Pattern GT_ZERO_NUMBER_LIMIT_2_PATTERN = Pattern.compile("([1-9]\\d*(\\.\\d{1,2})?)|(0\\.\\d{1,2})");
+
+    /**
+     * 验证是大于0的数(包括小数, 小数点后有效位超过2位则不合法)
+     * @param str
+     * @return
+     */
+    public static boolean isNumberGtZeroLimitTwo(String str) {
+        if (StringUtils.isBlank(str)) {
+            return false;
+        }
+        str = subZeroAndDot(str);
+        Matcher isNum = GT_ZERO_NUMBER_LIMIT_2_PATTERN.matcher(str);
         if (!isNum.matches()) {
             return false;
         }

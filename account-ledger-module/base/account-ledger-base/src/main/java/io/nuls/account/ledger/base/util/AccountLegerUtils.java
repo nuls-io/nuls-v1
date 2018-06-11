@@ -26,9 +26,12 @@ package io.nuls.account.ledger.base.util;
 
 import io.nuls.account.model.Account;
 import io.nuls.account.service.AccountService;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.VarInt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +47,8 @@ public class AccountLegerUtils {
     @Autowired
     private static AccountService accountService;
 
+    private final static int TX_HASH_LENGTH = NulsDigestData.HASH_LENGTH;
+
     public static boolean isLocalAccount(byte[] address) {
         List<Account> localAccountList = accountService.getAccountList().getData();
         if (localAccountList == null || localAccountList.size() == 0) {
@@ -56,6 +61,20 @@ public class AccountLegerUtils {
             }
         }
         return false;
+    }
+
+    public static List<byte[]> getLocalAddresses() {
+        List<byte[]> result = new ArrayList<>();
+        List<Account> localAccountList = accountService.getAccountList().getData();
+        if (localAccountList == null || localAccountList.size() == 0) {
+            return result;
+        }
+        List<byte[]> destAddresses = new ArrayList<>();
+        for (Account account : localAccountList) {
+            destAddresses.add(account.getAddress().getBase58Bytes());
+        }
+
+        return destAddresses;
     }
 
     public static List<byte[]> getRelatedAddresses(Transaction tx) {
@@ -75,7 +94,7 @@ public class AccountLegerUtils {
         return getRelatedAddresses(tx, destAddresses);
     }
 
-    private static List<byte[]> getRelatedAddresses(Transaction tx, List<byte[]> addresses) {
+    public static List<byte[]> getRelatedAddresses(Transaction tx, List<byte[]> addresses) {
         List<byte[]> result = new ArrayList<>();
         if (tx == null) {
             return result;
@@ -125,5 +144,41 @@ public class AccountLegerUtils {
             }
         }
         return false;
+    }
+
+    public static byte[] getTxHashBytes(byte[] fromBytes) {
+        if(fromBytes == null || fromBytes.length < TX_HASH_LENGTH) {
+            return null;
+        }
+        byte[] txBytes = new byte[TX_HASH_LENGTH];
+        System.arraycopy(fromBytes, 0, txBytes, 0, TX_HASH_LENGTH);
+        return txBytes;
+    }
+
+    public static String getTxHash(byte[] fromBytes) {
+        byte[] txBytes = getTxHashBytes(fromBytes);
+        if(txBytes != null) {
+            return Hex.encode(txBytes);
+        }
+        return null;
+    }
+
+    public static byte[] getIndexBytes(byte[] fromBytes) {
+        if(fromBytes == null || fromBytes.length < TX_HASH_LENGTH) {
+            return null;
+        }
+        int length = fromBytes.length - TX_HASH_LENGTH;
+        byte[] indexBytes = new byte[length];
+        System.arraycopy(fromBytes, TX_HASH_LENGTH, indexBytes, 0, length);
+        return indexBytes;
+    }
+
+    public static Integer getIndex(byte[] fromBytes) {
+        byte[] indexBytes = getIndexBytes(fromBytes);
+        if(indexBytes != null) {
+            VarInt varInt = new VarInt(indexBytes, 0);
+            return Math.toIntExact(varInt.value);
+        }
+        return null;
     }
 }
