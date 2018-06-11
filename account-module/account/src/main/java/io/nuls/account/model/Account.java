@@ -332,4 +332,20 @@ public class Account extends BaseNulsData {
         this.ecKey = ecKey;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null) {
+            return false;
+        }
+        if(!(obj instanceof Account)) {
+            return false;
+        }
+        Account other = (Account) obj;
+        return Arrays.equals(pubKey, other.getPubKey());
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(pubKey);
+    }
 }

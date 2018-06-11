@@ -24,6 +24,7 @@
  */
 package io.nuls.account.ledger.base.service;
 
+import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 
@@ -39,9 +40,13 @@ public interface LocalUtxoService {
 
     Result saveUtxoForAccount(Transaction tx, byte[] addresses);
 
+    Result saveUtxoForAccount(Transaction tx, List<byte[]> addressesList);
+
     Result deleteUtxoOfTransaction(Transaction tx);
 
     Result<List<byte[]>> unlockCoinData(Transaction tx, long newLockTime);
 
     Result<List<byte[]>> rollbackUnlockTxCoinData(Transaction tx);
+
+    Result getUtxo(byte[] owner);
 }

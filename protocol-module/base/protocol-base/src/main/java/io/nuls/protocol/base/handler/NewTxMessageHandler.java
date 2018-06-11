@@ -53,7 +53,6 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
 
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
-    private NetworkService networkService = NulsContext.getServiceBean(NetworkService.class);
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
     private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
 
@@ -92,14 +91,11 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
             Log.debug("receive new tx {} from {} , tx count {}", tx.getHash().getDigestHex(), fromNode.getId(), temporaryCacheManager.getTxCount());
         }
 
-        if (tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
+        if (tx.isSystemTx()) {
             return;
         }
         ValidateResult result = tx.verify();
-        if (result.isFailed() && result.getErrorCode() != TransactionErrorCode.ORPHAN_TX) {
-//            if (result.getLevel() == SeverityLevelEnum.FLAGRANT_FOUL) {
-//                networkService.removeNode(fromNode.getId());
-//            }
+        if (result.isFailed()) {
             return;
         }
 

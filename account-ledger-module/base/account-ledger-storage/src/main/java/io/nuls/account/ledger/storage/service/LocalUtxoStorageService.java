@@ -24,13 +24,9 @@
  */
 package io.nuls.account.ledger.storage.service;
 
-import io.nuls.account.ledger.storage.po.TransactionInfoPo;
 import io.nuls.db.model.Entry;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
 
 import java.util.List;
 import java.util.Map;
@@ -52,5 +48,9 @@ public interface LocalUtxoStorageService {
 
     List<Entry<byte[], byte[]>> loadAllCoinList();
 
-    Result batchSaveAndDeleteUTXO(Map<byte[], byte[]> utxosToSave, Set<byte[]> utxosToDelete);
+    Result batchSaveAndDeleteUTXO(List<Entry<byte[], byte[]>> utxosToSave, List<byte[]> utxosToDelete);
+
+    byte[] getUtxoBytes(byte[] owner);
+
+    Coin getUtxo(byte[] owner);
 }

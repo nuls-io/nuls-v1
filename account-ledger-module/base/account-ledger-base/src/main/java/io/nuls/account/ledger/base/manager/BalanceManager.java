@@ -69,7 +69,7 @@ public class BalanceManager {
     public void initAccountBalance() {
         balanceMap.clear();
 
-        List<Account> accounts = accountService.getAccountList().getData();
+        Collection<Account> accounts = accountService.getAccountList().getData();
         if (accounts == null) {
             return;
         }

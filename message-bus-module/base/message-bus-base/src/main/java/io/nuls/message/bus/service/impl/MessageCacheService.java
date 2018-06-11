@@ -26,7 +26,6 @@
 package io.nuls.message.bus.service.impl;
 
 import io.nuls.cache.CacheMap;
-import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.protocol.message.base.BaseMessage;
 
@@ -37,14 +36,16 @@ import io.nuls.protocol.message.base.BaseMessage;
  * @author: Charlie
  * @date: 2018/5/6
  */
-//@Service
 public class MessageCacheService {
 
     private static final MessageCacheService INSTANCE = new MessageCacheService();
 
     private static final int TIME_OF_IDLE_SECONDS = 600;
-    private CacheMap<NulsDigestData, BaseMessage> cacheMapSended = new CacheMap<>("message-cache-sended", 32, NulsDigestData.class, BaseMessage.class, 0, TIME_OF_IDLE_SECONDS);
-    private CacheMap<NulsDigestData, Integer> cacheMapRecieved = new CacheMap<>("message-cache-recieved", 8, NulsDigestData.class, Integer.class, 0, TIME_OF_IDLE_SECONDS);
+    private CacheMap<NulsDigestData, BaseMessage> cacheMapSended = new CacheMap<>("message-cache-sended", 128, NulsDigestData.class, BaseMessage.class, 0, TIME_OF_IDLE_SECONDS);
+    private CacheMap<NulsDigestData, Integer> cacheMapRecieved = new CacheMap<>("message-cache-recieved", 64, NulsDigestData.class, Integer.class, 0, TIME_OF_IDLE_SECONDS);
+
+//    private Map<NulsDigestData, BaseMessage> cacheMapSended = new HashMap<>();
+//    private Map<NulsDigestData, Integer> cacheMapRecieved = new HashMap<>();
 
     public static MessageCacheService getInstance() {
         return INSTANCE;
@@ -108,5 +109,8 @@ public class MessageCacheService {
     public void destroy() {
         this.cacheMapSended.destroy();
         this.cacheMapRecieved.destroy();
+
+//        this.cacheMapSended.clear();
+//        this.cacheMapRecieved.clear();
     }
 }

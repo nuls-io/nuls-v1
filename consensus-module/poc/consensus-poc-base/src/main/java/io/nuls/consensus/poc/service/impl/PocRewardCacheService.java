@@ -29,12 +29,9 @@ import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Account;
 import io.nuls.account.service.AccountService;
-import io.nuls.consensus.poc.constant.PocConsensusConstant;
-import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.model.RewardItem;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -42,7 +39,6 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
-import io.nuls.kernel.model.Transaction;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
@@ -77,7 +73,7 @@ public class PocRewardCacheService {
     private LedgerService ledgerService;
 
     public void initCache() {
-        List<Account> accountList = accountService.getAccountList().getData();
+        Collection<Account> accountList = accountService.getAccountList().getData();
         if (null == accountList || accountList.isEmpty()) {
             return;
         }
