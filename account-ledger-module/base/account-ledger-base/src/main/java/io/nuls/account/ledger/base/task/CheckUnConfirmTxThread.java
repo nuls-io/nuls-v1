@@ -76,7 +76,7 @@ public class CheckUnConfirmTxThread implements Runnable {
     @Override
     public void run() {
         try {
-            doTask();
+//            doTask();
         } catch (Exception e) {
             Log.error(e);
         }
