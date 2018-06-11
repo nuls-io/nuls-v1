@@ -115,7 +115,6 @@ public class LevelDBManager {
             }
         }
 
-        Log.info("LevelDBManager init is ok");
     }
 
     private static void initSchema() {
