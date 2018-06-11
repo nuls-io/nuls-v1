@@ -111,6 +111,7 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
                 return true;
             }
         }
-        return false;
+        //todo
+        return true;
     }
 }
