@@ -6,6 +6,7 @@ import io.nuls.account.sdk.model.Account;
 import io.nuls.account.sdk.model.Address;
 import io.nuls.account.sdk.model.dto.AccountDto;
 import io.nuls.account.sdk.model.dto.AccountKeyStoreDto;
+import io.nuls.account.sdk.model.dto.AssetDto;
 import io.nuls.account.sdk.service.AccountService;
 import io.nuls.account.sdk.util.AccountTool;
 import io.nuls.sdk.SDKBootstrap;
@@ -21,10 +22,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author: Charlie
@@ -177,8 +175,6 @@ public class AccountServiceImpl implements AccountService {
         return Result.getSuccess().setData("The path to the backup file is " +  path + File.separator + fileName);
     }
 
-
-    //未测试
     @Override
     public Result getAliasFee(String address, String alias) {
         if (!Address.validAddress(address)) {
@@ -190,13 +186,88 @@ public class AccountServiceImpl implements AccountService {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("address", address);
         parameters.put("alias", alias);
-        Result<Na> result = restFul.get("/account/alias/fee", parameters);
-        try {
+        Result result = restFul.get("/account/alias/fee", parameters);
+        if(result.isFailed()){
+            return result;
+        }
+        Double nuls = Na.naToNuls(((Map)result.getData()).get("value"));
+        /*try {
+            System.out.println(JSONUtils.obj2json(result.setData(Na.naToNuls(result.getData()))));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+        return result.setData(Na.naToNuls(result.getData()));
+    }
+
+
+    @Override
+    public Result getAccount(String address) {
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        Result result = restFul.get("/account/" + address, null);
+        if(result.isFailed()){
+            return result;
+        }
+        AccountDto accountDto = new AccountDto((Map<String, Object>) result.getData());
+       /* try {
             System.out.println(JSONUtils.obj2json(result));
         } catch (Exception e) {
             e.printStackTrace();
+        }*/
+        return result.setData(accountDto);
+    }
+
+    @Override
+    public Result getAccountList(int pageNumber, int pageSize) {
+        if(pageNumber < 1 || pageSize < 1 || pageSize > 100){
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        return result;
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("pageNumber", pageNumber);
+        parameters.put("pageSize", pageSize);
+        Result result = restFul.get("/account", parameters);
+        if(result.isFailed()){
+            return result;
+        }
+        List<Map<String, Object>> list = (List<Map<String, Object>>)((Map)result.getData()).get("list");
+        List<AccountDto> accountList = new ArrayList<>();
+        for(Map<String, Object> map : list){
+            AccountDto accountDto = new AccountDto(map);
+            accountList.add(accountDto);
+        }
+        /*try {
+            System.out.println(JSONUtils.obj2json(result.setData(accountList)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+        return result.setData(accountList);
+    }
+
+    @Override
+    public Result getAssets(String address) {
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        Result result = restFul.get("/account/assets/" + address, null);
+        if(result.isFailed()){
+            return result;
+        }
+        List<Map<String, Object>> list = (List<Map<String, Object>>)result.getData();
+        List<AssetDto> assetDtoList = new ArrayList<>();
+        for(Map<String, Object> map : list){
+            map.put("balance",  Na.naToNuls(map.get("balance")));
+            map.put("usable", Na.naToNuls(map.get("usable")));
+            map.put("locked", Na.naToNuls(map.get("locked")));
+            AssetDto assetDto = new AssetDto("NULS", map);
+            assetDtoList.add(assetDto);
+        }
+       /* try {
+            System.out.println(JSONUtils.obj2json(result.setData(assetDtoList)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+        return result.setData(assetDtoList);
     }
 
 
@@ -207,35 +278,12 @@ public class AccountServiceImpl implements AccountService {
         //as.createLocalAccount(3, "nuls123456");
         //as.createAccount("nuls123456");
         //as.backupAccount("2ChqBTvFXttQsghj8zQpcdv76TQU8G5", "/Users/lichao/Downloads", "nuls123456");
-//        as.getAliasFee("2CX4AaWCeqrz3qdJ6dmPYNcbPSUEy4F", "charlie");
-        as.getAccount("2CX4AaWCeqrz3qdJ6dmPYNcbPSUEy4F");
+        //as.getAliasFee("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie");
+        //as.getAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
+        //as.getAccountList(1, 100);
+        as.getAssets("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
     }
     /** ---------------------------------------------------------------------*/
-    @Override
-    public Result getAccount(String address) {
-        if (!Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
-        }
-        Result<AccountDto> result = restFul.get("/account/" + address, null);
-        System.out.println(result);
-        try {
-            System.out.println(JSONUtils.obj2json(result));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    @Override
-    public Result getAccountList(int pageNumber, int pageSize) {
-        return null;
-    }
-
-    @Override
-    public Result getAssets(String address) {
-        return null;
-    }
-
     @Override
     public Result getAddressByAlias(String alias) {
         return null;

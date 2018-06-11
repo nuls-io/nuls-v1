@@ -35,7 +35,7 @@ import io.nuls.sdk.constant.KernelErrorCode;
  * @author Charlie
  * @date 2018/6/8
  */
-public class Result<T> {
+public class Result {
 
     private boolean success;
 
@@ -43,7 +43,7 @@ public class Result<T> {
 
     private String msg;
 
-    private T data;
+    private Object data;
 
     public Result() {
 
@@ -86,11 +86,11 @@ public class Result<T> {
         this.msg = msg;
     }
 
-    public T getData() {
+    public Object getData() {
         return data;
     }
 
-    public Result setData(T data) {
+    public Result setData(Object data) {
         this.data = data;
         return this;
     }

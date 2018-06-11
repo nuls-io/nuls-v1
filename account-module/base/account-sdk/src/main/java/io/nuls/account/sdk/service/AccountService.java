@@ -149,7 +149,7 @@ public interface AccountService {
      * Get the account information list
      *
      * @param pageNumber
-     * @param pageSize
+     * @param pageSize 1~100
      * @return If the operation is successful, 'success' is true and data is List<AccountDto>;
      * If the operation fails, "success" is false and the result has error information
      */
@@ -159,7 +159,7 @@ public interface AccountService {
      * Get account assets
      *
      * @param address The address of account
-     * @return If the operation is successful, 'success' is true and data is List<AccountDto>;
+     * @return If the operation is successful, 'success' is true and data is List<AssetDto>;
      * If the operation fails, "success" is false and the result has error information
      */
     Result getAssets(String address);
