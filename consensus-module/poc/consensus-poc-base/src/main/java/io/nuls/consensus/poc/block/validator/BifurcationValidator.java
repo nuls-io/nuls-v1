@@ -49,7 +49,6 @@ import java.util.List;
  * @author: Niels Wang
  * @date: 2018/6/8
  */
-@Component
 public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
 
     @Autowired
