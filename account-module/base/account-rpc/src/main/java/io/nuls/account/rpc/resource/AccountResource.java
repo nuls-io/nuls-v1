@@ -38,6 +38,7 @@ import io.nuls.account.service.AccountBaseService;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
+import io.nuls.account.util.AccountTool;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
@@ -113,6 +114,39 @@ public class AccountResource {
             list.add(account.getAddress().toString());
         }
         return Result.getSuccess().setData(list).toRpcClientResult();
+    }
+
+    @POST
+    @Path("/local")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "[创建] 创建本地账户, 该账户不保存到数据库, 并将直接返回账户的所有信息 ", notes = "result.data: List<Account>")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = ArrayList.class)
+    })
+    public RpcClientResult createLocalAccount(@ApiParam(name = "form", value = "账户表单数据", required = true)
+                                          AccountCreateForm form) {
+        int count = form.getCount() < 1 ? 1 : form.getCount();
+        if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "between 0 and 100 can be created at once").toRpcClientResult();
+        }
+        String password = form.getPassword();
+        if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,
+                    "Length between 8 and 20, the combination of characters and numbers").toRpcClientResult();
+        }
+        List<Account> accounts = new ArrayList<>();
+        try {
+            for (int i = 0; i < count; i++) {
+                Account account = AccountTool.createAccount();
+                if (StringUtils.isNotBlank(password)) {
+                    account.encrypt(password);
+                }
+                accounts.add(account);
+            }
+        } catch (NulsException e) {
+            return Result.getFailed().toRpcClientResult();
+        }
+        return Result.getSuccess().setData(accounts).toRpcClientResult();
     }
 
     @GET
@@ -426,7 +460,7 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The password is required").toRpcClientResult();
         }
         if (StringUtils.isBlank(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The newPassword is required").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The new password is required").toRpcClientResult();
         }
         if (!StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG).toRpcClientResult();
@@ -453,7 +487,7 @@ public class AccountResource {
         }
         String newPassword = form.getPassword();
         if (StringUtils.isBlank(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The newPassword is required").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The new password is required").toRpcClientResult();
         }
         if (!StringUtils.validPassword(newPassword)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG).toRpcClientResult();
