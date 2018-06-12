@@ -24,6 +24,7 @@
  */
 
 package io.nuls.account.sdk.service;
+
 import io.nuls.sdk.model.Result;
 
 import java.io.FileReader;
@@ -119,8 +120,8 @@ public interface AccountService {
      * Backup an account
      * Generate a keystore backup file
      *
-     * @param address The number of accounts you want to backup
-     * @param path Folder path to save backup files, if you pass null to save to the current directory
+     * @param address  The number of accounts you want to backup
+     * @param path     Folder path to save backup files, if you pass null to save to the current directory
      * @param password
      * @return
      */
@@ -149,7 +150,7 @@ public interface AccountService {
      * Get the account information list
      *
      * @param pageNumber
-     * @param pageSize 1~100
+     * @param pageSize   1~100
      * @return If the operation is successful, 'success' is true and data is List<AccountDto>;
      * If the operation fails, "success" is false and the result has error information
      */
@@ -287,17 +288,18 @@ public interface AccountService {
      * Change the account password by current passowrd
      *
      * @param address     The address of account you want to change
-     * @param oldPassword The current password of account
-     * @param password    The new password
+     * @param password    The current password of account
+     * @param newPassword The new password
      * @return If the operation is successful, 'success' is true;
      * If the operation fails, "success" is false and the result has error information
      */
-    Result updatePassword(String address, String oldPassword, String password);
+    Result resetPassword(String address, String password, String newPassword);
 
     /**
      * Change the account password by keystore file
+     *
      * @param fileReader The fileReader of KeyStore file
-     * @param password The new password
+     * @param password   The new password
      * @return If the operation is successful, 'success' is true;
      * If the operation fails, "success" is false and the result has error information
      */

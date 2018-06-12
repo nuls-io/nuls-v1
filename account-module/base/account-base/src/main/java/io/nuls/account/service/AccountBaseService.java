@@ -131,10 +131,10 @@ public class AccountBaseService {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if(StringUtils.isBlank(oldPassword)){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The oldPassword is required");
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The old password is required");
         }
         if(StringUtils.isBlank(newPassword)){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The newPassword is required");
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The new password is required");
         }
         if (!StringUtils.validPassword(oldPassword)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG);
@@ -158,7 +158,7 @@ public class AccountBaseService {
             return accountStorageService.updateAccount(po);
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "The oldPassword is wrong, change password failed");
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "The old password is wrong, change password failed");
         }
     }
 
