@@ -1,24 +1,20 @@
 package io.nuls.account.sdk.service.impl;
 
 import io.nuls.account.sdk.constant.AccountConstant;
-import io.nuls.account.sdk.constant.AccountErrorCode;
-import io.nuls.account.sdk.model.Account;
-import io.nuls.account.sdk.model.Address;
 import io.nuls.account.sdk.model.dto.AccountDto;
 import io.nuls.account.sdk.model.dto.AccountKeyStoreDto;
 import io.nuls.account.sdk.model.dto.AssetDto;
-import io.nuls.account.sdk.model.dto.BalanceDto;
 import io.nuls.account.sdk.service.AccountService;
-import io.nuls.account.sdk.util.AccountTool;
 import io.nuls.sdk.SDKBootstrap;
+import io.nuls.sdk.constant.AccountErrorCode;
 import io.nuls.sdk.crypto.ECKey;
 import io.nuls.sdk.exception.NulsException;
+import io.nuls.sdk.model.Account;
+import io.nuls.sdk.model.Address;
 import io.nuls.sdk.model.Na;
 import io.nuls.sdk.model.Result;
-import io.nuls.sdk.utils.JSONUtils;
-import io.nuls.sdk.utils.Log;
-import io.nuls.sdk.utils.RestFulUtils;
-import io.nuls.sdk.utils.StringUtils;
+import io.nuls.sdk.model.dto.BalanceDto;
+import io.nuls.sdk.utils.*;
 
 import java.io.*;
 import java.util.*;
@@ -503,14 +499,18 @@ public class AccountServiceImpl implements AccountService {
 //        as.createLocalAccount(3, "nuls123456");
 //        as.createAccount("nuls123456");
 //        as.backupAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "/Users/lichao/Downloads", "nuls123456");
-        as.getAliasFee("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie");
+//        as.getAliasFee("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie");
 //        as.getAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
 //        as.getAccountList(1, 100);
 //        as.getAssets("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
 //        as.setAlias("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie", "nuls123456");
 //        as.getAddressByAlias("charlie");
 //        as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456");
-//        as.getWalletTotalBalance();
+       /* try {
+            System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
 //        as.importAccountByKeystore("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore","nuls123456",true);
 
        /* FileReader fileReader = null;
@@ -527,7 +527,7 @@ public class AccountServiceImpl implements AccountService {
 //        as.unlockAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456", 120);
 //        as.setPassword("2CWSpfF1mFTjWmDCAx4A6NXwykgpj4q", "nuls123456");
 //        as.removeAccount("2CWSpfF1mFTjWmDCAx4A6NXwykgpj4q", "nuls123456");
-//        as.resetPassword("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls1234567", "nuls123456");
+        as.resetPassword("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456", "nuls123456");
 
        /* FileReader fileReader = null;
         try {
