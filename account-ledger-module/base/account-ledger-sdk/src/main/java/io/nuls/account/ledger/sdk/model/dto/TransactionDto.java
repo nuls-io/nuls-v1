@@ -25,9 +25,12 @@
 
 package io.nuls.account.ledger.sdk.model.dto;
 
+import io.nuls.sdk.utils.StringUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @desription:
@@ -101,46 +104,21 @@ public class TransactionDto {
      */
     private List<OutputDto> outputs;
 
-   /* public TransactionDto(Transaction tx) {
-        long bestBlockHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
-        this.hash = tx.getHash().getDigestHex();
-        this.type = tx.getType();
-        this.time = tx.getTime();
-        this.blockHeight = tx.getBlockHeight();
-        this.fee = tx.getFee().getValue();
-        this.size = tx.getSize();
-        if (this.blockHeight > 0 || TxStatusEnum.CONFIRMED.equals(tx.getStatus())) {
-            this.confirmCount = bestBlockHeight - this.blockHeight;
-        } else {
-            this.confirmCount = 0L;
-        }
-        if (TxStatusEnum.CONFIRMED.equals(tx.getStatus())) {
-            this.status = 1;
-        } else {
-            this.status = 0;
-        }
-
-        if (tx.getRemark() != null) {
-            try {
-                this.setRemark(new String(tx.getRemark(), NulsConfig.DEFAULT_ENCODING));
-            } catch (UnsupportedEncodingException e) {
-                this.setRemark(Hex.encode(tx.getRemark()));
-            }
-        }
-        if (tx.getScriptSig() != null) {
-            this.setScriptSig(Hex.encode(tx.getScriptSig()));
-        }
-
-        CoinData coinData = tx.getCoinData();
-        List<InputDto> inputs = new ArrayList<>();
-        if(coinData != null) {
-            List<Coin> froms = coinData.getFrom();
-            for(Coin from : froms) {
-                inputs.add(new InputDto(from));
-            }
-        }
-        this.inputs = inputs;
-    }*/
+    public TransactionDto(Map<String, Object> map) {
+        this.hash = (String) map.get("hash");
+        this.type = (Integer) map.get("type");
+        this.time = StringUtils.parseLong(map.get("time"));
+        this.blockHeight = StringUtils.parseLong(map.get("blockHeight"));
+        this.fee = StringUtils.parseLong(map.get("fee"));
+        this.value = StringUtils.parseLong(map.get("value"));
+        this.size = (int) map.get("size");
+        this.confirmCount = StringUtils.parseLong(map.get("confirmCount"));
+        this.status = (Integer) map.get("status");
+        this.remark = (String) map.get("remark");
+        this.scriptSig = (String) map.get("scriptSig");
+        this.inputs = (List<InputDto>)map.get("inputs");
+        this.outputs = (List<OutputDto>)map.get("outputs");
+    }
 
     public String getHash() {
         return hash;
