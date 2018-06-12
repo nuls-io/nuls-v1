@@ -389,7 +389,7 @@ public class ChainContainer implements Cloneable {
             List<MeetingMember> memberList = currentRound.getMemberList();
             List<String> punishAddress = new ArrayList<>();
             for (MeetingMember item : memberList) {
-                if (item.getCalcCreditVal() <= PocConsensusConstant.RED_PUNISH_CREDIT_VAL) {
+                if (item.getCreditVal() <= PocConsensusConstant.RED_PUNISH_CREDIT_VAL) {
                     punishAddress.add(Base58.encode(item.getAgent().getAgentAddress()));
                 }
             }
