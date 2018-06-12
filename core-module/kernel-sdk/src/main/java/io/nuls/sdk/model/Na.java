@@ -324,4 +324,19 @@ public final class Na implements Comparable<Na>, Serializable {
         return (Na.valueOf(na)).toDouble();
     }
 
+    public static long parseNa(Object object) {
+        if (null == object) {
+            return 0L;
+        }
+        long na = 0L;
+        if (object instanceof Long) {
+            na = (Long) object;
+        } else if (object instanceof Integer) {
+            na = ((Integer) object).longValue();
+        } else {
+            return 0L;
+        }
+        return na;
+    }
+
 }

@@ -105,6 +105,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     private Lock lock = new ReentrantLock();
     private Lock saveLock = new ReentrantLock();
 
+    // 保存本地已使用的交易，Save locally used transactions
+    private Set<String> usedTxSets;
+
     @Override
     public void afterPropertiesSet() throws NulsException {
     }
@@ -137,6 +140,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 return result;
             }
         }
+
+        balanceManager.refreshBalanceIfNesessary();
+
         return Result.getSuccess().setData(savedTxList.size());
     }
 
@@ -187,42 +193,44 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         return result;
     }
 
-    long tt1 =0,tt2=0, tt3=0;
     @Override
     public Result<Integer> verifyAndSaveUnconfirmedTransaction(Transaction tx) {
         saveLock.lock();
         try {
-            long time = System.nanoTime();
             ValidateResult result = tx.verify();
             if (result.isFailed()) {
                 return result;
             }
-
-            tt1 += (System.nanoTime() - time);
-            time = System.nanoTime();
-
             if (!tx.isSystemTx()) {
                 Map<String, Coin> toCoinMap = addToCoinMap(tx);
-                result = this.ledgerService.verifyCoinData(tx, toCoinMap, null);
+                if(usedTxSets == null) {
+                    initUsedTxSets();
+                }
+                result = this.ledgerService.verifyCoinData(tx, toCoinMap, usedTxSets);
                 if (result.isFailed()) {
                     Log.info("verifyCoinData failed : " + result.getMsg());
                     return result;
                 }
-//                List<Transaction> list = new ArrayList<>(this.getAllUnconfirmedTransaction().getData());
-//                list.add(tx);
-//                result = transactionService.conflictDetect(list);
-//                if (result.isFailed()) {
-//                    Log.info("verifyCoinData failed");
-//                    return result;
-//                }
             }
-            tt2 += (System.nanoTime() - time);
-            time = System.nanoTime();
             Result<Integer> res = saveUnconfirmedTransaction(tx);
-            tt3+=(System.nanoTime() - time);
             return  res;
         } finally {
             saveLock.unlock();
+        }
+    }
+
+    private void initUsedTxSets() {
+        usedTxSets = new HashSet<>();
+        List<Transaction> allUnconfirmedTxs = unconfirmedTransactionStorageService.loadAllUnconfirmedList().getData();
+        for(Transaction tx : allUnconfirmedTxs) {
+            CoinData coinData = tx.getCoinData();
+            if(coinData == null) {
+                continue;
+            }
+            List<Coin> froms = tx.getCoinData().getFrom();
+            for(Coin from : froms) {
+                usedTxSets.add(LedgerUtil.asString(from.getOwner()));
+            }
         }
     }
 
@@ -297,10 +305,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result<Integer> rollbackTransaction(List<Transaction> txs) {
-        Result result = Result.getSuccess().setData(txs.size());
-        result = rollbackTransaction(txs, true);
+        Result result = rollbackTransaction(txs, true);
         if (result.isSuccess()) {
-            balanceManager.refreshBalance();
+            balanceManager.refreshBalanceIfNesessary();
         }
         return result;
     }
@@ -340,8 +347,23 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
         result = localUtxoService.deleteUtxoOfTransaction(tx);
 
+        if (result.isFailed()) {
+            return result;
+        }
+        result = unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
+
         for (int i = 0; i < addresses.size(); i++) {
             balanceManager.refreshBalance(addresses.get(i));
+        }
+
+        if(usedTxSets != null) {
+            CoinData coinData = tx.getCoinData();
+            if(coinData != null) {
+                List<Coin> froms = tx.getCoinData().getFrom();
+                for(Coin from : froms) {
+                    usedTxSets.remove(LedgerUtil.asString(from.getOwner()));
+                }
+            }
         }
 
         return result;
@@ -432,7 +454,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
     }
 
-
     public Na getTxFee(byte[] address, Na amount, int size, Na price) {
         List<Coin> coinList = balanceManager.getCoinListByAddress(address);
         if (coinList.isEmpty()) {
@@ -473,14 +494,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         return fee;
     }
 
-    long t1 = 0 , t2 = 0, t3 = 0, t4 = 0, t5 = 0;
-    int count = 0;
-
     @Override
     public Result transfer(byte[] from, byte[] to, Na values, String password, String remark, Na price) {
         try {
-            long time = System.nanoTime();
-
             Result<Account> accountResult = accountService.getAccount(from);
             if (accountResult.isFailed()) {
                 return accountResult;
@@ -495,10 +511,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     return passwordResult;
                 }
             }
-
-            t1 += System.nanoTime() - time;
-            time = System.nanoTime();
-
             TransferTransaction tx = new TransferTransaction();
             if (StringUtils.isNotBlank(remark)) {
                 try {
@@ -524,49 +536,22 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             tx.setCoinData(coinData);
 
-            t5 += System.nanoTime() - time;
-            time = System.nanoTime();
-
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             P2PKHScriptSig sig = new P2PKHScriptSig();
             sig.setPublicKey(account.getPubKey());
             sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
             tx.setScriptSig(sig.serialize());
 
-
-            t2 += System.nanoTime() - time;
-            time = System.nanoTime();
-
-
             Result saveResult = verifyAndSaveUnconfirmedTransaction(tx);
             if (saveResult.isFailed()) {
                 return saveResult;
             }
-
-            t3 += System.nanoTime() - time;
-            time = System.nanoTime();
 
             Result sendResult = transactionService.broadcastTx(tx);
             if (sendResult.isFailed()) {
                 this.rollbackTransaction(tx);
                 return sendResult;
             }
-
-            t4 += System.nanoTime() - time;
-
-            count++;
-
-            if(count % 500 == 0) {
-                Log.info("t1 is : " + t1 / 1000000 + " ms");
-                Log.info("t2 is : " + t2 / 1000000 + " ms");
-                Log.info("t3 is : " + t3 / 1000000 + " ms");
-                Log.info("t4 is : " + t4 / 1000000 + " ms");
-                Log.info("t5 is : " + t5 / 1000000 + " ms");
-                Log.info("----- tt1 is : " + tt1 / 1000000 + " ms");
-                Log.info("----- tt2 is : " + tt2 / 1000000 + " ms");
-                Log.info("----- tt3 is : " + tt3 / 1000000 + " ms");
-            }
-
             return Result.getSuccess().setData(tx.getHash().getDigestHex());
         } catch (IOException e) {
             Log.error(e);
@@ -735,6 +720,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             balanceManager.refreshBalance(address);
         }
 
+        CoinData coinData = tx.getCoinData();
+        if(coinData != null) {
+            List<Coin> froms = tx.getCoinData().getFrom();
+            for(Coin from : froms) {
+                usedTxSets.remove(LedgerUtil.asString(from.getOwner()));
+            }
+        }
         return Result.getSuccess();
     }
 
@@ -742,5 +734,4 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public Result<Transaction> getUnconfirmedTransaction(NulsDigestData hash) {
         return unconfirmedTransactionStorageService.getUnconfirmedTx(hash);
     }
-
 }

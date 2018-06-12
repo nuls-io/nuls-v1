@@ -26,7 +26,7 @@
 package io.nuls.account.sdk.model.dto;
 
 
-import io.nuls.account.sdk.model.Account;
+import io.nuls.sdk.model.Account;
 import io.nuls.sdk.utils.StringUtils;
 
 import java.util.Map;

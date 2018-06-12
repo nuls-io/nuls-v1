@@ -22,36 +22,41 @@
  * SOFTWARE.
  *
  */
-package io.nuls.account.ledger.storage.service;
 
-import io.nuls.db.model.Entry;
-import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.Result;
+package io.nuls.account.ledger.base.manager;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import io.nuls.account.model.Balance;
 
 /**
- * @author Facjas
- * @date 2018/5/10.
+ * author Facjas
+ * date 2018/6/12.
  */
-public interface LocalUtxoStorageService {
+public class BalanceCacheEntity {
+    private Balance balance;
+    long lowestLockHeigh;
+    long earlistLockTime;
 
-    Result saveUTXO(byte[] key, byte[] value);
+    public Balance getBalance() {
+        return balance;
+    }
 
-    Result batchSaveUTXO(Map<byte[], byte[]> utxos);
+    public void setBalance(Balance balance) {
+        this.balance = balance;
+    }
 
-    Result deleteUTXO(byte[] key);
+    public long getLowestLockHeigh() {
+        return lowestLockHeigh;
+    }
 
-    Result batchDeleteUTXO(Set<byte[]> utxos);
+    public void setLowestLockHeigh(long lowestLockHeigh) {
+        this.lowestLockHeigh = lowestLockHeigh;
+    }
 
-    Collection<Entry<byte[], byte[]>> loadAllCoinList();
+    public long getEarlistLockTime() {
+        return earlistLockTime;
+    }
 
-    Result batchSaveAndDeleteUTXO(List<Entry<byte[], byte[]>> utxosToSave, List<byte[]> utxosToDelete);
-
-    byte[] getUtxoBytes(byte[] owner);
-
-    Coin getUtxo(byte[] owner);
+    public void setEarlistLockTime(long earlistLockTime) {
+        this.earlistLockTime = earlistLockTime;
+    }
 }

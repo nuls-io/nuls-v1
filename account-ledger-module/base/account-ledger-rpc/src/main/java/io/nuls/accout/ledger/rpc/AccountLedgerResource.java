@@ -217,7 +217,7 @@ public class AccountLedgerResource {
         Result dtoResult = Result.getSuccess();
 
         try {
-            addressBytes = Base58.decode(address);
+            addressBytes = Base58.decode(address.trim());
         } catch (Exception e) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
