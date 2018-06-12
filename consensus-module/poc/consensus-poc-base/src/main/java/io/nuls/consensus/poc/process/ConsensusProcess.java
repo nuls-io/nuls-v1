@@ -414,7 +414,7 @@ public class ConsensusProcess {
 
         for (byte[] address : addressList) {
             MeetingMember member = round.getMemberByAgentAddress(address);
-            if (member.getCreditVal() <= 1) {
+            if (member.getCreditVal() <= -1) {
                 RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
                 RedPunishData redPunishData = new RedPunishData();
                 redPunishData.setAddress(address);
