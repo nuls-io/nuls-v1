@@ -113,14 +113,17 @@ public class BalanceManager {
                 return Result.getFailed(accountResult.getErrorCode());
             }
 
-            String addressKey = new String(address);
-            Balance balance = balanceMap.get(addressKey).getBalance();
-            if (balance == null) {
+            String addressKey = Base58.encode(address);
+            BalanceCacheEntity entity = balanceMap.get(addressKey);
+            Balance balance = null;
+            if (entity == null) {
                 try {
                     balance = calBalanceByAddress(address);
                 } catch (NulsException e) {
                     Log.info("getbalance of address[" + Base58.encode(address) + "] error");
                 }
+            }else {
+                balance = entity.getBalance();
             }
             return Result.getSuccess().setData(balance);
         } finally {
@@ -137,7 +140,7 @@ public class BalanceManager {
         lock.lock();
         try {
             if (address != null) {
-                balanceMap.remove(new String(address));
+                balanceMap.remove(Base58.encode(address));
             }
         } finally {
             lock.unlock();
@@ -203,7 +206,7 @@ public class BalanceManager {
             balance.setBalance(usable.add(locked));
             balanceCacheEntity.setBalance(balance);
 
-            balanceMap.put(new String(address), balanceCacheEntity);
+            balanceMap.put(Base58.encode(address), balanceCacheEntity);
             return balance;
         } finally {
             lock.unlock();
@@ -234,6 +237,9 @@ public class BalanceManager {
         try {
             for (String address : balanceMap.keySet()) {
                 BalanceCacheEntity entity = balanceMap.get(address);
+                if(entity == null){
+                    balanceMap.remove(address);
+                }
                 if (entity.getEarlistLockTime() == 0 && entity.getLowestLockHeigh() == 0) {
                     continue;
                 }
