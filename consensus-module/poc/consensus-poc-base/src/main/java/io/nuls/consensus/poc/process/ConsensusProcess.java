@@ -227,7 +227,7 @@ public class ConsensusProcess {
         } else {
             preMember = round.getMember(self.getPackingIndexOfRound() - 1);
         }
-        if(preMember == null) {
+        if (preMember == null) {
             return true;
         }
         byte[] preBlockPackingAddress = preMember.getPackingAddress();
@@ -346,7 +346,7 @@ public class ConsensusProcess {
                 continue;
             }
 
-            if(!outHashSet.add(tx.getHash())) {
+            if (!outHashSet.add(tx.getHash())) {
                 Log.warn("重复的交易");
                 continue;
             }
@@ -411,10 +411,13 @@ public class ConsensusProcess {
         //当连续100个黄牌时，给出一个红牌
         //When 100 yellow CARDS in a row, give a red card.
         List<byte[]> addressList = yellowPunishTransaction.getTxData().getAddressList();
-
+        Set<Integer> punishedSet = new HashSet<>();
         for (byte[] address : addressList) {
             MeetingMember member = round.getMemberByAgentAddress(address);
             if (member.getCreditVal() <= -1) {
+                if (!punishedSet.add(member.getPackingIndexOfRound())) {
+                    continue;
+                }
                 RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
                 RedPunishData redPunishData = new RedPunishData();
                 redPunishData.setAddress(address);
