@@ -414,7 +414,7 @@ public class ConsensusProcess {
         Set<Integer> punishedSet = new HashSet<>();
         for (byte[] address : addressList) {
             MeetingMember member = round.getMemberByAgentAddress(address);
-            if (member.getCreditVal() <= -1) {
+            if (member.getCreditVal() <= PocConsensusConstant.RED_PUNISH_CREDIT_VAL) {
                 if (!punishedSet.add(member.getPackingIndexOfRound())) {
                     continue;
                 }

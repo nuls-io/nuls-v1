@@ -99,4 +99,6 @@ public interface PocConsensusConstant {
     long CONSENSUS_LOCK_TIME = -1;
     long STOP_AGENT_LOCK_TIME = 3 * 24 * 3600000L;
     long RED_PUNISH_LOCK_TIME = 60 * 24 * 3600000L;
+
+    int RED_PUNISH_CREDIT_VAL = 0;
 }
