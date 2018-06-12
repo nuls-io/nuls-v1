@@ -35,14 +35,19 @@ import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.Chain;
+import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
+import io.nuls.consensus.poc.protocol.entity.RedPunishData;
+import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.consensus.poc.util.ConsensusTool;
+import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
@@ -123,19 +128,20 @@ public class BlockProcess {
 
         ValidateResult<List<Transaction>> validateResult = ledgerService.verifyDoubleSpend(block);
         if (validateResult.isFailed() && validateResult.getErrorCode().equals(LedgerErrorCode.LEDGER_DOUBLE_SPENT)) {
-//todo            RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
-//            RedPunishData redPunishData = new RedPunishData();
-//            redPunishData.setAddress(AddressTool.getAddress(block.getHeader().getScriptSig()));
-//            SmallBlock smallBlock = new SmallBlock();
-//            smallBlock.setHeader(block.getHeader());
-//            smallBlock.setTxHashList(block.getTxHashList());
-//            for (Transaction tx : validateResult.getData()) {
-//                smallBlock.addBaseTx(tx);
-//            }
-//            redPunishData.setEvidence(smallBlock.serialize());
-//            redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
-//            redPunishTransaction.setTxData(redPunishData);
-//            NulsContext.getServiceBean(ConsensusService.class).newTx(redPunishTransaction);
+            RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
+            RedPunishData redPunishData = new RedPunishData();
+            redPunishData.setAddress(AddressTool.getAddress(block.getHeader().getScriptSig()));
+            SmallBlock smallBlock = new SmallBlock();
+            smallBlock.setHeader(block.getHeader());
+            smallBlock.setTxHashList(block.getTxHashList());
+            for (Transaction tx : validateResult.getData()) {
+                smallBlock.addBaseTx(tx);
+            }
+            redPunishData.setEvidence(smallBlock.serialize());
+            redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
+            redPunishTransaction.setTxData(redPunishData);
+            redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
+            NulsContext.getServiceBean(ConsensusService.class).newTx(redPunishTransaction);
             return false;
         }
 
@@ -194,8 +200,8 @@ public class BlockProcess {
                         break;
                     }
 
-                    for(Future<Boolean> future : futures) {
-                        if(!future.get()) {
+                    for (Future<Boolean> future : futures) {
+                        if (!future.get()) {
                             success = false;
                             Log.info("verify failed!");
                             break;

@@ -420,7 +420,7 @@ public class ConsensusProcess {
                 redPunishData.setAddress(address);
                 redPunishData.setReasonCode(PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode());
                 redPunishTransaction.setTxData(redPunishData);
-                redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction));
+                redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
                 txList.add(redPunishTransaction);
             }
         }
