@@ -23,14 +23,14 @@
  *
  */
 
-package io.nuls.account.sdk.model;
+package io.nuls.sdk.model;
 
-import io.nuls.account.sdk.util.*;
 import io.nuls.sdk.constant.KernelErrorCode;
 import io.nuls.sdk.constant.SDKConstant;
-import io.nuls.sdk.exception.NulsRuntimeException;
 import io.nuls.sdk.crypto.Base58;
 import io.nuls.sdk.crypto.Hex;
+import io.nuls.sdk.exception.NulsRuntimeException;
+import io.nuls.sdk.utils.AddressTool;
 import io.nuls.sdk.utils.Log;
 import io.nuls.sdk.utils.SerializeUtils;
 

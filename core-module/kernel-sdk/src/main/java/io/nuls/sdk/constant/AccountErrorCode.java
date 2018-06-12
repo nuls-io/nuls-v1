@@ -23,10 +23,8 @@
  *
  */
 
-package io.nuls.account.sdk.constant;
+package io.nuls.sdk.constant;
 
-
-import io.nuls.sdk.constant.ErrorCode;
 
 /**
  * @author: Niels Wang

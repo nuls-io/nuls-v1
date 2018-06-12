@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.account.sdk.util;
+package io.nuls.sdk.utils;
 
 import io.nuls.sdk.constant.KernelErrorCode;
 import io.nuls.sdk.constant.SDKConstant;
@@ -31,7 +31,6 @@ import io.nuls.sdk.crypto.Base58;
 import io.nuls.sdk.exception.NulsException;
 import io.nuls.sdk.exception.NulsRuntimeException;
 import io.nuls.sdk.script.P2PKHScriptSig;
-import io.nuls.sdk.utils.*;
 
 /**
  * @author: Niels Wang

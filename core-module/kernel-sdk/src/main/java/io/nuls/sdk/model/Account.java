@@ -21,16 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.account.sdk.model;
+package io.nuls.sdk.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.nuls.account.sdk.constant.AccountErrorCode;
+import io.nuls.sdk.constant.AccountErrorCode;
 import io.nuls.sdk.crypto.AESEncrypt;
 import io.nuls.sdk.crypto.ECKey;
 import io.nuls.sdk.crypto.EncryptedData;
 import io.nuls.sdk.crypto.Sha256Hash;
 import io.nuls.sdk.exception.NulsException;
-import io.nuls.sdk.utils.*;
+import io.nuls.sdk.utils.StringUtils;
 import org.spongycastle.crypto.params.KeyParameter;
 
 import java.math.BigInteger;

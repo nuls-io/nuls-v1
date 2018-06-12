@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.account.sdk.model.dto;
+package io.nuls.sdk.model.dto;
 
 import io.nuls.sdk.model.Na;
 
@@ -38,46 +38,45 @@ public class BalanceDto {
     /**
      * 余额
      */
-    private double balance;
+    private long balance;
 
     /**
      * 可用余额
      */
-    private double usable;
+    private long usable;
 
     /**
      * 锁定余额
      */
-    private double locked;
+    private long locked;
 
     public BalanceDto(Map<String, Object> map) {
-        this.balance = Na.naToNuls(map.get("balance"));
-        this.usable = Na.naToNuls(map.get("usable"));
-        this.locked = Na.naToNuls(map.get("locked"));
+        this.balance = Na.parseNa(map.get("balance"));
+        this.usable = Na.parseNa(map.get("usable"));
+        this.locked = Na.parseNa(map.get("locked"));
     }
 
-    public double getBalance() {
+    public long getBalance() {
         return balance;
     }
 
-    public void setBalance(double balance) {
+    public void setBalance(long balance) {
         this.balance = balance;
     }
 
-    public double getUsable() {
+    public long getUsable() {
         return usable;
     }
 
-    public void setUsable(double usable) {
+    public void setUsable(long usable) {
         this.usable = usable;
     }
 
-    public double getLocked() {
+    public long getLocked() {
         return locked;
     }
 
-    public void setLocked(double locked) {
+    public void setLocked(long locked) {
         this.locked = locked;
     }
-
 }

@@ -23,17 +23,16 @@
  *
  */
 
-package io.nuls.account.sdk.util;
-
-import io.nuls.account.sdk.constant.AccountErrorCode;
-import io.nuls.account.sdk.model.Account;
-import io.nuls.account.sdk.model.Address;
+package io.nuls.sdk.utils;
+;
+import io.nuls.sdk.constant.AccountErrorCode;
 import io.nuls.sdk.constant.SDKConstant;
 import io.nuls.sdk.crypto.ECKey;
 import io.nuls.sdk.crypto.Hex;
 import io.nuls.sdk.crypto.Sha256Hash;
 import io.nuls.sdk.exception.NulsException;
-import io.nuls.sdk.utils.*;
+import io.nuls.sdk.model.Account;
+import io.nuls.sdk.model.Address;
 
 import java.math.BigInteger;
 
