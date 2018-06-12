@@ -53,13 +53,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         }
         map.put("outputs", outputs);
         TransactionDto transactionDto = new TransactionDto(map);
-        result.setData(map);
-        try {
-            System.out.println(JSONUtils.obj2json(transactionDto));
-            System.out.println(JSONUtils.obj2json(result));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        result.setData(transactionDto);
         return result;
     }
 
@@ -119,7 +113,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         SDKBootstrap.sdkStart();
         AccountLedgerService als = new AccountLedgerServiceImpl();
         try {
-//            System.out.println(JSONUtils.obj2json(als.getTxByHash("002023c66d10cf9047dbcca12aee2235ff9dfe0f13db3c921a2ec22e0dd63331cb85")));
+            System.out.println(JSONUtils.obj2json(als.getTxByHash("002023c66d10cf9047dbcca12aee2235ff9dfe0f13db3c921a2ec22e0dd63331cb85")));
 //            System.out.println(JSONUtils.obj2json(als.getBalance("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
             System.out.println(JSONUtils.obj2json(als.transfer("2ChDcC1nvki521xXhYAUzYXt4RLNuLs"
                     , "2CZ4AUEFkAx4AJUk365mdZ75Qod3Shk"
