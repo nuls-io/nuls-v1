@@ -24,6 +24,7 @@
  */
 package io.nuls.core.tools.crypto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import org.slf4j.Logger;
@@ -201,6 +202,7 @@ public class ECKey {
      *
      * @return BigInteger
      */
+    @JsonIgnore
     public BigInteger getPrivKey() {
         if (priv == null) {
             throw new MissingPrivateKeyException();
@@ -213,6 +215,7 @@ public class ECKey {
      *
      * @return byte[]
      */
+    @JsonIgnore
     public byte[] getPrivKeyBytes() {
         return getPrivKey().toByteArray();
     }
@@ -222,6 +225,7 @@ public class ECKey {
      *
      * @return String
      */
+    @JsonIgnore
     public String getPrivateKeyAsHex() {
         return Hex.encode(getPrivKeyBytes());
     }

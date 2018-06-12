@@ -23,9 +23,7 @@
  *
  */
 
-package io.nuls.account.sdk.model;
-
-import io.nuls.sdk.model.Na;
+package io.nuls.sdk.model;
 
 import java.io.Serializable;
 
