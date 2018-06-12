@@ -273,14 +273,14 @@ public class ConsensusTool {
         return punishTx;
     }
 
-    public static CoinData getStopAgentCoinData(Agent agent) throws IOException {
+    public static CoinData getStopAgentCoinData(Agent agent,long lockTime) throws IOException {
         if (null == agent) {
             return null;
         }
         NulsDigestData createTxHash = agent.getTxHash();
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
-        toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), TimeService.currentTimeMillis() + PocConsensusConstant.RED_PUNISH_LOCK_TIME));
+        toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), TimeService.currentTimeMillis() + lockTime));
         coinData.setTo(toList);
         CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);
         if (null == transaction) {
@@ -338,25 +338,18 @@ public class ConsensusTool {
         return coinData;
     }
 
-    public static CoinData getStopAgentCoinData(byte[] address) throws IOException {
+    public static CoinData getStopAgentCoinData(byte[] address,long lockTime) throws IOException {
         List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
         for (Agent agent : agentList) {
             if (agent.getDelHeight() > 0) {
                 continue;
             }
             if (Arrays.equals(address, agent.getAgentAddress())) {
-                return getStopAgentCoinData(agent);
+                return getStopAgentCoinData(agent,lockTime);
             }
         }
         return null;
     }
 
-    public static CoinData getStopAgentCoinData(NulsDigestData agentHash) throws IOException {
-        AgentPo agentPo = agentStorageService.get(agentHash);
-        if (null == agentPo) {
-            return null;
-        }
-        return getStopAgentCoinData(PoConvertUtil.poToAgent(agentPo));
-    }
 }
 
