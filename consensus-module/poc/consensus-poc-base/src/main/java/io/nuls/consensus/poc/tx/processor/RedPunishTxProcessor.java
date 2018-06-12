@@ -99,71 +99,36 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
         if (null == agent) {
             return Result.getFailed(KernelErrorCode.DATA_ERROR, "There is no agent can be punished.");
         }
-        CreateAgentTransaction transaction = (CreateAgentTransaction) this.ledgerService.getTx(agent.getHash());
-        if (null == transaction) {
-            return Result.getFailed(KernelErrorCode.DATA_ERROR, "Can't find the transaction which create the agent!");
-        }
-        try {
-            Result rollbackResult = this.ledgerService.rollbackUnlockTxCoinData(transaction);
-            if (rollbackResult.isFailed()) {
-                return rollbackResult;
-            }
-            rollbackResult = this.accountLedgerService.rollbackUnlockTxCoinData(transaction);
-            if (rollbackResult.isFailed()) {
-                this.ledgerService.rollbackUnlockTxCoinData(transaction);
-                return rollbackResult;
-            }
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(e.getErrorCode(), e.getMessage());
-        }
         List<DepositPo> depositPoList = depositStorageService.getList();
-        if (null == depositPoList) {
-            return Result.getSuccess();
-        }
-        List<Transaction> rollbackedList = new ArrayList<>();
-        rollbackedList.add(transaction);
-        for (DepositPo po : depositPoList) {
-            if (po.getDelHeight() >= 0) {
-                continue;
-            }
-            if (!po.getAgentHash().equals(agent.getHash())) {
-                continue;
-            }
-            po.setDelHeight(-1L);
-            Transaction depositTx = ledgerService.getTx(po.getTxHash());
-            try {
-                Result result = ledgerService.rollbackUnlockTxCoinData(depositTx);
-                if (result.isFailed()) {
-                    this.unlockTxList(rollbackedList,tx.getBlockHeight());
-                    return result;
+        List<DepositPo> updatedList = new ArrayList<>();
+        for(DepositPo po:depositPoList){
+            po.setDelHeight(-1);
+            boolean success = this.depositStorageService.save(po);
+            if(!success){
+                for(DepositPo po2:depositPoList) {
+                    po2.setDelHeight(tx.getBlockHeight());
+                    this.depositStorageService.save(po2);
                 }
-                result = accountLedgerService.rollbackUnlockTxCoinData(depositTx);
-                if (result.isFailed()) {
-                    this.unlockTxList(rollbackedList,tx.getBlockHeight());
-                    return result;
-                }
-                boolean b = depositStorageService.save(po);
-                if (!b) {
-                    this.unlockTxList(rollbackedList,tx.getBlockHeight());
-                    return ValidateResult.getFailedResult(this.getClass().getName(), "update deposit failed!");
-                }
-                rollbackedList.add(depositTx);
-            } catch (NulsException e) {
-                this.unlockTxList(rollbackedList,tx.getBlockHeight());
-                return Result.getFailed(e.getMessage());
+                return Result.getFailed(KernelErrorCode.DATA_ERROR, "Update deposit failed!");
             }
+            updatedList.add(po);
         }
         AgentPo agentPo = agent;
         agentPo.setDelHeight(-1L);
         boolean success = agentStorageService.save(agentPo);
         if (!success) {
-            this.unlockTxList(rollbackedList,tx.getBlockHeight());
+            for(DepositPo po2:depositPoList) {
+                po2.setDelHeight(tx.getBlockHeight());
+                this.depositStorageService.save(po2);
+            }
             return Result.getFailed(KernelErrorCode.DATA_ERROR, "Can't update the agent!");
         }
         success = storageService.delete(getPoKey(punishData.getAddress(), PunishType.RED.getCode(), tx.getBlockHeight()));
         if (!success) {
-            this.unlockTxList(rollbackedList,tx.getBlockHeight());
+            for(DepositPo po2:depositPoList) {
+                po2.setDelHeight(tx.getBlockHeight());
+                this.depositStorageService.save(po2);
+            }
             agentPo.setDelHeight(tx.getBlockHeight());
             agentStorageService.save(agentPo);
             throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollbackTransaction tx failed!");
@@ -172,16 +137,6 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
         return Result.getSuccess();
     }
 
-    private void unlockTxList(List<Transaction> rollbackedList,long height) {
-        for (Transaction depositTx : rollbackedList) {
-            try {
-                ledgerService.unlockTxCoinData(depositTx, height);
-            } catch (NulsException e) {
-                Log.error(e);
-            }
-            accountLedgerService.unlockCoinData(depositTx, height);
-        }
-    }
 
     @Override
     public Result onCommit(RedPunishTransaction tx, Object secondaryData) {
@@ -210,30 +165,10 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
             Log.error("There is no agent can be punished.");
             return Result.getSuccess();
         }
-        CreateAgentTransaction transaction = (CreateAgentTransaction) this.ledgerService.getTx(agent.getHash());
-        if (null == transaction) {
-            return Result.getFailed(KernelErrorCode.DATA_ERROR, "Can't find the transaction which create the agent!");
-        }
-        try {
-            Result unlockResult = this.ledgerService.unlockTxCoinData(transaction, tx.getTime() + 60 * 24 * 3600000L);
-            if (unlockResult.isFailed()) {
-                return unlockResult;
-            }
-            unlockResult = this.accountLedgerService.unlockCoinData(transaction, tx.getTime() + 60 * 24 * 3600000L);
-            if (unlockResult.isFailed()) {
-                this.ledgerService.rollbackUnlockTxCoinData(transaction);
-                return unlockResult;
-            }
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(e.getErrorCode(), e.getMessage());
-        }
+
+
         List<DepositPo> depositPoList = depositStorageService.getList();
-        if (null == depositPoList) {
-            return Result.getSuccess();
-        }
-        List<Transaction> unlockedList = new ArrayList<>();
-        unlockedList.add(transaction);
+        List<DepositPo> updatedList = new ArrayList<>();
         for (DepositPo po : depositPoList) {
             if (po.getDelHeight() >= 0) {
                 continue;
@@ -242,54 +177,36 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
                 continue;
             }
             po.setDelHeight(tx.getBlockHeight());
-            Transaction depositTx = ledgerService.getTx(po.getTxHash());
-            try {
-                Result result = ledgerService.unlockTxCoinData(depositTx, 0L);
-                if (result.isFailed()) {
-                    this.rollbackUnlockTxList(unlockedList);
-                    return result;
+            boolean b = depositStorageService.save(po);
+            if (!b) {
+                for(DepositPo po2:updatedList){
+                    po2.setDelHeight(-1);
+                    this.depositStorageService.save(po2);
                 }
-                result = accountLedgerService.unlockCoinData(depositTx, 0L);
-                if (result.isFailed()) {
-                    this.rollbackUnlockTxList(unlockedList);
-                    return result;
-                }
-                boolean b = depositStorageService.save(po);
-                if (!b) {
-                    this.rollbackUnlockTxList(unlockedList);
-                    return ValidateResult.getFailedResult(this.getClass().getName(), "update deposit failed!");
-                }
-                unlockedList.add(depositTx);
-            } catch (NulsException e) {
-                this.rollbackUnlockTxList(unlockedList);
-                return Result.getFailed(e.getMessage());
+                return ValidateResult.getFailedResult(this.getClass().getName(), "update deposit failed!");
             }
+            updatedList.add(po);
         }
         boolean success = storageService.save(punishLogPo);
         if (!success) {
-            this.rollbackUnlockTxList(unlockedList);
+            for(DepositPo po2:updatedList){
+                po2.setDelHeight(-1);
+                this.depositStorageService.save(po2);
+            }
             throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollbackTransaction tx failed!");
         }
         AgentPo agentPo = agent;
         agentPo.setDelHeight(tx.getBlockHeight());
         success = agentStorageService.save(agentPo);
         if (!success) {
-            this.rollbackUnlockTxList(unlockedList);
+            for(DepositPo po2:updatedList){
+                po2.setDelHeight(-1);
+                this.depositStorageService.save(po2);
+            }
             this.storageService.delete(punishLogPo.getKey());
             return Result.getFailed(KernelErrorCode.DATA_ERROR, "Can't update the agent!");
         }
         return Result.getSuccess();
-    }
-
-    private void rollbackUnlockTxList(List<Transaction> unlockedList) {
-        for (Transaction depositTx : unlockedList) {
-            try {
-                ledgerService.rollbackUnlockTxCoinData(depositTx);
-            } catch (NulsException e) {
-                Log.error(e);
-            }
-            accountLedgerService.rollbackUnlockTxCoinData(depositTx);
-        }
     }
 
     /**
