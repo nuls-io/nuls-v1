@@ -25,16 +25,20 @@
 
 package io.nuls.consensus.poc.block.validator;
 
+import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
+import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
@@ -49,6 +53,8 @@ import java.util.Arrays;
  */
 @Component
 public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
+
+    private static String CLASS_NAME = BifurcationValidator.class.getName();
 
     @Autowired
     private BlockService blockService;
@@ -75,18 +81,26 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
                 byte[] header2 = otherBlockHeader.serialize();
                 redPunishData.setEvidence(ArraysTool.joinintTogether(header1, header2));
             } catch (Exception e) {
-                ValidateResult.getFailedResult(this.getClass().getName(), e.getMessage());
+                ValidateResult.getFailedResult(CLASS_NAME, e.getMessage());
             }
-            redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
+            redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
             redPunishTransaction.setTxData(redPunishData);
+            CoinData coinData = null;
+            try {
+                coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress(), PocConsensusConstant.RED_PUNISH_LOCK_TIME);
+            } catch (IOException e) {
+                Log.error(e);
+                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
+            }
+            redPunishTransaction.setCoinData(coinData);
             try {
                 redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
             } catch (IOException e) {
                 Log.error(e);
-                return ValidateResult.getFailedResult(this.getClass().getName(), "Bifurcation");
+                return ValidateResult.getFailedResult(CLASS_NAME, "Bifurcation");
             }
             this.consensusService.newTx(redPunishTransaction);
-            return ValidateResult.getFailedResult(this.getClass().getName(), "Bifurcation");
+            return ValidateResult.getFailedResult(CLASS_NAME, "Bifurcation");
         }
 
         return result;

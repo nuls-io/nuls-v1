@@ -137,6 +137,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 return result;
             }
         }
+
+        balanceManager.refreshBalanceIfNesessary();
+
         return Result.getSuccess().setData(savedTxList.size());
     }
 
@@ -300,7 +303,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         Result result = Result.getSuccess().setData(txs.size());
         result = rollbackTransaction(txs, true);
         if (result.isSuccess()) {
-            balanceManager.refreshBalance();
+            balanceManager.refreshBalanceIfNesessary();
         }
         return result;
     }
@@ -742,5 +745,4 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public Result<Transaction> getUnconfirmedTransaction(NulsDigestData hash) {
         return unconfirmedTransactionStorageService.getUnconfirmedTx(hash);
     }
-
 }

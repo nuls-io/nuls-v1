@@ -25,14 +25,29 @@
 
 package io.nuls.consensus.poc.tx.validator;
 
+import io.nuls.consensus.poc.config.ConsensusConfig;
+import io.nuls.consensus.poc.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
+import io.nuls.consensus.poc.util.ConsensusTool;
+import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.*;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.model.SmallBlock;
+import io.nuls.protocol.model.validator.HeaderSignValidator;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Niels
@@ -40,26 +55,94 @@ import io.nuls.protocol.model.SmallBlock;
  */
 @Component
 public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunishTransaction> {
+
+    private static final String CLASS_NAME = RedPunishValidator.class.getName();
+
+    @Autowired
+    private HeaderSignValidator validator;
+
+    @Autowired
+    private LedgerService ledgerService;
+
     @Override
     public ValidateResult validate(RedPunishTransaction data) {
         RedPunishData punishData = data.getTxData();
+        if (ConsensusConfig.getSeedNodeStringList().contains(Base58.encode(punishData.getAddress()))) {
+            return ValidateResult.getFailedResult(CLASS_NAME, "The address is a consensus seed!");
+        }
+
         if (punishData.getReasonCode() == PunishReasonEnum.DOUBLE_SPEND.getCode()) {
             SmallBlock smallBlock = new SmallBlock();
             try {
                 smallBlock.parse(punishData.getEvidence());
             } catch (NulsException e) {
                 Log.error(e);
-                return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode(), e.getMessage());
+                return ValidateResult.getFailedResult(CLASS_NAME, e.getErrorCode(), e.getMessage());
+            }
+            BlockHeader header = smallBlock.getHeader();
+            ValidateResult result = validator.validate(header);
+            if (result.isFailed()) {
+                return ValidateResult.getFailedResult(CLASS_NAME, result.getErrorCode(), result.getMsg());
+            }
+            List<NulsDigestData> txHashList = smallBlock.getTxHashList();
+            if (!header.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(smallBlock.getTxHashList()))) {
+                return ValidateResult.getFailedResult(CLASS_NAME, "The header is wrong!");
+            }
+            List<Transaction> txList = smallBlock.getSubTxList();
+            if (null == txList || txList.size() < 2) {
+                return ValidateResult.getFailedResult(CLASS_NAME, "The transactions is wrong!");
+            }
+            result = ledgerService.verifyDoubleSpend(txList);
+            if (result.isSuccess()) {
+                return ValidateResult.getFailedResult(CLASS_NAME, "The transactions never double spend!");
             }
         } else if (punishData.getReasonCode() == PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode()) {
-
-
+            return ValidateResult.getSuccessResult();
         } else if (punishData.getReasonCode() == PunishReasonEnum.BIFURCATION.getCode()) {
+            NulsByteBuffer byteBuffer = new NulsByteBuffer(punishData.getEvidence());
 
+            BlockHeader header1 = null;
+            BlockHeader header2 = null;
+            try {
+                header1 = byteBuffer.readNulsData(new BlockHeader());
+                header2 = byteBuffer.readNulsData(new BlockHeader());
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+            if (null == header1 || null == header2) {
+                return ValidateResult.getFailedResult(CLASS_NAME, "The blockheaders is wrong!");
+            }
+            if (header1.getHeight() != header2.getHeight() || !header1.getPreHash().equals(header2.getPreHash())) {
+                return ValidateResult.getFailedResult(CLASS_NAME, "Never bifurcation!");
+            }
+            ValidateResult result = validator.validate(header1);
+            if (result.isFailed()) {
+                return ValidateResult.getFailedResult(CLASS_NAME, "The header1 is wrong!");
+            }
+            result = validator.validate(header2);
+            if (result.isFailed()) {
+                return ValidateResult.getFailedResult(CLASS_NAME, "The header2 is wrong!");
+            }
+            if (!Arrays.equals(header1.getScriptSig().getPublicKey(), header2.getScriptSig().getPublicKey())) {
+                return ValidateResult.getFailedResult(CLASS_NAME, "Never bifurcation!");
+            }
         } else {
             return ValidateResult.getFailedResult(this.getClass().getName(), "Wrong red punish reason!");
         }
 
+        try {
+            return verifyCoinData(data);
+        } catch (IOException e) {
+            Log.error(e);
+            return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
+        }
+    }
+
+    private ValidateResult verifyCoinData(RedPunishTransaction tx) throws IOException {
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(tx.getTxData().getAddress(), PocConsensusConstant.RED_PUNISH_LOCK_TIME);
+        if (!Arrays.equals(coinData.serialize(), tx.getCoinData().serialize())) {
+            return ValidateResult.getFailedResult(CLASS_NAME, "The coindata is wrong!");
+        }
         return ValidateResult.getSuccessResult();
     }
 }

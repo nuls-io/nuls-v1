@@ -47,6 +47,7 @@ import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.consensus.poc.rpc.model.*;
 import io.nuls.consensus.poc.rpc.utils.AgentComparator;
 import io.nuls.consensus.poc.service.impl.PocRewardCacheService;
+import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Base58;
@@ -563,65 +564,12 @@ public class PocConsensusResource {
         if (agent == null || agent.getDelHeight() > 0) {
             return Result.getFailed("Can not found any agent!").toRpcClientResult();
         }
-        NulsDigestData createTxHash = agent.getTxHash();
-        stopAgent.setCreateTxHash(createTxHash);
-        tx.setTxData(stopAgent);
-        CoinData coinData = new CoinData();
-        List<Coin> toList = new ArrayList<>();
-        toList.add(new Coin(stopAgent.getAddress(), agent.getDeposit(), TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME));
-        coinData.setTo(toList);
-        CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);
-        if (null == transaction) {
-            return Result.getFailed("Can not find the create agent transaction!").toRpcClientResult();
-        }
-        List<Coin> fromList = new ArrayList<>();
-        for (int index = 0; index < transaction.getCoinData().getTo().size(); index++) {
-            Coin coin = transaction.getCoinData().getTo().get(index);
-            if (coin.getNa().equals(agent.getDeposit()) && coin.getLockTime() == -1L) {
-                coin.setOwner(ArraysTool.joinintTogether(transaction.getHash().serialize(), new VarInt(index).encode()));
-                fromList.add(coin);
-                break;
-            }
-        }
-        if (fromList.isEmpty()) {
-            return Result.getFailed(KernelErrorCode.DATA_ERROR).toRpcClientResult();
-        }
-        coinData.setFrom(fromList);
 
-        List<Deposit> deposits = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
-        List<String> addressList = new ArrayList<>();
-        Map<String, Coin> toMap = new HashMap<>();
-        for (Deposit deposit : deposits) {
-            if (deposit.getDelHeight() > 0) {
-                continue;
-            }
-            if (!deposit.getAgentHash().equals(agent.getTxHash())) {
-                continue;
-            }
-            DepositTransaction dtx = (DepositTransaction) ledgerService.getTx(deposit.getTxHash());
-            Coin fromCoin = null;
-            for (Coin coin : dtx.getCoinData().getTo()) {
-                if (!coin.getNa().equals(deposit.getDeposit()) || coin.getLockTime() != -1L) {
-                    continue;
-                }
-                fromCoin = new Coin(ArraysTool.joinintTogether(dtx.getHash().serialize(), new VarInt(0).encode()), coin.getNa(), coin.getLockTime());
-                fromCoin.setLockTime(-1L);
-                fromList.add(fromCoin);
-                break;
-            }
-            String address = Base58.encode(deposit.getAddress());
-            Coin coin = toMap.get(address);
-            if (null == coin) {
-                coin = new Coin(deposit.getAddress(), deposit.getDeposit(), 0);
-                addressList.add(address);
-                toMap.put(address, coin);
-            } else {
-                coin.setNa(coin.getNa().add(fromCoin.getNa()));
-            }
-        }
-        for (String address : addressList) {
-            coinData.getTo().add(toMap.get(address));
-        }
+        stopAgent.setCreateTxHash(agent.getTxHash());
+        tx.setTxData(stopAgent);
+
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, PocConsensusConstant.STOP_AGENT_LOCK_TIME);
+
         tx.setCoinData(coinData);
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
