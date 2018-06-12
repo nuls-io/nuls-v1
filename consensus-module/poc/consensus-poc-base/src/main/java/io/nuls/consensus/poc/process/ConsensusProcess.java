@@ -415,8 +415,7 @@ public class ConsensusProcess {
         for (byte[] address : addressList) {
             MeetingMember member = round.getMemberByAgentAddress(address);
             if (null == member) {
-                //todo 考虑刚刚到临界值时委托减少的情况是否需要处理
-                continue;
+                member = round.getPreRound().getMemberByAgentAddress(address);
             }
             if (member.getCreditVal() <= PocConsensusConstant.RED_PUNISH_CREDIT_VAL) {
                 if (!punishedSet.add(member.getPackingIndexOfRound())) {

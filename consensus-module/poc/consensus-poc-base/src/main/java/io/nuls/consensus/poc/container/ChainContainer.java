@@ -386,9 +386,13 @@ public class ChainContainer implements Cloneable {
             BlockLog.debug("the red punish is wrong!");
             return false;
         } else {
-            List<MeetingMember> memberList = currentRound.getMemberList();
+            List<byte[]> addressList = yellowPunishTransaction.getTxData().getAddressList();
             List<String> punishAddress = new ArrayList<>();
-            for (MeetingMember item : memberList) {
+            for (byte[] address : addressList) {
+                MeetingMember item = currentRound.getMemberByAgentAddress(address);
+                if(null==item){
+                    item = currentRound.getPreRound().getMemberByAgentAddress(address);
+                }
                 if (item.getCreditVal() <= PocConsensusConstant.RED_PUNISH_CREDIT_VAL) {
                     punishAddress.add(Base58.encode(item.getAgent().getAgentAddress()));
                 }
