@@ -414,13 +414,13 @@ public class ConsensusProcess {
 
         for (byte[] address : addressList) {
             MeetingMember member = round.getMemberByAgentAddress(address);
-            if (member.getCreditVal() <= -1) {
+            if (member.getCreditVal() <= 1) {
                 RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
                 RedPunishData redPunishData = new RedPunishData();
                 redPunishData.setAddress(address);
                 redPunishData.setReasonCode(PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode());
                 redPunishTransaction.setTxData(redPunishData);
-                redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction));
+                redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
                 txList.add(redPunishTransaction);
             }
         }

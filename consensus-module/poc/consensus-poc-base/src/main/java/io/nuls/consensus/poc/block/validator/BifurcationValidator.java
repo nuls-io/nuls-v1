@@ -30,14 +30,17 @@ import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.array.ArraysTool;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.protocol.service.BlockService;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -76,6 +79,12 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
             }
             redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
             redPunishTransaction.setTxData(redPunishData);
+            try {
+                redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
+            } catch (IOException e) {
+                Log.error(e);
+                return ValidateResult.getFailedResult(this.getClass().getName(), "Bifurcation");
+            }
             this.consensusService.newTx(redPunishTransaction);
             return ValidateResult.getFailedResult(this.getClass().getName(), "Bifurcation");
         }
