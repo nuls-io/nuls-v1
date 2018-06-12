@@ -420,6 +420,8 @@ public class ConsensusProcess {
                 redPunishData.setAddress(address);
                 redPunishData.setReasonCode(PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode());
                 redPunishTransaction.setTxData(redPunishData);
+                CoinData coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress());
+                redPunishTransaction.setCoinData(coinData);
                 redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
                 txList.add(redPunishTransaction);
             }

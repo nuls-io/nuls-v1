@@ -143,6 +143,8 @@ public class BlockProcess {
             redPunishData.setEvidence(smallBlock.serialize());
             redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
             redPunishTransaction.setTxData(redPunishData);
+            CoinData coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress());
+            redPunishTransaction.setCoinData(coinData);
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
             NulsContext.getServiceBean(ConsensusService.class).newTx(redPunishTransaction);
             return false;
