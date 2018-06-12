@@ -184,12 +184,12 @@ public class BalanceManager {
                         continue;
                     }
                     // the height lock type
-                    if (balanceCacheEntity.getLowestLockHeigh() == 0 || lockTime < NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime < balanceCacheEntity.getLowestLockHeigh()) {
+                    if (balanceCacheEntity.getLowestLockHeigh() == 0 || (lockTime < NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime < balanceCacheEntity.getLowestLockHeigh())) {
                         balanceCacheEntity.setLowestLockHeigh(lockTime);
                         continue;
                     }
                     // the time lock type
-                    if (balanceCacheEntity.getEarlistLockTime() == 0 || lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime < balanceCacheEntity.getEarlistLockTime()) {
+                    if (balanceCacheEntity.getEarlistLockTime() == 0 || (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime < balanceCacheEntity.getEarlistLockTime())) {
                         balanceCacheEntity.setEarlistLockTime(lockTime);
                         continue;
                     }
