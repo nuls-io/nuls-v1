@@ -25,6 +25,10 @@
 
 package io.nuls.account.ledger.sdk.model.dto;
 
+import io.nuls.sdk.utils.StringUtils;
+
+import java.util.Map;
+
 public class InputDto {
 
     /**
@@ -47,12 +51,12 @@ public class InputDto {
      */
     private Long value;
 
-   /* public InputDto(Coin input) {
-        this.fromHash = AccountLegerUtils.getTxHash(input.getOwner());
-        this.fromIndex = AccountLegerUtils.getIndex(input.getOwner());
-        this.address = Base58.encode(input.getFrom().getOwner());
-        this.value = input.getFrom().getNa().getValue();
-    }*/
+    public InputDto(Map<String, Object> map) {
+        this.fromHash = (String) map.get("fromHash");
+        this.fromIndex = (Integer) map.get("fromIndex");
+        this.address = (String) map.get("address");
+        this.value = StringUtils.parseLong(map.get("value"));
+    }
 
     public String getAddress() {
         return address;

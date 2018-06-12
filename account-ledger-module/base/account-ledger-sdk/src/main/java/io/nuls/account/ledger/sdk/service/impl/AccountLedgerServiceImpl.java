@@ -1,5 +1,8 @@
 package io.nuls.account.ledger.sdk.service.impl;
 
+import io.nuls.account.ledger.sdk.model.dto.InputDto;
+import io.nuls.account.ledger.sdk.model.dto.OutputDto;
+import io.nuls.account.ledger.sdk.model.dto.TransactionDto;
 import io.nuls.account.ledger.sdk.service.AccountLedgerService;
 import io.nuls.sdk.SDKBootstrap;
 import io.nuls.sdk.constant.AccountErrorCode;
@@ -12,8 +15,7 @@ import io.nuls.sdk.utils.RestFulUtils;
 import io.nuls.sdk.utils.StringUtils;
 
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author: Charlie
@@ -25,8 +27,34 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
 
     @Override
     public Result getTxByHash(String hash) {
+        if(StringUtils.isBlank(hash)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
 
-        return null;
+        Result result = restFul.get("/accountledger/tx/" + hash, null);
+
+        Map<String, Object> map = (Map)result.getData();
+
+        //重新组装input
+        List<Map<String, Object>> inputMaps = (List<Map<String, Object>>)map.get("inputs");
+        List<InputDto> inputs = new ArrayList<>();
+        for(Map<String, Object> inputMap : inputMaps){
+            InputDto inputDto = new InputDto(inputMap);
+            inputs.add(inputDto);
+        }
+        map.put("inputs", inputs);
+
+        //重新组装output
+        List<Map<String, Object>> outputMaps = (List<Map<String, Object>>)map.get("outputs");
+        List<OutputDto> outputs = new ArrayList<>();
+        for(Map<String, Object> outputMap : outputMaps){
+            OutputDto outputDto = new OutputDto(outputMap);
+            outputs.add(outputDto);
+        }
+        map.put("outputs", outputs);
+        TransactionDto transactionDto = new TransactionDto(map);
+        result.setData(transactionDto);
+        return result;
     }
 
     @Override
@@ -85,9 +113,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         SDKBootstrap.sdkStart();
         AccountLedgerService als = new AccountLedgerServiceImpl();
         try {
-            System.out.println(JSONUtils.obj2json(als.getBalance("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
+            System.out.println(JSONUtils.obj2json(als.getTxByHash("002023c66d10cf9047dbcca12aee2235ff9dfe0f13db3c921a2ec22e0dd63331cb85")));
+//            System.out.println(JSONUtils.obj2json(als.getBalance("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
             System.out.println(JSONUtils.obj2json(als.transfer("2ChDcC1nvki521xXhYAUzYXt4RLNuLs"
-                    , "2Ci1r2FRgcbEg76QbPo4tsQAJkha6Q9"
+                    , "2CZ4AUEFkAx4AJUk365mdZ75Qod3Shk"
                     , "nuls123456"
                     , 8888800000000L
                     , "lichao"
