@@ -26,6 +26,7 @@
 
 package io.nuls.consensus.poc.process;
 
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
@@ -47,6 +48,8 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.thread.manager.NulsThreadFactory;
+import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -77,7 +80,7 @@ public class BlockProcess {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
 
-    private ExecutorService signExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private ExecutorService signExecutor = TaskManager.createThreadPool(Runtime.getRuntime().availableProcessors(),Integer.MAX_VALUE,new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS,""));
 
     public BlockProcess(ChainManager chainManager, OrphanBlockProvider orphanBlockProvider) {
         this.chainManager = chainManager;

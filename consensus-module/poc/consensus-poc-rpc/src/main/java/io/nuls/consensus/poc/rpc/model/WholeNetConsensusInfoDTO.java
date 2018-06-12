@@ -46,6 +46,7 @@ public class WholeNetConsensusInfoDTO {
 
     @ApiModelProperty(name = "consensusAccountNumber", value = "参与共识账户总数量")
     private int consensusAccountNumber;
+    private int packingAgentCount;
 
     public int getConsensusAccountNumber() {
         return consensusAccountNumber;
@@ -77,5 +78,13 @@ public class WholeNetConsensusInfoDTO {
 
     public void setRewardOfDay(long rewardOfDay) {
         this.rewardOfDay = rewardOfDay;
+    }
+
+    public void setPackingAgentCount(int packingAgentCount) {
+        this.packingAgentCount = packingAgentCount;
+    }
+
+    public int getPackingAgentCount() {
+        return packingAgentCount;
     }
 }

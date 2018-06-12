@@ -237,7 +237,11 @@ public class ConsensusTool {
         for (int i = 1; i <= yellowCount; i++) {
             int index = self.getPackingIndexOfRound() - i;
             if (index > 0) {
-                addressList.add(round.getMember(index).getAgentAddress());
+                MeetingMember member = round.getMember(index);
+                if (member.getAgent() == null) {
+                    continue;
+                }
+                addressList.add(member.getAgentAddress());
             } else {
                 MeetingRound preRound = round.getPreRound();
                 addressList.add(preRound.getMember(index + preRound.getMemberCount()).getAgentAddress());

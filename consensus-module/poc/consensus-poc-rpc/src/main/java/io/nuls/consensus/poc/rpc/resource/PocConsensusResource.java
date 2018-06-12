@@ -131,10 +131,14 @@ public class PocConsensusResource {
         MeetingRound round = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
         int memberCount = 0;
         long totalDeposit = 0;
+        int packingAgentCount = 0;
         if (null != round) {
             memberCount = round.getMemberList().size();
             for (MeetingMember member : round.getMemberList()) {
                 totalDeposit += (member.getTotalDeposit().getValue() + member.getOwnDeposit().getValue());
+                if (member.getAgent() != null) {
+                    packingAgentCount++;
+                }
             }
         }
 
@@ -142,6 +146,7 @@ public class PocConsensusResource {
         dto.setRewardOfDay(this.rewardCacheService.getAllReward().getValue());
         dto.setTotalDeposit(totalDeposit);
         dto.setConsensusAccountNumber(memberCount);
+        dto.setPackingAgentCount(packingAgentCount);
         result.setData(dto);
         return result.toRpcClientResult();
     }
