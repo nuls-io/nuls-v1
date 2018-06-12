@@ -568,7 +568,7 @@ public class PocConsensusResource {
         stopAgent.setCreateTxHash(agent.getTxHash());
         tx.setTxData(stopAgent);
 
-        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent);
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, PocConsensusConstant.STOP_AGENT_LOCK_TIME);
 
         tx.setCoinData(coinData);
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);

@@ -25,22 +25,27 @@
 
 package io.nuls.consensus.poc.tx.validator;
 
+import io.nuls.consensus.poc.config.ConsensusConfig;
+import io.nuls.consensus.poc.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
+import io.nuls.consensus.poc.util.ConsensusTool;
+import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.model.validator.HeaderSignValidator;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -62,6 +67,10 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
     @Override
     public ValidateResult validate(RedPunishTransaction data) {
         RedPunishData punishData = data.getTxData();
+        if (ConsensusConfig.getSeedNodeStringList().contains(Base58.encode(punishData.getAddress()))) {
+            return ValidateResult.getFailedResult(CLASS_NAME, "The address is a consensus seed!");
+        }
+
         if (punishData.getReasonCode() == PunishReasonEnum.DOUBLE_SPEND.getCode()) {
             SmallBlock smallBlock = new SmallBlock();
             try {
@@ -103,29 +112,37 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
             if (null == header1 || null == header2) {
                 return ValidateResult.getFailedResult(CLASS_NAME, "The blockheaders is wrong!");
             }
-            if(header1.getHeight()!=header2.getHeight()||!header1.getPreHash().equals(header2.getPreHash())){
+            if (header1.getHeight() != header2.getHeight() || !header1.getPreHash().equals(header2.getPreHash())) {
                 return ValidateResult.getFailedResult(CLASS_NAME, "Never bifurcation!");
             }
             ValidateResult result = validator.validate(header1);
-            if(result.isFailed()){
+            if (result.isFailed()) {
                 return ValidateResult.getFailedResult(CLASS_NAME, "The header1 is wrong!");
             }
             result = validator.validate(header2);
-            if(result.isFailed()){
+            if (result.isFailed()) {
                 return ValidateResult.getFailedResult(CLASS_NAME, "The header2 is wrong!");
             }
-            if(!Arrays.equals(header1.getScriptSig().getPublicKey(),header2.getScriptSig().getPublicKey())){
+            if (!Arrays.equals(header1.getScriptSig().getPublicKey(), header2.getScriptSig().getPublicKey())) {
                 return ValidateResult.getFailedResult(CLASS_NAME, "Never bifurcation!");
             }
         } else {
             return ValidateResult.getFailedResult(this.getClass().getName(), "Wrong red punish reason!");
         }
 
-        return verifyCoinData(punishData);
+        try {
+            return verifyCoinData(data);
+        } catch (IOException e) {
+            Log.error(e);
+            return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
+        }
     }
 
-    private ValidateResult verifyCoinData(RedPunishData punishData) {
-        // todo auto-generated method stub
-        return null;
+    private ValidateResult verifyCoinData(RedPunishTransaction tx) throws IOException {
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(tx.getTxData().getAddress(), PocConsensusConstant.RED_PUNISH_LOCK_TIME);
+        if (!Arrays.equals(coinData.serialize(), tx.getCoinData().serialize())) {
+            return ValidateResult.getFailedResult(CLASS_NAME, "The coindata is wrong!");
+        }
+        return ValidateResult.getSuccessResult();
     }
 }

@@ -99,6 +99,6 @@ public final class PoConvertUtil {
 
     public static String getAgentId(NulsDigestData hash) {
         String hashHex = hash.getDigestHex();
-        return hashHex.substring(hashHex.length() - 8);
+        return hashHex.substring(hashHex.length() - 8).toUpperCase();
     }
 }

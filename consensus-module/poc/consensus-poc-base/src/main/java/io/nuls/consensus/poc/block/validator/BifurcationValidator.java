@@ -25,6 +25,7 @@
 
 package io.nuls.consensus.poc.block.validator;
 
+import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
@@ -86,7 +87,7 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
             redPunishTransaction.setTxData(redPunishData);
             CoinData coinData = null;
             try {
-                coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress());
+                coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress(), PocConsensusConstant.RED_PUNISH_LOCK_TIME);
             } catch (IOException e) {
                 Log.error(e);
                 return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);

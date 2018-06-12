@@ -25,10 +25,14 @@
 
 package io.nuls.consensus.poc.tx.validator;
 
+import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
+import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.validate.ValidateResult;
+
+import java.util.List;
 
 /**
  * @author Niels
@@ -40,6 +44,12 @@ public class YellowPunishValidator extends BaseConsensusProtocolValidator<Yellow
     public ValidateResult validate(YellowPunishTransaction data) {
         if (null == data || data.getTxData() == null || data.getTxData().getAddressList() == null || data.getTxData().getAddressList().isEmpty()) {
             return ValidateResult.getFailedResult(this.getClass().getName(), "yellow punish tx is wrong!");
+        }
+        List<byte[]> list = data.getTxData().getAddressList();
+        for (byte[] address : list) {
+            if (ConsensusConfig.getSeedNodeStringList().contains(Base58.encode(address))) {
+                return ValidateResult.getFailedResult(this.getClass().getName(), "The address is a consensus seed!");
+            }
         }
         if (data.getCoinData() != null) {
             ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "yellow punish tx is wrong!");
