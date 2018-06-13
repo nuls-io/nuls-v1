@@ -51,4 +51,5 @@ public interface AccountErrorCode {
     ErrorCode ACCOUNTKEYSTORE_FILE_DAMAGED = ErrorCode.init("ACT015", "50015");
     ErrorCode ALIAS_FORMAT_WRONG = ErrorCode.init("ACT016", "50016");
     ErrorCode PASSWORD_FORMAT_WRONG = ErrorCode.init("ACT017", "50017");
+    ErrorCode DECRYPT_ACCOUNT_ERROR = ErrorCode.init("ACT018", "50018");
 }

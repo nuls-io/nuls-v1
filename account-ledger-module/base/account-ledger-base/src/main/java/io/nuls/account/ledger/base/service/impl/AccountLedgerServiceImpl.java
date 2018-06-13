@@ -374,7 +374,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result<Balance> getBalance(byte[] address) throws NulsException {
         if (address == null || address.length != AddressTool.HASH_LENGTH) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
 
         if (!AccountLegerUtils.isLocalAccount(address)) {
@@ -537,13 +537,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 coinData.getTo().add(coinDataResult.getChange());
             }
             tx.setCoinData(coinData);
-
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             P2PKHScriptSig sig = new P2PKHScriptSig();
             sig.setPublicKey(account.getPubKey());
             sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
             tx.setScriptSig(sig.serialize());
-
             Result saveResult = verifyAndSaveUnconfirmedTransaction(tx);
             if (saveResult.isFailed()) {
                 return saveResult;
@@ -595,6 +593,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             if (coin == null) {
                 return Result.getFailed(LedgerErrorCode.UTXO_NOT_FOUND);
             }
+            coin.setOwner(inputsKey.get(i));
             coinData.getFrom().add(coin);
         }
 

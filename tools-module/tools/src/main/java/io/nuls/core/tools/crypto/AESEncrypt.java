@@ -24,6 +24,7 @@
  */
 package io.nuls.core.tools.crypto;
 
+import io.nuls.core.tools.crypto.Exception.CryptoException;
 import org.spongycastle.crypto.BufferedBlockCipher;
 import org.spongycastle.crypto.engines.AESFastEngine;
 import org.spongycastle.crypto.modes.CBCBlockCipher;
@@ -90,13 +91,13 @@ public class AESEncrypt {
         }
     }
 
-    public static byte[] decrypt(byte[] dataToDecrypt, String password) {
+    public static byte[] decrypt(byte[] dataToDecrypt, String password) throws CryptoException{
         byte[] defaultiv = new byte[16];
         EncryptedData data = new EncryptedData(defaultiv, dataToDecrypt);
         return decrypt(data, new KeyParameter(Sha256Hash.hash(password.getBytes())));
     }
 
-    public static byte[] decrypt(byte[] dataToDecrypt, String password, String charset) throws UnsupportedEncodingException {
+    public static byte[] decrypt(byte[] dataToDecrypt, String password, String charset) throws CryptoException,UnsupportedEncodingException {
         byte[] defaultiv = new byte[16];
         EncryptedData data = new EncryptedData(defaultiv, dataToDecrypt);
         return decrypt(data, new KeyParameter(Sha256Hash.hash(password.getBytes(charset))));
@@ -107,7 +108,7 @@ public class AESEncrypt {
      *
      * @return byte[]
      */
-    public static byte[] decrypt(EncryptedData dataToDecrypt, KeyParameter aesKey) throws RuntimeException {
+    public static byte[] decrypt(EncryptedData dataToDecrypt, KeyParameter aesKey) throws CryptoException {
         Util.checkNotNull(dataToDecrypt);
         Util.checkNotNull(aesKey);
 
@@ -125,7 +126,7 @@ public class AESEncrypt {
 
             return Arrays.copyOf(decryptedBytes, length1 + length2);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CryptoException();
         }
     }
 

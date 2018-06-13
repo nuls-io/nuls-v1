@@ -172,11 +172,17 @@ public class ChainContainer implements Cloneable {
                 redList.add(po);
                 for (Agent agent : agentList) {
                     if (!Arrays.equals(agent.getAgentAddress(), po.getAddress())) {
-                       continue;
+                        continue;
+                    }
+                    if (agent.getDelHeight() > 0) {
+                        continue;
                     }
                     agent.setDelHeight(height);
-                    for(Deposit deposit:depositList){
-                        if(deposit.getAgentHash().equals(agent.getTxHash())){
+                    for (Deposit deposit : depositList) {
+                        if (!deposit.getAgentHash().equals(agent.getTxHash())) {
+                            continue;
+                        }
+                        if (deposit.getDelHeight() > 0) {
                             continue;
                         }
                         deposit.setDelHeight(height);
@@ -390,7 +396,7 @@ public class ChainContainer implements Cloneable {
             List<String> punishAddress = new ArrayList<>();
             for (byte[] address : addressList) {
                 MeetingMember item = currentRound.getMemberByAgentAddress(address);
-                if(null==item){
+                if (null == item) {
                     item = currentRound.getPreRound().getMemberByAgentAddress(address);
                 }
                 if (item.getCreditVal() <= PocConsensusConstant.RED_PUNISH_CREDIT_VAL) {

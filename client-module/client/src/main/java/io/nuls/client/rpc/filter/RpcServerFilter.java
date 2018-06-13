@@ -63,6 +63,7 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
             throw new NulsRuntimeException(KernelErrorCode.REQUEST_DENIED);
         }
         requestContext.setProperty("start", System.currentTimeMillis());
+
     }
 
     @Override
