@@ -23,29 +23,59 @@
  *
  */
 
-package io.nuls.account.sdk.model.dto;
+package io.nuls.protocol.sdk.model;
 
-import io.nuls.sdk.model.dto.BalanceDto;
+import io.nuls.sdk.utils.StringUtils;
 
 import java.util.Map;
 
-public class AssetDto extends BalanceDto {
+public class OutputDto {
+
+
 
     /**
-     * 资产名称
+     * 地址
      */
-    private String asset;
+    private String address;
 
-    public AssetDto(String asset, Map<String, Object> map) {
-        super(map);
-        this.asset = asset;
+    /**
+     * 数量
+     */
+    private Long value;
+
+    /**
+     * 锁定时间
+     */
+    private Long lockTime;
+
+   public OutputDto(Map<String, Object> map) {
+        this.address = (String) map.get("address");
+        this.value = StringUtils.parseLong(map.get("value"));
+        this.lockTime = StringUtils.parseLong(map.get("lockTime"));
     }
 
-    public String getAsset() {
-        return asset;
+
+    public String getAddress() {
+        return address;
     }
 
-    public void setAsset(String asset) {
-        this.asset = asset;
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Long getValue() {
+        return value;
+    }
+
+    public void setValue(Long value) {
+        this.value = value;
+    }
+
+    public Long getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(Long lockTime) {
+        this.lockTime = lockTime;
     }
 }

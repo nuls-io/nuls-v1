@@ -23,12 +23,10 @@
  *
  */
 
-package io.nuls.account.ledger.sdk.model.dto;
+package io.nuls.account.ledger.sdk.model;
 
 import io.nuls.sdk.utils.StringUtils;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 

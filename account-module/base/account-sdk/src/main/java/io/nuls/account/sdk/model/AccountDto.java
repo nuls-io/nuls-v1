@@ -23,39 +23,48 @@
  *
  */
 
-package io.nuls.account.ledger.sdk.model.dto;
+package io.nuls.account.sdk.model;
 
+
+import io.nuls.sdk.model.Account;
 import io.nuls.sdk.utils.StringUtils;
 
 import java.util.Map;
 
-public class InputDto {
+/**
+ * @author: Charlie
+ * @date: 2018/6/8
+ */
+public class AccountDto {
 
-    /**
-     * 来源output的txHash
-     */
-    private String fromHash;
-
-    /**
-     * 来源output的outIndex
-     */
-    private Integer fromIndex;
-
-    /**
-     * 转入地址
-     */
     private String address;
 
-    /**
-     * 转入金额
-     */
-    private Long value;
+    private String alias;
 
-    public InputDto(Map<String, Object> map) {
-        this.fromHash = (String) map.get("fromHash");
-        this.fromIndex = (Integer) map.get("fromIndex");
+    private String pubKey;
+
+    private String extend;
+
+    private Long createTime;
+    /**
+     * isEncrypted
+     */
+    private boolean encrypted;
+
+    public AccountDto() {
+    }
+
+    public AccountDto(Map<String, Object> map) {
         this.address = (String) map.get("address");
-        this.value = StringUtils.parseLong(map.get("value"));
+        this.alias = (String) map.get("alias");
+        this.pubKey = (String) map.get("pubKey");
+        this.extend = (String) map.get("extend");
+        this.createTime = StringUtils.parseLong(map.get("createTime"));
+        this.encrypted = (boolean) map.get("encrypted");
+    }
+
+    public AccountDto(Account account){
+
     }
 
     public String getAddress() {
@@ -66,27 +75,43 @@ public class InputDto {
         this.address = address;
     }
 
-    public Long getValue() {
-        return value;
+    public String getAlias() {
+        return alias;
     }
 
-    public void setValue(Long value) {
-        this.value = value;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
-    public String getFromHash() {
-        return fromHash;
+    public String getPubKey() {
+        return pubKey;
     }
 
-    public void setFromHash(String fromHash) {
-        this.fromHash = fromHash;
+    public void setPubKey(String pubKey) {
+        this.pubKey = pubKey;
     }
 
-    public Integer getFromIndex() {
-        return fromIndex;
+    public String getExtend() {
+        return extend;
     }
 
-    public void setFromIndex(Integer fromIndex) {
-        this.fromIndex = fromIndex;
+    public void setExtend(String extend) {
+        this.extend = extend;
+    }
+
+    public Long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Long createTime) {
+        this.createTime = createTime;
+    }
+
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

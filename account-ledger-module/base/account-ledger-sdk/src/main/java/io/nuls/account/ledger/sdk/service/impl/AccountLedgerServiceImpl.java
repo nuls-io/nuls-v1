@@ -1,8 +1,8 @@
 package io.nuls.account.ledger.sdk.service.impl;
 
-import io.nuls.account.ledger.sdk.model.dto.InputDto;
-import io.nuls.account.ledger.sdk.model.dto.OutputDto;
-import io.nuls.account.ledger.sdk.model.dto.TransactionDto;
+import io.nuls.account.ledger.sdk.model.InputDto;
+import io.nuls.account.ledger.sdk.model.OutputDto;
+import io.nuls.account.ledger.sdk.model.TransactionDto;
 import io.nuls.account.ledger.sdk.service.AccountLedgerService;
 import io.nuls.sdk.SDKBootstrap;
 import io.nuls.sdk.constant.AccountErrorCode;
@@ -32,9 +32,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         }
 
         Result result = restFul.get("/accountledger/tx/" + hash, null);
-
+        if (result.isFailed()) {
+            return result;
+        }
         Map<String, Object> map = (Map)result.getData();
-
         //重新组装input
         List<Map<String, Object>> inputMaps = (List<Map<String, Object>>)map.get("inputs");
         List<InputDto> inputs = new ArrayList<>();
@@ -113,14 +114,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         SDKBootstrap.sdkStart();
         AccountLedgerService als = new AccountLedgerServiceImpl();
         try {
-            System.out.println(JSONUtils.obj2json(als.getTxByHash("002023c66d10cf9047dbcca12aee2235ff9dfe0f13db3c921a2ec22e0dd63331cb85")));
+            System.out.println(JSONUtils.obj2json(als.getTxByHash("0020c68810e7fcbb1281e7e053fa100bc0b0a8184d5f7b4dd07e1093072077ee7bf9")));
 //            System.out.println(JSONUtils.obj2json(als.getBalance("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
-            System.out.println(JSONUtils.obj2json(als.transfer("2ChDcC1nvki521xXhYAUzYXt4RLNuLs"
+/*            System.out.println(JSONUtils.obj2json(als.transfer("2ChDcC1nvki521xXhYAUzYXt4RLNuLs"
                     , "2CZ4AUEFkAx4AJUk365mdZ75Qod3Shk"
                     , "nuls123456"
                     , 8888800000000L
                     , "lichao"
-                    )));
+                    )));*/
         } catch (Exception e) {
             e.printStackTrace();
         }

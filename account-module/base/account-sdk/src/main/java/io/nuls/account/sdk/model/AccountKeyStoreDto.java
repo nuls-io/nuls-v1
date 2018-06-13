@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.account.sdk.model.dto;
+package io.nuls.account.sdk.model;
 
 import java.util.Map;
 
