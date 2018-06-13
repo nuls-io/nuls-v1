@@ -64,7 +64,7 @@ public class BalanceManager {
 
     private Map<String, BalanceCacheEntity> balanceMap = new HashMap<>();
 
-    Lock lock = new ReentrantLock();
+    private Lock lock = new ReentrantLock();
 
     /**
      * 初始化缓存本地所有账户的余额信息
@@ -108,15 +108,11 @@ public class BalanceManager {
             if (address == null || address.length != AddressTool.HASH_LENGTH) {
                 return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
             }
-            Result<Account> accountResult = accountService.getAccount(address);
-            if (accountResult.isFailed()) {
-                return Result.getFailed(accountResult.getErrorCode());
-            }
 
             String addressKey = Base58.encode(address);
             BalanceCacheEntity entity = balanceMap.get(addressKey);
             Balance balance = null;
-            if (entity == null) {
+            if (entity == null || (entity.getEarlistLockTime() > 0L && entity.getEarlistLockTime() <= TimeService.currentTimeMillis())) {
                 try {
                     balance = calBalanceByAddress(address);
                 } catch (NulsException e) {
@@ -183,16 +179,16 @@ public class BalanceManager {
                     locked = locked.add(coin.getNa());
                     long lockTime = coin.getLockTime();
                     // the consensus lock type
-                    if (lockTime <= 0) {
+                    if (lockTime <= 0L) {
                         continue;
                     }
                     // the height lock type
-                    if (balanceCacheEntity.getLowestLockHeigh() == 0 || (lockTime < NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime < balanceCacheEntity.getLowestLockHeigh())) {
+                    if (balanceCacheEntity.getLowestLockHeigh() == 0L || (lockTime < NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime < balanceCacheEntity.getLowestLockHeigh())) {
                         balanceCacheEntity.setLowestLockHeigh(lockTime);
                         continue;
                     }
                     // the time lock type
-                    if (balanceCacheEntity.getEarlistLockTime() == 0 || (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime < balanceCacheEntity.getEarlistLockTime())) {
+                    if (balanceCacheEntity.getEarlistLockTime() == 0L || (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE && lockTime < balanceCacheEntity.getEarlistLockTime())) {
                         balanceCacheEntity.setEarlistLockTime(lockTime);
                         continue;
                     }
@@ -235,20 +231,23 @@ public class BalanceManager {
     public void refreshBalanceIfNesessary() {
         lock.lock();
         try {
+            long bestHeight = NulsContext.getInstance().getBestHeight();
             for (String address : balanceMap.keySet()) {
                 BalanceCacheEntity entity = balanceMap.get(address);
                 if(entity == null){
                     balanceMap.remove(address);
-                }
-                if (entity.getEarlistLockTime() == 0 && entity.getLowestLockHeigh() == 0) {
                     continue;
                 }
-                if (entity.getLowestLockHeigh() > 0 && entity.getLowestLockHeigh() <= NulsContext.getInstance().getBestHeight()) {
+                if (entity.getEarlistLockTime() == 0L && entity.getLowestLockHeigh() == 0L) {
+                    continue;
+                }
+                if (entity.getLowestLockHeigh() > 0L && entity.getLowestLockHeigh() <= bestHeight) {
                     balanceMap.remove(address);
                     continue;
                 }
-                if (entity.getEarlistLockTime() > 0 && entity.getEarlistLockTime() <= TimeService.currentTimeMillis()) {
+                if (entity.getEarlistLockTime() > 0L && entity.getEarlistLockTime() <= TimeService.currentTimeMillis()) {
                     balanceMap.remove(address);
+                    continue;
                 }
             }
         } finally {

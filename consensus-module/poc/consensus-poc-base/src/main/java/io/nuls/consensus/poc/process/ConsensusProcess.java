@@ -421,6 +421,9 @@ public class ConsensusProcess {
                 if (!punishedSet.add(member.getPackingIndexOfRound())) {
                     continue;
                 }
+                if (member.getAgent().getDelHeight() > 0L) {
+                    continue;
+                }
                 RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
                 RedPunishData redPunishData = new RedPunishData();
                 redPunishData.setAddress(address);

@@ -32,6 +32,7 @@ import io.nuls.cache.CacheMap;
 import io.nuls.core.tools.crypto.Base58;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 账户缓存服务类
@@ -45,6 +46,12 @@ public class AccountCacheService {
     private static final AccountCacheService INSTANCE = new AccountCacheService();
 
     private CacheMap<String, Account> cacheMap;
+
+    /**
+     * 本地账户集合
+     * Collection of local accounts
+     */
+    public Map<String, Account> localAccountMaps;
 
     private AccountCacheService() {
         this.cacheMap = new CacheMap<>(AccountConstant.ACCOUNT_LIST_CACHE, 32, String.class, Account.class);

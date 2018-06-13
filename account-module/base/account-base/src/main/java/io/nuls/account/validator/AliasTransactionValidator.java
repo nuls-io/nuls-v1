@@ -79,7 +79,7 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
         List<AliasPo> list = aliasStorageService.getAliasList().getData();
         for (AliasPo aliasPo : list) {
             if (Base58.encode(aliasPo.getAddress()).equals(Base58.encode(alias.getAddress()))) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_EXIST);
+                return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
             }
         }
         if (!Address.validAddress(alias.getAddress())) {

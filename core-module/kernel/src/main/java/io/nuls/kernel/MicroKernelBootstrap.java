@@ -28,6 +28,7 @@ import io.nuls.core.tools.cfg.ConfigLoader;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.i18n.I18nUtils;
 import io.nuls.kernel.lite.core.ModularServiceMethodInterceptor;
 import io.nuls.kernel.lite.core.SpringLiteContext;
@@ -69,6 +70,9 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
             Log.error("Client start failed", e);
             throw new RuntimeException("Client start failed");
         }
+
+        TimeService.getInstance().start();
+
         //set system language
         try {
             NulsConfig.DEFAULT_ENCODING = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_DEFAULT_ENCODING);
