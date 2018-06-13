@@ -496,7 +496,6 @@ public class AccountServiceImpl implements AccountService {
     public static void main(String[] args) {
         SDKBootstrap.sdkStart();
         AccountService as = new AccountServiceImpl();
-//        as.createLocalAccount(3, "nuls123456");
 //        as.createAccount("nuls123456");
 //        as.backupAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "/Users/lichao/Downloads", "nuls123456");
 //        as.getAliasFee("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie");
@@ -506,11 +505,12 @@ public class AccountServiceImpl implements AccountService {
 //        as.setAlias("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie", "nuls123456");
 //        as.getAddressByAlias("charlie");
 //        as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456");
-       /* try {
-            System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
+        try {
+            //System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
+            System.out.println(JSONUtils.obj2json(as.createLocalAccount(2, "nuls123456")));
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
+        }
 //        as.importAccountByKeystore("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore","nuls123456",true);
 
        /* FileReader fileReader = null;
@@ -527,7 +527,7 @@ public class AccountServiceImpl implements AccountService {
 //        as.unlockAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456", 120);
 //        as.setPassword("2CWSpfF1mFTjWmDCAx4A6NXwykgpj4q", "nuls123456");
 //        as.removeAccount("2CWSpfF1mFTjWmDCAx4A6NXwykgpj4q", "nuls123456");
-        as.resetPassword("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456", "nuls123456");
+//        as.resetPassword("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456", "nuls123456");
 
        /* FileReader fileReader = null;
         try {

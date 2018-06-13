@@ -143,7 +143,7 @@ public class TransferProcessor implements CommandProcessor {
         if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
             return CommandResult.getFailed(res.getMsg());
         }
-        String password = (String)res.getData();
+        String password = res.isSuccess() ? (String)res.getData() : null;
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("address", form.getAddress());
         parameters.put("toAddress", form.getToAddress());
