@@ -29,6 +29,7 @@ import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
+import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.util.ConsensusTool;
@@ -70,7 +71,6 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
         if (ConsensusConfig.getSeedNodeStringList().contains(Base58.encode(punishData.getAddress()))) {
             return ValidateResult.getFailedResult(CLASS_NAME, "The address is a consensus seed!");
         }
-
         if (punishData.getReasonCode() == PunishReasonEnum.DOUBLE_SPEND.getCode()) {
             SmallBlock smallBlock = new SmallBlock();
             try {
@@ -139,7 +139,20 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
     }
 
     private ValidateResult verifyCoinData(RedPunishTransaction tx) throws IOException {
-        CoinData coinData = ConsensusTool.getStopAgentCoinData(tx.getTxData().getAddress(), PocConsensusConstant.RED_PUNISH_LOCK_TIME);
+        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+        Agent theAgent = null;
+        for (Agent agent : agentList) {
+            if (agent.getDelHeight() > 0) {
+                continue;
+            }
+            if (Arrays.equals(tx.getTxData().getAddress(), agent.getAgentAddress())) {
+                theAgent = agent;
+            }
+        }
+        if(null==theAgent){
+            return ValidateResult.getFailedResult(CLASS_NAME,"The agent is not exist!");
+        }
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(theAgent, PocConsensusConstant.RED_PUNISH_LOCK_TIME);
         if (!Arrays.equals(coinData.serialize(), tx.getCoinData().serialize())) {
             return ValidateResult.getFailedResult(CLASS_NAME, "The coindata is wrong!");
         }
