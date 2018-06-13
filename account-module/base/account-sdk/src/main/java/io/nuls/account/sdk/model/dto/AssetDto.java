@@ -25,6 +25,8 @@
 
 package io.nuls.account.sdk.model.dto;
 
+import io.nuls.sdk.model.dto.BalanceDto;
+
 import java.util.Map;
 
 public class AssetDto extends BalanceDto {

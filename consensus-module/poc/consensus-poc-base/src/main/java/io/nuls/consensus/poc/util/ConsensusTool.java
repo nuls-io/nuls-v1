@@ -30,29 +30,40 @@ import io.nuls.account.model.Account;
 import io.nuls.account.service.AccountService;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.model.BlockData;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.protocol.entity.YellowPunishData;
+import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
+import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
+import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
+import io.nuls.consensus.poc.storage.po.AgentPo;
+import io.nuls.consensus.poc.storage.service.AgentStorageService;
+import io.nuls.consensus.poc.storage.service.DepositStorageService;
+import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.calc.DoubleUtils;
+import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.utils.VarInt;
+import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Niels
@@ -61,6 +72,9 @@ import java.util.List;
 public class ConsensusTool {
 
     private static AccountService accountService = NulsContext.getServiceBean(AccountService.class);
+    private static AgentStorageService agentStorageService = NulsContext.getServiceBean(AgentStorageService.class);
+    private static DepositStorageService depositStorageService = NulsContext.getServiceBean(DepositStorageService.class);
+    private static LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     public static SmallBlock getSmallBlock(Block block) {
         SmallBlock smallBlock = new SmallBlock();
@@ -237,7 +251,11 @@ public class ConsensusTool {
         for (int i = 1; i <= yellowCount; i++) {
             int index = self.getPackingIndexOfRound() - i;
             if (index > 0) {
-                addressList.add(round.getMember(index).getAgentAddress());
+                MeetingMember member = round.getMember(index);
+                if (member.getAgent() == null) {
+                    continue;
+                }
+                addressList.add(member.getAgentAddress());
             } else {
                 MeetingRound preRound = round.getPreRound();
                 addressList.add(preRound.getMember(index + preRound.getMemberCount()).getAgentAddress());
@@ -253,6 +271,84 @@ public class ConsensusTool {
         punishTx.setTime(self.getPackEndTime());
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx.serializeForHash()));
         return punishTx;
+    }
+
+    public static CoinData getStopAgentCoinData(Agent agent,long lockTime) throws IOException {
+        if (null == agent) {
+            return null;
+        }
+        NulsDigestData createTxHash = agent.getTxHash();
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), TimeService.currentTimeMillis() + lockTime));
+        coinData.setTo(toList);
+        CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);
+        if (null == transaction) {
+            throw new NulsRuntimeException(KernelErrorCode.FAILED, "Can not find the create agent transaction!");
+        }
+        List<Coin> fromList = new ArrayList<>();
+        for (int index = 0; index < transaction.getCoinData().getTo().size(); index++) {
+            Coin coin = transaction.getCoinData().getTo().get(index);
+            if (coin.getNa().equals(agent.getDeposit()) && coin.getLockTime() == -1L) {
+                coin.setOwner(ArraysTool.joinintTogether(transaction.getHash().serialize(), new VarInt(index).encode()));
+                fromList.add(coin);
+                break;
+            }
+        }
+        if (fromList.isEmpty()) {
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
+        }
+        coinData.setFrom(fromList);
+
+        List<Deposit> deposits = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
+        List<String> addressList = new ArrayList<>();
+        Map<String, Coin> toMap = new HashMap<>();
+        for (Deposit deposit : deposits) {
+            if (deposit.getDelHeight() > 0) {
+                continue;
+            }
+            if (!deposit.getAgentHash().equals(agent.getTxHash())) {
+                continue;
+            }
+            DepositTransaction dtx = (DepositTransaction) ledgerService.getTx(deposit.getTxHash());
+            Coin fromCoin = null;
+            for (Coin coin : dtx.getCoinData().getTo()) {
+                if (!coin.getNa().equals(deposit.getDeposit()) || coin.getLockTime() != -1L) {
+                    continue;
+                }
+                fromCoin = new Coin(ArraysTool.joinintTogether(dtx.getHash().serialize(), new VarInt(0).encode()), coin.getNa(), coin.getLockTime());
+                fromCoin.setLockTime(-1L);
+                fromList.add(fromCoin);
+                break;
+            }
+            String address = Base58.encode(deposit.getAddress());
+            Coin coin = toMap.get(address);
+            if (null == coin) {
+                coin = new Coin(deposit.getAddress(), deposit.getDeposit(), 0);
+                addressList.add(address);
+                toMap.put(address, coin);
+            } else {
+                coin.setNa(coin.getNa().add(fromCoin.getNa()));
+            }
+        }
+        for (String address : addressList) {
+            coinData.getTo().add(toMap.get(address));
+        }
+
+        return coinData;
+    }
+
+    public static CoinData getStopAgentCoinData(byte[] address,long lockTime) throws IOException {
+        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+        for (Agent agent : agentList) {
+            if (agent.getDelHeight() > 0) {
+                continue;
+            }
+            if (Arrays.equals(address, agent.getAgentAddress())) {
+                return getStopAgentCoinData(agent,lockTime);
+            }
+        }
+        return null;
     }
 
 }

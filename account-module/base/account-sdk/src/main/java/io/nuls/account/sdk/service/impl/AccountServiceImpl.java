@@ -1,24 +1,20 @@
 package io.nuls.account.sdk.service.impl;
 
 import io.nuls.account.sdk.constant.AccountConstant;
-import io.nuls.account.sdk.constant.AccountErrorCode;
-import io.nuls.account.sdk.model.Account;
-import io.nuls.account.sdk.model.Address;
 import io.nuls.account.sdk.model.dto.AccountDto;
 import io.nuls.account.sdk.model.dto.AccountKeyStoreDto;
 import io.nuls.account.sdk.model.dto.AssetDto;
-import io.nuls.account.sdk.model.dto.BalanceDto;
 import io.nuls.account.sdk.service.AccountService;
-import io.nuls.account.sdk.util.AccountTool;
 import io.nuls.sdk.SDKBootstrap;
+import io.nuls.sdk.constant.AccountErrorCode;
 import io.nuls.sdk.crypto.ECKey;
 import io.nuls.sdk.exception.NulsException;
+import io.nuls.sdk.model.Account;
+import io.nuls.sdk.model.Address;
 import io.nuls.sdk.model.Na;
 import io.nuls.sdk.model.Result;
-import io.nuls.sdk.utils.JSONUtils;
-import io.nuls.sdk.utils.Log;
-import io.nuls.sdk.utils.RestFulUtils;
-import io.nuls.sdk.utils.StringUtils;
+import io.nuls.sdk.model.dto.BalanceDto;
+import io.nuls.sdk.utils.*;
 
 import java.io.*;
 import java.util.*;
@@ -58,11 +54,6 @@ public class AccountServiceImpl implements AccountService {
         parameters.put("password", password);
         parameters.put("count", count);
         Result result = restFul.post("/account", parameters);
-        try {
-            System.out.println(JSONUtils.obj2json(result));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         return result;
 
     }
@@ -102,11 +93,6 @@ public class AccountServiceImpl implements AccountService {
         } catch (NulsException e) {
             return Result.getFailed();
         }
-      /*  try {
-            System.out.println(JSONUtils.obj2json(Result.getSuccess().setData(accounts)));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
         return Result.getSuccess().setData(accounts);
     }
 
@@ -190,12 +176,7 @@ public class AccountServiceImpl implements AccountService {
             return result;
         }
         Double nuls = Na.naToNuls(((Map) result.getData()).get("value"));
-        /*try {
-            System.out.println(JSONUtils.obj2json(result.setData(Na.naToNuls(result.getData()))));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-        return result.setData(Na.naToNuls(result.getData()));
+        return result.setData(Na.naToNuls(nuls));
     }
 
 
@@ -209,13 +190,6 @@ public class AccountServiceImpl implements AccountService {
             return result;
         }
         AccountDto accountDto = new AccountDto((Map<String, Object>) result.getData());
-
-        //
-        try {
-            System.out.println(JSONUtils.obj2json(result));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         return result.setData(accountDto);
     }
 
@@ -237,11 +211,6 @@ public class AccountServiceImpl implements AccountService {
             AccountDto accountDto = new AccountDto(map);
             accountList.add(accountDto);
         }
-        /*try {
-            System.out.println(JSONUtils.obj2json(result.setData(accountList)));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
         return result.setData(accountList);
     }
 
@@ -263,11 +232,6 @@ public class AccountServiceImpl implements AccountService {
             AssetDto assetDto = new AssetDto("NULS", map);
             assetDtoList.add(assetDto);
         }
-       /* try {
-            System.out.println(JSONUtils.obj2json(result.setData(assetDtoList)));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
         return result.setData(assetDtoList);
     }
 
@@ -280,11 +244,6 @@ public class AccountServiceImpl implements AccountService {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("alias", alias);
         Result result = restFul.get("/account/alias/address", parameters);
-        /*try {
-            System.out.println(JSONUtils.obj2json(result));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
         return result;
     }
 
@@ -299,11 +258,6 @@ public class AccountServiceImpl implements AccountService {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("password", password);
         Result result = restFul.post("/account/prikey/" + address, parameters);
-        try {
-            System.out.println(JSONUtils.obj2json(result));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         return result;
     }
 
@@ -318,11 +272,6 @@ public class AccountServiceImpl implements AccountService {
         map.put("usable", ((Map) map.get("usable")).get("value"));
         map.put("locked", ((Map) map.get("locked")).get("value"));
         BalanceDto balanceDto = new BalanceDto(map);
-       /* try {
-            System.out.println(JSONUtils.obj2json(result.setData(balanceDto)));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
         return result.setData(balanceDto);
     }
 
@@ -334,11 +283,6 @@ public class AccountServiceImpl implements AccountService {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("alias", alias);
         Result result = restFul.get("/account/alias", parameters);
-        try {
-            System.out.println(JSONUtils.obj2json(result));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         return result;
     }
 
@@ -364,17 +308,15 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         Result rs = getAccountKeystoreDto(fileReader);
+        if (rs.isFailed()) {
+            return rs;
+        }
         AccountKeyStoreDto accountKeyStoreDto = (AccountKeyStoreDto) rs.getData();
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("accountKeyStoreDto", accountKeyStoreDto);
         parameters.put("password", password);
         parameters.put("overwrite", overwrite);
         Result result = restFul.post("/account/import", parameters);
-        /*try {
-            System.out.println(JSONUtils.obj2json(result));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
         return result;
     }
 
@@ -428,11 +370,6 @@ public class AccountServiceImpl implements AccountService {
         parameters.put("password", password);
         parameters.put("overwrite", overwrite);
         Result result = restFul.post("/account/import/pri", parameters);
-       /* try {
-            System.out.println(JSONUtils.obj2json(result));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
         return result;
     }
 
@@ -442,11 +379,6 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Result result = restFul.get("/account/encrypted/" + address, null);
-        /*try {
-            System.out.println(JSONUtils.obj2json(result));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
         return result;
     }
 
@@ -456,11 +388,6 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Result result = restFul.post("/account/lock/" + address, "");
-       /* try {
-            System.out.println(JSONUtils.obj2json(result));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
         return result;
     }
 
@@ -472,79 +399,77 @@ public class AccountServiceImpl implements AccountService {
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        if(unlockTime < 1 || unlockTime > 120){
+        if (unlockTime < 1 || unlockTime > 120) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("password", password);
         parameters.put("unlockTime", unlockTime);
         Result result = restFul.post("/account/unlock/" + address, parameters);
-       /* try {
-            System.out.println(JSONUtils.obj2json(result));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
         return result;
     }
 
-
-
-
-    /**
-     * -----------------------------------Test------------------------------
-     */
-    public static void main(String[] args) {
-        SDKBootstrap.sdkStart();
-        AccountService as = new AccountServiceImpl();
-//        as.createLocalAccount(3, "nuls123456");
-//        as.createAccount("nuls123456");
-//        as.backupAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "/Users/lichao/Downloads", "nuls123456");
-//        as.getAliasFee("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie");
-//        as.getAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
-//        as.getAccountList(1, 100);
-//        as.getAssets("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
-//        as.setAlias("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie", "nuls123456");
-//        as.getAddressByAlias("charlie");
-//        as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456");
-//        as.getWalletTotalBalance();
-//        as.importAccountByKeystore("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore","nuls123456",true);
-
-       /* FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(new File("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore"));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        as.importAccountByKeystore(fileReader,"nuls123456",true);*/
-
-//        as.importAccountByPriKey("1f9d3ad044e0e1201e117b041f3d2ceedacb44688e57969620f3ad7a4d6e9d24", "nuls123456", true);
-//        as.isEncrypted("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
-//        as.lockAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
-        as.unlockAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456", 120);
-
-    }
-
-    /**
-     * ---------------------------------------------------------------------
-     */
     @Override
     public Result removeAccount(String address, String password) {
-        return null;
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+        }
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("password", password);
+        Result result = restFul.post("/account/remove/" + address, parameters);
+        return result;
     }
 
     @Override
     public Result setPassword(String address, String password) {
-        return null;
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        if (!StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG);
+        }
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("password", password);
+        Result result = restFul.post("/account/password/" + address, parameters);
+        return result;
     }
 
     @Override
-    public Result updatePassword(String address, String oldPassword, String password) {
-        return null;
+    public Result resetPassword(String address, String password, String newPassword) {
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        if (!StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        if (!StringUtils.validPassword(newPassword)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("password", password);
+        parameters.put("newPassword", newPassword);
+        Result result = restFul.put("/account/password/" + address, parameters);
+        return result;
     }
 
     @Override
     public Result updatePasswordByKeystore(FileReader fileReader, String password) {
-        return null;
+        if (null == fileReader || !StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        Result rs = getAccountKeystoreDto(fileReader);
+        if (rs.isFailed()) {
+            return rs;
+        }
+        AccountKeyStoreDto accountKeyStoreDto = (AccountKeyStoreDto) rs.getData();
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("accountKeyStoreDto", accountKeyStoreDto);
+        parameters.put("password", password);
+        Result result = restFul.post("/account/password/keystore", parameters);
+        return result;
     }
 
     @Override
@@ -562,11 +487,57 @@ public class AccountServiceImpl implements AccountService {
         parameters.put("alias", alias);
         parameters.put("password", password);
         Result result = restFul.post("/account/alias/" + address, parameters);
-        /*try {
-            System.out.println(JSONUtils.obj2json(result));
+        return result;
+    }
+
+    /**
+     * -----------------------------------Test------------------------------
+     */
+    public static void main(String[] args) {
+        SDKBootstrap.sdkStart();
+        AccountService as = new AccountServiceImpl();
+//        as.createLocalAccount(3, "nuls123456");
+//        as.createAccount("nuls123456");
+//        as.backupAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "/Users/lichao/Downloads", "nuls123456");
+//        as.getAliasFee("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie");
+//        as.getAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
+//        as.getAccountList(1, 100);
+//        as.getAssets("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
+//        as.setAlias("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie", "nuls123456");
+//        as.getAddressByAlias("charlie");
+//        as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456");
+       /* try {
+            System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
         } catch (Exception e) {
             e.printStackTrace();
         }*/
-        return result;
+//        as.importAccountByKeystore("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore","nuls123456",true);
+
+       /* FileReader fileReader = null;
+        try {
+            fileReader = new FileReader(new File("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        as.importAccountByKeystore(fileReader,"nuls123456",true);*/
+
+//        as.importAccountByPriKey("1f9d3ad044e0e1201e117b041f3d2ceedacb44688e57969620f3ad7a4d6e9d24", "nuls123456", true);
+//        as.isEncrypted("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
+//        as.lockAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
+//        as.unlockAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456", 120);
+//        as.setPassword("2CWSpfF1mFTjWmDCAx4A6NXwykgpj4q", "nuls123456");
+//        as.removeAccount("2CWSpfF1mFTjWmDCAx4A6NXwykgpj4q", "nuls123456");
+        as.resetPassword("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456", "nuls123456");
+
+       /* FileReader fileReader = null;
+        try {
+            fileReader = new FileReader(new File("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        as.updatePasswordByKeystore(fileReader,"nuls1234567");*/
     }
+    /**
+     * ---------------------------------------------------------------------
+     */
 }
