@@ -61,7 +61,11 @@ public class OutputDto {
      */
     private Integer status;
 
-   public OutputDto(Map<String, Object> map) {
+    public OutputDto() {
+
+    }
+
+    public OutputDto(Map<String, Object> map) {
         this.txHash = (String) map.get("txHash");
         this.index = (Integer) map.get("index");
         this.address = (String) map.get("address");

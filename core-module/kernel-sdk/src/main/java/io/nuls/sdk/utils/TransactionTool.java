@@ -25,6 +25,7 @@ public class TransactionTool {
         CoinData coinData = new CoinData();
         coinData.setFrom(inputs);
         coinData.setTo(outputs);
+        tx.setCoinData(coinData);
         tx.setTime(TimeService.currentTimeMillis());
         tx.setRemark(remark);
         return tx;

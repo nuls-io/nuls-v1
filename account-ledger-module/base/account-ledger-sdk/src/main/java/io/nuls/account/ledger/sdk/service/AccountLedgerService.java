@@ -1,9 +1,8 @@
 package io.nuls.account.ledger.sdk.service;
 
-import io.nuls.account.ledger.sdk.model.dto.InputDto;
-import io.nuls.account.ledger.sdk.model.dto.OutputDto;
+import io.nuls.account.ledger.sdk.model.InputDto;
+import io.nuls.account.ledger.sdk.model.OutputDto;
 import io.nuls.sdk.model.Result;
-import io.nuls.sdk.model.Transaction;
 
 import java.util.List;
 

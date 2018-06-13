@@ -43,7 +43,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         if (result.isFailed()) {
             return result;
         }
-        Map<String, Object> map = (Map)result.getData();
+        Map<String, Object> map = (Map) result.getData();
         //重新组装input
         List<Map<String, Object>> inputMaps = (List<Map<String, Object>>) map.get("inputs");
         List<InputDto> inputs = new ArrayList<>();
@@ -54,9 +54,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         map.put("inputs", inputs);
 
         //重新组装output
-        List<Map<String, Object>> outputMaps = (List<Map<String, Object>>)map.get("outputs");
+        List<Map<String, Object>> outputMaps = (List<Map<String, Object>>) map.get("outputs");
         List<OutputDto> outputs = new ArrayList<>();
-        for(Map<String, Object> outputMap : outputMaps){
+        for (Map<String, Object> outputMap : outputMaps) {
             OutputDto outputDto = new OutputDto(outputMap);
             outputs.add(outputDto);
         }
@@ -68,13 +68,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
 
     @Override
     public Result transfer(String address, String toAddress, String password, long amount, String remark) {
-        if(!Address.validAddress(address) || !Address.validAddress(toAddress)){
+        if (!Address.validAddress(address) || !Address.validAddress(toAddress)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        if(!StringUtils.validPassword(password)){
+        if (!StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        if(!validTxRemark(remark)){
+        if (!validTxRemark(remark)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Map<String, Object> parameters = new HashMap<>();
@@ -199,9 +199,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         if (!Address.validAddress(address)) {
             return Result.getFailed("address error");
         }
-        if (!ECKey.isValidPrivteHex(priKey)) {
-            return Result.getFailed("priKey error");
-        }
 
         if (StringUtils.isNotBlank(password)) {
             if (StringUtils.validPassword(password)) {
@@ -217,6 +214,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
                 return Result.getFailed("password error");
             }
         }
+        if (!ECKey.isValidPrivteHex(priKey)) {
+            return Result.getFailed("priKey error");
+        }
+
         ECKey key = ECKey.fromPrivate(new BigInteger(Hex.decode(priKey)));
         try {
             String newAddress = AccountTool.newAddress(key).getBase58();
@@ -239,20 +240,4 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         }
     }
 
-    public static void main(String[] args) {
-        SDKBootstrap.sdkStart();
-        AccountLedgerService als = new AccountLedgerServiceImpl();
-        try {
-            System.out.println(JSONUtils.obj2json(als.getTxByHash("002023c66d10cf9047dbcca12aee2235ff9dfe0f13db3c921a2ec22e0dd63331cb85")));
-//            System.out.println(JSONUtils.obj2json(als.getBalance("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
-            System.out.println(JSONUtils.obj2json(als.transfer("2ChDcC1nvki521xXhYAUzYXt4RLNuLs"
-                    , "2CZ4AUEFkAx4AJUk365mdZ75Qod3Shk"
-                    , "nuls123456"
-                    , 8888800000000L
-                    , "lichao"
-                    )));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

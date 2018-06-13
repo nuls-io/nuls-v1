@@ -51,6 +51,10 @@ public class InputDto {
      */
     private Long value;
 
+    public InputDto() {
+
+    }
+
     public InputDto(Map<String, Object> map) {
         this.fromHash = (String) map.get("fromHash");
         this.fromIndex = (Integer) map.get("fromIndex");
