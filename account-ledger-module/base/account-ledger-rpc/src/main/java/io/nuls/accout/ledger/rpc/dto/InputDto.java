@@ -46,6 +46,10 @@ public class InputDto {
     @ApiModelProperty(name = "value", value = "转入金额")
     private Long value;
 
+    public InputDto() {
+
+    }
+
     public InputDto(Coin input) {
         this.fromHash = AccountLegerUtils.getTxHash(input.getOwner());
         this.fromIndex = AccountLegerUtils.getIndex(input.getOwner());
