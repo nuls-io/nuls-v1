@@ -338,6 +338,18 @@ public class ConsensusTool {
         return coinData;
     }
 
+    public static CoinData getStopAgentCoinData(byte[] address,long lockTime) throws IOException {
+        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+        for (Agent agent : agentList) {
+            if (agent.getDelHeight() > 0) {
+                continue;
+            }
+            if (Arrays.equals(address, agent.getAgentAddress())) {
+                return getStopAgentCoinData(agent,lockTime);
+            }
+        }
+        return null;
+    }
 
 }
 
