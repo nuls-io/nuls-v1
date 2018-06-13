@@ -23,58 +23,39 @@
  *
  */
 
-package io.nuls.account.ledger.sdk.model.dto;
+package io.nuls.account.ledger.sdk.model;
 
 import io.nuls.sdk.utils.StringUtils;
 
 import java.util.Map;
 
-public class OutputDto {
+public class InputDto {
 
     /**
-     * 交易hash
+     * 来源output的txHash
      */
-    private String txHash;
+    private String fromHash;
 
     /**
-     * 索引
+     * 来源output的outIndex
      */
-    private Integer index;
+    private Integer fromIndex;
 
     /**
-     * 地址
+     * 转入地址
      */
     private String address;
 
     /**
-     * 数量
+     * 转入金额
      */
     private Long value;
 
-    /**
-     * 锁定时间
-     */
-    private Long lockTime;
-
-    /**
-     * "状态 0:usable(未花费), 1:timeLock(高度锁定), 2:consensusLock(参与共识锁定), 3:spent(已花费)
-     */
-    private Integer status;
-
-   public OutputDto(Map<String, Object> map) {
-        this.txHash = (String) map.get("txHash");
-        this.index = (Integer) map.get("index");
+    public InputDto(Map<String, Object> map) {
+        this.fromHash = (String) map.get("fromHash");
+        this.fromIndex = (Integer) map.get("fromIndex");
         this.address = (String) map.get("address");
         this.value = StringUtils.parseLong(map.get("value"));
-        this.lockTime = StringUtils.parseLong(map.get("lockTime"));
-    }
-
-    public Integer getIndex() {
-        return index;
-    }
-
-    public void setIndex(Integer index) {
-        this.index = index;
     }
 
     public String getAddress() {
@@ -93,27 +74,19 @@ public class OutputDto {
         this.value = value;
     }
 
-    public Long getLockTime() {
-        return lockTime;
+    public String getFromHash() {
+        return fromHash;
     }
 
-    public void setLockTime(Long lockTime) {
-        this.lockTime = lockTime;
+    public void setFromHash(String fromHash) {
+        this.fromHash = fromHash;
     }
 
-    public Integer getStatus() {
-        return status;
+    public Integer getFromIndex() {
+        return fromIndex;
     }
 
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public String getTxHash() {
-        return txHash;
-    }
-
-    public void setTxHash(String txHash) {
-        this.txHash = txHash;
+    public void setFromIndex(Integer fromIndex) {
+        this.fromIndex = fromIndex;
     }
 }

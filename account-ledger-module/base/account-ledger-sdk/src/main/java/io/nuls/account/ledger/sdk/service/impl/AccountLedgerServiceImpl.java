@@ -1,8 +1,8 @@
 package io.nuls.account.ledger.sdk.service.impl;
 
-import io.nuls.account.ledger.sdk.model.dto.InputDto;
-import io.nuls.account.ledger.sdk.model.dto.OutputDto;
-import io.nuls.account.ledger.sdk.model.dto.TransactionDto;
+import io.nuls.account.ledger.sdk.model.InputDto;
+import io.nuls.account.ledger.sdk.model.OutputDto;
+import io.nuls.account.ledger.sdk.model.TransactionDto;
 import io.nuls.account.ledger.sdk.service.AccountLedgerService;
 import io.nuls.sdk.SDKBootstrap;
 import io.nuls.sdk.constant.AccountErrorCode;
@@ -40,9 +40,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         }
 
         Result result = restFul.get("/accountledger/tx/" + hash, null);
-
-        Map<String, Object> map = (Map) result.getData();
-
+        if (result.isFailed()) {
+            return result;
+        }
+        Map<String, Object> map = (Map)result.getData();
         //重新组装input
         List<Map<String, Object>> inputMaps = (List<Map<String, Object>>) map.get("inputs");
         List<InputDto> inputs = new ArrayList<>();
@@ -53,9 +54,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         map.put("inputs", inputs);
 
         //重新组装output
-        List<Map<String, Object>> outputMaps = (List<Map<String, Object>>) map.get("outputs");
+        List<Map<String, Object>> outputMaps = (List<Map<String, Object>>)map.get("outputs");
         List<OutputDto> outputs = new ArrayList<>();
-        for (Map<String, Object> outputMap : outputMaps) {
+        for(Map<String, Object> outputMap : outputMaps){
             OutputDto outputDto = new OutputDto(outputMap);
             outputs.add(outputDto);
         }
@@ -67,13 +68,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
 
     @Override
     public Result transfer(String address, String toAddress, String password, long amount, String remark) {
-        if (!Address.validAddress(address) || !Address.validAddress(toAddress)) {
+        if(!Address.validAddress(address) || !Address.validAddress(toAddress)){
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        if (!StringUtils.validPassword(password)) {
+        if(!StringUtils.validPassword(password)){
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        if (!validTxRemark(remark)) {
+        if(!validTxRemark(remark)){
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Map<String, Object> parameters = new HashMap<>();
@@ -249,7 +250,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
                     , "nuls123456"
                     , 8888800000000L
                     , "lichao"
-            )));
+                    )));
         } catch (Exception e) {
             e.printStackTrace();
         }
