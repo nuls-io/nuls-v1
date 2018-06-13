@@ -207,7 +207,7 @@ public class AccountLedgerResource {
             return RpcClientResult.getFailed("inputs error");
         }
         if (form.getOutputs() == null || form.getOutputs().isEmpty()) {
-            return RpcClientResult.getFailed("inputs error");
+            return RpcClientResult.getFailed("outputs error");
         }
 
         byte[] remark = null;
@@ -288,7 +288,7 @@ public class AccountLedgerResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         //is private key matches address
-        ECKey key = ECKey.fromPrivate(new BigInteger(Hex.decode(form.getPriKey())));
+        ECKey key = ECKey.fromPrivate(new BigInteger(Hex.decode(priKey)));
         try {
             String newAddress = AccountTool.newAddress(key).getBase58();
             if (!newAddress.equals(form.getAddress())) {
@@ -303,11 +303,11 @@ public class AccountLedgerResource {
             Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(data));
             tx = accountLedgerService.signTransaction(tx, key);
 
-            Result validateResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
-
+            Result validateResult = tx.verify();
             if (validateResult.isFailed()) {
                 return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
             }
+
             return Result.getSuccess().setData(Hex.encode(tx.serialize())).toRpcClientResult();
         } catch (Exception e) {
             Log.error(e);
