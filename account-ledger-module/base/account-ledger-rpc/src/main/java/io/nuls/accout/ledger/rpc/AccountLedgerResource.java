@@ -35,17 +35,21 @@ import io.nuls.account.ledger.base.util.AccountLegerUtils;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.account.ledger.service.AccountLedgerService;
+import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
+import io.nuls.account.util.AccountTool;
 import io.nuls.accout.ledger.rpc.dto.*;
 import io.nuls.accout.ledger.rpc.form.TransactionHexForm;
 import io.nuls.accout.ledger.rpc.form.TransactionForm;
 import io.nuls.accout.ledger.rpc.form.TransferFeeForm;
 import io.nuls.accout.ledger.rpc.form.TransferForm;
 import io.nuls.accout.ledger.rpc.util.UtxoDtoComparator;
+import io.nuls.core.tools.crypto.AESEncrypt;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.ECKey;
+import io.nuls.core.tools.crypto.Exception.CryptoException;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
@@ -109,10 +113,10 @@ public class AccountLedgerResource {
         try {
             addressBytes = Base58.decode(address);
         } catch (Exception e) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if (addressBytes.length != AddressTool.HASH_LENGTH) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
 
         Result result = null;
@@ -138,7 +142,7 @@ public class AccountLedgerResource {
     })
     public RpcClientResult transfer(@ApiParam(name = "form", value = "转账", required = true) TransferForm form) {
         if (form == null) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if (!Address.validAddress(form.getAddress())) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
@@ -259,16 +263,48 @@ public class AccountLedgerResource {
         if (StringUtils.isBlank(form.getTxHex())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
+        if (!Address.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+
         String priKey = form.getPriKey();
+        if (StringUtils.isNotBlank(form.getPassword())) {
+            if (StringUtils.validPassword(form.getPassword())) {
+                //decrypt
+                byte[] privateKeyBytes = null;
+                try {
+                    privateKeyBytes = AESEncrypt.decrypt(Hex.decode(priKey), form.getPassword());
+                } catch (CryptoException e) {
+                    return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+                }
+                priKey = Hex.encode(privateKeyBytes);
+            } else {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+        }
+
+
         if (!ECKey.isValidPrivteHex(priKey)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
+        //is private key matches address
+        ECKey key = ECKey.fromPrivate(new BigInteger(Hex.decode(form.getPriKey())));
+        try {
+            String newAddress = AccountTool.newAddress(key).getBase58();
+            if (!newAddress.equals(form.getAddress())) {
+                return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+        } catch (NulsException e) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+
         try {
             byte[] data = Hex.decode(form.getTxHex());
             Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(data));
-            ECKey key = ECKey.fromPrivate(new BigInteger(Hex.decode(form.getPriKey())));
             tx = accountLedgerService.signTransaction(tx, key);
-            ValidateResult validateResult = tx.verify();
+
+            Result validateResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
+
             if (validateResult.isFailed()) {
                 return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
             }

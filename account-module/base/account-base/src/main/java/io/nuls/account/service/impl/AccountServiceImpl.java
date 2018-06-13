@@ -40,6 +40,7 @@ import io.nuls.account.storage.service.AliasStorageService;
 import io.nuls.account.tx.AliasTransaction;
 import io.nuls.account.util.AccountTool;
 import io.nuls.core.tools.crypto.*;
+import io.nuls.core.tools.crypto.Exception.CryptoException;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
@@ -581,7 +582,11 @@ public class AccountServiceImpl implements AccountService {
         //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
         if (account.isEncrypted() && account.isLocked()) {
             AssertUtil.canNotEmpty(password, "password can not be empty");
-            return this.signDigest(digest, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
+            try {
+                return this.signDigest(digest, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
+            } catch (CryptoException e) {
+                throw new NulsException(AccountErrorCode.DECRYPT_ACCOUNT_ERROR);
+            }
         } else {
             return this.signDigest(digest, account.getPriKey());
         }

@@ -40,9 +40,25 @@ public class TransactionHexForm {
     @QueryParam("txHex")
     private String txHex;
 
+    @ApiModelProperty(name = "address", value = "地址")
+    @QueryParam("address")
+    private String address;
+
     @ApiModelProperty(name = "priKey", value = "私钥")
     @QueryParam("priKey")
     private String priKey;
+
+    @ApiModelProperty(name = "password", value = "密码")
+    @QueryParam("password")
+    private String password;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     public void setTxHex(String txHex) {
         this.txHex = txHex;
@@ -58,5 +74,13 @@ public class TransactionHexForm {
 
     public String getPriKey() {
         return priKey;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

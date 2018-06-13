@@ -22,16 +22,11 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.message.bus.constant;
-
-
-import io.nuls.kernel.constant.ErrorCode;
+package io.nuls.core.tools.crypto.Exception;
 
 /**
- * @author: Charlie
- * @date: 2018/5/8
+ * author Facjas
+ * date 2018/6/13.
  */
-public interface MessageBusErrorCode {
-
+public class CryptoException extends Exception{
 }

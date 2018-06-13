@@ -374,7 +374,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result<Balance> getBalance(byte[] address) throws NulsException {
         if (address == null || address.length != AddressTool.HASH_LENGTH) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
 
         if (!AccountLegerUtils.isLocalAccount(address)) {
