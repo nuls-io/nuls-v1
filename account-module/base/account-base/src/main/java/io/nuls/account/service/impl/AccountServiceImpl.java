@@ -83,12 +83,6 @@ public class AccountServiceImpl implements AccountService {
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
-    /**
-     * 本地账户集合
-     * Collection of local accounts
-     */
-    public Map<String, Account> localAccountMaps;
-
     @Override
     public Result<List<Account>> createAccount(int count, String password) {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
@@ -118,7 +112,7 @@ public class AccountServiceImpl implements AccountService {
                 return result;
             }
             for(Account account : accounts) {
-                localAccountMaps.put(account.getAddress().getBase58(), account);
+                accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
             }
             return Result.getSuccess().setData(accounts);
         } catch (Exception e) {
@@ -168,7 +162,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        localAccountMaps.remove(account.getAddress().getBase58());
+        accountCacheService.localAccountMaps.remove(account.getAddress().getBase58());
         return Result.getSuccess();
     }
 
@@ -223,7 +217,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        localAccountMaps.put(account.getAddress().getBase58(), account);
+        accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
         accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
         return Result.getSuccess().setData(account);
     }
@@ -287,7 +281,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        localAccountMaps.put(account.getAddress().getBase58(), account);
+        accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
         accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
         return Result.getSuccess().setData(account);
     }
@@ -335,7 +329,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        localAccountMaps.put(account.getAddress().getBase58(), account);
+        accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
         accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
         return Result.getSuccess().setData(account);
     }
@@ -396,10 +390,10 @@ public class AccountServiceImpl implements AccountService {
         if (null != accountCache) {
             return accountCache;
         }
-        if(localAccountMaps == null) {
+        if(accountCacheService.localAccountMaps == null) {
             getAccountList();
         }
-        return localAccountMaps.get(address);
+        return accountCacheService.localAccountMaps.get(address);
     }
 
     @Override
@@ -432,10 +426,10 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<Collection<Account>> getAccountList() {
 
-        if(localAccountMaps != null) {
-            return Result.getSuccess().setData(localAccountMaps.values());
+        if(accountCacheService.localAccountMaps != null) {
+            return Result.getSuccess().setData(accountCacheService.localAccountMaps.values());
         }
-        localAccountMaps = new ConcurrentHashMap<>();
+        accountCacheService.localAccountMaps = new ConcurrentHashMap<>();
 
         List<Account> list = new ArrayList<>();
         Result<List<AccountPo>> result = accountStorageService.getAccountList();
@@ -453,7 +447,7 @@ public class AccountServiceImpl implements AccountService {
             addressList.add(account.getAddress().getBase58());
         }
         for(Account account : list) {
-            localAccountMaps.put(account.getAddress().getBase58(), account);
+            accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
         }
         return Result.getSuccess().setData(list);
     }
