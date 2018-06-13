@@ -49,10 +49,9 @@ import java.util.Map;
  * @author: Niels Wang
  * @date: 2018/3/1
  */
-public class VersionManager {
+public class VersionManager_bak {
 
-    private static final String ROOT_URL = "https://raw.githubusercontent.com/niels1286/testVersion/master/";
-    private static final String HIGHEST_VERDION_FILE_URL = ROOT_URL + "versionNo.json";
+    private static final String ROOT_URL = "https://raw.githubusercontent.com/nuls-io/nuls-wallet-release/master/";
     private static final String VERDION_JSON_URL = ROOT_URL + "version.json";
     private static final String DOWNLOAD_FILE_FOLDER_URL = ROOT_URL + "libs/";
 
@@ -145,7 +144,7 @@ public class VersionManager {
         }
         List<Map<String, Object>> libList = (List<Map<String, Object>>) map.get("libs");
         //check the temp folder exist,and delete
-        URL rootUrl = VersionManager.class.getResource("");
+        URL rootUrl = VersionManager_bak.class.getResource("");
         File tempFolder = new File(rootUrl.getPath() + "/temp");
         if (tempFolder.exists()) {
             deleteFile(tempFolder);

@@ -23,42 +23,30 @@
  *
  */
 
-package io.nuls.kernel.cfg;
+package io.nuls.client.rpc.resources.thread;
 
+import io.nuls.core.tools.log.Log;
 
-import io.nuls.core.tools.cfg.IniEntity;
+import java.io.IOException;
 
 /**
- * 用来管理系统配置项和系统版本信息
- * <p>
- * Used to manage system configuration items and system version information.
- *
  * @author: Niels Wang
- * @date: 2018/4/17
+ * @date: 2018/6/13
  */
-public class NulsConfig {
+public class ShutdownHook extends Thread {
 
-    /**
-     * nuls底层代码的版本号
-     * The version number of the underlying code for nuls.
-     */
-    public static String VERSION = "1.0.0";
+    @Override
+    public void run() {
+        String os = System.getProperty("os.name").toUpperCase();
+        //todo
+        if (os.startsWith("WINDOWS")) {
+            try {
+                Runtime.getRuntime().exec("NULS-Wallet.exe");
+            } catch (IOException e) {
+                Log.error(e);
+            }
+        } else {
 
-    /**
-     * 系统使用的编码方式
-     * The encoding used by the nuls system.
-     */
-    public static String DEFAULT_ENCODING = "UTF-8";
-
-    /**
-     * nuls系统配置文件中加载的配置项
-     * The configuration items loaded in the nuls system configuration file.
-     */
-    public static IniEntity NULS_CONFIG;
-
-    /**
-     * 模块配置文件中加载的所有配置项
-     * All the configuration items that are loaded in the module configuration file.
-     */
-    public static IniEntity MODULES_CONFIG;
+        }
+    }
 }

@@ -23,33 +23,29 @@
  *
  */
 
-package io.nuls.core.kernel.rpc.model;
+package io.nuls.client.rpc.resources.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+/**
+ * @author: Niels Wang
+ * @date: 2018/6/13
+ */
+public class JarSig {
+    private String fileName;
+    private String sig;
 
-@ApiModel(value = "versionJSON")
-public class VersionDto {
-
-    @ApiModelProperty(name = "myVersion", value = "当前版本号")
-    private String myVersion;
-
-    @ApiModelProperty(name = "newestVersion", value = "可更新的最新版本号")
-    private String newestVersion;
-
-    public String getMyVersion() {
-        return myVersion;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setMyVersion(String myVersion) {
-        this.myVersion = myVersion;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
-    public String getNewestVersion() {
-        return newestVersion;
+    public String getSig() {
+        return sig;
     }
 
-    public void setNewestVersion(String newestVersion) {
-        this.newestVersion = newestVersion;
+    public void setSig(String sig) {
+        this.sig = sig;
     }
 }
