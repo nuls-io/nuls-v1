@@ -28,6 +28,7 @@ package io.nuls.account.ledger.service;
 import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.account.model.Balance;
 import io.nuls.account.ledger.model.CoinDataResult;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
@@ -35,6 +36,7 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -151,6 +153,21 @@ public interface AccountLedgerService {
      * @return
      */
     Result createTransaction(List<byte[]> inputsKey, List<Coin> outputs, byte[] remark);
+
+    /**
+     * 签名交易
+     * @param tx
+     * @param ecKey
+     * @return
+     */
+    Transaction signTransaction(Transaction tx, ECKey ecKey) throws IOException;
+
+    /**
+     * 广播交易
+     * @param tx
+     * @return
+     */
+    Result broadcast(Transaction tx);
 
     /**
      * <p>

@@ -39,18 +39,18 @@ import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.accout.ledger.rpc.dto.*;
-import io.nuls.accout.ledger.rpc.form.TransactionFeeForm;
+import io.nuls.accout.ledger.rpc.form.TransactionHexForm;
 import io.nuls.accout.ledger.rpc.form.TransactionForm;
 import io.nuls.accout.ledger.rpc.form.TransferFeeForm;
 import io.nuls.accout.ledger.rpc.form.TransferForm;
 import io.nuls.accout.ledger.rpc.util.UtxoDtoComparator;
 import io.nuls.core.tools.crypto.Base58;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.TxStatusEnum;
@@ -61,9 +61,8 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.utils.AddressTool;
-import io.nuls.kernel.utils.TransactionFeeCalculator;
-import io.nuls.kernel.utils.VarInt;
+import io.nuls.kernel.utils.*;
+import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
 import io.swagger.annotations.*;
@@ -72,6 +71,7 @@ import org.spongycastle.util.Arrays;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -197,7 +197,7 @@ public class AccountLedgerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
-    public RpcClientResult createTransaction(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
+    public RpcClientResult createTransaction(@ApiParam(name = "form", value = "导入交易输入输出", required = true)
                                                      TransactionForm form) {
         if (form.getInputs() == null || form.getInputs().isEmpty()) {
             return RpcClientResult.getFailed("inputs error");
@@ -205,16 +205,9 @@ public class AccountLedgerResource {
         if (form.getOutputs() == null || form.getOutputs().isEmpty()) {
             return RpcClientResult.getFailed("inputs error");
         }
-//        if (form.getPrice() < 0) {
-//            return RpcClientResult.getFailed("price error");
-//        }
-//        Na price = Na.valueOf(form.getPrice());
-//        if(price.isLessThan(TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES) || price.isGreaterThan(TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES)) {
-//            return RpcClientResult.getFailed("price error");
-//        }
 
         byte[] remark = null;
-        if (StringUtils.isBlank(form.getRemark())) {
+        if (!StringUtils.isBlank(form.getRemark())) {
             try {
                 remark = form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING);
             } catch (UnsupportedEncodingException e) {
@@ -252,22 +245,65 @@ public class AccountLedgerResource {
     }
 
     @POST
-    @Path("/transaction/fee")
+    @Path("/transaction/sign")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "创建交易", notes = "result.data: resultJson 返回交易对象")
+    @ApiOperation(value = "交易签名", notes = "result.data: resultJson 返回交易对象")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
-    public RpcClientResult calTransactionFee(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
-                                                     TransactionFeeForm form) {
-        if (form.getPrice() < 0) {
-            return RpcClientResult.getFailed("price error");
+    public RpcClientResult signTransaction(@ApiParam(name = "form", value = "交易信息", required = true)
+                                                   TransactionHexForm form) {
+        if (StringUtils.isBlank(form.getPriKey())) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        Na na = Na.valueOf(form.getPrice());
-        if (na.isLessThan(TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES) || na.isGreaterThan(TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES)) {
-            return RpcClientResult.getFailed("price error");
+        if (StringUtils.isBlank(form.getTxHex())) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        return null;
+        String priKey = form.getPriKey();
+        if (!ECKey.isValidPrivteHex(priKey)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        try {
+            byte[] data = Hex.decode(form.getTxHex());
+            Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(data));
+            ECKey key = ECKey.fromPrivate(new BigInteger(Hex.decode(form.getPriKey())));
+            tx = accountLedgerService.signTransaction(tx, key);
+            ValidateResult validateResult = tx.verify();
+            if (validateResult.isFailed()) {
+                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
+            }
+            return Result.getSuccess().setData(Hex.encode(tx.serialize())).toRpcClientResult();
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(LedgerErrorCode.DATA_PARSE_ERROR).toRpcClientResult();
+        }
+    }
+
+
+    @POST
+    @Path("/transaction/broadcast")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "交易签名", notes = "result.data: resultJson 返回交易对象")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult broadcast(@ApiParam(name = "form", value = "交易信息", required = true) TransactionHexForm form) {
+        if (StringUtils.isBlank(form.getTxHex())) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        try {
+            byte[] data = Hex.decode(form.getTxHex());
+            Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(data));
+            ValidateResult validateResult = tx.verify();
+            if (validateResult.isFailed()) {
+                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
+            }
+            return accountLedgerService.broadcast(tx).toRpcClientResult();
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(LedgerErrorCode.DATA_PARSE_ERROR).toRpcClientResult();
+
+        }
     }
 
     @GET

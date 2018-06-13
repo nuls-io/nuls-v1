@@ -33,16 +33,16 @@ import javax.ws.rs.QueryParam;
  * @author Facjas
  * @date 2018/5/15.
  */
-@ApiModel(value = "转账表单数据")
-public class TransactionFeeForm {
+@ApiModel(value = "交易签名数据")
+public class TransactionHexForm {
 
     @ApiModelProperty(name = "txHex", value = "交易信息", required = true)
     @QueryParam("txHex")
     private String txHex;
 
-    @ApiModelProperty(name = "price", value = "单价")
-    @QueryParam("price")
-    private long price;
+    @ApiModelProperty(name = "priKey", value = "私钥")
+    @QueryParam("priKey")
+    private String priKey;
 
     public void setTxHex(String txHex) {
         this.txHex = txHex;
@@ -52,11 +52,11 @@ public class TransactionFeeForm {
         return txHex;
     }
 
-    public void setPrice(long price) {
-        this.price = price;
+    public void setPriKey(String priKey) {
+        this.priKey = priKey;
     }
 
-    public long getPrice() {
-        return price;
+    public String getPriKey() {
+        return priKey;
     }
 }

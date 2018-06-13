@@ -25,7 +25,6 @@
 
 package io.nuls.account.ledger.base.service.impl;
 
-import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.base.manager.BalanceManager;
 import io.nuls.account.ledger.base.service.LocalUtxoService;
 import io.nuls.account.ledger.base.service.TransactionInfoService;
@@ -42,6 +41,7 @@ import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.core.tools.crypto.Base58;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
@@ -66,7 +66,6 @@ import io.nuls.ledger.util.LedgerUtil;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
-import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -196,8 +195,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         return result;
     }
 
-    long tt1 = 0, tt2 = 0, tt3 = 0;
-
     @Override
     public Result<Integer> verifyAndSaveUnconfirmedTransaction(Transaction tx) {
         saveLock.lock();
@@ -208,7 +205,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             if (!tx.isSystemTx()) {
                 Map<String, Coin> toCoinMap = addToCoinMap(tx);
-                if(usedTxSets == null) {
+                if (usedTxSets == null) {
                     initUsedTxSets();
                 }
                 result = this.ledgerService.verifyCoinData(tx, toCoinMap, usedTxSets);
@@ -218,7 +215,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 }
             }
             Result<Integer> res = saveUnconfirmedTransaction(tx);
-            return  res;
+            return res;
         } finally {
             saveLock.unlock();
         }
@@ -227,20 +224,18 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     private void initUsedTxSets() {
         usedTxSets = new HashSet<>();
         List<Transaction> allUnconfirmedTxs = unconfirmedTransactionStorageService.loadAllUnconfirmedList().getData();
-        for(Transaction tx : allUnconfirmedTxs) {
+        for (Transaction tx : allUnconfirmedTxs) {
             CoinData coinData = tx.getCoinData();
-            if(coinData == null) {
+            if (coinData == null) {
                 continue;
             }
             List<Coin> froms = tx.getCoinData().getFrom();
-            for(Coin from : froms) {
+            for (Coin from : froms) {
                 usedTxSets.add(LedgerUtil.asString(from.getOwner()));
             }
         }
     }
 
-    private Map<String,Coin> addToCoinMap(Transaction transaction) {
-        Map<String,Coin> toMap = new HashMap<>();
     private Map<String, Coin> addToCoinMap(Transaction transaction) {
         Map<String, Coin> toMap = new HashMap<>();
 
@@ -251,7 +246,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
         List<Coin> froms = coinData.getFrom();
 
-        if(froms == null || froms.size() == 0) {
+        if (froms == null || froms.size() == 0) {
             return toMap;
         }
 
@@ -363,11 +358,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             balanceManager.refreshBalance(addresses.get(i));
         }
 
-        if(usedTxSets != null) {
+        if (usedTxSets != null) {
             CoinData coinData = tx.getCoinData();
-            if(coinData != null) {
+            if (coinData != null) {
                 List<Coin> froms = tx.getCoinData().getFrom();
-                for(Coin from : froms) {
+                for (Coin from : froms) {
                     usedTxSets.remove(LedgerUtil.asString(from.getOwner()));
                 }
             }
@@ -630,6 +625,22 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
     }
 
+    @Override
+    public Transaction signTransaction(Transaction tx, ECKey ecKey) throws IOException {
+        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        P2PKHScriptSig sig = new P2PKHScriptSig();
+        sig.setPublicKey(ecKey.getPubKey());
+        sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), ecKey));
+        tx.setScriptSig(sig.serialize());
+        return tx;
+    }
+
+    @Override
+    public Result broadcast(Transaction tx) {
+
+        return transactionService.broadcastTx(tx);
+    }
+
 
     /**
      * 导入账户
@@ -770,9 +781,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
 
         CoinData coinData = tx.getCoinData();
-        if(coinData != null) {
+        if (coinData != null) {
             List<Coin> froms = tx.getCoinData().getFrom();
-            for(Coin from : froms) {
+            for (Coin from : froms) {
                 usedTxSets.remove(LedgerUtil.asString(from.getOwner()));
             }
         }
