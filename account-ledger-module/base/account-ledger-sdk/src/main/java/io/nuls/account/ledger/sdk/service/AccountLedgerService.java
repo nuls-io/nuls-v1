@@ -38,4 +38,6 @@ public interface AccountLedgerService {
      * If the operation fails, "success" is false and the result has error information
      */
     Result getBalance(String address);
+
+
 }
