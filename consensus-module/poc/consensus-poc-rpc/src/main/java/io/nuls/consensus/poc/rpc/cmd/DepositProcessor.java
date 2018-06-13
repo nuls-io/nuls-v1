@@ -90,7 +90,7 @@ public class DepositProcessor implements CommandProcessor {
         if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
             return CommandResult.getFailed(res.getMsg());
         }
-        String password = (String)res.getData();
+        String password = res.isSuccess() ? (String)res.getData() : null;
         Long amount = Na.parseNuls(args[3]).getValue();
         Map<String, Object> parameters = new HashMap<>(4);
         parameters.put("address", address);

@@ -13,5 +13,12 @@
     <groupId>io.nuls.protocol-module</groupId>
     <artifactId>protocol-sdk</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.nuls.core-module</groupId>
+            <artifactId>kernel-sdk</artifactId>
+            <version>0.9.10</version>
+        </dependency>
+    </dependencies>
 
 </project>

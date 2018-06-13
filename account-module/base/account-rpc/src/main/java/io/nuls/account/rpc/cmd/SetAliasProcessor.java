@@ -92,7 +92,7 @@ public class SetAliasProcessor implements CommandProcessor {
         if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
             return CommandResult.getFailed(res.getMsg());
         }
-        String password = (String)res.getData();
+        String password = res.isSuccess() ? (String)res.getData() : null;
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("alias", args[2]);
         parameters.put("password", password);

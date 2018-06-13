@@ -87,7 +87,7 @@ public class WithdrawProcessor implements CommandProcessor {
         if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
             return CommandResult.getFailed(res.getMsg());
         }
-        String password = (String)res.getData();
+        String password = res.isSuccess() ? (String)res.getData() : null;
         Map<String, Object> parameters = new HashMap<>(3);
         parameters.put("address", address);
         parameters.put("txHash", args[2]);

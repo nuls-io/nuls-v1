@@ -504,8 +504,7 @@ public class AccountServiceImpl implements AccountService {
         }
         Result result = new Result();
         boolean rs = account.isEncrypted();
-        result.setSuccess(rs).setData(rs);
-        return result;
+        return result.setSuccess(rs);
     }
 
     @Override
