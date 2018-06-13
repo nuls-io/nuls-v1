@@ -29,6 +29,7 @@
  */
 package io.nuls.accout.ledger.rpc;
 
+import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.base.service.LocalUtxoService;
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
@@ -38,14 +39,18 @@ import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.accout.ledger.rpc.dto.*;
+import io.nuls.accout.ledger.rpc.form.TransactionFeeForm;
+import io.nuls.accout.ledger.rpc.form.TransactionForm;
 import io.nuls.accout.ledger.rpc.form.TransferFeeForm;
 import io.nuls.accout.ledger.rpc.form.TransferForm;
 import io.nuls.accout.ledger.rpc.util.UtxoDtoComparator;
 import io.nuls.core.tools.crypto.Base58;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.TxStatusEnum;
@@ -184,6 +189,86 @@ public class AccountLedgerResource {
                 AddressTool.getAddress(form.getToAddress()), value, form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES).toRpcClientResult();
     }
 
+
+    @POST
+    @Path("/transaction")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "创建交易", notes = "result.data: resultJson 返回交易对象")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult createTransaction(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
+                                                     TransactionForm form) {
+        if (form.getInputs() == null || form.getInputs().isEmpty()) {
+            return RpcClientResult.getFailed("inputs error");
+        }
+        if (form.getOutputs() == null || form.getOutputs().isEmpty()) {
+            return RpcClientResult.getFailed("inputs error");
+        }
+//        if (form.getPrice() < 0) {
+//            return RpcClientResult.getFailed("price error");
+//        }
+//        Na price = Na.valueOf(form.getPrice());
+//        if(price.isLessThan(TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES) || price.isGreaterThan(TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES)) {
+//            return RpcClientResult.getFailed("price error");
+//        }
+
+        byte[] remark = null;
+        if (StringUtils.isBlank(form.getRemark())) {
+            try {
+                remark = form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING);
+            } catch (UnsupportedEncodingException e) {
+                return RpcClientResult.getFailed("remark error");
+            }
+        }
+
+        List<Coin> outputs = new ArrayList<>();
+        for (int i = 0; i < form.getOutputs().size(); i++) {
+            OutputDto outputDto = form.getOutputs().get(i);
+            Coin to = new Coin();
+            try {
+                to.setOwner(Base58.decode(outputDto.getAddress()));
+            } catch (Exception e) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            }
+
+            to.setNa(Na.valueOf(outputDto.getValue()));
+            if (outputDto.getLockTime() < 0) {
+                return RpcClientResult.getFailed("lockTime error");
+            }
+
+            to.setLockTime(outputDto.getLockTime());
+            outputs.add(to);
+        }
+
+        List<byte[]> inputsKey = new ArrayList<>();
+        for (int i = 0; i < form.getInputs().size(); i++) {
+            InputDto inputDto = form.getInputs().get(i);
+            byte[] key = Arrays.concatenate(Hex.decode(inputDto.getFromHash()), new VarInt(inputDto.getFromIndex()).encode());
+            inputsKey.add(key);
+        }
+
+        return accountLedgerService.createTransaction(inputsKey, outputs, remark).toRpcClientResult();
+    }
+
+    @POST
+    @Path("/transaction/fee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "创建交易", notes = "result.data: resultJson 返回交易对象")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult calTransactionFee(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
+                                                     TransactionFeeForm form) {
+        if (form.getPrice() < 0) {
+            return RpcClientResult.getFailed("price error");
+        }
+        Na na = Na.valueOf(form.getPrice());
+        if (na.isLessThan(TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES) || na.isGreaterThan(TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES)) {
+            return RpcClientResult.getFailed("price error");
+        }
+        return null;
+    }
 
     @GET
     @Path("/tx/list/{address}")
@@ -384,7 +469,7 @@ public class AccountLedgerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = TransactionDto.class)
     })
-    public RpcClientResult getTxByHash(@ApiParam(name="hash", value="交易hash", required = true)
+    public RpcClientResult getTxByHash(@ApiParam(name = "hash", value = "交易hash", required = true)
                                        @PathParam("hash") String hash) {
         if (StringUtils.isBlank(hash)) {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER).toRpcClientResult();
@@ -393,7 +478,7 @@ public class AccountLedgerResource {
             return Result.getFailed(LedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Result result = getUnconfirmedTx(hash);
-        if(result.isSuccess()){
+        if (result.isSuccess()) {
             return result.toRpcClientResult();
         }
         return getConfirmedTx(hash).toRpcClientResult();
@@ -401,10 +486,11 @@ public class AccountLedgerResource {
 
     /**
      * 获取未确认的交易
+     *
      * @param hash
      * @return
      */
-    private Result getUnconfirmedTx(String hash){
+    private Result getUnconfirmedTx(String hash) {
         Result result = null;
         try {
             Result<Transaction> txResult = accountLedgerService.getUnconfirmedTransaction(NulsDigestData.fromDigestHex(hash));
@@ -415,16 +501,16 @@ public class AccountLedgerResource {
                 tx.setStatus(TxStatusEnum.CONFIRMED);
                 TransactionDto txDto = null;
                 CoinData coinData = tx.getCoinData();
-                if(coinData != null) {
+                if (coinData != null) {
                     // 组装from数据
                     List<Coin> froms = coinData.getFrom();
-                    if(froms != null && froms.size() > 0) {
+                    if (froms != null && froms.size() > 0) {
                         byte[] fromHash, owner;
                         int fromIndex;
                         NulsDigestData fromHashObj;
                         Transaction fromTx;
                         Coin fromUtxo;
-                        for(Coin from : froms) {
+                        for (Coin from : froms) {
                             owner = from.getOwner();
                             // owner拆分出txHash和index
                             fromHash = AccountLegerUtils.getTxHashBytes(owner);
@@ -434,7 +520,7 @@ public class AccountLedgerResource {
                             fromHashObj.parse(fromHash);
                             //获取上一笔的to,先查未确认,如果没有再查已确认
                             fromTx = accountLedgerService.getUnconfirmedTransaction(fromHashObj).getData();
-                            if(null == fromTx){
+                            if (null == fromTx) {
                                 fromTx = ledgerService.getTx(fromHashObj);
                             }
                             fromUtxo = fromTx.getCoinData().getTo().get(fromIndex);
@@ -445,7 +531,7 @@ public class AccountLedgerResource {
                     List<OutputDto> outputDtoList = new ArrayList<>();
                     // 组装to数据
                     List<Coin> tos = coinData.getTo();
-                    if(tos != null && tos.size() > 0) {
+                    if (tos != null && tos.size() > 0) {
                         byte[] txHashBytes = tx.getHash().serialize();
                         String txHash = hash;
                         OutputDto outputDto = null;
@@ -453,13 +539,13 @@ public class AccountLedgerResource {
                         long bestHeight = NulsContext.getInstance().getBestHeight();
                         long currentTime = TimeService.currentTimeMillis();
                         long lockTime;
-                        for(int i = 0, length = tos.size(); i < length; i++) {
+                        for (int i = 0, length = tos.size(); i < length; i++) {
                             to = tos.get(i);
                             outputDto = new OutputDto(to);
                             outputDto.setTxHash(txHash);
                             outputDto.setIndex(i);
                             temp = ledgerService.getUtxo(Arrays.concatenate(txHashBytes, new VarInt(i).encode()));
-                            if(temp == null) {
+                            if (temp == null) {
                                 // 已花费
                                 outputDto.setStatus(3);
                             } else {
@@ -512,10 +598,11 @@ public class AccountLedgerResource {
 
     /**
      * 获取已确认的交易
+     *
      * @param hash
      * @return
      */
-    private Result getConfirmedTx(String hash){
+    private Result getConfirmedTx(String hash) {
         Result result = null;
         try {
             Transaction tx = ledgerService.getTx(NulsDigestData.fromDigestHex(hash));
@@ -525,16 +612,16 @@ public class AccountLedgerResource {
                 tx.setStatus(TxStatusEnum.CONFIRMED);
                 TransactionDto txDto = null;
                 CoinData coinData = tx.getCoinData();
-                if(coinData != null) {
+                if (coinData != null) {
                     // 组装from数据
                     List<Coin> froms = coinData.getFrom();
-                    if(froms != null && froms.size() > 0) {
+                    if (froms != null && froms.size() > 0) {
                         byte[] fromHash, owner;
                         int fromIndex;
                         NulsDigestData fromHashObj;
                         Transaction fromTx;
                         Coin fromUtxo;
-                        for(Coin from : froms) {
+                        for (Coin from : froms) {
                             owner = from.getOwner();
                             // owner拆分出txHash和index
                             fromHash = AccountLegerUtils.getTxHashBytes(owner);
@@ -551,7 +638,7 @@ public class AccountLedgerResource {
                     List<OutputDto> outputDtoList = new ArrayList<>();
                     // 组装to数据
                     List<Coin> tos = coinData.getTo();
-                    if(tos != null && tos.size() > 0) {
+                    if (tos != null && tos.size() > 0) {
                         byte[] txHashBytes = tx.getHash().serialize();
                         String txHash = hash;
                         OutputDto outputDto = null;
@@ -559,13 +646,13 @@ public class AccountLedgerResource {
                         long bestHeight = NulsContext.getInstance().getBestHeight();
                         long currentTime = TimeService.currentTimeMillis();
                         long lockTime;
-                        for(int i = 0, length = tos.size(); i < length; i++) {
+                        for (int i = 0, length = tos.size(); i < length; i++) {
                             to = tos.get(i);
                             outputDto = new OutputDto(to);
                             outputDto.setTxHash(txHash);
                             outputDto.setIndex(i);
                             temp = (Coin) localUtxoService.getUtxo(Arrays.concatenate(txHashBytes, new VarInt(i).encode())).getData();
-                            if(temp == null) {
+                            if (temp == null) {
                                 // 已花费
                                 outputDto.setStatus(3);
                             } else {
@@ -617,7 +704,6 @@ public class AccountLedgerResource {
     }
 
 
-
     /**
      * 计算交易实际发生的金额
      * Calculate the actual amount of the transaction.
@@ -625,18 +711,18 @@ public class AccountLedgerResource {
      * @param txDto
      */
     private void calTransactionValue(TransactionDto txDto) {
-        if(txDto == null) {
+        if (txDto == null) {
             return;
         }
         List<InputDto> inputDtoList = txDto.getInputs();
         Set<String> inputAdressSet = new HashSet<>(inputDtoList.size());
-        for(InputDto inputDto : inputDtoList) {
+        for (InputDto inputDto : inputDtoList) {
             inputAdressSet.add(inputDto.getAddress());
         }
         Na value = Na.ZERO;
         List<OutputDto> outputDtoList = txDto.getOutputs();
-        for(OutputDto outputDto : outputDtoList) {
-            if(inputAdressSet.contains(outputDto.getAddress())) {
+        for (OutputDto outputDto : outputDtoList) {
+            if (inputAdressSet.contains(outputDto.getAddress())) {
                 continue;
             }
             value = value.add(Na.valueOf(outputDto.getValue()));

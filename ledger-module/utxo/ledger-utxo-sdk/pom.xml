@@ -33,6 +33,18 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <dependencies>
+        <dependency>
+            <groupId>io.nuls.core-module</groupId>
+            <artifactId>kernel-sdk</artifactId>
+            <version>0.9.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet-core</artifactId>
+            <version>2.27</version>
+        </dependency>
+    </dependencies>
 
     <groupId>io.nuls.ledger-module</groupId>
     <artifactId>ledger-utxo-sdk</artifactId>

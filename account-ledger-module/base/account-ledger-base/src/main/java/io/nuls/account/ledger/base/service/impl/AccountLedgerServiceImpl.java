@@ -25,6 +25,7 @@
 
 package io.nuls.account.ledger.base.service.impl;
 
+import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.base.manager.BalanceManager;
 import io.nuls.account.ledger.base.service.LocalUtxoService;
 import io.nuls.account.ledger.base.service.TransactionInfoService;
@@ -41,6 +42,7 @@ import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.core.tools.crypto.Base58;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
@@ -64,6 +66,7 @@ import io.nuls.ledger.util.LedgerUtil;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
+import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -111,7 +114,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result<Integer> saveConfirmedTransactionList(List<Transaction> txs) {
-        if(txs == null || txs.size() == 0) {
+        if (txs == null || txs.size() == 0) {
             Result.getSuccess().setData(0);
         }
 
@@ -129,7 +132,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
             result = saveConfirmedTransaction(tx, addresses);
             if (result.isSuccess()) {
-                if(result.getData() != null && (int) result.getData() == 1) {
+                if (result.getData() != null && (int) result.getData() == 1) {
                     savedTxList.add(tx);
                 }
             } else {
@@ -143,7 +146,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result<Integer> saveConfirmedTransaction(Transaction tx) {
 
-        if(tx == null) {
+        if (tx == null) {
             Result.getSuccess().setData(0);
         }
 
@@ -187,7 +190,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         return result;
     }
 
-    long tt1 =0,tt2=0, tt3=0;
+    long tt1 = 0, tt2 = 0, tt3 = 0;
+
     @Override
     public Result<Integer> verifyAndSaveUnconfirmedTransaction(Transaction tx) {
         saveLock.lock();
@@ -219,32 +223,32 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             tt2 += (System.nanoTime() - time);
             time = System.nanoTime();
             Result<Integer> res = saveUnconfirmedTransaction(tx);
-            tt3+=(System.nanoTime() - time);
-            return  res;
+            tt3 += (System.nanoTime() - time);
+            return res;
         } finally {
             saveLock.unlock();
         }
     }
 
-    private Map<String,Coin> addToCoinMap(Transaction transaction) {
-        Map<String,Coin> toMap = new HashMap<>();
+    private Map<String, Coin> addToCoinMap(Transaction transaction) {
+        Map<String, Coin> toMap = new HashMap<>();
 
         CoinData coinData = transaction.getCoinData();
-        if(coinData == null) {
+        if (coinData == null) {
             return toMap;
         }
 
         List<Coin> froms = coinData.getFrom();
 
-        if(froms == null || froms.size() == 0) {
+        if (froms == null || froms.size() == 0) {
             return toMap;
         }
 
-        for(Coin coin : froms) {
+        for (Coin coin : froms) {
             byte[] keyBytes = coin.getOwner();
             try {
                 Transaction unconfirmedTx = getUnconfirmedTransaction(NulsDigestData.fromDigestHex(LedgerUtil.getTxHash(keyBytes))).getData();
-                if(unconfirmedTx != null) {
+                if (unconfirmedTx != null) {
                     int index = LedgerUtil.getIndex(keyBytes);
                     Coin toCoin = unconfirmedTx.getCoinData().getTo().get(index);
                     toMap.put(LedgerUtil.asString(keyBytes), toCoin);
@@ -473,7 +477,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         return fee;
     }
 
-    long t1 = 0 , t2 = 0, t3 = 0, t4 = 0, t5 = 0;
+    long t1 = 0, t2 = 0, t3 = 0, t4 = 0, t5 = 0;
     int count = 0;
 
     @Override
@@ -556,7 +560,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
             count++;
 
-            if(count % 500 == 0) {
+            if (count % 500 == 0) {
                 Log.info("t1 is : " + t1 / 1000000 + " ms");
                 Log.info("t2 is : " + t2 / 1000000 + " ms");
                 Log.info("t3 is : " + t3 / 1000000 + " ms");
@@ -587,7 +591,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         try {
             tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            return Result.getFailed(LedgerErrorCode.PARAMETER_ERROR);
         }
         tx.setTime(TimeService.currentTimeMillis());
         CoinData coinData = new CoinData();
@@ -596,6 +600,48 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         Na fee = getTxFee(from, values, tx.size(), price);
         return Result.getSuccess().setData(fee);
     }
+
+    @Override
+    public Result createTransaction(List<byte[]> inputsKey, List<Coin> outputs, byte[] remark) {
+        TransferTransaction tx = new TransferTransaction();
+        CoinData coinData = new CoinData();
+        coinData.setTo(outputs);
+        tx.setRemark(remark);
+        for (int i = 0; i < inputsKey.size(); i++) {
+            Coin coin = ledgerService.getUtxo(inputsKey.get(i));
+            if (coin == null) {
+                return Result.getFailed(LedgerErrorCode.UTXO_NOT_FOUND);
+            }
+            coinData.getFrom().add(coin);
+        }
+
+        tx.setCoinData(coinData);
+        tx.setTime(TimeService.currentTimeMillis());
+        //计算交易手续费最小值
+        int size = tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH;
+        Na minFee = TransactionFeeCalculator.getTransferFee(size);
+        //计算inputs和outputs的差额 ，求手续费
+        Na fee = Na.ZERO;
+        for (Coin coin : tx.getCoinData().getFrom()) {
+            fee = fee.add(coin.getNa());
+        }
+        for (Coin coin : tx.getCoinData().getTo()) {
+            fee = fee.subtract(coin.getNa());
+        }
+        if (fee.isLessThan(minFee)) {
+            return Result.getFailed(LedgerErrorCode.FEE_NOT_RIGHT);
+        }
+
+        try {
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            String txHex = Hex.encode(tx.serialize());
+            return Result.getSuccess().setData(txHex);
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
+    }
+
 
     /**
      * 导入账户

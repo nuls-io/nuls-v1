@@ -52,6 +52,10 @@ public class OutputDto {
             value = "状态 0:usable(未花费), 1:timeLock(高度锁定), 2:consensusLock(参与共识锁定), 3:spent(已花费)")
     private Integer status;
 
+    public OutputDto() {
+
+    }
+
     public OutputDto(Coin output) {
         this.address = Base58.encode(output.getOwner());
         this.value = output.getNa().getValue();

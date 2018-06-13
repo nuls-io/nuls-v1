@@ -36,6 +36,7 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Facjas
@@ -140,6 +141,16 @@ public interface AccountLedgerService {
     Result transfer(byte[] from, byte[] to, Na values, String password, String remark, Na price);
 
     Result transferFee(byte[] from, byte[] to, Na values, String remark, Na price);
+
+    /**
+     * 创建交易
+     *
+     * @param inputsKey
+     * @param outputs
+     * @param remark
+     * @return
+     */
+    Result createTransaction(List<byte[]> inputsKey, List<Coin> outputs, byte[] remark);
 
     /**
      * <p>
