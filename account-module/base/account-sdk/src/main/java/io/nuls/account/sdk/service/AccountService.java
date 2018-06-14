@@ -77,43 +77,43 @@ public interface AccountService {
 
 
     /**
-     * Create an unencrypted local account (Not saved to the database)
+     * Create an unencrypted off-line account (Not saved to the database)
      *
      * @return Result
-     * If the operation is successful, 'success' is true, and data is List<String> (address);
+     * If the operation is successful, 'success' is true, and data is List<Account>;
      * If the operation fails, "success" is false and the result has error information
      */
-    Result createLocalAccount();
+    Result createOffLineAccount();
 
     /**
-     * Create an encrypted local account (Not saved to the database)
+     * Create an encrypted off-line account (Not saved to the database)
      *
      * @param password The password of the account
      * @return Result
-     * If the operation is successful, 'success' is true and data is List<String> (address);
+     * If the operation is successful, 'success' is true and data is List<Account>;
      * If the operation fails, "success" is false and the result has error information
      */
-    Result createLocalAccount(String password);
+    Result createOffLineAccount(String password);
 
     /**
-     * Create unencrypted local accounts (Not saved to the database)
+     * Create unencrypted off-line accounts (Not saved to the database)
      *
      * @param count The number of accounts you want to create
      * @return Result
-     * If the operation is successful, 'success' is true and data is List<String> (address);
+     * If the operation is successful, 'success' is true and data is List<Account>;
      * If the operation fails, "success" is false and the result has error information
      */
-    Result createLocalAccount(int count);
+    Result createOffLineAccount(int count);
 
     /**
-     * Create encrypted local accounts (Not saved to the database)
+     * Create encrypted off-line accounts (Not saved to the database)
      *
      * @param count The number of accounts you want to create
      * @return Result
-     * If the operation is successful, 'success' is true and data is List<String> (address);
+     * If the operation is successful, 'success' is true and data is List<Account>;
      * If the operation fails, "success" is false and the result has error information
      */
-    Result createLocalAccount(int count, String password);
+    Result createOffLineAccount(int count, String password);
 
 
     /**
@@ -126,6 +126,16 @@ public interface AccountService {
      * @return
      */
     Result backupAccount(String address, String path, String password);
+
+    /**
+     * Backup an account
+     * Generate a keystore backup file
+     *
+     * @param address  The number of accounts you want to backup
+     * @param path     Folder path to save backup files, if you pass null to save to the current directory
+     * @return
+     */
+    Result backupAccount(String address, String path);
 
     /**
      * Get the fee for setting the alias (The fee don't include the fixed 1 NULS to be destroyed)
@@ -168,7 +178,7 @@ public interface AccountService {
     /**
      * Get the account address by alias
      *
-     * @param alias the alias of account
+     * @param alias The alias of account
      * @return If the operation is successful, 'success' is true and data is address string;
      * If the operation fails, "success" is false and the result has error information
      */
@@ -183,6 +193,15 @@ public interface AccountService {
      * If the operation fails, "success" is false and the result has error information
      */
     Result getPrikey(String address, String password);
+
+    /**
+     * Get the private key
+     *
+     * @param address  The address of account
+     * @return If the operation is successful, 'success' is true and data is private key;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result getPrikey(String address);
 
     /**
      * Get the total balance of all accounts in the wallet
@@ -205,7 +224,7 @@ public interface AccountService {
      * Import account according to KeyStore file path
      *
      * @param path      Exported keystore file address during backup
-     * @param password  The password of account, if the account is unencrypted, pass null
+     * @param password  The password of account
      * @param overwrite true: Always perform an override import; false: if the account exists, it will not be executed and return fails
      * @return If the operation is successful, 'success' is true;
      * If the operation fails, "success" is false and the result has error information
@@ -215,8 +234,18 @@ public interface AccountService {
     /**
      * Import account according to KeyStore file path
      *
+     * @param path      Exported keystore file address during backup
+     * @param overwrite true: Always perform an override import; false: if the account exists, it will not be executed and return fails
+     * @return If the operation is successful, 'success' is true;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result importAccountByKeystore(String path, boolean overwrite);
+
+    /**
+     * Import account according to KeyStore file fileReader
+     *
      * @param fileReader The fileReader of KeyStore file
-     * @param password   The password of account, if the account is unencrypted, pass null
+     * @param password   The password of account
      * @param overwrite  true: Always perform an override import; false: if the account exists, it will not be executed and return fails
      * @return If the operation is successful, 'success' is true;
      * If the operation fails, "success" is false and the result has error information
@@ -224,15 +253,35 @@ public interface AccountService {
     Result importAccountByKeystore(FileReader fileReader, String password, boolean overwrite);
 
     /**
+     * Import account according to KeyStore file fileReader
+     *
+     * @param fileReader The fileReader of KeyStore file
+     * @param overwrite  true: Always perform an override import; false: if the account exists, it will not be executed and return fails
+     * @return If the operation is successful, 'success' is true;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result importAccountByKeystore(FileReader fileReader, boolean overwrite);
+
+    /**
      * Import account according to privateKey
      *
      * @param privateKey The privateKey of account
-     * @param password   The new password of account, if you do not want to set a password, pass null
+     * @param password   The new password of account
      * @param overwrite  true: Always perform an override import; false: if the account exists, it will not be executed and return fails
      * @return If the operation is successful, 'success' is true;
      * If the operation fails, "success" is false and the result has error information
      */
     Result importAccountByPriKey(String privateKey, String password, boolean overwrite);
+
+    /**
+     * Import account according to privateKey
+     *
+     * @param privateKey The privateKey of account
+     * @param overwrite  true: Always perform an override import; false: if the account exists, it will not be executed and return fails
+     * @return If the operation is successful, 'success' is true;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result importAccountByPriKey(String privateKey, boolean overwrite);
 
     /**
      * Verify that the account is encrypted
@@ -275,6 +324,15 @@ public interface AccountService {
     Result removeAccount(String address, String password);
 
     /**
+     * Remove the account
+     *
+     * @param address  The address of account you want to remove
+     * @return If the operation is successful, 'success' is true;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result removeAccount(String address);
+
+    /**
      * Set a password for your account(encrypt account)
      *
      * @param address  The address of account you want to remove
@@ -310,10 +368,19 @@ public interface AccountService {
      *
      * @param address  The address of account to set an alias for
      * @param alias    The alias value to be set
-     * @param password The password of account, this parameter can be passed null if the account is unencrypted
+     * @param password The password of account
      * @return If the operation is successful, 'success' is true;
      * If the operation fails, "success" is false and the result has error information
      */
     Result setAlias(String address, String alias, String password);
 
+    /**
+     * set alias
+     *
+     * @param address  The address of account to set an alias for
+     * @param alias    The alias value to be set
+     * @return If the operation is successful, 'success' is true;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result setAlias(String address, String alias);
 }

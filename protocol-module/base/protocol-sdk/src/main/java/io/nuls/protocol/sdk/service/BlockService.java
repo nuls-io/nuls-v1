@@ -12,36 +12,36 @@ public interface BlockService {
      * Get the block header accoding to block height
      * @param height The block height
      * @return
-     * If the operation is successful, 'success' is true, and data is ;
+     * If the operation is successful, 'success' is true, and data is blockHeaderDto;
      * If the operation fails, "success" is false and the result has error information
      */
-    Result getHeaderByHeight(int height);
+    Result getBlockHeader(int height);
 
 
     /**
      * Get the block header accoding to block hash
      * @param hash The block hash
      * @return
-     * If the operation is successful, 'success' is true, and data is ;
+     * If the operation is successful, 'success' is true, and data is blockHeaderDto;
      * If the operation fails, "success" is false and the result has error information
      */
-    Result getHeaderByHash(String hash);
+    Result getBlockHeader(String hash);
 
     /**
      * Get the block accoding to block height
      * @param height The block height
      * @return
-     * If the operation is successful, 'success' is true, and data is ;
+     * If the operation is successful, 'success' is true, and data is BlockDto;
      * If the operation fails, "success" is false and the result has error information
      */
-    Result getBlockByHeight(int height);
+    Result getBlock(int height);
 
     /**
      * Get the block accoding to block hash
      * @param hash The block hash
      * @return
-     * If the operation is successful, 'success' is true, and data is ;
+     * If the operation is successful, 'success' is true, and data is BlockDto;
      * If the operation fails, "success" is false and the result has error information
      */
-    Result getBlockByHash(String hash);
+    Result getBlock(String hash);
 }
