@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.account.ledger.sdk.model.dto;
+package io.nuls.account.ledger.sdk.model;
 
 import io.nuls.sdk.utils.StringUtils;
 
@@ -61,12 +61,17 @@ public class OutputDto {
      */
     private Integer status;
 
-   public OutputDto(Map<String, Object> map) {
+    public OutputDto() {
+
+    }
+
+    public OutputDto(Map<String, Object> map) {
         this.txHash = (String) map.get("txHash");
         this.index = (Integer) map.get("index");
         this.address = (String) map.get("address");
         this.value = StringUtils.parseLong(map.get("value"));
         this.lockTime = StringUtils.parseLong(map.get("lockTime"));
+        this.status = (Integer) map.get("status");
     }
 
     public Integer getIndex() {

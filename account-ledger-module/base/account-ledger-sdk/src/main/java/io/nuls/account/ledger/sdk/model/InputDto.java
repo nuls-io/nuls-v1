@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.account.ledger.sdk.model.dto;
+package io.nuls.account.ledger.sdk.model;
 
 import io.nuls.sdk.utils.StringUtils;
 
@@ -50,6 +50,10 @@ public class InputDto {
      * 转入金额
      */
     private Long value;
+
+    public InputDto() {
+
+    }
 
     public InputDto(Map<String, Object> map) {
         this.fromHash = (String) map.get("fromHash");

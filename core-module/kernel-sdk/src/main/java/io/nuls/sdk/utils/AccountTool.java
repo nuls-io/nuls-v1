@@ -24,7 +24,7 @@
  */
 
 package io.nuls.sdk.utils;
-;
+
 import io.nuls.sdk.constant.AccountErrorCode;
 import io.nuls.sdk.constant.SDKConstant;
 import io.nuls.sdk.crypto.ECKey;
@@ -47,6 +47,14 @@ public class AccountTool {
      * @return Address
      */
     public static final int CREATE_MAX_SIZE = 100;
+
+    public static Address newAddress(ECKey key) throws NulsException {
+        return newAddress(key.getPubKey());
+    }
+
+    public static Address newAddress(byte[] publicKey) throws NulsException {
+        return new Address(SDKConstant.DEFAULT_CHAIN_ID, SerializeUtils.sha256hash160(publicKey));
+    }
 
     public static Account createAccount(String prikey) throws NulsException {
         ECKey key = null;

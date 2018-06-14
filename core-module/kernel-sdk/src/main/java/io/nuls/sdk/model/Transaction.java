@@ -24,6 +24,7 @@
  */
 package io.nuls.sdk.model;
 
+import io.nuls.sdk.constant.SDKConstant;
 import io.nuls.sdk.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.sdk.exception.NulsException;
 import io.nuls.sdk.script.P2PKHScriptSig;
@@ -38,7 +39,6 @@ import java.util.*;
  * @date 2017/10/30
  */
 public abstract class Transaction<T extends TransactionLogicData> extends BaseNulsData implements Cloneable {
-    byte[] PLACE_HOLDER = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
 
     protected int type;
 
@@ -281,7 +281,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
             bos = new UnsafeByteArrayOutputStream(size);
             NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
             if (size == 0) {
-                bos.write(PLACE_HOLDER);
+                bos.write(SDKConstant.PLACE_HOLDER);
             } else {
                 buffer.writeVarInt(type);
                 buffer.writeVarInt(time);

@@ -22,16 +22,13 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.model.tx;
+package io.nuls.sdk.model;
 
-import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.model.TransactionLogicData;
-import io.nuls.kernel.utils.AddressTool;
-import io.nuls.kernel.utils.NulsByteBuffer;
-import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.sdk.constant.SDKConstant;
+import io.nuls.sdk.constant.TransactionConstant;
+import io.nuls.sdk.exception.NulsException;
+import io.nuls.sdk.utils.AddressTool;
+import io.nuls.sdk.utils.NulsByteBuffer;
 
 import java.util.Arrays;
 
@@ -42,7 +39,7 @@ import java.util.Arrays;
 public class TransferTransaction extends Transaction {
 
     public TransferTransaction() {
-        this(ProtocolConstant.TX_TYPE_TRANSFER);
+        this(TransactionConstant.TX_TYPE_TRANSFER);
     }
 
     protected TransferTransaction(int type) {
@@ -67,7 +64,7 @@ public class TransferTransaction extends Transaction {
 
     @Override
     protected TransactionLogicData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        byteBuffer.readBytes(NulsConstant.PLACE_HOLDER.length);
+        byteBuffer.readBytes(SDKConstant.PLACE_HOLDER.length);
         return null;
     }
 

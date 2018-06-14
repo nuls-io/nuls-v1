@@ -1,6 +1,10 @@
 package io.nuls.account.ledger.sdk.service;
 
+import io.nuls.account.ledger.sdk.model.InputDto;
+import io.nuls.account.ledger.sdk.model.OutputDto;
 import io.nuls.sdk.model.Result;
+
+import java.util.List;
 
 /**
  * @author: Charlie
@@ -39,5 +43,13 @@ public interface AccountLedgerService {
      */
     Result getBalance(String address);
 
+    /**
+     * 创建交易
+     * @param inputs
+     * @param outputs
+     * @return
+     */
+    Result createTransaction(List<InputDto> inputs, List<OutputDto> outputs, String remark);
 
+    Result signTransaction(String txHex, String priKey, String address, String password);
 }

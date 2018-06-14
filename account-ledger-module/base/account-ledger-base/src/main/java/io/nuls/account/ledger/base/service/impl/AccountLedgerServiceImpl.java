@@ -615,7 +615,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
 
         try {
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             String txHex = Hex.encode(tx.serialize());
             return Result.getSuccess().setData(txHex);
         } catch (IOException e) {
