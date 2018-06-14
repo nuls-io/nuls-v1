@@ -49,7 +49,7 @@ public final class FileUtil {
             zos = new ZipOutputStream(new BufferedOutputStream(fos));
             addEntry("/", source, zos);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            Log.error(e);
         } finally {
             close(zos, fos);
         }
@@ -111,7 +111,7 @@ public final class FileUtil {
             }
             zis.closeEntry();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            Log.error(e);
         } finally {
             close(zis, bos);
         }
@@ -129,7 +129,7 @@ public final class FileUtil {
                 out.write(b, 0, size);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         } finally {
             close(ins, out);
         }
@@ -146,7 +146,7 @@ public final class FileUtil {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
     }
 
@@ -215,12 +215,20 @@ public final class FileUtil {
         File[] files = folder.listFiles();
         for (File file : files) {
             if (file.isFile()) {
-                file.delete();
+                try {
+                    file.delete();
+                } catch (Exception e) {
+                    Log.error(e);
+                }
             } else {
                 deleteFolder(file);
             }
         }
-        folder.delete();
+        try {
+            folder.delete();
+        } catch (Exception e) {
+            Log.error(e);
+        }
         return true;
     }
 

@@ -25,8 +25,10 @@
 
 package io.nuls.client.rpc.resources.thread;
 
+import io.nuls.client.rpc.RpcServerManager;
 import io.nuls.client.rpc.resources.util.FileUtil;
 import io.nuls.client.version.SyncVersionRunner;
+import io.nuls.client.web.view.WebViewBootstrap;
 import io.nuls.core.tools.log.Log;
 
 import java.io.File;
@@ -40,16 +42,28 @@ public class ShutdownHook extends Thread {
 
     @Override
     public void run() {
-
+        try {
+            Thread.sleep(3000L);
+        } catch (InterruptedException e) {
+            Log.error(e);
+        }
         String root = this.getClass().getClassLoader().getResource("").getPath();
         String newDirPath = root + "/temp/" + SyncVersionRunner.getInstance().getNewestVersion();
         File tempDir = new File(newDirPath);
         if (tempDir.exists()) {
+            Log.error(1 + "");
             FileUtil.deleteFolder(root + "/bin");
+            Log.error(2 + "");
             FileUtil.deleteFolder(root + "/conf");
+            Log.error(3 + "");
             FileUtil.deleteFolder(root + "/libs");
-            FileUtil.decompress(newDirPath + "/bin.zip", root);
-            FileUtil.decompress(newDirPath + "/conf.zip", root);
+            Log.error(4 + "");
+            FileUtil.decompress(newDirPath + "/bin.zip", newDirPath);
+            FileUtil.copyFolder(new File(newDirPath + "/bin"), new File(root + "/bin"));
+            Log.error(5 + "");
+            FileUtil.decompress(newDirPath + "/conf.zip", newDirPath);
+            FileUtil.copyFolder(new File(newDirPath + "/conf"), new File(root + "/conf"));
+            Log.error(6 + "");
             FileUtil.copyFolder(new File(newDirPath + "/libs"), new File(root + "/libs"));
         }
         String os = System.getProperty("os.name").toUpperCase();

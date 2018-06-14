@@ -31,45 +31,90 @@ import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.RestFulUtils;
 
+import java.io.IOException;
+import java.util.Map;
+
 /**
  * @author: Charlie
  * @date: 2018/5/30
  */
-public class VersionProcessor implements CommandProcessor {
+public class UpgradeProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
-        return "version";
+        return "upgrade";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder bulider = new CommandBuilder();
-        bulider.newLine(getCommandDescription());
+        bulider.newLine(getCommandDescription()).newLine("\t<version>  the version you want to upgrade -required");
         return bulider.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "version --show the version of local&network";
+        return "upgrade <version> --upgrade to the newest version and restart the client where download complete";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        if (args.length != 1) {
-            return false;
+        if (args.length == 2 && args[1] != null && args[1].trim().length() > 0) {
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        RpcClientResult result = restFul.get("/client/version", null);
+        RpcClientResult result = restFul.post("/client/upgrade/" + args[1], "");
         if (result.isFailed()) {
             return CommandResult.getFailed(result.getMsg());
         }
+        //todo 打印进度，完成时确认重启
+        int count = 0;
+        while (true) {
+            result = restFul.get("/client/upgrade", null);
+            if (result.isFailed()) {
+                return CommandResult.getFailed(result.getMsg());
+            }
+            int percentage = (int) ((Map) result.getData()).get("percentage");
+            //todo 打印
+            print(percentage + "%", count);
+            if (percentage < 10) {
+                count = 2;
+            } else {
+                count = 3;
+            }
+
+            if (percentage == 100) {
+                break;
+            }
+            try {
+                Thread.sleep(500L);
+            } catch (InterruptedException e) {
+                System.out.print(e.getMessage());
+            }
+        }
+        result = restFul.post("/client/restart", "");
+
         return CommandResult.getResult(result);
+    }
+
+    private void print(String s, int backCount) {
+        try {
+            for (int i = 0; i < backCount; i++) {
+//todo            CommandHandler.CONSOLE_READER.backspace();
+//            CommandHandler.CONSOLE_READER.delete();
+            }
+            CommandHandler.CONSOLE_READER.clearScreen();
+            CommandHandler.CONSOLE_READER.print(s);
+            CommandHandler.CONSOLE_READER.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }

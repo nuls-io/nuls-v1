@@ -25,6 +25,7 @@
 
 package io.nuls.client.rpc.resources;
 
+import io.nuls.client.rpc.RpcServerManager;
 import io.nuls.client.rpc.resources.dto.UpgradeProcessDTO;
 import io.nuls.client.rpc.resources.dto.VersionDto;
 import io.nuls.client.rpc.resources.thread.ShutdownHook;
@@ -46,6 +47,7 @@ import io.swagger.annotations.ApiResponses;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.awt.image.Kernel;
 import java.net.URL;
 
 /**
@@ -135,6 +137,9 @@ public class ClientResource {
         if (!thread.isUpgrading()) {
             return Result.getFailed(KernelErrorCode.FAILED, "It's not upgrading!").toRpcClientResult();
         }
+        if (thread.getProcess().getPercentage() != 100) {
+            return Result.getFailed(KernelErrorCode.FAILED, "It's still upgrading!").toRpcClientResult();
+        }
         boolean result = thread.stop();
         if (result) {
             return Result.getSuccess().toRpcClientResult();
@@ -154,6 +159,7 @@ public class ClientResource {
         if (url == null) {
             return Result.getFailed(KernelErrorCode.FAILED).toRpcClientResult();
         }
+        RpcServerManager.getInstance().shutdown();
         Runtime.getRuntime().addShutdownHook(new ShutdownHook());
         System.exit(0);
         return Result.getSuccess().toRpcClientResult();

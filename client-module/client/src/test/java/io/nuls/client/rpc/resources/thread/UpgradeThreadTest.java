@@ -42,7 +42,13 @@ public class UpgradeThreadTest {
 //        service.start();
 //        service.run();
 //        FileUtil.deleteFolder("C:\\Users\\Administrator\\Desktop\\release\\NULS-Wallet-0.9.10.5-windows-x64\\conf");
-        FileUtil.deleteFolder("C:\\Users\\Administrator\\Desktop\\release\\NULS-Wallet-0.9.10.5-windows-x64\\libs");
-        System.out.println("success");
+//        FileUtil.deleteFolder("C:\\Users\\Administrator\\Desktop\\release\\NULS-Wallet-0.9.10.5-windows-x64\\libs");
+//        System.out.println("success");
+
+            System.out.print("abcdefg");
+            System.out.print("\b");
+            System.out.print("\b");
+            System.out.print("\b");
+
     }
 }

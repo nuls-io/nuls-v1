@@ -255,6 +255,8 @@ public class UpgradeThread implements Runnable {
                 upgrading = false;
                 return true;
             }
+            String root = UpgradeThread.class.getClassLoader().getResource("").getPath();
+            deleteTemp(root + "/temp/");
         } finally {
             lock.unlock();
         }
