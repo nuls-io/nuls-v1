@@ -22,7 +22,7 @@ public interface AccountLedgerService {
     Result getTxByHash(String hash);
 
     /**
-     * Transfer of account
+     * Transfer
      * @param address Remittance account address
      * @param toAddress  Beneficiary account Address
      * @param password Remittance account password
@@ -33,6 +33,18 @@ public interface AccountLedgerService {
      * If the operation fails, "success" is false and the result has error information
      */
     Result transfer(String address, String toAddress, String password, long amount, String remark);
+
+    /**
+     * Transfer
+     * @param address Remittance account address
+     * @param toAddress  Beneficiary account Address
+     * @param amount Transfer amount
+     * @param remark
+     * @return
+     * If the operation is successful, 'success' is true
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result transfer(String address, String toAddress, long amount, String remark);
 
     /**
      * Get account balance
