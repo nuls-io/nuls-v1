@@ -25,8 +25,11 @@
 
 package io.nuls.client.rpc.resources.thread;
 
+import io.nuls.client.rpc.resources.util.FileUtil;
+import io.nuls.client.version.SyncVersionRunner;
 import io.nuls.core.tools.log.Log;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -37,8 +40,19 @@ public class ShutdownHook extends Thread {
 
     @Override
     public void run() {
+
+        String root = this.getClass().getClassLoader().getResource("").getPath();
+        String newDirPath = root + "/temp/" + SyncVersionRunner.getInstance().getNewestVersion();
+        File tempDir = new File(newDirPath);
+        if (tempDir.exists()) {
+            FileUtil.deleteFolder(root + "/bin");
+            FileUtil.deleteFolder(root + "/conf");
+            FileUtil.deleteFolder(root + "/libs");
+            FileUtil.decompress(newDirPath + "/bin.zip", root);
+            FileUtil.decompress(newDirPath + "/conf.zip", root);
+            FileUtil.copyFolder(new File(newDirPath + "/libs"), new File(root + "/libs"));
+        }
         String os = System.getProperty("os.name").toUpperCase();
-        //todo
         if (os.startsWith("WINDOWS")) {
             try {
                 Runtime.getRuntime().exec("NULS-Wallet.exe");
@@ -46,7 +60,11 @@ public class ShutdownHook extends Thread {
                 Log.error(e);
             }
         } else {
-
+            try {
+                Runtime.getRuntime().exec("sh start.sh", null, new File(root + "/bin"));
+            } catch (IOException e) {
+                Log.error(e);
+            }
         }
     }
 }

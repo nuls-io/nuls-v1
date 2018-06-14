@@ -67,7 +67,7 @@ public class VersionDto {
         this.upgradable = upgradable;
     }
 
-    public String isInfromation() {
+    public String getInfromation() {
         return infromation;
     }
 

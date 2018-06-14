@@ -217,7 +217,7 @@ public final class FileUtil {
             if (file.isFile()) {
                 file.delete();
             } else {
-                deleteFolder(folder);
+                deleteFolder(file);
             }
         }
         folder.delete();

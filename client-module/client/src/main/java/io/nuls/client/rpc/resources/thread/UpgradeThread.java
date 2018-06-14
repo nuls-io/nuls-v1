@@ -40,8 +40,7 @@ import io.nuls.core.tools.str.VersionUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.func.TimeService;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -72,9 +71,6 @@ public class UpgradeThread implements Runnable {
             return;
         }
         try {
-            String os = System.getProperty("os.name").toUpperCase();
-            boolean isWindows = os.startsWith("WINDOWS");
-            boolean isMacOS = os.startsWith("MAC");
             SyncVersionRunner syncor = SyncVersionRunner.getInstance();
             this.version = syncor.getNewestVersion();
             String versionFileHash = syncor.getVersionFileHash();
@@ -88,7 +84,6 @@ public class UpgradeThread implements Runnable {
                 return;
             }
             process.setPercentage(3);
-            //todo 后续可以改成增量下载
             process.setStatus(VersionConstant.DOWNLOADING);
             String root = this.getClass().getClassLoader().getResource("").getPath();
             String newDirPath = root + "/temp/" + version;
@@ -102,17 +97,7 @@ public class UpgradeThread implements Runnable {
                 deleteTemp(root + "/temp/");
                 return;
             }
-            process.setPercentage(5);
-            if (isWindows) {
-                result = this.download(urlRoot + "/exe.zip", newDirPath + "/exe.zip", versionJson.getExeSig());
-                if (!result) {
-                    deleteTemp(root + "/temp/");
-                    return;
-                }
-            } else if (isMacOS) {
-                //todo
-            }
-            process.setPercentage(7);
+            process.setPercentage(6);
             result = this.download(urlRoot + "/conf.zip", newDirPath + "/conf.zip", versionJson.getConfSig());
             if (!result) {
                 deleteTemp(root + "/temp/");
@@ -128,12 +113,18 @@ public class UpgradeThread implements Runnable {
             int count = 0;
             int size = versionJson.getJarSigList().size();
             for (JarSig jarSig : versionJson.getJarSigList()) {
-                result = this.download(urlRoot + "/libs/" + jarSig.getFileName(), newDirPath + "/libs/" + jarSig.getFileName(), jarSig.getSig());
+                File file = new File(root + "/libs/" + jarSig.getFileName());
+                if (file.exists() && this.verifySig(file, Hex.decode(jarSig.getSig()))) {
+                    FileUtil.copyFile(file, new File(newDirPath + "/libs/" + jarSig.getFileName()));
+                    result = true;
+                } else {
+                    result = this.download(urlRoot + "/libs/" + jarSig.getFileName(), newDirPath + "/libs/" + jarSig.getFileName(), jarSig.getSig());
+                }
                 if (!result) {
                     deleteTemp(root + "/temp/");
                     return;
                 }
-                process.setPercentage(10 + (count * 70) / (size));
+                process.setPercentage(10 + (count * 80) / (size));
             }
             process.setStatus(VersionConstant.INSTALLING);
             String oldDirPath = root + "/temp/old";
@@ -142,58 +133,19 @@ public class UpgradeThread implements Runnable {
                 deleteTemp(root + "/temp/");
                 return;
             }
-            process.setPercentage(81);
+            process.setPercentage(92);
             result = this.copy(root + "/conf", oldDirPath + "/conf");
             if (!result) {
                 deleteTemp(root + "/temp/");
                 return;
             }
-            process.setPercentage(83);
+            process.setPercentage(95);
             result = this.copy(root + "/libs", oldDirPath + "/libs");
             if (!result) {
                 deleteTemp(root + "/temp/");
                 return;
             }
-            process.setPercentage(88);
-            if (isWindows) {
-                result = this.copy(root + "/NULS-Wallet.exe", oldDirPath + "/NULS-Wallet.exe");
-                if (!result) {
-                    deleteTemp(root + "/temp/");
-                    return;
-                }
-                new File(root + "/NULS-Wallet.exe").delete();
-            } else if (isMacOS) {
-                //todo
-            }
-
-            FileUtil.deleteFolder(root + "/bin");
-            FileUtil.deleteFolder(root + "/conf");
-            FileUtil.deleteFolder(root + "/libs");
-            if (!upgrading) {
-                rollbackAndDeleteTemp(root, isWindows, isMacOS);
-                return;
-            }
-            process.setPercentage(90);
-            FileUtil.decompress(newDirPath + "/bin.zip", root);
-            if (!upgrading) {
-                rollbackAndDeleteTemp(root, isWindows, isMacOS);
-                return;
-            }
-            FileUtil.decompress(newDirPath + "/conf.zip", root);
-            if (!upgrading) {
-                rollbackAndDeleteTemp(root, isWindows, isMacOS);
-                return;
-            }
-            FileUtil.copyFolder(libsDir, new File(root + "/libs"));
-            if (!upgrading) {
-                rollbackAndDeleteTemp(root, isWindows, isMacOS);
-                return;
-            }
-            if (isWindows) {
-                FileUtil.decompress(newDirPath + "/exe.zip", root);
-            } else if (isMacOS) {
-                //todo
-            }
+            process.setPercentage(100);
             process.setStatus(VersionConstant.WAITING_RESTART);
         } catch (Exception e) {
             Log.error(e);
@@ -202,20 +154,14 @@ public class UpgradeThread implements Runnable {
         }
     }
 
-    private void rollbackAndDeleteTemp(String root, boolean isWindows, boolean isMacOS) {
+    private void rollbackAndDeleteTemp(String root) {
         File rootBin = new File(root + "/bin");
         FileUtil.deleteFolder(rootBin);
         File rootConf = new File(root + "/conf");
         FileUtil.deleteFolder(rootConf);
         File rootLibs = new File(root + "/libs");
         FileUtil.deleteFolder(rootLibs);
-        if (isWindows) {
-            File rootExe = new File(root + "/NULS-Wallet.exe");
-            rootExe.delete();
-            FileUtil.copyFile(new File(root + "/temp/old/NULS-Wallet.exe"), rootExe);
-        } else if (isMacOS) {
-            //todo
-        }
+
         FileUtil.copyFolder(new File(root + "/temp/old/bin"), rootBin);
         FileUtil.copyFolder(new File(root + "/temp/old/conf"), rootConf);
         FileUtil.copyFolder(new File(root + "/temp/old/libs"), rootLibs);
@@ -338,6 +284,19 @@ public class UpgradeThread implements Runnable {
     }
 
     private boolean verifySig(byte[] bytes, byte[] sig) {
+        byte[] hash = Sha256Hash.hash(bytes);
+        return VersionConstant.EC_KEY.verify(hash, sig);
+    }
+
+    private boolean verifySig(File file, byte[] sig) throws IOException {
+        InputStream input = new FileInputStream(file);
+        byte[] bytes;
+        try {
+            bytes = new byte[input.available()];
+            input.read(bytes);
+        } finally {
+            input.close();
+        }
         byte[] hash = Sha256Hash.hash(bytes);
         return VersionConstant.EC_KEY.verify(hash, sig);
     }

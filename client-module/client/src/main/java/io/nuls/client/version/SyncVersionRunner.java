@@ -29,6 +29,7 @@ import io.nuls.client.rpc.resources.thread.UpgradeThread;
 import io.nuls.client.rpc.resources.util.FileUtil;
 import io.nuls.client.version.constant.VersionConstant;
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.crypto.Sha256Hash;
 import io.nuls.core.tools.io.HttpDownloadUtils;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
@@ -105,7 +106,7 @@ public class SyncVersionRunner implements Runnable {
         String version = (String) map.get("version");
         String versionFileHash = (String) map.get("versionFileHash");
         String signature = (String) map.get("signature");
-        boolean result = VersionConstant.EC_KEY.verify((version + "&" + versionFileHash).getBytes("UTF-8"), Hex.decode(signature));
+        boolean result = VersionConstant.EC_KEY.verify(Sha256Hash.hash((version + "&" + versionFileHash).getBytes("UTF-8")), Hex.decode(signature));
         if (!result) {
             return;
         }
