@@ -23,42 +23,29 @@
  *
  */
 
-package io.nuls.kernel.cfg;
-
-
-import io.nuls.core.tools.cfg.IniEntity;
+package io.nuls.client.rpc.resources.model;
 
 /**
- * 用来管理系统配置项和系统版本信息
- * <p>
- * Used to manage system configuration items and system version information.
- *
  * @author: Niels Wang
- * @date: 2018/4/17
+ * @date: 2018/6/13
  */
-public class NulsConfig {
+public class JarSig {
+    private String fileName;
+    private String sig;
 
-    /**
-     * nuls底层代码的版本号
-     * The version number of the underlying code for nuls.
-     */
-    public static String VERSION = "0.0.1";
+    public String getFileName() {
+        return fileName;
+    }
 
-    /**
-     * 系统使用的编码方式
-     * The encoding used by the nuls system.
-     */
-    public static String DEFAULT_ENCODING = "UTF-8";
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
-    /**
-     * nuls系统配置文件中加载的配置项
-     * The configuration items loaded in the nuls system configuration file.
-     */
-    public static IniEntity NULS_CONFIG;
+    public String getSig() {
+        return sig;
+    }
 
-    /**
-     * 模块配置文件中加载的所有配置项
-     * All the configuration items that are loaded in the module configuration file.
-     */
-    public static IniEntity MODULES_CONFIG;
+    public void setSig(String sig) {
+        this.sig = sig;
+    }
 }

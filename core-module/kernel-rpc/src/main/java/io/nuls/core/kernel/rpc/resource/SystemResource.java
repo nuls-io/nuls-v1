@@ -25,11 +25,8 @@
 
 package io.nuls.core.kernel.rpc.resource;
 
-import io.nuls.core.kernel.rpc.model.VersionDto;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
-import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.i18n.I18nUtils;
@@ -38,10 +35,11 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 
-import javax.ws.rs.*;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -71,22 +69,4 @@ public class SystemResource {
         }
         return Result.getSuccess().toRpcClientResult();
     }
-
-    @GET
-    @Path("/version")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "查询系统版本信息")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success",response = VersionDto.class)
-    })
-    public RpcClientResult getVersion() {
-        VersionDto rpcVersion = new VersionDto();
-        rpcVersion.setMyVersion(NulsConfig.VERSION);
-        rpcVersion.setNewestVersion(NulsConfig.NEWEST_VERSION);
-        if(StringUtils.isBlank(NulsConfig.NEWEST_VERSION)){
-            rpcVersion.setNewestVersion(NulsConfig.VERSION);
-        }
-        return Result.getSuccess().setData(rpcVersion).toRpcClientResult();
-    }
-
 }

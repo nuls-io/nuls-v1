@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.core.kernel.rpc.model;
+package io.nuls.client.rpc.resources.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -36,6 +36,12 @@ public class VersionDto {
 
     @ApiModelProperty(name = "newestVersion", value = "可更新的最新版本号")
     private String newestVersion;
+
+    @ApiModelProperty(name = "upgradeable", value = "是否可以进行升级")
+    private boolean upgradable;
+
+    @ApiModelProperty(name = "infromation", value = "新版本说明")
+    private String infromation;
 
     public String getMyVersion() {
         return myVersion;
@@ -51,5 +57,21 @@ public class VersionDto {
 
     public void setNewestVersion(String newestVersion) {
         this.newestVersion = newestVersion;
+    }
+
+    public boolean isUpgradable() {
+        return upgradable;
+    }
+
+    public void setUpgradable(boolean upgradable) {
+        this.upgradable = upgradable;
+    }
+
+    public String getInfromation() {
+        return infromation;
+    }
+
+    public void setInfromation(String infromation) {
+        this.infromation = infromation;
     }
 }

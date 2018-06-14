@@ -324,11 +324,9 @@
                             <mainClass>io.nuls.client.Bootstrap</mainClass>
                         </manifest>
                     </archive>
-                    <excludes>
-                        <exclude>*.xml</exclude>
-                        <exclude>*.properties</exclude>
-                        <exclude>*.ini</exclude>
-                    </excludes>
+                    <includes>
+                        <includes>**/io/nuls/**/*.class</includes>
+                    </includes>
                 </configuration>
             </plugin>
         </plugins>

@@ -23,42 +23,32 @@
  *
  */
 
-package io.nuls.kernel.cfg;
+package io.nuls.client.version.constant;
 
-
-import io.nuls.core.tools.cfg.IniEntity;
+import io.nuls.core.tools.crypto.ECKey;
+import io.nuls.core.tools.crypto.Hex;
 
 /**
- * 用来管理系统配置项和系统版本信息
- * <p>
- * Used to manage system configuration items and system version information.
- *
  * @author: Niels Wang
- * @date: 2018/4/17
+ * @date: 2018/6/13
  */
-public class NulsConfig {
+public interface VersionConstant {
+
+    String PUBLIC_KEY = "043f48de189fe5c01c7cd746cfdc404ab1957a287ef46fe23cb23e7ff6108f188eaaa89ce8e248854a809c187e9d207c881b126f0874183c0c81efe4293e6b1db7";
+
+    ECKey EC_KEY = ECKey.fromPublicOnly(Hex.decode(PUBLIC_KEY));
+
+
+    String ROOT_URL = "https://raw.githubusercontent.com/nuls-io/nuls-wallet-release/master/";
+    String VERDION_JSON_URL = ROOT_URL + "version.json";
 
     /**
-     * nuls底层代码的版本号
-     * The version number of the underlying code for nuls.
+     * 状态：0：未开始,1：下载中,2：安装中,3：等待重启,4：失败
      */
-    public static String VERSION = "0.0.1";
+    int UN_START = 0;
+    int DOWNLOADING = 1;
+    int INSTALLING = 2;
+    int WAITING_RESTART = 3;
+    int FAILED = 4;
 
-    /**
-     * 系统使用的编码方式
-     * The encoding used by the nuls system.
-     */
-    public static String DEFAULT_ENCODING = "UTF-8";
-
-    /**
-     * nuls系统配置文件中加载的配置项
-     * The configuration items loaded in the nuls system configuration file.
-     */
-    public static IniEntity NULS_CONFIG;
-
-    /**
-     * 模块配置文件中加载的所有配置项
-     * All the configuration items that are loaded in the module configuration file.
-     */
-    public static IniEntity MODULES_CONFIG;
 }

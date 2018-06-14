@@ -23,42 +23,26 @@
  *
  */
 
-package io.nuls.kernel.cfg;
+package io.nuls.client.rpc.resources.thread;
 
+import io.nuls.client.rpc.resources.util.FileUtil;
+import org.junit.Test;
 
-import io.nuls.core.tools.cfg.IniEntity;
+import static org.junit.Assert.*;
 
 /**
- * 用来管理系统配置项和系统版本信息
- * <p>
- * Used to manage system configuration items and system version information.
- *
  * @author: Niels Wang
- * @date: 2018/4/17
+ * @date: 2018/6/14
  */
-public class NulsConfig {
+public class UpgradeThreadTest {
 
-    /**
-     * nuls底层代码的版本号
-     * The version number of the underlying code for nuls.
-     */
-    public static String VERSION = "0.0.1";
-
-    /**
-     * 系统使用的编码方式
-     * The encoding used by the nuls system.
-     */
-    public static String DEFAULT_ENCODING = "UTF-8";
-
-    /**
-     * nuls系统配置文件中加载的配置项
-     * The configuration items loaded in the nuls system configuration file.
-     */
-    public static IniEntity NULS_CONFIG;
-
-    /**
-     * 模块配置文件中加载的所有配置项
-     * All the configuration items that are loaded in the module configuration file.
-     */
-    public static IniEntity MODULES_CONFIG;
+    @Test
+    public void download() {
+//        UpgradeThread service = UpgradeThread.getInstance();
+//        service.start();
+//        service.run();
+//        FileUtil.deleteFolder("C:\\Users\\Administrator\\Desktop\\release\\NULS-Wallet-0.9.10.5-windows-x64\\conf");
+        FileUtil.deleteFolder("C:\\Users\\Administrator\\Desktop\\release\\NULS-Wallet-0.9.10.5-windows-x64\\libs");
+        System.out.println("success");
+    }
 }
