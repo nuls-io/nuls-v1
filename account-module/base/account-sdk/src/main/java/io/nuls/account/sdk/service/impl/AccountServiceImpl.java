@@ -59,22 +59,22 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result createLocalAccount() {
-        return createLocalAccount(1, null);
+    public Result createOffLineAccount() {
+        return createOffLineAccount(1, null);
     }
 
     @Override
-    public Result createLocalAccount(String password) {
-        return createLocalAccount(1, password);
+    public Result createOffLineAccount(String password) {
+        return createOffLineAccount(1, password);
     }
 
     @Override
-    public Result createLocalAccount(int count) {
-        return createLocalAccount(count, null);
+    public Result createOffLineAccount(int count) {
+        return createOffLineAccount(count, null);
     }
 
     @Override
-    public Result createLocalAccount(int count, String password) {
+    public Result createOffLineAccount(int count, String password) {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "between 0 and 100 can be created at once");
         }
@@ -111,7 +111,15 @@ public class AccountServiceImpl implements AccountService {
             return result;
         }
         AccountKeyStoreDto accountKeyStoreDto = new AccountKeyStoreDto((Map<String, Object>) result.getData());
+        if (StringUtils.isBlank(path)) {
+            path = System.getProperty("user.dir");
+        }
         return backUpFile(path, accountKeyStoreDto);
+    }
+
+    @Override
+    public Result backupAccount(String address, String path) {
+        return backupAccount(address, path, null);
     }
 
     /**
@@ -262,6 +270,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Result getPrikey(String address) {
+        return getPrikey(address, null);
+    }
+
+    @Override
     public Result getWalletTotalBalance() {
         Result result = restFul.get("/account/balance", null);
         if (result.isFailed()) {
@@ -300,6 +313,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Result importAccountByKeystore(String path, boolean overwrite) {
+        return importAccountByKeystore(path, null, overwrite);
+    }
+
+    @Override
     public Result importAccountByKeystore(FileReader fileReader, String password, boolean overwrite) {
         if (null == fileReader) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
@@ -318,6 +336,11 @@ public class AccountServiceImpl implements AccountService {
         parameters.put("overwrite", overwrite);
         Result result = restFul.post("/account/import", parameters);
         return result;
+    }
+
+    @Override
+    public Result importAccountByKeystore(FileReader fileReader, boolean overwrite) {
+        return importAccountByKeystore(fileReader, null, overwrite);
     }
 
     /**
@@ -374,6 +397,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Result importAccountByPriKey(String privateKey, boolean overwrite) {
+        return importAccountByPriKey(privateKey, null, overwrite);
+    }
+
+    @Override
     public Result isEncrypted(String address) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
@@ -421,6 +449,11 @@ public class AccountServiceImpl implements AccountService {
         parameters.put("password", password);
         Result result = restFul.post("/account/remove/" + address, parameters);
         return result;
+    }
+
+    @Override
+    public Result removeAccount(String address) {
+        return removeAccount(address, null);
     }
 
     @Override
@@ -480,7 +513,7 @@ public class AccountServiceImpl implements AccountService {
         if (!StringUtils.validAlias(alias)) {
             return Result.getFailed(AccountErrorCode.ALIAS_FORMAT_WRONG);
         }
-        if (!StringUtils.validPassword(password)) {
+        if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         Map<String, Object> parameters = new HashMap<>();
@@ -488,6 +521,11 @@ public class AccountServiceImpl implements AccountService {
         parameters.put("password", password);
         Result result = restFul.post("/account/alias/" + address, parameters);
         return result;
+    }
+
+    @Override
+    public Result setAlias(String address, String alias) {
+        return setAlias(address, alias, null);
     }
 
     /**
@@ -507,7 +545,7 @@ public class AccountServiceImpl implements AccountService {
 //        as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456");
         try {
             //System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
-            System.out.println(JSONUtils.obj2json(as.createLocalAccount(2, "nuls123456")));
+            System.out.println(JSONUtils.obj2json(as.createOffLineAccount(2, "nuls123456")));
         } catch (Exception e) {
             e.printStackTrace();
         }

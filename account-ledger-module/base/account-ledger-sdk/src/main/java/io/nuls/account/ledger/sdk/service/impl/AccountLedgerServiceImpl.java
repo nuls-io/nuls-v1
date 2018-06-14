@@ -87,6 +87,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         return result;
     }
 
+    @Override
+    public Result transfer(String address, String toAddress, long amount, String remark) {
+        return transfer(address, toAddress, null, amount, remark);
+    }
+
     private boolean validTxRemark(String remark) {
         if (StringUtils.isBlank(remark)) {
             return true;

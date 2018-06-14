@@ -22,7 +22,7 @@ public class BlockServiceImpl implements BlockService {
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
-    public Result getHeaderByHeight(int height) {
+    public Result getBlockHeader(int height) {
         if(height < 0){
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
@@ -36,7 +36,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public Result getHeaderByHash(String hash) {
+    public Result getBlockHeader(String hash) {
         if(StringUtils.isBlank(hash)){
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
@@ -50,7 +50,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public Result getBlockByHeight(int height) {
+    public Result getBlock(int height) {
         if(height < 0){
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
@@ -63,7 +63,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public Result getBlockByHash(String hash) {
+    public Result getBlock(String hash) {
         if(StringUtils.isBlank(hash)){
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
@@ -106,10 +106,10 @@ public class BlockServiceImpl implements BlockService {
         SDKBootstrap.sdkStart();
         BlockService bs = new BlockServiceImpl();
         try {
-            System.out.println(JSONUtils.obj2json(bs.getHeaderByHeight(4)));
-            System.out.println(JSONUtils.obj2json(bs.getHeaderByHash("00207380c6fca01cbbecba8ad24dba57659713b96cac5ff90d8d844e4be97f6625ad")));
-            System.out.println(JSONUtils.obj2json(bs.getBlockByHeight(0)));
-            System.out.println(JSONUtils.obj2json(bs.getBlockByHash("0020c68810e7fcbb1281e7e053fa100bc0b0a8184d5f7b4dd07e1093072077ee7bf9")));
+            System.out.println(JSONUtils.obj2json(bs.getBlockHeader(4)));
+            System.out.println(JSONUtils.obj2json(bs.getBlockHeader("00207380c6fca01cbbecba8ad24dba57659713b96cac5ff90d8d844e4be97f6625ad")));
+            System.out.println(JSONUtils.obj2json(bs.getBlock(0)));
+            System.out.println(JSONUtils.obj2json(bs.getBlock("0020c68810e7fcbb1281e7e053fa100bc0b0a8184d5f7b4dd07e1093072077ee7bf9")));
         } catch (Exception e) {
             e.printStackTrace();
         }
