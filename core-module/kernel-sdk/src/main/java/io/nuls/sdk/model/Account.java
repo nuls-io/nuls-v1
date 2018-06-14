@@ -23,6 +23,7 @@
  */
 package io.nuls.sdk.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.sdk.constant.AccountErrorCode;
 import io.nuls.sdk.crypto.AESEncrypt;
 import io.nuls.sdk.crypto.ECKey;
@@ -122,7 +123,7 @@ public class Account {
             this.setEcKey(result);
         }
     }
-
+    @JsonIgnore
     public byte[] getHash160() {
         return this.getAddress().getHash160();
     }
@@ -147,6 +148,7 @@ public class Account {
      * Whether the account is locked (is there a cleartext private key)
      * @return true: Locked, false: not Locked
      */
+    @JsonIgnore
     public boolean isLocked() {
         return (this.getPriKey() == null) || (this.getPriKey().length == 0);
     }

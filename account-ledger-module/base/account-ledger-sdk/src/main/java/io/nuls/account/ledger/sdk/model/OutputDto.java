@@ -57,7 +57,7 @@ public class OutputDto {
     private Long lockTime;
 
     /**
-     * "状态 0:usable(未花费), 1:timeLock(高度锁定), 2:consensusLock(参与共识锁定), 3:spent(已花费)
+     * 状态 0:usable(未花费), 1:timeLock(高度锁定), 2:consensusLock(参与共识锁定), 3:spent(已花费)
      */
     private Integer status;
 
