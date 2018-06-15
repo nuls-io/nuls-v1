@@ -253,14 +253,13 @@ public class UpgradeThread implements Runnable {
         try {
             if (upgrading) {
                 upgrading = false;
-                return true;
             }
             String root = UpgradeThread.class.getClassLoader().getResource("").getPath();
             deleteTemp(root + "/temp/");
+            return true;
         } finally {
             lock.unlock();
         }
-        return false;
     }
 
     public boolean isUpgrading() {
