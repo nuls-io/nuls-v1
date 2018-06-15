@@ -137,7 +137,7 @@ public class ClientResource {
         if (!thread.isUpgrading()) {
             return Result.getFailed(KernelErrorCode.FAILED, "It's not upgrading!").toRpcClientResult();
         }
-        if (thread.getProcess().getPercentage() != 100) {
+        if (thread.getProcess().getPercentage() == 100) {
             return Result.getFailed(KernelErrorCode.FAILED, "It's still upgrading!").toRpcClientResult();
         }
         boolean result = thread.stop();

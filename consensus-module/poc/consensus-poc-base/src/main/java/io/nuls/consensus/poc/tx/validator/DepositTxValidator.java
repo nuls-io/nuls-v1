@@ -102,16 +102,6 @@ public class DepositTxValidator extends BaseConsensusProtocolValidator<DepositTr
         if (null == agentPo || agentPo.getDelHeight() > 0) {
             return ValidateResult.getFailedResult(this.getClass().getName(), "Agent is not exist!");
         }
-        long count = 0;
-        try {
-            count = this.getRedPunishCount(deposit.getAddress());
-        } catch (Exception e) {
-            Log.error(e);
-            return ValidateResult.getFailedResult(this.getClass().getName(), e.getMessage());
-        }
-        if (count > 0) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT);
-        }
         List<DepositPo> poList = this.getDepositListByAgent(deposit.getAgentHash());
         if (null != poList && poList.size() >= PocConsensusProtocolConstant.MAX_ACCEPT_NUM_OF_DEPOSIT) {
             return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.DEPOSIT_OVER_COUNT);
