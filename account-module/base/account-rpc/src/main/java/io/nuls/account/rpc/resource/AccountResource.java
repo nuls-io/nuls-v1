@@ -510,8 +510,29 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG).toRpcClientResult();
         }
 
+        try {
+            byte[] priKeyBytes = AESEncrypt.decrypt(Hex.decode(priKey), password);
+            return getEncryptedPrivateKey(address, Hex.encode(priKeyBytes), newPassword).toRpcClientResult();
+        } catch (Exception e) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
+        }
+    }
 
-
+    public Result getEncryptedPrivateKey(String address, String priKey, String password) {
+        if (!ECKey.isValidPrivteHex(priKey)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        Account account;
+        try {
+            account = AccountTool.createAccount(priKey);
+            if (!address.equals(account.getAddress().getBase58())) {
+                return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            }
+            account.encrypt(password);
+        } catch (NulsException e) {
+            return Result.getFailed(AccountErrorCode.FAILED);
+        }
+        return Result.getSuccess().setData(Hex.encode(account.getEncryptedPriKey()));
     }
 
     @PUT
