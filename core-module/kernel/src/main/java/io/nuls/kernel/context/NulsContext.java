@@ -49,6 +49,11 @@ public class NulsContext {
      */
     public static short DEFAULT_CHAIN_ID = 1;
 
+    /*
+     *  chain name
+     */
+    public static String CHAIN_NAME = "NULS";
+
     /**
      * cache the best block
      */
