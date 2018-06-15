@@ -56,7 +56,7 @@ public interface AccountConstant extends NulsConstant {
      * 设置账户别名的交易类型
      * Set the transaction type of account alias.
      */
-    int TX_TYPE_ACCOUNT_ALIAS = 51;
+    int TX_TYPE_ACCOUNT_ALIAS = 3;
 
     /**
      * 账户解锁时间最大值(单位:秒)

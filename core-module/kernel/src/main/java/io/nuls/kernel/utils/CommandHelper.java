@@ -230,19 +230,19 @@ public class CommandHelper {
                 return "coinbase";
             case 2:
                 return "transfer";
-            case 51:
+            case 3:
                 return "account_alias";
-            case 90:
+            case 4:
                 return "register_agent";
-            case 91:
+            case 5:
                 return "join_consensus";
-            case 92:
+            case 6:
                 return "cancel_deposit";
-            case 93:
+            case 7:
                 return "yellow_punish";
-            case 94:
+            case 8:
                 return "red_punish";
-            case 95:
+            case 9:
                 return "stop_agent";
             default:
                 return null;
