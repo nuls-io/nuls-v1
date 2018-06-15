@@ -44,6 +44,9 @@ public class OfflineAccountPasswordForm {
     @ApiModelProperty(name = "password", value = "密码", required = true)
     private String password;
 
+    @ApiModelProperty(name = "newPassword", value = "新密码", required = true)
+    private String newPassword;
+
     public String getPassword() {
         return password;
     }
@@ -66,5 +69,13 @@ public class OfflineAccountPasswordForm {
 
     public void setPriKey(String priKey) {
         this.priKey = priKey;
+    }
+
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
     }
 }

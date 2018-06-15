@@ -441,7 +441,6 @@ public class AccountResource {
         return accountBaseService.setPassword(address, password).toRpcClientResult();
     }
 
-
     @POST
     @Path("/offline/password/")
     @Produces(MediaType.APPLICATION_JSON)
@@ -458,33 +457,22 @@ public class AccountResource {
         if (StringUtils.isBlank(address) || !Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "address error").toRpcClientResult();
         }
-        if (StringUtils.isBlank(priKey)) {
+        if (StringUtils.isBlank(priKey) || !ECKey.isValidPrivteHex(priKey)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "priKey error").toRpcClientResult();
         }
-        if (!StringUtils.isBlank(password)) {
-            if (!StringUtils.validPassword(password)) {
-                return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG).toRpcClientResult();
-            }
-            byte[] privateKeyBytes = null;
-            try {
-                privateKeyBytes = AESEncrypt.decrypt(Hex.decode(priKey), password);
-            } catch (Exception e) {
-                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
-            }
-            priKey = Hex.encode(privateKeyBytes);
-        }
-        if (!ECKey.isValidPrivteHex(priKey)) {
-            return Result.getFailed("priKey error").toRpcClientResult();
+        if (StringUtils.isBlank(password) || !StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG).toRpcClientResult();
         }
 
+        //验证地址是否正确
         ECKey key = ECKey.fromPrivate(new BigInteger(Hex.decode(priKey)));
         try {
             String newAddress = AccountTool.newAddress(key).getBase58();
             if (!newAddress.equals(address)) {
-                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR, "address and private key do not match").toRpcClientResult();
             }
         } catch (NulsException e) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR, "address and private key do not match").toRpcClientResult();
         }
 
         try {
@@ -493,6 +481,37 @@ public class AccountResource {
         } catch (NulsException e) {
             return Result.getFailed(AccountErrorCode.FAILED).toRpcClientResult();
         }
+    }
+
+    @PUT
+    @Path("/offline/password/")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "[离线钱包修改密码] 根据原密码修改账户密码")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Result.class)
+    })
+    public RpcClientResult updatePassword(@ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
+                                                  OfflineAccountPasswordForm form) {
+        String address = form.getAddress();
+        String priKey = form.getPriKey();
+        String password = form.getPassword();
+        String newPassword = form.getNewPassword();
+
+        if (StringUtils.isBlank(address) || !Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "address error").toRpcClientResult();
+        }
+        if (StringUtils.isBlank(priKey)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "priKey error").toRpcClientResult();
+        }
+        if (StringUtils.isBlank(password) || !StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG).toRpcClientResult();
+        }
+        if (StringUtils.isBlank(newPassword) || !StringUtils.validPassword(newPassword)) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG).toRpcClientResult();
+        }
+
+
+
     }
 
     @PUT
@@ -525,6 +544,7 @@ public class AccountResource {
         }
         return this.accountBaseService.changePassword(address, password, newPassword).toRpcClientResult();
     }
+
 
     @PUT
     @Path("/password/prikey")
