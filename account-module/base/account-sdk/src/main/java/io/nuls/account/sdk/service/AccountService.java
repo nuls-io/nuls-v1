@@ -366,7 +366,7 @@ public interface AccountService {
     Result setPasswordOffLine(String address, String priKey, String password);
 
     /**
-     * Change the off-line account password by current passowrd
+     * Change the off-line account password by encryptedPriKey and passowrd
      *
      * @param address         The address of account
      * @param encryptedPriKey The encrypted Private Key
