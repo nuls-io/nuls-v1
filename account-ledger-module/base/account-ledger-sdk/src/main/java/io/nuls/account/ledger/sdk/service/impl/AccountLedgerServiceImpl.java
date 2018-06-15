@@ -126,19 +126,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         return result.setData(balanceDto);
     }
 
-    public static void main(String[] args) {
-        SDKBootstrap.sdkStart();
-        AccountLedgerServiceImpl as = new AccountLedgerServiceImpl();
-        try {
-            System.out.println(JSONUtils.obj2json(as.getBalance("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
-            System.out.println(JSONUtils.obj2json(as.getTxByHash("0020cade8c00989e47d0836295d670e621618c28121e5a3d984574ab25d19d0d49df")));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-
     @Override
     public Result createTransaction(List<InputDto> inputs, List<OutputDto> outputs, String remark) {
         if (inputs == null || inputs.isEmpty()) {

@@ -32,22 +32,17 @@ import io.swagger.annotations.ApiModelProperty;
  * @author: Charlie
  * @date: 2018/4/18
  */
-@ApiModel(value = "创建账户表单数据")
-public class AccountCreateForm {
+@ApiModel(value = "密码表单数据")
+public class OfflineAccountPasswordForm {
 
-    @ApiModelProperty(name = "count", value = "新建账户数量")
-    private int count;
+    @ApiModelProperty(name = "address", value = "地址", required = true)
+    private String address;
 
-    @ApiModelProperty(name = "password", value = "账户密码")
+    @ApiModelProperty(name = "priKey", value = "私钥", required = true)
+    private String priKey;
+
+    @ApiModelProperty(name = "password", value = "密码", required = true)
     private String password;
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
-    }
 
     public String getPassword() {
         return password;
@@ -55,5 +50,21 @@ public class AccountCreateForm {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPriKey() {
+        return priKey;
+    }
+
+    public void setPriKey(String priKey) {
+        this.priKey = priKey;
     }
 }
