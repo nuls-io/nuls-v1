@@ -334,7 +334,12 @@ public class AccountLedgerResource {
             if (validateResult.isFailed()) {
                 return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
             }
-            return accountLedgerService.broadcast(tx).toRpcClientResult();
+            Result result = accountLedgerService.broadcast(tx);
+            if (result.isFailed()) {
+                return result.toRpcClientResult();
+            }
+            result.setData(tx.getHash());
+            return result.toRpcClientResult();
         } catch (Exception e) {
             Log.error(e);
             return Result.getFailed(LedgerErrorCode.DATA_PARSE_ERROR).toRpcClientResult();
