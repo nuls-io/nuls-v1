@@ -17,13 +17,15 @@ import io.nuls.sdk.model.*;
 import io.nuls.sdk.model.dto.BalanceDto;
 import io.nuls.sdk.script.P2PKHScriptSig;
 import io.nuls.sdk.utils.*;
-import org.spongycastle.crypto.CryptoException;
 import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -123,6 +125,19 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         BalanceDto balanceDto = new BalanceDto(map);
         return result.setData(balanceDto);
     }
+
+    public static void main(String[] args) {
+        SDKBootstrap.sdkStart();
+        AccountLedgerServiceImpl as = new AccountLedgerServiceImpl();
+        try {
+            System.out.println(JSONUtils.obj2json(as.getBalance("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
+            System.out.println(JSONUtils.obj2json(as.getTxByHash("0020cade8c00989e47d0836295d670e621618c28121e5a3d984574ab25d19d0d49df")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
     @Override
     public Result createTransaction(List<InputDto> inputs, List<OutputDto> outputs, String remark) {

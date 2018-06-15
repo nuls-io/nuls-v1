@@ -545,7 +545,11 @@ public class AccountServiceImpl implements AccountService {
 //        as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456");
         try {
             //System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
-            System.out.println(JSONUtils.obj2json(as.createOffLineAccount(2, "nuls123456")));
+            //System.out.println(JSONUtils.obj2json(as.createOffLineAccount(2, "nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.createOffLineAccount()));
+//            System.out.println(JSONUtils.obj2json(as.createOffLineAccount("nuls123456")));
+            System.out.println(JSONUtils.obj2json(as.createAccount("nuls123456")));
+            System.out.println(JSONUtils.obj2json(as.getAccount("2CVGMStk6LHB6P6eT2fCxoTkUXX2rTX")));
         } catch (Exception e) {
             e.printStackTrace();
         }
