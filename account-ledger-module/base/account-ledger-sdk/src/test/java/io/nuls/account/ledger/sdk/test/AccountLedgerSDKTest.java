@@ -27,28 +27,30 @@ public class AccountLedgerSDKTest {
     @Test
     public void testCreateTransaction() {
         try {
-            List<InputDto> inputDtos = new ArrayList<>();
-            InputDto inputDto = new InputDto();
-            inputDto.setFromHash("002023c66d10cf9047dbcca12aee2235ff9dfe0f13db3c921a2ec22e0dd63331cb85");
-            inputDto.setFromIndex(4);
-            inputDto.setValue(1000000000000000L);
+            String remark = "create transaction demo";
+            long fee = 100000;
+            List<InputDto> inputs = new ArrayList<>();
+            List<OutputDto> outputs = new ArrayList<>();
 
-            inputDtos.add(inputDto);
+            InputDto input = new InputDto();
+            input.setFromHash("002023c66d10cf9047dbcca12aee2235ff9dfe0f13db3c921a2ec22e0dd63331cb85");
+            input.setFromIndex(1);
+            input.setValue(1000000000L);
+            inputs.add(input);
 
-            List<OutputDto> outputDtos = new ArrayList<>();
-            OutputDto outputDto = new OutputDto();
-            outputDto.setAddress("2CjPVMKST7h4Q5Dqa8Q9P9CwYSmN7mG");
-            outputDto.setValue(1000000L);
-            outputDto.setLockTime(0L);
-            outputDtos.add(outputDto);
+            OutputDto output = new OutputDto();
+            output.setAddress("2CjPVMKST7h4Q5Dqa8Q9P9CwYSmN7mG");
+            output.setValue(1000000L);
+            output.setLockTime(0L);
+            outputs.add(output);
 
-            outputDto = new OutputDto();
-            outputDto.setAddress("2CXJEuoXZMajeTEgL6TgiSxTRRMwiMM");
-            outputDto.setValue(1000000000000000L - 1000000 - 1000000);
-            outputDto.setLockTime(0L);
-            outputDtos.add(outputDto);
+            output = new OutputDto();
+            output.setAddress("2CXJEuoXZMajeTEgL6TgiSxTRRMwiMM");
+            output.setValue(1000000000L - 1000000 - fee);
+            output.setLockTime(0L);
+            outputs.add(output);
 
-            Result result = service.createTransaction(inputDtos, outputDtos, null);
+            Result result = service.createTransaction(inputs, outputs, remark);
             System.out.println(result.getData());
         } catch (Exception e) {
             e.printStackTrace();

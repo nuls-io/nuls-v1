@@ -83,7 +83,7 @@ public class UpgradeThread implements Runnable {
             if (null == versionJson) {
                 return;
             }
-            process.setPercentage(3);
+            process.setPercentage(5);
             process.setStatus(VersionConstant.DOWNLOADING);
             String root = this.getClass().getClassLoader().getResource("").getPath();
             String newDirPath = root + "/temp/" + version;
@@ -97,19 +97,19 @@ public class UpgradeThread implements Runnable {
                 deleteTemp(root + "/temp/");
                 return;
             }
-            process.setPercentage(6);
+            process.setPercentage(12);
             result = this.download(urlRoot + "/conf.zip", newDirPath + "/conf.zip", versionJson.getConfSig());
             if (!result) {
                 deleteTemp(root + "/temp/");
                 return;
             }
-            process.setPercentage(9);
+            process.setPercentage(15);
             File libsDir = new File(newDirPath + "/libs");
             if (libsDir.exists()) {
                 FileUtil.deleteFolder(libsDir);
             }
             libsDir.mkdirs();
-            process.setPercentage(10);
+            process.setPercentage(20);
             int count = 0;
             int size = versionJson.getJarSigList().size();
             for (JarSig jarSig : versionJson.getJarSigList()) {
@@ -124,7 +124,7 @@ public class UpgradeThread implements Runnable {
                     deleteTemp(root + "/temp/");
                     return;
                 }
-                process.setPercentage(10 + (count * 80) / (size));
+                process.setPercentage(20 + (count * 70) / (size));
             }
             process.setStatus(VersionConstant.INSTALLING);
             String oldDirPath = root + "/temp/old";
@@ -253,14 +253,13 @@ public class UpgradeThread implements Runnable {
         try {
             if (upgrading) {
                 upgrading = false;
-                return true;
             }
             String root = UpgradeThread.class.getClassLoader().getResource("").getPath();
             deleteTemp(root + "/temp/");
+            return true;
         } finally {
             lock.unlock();
         }
-        return false;
     }
 
     public boolean isUpgrading() {

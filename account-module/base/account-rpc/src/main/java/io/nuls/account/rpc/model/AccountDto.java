@@ -45,6 +45,12 @@ public class AccountDto {
     @ApiModelProperty(name = "pubKey", value = "公钥Hex.encode(byte[])")
     private String pubKey;
 
+    @ApiModelProperty(name = "priKey", value = "私钥Hex.encode(byte[])")
+    private String priKey;
+
+    @ApiModelProperty(name = "encryptedPriKey", value = "加密后的私钥Hex.encode(byte[])")
+    private String encryptedPriKey;
+
     @ApiModelProperty(name = "extend", value = "其他信息Hex.encode(byte[])")
     private String extend;
 
@@ -54,7 +60,9 @@ public class AccountDto {
     @ApiModelProperty(name = "encrypted", value = "账户是否加密")
     private boolean encrypted;
 
+
     public AccountDto() {
+
     }
 
     public AccountDto(Account account) {
@@ -66,6 +74,13 @@ public class AccountDto {
             this.extend = Hex.encode(account.getExtend());
         }
         this.encrypted = account.isEncrypted();
+        if (encrypted) {
+            this.encryptedPriKey = Hex.encode(account.getEncryptedPriKey());
+            this.priKey = "";
+        } else {
+            this.priKey = Hex.encode(account.getPriKey());
+            this.encryptedPriKey = "";
+        }
     }
 
     public String getAddress() {
@@ -114,5 +129,21 @@ public class AccountDto {
 
     public void setEncrypted(boolean encrypted) {
         this.encrypted = encrypted;
+    }
+
+    public String getPriKey() {
+        return priKey;
+    }
+
+    public void setPriKey(String priKey) {
+        this.priKey = priKey;
+    }
+
+    public String getEncryptedPriKey() {
+        return encryptedPriKey;
+    }
+
+    public void setEncryptedPriKey(String encryptedPriKey) {
+        this.encryptedPriKey = encryptedPriKey;
     }
 }

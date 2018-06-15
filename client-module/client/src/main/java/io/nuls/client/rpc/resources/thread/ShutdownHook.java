@@ -42,13 +42,9 @@ public class ShutdownHook extends Thread {
 
     @Override
     public void run() {
-        try {
-            Thread.sleep(3000L);
-        } catch (InterruptedException e) {
-            Log.error(e);
-        }
         String root = this.getClass().getClassLoader().getResource("").getPath();
-        String newDirPath = root + "/temp/" + SyncVersionRunner.getInstance().getNewestVersion();
+        String version = SyncVersionRunner.getInstance().getNewestVersion();
+        String newDirPath = root + "/temp/" + version;
         File tempDir = new File(newDirPath);
         if (tempDir.exists()) {
             Log.error(1 + "");
@@ -62,19 +58,19 @@ public class ShutdownHook extends Thread {
             FileUtil.copyFolder(new File(newDirPath + "/bin"), new File(root + "/bin"));
             Log.error(5 + "");
             FileUtil.decompress(newDirPath + "/conf.zip", newDirPath);
-            FileUtil.copyFolder(new File(newDirPath + "/conf"), new File(root + "/conf"));
-            Log.error(6 + "");
-            FileUtil.copyFolder(new File(newDirPath + "/libs"), new File(root + "/libs"));
         }
         String os = System.getProperty("os.name").toUpperCase();
         if (os.startsWith("WINDOWS")) {
             try {
-                Runtime.getRuntime().exec("NULS-Wallet.exe");
+                Runtime.getRuntime().exec("upgrade.bat " + version, null, new File(root + "/bin"));
             } catch (IOException e) {
                 Log.error(e);
             }
         } else {
             try {
+                FileUtil.copyFolder(new File(newDirPath + "/conf"), new File(root + "/conf"));
+                Log.error(6 + "");
+                FileUtil.copyFolder(new File(newDirPath + "/libs"), new File(root + "/libs"));
                 Runtime.getRuntime().exec("sh start.sh", null, new File(root + "/bin"));
             } catch (IOException e) {
                 Log.error(e);
