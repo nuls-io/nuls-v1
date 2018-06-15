@@ -7,7 +7,9 @@ import io.nuls.account.sdk.model.AssetDto;
 import io.nuls.account.sdk.service.AccountService;
 import io.nuls.sdk.SDKBootstrap;
 import io.nuls.sdk.constant.AccountErrorCode;
+import io.nuls.sdk.crypto.AESEncrypt;
 import io.nuls.sdk.crypto.ECKey;
+import io.nuls.sdk.crypto.Hex;
 import io.nuls.sdk.exception.NulsException;
 import io.nuls.sdk.model.Account;
 import io.nuls.sdk.model.Address;
@@ -17,7 +19,10 @@ import io.nuls.sdk.model.dto.BalanceDto;
 import io.nuls.sdk.utils.*;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -81,14 +86,14 @@ public class AccountServiceImpl implements AccountService {
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "Length between 8 and 20, the combination of characters and numbers");
         }
-        List<Account> accounts = new ArrayList<>();
+        List<AccountDto> accounts = new ArrayList<>();
         try {
             for (int i = 0; i < count; i++) {
                 Account account = AccountTool.createAccount();
                 if (StringUtils.isNotBlank(password)) {
                     account.encrypt(password);
                 }
-                accounts.add(account);
+                accounts.add(new AccountDto(account));
             }
         } catch (NulsException e) {
             return Result.getFailed();
@@ -489,6 +494,122 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public Result setPasswordOffLine(String address, String priKey, String password) {
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        if (StringUtils.isBlank(priKey)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        if (!StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        return getEncryptedPrivateKey(address, priKey, password);
+    }
+
+    @Override
+    public Result resetPasswordOffLine(String address, String encryptedPriKey, String password, String newPassword) {
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        if (StringUtils.isBlank(encryptedPriKey)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        if (!StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        if (!StringUtils.validPassword(newPassword)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        try {
+            byte[] priKey = AESEncrypt.decrypt(Hex.decode(encryptedPriKey), password);
+            return getEncryptedPrivateKey(address, Hex.encode(priKey), newPassword);
+        } catch (Exception e) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+        }
+    }
+
+    public Result getEncryptedPrivateKey(String address, String prikey, String password) {
+        if (!ECKey.isValidPrivteHex(prikey)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        Account account;
+        try {
+            account = AccountTool.createAccount(prikey);
+            if (!address.equals(account.getAddress().getBase58())) {
+                return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            }
+            account.encrypt(password);
+        } catch (NulsException e) {
+            return Result.getFailed(AccountErrorCode.FAILED);
+        }
+        return Result.getSuccess().setData(Hex.encode(account.getEncryptedPriKey()));
+    }
+
+    /**
+     * -----------------------------------Test------------------------------
+     */
+    public static void main(String[] args) {
+        SDKBootstrap.sdkStart();
+        AccountService as = new AccountServiceImpl();
+//        as.createAccount("nuls123456");
+//        as.backupAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "/Users/lichao/Downloads", "nuls123456");
+//        as.getAliasFee("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie");
+//        as.getAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
+//        as.getAccountList(1, 100);
+//        as.getAssets("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
+//        as.setAlias("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie", "nuls123456");
+//        as.getAddressByAlias("charlie");
+//        as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456");
+        try {
+            //System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
+            //System.out.println(JSONUtils.obj2json(as.createOffLineAccount(2, "nuls123456")));
+            //System.out.println(JSONUtils.obj2json(as.createOffLineAccount(10)));
+            //System.out.println(JSONUtils.obj2json(as.createOffLineAccount("nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.createAccount("nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.getAccount("2CVGMStk6LHB6P6eT2fCxoTkUXX2rTX")));
+            System.out.println(JSONUtils.obj2json(as.setPasswordOffLine(
+                    "2CacFwqMwcJiGNNBwiwV7bCL7bjwNBr",
+                    "00e4bfd347351ea899b5f0ae2c0a3e7a6951b202eaf72432d1a63a2dc85c59c82a",
+                    "nuls123456")));
+          /*  System.out.println(JSONUtils.obj2json(as.resetPasswordOffLine(
+                    "2CacFwqMwcJiGNNBwiwV7bCL7bjwNBr",
+                    "25368dbc0ff7eea4fc6da22bc37e85d7976a3846f8b58d4dc0cf484e740ba1b61f96395fbe1ddf70ece9fd21fcd95e7a",
+                    "nuls111111", "nuls123456")));*/
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        as.importAccountByKeystore("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore","nuls123456",true);
+
+       /* FileReader fileReader = null;
+        try {
+            fileReader = new FileReader(new File("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        as.importAccountByKeystore(fileReader,"nuls123456",true);*/
+
+//        as.importAccountByPriKey("1f9d3ad044e0e1201e117b041f3d2ceedacb44688e57969620f3ad7a4d6e9d24", "nuls123456", true);
+//        as.isEncrypted("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
+//        as.lockAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
+//        as.unlockAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456", 120);
+//        as.setPassword("2CWSpfF1mFTjWmDCAx4A6NXwykgpj4q", "nuls123456");
+//        as.removeAccount("2CWSpfF1mFTjWmDCAx4A6NXwykgpj4q", "nuls123456");
+//        as.resetPassword("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456", "nuls123456");
+
+       /* FileReader fileReader = null;
+        try {
+            fileReader = new FileReader(new File("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        as.updatePasswordByKeystore(fileReader,"nuls1234567");*/
+    }
+    /**
+     * ---------------------------------------------------------------------
+     */
+
+    @Override
     public Result updatePasswordByKeystore(FileReader fileReader, String password) {
         if (null == fileReader || !StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
@@ -528,58 +649,4 @@ public class AccountServiceImpl implements AccountService {
         return setAlias(address, alias, null);
     }
 
-    /**
-     * -----------------------------------Test------------------------------
-     */
-    public static void main(String[] args) {
-        SDKBootstrap.sdkStart();
-        AccountService as = new AccountServiceImpl();
-//        as.createAccount("nuls123456");
-//        as.backupAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "/Users/lichao/Downloads", "nuls123456");
-//        as.getAliasFee("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie");
-//        as.getAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
-//        as.getAccountList(1, 100);
-//        as.getAssets("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
-//        as.setAlias("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie", "nuls123456");
-//        as.getAddressByAlias("charlie");
-//        as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456");
-        try {
-            //System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
-            //System.out.println(JSONUtils.obj2json(as.createOffLineAccount(2, "nuls123456")));
-//            System.out.println(JSONUtils.obj2json(as.createOffLineAccount()));
-//            System.out.println(JSONUtils.obj2json(as.createOffLineAccount("nuls123456")));
-            System.out.println(JSONUtils.obj2json(as.createAccount("nuls123456")));
-            System.out.println(JSONUtils.obj2json(as.getAccount("2CVGMStk6LHB6P6eT2fCxoTkUXX2rTX")));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-//        as.importAccountByKeystore("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore","nuls123456",true);
-
-       /* FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(new File("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore"));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        as.importAccountByKeystore(fileReader,"nuls123456",true);*/
-
-//        as.importAccountByPriKey("1f9d3ad044e0e1201e117b041f3d2ceedacb44688e57969620f3ad7a4d6e9d24", "nuls123456", true);
-//        as.isEncrypted("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
-//        as.lockAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
-//        as.unlockAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456", 120);
-//        as.setPassword("2CWSpfF1mFTjWmDCAx4A6NXwykgpj4q", "nuls123456");
-//        as.removeAccount("2CWSpfF1mFTjWmDCAx4A6NXwykgpj4q", "nuls123456");
-//        as.resetPassword("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456", "nuls123456");
-
-       /* FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(new File("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore"));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        as.updatePasswordByKeystore(fileReader,"nuls1234567");*/
-    }
-    /**
-     * ---------------------------------------------------------------------
-     */
 }

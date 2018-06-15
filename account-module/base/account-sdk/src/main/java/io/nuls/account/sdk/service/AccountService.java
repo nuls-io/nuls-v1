@@ -80,7 +80,7 @@ public interface AccountService {
      * Create an unencrypted off-line account (Not saved to the database)
      *
      * @return Result
-     * If the operation is successful, 'success' is true, and data is List<Account>;
+     * If the operation is successful, 'success' is true, and data is List<AccountDto>;
      * If the operation fails, "success" is false and the result has error information
      */
     Result createOffLineAccount();
@@ -90,7 +90,7 @@ public interface AccountService {
      *
      * @param password The password of the account
      * @return Result
-     * If the operation is successful, 'success' is true and data is List<Account>;
+     * If the operation is successful, 'success' is true and data is List<AccountDto>;
      * If the operation fails, "success" is false and the result has error information
      */
     Result createOffLineAccount(String password);
@@ -100,7 +100,7 @@ public interface AccountService {
      *
      * @param count The number of accounts you want to create
      * @return Result
-     * If the operation is successful, 'success' is true and data is List<Account>;
+     * If the operation is successful, 'success' is true and data is List<AccountDto>;
      * If the operation fails, "success" is false and the result has error information
      */
     Result createOffLineAccount(int count);
@@ -110,7 +110,7 @@ public interface AccountService {
      *
      * @param count The number of accounts you want to create
      * @return Result
-     * If the operation is successful, 'success' is true and data is List<Account>;
+     * If the operation is successful, 'success' is true and data is List<AccountDto>;
      * If the operation fails, "success" is false and the result has error information
      */
     Result createOffLineAccount(int count, String password);
@@ -131,8 +131,8 @@ public interface AccountService {
      * Backup an account
      * Generate a keystore backup file
      *
-     * @param address  The number of accounts you want to backup
-     * @param path     Folder path to save backup files, if you pass null to save to the current directory
+     * @param address The number of accounts you want to backup
+     * @param path    Folder path to save backup files, if you pass null to save to the current directory
      * @return
      */
     Result backupAccount(String address, String path);
@@ -197,7 +197,7 @@ public interface AccountService {
     /**
      * Get the private key
      *
-     * @param address  The address of account
+     * @param address The address of account
      * @return If the operation is successful, 'success' is true and data is private key;
      * If the operation fails, "success" is false and the result has error information
      */
@@ -273,6 +273,7 @@ public interface AccountService {
      */
     Result importAccountByPriKey(String privateKey, String password, boolean overwrite);
 
+
     /**
      * Import account according to privateKey
      *
@@ -326,7 +327,7 @@ public interface AccountService {
     /**
      * Remove the account
      *
-     * @param address  The address of account you want to remove
+     * @param address The address of account you want to remove
      * @return If the operation is successful, 'success' is true;
      * If the operation fails, "success" is false and the result has error information
      */
@@ -336,11 +337,12 @@ public interface AccountService {
      * Set a password for your account(encrypt account)
      *
      * @param address  The address of account you want to remove
-     * @param password The password of account
+     * @param password The new password
      * @return If the operation is successful, 'success' is true;
      * If the operation fails, "success" is false and the result has error information
      */
     Result setPassword(String address, String password);
+
 
     /**
      * Change the account password by current passowrd
@@ -352,6 +354,28 @@ public interface AccountService {
      * If the operation fails, "success" is false and the result has error information
      */
     Result resetPassword(String address, String password, String newPassword);
+
+    /**
+     * Set a password for your off-line account(encrypt account)
+     *
+     * @param address  The address of account
+     * @param priKey   The private key of account
+     * @param password The new password
+     * @return
+     */
+    Result setPasswordOffLine(String address, String priKey, String password);
+
+    /**
+     * Change the off-line account password by encryptedPriKey and passowrd
+     *
+     * @param address         The address of account
+     * @param encryptedPriKey The encrypted Private Key
+     * @param password        The password to use when encrypting the private key
+     * @param newPassword     The new password
+     * @return
+     */
+    Result resetPasswordOffLine(String address, String encryptedPriKey, String password, String newPassword);
+
 
     /**
      * Change the account password by keystore file
@@ -377,8 +401,8 @@ public interface AccountService {
     /**
      * set alias
      *
-     * @param address  The address of account to set an alias for
-     * @param alias    The alias value to be set
+     * @param address The address of account to set an alias for
+     * @param alias   The alias value to be set
      * @return If the operation is successful, 'success' is true;
      * If the operation fails, "success" is false and the result has error information
      */

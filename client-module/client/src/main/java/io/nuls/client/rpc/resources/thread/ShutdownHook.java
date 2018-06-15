@@ -42,13 +42,9 @@ public class ShutdownHook extends Thread {
 
     @Override
     public void run() {
-        try {
-            Thread.sleep(3000L);
-        } catch (InterruptedException e) {
-            Log.error(e);
-        }
         String root = this.getClass().getClassLoader().getResource("").getPath();
-        String newDirPath = root + "/temp/" + SyncVersionRunner.getInstance().getNewestVersion();
+        String version = SyncVersionRunner.getInstance().getNewestVersion();
+        String newDirPath = root + "/temp/" + version;
         File tempDir = new File(newDirPath);
         if (tempDir.exists()) {
             Log.error(1 + "");
@@ -66,7 +62,7 @@ public class ShutdownHook extends Thread {
         String os = System.getProperty("os.name").toUpperCase();
         if (os.startsWith("WINDOWS")) {
             try {
-                Runtime.getRuntime().exec("upgrade.bat", null, new File(root + "/bin"));
+                Runtime.getRuntime().exec("upgrade.bat " + version, null, new File(root + "/bin"));
             } catch (IOException e) {
                 Log.error(e);
             }
