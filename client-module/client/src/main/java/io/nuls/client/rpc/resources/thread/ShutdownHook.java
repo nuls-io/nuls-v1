@@ -62,19 +62,19 @@ public class ShutdownHook extends Thread {
             FileUtil.copyFolder(new File(newDirPath + "/bin"), new File(root + "/bin"));
             Log.error(5 + "");
             FileUtil.decompress(newDirPath + "/conf.zip", newDirPath);
-            FileUtil.copyFolder(new File(newDirPath + "/conf"), new File(root + "/conf"));
-            Log.error(6 + "");
-            FileUtil.copyFolder(new File(newDirPath + "/libs"), new File(root + "/libs"));
         }
         String os = System.getProperty("os.name").toUpperCase();
         if (os.startsWith("WINDOWS")) {
             try {
-                Runtime.getRuntime().exec("NULS-Wallet.exe");
+                Runtime.getRuntime().exec("upgrade.bat", null, new File(root + "/bin"));
             } catch (IOException e) {
                 Log.error(e);
             }
         } else {
             try {
+                FileUtil.copyFolder(new File(newDirPath + "/conf"), new File(root + "/conf"));
+                Log.error(6 + "");
+                FileUtil.copyFolder(new File(newDirPath + "/libs"), new File(root + "/libs"));
                 Runtime.getRuntime().exec("sh start.sh", null, new File(root + "/bin"));
             } catch (IOException e) {
                 Log.error(e);

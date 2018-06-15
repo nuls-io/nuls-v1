@@ -216,7 +216,11 @@ public final class FileUtil {
         for (File file : files) {
             if (file.isFile()) {
                 try {
-                    file.delete();
+                    boolean b = file.delete();
+                    if(!b){
+                        System.gc();
+                        file.delete();
+                    }
                 } catch (Exception e) {
                     Log.error(e);
                 }
@@ -225,7 +229,11 @@ public final class FileUtil {
             }
         }
         try {
-            folder.delete();
+            boolean b = folder.delete();
+            if(!b){
+                System.gc();
+                folder.delete();
+            }
         } catch (Exception e) {
             Log.error(e);
         }
