@@ -49,34 +49,40 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        SocketChannel channel = (SocketChannel) ctx.channel();
-        Attribute<Node> nodeAttribute = channel.attr(key);
-        Node node = nodeAttribute.get();
+
+        System.out.println("----------------- client channelRegistered -------------------");
+//        SocketChannel channel = (SocketChannel) ctx.channel();
+//        Attribute<Node> nodeAttribute = channel.attr(key);
+//        Node node = nodeAttribute.get();
 
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
+        System.out.println("----------------- client channelActive -------------------");
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
+        System.out.println("----------------- client channelInactive -------------------");
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         super.channelRead(ctx, msg);
+        System.out.println("----------------- client channelRead -------------------");
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-
+        System.out.println("----------------- client exceptionCaught -------------------");
+        cause.printStackTrace();
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-
+        System.out.println("----------------- client channelUnregistered -------------------");
     }
 }
