@@ -1,7 +1,9 @@
 @echo off
 
 if "%OS%" == "Windows_NT" setlocal
-echo %1%
+
+ping /n 3 127.1>nul
+
 set SERVER_HOME=%~dp0
 cd %SERVER_HOME%
 cd ..

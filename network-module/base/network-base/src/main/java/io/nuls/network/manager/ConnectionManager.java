@@ -226,4 +226,8 @@ public class ConnectionManager {
         }
         return messageBusService;
     }
+
+    public void shutdown(){
+        nettyServer.shutdown();
+    }
 }
