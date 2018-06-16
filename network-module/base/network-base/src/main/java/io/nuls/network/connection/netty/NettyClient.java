@@ -34,6 +34,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
+import io.nuls.network.manager.NodeManager2;
 import io.nuls.network.model.Node;
 import io.nuls.network.manager.NodeManager;
 
@@ -50,7 +51,7 @@ public class NettyClient {
 
     private Node node;
 
-    private NodeManager nodeManager = NodeManager.getInstance();
+    private NodeManager2 nodeManager = NodeManager2.getInstance();
 
     public NettyClient(Node node) {
         this.node = node;
@@ -71,7 +72,7 @@ public class NettyClient {
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNETCI_TIME_OUT)
-                .handler(new NulsChannelInitializer<>(new ClientChannelHandler()));
+                .handler(new NulsChannelInitializer<>(new ClientChannelHandler2()));
     }
 
     public void start() {
@@ -83,8 +84,8 @@ public class NettyClient {
                         socketChannel = (SocketChannel) future.channel();
                     } else {
                         System.out.println("Client connect to host error: " + future.cause() + ", remove node: " + node.getId());
-                        nodeManager.validateFirstUnConnectedNode(node.getId());
-                        nodeManager.removeNode(node.getId());
+//                        nodeManager.validateFirstUnConnectedNode(node.getId());
+//                        nodeManager.removeNode(node.getId());
                     }
                 }
             });
@@ -95,8 +96,8 @@ public class NettyClient {
                 socketChannel.close();
             }
             System.out.println("Client start exception:" + e.getMessage() + ", remove node: " + node.getId());
-            nodeManager.validateFirstUnConnectedNode(node.getId());
-            nodeManager.removeNode(node.getId());
+//            nodeManager.validateFirstUnConnectedNode(node.getId());
+//            nodeManager.removeNode(node.getId());
         }
     }
 

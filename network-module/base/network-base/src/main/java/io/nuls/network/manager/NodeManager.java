@@ -111,7 +111,7 @@ public class NodeManager implements Runnable {
             networkParam.getLocalIps().add(externalIp);
         }
 
-        List<Node> nodeList = getNetworkStorage().getLocalNodeList(20);
+        List<Node> nodeList = getNetworkStorage().getLocalNodeList();
         nodeList.addAll(getSeedNodes());
         for (Node node : nodeList) {
             addNode(node);

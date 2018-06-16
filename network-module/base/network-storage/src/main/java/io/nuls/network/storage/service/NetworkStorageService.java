@@ -32,7 +32,7 @@ import java.util.Set;
 
 public interface NetworkStorageService {
 
-    List<Node> getLocalNodeList(int size);
+    List<Node> getLocalNodeList();
 
     List<Node> getLocalNodeList(int size, Set<String> ipSet);
 
