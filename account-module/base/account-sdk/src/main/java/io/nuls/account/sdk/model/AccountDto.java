@@ -26,6 +26,7 @@
 package io.nuls.account.sdk.model;
 
 
+import io.nuls.sdk.crypto.Hex;
 import io.nuls.sdk.model.Account;
 import io.nuls.sdk.utils.StringUtils;
 
@@ -51,6 +52,10 @@ public class AccountDto {
      */
     private boolean encrypted;
 
+    private String priKey;
+
+    private String encryptedPriKey;
+
     public AccountDto() {
     }
 
@@ -64,7 +69,16 @@ public class AccountDto {
     }
 
     public AccountDto(Account account){
-
+        this.address = account.getAddress().toString();
+        this.alias = account.getAlias();
+        this.pubKey =  Hex.encode(account.getPubKey());
+        this.createTime = account.getCreateTime();
+        if (account.getExtend() != null) {
+            this.extend = Hex.encode(account.getExtend());
+        }
+        this.encrypted = account.isEncrypted();
+        this.priKey = Hex.encode(account.getPriKey());
+        this.encryptedPriKey = Hex.encode(account.getEncryptedPriKey());
     }
 
     public String getAddress() {
@@ -113,5 +127,21 @@ public class AccountDto {
 
     public void setEncrypted(boolean encrypted) {
         this.encrypted = encrypted;
+    }
+
+    public String getPriKey() {
+        return priKey;
+    }
+
+    public void setPriKey(String priKey) {
+        this.priKey = priKey;
+    }
+
+    public String getEncryptedPriKey() {
+        return encryptedPriKey;
+    }
+
+    public void setEncryptedPriKey(String encryptedPriKey) {
+        this.encryptedPriKey = encryptedPriKey;
     }
 }

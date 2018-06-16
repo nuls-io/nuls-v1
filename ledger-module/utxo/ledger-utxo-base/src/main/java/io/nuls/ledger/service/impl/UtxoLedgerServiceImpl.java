@@ -30,12 +30,14 @@ import io.nuls.core.tools.map.MapUtil;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -267,6 +269,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
      * coinData的交易和txList同处一个块中，txList中的to可能是coinData的from，
      * 也就是可能存在，在同一个块中，下一笔输入就是上一笔的输出，所以需要校验它
      * bestHeight is used when switch chain.
+     *
      * @return ValidateResult
      */
     @Override
@@ -295,7 +298,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 }
             }
             // 保存Set用于验证自身双花
-            if(temporaryFromSet == null) {
+            if (temporaryFromSet == null) {
                 temporaryFromSet = new HashSet<>();
             }
 
@@ -308,7 +311,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             for (Coin from : froms) {
                 fromBytes = from.getOwner();
                 fromOfFromCoin = from.getFrom();
-                if(fromOfFromCoin == null) {
+                if (fromOfFromCoin == null) {
                     // 验证是否可花费, 校验的coinData的fromUTXO，检查数据库中是否存在此UTXO
                     fromOfFromCoin = utxoLedgerUtxoStorageService.getUtxo(fromBytes);
                 }
@@ -333,15 +336,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     if (java.util.Arrays.equals(fromOfFromCoin.getOwner(), NulsConstant.BLACK_HOLE_ADDRESS)) {
                         return ValidateResult.getFailedResult(CLASS_NAME, "The address is block hole!");
                     }
+                    if (NulsContext.DEFAULT_CHAIN_ID != SerializeUtils.bytes2Short(fromAdressBytes)) {
+                        return ValidateResult.getFailedResult(CLASS_NAME, "The address is not belongs to chain:" + NulsContext.CHAIN_NAME);
+                    }
                 }
                 // 验证非解锁类型的交易及解锁类型的交易
                 if (!transaction.isUnlockTx()) {
                     // 验证非解锁类型的交易，验证是否可用，检查是否还在锁定时间内
-                    if(bestHeight == null) {
+                    if (bestHeight == null) {
                         if (!fromOfFromCoin.usable()) {
                             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_UNUSABLE);
                         }
-                    }else {
+                    } else {
                         if (!fromOfFromCoin.usable(bestHeight)) {
                             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.UTXO_UNUSABLE);
                         }
@@ -359,7 +365,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 }
 
                 // 验证from的锁定时间和金额
-                if(!(fromOfFromCoin.getNa().equals(from.getNa()) && fromOfFromCoin.getLockTime() == from.getLockTime())) {
+                if (!(fromOfFromCoin.getNa().equals(from.getNa()) && fromOfFromCoin.getLockTime() == from.getLockTime())) {
                     return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.DATA_ERROR, "tx from coin data na and lock time error.");
                 }
 
@@ -370,11 +376,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             List<Coin> tos = coinData.getTo();
             Na toTotal = Na.ZERO;
             byte[] txBytes = transaction.getHash().serialize();
-            for(int i = 0 ; i < tos.size() ; i ++) {
+            for (int i = 0; i < tos.size(); i++) {
                 Coin to = tos.get(i);
                 toTotal = toTotal.add(to.getNa());
 
-                if(temporaryToMap != null) {
+                if (temporaryToMap != null) {
                     temporaryToMap.put(asString(ArraysTool.joinintTogether(txBytes, new VarInt(i).encode())), to);
                 }
             }
