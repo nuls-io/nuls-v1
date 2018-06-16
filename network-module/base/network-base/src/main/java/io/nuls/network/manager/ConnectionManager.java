@@ -98,7 +98,7 @@ public class ConnectionManager {
         TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "node connection", new Runnable() {
             @Override
             public void run() {
-                node.setStatus(Node.WAIT);
+                node.setStatus(Node.CONNECT);
                 NettyClient client = new NettyClient(node);
                 client.start();
             }
@@ -147,7 +147,7 @@ public class ConnectionManager {
                 }
             }
         } catch (Exception e) {
-            throw new NulsException(KernelErrorCode.DATA_ERROR,e);
+            throw new NulsException(KernelErrorCode.DATA_ERROR, e);
         } finally {
             buffer.clear();
         }
@@ -198,7 +198,7 @@ public class ConnectionManager {
     }
 
     public void processMessageResult(NetworkEventResult messageResult, Node node) throws IOException {
-        if (node.getStatus() == Node.CLOSE) {
+        if (!node.isAlive()) {
             return;
         }
         if (messageResult == null || !messageResult.isSuccess()) {

@@ -25,19 +25,20 @@
 
 package io.nuls.network.manager;
 
+import io.netty.channel.socket.SocketChannel;
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.storage.service.NetworkStorageService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -46,6 +47,7 @@ public class NodeManager2 implements Runnable {
     private static NodeManager2 instance = new NodeManager2();
 
     private NodeManager2() {
+
     }
 
     public static NodeManager2 getInstance() {
@@ -68,6 +70,12 @@ public class NodeManager2 implements Runnable {
 
     //存放所有正在连接或已连接的节点的id，防止重复连接
     private Set<String> nodeIdSet = ConcurrentHashMap.newKeySet();
+    //存放断开连接的节点
+    private Map<String, Node> disConnectNodes = new ConcurrentHashMap<>();
+    //存放连接成功但还未握手成功的节点
+    private Map<String, Node> connectedNodes = new ConcurrentHashMap<>();
+    //存放握手成功的节点
+    private Map<String, Node> handShakeNodes = new ConcurrentHashMap<>();
 
     /**
      * 初始化主动连接节点组合(outGroup)被动连接节点组(inGroup)
@@ -130,12 +138,81 @@ public class NodeManager2 implements Runnable {
             }
             nodeIdSet.add(node.getId());
             node.setType(Node.OUT);
+            disConnectNodes.put(node.getId(), node);
             connectionManager.connectionNode(node);
             return true;
         } finally {
             lock.unlock();
         }
     }
+
+    /**
+     * 删除节点分为主动删除和被动删除，当主动删除节点时，
+     * 先需要关闭连接，之后再删除节点
+     *
+     * @param node
+     */
+    public void removeNode(Node node) {
+        lock.lock();
+        try {
+            if (StringUtils.isNotBlank(node.getChannelId())) {
+                SocketChannel channel = NioChannelMap.get(node.getChannelId());
+                if (channel != null) {
+                    channel.close();
+                    return;
+                }
+            }
+
+            node.destroy();
+            removeNodeFromGroup(node);
+            removeNodeHandler(node);
+            nodeIdSet.remove(node.getId());
+        } finally {
+            lock.unlock();
+        }
+    }
+
+
+    private void removeNodeHandler(Node node) {
+        if (node.getType() == Node.BAD || node.getType() == Node.IN) {
+            disConnectNodes.remove(node.getId());
+            connectedNodes.remove(node.getId());
+            handShakeNodes.remove(node.getId());
+            if (node.getStatus() == Node.BAD) {
+                getNetworkStorage().deleteNode(node.getId());
+            }
+            return;
+        }
+
+        if (connectedNodes.containsKey(node.getId())) {
+            connectedNodes.remove(node.getId());
+        }
+        if (handShakeNodes.containsKey(node.getId())) {
+            handShakeNodes.remove(node.getId());
+        }
+
+        if (node.getFailCount() <= NetworkConstant.CONEECT_FAIL_MAX_COUNT) {
+            //node.setLastFailTime(TimeService.currentTimeMillis() + 10 * 1000 * node.getFailCount());
+            if (!disConnectNodes.containsKey(node.getId())) {
+                disConnectNodes.put(node.getId(), node);
+            }
+        } else {
+            disConnectNodes.remove(node.getId());
+            getNetworkStorage().deleteNode(node.getId());
+        }
+    }
+
+    private void removeNodeFromGroup(Node node) {
+        for (String groupName : node.getGroupSet()) {
+            NodeGroup group = nodeGroups.get(groupName);
+            if (group != null) {
+                group.removeNode(node.getId());
+            }
+        }
+        node.getGroupSet().clear();
+    }
+
+
 
     /**
      * 获取种子节点
@@ -170,11 +247,56 @@ public class NodeManager2 implements Runnable {
         return false;
     }
 
+    /**
+     * 随机保留2个种子节点的连接，其他的全部断开
+     */
+    private void removeSeedNode() {
+        Collection<Node> nodes = handShakeNodes.values();
+        int count = 0;
+        List<String> seedIpList = networkParam.getSeedIpList();
+        Collections.shuffle(seedIpList);
+
+        for (Node n : nodes) {
+            if (seedIpList.contains(n.getIp())) {
+                count++;
+                if (count > 2) {
+                    removeNode(n);
+                }
+            }
+        }
+    }
 
     @Override
     public void run() {
-        // todo auto-generated method stub
+        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+        while (running) {
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
+            Log.debug("--------disConnectNodes:" + disConnectNodes.size());
+            for (Node node : disConnectNodes.values()) {
+                System.out.println(node.toString());
+            }
+
+            Log.debug("--------connectedNodes:" + connectedNodes.size());
+            for (Node node : connectedNodes.values()) {
+                System.out.println(node.toString());
+            }
+
+            Log.debug("--------handShakeNodes:" + handShakeNodes.size());
+            for (Node node : handShakeNodes.values()) {
+                Log.debug(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
+            }
+
+            if (handShakeNodes.size() > networkParam.getMaxOutCount()) {
+                removeSeedNode();
+            }
+
+
+        }
     }
 
 

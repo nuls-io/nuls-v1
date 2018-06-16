@@ -73,7 +73,7 @@ public class NodesMessageHandler implements BaseNetworkMeesageHandler {
             }
             if (!exist) {
                 newNode.setType(Node.OUT);
-                newNode.setStatus(Node.CLOSE);
+                newNode.setStatus(Node.WAIT);
                 newNode.setId(null);
                 nodeManager.addNode(newNode);
             }

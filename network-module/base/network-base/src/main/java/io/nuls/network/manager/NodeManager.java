@@ -30,6 +30,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.constant.NetworkConstant;
@@ -572,7 +573,7 @@ public class NodeManager implements Runnable {
 
             Log.debug("--------handShakeNodes:" + handShakeNodes.size());
             for (Node node : handShakeNodes.values()) {
-//                System.out.println(node.toString());
+                System.out.println(node.toString());
             }
 
             for (Node node : handShakeNodes.values()) {
@@ -613,10 +614,10 @@ public class NodeManager implements Runnable {
             }
 
             for (Node node : disConnectNodes.values()) {
-                if (node.getType() == Node.OUT && node.getStatus() == Node.CLOSE) {
-                    /*if (node.getLastFailTime() <= TimeService.currentTimeMillis()) {
+                if (node.getType() == Node.OUT && node.getStatus() == Node.WAIT) {
+                    if (node.getLastFailTime() <= TimeService.currentTimeMillis()) {
                         connectionManager.connectionNode(node);
-                    }*/
+                    }
                     connectionManager.connectionNode(node);
                 }
             }
