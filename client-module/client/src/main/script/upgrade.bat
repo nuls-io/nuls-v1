@@ -22,7 +22,6 @@ cd bin
 goto doExec
 
 :doExec
-echo NULS uptrading
 call start.bat
 
 :end
