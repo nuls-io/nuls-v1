@@ -133,16 +133,16 @@ public final class FileUtil {
             e.printStackTrace();
         } finally {
             try {
-                if(inStream != null) {
+                if (inStream != null) {
                     inStream.close();
                 }
-                if(in != null) {
+                if (in != null) {
                     in.close();
                 }
-                if(outStream != null) {
+                if (outStream != null) {
                     outStream.close();
                 }
-                if(out != null) {
+                if (out != null) {
                     out.close();
                 }
             } catch (Exception e) {
@@ -233,9 +233,9 @@ public final class FileUtil {
             if (file.isFile()) {
                 try {
                     boolean b = file.delete();
-                    if(!b){
-                        System.gc();
-                        file.delete();
+                    if (!b) {
+                        Log.info("delete " + file.getName() + " result:" + b);
+                        mkNullToFile(file);
                     }
                 } catch (Exception e) {
                     Log.error(e);
@@ -246,14 +246,33 @@ public final class FileUtil {
         }
         try {
             boolean b = folder.delete();
-            if(!b){
-                System.gc();
-                folder.delete();
-            }
         } catch (Exception e) {
             Log.error(e);
         }
         return true;
+    }
+
+    private static void mkNullToFile(File file) {
+        byte[] bytes = new byte[0];
+        OutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(file);
+            outputStream.write(bytes);
+            outputStream.flush();
+        } catch (FileNotFoundException e) {
+            Log.error(e);
+        } catch (IOException e) {
+            Log.error(e);
+        } finally {
+            try {
+                if (null != outputStream) {
+                    outputStream.close();
+                }
+            } catch (Exception e) {
+                Log.error(e);
+            }
+        }
+
     }
 
     public static void deleteFolder(String path) {

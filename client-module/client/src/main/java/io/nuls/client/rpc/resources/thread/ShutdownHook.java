@@ -58,47 +58,25 @@ public class ShutdownHook extends Thread {
             Log.error(5 + "");
             FileUtil.decompress(newDirPath + "/conf.zip", newDirPath);
             String os = System.getProperty("os.name").toUpperCase();
-            if (os.startsWith("WINDOWS")) {
-                try {
-                    String cmd = root + "\\bim\\upgrade.bat " + version;
-                    Process child = Runtime.getRuntime().exec(cmd);
-                    InputStream in = child.getInputStream();
-                    int c;
-                    while ((c = in.read()) != -1) {
-                        System.out.print(c);
-                    }
-                    in.close();
-                    System.out.println("done");
-                    System.exit(0);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                try {
-                    FileUtil.copyFolder(new File(newDirPath + "/conf"), new File(root + "/conf"));
-                    Log.error(6 + "");
-                    FileUtil.copyFolder(new File(newDirPath + "/libs"), new File(root + "/libs"));
-                    Runtime.getRuntime().exec("sh start.sh", null, new File(root + "/bin"));
-                } catch (IOException e) {
-                    Log.error(e);
-                }
+            FileUtil.copyFolder(new File(newDirPath + "/conf"), new File(root + "/conf"));
+            Log.error(6 + "");
+            FileUtil.copyFolder(new File(newDirPath + "/libs"), new File(root + "/libs"));
+
+        }
+        String os = System.getProperty("os.name").toUpperCase();
+        if (os.startsWith("WINDOWS")) {
+            try {
+                Runtime.getRuntime().exec("NULS-Wallet.exe");
+            } catch (IOException e) {
+                Log.error(e);
             }
         } else {
-            String os = System.getProperty("os.name").toUpperCase();
-            if (os.startsWith("WINDOWS")) {
-                try {
-                    Runtime.getRuntime().exec("NULS_Wallet.exe");
-                } catch (IOException e) {
-                    Log.error(e);
-                }
-            } else {
-                try {
-                    Runtime.getRuntime().exec("sh start.sh", null, new File(root + "/bin"));
-                } catch (IOException e) {
-                    Log.error(e);
-                }
+            try {
+                Runtime.getRuntime().exec("sh start.sh", null, new File(root + "/bin"));
+            } catch (IOException e) {
+                Log.error(e);
             }
         }
-        System.gc();
+
     }
 }
