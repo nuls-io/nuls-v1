@@ -393,7 +393,7 @@ public class ChainContainer implements Cloneable {
             return false;
         } else {
             List<byte[]> addressList = yellowPunishTransaction.getTxData().getAddressList();
-            List<String> punishAddress = new ArrayList<>();
+            Set<String> punishAddress = new HashSet<>();
             for (byte[] address : addressList) {
                 MeetingMember item = currentRound.getMemberByAgentAddress(address);
                 if (null == item) {
