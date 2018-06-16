@@ -51,10 +51,10 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
         super.channelRegistered(ctx);
 
         System.out.println("----------------- client channelRegistered -------------------");
-//        SocketChannel channel = (SocketChannel) ctx.channel();
-//        Attribute<Node> nodeAttribute = channel.attr(key);
-//        Node node = nodeAttribute.get();
-
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        Attribute<Node> nodeAttribute = channel.attr(key);
+        Node node = nodeAttribute.get();
+        System.out.println(node.getId());
     }
 
     @Override
