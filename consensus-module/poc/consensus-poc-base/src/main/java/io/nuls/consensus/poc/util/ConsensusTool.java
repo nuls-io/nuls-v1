@@ -260,7 +260,11 @@ public class ConsensusTool {
                 addressList.add(member.getAgentAddress());
             } else {
                 MeetingRound preRound = round.getPreRound();
-                addressList.add(preRound.getMember(index + preRound.getMemberCount()).getAgentAddress());
+                MeetingMember member = preRound.getMember(index + preRound.getMemberCount());
+                if (member.getAgent() == null || member.getAgent().getDelHeight() > 0) {
+                    continue;
+                }
+                addressList.add(member.getAgentAddress());
             }
         }
         if (addressList.isEmpty()) {
