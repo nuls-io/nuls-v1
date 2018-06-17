@@ -464,7 +464,7 @@ public class NodeManager2 implements Runnable {
 
             Log.info("--------handShakeNodes:" + handShakeNodes.size());
             for (Node node : handShakeNodes.values()) {
-                Log.debug(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
+                Log.info(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
             }
 
             if (handShakeNodes.size() > networkParam.getMaxOutCount()) {
