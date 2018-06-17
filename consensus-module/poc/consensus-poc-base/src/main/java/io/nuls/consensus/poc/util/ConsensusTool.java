@@ -254,6 +254,8 @@ public class ConsensusTool {
                 MeetingMember member = round.getMember(index);
                 if (member.getAgent() == null) {
                     continue;
+                } else if (member.getAgent().getDelHeight() > 0) {
+                    continue;
                 }
                 addressList.add(member.getAgentAddress());
             } else {
@@ -273,7 +275,7 @@ public class ConsensusTool {
         return punishTx;
     }
 
-    public static CoinData getStopAgentCoinData(Agent agent,long lockTime) throws IOException {
+    public static CoinData getStopAgentCoinData(Agent agent, long lockTime) throws IOException {
         if (null == agent) {
             return null;
         }
@@ -338,14 +340,14 @@ public class ConsensusTool {
         return coinData;
     }
 
-    public static CoinData getStopAgentCoinData(byte[] address,long lockTime) throws IOException {
+    public static CoinData getStopAgentCoinData(byte[] address, long lockTime) throws IOException {
         List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
         for (Agent agent : agentList) {
             if (agent.getDelHeight() > 0) {
                 continue;
             }
             if (Arrays.equals(address, agent.getAgentAddress())) {
-                return getStopAgentCoinData(agent,lockTime);
+                return getStopAgentCoinData(agent, lockTime);
             }
         }
         return null;
