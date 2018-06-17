@@ -183,9 +183,9 @@ public class NodeManager2 implements Runnable {
      */
     public boolean addNode(Node node) {
         //判断是否是本地地址
-//        if (networkParam.getLocalIps().contains(node.getIp())) {
-//            return false;
-//        }
+        if (networkParam.getLocalIps().contains(node.getIp())) {
+            return false;
+        }
 
         lock.lock();
         try {
