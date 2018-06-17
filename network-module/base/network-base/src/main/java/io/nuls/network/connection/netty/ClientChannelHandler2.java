@@ -30,13 +30,16 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.network.IpUtil;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;
+import io.nuls.network.manager.NodeManager2;
 import io.nuls.network.model.Node;
 
 public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
 
-    private NodeManager nodeManager = NodeManager.getInstance();
+    private NodeManager2 nodeManager = NodeManager2.getInstance();
 
     private ConnectionManager connectionManager = ConnectionManager.getInstance();
 
@@ -51,15 +54,26 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
         super.channelRegistered(ctx);
 
         System.out.println("----------------- client channelRegistered -------------------");
-        SocketChannel channel = (SocketChannel) ctx.channel();
-        Attribute<Node> nodeAttribute = channel.attr(key);
-        Node node = nodeAttribute.get();
-        System.out.println(node.getId());
+//        SocketChannel channel = (SocketChannel) ctx.channel();
+//        Attribute<Node> nodeAttribute = channel.attr(key);
+//        Node node = nodeAttribute.get();
+//        System.out.println(node.getId());
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
+        String channelId = ctx.channel().id().asLongText();
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        Attribute<Node> nodeAttribute = channel.attr(key);
+        Node node = nodeAttribute.get();
+        node.setCanConnect(true);
+        NioChannelMap.add(channelId, channel);
+        node.setChannelId(channelId);
+        boolean result = nodeManager.processConnectedNode(node);
+        if (!result) {
+            channel.close();
+        }
         System.out.println("----------------- client channelActive -------------------");
     }
 
@@ -67,6 +81,9 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
         System.out.println("----------------- client channelInactive -------------------");
+
+        String channelId = ctx.channel().id().asLongText();
+        NioChannelMap.remove(channelId);
     }
 
     @Override
@@ -79,10 +96,17 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         System.out.println("----------------- client exceptionCaught -------------------");
         cause.printStackTrace();
+        ctx.channel().close();
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         System.out.println("----------------- client channelUnregistered -------------------");
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        Attribute<Node> nodeAttribute = channel.attr(key);
+        Node node = nodeAttribute.get();
+        if (node != null) {
+            nodeManager.removeNode(node);
+        }
     }
 }

@@ -72,6 +72,8 @@ public class Node extends BaseNulsData {
 
     private String externalIp;
 
+    private boolean canConnect;
+
     @Override
     public int size() {
         int s = 0;
@@ -113,10 +115,10 @@ public class Node extends BaseNulsData {
     public final static int BAD = 3;
     private volatile int status;
 
-    private boolean canConnect;
 
     public Node() {
         this.status = WAIT;
+        this.canConnect = false;
         groupSet = ConcurrentHashMap.newKeySet();
     }
 

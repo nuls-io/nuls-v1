@@ -434,7 +434,6 @@ public class NodeManager implements Runnable {
         }
     }
 
-
     public Collection<Node> getAvailableNodes() {
         return handShakeNodes.values();
     }

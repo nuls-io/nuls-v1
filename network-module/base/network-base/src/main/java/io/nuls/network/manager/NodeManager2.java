@@ -119,6 +119,63 @@ public class NodeManager2 implements Runnable {
     }
 
     /**
+     * 重置网络节点
+     */
+    public void reset() {
+        Log.debug("------------------network nodeManager reset--------------------");
+        for (Node node : disConnectNodes.values()) {
+            node.setFailCount(NetworkConstant.CONEECT_FAIL_MAX_COUNT);
+        }
+        for (Node node : handShakeNodes.values()) {
+            removeNode(node);
+        }
+    }
+
+    public Node getNode(String nodeId) {
+        Node node = disConnectNodes.get(nodeId);
+        if (node == null) {
+            node = connectedNodes.get(nodeId);
+        }
+        if (node == null) {
+            node = handShakeNodes.get(nodeId);
+        }
+        return node;
+    }
+
+    public Node getHandshakeNode(String nodeId) {
+        Node node = handShakeNodes.get(nodeId);
+        return node;
+    }
+
+    /**
+     * 获取当前所有节点（包括未连接成功和已连接的）
+     *
+     * @return
+     */
+    public Map<String, Node> getNodes() {
+        Map<String, Node> nodeMap = new HashMap<>();
+        nodeMap.putAll(disConnectNodes);
+        nodeMap.putAll(connectedNodes);
+        nodeMap.putAll(handShakeNodes);
+        return nodeMap;
+    }
+
+    public Map<String, Node> getConnectedNodes() {
+        Map<String, Node> nodeMap = new HashMap<>();
+        nodeMap.putAll(connectedNodes);
+        nodeMap.putAll(handShakeNodes);
+        return nodeMap;
+    }
+
+    public Collection<Node> getAvailableNodes() {
+        return handShakeNodes.values();
+    }
+
+    public NodeGroup getNodeGroup(String groupName) {
+        return nodeGroups.get(groupName);
+    }
+
+    /**
      * 添加主动连接节点，并创建连接
      *
      * @param node
@@ -126,9 +183,9 @@ public class NodeManager2 implements Runnable {
      */
     public boolean addNode(Node node) {
         //判断是否是本地地址
-        if (networkParam.getLocalIps().contains(node.getIp())) {
-            return false;
-        }
+//        if (networkParam.getLocalIps().contains(node.getIp())) {
+//            return false;
+//        }
 
         lock.lock();
         try {
@@ -143,6 +200,37 @@ public class NodeManager2 implements Runnable {
             return true;
         } finally {
             lock.unlock();
+        }
+    }
+
+    /**
+     * 处理已经成功连接的节点
+     *
+     * @param node
+     * @return
+     */
+    public boolean processConnectedNode(Node node) {
+        lock.lock();
+        try {
+            if (!connectedNodes.containsKey(node.getId()) && !handShakeNodes.containsKey(node.getId())) {
+                disConnectNodes.remove(node.getId());
+                connectedNodes.put(node.getId(), node);
+                return true;
+            }
+            return false;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void removeNode(String nodeId) {
+        Node node = getNode(nodeId);
+        if (node != null) {
+            removeNode(node);
+        } else {
+            Log.info("------------remove node is null-----------" + nodeId);
+            getNetworkStorage().deleteNode(nodeId);
+            nodeIdSet.remove(nodeId);
         }
     }
 
@@ -169,6 +257,18 @@ public class NodeManager2 implements Runnable {
             nodeIdSet.remove(node.getId());
         } finally {
             lock.unlock();
+        }
+    }
+
+
+    public void removeHandshakeNode(String nodeId) {
+        Node node = getHandshakeNode(nodeId);
+        if (node != null) {
+            removeNode(node);
+        } else {
+//            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
+            nodeIdSet.remove(node.getId());
+            getNetworkStorage().deleteNode(nodeId);
         }
     }
 
@@ -213,7 +313,6 @@ public class NodeManager2 implements Runnable {
     }
 
 
-
     /**
      * 获取种子节点
      *
@@ -225,9 +324,9 @@ public class NodeManager2 implements Runnable {
         Set<String> localIp = IpUtil.getIps();
         for (String seedIp : networkParam.getSeedIpList()) {
             String[] ipPort = seedIp.split(":");
-            if (!localIp.contains(ipPort[0])) {
-                seedNodes.add(new Node(ipPort[0], Integer.parseInt(ipPort[1]), Integer.parseInt(ipPort[1]), Node.OUT));
-            }
+//            if (!localIp.contains(ipPort[0])) {
+            seedNodes.add(new Node(ipPort[0], Integer.parseInt(ipPort[1]), Integer.parseInt(ipPort[1]), Node.OUT));
+//            }
         }
         return seedNodes;
     }

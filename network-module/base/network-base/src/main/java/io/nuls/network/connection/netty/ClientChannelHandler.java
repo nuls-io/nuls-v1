@@ -154,11 +154,6 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        SocketChannel channel = (SocketChannel) ctx.channel();
-        Attribute<Node> nodeAttribute = channel.attr(key);
-        Node node = nodeAttribute.get();
-        if (!channel.isActive() && node != null) {
-            nodeManager.deleteNode(node.getId());
-        }
+
     }
 }

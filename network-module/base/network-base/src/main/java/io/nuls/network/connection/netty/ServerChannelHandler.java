@@ -86,6 +86,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
                         //如果自己是服务器端，则删除当前主动作为客户端连接出去的节点，保存当前作为服务器端的连接
 //                        System.out.println("----------------sever client register each other remove node-----------------" + node.getId());
                         nodeManager.removeNode(node.getId());
+                        break;
                     }
                 }
             }
