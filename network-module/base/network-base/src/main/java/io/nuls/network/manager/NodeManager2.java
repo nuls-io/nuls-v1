@@ -484,13 +484,13 @@ public class NodeManager2 implements Runnable {
             for (int i = disNodeList.size() - 1; i >= 0; i--) {
                 node = disNodeList.get(i);
                 remove = false;
-                for (Node connectNode : getConnectedNodes().values()) {
-                    if (connectNode.getIp().equals(node.getIp())) {
-                        disConnectNodes.remove(node);
-                        remove = true;
-                        break;
-                    }
-                }
+//                for (Node connectNode : getConnectedNodes().values()) {
+//                    if (connectNode.getIp().equals(node.getIp())) {
+//                        disConnectNodes.remove(node.getId());
+//                        remove = true;
+//                        break;
+//                    }
+//                }
                 if (!remove) {
                     if (node.getStatus() == Node.WAIT) {
                         if (now > node.getLastFailTime() + 1 * DateUtil.MINUTE_TIME && node.isCanConnect()) {
