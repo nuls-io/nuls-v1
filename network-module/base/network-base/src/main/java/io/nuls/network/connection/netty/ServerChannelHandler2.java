@@ -25,6 +25,7 @@
 
 package io.nuls.network.connection.netty;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -43,6 +44,7 @@ import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
 
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
 import java.util.Map;
 
 /**
@@ -167,7 +169,24 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         super.channelRead(ctx, msg);
-        System.out.println("----------------- server channelRead -------------------");
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+        try {
+            Node node = nodeManager.getNode(nodeId);
+            if (node != null && node.isAlive()) {
+                ByteBuf buf = (ByteBuf) msg;
+                byte[] bytes = new byte[buf.readableBytes()];
+                buf.readBytes(bytes);
+                buf.release();
+                ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
+                buffer.put(bytes);
+                connectionManager.receiveMessage(buffer, node);
+            }
+        } catch (Exception e) {
+            Log.info(" ---------------------- server channelRead exception------------------------- " + nodeId);
+            e.printStackTrace();
+            throw e;
+        }
     }
 
 }
