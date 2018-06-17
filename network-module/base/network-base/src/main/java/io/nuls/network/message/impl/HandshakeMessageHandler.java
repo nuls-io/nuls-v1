@@ -88,7 +88,9 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
         node.setSeverPort(body.getSeverPort());
         node.setBestBlockHash(body.getBestBlockHash());
         node.setBestBlockHeight(body.getBestBlockHeight());
-        nodeManager.saveNode(node);
+        if (node.getType() == Node.OUT) {
+            nodeManager.saveNode(node);
+        }
         if (nodeManager.isSeedNode(node.getIp())) {
             nodeManager.saveExternalIp(body.getNodeIp(), isServer);
         }
