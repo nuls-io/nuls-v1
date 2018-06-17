@@ -635,21 +635,19 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public void export(@ApiParam(name = "address", value = "账户地址", required = true)
+    public RpcClientResult export(@ApiParam(name = "address", value = "账户地址", required = true)
                                   @PathParam("address") String address,
                                   @ApiParam(name = "form", value = "钱包备份表单数据")
                                           AccountPasswordForm form, @Context HttpServletResponse response) {
         if (StringUtils.isNotBlank(address) && !Address.validAddress(address)) {
-            Log.error(AccountErrorCode.ADDRESS_ERROR.getMsg());
-            return;
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         Result<AccountKeyStore> result = accountService.exportAccountToKeyStore(address, form.getPassword());
         if (result.isFailed()) {
-            Log.error(result.getMsg());
-            return;
+            return result.toRpcClientResult();
         }
         AccountKeyStore accountKeyStore = result.getData();
-        backUpFiless(new AccountKeyStoreDto(accountKeyStore), response);
+        return Result.getSuccess().setData(new AccountKeyStoreDto(accountKeyStore)).toRpcClientResult();
     }
 
 
@@ -657,7 +655,7 @@ public class AccountResource {
      * 输出文件流
      * Export file
      */
-    private void backUpFiless(AccountKeyStoreDto accountKeyStoreDto, HttpServletResponse response) {
+    private void backUpFile(AccountKeyStoreDto accountKeyStoreDto, HttpServletResponse response) {
         try{
             String fileName = accountKeyStoreDto.getAddress().concat(AccountConstant.ACCOUNTKEYSTORE_FILE_SUFFIX);
             //1.设置文件ContentType类型，这样设置，会自动判断下载文件类型

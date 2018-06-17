@@ -68,5 +68,5 @@ public interface AccountConstant extends NulsConstant {
      * 导出accountkeystore文件的后缀名
      * The suffix of the accountkeystore file
      */
-    String ACCOUNTKEYSTORE_FILE_SUFFIX=".accountkeystore";
+    String ACCOUNTKEYSTORE_FILE_SUFFIX=".keystore";
 }
