@@ -26,10 +26,12 @@
 package io.nuls.network.manager;
 
 import io.netty.channel.socket.SocketChannel;
+import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.constant.NetworkConstant;
@@ -39,6 +41,7 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.protocol.message.NetworkMessageBody;
 import io.nuls.network.storage.service.NetworkStorageService;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -54,6 +57,8 @@ public class NodeManager2 implements Runnable {
     public static NodeManager2 getInstance() {
         return instance;
     }
+
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private NetworkParam networkParam = NetworkParam.getInstance();
 
@@ -471,7 +476,31 @@ public class NodeManager2 implements Runnable {
                 removeSeedNode();
             }
 
-
+            //尝试重新连接
+            long now = TimeService.currentTimeMillis();
+            List<Node> disNodeList = new ArrayList<>(disConnectNodes.values());
+            Node node;
+            boolean remove;
+            for (int i = disNodeList.size() - 1; i >= 0; i--) {
+                node = disNodeList.get(i);
+                remove = false;
+                for (Node connectNode : getConnectedNodes().values()) {
+                    if (connectNode.getIp().equals(node.getIp())) {
+                        disConnectNodes.remove(node);
+                        remove = true;
+                        break;
+                    }
+                }
+                if (!remove) {
+                    if (node.getStatus() == Node.WAIT) {
+                        if (now > node.getLastFailTime() + 1 * DateUtil.MINUTE_TIME && node.isCanConnect()) {
+                            connectionManager.connectionNode(node);
+                        } else if (now > node.getLastFailTime() + 1 * DateUtil.MINUTE_TIME) {
+                            connectionManager.connectionNode(node);
+                        }
+                    }
+                }
+            }
         }
     }
 

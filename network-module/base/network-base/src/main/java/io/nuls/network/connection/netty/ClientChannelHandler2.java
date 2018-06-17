@@ -72,6 +72,7 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
         String nodeId = node == null ? null : node.getId();
         Log.info("---------------------- client channelActive -----------" + nodeId);
         node.setCanConnect(true);
+        node.setFailCount(0);
         NioChannelMap.add(channelId, channel);
         node.setChannelId(channelId);
         boolean result = nodeManager.processConnectedNode(node);

@@ -72,27 +72,30 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
         // 为防止两个节点同时作为服务器一方相互连接，在这里做硬性规定，
         // 两个节点同时相互连接时，ip数字小的一方作为服务器，大的一方作为客户端
         String remoteIP = channel.remoteAddress().getHostString();
-        Map<String, Node> nodeMap = nodeManager.getNodes();
+        Map<String, Node> nodeMap = nodeManager.getConnectedNodes();
         for (Node node : nodeMap.values()) {
             if (node.getIp().equals(remoteIP)) {
                 if (node.getType() == Node.OUT) {
-                    String localIP = InetAddress.getLocalHost().getHostAddress();
-                    boolean isLocalServer = IpUtil.judgeLocalIsServer(localIP, remoteIP);
-                    //判断自己是否为服务器端
-                    if (!isLocalServer) {
-                        //不是则删除连接
-                        System.out.println("---------------    -----------------");
-                        ctx.channel().close();
-                        return;
-                    } else {
-                        //如果自己是服务器端，则删除当前主动作为客户端连接出去的节点，保存当前作为服务器端的连接
-//                        System.out.println("----------------sever client register each other remove node-----------------" + node.getId());
-                        nodeManager.removeNode(node.getId());
-                    }
+                    ctx.channel().close();
+                    return;
+//
+//                    String localIP = InetAddress.getLocalHost().getHostAddress();
+//                    boolean isLocalServer = IpUtil.judgeLocalIsServer(localIP, remoteIP);
+//                    //判断自己是否为服务器端
+//                    if (!isLocalServer) {
+//                        //不是则删除连接
+//                        System.out.println("---------------    -----------------");
+//                        ctx.channel().close();
+//                        return;
+//                    } else {
+//                        //如果自己是服务器端，则删除当前主动作为客户端连接出去的节点，保存当前作为服务器端的连接
+////                        System.out.println("----------------sever client register each other remove node-----------------" + node.getId());
+//                        nodeManager.removeNode(node.getId());
+//                    }
                 }
             }
         }
-        nodeMap = nodeManager.getConnectedNodes();
+
         // if More than 10 in nodes of the same IP, close this channel
         // 如果相同ip的连接已经超过了10个，则不再接受
         int count = 0;
