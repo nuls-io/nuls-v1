@@ -40,6 +40,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.network.manager.ConnectionManager;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -160,6 +161,8 @@ public class ClientResource {
             return Result.getFailed(KernelErrorCode.FAILED).toRpcClientResult();
         }
         RpcServerManager.getInstance().shutdown();
+        ConnectionManager.getInstance().shutdown();
+
         Runtime.getRuntime().addShutdownHook(new ShutdownHook());
         System.exit(0);
         return Result.getSuccess().toRpcClientResult();

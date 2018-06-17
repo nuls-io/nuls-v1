@@ -39,12 +39,12 @@ public interface ConsensusConstant {
     /**
      * consensus transaction types
      */
-    int TX_TYPE_REGISTER_AGENT = 90;
-    int TX_TYPE_JOIN_CONSENSUS = 91;
-    int TX_TYPE_CANCEL_DEPOSIT = 92;
-    int TX_TYPE_STOP_AGENT = 95;
-    int TX_TYPE_YELLOW_PUNISH = 93;
-    int TX_TYPE_RED_PUNISH = 94;
+    int TX_TYPE_REGISTER_AGENT = 4;
+    int TX_TYPE_JOIN_CONSENSUS = 5;
+    int TX_TYPE_CANCEL_DEPOSIT = 6;
+    int TX_TYPE_YELLOW_PUNISH = 7;
+    int TX_TYPE_RED_PUNISH = 8;
+    int TX_TYPE_STOP_AGENT = 9;
 
 
 }

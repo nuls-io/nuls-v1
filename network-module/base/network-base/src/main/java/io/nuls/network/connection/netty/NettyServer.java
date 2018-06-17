@@ -70,4 +70,9 @@ public class NettyServer {
             worker.shutdownGracefully();
         }
     }
+
+    public void shutdown() {
+        boss.shutdownGracefully();
+        worker.shutdownGracefully();
+    }
 }
