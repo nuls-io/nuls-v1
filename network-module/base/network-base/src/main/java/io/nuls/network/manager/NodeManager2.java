@@ -36,6 +36,7 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.protocol.message.NetworkMessageBody;
 import io.nuls.network.storage.service.NetworkStorageService;
 
 import java.util.*;
@@ -250,7 +251,6 @@ public class NodeManager2 implements Runnable {
                     return;
                 }
             }
-
             node.destroy();
             removeNodeFromGroup(node);
             removeNodeHandler(node);
@@ -260,6 +260,26 @@ public class NodeManager2 implements Runnable {
         }
     }
 
+    public void saveNode(Node node) {
+        getNetworkStorage().saveNode(node);
+    }
+
+    public void saveExternalIp(String ip, boolean isSever) {
+        NetworkParam.getInstance().getLocalIps().add(ip);
+        networkStorageService.saveExternalIp(ip);
+        //当非服务器节点收到自己的外网IP时，尝试连接自己外网ip，看能否连通
+//        if (!isSever) {
+//            NodeGroup nodeGroup = nodeGroups.get(NetworkConstant.NETWORK_NODE_OUT_GROUP);
+//            if (nodeGroup.size() <= 1) {
+//                Node node = new Node();
+//                node.setIp(ip);
+//                node.setPort(networkParam.getPort());
+//                node.setType(Node.OUT);
+//                nodeIdSet.add(node.getId());
+//                connectionManager.connectionNode(node);
+//            }
+//        }
+    }
 
     public void removeHandshakeNode(String nodeId) {
         Node node = getHandshakeNode(nodeId);
@@ -301,6 +321,63 @@ public class NodeManager2 implements Runnable {
             getNetworkStorage().deleteNode(node.getId());
         }
     }
+
+    public boolean handshakeNode(String groupName, Node node, NetworkMessageBody versionMessage) {
+        lock.lock();
+        try {
+            if (!checkFullHandShake(node)) {
+                return false;
+            }
+            if (!connectedNodes.containsKey(node.getId())) {
+                return false;
+            }
+            node.setStatus(Node.HANDSHAKE);
+            node.setBestBlockHash(versionMessage.getBestBlockHash());
+            node.setBestBlockHeight(versionMessage.getBestBlockHeight());
+
+            connectedNodes.remove(node.getId());
+            handShakeNodes.put(node.getId(), node);
+            return addNodeToGroup(groupName, node);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private boolean checkFullHandShake(Node node) {
+        if (node.getType() == Node.IN) {
+            NodeGroup inGroup = getNodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
+            return inGroup.size() < networkParam.getMaxInCount();
+        } else {
+            NodeGroup outGroup = getNodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
+            return outGroup.size() < networkParam.getMaxOutCount();
+        }
+    }
+
+    /**
+     * 添加节点到节点组
+     *
+     * @param groupName
+     * @param node
+     * @return
+     */
+    public boolean addNodeToGroup(String groupName, Node node) {
+        NodeGroup nodeGroup = nodeGroups.get(groupName);
+        if (nodeGroup == null) {
+            //todo  throw new NulsExcetpion
+//            throw new RuntimeException("group not found");
+            return false;
+        }
+        if (groupName.equals(NetworkConstant.NETWORK_NODE_IN_GROUP) && nodeGroup.size() >= networkParam.getMaxInCount()) {
+            return false;
+        }
+        if (groupName.equals(NetworkConstant.NETWORK_NODE_OUT_GROUP) && nodeGroup.size() >= networkParam.getMaxOutCount()) {
+            return false;
+        }
+        node.addGroup(groupName);
+        nodeGroup.addNode(node);
+        return true;
+    }
+
 
     private void removeNodeFromGroup(Node node) {
         for (String groupName : node.getGroupSet()) {
@@ -375,17 +452,17 @@ public class NodeManager2 implements Runnable {
                 e.printStackTrace();
             }
 
-            Log.debug("--------disConnectNodes:" + disConnectNodes.size());
+            Log.info("--------disConnectNodes:" + disConnectNodes.size());
             for (Node node : disConnectNodes.values()) {
                 System.out.println(node.toString());
             }
 
-            Log.debug("--------connectedNodes:" + connectedNodes.size());
+            Log.info("--------connectedNodes:" + connectedNodes.size());
             for (Node node : connectedNodes.values()) {
                 System.out.println(node.toString());
             }
 
-            Log.debug("--------handShakeNodes:" + handShakeNodes.size());
+            Log.info("--------handShakeNodes:" + handShakeNodes.size());
             for (Node node : handShakeNodes.values()) {
                 Log.debug(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
             }

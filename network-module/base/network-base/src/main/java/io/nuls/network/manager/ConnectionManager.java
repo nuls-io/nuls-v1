@@ -59,7 +59,7 @@ public class ConnectionManager {
         return instance;
     }
 
-    private NetworkParam network = NetworkParam.getInstance();
+    private NetworkParam networkParam = NetworkParam.getInstance();
 
     private NettyServer nettyServer;
 
@@ -74,7 +74,7 @@ public class ConnectionManager {
     public void init() {
         nodeManager = NodeManager.getInstance();
         broadcastHandler = BroadcastHandler.getInstance();
-        nettyServer = new NettyServer(network.getPort());
+        nettyServer = new NettyServer(networkParam.getPort());
         nettyServer.init();
 //        eventBusService = NulsContext.getServiceBean(EventBusService.class);
 //        messageHandlerFactory = network.getMessageHandlerFactory();

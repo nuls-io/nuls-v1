@@ -30,6 +30,7 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.manager.NodeManager2;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.manager.NodeManager;
@@ -44,7 +45,7 @@ import java.util.Map;
 
 public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 
-    private NodeManager nodeManager = NodeManager.getInstance();
+    private NodeManager2 nodeManager = NodeManager2.getInstance();
 
     private NetworkParam networkParam = NetworkParam.getInstance();
 
@@ -83,14 +84,13 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
             }
         }
         //握手成功时，更新自己的外网ip地址
-        //  networkParam.getLocalIps().add(body.getNodeIp());
         node.setFailCount(0);
         node.setSeverPort(body.getSeverPort());
         node.setBestBlockHash(body.getBestBlockHash());
         node.setBestBlockHeight(body.getBestBlockHeight());
         nodeManager.saveNode(node);
-        if(nodeManager.isSeedNode(node.getIp())) {
-            nodeManager.saveExternalIp(body.getNodeIp());
+        if (nodeManager.isSeedNode(node.getIp())) {
+            nodeManager.saveExternalIp(body.getNodeIp(), isServer);
         }
 
         if (!isServer) {
