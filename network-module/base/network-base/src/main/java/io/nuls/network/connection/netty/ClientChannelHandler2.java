@@ -55,12 +55,11 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-
-        System.out.println("----------------- client channelRegistered -------------------");
-//        SocketChannel channel = (SocketChannel) ctx.channel();
-//        Attribute<Node> nodeAttribute = channel.attr(key);
-//        Node node = nodeAttribute.get();
-//        System.out.println(node.getId());
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        Attribute<Node> nodeAttribute = channel.attr(key);
+        Node node = nodeAttribute.get();
+        String nodeId = node == null ? null : node.getId();
+        Log.info("---------------------- client channelRegistered -----------" + nodeId);
     }
 
     @Override
@@ -70,6 +69,8 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
+        String nodeId = node == null ? null : node.getId();
+        Log.info("---------------------- client channelActive -----------" + nodeId);
         node.setCanConnect(true);
         NioChannelMap.add(channelId, channel);
         node.setChannelId(channelId);
@@ -77,14 +78,12 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
         if (!result) {
             channel.close();
         }
-        System.out.println("----------------- client channelActive -------------------");
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
         System.out.println("----------------- client channelInactive -------------------");
-
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
     }
@@ -121,12 +120,14 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("----------------- client channelUnregistered -------------------");
+
         SocketChannel channel = (SocketChannel) ctx.channel();
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
         if (node != null) {
+            System.out.println("----------------- client channelUnregistered -------------------" + node.getId());
             nodeManager.removeNode(node);
         }
+
     }
 }

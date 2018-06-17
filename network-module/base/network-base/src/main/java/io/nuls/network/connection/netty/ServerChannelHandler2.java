@@ -66,9 +66,8 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
-//        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.info("---------------------- server channelRegistered ------------------------- " + nodeId);
-        System.out.println("----------------- server channelRegistered -------------------");
+        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+        Log.info("---------------------- server channelRegistered ------------------------- " + nodeId);
         // 由于每个节点既是服务器，同时也会作为客户端去主动连接其他节点，
         // 为防止两个节点同时作为服务器一方相互连接，在这里做硬性规定，
         // 两个节点同时相互连接时，ip数字小的一方作为服务器，大的一方作为客户端
@@ -106,7 +105,6 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
                 }
             }
         }
-
     }
 
     @Override
@@ -114,7 +112,7 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
         super.channelActive(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.info("---------------------- server channelActive ------------------------- " + nodeId);
+        Log.info("---------------------- server channelActive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.add(channelId, channel);
@@ -132,8 +130,6 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
                 channel.remoteAddress().getHostString());
         HandshakeMessage handshakeMessage = new HandshakeMessage(body);
         broadcastHandler.broadcastToNode(handshakeMessage, node, false);
-
-        System.out.println("----------------- server channelActive -------------------");
     }
 
     @Override
@@ -141,7 +137,7 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
         super.channelInactive(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.info(" ---------------------- server channelInactive ------------------------- " + nodeId);
+        Log.info(" ---------------------- server channelInactive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
@@ -149,7 +145,6 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
 
         if (node != null) {
             if (channelId.equals(node.getChannelId())) {
-//                System.out.println("------------ sever channelInactive remove node-------------" + node.getId());
                 nodeManager.removeNode(nodeId);
             } else {
                 Log.info("--------------server channel id different----------------------");
