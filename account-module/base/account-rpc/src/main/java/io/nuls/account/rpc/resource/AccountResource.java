@@ -43,6 +43,7 @@ import io.nuls.core.tools.crypto.AESEncrypt;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
@@ -55,9 +56,13 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.swagger.annotations.*;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
@@ -623,7 +628,6 @@ public class AccountResource {
         return Result.getSuccess().setData(account.getAddress().toString()).toRpcClientResult();
     }
 
-
     @POST
     @Path("/export/{address}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -631,19 +635,87 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public RpcClientResult export(@ApiParam(name = "address", value = "账户地址", required = true)
+    public void export(@ApiParam(name = "address", value = "账户地址", required = true)
                                   @PathParam("address") String address,
                                   @ApiParam(name = "form", value = "钱包备份表单数据")
-                                          AccountPasswordForm form) {
+                                          AccountPasswordForm form, @Context HttpServletResponse response) {
         if (StringUtils.isNotBlank(address) && !Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            Log.error(AccountErrorCode.ADDRESS_ERROR.getMsg());
+            return;
         }
         Result<AccountKeyStore> result = accountService.exportAccountToKeyStore(address, form.getPassword());
         if (result.isFailed()) {
-            return result.toRpcClientResult();
+            Log.error(result.getMsg());
+            return;
         }
         AccountKeyStore accountKeyStore = result.getData();
-        return Result.getSuccess().setData(new AccountKeyStoreDto(accountKeyStore)).toRpcClientResult();
+        backUpFiless(new AccountKeyStoreDto(accountKeyStore), response);
+    }
+
+
+    /**
+     * 输出文件流
+     * Export file
+     */
+    private void backUpFiless(AccountKeyStoreDto accountKeyStoreDto, HttpServletResponse response) {
+        try{
+            String fileName = accountKeyStoreDto.getAddress().concat(AccountConstant.ACCOUNTKEYSTORE_FILE_SUFFIX);
+            //1.设置文件ContentType类型，这样设置，会自动判断下载文件类型
+            response.setContentType("application/octet-stream");
+            //2.设置文件头：最后一个参数是设置下载文件名
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("utf-8")));
+            response.getOutputStream().write(JSONUtils.obj2json(accountKeyStoreDto).getBytes());
+            response.getOutputStream().flush();
+        } catch (Exception e) {
+            Log.error("Export Exception!");
+        }
+    }
+
+
+    /**
+     * 直接生成文件
+     * Export file
+     *
+     * @param path
+     * @param accountKeyStoreDto
+     * @return
+     */
+    private Result backUpFile(String path, AccountKeyStoreDto accountKeyStoreDto) {
+        File backupFile = new File(path);
+        //if not directory , create directory
+        if (!backupFile.isDirectory()) {
+            if (!backupFile.mkdirs()) {
+                return Result.getFailed("create directory failed");
+            }
+            if (!backupFile.exists() && !backupFile.mkdir()) {
+                return Result.getFailed("create directory failed");
+            }
+        }
+        String fileName = accountKeyStoreDto.getAddress().concat(AccountConstant.ACCOUNTKEYSTORE_FILE_SUFFIX);
+        backupFile = new File(backupFile, fileName);
+        try {
+            if (!backupFile.exists() && !backupFile.createNewFile()) {
+                return Result.getFailed("create file failed");
+            }
+        } catch (IOException e) {
+            return Result.getFailed("create file failed");
+        }
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(backupFile);
+            fileOutputStream.write(JSONUtils.obj2json(accountKeyStoreDto).getBytes());
+        } catch (Exception e) {
+            return Result.getFailed("export failed");
+        } finally {
+            if (fileOutputStream != null) {
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    Log.error(e);
+                }
+            }
+        }
+        return Result.getSuccess().setData("The path to the backup file is " +  path + File.separator + fileName);
     }
 
     @POST
@@ -677,6 +749,85 @@ public class AccountResource {
         Account account = (Account) result.getData();
         return Result.getSuccess().setData(account.getAddress().toString()).toRpcClientResult();
     }
+    @POST
+    @Path("/import/keystore")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @ApiOperation(value = "[导入] 根据AccountKeyStore导入账户")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Result.class)
+    })
+    public RpcClientResult importAccountByKeystoreFile(@FormDataParam("keystore") InputStream in,
+                                                       @FormDataParam("password") String password,
+                                                       @FormDataParam("overwrite") Boolean overwrite) {
+
+        if (null == in || null == overwrite) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
+        }
+        Result<AccountKeyStoreDto> rs = getAccountKeyStoreDto(in);
+        if(rs.isFailed()){
+            return rs.toRpcClientResult();
+        }
+        AccountKeyStoreDto accountKeyStoreDto = rs.getData();
+        if (!overwrite) {
+            Account account = accountService.getAccount(accountKeyStoreDto.getAddress()).getData();
+            if (null != account) {
+                return Result.getFailed(AccountErrorCode.ACCOUNT_EXIST).toRpcClientResult();
+            }
+        }
+
+        Result result = accountService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), password);
+        if (result.isFailed()) {
+            return result.toRpcClientResult();
+        }
+        Account account = (Account) result.getData();
+        return Result.getSuccess().setData(account.getAddress().toString()).toRpcClientResult();
+    }
+
+
+    private Result<AccountKeyStoreDto> getAccountKeyStoreDto(InputStream in){
+        StringBuilder ks = new StringBuilder();
+        InputStreamReader inputStreamReader = null;
+        BufferedReader bufferedReader = null;
+        String str;
+        try {
+            inputStreamReader = new InputStreamReader(in);
+            bufferedReader = new BufferedReader(inputStreamReader);
+            while ((str = bufferedReader.readLine()) != null) {
+                if (!str.isEmpty()) {
+                    ks.append(str);
+                }
+            }
+            AccountKeyStoreDto accountKeyStoreDto = JSONUtils.json2pojo(ks.toString(), AccountKeyStoreDto.class);
+            return Result.getSuccess().setData(accountKeyStoreDto);
+        } catch (FileNotFoundException e) {
+            return Result.getFailed(AccountErrorCode.ACCOUNTKEYSTORE_FILE_NOT_EXIST);
+        } catch (IOException e) {
+            return Result.getFailed(AccountErrorCode.ACCOUNTKEYSTORE_FILE_DAMAGED);
+        } catch (Exception e) {
+            return Result.getFailed(AccountErrorCode.ACCOUNTKEYSTORE_FILE_DAMAGED);
+        } finally {
+            if (bufferedReader != null) {
+                try {
+                    bufferedReader.close();
+
+                } catch (IOException e) {
+                    Log.error(e);
+                }
+            }
+            if (inputStreamReader != null) {
+                try {
+                    inputStreamReader.close();
+                } catch (IOException e) {
+                    Log.error(e);
+                }
+            }
+        }
+    }
+
 
     @POST
     @Path("/import/pri")
