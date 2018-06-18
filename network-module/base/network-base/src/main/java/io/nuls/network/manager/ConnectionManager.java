@@ -63,7 +63,7 @@ public class ConnectionManager {
 
     private NettyServer nettyServer;
 
-    private NodeManager nodeManager;
+    private NodeManager2 nodeManager;
 
     private BroadcastHandler broadcastHandler;
 
@@ -72,7 +72,7 @@ public class ConnectionManager {
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
     public void init() {
-        nodeManager = NodeManager.getInstance();
+        nodeManager = NodeManager2.getInstance();
         broadcastHandler = BroadcastHandler.getInstance();
         nettyServer = new NettyServer(networkParam.getPort());
         nettyServer.init();

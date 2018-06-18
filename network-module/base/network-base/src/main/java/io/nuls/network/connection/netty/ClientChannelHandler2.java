@@ -35,7 +35,6 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.ConnectionManager;
-import io.nuls.network.manager.NodeManager;
 import io.nuls.network.manager.NodeManager2;
 import io.nuls.network.model.Node;
 

@@ -25,6 +25,7 @@
 
 package io.nuls.network.message.impl;
 
+import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.network.connection.netty.NioChannelMap;
@@ -33,15 +34,14 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.NodeManager2;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
-import io.nuls.network.manager.NodeManager;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
 import io.nuls.network.protocol.message.HandshakeMessage;
-
-import io.netty.channel.socket.SocketChannel;
 import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.network.protocol.message.NodeMessageBody;
+import io.nuls.network.protocol.message.NodesMessage;
 import io.nuls.protocol.message.base.BaseMessage;
 
-import java.util.Map;
+import java.util.List;
 
 public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 
@@ -100,7 +100,12 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
                     NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash(),
                     socketChannel.remoteAddress().getHostString());
             return new NetworkEventResult(true, new HandshakeMessage(body));
+        } else {
+            //如果是服务器方，在握手成功后，返回当前自己已经连接的所有节点信息
+            List<Node> nodeList = nodeManager.getCanConnectNodes();
+            NodeMessageBody messageBody = new NodeMessageBody(nodeList);
+            NodesMessage nodesMessage = new NodesMessage(messageBody);
+            return new NetworkEventResult(true, nodesMessage);
         }
-        return null;
     }
 }

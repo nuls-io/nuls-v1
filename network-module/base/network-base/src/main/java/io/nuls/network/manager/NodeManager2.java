@@ -171,6 +171,26 @@ public class NodeManager2 implements Runnable {
         return nodeMap;
     }
 
+    public List<Node> getCanConnectNodes() {
+        List nodeList = new ArrayList();
+        for (Node node : disConnectNodes.values()) {
+            if (node.getType() == Node.OUT && node.isCanConnect()) {
+                nodeList.add(node);
+            }
+        }
+        for (Node node : connectedNodes.values()) {
+            if (node.getType() == Node.OUT && node.isCanConnect()) {
+                nodeList.add(node);
+            }
+        }
+        for (Node node : handShakeNodes.values()) {
+            if (node.getType() == Node.OUT && node.isCanConnect()) {
+                nodeList.add(node);
+            }
+        }
+        return nodeList;
+    }
+
     public Map<String, Node> getConnectedNodes() {
         Map<String, Node> nodeMap = new HashMap<>();
         nodeMap.putAll(connectedNodes);
@@ -516,9 +536,9 @@ public class NodeManager2 implements Runnable {
                 }
                 if (!remove) {
                     if (node.getStatus() == Node.WAIT) {
-                        if (now > node.getLastFailTime() + 1 * DateUtil.MINUTE_TIME && node.isCanConnect()) {
+                        if (node.isCanConnect() && now > node.getLastFailTime() + 5 * DateUtil.MINUTE_TIME) {
                             connectionManager.connectionNode(node);
-                        } else if (now > node.getLastFailTime() + 1 * DateUtil.MINUTE_TIME) {
+                        } else if (now > node.getLastFailTime() + node.getFailCount() * DateUtil.MINUTE_TIME) {
                             connectionManager.connectionNode(node);
                         }
                     }

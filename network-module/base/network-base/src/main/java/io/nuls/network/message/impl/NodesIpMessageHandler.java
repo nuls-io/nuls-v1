@@ -53,9 +53,9 @@ public class NodesIpMessageHandler implements BaseNetworkMeesageHandler {
         NodesIpMessage handshakeMessage = (NodesIpMessage) message;
         NodeMessageBody body = handshakeMessage.getMsgBody();
 
-        for(String ip : body.getIpList()) {
-            networkParam.getIpMap().put(ip, TimeService.currentTimeMillis());
-        }
+//        for(String ip : body.getIpList()) {
+//            networkParam.getIpMap().put(ip, TimeService.currentTimeMillis());
+//        }
         return null;
     }
 }

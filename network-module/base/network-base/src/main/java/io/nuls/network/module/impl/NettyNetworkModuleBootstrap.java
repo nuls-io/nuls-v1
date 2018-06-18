@@ -31,7 +31,6 @@ import io.nuls.message.bus.manager.MessageManager;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.ConnectionManager;
-import io.nuls.network.manager.NodeManager;
 import io.nuls.network.manager.NodeManager2;
 import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.message.filter.impl.MagicNumberFilter;

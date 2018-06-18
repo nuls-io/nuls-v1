@@ -60,7 +60,7 @@ public class GetNodesIpMessageHandler implements BaseNetworkMeesageHandler {
         }
 
         NodeMessageBody messageBody = new NodeMessageBody();
-        messageBody.setIpList(ipList);
+//        messageBody.setIpList(ipList);
         NodesIpMessage nodesIpMessage = new NodesIpMessage(messageBody);
 
         return new NetworkEventResult(true, nodesIpMessage);

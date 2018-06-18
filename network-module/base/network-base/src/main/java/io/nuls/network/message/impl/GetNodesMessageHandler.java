@@ -56,10 +56,10 @@ public class GetNodesMessageHandler implements BaseNetworkMeesageHandler {
         GetNodesMessage getNodesMessage = (GetNodesMessage) message;
 
         NodeMessageBody body = getNodesMessage.getMsgBody();
-        body.getIpList().add(node.getIp());
-        List<Node> nodeList = getAvailableNodes(body.getLength(), body.getIpList());
+//        body.getIpList().add(node.getIp());
+//        List<Node> nodeList = getAvailableNodes(body.getLength(), body.getIpList());
         body = new NodeMessageBody();
-        body.setNodeList(nodeList);
+//        body.setNodeList(nodeList);
         NodesMessage nodesMessage = new NodesMessage(body);
         return new NetworkEventResult(true, nodesMessage);
     }

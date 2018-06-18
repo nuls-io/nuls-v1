@@ -37,13 +37,11 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.ConnectionManager;
-import io.nuls.network.manager.NodeManager;
 import io.nuls.network.manager.NodeManager2;
 import io.nuls.network.model.Node;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
 
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.Map;
 

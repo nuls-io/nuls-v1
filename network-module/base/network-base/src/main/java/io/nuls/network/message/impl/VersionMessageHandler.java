@@ -26,9 +26,9 @@
 package io.nuls.network.message.impl;
 
 import io.nuls.kernel.func.TimeService;
+import io.nuls.network.manager.NodeManager2;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
-import io.nuls.network.manager.NodeManager;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
 import io.nuls.network.protocol.message.NetworkMessageBody;
 import io.nuls.network.protocol.message.VersionMessage;
@@ -46,7 +46,7 @@ public class VersionMessageHandler implements BaseNetworkMeesageHandler {
         return instance;
     }
 
-    private NodeManager nodeManager = NodeManager.getInstance();
+    private NodeManager2 nodeManager = NodeManager2.getInstance();
 
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
