@@ -68,10 +68,16 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
         Log.info("---------------------- server channelRegistered ------------------------- " + nodeId);
-        // 由于每个节点既是服务器，同时也会作为客户端去主动连接其他节点，
-        // 为防止两个节点同时作为服务器一方相互连接，在这里做硬性规定，
-        // 两个节点同时相互连接时，ip数字小的一方作为服务器，大的一方作为客户端
+
         String remoteIP = channel.remoteAddress().getHostString();
+        //查看是否是本机尝试连接本机地址 ，如果是直接关闭连接
+        if(networkParam.getLocalIps().contains(remoteIP)) {
+            ctx.channel().close();
+            return;
+        }
+
+        // 由于每个节点既是服务器，同时也会作为客户端去主动连接其他节点，
+        // 为防止两个节点同时作为服务器一方相互连接，当有发现相同ip的主动节点时，就关闭当前连接
         Map<String, Node> nodeMap = nodeManager.getConnectedNodes();
         for (Node node : nodeMap.values()) {
             if (node.getIp().equals(remoteIP)) {

@@ -39,6 +39,8 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.network.protocol.message.P2PNodeBody;
+import io.nuls.network.protocol.message.P2PNodeMessage;
 import io.nuls.network.storage.service.NetworkStorageService;
 
 import java.text.SimpleDateFormat;
@@ -72,6 +74,8 @@ public class NodeManager2 implements Runnable {
 
     private NetworkStorageService networkStorageService;
 
+    private BroadcastHandler broadcastHandler;
+
     boolean running;
 
     //存放所有正在连接或已连接的节点的id，防止重复连接
@@ -89,6 +93,7 @@ public class NodeManager2 implements Runnable {
     public void init() {
         connectionManager = ConnectionManager.getInstance();
         nodeDiscoverHandler = NodeDiscoverHandler.getInstance();
+        broadcastHandler = BroadcastHandler.getInstance();
         // init default NodeGroup
         NodeGroup inNodes = new NodeGroup(NetworkConstant.NETWORK_NODE_IN_GROUP);
         NodeGroup outNodes = new NodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
@@ -265,27 +270,6 @@ public class NodeManager2 implements Runnable {
         }
     }
 
-    public void saveNode(Node node) {
-        getNetworkStorage().saveNode(node);
-    }
-
-    public void saveExternalIp(String ip, boolean isSever) {
-        NetworkParam.getInstance().getLocalIps().add(ip);
-        networkStorageService.saveExternalIp(ip);
-        //当非服务器节点收到自己的外网IP时，尝试连接自己外网ip，看能否连通
-//        if (!isSever) {
-//            NodeGroup nodeGroup = nodeGroups.get(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-//            if (nodeGroup.size() <= 1) {
-//                Node node = new Node();
-//                node.setIp(ip);
-//                node.setPort(networkParam.getPort());
-//                node.setType(Node.OUT);
-//                nodeIdSet.add(node.getId());
-//                connectionManager.connectionNode(node);
-//            }
-//        }
-    }
-
     public void removeHandshakeNode(String nodeId) {
         Node node = getHandshakeNode(nodeId);
         if (node != null) {
@@ -347,6 +331,38 @@ public class NodeManager2 implements Runnable {
             lock.unlock();
         }
     }
+
+    public void saveNode(Node node) {
+        getNetworkStorage().saveNode(node);
+    }
+
+    public void saveExternalIp(String ip, boolean isSever) {
+        NetworkParam.getInstance().getLocalIps().add(ip);
+        networkStorageService.saveExternalIp(ip);
+        //当非服务器节点收到自己的外网IP时，尝试连接自己外网ip，看能否连通
+        if (!isSever) {
+            NodeGroup nodeGroup = nodeGroups.get(NetworkConstant.NETWORK_NODE_OUT_GROUP);
+            if (nodeGroup.size() <= 1) {
+                Node node = new Node();
+                node.setIp(ip);
+                node.setPort(networkParam.getPort());
+                node.setType(Node.OUT);
+                nodeIdSet.add(node.getId());
+                connectionManager.connectionNode(node);
+            }
+        }
+    }
+
+    /**
+     * 广播本机外网服务器节点信息
+     */
+    public void broadNodeSever() {
+        String exterNalIp = networkStorageService.getExternalIp();
+        P2PNodeBody p2PNodeBody = new P2PNodeBody(exterNalIp, networkParam.getPort());
+        P2PNodeMessage message = new P2PNodeMessage(p2PNodeBody);
+        broadcastHandler.broadcastToAllNode(message,null,true);
+    }
+
 
     private boolean checkFullHandShake(Node node) {
         if (node.getType() == Node.IN) {

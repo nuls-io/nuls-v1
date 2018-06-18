@@ -33,6 +33,7 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;
 import io.nuls.network.manager.NodeManager2;
@@ -47,6 +48,8 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
     private ConnectionManager connectionManager = ConnectionManager.getInstance();
 
     private AttributeKey<Node> key = AttributeKey.valueOf("node");
+
+    private NetworkParam networkParam = NetworkParam.getInstance();
 
     public ClientChannelHandler2() {
 
@@ -71,13 +74,21 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
         Node node = nodeAttribute.get();
         String nodeId = node == null ? null : node.getId();
         Log.info("---------------------- client channelActive -----------" + nodeId);
-        node.setCanConnect(true);
-        node.setFailCount(0);
-        NioChannelMap.add(channelId, channel);
-        node.setChannelId(channelId);
-        boolean result = nodeManager.processConnectedNode(node);
-        if (!result) {
+        String remoteIP = channel.remoteAddress().getHostString();
+        //如果是本机节点访问自己的服务器，则广播本机服务器到全网
+        if (networkParam.getLocalIps().contains(remoteIP)) {
+            nodeManager.broadNodeSever();
             channel.close();
+        } else {
+            //其他节点则正常保持连接
+            node.setCanConnect(true);
+            node.setFailCount(0);
+            NioChannelMap.add(channelId, channel);
+            node.setChannelId(channelId);
+            boolean result = nodeManager.processConnectedNode(node);
+            if (!result) {
+                channel.close();
+            }
         }
     }
 

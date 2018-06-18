@@ -52,18 +52,20 @@ public interface NetworkConstant {
     String NETWORK_SEED_IP = "network.seed.ip";
     String NETWORK_NODE_IN_GROUP = "inGroup";
     String NETWORK_NODE_OUT_GROUP = "outGroup";
+    String CACHE_P2P_NODE = "cacheNode";
 
 
     int HANDSHAKE_SEVER_TYPE = 2;
     int HANDSHAKE_CLIENT_TYPE = 1;
 
     //network message type
-    short NETWORK_GET_VERSION = 01;
-    short NETWORK_VERSION = 02;
-    short NETWORK_GET_NODE = 03;
-    short NETWORK_NODE = 04;
-    short NETWORK_GET_NODEIP = 05;
-    short NETWORK_NODEIP = 06;
-    short NETWORK_HANDSHAKE = 07;
+    short NETWORK_GET_VERSION = 1;
+    short NETWORK_VERSION = 2;
+    short NETWORK_GET_NODE = 3;
+    short NETWORK_NODE = 4;
+    short NETWORK_GET_NODEIP = 5;
+    short NETWORK_NODEIP = 6;
+    short NETWORK_HANDSHAKE = 7;
+    short NETWORK_P2P_NODE = 8;
 
 }
