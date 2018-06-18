@@ -346,6 +346,7 @@ public class NodeManager2 implements Runnable {
                 Node node = new Node();
                 node.setIp(ip);
                 node.setPort(networkParam.getPort());
+                node.setSeverPort(networkParam.getPort());
                 node.setType(Node.OUT);
                 nodeIdSet.add(node.getId());
                 connectionManager.connectionNode(node);
@@ -356,11 +357,13 @@ public class NodeManager2 implements Runnable {
     /**
      * 广播本机外网服务器节点信息
      */
-    public void broadNodeSever() {
+    public void broadNodeSever(Node node) {
         String exterNalIp = networkStorageService.getExternalIp();
+        disConnectNodes.remove(node.getId());
         P2PNodeBody p2PNodeBody = new P2PNodeBody(exterNalIp, networkParam.getPort());
         P2PNodeMessage message = new P2PNodeMessage(p2PNodeBody);
-        broadcastHandler.broadcastToAllNode(message,null,true);
+        broadcastHandler.broadcastToAllNode(message, null, true);
+
     }
 
 

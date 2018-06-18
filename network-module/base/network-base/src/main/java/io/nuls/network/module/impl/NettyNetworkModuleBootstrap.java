@@ -82,6 +82,7 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
         MessageManager.putMessage(NodesMessage.class);
         MessageManager.putMessage(GetNodesIpMessage.class);
         MessageManager.putMessage(NodesIpMessage.class);
+        MessageManager.putMessage(P2PNodeMessage.class);
     }
 
     @Override

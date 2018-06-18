@@ -77,7 +77,7 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
         String remoteIP = channel.remoteAddress().getHostString();
         //如果是本机节点访问自己的服务器，则广播本机服务器到全网
         if (networkParam.getLocalIps().contains(remoteIP)) {
-            nodeManager.broadNodeSever();
+            nodeManager.broadNodeSever(node);
             channel.close();
         } else {
             //其他节点则正常保持连接
