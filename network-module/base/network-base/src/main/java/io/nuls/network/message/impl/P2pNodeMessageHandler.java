@@ -61,11 +61,13 @@ public class P2pNodeMessageHandler implements BaseNetworkMeesageHandler {
         P2PNodeBody cacheBody = nodeCacheManager.getNode(nodeBody.getId());
         //已经缓存则什么都不处理
         if (cacheBody != null) {
+            System.out.println("---------------------cacheBody is not null------------------------------");
             return null;
         }
         //尝试建立连接
         Node newNode = new Node(nodeBody.getNodeIp(), nodeBody.getSeverPort(), nodeBody.getSeverPort(), Node.OUT);
         nodeManager.addNode(newNode);
+        nodeCacheManager.cacheNode(nodeBody);
         //广播交易
         broadcastHandler.broadcastToAllNode(message, node, true);
         return null;
