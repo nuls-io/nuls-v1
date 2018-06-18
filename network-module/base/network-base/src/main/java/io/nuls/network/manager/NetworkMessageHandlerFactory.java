@@ -51,6 +51,7 @@ public class NetworkMessageHandlerFactory {
         handlerMap.put(NodesMessage.class.getName(), NodesMessageHandler.getInstance());
         handlerMap.put(GetNodesIpMessage.class.getName(), GetNodesIpMessageHandler.getInstance());
         handlerMap.put(NodesIpMessage.class.getName(), NodesIpMessageHandler.getInstance());
+        handlerMap.put(P2PNodeMessage.class.getName(), P2pNodeMessageHandler.getInstance());
     }
 
     public BaseNetworkMeesageHandler getHandler(BaseMessage message) {
