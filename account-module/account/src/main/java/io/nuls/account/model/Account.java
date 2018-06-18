@@ -178,18 +178,8 @@ public class Account extends BaseNulsData {
      * Password-encrypted account (set password for account)
      */
     public void encrypt(String password) throws NulsException {
-        encrypt(password, false);
-    }
-
-    /**
-     * 根据密码加密账户(给账户设置密码)
-     * Password-encrypted account (set password for account)
-     */
-    public void encrypt(String password, boolean isForce) throws NulsException {
-        if (this.isEncrypted() && !isForce) {
-            if (!unlock(password)) {
-                throw new NulsException(AccountErrorCode.PASSWORD_IS_WRONG);
-            }
+        if (this.isEncrypted()) {
+            throw new NulsException(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED);
         }
         ECKey eckey = this.getEcKey();
         byte[] privKeyBytes = eckey.getPrivKeyBytes();
