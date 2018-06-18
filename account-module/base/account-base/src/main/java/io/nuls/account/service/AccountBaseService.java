@@ -157,7 +157,7 @@ public class AccountBaseService {
             if (!account.unlock(oldPassword)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "old password error");
             }
-            account.encrypt(newPassword, true);
+            account.encrypt(newPassword);
             AccountPo po = new AccountPo(account);
 
             Result result = accountStorageService.updateAccount(po);
