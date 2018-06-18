@@ -41,9 +41,6 @@ public class P2PNodeBody extends BaseNulsData {
 
     private int severPort;
 
-    private String id;
-
-
     public P2PNodeBody() {
 
     }
@@ -51,7 +48,6 @@ public class P2PNodeBody extends BaseNulsData {
     public P2PNodeBody(String nodeIp, int severPort) {
         this.nodeIp = nodeIp;
         this.severPort = severPort;
-        this.id = nodeIp + ":" + severPort;
     }
 
     @Override
@@ -105,9 +101,6 @@ public class P2PNodeBody extends BaseNulsData {
 
 
     public String getId() {
-        if (id == null) {
-            id = nodeIp + ":" + severPort;
-        }
-        return id;
+        return nodeIp + ":" + severPort;
     }
 }
