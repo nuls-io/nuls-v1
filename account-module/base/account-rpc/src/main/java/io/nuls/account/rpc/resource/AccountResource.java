@@ -239,8 +239,8 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
     public RpcClientResult validationPassword(@PathParam("address") String address,
-                                 @ApiParam(name = "form", value = "设置别名表单数据", required = true)
-                                         AccountPasswordForm form) {
+                                              @ApiParam(name = "form", value = "设置别名表单数据", required = true)
+                                                      AccountPasswordForm form) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
@@ -248,14 +248,16 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Result<Account> rs = accountService.getAccount(address);
-        if (rs.isFailed()){
+        if (rs.isFailed()) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
         Account account = rs.getData();
-        boolean res = account.validatePassword(form.getPassword());
-        Result result = new Result();
-        result.setSuccess(res);
-        return result.toRpcClientResult();
+        if (account.validatePassword(form.getPassword())) {
+            return Result.getSuccess().toRpcClientResult();
+        } else {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
+
+        }
     }
 
     @POST
@@ -685,7 +687,7 @@ public class AccountResource {
      * Export file
      */
     private void backUpFile(AccountKeyStoreDto accountKeyStoreDto, HttpServletResponse response) {
-        try{
+        try {
             String fileName = accountKeyStoreDto.getAddress().concat(AccountConstant.ACCOUNTKEYSTORE_FILE_SUFFIX);
             //1.设置文件ContentType类型，这样设置，会自动判断下载文件类型
             response.setContentType("application/octet-stream");
@@ -742,7 +744,7 @@ public class AccountResource {
                 }
             }
         }
-        return Result.getSuccess().setData("The path to the backup file is " +  path + File.separator + fileName);
+        return Result.getSuccess().setData("The path to the backup file is " + path + File.separator + fileName);
     }
 
     @POST
@@ -776,6 +778,7 @@ public class AccountResource {
         Account account = (Account) result.getData();
         return Result.getSuccess().setData(account.getAddress().toString()).toRpcClientResult();
     }
+
     @POST
     @Path("/import/keystore")
     @Produces(MediaType.APPLICATION_JSON)
@@ -795,7 +798,7 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
         }
         Result<AccountKeyStoreDto> rs = getAccountKeyStoreDto(in);
-        if(rs.isFailed()){
+        if (rs.isFailed()) {
             return rs.toRpcClientResult();
         }
         AccountKeyStoreDto accountKeyStoreDto = rs.getData();
@@ -815,7 +818,7 @@ public class AccountResource {
     }
 
 
-    private Result<AccountKeyStoreDto> getAccountKeyStoreDto(InputStream in){
+    private Result<AccountKeyStoreDto> getAccountKeyStoreDto(InputStream in) {
         StringBuilder ks = new StringBuilder();
         InputStreamReader inputStreamReader = null;
         BufferedReader bufferedReader = null;

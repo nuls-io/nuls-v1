@@ -392,12 +392,8 @@ public class PocConsensusResource {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
         if (account.isEncrypted() && account.isLocked()) {
-            AssertUtil.canNotEmpty(form.getPassword());
-            try {
-                if (!account.decrypt(form.getPassword())) {
-                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
-                }
-            } catch (NulsException e) {
+            AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
+            if (!account.validatePassword(form.getPassword())) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
             }
         }
@@ -454,11 +450,7 @@ public class PocConsensusResource {
         }
         if (account.isEncrypted() && account.isLocked()) {
             AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
-            try {
-                if (!account.decrypt(form.getPassword())) {
-                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
-                }
-            } catch (NulsException e) {
+            if (!account.validatePassword(form.getPassword())) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
             }
         }
@@ -537,11 +529,7 @@ public class PocConsensusResource {
         }
         if (account.isEncrypted() && account.isLocked()) {
             AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
-            try {
-                if (!account.decrypt(form.getPassword())) {
-                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
-                }
-            } catch (NulsException e) {
+            if (!account.validatePassword(form.getPassword())) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
             }
         }
@@ -982,12 +970,8 @@ public class PocConsensusResource {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
         if (account.isEncrypted() && account.isLocked()) {
-            AssertUtil.canNotEmpty(form.getPassword());
-            try {
-                if (!account.decrypt(form.getPassword())) {
-                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
-                }
-            } catch (NulsException e) {
+            AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
+            if (!account.validatePassword(form.getPassword())) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
             }
         }
