@@ -519,29 +519,15 @@ public class NodeManager2 implements Runnable {
             if (handShakeNodes.size() > networkParam.getMaxOutCount()) {
                 removeSeedNode();
             }
-
             //尝试重新连接
             long now = TimeService.currentTimeMillis();
             List<Node> disNodeList = new ArrayList<>(disConnectNodes.values());
-            Node node;
-            boolean remove;
-            for (int i = disNodeList.size() - 1; i >= 0; i--) {
-                node = disNodeList.get(i);
-                remove = false;
-                for (Node connectNode : getConnectedNodes().values()) {
-                    if (connectNode.getIp().equals(node.getIp())) {
-                        disConnectNodes.remove(node.getId());
-                        remove = true;
-                        break;
-                    }
-                }
-                if (!remove) {
-                    if (node.getStatus() == Node.WAIT) {
-                        if (node.isCanConnect() && now > node.getLastFailTime() + 5 * DateUtil.MINUTE_TIME) {
-                            connectionManager.connectionNode(node);
-                        } else if (now > node.getLastFailTime() + node.getFailCount() * DateUtil.MINUTE_TIME) {
-                            connectionManager.connectionNode(node);
-                        }
+            for (Node node : disConnectNodes.values()) {
+                if (node.getStatus() == Node.WAIT) {
+                    if (node.isCanConnect() && now > node.getLastFailTime() + 5 * DateUtil.MINUTE_TIME) {
+                        connectionManager.connectionNode(node);
+                    } else if (now > node.getLastFailTime() + node.getFailCount() * DateUtil.MINUTE_TIME) {
+                        connectionManager.connectionNode(node);
                     }
                 }
             }
