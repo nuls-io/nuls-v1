@@ -74,9 +74,7 @@ public class AccountBaseService {
                 if (!account.validatePassword(password)) {
                     return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
-                account.unlock(password);
-                byte[] priKeyBytes = account.getPriKey();
-                account.lock();
+                byte[] priKeyBytes = account.getPriKey(password);
                 return Result.getSuccess().setData(Hex.encode(priKeyBytes));
             } catch (NulsException e) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);

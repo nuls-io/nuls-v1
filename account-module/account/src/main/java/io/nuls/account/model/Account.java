@@ -320,6 +320,27 @@ public class Account extends BaseNulsData {
         return priKey;
     }
 
+    public byte[] getPriKey(String password)throws NulsException{
+        boolean result = validatePassword(password);
+        if (!result) {
+            throw new NulsException(AccountErrorCode.PASSWORD_IS_WRONG);
+        }
+        byte[] unencryptedPrivateKey ;
+        try {
+            unencryptedPrivateKey = AESEncrypt.decrypt(this.getEncryptedPriKey(), password);
+        } catch (CryptoException e) {
+            Log.error(e);
+            throw new NulsException(AccountErrorCode.PASSWORD_IS_WRONG);
+        }
+        BigInteger newPriv = new BigInteger(1, unencryptedPrivateKey);
+        ECKey key = ECKey.fromPrivate(newPriv);
+
+        if (!Arrays.equals(key.getPubKey(), getPubKey())) {
+            throw new NulsException(AccountErrorCode.PASSWORD_IS_WRONG);
+        }
+        return unencryptedPrivateKey;
+    }
+
     public void setPriKey(byte[] priKey) {
         this.priKey = priKey;
     }
