@@ -106,10 +106,10 @@ public class BlockServiceImpl implements BlockService {
         SDKBootstrap.sdkStart();
         BlockService bs = new BlockServiceImpl();
         try {
-            System.out.println(JSONUtils.obj2json(bs.getBlockHeader(4)));
-            System.out.println(JSONUtils.obj2json(bs.getBlockHeader("00207380c6fca01cbbecba8ad24dba57659713b96cac5ff90d8d844e4be97f6625ad")));
-            System.out.println(JSONUtils.obj2json(bs.getBlock(0)));
-            System.out.println(JSONUtils.obj2json(bs.getBlock("0020c68810e7fcbb1281e7e053fa100bc0b0a8184d5f7b4dd07e1093072077ee7bf9")));
+//            System.out.println(JSONUtils.obj2json(bs.getBlockHeader(4)));
+//            System.out.println(JSONUtils.obj2json(bs.getBlockHeader("00207380c6fca01cbbecba8ad24dba57659713b96cac5ff90d8d844e4be97f6625ad")));
+            System.out.println(JSONUtils.obj2json(bs.getBlock(1884)));
+            System.out.println(JSONUtils.obj2json(bs.getBlock("00209bbcd98110b57f1ecd66c9d94d1a2381e6c03c3b9aa77db25b6eb5955bb658d3")));
         } catch (Exception e) {
             e.printStackTrace();
         }

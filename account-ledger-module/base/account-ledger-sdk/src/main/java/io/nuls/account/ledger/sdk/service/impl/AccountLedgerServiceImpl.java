@@ -255,14 +255,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         try {
 
             System.out.println(JSONUtils.obj2json(as.getBalance("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
-           /* System.out.println(JSONUtils.obj2json(as.setPasswordOffLine(
-                    "2CacFwqMwcJiGNNBwiwV7bCL7bjwNBr",
-                    "00e4bfd347351ea899b5f0ae2c0a3e7a6951b202eaf72432d1a63a2dc85c59c82a",
-                    "nuls123456")));*/
-          /*  System.out.println(JSONUtils.obj2json(as.resetPasswordOffLine(
-                    "2CacFwqMwcJiGNNBwiwV7bCL7bjwNBr",
-                    "25368dbc0ff7eea4fc6da22bc37e85d7976a3846f8b58d4dc0cf484e740ba1b61f96395fbe1ddf70ece9fd21fcd95e7a",
-                    "nuls111111", "nuls123456")));*/
+            System.out.println(JSONUtils.obj2json(as.getTxByHash("00203a169b42e5e142e20b273ac925e55f773b5a38c5f5c907efdbc43abb7d7a67b2")));
+//            System.out.println(JSONUtils.obj2json(as.transfer("2ChDcC1nvki521xXhYAUzYXt4RLNuLs",
+//                    "2CiVA3n1VoNQobAax4d7qNEBZAfehLN", "nuls123456",99900000000L,"转账")));
+
         } catch (Exception e) {
             e.printStackTrace();
         }
