@@ -75,7 +75,7 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public BroadcastResult sendToAllNode(BaseNulsData nulsData, boolean asyn) {
         BaseMessage baseMessage = (BaseMessage) nulsData;
-        return broadcastHandler.broadcastToAllNode(baseMessage,null, asyn);
+        return broadcastHandler.broadcastToAllNode(baseMessage, null, asyn);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public BroadcastResult sendToGroup(BaseNulsData nulsData, String groupName,Node excludeNode, boolean asyn) {
+    public BroadcastResult sendToGroup(BaseNulsData nulsData, String groupName, Node excludeNode, boolean asyn) {
         BaseMessage baseMessage = (BaseMessage) nulsData;
         return broadcastHandler.broadcastToNodeGroup(baseMessage, groupName, excludeNode, asyn);
     }
@@ -105,7 +105,8 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void reset() {
         Log.warn("start network reset");
-        nodeManager.reset();
+        return;
+//        nodeManager.reset();
     }
 
     @Override
