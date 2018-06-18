@@ -54,7 +54,7 @@ public class BroadcastHandler {
 
     private NetworkParam networkParam = NetworkParam.getInstance();
 
-    private NodeManager nodeManager = NodeManager.getInstance();
+    private NodeManager2 nodeManager = NodeManager2.getInstance();
 
     public BroadcastResult broadcastToAllNode(BaseMessage msg,Node excludeNode, boolean asyn) {
         if (nodeManager.getAvailableNodes().isEmpty()) {

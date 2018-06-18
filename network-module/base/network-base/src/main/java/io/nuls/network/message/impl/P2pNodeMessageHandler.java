@@ -25,20 +25,13 @@
 
 package io.nuls.network.message.impl;
 
-import io.netty.channel.socket.SocketChannel;
-import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.context.NulsContext;
 import io.nuls.network.cache.NodeCacheManager;
-import io.nuls.network.connection.netty.NioChannelMap;
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.NodeManager2;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
-import io.nuls.network.protocol.message.HandshakeMessage;
-import io.nuls.network.protocol.message.NetworkMessageBody;
 import io.nuls.network.protocol.message.P2PNodeBody;
 import io.nuls.network.protocol.message.P2PNodeMessage;
 import io.nuls.protocol.message.base.BaseMessage;
@@ -46,8 +39,6 @@ import io.nuls.protocol.message.base.BaseMessage;
 public class P2pNodeMessageHandler implements BaseNetworkMeesageHandler {
 
     private NodeManager2 nodeManager = NodeManager2.getInstance();
-
-    private NetworkParam networkParam = NetworkParam.getInstance();
 
     private static P2pNodeMessageHandler instance = new P2pNodeMessageHandler();
 

@@ -292,6 +292,11 @@ public class NodeManager2 implements Runnable {
             }
             return;
         }
+        //如果是本机ip地址，直接删除
+        if (networkParam.getLocalIps().contains(node.getIp())) {
+            disConnectNodes.remove(node.getId());
+            return;
+        }
 
         if (connectedNodes.containsKey(node.getId())) {
             connectedNodes.remove(node.getId());
@@ -357,9 +362,8 @@ public class NodeManager2 implements Runnable {
     /**
      * 广播本机外网服务器节点信息
      */
-    public void broadNodeSever(Node node) {
+    public void broadNodeSever() {
         String exterNalIp = networkStorageService.getExternalIp();
-        disConnectNodes.remove(node.getId());
         P2PNodeBody p2PNodeBody = new P2PNodeBody(exterNalIp, networkParam.getPort());
         P2PNodeMessage message = new P2PNodeMessage(p2PNodeBody);
         broadcastHandler.broadcastToAllNode(message, null, true);
