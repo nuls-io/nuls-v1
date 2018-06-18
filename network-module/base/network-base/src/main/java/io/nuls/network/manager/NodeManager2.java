@@ -277,6 +277,7 @@ public class NodeManager2 implements Runnable {
             if (StringUtils.isNotBlank(node.getChannelId())) {
                 SocketChannel channel = NioChannelMap.get(node.getChannelId());
                 if (channel != null) {
+                    nodeIdSet.remove(node.getId());
                     channel.close();
                     return;
                 }

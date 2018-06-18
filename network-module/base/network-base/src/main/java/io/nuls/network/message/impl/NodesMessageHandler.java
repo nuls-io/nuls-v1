@@ -25,7 +25,6 @@
 
 package io.nuls.network.message.impl;
 
-import io.nuls.core.tools.network.IpUtil;
 import io.nuls.network.manager.NodeManager2;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
