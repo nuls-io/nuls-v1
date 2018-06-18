@@ -239,9 +239,9 @@ public class AccountServiceImpl implements AccountService {
         List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
         List<AssetDto> assetDtoList = new ArrayList<>();
         for (Map<String, Object> map : list) {
-            map.put("balance", Na.naToNuls(map.get("balance")));
-            map.put("usable", Na.naToNuls(map.get("usable")));
-            map.put("locked", Na.naToNuls(map.get("locked")));
+            map.put("balance", map.get("balance"));
+            map.put("usable", map.get("usable"));
+            map.put("locked", map.get("locked"));
             AssetDto assetDto = new AssetDto("NULS", map);
             assetDtoList.add(assetDto);
         }
@@ -563,11 +563,14 @@ public class AccountServiceImpl implements AccountService {
 //        as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456");
         try {
             //System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
-            //System.out.println(JSONUtils.obj2json(as.createOffLineAccount(2, "nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.createOffLineAccount(2, "nuls123456")));
             //System.out.println(JSONUtils.obj2json(as.createOffLineAccount(10)));
             //System.out.println(JSONUtils.obj2json(as.createOffLineAccount("nuls123456")));
-            System.out.println(JSONUtils.obj2json(as.createAccount("nuls123456")));
-//            System.out.println(JSONUtils.obj2json(as.getAccount("2CVGMStk6LHB6P6eT2fCxoTkUXX2rTX")));
+//            System.out.println(JSONUtils.obj2json(as.createAccount("nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.getAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
+            System.out.println(JSONUtils.obj2json(as.getAliasFee("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie")));
+            System.out.println(JSONUtils.obj2json(as.getAssets("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
+            System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
            /* System.out.println(JSONUtils.obj2json(as.setPasswordOffLine(
                     "2CacFwqMwcJiGNNBwiwV7bCL7bjwNBr",
                     "00e4bfd347351ea899b5f0ae2c0a3e7a6951b202eaf72432d1a63a2dc85c59c82a",

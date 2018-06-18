@@ -246,5 +246,29 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
     }
+    /**
+     * -----------------------------------Test------------------------------
+     */
+    public static void main(String[] args) {
+        SDKBootstrap.sdkStart();
+        AccountLedgerServiceImpl as = new AccountLedgerServiceImpl();
+        try {
+
+            System.out.println(JSONUtils.obj2json(as.getBalance("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
+           /* System.out.println(JSONUtils.obj2json(as.setPasswordOffLine(
+                    "2CacFwqMwcJiGNNBwiwV7bCL7bjwNBr",
+                    "00e4bfd347351ea899b5f0ae2c0a3e7a6951b202eaf72432d1a63a2dc85c59c82a",
+                    "nuls123456")));*/
+          /*  System.out.println(JSONUtils.obj2json(as.resetPasswordOffLine(
+                    "2CacFwqMwcJiGNNBwiwV7bCL7bjwNBr",
+                    "25368dbc0ff7eea4fc6da22bc37e85d7976a3846f8b58d4dc0cf484e740ba1b61f96395fbe1ddf70ece9fd21fcd95e7a",
+                    "nuls111111", "nuls123456")));*/
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * ---------------------------------------------------------------------
+     */
 
 }
