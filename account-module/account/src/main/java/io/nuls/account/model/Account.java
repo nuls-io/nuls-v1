@@ -25,6 +25,8 @@ package io.nuls.account.model;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.core.tools.crypto.*;
+import io.nuls.core.tools.crypto.Exception.CryptoException;
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
@@ -81,11 +83,10 @@ public class Account extends BaseNulsData {
     private Long createTime;
 
 
-
     private byte[] encryptedPriKey;
 
     /**
-     *Decrypted  prikey
+     * Decrypted  prikey
      */
 
     private byte[] priKey;
@@ -100,7 +101,6 @@ public class Account extends BaseNulsData {
     /**
      * 账户是否被加密(是否设置过密码)
      * Whether the account is encrypted (Whether the password is set)
-     * @return
      */
     public boolean isEncrypted() {
         if (getEncryptedPriKey() != null && getEncryptedPriKey().length > 0) {
@@ -133,9 +133,6 @@ public class Account extends BaseNulsData {
     /**
      * 根据密码解锁账户
      * Unlock account based on password
-     * @param password
-     * @return
-     * @throws NulsException
      */
     public boolean unlock(String password) throws NulsException {
         decrypt(password);
@@ -148,6 +145,7 @@ public class Account extends BaseNulsData {
     /**
      * 账户是否被锁定(是否有明文私钥) 有私钥表示解锁
      * Whether the account is locked (is there a cleartext private key)
+     *
      * @return true: Locked, false: not Locked
      */
     public boolean isLocked() {
@@ -155,13 +153,29 @@ public class Account extends BaseNulsData {
     }
 
     public boolean validatePassword(String password) {
-        return StringUtils.validPassword(password);
+        boolean result = StringUtils.validPassword(password);
+        if (!result) {
+            return result;
+        }
+        byte[] unencryptedPrivateKey ;
+        try {
+            unencryptedPrivateKey = AESEncrypt.decrypt(this.getEncryptedPriKey(), password);
+        } catch (CryptoException e) {
+            Log.error(e);
+            return false;
+        }
+        BigInteger newPriv = new BigInteger(1, unencryptedPrivateKey);
+        ECKey key = ECKey.fromPrivate(newPriv);
+
+        if (!Arrays.equals(key.getPubKey(), getPubKey())) {
+            return false;
+        }
+        return true;
     }
 
     /**
      * 根据密码加密账户(给账户设置密码)
      * Password-encrypted account (set password for account)
-     * @param password
      */
     public void encrypt(String password) throws NulsException {
         encrypt(password, false);
@@ -170,7 +184,6 @@ public class Account extends BaseNulsData {
     /**
      * 根据密码加密账户(给账户设置密码)
      * Password-encrypted account (set password for account)
-     * @param password
      */
     public void encrypt(String password, boolean isForce) throws NulsException {
         if (this.isEncrypted() && !isForce) {
@@ -192,9 +205,6 @@ public class Account extends BaseNulsData {
     /**
      * 根据解密账户, 包括生成账户明文私钥
      * According to the decryption account, including generating the account plaintext private key
-     * @param password
-     * @return
-     * @throws NulsException
      */
     public boolean decrypt(String password) throws NulsException {
         try {
@@ -334,10 +344,10 @@ public class Account extends BaseNulsData {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj == null) {
+        if (obj == null) {
             return false;
         }
-        if(!(obj instanceof Account)) {
+        if (!(obj instanceof Account)) {
             return false;
         }
         Account other = (Account) obj;
