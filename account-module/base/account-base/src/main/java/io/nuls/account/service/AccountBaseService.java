@@ -152,12 +152,12 @@ public class AccountBaseService {
             if (!account.isEncrypted()) {
                 return Result.getFailed(AccountErrorCode.FAILED, "No password has been set up yet");
             }
-            if (!account.unlock(oldPassword)) {
+            if (!account.validatePassword(oldPassword)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "old password error");
             }
+            account.decrypt(oldPassword);
             account.encrypt(newPassword);
             AccountPo po = new AccountPo(account);
-
             Result result = accountStorageService.updateAccount(po);
             if(result.isFailed()){
                 return Result.getFailed(AccountErrorCode.FAILED);

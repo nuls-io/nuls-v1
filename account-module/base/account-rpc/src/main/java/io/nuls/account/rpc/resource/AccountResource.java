@@ -477,7 +477,7 @@ public class AccountResource {
     @POST
     @Path("/offline/password/")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "[设密码] 设置离线账户账户密码")
+    @ApiOperation(value = "[设密码] 设置离线账户密码")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
@@ -510,6 +510,7 @@ public class AccountResource {
 
         try {
             Account account = AccountTool.createAccount(priKey);
+            account.encrypt(password);
             return Result.getSuccess().setData(Hex.encode(account.getEncryptedPriKey())).toRpcClientResult();
         } catch (NulsException e) {
             return Result.getFailed(AccountErrorCode.FAILED).toRpcClientResult();
