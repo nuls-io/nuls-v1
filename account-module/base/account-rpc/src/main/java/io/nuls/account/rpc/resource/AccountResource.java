@@ -96,6 +96,7 @@ public class AccountResource {
     private ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
 
     private Map<String, ScheduledFuture> accountUnlockSchedulerMap = new HashMap<>();
+    private Result rs;
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -228,6 +229,33 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         return accountService.isEncrypted(address).toRpcClientResult();
+    }
+
+    @POST
+    @Path("/password/validation/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("[验证密码] 验证账户密码是否正确")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Result.class)
+    })
+    public RpcClientResult validationPassword(@PathParam("address") String address,
+                                 @ApiParam(name = "form", value = "设置别名表单数据", required = true)
+                                         AccountPasswordForm form) {
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (StringUtils.isBlank(form.getPassword())) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Result<Account> rs = accountService.getAccount(address);
+        if (rs.isFailed()){
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        Account account = rs.getData();
+        boolean res = account.validatePassword(form.getPassword());
+        Result result = new Result();
+        result.setSuccess(res);
+        return result.toRpcClientResult();
     }
 
     @POST

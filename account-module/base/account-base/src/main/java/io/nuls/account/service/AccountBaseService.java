@@ -71,9 +71,10 @@ public class AccountBaseService {
         //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
         if (account.isEncrypted() && account.isLocked()) {
             try {
-                if (StringUtils.isBlank(password) || !StringUtils.validPassword(password) || !account.unlock(password)) {
+                if (!account.validatePassword(password)) {
                     return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
+                account.unlock(password);
                 byte[] priKeyBytes = account.getPriKey();
                 account.lock();
                 return Result.getSuccess().setData(Hex.encode(priKeyBytes));
