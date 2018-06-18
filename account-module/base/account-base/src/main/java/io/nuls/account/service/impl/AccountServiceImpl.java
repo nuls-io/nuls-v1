@@ -513,21 +513,9 @@ public class AccountServiceImpl implements AccountService {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        if (!StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-        }
-        if (!account.isEncrypted()) {
-            return Result.getFailed(AccountErrorCode.FAILED, "No password has been set for this account");
-        }
-        try {
-            if (!account.unlock(password)) {
-                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-            } else {
-                return Result.getSuccess();
-            }
-        } catch (NulsException e) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-        }
+        Result result = new Result();
+        result.setSuccess(account.validatePassword(password));
+        return result;
     }
 
     @Override

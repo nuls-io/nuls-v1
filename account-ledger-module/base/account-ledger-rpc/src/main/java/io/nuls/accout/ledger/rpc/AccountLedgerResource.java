@@ -806,5 +806,4 @@ public class AccountLedgerResource {
         }
         txDto.setValue(value.getValue());
     }
-
 }
