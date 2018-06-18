@@ -56,6 +56,7 @@ public class AccountBaseService {
 
     /**
      * 获取账户私钥
+     *
      * @param address
      * @param password
      * @return
@@ -65,7 +66,7 @@ public class AccountBaseService {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Account account = accountService.getAccount(address).getData();
-        if(null == account){
+        if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
@@ -86,6 +87,7 @@ public class AccountBaseService {
 
     /**
      * 设置密码
+     *
      * @param address
      * @param password
      * @return
@@ -94,8 +96,8 @@ public class AccountBaseService {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        if(StringUtils.isBlank(password)){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The password is required");
+        if (StringUtils.isBlank(password)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The password is required");
         }
         if (!StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG);
@@ -105,13 +107,13 @@ public class AccountBaseService {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.FAILED, "The account not exist, address:" + address);
         }
-        if(account.isEncrypted()){
+        if (account.isEncrypted()) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED, "This account already has a password.");
         }
         try {
             account.encrypt(password);
             Result result = accountStorageService.updateAccount(new AccountPo(account));
-            if(result.isFailed()){
+            if (result.isFailed()) {
                 return Result.getFailed(AccountErrorCode.FAILED);
             }
             accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
@@ -124,6 +126,7 @@ public class AccountBaseService {
 
     /**
      * 根据原密码修改账户密码
+     *
      * @param oldPassword
      * @param newPassword
      * @return
@@ -132,11 +135,11 @@ public class AccountBaseService {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        if(StringUtils.isBlank(oldPassword)){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The old password is required");
+        if (StringUtils.isBlank(oldPassword)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The old password is required");
         }
-        if(StringUtils.isBlank(newPassword)){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR,"The new password is required");
+        if (StringUtils.isBlank(newPassword)) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The new password is required");
         }
         if (!StringUtils.validPassword(oldPassword)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG);
@@ -156,10 +159,10 @@ public class AccountBaseService {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "old password error");
             }
             account.decrypt(oldPassword);
-            account.encrypt(newPassword);
+            account.encrypt(newPassword, true);
             AccountPo po = new AccountPo(account);
             Result result = accountStorageService.updateAccount(po);
-            if(result.isFailed()){
+            if (result.isFailed()) {
                 return Result.getFailed(AccountErrorCode.FAILED);
             }
             accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);

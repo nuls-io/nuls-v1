@@ -157,7 +157,7 @@ public class Account extends BaseNulsData {
         if (!result) {
             return result;
         }
-        byte[] unencryptedPrivateKey ;
+        byte[] unencryptedPrivateKey;
         try {
             unencryptedPrivateKey = AESEncrypt.decrypt(this.getEncryptedPriKey(), password);
         } catch (CryptoException e) {
@@ -178,18 +178,32 @@ public class Account extends BaseNulsData {
      * Password-encrypted account (set password for account)
      */
     public void encrypt(String password) throws NulsException {
-        if (this.isEncrypted()) {
-            throw new NulsException(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED);
-        }
-        ECKey eckey = this.getEcKey();
-        byte[] privKeyBytes = eckey.getPrivKeyBytes();
-        EncryptedData encryptedPrivateKey = AESEncrypt.encrypt(privKeyBytes, EncryptedData.DEFAULT_IV, new KeyParameter(Sha256Hash.hash(password.getBytes())));
-        eckey.setEncryptedPrivateKey(encryptedPrivateKey);
-        ECKey result = ECKey.fromEncrypted(encryptedPrivateKey, getPubKey());
-        this.setPriKey(new byte[0]);
-        this.setEcKey(result);
-        this.setEncryptedPriKey(encryptedPrivateKey.getEncryptedBytes());
+        encrypt(password, false);
+    }
 
+    /**
+     * 根据密码加密账户(给账户设置密码)
+     * Password-encrypted account (set password for account)
+     */
+    public void encrypt(String password, boolean isForce) throws NulsException {
+        if (this.isEncrypted()) {
+            if (isForce) {
+                if(isLocked()){
+                    throw new NulsException(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED_AND_LOCKED);
+                }
+            } else {
+                throw new NulsException(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED);
+            }
+        } else {
+            ECKey eckey = this.getEcKey();
+            byte[] privKeyBytes = eckey.getPrivKeyBytes();
+            EncryptedData encryptedPrivateKey = AESEncrypt.encrypt(privKeyBytes, EncryptedData.DEFAULT_IV, new KeyParameter(Sha256Hash.hash(password.getBytes())));
+            eckey.setEncryptedPrivateKey(encryptedPrivateKey);
+            ECKey result = ECKey.fromEncrypted(encryptedPrivateKey, getPubKey());
+            this.setPriKey(new byte[0]);
+            this.setEcKey(result);
+            this.setEncryptedPriKey(encryptedPrivateKey.getEncryptedBytes());
+        }
     }
 
     /**
@@ -320,12 +334,12 @@ public class Account extends BaseNulsData {
         return priKey;
     }
 
-    public byte[] getPriKey(String password)throws NulsException{
+    public byte[] getPriKey(String password) throws NulsException {
         boolean result = validatePassword(password);
         if (!result) {
             throw new NulsException(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        byte[] unencryptedPrivateKey ;
+        byte[] unencryptedPrivateKey;
         try {
             unencryptedPrivateKey = AESEncrypt.decrypt(this.getEncryptedPriKey(), password);
         } catch (CryptoException e) {
