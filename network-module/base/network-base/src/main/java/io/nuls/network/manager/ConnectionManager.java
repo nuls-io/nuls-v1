@@ -214,7 +214,8 @@ public class ConnectionManager {
     }
 
     private boolean isHandShakeMessage(BaseMessage message) {
-        if (message.getHeader().getMsgType() == NetworkConstant.NETWORK_HANDSHAKE) {
+        if (message.getHeader().getMsgType() == NetworkConstant.NETWORK_HANDSHAKE ||
+                message.getHeader().getMsgType() == NetworkConstant.NETWORK_P2P_NODE) {
             return true;
         }
         return false;
