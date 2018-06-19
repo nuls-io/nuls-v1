@@ -188,22 +188,21 @@ public class Account extends BaseNulsData {
     public void encrypt(String password, boolean isForce) throws NulsException {
         if (this.isEncrypted()) {
             if (isForce) {
-                if(isLocked()){
+                if (isLocked()) {
                     throw new NulsException(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED_AND_LOCKED);
                 }
             } else {
                 throw new NulsException(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED);
             }
-        } else {
-            ECKey eckey = this.getEcKey();
-            byte[] privKeyBytes = eckey.getPrivKeyBytes();
-            EncryptedData encryptedPrivateKey = AESEncrypt.encrypt(privKeyBytes, EncryptedData.DEFAULT_IV, new KeyParameter(Sha256Hash.hash(password.getBytes())));
-            eckey.setEncryptedPrivateKey(encryptedPrivateKey);
-            ECKey result = ECKey.fromEncrypted(encryptedPrivateKey, getPubKey());
-            this.setPriKey(new byte[0]);
-            this.setEcKey(result);
-            this.setEncryptedPriKey(encryptedPrivateKey.getEncryptedBytes());
         }
+        ECKey eckey = this.getEcKey();
+        byte[] privKeyBytes = eckey.getPrivKeyBytes();
+        EncryptedData encryptedPrivateKey = AESEncrypt.encrypt(privKeyBytes, EncryptedData.DEFAULT_IV, new KeyParameter(Sha256Hash.hash(password.getBytes())));
+        eckey.setEncryptedPrivateKey(encryptedPrivateKey);
+        ECKey result = ECKey.fromEncrypted(encryptedPrivateKey, getPubKey());
+        this.setPriKey(new byte[0]);
+        this.setEcKey(result);
+        this.setEncryptedPriKey(encryptedPrivateKey.getEncryptedBytes());
     }
 
     /**
