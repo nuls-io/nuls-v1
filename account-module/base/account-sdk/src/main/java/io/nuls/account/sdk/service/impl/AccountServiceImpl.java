@@ -294,7 +294,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result isAliasExist(String alias) {
+    public Result isAliasUsable(String alias) {
         if (!StringUtils.validAlias(alias)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }

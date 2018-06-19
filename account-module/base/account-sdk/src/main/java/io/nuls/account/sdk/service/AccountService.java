@@ -212,13 +212,13 @@ public interface AccountService {
     Result getWalletTotalBalance();
 
     /**
-     * Verify that the alias is already occupied
+     * Verify that the alias is usable
      *
      * @param alias
-     * @return If the alias is already occupied, 'success' is true;
-     * If the alias is not occupied, "success" is false;
+     * @return If the alias is usable, 'success' is true;
+     * If the alias is  unusable, "success" is false;
      */
-    Result isAliasExist(String alias);
+    Result isAliasUsable(String alias);
 
     /**
      * Import account according to KeyStore file path

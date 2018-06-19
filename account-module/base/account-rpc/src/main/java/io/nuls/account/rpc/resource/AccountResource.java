@@ -299,15 +299,15 @@ public class AccountResource {
     @GET
     @Path("/alias")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("[验证别名是否存在] 验证别名是否存在 ")
+    @ApiOperation("[验证别名是否可用] 验证别名是否可用(是否没有没占用) ")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = Result.class)
     })
-    public RpcClientResult isAliasExist(@ApiParam(name = "alias", value = "别名", required = true) @QueryParam("alias") String alias) {
+    public RpcClientResult isAliasUsable(@ApiParam(name = "alias", value = "别名", required = true) @QueryParam("alias") String alias) {
         if (StringUtils.isBlank(alias)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        RpcClientResult result = new RpcClientResult(aliasService.isAliasExist(alias), KernelErrorCode.SUCCESS);
+        RpcClientResult result = new RpcClientResult(aliasService.isAliasUsable(alias), KernelErrorCode.SUCCESS);
         return result;
     }
 
