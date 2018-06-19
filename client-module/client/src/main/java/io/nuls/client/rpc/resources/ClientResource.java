@@ -31,6 +31,7 @@ import io.nuls.client.rpc.resources.dto.VersionDto;
 import io.nuls.client.rpc.resources.thread.ShutdownHook;
 import io.nuls.client.rpc.resources.thread.UpgradeThread;
 import io.nuls.client.version.SyncVersionRunner;
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.core.tools.str.VersionUtils;
@@ -160,11 +161,23 @@ public class ClientResource {
         if (url == null) {
             return Result.getFailed(KernelErrorCode.FAILED).toRpcClientResult();
         }
-        RpcServerManager.getInstance().shutdown();
-        ConnectionManager.getInstance().shutdown();
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1500L);
+                } catch (InterruptedException e) {
+                    Log.error(e);
+                }
+                RpcServerManager.getInstance().shutdown();
+                ConnectionManager.getInstance().shutdown();
 
-        Runtime.getRuntime().addShutdownHook(new ShutdownHook());
-        System.exit(0);
+                Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+                System.exit(0);
+
+            }
+        });
+        t.start();
         return Result.getSuccess().toRpcClientResult();
     }
 }
