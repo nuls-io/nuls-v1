@@ -128,72 +128,84 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
 
     @Override
     public Result createTransaction(List<InputDto> inputs, List<OutputDto> outputs, String remark) {
-        if (inputs == null || inputs.isEmpty()) {
-            return Result.getFailed("inputs error");
-        }
-        if (outputs == null || outputs.isEmpty()) {
-            return Result.getFailed("outputs error");
-        }
-        byte[] remarkBytes = null;
-        if (!StringUtils.isBlank(remark)) {
-            try {
-                remarkBytes = remark.getBytes(SDKConstant.DEFAULT_ENCODING);
-            } catch (UnsupportedEncodingException e) {
-                return Result.getFailed("remark error");
-            }
-        }
-        List<Coin> outputList = new ArrayList<>();
-        for (int i = 0; i < outputs.size(); i++) {
-            OutputDto outputDto = outputs.get(i);
-            Coin to = new Coin();
-            try {
-                to.setOwner(Base58.decode(outputDto.getAddress()));
-            } catch (Exception e) {
-                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
-            }
+        Map<String, Object> map = new HashMap<>();
+        map.put("inputs", inputs);
+        map.put("outputs", outputs);
+        map.put("remark", remark);
+        Result result = restFul.post("/transaction", map);
+        return result;
 
-            to.setNa(Na.valueOf(outputDto.getValue()));
-            if (outputDto.getLockTime() < 0) {
-                return Result.getFailed("lockTime error");
-            }
-
-            to.setLockTime(outputDto.getLockTime());
-            outputList.add(to);
-        }
-
-        List<Coin> inputsList = new ArrayList<>();
-        for (int i = 0; i < inputs.size(); i++) {
-            InputDto inputDto = inputs.get(i);
-            byte[] key = Arrays.concatenate(Hex.decode(inputDto.getFromHash()), new VarInt(inputDto.getFromIndex()).encode());
-            Coin coin = new Coin();
-            coin.setOwner(key);
-            coin.setNa(Na.valueOf(inputDto.getValue()));
-            inputsList.add(coin);
-        }
-
-        Transaction tx = TransactionTool.createTransferTx(inputsList, outputList, remarkBytes);
-        //计算交易手续费最小值
-        int size = tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH;
-        Na minFee = TransactionFeeCalculator.getTransferFee(size);
-        //计算inputs和outputs的差额 ，求手续费
-        Na fee = Na.ZERO;
-        for (Coin coin : tx.getCoinData().getFrom()) {
-            fee = fee.add(coin.getNa());
-        }
-        for (Coin coin : tx.getCoinData().getTo()) {
-            fee = fee.subtract(coin.getNa());
-        }
-        if (fee.isLessThan(minFee)) {
-            return Result.getFailed(TransactionErrorCode.FEE_NOT_RIGHT);
-        }
-        try {
-            String txHex = Hex.encode(tx.serialize());
-            return Result.getSuccess().setData(txHex);
-        } catch (IOException e) {
-            Log.error(e);
-            return Result.getFailed(e.getMessage());
-        }
     }
+
+
+//    @Override
+//    public Result createTransaction(List<InputDto> inputs, List<OutputDto> outputs, String remark) {
+//        if (inputs == null || inputs.isEmpty()) {
+//            return Result.getFailed("inputs error");
+//        }
+//        if (outputs == null || outputs.isEmpty()) {
+//            return Result.getFailed("outputs error");
+//        }
+//        byte[] remarkBytes = null;
+//        if (!StringUtils.isBlank(remark)) {
+//            try {
+//                remarkBytes = remark.getBytes(SDKConstant.DEFAULT_ENCODING);
+//            } catch (UnsupportedEncodingException e) {
+//                return Result.getFailed("remark error");
+//            }
+//        }
+//        List<Coin> outputList = new ArrayList<>();
+//        for (int i = 0; i < outputs.size(); i++) {
+//            OutputDto outputDto = outputs.get(i);
+//            Coin to = new Coin();
+//            try {
+//                to.setOwner(Base58.decode(outputDto.getAddress()));
+//            } catch (Exception e) {
+//                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+//            }
+//
+//            to.setNa(Na.valueOf(outputDto.getValue()));
+//            if (outputDto.getLockTime() < 0) {
+//                return Result.getFailed("lockTime error");
+//            }
+//
+//            to.setLockTime(outputDto.getLockTime());
+//            outputList.add(to);
+//        }
+//
+//        List<Coin> inputsList = new ArrayList<>();
+//        for (int i = 0; i < inputs.size(); i++) {
+//            InputDto inputDto = inputs.get(i);
+//            byte[] key = Arrays.concatenate(Hex.decode(inputDto.getFromHash()), new VarInt(inputDto.getFromIndex()).encode());
+//            Coin coin = new Coin();
+//            coin.setOwner(key);
+//            coin.setNa(Na.valueOf(inputDto.getValue()));
+//            inputsList.add(coin);
+//        }
+//
+//        Transaction tx = TransactionTool.createTransferTx(inputsList, outputList, remarkBytes);
+//        //计算交易手续费最小值
+//        int size = tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH;
+//        Na minFee = TransactionFeeCalculator.getTransferFee(size);
+//        //计算inputs和outputs的差额 ，求手续费
+//        Na fee = Na.ZERO;
+//        for (Coin coin : tx.getCoinData().getFrom()) {
+//            fee = fee.add(coin.getNa());
+//        }
+//        for (Coin coin : tx.getCoinData().getTo()) {
+//            fee = fee.subtract(coin.getNa());
+//        }
+//        if (fee.isLessThan(minFee)) {
+//            return Result.getFailed(TransactionErrorCode.FEE_NOT_RIGHT);
+//        }
+//        try {
+//            String txHex = Hex.encode(tx.serialize());
+//            return Result.getSuccess().setData(txHex);
+//        } catch (IOException e) {
+//            Log.error(e);
+//            return Result.getFailed(e.getMessage());
+//        }
+//    }
 
     @Override
     public Result signTransaction(String txHex, String priKey, String address, String password) {
@@ -246,6 +258,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
     }
+
     /**
      * -----------------------------------Test------------------------------
      */

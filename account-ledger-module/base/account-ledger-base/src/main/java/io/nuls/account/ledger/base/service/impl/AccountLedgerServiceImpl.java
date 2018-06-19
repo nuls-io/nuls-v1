@@ -588,10 +588,19 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         CoinData coinData = new CoinData();
         coinData.setTo(outputs);
         tx.setRemark(remark);
+        //验证地址是否一致
+        byte[] owner = null;
         for (int i = 0; i < inputsKey.size(); i++) {
             Coin coin = ledgerService.getUtxo(inputsKey.get(i));
             if (coin == null) {
                 return Result.getFailed(LedgerErrorCode.UTXO_NOT_FOUND);
+            }
+            if (i == 0) {
+                owner = coin.getOwner();
+            } else {
+                if (!Arrays.equals(coin.getOwner(), owner)) {
+                    return Result.getFailed(LedgerErrorCode.INVALID_INPUT, "utxo not from same address");
+                }
             }
             coin.setOwner(inputsKey.get(i));
             coinData.getFrom().add(coin);

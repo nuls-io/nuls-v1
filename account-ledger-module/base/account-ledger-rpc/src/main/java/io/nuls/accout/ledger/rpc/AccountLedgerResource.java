@@ -283,7 +283,6 @@ public class AccountLedgerResource {
             }
         }
 
-
         if (!ECKey.isValidPrivteHex(priKey)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
@@ -314,7 +313,6 @@ public class AccountLedgerResource {
             return Result.getFailed(LedgerErrorCode.DATA_PARSE_ERROR).toRpcClientResult();
         }
     }
-
 
     @POST
     @Path("/transaction/broadcast")
