@@ -2,8 +2,8 @@
 <configuration debug="false">
     <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
     <!--打包时<property name="LOG_HOME" value="../logs" />-->
-    <property name="LOG_HOME" value="${logdir}"/>
-    <!--<property name="LOG_HOME" value="./logs"/>-->
+    <!--<property name="LOG_HOME" value="${logdir}"/>-->
+    <property name="LOG_HOME" value="./logs"/>
     <property name="LOG_FILE" value="nuls"/>
     <property name="MSG_FILE" value="msg"/>
     <!-- 控制台输出 -->
