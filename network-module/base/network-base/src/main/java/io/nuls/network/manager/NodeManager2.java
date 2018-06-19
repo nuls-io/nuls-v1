@@ -133,10 +133,10 @@ public class NodeManager2 implements Runnable {
      * 重置网络节点
      */
     public void reset() {
-        Log.debug("------------------network nodeManager reset--------------------");
-        for (Node node : disConnectNodes.values()) {
-            node.setFailCount(NetworkConstant.CONEECT_FAIL_MAX_COUNT);
-        }
+        Log.debug("---!!!!!!!---------------network nodeManager reset---------------!!!!!!-----");
+//        for (Node node : disConnectNodes.values()) {
+//            node.setFailCount(NetworkConstant.CONEECT_FAIL_MAX_COUNT);
+//        }
         for (Node node : handShakeNodes.values()) {
             removeNode(node);
         }
