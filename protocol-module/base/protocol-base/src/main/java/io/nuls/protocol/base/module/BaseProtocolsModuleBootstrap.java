@@ -81,13 +81,21 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
             }
         }
         Block block = blockService.getBestBlock().getData();
-        ValidateResult result = block.verify();
-        if (result.isFailed()) {
-            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "the local best block is wrong!");
+        while (null != block && block.verify().isFailed()) {
+            try {
+                blockService.rollbackBlock(block);
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+            block = blockService.getBlock(block.getHeader().getPreHash()).getData();
         }
-        NulsContext.getInstance().setBestBlock(block);
-        this.initHandlers();
-        ((DownloadServiceImpl) NulsContext.getServiceBean(DownloadService.class)).start();
+        if (null != block) {
+            NulsContext.getInstance().setBestBlock(block);
+            this.initHandlers();
+            ((DownloadServiceImpl) NulsContext.getServiceBean(DownloadService.class)).start();
+        } else {
+            start();
+        }
     }
 
     private void initHandlers() {

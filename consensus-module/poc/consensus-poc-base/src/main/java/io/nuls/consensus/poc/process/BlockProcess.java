@@ -36,25 +36,34 @@ import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.Chain;
+import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
+import io.nuls.consensus.poc.protocol.entity.RedPunishData;
+import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.consensus.poc.util.ConsensusTool;
+import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.thread.manager.NulsThreadFactory;
+import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
-import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * @author ln
@@ -70,6 +79,8 @@ public class BlockProcess {
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
+
+    private ExecutorService signExecutor = TaskManager.createThreadPool(Runtime.getRuntime().availableProcessors(),Integer.MAX_VALUE,new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS,""));
 
     public BlockProcess(ChainManager chainManager, OrphanBlockProvider orphanBlockProvider) {
         this.chainManager = chainManager;
@@ -102,6 +113,7 @@ public class BlockProcess {
      * @throws IOException
      */
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
+
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
         Block block = blockContainer.getBlock();
 
@@ -119,19 +131,22 @@ public class BlockProcess {
 
         ValidateResult<List<Transaction>> validateResult = ledgerService.verifyDoubleSpend(block);
         if (validateResult.isFailed() && validateResult.getErrorCode().equals(LedgerErrorCode.LEDGER_DOUBLE_SPENT)) {
-//todo            RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
-//            RedPunishData redPunishData = new RedPunishData();
-//            redPunishData.setAddress(AddressTool.getAddress(block.getHeader().getScriptSig()));
-//            SmallBlock smallBlock = new SmallBlock();
-//            smallBlock.setHeader(block.getHeader());
-//            smallBlock.setTxHashList(block.getTxHashList());
-//            for (Transaction tx : validateResult.getData()) {
-//                smallBlock.addBaseTx(tx);
-//            }
-//            redPunishData.setEvidence(smallBlock.serialize());
-//            redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
-//            redPunishTransaction.setTxData(redPunishData);
-//            NulsContext.getServiceBean(ConsensusService.class).newTx(redPunishTransaction);
+            RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
+            RedPunishData redPunishData = new RedPunishData();
+            redPunishData.setAddress(AddressTool.getAddress(block.getHeader().getScriptSig()));
+            SmallBlock smallBlock = new SmallBlock();
+            smallBlock.setHeader(block.getHeader());
+            smallBlock.setTxHashList(block.getTxHashList());
+            for (Transaction tx : validateResult.getData()) {
+                smallBlock.addBaseTx(tx);
+            }
+            redPunishData.setEvidence(smallBlock.serialize());
+            redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
+            redPunishTransaction.setTxData(redPunishData);
+            CoinData coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress(), PocConsensusConstant.RED_PUNISH_LOCK_TIME);
+            redPunishTransaction.setCoinData(coinData);
+            redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
+            NulsContext.getServiceBean(ConsensusService.class).newTx(redPunishTransaction);
             return false;
         }
 
@@ -144,34 +159,42 @@ public class BlockProcess {
         } finally {
             Lockers.CHAIN_LOCK.unlock();
         }
+
         if (verifyAndAddBlockResult) {
             boolean success = true;
             try {
                 do {
                     // Verify that the block transaction is valid, save the block if the verification passes, and discard the block if it fails
                     // 验证区块交易是否合法，如果验证通过则保存区块，如果失败则丢弃该块
-                    block.verifyWithException();
-                    List<Transaction> verifiedList = new ArrayList<>();
+
+                    long time = System.currentTimeMillis();
+                    List<Future<Boolean>> futures = new ArrayList<>();
+
                     for (Transaction tx : block.getTxs()) {
-                        if (tx.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() == ProtocolConstant.TX_TYPE_COINBASE || tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
+                        Future<Boolean> res = signExecutor.submit(new Callable<Boolean>() {
+                            @Override
+                            public Boolean call() throws Exception {
+                                return tx.verify().isSuccess();
+                            }
+                        });
+                        futures.add(res);
+                    }
+
+                    Map<String, Coin> toMaps = new HashMap<>();
+                    Set<String> fromSet = new HashSet<>();
+
+                    for (Transaction tx : block.getTxs()) {
+                        if (tx.isSystemTx()) {
                             continue;
                         }
-                        ValidateResult result = ledgerService.verifyCoinData(tx, verifiedList);
-                        if (result.isSuccess()) {
-                            result = tx.verify();
-                            if (result.isFailed()) {
-                                Log.info("failed message:" + result.getMsg());
-                                success = false;
-                                break;
-                            } else {
-                                verifiedList.add(tx);
-                            }
-                        } else {
-                            success = false;
+                        ValidateResult result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
+                        if (result.isFailed()) {
                             Log.info("failed message:" + result.getMsg());
+                            success = false;
                             break;
                         }
                     }
+
                     if (!success) {
                         break;
                     }
@@ -181,6 +204,20 @@ public class BlockProcess {
                         Log.info("failed message:" + validateResult1.getMsg());
                         break;
                     }
+
+                    for (Future<Boolean> future : futures) {
+                        if (!future.get()) {
+                            success = false;
+                            Log.info("verify failed!");
+                            break;
+                        }
+                    }
+                    Log.debug("验证交易耗时：" + (System.currentTimeMillis() - time));
+                    if (!success) {
+                        break;
+                    }
+                    time = System.currentTimeMillis();
+
                     // save block
                     Result result = blockService.saveBlock(block);
                     success = result.isSuccess();
@@ -190,21 +227,12 @@ public class BlockProcess {
                         RewardStatisticsProcess.addBlock(block);
                         BlockLog.debug("save block height : " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                     }
+                    Log.debug("保存耗时：" + (System.currentTimeMillis() - time));
                 } while (false);
             } catch (Exception e) {
                 Log.error("save block error : " + e.getMessage(), e);
             }
             if (success) {
-                //check .TODO may need remove,代码稳定后判断是否需要删除下面代码
-                try {
-                    Block tempBlock = blockService.getBlock(block.getHeader().getHash()).getData();
-                    if (tempBlock.getHeader().getTxCount() != tempBlock.getTxs().size()) {
-                        Log.error("end save block tx count is error block : " + block.getHeader().getHash());
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
                 NulsContext.getInstance().setBestBlock(block);
                 //remove tx from memory pool
                 removeTxFromMemoryPool(block);

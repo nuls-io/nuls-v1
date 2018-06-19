@@ -26,13 +26,14 @@ package io.nuls.kernel;
 
 import io.nuls.core.tools.cfg.ConfigLoader;
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.i18n.I18nUtils;
 import io.nuls.kernel.lite.core.ModularServiceMethodInterceptor;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.module.BaseModuleBootstrap;
-import io.nuls.kernel.module.manager.VersionManager;
 import io.nuls.kernel.utils.TransactionManager;
 import io.nuls.kernel.validate.ValidatorManager;
 
@@ -69,6 +70,9 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
             Log.error("Client start failed", e);
             throw new RuntimeException("Client start failed");
         }
+
+        TimeService.getInstance().start();
+
         //set system language
         try {
             NulsConfig.DEFAULT_ENCODING = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, NulsConstant.CFG_SYSTEM_DEFAULT_ENCODING);
@@ -79,9 +83,9 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
         }
         SpringLiteContext.init("io.nuls", new ModularServiceMethodInterceptor());
         try {
+            NulsConfig.VERSION = getKernelVersion();
             TransactionManager.init();
             ValidatorManager.init();
-            VersionManager.start();
         } catch (Exception e) {
             Log.error(e);
         }
@@ -104,15 +108,11 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
         StringBuilder info = new StringBuilder();
         info.append("kernel module:\n");
 
-        try {
-            Class mavenInfo = Class.forName("io.nuls.module.version.KernelMavenInfo");
-            Field field = mavenInfo.getDeclaredField("VERSION");
+        String version = getKernelVersion();
+        if (StringUtils.isBlank(version)) {
             info.append("module-version:");
-            info.append(field.get(mavenInfo));
-        } catch (Exception e) {
-            //do nothing
+            info.append(version);
         }
-
         info.append("\nDEFAULT_ENCODING:");
         info.append(NulsConfig.DEFAULT_ENCODING);
         info.append("\nLanguage：");
@@ -124,4 +124,14 @@ public class MicroKernelBootstrap extends BaseModuleBootstrap {
         return info.toString();
     }
 
+    private String getKernelVersion() {
+        try {
+            Class mavenInfo = Class.forName("io.nuls.module.version.KernelMavenInfo");
+            Field field = mavenInfo.getDeclaredField("VERSION");
+            return (String) field.get(mavenInfo);
+        } catch (Exception e) {
+            //do nothing
+        }
+        return "0.0.0";
+    }
 }

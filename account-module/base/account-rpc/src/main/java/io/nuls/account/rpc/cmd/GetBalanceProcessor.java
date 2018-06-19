@@ -1,3 +1,28 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.model.Address;
@@ -55,14 +80,14 @@ public class GetBalanceProcessor  implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        RpcClientResult result = restFul.get("/account/balance/" + address, null);
+        RpcClientResult result = restFul.get("/accountledger/balance/" + address, null);
         if(result.isFailed()){
             return CommandResult.getFailed(result.getMsg());
         }
         Map<String, Object> map = (Map)result.getData();
-        map.put("balance",  CommandHelper.naToNuls(map.get("balance")));
-        map.put("usable", CommandHelper.naToNuls(map.get("usable")));
-        map.put("locked", CommandHelper.naToNuls(map.get("locked")));
+        map.put("balance",  CommandHelper.naToNuls(((Map)map.get("balance")).get("value")));
+        map.put("usable",  CommandHelper.naToNuls(((Map)map.get("usable")).get("value")));
+        map.put("locked",  CommandHelper.naToNuls(((Map)map.get("locked")).get("value")));
         result.setData(map);
         return CommandResult.getResult(result);
     }

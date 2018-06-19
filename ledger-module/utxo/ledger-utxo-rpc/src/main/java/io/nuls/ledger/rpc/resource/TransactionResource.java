@@ -25,7 +25,9 @@ package io.nuls.ledger.rpc.resource;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.TxStatusEnum;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -38,7 +40,7 @@ import io.nuls.ledger.rpc.model.OutputDto;
 import io.nuls.ledger.rpc.model.TransactionDto;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.ledger.storage.service.UtxoLedgerUtxoStorageService;
-import io.nuls.ledger.utils.LedgerUtil;
+import io.nuls.ledger.util.LedgerUtil;
 import io.swagger.annotations.*;
 import org.spongycastle.util.Arrays;
 
@@ -78,6 +80,9 @@ public class TransactionResource {
                           @PathParam("hash") String hash) {
         if (StringUtils.isBlank(hash)) {
             return Result.getFailed(LedgerErrorCode.NULL_PARAMETER).toRpcClientResult();
+        }
+        if (!NulsDigestData.validHash(hash)) {
+            return Result.getFailed(LedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Result result = null;
         try {
@@ -119,6 +124,9 @@ public class TransactionResource {
                         String txHash = hash;
                         OutputDto outputDto = null;
                         Coin to, temp;
+                        long bestHeight = NulsContext.getInstance().getBestHeight();
+                        long currentTime = TimeService.currentTimeMillis();
+                        long lockTime;
                         for(int i = 0, length = tos.size(); i < length; i++) {
                             to = tos.get(i);
                             outputDto = new OutputDto(to);
@@ -129,15 +137,31 @@ public class TransactionResource {
                                 // 已花费
                                 outputDto.setStatus(3);
                             } else {
-                                if(temp.getLockTime() == -1) {
-                                    // 参与共识锁定
+                                lockTime = temp.getLockTime();
+                                if (lockTime < 0) {
+                                    // 共识锁定
                                     outputDto.setStatus(2);
-                                } else if(TimeService.currentTimeMillis() < temp.getLockTime()) {
-                                    // 高度锁定
-                                    outputDto.setStatus(1);
-                                } else {
-                                    // 未花费
+                                } else if (lockTime == 0) {
+                                    // 正常未花费
                                     outputDto.setStatus(0);
+                                } else if (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE) {
+                                    // 判定是否时间高度锁定
+                                    if (lockTime > currentTime) {
+                                        // 时间高度锁定
+                                        outputDto.setStatus(1);
+                                    } else {
+                                        // 正常未花费
+                                        outputDto.setStatus(0);
+                                    }
+                                } else {
+                                    // 判定是否区块高度锁定
+                                    if (lockTime > bestHeight) {
+                                        // 区块高度锁定
+                                        outputDto.setStatus(1);
+                                    } else {
+                                        // 正常未花费
+                                        outputDto.setStatus(0);
+                                    }
                                 }
                             }
                             outputDtoList.add(outputDto);

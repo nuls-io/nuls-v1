@@ -1,16 +1,40 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.rpc.model.AccountKeyStoreDto;
-import io.nuls.kernel.model.RpcClientResult;
-import io.nuls.kernel.utils.CommandBuilder;
-import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
-import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
+import io.nuls.kernel.utils.CommandBuilder;
+import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.utils.RestFulUtils;
 
 import java.io.*;
@@ -18,6 +42,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 根据keystore导出账户,
+ * 密码用来验证(keystore), 如果keystore没有密码则可以不输
  * @author: Charlie
  * @date: 2018/5/25
  */
@@ -34,26 +60,22 @@ public class ImportByKeyStoreProcessor implements CommandProcessor {
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<path> The path to the AccountKeystore file ")
-                .newLine("\t[password] the password is between 8 and 20 inclusive of numbers and letters, not encrypted by default");
+                .newLine("\t<path> The path to the AccountKeystore file ");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "importkeystore <path> [password] -- import accounts according to AccountKeystore files";
+        return "importkeystore <path> -- import accounts according to AccountKeystore files";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if (length < 2 || length > 3) {
+        if (length != 2) {
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
-            return false;
-        }
-        if (length == 3 && !StringUtils.validPassword(args[2])) {
             return false;
         }
         return true;
@@ -62,7 +84,7 @@ public class ImportByKeyStoreProcessor implements CommandProcessor {
     @Override
     public CommandResult execute(String[] args) {
         String path = args[1];
-        String password = args.length == 3 ? args[2] : null;
+        String password = CommandHelper.getPwdOptional();
         Result rs = getAccountKeystoreDto(path);
         if(rs.isFailed()){
             return CommandResult.getFailed(rs.getMsg());

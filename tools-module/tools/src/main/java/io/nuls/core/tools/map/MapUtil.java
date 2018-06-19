@@ -24,6 +24,10 @@
 package io.nuls.core.tools.map;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @desription:
@@ -43,4 +47,25 @@ public class MapUtil{
         n |= n >>> 16;
         return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
     }
+
+    public static HashMap createHashMap(int cap) {
+        int capacity = tableSizeFor(cap) << 1;
+        return new HashMap<>(capacity);
+    }
+
+    public static ConcurrentHashMap createConcurrentHashMap(int cap) {
+        int capacity = tableSizeFor(cap) << 1;
+        return new ConcurrentHashMap<>(capacity);
+    }
+
+    public static HashSet craeteHashSet(int cap) {
+        int capacity = tableSizeFor(cap) << 1;
+        return new HashSet<>(capacity);
+    }
+
+    public static Set createConcurrentHashSet(int cap) {
+        int capacity = tableSizeFor(cap) << 1;
+        return ConcurrentHashMap.newKeySet(capacity);
+    }
+
 }

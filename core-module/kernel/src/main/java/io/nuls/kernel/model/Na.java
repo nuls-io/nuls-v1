@@ -90,7 +90,7 @@ public final class Na implements Comparable<Na>, Serializable {
     private final long value;
 
     private Na(final long na) {
-        if (MAX_NA_VALUE < na) {
+        if (MAX_NA_VALUE < na || na < 0) {
             throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
         this.value = na;
@@ -303,4 +303,28 @@ public final class Na implements Comparable<Na>, Serializable {
         return toText();
     }
 
+    /**
+     * Long 或者 Integer Na 转成 NUSL(double)
+     * 如果已经是小数类型说明已经是NUSL 则直接返回
+     * @param object
+     * @return
+     */
+    public static double naToNuls(Object object) {
+        if (null == object) {
+            return 0;
+        }
+        Long na = null;
+        if (object instanceof Long) {
+            na = (Long) object;
+        } else if (object instanceof Integer) {
+            na = ((Integer) object).longValue();
+        } else if (object instanceof Double){
+            return (Double) object;
+        }else if (object instanceof Float){
+            return Double.parseDouble(String.valueOf(object)) ;
+        } else {
+            return 0;
+        }
+        return (Na.valueOf(na)).toDouble();
+    }
 }

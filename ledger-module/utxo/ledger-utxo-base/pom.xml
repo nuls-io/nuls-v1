@@ -29,7 +29,7 @@
     <parent>
         <artifactId>ledger-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>0.9.8</version>
+        <version>0.9.10</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -41,23 +41,23 @@
         <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.10</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.ledger-module</groupId>
             <artifactId>ledger-utxo-storage</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.10</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db-leveldb</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.10</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.nuls.consensus-module</groupId>
             <artifactId>consensus-poc-protocol</artifactId>
-            <version>0.9.8</version>
+            <version>0.9.10</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

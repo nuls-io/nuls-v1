@@ -31,6 +31,7 @@ import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 /**
  * @author Niels
@@ -40,7 +41,7 @@ import io.nuls.kernel.validate.ValidateResult;
 public class TxFeeValidator implements NulsDataValidator<Transaction> {
     @Override
     public ValidateResult validate(Transaction tx) {
-        if (tx.isFreeOfFee()) {
+        if (tx.isSystemTx()) {
             return ValidateResult.getSuccessResult();
         }
         CoinData coinData = tx.getCoinData();
@@ -48,7 +49,12 @@ public class TxFeeValidator implements NulsDataValidator<Transaction> {
             return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
         }
         Na realFee = tx.getFee();
-        Na fee = TransactionFeeCalculator.getFee(tx.size());
+        Na fee = null;
+        if(tx.getType() == ProtocolConstant.TX_TYPE_TRANSFER){
+            fee = TransactionFeeCalculator.getTransferFee(tx.size());
+        }else{
+            fee =TransactionFeeCalculator.getMaxFee(tx.size());
+        }
         if (realFee.isGreaterOrEquals(fee)) {
             return ValidateResult.getSuccessResult();
         }

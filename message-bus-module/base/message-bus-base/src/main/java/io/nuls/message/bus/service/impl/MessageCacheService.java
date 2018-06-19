@@ -1,7 +1,31 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package io.nuls.message.bus.service.impl;
 
 import io.nuls.cache.CacheMap;
-import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.protocol.message.base.BaseMessage;
 
@@ -12,14 +36,16 @@ import io.nuls.protocol.message.base.BaseMessage;
  * @author: Charlie
  * @date: 2018/5/6
  */
-//@Service
 public class MessageCacheService {
 
     private static final MessageCacheService INSTANCE = new MessageCacheService();
 
     private static final int TIME_OF_IDLE_SECONDS = 600;
-    private CacheMap<NulsDigestData, BaseMessage> cacheMapSended = new CacheMap<>("message-cache-sended", 32, NulsDigestData.class, BaseMessage.class, 0, TIME_OF_IDLE_SECONDS);
-    private CacheMap<NulsDigestData, Integer> cacheMapRecieved = new CacheMap<>("message-cache-recieved", 8, NulsDigestData.class, Integer.class, 0, TIME_OF_IDLE_SECONDS);
+    private CacheMap<NulsDigestData, BaseMessage> cacheMapSended = new CacheMap<>("message-cache-sended", 128, NulsDigestData.class, BaseMessage.class, 0, TIME_OF_IDLE_SECONDS);
+    private CacheMap<NulsDigestData, Integer> cacheMapRecieved = new CacheMap<>("message-cache-recieved", 64, NulsDigestData.class, Integer.class, 0, TIME_OF_IDLE_SECONDS);
+
+//    private Map<NulsDigestData, BaseMessage> cacheMapSended = new HashMap<>();
+//    private Map<NulsDigestData, Integer> cacheMapRecieved = new HashMap<>();
 
     public static MessageCacheService getInstance() {
         return INSTANCE;
@@ -83,5 +109,8 @@ public class MessageCacheService {
     public void destroy() {
         this.cacheMapSended.destroy();
         this.cacheMapRecieved.destroy();
+
+//        this.cacheMapSended.clear();
+//        this.cacheMapRecieved.clear();
     }
 }

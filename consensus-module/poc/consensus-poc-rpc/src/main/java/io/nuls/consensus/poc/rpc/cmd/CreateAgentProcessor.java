@@ -1,5 +1,31 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package io.nuls.consensus.poc.rpc.cmd;
 
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -31,39 +57,37 @@ public class CreateAgentProcessor implements CommandProcessor {
         bulider.newLine(getCommandDescription())
                 .newLine("\t<agentAddress>   agent owner address   -required")
                 .newLine("\t<packingAddress>    packing address    -required")
-                .newLine("\t<commissionRate>    commission rate (10~100)   -required")
-                .newLine("\t<deposit>   amount you want to deposit -required")
-                .newLine("\t<agentName>  your agent name    -required")
-                .newLine("\t<remark>    introduction to your agent -required")
+                .newLine("\t<commissionRate>    commission rate (10~100), you can have up to 2 valid digits after the decimal point  -required")
+                .newLine("\t<deposit>   amount you want to deposit, you can have up to 8 valid digits after the decimal point -required")
                 .newLine("\t[rewardAddress]  Billing address    -not required");
         return bulider.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "createagent <agentAddress> <packingAddress> <commissionRate> <deposit> <agentName> <remark> [rewardAddress] --create a agent";
+        return "createagent <agentAddress> <packingAddress> <commissionRate> <deposit> [rewardAddress] --create a agent";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if(length < 7 || length > 8){
+        if(length < 5 || length > 6){
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
         if(!StringUtils.validAddressSimple(args[1]) || !StringUtils.validAddressSimple(args[2]) || StringUtils.isBlank(args[3])
-                || StringUtils.isBlank(args[4]) || StringUtils.isBlank(args[5]) || StringUtils.isBlank(args[6])){
+                || StringUtils.isBlank(args[4])){
             return false;
         }
-        if(!StringUtils.isNumberGtZero(args[3])){
+        if(!StringUtils.isNumberGtZeroLimitTwo(args[3])){
             return false;
         }
-        if(!StringUtils.isNumberGtZero(args[4])){
+        if(!StringUtils.isNuls(args[4])){
             return false;
         }
-        if(length == 8 && !StringUtils.validAddressSimple(args[7])){
+        if(length == 6 && !StringUtils.validAddressSimple(args[5])){
             return false;
         }
         return true;
@@ -71,9 +95,14 @@ public class CreateAgentProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        String password = CommandHelper.getPwd();
+        String address = args[1];
+        RpcClientResult res = CommandHelper.getPassword(address, restFul);
+        if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
+            return CommandResult.getFailed(res.getMsg());
+        }
+        String password = res.isSuccess() ? (String)res.getData() : null;
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("agentAddress", args[1]);
+        parameters.put("agentAddress", address);
         parameters.put("packingAddress", args[2]);
         parameters.put("commissionRate", Double.valueOf(args[3]));
         Long deposit = null;
@@ -84,11 +113,9 @@ public class CreateAgentProcessor implements CommandProcessor {
             return CommandResult.getFailed("Parameter deposit error");
         }
         parameters.put("deposit", deposit);
-        parameters.put("agentName", args[5]);
-        parameters.put("remark", args[6]);
         parameters.put("password", password);
-        if(args.length == 8){
-            parameters.put("rewardAddress", args[7]);
+        if(args.length == 6){
+            parameters.put("rewardAddress", args[5]);
         }
         RpcClientResult result = restFul.post("/consensus/agent",parameters);
         if (result.isFailed()) {

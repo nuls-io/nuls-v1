@@ -25,6 +25,7 @@
 
 package io.nuls.protocol.base.service;
 
+import io.nuls.consensus.service.ConsensusService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
@@ -57,6 +58,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private LedgerService ledgerService;
+    @Autowired
+    private ConsensusService consensusService;
 
     /**
      * 确认交易时调用的方法，对交易相关的业务进行提交操作
@@ -136,10 +139,13 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Result broadcastTx(Transaction tx) {
-        temporaryCacheManager.cacheTx(tx);
+
         TransactionMessage message = new TransactionMessage();
         message.setMsgBody(tx);
-        messageBusService.receiveMessage(message,null);
+
+        consensusService.newTx(tx);
+        temporaryCacheManager.cacheTx(tx);
+
         return messageBusService.broadcastAndCache(message, null, true);
     }
 

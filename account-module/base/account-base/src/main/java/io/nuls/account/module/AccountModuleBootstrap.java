@@ -25,6 +25,9 @@
 
 package io.nuls.account.module;
 
+import io.nuls.account.service.AccountService;
+import io.nuls.kernel.context.NulsContext;
+
 /**
  * @author: Niels Wang
  * @date: 2018/5/13
@@ -43,6 +46,8 @@ public class AccountModuleBootstrap extends AbstractAccountModuleBootstrap {
      */
     @Override
     public void start() {
+        AccountService accountService = NulsContext.getServiceBean(AccountService.class);
+        accountService.getAccountList();
     }
 
     /**

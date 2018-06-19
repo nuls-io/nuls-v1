@@ -39,6 +39,9 @@ import io.nuls.consensus.poc.model.BlockData;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
+import io.nuls.consensus.poc.protocol.entity.RedPunishData;
+import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.util.ConsensusTool;
@@ -48,10 +51,7 @@ import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.network.service.NetworkService;
@@ -195,13 +195,9 @@ public class ConsensusProcess {
             while (!hasReceiveNewestBlock) {
                 hasReceiveNewestBlock = hasReceiveNewestBlock(self, round);
                 if (hasReceiveNewestBlock) {
-                    long sleepTime = endTime - TimeService.currentTimeMillis();
-                    if (sleepTime > 0) {
-                        Thread.sleep(sleepTime);
-                    }
                     break;
                 }
-                Thread.sleep(500L);
+                Thread.sleep(100L);
                 if (TimeService.currentTimeMillis() >= endTime) {
                     break;
                 }
@@ -219,8 +215,7 @@ public class ConsensusProcess {
 
         int thisIndex = self.getPackingIndexOfRound();
 
-        byte[] preBlockPackingAddress = null;
-
+        MeetingMember preMember;
         if (thisIndex == 1) {
             MeetingRound preRound = round.getPreRound();
             if (preRound == null) {
@@ -228,12 +223,22 @@ public class ConsensusProcess {
                 Log.error("这里完成前必须处理掉");
                 return true;
             }
-            preBlockPackingAddress = preRound.getMember(preRound.getMemberCount()).getPackingAddress();
+            preMember = preRound.getMember(preRound.getMemberCount());
         } else {
-            preBlockPackingAddress = round.getMember(self.getPackingIndexOfRound()).getPackingAddress();
+            preMember = round.getMember(self.getPackingIndexOfRound() - 1);
         }
+        if (preMember == null) {
+            return true;
+        }
+        byte[] preBlockPackingAddress = preMember.getPackingAddress();
+        long thisRoundIndex = preMember.getRoundIndex();
+        int thisPackageIndex = preMember.getPackingIndexOfRound();
 
-        if (Arrays.equals(packingAddress, preBlockPackingAddress)) {
+        BlockRoundData blockRoundData = new BlockRoundData(bestBlockHeader.getExtend());
+        long roundIndex = blockRoundData.getRoundIndex();
+        int packageIndex = blockRoundData.getPackingIndexOfRound();
+
+        if (Arrays.equals(packingAddress, preBlockPackingAddress) && thisRoundIndex == roundIndex && thisPackageIndex == packageIndex) {
             return true;
         } else {
             return false;
@@ -273,9 +278,16 @@ public class ConsensusProcess {
         bd.setRoundData(roundData);
 
         List<Transaction> packingTxList = new ArrayList<>();
-        List<NulsDigestData> outHashList = new ArrayList<>();
+        Set<NulsDigestData> outHashSet = new HashSet<>();
 
         long totalSize = 0L;
+
+        Map<String, Coin> toMaps = new HashMap<>();
+        Set<String> fromSet = new HashSet<>();
+
+        long t1 = 0, t2 = 0;
+
+        long time = System.currentTimeMillis();
 
         while (true) {
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 500L) {
@@ -291,42 +303,53 @@ public class ConsensusProcess {
                 }
                 continue;
             }
-            if(txContainer.getTx() == null || txContainer.getPackageCount() >= 3) {
+            if (txContainer.getTx() == null || txContainer.getPackageCount() >= 3) {
                 continue;
             }
 
             Transaction tx = txContainer.getTx();
 
             if ((totalSize + tx.size()) > ProtocolConstant.MAX_BLOCK_SIZE) {
-                txMemoryPool.add(txContainer, false);
+                txMemoryPool.addInFirst(txContainer, false);
                 break;
             }
-            if (outHashList.contains(tx.getHash())) {
-                continue;
-            }
+
             Transaction repeatTx = ledgerService.getTx(tx.getHash());
+
             if (repeatTx != null) {
                 continue;
             }
-            ValidateResult result = tx.verify();
+
+            long t = System.currentTimeMillis();
+
+//            ValidateResult result = tx.verify();
+//
+//            t1 += (System.currentTimeMillis() - t);
+//
+//            if (result.isFailed()) {
+//                if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
+//                    txContainer.setPackageCount(txContainer.getPackageCount() + 1);
+//                    txMemoryPool.add(txContainer, true);
+//                }
+//                Log.warn(result.getMsg());
+//                continue;
+//            }
+
+            ValidateResult result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
+
             if (result.isFailed()) {
                 if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
-                    txContainer.setPackageCount(txContainer.getPackageCount() + 1);
                     txMemoryPool.add(txContainer, true);
+                    txContainer.setPackageCount(txContainer.getPackageCount() + 1);
                 }
                 Log.warn(result.getMsg());
                 continue;
             }
-            result = ledgerService.verifyCoinData(tx, packingTxList);
-            if (result.isFailed()) {
-                if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
-                    txMemoryPool.add(txContainer, true);
-                    txContainer.setPackageCount(txContainer.getPackageCount() + 1);
-                }
-                Log.warn(result.getMsg());
+
+            if (!outHashSet.add(tx.getHash())) {
+                Log.warn("重复的交易");
                 continue;
             }
-            outHashList.add(tx.getHash());
 
             tx.setBlockHeight(bd.getHeight());
             packingTxList.add(tx);
@@ -356,8 +379,12 @@ public class ConsensusProcess {
 
         Block newBlock = ConsensusTool.createBlock(bd, round.getLocalPacker());
 
-        Log.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + ", time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
+        Log.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtil.convertDate(new Date(self.getPackEndTime())));
+
+        t2 = System.currentTimeMillis() - time;
+        Log.debug("打包总耗时：" + t2 + " ms");
+//        Log.info("验证交易总耗时：" + t1 + " ms");
 
         return newBlock;
     }
@@ -376,50 +403,37 @@ public class ConsensusProcess {
     }
 
     private void punishTx(Block bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
-        redPunishTx(bestBlock, txList, round);
         YellowPunishTransaction yellowPunishTransaction = ConsensusTool.createYellowPunishTx(bestBlock, self, round);
-        if (null != yellowPunishTransaction) {
-            txList.add(yellowPunishTransaction);
-            //当连续100个黄牌时，给出一个红牌
-            //When 100 yellow CARDS in a row, give a red card.
-//            List<PunishLogPo> yellowPunishList = PocConsensusContext.getChainManager().getMasterChain().getChain().getYellowPunishList();
-//            Map<String, Integer> countMap = new HashMap<>();
-//            long startRoundIndex = round.getIndex() - PocConsensusConstant.MAXINUM_CONTINUOUS_YELLOW_NUMBER;
-//            for (PunishLogPo po : yellowPunishList) {
-//                if (startRoundIndex > po.getRoundIndex()) {
-//                    continue;
-//                }
-//                String address = Base58.encode(po.getAddress());
-//                Integer count = countMap.get(address);
-//                if (null == count) {
-//                    count = 1;
-//                } else {
-//                    count++;
-//                }
-//                countMap.put(address, count);
-//            }
-//            for (byte[] addressBytes : yellowPunishTransaction.getTxData().getAddressList()) {
-//                String address = Base58.encode(addressBytes);
-//                if (ConsensusConfig.getSeedNodeList().contains(addressBytes)) {
-//                    continue;
-//                }
-//                Integer count = countMap.get(address);
-//                if (null != count && count >= PocConsensusConstant.MAXINUM_CONTINUOUS_YELLOW_NUMBER) {
-//                    RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
-//                    RedPunishData redPunishData = new RedPunishData();
-//                    redPunishData.setAddress(addressBytes);
-//                    redPunishData.setReasonCode(PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode());
-//                    redPunishTransaction.setTxData(redPunishData);
-//                    redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction));
-//                    txList.add(redPunishTransaction);
-//                }
-//            }
+        if (null == yellowPunishTransaction) {
+            return;
         }
-//todo 是否还有其他红牌处理
-//        List<RedPunishTransaction> redTxList = ConsensusTool.createRedPunishTxList(bestBlock, self, );
-    }
-
-    private void redPunishTx(Block bestBlock, List<Transaction> txList, MeetingRound round) throws NulsException, IOException {
-        // todo implement
+        txList.add(yellowPunishTransaction);
+        //当连续100个黄牌时，给出一个红牌
+        //When 100 yellow CARDS in a row, give a red card.
+        List<byte[]> addressList = yellowPunishTransaction.getTxData().getAddressList();
+        Set<Integer> punishedSet = new HashSet<>();
+        for (byte[] address : addressList) {
+            MeetingMember member = round.getMemberByAgentAddress(address);
+            if (null == member) {
+                member = round.getPreRound().getMemberByAgentAddress(address);
+            }
+            if (member.getCreditVal() <= PocConsensusConstant.RED_PUNISH_CREDIT_VAL) {
+                if (!punishedSet.add(member.getPackingIndexOfRound())) {
+                    continue;
+                }
+                if (member.getAgent().getDelHeight() > 0L) {
+                    continue;
+                }
+                RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
+                RedPunishData redPunishData = new RedPunishData();
+                redPunishData.setAddress(address);
+                redPunishData.setReasonCode(PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode());
+                redPunishTransaction.setTxData(redPunishData);
+                CoinData coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress(), PocConsensusConstant.RED_PUNISH_LOCK_TIME);
+                redPunishTransaction.setCoinData(coinData);
+                redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
+                txList.add(redPunishTransaction);
+            }
+        }
     }
 }

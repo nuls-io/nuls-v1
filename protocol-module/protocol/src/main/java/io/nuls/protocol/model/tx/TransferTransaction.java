@@ -24,10 +24,11 @@
  */
 package io.nuls.protocol.model.tx;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.*;
+import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.TransactionLogicData;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.protocol.constant.ProtocolConstant;

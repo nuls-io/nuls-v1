@@ -33,6 +33,7 @@ import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
@@ -40,6 +41,7 @@ import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.util.ConsensusTool;
+import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
@@ -48,14 +50,12 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.service.BlockService;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author ln
@@ -161,27 +161,33 @@ public class ChainContainer implements Cloneable {
                     }
                 }
             } else if (txType == ConsensusConstant.TX_TYPE_RED_PUNISH) {
-//                RedPunishTransaction transaction = (RedPunishTransaction) tx;
-//                RedPunishData redPunishData = transaction.getTxData();
-//                PunishLogPo po = new PunishLogPo();
-//                po.setAddress(redPunishData.getAddress());
-//                po.setHeight(height);
-//                po.setRoundIndex(roundData.getRoundIndex());
-//                po.setTime(tx.getTime());
-//                po.setType(PunishType.RED.getCode());
-//                redList.add(po);
-//                for (Agent agent : agentList) {
-//                    if (!Arrays.equals(agent.getAgentAddress(), po.getAddress())) {
-//                       continue;
-//                    }
-//                    agent.setDelHeight(height);
-//                    for(Deposit deposit:depositList){
-//                        if(deposit.getAgentHash().equals(agent.getTxHash())){
-//                            continue;
-//                        }
-//                        deposit.setDelHeight(height);
-//                    }
-//                }
+                RedPunishTransaction transaction = (RedPunishTransaction) tx;
+                RedPunishData redPunishData = transaction.getTxData();
+                PunishLogPo po = new PunishLogPo();
+                po.setAddress(redPunishData.getAddress());
+                po.setHeight(height);
+                po.setRoundIndex(roundData.getRoundIndex());
+                po.setTime(tx.getTime());
+                po.setType(PunishType.RED.getCode());
+                redList.add(po);
+                for (Agent agent : agentList) {
+                    if (!Arrays.equals(agent.getAgentAddress(), po.getAddress())) {
+                        continue;
+                    }
+                    if (agent.getDelHeight() > 0) {
+                        continue;
+                    }
+                    agent.setDelHeight(height);
+                    for (Deposit deposit : depositList) {
+                        if (!deposit.getAgentHash().equals(agent.getTxHash())) {
+                            continue;
+                        }
+                        if (deposit.getDelHeight() > 0) {
+                            continue;
+                        }
+                        deposit.setDelHeight(height);
+                    }
+                }
             } else if (txType == ConsensusConstant.TX_TYPE_YELLOW_PUNISH) {
                 YellowPunishTransaction transaction = (YellowPunishTransaction) tx;
                 for (byte[] bytes : transaction.getTxData().getAddressList()) {
@@ -218,7 +224,7 @@ public class ChainContainer implements Cloneable {
         if (blockHeader == null) {
             return false;
         }
-
+//todo 是否是重复验证
         block.verifyWithException();
 
         // Verify that the block is properly connected
@@ -336,6 +342,7 @@ public class ChainContainer implements Cloneable {
 //            Log.error("Coinbase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
             return false;
         }
+        List<RedPunishTransaction> redPunishTxList = new ArrayList<>();
         YellowPunishTransaction yellowPunishTx = null;
         for (int i = 1; i < txs.size(); i++) {
             Transaction transaction = txs.get(i);
@@ -350,6 +357,8 @@ public class ChainContainer implements Cloneable {
                 BlockLog.debug("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
 //                Log.error("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                 return false;
+            } else if (transaction.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH && ((RedPunishTransaction) transaction).getTxData().getReasonCode() == PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode()) {
+                redPunishTxList.add((RedPunishTransaction) transaction);
             }
         }
 
@@ -359,9 +368,9 @@ public class ChainContainer implements Cloneable {
             Log.error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
             return false;
         }
-
+        YellowPunishTransaction yellowPunishTransaction = null;
         try {
-            YellowPunishTransaction yellowPunishTransaction = ConsensusTool.createYellowPunishTx(chain.getBestBlock(), member, currentRound);
+            yellowPunishTransaction = ConsensusTool.createYellowPunishTx(chain.getBestBlock(), member, currentRound);
             if (yellowPunishTransaction == yellowPunishTx) {
                 return true;
             } else if (yellowPunishTransaction == null || yellowPunishTx == null) {
@@ -379,7 +388,32 @@ public class ChainContainer implements Cloneable {
 //            Log.error("The tx's wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash(), e);
             return false;
         }
-
+        if (null == yellowPunishTransaction && !redPunishTxList.isEmpty()) {
+            BlockLog.debug("the red punish is wrong!");
+            return false;
+        } else {
+            List<byte[]> addressList = yellowPunishTransaction.getTxData().getAddressList();
+            Set<String> punishAddress = new HashSet<>();
+            for (byte[] address : addressList) {
+                MeetingMember item = currentRound.getMemberByAgentAddress(address);
+                if (null == item) {
+                    item = currentRound.getPreRound().getMemberByAgentAddress(address);
+                }
+                if (item.getCreditVal() <= PocConsensusConstant.RED_PUNISH_CREDIT_VAL) {
+                    punishAddress.add(Base58.encode(item.getAgent().getAgentAddress()));
+                }
+            }
+            if (punishAddress.size() != redPunishTxList.size()) {
+                BlockLog.debug("the count of red punishs is wrong!" + block.getHeader().getHash());
+                return false;
+            }
+            for (RedPunishTransaction redTx : redPunishTxList) {
+                if (!punishAddress.contains(Base58.encode(redTx.getTxData().getAddress()))) {
+                    BlockLog.debug("There is a wrong red punish tx!"+ block.getHeader().getHash());
+                    return false;
+                }
+            }
+        }
         return true;
     }
 
@@ -407,6 +441,12 @@ public class ChainContainer implements Cloneable {
         }
         if (blockList.size() <= 2) {
             addBlockInBlockList(blockList);
+            if (blockList.size() > 0) {
+                Block startBlock = blockList.get(0);
+                if (startBlock != null && chain.getStartBlockHeader().getHeight() > startBlock.getHeader().getHeight()) {
+                    chain.setStartBlockHeader(startBlock.getHeader());
+                }
+            }
         }
 
         blockList.remove(blockList.size() - 1);

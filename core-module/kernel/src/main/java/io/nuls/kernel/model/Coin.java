@@ -37,7 +37,9 @@ import io.nuls.kernel.utils.SerializeUtils;
 import java.io.IOException;
 
 /**
- * Created by ln on 2018/5/5.
+ *
+ * @author ln
+ * @date 2018/5/5
  */
 public class Coin extends BaseNulsData {
 
@@ -127,6 +129,11 @@ public class Coin extends BaseNulsData {
      * @return
      */
     public boolean usable() {
+        long bestHeight = NulsContext.getInstance().getBestHeight();
+        return usable(bestHeight);
+    }
+
+    public boolean usable(Long bestHeight) {
         if (lockTime < 0) {
             return false;
         }
@@ -135,7 +142,7 @@ public class Coin extends BaseNulsData {
         }
 
         long currentTime = TimeService.currentTimeMillis();
-        long bestHeight = NulsContext.getInstance().getBestHeight();
+        //long bestHeight = NulsContext.getInstance().getBestHeight();
 
         if (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE) {
             if (lockTime <= currentTime) {

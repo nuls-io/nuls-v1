@@ -26,9 +26,9 @@
 package io.nuls.account.ledger.service;
 
 import io.nuls.account.ledger.model.TransactionInfo;
-import io.nuls.account.model.Account;
 import io.nuls.account.model.Balance;
 import io.nuls.account.ledger.model.CoinDataResult;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
@@ -36,7 +36,9 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Facjas
@@ -131,16 +133,42 @@ public interface AccountLedgerService {
      * @param size    size of transaction ,to calc the fee
      * @return return balance of account, return 0 if  account is not a local account
      */
-    CoinDataResult getCoinData(byte[] address, Na amount, int size) throws NulsException;
+    CoinDataResult getCoinData(byte[] address, Na amount, int size, Na price) throws NulsException;
 
     /**
      * @param from
      * @param to
      * @param values
      */
-    Result transfer(byte[] from, byte[] to, Na values, String password, String remark);
+    Result transfer(byte[] from, byte[] to, Na values, String password, String remark, Na price);
 
-    Result transferFee(byte[] from, byte[] to, Na values, String remark);
+    Result transferFee(byte[] from, byte[] to, Na values, String remark, Na price);
+
+    /**
+     * 创建交易
+     *
+     * @param inputsKey
+     * @param outputs
+     * @param remark
+     * @return
+     */
+    Result createTransaction(List<byte[]> inputsKey, List<Coin> outputs, byte[] remark);
+
+    /**
+     * 签名交易
+     * @param tx
+     * @param ecKey
+     * @return
+     */
+    Transaction signTransaction(Transaction tx, ECKey ecKey) throws IOException;
+
+    /**
+     * 广播交易
+     * @param tx
+     * @return
+     */
+    Result broadcast(Transaction tx);
+
     /**
      * <p>
      * get local address list

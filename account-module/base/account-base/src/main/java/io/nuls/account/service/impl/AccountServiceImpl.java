@@ -1,6 +1,34 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package io.nuls.account.service.impl;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.ledger.model.CoinDataResult;
+import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.*;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
@@ -9,20 +37,23 @@ import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.account.storage.service.AliasStorageService;
+import io.nuls.account.tx.AliasTransaction;
 import io.nuls.account.util.AccountTool;
-import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.core.tools.crypto.*;
+import io.nuls.core.tools.crypto.Exception.CryptoException;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.NulsSignData;
-import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.*;
+import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.utils.TransactionFeeCalculator;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -53,16 +84,10 @@ public class AccountServiceImpl implements AccountService {
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
-    /**
-     * 本地账户集合
-     * Collection of local accounts
-     */
-    public static Set<String> LOCAL_ADDRESS_LIST = ConcurrentHashMap.newKeySet();
-
     @Override
     public Result<List<Account>> createAccount(int count, String password) {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "between 0 and 100 can be created at once");
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "between 0 and 100 can be created at once");
         }
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "Length between 8 and 20, the combination of characters and numbers");
@@ -71,7 +96,6 @@ public class AccountServiceImpl implements AccountService {
         try {
             List<Account> accounts = new ArrayList<>();
             List<AccountPo> accountPos = new ArrayList<>();
-            List<String> resultList = new ArrayList<>();
             for (int i = 0; i < count; i++) {
                 Account account = AccountTool.createAccount();
                 if (StringUtils.isNotBlank(password)) {
@@ -80,7 +104,6 @@ public class AccountServiceImpl implements AccountService {
                 accounts.add(account);
                 AccountPo po = new AccountPo(account);
                 accountPos.add(po);
-                resultList.add(account.getAddress().toString());
             }
             if (accountStorageService == null) {
                 Log.info("accountStorageService is null");
@@ -89,7 +112,9 @@ public class AccountServiceImpl implements AccountService {
             if (result.isFailed()) {
                 return result;
             }
-            LOCAL_ADDRESS_LIST.addAll(resultList);
+            for (Account account : accounts) {
+                accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+            }
             return Result.getSuccess().setData(accounts);
         } catch (Exception e) {
             Log.error(e);
@@ -126,11 +151,7 @@ public class AccountServiceImpl implements AccountService {
         }
         //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
         if (account.isEncrypted() && account.isLocked()) {
-            try {
-                if (StringUtils.isBlank(password) || !StringUtils.validPassword(password) || !account.unlock(password)) {
-                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-                }
-            } catch (NulsException e) {
+            if (!account.validatePassword(password)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         }
@@ -138,7 +159,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        LOCAL_ADDRESS_LIST.remove(address);
+        accountCacheService.localAccountMaps.remove(account.getAddress().getBase58());
         return Result.getSuccess();
     }
 
@@ -193,7 +214,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        LOCAL_ADDRESS_LIST.add(keyStore.getAddress());
+        accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
         accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
         return Result.getSuccess().setData(account);
     }
@@ -257,7 +278,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        LOCAL_ADDRESS_LIST.add(keyStore.getAddress());
+        accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
         accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
         return Result.getSuccess().setData(account);
     }
@@ -305,7 +326,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        LOCAL_ADDRESS_LIST.add(account.getAddress().toString());
+        accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
         accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
         return Result.getSuccess().setData(account);
     }
@@ -328,11 +349,7 @@ public class AccountServiceImpl implements AccountService {
         AccountKeyStore accountKeyStore = new AccountKeyStore();
         //只要加过密(且没解锁),就验证密码
         if (account.isEncrypted() && account.isLocked()) {
-            try {
-                if (StringUtils.isBlank(password) || !StringUtils.validPassword(password) || !account.decrypt(password)) {
-                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-                }
-            } catch (NulsException e) {
+            if (!account.validatePassword(password)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         }
@@ -366,25 +383,10 @@ public class AccountServiceImpl implements AccountService {
         if (null != accountCache) {
             return accountCache;
         }
-        AccountPo accountPo = null;
-        try {
-            Result<AccountPo> result = accountStorageService.getAccount(Base58.decode(address));
-            if (result.isFailed()) {
-                return null;
-            }
-            accountPo = result.getData();
-        } catch (Exception e) {
-            Log.error(e);
-            return null;
+        if (accountCacheService.localAccountMaps == null) {
+            getAccountList();
         }
-        if (accountPo == null) {
-            return null;
-        }
-        Account account = accountPo.toAccount();
-        if (!LOCAL_ADDRESS_LIST.contains(account.getAddress().toString())) {
-            LOCAL_ADDRESS_LIST.add(account.getAddress().toString());
-        }
-        return account;
+        return accountCacheService.localAccountMaps.get(address);
     }
 
     @Override
@@ -415,7 +417,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<List<Account>> getAccountList() {
+    public Result<Collection<Account>> getAccountList() {
+
+        if (accountCacheService.localAccountMaps != null) {
+            return Result.getSuccess().setData(accountCacheService.localAccountMaps.values());
+        }
+        accountCacheService.localAccountMaps = new ConcurrentHashMap<>();
+
         List<Account> list = new ArrayList<>();
         Result<List<AccountPo>> result = accountStorageService.getAccountList();
         if (result.isFailed()) {
@@ -431,7 +439,9 @@ public class AccountServiceImpl implements AccountService {
             list.add(account);
             addressList.add(account.getAddress().getBase58());
         }
-        LOCAL_ADDRESS_LIST = addressList;
+        for (Account account : list) {
+            accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+        }
         return Result.getSuccess().setData(list);
     }
 
@@ -485,29 +495,21 @@ public class AccountServiceImpl implements AccountService {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        return new Result(account.isEncrypted(), null);
+        Result result = new Result();
+        boolean rs = account.isEncrypted();
+        return result.setSuccess(rs);
     }
 
     @Override
     public Result validPassword(Account account, String password) {
         if (null == account) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
-        }
-        if (!StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        if (!account.isEncrypted()) {
-            return Result.getFailed(AccountErrorCode.FAILED, "No password has been set for this account");
-        }
-        try {
-            if (!account.unlock(password)) {
-                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-            } else {
-                return Result.getSuccess();
-            }
-        } catch (NulsException e) {
+        boolean rs = account.validatePassword(password);
+        if (!rs) {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
+        return Result.getSuccess();
     }
 
     @Override
@@ -562,7 +564,11 @@ public class AccountServiceImpl implements AccountService {
         //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
         if (account.isEncrypted() && account.isLocked()) {
             AssertUtil.canNotEmpty(password, "password can not be empty");
-            return this.signDigest(digest, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
+            try {
+                return this.signDigest(digest, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
+            } catch (CryptoException e) {
+                throw new NulsException(AccountErrorCode.DECRYPT_ACCOUNT_ERROR);
+            }
         } else {
             return this.signDigest(digest, account.getPriKey());
         }
@@ -647,5 +653,71 @@ public class AccountServiceImpl implements AccountService {
             }
         }
         return Result.getSuccess().setData(balance);
+    }
+
+    @Override
+    public Result<String> getAlias(byte[] address) {
+        if (!Address.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        return getAlias(Base58.encode(address));
+    }
+
+    @Override
+    public Result<String> getAlias(String address) {
+        Account account = getAccountByAddress(address);
+        if (null != account) {
+            return Result.getSuccess().setData(account.getAlias());
+        }
+        String alias = null;
+        List<AliasPo> list = aliasStorageService.getAliasList().getData();
+        for (AliasPo aliasPo : list) {
+            if (Base58.encode(aliasPo.getAddress()).equals(address)) {
+                alias = aliasPo.getAlias();
+                break;
+            }
+        }
+        return Result.getSuccess().setData(alias);
+
+    }
+
+    @Override
+    public Result<Na> getAliasFee(String addr, String aliasName) {
+        if (!Address.validAddress(addr)) {
+            Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        Account account = this.getAccount(addr).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        byte[] addressBytes = account.getAddress().getBase58Bytes();
+        try {
+            //创建一笔设置别名的交易
+            AliasTransaction tx = new AliasTransaction();
+            tx.setTime(TimeService.currentTimeMillis());
+            Alias alias = new Alias(addressBytes, aliasName);
+            tx.setTxData(alias);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            if (!coinDataResult.isEnough()) {
+                return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
+            }
+            CoinData coinData = new CoinData();
+            coinData.setFrom(coinDataResult.getCoinList());
+            Coin change = coinDataResult.getChange();
+            if (null != change) {
+                //创建toList
+                List<Coin> toList = new ArrayList<>();
+                toList.add(change);
+                coinData.setTo(toList);
+            }
+            Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
+            coinData.addTo(coin);
+            tx.setCoinData(coinData);
+            Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+            return Result.getSuccess().setData(fee);
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
     }
 }

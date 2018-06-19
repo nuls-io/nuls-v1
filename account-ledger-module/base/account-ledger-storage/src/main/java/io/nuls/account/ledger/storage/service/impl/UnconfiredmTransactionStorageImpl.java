@@ -25,9 +25,10 @@
 package io.nuls.account.ledger.storage.service.impl;
 
 import io.nuls.account.ledger.storage.constant.AccountLedgerStorageConstant;
+import io.nuls.account.ledger.storage.po.UnconfirmedTxPo;
 import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
-import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
+import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.exception.NulsException;
@@ -38,11 +39,9 @@ import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.utils.NulsByteBuffer;
-import io.nuls.kernel.utils.TransactionManager;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -50,50 +49,56 @@ import java.util.List;
  * date 2018/5/22.
  */
 @Component
-public class UnconfiredmTransactionStorageImpl implements UnconfirmedTransactionStorageService,InitializingBean {
+public class UnconfiredmTransactionStorageImpl implements UnconfirmedTransactionStorageService, InitializingBean {
 
     @Autowired
     private DBService dbService;
 
+    private long sequence = System.currentTimeMillis();
+
     @Override
     public void afterPropertiesSet() throws NulsException {
         Result result = dbService.createArea(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX);
-        if (result.isFailed()) {
-            //TODO
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+            throw new NulsRuntimeException(result.getErrorCode());
         }
     }
 
     @Override
-    public Result saveUnconfirmedTx(NulsDigestData hash,Transaction tx) {
+    public Result saveUnconfirmedTx(NulsDigestData hash, Transaction tx) {
         Result result;
         try {
-            result = dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, hash.serialize(), tx.serialize());
-        } catch (IOException e) {
+            sequence++;
+            UnconfirmedTxPo po = new UnconfirmedTxPo(tx, sequence);
+            result = dbService.put(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, hash.serialize(), po.serialize());
+        } catch (Exception e) {
+            e.printStackTrace();
             return Result.getFailed();
         }
         return result;
     }
 
     @Override
-    public Result deleteUnconfirmedTx(NulsDigestData hash){
+    public Result deleteUnconfirmedTx(NulsDigestData hash) {
         try {
             return dbService.delete(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, hash.serialize());
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.info("deleteUnconfirmedTx error");
             return Result.getFailed();
         }
     }
 
     @Override
-    public Result<Transaction> getUnconfirmedTx(NulsDigestData hash){
-        try{
+    public Result<Transaction> getUnconfirmedTx(NulsDigestData hash) {
+        try {
             byte[] txBytes = dbService.get(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX, hash.serialize());
-            if(txBytes == null) {
+            if (txBytes == null) {
                 return Result.getSuccess();
             }
-            Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(txBytes));
+            UnconfirmedTxPo po = new UnconfirmedTxPo(txBytes);
+            Transaction tx = po.getTx();
             return Result.getSuccess().setData(tx);
-        }catch (Exception e){
+        } catch (Exception e) {
             return Result.getFailed();
         }
     }
@@ -101,20 +106,32 @@ public class UnconfiredmTransactionStorageImpl implements UnconfirmedTransaction
     @Override
     public Result<List<Transaction>> loadAllUnconfirmedList() {
         Result result;
-        List<Transaction> tmpList = new ArrayList<>();
+        List<UnconfirmedTxPo> tmpList = new ArrayList<>();
         List<Entry<byte[], byte[]>> txs = dbService.entryList(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX);
 
-        for (Entry txEntry : txs) {
-            Transaction tmpTx = null;
+        for (Entry<byte[], byte[]> txEntry : txs) {
             try {
-                tmpTx = TransactionManager.getInstance(new NulsByteBuffer((byte[])txEntry.getValue()));
+                UnconfirmedTxPo tmpTx = new UnconfirmedTxPo(txEntry.getValue());
+                if (tmpTx != null) {
+                    tmpList.add(tmpTx);
+                }
             } catch (Exception e) {
-                Log.info("Load local transaction Error,transaction key[" + Hex.encode((byte[])txEntry.getKey()) + "]");
-            }
-            if (tmpTx != null) {
-                tmpList.add(tmpTx);
+                Log.warn("parse local tx error", e);
             }
         }
-        return Result.getSuccess().setData(tmpList);
+
+        tmpList.sort(new Comparator<UnconfirmedTxPo>() {
+            @Override
+            public int compare(UnconfirmedTxPo o1, UnconfirmedTxPo o2) {
+                return (int) (o1.getSequence() - o2.getSequence());
+            }
+        });
+
+        List<Transaction> resultList = new ArrayList<>();
+        for(UnconfirmedTxPo po : tmpList) {
+            resultList.add(po.getTx());
+        }
+
+        return Result.getSuccess().setData(resultList);
     }
 }

@@ -57,14 +57,6 @@ public class GetCreateAgentFeeForm {
     @QueryParam("deposit")
     private long deposit;
 
-    @ApiModelProperty(name = "remark", value = "节点备注", required = true)
-    @QueryParam("remark")
-    private String remark;
-
-    @ApiModelProperty(name = "agentName", value = "节点名称", required = true)
-    @QueryParam("agentName")
-    private String agentName;
-
     public double getCommissionRate() {
         return commissionRate;
     }
@@ -105,19 +97,4 @@ public class GetCreateAgentFeeForm {
         this.deposit = deposit;
     }
 
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = StringUtils.formatStringPara(remark);
-    }
-
-    public String getAgentName() {
-        return agentName;
-    }
-
-    public void setAgentName(String agentName) {
-        this.agentName = StringUtils.formatStringPara(agentName);
-    }
 }

@@ -40,12 +40,14 @@ public class AgentComparator implements Comparator<Agent> {
     public static final int COMMISSION_RATE = 1;
     public static final int CREDIT_VALUE = 2;
     public static final int DEPOSITABLE = 3;
+    public static final int COMPREHENSIVE = 4;
 
     private static final AgentComparator[] INSTANCE_ARRAY = new AgentComparator[]{
             new AgentComparator(DEPOSIT),
             new AgentComparator(COMMISSION_RATE),
             new AgentComparator(CREDIT_VALUE),
-            new AgentComparator(DEPOSITABLE)
+            new AgentComparator(DEPOSITABLE),
+            new AgentComparator(COMPREHENSIVE)
     };
     private final int sortType;
 
@@ -59,6 +61,8 @@ public class AgentComparator implements Comparator<Agent> {
                 return INSTANCE_ARRAY[CREDIT_VALUE];
             case DEPOSITABLE:
                 return INSTANCE_ARRAY[DEPOSITABLE];
+            case COMPREHENSIVE:
+                return INSTANCE_ARRAY[COMPREHENSIVE];
         }
         return null;
     }
@@ -99,6 +103,26 @@ public class AgentComparator implements Comparator<Agent> {
                     return -1;
                 } else if (o2.getTotalDeposit() == o1.getTotalDeposit()) {
                     return 0;
+                }
+                return 1;
+            }
+            case COMPREHENSIVE:{
+                //先判断是否可委托，再判断信用值，再判断可委托金额
+                //First judge whether the trust can be entrusted, then judge the credit value, then judge the amount of trust
+                if (o1.canDeposit()&&!o2.canDeposit()) {
+                    return -1;
+                } else if (o2.canDeposit() == o1.canDeposit()) {
+                    if (o2.getCreditVal() < o1.getCreditVal()) {
+                        return -1;
+                    } else if (o2.getCreditVal() == o1.getCreditVal()) {
+                        if (o2.getAvailableDepositAmount() < o1.getAvailableDepositAmount()) {
+                            return -1;
+                        } else if (o2.getAvailableDepositAmount() == o1.getAvailableDepositAmount()) {
+                            return 0;
+                        }
+                        return 1;
+                    }
+                    return 1;
                 }
                 return 1;
             }

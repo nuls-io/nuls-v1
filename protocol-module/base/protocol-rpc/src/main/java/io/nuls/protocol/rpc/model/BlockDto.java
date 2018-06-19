@@ -106,7 +106,7 @@ public class BlockDto {
         Na fee = Na.ZERO;
         for (Transaction tx : block.getTxs()) {
             this.txList.add(new TransactionDto(tx));
-            fee.add(tx.getFee());
+            fee = fee.add(tx.getFee());
             if (tx.getType() == ProtocolConstant.TX_TYPE_COINBASE) {
                 setBlockReward(tx);
             }

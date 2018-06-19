@@ -23,9 +23,12 @@
  */
 package io.nuls.db.manager;
 
+import io.nuls.core.tools.crypto.Base58;
 import io.nuls.db.entity.DBTestEntity;
 import io.nuls.db.model.Entry;
 import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.model.Na;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.junit.After;
 import org.junit.Assert;
@@ -33,10 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static io.nuls.db.manager.LevelDBManager.*;
 import static org.iq80.leveldb.impl.Iq80DBFactory.asString;
@@ -58,6 +58,41 @@ public class LevelDBManagerTest {
         area = "pierre-test";
         key = "testkey";
         createArea(area);
+    }
+
+    public void snapshotOfAddress() throws Exception{
+        Map<String, Na> balanceMap = new HashMap<>();
+        List<byte[]> valueList = valueList("ledger_utxo");
+        Coin coin;
+        String strAddress;
+        Na balance;
+        for (byte[] bytes : valueList) {
+            coin = new Coin();
+            coin.parse(bytes);
+            strAddress = Base58.encode(coin.getOwner());
+            balance = balanceMap.get(strAddress);
+            if(balance == null) {
+                balance = Na.ZERO;
+            }
+            balance = balance.add(coin.getNa());
+            balanceMap.put(strAddress, balance);
+        }
+        Set<Map.Entry<String, Na>> entries = balanceMap.entrySet();
+        //for (Map.Entry<String, Na> entry : entries) {
+        //    System.out.println(entry.getKey() + "," + entry.getValue().toText());
+        //}
+
+        List<Map.Entry<String, Na>> list = new ArrayList<>();
+        list.addAll(entries);
+        list.sort(new Comparator<Map.Entry<String, Na>>() {
+            @Override
+            public int compare(Map.Entry<String, Na> o1, Map.Entry<String, Na> o2) {
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+        for (Map.Entry<String, Na> entry : list) {
+            System.out.println(entry.getKey() + " " + entry.getValue().toString());
+        }
     }
 
     @Test

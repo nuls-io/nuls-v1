@@ -1,3 +1,28 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package io.nuls.consensus.poc.tx.validator;
 
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
@@ -80,7 +105,10 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
         Na fromTotal = Na.ZERO;
         Map<String, Na> verifyToMap = new HashMap<>();
         for (Coin coin : data.getCoinData().getFrom()) {
-            NulsDigestData txHash = new NulsDigestData();
+            if (coin.getLockTime() != -1L){
+                return ValidateResult.getFailedResult(this.getClass().getName(),"The from coin is wrong");
+            }
+                NulsDigestData txHash = new NulsDigestData();
             txHash.parse(coin.getOwner());
             DepositPo deposit = depositMap.remove(txHash);
             if (deposit == null) {
@@ -115,10 +143,7 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
         for (Coin coin : data.getCoinData().getTo()) {
             String address = Base58.encode(coin.getOwner());
             Na na = verifyToMap.get(address);
-            if (null == na) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), "The stop agent tx produced wrong coin!");
-            }
-            if (na.equals(coin.getNa())) {
+            if (null != na && na.equals(coin.getNa())) {
                 verifyToMap.remove(address);
                 continue;
             }

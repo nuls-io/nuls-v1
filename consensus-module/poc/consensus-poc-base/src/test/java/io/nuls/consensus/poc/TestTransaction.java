@@ -43,13 +43,11 @@ public class TestTransaction extends Transaction {
 
     @Override
     protected TransactionLogicData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        // todo auto-generated method stub
         return null;
     }
 
     @Override
     public String getInfo(byte[] address) {
-        // todo auto-generated method stub
         return null;
     }
 }

@@ -42,7 +42,7 @@ public class NulsConfig {
      * nuls底层代码的版本号
      * The version number of the underlying code for nuls.
      */
-    public static String VERSION = "1.0.0";
+    public static String VERSION = "0.0.1";
 
     /**
      * 系统使用的编码方式
@@ -61,10 +61,4 @@ public class NulsConfig {
      * All the configuration items that are loaded in the module configuration file.
      */
     public static IniEntity MODULES_CONFIG;
-
-    /**
-     * 从网络中获取的当前软件的最新版本号
-     * The latest version of the current software obtained from the network.
-     */
-    public static String NEWEST_VERSION;
 }

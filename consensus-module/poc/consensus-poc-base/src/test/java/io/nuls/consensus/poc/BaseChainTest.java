@@ -44,6 +44,7 @@ import io.nuls.kernel.utils.AddressTool;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
@@ -99,8 +100,6 @@ public class BaseChainTest extends BaseTest {
         agent.setRewardAddress(AddressTool.getAddress(ecKey.getPubKey()));
         agent.setTime(System.currentTimeMillis());
         agent.setDeposit(Na.NA.multiply(20000));
-        agent.setAgentName("test".getBytes());
-        agent.setIntroduction("test agent".getBytes());
         agent.setCommissionRate(0.3d);
         agent.setBlockHeight(blockHeader.getHeight());
 

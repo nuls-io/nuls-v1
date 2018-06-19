@@ -1,5 +1,31 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package io.nuls.consensus.poc.rpc.cmd;
 
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
@@ -28,20 +54,19 @@ public class StopAgentProcessor implements CommandProcessor {
     public String getHelp() {
         CommandBuilder bulider = new CommandBuilder();
         bulider.newLine(getCommandDescription())
-                .newLine("\t<address>  account address of the agent -required")
-                .newLine("\t[password]  The password of the account, if the account does not have a password, this entry is not required");
+                .newLine("\t<address> account address of the agent -required");
         return bulider.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "stopagent <address> [password] -- stop the agent";
+        return "stopagent <address> -- stop the agent";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if(length < 2 || length > 3){
+        if(length != 2){
             return false;
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
@@ -50,17 +75,19 @@ public class StopAgentProcessor implements CommandProcessor {
         if(!StringUtils.validAddressSimple(args[1])){
             return false;
         }
-        if(length == 3 && !StringUtils.validPassword(args[2])){
-            return false;
-        }
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        String password = args.length == 3 ? args[2] : null;
+        String address = args[1];
+        RpcClientResult res = CommandHelper.getPassword(address, restFul);
+        if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
+            return CommandResult.getFailed(res.getMsg());
+        }
+        String password = res.isSuccess() ? (String)res.getData() : null;
         Map<String, Object> parameters = new HashMap<>(2);
-        parameters.put("address", args[1]);
+        parameters.put("address", address);
         parameters.put("password", password);
         RpcClientResult result = restFul.post("/consensus/agent/stop", parameters);
         if (result.isFailed()) {

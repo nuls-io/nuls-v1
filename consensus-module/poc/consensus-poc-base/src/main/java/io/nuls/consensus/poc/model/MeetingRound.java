@@ -119,6 +119,14 @@ public class MeetingRound {
         }
         return null;
     }
+    public MeetingMember getMemberByAgentAddress(byte[] address) {
+        for (MeetingMember member : memberList) {
+            if (Arrays.equals(address, member.getAgentAddress())) {
+                return member;
+            }
+        }
+        return null;
+    }
 
     public Account getLocalPacker() {
         return localPacker;
@@ -145,7 +153,7 @@ public class MeetingRound {
         return myMember;
     }
 
-    public void calcLocalPacker(List<Account> accountList) {
+    public void calcLocalPacker(Collection<Account> accountList) {
         for (Account account : accountList) {
             if(account.isEncrypted()) {
                 continue;

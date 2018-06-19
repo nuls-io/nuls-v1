@@ -46,12 +46,11 @@ public class YellowPunishTransaction extends Transaction<YellowPunishData> {
 
     @Override
     public String getInfo(byte[] address) {
-        // todo auto-generated method stub
-        return null;
+        return "--";
     }
 
     @Override
-    public boolean isFreeOfFee() {
+    public boolean isSystemTx() {
         return true;
     }
 

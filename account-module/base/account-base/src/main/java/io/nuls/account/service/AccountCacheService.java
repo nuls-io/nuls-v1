@@ -1,3 +1,28 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package io.nuls.account.service;
 
 import io.nuls.account.constant.AccountConstant;
@@ -5,10 +30,9 @@ import io.nuls.account.model.Account;
 import io.nuls.account.model.Address;
 import io.nuls.cache.CacheMap;
 import io.nuls.core.tools.crypto.Base58;
-import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.lite.annotation.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 账户缓存服务类
@@ -22,6 +46,12 @@ public class AccountCacheService {
     private static final AccountCacheService INSTANCE = new AccountCacheService();
 
     private CacheMap<String, Account> cacheMap;
+
+    /**
+     * 本地账户集合
+     * Collection of local accounts
+     */
+    public Map<String, Account> localAccountMaps;
 
     private AccountCacheService() {
         this.cacheMap = new CacheMap<>(AccountConstant.ACCOUNT_LIST_CACHE, 32, String.class, Account.class);

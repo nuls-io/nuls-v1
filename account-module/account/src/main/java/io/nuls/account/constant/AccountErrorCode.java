@@ -39,7 +39,7 @@ public interface AccountErrorCode {
     ErrorCode ACCOUNT_EXIST = ErrorCode.init("ACT003", "50003");
     ErrorCode ADDRESS_ERROR = ErrorCode.init("ACT004", "50004");
     ErrorCode ALIAS_EXIST = ErrorCode.init("ACT005", "50005");
-    ErrorCode ALIAS_ERROR = ErrorCode.init("ACT006", "50006");
+    ErrorCode ALIAS_NOT_EXIST = ErrorCode.init("ACT006", "50006");
     ErrorCode ACCOUNT_ALREADY_SET_ALIAS = ErrorCode.init("ACT007", "50007");
     ErrorCode PARAMETER_ERROR = ErrorCode.init("ACT008", "50008");
     ErrorCode DATA_PARSE_ERROR = ErrorCode.init("ACT009", "50009");
@@ -49,4 +49,8 @@ public interface AccountErrorCode {
     ErrorCode ALIAS_ROLLBACK_ERROR = ErrorCode.init("ACT013", "50013");
     ErrorCode ACCOUNTKEYSTORE_FILE_NOT_EXIST = ErrorCode.init("ACT014", "50014");
     ErrorCode ACCOUNTKEYSTORE_FILE_DAMAGED = ErrorCode.init("ACT015", "50015");
+    ErrorCode ALIAS_FORMAT_WRONG = ErrorCode.init("ACT016", "50016");
+    ErrorCode PASSWORD_FORMAT_WRONG = ErrorCode.init("ACT017", "50017");
+    ErrorCode DECRYPT_ACCOUNT_ERROR = ErrorCode.init("ACT018", "50018");
+    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED_AND_LOCKED = ErrorCode.init("ACT019", "50019");
 }
