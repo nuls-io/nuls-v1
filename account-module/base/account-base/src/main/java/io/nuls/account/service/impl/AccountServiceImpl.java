@@ -503,11 +503,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result validPassword(Account account, String password) {
         if (null == account) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         boolean rs = account.validatePassword(password);
         if (!rs) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         return Result.getSuccess();
     }
