@@ -228,8 +228,12 @@ public class AccountLedgerResource {
             } catch (Exception e) {
                 return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
             }
+            try {
+                to.setNa(Na.valueOf(outputDto.getValue()));
+            } catch (Exception e) {
+                return Result.getFailed(LedgerErrorCode.DATA_PARSE_ERROR).toRpcClientResult();
+            }
 
-            to.setNa(Na.valueOf(outputDto.getValue()));
             if (outputDto.getLockTime() < 0) {
                 return RpcClientResult.getFailed("lockTime error");
             }

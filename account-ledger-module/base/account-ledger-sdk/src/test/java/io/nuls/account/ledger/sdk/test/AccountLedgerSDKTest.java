@@ -39,16 +39,25 @@ public class AccountLedgerSDKTest {
 
             OutputDto output = new OutputDto();
             output.setAddress("2CjPVMKST7h4Q5Dqa8Q9P9CwYSmN7mG");
+            output.setValue(1000000L);
             output.setLockTime(0L);
             outputs.add(output);
 
             output = new OutputDto();
-            output.setAddress("2CXJEuoXZMajeTEgL6TgiSxTRRMwiMM");
+            output.setAddress("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
             output.setValue(1000000000L - 1000000 - fee);
             output.setLockTime(0L);
             outputs.add(output);
 
             Result result = service.createTransaction(inputs, outputs, remark);
+
+            String txHex = (String) result.getData();
+            String prikey = "1f9d3ad044e0e1201e117b041f3d2ceedacb44688e57969620f3ad7a4d6e9d24";
+            String address = "2ChDcC1nvki521xXhYAUzYXt4RLNuLs";
+            result = service.signTransaction(txHex, prikey, address, null);
+            txHex = (String) result.getData();
+            result = service.broadcastTransaction(txHex);
+
             System.out.println(result.getData());
         } catch (Exception e) {
             e.printStackTrace();
