@@ -169,6 +169,10 @@ public final class FileUtil {
     public static void copyFolder(File source, File target) {
         String[] filePath = source.list();
 
+        if (null == filePath || filePath.length == 0) {
+            return;
+        }
+
         if (!target.exists()) {
             target.mkdirs();
         }
