@@ -25,14 +25,13 @@
 
 package io.nuls.client.rpc.resources.thread;
 
-import io.nuls.client.rpc.RpcServerManager;
 import io.nuls.client.rpc.resources.util.FileUtil;
 import io.nuls.client.version.SyncVersionRunner;
-import io.nuls.client.web.view.WebViewBootstrap;
 import io.nuls.core.tools.log.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author: Niels Wang
@@ -58,23 +57,26 @@ public class ShutdownHook extends Thread {
             FileUtil.copyFolder(new File(newDirPath + "/bin"), new File(root + "/bin"));
             Log.error(5 + "");
             FileUtil.decompress(newDirPath + "/conf.zip", newDirPath);
+            String os = System.getProperty("os.name").toUpperCase();
+            FileUtil.copyFolder(new File(newDirPath + "/conf"), new File(root + "/conf"));
+            Log.error(6 + "");
+            FileUtil.copyFolder(new File(newDirPath + "/libs"), new File(root + "/libs"));
+
         }
         String os = System.getProperty("os.name").toUpperCase();
         if (os.startsWith("WINDOWS")) {
             try {
-                Runtime.getRuntime().exec("upgrade.bat " + version, null, new File(root + "/bin"));
+                Runtime.getRuntime().exec("NULS-Wallet.exe");
             } catch (IOException e) {
                 Log.error(e);
             }
         } else {
             try {
-                FileUtil.copyFolder(new File(newDirPath + "/conf"), new File(root + "/conf"));
-                Log.error(6 + "");
-                FileUtil.copyFolder(new File(newDirPath + "/libs"), new File(root + "/libs"));
                 Runtime.getRuntime().exec("sh start.sh", null, new File(root + "/bin"));
             } catch (IOException e) {
                 Log.error(e);
             }
         }
+
     }
 }

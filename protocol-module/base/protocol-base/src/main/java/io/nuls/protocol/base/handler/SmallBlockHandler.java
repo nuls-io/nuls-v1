@@ -80,11 +80,11 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
             return;
         }
 
-        //checkIt
-        if ((TimeService.currentTimeMillis() - header.getTime()) > ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS) {
-            Log.info("It's too late:hash:" + header.getHash() + ", height:" + header.getHeight() + ", packerHex:" + Hex.encode(header.getPackingAddress()));
-            return;
-        }
+//        //checkIt
+//        if ((TimeService.currentTimeMillis() - header.getTime()) > ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS) {
+//            Log.info("It's too late:hash:" + header.getHash() + ", height:" + header.getHeight() + ", packerHex:" + Hex.encode(header.getPackingAddress()));
+//            return;
+//        }
 
         ValidateResult result = header.verify();
         boolean isOrphan = result.getErrorCode() == TransactionErrorCode.ORPHAN_TX || result.getErrorCode() == TransactionErrorCode.ORPHAN_BLOCK;

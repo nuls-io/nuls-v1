@@ -393,7 +393,7 @@ public class ChainContainer implements Cloneable {
             return false;
         } else {
             List<byte[]> addressList = yellowPunishTransaction.getTxData().getAddressList();
-            List<String> punishAddress = new ArrayList<>();
+            Set<String> punishAddress = new HashSet<>();
             for (byte[] address : addressList) {
                 MeetingMember item = currentRound.getMemberByAgentAddress(address);
                 if (null == item) {
@@ -404,12 +404,12 @@ public class ChainContainer implements Cloneable {
                 }
             }
             if (punishAddress.size() != redPunishTxList.size()) {
-                BlockLog.debug("the count of red punishs is wrong!");
+                BlockLog.debug("the count of red punishs is wrong!" + block.getHeader().getHash());
                 return false;
             }
             for (RedPunishTransaction redTx : redPunishTxList) {
                 if (!punishAddress.contains(Base58.encode(redTx.getTxData().getAddress()))) {
-                    BlockLog.debug("There is a wrong red punish tx!");
+                    BlockLog.debug("There is a wrong red punish tx!"+ block.getHeader().getHash());
                     return false;
                 }
             }

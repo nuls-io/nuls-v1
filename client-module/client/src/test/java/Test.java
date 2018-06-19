@@ -23,50 +23,33 @@
  *
  */
 
-package io.nuls.account.constant;
-
-import io.nuls.kernel.constant.NulsConstant;
-import io.nuls.kernel.model.Na;
-
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * @author: Charlie
- * @date: 2018/5/9
+ * @author: Niels Wang
+ * @date: 2018/6/15
  */
-public interface AccountConstant extends NulsConstant {
+public class Test {
 
-    /**
-     * The module id of the message-bus module
-     */
-   short MODULE_ID_ACCOUNT = 5;
+    public static void main(String[] args) throws IOException {
+        String path = Test.class.getClassLoader().getResource("").getPath();
+        callCmd(path + "\\bin\\upgrade.bat 0.9.11");
+    }
 
-    /**
-     * The name of accouts cache
-     */
-    String ACCOUNT_LIST_CACHE = "ACCOUNT_LIST";
-
-
-    Na ALIAS_NA = Na.parseNuls(1);
-
-
-
-    /**
-     * 设置账户别名的交易类型
-     * Set the transaction type of account alias.
-     */
-    int TX_TYPE_ACCOUNT_ALIAS = 3;
-
-    /**
-     * 账户解锁时间最大值(单位:秒)
-     * Account unlock time maximum (unit: second)
-     */
-    int ACCOUNT_MAX_UNLOCK_TIME = 120;
-
-    /**
-     * 导出accountkeystore文件的后缀名
-     * The suffix of the accountkeystore file
-     */
-    String ACCOUNTKEYSTORE_FILE_SUFFIX=".keystore";
+    public static void callCmd(String locationCmd) {
+        try {
+            Process child = Runtime.getRuntime().exec(locationCmd);
+            InputStream in = child.getInputStream();
+            int c;
+            while ((c = in.read()) != -1) {
+                System.out.print(c);
+            }
+            in.close();
+            System.out.println("done");
+            System.exit(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

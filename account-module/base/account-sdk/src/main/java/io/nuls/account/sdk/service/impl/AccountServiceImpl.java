@@ -239,9 +239,9 @@ public class AccountServiceImpl implements AccountService {
         List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
         List<AssetDto> assetDtoList = new ArrayList<>();
         for (Map<String, Object> map : list) {
-            map.put("balance", Na.naToNuls(map.get("balance")));
-            map.put("usable", Na.naToNuls(map.get("usable")));
-            map.put("locked", Na.naToNuls(map.get("locked")));
+            map.put("balance", map.get("balance"));
+            map.put("usable", map.get("usable"));
+            map.put("locked", map.get("locked"));
             AssetDto assetDto = new AssetDto("NULS", map);
             assetDtoList.add(assetDto);
         }
@@ -562,20 +562,36 @@ public class AccountServiceImpl implements AccountService {
 //        as.getAddressByAlias("charlie");
 //        as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456");
         try {
-            //System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
-            //System.out.println(JSONUtils.obj2json(as.createOffLineAccount(2, "nuls123456")));
-            //System.out.println(JSONUtils.obj2json(as.createOffLineAccount(10)));
-            //System.out.println(JSONUtils.obj2json(as.createOffLineAccount("nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
+//            System.out.println(JSONUtils.obj2json(as.createOffLineAccount(2, "nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.createOffLineAccount(1)));
+//            System.out.println(JSONUtils.obj2json(as.createOffLineAccount("nuls123456")));
 //            System.out.println(JSONUtils.obj2json(as.createAccount("nuls123456")));
-//            System.out.println(JSONUtils.obj2json(as.getAccount("2CVGMStk6LHB6P6eT2fCxoTkUXX2rTX")));
-            System.out.println(JSONUtils.obj2json(as.setPasswordOffLine(
-                    "2CacFwqMwcJiGNNBwiwV7bCL7bjwNBr",
-                    "00e4bfd347351ea899b5f0ae2c0a3e7a6951b202eaf72432d1a63a2dc85c59c82a",
-                    "nuls123456")));
-          /*  System.out.println(JSONUtils.obj2json(as.resetPasswordOffLine(
-                    "2CacFwqMwcJiGNNBwiwV7bCL7bjwNBr",
-                    "25368dbc0ff7eea4fc6da22bc37e85d7976a3846f8b58d4dc0cf484e740ba1b61f96395fbe1ddf70ece9fd21fcd95e7a",
-                    "nuls111111", "nuls123456")));*/
+//            System.out.println(JSONUtils.obj2json(as.getAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
+//            System.out.println(JSONUtils.obj2json(as.getAliasFee("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie")));
+//            System.out.println(JSONUtils.obj2json(as.getAssets("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
+//            System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
+//            System.out.println(JSONUtils.obj2json(as.setAlias("2CiU1CmB6c9jmSLDNBe6PouA7NgNULS","firstblood", "nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.getAddressByAlias("charlie")));
+//            System.out.println(JSONUtils.obj2json(as.getAccountList(1,10)));
+//            System.out.println(JSONUtils.obj2json(as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs","nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.isAliasExist("charlie")));
+//            System.out.println(JSONUtils.obj2json(as.backupAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "/Users/lichao/Downloads", "nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.importAccountByKeystore("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore","nuls123456",true)));
+//            System.out.println(JSONUtils.obj2json(as.importAccountByPriKey("74ffeeec0b2d6552a07eb7f5691a6da13278f87025283ca474741f35b247f55d",
+//                    "nuls123456",true)));
+//            System.out.println(JSONUtils.obj2json(as.isEncrypted("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
+//            System.out.println(JSONUtils.obj2json(as.removeAccount("2Ccv2oMPZ8X7r2pHA4SoFPwpUNiJ11J")));
+//            System.out.println(JSONUtils.obj2json(as.setPassword("2CYJcEQvYW7UuX3GMeFxm2Mzn6pQ6jJ","nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.resetPassword("2CWZUrEkkFebiz3T8cx6bDTLSVX43mv","nuls123456", "nuls111111")));
+            /*System.out.println(JSONUtils.obj2json(as.setPasswordOffLine(
+                    "2Cby7jxykhikf1UyKuWVdpVy6eAiLBm",
+                    "00e3bd8fc2cabaefae82c26f97355a4fdfdb38582d99af2f7438b827153e8f1b22",
+                    "nuls123456")));*/
+            System.out.println(JSONUtils.obj2json(as.resetPasswordOffLine(
+                    "2Cby7jxykhikf1UyKuWVdpVy6eAiLBm",
+                    "a770c1886f566c973b6eb99543ef03825a89ed16e20d8dbe320aed64a85d5863ca23df43ef16ce0475424a49e192b6f9",
+                    "nuls123456", "nuls111111")));
         } catch (Exception e) {
             e.printStackTrace();
         }

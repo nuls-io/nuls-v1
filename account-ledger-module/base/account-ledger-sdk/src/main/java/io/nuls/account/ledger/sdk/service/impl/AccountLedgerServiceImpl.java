@@ -246,5 +246,25 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
     }
+    /**
+     * -----------------------------------Test------------------------------
+     */
+    public static void main(String[] args) {
+        SDKBootstrap.sdkStart();
+        AccountLedgerServiceImpl as = new AccountLedgerServiceImpl();
+        try {
+
+            System.out.println(JSONUtils.obj2json(as.getBalance("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
+            System.out.println(JSONUtils.obj2json(as.getTxByHash("00203a169b42e5e142e20b273ac925e55f773b5a38c5f5c907efdbc43abb7d7a67b2")));
+//            System.out.println(JSONUtils.obj2json(as.transfer("2ChDcC1nvki521xXhYAUzYXt4RLNuLs",
+//                    "2CiVA3n1VoNQobAax4d7qNEBZAfehLN", "nuls123456",99900000000L,"转账")));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * ---------------------------------------------------------------------
+     */
 
 }

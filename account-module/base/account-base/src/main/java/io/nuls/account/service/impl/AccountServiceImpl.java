@@ -151,11 +151,7 @@ public class AccountServiceImpl implements AccountService {
         }
         //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
         if (account.isEncrypted() && account.isLocked()) {
-            try {
-                if (StringUtils.isBlank(password) || !StringUtils.validPassword(password) || !account.unlock(password)) {
-                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-                }
-            } catch (NulsException e) {
+            if (!account.validatePassword(password)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         }
@@ -353,11 +349,7 @@ public class AccountServiceImpl implements AccountService {
         AccountKeyStore accountKeyStore = new AccountKeyStore();
         //只要加过密(且没解锁),就验证密码
         if (account.isEncrypted() && account.isLocked()) {
-            try {
-                if (StringUtils.isBlank(password) || !StringUtils.validPassword(password) || !account.decrypt(password)) {
-                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-                }
-            } catch (NulsException e) {
+            if (!account.validatePassword(password)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         }
@@ -513,21 +505,9 @@ public class AccountServiceImpl implements AccountService {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        if (!StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-        }
-        if (!account.isEncrypted()) {
-            return Result.getFailed(AccountErrorCode.FAILED, "No password has been set for this account");
-        }
-        try {
-            if (!account.unlock(password)) {
-                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-            } else {
-                return Result.getSuccess();
-            }
-        } catch (NulsException e) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-        }
+        Result result = new Result();
+        result.setSuccess(account.validatePassword(password));
+        return result;
     }
 
     @Override

@@ -105,14 +105,10 @@ public class AliasService {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        try {
-            if (account.isEncrypted() && account.isLocked()) {
-                if (StringUtils.isBlank(password) || !StringUtils.validPassword(password) || !account.unlock(password)) {
-                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-                }
+        if (account.isEncrypted() && account.isLocked()) {
+            if (!account.validatePassword(password)) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
-        } catch (NulsException e) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         if (StringUtils.isNotBlank(account.getAlias())) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);

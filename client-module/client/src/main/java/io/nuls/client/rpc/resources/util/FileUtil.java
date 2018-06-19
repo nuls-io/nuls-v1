@@ -28,6 +28,7 @@ package io.nuls.client.rpc.resources.util;
 import io.nuls.core.tools.log.Log;
 
 import java.io.*;
+import java.nio.channels.FileChannel;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -117,21 +118,36 @@ public final class FileUtil {
         }
     }
 
-    public static void copyFile(File fromFile, File toFile) {
-        FileInputStream ins = null;
-        FileOutputStream out = null;
+    public static void copyFile(File source, File target) {
+        FileChannel in = null;
+        FileChannel out = null;
+        FileInputStream inStream = null;
+        FileOutputStream outStream = null;
         try {
-            ins = new FileInputStream(fromFile);
-            out = new FileOutputStream(toFile);
-            byte[] b = new byte[ins.available()];
-            int size;
-            while ((size = ins.read(b)) != -1) {
-                out.write(b, 0, size);
-            }
-        } catch (Exception e) {
-            Log.error(e);
+            inStream = new FileInputStream(source);
+            outStream = new FileOutputStream(target);
+            in = inStream.getChannel();
+            out = outStream.getChannel();
+            in.transferTo(0, in.size(), out);
+        } catch (IOException e) {
+            e.printStackTrace();
         } finally {
-            close(ins, out);
+            try {
+                if (inStream != null) {
+                    inStream.close();
+                }
+                if (in != null) {
+                    in.close();
+                }
+                if (outStream != null) {
+                    outStream.close();
+                }
+                if (out != null) {
+                    out.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -217,9 +233,9 @@ public final class FileUtil {
             if (file.isFile()) {
                 try {
                     boolean b = file.delete();
-                    if(!b){
-                        System.gc();
-                        file.delete();
+                    if (!b) {
+                        Log.info("delete " + file.getName() + " result:" + b);
+                        mkNullToFile(file);
                     }
                 } catch (Exception e) {
                     Log.error(e);
@@ -230,14 +246,33 @@ public final class FileUtil {
         }
         try {
             boolean b = folder.delete();
-            if(!b){
-                System.gc();
-                folder.delete();
-            }
         } catch (Exception e) {
             Log.error(e);
         }
         return true;
+    }
+
+    private static void mkNullToFile(File file) {
+        byte[] bytes = new byte[0];
+        OutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(file);
+            outputStream.write(bytes);
+            outputStream.flush();
+        } catch (FileNotFoundException e) {
+            Log.error(e);
+        } catch (IOException e) {
+            Log.error(e);
+        } finally {
+            try {
+                if (null != outputStream) {
+                    outputStream.close();
+                }
+            } catch (Exception e) {
+                Log.error(e);
+            }
+        }
+
     }
 
     public static void deleteFolder(String path) {

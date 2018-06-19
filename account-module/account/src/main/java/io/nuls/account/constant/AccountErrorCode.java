@@ -52,4 +52,5 @@ public interface AccountErrorCode {
     ErrorCode ALIAS_FORMAT_WRONG = ErrorCode.init("ACT016", "50016");
     ErrorCode PASSWORD_FORMAT_WRONG = ErrorCode.init("ACT017", "50017");
     ErrorCode DECRYPT_ACCOUNT_ERROR = ErrorCode.init("ACT018", "50018");
+    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED_AND_LOCKED = ErrorCode.init("ACT019", "50019");
 }
