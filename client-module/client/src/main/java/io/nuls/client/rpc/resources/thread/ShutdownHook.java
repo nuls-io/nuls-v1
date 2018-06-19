@@ -72,7 +72,6 @@ public class ShutdownHook extends Thread {
             }
         } else if (os.startsWith("MAC")) {
             try {
-                System.out.println("mac path::::"+root);
                 Runtime.getRuntime().exec("open -a NULSWallet");
             } catch (IOException e) {
                 Log.error(e);
