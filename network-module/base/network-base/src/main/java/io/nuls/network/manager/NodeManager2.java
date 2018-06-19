@@ -518,10 +518,21 @@ public class NodeManager2 implements Runnable {
 
             if (handShakeNodes.size() > networkParam.getMaxOutCount()) {
                 removeSeedNode();
+            } else if (handShakeNodes.size() <= 2) {
+                //如果已连接成功数太少，立刻尝试连接种子节点
+                for (Node node : getSeedNodes()) {
+                    addNode(node);
+                }
+            } else if (handShakeNodes.size() < networkParam.getMaxOutCount() && connectedNodes.size() == 0) {
+                for (Node node : disConnectNodes.values()) {
+                    if (node.isCanConnect() && node.getStatus() == Node.WAIT) {
+                        connectionManager.connectionNode(node);
+                    }
+                }
             }
-            //尝试重新连接
+
+            //定期尝试重新连接，检测网络节点
             long now = TimeService.currentTimeMillis();
-            List<Node> disNodeList = new ArrayList<>(disConnectNodes.values());
             for (Node node : disConnectNodes.values()) {
                 if (node.getStatus() == Node.WAIT) {
                     if (node.isCanConnect() && now > node.getLastFailTime() + 5 * DateUtil.MINUTE_TIME) {
@@ -533,7 +544,6 @@ public class NodeManager2 implements Runnable {
             }
         }
     }
-
 
     private NetworkStorageService getNetworkStorage() {
         if (networkStorageService == null) {
