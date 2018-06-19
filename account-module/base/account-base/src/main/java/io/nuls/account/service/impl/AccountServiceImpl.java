@@ -112,7 +112,7 @@ public class AccountServiceImpl implements AccountService {
             if (result.isFailed()) {
                 return result;
             }
-            for(Account account : accounts) {
+            for (Account account : accounts) {
                 accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
             }
             return Result.getSuccess().setData(accounts);
@@ -383,7 +383,7 @@ public class AccountServiceImpl implements AccountService {
         if (null != accountCache) {
             return accountCache;
         }
-        if(accountCacheService.localAccountMaps == null) {
+        if (accountCacheService.localAccountMaps == null) {
             getAccountList();
         }
         return accountCacheService.localAccountMaps.get(address);
@@ -419,7 +419,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<Collection<Account>> getAccountList() {
 
-        if(accountCacheService.localAccountMaps != null) {
+        if (accountCacheService.localAccountMaps != null) {
             return Result.getSuccess().setData(accountCacheService.localAccountMaps.values());
         }
         accountCacheService.localAccountMaps = new ConcurrentHashMap<>();
@@ -439,7 +439,7 @@ public class AccountServiceImpl implements AccountService {
             list.add(account);
             addressList.add(account.getAddress().getBase58());
         }
-        for(Account account : list) {
+        for (Account account : list) {
             accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
         }
         return Result.getSuccess().setData(list);
@@ -505,9 +505,11 @@ public class AccountServiceImpl implements AccountService {
         if (null == account) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        Result result = new Result();
-        result.setSuccess(account.validatePassword(password));
-        return result;
+        boolean rs = account.validatePassword(password);
+        if (!rs) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        return Result.getSuccess();
     }
 
     @Override
@@ -655,7 +657,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<String> getAlias(byte[] address) {
-        if(!Address.validAddress(address)){
+        if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         return getAlias(Base58.encode(address));
@@ -664,7 +666,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<String> getAlias(String address) {
         Account account = getAccountByAddress(address);
-        if(null != account){
+        if (null != account) {
             return Result.getSuccess().setData(account.getAlias());
         }
         String alias = null;
