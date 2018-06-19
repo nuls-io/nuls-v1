@@ -203,7 +203,6 @@ public class Account extends BaseNulsData {
         this.setPriKey(new byte[0]);
         this.setEcKey(result);
         this.setEncryptedPriKey(encryptedPrivateKey.getEncryptedBytes());
-
     }
 
     /**
