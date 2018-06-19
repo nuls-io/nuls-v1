@@ -64,22 +64,22 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result createOffLineAccount() {
-        return createOffLineAccount(1, null);
+    public Result createOfflineAccount() {
+        return createOfflineAccount(1, null);
     }
 
     @Override
-    public Result createOffLineAccount(String password) {
-        return createOffLineAccount(1, password);
+    public Result createOfflineAccount(String password) {
+        return createOfflineAccount(1, password);
     }
 
     @Override
-    public Result createOffLineAccount(int count) {
-        return createOffLineAccount(count, null);
+    public Result createOfflineAccount(int count) {
+        return createOfflineAccount(count, null);
     }
 
     @Override
-    public Result createOffLineAccount(int count, String password) {
+    public Result createOfflineAccount(int count, String password) {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "between 0 and 100 can be created at once");
         }
@@ -170,7 +170,7 @@ public class AccountServiceImpl implements AccountService {
                 }
             }
         }
-        return Result.getSuccess().setData("The path to the backup file is " + path + File.separator + fileName);
+        return Result.getSuccess().setData(path + File.separator + fileName);
     }
 
     @Override
@@ -494,7 +494,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result setPasswordOffLine(String address, String priKey, String password) {
+    public Result setPasswordOffline(String address, String priKey, String password) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
@@ -508,7 +508,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result resetPasswordOffLine(String address, String encryptedPriKey, String password, String newPassword) {
+    public Result resetPasswordOffline(String address, String encryptedPriKey, String password, String newPassword) {
         if (!Address.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
@@ -588,7 +588,7 @@ public class AccountServiceImpl implements AccountService {
                     "2Cby7jxykhikf1UyKuWVdpVy6eAiLBm",
                     "00e3bd8fc2cabaefae82c26f97355a4fdfdb38582d99af2f7438b827153e8f1b22",
                     "nuls123456")));*/
-            System.out.println(JSONUtils.obj2json(as.resetPasswordOffLine(
+            System.out.println(JSONUtils.obj2json(as.resetPasswordOffline(
                     "2Cby7jxykhikf1UyKuWVdpVy6eAiLBm",
                     "a770c1886f566c973b6eb99543ef03825a89ed16e20d8dbe320aed64a85d5863ca23df43ef16ce0475424a49e192b6f9",
                     "nuls123456", "nuls111111")));
