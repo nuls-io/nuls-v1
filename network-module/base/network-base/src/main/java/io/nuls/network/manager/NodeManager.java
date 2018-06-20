@@ -530,7 +530,13 @@ public class NodeManager implements Runnable {
                 }
             } else if (handShakeNodes.size() < networkParam.getMaxOutCount() && connectedNodes.size() == 0) {
                 for (Node node : disConnectNodes.values()) {
+                    Map<String, Node> nodeList = getConnectedNodes();
                     if (node.isCanConnect() && node.getStatus() == Node.WAIT) {
+                        for (Node n : nodeList.values()) {
+                            if (n.getIp().equals(node.getIp())) {
+                                break;
+                            }
+                        }
                         connectionManager.connectionNode(node);
                     }
                 }
