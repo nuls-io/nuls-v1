@@ -42,6 +42,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
 
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
@@ -65,11 +66,12 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
         super.channelRegistered(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.info("---------------------- server channelRegistered ------------------------- " + nodeId);
+        System.out.println("---------------------- server channelRegistered ------------------------- " + nodeId);
 
         String remoteIP = channel.remoteAddress().getHostString();
         //查看是否是本机尝试连接本机地址 ，如果是直接关闭连接
         if (networkParam.getLocalIps().contains(remoteIP)) {
+            System.out.println("----------------------本机尝试连接本机地址关闭 ------------------------- " + nodeId);
             ctx.channel().close();
             return;
         }
@@ -80,6 +82,7 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
         for (Node node : nodeMap.values()) {
             if (node.getIp().equals(remoteIP)) {
                 if (node.getType() == Node.OUT) {
+                    System.out.println("--------------- 相同ip外网连接   -----------------" + nodeId);
                     ctx.channel().close();
                     return;
 //
@@ -107,6 +110,7 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
             if (n.getIp().equals(remoteIP)) {
                 count++;
                 if (count >= NetworkConstant.SAME_IP_MAX_COUNT) {
+                    System.out.println("-------------超过10个-----" +  nodeId);
                     ctx.channel().close();
                     return;
                 }
@@ -119,7 +123,7 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
         super.channelActive(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.info("---------------------- server channelActive ------------------------- " + nodeId);
+        System.out.println("---------------------- server channelActive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.add(channelId, channel);
@@ -144,7 +148,7 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
         super.channelInactive(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.info(" ---------------------- server channelInactive ------------------------- " + nodeId);
+        System.out.println(" ---------------------- server channelInactive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
@@ -173,7 +177,7 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.info(" ---------------------- server channelRead------------------------- " + nodeId);
+        System.out.println(" ---------------------- server channelRead------------------------- " + nodeId);
         try {
             Node node = nodeManager.getNode(nodeId);
             if (node != null && node.isAlive()) {
@@ -186,7 +190,7 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
                 connectionManager.receiveMessage(buffer, node);
             }
         } catch (Exception e) {
-            Log.info(" ---------------------- server channelRead exception------------------------- " + nodeId);
+            System.out.println(" ---------------------- server channelRead exception------------------------- " + nodeId);
             e.printStackTrace();
             throw e;
         }

@@ -501,19 +501,19 @@ public class NodeManager2 implements Runnable {
                 e.printStackTrace();
             }
 
-            Log.error("--------disConnectNodes:" + disConnectNodes.size());
+            System.out.println("--------disConnectNodes:" + disConnectNodes.size());
             for (Node node : disConnectNodes.values()) {
                 System.out.println(node.toString());
             }
 
-            Log.error("--------connectedNodes:" + connectedNodes.size());
+            System.out.println("--------connectedNodes:" + connectedNodes.size());
             for (Node node : connectedNodes.values()) {
                 System.out.println(node.toString());
             }
 
-            Log.error("--------handShakeNodes:" + handShakeNodes.size());
+            System.out.println("--------handShakeNodes:" + handShakeNodes.size());
             for (Node node : handShakeNodes.values()) {
-                Log.error(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
+                System.out.println(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
             }
 
             if (handShakeNodes.size() > networkParam.getMaxOutCount()) {
