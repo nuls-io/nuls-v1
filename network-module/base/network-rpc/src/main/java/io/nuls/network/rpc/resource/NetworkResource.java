@@ -36,6 +36,7 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.rpc.model.NetworkInfoDto;
+import io.nuls.network.rpc.model.NodeDto;
 import io.nuls.network.service.NetworkService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -46,6 +47,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Path("/network")
@@ -101,6 +104,27 @@ public class NetworkResource {
         Set<String> ipSet = NetworkParam.getInstance().getIpMap().keySet();
         Result result = Result.getSuccess();
         result.setData(ipSet);
+        return result.toRpcClientResult();
+    }
+
+    @GET
+    @Path("/peers")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("查询节点[3.7.2]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String[].class)
+    })
+    public RpcClientResult getPeers() {
+        List<Node> nodeList = networkService.getCanConnectNodes();
+        Result result = Result.getSuccess();
+        List<NodeDto> dtoList = new ArrayList<>();
+        for(Node node :nodeList) {
+            NodeDto dto = new NodeDto();
+            dto.setIp(node.getIp());
+            dto.setPort(node.getPort());
+            dtoList.add(dto);
+        }
+        result.setData(nodeList);
         return result.toRpcClientResult();
     }
 }

@@ -60,8 +60,6 @@ public class NodeManager implements Runnable {
         return instance;
     }
 
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
     private NetworkParam networkParam = NetworkParam.getInstance();
 
     private Map<String, NodeGroup> nodeGroups = new ConcurrentHashMap<>();
@@ -75,6 +73,8 @@ public class NodeManager implements Runnable {
     private NetworkStorageService networkStorageService;
 
     private BroadcastHandler broadcastHandler;
+
+    private boolean isSeed;
 
     boolean running;
 
@@ -99,13 +99,13 @@ public class NodeManager implements Runnable {
         NodeGroup outNodes = new NodeGroup(NetworkConstant.NETWORK_NODE_OUT_GROUP);
         nodeGroups.put(inNodes.getName(), inNodes);
         nodeGroups.put(outNodes.getName(), outNodes);
-//
-//        for (String ip : IpUtil.getIps()) {
-//            if (isSeedNode(ip)) {
-//                networkParam.setMaxInCount(networkParam.getMaxInCount() * 2);
-//                isSeed = true;
-//            }
-//        }
+
+        for (String ip : IpUtil.getIps()) {
+            if (isSeedNode(ip)) {
+                //networkParam.setMaxInCount(networkParam.getMaxInCount() * 2);
+                isSeed = true;
+            }
+        }
     }
 
     /**
@@ -365,8 +365,10 @@ public class NodeManager implements Runnable {
     public void saveExternalIp(String ip, boolean isSever) {
         NetworkParam.getInstance().getLocalIps().add(ip);
         networkStorageService.saveExternalIp(ip);
+
+
         //当非服务器节点收到自己的外网IP时，尝试连接自己外网ip，看能否连通
-        if (!isSever) {
+        if (!isSever && !isSeed) {
             NodeGroup nodeGroup = nodeGroups.get(NetworkConstant.NETWORK_NODE_OUT_GROUP);
             if (nodeGroup.size() <= 1) {
                 Node node = new Node();

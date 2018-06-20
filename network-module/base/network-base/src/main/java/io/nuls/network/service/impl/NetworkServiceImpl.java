@@ -38,6 +38,7 @@ import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.message.base.BaseMessage;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -65,6 +66,11 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public Collection<Node> getAvailableNodes() {
         return nodeManager.getAvailableNodes();
+    }
+
+    @Override
+    public List<Node> getCanConnectNodes() {
+        return nodeManager.getCanConnectNodes();
     }
 
     @Override

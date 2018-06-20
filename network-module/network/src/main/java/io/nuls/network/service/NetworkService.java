@@ -33,6 +33,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,6 +49,8 @@ public interface NetworkService {
     Map<String, Node> getNodes();
 
     Collection<Node> getAvailableNodes();
+
+    List<Node> getCanConnectNodes();
 
     NodeGroup getNodeGroup(String groupName);
 
