@@ -644,7 +644,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result broadcast(Transaction tx) {
-
         return transactionService.broadcastTx(tx);
     }
 
