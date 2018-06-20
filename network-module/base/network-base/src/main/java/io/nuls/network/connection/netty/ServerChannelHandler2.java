@@ -69,7 +69,7 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
 
         String remoteIP = channel.remoteAddress().getHostString();
         //查看是否是本机尝试连接本机地址 ，如果是直接关闭连接
-        if(networkParam.getLocalIps().contains(remoteIP)) {
+        if (networkParam.getLocalIps().contains(remoteIP)) {
             ctx.channel().close();
             return;
         }
@@ -189,6 +189,11 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("----------------- server channelUnregistered -------------------");
     }
 
 }
