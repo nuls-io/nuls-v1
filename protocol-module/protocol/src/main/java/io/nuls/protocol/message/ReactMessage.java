@@ -29,7 +29,6 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.protocol.constant.ProtocolConstant;
-import io.nuls.protocol.model.CompleteParam;
 import io.nuls.protocol.model.ReactParam;
 
 /**
@@ -39,11 +38,11 @@ import io.nuls.protocol.model.ReactParam;
 public class ReactMessage extends BaseProtocolMessage<ReactParam> {
 
     public ReactMessage() {
-        super(ProtocolConstant.REQUEST_REACT);
+        super(ProtocolConstant.PROTOCOL_REQUEST_REACT);
     }
 
     public ReactMessage(NulsDigestData requestId) {
-        super(ProtocolConstant.REQUEST_REACT);
+        super(ProtocolConstant.PROTOCOL_REQUEST_REACT);
         setMsgBody(new ReactParam(requestId));
     }
 
