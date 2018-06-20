@@ -43,7 +43,7 @@ import io.nuls.protocol.model.basic.NulsStringData;
 public class CommonStringMessage extends BaseProtocolMessage<NulsStringData> {
 
     public CommonStringMessage() {
-        super(ProtocolConstant.MESSAGE_TYPE_STRING);
+        super(ProtocolConstant.PROTOCOL_STRING);
     }
 
     @Override

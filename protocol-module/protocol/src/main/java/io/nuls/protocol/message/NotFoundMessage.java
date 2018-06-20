@@ -39,7 +39,7 @@ import io.nuls.protocol.model.NotFound;
  */
 public class NotFoundMessage extends BaseProtocolMessage<NotFound> {
     public NotFoundMessage() {
-        super(ProtocolConstant.MESSAGE_TYPE_NOT_FOUND);
+        super(ProtocolConstant.PROTOCOL_NOT_FOUND);
     }
 
     @Override

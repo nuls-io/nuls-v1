@@ -34,6 +34,7 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.service.NetworkService;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,6 +58,12 @@ public class ConsensusNetworkService implements NetworkService {
 
     @Override
     public Collection<Node> getAvailableNodes() {
+        return null;
+    }
+
+    @Override
+    public List<Node> getCanConnectNodes() {
+        // todo auto-generated method stub
         return null;
     }
 

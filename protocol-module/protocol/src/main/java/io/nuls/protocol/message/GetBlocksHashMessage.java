@@ -39,7 +39,7 @@ import io.nuls.protocol.model.GetBlocksHashParam;
 public class GetBlocksHashMessage extends BaseProtocolMessage<GetBlocksHashParam> {
 
     public GetBlocksHashMessage() {
-        super(ProtocolConstant.MESSAGE_TYPE_GET_BLOCKS_HASH);
+        super(ProtocolConstant.PROTOCOL_GET_BLOCKS_HASH);
     }
 
     @Override

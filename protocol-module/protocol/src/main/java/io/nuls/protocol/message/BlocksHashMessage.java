@@ -36,7 +36,7 @@ import io.nuls.protocol.model.BlockHashResponse;
 public class BlocksHashMessage extends BaseProtocolMessage<BlockHashResponse> {
 
     public BlocksHashMessage() {
-        super(ProtocolConstant.MESSAGE_TYPE_BLOCKS_HASH);
+        super(ProtocolConstant.PROTOCOL_BLOCKS_HASH);
     }
 
     @Override

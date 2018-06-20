@@ -39,7 +39,7 @@ import io.nuls.protocol.model.GetTxGroupParam;
 public class GetTxGroupRequest extends BaseProtocolMessage<GetTxGroupParam> {
 
     public GetTxGroupRequest() {
-        super(ProtocolConstant.MESSAGE_TYPE_GET_TX_GROUP);
+        super(ProtocolConstant.PROTOCOL_GET_TX_GROUP);
     }
 
     @Override

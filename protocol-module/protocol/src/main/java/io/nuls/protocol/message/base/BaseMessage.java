@@ -54,8 +54,8 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
     /**
      * 初始化基础消息的消息头
      */
-    public BaseMessage(short moduleId, short eventType) {
-        this.header = new MessageHeader(moduleId, eventType);
+    public BaseMessage(short moduleId, short msgType) {
+        this.header = new MessageHeader(moduleId, msgType);
     }
 
 
