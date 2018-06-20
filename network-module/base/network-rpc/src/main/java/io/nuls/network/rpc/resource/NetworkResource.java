@@ -47,10 +47,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Path("/network")
 @Api(value = "/network", description = "network")
@@ -108,7 +105,9 @@ public class NetworkResource {
         for (Node node : nodeList) {
             ipSet.add(node.getIp());
         }
-        result.setData(ipSet);
+        Map<String, Set<String>> map = new HashMap<>();
+        map.put("list", ipSet);
+        result.setData(map);
         return result.toRpcClientResult();
     }
 
@@ -129,7 +128,9 @@ public class NetworkResource {
             dto.setPort(node.getPort());
             dtoList.add(dto);
         }
-        result.setData(dtoList);
+        Map<String, List<NodeDto>> map = new HashMap<>();
+        map.put("list", dtoList);
+        result.setData(map);
         return result.toRpcClientResult();
     }
 }

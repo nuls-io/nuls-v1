@@ -236,7 +236,7 @@ public class AccountResource {
         }
         Result result = accountService.isEncrypted(address);
         Map<String, Boolean> map = new HashMap<>();
-        map.put("value", (Boolean) result.getData());
+        map.put("value", (Boolean)result.getData());
         result.setData(map);
         return result.toRpcClientResult();
     }

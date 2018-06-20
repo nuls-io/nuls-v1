@@ -46,9 +46,7 @@ import io.swagger.annotations.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author: Niels Wang
@@ -205,7 +203,9 @@ public class BlockResource {
             result = Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         } else {
             result = Result.getSuccess();
-            result.setData(Base64.getEncoder().encodeToString(block.serialize()));
+            Map<String, String> map = new HashMap<>();
+            map.put("value", Base64.getEncoder().encodeToString(block.serialize()));
+            result.setData(map);
         }
         return result.toRpcClientResult();
     }
@@ -233,8 +233,9 @@ public class BlockResource {
             }
             list.add(new BlockDto(block));
         }
-
-        return Result.getSuccess().setData(list).toRpcClientResult();
+        Map<String, List<BlockDto>> map = new HashMap<>();
+        map.put("list", list);
+        return Result.getSuccess().setData(map).toRpcClientResult();
 
     }
 }

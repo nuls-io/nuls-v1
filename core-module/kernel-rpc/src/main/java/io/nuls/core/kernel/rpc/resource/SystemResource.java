@@ -41,6 +41,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: Niels Wang
@@ -67,6 +69,8 @@ public class SystemResource {
             Log.error(e);
             Result.getFailed(e.getMessage());
         }
-        return Result.getSuccess().toRpcClientResult();
+        Map<String, Boolean> map = new HashMap<>();
+        map.put("value", true);
+        return Result.getSuccess().setData(map).toRpcClientResult();
     }
 }
