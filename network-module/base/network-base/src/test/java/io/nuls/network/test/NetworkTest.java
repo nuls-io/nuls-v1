@@ -58,10 +58,10 @@ public class NetworkTest {
             list.add("adsda");
             list.add("adsda");
             NodeMessageBody nodeMessageBody = new NodeMessageBody();
-            nodeMessageBody.setIpList(list);
+//            nodeMessageBody.setIpList(list);
             GetNodesIpMessage getNodesIpMessage = new GetNodesIpMessage(nodeMessageBody);
             getNodesIpMessage.serialize();
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

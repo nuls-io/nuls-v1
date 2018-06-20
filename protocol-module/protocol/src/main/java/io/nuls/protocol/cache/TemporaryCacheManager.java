@@ -48,6 +48,7 @@ public class TemporaryCacheManager {
     private Map<NulsDigestData, Transaction> txCacheMap = new HashMap<>();
 
     private TemporaryCacheManager() {
+
     }
 
     public static TemporaryCacheManager getInstance() {

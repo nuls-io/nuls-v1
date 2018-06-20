@@ -72,6 +72,8 @@ public class Node extends BaseNulsData {
 
     private String externalIp;
 
+    private boolean canConnect;
+
     @Override
     public int size() {
         int s = 0;
@@ -110,14 +112,13 @@ public class Node extends BaseNulsData {
     public final static int WAIT = 0;
     public final static int CONNECT = 1;
     public final static int HANDSHAKE = 2;
-    public final static int CLOSE = 3;
-    public final static int BAD = 4;
+    public final static int BAD = 3;
     private volatile int status;
 
-    private boolean canConnect;
 
     public Node() {
-        this.status = CLOSE;
+        this.status = WAIT;
+        this.canConnect = false;
         groupSet = ConcurrentHashMap.newKeySet();
     }
 
@@ -144,7 +145,7 @@ public class Node extends BaseNulsData {
     public void destroy() {
         this.lastFailTime = TimeService.currentTimeMillis();
         this.setFailCount(this.getFailCount() + 1);
-        this.status = Node.CLOSE;
+        this.status = Node.WAIT;
     }
 
     public boolean isHandShake() {
@@ -177,7 +178,10 @@ public class Node extends BaseNulsData {
         sb.append("{");
         sb.append("id:" + getId() + ",");
         sb.append("type:" + type + ",");
-        sb.append("status:" + status + "}");
+        sb.append("status:" + status + ",");
+        sb.append("canConnect:" + canConnect + ",");
+        sb.append("failCount:" + failCount + "}");
+
         return sb.toString();
     }
 
@@ -277,8 +281,7 @@ public class Node extends BaseNulsData {
     }
 
     public String getId() {
-        id = ip + ":" + port;
-        return id;
+        return ip + ":" + port;
     }
 
     public String getPoId() {
@@ -340,4 +343,5 @@ public class Node extends BaseNulsData {
     public void setExternalIp(String externalIp) {
         this.externalIp = externalIp;
     }
+
 }

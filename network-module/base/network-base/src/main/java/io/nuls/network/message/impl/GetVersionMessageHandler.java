@@ -26,12 +26,11 @@
 package io.nuls.network.message.impl;
 
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.func.TimeService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.manager.NodeManager;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
-import io.nuls.network.manager.NodeManager;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
 import io.nuls.network.protocol.message.GetVersionMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;

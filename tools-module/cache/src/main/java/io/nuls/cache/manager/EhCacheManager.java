@@ -24,9 +24,7 @@
  */
 package io.nuls.cache.manager;
 
-import io.nuls.cache.listener.intf.NulsCacheListener;
 import io.nuls.cache.model.CacheMapParams;
-import io.nuls.cache.utils.CacheObjectSerializer;
 import io.nuls.cache.utils.EhcacheListener;
 import io.nuls.core.tools.param.AssertUtil;
 import org.ehcache.Cache;
@@ -34,9 +32,7 @@ import org.ehcache.CacheManager;
 import org.ehcache.config.builders.*;
 import org.ehcache.config.units.MemoryUnit;
 import org.ehcache.event.EventType;
-import org.ehcache.spi.copy.Copier;
 
-import java.io.Serializable;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

@@ -33,13 +33,12 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.network.IpUtil;
-import io.nuls.network.model.Node;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;
+import io.nuls.network.model.Node;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.Map;
 
 public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
@@ -49,82 +48,69 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     private AttributeKey<Node> key = AttributeKey.valueOf("node");
 
+    private NetworkParam networkParam = NetworkParam.getInstance();
+
     public ClientChannelHandler() {
 
     }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        super.channelRegistered(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
-        String nodeId = node == null ? null : node.getId();
-//        Log.info("---------------------- client channelRegistered -----------" + nodeId);
-
-        Map<String, Node> nodes = nodeManager.getNodes();
-        //Map<String, Node> nodes = getNetworkService().getNodes();
-        // If a node with the same IP already in nodes, as a out node, can not add anymore
-        for (Node n : nodes.values()) {
-            //both ip and port equals , it means the node is myself
-            if (n.getIp().equals(node.getIp()) && !n.getPort().equals(node.getSeverPort())) {
-//                Log.info("----------------------client: it already had a connection: " + n.getId() + " type:" + n.getType() + ", this connection: " + nodeId + "---------------------- ");
-                ctx.channel().close();
-                return;
-            }
+        if(node != null) {
+            node.setCanConnect(false);
         }
+        String nodeId = node == null ? "null" : node.getId();
+        Log.info("---------------------- client channelRegistered -----------" + nodeId);
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
         String channelId = ctx.channel().id().asLongText();
         SocketChannel channel = (SocketChannel) ctx.channel();
-        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.info(" ---------------------- client channelActive ----------" + nodeId);
-//        Log.info("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
-//        Log.info("remoteInfo: "+channel.remoteAddress().getHostString()+":" + channel.remoteAddress().getPort());
-
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
-
-        try {
+        String nodeId = node == null ? "null" : node.getId();
+        Log.info("---------------------- client channelActive -----------" + nodeId);
+        String remoteIP = channel.remoteAddress().getHostString();
+        //如果是本机节点访问自己的服务器，则广播本机服务器到全网
+        if (networkParam.getLocalIps().contains(remoteIP)) {
+            nodeManager.broadNodeSever();
+            channel.close();
+        } else {
+            //其他节点则正常保持连接
+            node.setCanConnect(true);
+            node.setFailCount(0);
             NioChannelMap.add(channelId, channel);
             node.setChannelId(channelId);
-            node.setStatus(Node.CONNECT);
             boolean result = nodeManager.processConnectedNode(node);
             if (!result) {
                 channel.close();
             }
-        } catch (Exception e) {
-            Log.info("client channelActive error: " + nodeId);
         }
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
-        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.info(" ---------------------- client channelInactive ---------------------- " + nodeId);
-//        Log.info("localInfo: "+channel.localAddress().getHostString()+":" + channel.localAddress().getPort());
-//        Log.info("remoteInfo: "+channel.remoteAddress().getHostString()+":" + channel.remoteAddress().getPort());
-
+        Attribute<Node> nodeAttribute = channel.attr(key);
+        Node node = nodeAttribute.get();
+        String nodeId = node == null ? "null" : node.getId();
+        System.out.println("----------------- client channelInactive -------------------" + nodeId);
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
-        Node node = nodeManager.getNode(nodeId);
-        if (node != null) {
-            if (node.getChannelId() == null || channelId.equals(node.getChannelId())) {
-//                System.out.println(  "---------------client channelInactive remove node----------------" + nodeId);
-                nodeManager.removeNode(node.getId());
-            } else {
-                Log.info("---------------- client channelId different----------------" + channelId + "," + node.getChannelId());
-            }
-        }
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-
+        Log.info(" ---------------------- client channelRead---------------------- " + nodeId);
         try {
             Node node = nodeManager.getNode(nodeId);
             if (node != null && node.isAlive()) {
@@ -145,20 +131,21 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-//        Log.info("--------------- ClientChannelHandler exceptionCaught :" + cause.getMessage());
-//        cause.printStackTrace();
-
+        System.out.println("----------------- client exceptionCaught -------------------");
+        cause.printStackTrace();
         ctx.channel().close();
     }
 
-
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+
         SocketChannel channel = (SocketChannel) ctx.channel();
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
-        if (!channel.isActive() && node != null) {
-            nodeManager.deleteNode(node.getId());
+        if (node != null) {
+            System.out.println("----------------- client channelUnregistered -------------------" + node.getId());
+            nodeManager.removeNode(node);
         }
+
     }
 }

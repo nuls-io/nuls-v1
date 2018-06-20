@@ -25,42 +25,50 @@
 
 package io.nuls.network.message.impl;
 
-import io.nuls.kernel.func.TimeService;
+import io.nuls.network.cache.NodeCacheManager;
+import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.NodeManager;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
-import io.nuls.network.protocol.message.NetworkMessageBody;
-import io.nuls.network.protocol.message.VersionMessage;
+import io.nuls.network.protocol.message.P2PNodeBody;
+import io.nuls.network.protocol.message.P2PNodeMessage;
 import io.nuls.protocol.message.base.BaseMessage;
 
-public class VersionMessageHandler implements BaseNetworkMeesageHandler {
-
-    private static VersionMessageHandler instance = new VersionMessageHandler();
-
-    private VersionMessageHandler() {
-
-    }
-
-    public static VersionMessageHandler getInstance() {
-        return instance;
-    }
+public class P2pNodeMessageHandler implements BaseNetworkMeesageHandler {
 
     private NodeManager nodeManager = NodeManager.getInstance();
 
+    private static P2pNodeMessageHandler instance = new P2pNodeMessageHandler();
+
+    private NodeCacheManager nodeCacheManager = NodeCacheManager.getInstance();
+
+    private BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
+
+    private P2pNodeMessageHandler() {
+
+    }
+
+    public static P2pNodeMessageHandler getInstance() {
+        return instance;
+    }
+
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
-        VersionMessage versionMessage = (VersionMessage) message;
-        NetworkMessageBody body = versionMessage.getMsgBody();
-
-        if (body.getBestBlockHeight() < 0) {
-            node.setStatus(Node.BAD);
-            nodeManager.removeNode(node.getId());
+        P2PNodeMessage nodeMessage = (P2PNodeMessage) message;
+        P2PNodeBody nodeBody = nodeMessage.getMsgBody();
+        P2PNodeBody cacheBody = nodeCacheManager.getNode(nodeBody.getId());
+        //已经缓存则什么都不处理
+        if (cacheBody != null) {
+            System.out.println("---------------------cacheBody is not null------------------------------");
             return null;
         }
-        node.setBestBlockHeight(body.getBestBlockHeight());
-        node.setBestBlockHash(body.getBestBlockHash());
-        node.setTimeOffset(TimeService.currentTimeMillis() - body.getNetworkTime());
+        //尝试建立连接
+        Node newNode = new Node(nodeBody.getNodeIp(), nodeBody.getSeverPort(), nodeBody.getSeverPort(), Node.OUT);
+        nodeManager.addNode(newNode);
+        nodeCacheManager.cacheNode(nodeBody);
+        //广播交易
+        broadcastHandler.broadcastToAllNode(message, node, true);
         return null;
     }
 }

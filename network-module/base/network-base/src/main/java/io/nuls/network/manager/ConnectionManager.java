@@ -26,7 +26,6 @@
 package io.nuls.network.manager;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -59,7 +58,7 @@ public class ConnectionManager {
         return instance;
     }
 
-    private NetworkParam network = NetworkParam.getInstance();
+    private NetworkParam networkParam = NetworkParam.getInstance();
 
     private NettyServer nettyServer;
 
@@ -74,7 +73,7 @@ public class ConnectionManager {
     public void init() {
         nodeManager = NodeManager.getInstance();
         broadcastHandler = BroadcastHandler.getInstance();
-        nettyServer = new NettyServer(network.getPort());
+        nettyServer = new NettyServer(networkParam.getPort());
         nettyServer.init();
 //        eventBusService = NulsContext.getServiceBean(EventBusService.class);
 //        messageHandlerFactory = network.getMessageHandlerFactory();
@@ -94,11 +93,10 @@ public class ConnectionManager {
     }
 
     public void connectionNode(Node node) {
-
+        node.setStatus(Node.CONNECT);
         TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "node connection", new Runnable() {
             @Override
             public void run() {
-                node.setStatus(Node.WAIT);
                 NettyClient client = new NettyClient(node);
                 client.start();
             }
@@ -147,7 +145,7 @@ public class ConnectionManager {
                 }
             }
         } catch (Exception e) {
-            throw new NulsException(KernelErrorCode.DATA_ERROR,e);
+            throw new NulsException(KernelErrorCode.DATA_ERROR, e);
         } finally {
             buffer.clear();
         }
@@ -158,7 +156,6 @@ public class ConnectionManager {
         if (message == null) {
             return;
         }
-
         if (isNetworkMessage(message)) {
             if (node.getStatus() != Node.HANDSHAKE && !isHandShakeMessage(message)) {
                 return;
@@ -198,7 +195,7 @@ public class ConnectionManager {
     }
 
     public void processMessageResult(NetworkEventResult messageResult, Node node) throws IOException {
-        if (node.getStatus() == Node.CLOSE) {
+        if (!node.isAlive()) {
             return;
         }
         if (messageResult == null || !messageResult.isSuccess()) {
@@ -214,7 +211,8 @@ public class ConnectionManager {
     }
 
     private boolean isHandShakeMessage(BaseMessage message) {
-        if (message.getHeader().getMsgType() == NetworkConstant.NETWORK_HANDSHAKE) {
+        if (message.getHeader().getMsgType() == NetworkConstant.NETWORK_HANDSHAKE ||
+                message.getHeader().getMsgType() == NetworkConstant.NETWORK_P2P_NODE) {
             return true;
         }
         return false;
@@ -227,7 +225,7 @@ public class ConnectionManager {
         return messageBusService;
     }
 
-    public void shutdown(){
+    public void shutdown() {
         nettyServer.shutdown();
     }
 }

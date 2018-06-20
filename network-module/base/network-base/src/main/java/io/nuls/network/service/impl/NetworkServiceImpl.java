@@ -29,17 +29,16 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.model.BroadcastResult;
-import io.nuls.network.model.Node;
 import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.NodeManager;
+import io.nuls.network.model.BroadcastResult;
+import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.message.base.BaseMessage;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 @Service
 public class NetworkServiceImpl implements NetworkService {
@@ -76,7 +75,7 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public BroadcastResult sendToAllNode(BaseNulsData nulsData, boolean asyn) {
         BaseMessage baseMessage = (BaseMessage) nulsData;
-        return broadcastHandler.broadcastToAllNode(baseMessage,null, asyn);
+        return broadcastHandler.broadcastToAllNode(baseMessage, null, asyn);
     }
 
     @Override
@@ -98,7 +97,7 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public BroadcastResult sendToGroup(BaseNulsData nulsData, String groupName,Node excludeNode, boolean asyn) {
+    public BroadcastResult sendToGroup(BaseNulsData nulsData, String groupName, Node excludeNode, boolean asyn) {
         BaseMessage baseMessage = (BaseMessage) nulsData;
         return broadcastHandler.broadcastToNodeGroup(baseMessage, groupName, excludeNode, asyn);
     }
@@ -106,7 +105,8 @@ public class NetworkServiceImpl implements NetworkService {
     @Override
     public void reset() {
         Log.warn("start network reset");
-        nodeManager.reset();
+        return;
+//        nodeManager.reset();
     }
 
     @Override

@@ -28,12 +28,10 @@ import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
-import io.nuls.network.protocol.message.*;
+import io.nuls.network.protocol.message.GetVersionMessage;
+import io.nuls.network.protocol.message.NetworkMessageBody;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author vivi
@@ -69,31 +67,29 @@ public class NodeDiscoverHandler implements Runnable {
      * @param size
      */
     public void findOtherNode(int size) {
-        NodeMessageBody messageBody = new NodeMessageBody();
-        messageBody.setLength(size);
-        //将自己已经连接节点的ip地址发送给对方，避免对方节点重复给相同ip
-        List<String> ipList = new ArrayList<>();
-        for (Node node : nodesManager.getAvailableNodes()) {
-            ipList.add(node.getIp());
-        }
-        messageBody.setIpList(ipList);
-        GetNodesMessage message = new GetNodesMessage(messageBody);
-        List<Node> nodeList = new ArrayList<>(nodesManager.getAvailableNodes());
-        Collections.shuffle(nodeList);
-        for (int i = 0; i < nodeList.size(); i++) {
-            if (i == 2) {
-                break;
-            }
-            Node node = nodeList.get(i);
-            broadcastHandler.broadcastToNode(message, node, true);
-        }
+//        NodeMessageBody messageBody = new NodeMessageBody();
+//        messageBody.setLength(size);
+//        //将自己已经连接节点的ip地址发送给对方，避免对方节点重复给相同ip
+//        List<String> ipList = new ArrayList<>();
+//        for (Node node : nodesManager.getAvailableNodes()) {
+//            ipList.add(node.getIp());
+//        }
+//        messageBody.setIpList(ipList);
+//        GetNodesMessage message = new GetNodesMessage(messageBody);
+//        List<Node> nodeList = new ArrayList<>(nodesManager.getAvailableNodes());
+//        Collections.shuffle(nodeList);
+//        for (int i = 0; i < nodeList.size(); i++) {
+//            if (i == 2) {
+//                break;
+//            }
+//            Node node = nodeList.get(i);
+//            broadcastHandler.broadcastToNode(message, node, true);
+//        }
     }
 
     /**
      * 每10秒询问一次当前连接的节点的最新高度和最新区块信息
-     * 每30秒询问一次已连接的节点，向他们询问其他更多可连接的节点的IP地址
      */
-    private int count = 19;
 
     @Override
     public void run() {
@@ -101,29 +97,20 @@ public class NodeDiscoverHandler implements Runnable {
 
         while (running) {
             try {
-                Thread.sleep(3000);
+                Thread.sleep(10000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            count++;
 
             Collection<Node> nodeList = nodesManager.getAvailableNodes();
             NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
                     NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash());
             GetVersionMessage getVersionMessage = new GetVersionMessage(body);
-            NodeMessageBody nodeMessageBody = new NodeMessageBody();
-            GetNodesIpMessage getNodesIpMessage = new GetNodesIpMessage(nodeMessageBody);
 
             for (Node node : nodeList) {
                 if (node.getType() == Node.OUT) {
                     broadcastHandler.broadcastToNode(getVersionMessage, node, true);
                 }
-                if (count == 20) {
-                    broadcastHandler.broadcastToNode(getNodesIpMessage, node, true);
-                }
-            }
-            if (count == 20) {
-                count = 0;
             }
         }
     }

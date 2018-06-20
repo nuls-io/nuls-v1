@@ -51,16 +51,11 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
     @Autowired
     private DBService dbService;
 
-    public List<Node> getLocalNodeList(int size) {
+    public List<Node> getLocalNodeList() {
         List<NodePo> poList = getDbService().values(NetworkStorageConstant.DB_NAME_NETWORK_NODE, NodePo.class);
         if (poList == null) {
             return new ArrayList<>();
         }
-        if (size > poList.size()) {
-            size = poList.size();
-        }
-
-        poList = poList.subList(0, size);
         List<Node> nodeList = new ArrayList<>();
         for (NodePo po : poList) {
             nodeList.add(NetworkTransferTool.toNode(po));
@@ -111,7 +106,7 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
     @Override
     public String getExternalIp() {
         byte[] bytes = getDbService().get(DBConstant.BASE_AREA_NAME, NetworkStorageConstant.DB_NAME_EXTERNAL_IP.getBytes());
-        if(bytes != null) {
+        if (bytes != null) {
             return new String(bytes);
         }
         return null;

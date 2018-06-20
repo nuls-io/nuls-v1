@@ -23,39 +23,30 @@
  *
  */
 
-package io.nuls.network.message.impl;
+package io.nuls.network.protocol.message;
 
-import io.nuls.kernel.func.TimeService;
-import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.model.NetworkEventResult;
-import io.nuls.network.model.Node;
-import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
-import io.nuls.network.protocol.message.NodeMessageBody;
-import io.nuls.network.protocol.message.NodesIpMessage;
-import io.nuls.protocol.message.base.BaseMessage;
 
-public class NodesIpMessageHandler implements BaseNetworkMeesageHandler {
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.network.constant.NetworkConstant;
 
-    private static NodesIpMessageHandler instance = new NodesIpMessageHandler();
+public class P2PNodeMessage extends BaseNetworkMessage<P2PNodeBody> {
+    /**
+     * 初始化基础消息的消息头
+     */
 
-    private NodesIpMessageHandler() {
-
+    public P2PNodeMessage() {
+        super(NetworkConstant.NETWORK_P2P_NODE);
     }
-
-    public static NodesIpMessageHandler getInstance() {
-        return instance;
-    }
-
-    private NetworkParam networkParam = NetworkParam.getInstance();
 
     @Override
-    public NetworkEventResult process(BaseMessage message, Node node) {
-        NodesIpMessage handshakeMessage = (NodesIpMessage) message;
-        NodeMessageBody body = handshakeMessage.getMsgBody();
-
-//        for(String ip : body.getIpList()) {
-//            networkParam.getIpMap().put(ip, TimeService.currentTimeMillis());
-//        }
-        return null;
+    protected P2PNodeBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new P2PNodeBody());
     }
+
+    public P2PNodeMessage(P2PNodeBody body) {
+        this();
+        this.setMsgBody(body);
+    }
+
 }

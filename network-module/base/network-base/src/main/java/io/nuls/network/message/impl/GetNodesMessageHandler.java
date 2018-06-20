@@ -25,9 +25,9 @@
 
 package io.nuls.network.message.impl;
 
+import io.nuls.network.manager.NodeManager;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
-import io.nuls.network.manager.NodeManager;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
 import io.nuls.network.protocol.message.GetNodesMessage;
 import io.nuls.network.protocol.message.NodeMessageBody;
@@ -56,10 +56,10 @@ public class GetNodesMessageHandler implements BaseNetworkMeesageHandler {
         GetNodesMessage getNodesMessage = (GetNodesMessage) message;
 
         NodeMessageBody body = getNodesMessage.getMsgBody();
-        body.getIpList().add(node.getIp());
-        List<Node> nodeList = getAvailableNodes(body.getLength(), body.getIpList());
+//        body.getIpList().add(node.getIp());
+//        List<Node> nodeList = getAvailableNodes(body.getLength(), body.getIpList());
         body = new NodeMessageBody();
-        body.setNodeList(nodeList);
+//        body.setNodeList(nodeList);
         NodesMessage nodesMessage = new NodesMessage(body);
         return new NetworkEventResult(true, nodesMessage);
     }
