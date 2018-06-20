@@ -53,8 +53,6 @@ public class NetworkParam {
 
     private List<String> seedIpList;
 
-    private Map<String, Long> ipMap = new ConcurrentHashMap<>();
-
     public int getPort() {
         return port;
     }
@@ -101,10 +99,6 @@ public class NetworkParam {
 
     public void setSeedIpList(List<String> seedIpList) {
         this.seedIpList = seedIpList;
-    }
-
-    public Map<String, Long> getIpMap() {
-        return ipMap;
     }
 
 }

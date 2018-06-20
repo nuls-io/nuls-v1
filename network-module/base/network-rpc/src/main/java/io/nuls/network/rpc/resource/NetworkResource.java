@@ -48,6 +48,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -101,8 +102,12 @@ public class NetworkResource {
             @ApiResponse(code = 200, message = "success", response = String[].class)
     })
     public RpcClientResult getNode() {
-        Set<String> ipSet = NetworkParam.getInstance().getIpMap().keySet();
+        List<Node> nodeList = networkService.getCanConnectNodes();
+        Set<String> ipSet = new HashSet<>();
         Result result = Result.getSuccess();
+        for (Node node : nodeList) {
+            ipSet.add(node.getIp());
+        }
         result.setData(ipSet);
         return result.toRpcClientResult();
     }
@@ -112,19 +117,19 @@ public class NetworkResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("查询节点[3.7.2]")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = String[].class)
+            @ApiResponse(code = 200, message = "success", response = NodeDto.class)
     })
     public RpcClientResult getPeers() {
         List<Node> nodeList = networkService.getCanConnectNodes();
         Result result = Result.getSuccess();
         List<NodeDto> dtoList = new ArrayList<>();
-        for(Node node :nodeList) {
+        for (Node node : nodeList) {
             NodeDto dto = new NodeDto();
             dto.setIp(node.getIp());
             dto.setPort(node.getPort());
             dtoList.add(dto);
         }
-        result.setData(nodeList);
+        result.setData(dtoList);
         return result.toRpcClientResult();
     }
 }
