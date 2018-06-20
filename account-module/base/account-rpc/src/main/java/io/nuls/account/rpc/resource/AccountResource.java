@@ -25,7 +25,6 @@
 
 package io.nuls.account.rpc.resource;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
@@ -48,7 +47,6 @@ import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -201,6 +199,7 @@ public class AccountResource {
         resultPage.setList(dtoList);
         return Result.getSuccess().setData(resultPage).toRpcClientResult();
     }
+
 
     @GET
     @Path("/{address}")

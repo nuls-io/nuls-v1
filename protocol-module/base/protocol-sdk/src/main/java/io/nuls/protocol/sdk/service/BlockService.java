@@ -9,6 +9,14 @@ import io.nuls.sdk.model.Result;
 public interface BlockService {
 
     /**
+     * Get the Newest block header
+     * @return
+     * If the operation is successful, 'success' is true, and data is blockHeaderDto;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result getNewestBlockHeader();
+
+    /**
      * Get the block header accoding to block height
      * @param height The block height
      * @return
