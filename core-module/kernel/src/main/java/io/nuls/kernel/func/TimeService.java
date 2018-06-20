@@ -27,9 +27,11 @@ package io.nuls.kernel.func;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.thread.manager.TaskManager;
+import org.apache.commons.net.ntp.NTPUDPClient;
+import org.apache.commons.net.ntp.TimeInfo;
 
-import java.net.URL;
-import java.net.URLConnection;
+import java.io.IOException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,11 +45,16 @@ import java.util.List;
 public class TimeService implements Runnable {
 
     private TimeService() {
-        urlList.add("http://time.inchain.org");         //inchain
-        urlList.add("https://www.baidu.com");           //baidu
-        urlList.add("https://www.alibaba.com");         //alibaba
-        urlList.add("https://github.com/");             //github
-//        syncWebTime();
+        urlList.add("sgp.ntp.org.cn");
+        urlList.add("cn.ntp.org.cn");
+        urlList.add("time1.apple.com");
+        urlList.add("ntp3.aliyun.com");
+        urlList.add("ntp5.aliyun.com");
+        urlList.add("us.ntp.org.cn");
+        urlList.add("kr.ntp.org.cn");
+        urlList.add("de.ntp.org.cn");
+        urlList.add("jp.ntp.org.cn");
+        urlList.add("ntp7.aliyun.com");
     }
 
     private static TimeService instance = new TimeService();
@@ -101,25 +108,27 @@ public class TimeService implements Runnable {
 
     /**
      * 获取网络时间
-     * 连接公用网站，获取对方的网络时间，
-     * 有一个获取成功就立刻返回
-     *
-     * @return
+     * todo 可优化为哪个地址延迟小使用哪个
      */
     private long getWebTime() {
+        NTPUDPClient client = new NTPUDPClient();
+        try {
+            client.open();
+        } catch (SocketException e) {
+            Log.error(e);
+            return 0L;
+        }
         for (int i = 0; i < urlList.size(); i++) {
+            client.setDefaultTimeout(1000);
             try {
-                URL url = new URL(urlList.get(i));
-                URLConnection conn = url.openConnection();
-                conn.connect();
-                long time = conn.getDate();
-                return time;
+                InetAddress inetAddress = InetAddress.getByName(urlList.get(i));
+                TimeInfo timeInfo = client.getTime(inetAddress);
+                return timeInfo.getReturnTime();
             } catch (Exception e) {
-                // try to connect next
                 continue;
             }
         }
-        return 0;
+        return 0L;
     }
 
     /**
@@ -163,8 +172,6 @@ public class TimeService implements Runnable {
     /**
      * 获取当前网络时间毫秒数
      * Gets the current network time in milliseconds.
-     *
-     * @return
      */
     public static long currentTimeMillis() {
         return System.currentTimeMillis() + netTimeOffset;
@@ -173,8 +180,6 @@ public class TimeService implements Runnable {
     /**
      * 获取网络时间偏移值
      * Gets the network time offset.
-     *
-     * @return
      */
     public static long getNetTimeOffset() {
         return netTimeOffset;
