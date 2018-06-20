@@ -83,7 +83,7 @@ public interface AccountService {
      * If the operation is successful, 'success' is true, and data is List<AccountDto>;
      * If the operation fails, "success" is false and the result has error information
      */
-    Result createOffLineAccount();
+    Result createOfflineAccount();
 
     /**
      * Create an encrypted off-line account (Not saved to the database)
@@ -93,7 +93,7 @@ public interface AccountService {
      * If the operation is successful, 'success' is true and data is List<AccountDto>;
      * If the operation fails, "success" is false and the result has error information
      */
-    Result createOffLineAccount(String password);
+    Result createOfflineAccount(String password);
 
     /**
      * Create unencrypted off-line accounts (Not saved to the database)
@@ -103,7 +103,7 @@ public interface AccountService {
      * If the operation is successful, 'success' is true and data is List<AccountDto>;
      * If the operation fails, "success" is false and the result has error information
      */
-    Result createOffLineAccount(int count);
+    Result createOfflineAccount(int count);
 
     /**
      * Create encrypted off-line accounts (Not saved to the database)
@@ -113,7 +113,7 @@ public interface AccountService {
      * If the operation is successful, 'success' is true and data is List<AccountDto>;
      * If the operation fails, "success" is false and the result has error information
      */
-    Result createOffLineAccount(int count, String password);
+    Result createOfflineAccount(int count, String password);
 
 
     /**
@@ -212,13 +212,13 @@ public interface AccountService {
     Result getWalletTotalBalance();
 
     /**
-     * Verify that the alias is already occupied
+     * Verify that the alias is usable
      *
      * @param alias
-     * @return If the alias is already occupied, 'success' is true;
-     * If the alias is not occupied, "success" is false;
+     * @return If the alias is usable, 'success' is true;
+     * If the alias is  unusable, "success" is false;
      */
-    Result isAliasExist(String alias);
+    Result isAliasUsable(String alias);
 
     /**
      * Import account according to KeyStore file path
@@ -363,7 +363,7 @@ public interface AccountService {
      * @param password The new password
      * @return
      */
-    Result setPasswordOffLine(String address, String priKey, String password);
+    Result setPasswordOffline(String address, String priKey, String password);
 
     /**
      * Change the off-line account password by encryptedPriKey and passowrd
@@ -374,7 +374,7 @@ public interface AccountService {
      * @param newPassword     The new password
      * @return
      */
-    Result resetPasswordOffLine(String address, String encryptedPriKey, String password, String newPassword);
+    Result resetPasswordOffline(String address, String encryptedPriKey, String password, String newPassword);
 
 
     /**

@@ -228,8 +228,12 @@ public class AccountLedgerResource {
             } catch (Exception e) {
                 return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
             }
+            try {
+                to.setNa(Na.valueOf(outputDto.getValue()));
+            } catch (Exception e) {
+                return Result.getFailed(LedgerErrorCode.DATA_PARSE_ERROR).toRpcClientResult();
+            }
 
-            to.setNa(Na.valueOf(outputDto.getValue()));
             if (outputDto.getLockTime() < 0) {
                 return RpcClientResult.getFailed("lockTime error");
             }
@@ -283,7 +287,6 @@ public class AccountLedgerResource {
             }
         }
 
-
         if (!ECKey.isValidPrivteHex(priKey)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
@@ -314,7 +317,6 @@ public class AccountLedgerResource {
             return Result.getFailed(LedgerErrorCode.DATA_PARSE_ERROR).toRpcClientResult();
         }
     }
-
 
     @POST
     @Path("/transaction/broadcast")

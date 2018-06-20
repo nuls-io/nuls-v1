@@ -70,6 +70,12 @@ public class ShutdownHook extends Thread {
             } catch (IOException e) {
                 Log.error(e);
             }
+        } else if (os.startsWith("MAC")) {
+            try {
+                Runtime.getRuntime().exec("open -a NULSWallet");
+            } catch (IOException e) {
+                Log.error(e);
+            }
         } else {
             try {
                 Runtime.getRuntime().exec("sh start.sh", null, new File(root + "/bin"));

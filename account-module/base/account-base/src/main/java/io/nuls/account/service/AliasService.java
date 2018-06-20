@@ -116,7 +116,7 @@ public class AliasService {
         if (!StringUtils.validAlias(aliasName)) {
             return Result.getFailed(AccountErrorCode.ALIAS_FORMAT_WRONG);
         }
-        if (isAliasExist(aliasName)) {
+        if (!isAliasUsable(aliasName)) {
             return Result.getFailed(AccountErrorCode.ALIAS_EXIST);
         }
         byte[] addressBytes = account.getAddress().getBase58Bytes();
@@ -205,8 +205,8 @@ public class AliasService {
         return aliasPo == null ? null : aliasPo.toAlias();
     }
 
-    public boolean isAliasExist(String alias) {
-        return null != getAlias(alias);
+    public boolean isAliasUsable(String alias) {
+        return null == getAlias(alias);
     }
 
     /**
