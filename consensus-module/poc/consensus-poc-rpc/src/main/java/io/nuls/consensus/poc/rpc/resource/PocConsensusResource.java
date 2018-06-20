@@ -421,7 +421,9 @@ public class PocConsensusResource {
         if (!result1.isSuccess()) {
             return result1;
         }
-        return Result.getSuccess().setData(tx.getHash().getDigestHex()).toRpcClientResult();
+        Map<String, String> valueMap = new HashMap<>();
+        valueMap.put("value", tx.getHash().getDigestHex());
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 
 
@@ -472,7 +474,9 @@ public class PocConsensusResource {
         if (!result1.isSuccess()) {
             return result1;
         }
-        return Result.getSuccess().setData(tx.getHash().getDigestHex()).toRpcClientResult();
+        Map<String, String> valueMap = new HashMap<>();
+        valueMap.put("value", tx.getHash().getDigestHex());
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 
     public RpcClientResult txProcessing(Transaction tx, CoinDataResult result, Account account, String password) {
@@ -563,6 +567,8 @@ public class PocConsensusResource {
         if (!result1.isSuccess()) {
             return result1;
         }
+        Map<String, String> valueMap = new HashMap<>();
+        valueMap.put("value", tx.getHash().getDigestHex());
         return Result.getSuccess().setData(tx.getHash().getDigestHex()).toRpcClientResult();
     }
 
@@ -1014,7 +1020,9 @@ public class PocConsensusResource {
         if (!result1.isSuccess()) {
             return result1;
         }
-        return Result.getSuccess().setData(tx.getHash().getDigestHex()).toRpcClientResult();
+        Map<String, String> valueMap = new HashMap<>();
+        valueMap.put("value", tx.getHash().getDigestHex());
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 
 

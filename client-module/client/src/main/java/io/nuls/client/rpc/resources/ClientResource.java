@@ -51,6 +51,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.awt.image.Kernel;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: Niels Wang
@@ -122,9 +124,11 @@ public class ClientResource {
         boolean result = thread.start();
         if (result) {
             TaskManager.createAndRunThread((short) 1, "upgrade", thread);
-            return Result.getSuccess().toRpcClientResult();
+            Map<String, Boolean> map = new HashMap<>();
+            map.put("value", true);
+            return Result.getSuccess().setData(map).toRpcClientResult();
         }
-        return Result.getFailed().toRpcClientResult();
+        return Result.getFailed(KernelErrorCode.FAILED).toRpcClientResult();
     }
 
     @POST
@@ -144,9 +148,11 @@ public class ClientResource {
         }
         boolean result = thread.stop();
         if (result) {
-            return Result.getSuccess().toRpcClientResult();
+            Map<String, Boolean> map = new HashMap<>();
+            map.put("value", true);
+            return Result.getSuccess().setData(map).toRpcClientResult();
         }
-        return Result.getFailed().toRpcClientResult();
+        return Result.getFailed(KernelErrorCode.FAILED).toRpcClientResult();
     }
 
     @POST
@@ -178,6 +184,8 @@ public class ClientResource {
             }
         });
         t.start();
-        return Result.getSuccess().toRpcClientResult();
+        Map<String, Boolean> map = new HashMap<>();
+        map.put("value", true);
+        return Result.getSuccess().setData(map).toRpcClientResult();
     }
 }
