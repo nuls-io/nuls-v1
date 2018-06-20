@@ -55,10 +55,10 @@ public class MessageFilterProcessor<E extends BaseMessage> implements EventHandl
                     message.getHeader().getModuleId() == MessageBusConstant.MODULE_ID_MESSAGE_BUS;
 
             if (!commonDigestTx) {
-                boolean needCache = message.getHeader().getMsgType() == ProtocolConstant.MESSAGE_TYPE_NEW_BLOCK &&
+                boolean needCache = message.getHeader().getMsgType() == ProtocolConstant.PROTOCOL_NEW_BLOCK &&
                         message.getHeader().getModuleId() == ProtocolConstant.MODULE_ID_PROTOCOL;
                 if(!needCache) {
-                    needCache = message.getHeader().getMsgType() == ProtocolConstant.MESSAGE_TYPE_NEW_TX &&
+                    needCache = message.getHeader().getMsgType() == ProtocolConstant.PROTOCOL_NEW_TX &&
                             message.getHeader().getModuleId() == ProtocolConstant.MODULE_ID_PROTOCOL;
                 }
                 if(needCache) {
@@ -67,10 +67,8 @@ public class MessageFilterProcessor<E extends BaseMessage> implements EventHandl
                 return;
             }
             if (messageCacheService.kownTheMessage(message.getHash())) {
-//                Log.info("discard2:{}," + message.getClass(), processDataDisruptorMessage.getData().getNode().getId());
                 processDataDisruptorMessage.setStoped(true);
             }else if (messageCacheService.kownTheMessage(((CommonDigestMessage) message).getMsgBody())) {
-//                Log.info("discard:{}," + ((CommonDigestMessage) message).getMsgBody(), processDataDisruptorMessage.getData().getNode().getId());
                 processDataDisruptorMessage.setStoped(true);
             } else {
                 messageCacheService.cacheRecievedMessageHash(message.getHash());
