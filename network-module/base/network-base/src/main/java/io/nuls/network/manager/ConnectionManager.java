@@ -94,11 +94,10 @@ public class ConnectionManager {
     }
 
     public void connectionNode(Node node) {
-
+        node.setStatus(Node.CONNECT);
         TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "node connection", new Runnable() {
             @Override
             public void run() {
-                node.setStatus(Node.CONNECT);
                 NettyClient client = new NettyClient(node);
                 client.start();
             }
@@ -158,7 +157,6 @@ public class ConnectionManager {
         if (message == null) {
             return;
         }
-
         if (isNetworkMessage(message)) {
             if (node.getStatus() != Node.HANDSHAKE && !isHandShakeMessage(message)) {
                 return;
@@ -228,7 +226,7 @@ public class ConnectionManager {
         return messageBusService;
     }
 
-    public void shutdown(){
+    public void shutdown() {
         nettyServer.shutdown();
     }
 }
