@@ -60,6 +60,9 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
+        if(node != null) {
+            node.setCanConnect(false);
+        }
         String nodeId = node == null ? "null" : node.getId();
         Log.info("---------------------- client channelRegistered -----------" + nodeId);
     }
