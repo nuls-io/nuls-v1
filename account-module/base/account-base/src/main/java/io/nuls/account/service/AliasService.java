@@ -197,7 +197,7 @@ public class AliasService {
             Log.error(e);
             return Result.getFailed(AccountErrorCode.FAILED);
         }
-        return Result.getSuccess();
+        return Result.getSuccess().setData(true);
     }
 
     public Alias getAlias(String alias) {
@@ -240,7 +240,7 @@ public class AliasService {
             Log.error(e);
             throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
         }
-        return Result.getSuccess();
+        return Result.getSuccess().setData(true);
     }
 
 
