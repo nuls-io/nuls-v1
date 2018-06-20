@@ -362,23 +362,26 @@ public class NodeManager implements Runnable {
         getNetworkStorage().saveNode(node);
     }
 
-    public void saveExternalIp(String ip, boolean isSever) {
+    public void saveExternalIp(String ip) {
         NetworkParam.getInstance().getLocalIps().add(ip);
         networkStorageService.saveExternalIp(ip);
+    }
 
-
+    public void tryToConnectMySelf() {
+        String externalIp = networkStorageService.getExternalIp();
+        if (StringUtils.isBlank(externalIp)) {
+            return;
+        }
         //当非服务器节点收到自己的外网IP时，尝试连接自己外网ip，看能否连通
-        if (!isSever && !isSeed) {
-            NodeGroup nodeGroup = nodeGroups.get(NetworkConstant.NETWORK_NODE_OUT_GROUP);
-            if (nodeGroup.size() <= 1) {
-                Node node = new Node();
-                node.setIp(ip);
-                node.setPort(networkParam.getPort());
-                node.setSeverPort(networkParam.getPort());
-                node.setType(Node.OUT);
-                nodeIdSet.add(node.getId());
-                connectionManager.connectionNode(node);
-            }
+        NodeGroup nodeGroup = nodeGroups.get(NetworkConstant.NETWORK_NODE_OUT_GROUP);
+        if (nodeGroup.size() <= 1) {
+            Node node = new Node();
+            node.setIp(externalIp);
+            node.setPort(networkParam.getPort());
+            node.setSeverPort(networkParam.getPort());
+            node.setType(Node.OUT);
+            nodeIdSet.add(node.getId());
+            connectionManager.connectionNode(node);
         }
     }
 

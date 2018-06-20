@@ -25,6 +25,7 @@
 
 package io.nuls.network.protocol.message;
 
+import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.BaseNulsData;
@@ -51,8 +52,10 @@ public class NetworkMessageBody extends BaseNulsData {
 
     private String nodeIp;
 
-    public NetworkMessageBody() {
+    private String version;
 
+    public NetworkMessageBody() {
+        this.version = NulsConfig.VERSION;
     }
 
     public NetworkMessageBody(int handshakeType, int severPort, long bestBlockHeight, NulsDigestData bestBlockHash) {
@@ -61,6 +64,7 @@ public class NetworkMessageBody extends BaseNulsData {
         this.bestBlockHeight = bestBlockHeight;
         this.bestBlockHash = bestBlockHash;
         this.networkTime = TimeService.currentTimeMillis();
+        this.version = NulsConfig.VERSION;
     }
 
     public NetworkMessageBody(int handshakeType, int severPort, long bestBlockHeight, NulsDigestData bestBlockHash, String ip) {
@@ -77,6 +81,7 @@ public class NetworkMessageBody extends BaseNulsData {
         s += bestBlockHash.size();
         s += SerializeUtils.sizeOfUint48(); // networkTime
         s += SerializeUtils.sizeOfString(nodeIp);
+        s += SerializeUtils.sizeOfString(version);
         return s;
     }
 
@@ -91,6 +96,7 @@ public class NetworkMessageBody extends BaseNulsData {
         stream.write(bestBlockHash.serialize());
         stream.writeUint48(networkTime);
         stream.writeString(nodeIp);
+        stream.writeString(version);
     }
 
     @Override
@@ -101,6 +107,7 @@ public class NetworkMessageBody extends BaseNulsData {
         bestBlockHash = buffer.readHash();
         networkTime = buffer.readUint48();
         nodeIp = buffer.readString();
+        version = buffer.readString();
     }
 
     public int getHandshakeType() {
@@ -162,5 +169,13 @@ public class NetworkMessageBody extends BaseNulsData {
         byte[] bytes = networkMessageBody.serialize();
         NetworkMessageBody n2 = new NetworkMessageBody();
         n2.parse(bytes);
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

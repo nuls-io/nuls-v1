@@ -92,10 +92,13 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
             nodeManager.saveNode(node);
         }
         if (nodeManager.isSeedNode(node.getIp())) {
-            nodeManager.saveExternalIp(body.getNodeIp(), isServer);
+            nodeManager.saveExternalIp(body.getNodeIp());
         }
 
         if (!isServer) {
+            //非种子节点尝试连接自己
+            nodeManager.tryToConnectMySelf();
+
             body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_CLIENT_TYPE, networkParam.getPort(),
                     NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash(),
                     socketChannel.remoteAddress().getHostString());
