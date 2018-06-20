@@ -96,7 +96,7 @@ public class CreateProcessor implements CommandProcessor {
         parameters.put("count", count);
         RpcClientResult result = restFul.post("/account", parameters);
         if(result.isFailed()){
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         return CommandResult.getResult(result);
     }

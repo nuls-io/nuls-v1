@@ -82,7 +82,7 @@ public class GetDepositedInfoProcessor implements CommandProcessor {
         String address = args[1];
         RpcClientResult result = restFul.get("/consensus/address/" + address, null);
         if (result.isFailed()) {
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         Map<String, Object> map = (Map)result.getData();
         map.put("usableBalance",  CommandHelper.naToNuls(map.get("usableBalance")));

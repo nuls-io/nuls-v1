@@ -39,25 +39,43 @@ public class Result {
 
     private boolean success;
 
-    private String code;
-
-    private String msg;
 
     private Object data;
 
     public Result() {
 
     }
+    public Result(boolean success, ErrorData errorData) {
+        this.success = success;
+        this.data = errorData;
+    }
     public Result(boolean success, ErrorCode errorCode) {
         this.success = success;
-        this.code = errorCode.getCode();
-        this.msg = errorCode.getMsg();
+        this.data = ErrorData.getErrorData(errorCode);
     }
 
-    public Result(boolean success, String code, String msg) {
+    public Result(boolean success, Object data) {
         this.success = success;
-        this.code = code;
-        this.msg = msg;
+        this.data = data;
+    }
+
+    public static Result getFailed() {
+        return getFailed(KernelErrorCode.FAILED);
+    }
+
+    public static Result getFailed(String msg) {
+        return getFailed(KernelErrorCode.FAILED, msg);
+    }
+
+    public static Result getFailed(ErrorCode errorCode) {
+        return getFailed(errorCode, errorCode.getMsg());
+    }
+
+    public static Result getFailed(ErrorCode errorCode, String msg) {
+        ErrorData errorData = ErrorData.getErrorData(errorCode);
+        errorData.setMsg(msg);
+        Result result = new Result(false, errorCode);
+        return result;
     }
 
     @Override
@@ -68,22 +86,6 @@ public class Result {
             return null;
         }
 
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
     }
 
     public Object getData() {
@@ -108,26 +110,9 @@ public class Result {
         this.success = success;
     }
 
-
-    public static Result getFailed() {
-        return getFailed(KernelErrorCode.FAILED);
-    }
-
-    public static Result getFailed(String msg) {
-        return new Result(false, KernelErrorCode.FAILED.getCode(), msg);
-    }
-
     public static Result getSuccess() {
         return new Result(true, KernelErrorCode.SUCCESS);
     }
 
-    public static Result getFailed(ErrorCode errorCode) {
-        return getFailed(errorCode, errorCode.getMsg());
-    }
-    public static Result getFailed(ErrorCode errorCode, String msg) {
-        Result result = new Result(false, errorCode);
-        result.setCode(errorCode.getCode());
-        result.setMsg(errorCode.getMsg());
-        return result;
-    }
+
 }

@@ -308,14 +308,14 @@ public class CommandHelper {
             return RpcClientResult.getFailed("address is wrong");
         }
         RpcClientResult result = restFul.get("/account/encrypted/" + address, null);
-        if (!result.getCode().equals(KernelErrorCode.SUCCESS.getCode()) || result.isFailed()) {
-            return result;
+        if (result.isSuccess()) {
+            String pwd = getPwd(prompt);
+            RpcClientResult rpcClientResult = new RpcClientResult();
+            rpcClientResult.setSuccess(true);
+            rpcClientResult.setData(pwd);
+            return rpcClientResult;
         }
-        String pwd = getPwd(prompt);
-        RpcClientResult rpcClientResult = new RpcClientResult();
-        rpcClientResult.setSuccess(true);
-        rpcClientResult.setCode(KernelErrorCode.SUCCESS.getCode());
-        rpcClientResult.setData(pwd);
-        return rpcClientResult;
+        return result;
+
     }
 }

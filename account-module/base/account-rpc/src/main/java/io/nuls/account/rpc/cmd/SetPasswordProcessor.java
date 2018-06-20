@@ -82,10 +82,10 @@ public class SetPasswordProcessor implements CommandProcessor {
     public CommandResult execute(String[] args) {
         String address = args[1];
         RpcClientResult rs = restFul.get("/account/encrypted/" + address, null);
-        if (!rs.getCode().equals(KernelErrorCode.SUCCESS.getCode())) {
-            return CommandResult.getFailed(rs.getMsg());
+        if (!rs.isSuccess()) {
+            return CommandResult.getFailed(rs);
         }
-        if(rs.isSuccess()){
+        if(rs.isSuccess() && rs.dataToBooleanValue()){
             return CommandResult.getFailed("This account already has a password.");
         }
         String password = CommandHelper.getNewPwd();
@@ -94,7 +94,7 @@ public class SetPasswordProcessor implements CommandProcessor {
         parameters.put("password", password);
         RpcClientResult result = restFul.post("/account/password/" + address, parameters);
         if(result.isFailed()){
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         return CommandResult.getResult(result);
     }

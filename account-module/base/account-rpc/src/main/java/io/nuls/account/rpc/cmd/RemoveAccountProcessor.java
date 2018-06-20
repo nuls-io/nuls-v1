@@ -82,15 +82,15 @@ public class RemoveAccountProcessor implements CommandProcessor {
     public CommandResult execute(String[] args) {
         String address = args[1];
         RpcClientResult res = CommandHelper.getPassword(address, restFul);
-        if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
-            return CommandResult.getFailed(res.getMsg());
+        if(!res.isSuccess()){
+            return CommandResult.getFailed(res);
         }
         String password = res.isSuccess() ? (String)res.getData() : null;
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("password", password);
         RpcClientResult result = restFul.post("/account/remove/" + address, parameters);
         if(result.isFailed()){
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         return CommandResult.getResult(result);
     }

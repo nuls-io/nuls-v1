@@ -84,7 +84,7 @@ public class GetAssetProcessor implements CommandProcessor {
         String address = args[1];
         RpcClientResult result = restFul.get("/account/assets/" + address, null);
         if(result.isFailed()){
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         List<Map<String, Object>> list = (List<Map<String, Object>>)result.getData();
         for(Map<String, Object> map : list){

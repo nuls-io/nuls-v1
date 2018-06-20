@@ -78,10 +78,10 @@ public class ResetPasswordProcessor implements CommandProcessor {
     public CommandResult execute(String[] args) {
         String address = args[1];
         RpcClientResult res = CommandHelper.getPassword(address, restFul, "Enter your old password:");
-        if(!res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
-            return CommandResult.getFailed(res.getMsg());
+        if(!res.isSuccess()){
+            return CommandResult.getFailed(res);
         }
-        if(res.isFailed()){
+        if(res.isSuccess() && !res.dataToBooleanValue()){
             return CommandResult.getFailed("No password has been set up yet");
         }
         String password = res.isSuccess() ? (String)res.getData() : null;
@@ -92,7 +92,7 @@ public class ResetPasswordProcessor implements CommandProcessor {
         parameters.put("newPassword", newPassword);
         RpcClientResult result = restFul.put("/account/password/" + address, parameters);
         if(result.isFailed()){
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         return CommandResult.getResult(result);
     }

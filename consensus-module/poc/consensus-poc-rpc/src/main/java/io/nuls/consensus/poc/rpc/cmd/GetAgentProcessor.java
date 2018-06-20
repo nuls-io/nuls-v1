@@ -88,7 +88,7 @@ public class GetAgentProcessor implements CommandProcessor {
         String agentHash = args[1];
         RpcClientResult result = restFul.get("/consensus/agent/" + agentHash, null);
         if (result.isFailed()) {
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         Map<String, Object> map = (Map) result.getData();
         map.put("deposit", CommandHelper.naToNuls(map.get("deposit")));

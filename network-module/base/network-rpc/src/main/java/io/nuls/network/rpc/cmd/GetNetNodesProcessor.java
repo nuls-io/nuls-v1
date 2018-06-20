@@ -68,7 +68,7 @@ public class GetNetNodesProcessor implements CommandProcessor {
     public CommandResult execute(String[] args) {
         RpcClientResult result = restFul.get("/network/nodes", null);
         if (result.isFailed()) {
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         return CommandResult.getResult(result);
     }

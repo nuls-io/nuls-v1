@@ -79,7 +79,7 @@ public class GetTxProcessor implements CommandProcessor {
         }
         RpcClientResult result = restFul.get("/tx/hash/" + hash, null);
         if (result.isFailed()) {
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         Map<String, Object> map = (Map)result.getData();
         map.put("fee", CommandHelper.naToNuls(map.get("fee")));

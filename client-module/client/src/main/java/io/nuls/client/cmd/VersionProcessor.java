@@ -68,7 +68,7 @@ public class VersionProcessor implements CommandProcessor {
     public CommandResult execute(String[] args) {
         RpcClientResult result = restFul.get("/client/version", null);
         if (result.isFailed()) {
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         return CommandResult.getResult(result);
     }

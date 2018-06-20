@@ -71,14 +71,14 @@ public class UpgradeProcessor implements CommandProcessor {
     public CommandResult execute(String[] args) {
         RpcClientResult result = restFul.post("/client/upgrade/" + args[1], "");
         if (result.isFailed()) {
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         //todo 打印进度，完成时确认重启
         int count = 0;
         while (true) {
             result = restFul.get("/client/upgrade", null);
             if (result.isFailed()) {
-                return CommandResult.getFailed(result.getMsg());
+                return CommandResult.getFailed(result);
             }
             int percentage = (int) ((Map) result.getData()).get("percentage");
             //todo 打印

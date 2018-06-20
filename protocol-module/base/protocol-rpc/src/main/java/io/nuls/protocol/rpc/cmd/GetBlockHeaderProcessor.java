@@ -99,7 +99,7 @@ public class GetBlockHeaderProcessor implements CommandProcessor {
             result = restFul.get("/block/header/height/" + height, null);
         }
         if(result.isFailed()){
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         Map<String, Object> map = (Map) result.getData();
         map.put("reward", CommandHelper.naToNuls(map.get("reward")));

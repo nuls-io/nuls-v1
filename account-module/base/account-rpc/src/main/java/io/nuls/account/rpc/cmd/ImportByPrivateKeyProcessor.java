@@ -87,7 +87,7 @@ public class ImportByPrivateKeyProcessor implements CommandProcessor {
         parameters.put("overwrite", false);
         RpcClientResult result = restFul.post("/account/import/pri", parameters);
         if (result.isFailed()) {
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         return CommandResult.getResult(result);
     }

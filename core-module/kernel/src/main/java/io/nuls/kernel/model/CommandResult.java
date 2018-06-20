@@ -30,6 +30,8 @@ import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 
+import java.util.Map;
+
 /**
  * @author Niels
  * @date 2018/3/7
@@ -74,13 +76,22 @@ public class CommandResult {
         return result;
     }
 
+    public static CommandResult getFailed(RpcClientResult rpcResult) {
+        CommandResult result = new CommandResult();
+        Map<String, Object> map = (Map)rpcResult.getData();
+        result.setMessage((String)map.get("msg"));
+        result.setSuccess(false);
+        return result;
+    }
+
     public static CommandResult getResult(RpcClientResult rpcResult) {
         if (null == rpcResult) {
             return CommandResult.getFailed("Result is null!");
         }
         CommandResult result = new CommandResult();
         result.setSuccess(rpcResult.isSuccess());
-        String message = rpcResult.getMsg();
+        Map<String, Object> map = (Map)rpcResult.getData();
+        String message = (String)map.get("msg");
         if (StringUtils.isBlank(message)) {
             message = "";
         } else {
@@ -88,7 +99,7 @@ public class CommandResult {
         }
         if (rpcResult.getData() != null) {
             try {
-                message += JSONUtils.obj2PrettyJson(rpcResult.getData());
+                message += JSONUtils.obj2PrettyJson(((Map)rpcResult.getData()).get("value"));
             } catch (Exception e) {
                 Log.error(e);
             }
@@ -100,4 +111,5 @@ public class CommandResult {
     public static CommandResult getSuccess(String message) {
         return new CommandResult().setSuccess(true).setMessage(message);
     }
+
 }

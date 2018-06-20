@@ -84,7 +84,7 @@ public class GetBlockHeaderListProcessor implements CommandProcessor {
         parameters.put("pageSize", pageSize);
         RpcClientResult result = restFul.get("", parameters);
         if (result.isFailed()) {
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         return CommandResult.getResult(result);
     }

@@ -74,7 +74,7 @@ public class GetConsensusProcessor implements CommandProcessor {
     public CommandResult execute(String[] args) {
         RpcClientResult result = restFul.get("/consensus",null);
         if (result.isFailed()) {
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         Map<String, Object> map = (Map)result.getData();
         map.put("rewardOfDay", CommandHelper.naToNuls(map.get("rewardOfDay")));

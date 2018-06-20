@@ -74,7 +74,7 @@ public class GetWalletBalanceProcessor implements CommandProcessor {
     public CommandResult execute(String[] args) {
         RpcClientResult result = restFul.get("/account/balance", null);
         if(result.isFailed()){
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         Map<String, Object> map = (Map)result.getData();
         map.put("balance",  CommandHelper.naToNuls(((Map)map.get("balance")).get("value")));

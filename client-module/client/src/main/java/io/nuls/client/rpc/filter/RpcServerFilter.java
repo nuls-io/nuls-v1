@@ -31,6 +31,7 @@ import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.model.ErrorData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
 
@@ -87,7 +88,7 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
             result = new RpcClientResult(false, exception.getErrorCode());
         } else if (e instanceof NulsRuntimeException) {
             NulsRuntimeException exception = (NulsRuntimeException) e;
-            result = new RpcClientResult(false, exception.getCode(), exception.getMessage());
+            result = new RpcClientResult(false, new ErrorData(exception.getCode(), exception.getMessage()));
         } else {
             result = Result.getFailed().setMsg(e.getMessage()).toRpcClientResult();
         }

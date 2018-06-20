@@ -29,6 +29,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 
+import java.util.Map;
+
 /**
  * @author Niels
  * @date 2017/10/31
@@ -37,34 +39,37 @@ public class RpcClientResult {
 
     private boolean success;
 
-    private String code;
-
-    private String msg;
-
     private Object data;
 
     public RpcClientResult() {
 
     }
 
-    public RpcClientResult(boolean success, String code, String msg) {
+    public RpcClientResult(boolean success, ErrorData errorData) {
         this.success = success;
-        this.code = code;
-        this.msg = msg;
+        this.data = errorData;
     }
 
     public RpcClientResult(boolean success, ErrorCode errorCode) {
         this.success = success;
-        this.code = errorCode.getCode();
-        this.msg = errorCode.getMsg();
+        this.data = ErrorData.getErrorData(errorCode);
     }
 
-    public static RpcClientResult getFailed(String message) {
-        RpcClientResult result = new RpcClientResult();
-        result.setSuccess(false);
-        result.setMsg(message);
-        result.setCode(KernelErrorCode.FAILED.getCode());
-        return result;
+    public RpcClientResult(boolean success, Object data) {
+        this.success = success;
+        this.data = data;
+    }
+
+    public static RpcClientResult getFailed(ErrorData errorData) {
+        return new RpcClientResult(false, errorData);
+    }
+
+    public static RpcClientResult getFailed(ErrorCode errorCode) {
+        return new RpcClientResult(false, errorCode);
+    }
+
+    public static RpcClientResult getFailed(String msg) {
+        return getFailed(new ErrorData(KernelErrorCode.FAILED.getCode(), msg));
     }
 
     @Override
@@ -75,22 +80,6 @@ public class RpcClientResult {
             return null;
         }
 
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
     }
 
     public Object getData() {
@@ -112,5 +101,17 @@ public class RpcClientResult {
 
     public void setSuccess(boolean success) {
         this.success = success;
+    }
+
+    public boolean dataToBooleanValue(){
+        return (boolean)((Map)data).get("value");
+    }
+
+    public String dataToStringValue(){
+        Object object = ((Map)data).get("value");
+        if(null != object){
+            return (String)object;
+        }
+        return null;
     }
 }

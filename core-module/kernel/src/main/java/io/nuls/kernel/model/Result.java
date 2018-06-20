@@ -167,14 +167,20 @@ public class Result<T> implements Serializable {
 
     public RpcClientResult toRpcClientResult() {
         RpcClientResult rpcClientResult = new RpcClientResult();
-        rpcClientResult.setCode(this.errorCode.getCode());
-        if (StringUtils.isBlank(msg) && null != errorCode) {
-            rpcClientResult.setMsg(this.errorCode.getMsg());
-        } else {
-            rpcClientResult.setMsg(msg);
-        }
         rpcClientResult.setSuccess(success);
-        rpcClientResult.setData(data);
+        if(success){
+            rpcClientResult.setData(data);
+        }else {
+            ErrorData errorData = new ErrorData();
+            if (StringUtils.isBlank(msg) && null != errorCode) {
+                errorData.setMsg(this.errorCode.getMsg());
+                errorData.setCode(this.errorCode.getCode());
+            } else {
+                errorData.setCode(KernelErrorCode.FAILED.getCode());
+                errorData.setMsg(msg);
+            }
+            rpcClientResult.setData(errorData);
+        }
         return rpcClientResult;
     }
 }

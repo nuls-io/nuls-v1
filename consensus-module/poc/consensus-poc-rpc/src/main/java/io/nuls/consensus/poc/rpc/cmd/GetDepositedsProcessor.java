@@ -104,7 +104,7 @@ public class GetDepositedsProcessor implements CommandProcessor {
         }
         RpcClientResult result = restFul.get("/consensus/deposit/address/" + address, parameters);
         if (result.isFailed()) {
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         List<Map<String, Object>> list = (List<Map<String, Object>>)((Map)result.getData()).get("list");
         for(Map<String, Object> map : list){

@@ -140,8 +140,8 @@ public class TransferProcessor implements CommandProcessor {
         }
         String address = form.getAddress();
         RpcClientResult res = CommandHelper.getPassword(address, restFul);
-        if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
-            return CommandResult.getFailed(res.getMsg());
+        if(!res.isSuccess()){
+            return CommandResult.getFailed(res);
         }
         String password = res.isSuccess() ? (String)res.getData() : null;
         Map<String, Object> parameters = new HashMap<>();
@@ -152,7 +152,7 @@ public class TransferProcessor implements CommandProcessor {
         parameters.put("remark", form.getRemark());
         RpcClientResult result = restFul.post("/accountledger/transfer", parameters);
         if (result.isFailed()) {
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         return CommandResult.getResult(result);
     }

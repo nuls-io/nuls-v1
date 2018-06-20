@@ -92,15 +92,16 @@ public class BackupAccountProcessor implements CommandProcessor {
         String address = args[1];
         String path = args.length == 3 ? args[2] : System.getProperty("user.dir");
         RpcClientResult res = CommandHelper.getPassword(address, restFul);
-        if(res.isFailed() && !res.getCode().equals(KernelErrorCode.SUCCESS.getCode())){
-            return CommandResult.getFailed(res.getMsg());
+        ((Map)res.getData()).get("value");
+        if(!res.isSuccess()){
+            return CommandResult.getFailed(res);
         }
         String password = res.isSuccess() ? (String)res.getData() : null;
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("password", password);
         RpcClientResult result = restFul.post("/account/export/" + address, parameters);
         if (result.isFailed()) {
-            return CommandResult.getFailed(result.getMsg());
+            return CommandResult.getFailed(result);
         }
         AccountKeyStoreDto accountKeyStoreDto = new AccountKeyStoreDto((Map<String, Object>) result.getData());
         Result rs = backUpFile(path, accountKeyStoreDto);
