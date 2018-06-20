@@ -34,7 +34,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
-import io.nuls.network.manager.NodeManager2;
+import io.nuls.network.manager.NodeManager;
 import io.nuls.network.model.Node;
 
 import static io.nuls.network.constant.NetworkConstant.CONNETCI_TIME_OUT;
@@ -50,7 +50,7 @@ public class NettyClient {
 
     private Node node;
 
-    private NodeManager2 nodeManager = NodeManager2.getInstance();
+    private NodeManager nodeManager = NodeManager.getInstance();
 
     public NettyClient(Node node) {
         this.node = node;
@@ -71,7 +71,7 @@ public class NettyClient {
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNETCI_TIME_OUT)
-                .handler(new NulsChannelInitializer<>(new ClientChannelHandler2()));
+                .handler(new NulsChannelInitializer<>(new ClientChannelHandler()));
     }
 
     public void start() {

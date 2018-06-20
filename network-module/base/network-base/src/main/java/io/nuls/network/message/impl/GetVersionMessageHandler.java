@@ -28,7 +28,7 @@ package io.nuls.network.message.impl;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.manager.NodeManager2;
+import io.nuls.network.manager.NodeManager;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
@@ -49,7 +49,7 @@ public class GetVersionMessageHandler implements BaseNetworkMeesageHandler {
         return instance;
     }
 
-    private NodeManager2 nodeManager = NodeManager2.getInstance();
+    private NodeManager nodeManager = NodeManager.getInstance();
 
     private NetworkParam networkParam = NetworkParam.getInstance();
 

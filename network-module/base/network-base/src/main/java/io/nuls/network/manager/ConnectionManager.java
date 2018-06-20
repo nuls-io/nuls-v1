@@ -26,7 +26,6 @@
 package io.nuls.network.manager;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -63,7 +62,7 @@ public class ConnectionManager {
 
     private NettyServer nettyServer;
 
-    private NodeManager2 nodeManager;
+    private NodeManager nodeManager;
 
     private BroadcastHandler broadcastHandler;
 
@@ -72,7 +71,7 @@ public class ConnectionManager {
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
     public void init() {
-        nodeManager = NodeManager2.getInstance();
+        nodeManager = NodeManager.getInstance();
         broadcastHandler = BroadcastHandler.getInstance();
         nettyServer = new NettyServer(networkParam.getPort());
         nettyServer.init();

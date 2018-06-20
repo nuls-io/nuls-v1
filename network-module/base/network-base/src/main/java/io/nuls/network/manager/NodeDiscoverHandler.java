@@ -50,7 +50,7 @@ public class NodeDiscoverHandler implements Runnable {
 
     private NetworkParam networkParam = NetworkParam.getInstance();
 
-    private NodeManager2 nodesManager = NodeManager2.getInstance();
+    private NodeManager nodesManager = NodeManager.getInstance();
 
     private BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
 

@@ -53,7 +53,7 @@ public class NettyServer {
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.TCP_NODELAY, true)            //Send messages immediately
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childHandler(new NulsChannelInitializer<>(new ServerChannelHandler2()));
+                .childHandler(new NulsChannelInitializer<>(new ServerChannelHandler()));
     }
 
     public void start() throws InterruptedException {

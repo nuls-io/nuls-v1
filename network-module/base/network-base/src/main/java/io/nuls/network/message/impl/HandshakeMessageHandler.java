@@ -31,7 +31,7 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.manager.NodeManager2;
+import io.nuls.network.manager.NodeManager;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
@@ -45,7 +45,7 @@ import java.util.List;
 
 public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
 
-    private NodeManager2 nodeManager = NodeManager2.getInstance();
+    private NodeManager nodeManager = NodeManager.getInstance();
 
     private NetworkParam networkParam = NetworkParam.getInstance();
 

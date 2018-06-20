@@ -35,14 +35,13 @@ import io.nuls.core.tools.network.IpUtil;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.model.Node;
 import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;
+import io.nuls.network.model.Node;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
 
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
@@ -63,31 +62,42 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        super.channelRegistered(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.info("---------------------- server channelRegistered ------------------------- " + nodeId);
+        System.out.println("---------------------- server channelRegistered ------------------------- " + nodeId);
+
+        String remoteIP = channel.remoteAddress().getHostString();
+        //查看是否是本机尝试连接本机地址 ，如果是直接关闭连接
+        if (networkParam.getLocalIps().contains(remoteIP)) {
+            System.out.println("----------------------本机尝试连接本机地址关闭 ------------------------- " + nodeId);
+            ctx.channel().close();
+            return;
+        }
 
         // 由于每个节点既是服务器，同时也会作为客户端去主动连接其他节点，
-        // 为防止两个节点同时作为服务器一方相互连接，在这里做硬性规定，
-        // 两个节点同时相互连接时，ip数字小的一方作为服务器，大的一方作为客户端
-        String remoteIP = channel.remoteAddress().getHostString();
-        Map<String, Node> nodeMap = nodeManager.getNodes();
+        // 为防止两个节点同时作为服务器一方相互连接，当有发现相同ip的主动节点时，就关闭当前连接
+        Map<String, Node> nodeMap = nodeManager.getConnectedNodes();
         for (Node node : nodeMap.values()) {
             if (node.getIp().equals(remoteIP)) {
                 if (node.getType() == Node.OUT) {
-                    String localIP = InetAddress.getLocalHost().getHostAddress();
-                    boolean isLocalServer = IpUtil.judgeLocalIsServer(localIP, remoteIP);
-                    //判断自己是否为服务器端
-                    if (!isLocalServer) {
-                        //不是则删除连接
-                        ctx.channel().close();
-                        return;
-                    } else {
-                        //如果自己是服务器端，则删除当前主动作为客户端连接出去的节点，保存当前作为服务器端的连接
-//                        System.out.println("----------------sever client register each other remove node-----------------" + node.getId());
-                        nodeManager.removeNode(node.getId());
-                        break;
-                    }
+                    System.out.println("--------------- 相同ip外网连接   -----------------" + nodeId);
+                    ctx.channel().close();
+                    return;
+//
+//                    String localIP = InetAddress.getLocalHost().getHostAddress();
+//                    boolean isLocalServer = IpUtil.judgeLocalIsServer(localIP, remoteIP);
+//                    //判断自己是否为服务器端
+//                    if (!isLocalServer) {
+//                        //不是则删除连接
+//                        System.out.println("---------------    -----------------");
+//                        ctx.channel().close();
+//                        return;
+//                    } else {
+//                        //如果自己是服务器端，则删除当前主动作为客户端连接出去的节点，保存当前作为服务器端的连接
+////                        System.out.println("----------------sever client register each other remove node-----------------" + node.getId());
+//                        nodeManager.removeNode(node.getId());
+//                    }
                 }
             }
         }
@@ -99,6 +109,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             if (n.getIp().equals(remoteIP)) {
                 count++;
                 if (count >= NetworkConstant.SAME_IP_MAX_COUNT) {
+                    System.out.println("-------------超过10个-----" +  nodeId);
                     ctx.channel().close();
                     return;
                 }
@@ -108,9 +119,10 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.info("---------------------- server channelActive ------------------------- " + nodeId);
+        System.out.println("---------------------- server channelActive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.add(channelId, channel);
@@ -118,12 +130,11 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         node.setChannelId(channelId);
         node.setStatus(Node.CONNECT);
         boolean success = nodeManager.processConnectedNode(node);
-
         if (!success) {
             ctx.channel().close();
             return;
         }
-        //握手成功时，告诉对方对方的外网ip地址
+        //握手成功时，告知对方其自身的外网ip地址
         NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
                 NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash(),
                 channel.remoteAddress().getHostString());
@@ -133,9 +144,10 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.info(" ---------------------- server channelInactive ------------------------- " + nodeId);
+        System.out.println(" ---------------------- server channelInactive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
@@ -143,7 +155,6 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
         if (node != null) {
             if (channelId.equals(node.getChannelId())) {
-//                System.out.println("------------ sever channelInactive remove node-------------" + node.getId());
                 nodeManager.removeNode(nodeId);
             } else {
                 Log.info("--------------server channel id different----------------------");
@@ -156,16 +167,8 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-//        Log.error("----------------ServerChannelHandler exceptionCaught-----------");
-//        Log.info("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage());
-//        cause.printStackTrace();
-//        SocketChannel channel = (SocketChannel) ctx.channel();
-//        InetSocketAddress localAddress = channel.localAddress();
-//        InetSocketAddress remoteAddress = channel.remoteAddress();
-//        String local = IpUtil.getNodeId(localAddress);
-//        String remote = IpUtil.getNodeId(remoteAddress);
-//        Log.info("--------------- ServerChannelHandler exceptionCaught :" + cause.getMessage()
-//                + ", localInfo: " + local + ", remoteInfo: " + remote);
+        System.out.println("----------------- server exceptionCaught -------------------");
+        cause.printStackTrace();
         ctx.channel().close();
     }
 
@@ -173,6 +176,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+        System.out.println(" ---------------------- server channelRead------------------------- " + nodeId);
         try {
             Node node = nodeManager.getNode(nodeId);
             if (node != null && node.isAlive()) {
@@ -185,12 +189,17 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
                 connectionManager.receiveMessage(buffer, node);
             }
         } catch (Exception e) {
-            Log.info(" ---------------------- server channelRead exception------------------------- " + nodeId);
-//            e.printStackTrace();
+            System.out.println(" ---------------------- server channelRead exception------------------------- " + nodeId);
+            e.printStackTrace();
             throw e;
         }
-//
+    }
 
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+        System.out.println("----------------- server channelUnregistered -------------------" + nodeId);
     }
 
 }

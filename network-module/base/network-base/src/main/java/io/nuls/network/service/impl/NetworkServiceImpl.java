@@ -30,7 +30,7 @@ import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.BroadcastHandler;
-import io.nuls.network.manager.NodeManager2;
+import io.nuls.network.manager.NodeManager;
 import io.nuls.network.model.BroadcastResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -43,7 +43,7 @@ import java.util.Map;
 @Service
 public class NetworkServiceImpl implements NetworkService {
 
-    private NodeManager2 nodeManager = NodeManager2.getInstance();
+    private NodeManager nodeManager = NodeManager.getInstance();
 
     private BroadcastHandler broadcastHandler = BroadcastHandler.getInstance();
 
