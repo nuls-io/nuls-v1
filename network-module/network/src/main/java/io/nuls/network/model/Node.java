@@ -178,7 +178,10 @@ public class Node extends BaseNulsData {
         sb.append("{");
         sb.append("id:" + getId() + ",");
         sb.append("type:" + type + ",");
-        sb.append("status:" + status + "}");
+        sb.append("status:" + status + ",");
+        sb.append("canConnect" + canConnect + ",");
+        sb.append("failCount" + failCount + "}");
+
         return sb.toString();
     }
 
