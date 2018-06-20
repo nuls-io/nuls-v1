@@ -38,7 +38,7 @@ import io.nuls.protocol.constant.ProtocolConstant;
  */
 public class BlockHeaderMessage extends BaseProtocolMessage<BlockHeader> {
     public BlockHeaderMessage() {
-        super(ProtocolConstant.MESSAGE_TYPE_BLOCK_HEADER);
+        super(ProtocolConstant.PROTOCOL_BLOCK_HEADER);
     }
 
     @Override

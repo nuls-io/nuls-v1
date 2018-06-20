@@ -39,7 +39,7 @@ import io.nuls.protocol.model.GetBlockParam;
 public class GetBlockMessage extends BaseProtocolMessage<GetBlockParam> {
 
     public GetBlockMessage() {
-        super(ProtocolConstant.MESSAGE_TYPE_GET_BLOCK);
+        super(ProtocolConstant.PROTOCOL_GET_BLOCK);
     }
 
     @Override

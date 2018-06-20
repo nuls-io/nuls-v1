@@ -38,7 +38,7 @@ import io.nuls.protocol.model.TxGroup;
 public class TxGroupMessage extends BaseProtocolMessage<TxGroup> {
 
     public TxGroupMessage() {
-        super(ProtocolConstant.MESSAGE_TYPE_TX_GROUP);
+        super(ProtocolConstant.PROTOCOL_TX_GROUP);
     }
 
     @Override

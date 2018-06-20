@@ -37,7 +37,7 @@ import io.nuls.protocol.model.SmallBlock;
  */
 public class SmallBlockMessage extends BaseProtocolMessage<SmallBlock> {
     public SmallBlockMessage() {
-        super(ProtocolConstant.MESSAGE_TYPE_NEW_BLOCK);
+        super(ProtocolConstant.PROTOCOL_NEW_BLOCK);
     }
 
     @Override

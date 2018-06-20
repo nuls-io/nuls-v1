@@ -39,7 +39,7 @@ import io.nuls.protocol.model.GetBlocksByHashParam;
 public class GetBlocksByHashMessage extends BaseProtocolMessage<GetBlocksByHashParam> {
 
     public GetBlocksByHashMessage() {
-        super(ProtocolConstant.MESSAGE_TYPE_GET_BLOCKS_BY_HASH);
+        super(ProtocolConstant.PROTOCOL_GET_BLOCKS_BY_HASH);
     }
 
     public GetBlocksByHashMessage(NulsDigestData startHash, NulsDigestData endHash) {

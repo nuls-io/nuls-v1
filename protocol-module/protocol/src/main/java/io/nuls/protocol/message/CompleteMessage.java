@@ -36,7 +36,7 @@ import io.nuls.protocol.model.CompleteParam;
 public class CompleteMessage extends BaseProtocolMessage<CompleteParam> {
 
     public CompleteMessage() {
-        super(ProtocolConstant.MESSAGE_TYPE_COMPLETE);
+        super(ProtocolConstant.PROTOCOL_COMPLETE);
     }
 
     @Override

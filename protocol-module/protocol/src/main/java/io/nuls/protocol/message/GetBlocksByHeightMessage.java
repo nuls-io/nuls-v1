@@ -38,7 +38,7 @@ import io.nuls.protocol.model.GetBlocksByHeightParam;
 public class GetBlocksByHeightMessage extends BaseProtocolMessage<GetBlocksByHeightParam> {
 
     public GetBlocksByHeightMessage() {
-        super(ProtocolConstant.MESSAGE_TYPE_GET_BLOCKS_BY_HEIGHT);
+        super(ProtocolConstant.PROTOCOL_GET_BLOCKS_BY_HEIGHT);
     }
 
     public GetBlocksByHeightMessage(long startHeight, long endHeight) {

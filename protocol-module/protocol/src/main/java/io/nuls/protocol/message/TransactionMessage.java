@@ -41,7 +41,7 @@ import io.nuls.protocol.constant.ProtocolConstant;
 public class TransactionMessage extends BaseProtocolMessage<Transaction> {
 
     public TransactionMessage() {
-        super(ProtocolConstant.MESSAGE_TYPE_NEW_TX);
+        super(ProtocolConstant.PROTOCOL_NEW_TX);
     }
 
     @Override
