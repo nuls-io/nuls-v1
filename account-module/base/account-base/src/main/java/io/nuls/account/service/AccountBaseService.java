@@ -119,9 +119,9 @@ public class AccountBaseService {
             accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
         } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed();
+            return Result.getFailed(AccountErrorCode.FAILED);
         }
-        return Result.getSuccess();
+        return Result.getSuccess().setData(true);
     }
 
     /**
@@ -166,7 +166,7 @@ public class AccountBaseService {
                 return Result.getFailed(AccountErrorCode.FAILED);
             }
             accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
-            return result;
+            return result.setData(true);
         } catch (Exception e) {
             Log.error(e);
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "The old password is wrong, change password failed");

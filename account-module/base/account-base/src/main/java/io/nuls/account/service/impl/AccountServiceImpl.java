@@ -160,7 +160,7 @@ public class AccountServiceImpl implements AccountService {
             return result;
         }
         accountCacheService.localAccountMaps.remove(account.getAddress().getBase58());
-        return Result.getSuccess();
+        return Result.getSuccess().setData(true);
     }
 
     @Override
@@ -497,7 +497,11 @@ public class AccountServiceImpl implements AccountService {
         }
         Result result = new Result();
         boolean rs = account.isEncrypted();
-        return result.setSuccess(rs);
+        //operation success
+        result.setSuccess(true);
+        //funtion result
+        result.setData(rs);
+        return result;
     }
 
     @Override
@@ -506,10 +510,7 @@ public class AccountServiceImpl implements AccountService {
             return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         boolean rs = account.validatePassword(password);
-        if (!rs) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-        }
-        return Result.getSuccess();
+        return Result.getSuccess().setData(rs);
     }
 
     @Override

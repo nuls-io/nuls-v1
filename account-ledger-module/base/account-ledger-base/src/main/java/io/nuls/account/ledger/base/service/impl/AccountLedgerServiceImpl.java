@@ -25,6 +25,7 @@
 
 package io.nuls.account.ledger.base.service.impl;
 
+import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.base.manager.BalanceManager;
 import io.nuls.account.ledger.base.service.LocalUtxoService;
 import io.nuls.account.ledger.base.service.TransactionInfoService;
@@ -507,10 +508,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
             if (accountService.isEncrypted(account).isSuccess() && account.isLocked()) {
                 AssertUtil.canNotEmpty(password, "the password can not be empty");
-
-                Result passwordResult = accountService.validPassword(account, password);
-                if (passwordResult.isFailed()) {
-                    return passwordResult;
+                if (!account.validatePassword(password)) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
             }
             TransferTransaction tx = new TransferTransaction();
