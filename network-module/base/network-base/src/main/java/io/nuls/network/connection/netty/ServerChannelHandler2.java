@@ -173,6 +173,7 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+        Log.info(" ---------------------- server channelRead------------------------- " + nodeId);
         try {
             Node node = nodeManager.getNode(nodeId);
             if (node != null && node.isAlive()) {
@@ -193,7 +194,9 @@ public class ServerChannelHandler2 extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("----------------- server channelUnregistered -------------------");
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+        System.out.println("----------------- server channelUnregistered -------------------" + nodeId);
     }
 
 }

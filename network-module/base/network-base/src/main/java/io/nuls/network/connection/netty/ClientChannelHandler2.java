@@ -60,7 +60,7 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
-        String nodeId = node == null ? null : node.getId();
+        String nodeId = node == null ? "null" : node.getId();
         Log.info("---------------------- client channelRegistered -----------" + nodeId);
     }
 
@@ -71,7 +71,7 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
-        String nodeId = node == null ? null : node.getId();
+        String nodeId = node == null ? "null" : node.getId();
         Log.info("---------------------- client channelActive -----------" + nodeId);
         String remoteIP = channel.remoteAddress().getHostString();
         //如果是本机节点访问自己的服务器，则广播本机服务器到全网
@@ -94,7 +94,11 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        System.out.println("----------------- client channelInactive -------------------");
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        Attribute<Node> nodeAttribute = channel.attr(key);
+        Node node = nodeAttribute.get();
+        String nodeId = node == null ? "null" : node.getId();
+        System.out.println("----------------- client channelInactive -------------------" + nodeId);
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
     }
@@ -103,7 +107,7 @@ public class ClientChannelHandler2 extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-
+        Log.info(" ---------------------- client channelRead---------------------- " + nodeId);
         try {
             Node node = nodeManager.getNode(nodeId);
             if (node != null && node.isAlive()) {
