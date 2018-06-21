@@ -40,6 +40,7 @@ import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
+import io.nuls.consensus.poc.temp.Compatible0910;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.BlockLog;
@@ -366,7 +367,9 @@ public class ChainContainer implements Cloneable {
         if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
             BlockLog.debug("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
             Log.error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
-            return false;
+            if (Compatible0910.isCompatible(tx)) {
+                return false;
+            }
         }
         YellowPunishTransaction yellowPunishTransaction = null;
         try {

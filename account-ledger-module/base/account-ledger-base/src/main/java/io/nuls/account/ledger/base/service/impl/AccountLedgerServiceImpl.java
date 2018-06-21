@@ -417,6 +417,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 if (!coin.usable()) {
                     continue;
                 }
+                if(coin.getNa().equals(Na.ZERO)){
+                    continue;
+                }
                 coins.add(coin);
                 size += coin.size();
                 if (i == 127) {
