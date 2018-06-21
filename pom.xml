@@ -4,7 +4,7 @@
 
     <groupId>io.nuls</groupId>
     <artifactId>nuls</artifactId>
-    <version>0.9.10</version>
+    <version>0.9.11</version>
     <packaging>pom</packaging>
 
     <name>nuls</name>
