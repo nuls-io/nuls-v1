@@ -308,8 +308,8 @@ public class AccountResource {
         }
         Result result = accountService.getAliasFee(form.getAddress(), form.getAlias());
         if(result.isSuccess()) {
-            Map<String, Long> map = new HashMap<>();
-            map.put("value", (Long)result.getData());
+            Map<String, Object> map = new HashMap<>();
+            map.put("value", result.getData());
             result.setData(map);
         }
         return result.toRpcClientResult();

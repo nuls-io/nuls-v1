@@ -199,8 +199,8 @@ public class AccountLedgerResource {
         Result result = accountLedgerService.transferFee(AddressTool.getAddress(form.getAddress()),
                 AddressTool.getAddress(form.getToAddress()), value, form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
         if(result.isSuccess()) {
-            Map<String, String> map = new HashMap<>();
-            map.put("value", (String)result.getData());
+            Map<String, Object> map = new HashMap<>();
+            map.put("value", result.getData());
             result.setData(map);
         }
         return result.toRpcClientResult();
