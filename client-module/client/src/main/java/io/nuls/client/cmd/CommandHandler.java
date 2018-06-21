@@ -90,9 +90,9 @@ public class CommandHandler {
         register(new CreateProcessor());
         register(new GetAccountProcessor());
         register(new GetAccountsProcessor());
-        register(new GetAssetProcessor());//
+//        register(new GetAssetProcessor());//
         register(new GetBalanceProcessor());
-        register(new GetWalletBalanceProcessor());//
+//        register(new GetWalletBalanceProcessor());//
         register(new GetPrivateKeyProcessor());
         register(new ImportByKeyStoreProcessor());
         register(new ImportByPrivateKeyProcessor());
@@ -107,7 +107,7 @@ public class CommandHandler {
          */
         register(new TransferProcessor());
         register(new GetAccountTxListProcessor());
-        register(new GetUTXOProcessor());//
+//        register(new GetUTXOProcessor());//
 
         /**
          * consensus

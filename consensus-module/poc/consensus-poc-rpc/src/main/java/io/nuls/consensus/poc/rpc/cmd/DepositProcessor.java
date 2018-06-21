@@ -101,6 +101,6 @@ public class DepositProcessor implements CommandProcessor {
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getResult(result);
+        return CommandResult.getResult(CommandResult.dataTransformValue(result));
     }
 }
