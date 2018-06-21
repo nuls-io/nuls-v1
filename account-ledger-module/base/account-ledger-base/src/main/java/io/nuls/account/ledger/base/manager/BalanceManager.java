@@ -88,9 +88,6 @@ public class BalanceManager {
 
     /**
      * 获取账户余额
-     *
-     * @param address
-     * @return
      */
     public Result<Balance> getBalance(Address address) {
         return getBalance(address.getBase58Bytes());
@@ -98,9 +95,6 @@ public class BalanceManager {
 
     /**
      * 获取账户余额
-     *
-     * @param address
-     * @return
      */
     public Result<Balance> getBalance(byte[] address) {
         lock.lock();
@@ -118,7 +112,7 @@ public class BalanceManager {
                 } catch (NulsException e) {
                     Log.info("getbalance of address[" + Base58.encode(address) + "] error");
                 }
-            }else {
+            } else {
                 balance = entity.getBalance();
             }
             return Result.getSuccess().setData(balance);
@@ -129,8 +123,6 @@ public class BalanceManager {
 
     /**
      * 刷新余额，其实就是删除缓存，下次获取时再重新计算
-     *
-     * @param address
      */
     public void refreshBalance(byte[] address) {
         lock.lock();
@@ -154,10 +146,6 @@ public class BalanceManager {
 
     /**
      * 计算账户的余额，这个方法应该和获取余额方法互斥，避免并发导致数据不准确
-     *
-     * @param address
-     * @return
-     * @throws NulsException
      */
     public Balance calBalanceByAddress(byte[] address) throws NulsException {
         lock.lock();
@@ -232,9 +220,12 @@ public class BalanceManager {
         lock.lock();
         try {
             long bestHeight = NulsContext.getInstance().getBestHeight();
+            if (balanceMap.isEmpty()) {
+                return;
+            }
             for (String address : balanceMap.keySet()) {
                 BalanceCacheEntity entity = balanceMap.get(address);
-                if(entity == null){
+                if (entity == null) {
                     balanceMap.remove(address);
                     continue;
                 }
