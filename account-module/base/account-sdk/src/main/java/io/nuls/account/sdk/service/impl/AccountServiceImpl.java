@@ -98,7 +98,9 @@ public class AccountServiceImpl implements AccountService {
         } catch (NulsException e) {
             return Result.getFailed();
         }
-        return Result.getSuccess().setData(accounts);
+        Map<String, List<AccountDto>> map = new HashMap<>();
+        map.put("list", accounts);
+        return Result.getSuccess().setData(map);
     }
 
     @Override
@@ -170,7 +172,9 @@ public class AccountServiceImpl implements AccountService {
                 }
             }
         }
-        return Result.getSuccess().setData(path + File.separator + fileName);
+        Map<String, String> map = new HashMap<>();
+        map.put("value", path + File.separator + fileName);
+        return Result.getSuccess().setData(map);
     }
 
     @Override
@@ -188,8 +192,10 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        Double nuls = Na.naToNuls(((Map) result.getData()).get("value"));
-        return result.setData(Na.naToNuls(nuls));
+        Map<String, Object> map = (Map) result.getData();
+        Double nuls = Na.naToNuls(map.get("value"));
+        map.put("value",nuls);
+        return result.setData(map);
     }
 
 
@@ -218,13 +224,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        List<Map<String, Object>> list = (List<Map<String, Object>>) ((Map) result.getData()).get("list");
-        List<AccountDto> accountList = new ArrayList<>();
-        for (Map<String, Object> map : list) {
-            AccountDto accountDto = new AccountDto(map);
-            accountList.add(accountDto);
-        }
-        return result.setData(accountList);
+        return result.setData(result.getData());
     }
 
     @Override
@@ -236,16 +236,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
-        List<Map<String, Object>> list = (List<Map<String, Object>>) result.getData();
-        List<AssetDto> assetDtoList = new ArrayList<>();
-        for (Map<String, Object> map : list) {
-            map.put("balance", map.get("balance"));
-            map.put("usable", map.get("usable"));
-            map.put("locked", map.get("locked"));
-            AssetDto assetDto = new AssetDto("NULS", map);
-            assetDtoList.add(assetDto);
-        }
-        return result.setData(assetDtoList);
+        return result;
     }
 
 
@@ -543,7 +534,9 @@ public class AccountServiceImpl implements AccountService {
         } catch (NulsException e) {
             return Result.getFailed(AccountErrorCode.FAILED);
         }
-        return Result.getSuccess().setData(Hex.encode(account.getEncryptedPriKey()));
+        Map<String, String> map = new HashMap<>();
+        map.put("value", Hex.encode(account.getEncryptedPriKey()));
+        return Result.getSuccess().setData(map);
     }
 
     /**
@@ -552,74 +545,41 @@ public class AccountServiceImpl implements AccountService {
     public static void main(String[] args) {
         SDKBootstrap.sdkStart();
         AccountService as = new AccountServiceImpl();
-//        as.createAccount("nuls123456");
-//        as.backupAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "/Users/lichao/Downloads", "nuls123456");
-//        as.getAliasFee("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie");
-//        as.getAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
-//        as.getAccountList(1, 100);
-//        as.getAssets("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
-//        as.setAlias("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie", "nuls123456");
-//        as.getAddressByAlias("charlie");
-//        as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456");
         try {
-//            System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
-//            System.out.println(JSONUtils.obj2json(as.createOffLineAccount(2, "nuls123456")));
-//            System.out.println(JSONUtils.obj2json(as.createOffLineAccount(1)));
-//            System.out.println(JSONUtils.obj2json(as.createOffLineAccount("nuls123456")));
-//            System.out.println(JSONUtils.obj2json(as.createAccount("nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.createAccount(3,"nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.createOfflineAccount(2, "nuls123456")));
 //            System.out.println(JSONUtils.obj2json(as.getAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
 //            System.out.println(JSONUtils.obj2json(as.getAliasFee("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie")));
-//            System.out.println(JSONUtils.obj2json(as.getAssets("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
-//            System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
-//            System.out.println(JSONUtils.obj2json(as.setAlias("2CiU1CmB6c9jmSLDNBe6PouA7NgNULS","firstblood", "nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.getAccountList(1, 100)));
 //            System.out.println(JSONUtils.obj2json(as.getAddressByAlias("charlie")));
-//            System.out.println(JSONUtils.obj2json(as.getAccountList(1,10)));
-//            System.out.println(JSONUtils.obj2json(as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs","nuls123456")));
-//            System.out.println(JSONUtils.obj2json(as.isAliasExist("charlie")));
-//            System.out.println(JSONUtils.obj2json(as.backupAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "/Users/lichao/Downloads", "nuls123456")));
-//            System.out.println(JSONUtils.obj2json(as.importAccountByKeystore("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore","nuls123456",true)));
+//            System.out.println(JSONUtils.obj2json(as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls111111")));
+//            System.out.println(JSONUtils.obj2json(as.isAliasUsable("charlie")));
+//            System.out.println(JSONUtils.obj2json(as.backupAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "/Users/lichao/Downloads", "nuls111111")));
+//            System.out.println(JSONUtils.obj2json(as.importAccountByKeystore("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore","nuls111111",true)));
 //            System.out.println(JSONUtils.obj2json(as.importAccountByPriKey("74ffeeec0b2d6552a07eb7f5691a6da13278f87025283ca474741f35b247f55d",
 //                    "nuls123456",true)));
 //            System.out.println(JSONUtils.obj2json(as.isEncrypted("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
-//            System.out.println(JSONUtils.obj2json(as.removeAccount("2Ccv2oMPZ8X7r2pHA4SoFPwpUNiJ11J")));
-//            System.out.println(JSONUtils.obj2json(as.setPassword("2CYJcEQvYW7UuX3GMeFxm2Mzn6pQ6jJ","nuls123456")));
-//            System.out.println(JSONUtils.obj2json(as.resetPassword("2CWZUrEkkFebiz3T8cx6bDTLSVX43mv","nuls123456", "nuls111111")));
-            /*System.out.println(JSONUtils.obj2json(as.setPasswordOffLine(
-                    "2Cby7jxykhikf1UyKuWVdpVy6eAiLBm",
-                    "00e3bd8fc2cabaefae82c26f97355a4fdfdb38582d99af2f7438b827153e8f1b22",
-                    "nuls123456")));*/
-            System.out.println(JSONUtils.obj2json(as.resetPasswordOffline(
-                    "2Cby7jxykhikf1UyKuWVdpVy6eAiLBm",
-                    "a770c1886f566c973b6eb99543ef03825a89ed16e20d8dbe320aed64a85d5863ca23df43ef16ce0475424a49e192b6f9",
-                    "nuls123456", "nuls111111")));
+//            System.out.println(JSONUtils.obj2json(as.removeAccount("2CZxWCRn49qTdpHfU4x2p4Pm1P6RnU8", "nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.setPassword("2CiANt4bUihwuwrzFFKgA91mC3U4dRT","nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.resetPassword("2CiANt4bUihwuwrzFFKgA91mC3U4dRT","nuls123456", "nuls111111")));
+//            System.out.println(JSONUtils.obj2json(as.setAlias("2CiU1CmB6c9jmSLDNBe6PouA7NgNULS","firstbloods", "nuls123456")));
+//            System.out.println(JSONUtils.obj2json(as.createOfflineAccount(2)));
+
+//            System.out.println(JSONUtils.obj2json(as.setPasswordOffline(
+//                    "2CinqyeuVQDCwjAwLDfgQaFBc5QzFFw",
+//                    "01315f71eb607c076969974549d26c6326cda462e959190afc6a8621fe9da3f2",
+//                    "nuls123456")));
+
+//            System.out.println(JSONUtils.obj2json(as.resetPasswordOffline(
+//                    "2CinqyeuVQDCwjAwLDfgQaFBc5QzFFw",
+//                    "275c2f9532c25c981ca56974e91f2b8232901542ad5150b1193ae52337d2310645436a345adfde8158e3966d2acfb7eb",
+//                    "nuls123456", "nuls111111")));
+
+            System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
+            System.out.println(JSONUtils.obj2json(as.getAssets("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        as.importAccountByKeystore("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore","nuls123456",true);
-
-       /* FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(new File("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore"));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        as.importAccountByKeystore(fileReader,"nuls123456",true);*/
-
-//        as.importAccountByPriKey("1f9d3ad044e0e1201e117b041f3d2ceedacb44688e57969620f3ad7a4d6e9d24", "nuls123456", true);
-//        as.isEncrypted("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
-//        as.lockAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
-//        as.unlockAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456", 120);
-//        as.setPassword("2CWSpfF1mFTjWmDCAx4A6NXwykgpj4q", "nuls123456");
-//        as.removeAccount("2CWSpfF1mFTjWmDCAx4A6NXwykgpj4q", "nuls123456");
-//        as.resetPassword("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls123456", "nuls123456");
-
-       /* FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(new File("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore"));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        as.updatePasswordByKeystore(fileReader,"nuls1234567");*/
     }
     /**
      * ---------------------------------------------------------------------
