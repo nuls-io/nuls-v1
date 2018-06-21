@@ -27,6 +27,7 @@ package io.nuls.client.cmd;
 
 import io.nuls.account.rpc.cmd.*;
 import io.nuls.accout.ledger.rpc.cmd.GetAccountTxListProcessor;
+import io.nuls.accout.ledger.rpc.cmd.GetUTXOProcessor;
 import io.nuls.accout.ledger.rpc.cmd.TransferProcessor;
 import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.rpc.constant.RpcConstant;
@@ -89,9 +90,9 @@ public class CommandHandler {
         register(new CreateProcessor());
         register(new GetAccountProcessor());
         register(new GetAccountsProcessor());
-//        register(new GetAssetProcessor());
+        register(new GetAssetProcessor());//
         register(new GetBalanceProcessor());
-//        register(new GetWalletBalanceProcessor());
+        register(new GetWalletBalanceProcessor());//
         register(new GetPrivateKeyProcessor());
         register(new ImportByKeyStoreProcessor());
         register(new ImportByPrivateKeyProcessor());
@@ -106,7 +107,7 @@ public class CommandHandler {
          */
         register(new TransferProcessor());
         register(new GetAccountTxListProcessor());
-        //register(new GetUTXOProcessor());
+        register(new GetUTXOProcessor());//
 
         /**
          * consensus

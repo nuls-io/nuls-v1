@@ -84,7 +84,7 @@ public class ResetPasswordProcessor implements CommandProcessor {
         if(res.isSuccess() && !res.dataToBooleanValue()){
             return CommandResult.getFailed("No password has been set up yet");
         }
-        String password = res.isSuccess() ? (String)res.getData() : null;
+        String password = (String)res.getData();
         String newPassword = CommandHelper.getNewPwd();
         CommandHelper.confirmPwd(newPassword);
         Map<String, Object> parameters = new HashMap<>();

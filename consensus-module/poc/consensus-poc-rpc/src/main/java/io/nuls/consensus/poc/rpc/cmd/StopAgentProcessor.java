@@ -85,7 +85,7 @@ public class StopAgentProcessor implements CommandProcessor {
         if(!res.isSuccess()){
             return CommandResult.getFailed(res);
         }
-        String password = res.isSuccess() ? (String)res.getData() : null;
+        String password = (String)res.getData();
         Map<String, Object> parameters = new HashMap<>(2);
         parameters.put("address", address);
         parameters.put("password", password);

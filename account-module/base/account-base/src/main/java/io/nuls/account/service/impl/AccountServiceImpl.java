@@ -418,30 +418,39 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Collection<Account>> getAccountList() {
-
-        if (accountCacheService.localAccountMaps != null) {
-            return Result.getSuccess().setData(accountCacheService.localAccountMaps.values());
-        }
-        accountCacheService.localAccountMaps = new ConcurrentHashMap<>();
-
         List<Account> list = new ArrayList<>();
-        Result<List<AccountPo>> result = accountStorageService.getAccountList();
-        if (result.isFailed()) {
-            return Result.getFailed().setData(list);
+        if (accountCacheService.localAccountMaps != null) {
+            Collection<Account> values = accountCacheService.localAccountMaps.values();
+            Iterator<Account> iterator = values.iterator();
+            while(iterator.hasNext()) {
+                list.add(iterator.next());
+            }
+        }else {
+            accountCacheService.localAccountMaps = new ConcurrentHashMap<>();
+            Result<List<AccountPo>> result = accountStorageService.getAccountList();
+            if (result.isFailed()) {
+                return Result.getFailed().setData(list);
+            }
+            List<AccountPo> poList = result.getData();
+            Set<String> addressList = new HashSet<>();
+            if (null == poList || poList.isEmpty()) {
+                return Result.getSuccess().setData(list);
+            }
+            for (AccountPo po : poList) {
+                Account account = po.toAccount();
+                list.add(account);
+                addressList.add(account.getAddress().getBase58());
+            }
+            for (Account account : list) {
+                accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+            }
         }
-        List<AccountPo> poList = result.getData();
-        Set<String> addressList = new HashSet<>();
-        if (null == poList || poList.isEmpty()) {
-            return Result.getSuccess().setData(list);
-        }
-        for (AccountPo po : poList) {
-            Account account = po.toAccount();
-            list.add(account);
-            addressList.add(account.getAddress().getBase58());
-        }
-        for (Account account : list) {
-            accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
-        }
+        list.sort(new Comparator<Account>() {
+            @Override
+            public int compare(Account o1, Account o2) {
+                return (int) (o2.getCreateTime() - o1.getCreateTime());
+            }
+        });
         return Result.getSuccess().setData(list);
     }
 

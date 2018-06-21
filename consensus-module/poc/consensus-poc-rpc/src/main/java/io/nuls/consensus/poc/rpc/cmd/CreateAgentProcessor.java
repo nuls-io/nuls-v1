@@ -100,7 +100,7 @@ public class CreateAgentProcessor implements CommandProcessor {
         if(!res.isSuccess()){
             return CommandResult.getFailed(res);
         }
-        String password = res.isSuccess() ? (String)res.getData() : null;
+        String password = (String)res.getData();
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("agentAddress", address);
         parameters.put("packingAddress", args[2]);

@@ -90,16 +90,14 @@ public class CommandResult {
         }
         CommandResult result = new CommandResult();
         result.setSuccess(rpcResult.isSuccess());
-        Map<String, Object> map = (Map)rpcResult.getData();
-        String message = (String)map.get("msg");
-        if (StringUtils.isBlank(message)) {
-            message = "";
-        } else {
-            message += ":";
-        }
-        if (rpcResult.getData() != null) {
+        String message = "";
+        if(!rpcResult.isSuccess()){
+            Map<String, Object> map = (Map)rpcResult.getData();
+            message = (String)map.get("msg");
+            //message += ":";
+        }else {
             try {
-                message += JSONUtils.obj2PrettyJson(((Map)rpcResult.getData()).get("value"));
+                message += JSONUtils.obj2PrettyJson(rpcResult.getData());
             } catch (Exception e) {
                 Log.error(e);
             }
@@ -110,6 +108,23 @@ public class CommandResult {
 
     public static CommandResult getSuccess(String message) {
         return new CommandResult().setSuccess(true).setMessage(message);
+    }
+
+
+    public static RpcClientResult dataTransformValue(RpcClientResult rpcResult){
+        Map<String, Object> map = ((Map)rpcResult.getData());
+        if(null != map) {
+            rpcResult.setData(map.get("value"));
+        }
+        return rpcResult;
+    }
+
+    public static RpcClientResult dataTransformList(RpcClientResult rpcResult){
+        Map<String, Object> map = ((Map)rpcResult.getData());
+        if(null != map) {
+            rpcResult.setData(map.get("list"));
+        }
+        return rpcResult;
     }
 
 }

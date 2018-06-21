@@ -32,6 +32,7 @@ import io.nuls.kernel.model.RpcClientResult;
 import jline.console.ConsoleReader;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -309,13 +310,16 @@ public class CommandHelper {
         }
         RpcClientResult result = restFul.get("/account/encrypted/" + address, null);
         if (result.isSuccess()) {
-            String pwd = getPwd(prompt);
             RpcClientResult rpcClientResult = new RpcClientResult();
             rpcClientResult.setSuccess(true);
-            rpcClientResult.setData(pwd);
+            if(result.dataToBooleanValue()) {
+                String pwd = getPwd(prompt);
+                rpcClientResult.setData(pwd);
+            }
             return rpcClientResult;
         }
         return result;
 
     }
+
 }

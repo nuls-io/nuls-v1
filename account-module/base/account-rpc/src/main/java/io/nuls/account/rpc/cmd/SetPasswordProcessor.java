@@ -96,6 +96,6 @@ public class SetPasswordProcessor implements CommandProcessor {
         if(result.isFailed()){
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getResult(result);
+        return CommandResult.getSuccess("Success");
     }
 }

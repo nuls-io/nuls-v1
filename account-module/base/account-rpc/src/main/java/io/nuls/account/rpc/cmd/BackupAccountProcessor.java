@@ -92,11 +92,10 @@ public class BackupAccountProcessor implements CommandProcessor {
         String address = args[1];
         String path = args.length == 3 ? args[2] : System.getProperty("user.dir");
         RpcClientResult res = CommandHelper.getPassword(address, restFul);
-        ((Map)res.getData()).get("value");
         if(!res.isSuccess()){
             return CommandResult.getFailed(res);
         }
-        String password = res.isSuccess() ? (String)res.getData() : null;
+        String password = (String)res.getData();
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("password", password);
         RpcClientResult result = restFul.post("/account/export/" + address, parameters);
@@ -108,7 +107,7 @@ public class BackupAccountProcessor implements CommandProcessor {
         if (rs.isFailed()) {
             return CommandResult.getFailed(rs.getMsg());
         }
-        return CommandResult.getResult(rs.toRpcClientResult());
+        return CommandResult.getSuccess((String)rs.getData());
     }
 
     /**

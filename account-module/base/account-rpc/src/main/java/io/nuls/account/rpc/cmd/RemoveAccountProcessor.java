@@ -85,7 +85,7 @@ public class RemoveAccountProcessor implements CommandProcessor {
         if(!res.isSuccess()){
             return CommandResult.getFailed(res);
         }
-        String password = res.isSuccess() ? (String)res.getData() : null;
+        String password = (String)res.getData();
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("password", password);
         RpcClientResult result = restFul.post("/account/remove/" + address, parameters);
