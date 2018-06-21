@@ -569,7 +569,7 @@ public class PocConsensusResource {
         }
         Map<String, String> valueMap = new HashMap<>();
         valueMap.put("value", tx.getHash().getDigestHex());
-        return Result.getSuccess().setData(tx.getHash().getDigestHex()).toRpcClientResult();
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 
     @GET

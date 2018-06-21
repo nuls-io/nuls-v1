@@ -501,6 +501,7 @@ public class AccountLedgerResource {
         Page<UtxoDto> page = new Page<>(pageNumber, pageSize, result.getData().size());
         int start = pageNumber * pageSize - pageSize;
         if (start >= coinList.size()) {
+            dtoResult.setSuccess(true);
             dtoResult.setData(page);
             return dtoResult.toRpcClientResult();
         }
