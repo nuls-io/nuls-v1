@@ -195,6 +195,9 @@ public class ConsensusTool {
                 double fee = DoubleUtils.mul(reward, commissionRate);
                 caReward = caReward + fee;
                 double hisReward = DoubleUtils.sub(reward, fee);
+                if (hisReward == 0D) {
+                    continue;
+                }
                 Na depositReward = Na.valueOf(DoubleUtils.longValue(hisReward));
 
                 Coin rewardCoin = null;
