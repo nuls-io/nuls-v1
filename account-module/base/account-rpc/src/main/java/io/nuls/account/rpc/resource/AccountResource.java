@@ -32,7 +32,6 @@ import io.nuls.account.model.*;
 import io.nuls.account.rpc.model.AccountDto;
 import io.nuls.account.rpc.model.AccountKeyStoreDto;
 import io.nuls.account.rpc.model.AssetDto;
-import io.nuls.account.rpc.model.BalanceDto;
 import io.nuls.account.rpc.model.form.*;
 import io.nuls.account.service.AccountBaseService;
 import io.nuls.account.service.AccountCacheService;
@@ -100,9 +99,9 @@ public class AccountResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "[创建] 创建账户 ", notes = "result.data: List<AccountDto>")
+    @ApiOperation(value = "[创建] 创建账户 ", notes = "result.data: List<String>")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = ArrayList.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult create(@ApiParam(name = "form", value = "账户表单数据", required = true)
                                           AccountCreateForm form) {
@@ -130,7 +129,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[创建] 创建离线账户, 该账户不保存到数据库, 并将直接返回账户的所有信息 ", notes = "result.data: List<Account>")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = ArrayList.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult createOfflineAccount(@ApiParam(name = "form", value = "账户表单数据", required = true)
                                                         AccountCreateForm form) {
@@ -161,9 +160,9 @@ public class AccountResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "[查询] 查询账户列表 [3.3.4]", notes = "result.data: Page<AccountDto>")
+    @ApiOperation(value = "[查询] 查询账户列表", notes = "result.data: Page<AccountDto>")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = AccountDto.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult accountList(@ApiParam(name = "pageNumber", value = "页码")
                                        @QueryParam("pageNumber") int pageNumber,
@@ -204,9 +203,9 @@ public class AccountResource {
     @GET
     @Path("/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("[查询] 查询账户信息 [3.3.2]")
+    @ApiOperation("[查询] 查询账户信息")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = AccountDto.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult get(@ApiParam(name = "address", value = "账户地址", required = true)
                                @PathParam("address") String address) {
@@ -245,7 +244,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("[验证密码] 验证账户密码是否正确")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult validationPassword(@PathParam("address") String address,
                                               @ApiParam(name = "form", value = "设置别名表单数据", required = true)
@@ -270,9 +269,9 @@ public class AccountResource {
     @POST
     @Path("/alias/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("[别名] 设置别名 [3.3.6]")
+    @ApiOperation("[别名] 设置别名")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult alias(@PathParam("address") String address,
                                  @ApiParam(name = "form", value = "设置别名表单数据", required = true)
@@ -297,7 +296,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("[别名手续费] 获取设置别名手续 ")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult aliasFee(@BeanParam() AccountAliasFeeForm form) {
         if (!Address.validAddress(form.getAddress())) {
@@ -320,7 +319,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("[验证别名是否可用] 验证别名是否可用(是否没有没占用) ")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult isAliasUsable(@ApiParam(name = "alias", value = "别名", required = true) @QueryParam("alias") String alias) {
         if (StringUtils.isBlank(alias)) {
@@ -336,7 +335,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("[别名获取地址] 根据别名获取账户地址地址 ")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult getAddressByAlias(@ApiParam(name = "alias", value = "别名", required = true) @QueryParam("alias") String alias) {
         if (StringUtils.isBlank(alias)) {
@@ -356,7 +355,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("[余额] 查询本地所有账户总余额")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = BalanceDto.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult getTotalBalance() {
         try {
@@ -371,7 +370,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[资产] 查询账户资产 [3.3.8]", notes = "result.data: List<AssetDto>")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = AssetDto.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult getAssets(@ApiParam(name = "address", value = "账户地址", required = true)
                                      @PathParam("address") String address) {
@@ -400,9 +399,9 @@ public class AccountResource {
     @POST
     @Path("/prikey/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation("[私钥查询] 查询账户私钥，只能查询本地创建或导入的账户 [3.3.7]")
+    @ApiOperation("[私钥查询] 查询账户私钥，只能查询本地创建或导入的账户")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = String.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult getPrikey(@PathParam("address") String address, @ApiParam(name = "form", value = "查询私钥表单数据", required = true)
             AccountPasswordForm form) {
@@ -444,7 +443,7 @@ public class AccountResource {
     @POST
     @Path("/unlock/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "[解锁] 解锁账户", notes = "")
+    @ApiOperation(value = "[解锁] 解锁账户")
     public RpcClientResult unlock(@ApiParam(name = "address", value = "账户地址", required = true)
                                   @PathParam("address") String address,
                                   @ApiParam(name = "form", value = "解锁表单数据", required = true)
@@ -492,7 +491,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[设密码] 设置账户密码")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult setPassword(@ApiParam(name = "address", value = "账户地址", required = true)
                                        @PathParam("address") String address,
@@ -522,7 +521,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[设密码] 设置离线账户密码")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult setPassword(@ApiParam(name = "form", value = "设置离线账户密码表单数据", required = true)
                                                OfflineAccountPasswordForm form) {
@@ -567,7 +566,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[离线钱包修改密码] 根据原密码修改账户密码")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult updatePassword(@ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
                                                   OfflineAccountPasswordForm form) {
@@ -625,7 +624,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[修改密码] 根据原密码修改账户密码")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult updatePassword(@ApiParam(name = "address", value = "账户地址", required = true)
                                           @PathParam("address") String address,
@@ -663,7 +662,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[修改密码] 根据私钥修改账户密码")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult updatePasswordByPriKey(@ApiParam(name = "form", value = "修改账户密码表单数据", required = true)
                                                           AccountPriKeyChangePasswordForm form) {
@@ -694,7 +693,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[修改密码] 根据AccountKeyStore修改账户密码")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult updatePasswordByAccountKeyStore(@ApiParam(name = "form", value = "重置密码表单数据", required = true)
                                                                    AccountKeyStoreResetPasswordForm form) {
@@ -723,7 +722,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[导出] 账户备份，导出AccountKeyStore字符串 ")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult export(@ApiParam(name = "address", value = "账户地址", required = true)
                                   @PathParam("address") String address,
@@ -811,7 +810,7 @@ public class AccountResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[导入] 根据AccountKeyStore导入账户")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult importAccount(@ApiParam(name = "form", value = "导入账户表单数据", required = true)
                                                  AccountKeyStoreImportForm form) {
@@ -846,7 +845,7 @@ public class AccountResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @ApiOperation(value = "[导入] 根据AccountKeyStore导入账户")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Result.class)
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult importAccountByKeystoreFile(@FormDataParam("keystore") InputStream in,
                                                        @FormDataParam("password") String password,
@@ -971,7 +970,7 @@ public class AccountResource {
     @POST
     @Path("/remove/{address}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "[移除] 移除账户", notes = "Nuls_RPC_API文档[3.4.9]")
+    @ApiOperation(value = "[移除] 移除账户")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })

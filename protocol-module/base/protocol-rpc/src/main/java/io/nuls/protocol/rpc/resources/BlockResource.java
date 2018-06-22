@@ -179,10 +179,38 @@ public class BlockResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = BlockDto.class)
     })
-    public RpcClientResult getBestBlockHash() throws IOException {
+    public RpcClientResult getBestBlockHeader() throws IOException {
         Result result = Result.getSuccess();
         result.setData(new BlockHeaderDto(NulsContext.getInstance().getBestBlock()));
         return result.toRpcClientResult();
+    }
+
+    @GET
+    @Path("/newest/hight")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "查询最新区块高度")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult getBestBlockHight() throws IOException {
+        long hight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
+        Map<String, Long> map = new HashMap<>();
+        map.put("value", hight);
+        return Result.getSuccess().setData(map).toRpcClientResult();
+    }
+
+    @GET
+    @Path("/newest/hash")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "查询最新区块的hash")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult getBestBlockHash() throws IOException {
+        String hash = NulsContext.getInstance().getBestBlock().getHeader().getHash().getDigestHex();
+        Map<String, String> map = new HashMap<>();
+        map.put("value", hash);
+        return Result.getSuccess().setData(map).toRpcClientResult();
     }
 
     @GET

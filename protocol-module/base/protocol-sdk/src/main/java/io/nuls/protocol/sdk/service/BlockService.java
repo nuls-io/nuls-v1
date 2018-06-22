@@ -8,6 +8,23 @@ import io.nuls.sdk.model.Result;
  */
 public interface BlockService {
 
+
+    /**
+     *Get the Newest block hight
+     * @return
+     * If the operation is successful, 'success' is true, and data is Long type;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result getNewestBlockHight();
+
+    /**
+     *Get the Newest block Hash
+     * @return
+     * If the operation is successful, 'success' is true, and data is Long type;
+     * If the operation fails, "success" is false and the result has error information
+     */
+    Result getNewestBlockHash();
+
     /**
      * Get the Newest block header
      * @return
