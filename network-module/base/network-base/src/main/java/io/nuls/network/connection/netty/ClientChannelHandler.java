@@ -101,7 +101,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
         String nodeId = node == null ? "null" : node.getId();
-        System.out.println("----------------- client channelInactive -------------------" + nodeId);
+        Log.info("----------------- client channelInactive -------------------" + nodeId);
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
     }
@@ -130,7 +130,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        System.out.println("----------------- client exceptionCaught -------------------");
+        Log.info("----------------- client exceptionCaught -------------------");
         cause.printStackTrace();
         ctx.channel().close();
     }
@@ -142,7 +142,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
         if (node != null) {
-            System.out.println("----------------- client channelUnregistered -------------------" + node.getId());
+            Log.info("----------------- client channelUnregistered -------------------" + node.getId());
             nodeManager.removeNode(node);
         }
 
