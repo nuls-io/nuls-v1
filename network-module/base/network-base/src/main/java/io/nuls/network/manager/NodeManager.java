@@ -74,8 +74,6 @@ public class NodeManager implements Runnable {
 
     private BroadcastHandler broadcastHandler;
 
-    private boolean isSeed;
-
     boolean running;
 
     //存放所有正在连接或已连接的节点的id，防止重复连接
@@ -102,8 +100,7 @@ public class NodeManager implements Runnable {
 
         for (String ip : IpUtil.getIps()) {
             if (isSeedNode(ip)) {
-                //networkParam.setMaxInCount(networkParam.getMaxInCount() * 2);
-                isSeed = true;
+                networkParam.setMaxInCount(networkParam.getMaxInCount() * 2);
             }
         }
     }

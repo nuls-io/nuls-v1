@@ -123,7 +123,7 @@ public class TimeService implements Runnable {
             try {
                 InetAddress inetAddress = InetAddress.getByName(urlList.get(i));
                 TimeInfo timeInfo = client.getTime(inetAddress);
-                return timeInfo.getReturnTime();
+                return timeInfo.getMessage().getTransmitTimeStamp().getTime();
             } catch (Exception e) {
                 continue;
             }

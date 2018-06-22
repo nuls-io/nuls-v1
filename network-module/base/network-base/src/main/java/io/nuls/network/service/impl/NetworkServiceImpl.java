@@ -110,9 +110,8 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public void reset() {
-        Log.warn("start network reset");
-        return;
-//        nodeManager.reset();
+        Log.warn("------network reset");
+        nodeManager.reset();
     }
 
     @Override

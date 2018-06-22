@@ -39,7 +39,7 @@ public class OutputDto {
     /**
      * 索引
      */
-    private Integer index;
+    private int index;
 
     /**
      * 地址
@@ -49,17 +49,17 @@ public class OutputDto {
     /**
      * 数量
      */
-    private Long value;
+    private long value;
 
     /**
      * 锁定时间
      */
-    private Long lockTime;
+    private long lockTime;
 
     /**
      * 状态 0:usable(未花费), 1:timeLock(高度锁定), 2:consensusLock(参与共识锁定), 3:spent(已花费)
      */
-    private Integer status;
+    private int status;
 
     public OutputDto() {
 
@@ -74,11 +74,19 @@ public class OutputDto {
         this.status = (Integer) map.get("status");
     }
 
-    public Integer getIndex() {
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
+    public int getIndex() {
         return index;
     }
 
-    public void setIndex(Integer index) {
+    public void setIndex(int index) {
         this.index = index;
     }
 
@@ -90,35 +98,27 @@ public class OutputDto {
         this.address = address;
     }
 
-    public Long getValue() {
+    public long getValue() {
         return value;
     }
 
-    public void setValue(Long value) {
+    public void setValue(long value) {
         this.value = value;
     }
 
-    public Long getLockTime() {
+    public long getLockTime() {
         return lockTime;
     }
 
-    public void setLockTime(Long lockTime) {
+    public void setLockTime(long lockTime) {
         this.lockTime = lockTime;
     }
 
-    public Integer getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(Integer status) {
+    public void setStatus(int status) {
         this.status = status;
-    }
-
-    public String getTxHash() {
-        return txHash;
-    }
-
-    public void setTxHash(String txHash) {
-        this.txHash = txHash;
     }
 }

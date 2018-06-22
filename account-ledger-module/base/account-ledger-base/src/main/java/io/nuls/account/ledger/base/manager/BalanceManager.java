@@ -220,10 +220,8 @@ public class BalanceManager {
         lock.lock();
         try {
             long bestHeight = NulsContext.getInstance().getBestHeight();
-            if (balanceMap.isEmpty()) {
-                return;
-            }
-            for (String address : balanceMap.keySet()) {
+            Set<String> set = new HashSet<>(balanceMap.keySet());
+            for (String address : set) {
                 BalanceCacheEntity entity = balanceMap.get(address);
                 if (entity == null) {
                     balanceMap.remove(address);
