@@ -22,6 +22,24 @@ public class BlockServiceImpl implements BlockService {
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
+    public Result getNewestBlockHight() {
+        Result result = restFul.get("/block/newest/hight", null);
+        if (result.isFailed()) {
+            return result;
+        }
+        return result;
+    }
+
+    @Override
+    public Result getNewestBlockHash() {
+        Result result = restFul.get("/block/newest/hash", null);
+        if (result.isFailed()) {
+            return result;
+        }
+        return result;
+    }
+
+    @Override
     public Result getNewestBlockHeader() {
         Result result = restFul.get("/block/newest", null);
         if (result.isFailed()) {
@@ -117,11 +135,15 @@ public class BlockServiceImpl implements BlockService {
         SDKBootstrap.sdkStart();
         BlockService bs = new BlockServiceImpl();
         try {
+            System.out.println(JSONUtils.obj2json(bs.getNewestBlockHight()));
+            System.out.println(JSONUtils.obj2json(bs.getNewestBlockHash()));
+            /*
             System.out.println(JSONUtils.obj2json(bs.getBlockHeader(4)));
             System.out.println(JSONUtils.obj2json(bs.getBlockHeader("002029fff0e77722c318ee34583cab809f2e2bcfe46334f4678bbfef62a103bccbfa")));
             System.out.println(JSONUtils.obj2json(bs.getNewestBlockHeader()));
             System.out.println(JSONUtils.obj2json(bs.getBlock(10)));
             System.out.println(JSONUtils.obj2json(bs.getBlock("002029fff0e77722c318ee34583cab809f2e2bcfe46334f4678bbfef62a103bccbfa")));
+            */
         } catch (Exception e) {
             e.printStackTrace();
         }
