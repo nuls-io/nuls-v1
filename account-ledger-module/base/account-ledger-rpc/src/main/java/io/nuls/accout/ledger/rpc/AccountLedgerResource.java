@@ -314,10 +314,10 @@ public class AccountLedgerResource {
         try {
             String newAddress = AccountTool.newAddress(key).getBase58();
             if (!newAddress.equals(form.getAddress())) {
-                return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
             }
         } catch (NulsException e) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
 
         try {

@@ -197,13 +197,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         }
 
         List<Coin> inputsList = new ArrayList<>();
+
         for (int i = 0; i < inputs.size(); i++) {
             InputDto inputDto = inputs.get(i);
             byte[] key = Arrays.concatenate(Hex.decode(inputDto.getFromHash()), new VarInt(inputDto.getFromIndex()).encode());
             Coin coin = new Coin();
             coin.setOwner(key);
             coin.setNa(Na.valueOf(inputDto.getValue()));
-
+            coin.setLockTime(inputDto.getLockTime());
             inputsList.add(coin);
         }
 
@@ -224,7 +225,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         }
         try {
             String txHex = Hex.encode(tx.serialize());
-            return Result.getSuccess().setData(txHex);
+            Map<String, String> map = new HashMap<>();
+            map.put("value", txHex);
+            return Result.getSuccess().setData(map);
         } catch (IOException e) {
             Log.error(e);
             return Result.getFailed(e.getMessage());
@@ -254,11 +257,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
                 }
                 priKey = Hex.encode(privateKeyBytes);
             } else {
-                return Result.getFailed("password error");
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         }
         if (!ECKey.isValidPrivteHex(priKey)) {
-            return Result.getFailed("priKey error");
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "priKey error");
         }
 
         ECKey key = ECKey.fromPrivate(new BigInteger(Hex.decode(priKey)));
@@ -276,7 +279,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
             Transaction tx = TransactionTool.getInstance(new NulsByteBuffer(data));
             tx = TransactionTool.signTransaction(tx, key);
 
-            return Result.getSuccess().setData(Hex.encode(tx.serialize()));
+            txHex = Hex.encode(tx.serialize());
+            Map<String, String> map = new HashMap<>();
+            map.put("value", txHex);
+            return Result.getSuccess().setData(map);
         } catch (Exception e) {
             Log.error(e);
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
