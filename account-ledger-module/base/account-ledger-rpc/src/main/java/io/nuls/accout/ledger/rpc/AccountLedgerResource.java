@@ -208,7 +208,6 @@ public class AccountLedgerResource {
         return result.toRpcClientResult();
     }
 
-
     @POST
     @Path("/transaction")
     @Produces(MediaType.APPLICATION_JSON)
