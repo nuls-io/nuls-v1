@@ -76,10 +76,10 @@ public class TransactionFeeCalculator {
      */
     public static final Na getFee(int size, Na price) {
         if (price.isLessThan(MIN_PRECE_PRE_1024_BYTES)) {
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "The price is too low!");
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
         if (price.isGreaterThan(OTHER_PRECE_PRE_1024_BYTES)) {
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "The price is too high!");
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
         Na fee = price.multiply(size / KB);
         if (size % KB > 0) {

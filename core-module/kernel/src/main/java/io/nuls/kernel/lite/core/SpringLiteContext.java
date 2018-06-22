@@ -370,10 +370,10 @@ public class SpringLiteContext {
     public static <T> T getBean(Class<T> beanClass) {
         Set<String> nameSet = CLASS_NAME_SET_MAP.get(beanClass);
         if (null == nameSet || nameSet.isEmpty()) {
-            throw new NulsRuntimeException(KernelErrorCode.DATA_NOT_FOUND, "Can't find bean of " + beanClass.getName());
+            throw new NulsRuntimeException(KernelErrorCode.DATA_NOT_FOUND);
         }
         if (nameSet.size() > 1) {
-            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "There are " + nameSet.size() + " beans of " + beanClass.getName());
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
         T value = null;
         String beanName = null;

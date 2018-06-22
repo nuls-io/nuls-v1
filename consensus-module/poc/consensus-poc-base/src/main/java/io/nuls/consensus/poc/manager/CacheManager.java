@@ -69,7 +69,7 @@ public class CacheManager {
 
         if (blockHeaderList == null || blockHeaderList.size() == 0 || blockList == null || blockList.size() == 0) {
             Log.error("load cache error ,not find the block info!");
-            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "load cache error ,not find the block info!");
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
         List<Agent> agentList = cacheLoader.loadAgents();
         List<Deposit> depositList = cacheLoader.loadDepositList();

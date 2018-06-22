@@ -52,8 +52,8 @@ public class BeanStatusException extends NulsRuntimeException {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
-    public BeanStatusException(ErrorCode errorCode, String msg) {
+    /*public BeanStatusException(ErrorCode errorCode, String msg) {
         super(errorCode, msg);
-    }
+    }*/
 
 }

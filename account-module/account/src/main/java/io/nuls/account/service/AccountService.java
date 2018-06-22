@@ -243,6 +243,10 @@ public interface AccountService {
 
     /**
      * Verify the account password.
+     *
+     * @param account
+     * @param password
+     * @return
      */
     Result validPassword(Account account, String password);
 
@@ -365,6 +369,7 @@ public interface AccountService {
     /**
      * 根据账户地址字节数组获取账户别名
      * Get an account alias based on the array of account address bytes
+     *
      * @param address
      * @return alias string
      */
@@ -373,6 +378,7 @@ public interface AccountService {
     /**
      * 根据账户地址获取账户别名
      * Get account alias according to account address
+     *
      * @param address
      * @return alias string
      */
@@ -381,10 +387,12 @@ public interface AccountService {
 
     /**
      * 获取设置别名交易手续费
-     * @param addr
+     * Gets to set the alias transaction fee
+     *
+     * @param address
      * @param aliasName
      * @return
      */
-    Result<Na> getAliasFee(String addr, String aliasName);
+    Result<Na> getAliasFee(String address, String aliasName);
 
 }

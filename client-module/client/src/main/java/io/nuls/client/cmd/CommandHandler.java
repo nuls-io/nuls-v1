@@ -147,7 +147,7 @@ public class CommandHandler {
             port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT);
         } catch (Exception e) {
             Log.error("CommandHandler start failed", e);
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "CommandHandler start failed");
+            throw new NulsRuntimeException(KernelErrorCode.FAILED);
         }
         if (StringUtils.isBlank(port)) {
             RestFulUtils.getInstance().setServerUri("http://" + RpcConstant.DEFAULT_IP + ":" + RpcConstant.DEFAULT_PORT + RpcConstant.PREFIX);

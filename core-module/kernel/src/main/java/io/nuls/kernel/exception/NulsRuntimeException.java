@@ -116,12 +116,12 @@ public class NulsRuntimeException extends RuntimeException {
         this.errorCode = message;
     }
 
-    public NulsRuntimeException(ErrorCode errorCode, String msg) {
-        super(msg);
-        this.code = errorCode.getCode();
-        this.message = errorCode.getMsg() + ":" + msg;
-        this.errorCode = errorCode;
-    }
+//    public NulsRuntimeException(ErrorCode errorCode, String msg) {
+//        super(msg);
+//        this.code = errorCode.getCode();
+//        this.message = errorCode.getMsg() + ":" + msg;
+//        this.errorCode = errorCode;
+//    }
 
     @Override
     public String getMessage() {

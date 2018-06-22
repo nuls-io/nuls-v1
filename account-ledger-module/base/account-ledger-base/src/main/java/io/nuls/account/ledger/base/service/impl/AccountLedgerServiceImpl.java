@@ -394,7 +394,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public CoinDataResult getCoinData(byte[] address, Na amount, int size, Na price) throws NulsException {
         if (null == price) {
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "the price is null!");
+            throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
         }
 
         lock.lock();

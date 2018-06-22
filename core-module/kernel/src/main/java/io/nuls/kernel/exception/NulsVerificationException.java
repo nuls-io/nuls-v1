@@ -32,9 +32,9 @@ import io.nuls.kernel.constant.KernelErrorCode;
  */
 public class NulsVerificationException extends NulsRuntimeException {
 
-    public NulsVerificationException(String msg) {
+   /* public NulsVerificationException(String msg) {
         super(KernelErrorCode.VERIFICATION_FAILD, msg);
-    }
+    }*/
 
     public NulsVerificationException(ErrorCode errorCode) {
         super(errorCode);
@@ -44,7 +44,7 @@ public class NulsVerificationException extends NulsRuntimeException {
         super(errorCode, e);
     }
 
-    public NulsVerificationException(ErrorCode errorCode, String msg) {
-        super(errorCode, msg);
-    }
+//    public NulsVerificationException(ErrorCode errorCode, String msg) {
+//        super(errorCode, msg);
+//    }
 }

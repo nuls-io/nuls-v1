@@ -54,7 +54,7 @@ public class NulsByteBuffer {
 
     public NulsByteBuffer(byte[] bytes, int cursor) {
         if (null == bytes || bytes.length == 0 || cursor < 0) {
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "create byte buffer faild!");
+            throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
         }
         this.payload = bytes;
         this.cursor = cursor;

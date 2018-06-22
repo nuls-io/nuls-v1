@@ -73,6 +73,7 @@ public interface KernelErrorCode {
     ErrorCode UPGRADING = ErrorCode.init("SYS029", "20029");
     ErrorCode NOT_UPGRADING = ErrorCode.init("SYS030", "20030");
     ErrorCode VERSION_NOT_NEWEST = ErrorCode.init("SYS031", "20031");
+    ErrorCode SERIALIZE_ERROR = ErrorCode.init("SYS032", "20032");
 
 
     /*

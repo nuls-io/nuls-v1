@@ -33,6 +33,7 @@ import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.storage.service.PunishLogStorageService;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -78,7 +79,7 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
                     po.setType(PunishType.YELLOW.getCode());
                     punishLogStorageService.save(po);
                 }
-                throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollbackTransaction tx failed!");
+                throw new NulsRuntimeException(TransactionErrorCode.ROLLBACK_TRANSACTION_FAILED);
             } else {
                 deletedList.add(address);
             }
@@ -106,7 +107,7 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
                 for (PunishLogPo punishLogPo : savedList) {
                     punishLogStorageService.delete(getPoKey(punishLogPo.getAddress(), PunishType.YELLOW.getCode(), punishLogPo.getHeight(), punishLogPo.getIndex()));
                 }
-                throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollbackTransaction tx failed!");
+                throw new NulsRuntimeException(TransactionErrorCode.ROLLBACK_TRANSACTION_FAILED);
             } else {
                 savedList.add(po);
             }

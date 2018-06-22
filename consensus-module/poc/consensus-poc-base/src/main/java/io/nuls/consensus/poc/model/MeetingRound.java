@@ -82,7 +82,7 @@ public class MeetingRound {
 
         this.memberList = memberList;
         if (null == memberList || memberList.isEmpty()) {
-            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "consensus member list is empty");
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
 
         Collections.sort(memberList);
@@ -103,10 +103,10 @@ public class MeetingRound {
 
     public MeetingMember getMember(int order) {
         if (order == 0) {
-            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "the parameter is wrong:memberOrder");
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
         if (null == memberList || memberList.isEmpty()) {
-            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "consensus member list is empty");
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
         return this.memberList.get(order - 1);
     }
