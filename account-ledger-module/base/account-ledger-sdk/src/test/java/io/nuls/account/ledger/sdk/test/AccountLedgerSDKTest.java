@@ -36,6 +36,7 @@ public class AccountLedgerSDKTest {
             InputDto input = new InputDto();
             input.setFromHash("002023c66d10cf9047dbcca12aee2235ff9dfe0f13db3c921a2ec22e0dd63331cb85");
             input.setFromIndex(4);
+            input.setValue(1000000000L);
             inputs.add(input);
 
             OutputDto output = new OutputDto();
