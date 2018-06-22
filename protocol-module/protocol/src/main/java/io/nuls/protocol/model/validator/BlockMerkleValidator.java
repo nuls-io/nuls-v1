@@ -24,6 +24,7 @@
  */
 package io.nuls.protocol.model.validator;
 
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
@@ -36,11 +37,10 @@ import io.nuls.kernel.validate.ValidateResult;
  */
 @Component
 public class BlockMerkleValidator implements NulsDataValidator<Block> {
-    private static final String ERROR_MESSAGE = "Merkle Hash is wrong!";
 
     @Override
     public ValidateResult validate(Block data) {
-        ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), ERROR_MESSAGE);
+        ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.MERKLE_HASH_WRONG);
         do {
             if (null == data) {
                 result.setMsg("Data is null!");

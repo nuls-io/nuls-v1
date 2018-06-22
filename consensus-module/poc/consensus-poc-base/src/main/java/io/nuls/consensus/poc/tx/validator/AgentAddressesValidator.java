@@ -32,6 +32,7 @@ import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
@@ -54,9 +55,9 @@ public class AgentAddressesValidator extends BaseConsensusProtocolValidator<Crea
         Agent agent = data.getTxData();
         for (byte[] address : ConsensusConfig.getSeedNodeList()) {
             if (Arrays.equals(address, agent.getAgentAddress())) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), "The agent address is a seed address");
+                return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
             } else if (Arrays.equals(address, agent.getPackingAddress())) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), "The packing address is a seed address");
+                return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
             }
         }
         long count = 0;
@@ -64,7 +65,7 @@ public class AgentAddressesValidator extends BaseConsensusProtocolValidator<Crea
             count = this.getRedPunishCount(agent.getAgentAddress());
         } catch (Exception e) {
             Log.error(e);
-            return ValidateResult.getFailedResult(this.getClass().getName(), e.getMessage());
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         if (count > 0) {
             return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT);

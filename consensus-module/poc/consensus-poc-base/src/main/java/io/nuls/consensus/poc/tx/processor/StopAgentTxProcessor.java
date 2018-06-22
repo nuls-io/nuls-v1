@@ -27,6 +27,7 @@ package io.nuls.consensus.poc.tx.processor;
 
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.tx.StopAgentTransaction;
@@ -37,6 +38,7 @@ import io.nuls.consensus.poc.storage.service.DepositStorageService;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -77,7 +79,7 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
     public Result onRollback(StopAgentTransaction tx, Object secondaryData) {
         AgentPo agentPo = agentStorageService.get(tx.getTxData().getCreateTxHash());
         if (null == agentPo || agentPo.getDelHeight() < 0) {
-            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "the agent is not exist or it's never stopped!");
+            throw new NulsRuntimeException(KernelErrorCode.DATA_NOT_FOUND);
         }
         agentPo.setDelHeight(-1L);
         List<DepositPo> depositPoList = depositStorageService.getList();
@@ -93,7 +95,7 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
         }
         boolean b = agentStorageService.save(agentPo);
         if (!b) {
-            return Result.getFailed("update agent failed!");
+            return Result.getFailed(PocConsensusErrorCode.UPDATE_AGENT_FAILED);
         }
         return Result.getSuccess();
     }
@@ -102,11 +104,11 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
     public Result onCommit(StopAgentTransaction tx, Object secondaryData) {
         BlockHeader header = (BlockHeader) secondaryData;
         if (tx.getTime() < (header.getTime() - 300000L)) {
-            return Result.getFailed("Stop agent must lock the coin 3 days");
+            return Result.getFailed(PocConsensusErrorCode.LOCK_TIME_NOT_REACHED);
         }
         AgentPo agentPo = agentStorageService.get(tx.getTxData().getCreateTxHash());
         if (null == agentPo || agentPo.getDelHeight() > 0) {
-            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "the agent is not exist or had deleted!");
+            throw new NulsRuntimeException(KernelErrorCode.DATA_NOT_FOUND);
         }
         List<DepositPo> depositPoList = depositStorageService.getList();
         for (DepositPo depositPo : depositPoList) {
@@ -124,7 +126,7 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
 
         boolean b = agentStorageService.save(agentPo);
         if (!b) {
-            return Result.getFailed("update agent failed!");
+            return Result.getFailed(PocConsensusErrorCode.UPDATE_AGENT_FAILED);
         }
         return Result.getSuccess();
     }
@@ -143,21 +145,21 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
             } else if (tx.getType() == ConsensusConstant.TX_TYPE_STOP_AGENT) {
                 StopAgentTransaction transaction = (StopAgentTransaction) tx;
                 if (!hashSet.add(transaction.getTxData().getCreateTxHash())) {
-                    ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "transactions repeated!");
+                    ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TRANSACTION_REPEATED);
                     result.setData(transaction);
                     return result;
                 }
                 if (transaction.getTxData().getAddress() == null) {
                     CreateAgentTransaction agentTransaction = (CreateAgentTransaction) ledgerService.getTx(transaction.getTxData().getCreateTxHash());
                     if (null == agentTransaction) {
-                        ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "agent transaction not exist!");
+                        ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_NOT_EXIST);
                         result.setData(transaction);
                         return result;
                     }
                     transaction.getTxData().setAddress(agentTransaction.getTxData().getAgentAddress());
                 }
                 if (addressSet.contains(Base58.encode(transaction.getTxData().getAddress()))) {
-                    ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "The agent has stopped by Red Punish trnasaction!");
+                    ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_STOPPED);
                     result.setData(transaction);
                     return result;
                 }

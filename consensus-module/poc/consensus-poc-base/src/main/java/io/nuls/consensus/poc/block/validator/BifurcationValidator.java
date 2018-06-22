@@ -26,6 +26,7 @@
 package io.nuls.consensus.poc.block.validator;
 
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
@@ -81,7 +82,7 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
                 byte[] header2 = otherBlockHeader.serialize();
                 redPunishData.setEvidence(ArraysTool.joinintTogether(header1, header2));
             } catch (Exception e) {
-                ValidateResult.getFailedResult(CLASS_NAME, e.getMessage());
+                ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.SYS_UNKOWN_EXCEPTION);
             }
             redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
             redPunishTransaction.setTxData(redPunishData);
@@ -97,10 +98,10 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
                 redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
             } catch (IOException e) {
                 Log.error(e);
-                return ValidateResult.getFailedResult(CLASS_NAME, "Bifurcation");
+                return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.BIFURCATION);
             }
             this.consensusService.newTx(redPunishTransaction);
-            return ValidateResult.getFailedResult(CLASS_NAME, "Bifurcation");
+            return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.BIFURCATION);
         }
 
         return result;

@@ -87,10 +87,10 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<List<Account>> createAccount(int count, String password) {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "between 0 and 100 can be created at once");
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "Length between 8 and 20, the combination of characters and numbers");
+            return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
         locker.lock();
         try {
@@ -727,7 +727,7 @@ public class AccountServiceImpl implements AccountService {
             return Result.getSuccess().setData(fee);
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 }

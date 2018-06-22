@@ -29,6 +29,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
+import io.nuls.message.bus.constant.MessageBusErrorCode;
 import io.nuls.message.bus.manager.DispatchManager;
 import io.nuls.message.bus.manager.HandlerManager;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
@@ -109,17 +110,17 @@ public class MessageBusServiceImpl implements MessageBusService {
     public Result<? extends BaseMessage> getMessageInstance(short moduleId, int type) {
         Class<? extends BaseMessage> clazz = MessageManager.getMessage(moduleId, type);
         if (null == clazz) {
-            return Result.getFailed("the message type can not found!");
+            return Result.getFailed(MessageBusErrorCode.UNKOWN_MSG_TYPE);
         }
         BaseMessage message = null;
         try {
             message = clazz.newInstance();
         } catch (InstantiationException e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(MessageBusErrorCode.INSTANTIATION_EXCEPTION);
         } catch (IllegalAccessException e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(MessageBusErrorCode.ILLEGAL_ACCESS_EXCEPTION);
         }
 
         return Result.getSuccess().setData(message);

@@ -40,6 +40,7 @@ import io.nuls.account.tx.AliasTransaction;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
@@ -162,7 +163,7 @@ public class AliasService {
             return Result.getSuccess().setData(hash);
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 

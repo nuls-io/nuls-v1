@@ -28,6 +28,7 @@ package io.nuls.consensus.poc.tx.validator;
 import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.context.PocConsensusContext;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
@@ -69,7 +70,7 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
     public ValidateResult validate(RedPunishTransaction data) {
         RedPunishData punishData = data.getTxData();
         if (ConsensusConfig.getSeedNodeStringList().contains(Base58.encode(punishData.getAddress()))) {
-            return ValidateResult.getFailedResult(CLASS_NAME, "The address is a consensus seed!");
+            return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
         }
         if (punishData.getReasonCode() == PunishReasonEnum.DOUBLE_SPEND.getCode()) {
             SmallBlock smallBlock = new SmallBlock();
@@ -86,15 +87,15 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
             }
             List<NulsDigestData> txHashList = smallBlock.getTxHashList();
             if (!header.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(smallBlock.getTxHashList()))) {
-                return ValidateResult.getFailedResult(CLASS_NAME, "The header is wrong!");
+                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
             }
             List<Transaction> txList = smallBlock.getSubTxList();
             if (null == txList || txList.size() < 2) {
-                return ValidateResult.getFailedResult(CLASS_NAME, "The transactions is wrong!");
+                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
             }
             result = ledgerService.verifyDoubleSpend(txList);
             if (result.isSuccess()) {
-                return ValidateResult.getFailedResult(CLASS_NAME, "The transactions never double spend!");
+                return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.TRANSACTIONS_NEVER_DOUBLE_SPEND);
             }
         } else if (punishData.getReasonCode() == PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode()) {
             return ValidateResult.getSuccessResult();
@@ -110,24 +111,24 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
                 Log.error(e);
             }
             if (null == header1 || null == header2) {
-                return ValidateResult.getFailedResult(CLASS_NAME, "The blockheaders is wrong!");
+                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_NOT_FOUND);
             }
             if (header1.getHeight() != header2.getHeight() || !header1.getPreHash().equals(header2.getPreHash())) {
-                return ValidateResult.getFailedResult(CLASS_NAME, "Never bifurcation!");
+                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
             }
             ValidateResult result = validator.validate(header1);
             if (result.isFailed()) {
-                return ValidateResult.getFailedResult(CLASS_NAME, "The header1 is wrong!");
+                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
             }
             result = validator.validate(header2);
             if (result.isFailed()) {
-                return ValidateResult.getFailedResult(CLASS_NAME, "The header2 is wrong!");
+                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
             }
             if (!Arrays.equals(header1.getScriptSig().getPublicKey(), header2.getScriptSig().getPublicKey())) {
-                return ValidateResult.getFailedResult(CLASS_NAME, "Never bifurcation!");
+                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
             }
         } else {
-            return ValidateResult.getFailedResult(this.getClass().getName(), "Wrong red punish reason!");
+            return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.WRONG_RED_PUNISH_REASON);
         }
 
         try {
@@ -150,11 +151,11 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
             }
         }
         if(null==theAgent){
-            return ValidateResult.getFailedResult(CLASS_NAME,"The agent is not exist!");
+            return ValidateResult.getFailedResult(CLASS_NAME,PocConsensusErrorCode.AGENT_NOT_EXIST);
         }
         CoinData coinData = ConsensusTool.getStopAgentCoinData(theAgent, PocConsensusConstant.RED_PUNISH_LOCK_TIME);
         if (!Arrays.equals(coinData.serialize(), tx.getCoinData().serialize())) {
-            return ValidateResult.getFailedResult(CLASS_NAME, "The coindata is wrong!");
+            return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }

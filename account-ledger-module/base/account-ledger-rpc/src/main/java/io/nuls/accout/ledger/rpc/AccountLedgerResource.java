@@ -689,7 +689,7 @@ public class AccountLedgerResource {
             }
         } catch (NulsRuntimeException re) {
             Log.error(re);
-            result = new Result(false, re.getCode(), re.getMessage());
+            result = Result.getFailed(re.getErrorCode());
         } catch (Exception e) {
             Log.error(e);
             result = Result.getFailed(LedgerErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -796,7 +796,7 @@ public class AccountLedgerResource {
             }
         } catch (NulsRuntimeException re) {
             Log.error(re);
-            result = new Result(false, re.getCode(), re.getMessage());
+            result = Result.getFailed(re.getErrorCode());
         } catch (Exception e) {
             Log.error(e);
             result = Result.getFailed(LedgerErrorCode.SYS_UNKOWN_EXCEPTION);

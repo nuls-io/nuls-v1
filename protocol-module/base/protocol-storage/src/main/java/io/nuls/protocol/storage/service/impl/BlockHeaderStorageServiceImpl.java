@@ -168,14 +168,14 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
             hashBytes = po.getHash().serialize();
         } catch (IOException e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(KernelErrorCode.IO_ERROR);
         }
         Result result = null;
         try {
             result = dbService.put(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER, hashBytes, po.serialize());
         } catch (IOException e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(KernelErrorCode.IO_ERROR);
         }
         if (result.isFailed()) {
             return result;
@@ -191,7 +191,7 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
 
     private Result removeBlockHerader(byte[] hashBytes) {
         if (null == hashBytes) {
-            return Result.getFailed("Null Parameter");
+            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
         return dbService.delete(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER, hashBytes);
     }
@@ -218,7 +218,7 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
             return removeBlockHerader(po.getHash().serialize());
         } catch (IOException e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed();
         }
     }
 

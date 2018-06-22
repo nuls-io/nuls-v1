@@ -35,6 +35,7 @@ import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.CancelDeposit;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
@@ -333,7 +334,7 @@ public class PocConsensusResource {
             }
         }
         if (agent == null || agent.getDelHeight() > 0) {
-            return Result.getFailed("Can not found any agent!").toRpcClientResult();
+            return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
         }
         NulsDigestData createTxHash = agent.getTxHash();
         stopAgent.setCreateTxHash(createTxHash);
@@ -344,7 +345,7 @@ public class PocConsensusResource {
         coinData.setTo(toList);
         CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);
         if (null == transaction) {
-            return Result.getFailed("Can not find the create agent transaction!").toRpcClientResult();
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND).toRpcClientResult();
         }
         List<Coin> fromList = new ArrayList<>();
         for (int index = 0; index < transaction.getCoinData().getTo().size(); index++) {
@@ -440,7 +441,7 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getAddress());
         AssertUtil.canNotEmpty(form.getAgentHash());
         if (!NulsDigestData.validHash(form.getAgentHash())) {
-            return Result.getFailed("Can not find agent!").toRpcClientResult();
+            return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
         }
         AssertUtil.canNotEmpty(form.getDeposit());
         if (!AddressTool.validAddress(form.getAddress())) {
@@ -498,7 +499,7 @@ public class PocConsensusResource {
             tx.setScriptSig(sig.serialize());
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage()).toRpcClientResult();
+            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
         }
         Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
         if (saveResult.isFailed()) {
@@ -552,7 +553,7 @@ public class PocConsensusResource {
             }
         }
         if (agent == null || agent.getDelHeight() > 0) {
-            return Result.getFailed("Can not found any agent!").toRpcClientResult();
+            return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
         }
 
         stopAgent.setCreateTxHash(agent.getTxHash());
@@ -702,7 +703,7 @@ public class PocConsensusResource {
                                     @PathParam("agentHash") String agentHash) throws NulsException {
 
         if (!NulsDigestData.validHash(agentHash)) {
-            return Result.getFailed("Can not find agent!").toRpcClientResult();
+            return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
         }
         Result result = Result.getSuccess();
         List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
@@ -717,7 +718,7 @@ public class PocConsensusResource {
                 return result.toRpcClientResult();
             }
         }
-        return Result.getFailed("Can not find agent!").toRpcClientResult();
+        return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
     }
 
     @GET
@@ -736,7 +737,7 @@ public class PocConsensusResource {
                                                         @PathParam("address") String address) {
         AssertUtil.canNotEmpty(address);
         if (!AddressTool.validAddress(address)) {
-            return Result.getFailed("The address is wrong!").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
@@ -821,7 +822,7 @@ public class PocConsensusResource {
                                                    @QueryParam("agentHash") String agentHash) {
         AssertUtil.canNotEmpty(address);
         if (!AddressTool.validAddress(address)) {
-            return Result.getFailed("The address is wrong!").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if (null == pageNumber || pageNumber == 0) {
             pageNumber = 1;
@@ -833,7 +834,7 @@ public class PocConsensusResource {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (null != agentHash && !NulsDigestData.validHash(agentHash)) {
-            return Result.getFailed("Can not find agent!").toRpcClientResult();
+            return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
         }
         Result result = Result.getSuccess();
         List<Deposit> allList = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
@@ -965,7 +966,7 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
         if (!NulsDigestData.validHash(form.getTxHash())) {
-            return Result.getFailed("Cann't find the deposit transaction!").toRpcClientResult();
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         AssertUtil.canNotEmpty(form.getAddress());
         if (!Address.validAddress(form.getAddress())) {
@@ -988,10 +989,10 @@ public class PocConsensusResource {
         try {
             depositTransaction = (DepositTransaction) ledgerService.getTx(hash);
         } catch (Exception e) {
-            return Result.getFailed("The deposit hash is wrong!").toRpcClientResult();
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (null == depositTransaction) {
-            return Result.getFailed("Cann't find the deposit transaction!").toRpcClientResult();
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND).toRpcClientResult();
         }
         cancelDeposit.setAddress(AddressTool.getAddress(form.getAddress()));
         cancelDeposit.setJoinTxHash(hash);
@@ -1039,7 +1040,7 @@ public class PocConsensusResource {
                                           @QueryParam("depositTxHash") String depositTxHash) throws NulsException, IOException {
         AssertUtil.canNotEmpty(depositTxHash);
         if (!NulsDigestData.validHash(depositTxHash)) {
-            return Result.getFailed("Cann't find the deposit transaction!").toRpcClientResult();
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         AssertUtil.canNotEmpty(address);
         if (!Address.validAddress(address)) {
@@ -1054,7 +1055,7 @@ public class PocConsensusResource {
         NulsDigestData hash = NulsDigestData.fromDigestHex(depositTxHash);
         DepositTransaction depositTransaction = (DepositTransaction) ledgerService.getTx(hash);
         if (null == depositTransaction) {
-            return Result.getFailed("Cann't find the deposit transaction!").toRpcClientResult();
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND).toRpcClientResult();
         }
         cancelDeposit.setAddress(AddressTool.getAddress(depositTxHash));
         cancelDeposit.setJoinTxHash(hash);

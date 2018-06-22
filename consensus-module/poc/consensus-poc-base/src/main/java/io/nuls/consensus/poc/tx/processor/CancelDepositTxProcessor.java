@@ -26,6 +26,7 @@
 package io.nuls.consensus.poc.tx.processor;
 
 import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
@@ -35,6 +36,9 @@ import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.consensus.poc.storage.service.DepositStorageService;
 import io.nuls.core.tools.crypto.Base58;
+import io.nuls.db.constant.DBErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.NulsDigestData;
@@ -68,43 +72,43 @@ public class CancelDepositTxProcessor implements TransactionProcessor<CancelDepo
     public Result onRollback(CancelDepositTransaction tx, Object secondaryData) {
         DepositTransaction transaction = (DepositTransaction) ledgerService.getTx(tx.getTxData().getJoinTxHash());
         if (null == transaction) {
-            return Result.getFailed("Can not find the deposit!");
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         }
         DepositPo po = depositStorageService.get(tx.getTxData().getJoinTxHash());
         if (null == po) {
-            return Result.getFailed("Can not find the deposit!");
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         }
         if (po.getDelHeight() != tx.getBlockHeight()) {
-            return Result.getFailed("The deposit never canceled before!");
+            return Result.getFailed(PocConsensusErrorCode.DEPOSIT_NEVER_CANCELED);
         }
         po.setDelHeight(-1L);
         boolean b = depositStorageService.save(po);
         if (b) {
             return Result.getSuccess();
         }
-        return Result.getFailed("Save the deposit failed!");
+        return Result.getFailed(PocConsensusErrorCode.SAVE_ERROR);
     }
 
     @Override
     public Result onCommit(CancelDepositTransaction tx, Object secondaryData) {
         DepositTransaction transaction = (DepositTransaction) ledgerService.getTx(tx.getTxData().getJoinTxHash());
         if (null == transaction) {
-            return Result.getFailed("Can not find the deposit!");
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         }
         DepositPo po = depositStorageService.get(tx.getTxData().getJoinTxHash());
         if (null == po) {
-            return Result.getFailed("Can not find the deposit!");
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         }
         tx.getTxData().setAddress(po.getAddress());
         if (po.getDelHeight() > 0L) {
-            return Result.getFailed("The deposit was canceled before!");
+            return Result.getFailed(PocConsensusErrorCode.DEPOSIT_WAS_CANCELED);
         }
         po.setDelHeight(tx.getBlockHeight());
         boolean b = depositStorageService.save(po);
         if (b) {
             return Result.getSuccess();
         }
-        return Result.getFailed("Save the deposit failed!");
+        return Result.getFailed(PocConsensusErrorCode.SAVE_ERROR);
     }
 
     @Override
@@ -129,18 +133,18 @@ public class CancelDepositTxProcessor implements TransactionProcessor<CancelDepo
             if (tx.getType() == ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT) {
                 CancelDepositTransaction transaction = (CancelDepositTransaction) tx;
                 if (!hashSet.add(transaction.getTxData().getJoinTxHash())) {
-                    return ValidateResult.getFailedResult(this.getClass().getName(), "transaction repeated!");
+                    return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TRANSACTION_REPEATED);
                 }
                 if (agentHashSet.contains(transaction.getTxData().getJoinTxHash())) {
-                    return ValidateResult.getFailedResult(this.getClass().getName(), "The agent is stopped!");
+                    return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_STOPPED);
                 }
                 DepositPo depositPo = depositStorageService.get(transaction.getTxData().getJoinTxHash());
                 AgentPo agentPo = agentStorageService.get(depositPo.getAgentHash());
                 if (null == agentPo) {
-                    return ValidateResult.getFailedResult(this.getClass().getName(), "Can't find the agent!");
+                    return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_NOT_EXIST);
                 }
                 if (addressSet.contains(Base58.encode(agentPo.getAgentAddress()))) {
-                    return ValidateResult.getFailedResult(this.getClass().getName(), "The agent was punished!");
+                    return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_PUNISHED);
                 }
             }
         }

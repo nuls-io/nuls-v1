@@ -40,11 +40,11 @@ public class ValidateResult<T> extends Result<T> {
 
     private String className;
 
-    public static ValidateResult getFailedResult(String className, String msg) {
+   /* public static ValidateResult getFailedResult(String className, String msg) {
         return getFailedResult(className, SeverityLevelEnum.WRONG, msg);
-    }
+    }*/
 
-    public static ValidateResult getFailedResult(String className, SeverityLevelEnum level, String msg) {
+  /*  public static ValidateResult getFailedResult(String className, SeverityLevelEnum level, String msg) {
         ValidateResult result = new ValidateResult();
         result.setSuccess(false);
         result.setErrorCode(KernelErrorCode.VERIFICATION_FAILD);
@@ -52,7 +52,7 @@ public class ValidateResult<T> extends Result<T> {
         result.setLevel(level);
         result.setClassName(className);
         return result;
-    }
+    }*/
 
     public static ValidateResult getSuccessResult() {
         ValidateResult result = new ValidateResult();

@@ -97,7 +97,7 @@ public class AccountBaseService {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isBlank(password)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The password is required");
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         if (!StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG);
@@ -105,10 +105,10 @@ public class AccountBaseService {
         }
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
-            return Result.getFailed(AccountErrorCode.FAILED, "The account not exist, address:" + address);
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         if (account.isEncrypted()) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED, "This account already has a password.");
+            return Result.getFailed(AccountErrorCode.ACCOUNT_IS_ALREADY_ENCRYPTED);
         }
         try {
             account.encrypt(password);
@@ -136,10 +136,10 @@ public class AccountBaseService {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isBlank(oldPassword)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The old password is required");
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         if (StringUtils.isBlank(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The new password is required");
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         if (!StringUtils.validPassword(oldPassword)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG);
@@ -149,14 +149,14 @@ public class AccountBaseService {
         }
         Account account = accountService.getAccount(address).getData();
         if (null == account) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST, "The account not exist, address:" + address);
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         try {
             if (!account.isEncrypted()) {
-                return Result.getFailed(AccountErrorCode.FAILED, "No password has been set up yet");
+                return Result.getFailed(AccountErrorCode.ACCOUNT_UNENCRYPTED);
             }
             if (!account.validatePassword(oldPassword)) {
-                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "old password error");
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
             account.decrypt(oldPassword);
             account.encrypt(newPassword, true);
@@ -167,9 +167,9 @@ public class AccountBaseService {
             }
             accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
             return result.setData(true);
-        } catch (Exception e) {
+        } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG, "The old password is wrong, change password failed");
+            return Result.getFailed(e.getErrorCode());
         }
     }
 

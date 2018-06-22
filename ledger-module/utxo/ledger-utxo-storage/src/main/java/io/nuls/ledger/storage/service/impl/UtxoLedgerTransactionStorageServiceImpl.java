@@ -75,7 +75,7 @@ public class UtxoLedgerTransactionStorageServiceImpl implements UtxoLedgerTransa
             txHashBytes = tx.getHash().serialize();
         } catch (IOException e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(KernelErrorCode.IO_ERROR);
         }
         // 保存交易
         Result result = dbService.putModel(LedgerStorageConstant.DB_NAME_LEDGER_TX, txHashBytes, tx);
@@ -111,7 +111,7 @@ public class UtxoLedgerTransactionStorageServiceImpl implements UtxoLedgerTransa
             txHashBytes = tx.getHash().serialize();
         } catch (IOException e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(KernelErrorCode.IO_ERROR);
         }
         // 删除交易
         Result result = dbService.delete(LedgerStorageConstant.DB_NAME_LEDGER_TX, txHashBytes);

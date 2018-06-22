@@ -31,6 +31,8 @@ import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -63,7 +65,7 @@ public class AgentCountValidator implements NulsDataValidator<CreateAgentTransac
             Set<String> set = new HashSet<>();
             for (AgentPo ca : caList) {
                 if (ca.getHash().equals(tx.getHash())) {
-                    return ValidateResult.getFailedResult(this.getClass().getName(), "agent tx repeated!");
+                    return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TRANSACTION_REPEATED);
                 }
                 if (ca.getDelHeight() > 0L) {
                     continue;
@@ -74,11 +76,11 @@ public class AgentCountValidator implements NulsDataValidator<CreateAgentTransac
             }
             boolean b = set.add(Hex.encode(agent.getAgentAddress()));
             if (!b) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), "need change the agentAddress.");
+                return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
             }
             b = set.add(Hex.encode(agent.getPackingAddress()));
             if (!b) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), "need change the packingAddress.");
+                return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
             }
         }
         return result;

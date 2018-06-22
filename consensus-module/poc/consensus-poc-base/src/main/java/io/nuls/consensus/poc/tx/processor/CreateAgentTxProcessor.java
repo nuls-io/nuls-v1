@@ -39,6 +39,7 @@ import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -109,7 +110,7 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
                     String packAddressHex = Hex.encode(agent.getPackingAddress());
 
                     if (!addressHexSet.add(agentAddressHex) || !addressHexSet.add(packAddressHex)) {
-                        return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), KernelErrorCode.FAILED, "there is a agent has same address!").setData(transaction);
+                        return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.AGENT_EXIST).setData(transaction);
                     }
                     break;
                 case ConsensusConstant.TX_TYPE_RED_PUNISH:
@@ -117,7 +118,7 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
                     RedPunishData redPunishData = redPunishTransaction.getTxData();
                     String addressHex = Hex.encode(redPunishData.getAddress());
                     if (!addressHexSet.add(addressHex)) {
-                        return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT, "there is a new Red Punish Transaction!").setData(transaction);
+                        return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT).setData(transaction);
                     }
                     break;
             }
