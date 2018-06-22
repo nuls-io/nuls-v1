@@ -24,6 +24,7 @@
  */
 package io.nuls.protocol.model.validator;
 
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.Transaction;
@@ -37,12 +38,11 @@ import io.nuls.protocol.constant.ProtocolConstant;
  */
 @Component
 public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
-    private static final String ERROR_MESSAGE = "The block is too big!";
 
     @Override
     public ValidateResult validate(Block data) {
         if (data == null) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), "Data is null!");
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_NOT_FOUND);
         }
         long length = 0L;
         for (Transaction tx : data.getTxs()) {
@@ -52,7 +52,7 @@ public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
             length += tx.size();
         }
         if (length > ProtocolConstant.MAX_BLOCK_SIZE) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), ERROR_MESSAGE);
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.BLOCK_TOO_BIG);
         }
         return ValidateResult.getSuccessResult();
     }

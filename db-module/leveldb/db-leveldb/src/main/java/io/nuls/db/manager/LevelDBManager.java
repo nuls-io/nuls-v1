@@ -443,7 +443,7 @@ public class LevelDBManager {
             return Result.getSuccess();
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -468,7 +468,7 @@ public class LevelDBManager {
             return Result.getSuccess();
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -493,7 +493,7 @@ public class LevelDBManager {
             return Result.getSuccess();
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -522,7 +522,7 @@ public class LevelDBManager {
             return put(area, key, bytes);
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -557,7 +557,7 @@ public class LevelDBManager {
             return Result.getSuccess();
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -574,7 +574,7 @@ public class LevelDBManager {
             return Result.getSuccess();
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 

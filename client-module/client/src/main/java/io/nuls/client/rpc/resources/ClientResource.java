@@ -109,7 +109,7 @@ public class ClientResource {
         AssertUtil.canNotEmpty(version);
         SyncVersionRunner syncor = SyncVersionRunner.getInstance();
         if (!version.equals(syncor.getNewestVersion())) {
-            Result result = Result.getFailed("The version is not the newest version!");
+            Result result = Result.getFailed(KernelErrorCode.VERSION_NOT_NEWEST);
             return result.toRpcClientResult();
         }
         URL url = ClientResource.class.getClassLoader().getResource("libs");
@@ -119,7 +119,7 @@ public class ClientResource {
 
         UpgradeThread thread = UpgradeThread.getInstance();
         if (thread.isUpgrading()) {
-            return Result.getFailed(KernelErrorCode.FAILED, "It's upgrading!").toRpcClientResult();
+            return Result.getFailed(KernelErrorCode.UPGRADING).toRpcClientResult();
         }
         boolean result = thread.start();
         if (result) {
@@ -141,10 +141,10 @@ public class ClientResource {
     public RpcClientResult stopUpdate() {
         UpgradeThread thread = UpgradeThread.getInstance();
         if (!thread.isUpgrading()) {
-            return Result.getFailed(KernelErrorCode.FAILED, "It's not upgrading!").toRpcClientResult();
+            return Result.getFailed(KernelErrorCode.NOT_UPGRADING).toRpcClientResult();
         }
         if (thread.getProcess().getPercentage() == 100) {
-            return Result.getFailed(KernelErrorCode.FAILED, "It's still upgrading!").toRpcClientResult();
+            return Result.getFailed(KernelErrorCode.UPGRADING).toRpcClientResult();
         }
         boolean result = thread.stop();
         if (result) {

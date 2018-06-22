@@ -50,17 +50,6 @@ public class NulsException extends Exception {
         this.message = message.getMsg();
     }
 
-    /**
-     * Constructs a new exception with the specified detail validator.  The
-     * cause is not initialized, and may subsequently be initialized by
-     * a call to {@link #initCause}.
-     */
-    public NulsException(ErrorCode errorCode, String msg) {
-        super(msg);
-        this.errorCode = errorCode;
-        this.code = errorCode.getCode();
-        this.message = msg;
-    }
 
     /**
      * Constructs a new exception with the specified detail validator and

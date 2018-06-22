@@ -39,7 +39,7 @@ public class InputDto {
     /**
      * 来源output的outIndex
      */
-    private Integer fromIndex;
+    private int fromIndex;
 
     /**
      * 转入地址
@@ -49,7 +49,9 @@ public class InputDto {
     /**
      * 转入金额
      */
-    private Long value;
+    private long value;
+
+    private long lockTime;
 
     public InputDto() {
 
@@ -62,22 +64,6 @@ public class InputDto {
         this.value = StringUtils.parseLong(map.get("value"));
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public Long getValue() {
-        return value;
-    }
-
-    public void setValue(Long value) {
-        this.value = value;
-    }
-
     public String getFromHash() {
         return fromHash;
     }
@@ -86,11 +72,35 @@ public class InputDto {
         this.fromHash = fromHash;
     }
 
-    public Integer getFromIndex() {
+    public int getFromIndex() {
         return fromIndex;
     }
 
-    public void setFromIndex(Integer fromIndex) {
+    public void setFromIndex(int fromIndex) {
         this.fromIndex = fromIndex;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public long getValue() {
+        return value;
+    }
+
+    public void setValue(long value) {
+        this.value = value;
+    }
+
+    public long getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(long lockTime) {
+        this.lockTime = lockTime;
     }
 }

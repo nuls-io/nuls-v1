@@ -28,6 +28,7 @@ package io.nuls.consensus.poc.tx.processor;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.model.BlockRoundData;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
@@ -43,6 +44,7 @@ import io.nuls.consensus.poc.storage.service.PunishLogStorageService;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -97,7 +99,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
             }
         }
         if (null == agent) {
-            return Result.getFailed(KernelErrorCode.DATA_ERROR, "There is no agent can be punished.");
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         }
         List<DepositPo> depositPoList = depositStorageService.getList();
         List<DepositPo> updatedList = new ArrayList<>();
@@ -109,7 +111,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
                     po2.setDelHeight(tx.getBlockHeight());
                     this.depositStorageService.save(po2);
                 }
-                return Result.getFailed(KernelErrorCode.DATA_ERROR, "Update deposit failed!");
+                return Result.getFailed(PocConsensusErrorCode.UPDATE_DEPOSIT_FAILED);
             }
             updatedList.add(po);
         }
@@ -121,7 +123,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
                 po2.setDelHeight(tx.getBlockHeight());
                 this.depositStorageService.save(po2);
             }
-            return Result.getFailed(KernelErrorCode.DATA_ERROR, "Can't update the agent!");
+            return Result.getFailed(PocConsensusErrorCode.UPDATE_AGENT_FAILED);
         }
         success = storageService.delete(getPoKey(punishData.getAddress(), PunishType.RED.getCode(), tx.getBlockHeight()));
         if (!success) {
@@ -131,7 +133,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
             }
             agentPo.setDelHeight(tx.getBlockHeight());
             agentStorageService.save(agentPo);
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollbackTransaction tx failed!");
+            throw new NulsRuntimeException(TransactionErrorCode.ROLLBACK_TRANSACTION_FAILED);
         }
 
         return Result.getSuccess();
@@ -183,7 +185,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
                     po2.setDelHeight(-1);
                     this.depositStorageService.save(po2);
                 }
-                return ValidateResult.getFailedResult(this.getClass().getName(), "update deposit failed!");
+                return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.UPDATE_DEPOSIT_FAILED);
             }
             updatedList.add(po);
         }
@@ -193,7 +195,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
                 po2.setDelHeight(-1);
                 this.depositStorageService.save(po2);
             }
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "rollbackTransaction tx failed!");
+            throw new NulsRuntimeException(TransactionErrorCode.ROLLBACK_TRANSACTION_FAILED);
         }
         AgentPo agentPo = agent;
         agentPo.setDelHeight(tx.getBlockHeight());
@@ -204,7 +206,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
                 this.depositStorageService.save(po2);
             }
             this.storageService.delete(punishLogPo.getKey());
-            return Result.getFailed(KernelErrorCode.DATA_ERROR, "Can't update the agent!");
+            return Result.getFailed(PocConsensusErrorCode.UPDATE_AGENT_FAILED);
         }
         return Result.getSuccess();
     }

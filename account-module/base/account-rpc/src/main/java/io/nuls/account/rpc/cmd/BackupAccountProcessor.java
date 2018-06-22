@@ -123,27 +123,27 @@ public class BackupAccountProcessor implements CommandProcessor {
         //if not directory , create directory
         if (!backupFile.isDirectory()) {
             if (!backupFile.mkdirs()) {
-                return Result.getFailed("create directory failed");
+                return Result.getFailed(KernelErrorCode.FILE_OPERATION_FAILD);
             }
             if (!backupFile.exists() && !backupFile.mkdir()) {
-                return Result.getFailed("create directory failed");
+                return Result.getFailed(KernelErrorCode.FILE_OPERATION_FAILD);
             }
         }
         String fileName = accountKeyStoreDto.getAddress().concat(AccountConstant.ACCOUNTKEYSTORE_FILE_SUFFIX);
         backupFile = new File(backupFile, fileName);
         try {
             if (!backupFile.exists() && !backupFile.createNewFile()) {
-                return Result.getFailed("create file failed");
+                return Result.getFailed(KernelErrorCode.FILE_OPERATION_FAILD);
             }
         } catch (IOException e) {
-            return Result.getFailed("create file failed");
+            return Result.getFailed(KernelErrorCode.IO_ERROR);
         }
         FileOutputStream fileOutputStream = null;
         try {
             fileOutputStream = new FileOutputStream(backupFile);
             fileOutputStream.write(JSONUtils.obj2json(accountKeyStoreDto).getBytes());
         } catch (Exception e) {
-            return Result.getFailed("export failed");
+            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION);
         } finally {
             if (fileOutputStream != null) {
                 try {

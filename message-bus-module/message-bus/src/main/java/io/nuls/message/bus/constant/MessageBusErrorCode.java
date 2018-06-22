@@ -27,11 +27,13 @@ package io.nuls.message.bus.constant;
 
 
 import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 
 /**
  * @author: Charlie
  * @date: 2018/5/8
  */
-public interface MessageBusErrorCode {
+public interface MessageBusErrorCode extends KernelErrorCode {
 
+    ErrorCode UNKOWN_MSG_TYPE= ErrorCode.init("MB001", "60001");
 }

@@ -95,13 +95,13 @@ public class SyncVersionRunner implements Runnable {
         try {
             jsonStr = new String(HttpDownloadUtils.download(VersionConstant.VERDION_JSON_URL), NulsConfig.DEFAULT_ENCODING);
         } catch (IOException e) {
-            throw new NulsException(KernelErrorCode.FAILED, "Download version json faild!");
+            throw new NulsException(KernelErrorCode.DOWNLOAD_VERSION_FAILD);
         }
         Map<String, Object> map = null;
         try {
             map = JSONUtils.json2map(jsonStr);
         } catch (Exception e) {
-            throw new NulsException(KernelErrorCode.FAILED, "Parse version json faild!");
+            throw new NulsException(KernelErrorCode.PARSE_JSON_FAILD);
         }
         String version = (String) map.get("version");
         String versionFileHash = (String) map.get("versionFileHash");

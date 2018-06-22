@@ -130,7 +130,7 @@ public class BatchOperationImpl implements BatchOperation {
             db.write(batch);
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(DBErrorCode.DB_UNKOWN_EXCEPTION, e.getMessage());
+            return Result.getFailed(DBErrorCode.DB_UNKOWN_EXCEPTION);
         } finally {
             // Make sure you close the batch to avoid resource leaks.
             // 貌似LevelDB未实现此close方法, 所以加入一个逻辑关闭

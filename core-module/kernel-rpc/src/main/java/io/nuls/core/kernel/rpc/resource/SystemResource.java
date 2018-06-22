@@ -61,13 +61,13 @@ public class SystemResource {
         AssertUtil.canNotEmpty(language);
         boolean b = I18nUtils.hasLanguage(language);
         if(!b){
-            return Result.getFailed(KernelErrorCode.DATA_ERROR,"language unkown!").toRpcClientResult();
+            return Result.getFailed(KernelErrorCode.DATA_ERROR).toRpcClientResult();
         }
         try {
             I18nUtils.setLanguage(language);
         } catch (NulsException e) {
             Log.error(e);
-            Result.getFailed(e.getMessage());
+            Result.getFailed(e.getErrorCode());
         }
         Map<String, Boolean> map = new HashMap<>();
         map.put("value", true);

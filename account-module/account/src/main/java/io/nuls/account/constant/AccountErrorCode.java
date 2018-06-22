@@ -53,4 +53,6 @@ public interface AccountErrorCode {
     ErrorCode PASSWORD_FORMAT_WRONG = ErrorCode.init("ACT017", "50017");
     ErrorCode DECRYPT_ACCOUNT_ERROR = ErrorCode.init("ACT018", "50018");
     ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED_AND_LOCKED = ErrorCode.init("ACT019", "50019");
+
+    ErrorCode ACCOUNT_UNENCRYPTED = ErrorCode.init("ACT020", "50020");
 }

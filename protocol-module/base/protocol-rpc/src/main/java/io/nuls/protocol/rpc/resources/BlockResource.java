@@ -79,7 +79,7 @@ public class BlockResource {
             dto = new BlockHeaderDto(blockResult.getData());
         } catch (IOException e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage()).toRpcClientResult();
+            return Result.getFailed(KernelErrorCode.IO_ERROR).toRpcClientResult();
         }
         return Result.getSuccess().setData(dto).toRpcClientResult();
     }
@@ -113,7 +113,7 @@ public class BlockResource {
             result.setData(new BlockHeaderDto(block));
         } catch (IOException e) {
             Log.error(e);
-            return Result.getFailed(e.getMessage()).toRpcClientResult();
+            return Result.getFailed(KernelErrorCode.IO_ERROR).toRpcClientResult();
         }
         return result.toRpcClientResult();
     }

@@ -25,6 +25,8 @@
 
 package io.nuls.consensus.poc.tx.validator;
 
+import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.model.Account;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
@@ -32,6 +34,7 @@ import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Component;
@@ -62,21 +65,21 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
 
         Agent agent = tx.getTxData();
         if (null == agent) {
-            return ValidateResult.getFailedResult(getClass().getName(), "tx data can not be null!");
+            return ValidateResult.getFailedResult(getClass().getName(), KernelErrorCode.DATA_NOT_FOUND);
         }
         if (!AddressTool.validAddress(agent.getAgentAddress()) || !AddressTool.validAddress(agent.getRewardAddress()) || !AddressTool.validAddress(agent.getPackingAddress())) {
-            return ValidateResult.getFailedResult(getClass().getName(), "Address format wrong!");
+            return ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
         }
         if (Arrays.equals(agent.getAgentAddress(), agent.getPackingAddress()) || Arrays.equals(agent.getRewardAddress(), agent.getPackingAddress())) {
-            return ValidateResult.getFailedResult(getClass().getName(), "It's not safe:agentAddress equals packingAddress");
+            return ValidateResult.getFailedResult(getClass().getName(), KernelErrorCode.DATA_ERROR);
         }
 
         if (tx.getTime() <= 0) {
-            return ValidateResult.getFailedResult(getClass().getName(), "tx time cannot be 0!");
+            return ValidateResult.getFailedResult(getClass().getName(), KernelErrorCode.DATA_ERROR);
         }
         double commissionRate = agent.getCommissionRate();
         if (commissionRate < PocConsensusProtocolConstant.MIN_COMMISSION_RATE || commissionRate > PocConsensusProtocolConstant.MAX_COMMISSION_RATE) {
-            return ValidateResult.getFailedResult(this.getClass().getSimpleName(), PocConsensusErrorCode.COMMISSION_RATE_OUT_OF_RANGE.getMsg());
+            return ValidateResult.getFailedResult(this.getClass().getSimpleName(), PocConsensusErrorCode.COMMISSION_RATE_OUT_OF_RANGE);
         }
 
         if (PocConsensusProtocolConstant.AGENT_DEPOSIT_LOWER_LIMIT.isGreaterThan(agent.getDeposit())) {
@@ -94,10 +97,10 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
             sig.parse(tx.getScriptSig());
         } catch (NulsException e) {
             Log.error(e);
-            return ValidateResult.getFailedResult(this.getClass().getName(), e.getMessage());
+            return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
         if (!Arrays.equals(agent.getAgentAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
-            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "The agent does not belong to this address.");
+            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
             return result;
         }

@@ -37,6 +37,7 @@ import io.nuls.account.tx.AliasTransaction;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
@@ -104,10 +105,10 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
             sig.parse(tx.getScriptSig());
         } catch (NulsException e) {
             Log.error(e);
-            return ValidateResult.getFailedResult(this.getClass().getName(), e.getMessage());
+            return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
         if (!Arrays.equals(tx.getTxData().getAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
-            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "The agent does not belong to this address.");
+            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
             return result;
         }

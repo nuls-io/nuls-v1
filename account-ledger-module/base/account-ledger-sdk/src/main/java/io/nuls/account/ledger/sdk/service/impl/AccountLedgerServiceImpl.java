@@ -7,14 +7,21 @@ import io.nuls.account.ledger.sdk.service.AccountLedgerService;
 import io.nuls.sdk.SDKBootstrap;
 import io.nuls.sdk.constant.AccountErrorCode;
 import io.nuls.sdk.constant.SDKConstant;
-import io.nuls.sdk.model.Address;
-import io.nuls.sdk.model.Result;
+import io.nuls.sdk.constant.TransactionErrorCode;
+import io.nuls.sdk.crypto.AESEncrypt;
+import io.nuls.sdk.crypto.Base58;
+import io.nuls.sdk.crypto.ECKey;
+import io.nuls.sdk.crypto.Hex;
+import io.nuls.sdk.exception.NulsException;
+import io.nuls.sdk.model.*;
 import io.nuls.sdk.model.dto.BalanceDto;
-import io.nuls.sdk.utils.JSONUtils;
-import io.nuls.sdk.utils.RestFulUtils;
-import io.nuls.sdk.utils.StringUtils;
+import io.nuls.sdk.script.P2PKHScriptSig;
+import io.nuls.sdk.utils.*;
+import org.spongycastle.util.Arrays;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -119,27 +126,27 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         return result.setData(balanceDto);
     }
 
-    @Override
-    public Result createTransaction(List<InputDto> inputs, List<OutputDto> outputs, String remark) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("inputs", inputs);
-        map.put("outputs", outputs);
-        map.put("remark", remark);
-        Result result = restFul.post("/accountledger/transaction", map);
-        return result;
-
-    }
-
-    @Override
-    public Result signTransaction(String txHex, String priKey, String address, String password) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("txHex", txHex);
-        map.put("priKey", priKey);
-        map.put("address", address);
-        map.put("password", password);
-        Result result = restFul.post("/accountledger/transaction/sign", map);
-        return result;
-    }
+//    @Override
+//    public Result createTransaction(List<InputDto> inputs, List<OutputDto> outputs, String remark) {
+//        Map<String, Object> map = new HashMap<>();
+//        map.put("inputs", inputs);
+//        map.put("outputs", outputs);
+//        map.put("remark", remark);
+//        Result result = restFul.post("/accountledger/transaction", map);
+//        return result;
+//
+//    }
+//
+//    @Override
+//    public Result signTransaction(String txHex, String priKey, String address, String password) {
+//        Map<String, Object> map = new HashMap<>();
+//        map.put("txHex", txHex);
+//        map.put("priKey", priKey);
+//        map.put("address", address);
+//        map.put("password", password);
+//        Result result = restFul.post("/accountledger/transaction/sign", map);
+//        return result;
+//    }
 
     @Override
     public Result broadcastTransaction(String txHex) {
@@ -149,127 +156,132 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         return result;
     }
 
+    @Override
+    public Result createTransaction(List<InputDto> inputs, List<OutputDto> outputs, String remark) {
+        if (inputs == null || inputs.isEmpty()) {
+            return Result.getFailed("inputs error");
+        }
+        if (outputs == null || outputs.isEmpty()) {
+            return Result.getFailed("outputs error");
+        }
+        byte[] remarkBytes = null;
+        if (!StringUtils.isBlank(remark)) {
+            try {
+                remarkBytes = remark.getBytes(SDKConstant.DEFAULT_ENCODING);
+            } catch (UnsupportedEncodingException e) {
+                return Result.getFailed("remark error");
+            }
+        }
 
-//    @Override
-//    public Result createTransaction(List<InputDto> inputs, List<OutputDto> outputs, String remark) {
-//        if (inputs == null || inputs.isEmpty()) {
-//            return Result.getFailed("inputs error");
-//        }
-//        if (outputs == null || outputs.isEmpty()) {
-//            return Result.getFailed("outputs error");
-//        }
-//        byte[] remarkBytes = null;
-//        if (!StringUtils.isBlank(remark)) {
-//            try {
-//                remarkBytes = remark.getBytes(SDKConstant.DEFAULT_ENCODING);
-//            } catch (UnsupportedEncodingException e) {
-//                return Result.getFailed("remark error");
-//            }
-//        }
-//        List<Coin> outputList = new ArrayList<>();
-//        for (int i = 0; i < outputs.size(); i++) {
-//            OutputDto outputDto = outputs.get(i);
-//            Coin to = new Coin();
-//            try {
-//                to.setOwner(Base58.decode(outputDto.getAddress()));
-//            } catch (Exception e) {
-//                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
-//            }
-//
-//            to.setNa(Na.valueOf(outputDto.getValue()));
-//            if (outputDto.getLockTime() < 0) {
-//                return Result.getFailed("lockTime error");
-//            }
-//
-//            to.setLockTime(outputDto.getLockTime());
-//            outputList.add(to);
-//        }
-//
-//        List<Coin> inputsList = new ArrayList<>();
-//        for (int i = 0; i < inputs.size(); i++) {
-//            InputDto inputDto = inputs.get(i);
-//            byte[] key = Arrays.concatenate(Hex.decode(inputDto.getFromHash()), new VarInt(inputDto.getFromIndex()).encode());
-//            Coin coin = new Coin();
-//            coin.setOwner(key);
-//            coin.setNa(Na.valueOf(inputDto.getValue()));
-//            inputsList.add(coin);
-//        }
-//
-//        Transaction tx = TransactionTool.createTransferTx(inputsList, outputList, remarkBytes);
-//        //计算交易手续费最小值
-//        int size = tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH;
-//        Na minFee = TransactionFeeCalculator.getTransferFee(size);
-//        //计算inputs和outputs的差额 ，求手续费
-//        Na fee = Na.ZERO;
-//        for (Coin coin : tx.getCoinData().getFrom()) {
-//            fee = fee.add(coin.getNa());
-//        }
-//        for (Coin coin : tx.getCoinData().getTo()) {
-//            fee = fee.subtract(coin.getNa());
-//        }
-//        if (fee.isLessThan(minFee)) {
-//            return Result.getFailed(TransactionErrorCode.FEE_NOT_RIGHT);
-//        }
-//        try {
-//            String txHex = Hex.encode(tx.serialize());
-//            return Result.getSuccess().setData(txHex);
-//        } catch (IOException e) {
-//            Log.error(e);
-//            return Result.getFailed(e.getMessage());
-//        }
-//    }
+        List<Coin> outputList = new ArrayList<>();
+        for (int i = 0; i < outputs.size(); i++) {
+            OutputDto outputDto = outputs.get(i);
+            Coin to = new Coin();
+            try {
+                to.setOwner(Base58.decode(outputDto.getAddress()));
+            } catch (Exception e) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+            }
 
-//    @Override
-//    public Result signTransaction(String txHex, String priKey, String address, String password) {
-//        if (StringUtils.isBlank(priKey)) {
-//            return Result.getFailed("priKey error");
-//        }
-//        if (StringUtils.isBlank(txHex)) {
-//            return Result.getFailed("txHex error");
-//        }
-//        if (!Address.validAddress(address)) {
-//            return Result.getFailed("address error");
-//        }
-//
-//        if (StringUtils.isNotBlank(password)) {
-//            if (StringUtils.validPassword(password)) {
-//                //decrypt
-//                byte[] privateKeyBytes = null;
-//                try {
-//                    privateKeyBytes = AESEncrypt.decrypt(Hex.decode(priKey), password);
-//                } catch (Exception e) {
-//                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-//                }
-//                priKey = Hex.encode(privateKeyBytes);
-//            } else {
-//                return Result.getFailed("password error");
-//            }
-//        }
-//        if (!ECKey.isValidPrivteHex(priKey)) {
-//            return Result.getFailed("priKey error");
-//        }
-//
-//        ECKey key = ECKey.fromPrivate(new BigInteger(Hex.decode(priKey)));
-//        try {
-//            String newAddress = AccountTool.newAddress(key).getBase58();
-//            if (!newAddress.equals(address)) {
-//                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
-//            }
-//        } catch (NulsException e) {
-//            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
-//        }
-//
-//        try {
-//            byte[] data = Hex.decode(txHex);
-//            Transaction tx = TransactionTool.getInstance(new NulsByteBuffer(data));
-//            tx = TransactionTool.signTransaction(tx, key);
-//
-//            return Result.getSuccess().setData(Hex.encode(tx.serialize()));
-//        } catch (Exception e) {
-//            Log.error(e);
-//            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
-//        }
-//    }
+            try {
+                to.setNa(Na.valueOf(outputDto.getValue()));
+            } catch (Exception e) {
+                return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+            }
+            if (outputDto.getLockTime() < 0) {
+                return Result.getFailed("lockTime error");
+            }
+
+            to.setLockTime(outputDto.getLockTime());
+            outputList.add(to);
+        }
+
+        List<Coin> inputsList = new ArrayList<>();
+        for (int i = 0; i < inputs.size(); i++) {
+            InputDto inputDto = inputs.get(i);
+            byte[] key = Arrays.concatenate(Hex.decode(inputDto.getFromHash()), new VarInt(inputDto.getFromIndex()).encode());
+            Coin coin = new Coin();
+            coin.setOwner(key);
+            coin.setNa(Na.valueOf(inputDto.getValue()));
+
+            inputsList.add(coin);
+        }
+
+        Transaction tx = TransactionTool.createTransferTx(inputsList, outputList, remarkBytes);
+        //计算交易手续费最小值
+        int size = tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH;
+        Na minFee = TransactionFeeCalculator.getTransferFee(size);
+        //计算inputs和outputs的差额 ，求手续费
+        Na fee = Na.ZERO;
+        for (Coin coin : tx.getCoinData().getFrom()) {
+            fee = fee.add(coin.getNa());
+        }
+        for (Coin coin : tx.getCoinData().getTo()) {
+            fee = fee.subtract(coin.getNa());
+        }
+        if (fee.isLessThan(minFee)) {
+            return Result.getFailed(TransactionErrorCode.FEE_NOT_RIGHT);
+        }
+        try {
+            String txHex = Hex.encode(tx.serialize());
+            return Result.getSuccess().setData(txHex);
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(e.getMessage());
+        }
+    }
+
+    @Override
+    public Result signTransaction(String txHex, String priKey, String address, String password) {
+        if (StringUtils.isBlank(priKey)) {
+            return Result.getFailed("priKey error");
+        }
+        if (StringUtils.isBlank(txHex)) {
+            return Result.getFailed("txHex error");
+        }
+        if (!Address.validAddress(address)) {
+            return Result.getFailed("address error");
+        }
+
+        if (StringUtils.isNotBlank(password)) {
+            if (StringUtils.validPassword(password)) {
+                //decrypt
+                byte[] privateKeyBytes = null;
+                try {
+                    privateKeyBytes = AESEncrypt.decrypt(Hex.decode(priKey), password);
+                } catch (Exception e) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+                priKey = Hex.encode(privateKeyBytes);
+            } else {
+                return Result.getFailed("password error");
+            }
+        }
+        if (!ECKey.isValidPrivteHex(priKey)) {
+            return Result.getFailed("priKey error");
+        }
+
+        ECKey key = ECKey.fromPrivate(new BigInteger(Hex.decode(priKey)));
+        try {
+            String newAddress = AccountTool.newAddress(key).getBase58();
+            if (!newAddress.equals(address)) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+            }
+        } catch (NulsException e) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+
+        try {
+            byte[] data = Hex.decode(txHex);
+            Transaction tx = TransactionTool.getInstance(new NulsByteBuffer(data));
+            tx = TransactionTool.signTransaction(tx, key);
+
+            return Result.getSuccess().setData(Hex.encode(tx.serialize()));
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
+        }
+    }
 
     /**
      * -----------------------------------Test------------------------------

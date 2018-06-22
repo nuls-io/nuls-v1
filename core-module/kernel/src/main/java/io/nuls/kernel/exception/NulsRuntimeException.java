@@ -36,6 +36,7 @@ public class NulsRuntimeException extends RuntimeException {
 
     private String code;
     private String message;
+    private ErrorCode errorCode;
 
     /**
      * Constructs a new exception with the specified detail validator.  The
@@ -49,6 +50,7 @@ public class NulsRuntimeException extends RuntimeException {
         super(message.getMsg());
         this.code = message.getCode();
         this.message = message.getMsg();
+        this.errorCode = message;
     }
 
     /**
@@ -69,6 +71,7 @@ public class NulsRuntimeException extends RuntimeException {
         super(message.getMsg(), cause);
         this.code = message.getCode();
         this.message = message.getMsg();
+        this.errorCode = message;
         ;
     }
 
@@ -110,12 +113,14 @@ public class NulsRuntimeException extends RuntimeException {
         super(message.getMsg(), cause, enableSuppression, writableStackTrace);
         this.code = message.getCode();
         this.message = message.getMsg();
+        this.errorCode = message;
     }
 
     public NulsRuntimeException(ErrorCode errorCode, String msg) {
         super(msg);
         this.code = errorCode.getCode();
         this.message = errorCode.getMsg() + ":" + msg;
+        this.errorCode = errorCode;
     }
 
     @Override
@@ -132,5 +137,9 @@ public class NulsRuntimeException extends RuntimeException {
 
     public void setCode(String code) {
         this.code = code;
+}
+
+    public ErrorCode getErrorCode() {
+        return errorCode;
     }
 }

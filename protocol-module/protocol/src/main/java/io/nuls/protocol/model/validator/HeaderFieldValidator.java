@@ -24,6 +24,7 @@
  */
 package io.nuls.protocol.model.validator;
 
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.validate.NulsDataValidator;
@@ -37,8 +38,6 @@ import io.nuls.kernel.validate.ValidateResult;
 public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
 
     private static final int HEADER_EXTENDS_MAS_SIZE = 64;
-
-    private static final String ERROR_MESSAGE = "block header field check failed";
 
     @Override
     public ValidateResult validate(BlockHeader data) {
@@ -67,7 +66,7 @@ public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
             }
         } while (false);
         if (failed) {
-            result = ValidateResult.getFailedResult(this.getClass().getName(), ERROR_MESSAGE);
+            result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.BLOCK_HEADER_FIELD_CHECK_FAILED);
         }
         return result;
     }

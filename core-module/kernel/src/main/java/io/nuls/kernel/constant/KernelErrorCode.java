@@ -61,6 +61,20 @@ public interface KernelErrorCode {
     ErrorCode SIGNATURE_ERROR = ErrorCode.init("SYS021", "20021");
     ErrorCode CHAIN_ID_ERROR = ErrorCode.init("SYS022", "20022");
     ErrorCode REQUEST_DENIED = ErrorCode.init("SYS023", "20023");
+
+
+    ErrorCode DOWNLOAD_VERSION_FAILD = ErrorCode.init("SYS024", "20024");
+    ErrorCode PARSE_JSON_FAILD = ErrorCode.init("SYS025", "20025");
+    ErrorCode FILE_OPERATION_FAILD = ErrorCode.init("SYS026", "20026");
+
+    ErrorCode ILLEGAL_ACCESS_EXCEPTION = ErrorCode.init("SYS027", "20027");
+    ErrorCode INSTANTIATION_EXCEPTION = ErrorCode.init("SYS028", "20028");
+
+    ErrorCode UPGRADING = ErrorCode.init("SYS029", "20029");
+    ErrorCode NOT_UPGRADING = ErrorCode.init("SYS030", "20030");
+    ErrorCode VERSION_NOT_NEWEST = ErrorCode.init("SYS031", "20031");
+
+
     /*
      * ----------  Consensus Network code   --------
      */
@@ -116,6 +130,13 @@ public interface KernelErrorCode {
     ErrorCode CANCEL_CONSENSUS = ErrorCode.init("MSG013", "80013");
     ErrorCode BALANCE_CHANGE = ErrorCode.init("MSG014", "80014");
 
-
+    ErrorCode  VALIDATORS_NOT_FULLY_EXECUTED= ErrorCode.init("MSG015", "80015");
+    ErrorCode  BLOCK_HEADER_SIGN_CHECK_FAILED= ErrorCode.init("MSG016", "80016");
+    ErrorCode  BLOCK_HEADER_FIELD_CHECK_FAILED= ErrorCode.init("MSG017", "80017");
+    ErrorCode  BLOCK_FIELD_CHECK_FAILED= ErrorCode.init("MSG018", "80018");
+    ErrorCode  BLOCK_TOO_BIG= ErrorCode.init("MSG019", "80019");
+    ErrorCode  MERKLE_HASH_WRONG= ErrorCode.init("MSG020", "80020");
+    ErrorCode  ADDRESS_IS_BLOCK_HOLE= ErrorCode.init("MSG021", "80021");
+    ErrorCode  ADDRESS_IS_NOT_BELONGS_TO_CHAIN= ErrorCode.init("MSG022", "80022");
 
 }

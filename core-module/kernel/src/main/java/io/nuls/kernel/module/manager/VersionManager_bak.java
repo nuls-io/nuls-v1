@@ -119,14 +119,14 @@ public class VersionManager_bak {
             jsonStr = new String(HttpDownloadUtils.download(VERDION_JSON_URL), NulsConfig.DEFAULT_ENCODING);
         } catch (IOException e) {
             Log.error(e);
-            throw new NulsException(KernelErrorCode.FAILED, "Download version json faild!");
+            throw new NulsException(KernelErrorCode.DOWNLOAD_VERSION_FAILD);
         }
         Map<String, Object> map = null;
         try {
             map = JSONUtils.json2map(jsonStr);
         } catch (Exception e) {
             Log.error(e);
-            throw new NulsException(KernelErrorCode.FAILED, "Parse version json faild!");
+            throw new NulsException(KernelErrorCode.PARSE_JSON_FAILD);
         }
         String version = (String) map.get("version");
         String sign = (String) map.get("sign");
@@ -174,7 +174,7 @@ public class VersionManager_bak {
                 File jar = new File(jarMap.get(key));
                 boolean b = jar.renameTo(new File(bakFolder.getPath() + "/" + key));
                 if (!b) {
-                    throw new NulsException(KernelErrorCode.FAILED, "move the file fiald:" + key);
+                    throw new NulsException(KernelErrorCode.FILE_OPERATION_FAILD);
                 }
                 removeList.add(jar.getName());
             }
@@ -198,7 +198,7 @@ public class VersionManager_bak {
             for (File file : files) {
                 boolean b = file.renameTo(new File(libsUrl.getPath() + "/" + file.getName()));
                 if (!b) {
-                    throw new NulsException(KernelErrorCode.FAILED, "move the file fiald:" + file.getPath());
+                    throw new NulsException(KernelErrorCode.FILE_OPERATION_FAILD);
                 }
                 moved.add(file.getName());
             }
@@ -229,7 +229,7 @@ public class VersionManager_bak {
                 str.append(fileName);
                 str.append(";");
             }
-            throw new NulsException(KernelErrorCode.FAILED, "move the file fiald:" + str.toString());
+            throw new NulsException(KernelErrorCode.FILE_OPERATION_FAILD);
         }
     }
 

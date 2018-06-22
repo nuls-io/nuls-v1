@@ -24,6 +24,7 @@
  */
 package io.nuls.protocol.model.validator;
 
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.validate.NulsDataValidator;
@@ -35,7 +36,6 @@ import io.nuls.kernel.validate.ValidateResult;
  */
 @Component
 public class BlockFieldValidator implements NulsDataValidator<Block> {
-    private static final String ERROR_MESSAGE = "block field check failed";
 
     @Override
     public ValidateResult validate(Block data) {
@@ -62,7 +62,7 @@ public class BlockFieldValidator implements NulsDataValidator<Block> {
 
         } while (false);
         if (failed) {
-            result = ValidateResult.getFailedResult(this.getClass().getName(),ERROR_MESSAGE);
+            result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.BLOCK_FIELD_CHECK_FAILED);
         }
         return result;
     }

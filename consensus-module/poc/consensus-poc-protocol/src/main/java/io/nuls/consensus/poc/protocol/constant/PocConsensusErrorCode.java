@@ -42,4 +42,22 @@ public interface PocConsensusErrorCode {
     ErrorCode DEPOSIT_OVER_COUNT = ErrorCode.init("cs007", "70007");
     ErrorCode DEPOSIT_TOO_MUCH = ErrorCode.init("cs008", "70008");
     ErrorCode AGENT_STOPPED = ErrorCode.init("cs009","70009");
+
+    ErrorCode DEPOSIT_WAS_CANCELED = ErrorCode.init("cs010","70010");
+    ErrorCode DEPOSIT_NEVER_CANCELED = ErrorCode.init("cs011","70011");
+    ErrorCode UPDATE_DEPOSIT_FAILED = ErrorCode.init("cs012","70012");
+    ErrorCode SAVE_ERROR = ErrorCode.init("cs013","70013");
+    ErrorCode UPDATE_AGENT_FAILED = ErrorCode.init("cs014","70014");
+    ErrorCode LOCK_TIME_NOT_REACHED = ErrorCode.init("cs015","70015");
+
+    ErrorCode AGENT_NOT_EXIST = ErrorCode.init("cs016","70016");
+    ErrorCode AGENT_EXIST = ErrorCode.init("cs017","70017");
+    ErrorCode AGENT_PUNISHED = ErrorCode.init("cs018","70018");
+    ErrorCode BIFURCATION = ErrorCode.init("cs019","70019");
+    ErrorCode YELLOW_PUNISH_TX_WRONG = ErrorCode.init("cs020","70020");
+    ErrorCode ADDRESS_IS_CONSENSUS_SEED = ErrorCode.init("cs021","70021");
+    ErrorCode TRANSACTIONS_NEVER_DOUBLE_SPEND = ErrorCode.init("cs022","70022");
+    ErrorCode WRONG_RED_PUNISH_REASON = ErrorCode.init("cs023","70023");
+
+
 }

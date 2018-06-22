@@ -31,6 +31,7 @@ import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.service.DepositStorageService;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -56,17 +57,17 @@ public class CancelDepositTxValidator implements NulsDataValidator<CancelDeposit
     public ValidateResult validate(CancelDepositTransaction data) {
         DepositPo depositPo = depositStorageService.get(data.getTxData().getJoinTxHash());
         if(null==depositPo||depositPo.getDelHeight()>0){
-            return ValidateResult.getFailedResult(this.getClass().getName(),"The deposit is deleted or never created!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),KernelErrorCode.DATA_NOT_FOUND);
         }
         P2PKHScriptSig sig = new P2PKHScriptSig();
         try {
             sig.parse(data.getScriptSig());
         } catch (NulsException e) {
             Log.error(e);
-            return ValidateResult.getFailedResult(this.getClass().getName(), e.getMessage());
+            return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
         if (!Arrays.equals(depositPo.getAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
-            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "The deposit does not belong to this address.");
+            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
             return result;
         }

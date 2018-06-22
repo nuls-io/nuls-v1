@@ -46,36 +46,24 @@ public class Result<T> implements Serializable {
 
     private T data;
 
-    public Result(boolean success, String message, ErrorCode errorCode, T data) {
-        this.success = success;
-        this.msg = message;
-
-        if (null == errorCode) {
-            errorCode = KernelErrorCode.FAILED;
-            if (success) {
-                errorCode = KernelErrorCode.SUCCESS;
-            }
-        }
-        this.errorCode = errorCode;
-        this.data = data;
-    }
 
     public Result() {
-        this(false, "", KernelErrorCode.SUCCESS, null);
+        this(true, KernelErrorCode.SUCCESS, null);
     }
 
-    public Result(boolean success, String message) {
-        this(success, message, null, null);
+    public Result(boolean success) {
+        this.success = success;
+        this.errorCode = KernelErrorCode.SUCCESS;
     }
-
     public Result(boolean success, ErrorCode errorCode, T data) {
         this.success = success;
         this.errorCode = errorCode;
         this.data = data;
     }
 
-    public Result(boolean success, String message, T t) {
-        this(success, message, KernelErrorCode.SUCCESS, t);
+    public Result(boolean success, ErrorCode errorCode) {
+        this.success = success;
+        this.errorCode = errorCode;
     }
 
     public boolean isSuccess() {
@@ -138,21 +126,17 @@ public class Result<T> implements Serializable {
         return getFailed(KernelErrorCode.FAILED);
     }
 
-    public static Result getFailed(String msg) {
+ /*   public static Result getFailed(String msg) {
         return new Result(false, msg);
-    }
+    }*/
 
     public static Result getSuccess() {
-        return new Result(true, "");
+        return new Result(true);
     }
+
 
     public static Result getFailed(ErrorCode errorCode) {
-        return getFailed(errorCode, errorCode.getMsg());
-    }
-
-    public static Result getFailed(ErrorCode errorCode, String msg) {
-        Result result = new Result(false, msg);
-        result.setErrorCode(errorCode);
+        Result result = new Result(false, errorCode, null);
         return result;
     }
 

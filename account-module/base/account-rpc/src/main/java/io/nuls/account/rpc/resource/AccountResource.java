@@ -47,6 +47,7 @@ import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -135,12 +136,11 @@ public class AccountResource {
                                                         AccountCreateForm form) {
         int count = form.getCount() < 1 ? 1 : form.getCount();
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "between 0 and 100 can be created at once").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         String password = form.getPassword();
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG,
-                    "Length between 8 and 20, the combination of characters and numbers").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG).toRpcClientResult();
         }
         List<AccountDto> accounts = new ArrayList<>();
         try {
@@ -503,7 +503,7 @@ public class AccountResource {
         }
         String password = form.getPassword();
         if (StringUtils.isBlank(password)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The password is required").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (!StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG).toRpcClientResult();
@@ -531,10 +531,10 @@ public class AccountResource {
         String password = form.getPassword();
 
         if (StringUtils.isBlank(address) || !Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "address error").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (StringUtils.isBlank(priKey) || !ECKey.isValidPrivteHex(priKey)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "priKey error").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (StringUtils.isBlank(password) || !StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG).toRpcClientResult();
@@ -545,10 +545,10 @@ public class AccountResource {
         try {
             String newAddress = AccountTool.newAddress(key).getBase58();
             if (!newAddress.equals(address)) {
-                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR, "address and private key do not match").toRpcClientResult();
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
             }
         } catch (NulsException e) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR, "address and private key do not match").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
 
         try {
@@ -577,10 +577,10 @@ public class AccountResource {
         String newPassword = form.getNewPassword();
 
         if (StringUtils.isBlank(address) || !Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "address error").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (StringUtils.isBlank(priKey)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "priKey error").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (StringUtils.isBlank(password) || !StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG).toRpcClientResult();
@@ -637,10 +637,10 @@ public class AccountResource {
         String password = form.getPassword();
         String newPassword = form.getNewPassword();
         if (StringUtils.isBlank(password)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The password is required").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (StringUtils.isBlank(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The new password is required").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (!StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG).toRpcClientResult();
@@ -670,11 +670,11 @@ public class AccountResource {
 
         String prikey = form.getPriKey();
         if (!ECKey.isValidPrivteHex(prikey)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The prikey is wrong").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         String newPassword = form.getPassword();
         if (StringUtils.isBlank(newPassword)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "The new password is required").toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (!StringUtils.validPassword(newPassword)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG).toRpcClientResult();
@@ -773,27 +773,27 @@ public class AccountResource {
         //if not directory , create directory
         if (!backupFile.isDirectory()) {
             if (!backupFile.mkdirs()) {
-                return Result.getFailed("create directory failed");
+                return Result.getFailed(KernelErrorCode.FILE_OPERATION_FAILD);
             }
             if (!backupFile.exists() && !backupFile.mkdir()) {
-                return Result.getFailed("create directory failed");
+                return Result.getFailed(KernelErrorCode.FILE_OPERATION_FAILD);
             }
         }
         String fileName = accountKeyStoreDto.getAddress().concat(AccountConstant.ACCOUNTKEYSTORE_FILE_SUFFIX);
         backupFile = new File(backupFile, fileName);
         try {
             if (!backupFile.exists() && !backupFile.createNewFile()) {
-                return Result.getFailed("create file failed");
+                return Result.getFailed(KernelErrorCode.FILE_OPERATION_FAILD);
             }
         } catch (IOException e) {
-            return Result.getFailed("create file failed");
+            return Result.getFailed(KernelErrorCode.IO_ERROR);
         }
         FileOutputStream fileOutputStream = null;
         try {
             fileOutputStream = new FileOutputStream(backupFile);
             fileOutputStream.write(JSONUtils.obj2json(accountKeyStoreDto).getBytes());
         } catch (Exception e) {
-            return Result.getFailed("export failed");
+            return Result.getFailed(KernelErrorCode.PARSE_JSON_FAILD);
         } finally {
             if (fileOutputStream != null) {
                 try {

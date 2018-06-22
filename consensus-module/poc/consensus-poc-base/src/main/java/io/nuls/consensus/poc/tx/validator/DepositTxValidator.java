@@ -61,6 +61,7 @@ import io.nuls.consensus.poc.storage.service.DepositStorageService;
 import io.nuls.consensus.poc.storage.service.PunishLogStorageService;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -95,12 +96,12 @@ public class DepositTxValidator extends BaseConsensusProtocolValidator<DepositTr
     @Override
     public ValidateResult validate(DepositTransaction tx) {
         if (null == tx || null == tx.getTxData() || null == tx.getTxData().getAgentHash() || null == tx.getTxData().getDeposit() || null == tx.getTxData().getAddress()) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), "the deposit tx is Incomplete!");
+            return ValidateResult.getFailedResult(this.getClass().getName(),KernelErrorCode.DATA_ERROR);
         }
         Deposit deposit = tx.getTxData();
         AgentPo agentPo = agentStorageService.get(deposit.getAgentHash());
         if (null == agentPo || agentPo.getDelHeight() > 0) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), "Agent is not exist!");
+            return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_NOT_EXIST);
         }
         List<DepositPo> poList = this.getDepositListByAgent(deposit.getAgentHash());
         if (null != poList && poList.size() >= PocConsensusProtocolConstant.MAX_ACCEPT_NUM_OF_DEPOSIT) {
@@ -127,10 +128,10 @@ public class DepositTxValidator extends BaseConsensusProtocolValidator<DepositTr
             sig.parse(tx.getScriptSig());
         } catch (NulsException e) {
             Log.error(e);
-            return ValidateResult.getFailedResult(this.getClass().getName(), e.getMessage());
+            return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
         if (!Arrays.equals(deposit.getAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
-            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), "The deposit address is not this address.");
+            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
             return result;
         }

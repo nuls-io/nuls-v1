@@ -62,10 +62,10 @@ public class DownloadServiceImpl implements DownloadService {
         try {
             block = DownloadUtils.getBlockByHash(hash, node);
         } catch (RuntimeException e) {
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         if (block == null) {
-            return Result.getFailed(KernelErrorCode.FAILED);
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         }
         return Result.getSuccess().setData(block);
     }
@@ -84,10 +84,10 @@ public class DownloadServiceImpl implements DownloadService {
         try {
             txGroup = DownloadUtils.getTxGroup(txHashList, node);
         } catch (Exception e) {
-            return Result.getFailed(e.getMessage());
+            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         if (txGroup == null) {
-            return Result.getFailed(KernelErrorCode.FAILED);
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         }
         return Result.getSuccess().setData(txGroup);
     }
@@ -101,7 +101,7 @@ public class DownloadServiceImpl implements DownloadService {
         if (processor.getDownloadStatus() == DownloadStatus.SUCCESS) {
             return Result.getSuccess();
         }
-        return Result.getFailed(processor.getDownloadStatus().name());
+        return Result.getFailed(KernelErrorCode.FAILED);
     }
 
     public boolean start() {
