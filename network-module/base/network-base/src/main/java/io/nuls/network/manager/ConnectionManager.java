@@ -45,7 +45,6 @@ import io.nuls.protocol.message.base.BaseMessage;
 import io.nuls.protocol.message.base.MessageHeader;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -105,42 +104,10 @@ public class ConnectionManager {
         }, true);
     }
 
-    int count = 0;
-
     public void receiveMessage(ByteBuf buffer, Node node) throws NulsException {
-
-        if (node.getIp().equals("192.168.1.103")) {
-            count++;
-            Log.info("接收到第 " + count + " 个消息");
-            return;
-        }
         List<BaseMessage> list;
         try {
-//            buffer.flip();
-//            if (!node.isAlive()) {
-//                buffer.clear();
-//                return;
-//            }
             list = new ArrayList<>();
-//            byte[] bytes = buffer.array();
-//            byte[] bytes = new byte[buffer.readableBytes()];
-//            buffer.readBytes(bytes);
-//            int offset = 0;
-//            while (offset < bytes.length - 1) {
-//                MessageHeader header = new MessageHeader();
-//                header.parse(bytes);
-//                BaseMessage message = getMessageBusService().getMessageInstance(header.getModuleId(), header.getMsgType()).getData();
-//                message.parse(bytes);
-//
-//                list.add(message);
-//                offset = message.serialize().length;
-//                if (bytes.length > offset) {
-//                    byte[] subBytes = new byte[bytes.length - offset];
-//                    System.arraycopy(bytes, offset, subBytes, 0, subBytes.length);
-//                    bytes = subBytes;
-//                    offset = 0;
-//                }
-//            }
             byte[] bytes = new byte[buffer.readableBytes()];
             buffer.readBytes(bytes);
             NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
@@ -162,7 +129,7 @@ public class ConnectionManager {
                     processMessage(message, node);
                 } else {
                     node.setStatus(Node.BAD);
-                    Log.info("-------------------- receive message filter remove node ---------------------------" + node.getId());
+                    Log.debug("-------------------- receive message filter remove node ---------------------------" + node.getId());
                     nodeManager.removeNode(node.getId());
                 }
             }
