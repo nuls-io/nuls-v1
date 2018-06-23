@@ -98,6 +98,9 @@ public class Block extends BaseNulsData implements Cloneable {
     public List<NulsDigestData> getTxHashList() {
         List<NulsDigestData> list = new ArrayList<>();
         for (Transaction tx : txs) {
+            if (null == tx) {
+                continue;
+            }
             list.add(tx.getHash());
         }
         return list;

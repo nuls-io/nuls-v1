@@ -98,6 +98,9 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Result rollbackTx(Transaction tx, Object secondaryData) {
+        if (null == tx) {
+            return Result.getSuccess();
+        }
         List<TransactionProcessor> processorList = TransactionManager.getProcessorList(tx.getClass());
         List<TransactionProcessor> rollbackedList = new ArrayList<>();
         for (TransactionProcessor processor : processorList) {

@@ -320,7 +320,7 @@ public class ConsensusProcess {
                 continue;
             }
 
-            long t = System.currentTimeMillis();
+//            long t = System.currentTimeMillis();
 
 //            ValidateResult result = tx.verify();
 //
@@ -335,8 +335,10 @@ public class ConsensusProcess {
 //                continue;
 //            }
 
-            ValidateResult result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
-
+            ValidateResult result = ValidateResult.getSuccessResult();
+            if (!tx.isSystemTx()) {
+                result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
+            }
             if (result.isFailed()) {
                 if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
                     txMemoryPool.add(txContainer, true);

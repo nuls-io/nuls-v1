@@ -69,9 +69,13 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
             return;
         }
 
+        if (tx.isSystemTx()) {
+            return;
+        }
+
         txs.add(tx);
         int size = txs.size();
-        if(size % 1000 == 0) {
+        if (size % 1000 == 0) {
             Log.info("tx size is : " + size);
         }
 //        if(size == 30000) {

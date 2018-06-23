@@ -33,10 +33,13 @@ import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.Chain;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
+import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
@@ -80,7 +83,7 @@ public class BlockProcess {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
 
-    private ExecutorService signExecutor = TaskManager.createThreadPool(Runtime.getRuntime().availableProcessors(),Integer.MAX_VALUE,new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS,""));
+    private ExecutorService signExecutor = TaskManager.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, ""));
 
     public BlockProcess(ChainManager chainManager, OrphanBlockProvider orphanBlockProvider) {
         this.chainManager = chainManager;
@@ -108,9 +111,7 @@ public class BlockProcess {
      * 4、保存区块头信息，保存区块交易信息
      * 5、转发区块
      *
-     * @param blockContainer
      * @return boolean
-     * @throws IOException
      */
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
 
@@ -133,7 +134,22 @@ public class BlockProcess {
         if (validateResult.isFailed() && validateResult.getErrorCode().equals(LedgerErrorCode.LEDGER_DOUBLE_SPENT)) {
             RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
             RedPunishData redPunishData = new RedPunishData();
-            redPunishData.setAddress(AddressTool.getAddress(block.getHeader().getScriptSig()));
+            byte[] packingAddress = AddressTool.getAddress(block.getHeader().getScriptSig());
+            List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+            Agent agent = null;
+            for (Agent a : agentList) {
+                if (a.getDelHeight() > 0) {
+                    continue;
+                }
+                if (Arrays.equals(a.getPackingAddress(), packingAddress)) {
+                    agent = a;
+                    break;
+                }
+            }
+            if (null == agent) {
+                return false;
+            }
+            redPunishData.setAddress(agent.getAgentAddress());
             SmallBlock smallBlock = new SmallBlock();
             smallBlock.setHeader(block.getHeader());
             smallBlock.setTxHashList(block.getTxHashList());
@@ -272,8 +288,6 @@ public class BlockProcess {
      * forwarding block
      * <p>
      * 转发区块
-     *
-     * @param blockContainer
      */
     private void forwardingBlock(BlockContainer blockContainer) {
         if (blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING) {
@@ -299,7 +313,6 @@ public class BlockProcess {
      * <p>
      * 交易被确认，移除内存池里面存在的交易
      *
-     * @param block
      * @return boolean
      */
     public boolean removeTxFromMemoryPool(Block block) {
@@ -321,7 +334,6 @@ public class BlockProcess {
      * 当一个新的区块，不能被添加进主链时，那么它有可能存在于一条分叉链上，也有可能是本地主链不是最新的网络主链
      * 出现这种情况时，需要检测该区块是否与主链分叉或者与已经存在的分叉链相连，如果能组合成一条新的分叉链，则添加新的分叉链
      *
-     * @param block
      * @return boolean
      */
     protected boolean checkAndAddForkChain(Block block) {
@@ -339,7 +351,6 @@ public class BlockProcess {
      * <p>
      * 当一个区块不能与主链相连时，检查是否是主链的分支，如果是主链的分支，则产生一条分叉链，然后把该分叉链添加进待验证的分叉链池里
      *
-     * @param block
      * @return boolean
      */
     protected boolean checkForkChainFromMasterChain(Block block) {
@@ -388,7 +399,6 @@ public class BlockProcess {
      * <p>
      * 当一个区块不能与主链相连时，检查是否是分叉链的分支，或者与分叉链相连，如果是，则产生一条分叉链，然后把该分叉链添加进待验证的分叉链池里；或者把该块直接添加到对应的分叉链上
      *
-     * @param block
      * @return boolean
      */
     protected boolean checkForkChainFromForkChains(Block block) {

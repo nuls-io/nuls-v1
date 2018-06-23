@@ -26,10 +26,13 @@
 package io.nuls.consensus.poc.block.validator;
 
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
+import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
+import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.array.ArraysTool;
@@ -47,6 +50,7 @@ import io.nuls.protocol.service.BlockService;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author: Niels Wang
@@ -74,15 +78,31 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
         }
         BlockHeader otherBlockHeader = blockService.getBlockHeader(header.getHeight()).getData();
         if (null != otherBlockHeader && !otherBlockHeader.getHash().equals(header.getHash()) && Arrays.equals(otherBlockHeader.getPackingAddress(), header.getPackingAddress())) {
+            List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+            Agent agent = null;
+            for (Agent a : agentList) {
+                if (a.getDelHeight() > 0) {
+                    continue;
+                }
+                if (Arrays.equals(a.getPackingAddress(), header.getPackingAddress())) {
+                    agent = a;
+                    break;
+                }
+            }
+            if (null == agent) {
+                return ValidateResult.getFailedResult(CLASS_NAME,PocConsensusErrorCode.BIFURCATION);
+            }
+
             RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
             RedPunishData redPunishData = new RedPunishData();
-            redPunishData.setAddress(header.getPackingAddress());
+
+            redPunishData.setAddress(agent.getAgentAddress());
             try {
                 byte[] header1 = header.serialize();
                 byte[] header2 = otherBlockHeader.serialize();
                 redPunishData.setEvidence(ArraysTool.joinintTogether(header1, header2));
             } catch (Exception e) {
-                ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.SYS_UNKOWN_EXCEPTION);
+                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.SYS_UNKOWN_EXCEPTION);
             }
             redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
             redPunishTransaction.setTxData(redPunishData);
