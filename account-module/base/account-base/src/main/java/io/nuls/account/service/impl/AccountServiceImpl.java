@@ -118,7 +118,7 @@ public class AccountServiceImpl implements AccountService {
             return Result.getSuccess().setData(accounts);
         } catch (Exception e) {
             Log.error(e);
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "create account failed!");
+            throw new NulsRuntimeException(KernelErrorCode.FAILED);
         } finally {
             locker.unlock();
         }
@@ -692,11 +692,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<Na> getAliasFee(String addr, String aliasName) {
-        if (!Address.validAddress(addr)) {
+    public Result<Na> getAliasFee(String address, String aliasName) {
+        if (!Address.validAddress(address)) {
             Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        Account account = this.getAccount(addr).getData();
+        Account account = this.getAccount(address).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }

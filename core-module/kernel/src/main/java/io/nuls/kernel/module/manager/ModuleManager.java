@@ -99,7 +99,7 @@ public class ModuleManager {
     public void regModule(BaseModuleBootstrap module) {
         short moduleId = module.getModuleId();
         if (MODULE_MAP.keySet().contains(moduleId)) {
-            throw new NulsRuntimeException(KernelErrorCode.THREAD_REPETITION, "the id of Module is already exist(" + module.getModuleName() + ")");
+            throw new NulsRuntimeException(KernelErrorCode.THREAD_REPETITION);
         }
         MODULE_MAP.put(moduleId, module);
     }

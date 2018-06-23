@@ -63,7 +63,7 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
             }
             byte[] bytes = bos.toByteArray();
             if (bytes.length != this.size()) {
-                throw new NulsRuntimeException(KernelErrorCode.FAILED, "data serialize error：" + this.getClass());
+                throw new NulsRuntimeException(KernelErrorCode.SERIALIZE_ERROR);
             }
             return bytes;
         } finally {
@@ -104,7 +104,7 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
     public final void verifyWithException() throws NulsVerificationException {
         ValidateResult result = this.verify();
         if (result.isFailed()) {
-            throw new NulsVerificationException(result.getMsg());
+            throw new NulsVerificationException(result.getErrorCode());
         }
     }
 

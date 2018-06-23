@@ -293,7 +293,7 @@ public class ConsensusTool {
         coinData.setTo(toList);
         CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);
         if (null == transaction) {
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "Can not find the create agent transaction!");
+            throw new NulsRuntimeException(KernelErrorCode.DATA_NOT_FOUND);
         }
         List<Coin> fromList = new ArrayList<>();
         for (int index = 0; index < transaction.getCoinData().getTo().size(); index++) {

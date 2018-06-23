@@ -26,6 +26,7 @@ package io.nuls.kernel.utils;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Transaction;
@@ -116,7 +117,7 @@ public class TransactionManager {
         int txType = (int) new NulsByteBuffer(byteBuffer.getPayloadByCursor()).readVarInt();
         Class<? extends Transaction> txClass = TYPE_TX_MAP.get(txType);
         if (null == txClass) {
-            throw new NulsRuntimeException(KernelErrorCode.FAILED, "transaction type not exist!");
+            throw new NulsRuntimeException(KernelErrorCode.DATA_NOT_FOUND);
         }
         Transaction tx = byteBuffer.readNulsData(txClass.newInstance());
         return tx;

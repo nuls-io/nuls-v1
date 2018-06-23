@@ -186,7 +186,7 @@ public class BlockResource {
     }
 
     @GET
-    @Path("/newest/hight")
+    @Path("/newest/height")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "查询最新区块高度")
     @ApiResponses(value = {

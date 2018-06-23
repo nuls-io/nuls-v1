@@ -77,7 +77,7 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
             }
         } else {
             if (!block0.getHeader().getHash().equals(genesisBlock.getHeader().getHash())) {
-                throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR, "the local genesis block is wrong!");
+                throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
             }
         }
         Block block = blockService.getBestBlock().getData();
