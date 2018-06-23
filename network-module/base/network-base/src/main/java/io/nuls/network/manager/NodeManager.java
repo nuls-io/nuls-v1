@@ -76,8 +76,6 @@ public class NodeManager implements Runnable {
 
     boolean running;
 
-    //存放所有正在连接或已连接的节点的id，防止重复连接
-    private Set<String> nodeIdSet = ConcurrentHashMap.newKeySet();
     //存放断开连接的节点
     private Map<String, Node> disConnectNodes = new ConcurrentHashMap<>();
     //存放连接成功但还未握手成功的节点
@@ -176,12 +174,12 @@ public class NodeManager implements Runnable {
             }
         }
         for (Node node : connectedNodes.values()) {
-            if (node.getType() == Node.OUT && node.isCanConnect()) {
+            if (node.getType() == Node.OUT) {
                 nodeList.add(node);
             }
         }
         for (Node node : handShakeNodes.values()) {
-            if (node.getType() == Node.OUT && node.isCanConnect()) {
+            if (node.getType() == Node.OUT) {
                 nodeList.add(node);
             }
         }
@@ -214,15 +212,18 @@ public class NodeManager implements Runnable {
         if (networkParam.getLocalIps().contains(node.getIp())) {
             return false;
         }
-
+        if (node.getStatus() != Node.WAIT) {
+            return false;
+        }
         lock.lock();
         try {
-            //已连接的节点，不再重复连接
-            if (nodeIdSet.contains(node.getId())) {
+            //同一ip地址，不再重复连接
+            if (checkIpExist(node.getIp())) {
                 return false;
             }
-            nodeIdSet.add(node.getId());
             node.setType(Node.OUT);
+            node.setTestConnect(false);
+
             disConnectNodes.put(node.getId(), node);
             connectionManager.connectionNode(node);
             return true;
@@ -258,7 +259,6 @@ public class NodeManager implements Runnable {
         } else {
             Log.info("------------remove node is null-----------" + nodeId);
             getNetworkStorage().deleteNode(nodeId);
-            nodeIdSet.remove(nodeId);
         }
     }
 
@@ -274,7 +274,6 @@ public class NodeManager implements Runnable {
             if (StringUtils.isNotBlank(node.getChannelId())) {
                 SocketChannel channel = NioChannelMap.get(node.getChannelId());
                 if (channel != null) {
-                    nodeIdSet.remove(node.getId());
                     channel.close();
                     return;
                 }
@@ -282,7 +281,6 @@ public class NodeManager implements Runnable {
             node.destroy();
             removeNodeFromGroup(node);
             removeNodeHandler(node);
-            nodeIdSet.remove(node.getId());
         } finally {
             lock.unlock();
         }
@@ -294,7 +292,6 @@ public class NodeManager implements Runnable {
             removeNode(node);
         } else {
 //            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
-            nodeIdSet.remove(node.getId());
             getNetworkStorage().deleteNode(nodeId);
         }
     }
@@ -324,7 +321,7 @@ public class NodeManager implements Runnable {
         }
 
         if (node.getFailCount() <= NetworkConstant.CONEECT_FAIL_MAX_COUNT) {
-            //node.setLastFailTime(TimeService.currentTimeMillis() + 10 * 1000 * node.getFailCount());
+            node.setLastFailTime(TimeService.currentTimeMillis());
             if (!disConnectNodes.containsKey(node.getId())) {
                 disConnectNodes.put(node.getId(), node);
             }
@@ -372,12 +369,13 @@ public class NodeManager implements Runnable {
         //当非服务器节点收到自己的外网IP时，尝试连接自己外网ip，看能否连通
         NodeGroup nodeGroup = nodeGroups.get(NetworkConstant.NETWORK_NODE_OUT_GROUP);
         if (nodeGroup.size() <= 1) {
+
+            System.out.println("----------------");
             Node node = new Node();
             node.setIp(externalIp);
             node.setPort(networkParam.getPort());
             node.setSeverPort(networkParam.getPort());
             node.setType(Node.OUT);
-            nodeIdSet.add(node.getId());
             connectionManager.connectionNode(node);
         }
     }
@@ -392,7 +390,6 @@ public class NodeManager implements Runnable {
         broadcastHandler.broadcastToAllNode(message, null, true);
 
     }
-
 
     private boolean checkFullHandShake(Node node) {
         if (node.getType() == Node.IN) {
@@ -429,7 +426,6 @@ public class NodeManager implements Runnable {
         return true;
     }
 
-
     private void removeNodeFromGroup(Node node) {
         for (String groupName : node.getGroupSet()) {
             NodeGroup group = nodeGroups.get(groupName);
@@ -448,13 +444,9 @@ public class NodeManager implements Runnable {
      */
     public List<Node> getSeedNodes() {
         List<Node> seedNodes = new ArrayList<>();
-
-        Set<String> localIp = IpUtil.getIps();
         for (String seedIp : networkParam.getSeedIpList()) {
             String[] ipPort = seedIp.split(":");
-//            if (!localIp.contains(ipPort[0])) {
             seedNodes.add(new Node(ipPort[0], Integer.parseInt(ipPort[1]), Integer.parseInt(ipPort[1]), Node.OUT));
-//            }
         }
         return seedNodes;
     }
@@ -491,6 +483,16 @@ public class NodeManager implements Runnable {
                 }
             }
         }
+    }
+
+    private boolean checkIpExist(String ip) {
+        Collection<Node> nodeMap = getNodes().values();
+        for (Node node : nodeMap) {
+            if (node.getIp().equals(ip)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -559,6 +561,4 @@ public class NodeManager implements Runnable {
         }
         return networkStorageService;
     }
-
-
 }
