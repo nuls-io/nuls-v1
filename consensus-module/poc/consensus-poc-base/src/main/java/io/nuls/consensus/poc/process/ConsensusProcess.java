@@ -160,7 +160,7 @@ public class ConsensusProcess {
             if (null != realBestBlock) {
                 List<NulsDigestData> txHashList = realBestBlock.getTxHashList();
                 for (Transaction transaction : block.getTxs()) {
-                    if (transaction.getType() == ProtocolConstant.TX_TYPE_COINBASE || transaction.getType() == ConsensusConstant.TX_TYPE_YELLOW_PUNISH || transaction.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
+                    if (transaction.isSystemTx()) {
                         continue;
                     }
                     if (txHashList.contains(transaction.getHash())) {
@@ -345,6 +345,11 @@ public class ConsensusProcess {
                     txContainer.setPackageCount(txContainer.getPackageCount() + 1);
                 }
                 Log.warn(result.getMsg());
+                try {
+                    Thread.sleep(1L);
+                } catch (InterruptedException e) {
+                    Log.error("packaging error ", e);
+                }
                 continue;
             }
 

@@ -57,13 +57,10 @@ public class BlockProcessTask implements Runnable {
 
     @Override
     public void run() {
-        Lockers.CHAIN_LOCK.lock();
         try {
             doTask();
         } catch (Exception e) {
             Log.error(e);
-        } finally {
-            Lockers.CHAIN_LOCK.unlock();
         }
     }
 
