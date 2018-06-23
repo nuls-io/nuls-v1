@@ -243,10 +243,10 @@ public class NulsByteBuffer {
                 ((payload[cursor + 4] & 0xffL) << 32) |
                 ((payload[cursor + 5] & 0xffL) << 40);
         //todo
-        if(value==281474976710655L){
+        cursor += 6;
+        if (value == 281474976710655L) {
             return -1L;
         }
-        cursor += 6;
         return value;
     }
 
