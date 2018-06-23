@@ -163,12 +163,16 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             Node node = nodeManager.getNode(nodeId);
             if (node != null && node.isAlive()) {
                 ByteBuf buf = (ByteBuf) msg;
-                byte[] bytes = new byte[buf.readableBytes()];
-                buf.readBytes(bytes);
-                buf.release();
-                ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
-                buffer.put(bytes);
-                connectionManager.receiveMessage(buffer, node);
+//                byte[] bytes = new byte[buf.readableBytes()];
+//                buf.readBytes(bytes);
+//                buf.release();
+//                ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
+//                buffer.put(bytes);
+                try {
+                    connectionManager.receiveMessage(buf, node);
+                } finally {
+                    buf.release();
+                }
             }
         } catch (Exception e) {
 //            System.out.println(" ---------------------- server channelRead exception------------------------- " + nodeId);

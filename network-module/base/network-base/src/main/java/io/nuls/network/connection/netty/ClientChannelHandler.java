@@ -114,13 +114,17 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             Node node = nodeManager.getNode(nodeId);
             if (node != null && node.isAlive()) {
                 ByteBuf buf = (ByteBuf) msg;
-                byte[] bytes = new byte[buf.readableBytes()];
-                buf.readBytes(bytes);
-                buf.release();
-                ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
-                buffer.put(bytes);
+//                byte[] bytes = new byte[buf.readableBytes()];
+//                buf.readBytes(bytes);
+//                buf.release();
+//                ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
+//                buffer.put(bytes);
 
-                connectionManager.receiveMessage(buffer, node);
+                try {
+                    connectionManager.receiveMessage(buf, node);
+                } finally {
+                    buf.release();
+                }
             }
         } catch (Exception e) {
             Log.info(" ---------------------- client channelRead exception---------------------- " + nodeId);
@@ -137,6 +141,8 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+
+        super.channelUnregistered(ctx);
 
         SocketChannel channel = (SocketChannel) ctx.channel();
         Attribute<Node> nodeAttribute = channel.attr(key);
