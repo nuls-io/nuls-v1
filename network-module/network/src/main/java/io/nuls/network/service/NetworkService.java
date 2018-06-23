@@ -45,13 +45,15 @@ public interface NetworkService {
     /**
      * 断开一个已连接的节点
      * Disconnect the connection with the node
-     * @param nodeId  the id of node
+     *
+     * @param nodeId the id of node
      */
     void removeNode(String nodeId);
 
     /**
      * 获取一个节点
-     *  get node by id
+     * get node by id
+     *
      * @param nodeId the id of node
      * @return
      */
@@ -60,13 +62,15 @@ public interface NetworkService {
     /**
      * 获取所有节点
      * get all nodes
+     *
      * @return
      */
     Map<String, Node> getNodes();
 
     /**
      * 获取已连接的节点
-     *get connected nodes
+     * get connected nodes
+     *
      * @return
      */
     Collection<Node> getAvailableNodes();
@@ -74,6 +78,7 @@ public interface NetworkService {
     /**
      * 获取可连接的节点
      * get connectable nodes
+     *
      * @return
      */
     List<Node> getCanConnectNodes();
@@ -81,6 +86,7 @@ public interface NetworkService {
     /**
      * 根据名字获取节点组
      * get NodeGroup by name
+     *
      * @param groupName
      * @return
      */
@@ -88,28 +94,31 @@ public interface NetworkService {
 
     /**
      * 发送消息
-     *Send message to all connected nodes
+     * Send message to all connected nodes
+     *
      * @param nulsData message
-     * @param asyn Whether or not asynchronous
+     * @param asyn     Whether or not asynchronous
      * @return
      */
     BroadcastResult sendToAllNode(BaseNulsData nulsData, boolean asyn);
 
     /**
      * 发送消息
-     *Send message to all connected nodes
+     * Send message to all connected nodes
+     *
      * @param event
-     * @param excludeNode  node that does not need to be send
-     * @param asyn Whether or not asynchronous
+     * @param excludeNode node that does not need to be send
+     * @param asyn        Whether or not asynchronous
      * @return
      */
     BroadcastResult sendToAllNode(BaseNulsData event, Node excludeNode, boolean asyn);
 
     /**
      * send message to node
+     *
      * @param event
      * @param node
-     * @param asyn Whether or not asynchronous
+     * @param asyn  Whether or not asynchronous
      * @return
      */
     BroadcastResult sendToNode(BaseNulsData event, Node node, boolean asyn);
@@ -117,6 +126,7 @@ public interface NetworkService {
     /**
      * 发送消息给节点组
      * send message to nodeGroup
+     *
      * @param event
      * @param groupName
      * @param asyn
@@ -127,9 +137,10 @@ public interface NetworkService {
     /**
      * 发送消息给节点组
      * send message to nodeGroup
+     *
      * @param event
      * @param groupName
-     * @param excludeNode  node that does not need to be send
+     * @param excludeNode node that does not need to be send
      * @param asyn
      * @return
      */
@@ -144,6 +155,7 @@ public interface NetworkService {
     /**
      * 获取网络配置信息
      * Get network configuration information
+     *
      * @return
      */
     NetworkParam getNetworkParam();

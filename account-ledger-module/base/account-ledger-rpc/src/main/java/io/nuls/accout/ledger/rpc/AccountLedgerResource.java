@@ -29,6 +29,7 @@
  */
 package io.nuls.accout.ledger.rpc;
 
+import com.sun.org.apache.regexp.internal.RE;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.base.service.LocalUtxoService;
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
@@ -55,6 +56,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.TxStatusEnum;
@@ -162,9 +164,9 @@ public class AccountLedgerResource {
         Result result = accountLedgerService.transfer(AddressTool.getAddress(form.getAddress()),
                 AddressTool.getAddress(form.getToAddress()),
                 value, form.getPassword(), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
-        if(result.isSuccess()) {
+        if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
-            map.put("value", (String)result.getData());
+            map.put("value", (String) result.getData());
             result.setData(map);
         }
         return result.toRpcClientResult();
@@ -198,7 +200,7 @@ public class AccountLedgerResource {
         Na value = Na.valueOf(form.getAmount());
         Result result = accountLedgerService.transferFee(AddressTool.getAddress(form.getAddress()),
                 AddressTool.getAddress(form.getToAddress()), value, form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
-        if(result.isSuccess()) {
+        if (result.isSuccess()) {
             Map<String, Object> map = new HashMap<>();
             map.put("value", result.getData());
             result.setData(map);
@@ -262,9 +264,9 @@ public class AccountLedgerResource {
             inputsKey.add(key);
         }
         Result result = accountLedgerService.createTransaction(inputsKey, outputs, remark);
-        if(result.isSuccess()) {
+        if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
-            map.put("value", (String)result.getData());
+            map.put("value", (String) result.getData());
             result.setData(map);
         }
         return result.toRpcClientResult();
@@ -329,6 +331,18 @@ public class AccountLedgerResource {
                 return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
             }
 
+            for (Coin coin : tx.getCoinData().getFrom()) {
+                Coin utxo = ledgerService.getUtxo(coin.getOwner());
+                if (utxo == null) {
+                    return Result.getFailed(LedgerErrorCode.UTXO_NOT_FOUND).toRpcClientResult();
+                }
+
+                if (!form.getAddress().equals(Base58.encode(utxo.getOwner()))) {
+                    return Result.getFailed(LedgerErrorCode.INVALID_INPUT).toRpcClientResult();
+                }
+
+            }
+
             Map<String, String> map = new HashMap<>();
             map.put("value", Hex.encode(tx.serialize()));
             return Result.getSuccess().setData(map).toRpcClientResult();
@@ -357,9 +371,9 @@ public class AccountLedgerResource {
                 return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
             }
             Result result = accountLedgerService.broadcast(tx);
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 Map<String, Object> map = new HashMap<>();
-                map.put("value", tx.getHash());
+                map.put("value", tx.getHash().getDigestHex());
                 result.setData(map);
             }
             return result.toRpcClientResult();

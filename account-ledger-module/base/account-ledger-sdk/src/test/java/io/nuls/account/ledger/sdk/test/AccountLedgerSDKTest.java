@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class AccountLedgerSDKTest {
 
@@ -34,7 +35,7 @@ public class AccountLedgerSDKTest {
 
             InputDto input = new InputDto();
             input.setFromHash("002023c66d10cf9047dbcca12aee2235ff9dfe0f13db3c921a2ec22e0dd63331cb85");
-            input.setFromIndex(1);
+            input.setFromIndex(4);
             inputs.add(input);
 
             OutputDto output = new OutputDto();
@@ -44,18 +45,19 @@ public class AccountLedgerSDKTest {
             outputs.add(output);
 
             output = new OutputDto();
-            output.setAddress("2ChDcC1nvki521xXhYAUzYXt4RLNuLs");
+            output.setAddress("2CXJEuoXZMajeTEgL6TgiSxTRRMwiMM");
             output.setValue(1000000000L - 1000000 - fee);
             output.setLockTime(0L);
             outputs.add(output);
 
             Result result = service.createTransaction(inputs, outputs, remark);
-
-            String txHex = (String) result.getData();
-            String prikey = "1f9d3ad044e0e1201e117b041f3d2ceedacb44688e57969620f3ad7a4d6e9d24";
-            String address = "2ChDcC1nvki521xXhYAUzYXt4RLNuLs";
+            Map<String, Object> resultMap = (Map<String, Object>) result.getData();
+            String txHex = resultMap.get("value").toString();
+            String prikey = "009c6632fa16815659ff6fa0ae572eedb3d2c88471657c0192243b0fd5283605d2";
+            String address = "2CXJEuoXZMajeTEgL6TgiSxTRRMwiMM";
             result = service.signTransaction(txHex, prikey, address, null);
-            txHex = (String) result.getData();
+            resultMap = (Map<String, Object>) result.getData();
+            txHex = resultMap.get("value").toString();
             result = service.broadcastTransaction(txHex);
 
             System.out.println(result.getData());
