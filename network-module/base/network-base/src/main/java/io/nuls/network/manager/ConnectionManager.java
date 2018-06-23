@@ -25,6 +25,7 @@
 
 package io.nuls.network.manager;
 
+import io.netty.buffer.ByteBuf;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
@@ -103,16 +104,25 @@ public class ConnectionManager {
         }, true);
     }
 
-    public void receiveMessage(ByteBuffer buffer, Node node) throws NulsException {
+    int count = 0 ;
+
+    public void receiveMessage(ByteBuf buffer, Node node) throws NulsException {
+
+        if(node.getIp().equals("192.168.1.103")) {
+            count++;
+            Log.info("接收到第 " + count + " 个消息");
+        }
         List<BaseMessage> list;
         try {
-            buffer.flip();
-            if (!node.isAlive()) {
-                buffer.clear();
-                return;
-            }
+//            buffer.flip();
+//            if (!node.isAlive()) {
+//                buffer.clear();
+//                return;
+//            }
             list = new ArrayList<>();
-            byte[] bytes = buffer.array();
+//            byte[] bytes = buffer.array();
+            byte[] bytes = new byte[buffer.readableBytes()];
+            buffer.readBytes(bytes);
             int offset = 0;
             while (offset < bytes.length - 1) {
                 MessageHeader header = new MessageHeader();
