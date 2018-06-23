@@ -61,7 +61,7 @@ public class NulsDoubleData extends BasicTypeData<Double> {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.setVal(byteBuffer.readDouble());
     }
 }

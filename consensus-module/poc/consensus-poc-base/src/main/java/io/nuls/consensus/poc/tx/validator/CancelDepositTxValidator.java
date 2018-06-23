@@ -61,7 +61,7 @@ public class CancelDepositTxValidator implements NulsDataValidator<CancelDeposit
         }
         P2PKHScriptSig sig = new P2PKHScriptSig();
         try {
-            sig.parse(data.getScriptSig());
+            sig.parse(data.getScriptSig(), 0);
         } catch (NulsException e) {
             Log.error(e);
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());

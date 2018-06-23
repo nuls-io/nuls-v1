@@ -203,7 +203,7 @@ public class BalanceManager {
         for (Entry<byte[], byte[]> coinEntry : rawList) {
             Coin coin = new Coin();
             try {
-                coin.parse(coinEntry.getValue());
+                coin.parse(coinEntry.getValue(), 0);
             } catch (NulsException e) {
                 Log.info("parse coin form db error");
                 continue;

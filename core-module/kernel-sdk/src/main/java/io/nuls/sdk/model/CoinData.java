@@ -71,7 +71,7 @@ public class CoinData extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         int fromCount = (int) byteBuffer.readVarInt();
 
         if (0 < fromCount) {

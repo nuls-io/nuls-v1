@@ -73,7 +73,7 @@ public class OrphanStorageServiceImpl implements OrphanStorageService, Initializ
         byte[] content = dbService.get(DB_NAME, key.getDigestBytes());
         Block block = new Block();
         try {
-            block.parse(content);
+            block.parse(content, 0);
         } catch (NulsException e) {
             Log.error(e);
         }

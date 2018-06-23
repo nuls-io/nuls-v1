@@ -141,7 +141,7 @@ public class LevelDBServiceTest {
 
             DBTestEntity e = new DBTestEntity();
             try {
-                e.parse(resultBytes);
+                e.parse(resultBytes,0);
             } catch (NulsException e1) {
                 Log.error(e1);
             }

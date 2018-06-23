@@ -88,7 +88,7 @@ public class TransactionInfoStorageServiceImpl implements TransactionInfoStorage
             if (java.util.Arrays.equals(addressKey, address)) {
                 byte[] values = dbService.get(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, key);
                 TransactionInfoPo transactionInfoPo = new TransactionInfoPo();
-                transactionInfoPo.parse(values);
+                transactionInfoPo.parse(values, 0);
                 infoPoList.add(transactionInfoPo);
             }
         }

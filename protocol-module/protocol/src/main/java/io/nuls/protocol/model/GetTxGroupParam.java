@@ -80,7 +80,7 @@ public class GetTxGroupParam extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         long txCount = byteBuffer.readVarInt();
         this.txHashList = new ArrayList<>();
         for (int i = 0; i < txCount; i++) {

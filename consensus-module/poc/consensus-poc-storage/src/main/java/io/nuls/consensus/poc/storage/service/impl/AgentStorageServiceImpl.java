@@ -92,7 +92,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
         }
         AgentPo agentPo = new AgentPo();
         try {
-            agentPo.parse(body);
+            agentPo.parse(body,0);
         } catch (NulsException e) {
             Log.error(e);
             throw  new NulsRuntimeException(e);
@@ -125,14 +125,14 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
         for (Entry<byte[], byte[]> entry : list) {
             AgentPo agentPo = new AgentPo();
             try {
-                agentPo.parse(entry.getValue());
+                agentPo.parse(entry.getValue(),0);
             } catch (NulsException e) {
                 Log.error(e);
                 throw  new NulsRuntimeException(e);
             }
             NulsDigestData hash = new NulsDigestData();
             try {
-                hash.parse(entry.getKey());
+                hash.parse(entry.getKey(),0);
             } catch (NulsException e) {
                 Log.error(e);
             }

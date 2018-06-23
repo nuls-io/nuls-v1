@@ -68,7 +68,7 @@ public class LevelDBManagerTest {
         Na balance;
         for (byte[] bytes : valueList) {
             coin = new Coin();
-            coin.parse(bytes);
+            coin.parse(bytes,0);
             strAddress = Base58.encode(coin.getOwner());
             balance = balanceMap.get(strAddress);
             if(balance == null) {

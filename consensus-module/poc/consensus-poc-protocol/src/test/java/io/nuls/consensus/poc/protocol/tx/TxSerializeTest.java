@@ -87,7 +87,7 @@ public class TxSerializeTest {
 
         assertEquals(bytes.length, tx.size());
 
-        nullTx.parse(bytes);
+        nullTx.parse(bytes, 0);
 
         assertEquals(bytes.length, nullTx.size());
 

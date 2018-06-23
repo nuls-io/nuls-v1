@@ -102,7 +102,7 @@ public class SmallBlock extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.header = byteBuffer.readNulsData(new BlockHeader());
 
         this.txHashList = new ArrayList<>();

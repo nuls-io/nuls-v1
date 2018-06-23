@@ -109,7 +109,7 @@ public class TransactionResource {
                             fromIndex = LedgerUtil.getIndex(owner);
                             // 查询from UTXO
                             fromHashObj = new NulsDigestData();
-                            fromHashObj.parse(fromHash);
+                            fromHashObj.parse(fromHash,0);
                             fromTx = ledgerService.getTx(fromHashObj);
                             fromUtxo = fromTx.getCoinData().getTo().get(fromIndex);
                             from.setFrom(fromUtxo);

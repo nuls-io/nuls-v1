@@ -82,7 +82,7 @@ public class TxGroup extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         requestHash = byteBuffer.readHash();
         long txCount = byteBuffer.readVarInt();
         this.txList = new ArrayList<>();

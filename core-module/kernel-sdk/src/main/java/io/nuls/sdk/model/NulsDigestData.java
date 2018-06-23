@@ -70,7 +70,7 @@ public class NulsDigestData extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         digestAlgType = byteBuffer.readByte();
         this.digestBytes = byteBuffer.readByLengthByte();
     }

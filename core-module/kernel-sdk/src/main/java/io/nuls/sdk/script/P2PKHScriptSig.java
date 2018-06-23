@@ -123,7 +123,7 @@ public class P2PKHScriptSig extends Script {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         int length = byteBuffer.readByte();
         this.publicKey = byteBuffer.readBytes(length);
         this.signData = new NulsSignData();

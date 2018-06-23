@@ -31,6 +31,7 @@ import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.connection.netty.NettyClient;
 import io.nuls.network.connection.netty.NettyServer;
@@ -104,13 +105,14 @@ public class ConnectionManager {
         }, true);
     }
 
-    int count = 0 ;
+    int count = 0;
 
     public void receiveMessage(ByteBuf buffer, Node node) throws NulsException {
 
-        if(node.getIp().equals("192.168.1.103")) {
+        if (node.getIp().equals("192.168.1.103")) {
             count++;
             Log.info("接收到第 " + count + " 个消息");
+            return;
         }
         List<BaseMessage> list;
         try {
@@ -121,23 +123,33 @@ public class ConnectionManager {
 //            }
             list = new ArrayList<>();
 //            byte[] bytes = buffer.array();
+//            byte[] bytes = new byte[buffer.readableBytes()];
+//            buffer.readBytes(bytes);
+//            int offset = 0;
+//            while (offset < bytes.length - 1) {
+//                MessageHeader header = new MessageHeader();
+//                header.parse(bytes);
+//                BaseMessage message = getMessageBusService().getMessageInstance(header.getModuleId(), header.getMsgType()).getData();
+//                message.parse(bytes);
+//
+//                list.add(message);
+//                offset = message.serialize().length;
+//                if (bytes.length > offset) {
+//                    byte[] subBytes = new byte[bytes.length - offset];
+//                    System.arraycopy(bytes, offset, subBytes, 0, subBytes.length);
+//                    bytes = subBytes;
+//                    offset = 0;
+//                }
+//            }
             byte[] bytes = new byte[buffer.readableBytes()];
             buffer.readBytes(bytes);
-            int offset = 0;
-            while (offset < bytes.length - 1) {
-                MessageHeader header = new MessageHeader();
-                header.parse(bytes);
+            NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+            while (!byteBuffer.isFinished()) {
+                MessageHeader header = byteBuffer.readNulsData(new MessageHeader());
+                byteBuffer.setCursor(byteBuffer.getCursor() - header.size());
                 BaseMessage message = getMessageBusService().getMessageInstance(header.getModuleId(), header.getMsgType()).getData();
-                message.parse(bytes);
-
+                message = byteBuffer.readNulsData(message);
                 list.add(message);
-                offset = message.serialize().length;
-                if (bytes.length > offset) {
-                    byte[] subBytes = new byte[bytes.length - offset];
-                    System.arraycopy(bytes, offset, subBytes, 0, subBytes.length);
-                    bytes = subBytes;
-                    offset = 0;
-                }
             }
             for (BaseMessage message : list) {
                 if (MessageFilterChain.getInstance().doFilter(message)) {

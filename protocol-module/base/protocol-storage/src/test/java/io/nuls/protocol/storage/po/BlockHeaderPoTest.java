@@ -81,7 +81,7 @@ public class BlockHeaderPoTest {
 
         BlockHeaderPo newPo = new BlockHeaderPo();
         try {
-            newPo.parse(bytes);
+            newPo.parse(bytes,0);
         } catch (NulsException e) {
             Log.error(e);
         }

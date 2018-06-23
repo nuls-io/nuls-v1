@@ -185,7 +185,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     byte[] hashBytes = new byte[NulsDigestData.HASH_LENGTH];
                     System.arraycopy(from.getOwner(), 0, hashBytes, 0, hashBytes.length);
                     NulsDigestData fromTxHash = new NulsDigestData();
-                    fromTxHash.parse(hashBytes);
+                    fromTxHash.parse(hashBytes,0);
 
                     byte[] indexBytes = new byte[from.getOwner().length - NulsDigestData.HASH_LENGTH];
                     System.arraycopy(from.getOwner(), NulsDigestData.HASH_LENGTH, indexBytes, 0, indexBytes.length);
@@ -229,7 +229,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
         NulsDigestData digestData = new NulsDigestData();
         try {
-            digestData.parse(txHashBytes);
+            digestData.parse(txHashBytes,0);
         } catch (Exception e) {
             return null;
         }
@@ -551,7 +551,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             for (byte[] utxoBytes : list) {
                 if (utxoBytes != null) {
                     coin = new Coin();
-                    coin.parse(utxoBytes);
+                    coin.parse(utxoBytes,0);
                     result = LongUtils.add(result, coin.getNa().getValue());
                 }
             }

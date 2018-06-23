@@ -75,7 +75,7 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
         if (punishData.getReasonCode() == PunishReasonEnum.DOUBLE_SPEND.getCode()) {
             SmallBlock smallBlock = new SmallBlock();
             try {
-                smallBlock.parse(punishData.getEvidence());
+                smallBlock.parse(punishData.getEvidence(), 0);
             } catch (NulsException e) {
                 Log.error(e);
                 return ValidateResult.getFailedResult(CLASS_NAME, e.getErrorCode(), e.getMessage());
@@ -86,7 +86,7 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
                 return ValidateResult.getFailedResult(CLASS_NAME, result.getErrorCode(), result.getMsg());
             }
             List<NulsDigestData> txHashList = smallBlock.getTxHashList();
-            if (!header.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(smallBlock.getTxHashList()))) {
+            if (!header.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(txHashList))) {
                 return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
             }
             List<Transaction> txList = smallBlock.getSubTxList();

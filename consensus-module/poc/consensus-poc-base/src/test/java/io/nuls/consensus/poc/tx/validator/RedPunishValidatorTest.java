@@ -48,7 +48,7 @@ public class RedPunishValidatorTest {
         HeaderSignValidator signValidator = new HeaderSignValidator();
 
         try {
-            tx.parse(bytes);
+            tx.parse(bytes, 0);
             validator.validate(tx);
         } catch (NulsException e) {
             e.printStackTrace();

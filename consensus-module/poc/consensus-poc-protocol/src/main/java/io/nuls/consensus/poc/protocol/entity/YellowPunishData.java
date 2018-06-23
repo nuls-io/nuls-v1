@@ -74,7 +74,7 @@ public class YellowPunishData extends TransactionLogicData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         int count = (int) byteBuffer.readVarInt();
         addressList.clear();
         for (int i = 0; i < count; i++) {

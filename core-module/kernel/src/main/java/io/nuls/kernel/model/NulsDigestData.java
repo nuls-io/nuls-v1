@@ -73,7 +73,7 @@ public class NulsDigestData extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         digestAlgType = byteBuffer.readByte();
         this.digestBytes = byteBuffer.readByLengthByte();
     }
@@ -99,7 +99,7 @@ public class NulsDigestData extends BaseNulsData {
     public static NulsDigestData fromDigestHex(String hex) throws NulsException {
         byte[] bytes = Hex.decode(hex);
         NulsDigestData hash = new NulsDigestData();
-        hash.parse(bytes);
+        hash.parse(bytes,0);
         return hash;
     }
 

@@ -76,7 +76,7 @@ public class NodeMessageBody extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
 //        length = byteBuffer.readUint16();
 //
 //        List<String> ipList = new ArrayList<>();

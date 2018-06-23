@@ -100,7 +100,7 @@ public class NetworkMessageBody extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer buffer) throws NulsException {
+    public void parse(NulsByteBuffer buffer) throws NulsException {
         handshakeType = buffer.readUint16();
         severPort = buffer.readUint16();
         bestBlockHeight = buffer.readUint32();
@@ -168,7 +168,7 @@ public class NetworkMessageBody extends BaseNulsData {
 
         byte[] bytes = networkMessageBody.serialize();
         NetworkMessageBody n2 = new NetworkMessageBody();
-        n2.parse(bytes);
+        n2.parse(bytes,0);
     }
 
     public String getVersion() {

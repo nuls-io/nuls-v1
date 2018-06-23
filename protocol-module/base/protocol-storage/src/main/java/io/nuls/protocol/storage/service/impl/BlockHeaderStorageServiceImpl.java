@@ -137,13 +137,13 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
         }
         BlockHeaderPo po = new BlockHeaderPo();
         try {
-            po.parse(bytes);
+            po.parse(bytes,0);
         } catch (NulsException e) {
             Log.error(e);
         }
         NulsDigestData hash = new NulsDigestData();
         try {
-            hash.parse(hashBytes);
+            hash.parse(hashBytes,0);
         } catch (NulsException e) {
             Log.error(e);
         }

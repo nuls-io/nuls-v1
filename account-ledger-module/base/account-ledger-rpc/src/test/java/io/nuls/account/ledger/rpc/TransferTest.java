@@ -141,13 +141,20 @@ public class TransferTest {
         return list;
     }
 
-
+   private static int successCount = 0;
     public static void main(String[] args) {
+        for (int i = 0; i < 1000; i++) {
+            doit();
+        }
+    }
+
+    private static void doit() {
         List<String> addressList = getAddressList();
+
         for (String toAddress : addressList) {
-            String address = "2Cht55uh8JR5ZAQkp1CVyNPwmFvNuLS";
+            String address = "2CiB4JFCXiPZpUm9JcyQ1nVexy2qx19";
 //            String toAddress = "2Cg7BLHWBSxMhq3FpjR9BrkyxXp4m4j";
-            long amount = 2018L;
+            long amount = 201800L;
             String password = "";
             String remark = "test";
 
@@ -155,23 +162,16 @@ public class TransferTest {
 
             String url = "http://127.0.0.1:8001/api/accountledger/transfer";
 
-            int successCount = 0;
 
-            for (int i = 0; i < 10000; i++) {
+            for (int i = 0; i < 100; i++) {
                 String res = post(url, param, "utf-8");
-
                 if (res.indexOf("true") != -1) {
                     successCount++;
                 }
                 System.out.println(successCount + "  " + res);
-
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             }
         }
+
     }
 
     public static String post(String url, final String param, String encoding) {
