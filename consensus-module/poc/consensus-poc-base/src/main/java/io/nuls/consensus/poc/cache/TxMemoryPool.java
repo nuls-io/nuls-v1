@@ -174,19 +174,14 @@ public final class TxMemoryPool {
     }
 
     public boolean remove(NulsDigestData hash) {
-        try {
-            if (container.containsKey(hash)) {
-                container.remove(hash);
-                txHashQueue.remove(hash);
-                return true;
-            } else if (orphanContainer.containsKey(hash)) {
-                orphanContainer.remove(hash);
-                orphanTxHashQueue.remove(hash);
-                return true;
-            }
-            return false;
-        } finally {
+        TxContainer obj = container.remove(hash);
+        if(obj != null) {
+            txHashQueue.remove(hash);
+        } else {
+            orphanContainer.remove(hash);
+            orphanTxHashQueue.remove(hash);
         }
+        return true;
     }
 
     public boolean exist(NulsDigestData hash) {
