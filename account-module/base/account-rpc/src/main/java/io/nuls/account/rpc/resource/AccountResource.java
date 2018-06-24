@@ -306,11 +306,6 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Result result = accountService.getAliasFee(form.getAddress(), form.getAlias());
-        if(result.isSuccess()) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("value", result.getData());
-            result.setData(map);
-        }
         return result.toRpcClientResult();
     }
 

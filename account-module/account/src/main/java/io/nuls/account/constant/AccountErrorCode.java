@@ -55,6 +55,6 @@ public interface AccountErrorCode {
     ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED_AND_LOCKED = ErrorCode.init("ACT019", "50019");
 
     ErrorCode ACCOUNT_UNENCRYPTED = ErrorCode.init("ACT020", "50020");
-    ErrorCode ALIAS_CONFLICT = ErrorCode.init("ACT021", "50021");//There is another AliasTransaction set the same alias!
-    ErrorCode ACCOUNT_ALREADY_HAS_ALIAS = ErrorCode.init("ACT022", "50022");//The account already has an alias
+    ErrorCode ALIAS_CONFLICT = ErrorCode.init("ACT021", "50021");
+    ErrorCode ACCOUNT_ALREADY_HAS_ALIAS = ErrorCode.init("ACT022", "50022");
 }

@@ -266,9 +266,7 @@ public class PocConsensusResource {
             tx.getCoinData().getTo().add(result.getChange());
         }
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put("value", fee.getValue());
-        return Result.getSuccess().setData(valueMap).toRpcClientResult();
+        return Result.getSuccess().setData(fee).toRpcClientResult();
     }
 
     @GET
@@ -300,9 +298,7 @@ public class PocConsensusResource {
             tx.getCoinData().getTo().add(result.getChange());
         }
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put("value", fee.getValue());
-        return Result.getSuccess().setData(valueMap).toRpcClientResult();
+        return Result.getSuccess().setData(fee).toRpcClientResult();
     }
 
     @GET
@@ -364,9 +360,7 @@ public class PocConsensusResource {
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         tx.setCoinData(coinData);
         Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put("value", resultFee.getValue());
-        return Result.getSuccess().setData(valueMap).toRpcClientResult();
+        return Result.getSuccess().setData(resultFee).toRpcClientResult();
     }
 
 
@@ -1081,8 +1075,6 @@ public class PocConsensusResource {
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        Map<String, Object> valueMap = new HashMap<>();
-        valueMap.put("value", resultFee.getValue());
-        return Result.getSuccess().setData(valueMap).toRpcClientResult();
+        return Result.getSuccess().setData(resultFee).toRpcClientResult();
     }
 }
