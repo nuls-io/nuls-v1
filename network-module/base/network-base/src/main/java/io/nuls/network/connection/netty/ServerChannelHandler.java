@@ -42,6 +42,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
@@ -151,7 +152,9 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 //        Log.info("----------------- server exceptionCaught -------------------");
-        cause.printStackTrace();
+        if (!(cause instanceof IOException)) {
+            Log.error(cause);
+        }
         ctx.channel().close();
     }
 

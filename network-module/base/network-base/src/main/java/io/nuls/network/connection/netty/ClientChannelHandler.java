@@ -38,6 +38,7 @@ import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;
 import io.nuls.network.model.Node;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
@@ -135,7 +136,9 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 //        Log.info("----------------- client exceptionCaught -------------------");
-        cause.printStackTrace();
+        if(!(cause instanceof IOException)) {
+            Log.error(cause);
+        }
         ctx.channel().close();
     }
 

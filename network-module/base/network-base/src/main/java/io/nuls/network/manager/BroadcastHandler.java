@@ -38,7 +38,9 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.protocol.message.base.BaseMessage;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class BroadcastHandler {
 
@@ -56,11 +58,28 @@ public class BroadcastHandler {
 
     private NodeManager nodeManager = NodeManager.getInstance();
 
-    public BroadcastResult broadcastToAllNode(BaseMessage msg,Node excludeNode, boolean asyn) {
+    public BroadcastResult broadcastToAllNode(BaseMessage msg, Node excludeNode, boolean asyn) {
         if (nodeManager.getAvailableNodes().isEmpty()) {
             return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_NODE_EMPTY);
         }
         return broadcastToList(nodeManager.getAvailableNodes(), msg, excludeNode, asyn);
+    }
+
+    public BroadcastResult broadcastToHalfNode(BaseMessage msg, Node excludeNode, boolean asyn) {
+
+        if (nodeManager.getAvailableNodes().isEmpty()) {
+            return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_NODE_EMPTY);
+        }
+        List<Node> nodeList = new ArrayList<>();
+        int i = 0;
+        for (Node node : nodeManager.getAvailableNodes()) {
+            i++;
+            if (i % 2 == 1) {
+                nodeList.add(node);
+            }
+        }
+
+        return broadcastToList(nodeList, msg, excludeNode, asyn);
     }
 
     public BroadcastResult broadcastToNode(BaseMessage msg, Node sendNode, boolean asyn) {

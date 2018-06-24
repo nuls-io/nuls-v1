@@ -68,7 +68,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
     private Queue<Block> blockQueue;
     private String queueName;
 
-    private int maxDowncount = 100;
+    private int maxDowncount = 10;
 
     public DownloadThreadManager(NetworkNewestBlockInfos newestInfos, Queue<Block> blockQueue) {
         this.newestInfos = newestInfos;
