@@ -106,6 +106,12 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
         } else {
             //如果是服务器方，在握手成功后，返回当前自己已经连接的所有节点信息
             List<Node> nodeList = nodeManager.getCanConnectNodes();
+            for (int i = nodeList.size() - 1; i >= 0; i--) {
+                Node n = nodeList.get(i);
+                if (nodeManager.isSeedNode(n.getIp())) {
+                    nodeList.remove(i);
+                }
+            }
             NodeMessageBody messageBody = new NodeMessageBody(nodeList);
             NodesMessage nodesMessage = new NodesMessage(messageBody);
             return new NetworkEventResult(true, nodesMessage);

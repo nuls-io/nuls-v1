@@ -52,7 +52,6 @@ public class NodesMessageHandler implements BaseNetworkMeesageHandler {
         NodesMessage nodesMessage = (NodesMessage) message;
         NodeMessageBody body = nodesMessage.getMsgBody();
         for (Node newNode : body.getNodeList()) {
-            System.out.println("------------------------  new Node   ------------------" +  newNode.getId());
             nodeManager.addNode(newNode);
         }
         return null;
