@@ -34,10 +34,8 @@ import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.context.PocConsensusContext;
-import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.Chain;
-import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
@@ -65,7 +63,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
@@ -114,6 +111,8 @@ public class BlockProcess {
      * @return boolean
      */
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
+
+        long t = System.currentTimeMillis();
 
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
         Block block = blockContainer.getBlock();
@@ -168,14 +167,7 @@ public class BlockProcess {
 
         // Verify that the block round information is correct, if correct, join the main chain
         // 验证区块轮次信息是否正确、如果正确，则加入主链
-        boolean verifyAndAddBlockResult = false;
-        Lockers.CHAIN_LOCK.lock();
-        try {
-            verifyAndAddBlockResult = chainManager.getMasterChain().verifyAndAddBlock(block, isDownload);
-        } finally {
-            Lockers.CHAIN_LOCK.unlock();
-        }
-
+        boolean verifyAndAddBlockResult = chainManager.getMasterChain().verifyAndAddBlock(block, isDownload);
         if (verifyAndAddBlockResult) {
             boolean success = true;
             try {
@@ -228,7 +220,7 @@ public class BlockProcess {
                             break;
                         }
                     }
-                    Log.debug("验证交易耗时：" + (System.currentTimeMillis() - time));
+                    Log.info("验证交易耗时：" + (System.currentTimeMillis() - time));
                     if (!success) {
                         break;
                     }
@@ -243,25 +235,24 @@ public class BlockProcess {
                         RewardStatisticsProcess.addBlock(block);
                         BlockLog.debug("save block height : " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                     }
-                    Log.debug("保存耗时：" + (System.currentTimeMillis() - time));
+                    Log.info("保存耗时：" + (System.currentTimeMillis() - time));
                 } while (false);
             } catch (Exception e) {
                 Log.error("save block error : " + e.getMessage(), e);
             }
             if (success) {
+                t = System.currentTimeMillis();
                 NulsContext.getInstance().setBestBlock(block);
                 //remove tx from memory pool
                 removeTxFromMemoryPool(block);
+                Log.info("移除内存交易耗时：" + (System.currentTimeMillis() - t));
+                t = System.currentTimeMillis();
                 // 转发区块
                 forwardingBlock(blockContainer);
+                Log.info("转发区块耗时：" + (System.currentTimeMillis() - t));
                 return true;
             } else {
-                Lockers.CHAIN_LOCK.lock();
-                try {
-                    chainManager.getMasterChain().rollback(block);
-                } finally {
-                    Lockers.CHAIN_LOCK.unlock();
-                }
+                chainManager.getMasterChain().rollback(block);
                 NulsContext.getInstance().setBestBlock(chainManager.getBestBlock());
 
                 Log.error("save block fail : " + block.getHeader().getHeight() + " , isDownload : " + isDownload);

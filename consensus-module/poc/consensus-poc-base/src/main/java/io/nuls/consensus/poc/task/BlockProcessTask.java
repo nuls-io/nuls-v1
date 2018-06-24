@@ -57,10 +57,13 @@ public class BlockProcessTask implements Runnable {
 
     @Override
     public void run() {
+        Lockers.CHAIN_LOCK.lock();
         try {
             doTask();
         } catch (Exception e) {
             Log.error(e);
+        } finally {
+            Lockers.CHAIN_LOCK.unlock();
         }
     }
 
@@ -73,9 +76,9 @@ public class BlockProcessTask implements Runnable {
         BlockContainer blockContainer;
         while((blockContainer = blockQueueProvider.get()) != null) {
             try {
-//                long time = System.currentTimeMillis();
+                long time = System.currentTimeMillis();
                 blockProcess.addBlock(blockContainer);
-//                Log.info("add 区块 " + blockContainer.getBlock().getHeader().getHeight() + " 耗时 " + (System.currentTimeMillis() - time) + " ms , tx count : " + blockContainer.getBlock().getHeader().getTxCount());
+                Log.info("add 区块 " + blockContainer.getBlock().getHeader().getHeight() + " 耗时 " + (System.currentTimeMillis() - time) + " ms , tx count : " + blockContainer.getBlock().getHeader().getTxCount());
             } catch (IOException e) {
                 Log.error("add block fail , error : " + e.getMessage(), e);
             }

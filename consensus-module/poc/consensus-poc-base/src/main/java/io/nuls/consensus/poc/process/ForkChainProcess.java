@@ -26,7 +26,6 @@
 
 package io.nuls.consensus.poc.process;
 
-import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.ChainContainer;
@@ -46,7 +45,6 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
-import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
 
@@ -78,56 +76,60 @@ public class ForkChainProcess {
         if (ConsensusStatusContext.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
             return false;
         }
+        Lockers.CHAIN_LOCK.lock();
+        try {
 
-        printChainStatusLog();
+            printChainStatusLog();
 
-        // Monitor the status of the orphan chain, if it is available, join the verification chain
-        // 监控孤立链的状态，如果有可连接的，则加入验证链里面
-        monitorOrphanChains();
+            // Monitor the status of the orphan chain, if it is available, join the verification chain
+            // 监控孤立链的状态，如果有可连接的，则加入验证链里面
+            monitorOrphanChains();
 
-        long newestBlockHeight = chainManager.getBestBlockHeight() + PocConsensusConstant.CHANGE_CHAIN_BLOCK_DIFF_COUNT;
+            long newestBlockHeight = chainManager.getBestBlockHeight() + PocConsensusConstant.CHANGE_CHAIN_BLOCK_DIFF_COUNT;
 
-        ChainContainer newChain = chainManager.getMasterChain();
-        if (null == newChain) {
-            return false;
-        }
-        Iterator<ChainContainer> iterator = chainManager.getChains().iterator();
-        while (iterator.hasNext()) {
-            ChainContainer forkChain = iterator.next();
-            if (forkChain.getChain() == null || forkChain.getChain().getStartBlockHeader() == null || forkChain.getChain().getEndBlockHeader() == null) {
-                iterator.remove();
-                continue;
+            ChainContainer newChain = chainManager.getMasterChain();
+            if (null == newChain) {
+                return false;
             }
-            long newChainHeight = forkChain.getChain().getEndBlockHeader().getHeight();
-            if (newChainHeight > newestBlockHeight || (newChainHeight == newestBlockHeight && forkChain.getChain().getEndBlockHeader().getTime() < newChain.getChain().getEndBlockHeader().getTime())) {
-                newChain = forkChain;
-                newestBlockHeight = newChainHeight;
-            }
-        }
-
-        if (!newChain.equals(chainManager.getMasterChain())) {
-
-            ChainLog.debug("discover the fork chain {} : start {} - {} , end {} - {} , exceed the master {} - {} - {}, start verify the fork chian", newChain.getChain().getId(), newChain.getChain().getStartBlockHeader().getHeight(), newChain.getChain().getStartBlockHeader().getHash(), newChain.getChain().getEndBlockHeader().getHeight(), newChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlockHeight(), chainManager.getBestBlock().getHeader().getHash());
-
-            ChainContainer resultChain = verifyNewChain(newChain);
-
-            if (resultChain == null) {
-                ChainLog.debug("verify the fork chain fail {} remove it", newChain.getChain().getId());
-
-                chainManager.getChains().remove(newChain);
-            } else {
-                //Verify pass, try to switch chain
-                //验证通过，尝试切换链
-                boolean success = changeChain(resultChain, newChain);
-                if (success) {
-                    chainManager.getChains().remove(newChain);
+            Iterator<ChainContainer> iterator = chainManager.getChains().iterator();
+            while (iterator.hasNext()) {
+                ChainContainer forkChain = iterator.next();
+                if (forkChain.getChain() == null || forkChain.getChain().getStartBlockHeader() == null || forkChain.getChain().getEndBlockHeader() == null) {
+                    iterator.remove();
+                    continue;
                 }
-                ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", newChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
+                long newChainHeight = forkChain.getChain().getEndBlockHeader().getHeight();
+                if (newChainHeight > newestBlockHeight || (newChainHeight == newestBlockHeight && forkChain.getChain().getEndBlockHeader().getTime() < newChain.getChain().getEndBlockHeader().getTime())) {
+                    newChain = forkChain;
+                    newestBlockHeight = newChainHeight;
+                }
             }
+
+            if (!newChain.equals(chainManager.getMasterChain())) {
+
+                ChainLog.debug("discover the fork chain {} : start {} - {} , end {} - {} , exceed the master {} - {} - {}, start verify the fork chian", newChain.getChain().getId(), newChain.getChain().getStartBlockHeader().getHeight(), newChain.getChain().getStartBlockHeader().getHash(), newChain.getChain().getEndBlockHeader().getHeight(), newChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlockHeight(), chainManager.getBestBlock().getHeader().getHash());
+
+                ChainContainer resultChain = verifyNewChain(newChain);
+
+                if (resultChain == null) {
+                    ChainLog.debug("verify the fork chain fail {} remove it", newChain.getChain().getId());
+
+                    chainManager.getChains().remove(newChain);
+                } else {
+                    //Verify pass, try to switch chain
+                    //验证通过，尝试切换链
+                    boolean success = changeChain(resultChain, newChain);
+                    if (success) {
+                        chainManager.getChains().remove(newChain);
+                    }
+                    ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", newChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
+                }
+            }
+
+            clearExpiredChain();
+        } finally {
+            Lockers.CHAIN_LOCK.unlock();
         }
-
-        clearExpiredChain();
-
         return true;
     }
 
