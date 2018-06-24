@@ -54,7 +54,7 @@ public class StopAgent extends TransactionLogicData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.createTxHash = byteBuffer.readHash();
     }
 

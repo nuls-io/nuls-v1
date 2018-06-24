@@ -57,7 +57,7 @@ public class UnconfirmedTxPo extends BaseNulsData {
     public UnconfirmedTxPo(byte[] txBytes) {
         super();
         try {
-            parse(txBytes);
+            parse(txBytes, 0);
         } catch (NulsException e) {
             e.printStackTrace();
         }
@@ -75,7 +75,7 @@ public class UnconfirmedTxPo extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         try {
             tx = TransactionManager.getInstance(byteBuffer);
         } catch (Exception e) {

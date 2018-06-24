@@ -59,7 +59,7 @@ public class NulsIntegerData extends BasicTypeData<Integer> {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.setVal((int) byteBuffer.readVarInt());
     }
 }

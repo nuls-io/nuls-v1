@@ -64,7 +64,7 @@ public class PunishLogPo extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.type = byteBuffer.readByte();
         this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
         this.time = byteBuffer.readUint48();

@@ -102,7 +102,7 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
         }
         P2PKHScriptSig sig = new P2PKHScriptSig();
         try {
-            sig.parse(tx.getScriptSig());
+            sig.parse(tx.getScriptSig(),0);
         } catch (NulsException e) {
             Log.error(e);
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());

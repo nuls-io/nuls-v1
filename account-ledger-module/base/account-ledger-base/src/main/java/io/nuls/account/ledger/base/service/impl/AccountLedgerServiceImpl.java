@@ -581,7 +581,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         Coin toCoin = new Coin(to, values);
         coinData.getTo().add(toCoin);
         Na fee = getTxFee(from, values, tx.size(), price);
-        return Result.getSuccess().setData(fee);
+        Result result = Result.getSuccess().setData(fee);
+        return result;
     }
 
     @Override

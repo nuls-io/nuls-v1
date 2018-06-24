@@ -89,7 +89,7 @@ public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageSe
         try {
             if(utxoBytes != null) {
                 coin = new Coin();
-                coin.parse(utxoBytes);
+                coin.parse(utxoBytes,0);
             }
         } catch (NulsException e) {
             Log.error(e);

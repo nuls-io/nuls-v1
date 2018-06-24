@@ -46,7 +46,7 @@ public class CreateAgentTransaction extends Transaction<Agent> {
     public CreateAgentTransaction clone() {
         CreateAgentTransaction tx = new CreateAgentTransaction();
         try {
-            tx.parse(serialize());
+            tx.parse(serialize(), 0);
         } catch (Exception e) {
             throw new NulsRuntimeException(e);
         }

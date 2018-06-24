@@ -114,7 +114,8 @@ public class TransactionManager {
     }
 
     public static Transaction getInstance(NulsByteBuffer byteBuffer) throws Exception {
-        int txType = (int) new NulsByteBuffer(byteBuffer.getPayloadByCursor()).readVarInt();
+        int txType = byteBuffer.readUint16();
+        byteBuffer.setCursor(byteBuffer.getCursor() - SerializeUtils.sizeOfUint16());
         Class<? extends Transaction> txClass = TYPE_TX_MAP.get(txType);
         if (null == txClass) {
             throw new NulsRuntimeException(KernelErrorCode.DATA_NOT_FOUND);

@@ -100,7 +100,7 @@ public class MessageHeader extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer buffer) throws NulsException {
+    public void parse(NulsByteBuffer buffer) throws NulsException {
         magicNumber = buffer.readUint32();
         length = (int) buffer.readUint32();
         xor = buffer.readByte();

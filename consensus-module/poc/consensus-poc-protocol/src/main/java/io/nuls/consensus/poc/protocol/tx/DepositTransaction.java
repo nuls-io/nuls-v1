@@ -56,7 +56,7 @@ public class DepositTransaction extends Transaction<Deposit> {
     public DepositTransaction clone() {
         DepositTransaction tx = new DepositTransaction();
         try {
-            tx.parse(serialize());
+            tx.parse(serialize(), 0);
         } catch (Exception e) {
             throw new NulsRuntimeException(e);
         }

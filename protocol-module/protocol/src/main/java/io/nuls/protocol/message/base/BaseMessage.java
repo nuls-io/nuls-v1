@@ -69,7 +69,7 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         MessageHeader header = new MessageHeader();
         header.parse(byteBuffer);
         this.header = header;

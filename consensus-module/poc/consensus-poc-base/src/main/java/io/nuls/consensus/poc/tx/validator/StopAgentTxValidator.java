@@ -72,7 +72,7 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
         }
         P2PKHScriptSig sig = new P2PKHScriptSig();
         try {
-            sig.parse(data.getScriptSig());
+            sig.parse(data.getScriptSig(), 0);
         } catch (NulsException e) {
             Log.error(e);
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
@@ -110,7 +110,7 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
                 return ValidateResult.getFailedResult(this.getClass().getName(),KernelErrorCode.DATA_ERROR);
             }
                 NulsDigestData txHash = new NulsDigestData();
-            txHash.parse(coin.getOwner());
+            txHash.parse(coin.getOwner(), 0);
             DepositPo deposit = depositMap.remove(txHash);
             if (deposit == null) {
                 return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);

@@ -61,7 +61,7 @@ public class BlockRoundData extends BaseNulsData {
 
     public BlockRoundData(byte[] extend) {
         try {
-            this.parse(extend);
+            this.parse(extend,0);
         } catch (NulsException e) {
             Log.error(e);
         }
@@ -119,7 +119,7 @@ public class BlockRoundData extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.roundIndex = byteBuffer.readUint32();
         this.consensusMemberCount = byteBuffer.readUint16();
         this.roundStartTime = byteBuffer.readUint48();

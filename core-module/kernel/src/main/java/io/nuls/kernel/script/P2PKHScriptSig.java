@@ -57,7 +57,7 @@ public class P2PKHScriptSig extends Script {
     public P2PKHScriptSig(byte[] signBytes, byte[] publicKey) {
         this.signData = new NulsSignData();
         try {
-            this.signData.parse(signBytes);
+            this.signData.parse(signBytes,0);
         } catch (NulsException e) {
             Log.error(e);
         }
@@ -100,7 +100,7 @@ public class P2PKHScriptSig extends Script {
 
     public static P2PKHScriptSig createFromBytes(byte[] bytes) throws NulsException {
         P2PKHScriptSig sig = new P2PKHScriptSig();
-        sig.parse(bytes);
+        sig.parse(bytes,0);
         return sig;
     }
 
@@ -126,7 +126,7 @@ public class P2PKHScriptSig extends Script {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         int length = byteBuffer.readByte();
         this.publicKey = byteBuffer.readBytes(length);
         this.signData = new NulsSignData();

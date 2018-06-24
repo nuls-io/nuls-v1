@@ -56,6 +56,7 @@ public class AccountBaseService {
 
     /**
      * 获取账户私钥
+     * Get the account private key
      *
      * @param address
      * @param password
@@ -87,6 +88,7 @@ public class AccountBaseService {
 
     /**
      * 设置密码
+     * Set password (Encryption account)
      *
      * @param address
      * @param password
@@ -126,6 +128,7 @@ public class AccountBaseService {
 
     /**
      * 根据原密码修改账户密码
+     * Change the account password according to the current password
      *
      * @param oldPassword
      * @param newPassword

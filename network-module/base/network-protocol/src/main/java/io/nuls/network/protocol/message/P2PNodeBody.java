@@ -68,7 +68,7 @@ public class P2PNodeBody extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer buffer) throws NulsException {
+    public void parse(NulsByteBuffer buffer) throws NulsException {
         severPort = buffer.readUint16();
         nodeIp = buffer.readString();
     }
@@ -96,7 +96,7 @@ public class P2PNodeBody extends BaseNulsData {
         body.setNodeIp("127.0.0.01");
         byte[] bytes = body.serialize();
         P2PNodeBody n2 = new P2PNodeBody();
-        n2.parse(bytes);
+        n2.parse(bytes,0);
     }
 
 

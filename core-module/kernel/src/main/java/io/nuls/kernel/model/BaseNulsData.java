@@ -84,14 +84,16 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
 
 
     @Override
-    public final void parse(byte[] bytes) throws NulsException {
+    public final void parse(byte[] bytes, int cursor) throws NulsException {
         if (bytes == null || bytes.length == 0 || ((bytes.length == 4) && Arrays.equals(NulsConstant.PLACE_HOLDER, bytes))) {
             return;
         }
-        this.parse(new NulsByteBuffer(bytes));
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+        byteBuffer.setCursor(cursor);
+        this.parse(byteBuffer);
     }
 
-    protected abstract void parse(NulsByteBuffer byteBuffer) throws NulsException;
+    public abstract void parse(NulsByteBuffer byteBuffer) throws NulsException;
 
     /**
      * @throws NulsException

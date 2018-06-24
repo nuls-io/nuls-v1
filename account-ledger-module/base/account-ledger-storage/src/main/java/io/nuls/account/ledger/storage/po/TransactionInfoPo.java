@@ -114,7 +114,7 @@ public class TransactionInfoPo extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.txHash = byteBuffer.readHash();
         this.blockHeight = byteBuffer.readUint32();
         this.time = byteBuffer.readUint48();

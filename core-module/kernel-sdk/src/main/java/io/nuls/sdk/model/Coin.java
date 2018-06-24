@@ -72,7 +72,7 @@ public class Coin extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.owner = byteBuffer.readByLengthByte();
         this.na = Na.valueOf(byteBuffer.readInt64());
         this.lockTime = byteBuffer.readUint48();

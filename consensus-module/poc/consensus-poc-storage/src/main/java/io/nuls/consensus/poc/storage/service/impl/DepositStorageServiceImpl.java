@@ -92,7 +92,7 @@ public class DepositStorageServiceImpl implements DepositStorageService, Initial
         }
         DepositPo depositPo = new DepositPo();
         try {
-            depositPo.parse(body);
+            depositPo.parse(body, 0);
         } catch (NulsException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -125,14 +125,14 @@ public class DepositStorageServiceImpl implements DepositStorageService, Initial
         for (Entry<byte[], byte[]> entry : list) {
             DepositPo depositPo = new DepositPo();
             try {
-                depositPo.parse(entry.getValue());
+                depositPo.parse(entry.getValue(), 0);
             } catch (NulsException e) {
                 Log.error(e);
                 throw new NulsRuntimeException(e);
             }
             NulsDigestData hash = new NulsDigestData();
             try {
-                hash.parse(entry.getKey());
+                hash.parse(entry.getKey(), 0);
             } catch (NulsException e) {
                 Log.error(e);
             }

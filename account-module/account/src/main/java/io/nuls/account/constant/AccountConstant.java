@@ -47,10 +47,11 @@ public interface AccountConstant extends NulsConstant {
      */
     String ACCOUNT_LIST_CACHE = "ACCOUNT_LIST";
 
-
+    /**
+     * 设置别名的费用(烧毁)
+     * The cost of setting an alias
+     */
     Na ALIAS_NA = Na.parseNuls(1);
-
-
 
     /**
      * 设置账户别名的交易类型

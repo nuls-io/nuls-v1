@@ -65,7 +65,7 @@ public class CompleteParam extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.requestHash = byteBuffer.readHash();
         this.success = byteBuffer.readBoolean();
     }

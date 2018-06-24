@@ -249,7 +249,7 @@ public class Account extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         address = Address.fromHashs(byteBuffer.readByLengthByte());
         alias = new String(byteBuffer.readByLengthByte());
         encryptedPriKey = byteBuffer.readByLengthByte();

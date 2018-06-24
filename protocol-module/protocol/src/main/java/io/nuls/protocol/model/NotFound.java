@@ -79,7 +79,7 @@ public class NotFound extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.type = NotFoundType.getType(byteBuffer.readByte());
         this.hash = byteBuffer.readHash();
     }

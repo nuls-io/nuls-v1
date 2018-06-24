@@ -75,7 +75,7 @@ public class DataValidatorChain {
             result = validator.validate(data);
         } catch (NulsException e) {
             Log.error(e);
-            return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode(), e.getMessage());
+            return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
         if (null == result) {
             Log.error(validator.getClass() + " has null result!");

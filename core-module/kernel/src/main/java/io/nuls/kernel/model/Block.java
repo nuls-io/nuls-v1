@@ -62,7 +62,7 @@ public class Block extends BaseNulsData implements Cloneable {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         header = new BlockHeader();
         header.parse(byteBuffer);
         try {

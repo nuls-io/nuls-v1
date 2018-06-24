@@ -79,7 +79,7 @@ public class BlockHashResponse extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.requestMessageHash = byteBuffer.readHash();
         long hashListSize = byteBuffer.readVarInt();
         if (hashListSize <= 0) {

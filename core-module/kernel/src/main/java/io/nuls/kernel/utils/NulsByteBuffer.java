@@ -201,11 +201,11 @@ public class NulsByteBuffer {
         return this.payload.length == cursor;
     }
 
-    public byte[] getPayloadByCursor() {
-        byte[] bytes = new byte[payload.length - cursor];
-        System.arraycopy(this.payload, cursor, bytes, 0, bytes.length);
-        return bytes;
-    }
+//    public byte[] getPayloadByCursor() {
+//        byte[] bytes = new byte[payload.length - cursor];
+//        System.arraycopy(this.payload, cursor, bytes, 0, bytes.length);
+//        return bytes;
+//    }
 
     public byte[] getPayload() {
         return payload;
@@ -227,10 +227,7 @@ public class NulsByteBuffer {
                 return null;
             }
         }
-        byte[] bytes = new byte[length];
-        System.arraycopy(payload, cursor, bytes, 0, length);
-        nulsData.parse(bytes);
-        cursor += nulsData.size();
+        nulsData.parse(this);
         return nulsData;
     }
 
@@ -246,10 +243,10 @@ public class NulsByteBuffer {
                 ((payload[cursor + 4] & 0xffL) << 32) |
                 ((payload[cursor + 5] & 0xffL) << 40);
         //todo
-        if(value==281474976710655L){
+        cursor += 6;
+        if (value == 281474976710655L) {
             return -1L;
         }
-        cursor += 6;
         return value;
     }
 
@@ -260,5 +257,13 @@ public class NulsByteBuffer {
             Log.error(e);
             throw new NulsException(e);
         }
+    }
+
+    public int getCursor() {
+        return cursor;
+    }
+
+    public void setCursor(int cursor) {
+        this.cursor = cursor;
     }
 }

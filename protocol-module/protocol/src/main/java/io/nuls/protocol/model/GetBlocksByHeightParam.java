@@ -67,7 +67,7 @@ public class GetBlocksByHeightParam extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.startHeight = byteBuffer.readUint32();
         this.endHeight = byteBuffer.readUint32();
     }

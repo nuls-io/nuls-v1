@@ -78,7 +78,7 @@ public class GetBlocksByHashParam extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.startHash = byteBuffer.readHash();
         this.endHash = byteBuffer.readHash();
     }

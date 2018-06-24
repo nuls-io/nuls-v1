@@ -103,7 +103,7 @@ public class CallContractData extends BaseNulsData {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         // todo auto-generated method stub
 
     }

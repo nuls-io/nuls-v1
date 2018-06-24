@@ -76,7 +76,7 @@ public class P2PKHScript extends Script {
     }
 
     @Override
-    protected void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.publicKeyDigest = byteBuffer.readHash();
     }
 

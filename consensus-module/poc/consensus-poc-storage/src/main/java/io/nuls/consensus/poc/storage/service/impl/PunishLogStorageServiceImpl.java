@@ -83,7 +83,7 @@ public class PunishLogStorageServiceImpl implements PunishLogStorageService, Ini
         for (Entry<byte[], byte[]> entry : list) {
             PunishLogPo po = new PunishLogPo();
             try {
-                po.parse(entry.getValue());
+                po.parse(entry.getValue(), 0);
             } catch (NulsException e) {
                 throw new NulsRuntimeException(e);
             }

@@ -200,11 +200,6 @@ public class AccountLedgerResource {
         Na value = Na.valueOf(form.getAmount());
         Result result = accountLedgerService.transferFee(AddressTool.getAddress(form.getAddress()),
                 AddressTool.getAddress(form.getToAddress()), value, form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
-        if (result.isSuccess()) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("value", result.getData());
-            result.setData(map);
-        }
         return result.toRpcClientResult();
     }
 
@@ -528,7 +523,7 @@ public class AccountLedgerResource {
             if (tx == null) {
                 NulsDigestData hash = new NulsDigestData();
                 try {
-                    hash.parse(txHash);
+                    hash.parse(txHash, 0);
                     tx = accountLedgerService.getUnconfirmedTransaction(hash).getData();
                 } catch (NulsException e) {
                     Log.error(e);
@@ -631,7 +626,7 @@ public class AccountLedgerResource {
                             fromIndex = AccountLegerUtils.getIndex(owner);
                             // 查询from UTXO
                             fromHashObj = new NulsDigestData();
-                            fromHashObj.parse(fromHash);
+                            fromHashObj.parse(fromHash, 0);
                             //获取上一笔的to,先查未确认,如果没有再查已确认
                             fromTx = accountLedgerService.getUnconfirmedTransaction(fromHashObj).getData();
                             if (null == fromTx) {
@@ -742,7 +737,7 @@ public class AccountLedgerResource {
                             fromIndex = AccountLegerUtils.getIndex(owner);
                             // 查询from UTXO
                             fromHashObj = new NulsDigestData();
-                            fromHashObj.parse(fromHash);
+                            fromHashObj.parse(fromHash, 0);
                             fromTx = ledgerService.getTx(fromHashObj);
                             fromUtxo = fromTx.getCoinData().getTo().get(fromIndex);
                             from.setFrom(fromUtxo);
