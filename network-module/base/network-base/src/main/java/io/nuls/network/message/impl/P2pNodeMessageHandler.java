@@ -25,6 +25,7 @@
 
 package io.nuls.network.message.impl;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.network.cache.NodeCacheManager;
 import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.NodeManager;
@@ -60,7 +61,7 @@ public class P2pNodeMessageHandler implements BaseNetworkMeesageHandler {
         P2PNodeBody cacheBody = nodeCacheManager.getNode(nodeBody.getId());
         //已经缓存则什么都不处理
         if (cacheBody != null) {
-            System.out.println("---------------------cacheBody is not null------------------------------");
+            Log.info("---------------------cacheBody is not null------------------------------" +  cacheBody.toString());
             return null;
         }
         //尝试建立连接

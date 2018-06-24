@@ -225,9 +225,13 @@ public class NodeManager implements Runnable {
         lock.lock();
         try {
             //同一ip地址，不再重复连接
-            if (checkIpExist(node.getIp())) {
-                return false;
+            Collection<Node> nodeMap = getNodes().values();
+            for (Node n : nodeMap) {
+                if (node.getIp().equals(n.getIp()) && n.getType() == Node.OUT) {
+                    return false;
+                }
             }
+
             node.setType(Node.OUT);
             node.setTestConnect(false);
 
@@ -248,11 +252,19 @@ public class NodeManager implements Runnable {
     public boolean processConnectedNode(Node node) {
         lock.lock();
         try {
-            if (!connectedNodes.containsKey(node.getId()) && !handShakeNodes.containsKey(node.getId())) {
-                disConnectNodes.remove(node.getId());
-                connectedNodes.put(node.getId(), node);
-                return true;
+            if (connectedNodes.containsKey(node.getId()) || handShakeNodes.containsKey(node.getId())) {
+                return false;
             }
+            //主动连接时，不能连同一ip
+            if (node.getType() == Node.OUT) {
+                for (Node n : getConnectedNodes().values()) {
+                    if (n.getIp().equals(node.getIp())) {
+                        return false;
+                    }
+                }
+            }
+            disConnectNodes.remove(node.getId());
+            connectedNodes.put(node.getId(), node);
             return false;
         } finally {
             lock.unlock();
@@ -544,13 +556,7 @@ public class NodeManager implements Runnable {
                 }
             } else if (handShakeNodes.size() < networkParam.getMaxOutCount() && connectedNodes.size() == 0) {
                 for (Node node : disConnectNodes.values()) {
-                    Map<String, Node> nodeList = getConnectedNodes();
                     if (node.isCanConnect() && node.getStatus() == Node.WAIT) {
-                        for (Node n : nodeList.values()) {
-                            if (n.getIp().equals(node.getIp())) {
-                                break;
-                            }
-                        }
                         connectionManager.connectionNode(node);
                     }
                 }

@@ -90,17 +90,15 @@ public class P2PNodeBody extends BaseNulsData {
         this.nodeIp = nodeIp;
     }
 
-    public static void main(String[] args) throws IOException, NulsException {
-        P2PNodeBody body = new P2PNodeBody();
-        body.setSeverPort(1001);
-        body.setNodeIp("127.0.0.01");
-        byte[] bytes = body.serialize();
-        P2PNodeBody n2 = new P2PNodeBody();
-        n2.parse(bytes,0);
-    }
-
-
     public String getId() {
         return nodeIp + ":" + severPort;
+    }
+
+    @Override
+    public String toString() {
+        return "P2PNodeBody{" +
+                "nodeIp='" + nodeIp + '\'' +
+                ", severPort=" + severPort +
+                '}';
     }
 }
