@@ -244,7 +244,7 @@ public class BlockProcess {
                 t = System.currentTimeMillis();
                 NulsContext.getInstance().setBestBlock(block);
                 //remove tx from memory pool
-                removeTxFromMemoryPool(block);
+//                removeTxFromMemoryPool(block);
                 Log.info("移除内存交易耗时：" + (System.currentTimeMillis() - t));
                 t = System.currentTimeMillis();
                 // 转发区块
