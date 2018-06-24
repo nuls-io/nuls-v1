@@ -133,31 +133,32 @@ public class DownloadThreadManager implements Callable<Boolean> {
                     break;
                 }
             }
+            for (FutureTask<ResultMessage> task : futures) {
+                ResultMessage result = null;
+                try {
+                    result = task.get();
+                } catch (Exception e) {
+                    Log.error(e);
+                }
+                List<Block> blockList = null;
+
+                if (result == null || (blockList = result.getBlockList()) == null || blockList.size() == 0) {
+                    blockList = retryDownload(executor, result);
+                }
+
+                if (blockList == null) {
+                    executor.shutdown();
+                    resetNetwork("attempts to download blocks from all available nodes failed");
+                    return true;
+                }
+
+                for (Block block : blockList) {
+                    blockQueue.offer(block);
+                }
+            }
+            futures.clear();
         }
 
-        for (FutureTask<ResultMessage> task : futures) {
-            ResultMessage result = null;
-            try {
-                result = task.get();
-            } catch (Exception e) {
-                Log.error(e);
-            }
-            List<Block> blockList = null;
-
-            if (result == null || (blockList = result.getBlockList()) == null || blockList.size() == 0) {
-                blockList = retryDownload(executor, result);
-            }
-
-            if (blockList == null) {
-                executor.shutdown();
-                resetNetwork("attempts to download blocks from all available nodes failed");
-                return true;
-            }
-
-            for (Block block : blockList) {
-                blockQueue.offer(block);
-            }
-        }
         executor.shutdown();
 
         return true;
