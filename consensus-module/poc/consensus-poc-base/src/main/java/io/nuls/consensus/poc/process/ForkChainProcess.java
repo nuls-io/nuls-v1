@@ -502,6 +502,7 @@ public class ForkChainProcess {
                     }
                 }
                 Log.error("Rollback failed during switch chain, skip this chain", e);
+                e.printStackTrace();
                 return false;
             }
         }
