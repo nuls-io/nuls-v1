@@ -68,7 +68,7 @@ public class NettyClient {
 
         boot.group(worker)
                 .channel(NioSocketChannel.class)
-                .option(ChannelOption.SO_BACKLOG, 128)
+//                .option(ChannelOption.SO_BACKLOG, 128)
                 .option(ChannelOption.TCP_NODELAY, true)            //Send messages immediately
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.SO_SNDBUF, 128*1024)

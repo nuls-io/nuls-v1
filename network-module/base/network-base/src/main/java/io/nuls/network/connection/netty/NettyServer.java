@@ -50,7 +50,7 @@ public class NettyServer {
         serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(boss, worker)
                 .channel(NioServerSocketChannel.class)
-                .childOption(ChannelOption.SO_BACKLOG, 128)
+//                .childOption(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.TCP_NODELAY, true)            //Send messages immediately
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childOption(ChannelOption.SO_SNDBUF, 128 * 1024)
