@@ -78,12 +78,12 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
                 smallBlock.parse(punishData.getEvidence(), 0);
             } catch (NulsException e) {
                 Log.error(e);
-                return ValidateResult.getFailedResult(CLASS_NAME, e.getErrorCode(), e.getMessage());
+                return ValidateResult.getFailedResult(CLASS_NAME, e.getErrorCode());
             }
             BlockHeader header = smallBlock.getHeader();
             ValidateResult result = validator.validate(header);
             if (result.isFailed()) {
-                return ValidateResult.getFailedResult(CLASS_NAME, result.getErrorCode(), result.getMsg());
+                return ValidateResult.getFailedResult(CLASS_NAME, result.getErrorCode());
             }
             List<NulsDigestData> txHashList = smallBlock.getTxHashList();
             if (!header.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(txHashList))) {

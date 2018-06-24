@@ -60,11 +60,11 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
-        if(node != null) {
+        if (node != null) {
             node.setCanConnect(false);
         }
-        String nodeId = node == null ? "null" : node.getId();
-        Log.info("---------------------- client channelRegistered -----------" + nodeId);
+//        String nodeId = node == null ? "null" : node.getId();
+//        Log.info("---------------------- client channelRegistered -----------" + nodeId);
     }
 
     @Override
@@ -74,8 +74,8 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
         SocketChannel channel = (SocketChannel) ctx.channel();
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
-        String nodeId = node == null ? "null" : node.getId();
-        Log.info("---------------------- client channelActive -----------" + nodeId);
+//        String nodeId = node == null ? "null" : node.getId();
+//        Log.info("---------------------- client channelActive -----------" + nodeId);
         String remoteIP = channel.remoteAddress().getHostString();
         //如果是本机节点访问自己的服务器，则广播本机服务器到全网
         if (networkParam.getLocalIps().contains(remoteIP)) {
@@ -97,11 +97,11 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        SocketChannel channel = (SocketChannel) ctx.channel();
-        Attribute<Node> nodeAttribute = channel.attr(key);
-        Node node = nodeAttribute.get();
-        String nodeId = node == null ? "null" : node.getId();
-        Log.info("----------------- client channelInactive -------------------" + nodeId);
+//        SocketChannel channel = (SocketChannel) ctx.channel();
+//        Attribute<Node> nodeAttribute = channel.attr(key);
+//        Node node = nodeAttribute.get();
+//        String nodeId = node == null ? "null" : node.getId();
+//        Log.info("----------------- client channelInactive -------------------" + nodeId);
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
     }
@@ -134,21 +134,20 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        Log.info("----------------- client exceptionCaught -------------------");
+//        Log.info("----------------- client exceptionCaught -------------------");
         cause.printStackTrace();
         ctx.channel().close();
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-
         super.channelUnregistered(ctx);
 
         SocketChannel channel = (SocketChannel) ctx.channel();
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
         if (node != null) {
-            Log.info("----------------- client channelUnregistered -------------------" + node.getId());
+//            Log.info("----------------- client channelUnregistered -------------------" + node.getId());
             nodeManager.removeNode(node);
         }
 

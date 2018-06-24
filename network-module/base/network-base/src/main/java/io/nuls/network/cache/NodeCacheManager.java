@@ -17,7 +17,7 @@ public class NodeCacheManager {
     }
 
     //将收到的广播节点的信息缓存20分钟，避免重复广播
-    private CacheMap<String, P2PNodeBody> cacheNodeMap = new CacheMap<>(NetworkConstant.CACHE_P2P_NODE, 8, String.class, P2PNodeBody.class, 60 * 20, 0, null);
+    private CacheMap<String, P2PNodeBody> cacheNodeMap = new CacheMap<>(NetworkConstant.CACHE_P2P_NODE, 8, String.class, P2PNodeBody.class, 60 * 5, 0, null);
 
     public void cacheNode(P2PNodeBody body) {
         cacheNodeMap.put(body.getId(), body);

@@ -74,6 +74,8 @@ public class Node extends BaseNulsData {
 
     private boolean canConnect;
 
+    private boolean testConnect;
+
     @Override
     public int size() {
         int s = 0;
@@ -344,4 +346,11 @@ public class Node extends BaseNulsData {
         this.externalIp = externalIp;
     }
 
+    public boolean isTestConnect() {
+        return testConnect;
+    }
+
+    public void setTestConnect(boolean testConnect) {
+        this.testConnect = testConnect;
+    }
 }

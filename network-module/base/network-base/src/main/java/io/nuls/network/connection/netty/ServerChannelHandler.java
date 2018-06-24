@@ -64,7 +64,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
-        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+//        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
 //        Log.info("---------------------- server channelRegistered ------------------------- " + nodeId);
 
         String remoteIP = channel.remoteAddress().getHostString();
@@ -121,7 +121,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
-        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+//        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
 //        System.out.println("---------------------- server channelActive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
@@ -150,7 +150,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        Log.info("----------------- server exceptionCaught -------------------");
+//        Log.info("----------------- server exceptionCaught -------------------");
         cause.printStackTrace();
         ctx.channel().close();
     }
@@ -186,7 +186,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         super.channelUnregistered(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        Log.info(" ---------------------- server channelInactive ------------------------- " + nodeId);
+//        Log.info(" ---------------------- server channelInactive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
         NioChannelMap.remove(channelId);
@@ -195,14 +195,15 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         if (node != null) {
             if (channelId.equals(node.getChannelId())) {
                 nodeManager.removeNode(nodeId);
-            } else {
-                Log.info("--------------server channel id different----------------------");
-                Log.info("--------------server channel id different----------------------");
-                Log.info("--------------server channel id different----------------------");
-                Log.info("--------node:" + node.getId() + ",type:" + node.getType());
-                Log.info(node.getChannelId());
-                Log.info(channelId);
             }
+//            else {
+//                Log.info("--------------server channel id different----------------------");
+//                Log.info("--------------server channel id different----------------------");
+//                Log.info("--------------server channel id different----------------------");
+//                Log.info("--------node:" + node.getId() + ",type:" + node.getType());
+//                Log.info(node.getChannelId());
+//                Log.info(channelId);
+//            }
         }
     }
 
