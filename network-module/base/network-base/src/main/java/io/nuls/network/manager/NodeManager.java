@@ -326,17 +326,14 @@ public class NodeManager implements Runnable {
             }
             return;
         }
-        for (Node seedNode : getSeedNodes()) {
-            if (seedNode.getIp().equals(node.getIp())) {
-                disConnectNodes.remove(node.getId());
-                connectedNodes.remove(node.getId());
-                handShakeNodes.remove(node.getId());
-                return;
-            }
+        if (isSeedNode(node.getIp())) {
+            disConnectNodes.remove(node.getId());
+            connectedNodes.remove(node.getId());
+            handShakeNodes.remove(node.getId());
+            return;
         }
-
         //如果是本机ip地址，直接删除
-        if (networkParam.getLocalIps().contains(node.getIp())) {
+        if (isSeedNode(node.getIp()) || networkParam.getLocalIps().contains(node.getIp())) {
             disConnectNodes.remove(node.getId());
             return;
         }
@@ -381,7 +378,10 @@ public class NodeManager implements Runnable {
     }
 
     public void saveNode(Node node) {
-        getNetworkStorage().saveNode(node);
+        if (!isSeedNode(node.getIp())) {
+            getNetworkStorage().saveNode(node);
+        }
+
     }
 
     public void saveExternalIp(String ip) {
@@ -485,8 +485,8 @@ public class NodeManager implements Runnable {
      * @return
      */
     public boolean isSeedNode(String ip) {
-        for (String seedIp : networkParam.getSeedIpList()) {
-            if (seedIp.indexOf(ip) != -1) {
+        for (Node node : getSeedNodes()) {
+            if (node.getIp().equals(ip)) {
                 return true;
             }
         }
