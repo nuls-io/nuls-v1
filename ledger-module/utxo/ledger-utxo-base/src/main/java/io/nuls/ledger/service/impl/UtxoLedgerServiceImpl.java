@@ -323,7 +323,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 if (null == fromOfFromCoin) {
                     // 如果既不存在于txList的to中(如果txList不为空)，又不存在于数据库中，那么这是一笔问题数据，进一步检查是否存在这笔交易，交易有就是双花，没有就是孤儿交易，则返回失败
                     if (null != utxoLedgerTransactionStorageService.getTxBytes(LedgerUtil.getTxHashBytes(fromBytes))) {
-                        return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT, "no UTXO in DB&&txList, had one tx.");
+                        return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT);
                     } else {
                         return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.ORPHAN_TX);
                     }
@@ -362,12 +362,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
                 // 验证与待确认交易列表中是否有双花，既是待校验交易的fromUtxo是否和txList中的fromUtxo重复，有重复则是双花
                 if (temporaryFromSet != null && !temporaryFromSet.add(asString(fromBytes))) {
-                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT, "duplicate utxo.");
+                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT);
                 }
 
                 // 验证from的锁定时间和金额
                 if (!(fromOfFromCoin.getNa().equals(from.getNa()) && fromOfFromCoin.getLockTime() == from.getLockTime())) {
-                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.DATA_ERROR, "tx from coin data na and lock time error.");
+                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.DATA_ERROR);
                 }
 
                 fromTotal = fromTotal.add(fromOfFromCoin.getNa());
