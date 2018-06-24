@@ -542,10 +542,10 @@ public class NodeManager implements Runnable {
 //                System.out.println(node.toString());
 //            }
 //
-            System.out.println("--------handShakeNodes:" + handShakeNodes.size());
-            for (Node node : handShakeNodes.values()) {
-                System.out.println(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
-            }
+//            System.out.println("--------handShakeNodes:" + handShakeNodes.size());
+//            for (Node node : handShakeNodes.values()) {
+//                System.out.println(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
+//            }
 
             if (handShakeNodes.size() > networkParam.getMaxOutCount()) {
                 removeSeedNode();
