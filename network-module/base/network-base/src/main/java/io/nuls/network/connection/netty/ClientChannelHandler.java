@@ -37,6 +37,7 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeManager;
 import io.nuls.network.model.Node;
+import io.nuls.network.util.NetworkThreadPool;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -115,17 +116,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             Node node = nodeManager.getNode(nodeId);
             if (node != null && node.isAlive()) {
                 ByteBuf buf = (ByteBuf) msg;
-//                byte[] bytes = new byte[buf.readableBytes()];
-//                buf.readBytes(bytes);
-//                buf.release();
-//                ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
-//                buffer.put(bytes);
-
-                try {
-                    connectionManager.receiveMessage(buf, node);
-                } finally {
-                    buf.release();
-                }
+                NetworkThreadPool.doRead(buf, node);
             }
         } catch (Exception e) {
             Log.info(" ---------------------- client channelRead exception---------------------- " + nodeId);
@@ -136,7 +127,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 //        Log.info("----------------- client exceptionCaught -------------------");
-        if(!(cause instanceof IOException)) {
+        if (!(cause instanceof IOException)) {
             Log.error(cause);
         }
         ctx.channel().close();

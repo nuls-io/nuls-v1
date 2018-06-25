@@ -41,6 +41,7 @@ import io.nuls.network.manager.NodeManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.protocol.message.HandshakeMessage;
 import io.nuls.network.protocol.message.NetworkMessageBody;
+import io.nuls.network.util.NetworkThreadPool;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -166,16 +167,8 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             Node node = nodeManager.getNode(nodeId);
             if (node != null && node.isAlive()) {
                 ByteBuf buf = (ByteBuf) msg;
-//                byte[] bytes = new byte[buf.readableBytes()];
-//                buf.readBytes(bytes);
-//                buf.release();
-//                ByteBuffer buffer = ByteBuffer.allocate(bytes.length);
-//                buffer.put(bytes);
-                try {
-                    connectionManager.receiveMessage(buf, node);
-                } finally {
-                    buf.release();
-                }
+                NetworkThreadPool.doRead(buf, node);
+//                connectionManager.receiveMessage();
             }
         } catch (Exception e) {
 //            System.out.println(" ---------------------- server channelRead exception------------------------- " + nodeId);
