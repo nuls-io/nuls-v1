@@ -237,4 +237,12 @@ public interface DBService {
      */
     BatchOperation createWriteBatch(String area);
 
+    /**
+     * 清除Area
+     *
+     * @param areaName
+     * @return
+     */
+    Result destroyArea(String areaName);
+
 }

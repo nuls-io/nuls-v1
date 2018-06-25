@@ -155,4 +155,9 @@ public class LevelDBServiceImpl implements DBService {
         }
         return batchOperation;
     }
+
+    @Override
+    public Result destroyArea(String areaName) {
+        return LevelDBManager.destroyArea(areaName);
+    }
 }
