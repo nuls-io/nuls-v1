@@ -152,7 +152,7 @@ public class TransferTest {
         List<String> addressList = getAddressList();
 
         for (String toAddress : addressList) {
-            String address = "2CiB4JFCXiPZpUm9JcyQ1nVexy2qx19";
+            String address = "2CXJEuoXZMajeTEgL6TgiSxTRRMwiMM";
 //            String toAddress = "2Cg7BLHWBSxMhq3FpjR9BrkyxXp4m4j";
             long amount = 201800L;
             String password = "";
