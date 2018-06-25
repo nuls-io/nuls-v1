@@ -38,6 +38,7 @@ import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.kernel.validate.ValidateResult;
@@ -182,14 +183,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             Coin recovery;
             for (Coin from : froms) {
                 try {
-                    byte[] hashBytes = new byte[NulsDigestData.HASH_LENGTH];
-                    System.arraycopy(from.getOwner(), 0, hashBytes, 0, hashBytes.length);
-                    NulsDigestData fromTxHash = new NulsDigestData();
-                    fromTxHash.parse(hashBytes,0);
+                    NulsByteBuffer byteBuffer = new NulsByteBuffer(from.getOwner());
 
-                    byte[] indexBytes = new byte[from.getOwner().length - NulsDigestData.HASH_LENGTH];
-                    System.arraycopy(from.getOwner(), NulsDigestData.HASH_LENGTH, indexBytes, 0, indexBytes.length);
-                    int fromIndex = (int) new VarInt(indexBytes, 0).value;
+                    NulsDigestData fromTxHash = byteBuffer.readHash();
+
+                    int fromIndex = (int) byteBuffer.readVarInt();
 
                     Transaction fromTx = utxoLedgerTransactionStorageService.getTx(fromTxHash);
                     recovery = fromTx.getCoinData().getTo().get(fromIndex);
