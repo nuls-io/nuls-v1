@@ -85,13 +85,18 @@ public class TransferProcessor implements CommandProcessor {
                 break;
             }
             if (!Address.validAddress(args[1]) || !Address.validAddress(args[2])) {
-                return false;
+                result = false;
+                break;
             }
             if (!StringUtils.isNuls(args[3])) {
                 result = false;
                 break;
             }
             TransferForm form = getTransferForm(args);
+            if(null == form){
+                result = false;
+                break;
+            }
             paramsData.set(form);
             result = StringUtils.isNotBlank(form.getToAddress());
             if (!result) {
