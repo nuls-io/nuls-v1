@@ -41,6 +41,7 @@ import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
+import io.nuls.network.util.NetworkThreadPool;
 import io.nuls.protocol.message.base.BaseMessage;
 import io.nuls.protocol.message.base.MessageHeader;
 
@@ -81,7 +82,7 @@ public class ConnectionManager {
     }
 
     public void start() {
-        TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "node connection", new Runnable() {
+        TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "node server start", new Runnable() {
             @Override
             public void run() {
                 try {
@@ -95,13 +96,14 @@ public class ConnectionManager {
 
     public void connectionNode(Node node) {
         node.setStatus(Node.CONNECT);
-        TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "node connection", new Runnable() {
-            @Override
-            public void run() {
-                NettyClient client = new NettyClient(node);
-                client.start();
-            }
-        }, true);
+        NetworkThreadPool.doConnect(node);
+//        TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "node connection", new Runnable() {
+//            @Override
+//            public void run() {
+//                NettyClient client = new NettyClient(node);
+//                client.start();
+//            }
+//        }, true);
     }
 
     public void receiveMessage(ByteBuf buffer, Node node) throws NulsException {
