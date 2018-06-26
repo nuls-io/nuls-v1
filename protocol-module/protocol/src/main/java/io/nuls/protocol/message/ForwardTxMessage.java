@@ -22,28 +22,28 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.message.bus.message;
+package io.nuls.protocol.message;
 
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.NulsByteBuffer;
-import io.nuls.message.bus.constant.MessageBusConstant;
-import io.nuls.protocol.message.base.BaseMessage;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 /**
- * @author: Charlie
- * @date: 2018/5/6
+ * 发送新交易的消息
+ * The message for send a new transaction
+ *
+ * @author Niels
+ * @date 2017/11/8
  */
-public class GetMessageBodyMessage extends BaseMessage<NulsDigestData> {
+public class ForwardTxMessage extends BaseProtocolMessage<NulsDigestData> {
 
-    public GetMessageBodyMessage() {
-        super(MessageBusConstant.MODULE_ID_MESSAGE_BUS, MessageBusConstant.MSG_TYPE_GET_MSG_BODY_MSG);
+    public ForwardTxMessage() {
+        super(ProtocolConstant.PROTOCOL_FORWARD_NEW_TX);
     }
 
     @Override
     protected NulsDigestData parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
         return byteBuffer.readHash();
     }
-
 }

@@ -28,7 +28,7 @@ package io.nuls.protocol.base.handler;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.base.download.cache.DownloadCacheHandler;
+import io.nuls.protocol.base.cache.ProtocolCacheHandler;
 import io.nuls.protocol.message.NotFoundMessage;
 
 /**
@@ -41,6 +41,6 @@ public class NotFoundHander extends AbstractMessageHandler<NotFoundMessage> {
      */
     @Override
     public void onMessage(NotFoundMessage event, Node node) throws NulsException {
-        DownloadCacheHandler.notFoundBlock(event.getMsgBody());
+        ProtocolCacheHandler.notFound(event.getMsgBody());
     }
 }

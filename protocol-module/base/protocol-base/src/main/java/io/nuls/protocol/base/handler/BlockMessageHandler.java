@@ -28,7 +28,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.model.Block;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.base.download.cache.DownloadCacheHandler;
+import io.nuls.protocol.base.cache.ProtocolCacheHandler;
 import io.nuls.protocol.message.BlockMessage;
 
 /**
@@ -44,6 +44,6 @@ public class BlockMessageHandler extends AbstractMessageHandler<BlockMessage> {
             Log.warn("recieved a null blockEvent form " + fromNode.getId());
             return;
         }
-        DownloadCacheHandler.receiveBlock(block);
+        ProtocolCacheHandler.receiveBlock(block);
     }
 }

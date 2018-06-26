@@ -24,28 +24,23 @@
  */
 package io.nuls.protocol.base.handler;
 
-import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.constant.NotFoundType;
+import io.nuls.protocol.constant.MessageDataType;
 import io.nuls.protocol.message.*;
 import io.nuls.protocol.model.CompleteParam;
-import io.nuls.protocol.model.GetBlocksByHashParam;
 import io.nuls.protocol.model.GetBlocksByHeightParam;
 import io.nuls.protocol.model.NotFound;
 import io.nuls.protocol.service.BlockService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author facjas
@@ -113,7 +108,7 @@ public class GetBlocksByHeightHandler extends AbstractMessageHandler<GetBlocksBy
 
     private void sendNotFound(NulsDigestData hash, Node node) {
         NotFoundMessage message = new NotFoundMessage();
-        NotFound data = new NotFound(NotFoundType.BLOCKS, hash);
+        NotFound data = new NotFound(MessageDataType.BLOCKS, hash);
         message.setMsgBody(data);
         Result result = this.messageBusService.sendToNode(message, node, true);
         if (result.isFailed()) {

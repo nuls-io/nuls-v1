@@ -35,7 +35,7 @@ package io.nuls.protocol.constant;
  * @author: Niels Wang
  * @date: 2018/4/9
  */
-public enum NotFoundType {
+public enum MessageDataType {
     /**
      * 获取区块找不到时，返回的Not Found 类型
      * When the block cannot be Found, the returned Not Found type.
@@ -48,15 +48,23 @@ public enum NotFoundType {
      */
     BLOCKS(2),
     /**
-     * 获取交易找不到时，返回的Not Found 类型
-     * When the transaction cannot be Found, the returned Not Found type.
+     * 获取交易组找不到时，返回的Not Found 类型
+     * When the transactions cannot be Found, the returned Not Found type.
      */
-    TRANSACTION(3),
+    TRANSACTIONS(3),
     /**
      * 获取区块头摘要找不到时，返回的Not Found 类型
      * When the block header digest data cannot be Found, the returned Not Found type.
      */
-    HASHES(4);
+    HASHES(4),
+
+    SMALL_BLOCK(5),
+
+    TRANSACTION(6),
+
+    REQUEST(7),
+
+    ;
 
     /**
      * 对应的code，用于{@link io.nuls.protocol.model.NotFound}类序列化使用
@@ -64,7 +72,7 @@ public enum NotFoundType {
      */
     private final int code;
 
-    NotFoundType(int code) {
+    MessageDataType(int code) {
         this.code = code;
     }
 
@@ -83,16 +91,16 @@ public enum NotFoundType {
      * 根据编码获取枚举实例
      *
      * @param code int type code
-     * @return {@link NotFoundType}
+     * @return {@link MessageDataType}
      */
-    public static NotFoundType getType(int code) {
+    public static MessageDataType getType(int code) {
         switch (code) {
             case 1:
                 return BLOCK;
             case 2:
                 return BLOCKS;
             case 3:
-                return TRANSACTION;
+                return TRANSACTIONS;
             case 4:
                 return HASHES;
             default:

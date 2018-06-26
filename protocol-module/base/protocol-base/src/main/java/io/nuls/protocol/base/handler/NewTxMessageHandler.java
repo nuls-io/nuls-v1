@@ -34,6 +34,7 @@ import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.base.cache.ProtocolCacheHandler;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.TransactionMessage;
@@ -68,6 +69,8 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
         if (null == tx) {
             return;
         }
+
+        ProtocolCacheHandler.receiveTx(tx.getHash());
 
         if (tx.isSystemTx()) {
             return;

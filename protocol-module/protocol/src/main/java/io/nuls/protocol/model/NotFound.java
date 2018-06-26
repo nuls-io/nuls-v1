@@ -31,7 +31,7 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
-import io.nuls.protocol.constant.NotFoundType;
+import io.nuls.protocol.constant.MessageDataType;
 
 import java.io.IOException;
 
@@ -41,11 +41,11 @@ import java.io.IOException;
  */
 public class NotFound extends BaseNulsData {
     /**
-     * 数据类型 {@link NotFoundType}
+     * 数据类型 {@link MessageDataType}
      * data type
      */
 
-    private NotFoundType type;
+    private MessageDataType type;
 
     /**
      * 数据摘要
@@ -57,7 +57,7 @@ public class NotFound extends BaseNulsData {
     public NotFound() {
     }
 
-    public NotFound(NotFoundType type, NulsDigestData hash) {
+    public NotFound(MessageDataType type, NulsDigestData hash) {
         this.type = type;
         this.hash = hash;
     }
@@ -80,19 +80,19 @@ public class NotFound extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.type = NotFoundType.getType(byteBuffer.readByte());
+        this.type = MessageDataType.getType(byteBuffer.readByte());
         this.hash = byteBuffer.readHash();
     }
 
     /**
-     * 数据类型 {@link NotFoundType}
+     * 数据类型 {@link MessageDataType}
      * data type
      */
-    public NotFoundType getType() {
+    public MessageDataType getType() {
         return type;
     }
 
-    public void setType(NotFoundType type) {
+    public void setType(MessageDataType type) {
         this.type = type;
     }
 

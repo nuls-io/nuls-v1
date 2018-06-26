@@ -33,7 +33,7 @@
 //import io.nuls.kernel.model.Result;
 //import io.nuls.message.bus.service.MessageBusService;
 //import io.nuls.network.model.Node;
-//import io.nuls.protocol.constant.NotFoundType;
+//import io.nuls.protocol.constant.MessageDataType;
 //import io.nuls.protocol.message.BlockMessage;
 //import io.nuls.protocol.message.GetBlockMessage;
 //import io.nuls.protocol.message.NotFoundMessage;
@@ -133,7 +133,7 @@
 //
 //    private void sendNotFound(NulsDigestData hash, Node node) {
 //        NotFoundMessage event = new NotFoundMessage();
-//        NotFound data = new NotFound(NotFoundType.BLOCK, hash);
+//        NotFound data = new NotFound(MessageDataType.BLOCK, hash);
 //        event.setMsgBody(data);
 //        Result result = this.messageBusService.sendToNode(event, node, true);
 //        if (result.isFailed()) {

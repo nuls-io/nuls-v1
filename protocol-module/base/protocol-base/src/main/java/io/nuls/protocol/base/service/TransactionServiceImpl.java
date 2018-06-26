@@ -38,6 +38,7 @@ import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.message.ForwardTxMessage;
 import io.nuls.protocol.message.TransactionMessage;
 import io.nuls.protocol.service.TransactionService;
 
@@ -128,9 +129,9 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Result forwardTx(Transaction tx, Node excludeNode) {
-        TransactionMessage message = new TransactionMessage();
-        message.setMsgBody(tx);
-        return messageBusService.broadcastHashAndCache(message, excludeNode, true);
+        ForwardTxMessage message = new ForwardTxMessage();
+        message.setMsgBody(tx.getHash());
+        return messageBusService.broadcast(message, excludeNode, true);
     }
 
     /**
@@ -149,7 +150,7 @@ public class TransactionServiceImpl implements TransactionService {
         consensusService.newTx(tx);
         temporaryCacheManager.cacheTx(tx);
 
-        return messageBusService.broadcastAndCache(message, null, true);
+        return messageBusService.broadcast(message, null, true);
     }
 
     /**

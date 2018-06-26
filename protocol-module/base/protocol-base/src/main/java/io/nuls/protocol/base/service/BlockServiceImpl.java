@@ -36,6 +36,7 @@ import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
 import io.nuls.protocol.base.utils.PoConvertUtil;
+import io.nuls.protocol.message.ForwardSmallBlockMessage;
 import io.nuls.protocol.message.SmallBlockMessage;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
@@ -245,7 +246,7 @@ public class BlockServiceImpl implements BlockService {
      * When you fail to save the block, you need to roll back the already stored transaction.
      */
     private void rollbackTxList(List<Transaction> savedList, BlockHeader blockHeader) throws NulsException {
-        for(int i = savedList.size() - 1 ; i >= 0 ; i --) {
+        for (int i = savedList.size() - 1; i >= 0; i--) {
             Transaction tx = savedList.get(i);
             transactionService.rollbackTx(tx, blockHeader);
             ledgerService.rollbackTx(tx);
@@ -292,8 +293,9 @@ public class BlockServiceImpl implements BlockService {
      */
     @Override
     public Result forwardBlock(SmallBlock smallBlock, Node excludeNode) {
-        SmallBlockMessage message = fillSmallBlockMessage(smallBlock);
-        return messageBusService.broadcastHashAndCache(message, excludeNode, true);
+        ForwardSmallBlockMessage message = new ForwardSmallBlockMessage();
+        message.setMsgBody(smallBlock.getHeader().getHash());
+        return messageBusService.broadcast(message, excludeNode, true);
     }
 
     /**
@@ -306,13 +308,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public Result broadcastBlock(SmallBlock smallBlock) {
         SmallBlockMessage message = fillSmallBlockMessage(smallBlock);
-        //todo test
-        Result<List<String>> result = messageBusService.broadcastHashAndCache(message, null, false);
-        StringBuilder str = new StringBuilder("broadcast " + smallBlock.getHeader().getHash() + " to: ");
-        for (String node : result.getData()) {
-            str.append(", " + node);
-        }
-        Log.info(str.toString());
+        Result<List<String>> result = messageBusService.broadcast(message, null, false);
         return result;
     }
 

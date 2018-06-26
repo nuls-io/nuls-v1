@@ -38,6 +38,7 @@ import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
+import io.nuls.protocol.base.cache.ProtocolCacheHandler;
 import io.nuls.protocol.base.utils.AssemblyBlockUtil;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.ProtocolConstant;
@@ -74,6 +75,8 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
             return;
         }
         BlockHeader header = smallBlock.getHeader();
+
+        ProtocolCacheHandler.receiveSmallBlock(header.getHash());
 
         BlockHeader theBlockHeader = blockService.getBlockHeader(header.getHash()).getData();
         if (null != theBlockHeader) {
