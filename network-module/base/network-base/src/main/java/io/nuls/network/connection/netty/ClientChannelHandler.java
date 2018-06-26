@@ -116,7 +116,12 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             Node node = nodeManager.getNode(nodeId);
             if (node != null && node.isAlive()) {
                 ByteBuf buf = (ByteBuf) msg;
-                NetworkThreadPool.doRead(buf, node);
+                try {
+                    connectionManager.receiveMessage(buf, node);
+                } finally {
+                    buf.release();
+                }
+//                NetworkThreadPool.doRead(buf, node);
             }
         } catch (Exception e) {
             Log.info(" ---------------------- client channelRead exception---------------------- " + nodeId);
