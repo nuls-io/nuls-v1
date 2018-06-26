@@ -34,7 +34,7 @@ import java.util.List;
 
 /**
  * 消息总线模块提供给外部的服务接口定义
- * The event-bus module provides the definition of the external service interface
+ * The message-bus module provides the definition of the external service interface
  *
  * @author: Charlie
  * @date: 2018/5/4
