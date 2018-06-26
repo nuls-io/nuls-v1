@@ -70,7 +70,7 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
             return;
         }
 
-        ProtocolCacheHandler.receiveTx(tx.getHash());
+        ProtocolCacheHandler.receiveTx(tx.getHash(), false);
 
         if (tx.isSystemTx()) {
             return;

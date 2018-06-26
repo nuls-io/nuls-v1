@@ -59,9 +59,9 @@ public class ProtocolCacheHandler {
         return txCacher.addFuture(txHash);
     }
 
-    public static void receiveTx(NulsDigestData txHash) {
+    public static void receiveTx(NulsDigestData txHash, boolean log) {
         TX_FILTER.insert(txHash.getDigestBytes());
-        txCacher.callback(txHash, true);
+        txCacher.callback(txHash, true, log);
 
     }
 
@@ -73,9 +73,9 @@ public class ProtocolCacheHandler {
         return smallBlockCacher.addFuture(blockHash);
     }
 
-    public static void receiveSmallBlock(NulsDigestData blockHash) {
+    public static void receiveSmallBlock(NulsDigestData blockHash, boolean log) {
         SMALL_BLOCK_FILTER.insert(blockHash.getDigestBytes());
-        smallBlockCacher.callback(blockHash, true);
+        smallBlockCacher.callback(blockHash, true, log);
     }
 
     public static void removeSmallBlockFuture(NulsDigestData blockHash) {

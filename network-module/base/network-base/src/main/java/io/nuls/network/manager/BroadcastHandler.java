@@ -113,6 +113,10 @@ public class BroadcastHandler {
                 if (excludeNode != null && node.getId().equals(excludeNode.getId())) {
                     continue;
                 }
+                //todo 调试用
+                if (node.getIp().equalsIgnoreCase("192.168.1.191")) {
+                    continue;
+                }
                 BroadcastResult br = broadcastToNode(message, node, asyn);
                 if (br.isSuccess()) {
                     successCount++;
