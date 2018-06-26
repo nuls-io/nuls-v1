@@ -26,7 +26,6 @@
 package io.nuls.message.bus.service.impl;
 
 import io.nuls.cache.CacheMap;
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.protocol.message.base.BaseMessage;
 
@@ -92,13 +91,8 @@ public class MessageCacheService {
      * @param hash The hash you want to check
      */
     public boolean kownTheMessage(NulsDigestData hash) {
-        long start = System.currentTimeMillis();
         boolean b = this.cacheMapRecieved.containsKey(hash) ||
                 this.cacheMapSended.containsKey(hash);
-        long use = System.currentTimeMillis() - start;
-        if(use>1){
-            Log.info("判斷交易是否重复话费时间：" + use + "ms");
-        }
         return b;
     }
 
