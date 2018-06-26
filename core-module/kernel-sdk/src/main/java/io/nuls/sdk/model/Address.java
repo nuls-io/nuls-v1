@@ -78,7 +78,7 @@ public class Address {
      */
     public Address(String address) {
         try {
-            byte[] bytes = Base58.decode(address);
+            byte[] bytes = AddressTool.getAddress(address);
 
             Address addressTmp = Address.fromHashs(bytes);
             this.chainId = addressTmp.getChainId();
