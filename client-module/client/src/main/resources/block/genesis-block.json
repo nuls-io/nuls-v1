@@ -3,33 +3,18 @@
   "time": "1525104000000",
   "txs": [
     {
-      "address": "2Cht55uh8JR5ZAQkp1CVyNPwmFvNuLS",
+      "address": "6HgVwmpKaAbPaU1CVU51VFTJwPvyKUUn",
       "nuls": 10000000,
       "unlockHeight": 0
     },
     {
-      "address": "2ChDcC1nvki521xXhYAUzYXt4RLNuLs",
+      "address": "6HgjYMAN7H27KegtMLpR4rdQJ3q8cNmm",
       "nuls": 10000000,
       "unlockHeight": 0
     },
     {
-      "address": "2CiU1CmB6c9jmSLDNBe6PouA7NgNULS",
-      "nuls": 10000000,
-      "unlockHeight": 0
-    },
-    {
-      "address": "2CcGuvxdR5R8SBU3hvg1WE9XV1UNuLS",
-      "nuls": 10000000,
-      "unlockHeight": 0
-    },
-    {
-      "address": "2CXJEuoXZMajeTEgL6TgiSxTRRMwiMM",
-      "nuls": 10000000,
-      "unlockHeight": 0
-    },
-    {
-      "address": "2CXz2tsMrfDuMA92ZVDVdnw92Ws5jnN",
-      "nuls": 50000000,
+      "address": "6HgaqsowQbVM8AXbHbssSAAHddeypwcc",
+      "nuls": 80000000,
       "unlockHeight": 0
     }
   ]
