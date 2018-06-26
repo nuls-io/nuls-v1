@@ -33,6 +33,7 @@ import io.nuls.kernel.model.Transaction;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
+import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.MessageDataType;
 import io.nuls.protocol.message.*;
 import io.nuls.protocol.model.NotFound;
@@ -47,6 +48,7 @@ public class GetSmallBlockHandler extends AbstractMessageHandler<GetSmallBlockMe
 
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
+    private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
 
     @Override
     public void onMessage(GetSmallBlockMessage message, Node fromNode) {
@@ -54,19 +56,23 @@ public class GetSmallBlockHandler extends AbstractMessageHandler<GetSmallBlockMe
             return;
         }
         NulsDigestData blockHash = message.getMsgBody();
-        Block block = blockService.getBlock(blockHash).getData();
-        if (null == block) {
-            sendNotFound(blockHash, fromNode);
-        }
-        SmallBlockMessage smallBlockMessage = new SmallBlockMessage();
-        SmallBlock smallBlock = new SmallBlock();
-        smallBlock.setHeader(block.getHeader());
-        smallBlock.setTxHashList(block.getTxHashList());
-        for (Transaction tx : block.getTxs()) {
-            if (tx.isSystemTx()) {
-                smallBlock.addBaseTx(tx);
+        SmallBlock smallBlock = cacheManager.getSmallBlock(blockHash);
+        if (null == smallBlock) {
+            Block block = blockService.getBlock(blockHash).getData();
+            if (null == block) {
+                sendNotFound(blockHash, fromNode);
+                return;
+            }
+            smallBlock = new SmallBlock();
+            smallBlock.setHeader(block.getHeader());
+            smallBlock.setTxHashList(block.getTxHashList());
+            for (Transaction tx : block.getTxs()) {
+                if (tx.isSystemTx()) {
+                    smallBlock.addBaseTx(tx);
+                }
             }
         }
+        SmallBlockMessage smallBlockMessage = new SmallBlockMessage();
         smallBlockMessage.setMsgBody(smallBlock);
         messageBusService.sendToNode(smallBlockMessage, fromNode, true);
     }

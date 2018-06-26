@@ -29,6 +29,7 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
@@ -45,6 +46,7 @@ public class GetTxMessageHandler extends AbstractMessageHandler<GetTxMessage> {
 
     private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     @Override
     public void onMessage(GetTxMessage message, Node fromNode) {
@@ -53,8 +55,13 @@ public class GetTxMessageHandler extends AbstractMessageHandler<GetTxMessage> {
         }
         Transaction tx = cacheManager.getTx(message.getMsgBody());
         if (null == tx) {
-            sendNotFound(message.getMsgBody(), fromNode);
+            tx = ledgerService.getTx(message.getMsgBody());
         }
+        if (null == tx) {
+            sendNotFound(message.getMsgBody(), fromNode);
+            return;
+        }
+
         TransactionMessage txMessage = new TransactionMessage();
         txMessage.setMsgBody(tx);
         messageBusService.sendToNode(txMessage, fromNode, true);
