@@ -105,7 +105,7 @@ public class Address {
     }
 
     public static Address fromHashs(String address) throws Exception {
-        byte[] bytes = Base58.decode(address);
+        byte[] bytes = AddressTool.getAddress(address);
         return fromHashs(bytes);
     }
 
