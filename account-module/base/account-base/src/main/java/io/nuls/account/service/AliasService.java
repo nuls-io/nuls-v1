@@ -30,7 +30,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Account;
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.account.model.Alias;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.po.AliasPo;
@@ -48,12 +48,14 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.protocol.service.TransactionService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -99,7 +101,7 @@ public class AliasService {
      * @return txhash
      */
     public Result<String> setAlias(String addr, String aliasName, String password) {
-        if (!Address.validAddress(addr)) {
+        if (!AddressTool.validAddress(addr)) {
             Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Account account = accountService.getAccount(addr).getData();
@@ -120,7 +122,7 @@ public class AliasService {
         if (!isAliasUsable(aliasName)) {
             return Result.getFailed(AccountErrorCode.ALIAS_EXIST);
         }
-        byte[] addressBytes = account.getAddress().getBase58Bytes();
+        byte[] addressBytes = account.getAddress().getAddressBytes();
         try {
             //创建一笔设置别名的交易
             AliasTransaction tx = new AliasTransaction();
@@ -223,7 +225,7 @@ public class AliasService {
     public Result rollbackAlias(AliasPo aliasPo) throws NulsException {
         try {
             AliasPo po = aliasStorageService.getAlias(aliasPo.getAlias()).getData();
-            if (po != null && Base58.encode(po.getAddress()).equals(Base58.encode(aliasPo.getAddress()))) {
+            if (po != null && Arrays.equals(po.getAddress(), aliasPo.getAddress())) {
                 aliasStorageService.removeAlias(aliasPo.getAlias());
                 Result<AccountPo> rs = accountStorageService.getAccount(aliasPo.getAddress());
                 if (rs.isSuccess()) {

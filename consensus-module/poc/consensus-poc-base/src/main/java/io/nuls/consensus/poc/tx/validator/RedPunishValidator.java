@@ -41,6 +41,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
@@ -69,7 +70,7 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
     @Override
     public ValidateResult validate(RedPunishTransaction data) {
         RedPunishData punishData = data.getTxData();
-        if (ConsensusConfig.getSeedNodeStringList().contains(Base58.encode(punishData.getAddress()))) {
+        if (ConsensusConfig.getSeedNodeStringList().contains(AddressTool.getStringAddressByBytes(punishData.getAddress()))) {
             return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
         }
         if (punishData.getReasonCode() == PunishReasonEnum.DOUBLE_SPEND.getCode()) {

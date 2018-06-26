@@ -26,6 +26,7 @@ package io.nuls.protocol.model.tx;
 
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.model.TransactionLogicData;
@@ -49,13 +50,12 @@ public class TransferTransaction extends Transaction {
         super(type);
     }
 
+    //todo 看不懂
     @Override
     public String getInfo(byte[] address) {
         boolean isTransfer = false;
-        byte[] addressOwner = new byte[AddressTool.HASH_LENGTH];
         Coin to = coinData.getTo().get(0);
-        System.arraycopy(to.getOwner(), 0, addressOwner, 0, AddressTool.HASH_LENGTH);
-        if (!Arrays.equals(address, addressOwner)) {
+        if (!Arrays.equals(address, to.getOwner())) {
             isTransfer = true;
         }
         if (isTransfer) {

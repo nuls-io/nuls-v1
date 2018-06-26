@@ -70,7 +70,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
 
     @Override
     public Result transfer(String address, String toAddress, String password, long amount, String remark) {
-        if (!Address.validAddress(address) || !Address.validAddress(toAddress)) {
+        if (!AddressTool.validAddress(address) || !AddressTool.validAddress(toAddress)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (!StringUtils.validPassword(password)) {
@@ -111,7 +111,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
 
     @Override
     public Result getBalance(String address) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Result result = restFul.get("/accountledger/balance/" + address, null);
@@ -178,7 +178,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
             OutputDto outputDto = outputs.get(i);
             Coin to = new Coin();
             try {
-                to.setOwner(Base58.decode(outputDto.getAddress()));
+                to.setOwner(AddressTool.getAddress(outputDto.getAddress()));
             } catch (Exception e) {
                 return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
             }
@@ -242,7 +242,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         if (StringUtils.isBlank(txHex)) {
             return Result.getFailed("txHex error");
         }
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed("address error");
         }
 

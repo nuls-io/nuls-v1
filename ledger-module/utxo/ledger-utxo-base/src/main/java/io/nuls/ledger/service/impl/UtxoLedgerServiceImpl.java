@@ -234,23 +234,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return getTx(digestData);
     }
 
-    private boolean checkPublicKeyHash(byte[] address, byte[] pubKeyHash) {
-
-        if (address == null || pubKeyHash == null) {
-            return false;
-        }
-        int pubKeyHashLength = pubKeyHash.length;
-        if (address.length != AddressTool.HASH_LENGTH || pubKeyHashLength != 20) {
-            return false;
-        }
-        for (int i = 0; i < pubKeyHashLength; i++) {
-            if (pubKeyHash[i] != address[i + 2]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     /**
      * 此txList是待打包的块中的交易，所以toList是下一步的UTXO，应该校验它
      * coinData的交易和txList同处一个块中，txList中的to可能是coinData的from，
@@ -328,7 +311,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 } else {
                     fromAdressBytes = fromOfFromCoin.getOwner();
                     // 验证地址中的公钥hash160和交易中的公钥hash160是否相等，不相等则说明这笔utxo不属于交易发出者
-                    if (transaction.needVerifySignature() && !checkPublicKeyHash(fromAdressBytes, user)) {
+                    if (transaction.needVerifySignature() && !AddressTool.checkPublicKeyHash(fromAdressBytes, user)) {
                         Log.warn("public key hash160 check error.");
                         return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_INPUT);
                     }
@@ -380,7 +363,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 toTotal = toTotal.add(to.getNa());
 
                 if (temporaryToMap != null) {
-                    temporaryToMap.put(asString(ArraysTool.joinintTogether(txBytes, new VarInt(i).encode())), to);
+                    temporaryToMap.put(asString(ArraysTool.concatenate(txBytes, new VarInt(i).encode())), to);
                 }
             }
             // 验证输出不能大于输入

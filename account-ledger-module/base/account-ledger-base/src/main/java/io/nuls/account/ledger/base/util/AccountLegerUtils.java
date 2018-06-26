@@ -57,7 +57,7 @@ public class AccountLegerUtils {
         }
 
         for (Account account : localAccountList) {
-            if (Arrays.equals(account.getAddress().getBase58Bytes(), address)) {
+            if (Arrays.equals(account.getAddress().getAddressBytes(), address)) {
                 return true;
             }
         }
@@ -72,7 +72,7 @@ public class AccountLegerUtils {
         }
         List<byte[]> destAddresses = new ArrayList<>();
         for (Account account : localAccountList) {
-            destAddresses.add(account.getAddress().getBase58Bytes());
+            destAddresses.add(account.getAddress().getAddressBytes());
         }
 
         return destAddresses;
@@ -89,7 +89,7 @@ public class AccountLegerUtils {
         }
         List<byte[]> destAddresses = new ArrayList<>();
         for (Account account : localAccountList) {
-            destAddresses.add(account.getAddress().getBase58Bytes());
+            destAddresses.add(account.getAddress().getAddressBytes());
         }
 
         return getRelatedAddresses(tx, destAddresses);

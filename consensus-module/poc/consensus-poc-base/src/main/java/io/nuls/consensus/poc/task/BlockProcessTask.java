@@ -35,12 +35,15 @@ import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Transaction;
+import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.service.DownloadService;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
- *
  * @author ln
  * @date 2018/4/13
  */
@@ -50,6 +53,10 @@ public class BlockProcessTask implements Runnable {
 
     private BlockProcess blockProcess;
     private BlockQueueProvider blockQueueProvider = BlockQueueProvider.getInstance();
+
+    private boolean first = true;
+
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     public BlockProcessTask(BlockProcess blockProcess) {
         this.blockProcess = blockProcess;
@@ -69,13 +76,28 @@ public class BlockProcessTask implements Runnable {
 
     private void doTask() {
         //wait consensus ready running
-        if(ConsensusStatusContext.getConsensusStatus().ordinal() <= ConsensusStatus.LOADING_CACHE.ordinal()) {
+        if (ConsensusStatusContext.getConsensusStatus().ordinal() <= ConsensusStatus.LOADING_CACHE.ordinal()) {
             return;
         }
-
         BlockContainer blockContainer;
-        while((blockContainer = blockQueueProvider.get()) != null) {
+        while ((blockContainer = blockQueueProvider.get()) != null) {
             try {
+                if (first) {
+                    List<Transaction> txList = blockContainer.getBlock().getTxs();
+                    for (int index = txList.size()-1; index >=0; index--) {
+                        Transaction tx = blockContainer.getBlock().getTxs().get(index);
+                        Transaction _tx = ledgerService.getTx(tx.getHash());
+                        if (null == _tx) {
+                            continue;
+                        }
+                        try {
+                            ledgerService.rollbackTx(tx);
+                        } catch (NulsException e) {
+                            Log.error(e);
+                        }
+                    }
+                    first = false;
+                }
                 long time = System.currentTimeMillis();
                 blockProcess.addBlock(blockContainer);
                 Log.info("add 区块 " + blockContainer.getBlock().getHeader().getHeight() + " 耗时 " + (System.currentTimeMillis() - time) + " ms , tx count : " + blockContainer.getBlock().getHeader().getTxCount());
@@ -86,7 +108,7 @@ public class BlockProcessTask implements Runnable {
 
         // The system starts up. The local height and the network height are the same. When the block is not to be downloaded, the system needs to know and set the consensus status to running.
         // 系统启动，本地高度和网络高度一致，不需要下载区块时，系统需要知道并设置共识状态为运行中
-        if(downloadService.isDownloadSuccess().isSuccess() && ConsensusStatusContext.getConsensusStatus() == ConsensusStatus.WAIT_RUNNING &&
+        if (downloadService.isDownloadSuccess().isSuccess() && ConsensusStatusContext.getConsensusStatus() == ConsensusStatus.WAIT_RUNNING &&
                 (blockContainer == null || blockContainer.getStatus() == BlockContainerStatus.RECEIVED)) {
             ConsensusStatusContext.setConsensusStatus(ConsensusStatus.RUNNING);
         }

@@ -25,6 +25,8 @@
 
 package io.nuls.core.tools.array;
 
+import java.util.Arrays;
+
 /**
  * @author: Niels Wang
  * @date: 2018/5/13
@@ -37,7 +39,7 @@ public class ArraysTool {
      * @param arrays 想要拼接的数组集合、A collection of arrays that you want to concatenate.
      * @return 拼接结果、 the result of the Joining together
      */
-    public static final byte[] joinintTogether(byte[]... arrays) {
+    public static final byte[] concatenate(byte[]... arrays) {
         int length = 0;
         for (byte[] array : arrays) {
             length += array.length;
@@ -53,5 +55,9 @@ public class ArraysTool {
 
     public static final boolean isEmptyOrNull(byte[] bytes) {
         return (bytes == null || bytes.length == 0);
+    }
+
+    public static boolean arrayEquals(byte[] array1, byte[] array2) {
+        return Arrays.equals(array1, array2);
     }
 }

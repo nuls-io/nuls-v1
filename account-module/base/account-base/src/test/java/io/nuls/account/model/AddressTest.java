@@ -25,9 +25,7 @@
 
 package io.nuls.account.model;
 
-import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.ECKey;
-import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
 import org.junit.Test;
@@ -64,7 +62,7 @@ public class AddressTest {
         byte[] base58bytes = new byte[23];
         System.arraycopy(body, 0, base58bytes, 0, body.length);
         base58bytes[body.length] = xor;
-        return Base58.encode(base58bytes);
+        return AddressTool.getStringAddressByBytes(base58bytes);
     }
 
 

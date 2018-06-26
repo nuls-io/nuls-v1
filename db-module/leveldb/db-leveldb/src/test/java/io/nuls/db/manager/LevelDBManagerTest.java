@@ -29,6 +29,7 @@ import io.nuls.db.model.Entry;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
+import io.nuls.kernel.utils.AddressTool;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.junit.After;
 import org.junit.Assert;
@@ -69,7 +70,7 @@ public class LevelDBManagerTest {
         for (byte[] bytes : valueList) {
             coin = new Coin();
             coin.parse(bytes,0);
-            strAddress = Base58.encode(coin.getOwner());
+            strAddress = AddressTool.getStringAddressByBytes(coin.getOwner());
             balance = balanceMap.get(strAddress);
             if(balance == null) {
                 balance = Na.ZERO;

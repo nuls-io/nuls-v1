@@ -27,7 +27,7 @@ package io.nuls.account.validator;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.account.model.Alias;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
@@ -74,18 +74,18 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
     @Override
     public ValidateResult validate(AliasTransaction tx) {
         Alias alias = tx.getTxData();
-        if(!aliasService.isAliasUsable(alias.getAlias())){
+        if (!aliasService.isAliasUsable(alias.getAlias())) {
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_EXIST);
         }
         List<AliasPo> list = aliasStorageService.getAliasList().getData();
         for (AliasPo aliasPo : list) {
-            if (Base58.encode(aliasPo.getAddress()).equals(Base58.encode(alias.getAddress()))) {
+            if (Arrays.equals(aliasPo.getAddress(), alias.getAddress())) {
                 return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
             }
         }
-        if (!Address.validAddress(alias.getAddress())) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
-        }
+//        if (!AddressTool.validAddress(alias.getAddress())) {
+//            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
+//        }
         if (!StringUtils.validAlias(alias.getAlias())) {
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_FORMAT_WRONG);
         }
@@ -102,7 +102,7 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
         }
         P2PKHScriptSig sig = new P2PKHScriptSig();
         try {
-            sig.parse(tx.getScriptSig(),0);
+            sig.parse(tx.getScriptSig(), 0);
         } catch (NulsException e) {
             Log.error(e);
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());

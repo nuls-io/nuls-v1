@@ -25,7 +25,7 @@
 
 package io.nuls.consensus.poc.rpc.model;
 
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
@@ -33,6 +33,7 @@ import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.utils.AddressTool;
 
 import java.io.UnsupportedEncodingException;
 
@@ -68,7 +69,7 @@ public class DepositDTO {
     public DepositDTO(Deposit deposit) {
         this.deposit = deposit.getDeposit().getValue();
         this.agentHash = deposit.getAgentHash().getDigestHex();
-        this.address = Base58.encode(deposit.getAddress());
+        this.address = AddressTool.getStringAddressByBytes(deposit.getAddress());
         this.time = deposit.getTime();
         this.txHash = deposit.getTxHash().getDigestHex();
         this.blockHeight = deposit.getBlockHeight();
@@ -79,7 +80,7 @@ public class DepositDTO {
     public DepositDTO(Deposit deposit, Agent agent) {
         this(deposit);
         if (agent != null) {
-            this.agentAddress = Base58.encode(agent.getAgentAddress());
+            this.agentAddress = AddressTool.getStringAddressByBytes(agent.getAgentAddress());
             this.agentName = PoConvertUtil.getAgentId(agent.getTxHash());
         }
     }

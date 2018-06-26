@@ -29,26 +29,22 @@
  */
 package io.nuls.accout.ledger.rpc;
 
-import com.sun.org.apache.regexp.internal.RE;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.base.service.LocalUtxoService;
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.account.model.Account;
-import io.nuls.account.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.accout.ledger.rpc.dto.*;
-import io.nuls.accout.ledger.rpc.form.TransactionHexForm;
 import io.nuls.accout.ledger.rpc.form.TransactionForm;
+import io.nuls.accout.ledger.rpc.form.TransactionHexForm;
 import io.nuls.accout.ledger.rpc.form.TransferFeeForm;
 import io.nuls.accout.ledger.rpc.form.TransferForm;
 import io.nuls.accout.ledger.rpc.util.UtxoDtoComparator;
 import io.nuls.core.tools.crypto.AESEncrypt;
-import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Exception.CryptoException;
 import io.nuls.core.tools.crypto.Hex;
@@ -56,7 +52,6 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.TxStatusEnum;
@@ -113,11 +108,11 @@ public class AccountLedgerResource {
                                       @PathParam("address") String address) {
         byte[] addressBytes = null;
         try {
-            addressBytes = Base58.decode(address);
+            addressBytes = AddressTool.getAddress(address);
         } catch (Exception e) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        if (addressBytes.length != AddressTool.HASH_LENGTH) {
+        if (addressBytes.length != Address.ADDRESS_LENGTH) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
 
@@ -146,10 +141,10 @@ public class AccountLedgerResource {
         if (form == null) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        if (!Address.validAddress(form.getAddress())) {
+        if (!AddressTool.validAddress(form.getAddress())) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        if (!Address.validAddress(form.getToAddress())) {
+        if (!AddressTool.validAddress(form.getToAddress())) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if (form.getAmount() <= 0) {
@@ -184,10 +179,10 @@ public class AccountLedgerResource {
         if (form == null) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        if (!Address.validAddress(form.getAddress())) {
+        if (!AddressTool.validAddress(form.getAddress())) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        if (!Address.validAddress(form.getToAddress())) {
+        if (!AddressTool.validAddress(form.getToAddress())) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if (form.getAmount() <= 0) {
@@ -233,7 +228,7 @@ public class AccountLedgerResource {
             OutputDto outputDto = form.getOutputs().get(i);
             Coin to = new Coin();
             try {
-                to.setOwner(Base58.decode(outputDto.getAddress()));
+                to.setOwner(AddressTool.getAddress(outputDto.getAddress()));
             } catch (Exception e) {
                 return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
             }
@@ -281,7 +276,7 @@ public class AccountLedgerResource {
         if (StringUtils.isBlank(form.getTxHex())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        if (!Address.validAddress(form.getAddress())) {
+        if (!AddressTool.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
 
@@ -331,7 +326,7 @@ public class AccountLedgerResource {
                     return Result.getFailed(LedgerErrorCode.UTXO_NOT_FOUND).toRpcClientResult();
                 }
 
-                if (!form.getAddress().equals(Base58.encode(utxo.getOwner()))) {
+                if (!form.getAddress().equals(AddressTool.getStringAddressByBytes(utxo.getOwner()))) {
                     return Result.getFailed(LedgerErrorCode.INVALID_INPUT).toRpcClientResult();
                 }
 
@@ -410,7 +405,7 @@ public class AccountLedgerResource {
         Result dtoResult = Result.getSuccess();
 
         try {
-            addressBytes = Base58.decode(address.trim());
+            addressBytes = AddressTool.getAddress(address.trim());
         } catch (Exception e) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
@@ -493,7 +488,7 @@ public class AccountLedgerResource {
         Result dtoResult = new Result<>();
 
         try {
-            addressBytes = Base58.decode(address);
+            addressBytes = AddressTool.getAddress(address);
         } catch (Exception e) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
@@ -595,9 +590,6 @@ public class AccountLedgerResource {
 
     /**
      * 获取未确认的交易
-     *
-     * @param hash
-     * @return
      */
     private Result getUnconfirmedTx(String hash) {
         Result result = null;
@@ -707,9 +699,6 @@ public class AccountLedgerResource {
 
     /**
      * 获取已确认的交易
-     *
-     * @param hash
-     * @return
      */
     private Result getConfirmedTx(String hash) {
         Result result = null;
@@ -816,8 +805,6 @@ public class AccountLedgerResource {
     /**
      * 计算交易实际发生的金额
      * Calculate the actual amount of the transaction.
-     *
-     * @param txDto
      */
     private void calTransactionValue(TransactionDto txDto) {
         if (txDto == null) {

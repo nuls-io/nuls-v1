@@ -105,7 +105,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result backupAccount(String address, String path, String password) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
@@ -132,10 +132,6 @@ public class AccountServiceImpl implements AccountService {
     /**
      * 导出文件
      * Export file
-     *
-     * @param path
-     * @param accountKeyStoreDto
-     * @return
      */
     private Result backUpFile(String path, AccountKeyStoreDto accountKeyStoreDto) {
         File backupFile = new File(path);
@@ -179,7 +175,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result getAliasFee(String address, String alias) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (!StringUtils.validAlias(alias)) {
@@ -194,14 +190,14 @@ public class AccountServiceImpl implements AccountService {
         }
         Map<String, Object> map = (Map) result.getData();
         Double nuls = Na.naToNuls(map.get("value"));
-        map.put("value",nuls);
+        map.put("value", nuls);
         return result.setData(map);
     }
 
 
     @Override
     public Result getAccount(String address) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Result result = restFul.get("/account/" + address, null);
@@ -229,7 +225,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result getAssets(String address) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Result result = restFul.get("/account/assets/" + address, null);
@@ -253,7 +249,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result getPrikey(String address, String password) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
@@ -342,9 +338,6 @@ public class AccountServiceImpl implements AccountService {
     /**
      * 根据文件地址获取AccountKeystoreDto对象
      * Gets the AccountKeystoreDto object based on the file address
-     *
-     * @param fileReader
-     * @return
      */
     private Result getAccountKeystoreDto(FileReader fileReader) {
         StringBuilder ks = new StringBuilder();
@@ -399,7 +392,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result isEncrypted(String address) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Result result = restFul.get("/account/encrypted/" + address, null);
@@ -408,7 +401,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result lockAccount(String address) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Result result = restFul.post("/account/lock/" + address, "");
@@ -417,7 +410,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result unlockAccount(String address, String password, int unlockTime) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
@@ -435,7 +428,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result removeAccount(String address, String password) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
@@ -454,7 +447,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result setPassword(String address, String password) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (!StringUtils.validPassword(password)) {
@@ -468,7 +461,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result resetPassword(String address, String password, String newPassword) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (!StringUtils.validPassword(password)) {
@@ -486,7 +479,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result setPasswordOffline(String address, String priKey, String password) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isBlank(priKey)) {
@@ -500,7 +493,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result resetPasswordOffline(String address, String encryptedPriKey, String password, String newPassword) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isBlank(encryptedPriKey)) {
@@ -527,7 +520,7 @@ public class AccountServiceImpl implements AccountService {
         Account account;
         try {
             account = AccountTool.createAccount(prikey);
-            if (!address.equals(account.getAddress().getBase58())) {
+            if (!address.equals(AddressTool.getStringAddressByBytes(account.getAddress().getAddressBytes()))) {
                 return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
             }
             account.encrypt(password);
@@ -581,6 +574,7 @@ public class AccountServiceImpl implements AccountService {
             e.printStackTrace();
         }
     }
+
     /**
      * ---------------------------------------------------------------------
      */
@@ -604,7 +598,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result setAlias(String address, String alias, String password) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (!StringUtils.validAlias(alias)) {

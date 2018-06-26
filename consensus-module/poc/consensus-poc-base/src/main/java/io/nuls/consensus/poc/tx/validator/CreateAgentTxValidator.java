@@ -67,9 +67,9 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
         if (null == agent) {
             return ValidateResult.getFailedResult(getClass().getName(), KernelErrorCode.DATA_NOT_FOUND);
         }
-        if (!AddressTool.validAddress(agent.getAgentAddress()) || !AddressTool.validAddress(agent.getRewardAddress()) || !AddressTool.validAddress(agent.getPackingAddress())) {
-            return ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
-        }
+//        if (!AddressTool.validAddress(agent.getAgentAddress()) || !AddressTool.validAddress(agent.getRewardAddress()) || !AddressTool.validAddress(agent.getPackingAddress())) {
+//            return ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
+//        }
         if (Arrays.equals(agent.getAgentAddress(), agent.getPackingAddress()) || Arrays.equals(agent.getRewardAddress(), agent.getPackingAddress())) {
             return ValidateResult.getFailedResult(getClass().getName(), KernelErrorCode.DATA_ERROR);
         }
@@ -111,7 +111,7 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
             if (coin.getLockTime() == PocConsensusConstant.CONSENSUS_LOCK_TIME) {
                 lockCount++;
             }
-            addressSet.add(Base58.encode(AddressTool.getAddress(coin.getOwner())));
+            addressSet.add(AddressTool.getStringAddressByBytes(coin.getOwner()));
         }
         if (lockCount > 1) {
             return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.DEPOSIT_ERROR);

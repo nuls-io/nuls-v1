@@ -27,6 +27,7 @@ package io.nuls.ledger.rpc.model;
 
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.ledger.util.LedgerUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -49,7 +50,7 @@ public class InputDto {
     public InputDto(Coin input) {
         this.fromHash = LedgerUtil.getTxHash(input.getOwner());
         this.fromIndex = LedgerUtil.getIndex(input.getOwner());
-        this.address = Base58.encode(input.getFrom().getOwner());
+        this.address = AddressTool.getStringAddressByBytes(input.getFrom().getOwner());
         this.value = input.getFrom().getNa().getValue();
     }
 

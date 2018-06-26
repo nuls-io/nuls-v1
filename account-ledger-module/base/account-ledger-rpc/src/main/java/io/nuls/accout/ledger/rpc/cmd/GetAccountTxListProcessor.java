@@ -25,9 +25,10 @@
 
 package io.nuls.accout.ledger.rpc.cmd;
 
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.kernel.model.RpcClientResult;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.core.tools.str.StringUtils;
@@ -79,7 +80,7 @@ public class GetAccountTxListProcessor implements CommandProcessor {
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (!Address.validAddress(args[1])) {
+        if (!AddressTool.validAddress(args[1])) {
             return false;
         }
         if (!StringUtils.isNumeric(args[2]) || !StringUtils.isNumeric(args[3])) {

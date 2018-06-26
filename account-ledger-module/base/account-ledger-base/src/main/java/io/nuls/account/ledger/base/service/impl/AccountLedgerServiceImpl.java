@@ -38,7 +38,7 @@ import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.ledger.storage.po.TransactionInfoPo;
 import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
 import io.nuls.account.model.Account;
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.core.tools.crypto.Base58;
@@ -374,7 +374,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result<Balance> getBalance(byte[] address) throws NulsException {
-        if (address == null || address.length != AddressTool.HASH_LENGTH) {
+        if (address == null || address.length != Address.ADDRESS_LENGTH) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
 
@@ -417,7 +417,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 if (!coin.usable()) {
                     continue;
                 }
-                if(coin.getNa().equals(Na.ZERO)){
+                if (coin.getNa().equals(Na.ZERO)) {
                     continue;
                 }
                 coins.add(coin);
@@ -656,13 +656,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
      */
     @Override
     public Result importLedgerByAddress(String address) {
-        if (address == null || !Address.validAddress(address)) {
+        if (address == null || !AddressTool.validAddress(address)) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
 
         byte[] addressBytes = null;
         try {
-            addressBytes = Base58.decode(address);
+            addressBytes = AddressTool.getAddress(address);
         } catch (Exception e) {
             return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
         }
@@ -712,10 +712,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     protected Result<Integer> importConfirmedTransaction(Transaction tx, byte[] address) {
-
-        if (!AddressTool.validAddress(address)) {
-            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
-        }
 
         if (!AccountLegerUtils.isTxRelatedToAddress(tx, address)) {
             return Result.getSuccess().setData(new Integer(0));

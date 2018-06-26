@@ -142,7 +142,7 @@ public class DepositTxValidator extends BaseConsensusProtocolValidator<DepositTr
             if (coin.getLockTime() == PocConsensusConstant.CONSENSUS_LOCK_TIME) {
                 lockCount++;
             }
-            addressSet.add(Base58.encode(AddressTool.getAddress(coin.getOwner())));
+            addressSet.add(AddressTool.getStringAddressByBytes(coin.getOwner()));
         }
         if (lockCount > 1) {
             return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.DEPOSIT_ERROR);

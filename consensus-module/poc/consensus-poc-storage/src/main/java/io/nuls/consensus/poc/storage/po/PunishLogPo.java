@@ -28,12 +28,12 @@ package io.nuls.consensus.poc.storage.po;
 
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.utils.*;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 
 /**
  * @author Niels
@@ -66,7 +66,7 @@ public class PunishLogPo extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.type = byteBuffer.readByte();
-        this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.time = byteBuffer.readUint48();
         this.height = byteBuffer.readVarInt();
         this.roundIndex = byteBuffer.readVarInt();
@@ -78,7 +78,7 @@ public class PunishLogPo extends BaseNulsData {
     public int size() {
         int size = 0;
         size += 1;
-        size += AddressTool.HASH_LENGTH;
+        size += Address.ADDRESS_LENGTH;
         size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfVarInt(height);
         size += SerializeUtils.sizeOfVarInt(roundIndex);
@@ -136,7 +136,7 @@ public class PunishLogPo extends BaseNulsData {
     }
 
     public byte[] getKey() {
-        return ArraysTool.joinintTogether(address, new byte[]{type}, SerializeUtils.uint64ToByteArray(height), new VarInt(index).encode());
+        return ArraysTool.concatenate(address, new byte[]{type}, SerializeUtils.uint64ToByteArray(height), new VarInt(index).encode());
     }
 
     @Override

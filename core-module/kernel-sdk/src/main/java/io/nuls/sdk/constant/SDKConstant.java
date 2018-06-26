@@ -14,7 +14,7 @@ public interface SDKConstant {
      * and the current address begins with "Ns".16402.
      */
     short DEFAULT_CHAIN_ID = 1;
-
+    byte DEFAULT_ADDRESS_TYPE = 0;
     /**
      * 空值占位符
      * Null placeholder.

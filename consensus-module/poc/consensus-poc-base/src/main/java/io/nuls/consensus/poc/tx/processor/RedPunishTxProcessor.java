@@ -26,15 +26,11 @@
 package io.nuls.consensus.poc.tx.processor;
 
 import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PunishType;
-import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
-import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
-import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
@@ -45,7 +41,6 @@ import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.TransactionErrorCode;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -215,7 +210,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
      * 获取固定格式的key
      */
     private byte[] getPoKey(byte[] address, byte type, long blockHeight) {
-        return ArraysTool.joinintTogether(address, new byte[]{type}, SerializeUtils.uint64ToByteArray(blockHeight));
+        return ArraysTool.concatenate(address, new byte[]{type}, SerializeUtils.uint64ToByteArray(blockHeight));
     }
 
     @Override

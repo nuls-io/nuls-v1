@@ -51,6 +51,7 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
@@ -403,7 +404,7 @@ public class ChainContainer implements Cloneable {
                     item = currentRound.getPreRound().getMemberByAgentAddress(address);
                 }
                 if (item.getCreditVal() <= PocConsensusConstant.RED_PUNISH_CREDIT_VAL) {
-                    punishAddress.add(Base58.encode(item.getAgent().getAgentAddress()));
+                    punishAddress.add(AddressTool.getStringAddressByBytes(item.getAgent().getAgentAddress()));
                 }
             }
             if (punishAddress.size() != redPunishTxList.size()) {
@@ -411,7 +412,7 @@ public class ChainContainer implements Cloneable {
                 return false;
             }
             for (RedPunishTransaction redTx : redPunishTxList) {
-                if (!punishAddress.contains(Base58.encode(redTx.getTxData().getAddress()))) {
+                if (!punishAddress.contains(AddressTool.getStringAddressByBytes(redTx.getTxData().getAddress()))) {
                     BlockLog.debug("There is a wrong red punish tx!"+ block.getHeader().getHash());
                     return false;
                 }

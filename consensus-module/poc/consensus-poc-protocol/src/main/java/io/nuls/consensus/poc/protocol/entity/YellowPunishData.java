@@ -25,6 +25,7 @@
 package io.nuls.consensus.poc.protocol.entity;
 
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.TransactionLogicData;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
@@ -78,7 +79,7 @@ public class YellowPunishData extends TransactionLogicData {
         int count = (int) byteBuffer.readVarInt();
         addressList.clear();
         for (int i = 0; i < count; i++) {
-            addressList.add(byteBuffer.readBytes(AddressTool.HASH_LENGTH));
+            addressList.add(byteBuffer.readBytes(Address.ADDRESS_LENGTH));
         }
 
     }
@@ -87,7 +88,7 @@ public class YellowPunishData extends TransactionLogicData {
     public int size() {
         int size = SerializeUtils.sizeOfVarInt(addressList.size());
         for (byte[] address : addressList) {
-            size += AddressTool.HASH_LENGTH;
+            size += Address.ADDRESS_LENGTH;
         }
         return size;
     }

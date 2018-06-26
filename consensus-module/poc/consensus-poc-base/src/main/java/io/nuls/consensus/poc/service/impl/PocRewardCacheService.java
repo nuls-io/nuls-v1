@@ -39,6 +39,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
@@ -100,7 +101,7 @@ public class PocRewardCacheService {
         }
         //本地账户的历史收益累计
         for (Account account : accountList) {
-            List<TransactionInfo> list = accountLedgerService.getTxInfoList(account.getAddress().getBase58Bytes()).getData();
+            List<TransactionInfo> list = accountLedgerService.getTxInfoList(account.getAddress().getAddressBytes()).getData();
             if (list == null || list.isEmpty()) {
                 continue;
             }
@@ -113,13 +114,7 @@ public class PocRewardCacheService {
     }
 
     private void calcRewardHistory(String address, List<TransactionInfo> list, long startHeight) {
-        byte[] addressByte = new byte[0];
-        try {
-            addressByte = Base58.decode(address);
-        } catch (Exception e) {
-            Log.error(e);
-            return;
-        }
+        byte[] addressByte = AddressTool.getAddress(address);
         for (TransactionInfo info : list) {
             if (info.getTxType() != ProtocolConstant.TX_TYPE_COINBASE) {
                 continue;
@@ -173,7 +168,7 @@ public class PocRewardCacheService {
 
 
     private void addRewardItem(long height, long time, Coin coin, long startTime) {
-        String address = Base58.encode(coin.getOwner());
+        String address = AddressTool.getStringAddressByBytes(coin.getOwner());
         Map<Long, RewardItem> map = todayRewardMap.get(address);
         if (null == map) {
             map = new HashMap<>();
@@ -208,7 +203,7 @@ public class PocRewardCacheService {
         CoinBaseTransaction tx = (CoinBaseTransaction) block.getTxs().get(0);
         if (null != tx.getCoinData().getTo() && !tx.getCoinData().getTo().isEmpty()) {
             for (Coin coin : tx.getCoinData().getTo()) {
-                String address = Base58.encode(coin.getOwner());
+                String address = AddressTool.getStringAddressByBytes(coin.getOwner());
                 Map<Long, RewardItem> map = todayRewardMap.get(address);
                 if (null == map) {
                     continue;

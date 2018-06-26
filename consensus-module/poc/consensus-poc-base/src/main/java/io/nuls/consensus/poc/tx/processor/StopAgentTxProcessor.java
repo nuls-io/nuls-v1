@@ -48,6 +48,7 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.TransactionProcessor;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 
@@ -141,7 +142,7 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
         for (Transaction tx : txList) {
             if (tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
                 RedPunishTransaction transaction = (RedPunishTransaction) tx;
-                addressSet.add(Base58.encode(transaction.getTxData().getAddress()));
+                addressSet.add(AddressTool.getStringAddressByBytes(transaction.getTxData().getAddress()));
             } else if (tx.getType() == ConsensusConstant.TX_TYPE_STOP_AGENT) {
                 StopAgentTransaction transaction = (StopAgentTransaction) tx;
                 if (!hashSet.add(transaction.getTxData().getCreateTxHash())) {
@@ -158,7 +159,7 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
                     }
                     transaction.getTxData().setAddress(agentTransaction.getTxData().getAgentAddress());
                 }
-                if (addressSet.contains(Base58.encode(transaction.getTxData().getAddress()))) {
+                if (addressSet.contains(AddressTool.getStringAddressByBytes(transaction.getTxData().getAddress()))) {
                     ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_STOPPED);
                     result.setData(transaction);
                     return result;

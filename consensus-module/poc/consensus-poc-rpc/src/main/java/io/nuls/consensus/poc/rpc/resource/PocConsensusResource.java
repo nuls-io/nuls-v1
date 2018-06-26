@@ -29,7 +29,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Account;
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.account.service.AccountService;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.context.PocConsensusContext;
@@ -161,7 +161,7 @@ public class PocConsensusResource {
     public RpcClientResult getInfo(@ApiParam(name = "address", value = "钱包账户地", required = true)
                                    @PathParam("address") String address) {
 
-        if (!Address.validAddress(StringUtils.formatStringPara(address))) {
+        if (!AddressTool.validAddress(StringUtils.formatStringPara(address))) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         Result accountResult = accountService.getAccount(address);
@@ -347,7 +347,7 @@ public class PocConsensusResource {
         for (int index = 0; index < transaction.getCoinData().getTo().size(); index++) {
             Coin coin = transaction.getCoinData().getTo().get(index);
             if (coin.getLockTime() == -1L && coin.getNa().equals(agent.getDeposit())) {
-                coin.setOwner(ArraysTool.joinintTogether(transaction.getHash().serialize(), new VarInt(index).encode()));
+                coin.setOwner(ArraysTool.concatenate(transaction.getHash().serialize(), new VarInt(index).encode()));
                 fromList.add(coin);
                 break;
             }
@@ -541,7 +541,7 @@ public class PocConsensusResource {
             if (a.getDelHeight() > 0) {
                 continue;
             }
-            if (Arrays.equals(a.getAgentAddress(), account.getAddress().getBase58Bytes())) {
+            if (Arrays.equals(a.getAgentAddress(), account.getAddress().getAddressBytes())) {
                 agent = a;
                 break;
             }
@@ -603,8 +603,8 @@ public class PocConsensusResource {
                 agentList.remove(i);
             } else if (StringUtils.isNotBlank(keyword)) {
                 keyword = keyword.toUpperCase();
-                String agentAddress = Base58.encode(agent.getAgentAddress()).toUpperCase();
-                String packingAddress = Base58.encode(agent.getPackingAddress()).toUpperCase();
+                String agentAddress = AddressTool.getStringAddressByBytes(agent.getAgentAddress()).toUpperCase();
+                String packingAddress = AddressTool.getStringAddressByBytes(agent.getPackingAddress()).toUpperCase();
                 String agentId = PoConvertUtil.getAgentId(agent.getTxHash()).toUpperCase();
                 String alias = accountService.getAlias(agent.getAgentAddress()).getData();
                 boolean b = agentId.indexOf(keyword) >= 0;
@@ -668,7 +668,7 @@ public class PocConsensusResource {
                 continue;
             }
             total = total.add(deposit.getDeposit());
-            memberSet.add(Base58.encode(deposit.getAddress()));
+            memberSet.add(AddressTool.getStringAddressByBytes(deposit.getAddress()));
         }
         agent.setMemberCount(memberSet.size());
         agent.setTotalDeposit(total.getValue());
@@ -963,7 +963,7 @@ public class PocConsensusResource {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         AssertUtil.canNotEmpty(form.getAddress());
-        if (!Address.validAddress(form.getAddress())) {
+        if (!AddressTool.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         Account account = accountService.getAccount(form.getAddress()).getData();
@@ -999,7 +999,7 @@ public class PocConsensusResource {
         for (int index = 0; index < depositTransaction.getCoinData().getTo().size(); index++) {
             Coin coin = depositTransaction.getCoinData().getTo().get(index);
             if (coin.getLockTime() == -1L && coin.getNa().equals(depositTransaction.getTxData().getDeposit())) {
-                coin.setOwner(ArraysTool.joinintTogether(hash.serialize(), new VarInt(index).encode()));
+                coin.setOwner(ArraysTool.concatenate(hash.serialize(), new VarInt(index).encode()));
                 fromList.add(coin);
                 break;
             }
@@ -1037,7 +1037,7 @@ public class PocConsensusResource {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         AssertUtil.canNotEmpty(address);
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         Account account = accountService.getAccount(address).getData();
@@ -1062,7 +1062,7 @@ public class PocConsensusResource {
         for (int index = 0; index < depositTransaction.getCoinData().getTo().size(); index++) {
             Coin coin = depositTransaction.getCoinData().getTo().get(index);
             if (coin.getLockTime() == -1L && coin.getNa().equals(depositTransaction.getTxData().getDeposit())) {
-                coin.setOwner(ArraysTool.joinintTogether(hash.serialize(), new VarInt(index).encode()));
+                coin.setOwner(ArraysTool.concatenate(hash.serialize(), new VarInt(index).encode()));
                 fromList.add(coin);
                 break;
             }

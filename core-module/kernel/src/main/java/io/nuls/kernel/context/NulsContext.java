@@ -49,6 +49,12 @@ public class NulsContext {
      */
     public static short DEFAULT_CHAIN_ID = 1;
 
+    /**
+     * 默认的地址类型，一条链可以包含几种地址类型，地址类型包含在地址中
+     * The default address type, a chain can contain several address types, and the address type is contained in the address.
+     */
+    public static byte DEFAULT_ADDRESS_TYPE = 0;
+
     /*
      *  chain name
      */

@@ -31,6 +31,7 @@ import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 
 import java.util.List;
@@ -48,7 +49,7 @@ public class YellowPunishValidator extends BaseConsensusProtocolValidator<Yellow
         }
         List<byte[]> list = data.getTxData().getAddressList();
         for (byte[] address : list) {
-            if (ConsensusConfig.getSeedNodeStringList().contains(Base58.encode(address))) {
+            if (ConsensusConfig.getSeedNodeStringList().contains(AddressTool.getStringAddressByBytes(address))) {
                 return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.ADDRESS_IS_CONSENSUS_SEED);
             }
         }

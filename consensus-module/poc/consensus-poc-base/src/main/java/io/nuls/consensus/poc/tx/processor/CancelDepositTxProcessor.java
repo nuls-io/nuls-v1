@@ -45,6 +45,7 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.TransactionProcessor;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 
@@ -123,7 +124,7 @@ public class CancelDepositTxProcessor implements TransactionProcessor<CancelDepo
         for (Transaction tx : txList) {
             if (tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
                 RedPunishTransaction transaction = (RedPunishTransaction) tx;
-                addressSet.add(Base58.encode(transaction.getTxData().getAddress()));
+                addressSet.add(AddressTool.getStringAddressByBytes(transaction.getTxData().getAddress()));
             } else if (tx.getType() == ConsensusConstant.TX_TYPE_STOP_AGENT) {
                 StopAgentTransaction transaction = (StopAgentTransaction) tx;
                 agentHashSet.add(transaction.getTxData().getCreateTxHash());
@@ -143,7 +144,7 @@ public class CancelDepositTxProcessor implements TransactionProcessor<CancelDepo
                 if (null == agentPo) {
                     return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_NOT_EXIST);
                 }
-                if (addressSet.contains(Base58.encode(agentPo.getAgentAddress()))) {
+                if (addressSet.contains(AddressTool.getStringAddressByBytes(agentPo.getAgentAddress()))) {
                     return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_PUNISHED);
                 }
             }

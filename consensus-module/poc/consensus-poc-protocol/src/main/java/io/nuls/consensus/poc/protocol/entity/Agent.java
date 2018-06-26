@@ -29,6 +29,7 @@ import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.TransactionLogicData;
@@ -93,9 +94,9 @@ public class Agent extends TransactionLogicData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readInt64());
-        this.agentAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
-        this.packingAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
-        this.rewardAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.agentAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+        this.packingAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+        this.rewardAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.commissionRate = byteBuffer.readDouble();
     }
 

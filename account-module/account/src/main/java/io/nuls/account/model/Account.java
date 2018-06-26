@@ -29,6 +29,7 @@ import io.nuls.core.tools.crypto.Exception.CryptoException;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
@@ -229,7 +230,7 @@ public class Account extends BaseNulsData {
 
     @Override
     public int size() {
-        int s = SerializeUtils.sizeOfBytes(address.calcBase58bytes());
+        int s = Address.ADDRESS_LENGTH;
         s += SerializeUtils.sizeOfString(alias);
         s += SerializeUtils.sizeOfBytes(encryptedPriKey);
         s += SerializeUtils.sizeOfBytes(pubKey);
@@ -240,7 +241,7 @@ public class Account extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeBytesWithLength(address.calcBase58bytes());
+        stream.write(address.getAddressBytes());
         stream.writeString(alias);
         stream.writeBytesWithLength(encryptedPriKey);
         stream.writeBytesWithLength(pubKey);
@@ -250,7 +251,7 @@ public class Account extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        address = Address.fromHashs(byteBuffer.readByLengthByte());
+        address = Address.fromHashs(byteBuffer.readBytes(Address.ADDRESS_LENGTH));
         alias = new String(byteBuffer.readByLengthByte());
         encryptedPriKey = byteBuffer.readByLengthByte();
         pubKey = byteBuffer.readByLengthByte();

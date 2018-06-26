@@ -27,7 +27,9 @@ package io.nuls.accout.ledger.rpc.dto;
 
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
 import io.nuls.core.tools.crypto.Base58;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.utils.AddressTool;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -53,7 +55,7 @@ public class InputDto {
     public InputDto(Coin input) {
         this.fromHash = AccountLegerUtils.getTxHash(input.getOwner());
         this.fromIndex = AccountLegerUtils.getIndex(input.getOwner());
-        this.address = Base58.encode(input.getFrom().getOwner());
+        this.address = AddressTool.getStringAddressByBytes(input.getFrom().getOwner());
         this.value = input.getFrom().getNa().getValue();
     }
 
