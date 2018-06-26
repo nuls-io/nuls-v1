@@ -114,7 +114,7 @@ public class ClientResource {
         }
         URL url = ClientResource.class.getClassLoader().getResource("libs");
         if (null == url) {
-            return Result.getFailed().toRpcClientResult();
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND).toRpcClientResult();
         }
 
         UpgradeThread thread = UpgradeThread.getInstance();
