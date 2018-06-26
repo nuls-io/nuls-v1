@@ -93,6 +93,10 @@ public class TransferProcessor implements CommandProcessor {
                 break;
             }
             TransferForm form = getTransferForm(args);
+            if(null == form){
+                result = false;
+                break;
+            }
             paramsData.set(form);
             result = StringUtils.isNotBlank(form.getToAddress());
             if (!result) {
