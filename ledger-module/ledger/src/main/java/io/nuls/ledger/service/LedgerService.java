@@ -111,6 +111,9 @@ public interface LedgerService {
     ValidateResult<List<Transaction>> verifyDoubleSpend(List<Transaction> txList);
 
     /**
+     * 弃用的方法
+     * Deprecated method
+     *
      * Unlock the coindata of a transaction. When certain business scenarios require a certain amount of funds to be locked, an action is unlocked at some point in the future, the method is called, and the lock state changes to the spent state.
      * The specific operation is to determine whether the from data in the coindata is -1, if it is not then return failure, if it is deleted, and then write the new to the input pool does not spend
      *
@@ -119,15 +122,20 @@ public interface LedgerService {
      * @param tx
      * @return boolean
      */
+    @Deprecated
     Result unlockTxCoinData(Transaction tx, long newockTime) throws NulsException;
 
     /**
+     * 弃用的方法
+     * Deprecated method
+     *
      * rollback unlockTxCoinData
      *
      * 回滚unlockTxCoinData
      * @param tx
      * @return boolean
      */
+    @Deprecated
     Result rollbackUnlockTxCoinData(Transaction tx) throws NulsException;
 
     /**
