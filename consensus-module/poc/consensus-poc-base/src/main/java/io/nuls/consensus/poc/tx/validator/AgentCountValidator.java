@@ -25,6 +25,7 @@
 
 package io.nuls.consensus.poc.tx.validator;
 
+import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.consensus.poc.storage.po.AgentPo;
@@ -76,11 +77,11 @@ public class AgentCountValidator implements NulsDataValidator<CreateAgentTransac
             }
             boolean b = set.add(Hex.encode(agent.getAgentAddress()));
             if (!b) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
+                return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_EXIST);
             }
             b = set.add(Hex.encode(agent.getPackingAddress()));
             if (!b) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
+                return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_PACKING_EXIST);
             }
         }
         return result;

@@ -58,6 +58,7 @@ public interface PocConsensusErrorCode {
     ErrorCode ADDRESS_IS_CONSENSUS_SEED = ErrorCode.init("cs021","70021");
     ErrorCode TRANSACTIONS_NEVER_DOUBLE_SPEND = ErrorCode.init("cs022","70022");
     ErrorCode WRONG_RED_PUNISH_REASON = ErrorCode.init("cs023","70023");
+    ErrorCode AGENT_PACKING_EXIST = ErrorCode.init("cs024","70024");
 
 
 }
