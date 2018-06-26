@@ -45,8 +45,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class ForwardSmallBlockHandler extends AbstractMessageHandler<ForwardSmallBlockMessage> {
 
-    private static final InventoryFilter inventoryFilter = new InventoryFilter();
-
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
     @Override
@@ -55,6 +53,7 @@ public class ForwardSmallBlockHandler extends AbstractMessageHandler<ForwardSmal
             return;
         }
         NulsDigestData hash = message.getMsgBody();
+        InventoryFilter inventoryFilter = ProtocolCacheHandler.SMALL_BLOCK_FILTER;
         boolean constains = inventoryFilter.contains(hash.getDigestBytes());
         if (constains) {
             return;

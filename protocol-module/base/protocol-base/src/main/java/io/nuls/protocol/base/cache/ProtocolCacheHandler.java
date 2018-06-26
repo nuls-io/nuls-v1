@@ -28,6 +28,7 @@ package io.nuls.protocol.base.cache;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.SerializeUtils;
+import io.nuls.protocol.base.utils.filter.InventoryFilter;
 import io.nuls.protocol.constant.MessageDataType;
 import io.nuls.protocol.model.BlockHashResponse;
 import io.nuls.protocol.model.CompleteParam;
@@ -43,6 +44,9 @@ import java.util.concurrent.Future;
  */
 public class ProtocolCacheHandler {
 
+    public static final InventoryFilter TX_FILTER = new InventoryFilter();
+    public static final InventoryFilter SMALL_BLOCK_FILTER = new InventoryFilter();
+
     private static DataCacher<Block> blockCacher = new DataCacher<>(MessageDataType.BLOCK);
     private static DataCacher<TxGroup> txGroupCacher = new DataCacher<>(MessageDataType.TRANSACTIONS);
     private static DataCacher<BlockHashResponse> blockHashesCacher = new DataCacher<>(MessageDataType.HASHES);
@@ -56,7 +60,9 @@ public class ProtocolCacheHandler {
     }
 
     public static void receiveTx(NulsDigestData txHash) {
+        TX_FILTER.insert(txHash.getDigestBytes());
         txCacher.callback(txHash, true);
+
     }
 
     public static void removeTxFuture(NulsDigestData txHash) {
@@ -68,6 +74,7 @@ public class ProtocolCacheHandler {
     }
 
     public static void receiveSmallBlock(NulsDigestData blockHash) {
+        SMALL_BLOCK_FILTER.insert(blockHash.getDigestBytes());
         smallBlockCacher.callback(blockHash, true);
     }
 

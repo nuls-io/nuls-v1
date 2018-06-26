@@ -44,8 +44,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMessage> {
 
-    private static final InventoryFilter inventoryFilter = new InventoryFilter();
-
     private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
 
     @Override
@@ -54,6 +52,7 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
             return;
         }
         NulsDigestData hash = message.getMsgBody();
+        InventoryFilter inventoryFilter = ProtocolCacheHandler.TX_FILTER;
         boolean constains = inventoryFilter.contains(hash.getDigestBytes());
         if (constains) {
             return;
@@ -75,7 +74,7 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
         } catch (Exception e) {
             Log.warn("get small block failed:" + hash.getDigestHex(), e);
             return;
-        }finally {
+        } finally {
             ProtocolCacheHandler.removeTxFuture(hash);
         }
         if (complete) {
