@@ -36,9 +36,9 @@ import io.nuls.protocol.constant.ProtocolConstant;
  * @author Niels
  * @date 2017/11/13
  */
-public class GetTransactionMessage extends BaseProtocolMessage<NulsDigestData> {
+public class GetTxMessage extends BaseProtocolMessage<NulsDigestData> {
 
-    public GetTransactionMessage() {
+    public GetTxMessage() {
         super(ProtocolConstant.PROTOCOL_GET_TRANSACTION);
     }
 

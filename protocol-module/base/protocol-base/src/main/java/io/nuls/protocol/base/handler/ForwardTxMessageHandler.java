@@ -33,8 +33,7 @@ import io.nuls.protocol.base.cache.ProtocolCacheHandler;
 import io.nuls.protocol.base.utils.filter.InventoryFilter;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.message.ForwardTxMessage;
-import io.nuls.protocol.message.GetSmallBlockMessage;
-import io.nuls.protocol.message.GetTransactionMessage;
+import io.nuls.protocol.message.GetTxMessage;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -62,8 +61,8 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
 
         //todo 某个条件下清空过滤器
 
-        GetTransactionMessage getTransactionMessage = new GetTransactionMessage();
-        getTransactionMessage.setMsgBody(hash);
+        GetTxMessage getTxMessage = new GetTxMessage();
+        getTxMessage.setMsgBody(hash);
         CompletableFuture<Boolean> future = ProtocolCacheHandler.addGetTxRequest(hash);
         Result result = messageBusService.sendToNode(message, fromNode, false);
         if (result.isFailed()) {

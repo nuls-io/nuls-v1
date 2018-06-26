@@ -41,13 +41,13 @@ import io.nuls.protocol.model.NotFound;
  * @author facjas
  * @date 2017/11/16
  */
-public class GetTxMessageHandler extends AbstractMessageHandler<GetTransactionMessage> {
+public class GetTxMessageHandler extends AbstractMessageHandler<GetTxMessage> {
 
     private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
     @Override
-    public void onMessage(GetTransactionMessage message, Node fromNode) {
+    public void onMessage(GetTxMessage message, Node fromNode) {
         if (message == null || fromNode == null || null == message.getMsgBody()) {
             return;
         }

@@ -34,7 +34,6 @@ import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.kernel.utils.TransactionManager;
-import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.constant.NetworkConstant;
@@ -113,6 +112,11 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         messageBusService.subscribeMessage(SmallBlockMessage.class, new SmallBlockHandler());
         messageBusService.subscribeMessage(CompleteMessage.class, new CompleteHandler());
         messageBusService.subscribeMessage(ReactMessage.class, new ReactMessageHandler());
+
+        messageBusService.subscribeMessage(GetTxMessage.class, new GetTxMessageHandler());
+        messageBusService.subscribeMessage(GetSmallBlockMessage.class, new GetSmallBlockHandler());
+        messageBusService.subscribeMessage(ForwardSmallBlockMessage.class, new ForwardSmallBlockHandler());
+        messageBusService.subscribeMessage(ForwardTxMessage.class, new ForwardTxMessageHandler());
     }
 
     @Override
