@@ -38,6 +38,7 @@ import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.utils.AddressTool;
 
@@ -89,9 +90,9 @@ public class TransactionInfoServiceImpl implements TransactionInfoService {
 
         try {
             for (int i = 0; i < addresses.size(); i++) {
-                byte[] infoKey = new byte[AddressTool.HASH_LENGTH + infoPo.getTxHash().size()];
-                System.arraycopy(addresses.get(i), 0, infoKey, 0, AddressTool.HASH_LENGTH);
-                System.arraycopy(infoPo.getTxHash().serialize(), 0, infoKey, AddressTool.HASH_LENGTH, infoPo.getTxHash().size());
+                byte[] infoKey = new byte[Address.ADDRESS_LENGTH + infoPo.getTxHash().size()];
+                System.arraycopy(addresses.get(i), 0, infoKey, 0, Address.ADDRESS_LENGTH);
+                System.arraycopy(infoPo.getTxHash().serialize(), 0, infoKey, Address.ADDRESS_LENGTH, infoPo.getTxHash().size());
                 transactionInfoStorageService.saveTransactionInfo(infoKey, infoPo);
                 savedKeyList.add(infoKey);
             }
@@ -122,18 +123,18 @@ public class TransactionInfoServiceImpl implements TransactionInfoService {
         }
 
         byte[] addresses = infoPo.getAddresses();
-        if (addresses.length % AddressTool.HASH_LENGTH != 0) {
+        if (addresses.length % Address.ADDRESS_LENGTH != 0) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
 
-        int addressCount = addresses.length / AddressTool.HASH_LENGTH;
+        int addressCount = addresses.length / Address.ADDRESS_LENGTH;
 
         for (int i = 0; i < addressCount; i++) {
 
-            byte[] infoKey = new byte[AddressTool.HASH_LENGTH + infoPo.getTxHash().size()];
-            System.arraycopy(addresses, i * AddressTool.HASH_LENGTH, infoKey, 0, AddressTool.HASH_LENGTH);
+            byte[] infoKey = new byte[Address.ADDRESS_LENGTH + infoPo.getTxHash().size()];
+            System.arraycopy(addresses, i * Address.ADDRESS_LENGTH, infoKey, 0, Address.ADDRESS_LENGTH);
             try {
-                System.arraycopy(infoPo.getTxHash().serialize(), 0, infoKey, AddressTool.HASH_LENGTH, infoPo.getTxHash().size());
+                System.arraycopy(infoPo.getTxHash().serialize(), 0, infoKey, Address.ADDRESS_LENGTH, infoPo.getTxHash().size());
             } catch (IOException e) {
                 Log.info(e.getMessage());
             }

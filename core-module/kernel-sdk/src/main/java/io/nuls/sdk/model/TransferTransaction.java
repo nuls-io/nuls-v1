@@ -49,10 +49,9 @@ public class TransferTransaction extends Transaction {
     @Override
     public String getInfo(byte[] address) {
         boolean isTransfer = false;
-        byte[] addressOwner = new byte[AddressTool.HASH_LENGTH];
+        //todo
         Coin to = coinData.getTo().get(0);
-        System.arraycopy(to.getOwner(), 0, addressOwner, 0, AddressTool.HASH_LENGTH);
-        if (!Arrays.equals(address, addressOwner)) {
+        if (!Arrays.equals(address, to.getOwner())) {
             isTransfer = true;
         }
         if (isTransfer) {

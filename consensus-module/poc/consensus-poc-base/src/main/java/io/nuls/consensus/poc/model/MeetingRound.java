@@ -26,7 +26,7 @@
 package io.nuls.consensus.poc.model;
 
 import io.nuls.account.model.Account;
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -158,7 +158,7 @@ public class MeetingRound {
             if(account.isEncrypted()) {
                 continue;
             }
-            MeetingMember member = getMember(account.getAddress().getBase58Bytes());
+            MeetingMember member = getMember(account.getAddress().getAddressBytes());
             if (null != member) {
                 this.localPacker = account;
                 myMember = member;

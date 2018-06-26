@@ -27,6 +27,7 @@
 package io.nuls.consensus.poc.storage.po;
 
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
@@ -80,9 +81,9 @@ public class AgentPo extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.hash = byteBuffer.readHash();
-        this.agentAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
-        this.packingAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
-        this.rewardAddress = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.agentAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+        this.packingAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+        this.rewardAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.deposit = Na.valueOf(byteBuffer.readInt64());
         this.commissionRate = byteBuffer.readDouble();
         this.time = byteBuffer.readUint48();
@@ -93,7 +94,7 @@ public class AgentPo extends BaseNulsData {
     @Override
     public int size() {
         int size = SerializeUtils.sizeOfNulsData(hash);
-        size += AddressTool.HASH_LENGTH * 3;
+        size += Address.ADDRESS_LENGTH * 3;
         size += SerializeUtils.sizeOfInt64();
         size += SerializeUtils.sizeOfDouble(commissionRate);
         size += SerializeUtils.sizeOfUint48();

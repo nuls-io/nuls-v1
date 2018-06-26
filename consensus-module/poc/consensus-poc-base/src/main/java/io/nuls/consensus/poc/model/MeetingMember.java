@@ -28,7 +28,6 @@ package io.nuls.consensus.poc.model;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.core.tools.array.ArraysTool;
-import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.crypto.Sha256Hash;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
@@ -72,7 +71,7 @@ public class MeetingMember implements Comparable<MeetingMember> {
 
     public String getSortValue() {
         if (this.sortValue == null) {
-            byte[] hash = ArraysTool.joinintTogether(packingAddress, SerializeUtils.uint64ToByteArray(roundStartTime));
+            byte[] hash = ArraysTool.concatenate(packingAddress, SerializeUtils.uint64ToByteArray(roundStartTime));
             sortValue = Sha256Hash.twiceOf(hash).toString();
         }
         return sortValue;

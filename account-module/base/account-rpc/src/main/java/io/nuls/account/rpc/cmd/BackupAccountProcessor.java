@@ -26,7 +26,7 @@
 package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.account.rpc.model.AccountKeyStoreDto;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
@@ -35,6 +35,7 @@ import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.utils.RestFulUtils;
@@ -81,7 +82,7 @@ public class BackupAccountProcessor implements CommandProcessor {
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (!Address.validAddress(args[1])) {
+        if (!AddressTool.validAddress(args[1])) {
             return false;
         }
         return true;

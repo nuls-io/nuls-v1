@@ -28,7 +28,6 @@ package io.nuls.consensus.poc.util;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
 import io.nuls.account.service.AccountService;
-import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.model.BlockData;
@@ -41,8 +40,6 @@ import io.nuls.consensus.poc.protocol.entity.YellowPunishData;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
-import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
-import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.consensus.poc.storage.service.DepositStorageService;
 import io.nuls.core.tools.array.ArraysTool;
@@ -56,9 +53,9 @@ import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
-import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 
@@ -299,7 +296,7 @@ public class ConsensusTool {
         for (int index = 0; index < transaction.getCoinData().getTo().size(); index++) {
             Coin coin = transaction.getCoinData().getTo().get(index);
             if (coin.getNa().equals(agent.getDeposit()) && coin.getLockTime() == -1L) {
-                coin.setOwner(ArraysTool.joinintTogether(transaction.getHash().serialize(), new VarInt(index).encode()));
+                coin.setOwner(ArraysTool.concatenate(transaction.getHash().serialize(), new VarInt(index).encode()));
                 fromList.add(coin);
                 break;
             }
@@ -325,12 +322,12 @@ public class ConsensusTool {
                 if (!coin.getNa().equals(deposit.getDeposit()) || coin.getLockTime() != -1L) {
                     continue;
                 }
-                fromCoin = new Coin(ArraysTool.joinintTogether(dtx.getHash().serialize(), new VarInt(0).encode()), coin.getNa(), coin.getLockTime());
+                fromCoin = new Coin(ArraysTool.concatenate(dtx.getHash().serialize(), new VarInt(0).encode()), coin.getNa(), coin.getLockTime());
                 fromCoin.setLockTime(-1L);
                 fromList.add(fromCoin);
                 break;
             }
-            String address = Base58.encode(deposit.getAddress());
+            String address = AddressTool.getStringAddressByBytes(deposit.getAddress());
             Coin coin = toMap.get(address);
             if (null == coin) {
                 coin = new Coin(deposit.getAddress(), deposit.getDeposit(), 0);

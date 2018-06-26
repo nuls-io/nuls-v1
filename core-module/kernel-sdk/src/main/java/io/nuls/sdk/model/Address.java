@@ -28,11 +28,12 @@ package io.nuls.sdk.model;
 import io.nuls.sdk.constant.KernelErrorCode;
 import io.nuls.sdk.constant.SDKConstant;
 import io.nuls.sdk.crypto.Base58;
-import io.nuls.sdk.crypto.Hex;
 import io.nuls.sdk.exception.NulsRuntimeException;
 import io.nuls.sdk.utils.AddressTool;
 import io.nuls.sdk.utils.Log;
 import io.nuls.sdk.utils.SerializeUtils;
+
+import java.util.Arrays;
 
 /**
  * @author: Chralie
@@ -40,10 +41,11 @@ import io.nuls.sdk.utils.SerializeUtils;
  */
 public class Address {
 
+
     /**
-     *  hash length
+     * hash length
      */
-    private static final int HASH_LENGTH = 23;
+    public static final int ADDRESS_LENGTH = 23;
 
     /**
      * RIPEMD160 length
@@ -53,8 +55,12 @@ public class Address {
     /**
      * chain id
      */
-
     private short chainId = SDKConstant.DEFAULT_CHAIN_ID;
+
+    /**
+     * address type
+     */
+    private byte addressType;
 
     /**
      * hash160 of public key
@@ -62,48 +68,41 @@ public class Address {
     protected byte[] hash160;
 
     /**
-     *
      * @param address bytes
      */
 
-    protected byte[] base58Bytes;
+    protected byte[] addressBytes;
 
     /**
      * @param address
      */
     public Address(String address) {
         try {
-            byte[] bytes = Base58.decode(address);
+            byte[] bytes = AddressTool.getAddress(address);
 
             Address addressTmp = Address.fromHashs(bytes);
             this.chainId = addressTmp.getChainId();
+            this.addressType = addressTmp.getAddressType();
             this.hash160 = addressTmp.getHash160();
-            this.base58Bytes = calcBase58bytes();
+            this.addressBytes = calcAddressbytes();
         } catch (Exception e) {
             Log.error(e);
         }
     }
 
-    public Address(short chainId, byte[] hash160) {
+    public Address(short chainId, byte addressType, byte[] hash160) {
         this.chainId = chainId;
+        this.addressType = addressType;
         this.hash160 = hash160;
-        this.base58Bytes = calcBase58bytes();
+        this.addressBytes = calcAddressbytes();
     }
 
     public byte[] getHash160() {
         return hash160;
     }
 
-    @Override
-    public String toString() {
-        return getBase58();
-    }
-
     public short getChainId() {
         return chainId;
-    }
-    public String getBase58() {
-        return Base58.encode(calcBase58bytes());
     }
 
     public static Address fromHashs(String address) throws Exception {
@@ -112,66 +111,66 @@ public class Address {
     }
 
     public static Address fromHashs(byte[] hashs) {
-        if (hashs == null || hashs.length != HASH_LENGTH) {
+        if (hashs == null || hashs.length != ADDRESS_LENGTH) {
             throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
 
         short chainId = SerializeUtils.bytes2Short(hashs);
+        byte addressType = hashs[2];
         byte[] content = new byte[LENGTH];
-        System.arraycopy(hashs, 2, content, 0, LENGTH);
+        System.arraycopy(hashs, 3, content, 0, LENGTH);
 
-        Address address = new Address(chainId, content);
-        AddressTool.checkXOR(address.calcBase58bytes());
+        Address address = new Address(chainId, addressType, content);
         return address;
     }
 
-    public byte[] calcBase58bytes() {
-        byte[] body = new byte[22];
+    public byte[] calcAddressbytes() {
+        byte[] body = new byte[ADDRESS_LENGTH];
         System.arraycopy(SerializeUtils.shortToBytes(chainId), 0, body, 0, 2);
-        System.arraycopy(hash160, 0, body, 2, hash160.length);
-        byte xor = getXor(body);
-        byte[] base58bytes = new byte[23];
-        System.arraycopy(body, 0, base58bytes, 0, body.length);
-        base58bytes[body.length] = xor;
-        return base58bytes;
-    }
-
-    protected byte getXor(byte[] body) {
-
-        byte xor = 0x00;
-        for (int i = 0; i < body.length; i++) {
-            xor ^= body[i];
-        }
-
-        return xor;
-    }
-
-    public static boolean validAddress(String address) {
-        return AddressTool.validAddress(address);
-    }
-    public static boolean validAddress(byte[] address) {
-        return AddressTool.validAddress(address);
+        body[2] = this.addressType;
+        System.arraycopy(hash160, 0, body, 3, hash160.length);
+        return body;
     }
 
     @Override
     public boolean equals(Object obj) {
-        Address other = (Address) obj;
-        return this.getBase58().equals(other.getBase58());
+        if (obj == null) {
+            return false;
+        }
+        if (obj instanceof Address) {
+            Address other = (Address) obj;
+            return Arrays.equals(this.addressBytes, other.getAddressBytes());
+        }
+        return false;
     }
 
-    public String hashHex() {
-        return Hex.encode(calcBase58bytes());
+    public byte[] getAddressBytes() {
+        return addressBytes;
     }
 
-    public byte[] getBase58Bytes() {
-        return base58Bytes;
+    public void setAddressBytes(byte[] addressBytes) {
+        this.addressBytes = addressBytes;
     }
 
-    public void setBase58Bytes(byte[] base58Bytes) {
-        this.base58Bytes = base58Bytes;
+    public byte getAddressType() {
+        return addressType;
+    }
+
+    public void setAddressType(byte addressType) {
+        this.addressType = addressType;
     }
 
     public static int size() {
-        return HASH_LENGTH;
+        return ADDRESS_LENGTH;
     }
+
+    public String getBase58() {
+        return AddressTool.getStringAddressByBytes(this.addressBytes);
+    }
+
+    @Override
+    public String toString() {
+        return AddressTool.getStringAddressByBytes(this.addressBytes);
+    }
+
 }

@@ -27,6 +27,7 @@ package io.nuls.ledger.rpc.model;
 
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.utils.AddressTool;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -53,7 +54,7 @@ public class OutputDto {
     private Integer status;
 
     public OutputDto(Coin output) {
-        this.address = Base58.encode(output.getOwner());
+        this.address = AddressTool.getStringAddressByBytes(output.getOwner());
         this.value = output.getNa().getValue();
         this.lockTime = output.getLockTime();
     }

@@ -26,6 +26,7 @@
 package io.nuls.consensus.poc.storage.po;
 
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
@@ -69,7 +70,7 @@ public class DepositPo extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.deposit = Na.valueOf(byteBuffer.readInt64());
         this.agentHash = byteBuffer.readHash();
-        this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.time = byteBuffer.readUint48();
         this.txHash = byteBuffer.readHash();
         this.blockHeight = byteBuffer.readVarInt();

@@ -33,6 +33,7 @@ import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
+import io.nuls.kernel.utils.AddressTool;
 
 import java.util.HashSet;
 import java.util.List;
@@ -57,7 +58,7 @@ public class BlockMonitorProcess {
         int count = 0;
         Set<String> addressSet = new HashSet<>();
         for (Block block : blockList) {
-            addressSet.add(Base58.encode(block.getHeader().getPackingAddress()));
+            addressSet.add(AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
             count++;
             if (count > 10) {
                 break;

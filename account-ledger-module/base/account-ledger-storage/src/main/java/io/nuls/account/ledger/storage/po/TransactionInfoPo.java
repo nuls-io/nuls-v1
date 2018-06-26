@@ -27,6 +27,7 @@ package io.nuls.account.ledger.storage.po;
 
 import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
@@ -66,9 +67,9 @@ public class TransactionInfoPo extends BaseNulsData {
         this.time = tx.getTime();
         List<byte[]> addressList = tx.getAllRelativeAddress();
 
-        byte[] addresses = new byte[addressList.size() * AddressTool.HASH_LENGTH];
+        byte[] addresses = new byte[addressList.size() * Address.ADDRESS_LENGTH];
         for (int i = 0; i < addressList.size(); i++) {
-            System.arraycopy(addressList.get(i), 0, addresses, AddressTool.HASH_LENGTH* i, AddressTool.HASH_LENGTH);
+            System.arraycopy(addressList.get(i), 0, addresses, Address.ADDRESS_LENGTH* i, Address.ADDRESS_LENGTH);
         }
         this.addresses = addresses;
         this.txType = tx.getType();

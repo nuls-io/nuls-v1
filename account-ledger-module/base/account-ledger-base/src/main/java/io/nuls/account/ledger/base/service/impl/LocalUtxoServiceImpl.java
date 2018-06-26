@@ -81,11 +81,11 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
 
-        for(byte[] addresses : addressesList) {
-            if (!AddressTool.validAddress(addresses)) {
-                return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
-            }
-        }
+//        for(byte[] addresses : addressesList) {
+//            if (!AddressTool.validAddress(addresses)) {
+//                return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+//            }
+//        }
 
         CoinData coinData = tx.getCoinData();
 
@@ -172,7 +172,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 }
 
                 try {
-                    outKey = ArraysTool.joinintTogether(txHashBytes, new VarInt(i).encode());
+                    outKey = ArraysTool.concatenate(txHashBytes, new VarInt(i).encode());
                     toList.add(new Entry<>(outKey, to.serialize()));
                 } catch (IOException e) {
                     Log.error(e);
@@ -203,7 +203,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     if(!AccountLegerUtils.isLocalAccount(tos.get(i).getOwner())) {
                         continue;
                     }
-                    outKey = ArraysTool.joinintTogether(tx.getHash().serialize(), new VarInt(i).encode());
+                    outKey = ArraysTool.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
                     toList.add(outKey);
                 } catch (IOException e) {
                     throw new NulsRuntimeException(e);
@@ -281,7 +281,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     Coin needUnLockUtxoNew = new Coin(to.getOwner(), to.getNa(), newLockTime);
                     needUnLockUtxoNew.setFrom(to.getFrom());
                     try {
-                        byte[] outKey = ArraysTool.joinintTogether(tx.getHash().serialize(), new VarInt(i).encode());
+                        byte[] outKey = ArraysTool.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
                         saveUTXO(outKey, needUnLockUtxoNew.serialize());
                         addresses.add(to.getOwner());
                     } catch (IOException e) {
@@ -306,7 +306,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                 Coin to = tos.get(i);
                 if (to.getLockTime() == -1L) {
                     try {
-                        byte[] outKey = ArraysTool.joinintTogether(tx.getHash().serialize(), new VarInt(i).encode());
+                        byte[] outKey = ArraysTool.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
                         saveUTXO(outKey, to.serialize());
                         addresses.add(to.getOwner());
                     } catch (IOException e) {

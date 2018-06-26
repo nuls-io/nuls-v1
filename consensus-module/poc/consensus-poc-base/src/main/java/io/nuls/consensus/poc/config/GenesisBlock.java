@@ -24,7 +24,7 @@
  */
 package io.nuls.consensus.poc.config;
 
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.account.service.AccountService;
 import io.nuls.consensus.poc.model.BlockRoundData;
 import io.nuls.core.tools.crypto.ECKey;
@@ -128,7 +128,7 @@ public final class GenesisBlock extends Block {
 
             Address ads = Address.fromHashs(address);
 
-            Coin coin = new Coin(ads.getBase58Bytes(), Na.parseNuls(nuls), height == null ? 0 : height.longValue());
+            Coin coin = new Coin(ads.getAddressBytes(), Na.parseNuls(nuls), height == null ? 0 : height.longValue());
             coinData.addTo(coin);
         }
 

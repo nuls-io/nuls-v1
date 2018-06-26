@@ -25,9 +25,8 @@
 
 package io.nuls.account.model;
 
-import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.ECKey;
-import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
 import org.junit.Test;
@@ -40,14 +39,12 @@ public class AddressTest {
 
     @Test
     public void test() {
-        final short chainId = 16402;
+        //short chainId = 8964;
+        short chainId = 1;
         while (true) {
             ECKey ecKey = new ECKey();
             String address = getAddress(chainId, ecKey.getPubKey());
-//            if (address.endsWith("Niels") || address.endsWith("Charlie")|| address.endsWith("Pierre")) {
-            if (address.toUpperCase().endsWith("HOLE".toUpperCase())) {
                 System.out.println(address + ":::::::" + ecKey.getPrivateKeyAsHex());
-            }
         }
     }
 
@@ -57,14 +54,8 @@ public class AddressTest {
             return null;
         }
         byte[] hash160 = SerializeUtils.sha256hash160(publicKey);
-        byte[] body = new byte[22];
-        System.arraycopy(SerializeUtils.shortToBytes(chainId), 0, body, 0, 2);
-        System.arraycopy(hash160, 0, body, 2, hash160.length);
-        byte xor = getXor(body);
-        byte[] base58bytes = new byte[23];
-        System.arraycopy(body, 0, base58bytes, 0, body.length);
-        base58bytes[body.length] = xor;
-        return Base58.encode(base58bytes);
+        Address address = new Address(chainId, (byte) 1, hash160);
+        return address.getBase58();
     }
 
 

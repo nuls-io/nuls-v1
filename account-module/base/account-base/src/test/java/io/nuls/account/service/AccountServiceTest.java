@@ -131,7 +131,7 @@ public class AccountServiceTest {
         assertNotNull(acc1);
         assertEquals(acc1.getAddress().toString(), account.getAddress().toString());
 
-        Account acc2 = accountService.getAccount(account.getAddress().getBase58Bytes()).getData();
+        Account acc2 = accountService.getAccount(account.getAddress().getAddressBytes()).getData();
         assertNotNull(acc2);
         assertEquals(acc2.getAddress().toString(), account.getAddress().toString());
     }

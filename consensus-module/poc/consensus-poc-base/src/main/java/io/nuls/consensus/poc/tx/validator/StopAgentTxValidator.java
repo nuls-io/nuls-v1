@@ -124,7 +124,7 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
             if (deposit.getAgentHash() == null) {
                 continue;
             }
-            String address = Base58.encode(deposit.getAddress());
+            String address = AddressTool.getStringAddressByBytes(deposit.getAddress());
             Na na = verifyToMap.get(address);
             if (null == na) {
                 na = deposit.getDeposit();
@@ -142,7 +142,7 @@ public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransact
         Na ownToCoin = ownDeposit.getDeposit().subtract(data.getFee());
         long ownLockTime = 0L;
         for (Coin coin : data.getCoinData().getTo()) {
-            String address = Base58.encode(coin.getOwner());
+            String address = AddressTool.getStringAddressByBytes(coin.getOwner());
             Na na = verifyToMap.get(address);
             if (null != na && na.equals(coin.getNa())) {
                 verifyToMap.remove(address);

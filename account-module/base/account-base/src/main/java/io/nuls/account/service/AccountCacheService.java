@@ -27,9 +27,10 @@ package io.nuls.account.service;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.Account;
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.cache.CacheMap;
 import io.nuls.core.tools.crypto.Base58;
+import io.nuls.kernel.utils.AddressTool;
 
 import java.util.List;
 import java.util.Map;
@@ -96,7 +97,7 @@ public class AccountCacheService {
      * @return
      */
     public boolean contains(byte[] address) {
-        return this.cacheMap.containsKey(Base58.encode(address));
+        return this.cacheMap.containsKey(AddressTool.getStringAddressByBytes(address));
     }
 
     /**
@@ -113,7 +114,7 @@ public class AccountCacheService {
     }
 
     public void removeAccount(byte[] address) {
-        this.cacheMap.remove(Base58.encode(address));
+        this.cacheMap.remove(AddressTool.getStringAddressByBytes(address));
     }
 
 

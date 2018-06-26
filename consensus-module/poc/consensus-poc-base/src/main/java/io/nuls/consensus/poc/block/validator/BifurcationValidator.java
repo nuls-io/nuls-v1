@@ -32,7 +32,6 @@ import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
-import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.array.ArraysTool;
@@ -100,7 +99,7 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
             try {
                 byte[] header1 = header.serialize();
                 byte[] header2 = otherBlockHeader.serialize();
-                redPunishData.setEvidence(ArraysTool.joinintTogether(header1, header2));
+                redPunishData.setEvidence(ArraysTool.concatenate(header1, header2));
             } catch (Exception e) {
                 return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.SYS_UNKOWN_EXCEPTION);
             }

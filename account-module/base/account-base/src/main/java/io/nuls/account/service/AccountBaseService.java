@@ -27,7 +27,7 @@ package io.nuls.account.service;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.core.tools.crypto.Hex;
@@ -37,6 +37,7 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.utils.AddressTool;
 
 
 /**
@@ -63,7 +64,7 @@ public class AccountBaseService {
      * @return
      */
     public Result getPrivateKey(String address, String password) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Account account = accountService.getAccount(address).getData();
@@ -95,7 +96,7 @@ public class AccountBaseService {
      * @return
      */
     public Result setPassword(String address, String password) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isBlank(password)) {
@@ -135,7 +136,7 @@ public class AccountBaseService {
      * @return
      */
     public Result changePassword(String address, String oldPassword, String newPassword) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isBlank(oldPassword)) {

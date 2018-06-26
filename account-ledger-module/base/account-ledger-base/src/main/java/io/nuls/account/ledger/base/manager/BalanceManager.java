@@ -29,7 +29,7 @@ import io.nuls.account.ledger.base.util.CoinComparator;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.storage.service.LocalUtxoStorageService;
 import io.nuls.account.model.Account;
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.core.tools.crypto.Base58;
@@ -79,7 +79,7 @@ public class BalanceManager {
 
         for (Account account : accounts) {
             try {
-                calBalanceByAddress(account.getAddress().getBase58Bytes());
+                calBalanceByAddress(account.getAddress().getAddressBytes());
             } catch (NulsException e) {
                 Log.info("getbalance of address[" + account.getAddress().getBase58() + "] error");
             }
@@ -90,7 +90,7 @@ public class BalanceManager {
      * 获取账户余额
      */
     public Result<Balance> getBalance(Address address) {
-        return getBalance(address.getBase58Bytes());
+        return getBalance(address.getAddressBytes());
     }
 
     /**
@@ -99,18 +99,18 @@ public class BalanceManager {
     public Result<Balance> getBalance(byte[] address) {
         lock.lock();
         try {
-            if (address == null || address.length != AddressTool.HASH_LENGTH) {
+            if (address == null || address.length != Address.ADDRESS_LENGTH) {
                 return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR);
             }
 
-            String addressKey = Base58.encode(address);
+            String addressKey = AddressTool.getStringAddressByBytes(address);
             BalanceCacheEntity entity = balanceMap.get(addressKey);
             Balance balance = null;
             if (entity == null || (entity.getEarlistLockTime() > 0L && entity.getEarlistLockTime() <= TimeService.currentTimeMillis())) {
                 try {
                     balance = calBalanceByAddress(address);
                 } catch (NulsException e) {
-                    Log.info("getbalance of address[" + Base58.encode(address) + "] error");
+                    Log.info("getbalance of address[" + AddressTool.getStringAddressByBytes(address) + "] error");
                 }
             } else {
                 balance = entity.getBalance();
@@ -128,7 +128,7 @@ public class BalanceManager {
         lock.lock();
         try {
             if (address != null) {
-                balanceMap.remove(Base58.encode(address));
+                balanceMap.remove(AddressTool.getStringAddressByBytes(address));
             }
         } finally {
             lock.unlock();
@@ -190,7 +190,7 @@ public class BalanceManager {
             balance.setBalance(usable.add(locked));
             balanceCacheEntity.setBalance(balance);
 
-            balanceMap.put(Base58.encode(address), balanceCacheEntity);
+            balanceMap.put(AddressTool.getStringAddressByBytes(address), balanceCacheEntity);
             return balance;
         } finally {
             lock.unlock();

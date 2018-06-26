@@ -53,6 +53,7 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 
 import java.math.BigInteger;
@@ -142,7 +143,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<Boolean> removeAccount(String address, String password) {
 
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Account account = getAccountByAddress(address);
@@ -195,13 +196,13 @@ public class AccountServiceImpl implements AccountService {
         }
         if (StringUtils.isNotBlank(keyStore.getAlias())) {
             Alias aliasDb = aliasService.getAlias(keyStore.getAlias());
-            if (null != aliasDb && Base58.encode(aliasDb.getAddress()).equals(account.getAddress().toString())) {
+            if (null != aliasDb && AddressTool.getStringAddressByBytes(aliasDb.getAddress()).equals(account.getAddress().toString())) {
                 account.setAlias(aliasDb.getAlias());
             } else {
                 List<AliasPo> list = aliasStorageService.getAliasList().getData();
                 for (AliasPo aliasPo : list) {
                     //如果全网别名中的地址有和当前导入的账户地址相同,则赋值别名到账户中
-                    if (Base58.encode(aliasPo.getAddress()).equals(account.getAddress().toString())) {
+                    if (AddressTool.getStringAddressByBytes(aliasPo.getAddress()).equals(account.getAddress().toString())) {
                         account.setAlias(aliasPo.getAlias());
                         break;
                     }
@@ -252,13 +253,13 @@ public class AccountServiceImpl implements AccountService {
 
         if (StringUtils.isNotBlank(keyStore.getAlias())) {
             Alias aliasDb = aliasService.getAlias(keyStore.getAlias());
-            if (null != aliasDb && Base58.encode(aliasDb.getAddress()).equals(account.getAddress().toString())) {
+            if (null != aliasDb && AddressTool.getStringAddressByBytes(aliasDb.getAddress()).equals(account.getAddress().toString())) {
                 account.setAlias(aliasDb.getAlias());
             } else {
                 List<AliasPo> list = aliasStorageService.getAliasList().getData();
                 for (AliasPo aliasPo : list) {
                     //如果全网别名中的地址有和当前导入的账户地址相同,则赋值别名到账户中
-                    if (Base58.encode(aliasPo.getAddress()).equals(account.getAddress().toString())) {
+                    if (AddressTool.getStringAddressByBytes(aliasPo.getAddress()).equals(account.getAddress().toString())) {
                         account.setAlias(aliasPo.getAlias());
                         break;
                     }
@@ -313,7 +314,7 @@ public class AccountServiceImpl implements AccountService {
             List<AliasPo> list = aliasStorageService.getAliasList().getData();
             for (AliasPo aliasPo : list) {
                 //如果全网别名中的地址有和当前导入的账户地址相同,则赋值别名到账户中
-                if (Base58.encode(aliasPo.getAddress()).equals(account.getAddress().toString())) {
+                if (AddressTool.getStringAddressByBytes(aliasPo.getAddress()).equals(account.getAddress().toString())) {
                     account.setAlias(aliasPo.getAlias());
                     break;
                 }
@@ -339,7 +340,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<AccountKeyStore> exportAccountToKeyStore(String address, String password) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Account account = getAccountByAddress(address);
@@ -375,7 +376,7 @@ public class AccountServiceImpl implements AccountService {
      * @return Account
      */
     private Account getAccountByAddress(String address) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return null;
         }
         //如果账户已经解锁,则直接返回解锁后的账户. If the account is unlocked, return directly to the unlocked account
@@ -391,7 +392,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Account> getAccount(byte[] address) {
-        Account account = getAccountByAddress(Base58.encode(address));
+        Account account = getAccountByAddress(AddressTool.getStringAddressByBytes(address));
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
@@ -497,7 +498,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Boolean> isEncrypted(String address) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Account account = getAccountByAddress(address);
@@ -524,10 +525,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Boolean> verifyAddressFormat(String address) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        return new Result(Address.validAddress(address), null);
+        return new Result(AddressTool.validAddress(address), null);
     }
 
     @Override
@@ -609,7 +610,7 @@ public class AccountServiceImpl implements AccountService {
         if (null == account || null == account.getAddress()) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        return accountLedgerService.getBalance(account.getAddress().getBase58Bytes());
+        return accountLedgerService.getBalance(account.getAddress().getAddressBytes());
     }
 
     @Override
@@ -617,12 +618,12 @@ public class AccountServiceImpl implements AccountService {
         if (null == address) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        return accountLedgerService.getBalance(address.getBase58Bytes());
+        return accountLedgerService.getBalance(address.getAddressBytes());
     }
 
     @Override
     public Result<Balance> getBalance(String address) throws NulsException {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Account account = getAccountByAddress(address);
@@ -630,7 +631,7 @@ public class AccountServiceImpl implements AccountService {
             Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         Address addr = new Address(address);
-        return accountLedgerService.getBalance(addr.getBase58Bytes());
+        return accountLedgerService.getBalance(addr.getAddressBytes());
     }
 
     @Override
@@ -651,7 +652,7 @@ public class AccountServiceImpl implements AccountService {
         }
 
         for (Account account : list) {
-            Result<Balance> resultBalance = accountLedgerService.getBalance(account.getAddress().getBase58Bytes());
+            Result<Balance> resultBalance = accountLedgerService.getBalance(account.getAddress().getAddressBytes());
             if (resultBalance.isSuccess()) {
                 Balance temp = resultBalance.getData();
                 if (null == temp) {
@@ -667,10 +668,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<String> getAlias(byte[] address) {
-        if (!Address.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
-        }
-        return getAlias(Base58.encode(address));
+        return getAlias(AddressTool.getStringAddressByBytes(address));
     }
 
     @Override
@@ -682,7 +680,7 @@ public class AccountServiceImpl implements AccountService {
         String alias = null;
         List<AliasPo> list = aliasStorageService.getAliasList().getData();
         for (AliasPo aliasPo : list) {
-            if (Base58.encode(aliasPo.getAddress()).equals(address)) {
+            if (AddressTool.getStringAddressByBytes(aliasPo.getAddress()).equals(address)) {
                 alias = aliasPo.getAlias();
                 break;
             }
@@ -693,14 +691,14 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Na> getAliasFee(String address, String aliasName) {
-        if (!Address.validAddress(address)) {
+        if (!AddressTool.validAddress(address)) {
             Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
         Account account = this.getAccount(address).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        byte[] addressBytes = account.getAddress().getBase58Bytes();
+        byte[] addressBytes = account.getAddress().getAddressBytes();
         try {
             //创建一笔设置别名的交易
             AliasTransaction tx = new AliasTransaction();

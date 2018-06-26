@@ -26,7 +26,7 @@
 package io.nuls.account.storage.service.impl;
 
 import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.account.storage.constant.AccountStorageConstant;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.service.AccountStorageService;
@@ -69,22 +69,22 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
     public Result saveAccountList(List<AccountPo> accountPoList) {
         BatchOperation batch = dbService.createWriteBatch(AccountStorageConstant.DB_NAME_ACCOUNT);
         for (AccountPo po : accountPoList) {
-            batch.putModel(po.getAddressObj().getBase58Bytes(), po);
+            batch.putModel(po.getAddressObj().getAddressBytes(), po);
         }
         return batch.executeBatch();
     }
 
     @Override
     public Result saveAccount(AccountPo po) {
-        return dbService.putModel(AccountStorageConstant.DB_NAME_ACCOUNT, po.getAddressObj().getBase58Bytes(), po);
+        return dbService.putModel(AccountStorageConstant.DB_NAME_ACCOUNT, po.getAddressObj().getAddressBytes(), po);
     }
 
     @Override
     public Result removeAccount(Address address) {
-        if (null == address || address.getBase58Bytes() == null || address.getBase58Bytes().length <= 0) {
+        if (null == address || address.getAddressBytes() == null || address.getAddressBytes().length <= 0) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        return dbService.delete(AccountStorageConstant.DB_NAME_ACCOUNT, address.getBase58Bytes());
+        return dbService.delete(AccountStorageConstant.DB_NAME_ACCOUNT, address.getAddressBytes());
     }
 
     @Override
@@ -95,7 +95,7 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
 
     @Override
     public Result<AccountPo> getAccount(Address address) {
-        return this.getAccount(address.getBase58Bytes());
+        return this.getAccount(address.getAddressBytes());
     }
 
     @Override
@@ -112,11 +112,11 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
         if(null == po.getAddressObj()){
             po.setAddressObj(new Address(po.getAddress()));
         }
-        AccountPo account = dbService.getModel(AccountStorageConstant.DB_NAME_ACCOUNT, po.getAddressObj().getBase58Bytes(), AccountPo.class);
+        AccountPo account = dbService.getModel(AccountStorageConstant.DB_NAME_ACCOUNT, po.getAddressObj().getAddressBytes(), AccountPo.class);
         if(null == account){
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-        return dbService.putModel(AccountStorageConstant.DB_NAME_ACCOUNT, po.getAddressObj().getBase58Bytes(), po);
+        return dbService.putModel(AccountStorageConstant.DB_NAME_ACCOUNT, po.getAddressObj().getAddressBytes(), po);
     }
 
     @Override

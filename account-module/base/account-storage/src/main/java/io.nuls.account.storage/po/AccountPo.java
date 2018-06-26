@@ -26,7 +26,7 @@
 package io.nuls.account.storage.po;
 
 import io.nuls.account.model.Account;
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.EncryptedData;
 import io.nuls.core.tools.log.Log;

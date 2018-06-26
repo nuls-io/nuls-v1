@@ -38,6 +38,7 @@ import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.utils.AddressTool;
 
@@ -82,9 +83,9 @@ public class TransactionInfoStorageServiceImpl implements TransactionInfoStorage
             return infoPoList;
         }
 
-        byte[] addressKey = new byte[AddressTool.HASH_LENGTH];
+        byte[] addressKey = new byte[Address.ADDRESS_LENGTH];
         for (byte[] key : keySet) {
-            System.arraycopy(key, 0, addressKey, 0, AddressTool.HASH_LENGTH);
+            System.arraycopy(key, 0, addressKey, 0, Address.ADDRESS_LENGTH);
             if (java.util.Arrays.equals(addressKey, address)) {
                 byte[] values = dbService.get(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_TX_INDEX, key);
                 TransactionInfoPo transactionInfoPo = new TransactionInfoPo();

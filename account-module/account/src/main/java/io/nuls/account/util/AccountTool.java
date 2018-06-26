@@ -27,7 +27,7 @@ package io.nuls.account.util;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
-import io.nuls.account.model.Address;
+import io.nuls.kernel.model.Address;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.crypto.Sha256Hash;
@@ -56,7 +56,7 @@ public class AccountTool {
     }
 
     public static Address newAddress(byte[] publicKey) throws NulsException {
-        return new Address(NulsContext.DEFAULT_CHAIN_ID, SerializeUtils.sha256hash160(publicKey));
+        return new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(publicKey));
     }
 
     public static Account createAccount(String prikey) throws NulsException {
@@ -67,10 +67,10 @@ public class AccountTool {
             try {
                 key = ECKey.fromPrivate(new BigInteger(Hex.decode(prikey)));
             } catch (Exception e) {
-                throw new NulsException(AccountErrorCode.PARAMETER_ERROR,e);
+                throw new NulsException(AccountErrorCode.PARAMETER_ERROR, e);
             }
         }
-        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, SerializeUtils.sha256hash160(key.getPubKey()));
+        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
         Account account = new Account();
         account.setEncryptedPriKey(new byte[0]);
         account.setAddress(address);

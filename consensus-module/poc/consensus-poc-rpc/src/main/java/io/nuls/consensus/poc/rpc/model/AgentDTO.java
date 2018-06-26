@@ -31,6 +31,7 @@ import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.utils.AddressTool;
 
 import java.io.UnsupportedEncodingException;
 
@@ -42,9 +43,9 @@ public class AgentDTO {
 
     public AgentDTO(Agent agent,String alias) {
         this.agentHash = agent.getTxHash().getDigestHex();
-        this.agentAddress = Base58.encode(agent.getAgentAddress());
-        this.packingAddress = Base58.encode(agent.getPackingAddress());
-        this.rewardAddress = Base58.encode(agent.getRewardAddress());
+        this.agentAddress = AddressTool.getStringAddressByBytes(agent.getAgentAddress());
+        this.packingAddress = AddressTool.getStringAddressByBytes(agent.getPackingAddress());
+        this.rewardAddress = AddressTool.getStringAddressByBytes(agent.getRewardAddress());
         this.deposit = agent.getDeposit().getValue();
         this.commissionRate = agent.getCommissionRate();
         this.agentName = alias;

@@ -25,6 +25,7 @@
 package io.nuls.consensus.poc.protocol.entity;
 
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.TransactionLogicData;
 import io.nuls.kernel.utils.*;
 
@@ -63,7 +64,7 @@ public class RedPunishData extends TransactionLogicData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.address = byteBuffer.readBytes(AddressTool.HASH_LENGTH);
+        this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.reasonCode = byteBuffer.readByte();
         this.evidence = byteBuffer.readByLengthByte();
     }

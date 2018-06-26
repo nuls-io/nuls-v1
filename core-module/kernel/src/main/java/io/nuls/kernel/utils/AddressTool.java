@@ -25,6 +25,7 @@
 
 package io.nuls.kernel.utils;
 
+import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
@@ -32,6 +33,7 @@ import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.script.P2PKHScriptSig;
 
 /**
@@ -40,18 +42,17 @@ import io.nuls.kernel.script.P2PKHScriptSig;
  */
 public class AddressTool {
 
-    /**
-     *
-     */
-    public static final int HASH_LENGTH = 23;
-
-    public static byte[] getAddress(String base58Address) {
+    public static byte[] getAddress(String addressString) {
+        byte[] bytes;
         try {
-            return Base58.decode(base58Address);
+            bytes = Base58.decode(addressString);
         } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
+        byte[] result = new byte[Address.ADDRESS_LENGTH];
+        System.arraycopy(bytes, 0, result, 0, Address.ADDRESS_LENGTH);
+        return result;
     }
 
     public static byte[] getAddress(byte[] publicKey) {
@@ -59,15 +60,8 @@ public class AddressTool {
             return null;
         }
         byte[] hash160 = SerializeUtils.sha256hash160(publicKey);
-        short chainId = NulsContext.DEFAULT_CHAIN_ID;
-        byte[] body = new byte[22];
-        System.arraycopy(SerializeUtils.shortToBytes(chainId), 0, body, 0, 2);
-        System.arraycopy(hash160, 0, body, 2, hash160.length);
-        byte xor = getXor(body);
-        byte[] base58bytes = new byte[23];
-        System.arraycopy(body, 0, base58bytes, 0, body.length);
-        base58bytes[body.length] = xor;
-        return base58bytes;
+        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, hash160);
+        return address.getAddressBytes();
     }
 
     private static byte getXor(byte[] body) {
@@ -75,7 +69,6 @@ public class AddressTool {
         for (int i = 0; i < body.length; i++) {
             xor ^= body[i];
         }
-
         return xor;
     }
 
@@ -86,30 +79,14 @@ public class AddressTool {
         return getAddress(scriptSig.getPublicKey());
     }
 
-    public static String getAddressBase58(byte[] publicKey) {
-        if (publicKey == null) {
-            return null;
-        }
-        byte[] bytes = getAddress(publicKey);
-        return Base58.encode(bytes);
-    }
-
-    public static String getAddressBase58(P2PKHScriptSig scriptSig) {
-        if (scriptSig == null) {
-            return null;
-
-        }
-        return getAddressBase58(scriptSig.getPublicKey());
-    }
-
     public static boolean validAddress(String address) {
         if (StringUtils.isBlank(address)) {
             return false;
         }
-        byte[] bytes = null;
+        byte[] bytes;
         try {
             bytes = Base58.decode(address);
-            if (bytes.length != HASH_LENGTH) {
+            if (bytes.length != Address.ADDRESS_LENGTH + 1) {
                 return false;
             }
         } catch (NulsException e) {
@@ -117,34 +94,52 @@ public class AddressTool {
         } catch (Exception e) {
             return false;
         }
-        return validAddress(bytes);
-    }
-
-    public static boolean validAddress(byte[] address) {
-        if (address == null) {
-            return false;
-        }
         try {
-            checkXOR(address);
+            checkXOR(bytes);
         } catch (Exception e) {
             return false;
         }
         return true;
     }
 
+
     public static void checkXOR(byte[] hashs) {
-        byte[] body = new byte[22];
-        System.arraycopy(hashs, 0, body, 0, 22);
+        byte[] body = new byte[Address.ADDRESS_LENGTH];
+        System.arraycopy(hashs, 0, body, 0, Address.ADDRESS_LENGTH);
 
         byte xor = 0x00;
         for (int i = 0; i < body.length; i++) {
             xor ^= body[i];
         }
         byte[] sign = new byte[1];
-        System.arraycopy(hashs, 22, sign, 0, 1);
+        System.arraycopy(hashs, Address.ADDRESS_LENGTH, sign, 0, 1);
 
-        if (xor != hashs[22]) {
+        if (xor != hashs[Address.ADDRESS_LENGTH]) {
             throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
         }
     }
+
+    public static String getStringAddressByBytes(byte[] addressBytes) {
+        byte[] bytes = ArraysTool.concatenate(addressBytes, new byte[]{getXor(addressBytes)});
+        return Base58.encode(bytes);
+    }
+
+
+    public static boolean checkPublicKeyHash(byte[] address, byte[] pubKeyHash) {
+
+        if (address == null || pubKeyHash == null) {
+            return false;
+        }
+        int pubKeyHashLength = pubKeyHash.length;
+        if (address.length != Address.ADDRESS_LENGTH || pubKeyHashLength != 20) {
+            return false;
+        }
+        for (int i = 0; i < pubKeyHashLength; i++) {
+            if (pubKeyHash[i] != address[i + 3]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
