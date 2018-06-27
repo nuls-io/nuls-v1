@@ -73,7 +73,6 @@ public class DataCacher<T> {
     public void notFound(NulsDigestData hash) {
         CompletableFuture<T> future = cacher.get(hash);
         if (future == null) {
-            Log.warn("{} NotFound : " + hash, type);
             return;
         }
         future.complete(null);
