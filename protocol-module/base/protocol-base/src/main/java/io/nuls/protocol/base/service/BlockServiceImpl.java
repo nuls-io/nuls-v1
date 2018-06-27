@@ -307,9 +307,10 @@ public class BlockServiceImpl implements BlockService {
      */
     @Override
     public Result broadcastBlock(SmallBlock smallBlock) {
-        SmallBlockMessage message = fillSmallBlockMessage(smallBlock);
-        Result<List<String>> result = messageBusService.broadcast(message, null, false);
-        return result;
+        return this.forwardBlock(smallBlock, null);
+//        SmallBlockMessage message = fillSmallBlockMessage(smallBlock);
+//        Result<List<String>> result = messageBusService.broadcast(message, null, false);
+//        return result;
     }
 
     /**
