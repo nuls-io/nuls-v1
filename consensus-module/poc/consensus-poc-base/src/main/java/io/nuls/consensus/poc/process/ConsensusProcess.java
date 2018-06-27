@@ -249,8 +249,7 @@ public class ConsensusProcess {
     }
 
     private void broadcastSmallBlock(Block block) {
-        SmallBlock smallBlock = ConsensusTool.getSmallBlock(block);
-        blockService.forwardBlock(smallBlock, null);
+        blockService.forwardBlock(block.getHeader().getHash(), null);
     }
 
     private Block doPacking(MeetingMember self, MeetingRound round) throws NulsException, IOException {

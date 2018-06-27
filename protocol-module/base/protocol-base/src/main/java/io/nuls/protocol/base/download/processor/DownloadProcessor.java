@@ -204,9 +204,9 @@ public class DownloadProcessor extends Thread {
         Map<NulsDigestData, Integer> statisticsMaps = new HashMap<>();
         Map<NulsDigestData, List<Node>> nodeMaps = new HashMap<>();
 
-        System.out.println("--------------start download-------------------");
+//        System.out.println("--------------start download-------------------");
         for (Node node : nodeList) {
-            System.out.println(node.getId() + " : " + node.getBestBlockHeight() + " : " + node.getBestBlockHash());
+//            System.out.println(node.getId() + " : " + node.getBestBlockHeight() + " : " + node.getBestBlockHash());
             NulsDigestData hash = node.getBestBlockHash();
 
             Integer statistics = statisticsMaps.get(hash);

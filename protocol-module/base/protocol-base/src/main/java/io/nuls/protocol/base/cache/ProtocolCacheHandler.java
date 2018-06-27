@@ -25,6 +25,7 @@
 
 package io.nuls.protocol.base.cache;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -60,9 +61,9 @@ public class ProtocolCacheHandler {
         return txCacher.addFuture(txHash);
     }
 
-    public static void receiveTx(NulsDigestData txHash, boolean log) {
+    public static void receiveTx(NulsDigestData txHash) {
         TX_FILTER.insert(txHash.getDigestBytes());
-        txCacher.callback(txHash, true, log);
+        txCacher.callback(txHash, true);
     }
 
     public static void removeTxFuture(NulsDigestData txHash) {
@@ -73,9 +74,10 @@ public class ProtocolCacheHandler {
         return smallBlockCacher.addFuture(blockHash);
     }
 
-    public static void receiveSmallBlock(NulsDigestData blockHash, boolean log) {
+    public static void receiveSmallBlock(NulsDigestData blockHash) {
+        Log.error("receive small block:" + blockHash);
         SMALL_BLOCK_FILTER.insert(blockHash.getDigestBytes());
-        smallBlockCacher.callback(blockHash, true, log);
+        smallBlockCacher.callback(blockHash, true);
     }
 
     public static void removeSmallBlockFuture(NulsDigestData blockHash) {
@@ -92,7 +94,7 @@ public class ProtocolCacheHandler {
 
     public static void receiveBlock(Block block) {
         NulsDigestData hash = NulsDigestData.calcDigestData(SerializeUtils.uint64ToByteArray(block.getHeader().getHeight()));
-        boolean result = blockByHeightCacher.callback(hash, block);
+        boolean result = blockByHeightCacher.callback(hash, block, false);
         if (!result) {
             blockByHashCacher.callback(block.getHeader().getHash(), block);
         }

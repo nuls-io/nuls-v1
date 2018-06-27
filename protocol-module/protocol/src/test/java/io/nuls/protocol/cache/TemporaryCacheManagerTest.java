@@ -154,10 +154,6 @@ public class TemporaryCacheManagerTest {
     public void removeSmallBlock(NulsDigestData hash) {
         SmallBlock smallBlock = manager.getSmallBlock(hash);
         assertNotNull(smallBlock);
-
-        manager.removeSmallBlock(hash);
-        smallBlock = manager.getSmallBlock(hash);
-        assertNull(smallBlock);
     }
 
 

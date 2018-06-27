@@ -76,7 +76,7 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
         }
         BlockHeader header = smallBlock.getHeader();
 
-        ProtocolCacheHandler.receiveSmallBlock(header.getHash(), false);
+        ProtocolCacheHandler.receiveSmallBlock(header.getHash());
 
         BlockHeader theBlockHeader = blockService.getBlockHeader(header.getHash()).getData();
         if (null != theBlockHeader) {
