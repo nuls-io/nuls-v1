@@ -50,7 +50,7 @@ import java.util.List;
  * @author Niels
  * @date 2018/1/8
  */
-public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessage> {
+public class TransactionMessageHandler extends AbstractMessageHandler<TransactionMessage> {
 
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
@@ -59,7 +59,7 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
 
     private List<Transaction> txs = new ArrayList<>();
 
-    public NewTxMessageHandler() {
+    public TransactionMessageHandler() {
     }
 
     @Override

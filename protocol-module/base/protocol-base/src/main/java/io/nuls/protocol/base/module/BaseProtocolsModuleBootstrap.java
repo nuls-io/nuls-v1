@@ -108,7 +108,7 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         messageBusService.subscribeMessage(GetBlocksByHeightMessage.class, new GetBlocksByHeightHandler());
         messageBusService.subscribeMessage(GetTxGroupRequest.class, new GetTxGroupHandler());
         messageBusService.subscribeMessage(TxGroupMessage.class, new TxGroupHandler());
-        messageBusService.subscribeMessage(TransactionMessage.class, new NewTxMessageHandler());
+        messageBusService.subscribeMessage(TransactionMessage.class, new TransactionMessageHandler());
         messageBusService.subscribeMessage(SmallBlockMessage.class, new SmallBlockHandler());
         messageBusService.subscribeMessage(CompleteMessage.class, new CompleteHandler());
         messageBusService.subscribeMessage(ReactMessage.class, new ReactMessageHandler());
