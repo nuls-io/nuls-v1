@@ -97,7 +97,7 @@ public class ConsensusBlockServiceImpl implements BlockService {
     }
 
     @Override
-    public Result forwardBlock(SmallBlock block, Node excludeNode) {
+    public Result forwardBlock(NulsDigestData blockHash, Node excludeNode) {
         return null;
     }
 
