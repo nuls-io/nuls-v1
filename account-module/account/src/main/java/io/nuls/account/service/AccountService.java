@@ -331,7 +331,7 @@ public interface AccountService {
     Result verifySignData(byte[] data, NulsSignData signData, byte[] pubKey);
 
     /**
-     * 获取所有的账户的余额 ?
+     * 获取所有的账户的余额
      * Query the balance of all accounts.
      *
      * @return Balance object.

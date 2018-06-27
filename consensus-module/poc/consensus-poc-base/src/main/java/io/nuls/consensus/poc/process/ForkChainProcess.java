@@ -404,12 +404,14 @@ public class ForkChainProcess {
                 if (result.isSuccess()) {
                     result = ledgerService.verifyCoinData(tx, toMaps, fromSet, newBestHeight);
                     if (result.isFailed()) {
-                        Log.info("failed message:" + result.getMsg());
+                        ErrorData errorData = (ErrorData) result.getData();
+                        Log.info("failed message:" + errorData.getMsg());
                         changeSuccess = false;
                         break;
                     }
                 } else {
-                    Log.info("failed message:" + result.getMsg());
+                    ErrorData errorData = (ErrorData) result.getData();
+                    Log.info("failed message:" + errorData.getMsg());
                     changeSuccess = false;
                     break;
                 }
