@@ -198,4 +198,8 @@ public final class TxMemoryPool {
         } finally {
         }
     }
+
+    public int size() {
+        return container.size() + orphanContainer.size();
+    }
 }

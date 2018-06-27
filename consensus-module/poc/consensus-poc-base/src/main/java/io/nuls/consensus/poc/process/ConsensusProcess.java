@@ -303,9 +303,6 @@ public class ConsensusProcess {
                 }
                 continue;
             }
-            if (txContainer.getTx() == null || txContainer.getPackageCount() >= 3) {
-                continue;
-            }
 
             Transaction tx = txContainer.getTx();
 
@@ -340,10 +337,16 @@ public class ConsensusProcess {
                 result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
             }
             if (result.isFailed()) {
+
+                if (txContainer.getTx() == null || txContainer.getPackageCount() >= 2) {
+                    continue;
+                }
+
                 if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
                     txMemoryPool.add(txContainer, true);
                     txContainer.setPackageCount(txContainer.getPackageCount() + 1);
                 }
+
                 Log.warn(result.getMsg());
                 try {
                     Thread.sleep(1L);
