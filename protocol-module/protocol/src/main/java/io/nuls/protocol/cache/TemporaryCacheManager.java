@@ -105,6 +105,18 @@ public class TemporaryCacheManager {
     }
 
     /**
+     * 根据区块摘要对象从缓存中移出一个SmallBlock，移除后再获取时将返回null
+     * A SmallBlock is removed from the cache based on the block summary object, and null is returned when it is removed.
+     */
+    public void removeSmallBlock(NulsDigestData hash) {
+        if (null == smallBlockCacheMap) {
+            return;
+        }
+        smallBlockCacheMap.remove(hash);
+    }
+
+
+    /**
      * 清空所有缓存的数据
      * Empty all cached data.
      */
