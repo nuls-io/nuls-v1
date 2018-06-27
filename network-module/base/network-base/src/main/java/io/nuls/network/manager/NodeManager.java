@@ -43,7 +43,6 @@ import io.nuls.network.protocol.message.P2PNodeBody;
 import io.nuls.network.protocol.message.P2PNodeMessage;
 import io.nuls.network.storage.service.NetworkStorageService;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -115,14 +114,13 @@ public class NodeManager implements Runnable {
      * 同时开启获取对方最新信息的线程
      */
     public void start() {
-        networkStorageService = NulsContext.getServiceBean(NetworkStorageService.class);
         //获取我自己的外网ip，防止自己连自己外网的情况出现
-        String externalIp = networkStorageService.getExternalIp();
+        String externalIp = getNetworkStorageService().getExternalIp();
         if (externalIp != null) {
             networkParam.getLocalIps().add(externalIp);
         }
 
-        List<Node> nodeList = networkStorageService.getLocalNodeList();
+        List<Node> nodeList = getNetworkStorageService().getLocalNodeList();
         nodeList.addAll(getSeedNodes());
         for (Node node : nodeList) {
             addNode(node);
@@ -163,8 +161,6 @@ public class NodeManager implements Runnable {
 
     /**
      * 获取当前所有节点（包括未连接成功和已连接的）
-     *
-     * @return
      */
     public Map<String, Node> getNodes() {
         Map<String, Node> nodeMap = new HashMap<>();
@@ -211,9 +207,6 @@ public class NodeManager implements Runnable {
 
     /**
      * 添加主动连接节点，并创建连接
-     *
-     * @param node
-     * @return
      */
     public boolean addNode(Node node) {
         //判断是否是本地地址
@@ -246,9 +239,6 @@ public class NodeManager implements Runnable {
 
     /**
      * 处理已经成功连接的节点
-     *
-     * @param node
-     * @return
      */
     public boolean processConnectedNode(Node node) {
         lock.lock();
@@ -278,15 +268,13 @@ public class NodeManager implements Runnable {
             removeNode(node);
         } else {
             Log.info("------------remove node is null-----------" + nodeId);
-            networkStorageService.deleteNode(nodeId);
+            getNetworkStorageService().deleteNode(nodeId);
         }
     }
 
     /**
      * 删除节点分为主动删除和被动删除，当主动删除节点时，
      * 先需要关闭连接，之后再删除节点
-     *
-     * @param node
      */
     public void removeNode(Node node) {
         lock.lock();
@@ -312,7 +300,7 @@ public class NodeManager implements Runnable {
             removeNode(node);
         } else {
 //            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
-            networkStorageService.deleteNode(nodeId);
+            getNetworkStorageService().deleteNode(nodeId);
         }
     }
 
@@ -323,7 +311,7 @@ public class NodeManager implements Runnable {
             connectedNodes.remove(node.getId());
             handShakeNodes.remove(node.getId());
             if (node.getStatus() == Node.BAD) {
-                networkStorageService.deleteNode(node.getId());
+                getNetworkStorageService().deleteNode(node.getId());
             }
             return;
         }
@@ -353,7 +341,7 @@ public class NodeManager implements Runnable {
             }
         } else {
             disConnectNodes.remove(node.getId());
-            networkStorageService.deleteNode(node.getId());
+            getNetworkStorageService().deleteNode(node.getId());
         }
     }
 
@@ -380,18 +368,25 @@ public class NodeManager implements Runnable {
 
     public void saveNode(Node node) {
         if (!isSeedNode(node.getIp())) {
-            networkStorageService.saveNode(node);
+            getNetworkStorageService().saveNode(node);
         }
 
     }
 
     public void saveExternalIp(String ip) {
         NetworkParam.getInstance().getLocalIps().add(ip);
-        networkStorageService.saveExternalIp(ip);
+        getNetworkStorageService().saveExternalIp(ip);
+    }
+
+    private NetworkStorageService getNetworkStorageService() {
+        if (null == this.networkStorageService) {
+            this.networkStorageService = NulsContext.getServiceBean(NetworkStorageService.class);
+        }
+        return this.networkStorageService;
     }
 
     public void tryToConnectMySelf() {
-        String externalIp = networkStorageService.getExternalIp();
+        String externalIp = getNetworkStorageService().getExternalIp();
         if (StringUtils.isBlank(externalIp)) {
             return;
         }
@@ -411,7 +406,7 @@ public class NodeManager implements Runnable {
      * 广播本机外网服务器节点信息
      */
     public void broadNodeSever() {
-        String externalIp = networkStorageService.getExternalIp();
+        String externalIp = getNetworkStorageService().getExternalIp();
         P2PNodeBody p2PNodeBody = new P2PNodeBody(externalIp, networkParam.getPort());
         P2PNodeMessage message = new P2PNodeMessage(p2PNodeBody);
         broadcastHandler.broadcastToAllNode(message, null, true);
@@ -429,10 +424,6 @@ public class NodeManager implements Runnable {
 
     /**
      * 添加节点到节点组
-     *
-     * @param groupName
-     * @param node
-     * @return
      */
     public boolean addNodeToGroup(String groupName, Node node) {
         NodeGroup nodeGroup = nodeGroups.get(groupName);
@@ -464,8 +455,6 @@ public class NodeManager implements Runnable {
 
     /**
      * 获取种子节点
-     *
-     * @return
      */
     public List<Node> getSeedNodes() {
         if (seedNodes != null) {
@@ -481,9 +470,6 @@ public class NodeManager implements Runnable {
 
     /**
      * 是否是种子节点
-     *
-     * @param ip
-     * @return
      */
     public boolean isSeedNode(String ip) {
         for (Node node : getSeedNodes()) {
