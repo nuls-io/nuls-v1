@@ -29,7 +29,6 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Account;
-import io.nuls.kernel.model.Address;
 import io.nuls.account.service.AccountService;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.context.PocConsensusContext;
@@ -51,7 +50,6 @@ import io.nuls.consensus.poc.service.impl.PocRewardCacheService;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.array.ArraysTool;
-import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.param.AssertUtil;
@@ -499,7 +497,7 @@ public class PocConsensusResource {
         if (saveResult.isFailed()) {
             return saveResult.toRpcClientResult();
         }
-        Result sendResult = this.transactionService.broadcastTx(tx);
+        Result sendResult = this.transactionService.forwardTx(tx, null);
         if (sendResult.isFailed()) {
             accountLedgerService.rollbackTransaction(tx);
             return sendResult.toRpcClientResult();

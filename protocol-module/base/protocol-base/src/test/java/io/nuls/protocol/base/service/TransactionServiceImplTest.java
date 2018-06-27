@@ -25,7 +25,6 @@
 
 package io.nuls.protocol.base.service;
 
-import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.*;
 import io.nuls.consensus.poc.protocol.tx.*;
 import io.nuls.core.tools.crypto.ECKey;
@@ -124,7 +123,7 @@ public class TransactionServiceImplTest {
     private void broadcastTx() {
         for (int i = txList.size() - 1; i >= 0; i--) {
             Transaction tx = txList.get(i);
-            Result result = this.transactionService.broadcastTx(tx);
+            Result result = this.transactionService.forwardTx(tx, null);
             assertTrue(result.isSuccess());
         }
     }

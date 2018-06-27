@@ -25,7 +25,6 @@
  */
 package io.nuls.consensus.poc.process;
 
-import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
@@ -251,7 +250,7 @@ public class ConsensusProcess {
 
     private void broadcastSmallBlock(Block block) {
         SmallBlock smallBlock = ConsensusTool.getSmallBlock(block);
-        blockService.broadcastBlock(smallBlock);
+        blockService.forwardBlock(smallBlock, null);
     }
 
     private Block doPacking(MeetingMember self, MeetingRound round) throws NulsException, IOException {

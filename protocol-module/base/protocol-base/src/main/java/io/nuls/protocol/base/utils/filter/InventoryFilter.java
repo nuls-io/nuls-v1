@@ -25,7 +25,7 @@
 
 package io.nuls.protocol.base.utils.filter;
 
-import io.nuls.kernel.lite.annotation.Component;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 向量清单过滤器
@@ -34,7 +34,17 @@ import io.nuls.kernel.lite.annotation.Component;
  */
 public class InventoryFilter {
 
-    private BloomFilter filter = new BloomFilter(1000000, 0.0001, randomLong());
+    private final int maxCount;
+    private final int elements;
+    private AtomicInteger size = new AtomicInteger(0);
+
+    private BloomFilter filter;
+
+    public InventoryFilter(int maxCount, int elements) {
+        this.maxCount = maxCount;
+        this.elements = elements;
+        filter = new BloomFilter(elements, 0.0001, randomLong());
+    }
 
     public BloomFilter getFilter() {
         return filter;
@@ -42,6 +52,10 @@ public class InventoryFilter {
 
     public void insert(byte[] object) {
         filter.insert(object);
+        int count = size.incrementAndGet();
+        if (count >= maxCount) {
+            this.clear();
+        }
     }
 
     public boolean contains(byte[] object) {
@@ -49,7 +63,7 @@ public class InventoryFilter {
     }
 
     public void clear() {
-        filter = new BloomFilter(1000000, 0.0001, randomLong());
+        filter = new BloomFilter(elements, 0.0001, randomLong());
     }
 
     private long randomLong() {

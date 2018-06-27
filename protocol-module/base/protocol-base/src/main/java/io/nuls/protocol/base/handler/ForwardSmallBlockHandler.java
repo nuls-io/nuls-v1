@@ -58,9 +58,6 @@ public class ForwardSmallBlockHandler extends AbstractMessageHandler<ForwardSmal
         if (constains) {
             return;
         }
-
-        //todo 某个条件下清空过滤器
-
         GetSmallBlockMessage getSmallBlockMessage = new GetSmallBlockMessage();
         getSmallBlockMessage.setMsgBody(hash);
         CompletableFuture<Boolean> future = ProtocolCacheHandler.addGetSmallBlockRequest(hash);
