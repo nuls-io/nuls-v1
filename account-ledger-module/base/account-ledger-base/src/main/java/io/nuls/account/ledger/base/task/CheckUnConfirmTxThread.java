@@ -186,7 +186,7 @@ public class CheckUnConfirmTxThread implements Runnable {
 
 
     private Result reBroadcastTransaction(Transaction tx) {
-        Result sendResult = transactionService.broadcastTx(tx);
+        Result sendResult = transactionService.forwardTx(tx, null);
         if (sendResult.isFailed()) {
             return sendResult;
         }

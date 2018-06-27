@@ -44,8 +44,8 @@ import java.util.concurrent.Future;
  */
 public class ProtocolCacheHandler {
 
-    public static final InventoryFilter TX_FILTER = new InventoryFilter();
-    public static final InventoryFilter SMALL_BLOCK_FILTER = new InventoryFilter();
+    public static final InventoryFilter TX_FILTER = new InventoryFilter(10000,1000000);
+    public static final InventoryFilter SMALL_BLOCK_FILTER = new InventoryFilter(100,100000);
 
     private static DataCacher<Block> blockCacher = new DataCacher<>(MessageDataType.BLOCK);
     private static DataCacher<TxGroup> txGroupCacher = new DataCacher<>(MessageDataType.TRANSACTIONS);
@@ -62,7 +62,6 @@ public class ProtocolCacheHandler {
     public static void receiveTx(NulsDigestData txHash, boolean log) {
         TX_FILTER.insert(txHash.getDigestBytes());
         txCacher.callback(txHash, true, log);
-
     }
 
     public static void removeTxFuture(NulsDigestData txHash) {
