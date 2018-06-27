@@ -73,7 +73,7 @@ public class DownloadUtils {
             Block block = future.get(30L, TimeUnit.SECONDS);
             return block;
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error(e);
             return null;
         } finally {
             ProtocolCacheHandler.removeBlockFuture(hash);
@@ -97,7 +97,7 @@ public class DownloadUtils {
         try {
             requestHash = NulsDigestData.calcDigestData(message.getMsgBody().serialize());
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
 
         Future<CompleteParam> taskFuture = ProtocolCacheHandler.addTaskRequest(requestHash);
@@ -186,7 +186,7 @@ public class DownloadUtils {
             response = future.get(20L, TimeUnit.SECONDS);
         } catch (Exception e) {
             Log.error(node.getId() + ",start:" + startHeight + " , size:" + size);
-            Log.error(e.getMessage());
+            Log.error(e);
         } finally {
             ProtocolCacheHandler.removeHashesFuture(requestHash);
         }
@@ -219,7 +219,7 @@ public class DownloadUtils {
             return txGroup;
         } catch (Exception e) {
             Log.error(node.getId() + ",get txgroup failed!");
-            Log.error(e.getMessage());
+            Log.error(e);
             ProtocolCacheHandler.removeTxGroupFuture(request.getHash());
             ProtocolCacheHandler.removeRequest(requestHash);
             throw e;
