@@ -92,7 +92,7 @@ public class Bootstrap {
                 Block bestBlock = NulsContext.getInstance().getBestBlock();
                 Collection<Node> nodes = NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
 
-                Log.info("bestHeight:" + bestBlock.getHeader().getHeight() + " , txCount : " + bestBlock.getHeader().getTxCount() + " , tx memory pool count : " + TxMemoryPool.getInstance().getAll().size() + " , hash : " + bestBlock.getHeader().getHash() + ",nodeCount:" + nodes.size());
+                Log.info("bestHeight:" + bestBlock.getHeader().getHeight() + " , txCount : " + bestBlock.getHeader().getTxCount() + " , tx memory pool count : " + TxMemoryPool.getInstance().size() + " , hash : " + bestBlock.getHeader().getHash() + ",nodeCount:" + nodes.size());
                 for (Node node : nodes) {
                     Log.info(node.getBestBlockHeight() + ", " + node.getId() + ", " + node.getBestBlockHash());
                 }
