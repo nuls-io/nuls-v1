@@ -26,6 +26,7 @@
 package io.nuls.network.module.impl;
 
 import io.nuls.core.tools.network.IpUtil;
+import io.nuls.db.constant.DBConstant;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.message.bus.manager.MessageManager;
 import io.nuls.network.constant.NetworkConstant;
@@ -36,6 +37,7 @@ import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.message.filter.impl.MagicNumberFilter;
 import io.nuls.network.module.AbstractNetworkModule;
 import io.nuls.network.protocol.message.*;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,6 +88,7 @@ public class NettyNetworkModuleBootstrap extends AbstractNetworkModule {
 
     @Override
     public void start() {
+        this.waitForDependencyRunning(DBConstant.MODULE_ID_DB, ProtocolConstant.MODULE_ID_PROTOCOL);
         connectionManager.start();
         try {
             Thread.sleep(3000);
