@@ -199,7 +199,7 @@ public class BalanceManager {
 
     public List<Coin> getCoinListByAddress(byte[] address) {
         List<Coin> coinList = new ArrayList<>();
-        Collection<Entry<byte[], byte[]>> rawList = localUtxoStorageService.loadAllCoinList();
+        List<Entry<byte[], byte[]>> rawList = localUtxoStorageService.loadAllCoinList();
         for (Entry<byte[], byte[]> coinEntry : rawList) {
             Coin coin = new Coin();
             try {

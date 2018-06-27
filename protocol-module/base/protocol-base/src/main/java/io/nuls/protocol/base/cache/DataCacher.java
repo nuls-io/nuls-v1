@@ -53,20 +53,21 @@ public class DataCacher<T> {
         return future;
     }
 
-    public void callback(NulsDigestData hash, T t) {
-        this.callback(hash, t, true);
+    public boolean callback(NulsDigestData hash, T t) {
+        return this.callback(hash, t, true);
     }
 
-    public void callback(NulsDigestData hash, T t, boolean log) {
+    public boolean callback(NulsDigestData hash, T t, boolean log) {
         CompletableFuture<T> future = cacher.get(hash);
         if (future == null) {
             if (log) {
                 Log.warn("Time out: ({}) : {}", type, hash.getDigestHex());
             }
-            return;
+            return false;
         }
         future.complete(t);
         cacher.remove(hash);
+        return true;
     }
 
     public void notFound(NulsDigestData hash) {

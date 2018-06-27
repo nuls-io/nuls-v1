@@ -70,7 +70,7 @@ public class LocalUtxoStorageServiceImpl implements LocalUtxoStorageService, Ini
     }
 
     @Override
-    public Collection<Entry<byte[], byte[]>> loadAllCoinList() {
+    public List<Entry<byte[], byte[]>> loadAllCoinList() {
         if(cacheMap == null) {
             cacheMap = new HashMap<>();
 
@@ -79,7 +79,7 @@ public class LocalUtxoStorageServiceImpl implements LocalUtxoStorageService, Ini
                 cacheMap.put(new String(entry.getKey()), entry);
             }
         }
-        return cacheMap.values();
+        return new ArrayList<>(cacheMap.values());
     }
 
     @Override

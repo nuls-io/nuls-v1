@@ -82,13 +82,16 @@ public class ProtocolCacheHandler {
         smallBlockCacher.removeFuture(blockHash);
     }
 
-    public static CompletableFuture<Block> addGetBlockRequest(NulsDigestData blockHash) {
-        return blockCacher.addFuture(blockHash);
+    public static CompletableFuture<Block> addGetBlockRequest(NulsDigestData requestHash) {
+        return blockCacher.addFuture(requestHash);
     }
 
     public static void receiveBlock(Block block) {
         NulsDigestData hash = NulsDigestData.calcDigestData(SerializeUtils.uint64ToByteArray(block.getHeader().getHeight()));
-        blockCacher.callback(hash, block);
+        boolean result = blockCacher.callback(hash, block);
+        if (!result) {
+            blockCacher.callback(block.getHeader().getHash(), block);
+        }
     }
 
     public static CompletableFuture<BlockHashResponse> addGetBlockHashesRequest(NulsDigestData requestHash) {

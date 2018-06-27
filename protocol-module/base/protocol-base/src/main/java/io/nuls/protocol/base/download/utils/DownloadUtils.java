@@ -41,10 +41,7 @@ import io.nuls.protocol.model.GetTxGroupParam;
 import io.nuls.protocol.model.TxGroup;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -63,6 +60,7 @@ public class DownloadUtils {
         Future<Block> future = ProtocolCacheHandler.addGetBlockRequest(hash);
         Future<NulsDigestData> reactFuture = ProtocolCacheHandler.addRequest(hash);
         Result result = messageBusService.sendToNode(message, node, false);
+        Log.error("start request:"+new Date().toLocaleString()+" ::: "+hash);
         if (!result.isSuccess()) {
             ProtocolCacheHandler.removeBlockFuture(hash);
             ProtocolCacheHandler.removeRequest(hash);
@@ -73,7 +71,7 @@ public class DownloadUtils {
             Block block = future.get(30L, TimeUnit.SECONDS);
             return block;
         } catch (Exception e) {
-            Log.error(e);
+            Log.error(node.getId(),e);
             return null;
         } finally {
             ProtocolCacheHandler.removeBlockFuture(hash);
