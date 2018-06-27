@@ -322,13 +322,17 @@ public class AccountServiceImpl implements AccountService {
         } else {
             account.setAlias(acc.getAlias());
         }
+        Result res = accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
+        if (res.isFailed()) {
+            return res;
+        }
         AccountPo po = new AccountPo(account);
         Result result = accountStorageService.saveAccount(po);
         if (result.isFailed()) {
             return result;
         }
         accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
-        accountLedgerService.importLedgerByAddress(account.getAddress().getBase58());
+
         return Result.getSuccess().setData(account);
     }
 
