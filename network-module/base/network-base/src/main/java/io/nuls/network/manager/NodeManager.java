@@ -115,13 +115,14 @@ public class NodeManager implements Runnable {
      * 同时开启获取对方最新信息的线程
      */
     public void start() {
+        networkStorageService = NulsContext.getServiceBean(NetworkStorageService.class);
         //获取我自己的外网ip，防止自己连自己外网的情况出现
-        String externalIp = getNetworkStorage().getExternalIp();
+        String externalIp = networkStorageService.getExternalIp();
         if (externalIp != null) {
             networkParam.getLocalIps().add(externalIp);
         }
 
-        List<Node> nodeList = getNetworkStorage().getLocalNodeList();
+        List<Node> nodeList = networkStorageService.getLocalNodeList();
         nodeList.addAll(getSeedNodes());
         for (Node node : nodeList) {
             addNode(node);
@@ -277,7 +278,7 @@ public class NodeManager implements Runnable {
             removeNode(node);
         } else {
             Log.info("------------remove node is null-----------" + nodeId);
-            getNetworkStorage().deleteNode(nodeId);
+            networkStorageService.deleteNode(nodeId);
         }
     }
 
@@ -311,7 +312,7 @@ public class NodeManager implements Runnable {
             removeNode(node);
         } else {
 //            Log.info("------------removeHandshakeNode node is null-----------" + nodeId);
-            getNetworkStorage().deleteNode(nodeId);
+            networkStorageService.deleteNode(nodeId);
         }
     }
 
@@ -322,7 +323,7 @@ public class NodeManager implements Runnable {
             connectedNodes.remove(node.getId());
             handShakeNodes.remove(node.getId());
             if (node.getStatus() == Node.BAD) {
-                getNetworkStorage().deleteNode(node.getId());
+                networkStorageService.deleteNode(node.getId());
             }
             return;
         }
@@ -352,7 +353,7 @@ public class NodeManager implements Runnable {
             }
         } else {
             disConnectNodes.remove(node.getId());
-            getNetworkStorage().deleteNode(node.getId());
+            networkStorageService.deleteNode(node.getId());
         }
     }
 
@@ -379,7 +380,7 @@ public class NodeManager implements Runnable {
 
     public void saveNode(Node node) {
         if (!isSeedNode(node.getIp())) {
-            getNetworkStorage().saveNode(node);
+            networkStorageService.saveNode(node);
         }
 
     }
@@ -576,10 +577,4 @@ public class NodeManager implements Runnable {
         }
     }
 
-    private NetworkStorageService getNetworkStorage() {
-        if (networkStorageService == null) {
-            networkStorageService = NulsContext.getServiceBean(NetworkStorageService.class);
-        }
-        return networkStorageService;
-    }
 }
