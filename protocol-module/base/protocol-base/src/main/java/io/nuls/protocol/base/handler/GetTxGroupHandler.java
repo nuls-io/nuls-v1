@@ -33,7 +33,7 @@ import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
 import io.nuls.protocol.cache.TemporaryCacheManager;
-import io.nuls.protocol.constant.NotFoundType;
+import io.nuls.protocol.constant.MessageDataType;
 import io.nuls.protocol.message.GetTxGroupRequest;
 import io.nuls.protocol.message.NotFoundMessage;
 import io.nuls.protocol.message.ReactMessage;
@@ -107,7 +107,7 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
 
     private void sendNotFound(NulsDigestData hash, Node fromNode) {
         NotFoundMessage event = new NotFoundMessage();
-        NotFound data = new NotFound(NotFoundType.TRANSACTION, hash);
+        NotFound data = new NotFound(MessageDataType.TRANSACTIONS, hash);
         event.setMsgBody(data);
         Result result = this.messageBusService.sendToNode(event, fromNode, true);
         if (result.isFailed()) {

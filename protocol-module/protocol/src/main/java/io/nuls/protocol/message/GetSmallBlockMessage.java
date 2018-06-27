@@ -22,36 +22,30 @@
  * SOFTWARE.
  *
  */
+package io.nuls.protocol.message;
 
-package io.nuls.message.bus.handler;
-
-import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.message.bus.message.GetMessageBodyMessage;
-import io.nuls.message.bus.service.MessageBusService;
-import io.nuls.message.bus.service.impl.MessageCacheService;
-import io.nuls.network.model.Node;
-import io.nuls.protocol.message.base.BaseMessage;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.model.GetBlockParam;
 
 /**
- * 获取消息体的处理器
- * The cmd used to get the message body.
+ * 获取区块的消息
+ * The message for get block or blocks
  *
- * @author: Charlie
- * @date: 2018/5/8
+ * @author Niels
+ * @date 2017/11/13
  */
-public class GetMessageBodyHandler extends AbstractMessageHandler<GetMessageBodyMessage> {
+public class GetSmallBlockMessage extends BaseProtocolMessage<NulsDigestData> {
 
-    private MessageCacheService messageCacheService = MessageCacheService.getInstance();
-    private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
-    @Override
-    public void onMessage(GetMessageBodyMessage message, Node fromNode) throws NulsException {
-        BaseMessage baseMessage = messageCacheService.getSendMessage(message.getMsgBody());
-        if (null == baseMessage) {
-            Log.warn("get message faild, node:" + fromNode.getId() + ",event:" + message.getMsgBody());
-            return;
-        }
-        messageBusService.sendToNode(baseMessage,fromNode,false);
+    public GetSmallBlockMessage() {
+        super(ProtocolConstant.PROTOCOL_GET_SMALL_BLOCK);
     }
+
+    @Override
+    protected NulsDigestData parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readHash();
+    }
+
 }

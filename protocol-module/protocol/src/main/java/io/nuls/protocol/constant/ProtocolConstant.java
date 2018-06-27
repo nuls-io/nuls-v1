@@ -154,4 +154,9 @@ public interface ProtocolConstant extends NulsConstant {
      * Request reply message type, used to immediately know if the target node received this request
      */
     short PROTOCOL_REQUEST_REACT = 16;
+    short PROTOCOL_FORWARD_NEW_TX = 17;
+    short PROTOCOL_FORWARD_NEW_BLOCK = 18;
+    short PROTOCOL_GET_SMALL_BLOCK = 19;
+    short PROTOCOL_GET_TRANSACTION = 20;
+
 }

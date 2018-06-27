@@ -26,66 +26,55 @@ package io.nuls.protocol.base.handler;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.Transaction;
+import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
+import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.MessageDataType;
-import io.nuls.protocol.message.BlockMessage;
-import io.nuls.protocol.message.GetBlockMessage;
-import io.nuls.protocol.message.NotFoundMessage;
-import io.nuls.protocol.message.ReactMessage;
+import io.nuls.protocol.message.*;
 import io.nuls.protocol.model.NotFound;
-import io.nuls.protocol.service.BlockService;
 
 /**
  * @author facjas
  * @date 2017/11/16
  */
-public class GetBlockHandler extends AbstractMessageHandler<GetBlockMessage> {
+public class GetTxMessageHandler extends AbstractMessageHandler<GetTxMessage> {
 
-    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+    private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
+    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
     @Override
-    public void onMessage(GetBlockMessage message, Node fromNode) {
-
-        if(message == null || message.getMsgBody() == null || fromNode == null) {
+    public void onMessage(GetTxMessage message, Node fromNode) {
+        if (message == null || fromNode == null || null == message.getMsgBody()) {
+            return;
+        }
+        Transaction tx = cacheManager.getTx(message.getMsgBody());
+        if (null == tx) {
+            tx = ledgerService.getTx(message.getMsgBody());
+        }
+        if (null == tx) {
+            sendNotFound(message.getMsgBody(), fromNode);
             return;
         }
 
-        NulsDigestData blockHash = message.getBlockHash();
-
-        // react request
-        messageBusService.sendToNode(new ReactMessage(blockHash), fromNode, true);
-
-        Block block= null;
-        Result<Block> result = blockService.getBlock(blockHash);
-        if (result.isFailed() || (block = result.getData()) == null) {
-            sendNotFound(blockHash, fromNode);
-            return;
-        }
-        sendBlock(block, fromNode);
+        TransactionMessage txMessage = new TransactionMessage();
+        txMessage.setMsgBody(tx);
+        messageBusService.sendToNode(txMessage, fromNode, true);
     }
 
-    private void sendNotFound(NulsDigestData hash, Node node) {
-        NotFoundMessage message = new NotFoundMessage();
-        NotFound data = new NotFound(MessageDataType.BLOCK, hash);
-        message.setMsgBody(data);
-        Result result = this.messageBusService.sendToNode(message, node, true);
+    private void sendNotFound(NulsDigestData hash, Node fromNode) {
+        NotFoundMessage event = new NotFoundMessage();
+        NotFound data = new NotFound(MessageDataType.TRANSACTION, hash);
+        event.setMsgBody(data);
+        Result result = this.messageBusService.sendToNode(event, fromNode, true);
         if (result.isFailed()) {
-            Log.warn("send BLOCK NotFound failed:" + node.getId() + ", hash:" + hash);
+            Log.warn("send not found failed:" + fromNode.getId() + ", hash:" + hash);
         }
     }
 
-    private void sendBlock(Block block, Node fromNode) {
-        BlockMessage blockMessage = new BlockMessage();
-        blockMessage.setMsgBody(block);
-        Result result = this.messageBusService.sendToNode(blockMessage, fromNode, true);
-        if (result.isFailed()) {
-            Log.warn("send block failed:" + fromNode.getId() + ",height:" + block.getHeader().getHeight());
-        }
-    }
 }

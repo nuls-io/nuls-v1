@@ -33,7 +33,7 @@ import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.constant.NotFoundType;
+import io.nuls.protocol.constant.MessageDataType;
 import io.nuls.protocol.message.BlocksHashMessage;
 import io.nuls.protocol.message.GetBlocksHashMessage;
 import io.nuls.protocol.message.NotFoundMessage;
@@ -41,8 +41,6 @@ import io.nuls.protocol.model.BlockHashResponse;
 import io.nuls.protocol.model.GetBlocksHashParam;
 import io.nuls.protocol.model.NotFound;
 import io.nuls.protocol.service.BlockService;
-
-import java.io.IOException;
 
 /**
  * @author Niels
@@ -84,7 +82,7 @@ public class GetBlocksHashHandler extends AbstractMessageHandler<GetBlocksHashMe
 
     private void sendNotFound(Node node, NulsDigestData hash) {
         NotFoundMessage event = new NotFoundMessage();
-        NotFound data = new NotFound(NotFoundType.HASHES, hash);
+        NotFound data = new NotFound(MessageDataType.HASHES, hash);
         event.setMsgBody(data);
         Result result = this.messageBusService.sendToNode(event, node, true);
         if (result.isFailed()) {

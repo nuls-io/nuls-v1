@@ -29,9 +29,8 @@ package io.nuls.protocol.base.handler;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.base.download.cache.DownloadCacheHandler;
+import io.nuls.protocol.base.cache.ProtocolCacheHandler;
 import io.nuls.protocol.message.ReactMessage;
-import io.nuls.protocol.model.CompleteParam;
 import io.nuls.protocol.model.ReactParam;
 
 /**
@@ -49,6 +48,6 @@ public class ReactMessageHandler extends AbstractMessageHandler<ReactMessage> {
         if(param.getRequestId() == null) {
             return;
         }
-        DownloadCacheHandler.requestReact(param.getRequestId());
+        ProtocolCacheHandler.requestReact(param.getRequestId());
     }
 }
