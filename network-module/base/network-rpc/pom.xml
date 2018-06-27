@@ -44,6 +44,11 @@
             <artifactId>network</artifactId>
             <version>0.9.11</version>
         </dependency>
+        <dependency>
+            <groupId>io.nuls.network-module</groupId>
+            <artifactId>network-base</artifactId>
+            <version>0.9.11</version>
+        </dependency>
     </dependencies>
 
 

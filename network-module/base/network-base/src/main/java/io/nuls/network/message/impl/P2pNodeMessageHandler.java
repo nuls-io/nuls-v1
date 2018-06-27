@@ -25,7 +25,6 @@
 
 package io.nuls.network.message.impl;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.network.cache.NodeCacheManager;
 import io.nuls.network.manager.BroadcastHandler;
 import io.nuls.network.manager.NodeManager;

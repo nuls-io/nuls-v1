@@ -53,7 +53,7 @@ public interface NetworkConstant {
     String NETWORK_NODE_IN_GROUP = "inGroup";
     String NETWORK_NODE_OUT_GROUP = "outGroup";
     String CACHE_P2P_NODE = "cacheNode";
-
+    String CACHE_P2P_IP = "cacheIP";
 
     int HANDSHAKE_SEVER_TYPE = 2;
     int HANDSHAKE_CLIENT_TYPE = 1;
