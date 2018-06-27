@@ -126,7 +126,7 @@ public interface AccountLedgerService {
 
     /**
      * <p>
-     * get useable coindata
+     * get usable coinData
      *
      * @param address account address
      * @param amount  amount want to use
@@ -136,12 +136,26 @@ public interface AccountLedgerService {
     CoinDataResult getCoinData(byte[] address, Na amount, int size, Na price) throws NulsException;
 
     /**
-     * @param from
-     * @param to
-     * @param values
+     * A transfers NULS to B
+     * @param from address of A
+     * @param to address of B
+     * @param values NULS amount
+     * @param password password of A
+     * @param remark remarks of transaction
+     * @param price Unit price of fee
+     * @return
      */
     Result transfer(byte[] from, byte[] to, Na values, String password, String remark, Na price);
 
+    /**
+     * calculation fee of transaction
+     * @param from address of A
+     * @param to address of B
+     * @param values NULS amount
+     * @param remark remarks of transaction
+     * @param price Unit price of fee
+     * @return
+     */
     Result transferFee(byte[] from, byte[] to, Na values, String remark, Na price);
 
     /**

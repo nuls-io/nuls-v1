@@ -58,6 +58,8 @@ public class NetworkResource {
     @Autowired
     private NetworkService networkService;
 
+    private NodeCacheManager nodeCacheManager = NodeCacheManager.getInstance();
+
     @GET
     @Path("/info/")
     @Produces(MediaType.APPLICATION_JSON)
@@ -100,12 +102,14 @@ public class NetworkResource {
             @ApiResponse(code = 200, message = "success", response = String[].class)
     })
     public RpcClientResult getNode() {
-        Set<String> ipSet = NodeCacheManager.getInstance().getIpSet();
-        if(ipSet == null || ipSet.isEmpty()) {
+        Set<String> ipSet = nodeCacheManager.getIpSet();
+        if (ipSet == null || ipSet.isEmpty()) {
+            ipSet = new HashSet<>();
             List<Node> nodeList = networkService.getCanConnectNodes();
             for (Node node : nodeList) {
                 ipSet.add(node.getIp());
             }
+            nodeCacheManager.cacheIpSet(ipSet);
         }
         Result result = Result.getSuccess();
         Map<String, Set<String>> map = new HashMap<>();
