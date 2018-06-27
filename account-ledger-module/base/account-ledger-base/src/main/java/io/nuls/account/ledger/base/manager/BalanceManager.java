@@ -125,14 +125,9 @@ public class BalanceManager {
      * 刷新余额，其实就是删除缓存，下次获取时再重新计算
      */
     public void refreshBalance(byte[] address) {
-        lock.lock();
-        try {
             if (address != null) {
                 balanceMap.remove(AddressTool.getStringAddressByBytes(address));
             }
-        } finally {
-            lock.unlock();
-        }
     }
 
     public void refreshBalance() {
@@ -217,8 +212,6 @@ public class BalanceManager {
     }
 
     public void refreshBalanceIfNesessary() {
-        lock.lock();
-        try {
             long bestHeight = NulsContext.getInstance().getBestHeight();
             Set<String> set = new HashSet<>(balanceMap.keySet());
             for (String address : set) {
@@ -239,8 +232,5 @@ public class BalanceManager {
                     continue;
                 }
             }
-        } finally {
-            lock.unlock();
-        }
     }
 }

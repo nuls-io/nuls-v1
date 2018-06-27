@@ -136,20 +136,6 @@ public class MessageBusServiceImplTest {
     }
 
     /**
-     * 广播消息hash缓存
-     * broadcast a message hash and cache that need to be passed
-     */
-    @Test
-    public void broadcastHashAndCache() {
-        BlockMessage blockMessage = new BlockMessage();
-        Node node = new Node("192.168.1.90",8003,1);
-        boolean aysn = true;
-        Result<List<String>> result =  messageBusService.broadcastHashAndCache(blockMessage, node, aysn);
-        assertTrue(result.isSuccess());
-        assertTrue(result.getData().size()>0);
-    }
-
-    /**
      * 广播消息
      * broadcast to nodes except "excludeNode"
      */
@@ -158,7 +144,7 @@ public class MessageBusServiceImplTest {
         BlockMessage blockMessage = new BlockMessage();
         Node node = new Node("192.168.1.90",8003,1);
         boolean aysn = true;
-        Result<List<String>> result =  messageBusService.broadcastAndCache(blockMessage, node, aysn);
+        Result<List<String>> result =  messageBusService.broadcast(blockMessage, node, aysn);
         assertTrue(result.isSuccess());
         assertTrue(result.getData().size()>0);
     }

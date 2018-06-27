@@ -22,22 +22,24 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.message.bus.message;
+package io.nuls.protocol.message;
 
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.NulsByteBuffer;
-import io.nuls.message.bus.constant.MessageBusConstant;
-import io.nuls.protocol.message.base.BaseMessage;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 /**
- * @author: Charlie
- * @date: 2018/5/6
+ * 获取区块的消息
+ * The message for get block or blocks
+ *
+ * @author Niels
+ * @date 2017/11/13
  */
-public class CommonDigestMessage extends BaseMessage<NulsDigestData> {
-    public CommonDigestMessage() {
-        super(MessageBusConstant.MODULE_ID_MESSAGE_BUS, MessageBusConstant.MSG_TYPE_COMMON_MSG_HASH_MSG);
+public class GetTxMessage extends BaseProtocolMessage<NulsDigestData> {
+
+    public GetTxMessage() {
+        super(ProtocolConstant.PROTOCOL_GET_TRANSACTION);
     }
 
     @Override
@@ -45,8 +47,4 @@ public class CommonDigestMessage extends BaseMessage<NulsDigestData> {
         return byteBuffer.readHash();
     }
 
-    public CommonDigestMessage(NulsDigestData hash) {
-        this();
-        this.setMsgBody(hash);
-    }
 }

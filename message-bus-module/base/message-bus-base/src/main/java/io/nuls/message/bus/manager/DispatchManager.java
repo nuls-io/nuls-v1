@@ -31,7 +31,6 @@ import io.nuls.kernel.module.service.ModuleService;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.message.bus.module.MessageBusModuleBootstrap;
-import io.nuls.message.bus.processor.MessageFilterProcessor;
 import io.nuls.message.bus.processor.MessageClassificationProcessor;
 import io.nuls.message.bus.model.ProcessData;
 import io.nuls.protocol.message.base.BaseMessage;
@@ -63,7 +62,7 @@ public class DispatchManager<M extends BaseMessage> {
         disruptorService.createDisruptor(disruptorName, MessageBusConstant.DEFAULT_RING_BUFFER_SIZE, nulsThreadFactory);
 
         messageProcesser = new MessageClassificationProcessor();
-        disruptorService.handleEventWith(disruptorName, new MessageFilterProcessor()).then(messageProcesser);
+        disruptorService.handleEventWith(disruptorName, messageProcesser);
 
         disruptorService.start(disruptorName);
     }

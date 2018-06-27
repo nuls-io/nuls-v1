@@ -34,7 +34,6 @@ import io.nuls.message.bus.manager.DispatchManager;
 import io.nuls.message.bus.manager.HandlerManager;
 import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.manager.MessageManager;
-import io.nuls.message.bus.message.CommonDigestMessage;
 import io.nuls.message.bus.model.ProcessData;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.BroadcastResult;
@@ -56,7 +55,6 @@ public class MessageBusServiceImpl implements MessageBusService {
     private NetworkService networkService;
     private HandlerManager handlerManager = HandlerManager.getInstance();
     private DispatchManager processorManager = DispatchManager.getInstance();
-    private MessageCacheService messageCacheService = MessageCacheService.getInstance();
 
     @Override
     public String subscribeMessage(Class<? extends BaseMessage> messageClass, NulsMessageHandler<? extends BaseMessage> messageHandler) {
@@ -83,15 +81,7 @@ public class MessageBusServiceImpl implements MessageBusService {
     }
 
     @Override
-    public Result<List<String>> broadcastHashAndCache(BaseMessage message, Node excludeNode, boolean aysn) {
-        messageCacheService.cacheSendedMessage(message);
-        BroadcastResult result = this.networkService.sendToAllNode(new CommonDigestMessage(message.getHash()), excludeNode, aysn);
-        return getNodeIdListResult(result);
-    }
-
-    @Override
-    public Result<List<String>> broadcastAndCache(BaseMessage message, Node excludeNode, boolean aysn) {
-        messageCacheService.cacheSendedMessage(message);
+    public Result<List<String>> broadcast(BaseMessage message, Node excludeNode, boolean aysn) {
         BroadcastResult result = networkService.sendToAllNode(message, excludeNode, aysn);
         return getNodeIdListResult(result);
     }

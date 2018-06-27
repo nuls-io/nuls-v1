@@ -41,6 +41,7 @@ import io.nuls.kernel.model.Result;
 import io.nuls.ledger.service.LedgerService;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Facjas
@@ -72,7 +73,7 @@ public class LocalUtxoStorageServiceImpl implements LocalUtxoStorageService, Ini
     @Override
     public Collection<Entry<byte[], byte[]>> loadAllCoinList() {
         if(cacheMap == null) {
-            cacheMap = new HashMap<>();
+            cacheMap = new ConcurrentHashMap<>();
 
             List<Entry<byte[], byte[]>> coinList = dbService.entryList(AccountLedgerStorageConstant.DB_NAME_ACCOUNT_LEDGER_COINDATA);
             for(Entry<byte[], byte[]> entry : coinList) {

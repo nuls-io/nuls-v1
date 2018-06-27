@@ -74,18 +74,6 @@ public interface MessageBusService {
      */
     void receiveMessage(BaseMessage message, Node node);
 
-
-    /**
-     * 广播消息hash
-     * broadcast a message hash and cache that need to be passed
-     *
-     * @param message     The message was broadcast.
-     * @param excludeNode 不会广播的节点 The node that is not passed.
-     * @param aysn        是否异步 Asynchronous execution
-     * @return Return all broadcasted node id list
-     */
-    Result<List<String>> broadcastHashAndCache(BaseMessage message, Node excludeNode, boolean aysn);
-
     /**
      * 广播消息
      * broadcast to nodes except "excludeNode"
@@ -95,7 +83,7 @@ public interface MessageBusService {
      * @param aysn        是否异步 Asynchronous execution
      * @return Return all broadcasted node id list
      */
-    Result<List<String>> broadcastAndCache(BaseMessage message, Node excludeNode, boolean aysn);
+    Result<List<String>> broadcast(BaseMessage message, Node excludeNode, boolean aysn);
 
 
     /**

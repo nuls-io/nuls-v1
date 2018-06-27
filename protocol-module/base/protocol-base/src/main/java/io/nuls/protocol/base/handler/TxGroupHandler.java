@@ -28,7 +28,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.base.download.cache.DownloadCacheHandler;
+import io.nuls.protocol.base.cache.ProtocolCacheHandler;
 import io.nuls.protocol.message.TxGroupMessage;
 import io.nuls.protocol.model.TxGroup;
 
@@ -45,6 +45,6 @@ public class TxGroupHandler extends AbstractMessageHandler<TxGroupMessage> {
             Log.warn("recieved a null txGroup form " + fromNode.getId());
             return;
         }
-        DownloadCacheHandler.receiveTxGroup(txGroup);
+        ProtocolCacheHandler.receiveTxGroup(txGroup);
     }
 }

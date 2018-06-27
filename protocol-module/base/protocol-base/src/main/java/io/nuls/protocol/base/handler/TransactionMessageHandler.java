@@ -34,6 +34,7 @@ import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.base.cache.ProtocolCacheHandler;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.TransactionMessage;
@@ -49,7 +50,7 @@ import java.util.List;
  * @author Niels
  * @date 2018/1/8
  */
-public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessage> {
+public class TransactionMessageHandler extends AbstractMessageHandler<TransactionMessage> {
 
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
@@ -58,7 +59,7 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
 
     private List<Transaction> txs = new ArrayList<>();
 
-    public NewTxMessageHandler() {
+    public TransactionMessageHandler() {
     }
 
     @Override
@@ -68,6 +69,8 @@ public class NewTxMessageHandler extends AbstractMessageHandler<TransactionMessa
         if (null == tx) {
             return;
         }
+
+        ProtocolCacheHandler.receiveTx(tx.getHash(), false);
 
         if (tx.isSystemTx()) {
             return;

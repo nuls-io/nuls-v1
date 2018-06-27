@@ -27,7 +27,7 @@ package io.nuls.protocol.base.handler;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.base.download.cache.DownloadCacheHandler;
+import io.nuls.protocol.base.cache.ProtocolCacheHandler;
 import io.nuls.protocol.message.BlocksHashMessage;
 
 /**
@@ -38,7 +38,7 @@ public class BlocksHashHandler extends AbstractMessageHandler<BlocksHashMessage>
 
     @Override
     public void onMessage(BlocksHashMessage message, Node fromNode) throws NulsException {
-        DownloadCacheHandler.receiveHashes(message.getMsgBody());
+        ProtocolCacheHandler.receiveHashes(message.getMsgBody());
     }
 
 }

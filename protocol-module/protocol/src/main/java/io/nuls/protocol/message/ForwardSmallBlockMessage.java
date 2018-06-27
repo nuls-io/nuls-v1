@@ -22,29 +22,28 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.base.handler;
+package io.nuls.protocol.message;
 
-import io.nuls.message.bus.handler.AbstractMessageHandler;
-import io.nuls.network.model.Node;
-import io.nuls.protocol.base.cache.ProtocolCacheHandler;
-import io.nuls.protocol.message.CompleteMessage;
-import io.nuls.protocol.model.CompleteParam;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.protocol.constant.ProtocolConstant;
 
 /**
- * @author ln
- * @date 2018/05/26
+ * 发送新交易的消息
+ * The message for send a new transaction
+ *
+ * @author Niels
+ * @date 2017/11/8
  */
-public class CompleteHandler extends AbstractMessageHandler<CompleteMessage> {
+public class ForwardSmallBlockMessage extends BaseProtocolMessage<NulsDigestData> {
+
+    public ForwardSmallBlockMessage() {
+        super(ProtocolConstant.PROTOCOL_FORWARD_NEW_BLOCK);
+    }
 
     @Override
-    public void onMessage(CompleteMessage message, Node fromNode) {
-
-        if(message == null || message.getMsgBody() == null || fromNode == null) {
-            return;
-        }
-
-        CompleteParam param = message.getMsgBody();
-
-        ProtocolCacheHandler.taskComplete(param);
+    protected NulsDigestData parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readHash();
     }
 }
