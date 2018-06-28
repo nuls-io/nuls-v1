@@ -2,10 +2,8 @@ package io.nuls.protocol.sdk.service.impl;
 
 import io.nuls.protocol.sdk.model.*;
 import io.nuls.protocol.sdk.service.BlockService;
-import io.nuls.sdk.SDKBootstrap;
 import io.nuls.sdk.constant.KernelErrorCode;
 import io.nuls.sdk.model.Result;
-import io.nuls.sdk.utils.JSONUtils;
 import io.nuls.sdk.utils.RestFulUtils;
 import io.nuls.sdk.utils.StringUtils;
 
@@ -131,21 +129,4 @@ public class BlockServiceImpl implements BlockService {
         return new BlockDto(map);
     }
 
-    public static void main(String[] args) {
-        SDKBootstrap.sdkStart();
-        BlockService bs = new BlockServiceImpl();
-        try {
-            System.out.println(JSONUtils.obj2json(bs.getNewestBlockHight()));
-            System.out.println(JSONUtils.obj2json(bs.getNewestBlockHash()));
-            /*
-            System.out.println(JSONUtils.obj2json(bs.getBlockHeader(4)));
-            System.out.println(JSONUtils.obj2json(bs.getBlockHeader("002029fff0e77722c318ee34583cab809f2e2bcfe46334f4678bbfef62a103bccbfa")));
-            System.out.println(JSONUtils.obj2json(bs.getNewestBlockHeader()));
-            System.out.println(JSONUtils.obj2json(bs.getBlock(10)));
-            System.out.println(JSONUtils.obj2json(bs.getBlock("002029fff0e77722c318ee34583cab809f2e2bcfe46334f4678bbfef62a103bccbfa")));
-            */
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

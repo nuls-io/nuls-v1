@@ -4,16 +4,17 @@ import io.nuls.account.ledger.sdk.model.InputDto;
 import io.nuls.account.ledger.sdk.model.OutputDto;
 import io.nuls.account.ledger.sdk.model.TransactionDto;
 import io.nuls.account.ledger.sdk.service.AccountLedgerService;
-import io.nuls.sdk.SDKBootstrap;
 import io.nuls.sdk.constant.AccountErrorCode;
 import io.nuls.sdk.constant.SDKConstant;
 import io.nuls.sdk.constant.TransactionErrorCode;
 import io.nuls.sdk.crypto.AESEncrypt;
-import io.nuls.sdk.crypto.Base58;
 import io.nuls.sdk.crypto.ECKey;
 import io.nuls.sdk.crypto.Hex;
 import io.nuls.sdk.exception.NulsException;
-import io.nuls.sdk.model.*;
+import io.nuls.sdk.model.Coin;
+import io.nuls.sdk.model.Na;
+import io.nuls.sdk.model.Result;
+import io.nuls.sdk.model.Transaction;
 import io.nuls.sdk.model.dto.BalanceDto;
 import io.nuls.sdk.script.P2PKHScriptSig;
 import io.nuls.sdk.utils.*;
@@ -125,28 +126,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
         BalanceDto balanceDto = new BalanceDto(map);
         return result.setData(balanceDto);
     }
-
-//    @Override
-//    public Result createTransaction(List<InputDto> inputs, List<OutputDto> outputs, String remark) {
-//        Map<String, Object> map = new HashMap<>();
-//        map.put("inputs", inputs);
-//        map.put("outputs", outputs);
-//        map.put("remark", remark);
-//        Result result = restFul.post("/accountledger/transaction", map);
-//        return result;
-//
-//    }
-//
-//    @Override
-//    public Result signTransaction(String txHex, String priKey, String address, String password) {
-//        Map<String, Object> map = new HashMap<>();
-//        map.put("txHex", txHex);
-//        map.put("priKey", priKey);
-//        map.put("address", address);
-//        map.put("password", password);
-//        Result result = restFul.post("/accountledger/transaction/sign", map);
-//        return result;
-//    }
 
     @Override
     public Result broadcastTransaction(String txHex) {
@@ -288,27 +267,5 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
             return Result.getFailed(AccountErrorCode.DATA_PARSE_ERROR);
         }
     }
-
-    /**
-     * -----------------------------------Test------------------------------
-     */
-    public static void main(String[] args) {
-        SDKBootstrap.sdkStart();
-        AccountLedgerServiceImpl as = new AccountLedgerServiceImpl();
-        try {
-
-//            System.out.println(JSONUtils.obj2json(as.getBalance("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
-//            System.out.println(JSONUtils.obj2json(as.getTxByHash("002058d239c3e1d2af013492d8196f5dab2ab29827e8b96cc565e5d8508747945871")));
-            System.out.println(JSONUtils.obj2json(as.broadcastTransaction("002058d239c3e1d2af013492d8196f5dab2ab29827e8b96cc565e5d8508747945871")));
-//            System.out.println(JSONUtils.obj2json(as.transfer("2ChDcC1nvki521xXhYAUzYXt4RLNuLs",
-//                    "2CZxWCRn49qTdpHfU4x2p4Pm1P6RnU8", "nuls111111",99900000000L,"转账")));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    /**
-     * ---------------------------------------------------------------------
-     */
 
 }
