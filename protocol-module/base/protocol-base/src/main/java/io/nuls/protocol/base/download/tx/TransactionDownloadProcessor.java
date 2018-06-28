@@ -28,11 +28,18 @@ package io.nuls.protocol.base.download.tx;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.message.bus.service.MessageBusService;
+import io.nuls.network.model.Node;
+import io.nuls.protocol.base.cache.ProtocolCacheHandler;
 import io.nuls.protocol.cache.TemporaryCacheManager;
+import io.nuls.protocol.message.GetTxMessage;
 import io.nuls.protocol.service.TransactionService;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,7 +57,7 @@ public class TransactionDownloadProcessor implements Runnable {
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
-    private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
+    protected MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
     private AtomicInteger count = new AtomicInteger(0);
 
@@ -74,16 +81,37 @@ public class TransactionDownloadProcessor implements Runnable {
 
     private void process() {
 
-        Transaction tx;
+        Transaction tx = null;
+        Future<Transaction> future;
+        NulsDigestData txHash;
+        Node fromNode;
         try {
             TransactionContainer container = queue.take();
-            if (null == container || container.getFuture() == null) {
+            if (null == container || null == container.getFuture() || null == container.getTxHash()) {
                 return;
             }
-            tx = container.getFuture().get(10, TimeUnit.SECONDS);
+            future = container.getFuture();
+            txHash = container.getTxHash();
+            fromNode = container.getNode();
         } catch (Exception e) {
             Log.error(e);
             return;
+        }
+        int i = 0;
+        while (i < 3) {
+            i++;
+            try {
+                tx = future.get(5, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                future = ProtocolCacheHandler.addGetTxRequest(txHash);
+                GetTxMessage getTxMessage = new GetTxMessage();
+                getTxMessage.setMsgBody(txHash);
+                Result result = messageBusService.sendToNode(getTxMessage, fromNode, false);
+                if (result.isFailed()) {
+                    ProtocolCacheHandler.removeTxFuture(txHash);
+                    continue;
+                }
+            }
         }
 
         if (null == tx || tx.isSystemTx()) {

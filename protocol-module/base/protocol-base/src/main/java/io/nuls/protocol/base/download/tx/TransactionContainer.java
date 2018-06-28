@@ -25,6 +25,7 @@
 
 package io.nuls.protocol.base.download.tx;
 
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.network.model.Node;
 
@@ -36,12 +37,14 @@ import java.util.concurrent.Future;
  */
 public class TransactionContainer {
 
-    private Node node;
-    private Future<Transaction> future;
+    private final NulsDigestData txHash;
+    private final Node node;
+    private final Future<Transaction> future;
 
-    public TransactionContainer(Node node, Future<Transaction> future) {
+    public TransactionContainer(Node node, Future<Transaction> future, NulsDigestData hash) {
         this.node = node;
         this.future = future;
+        this.txHash = hash;
     }
 
     public Node getNode() {
@@ -52,4 +55,7 @@ public class TransactionContainer {
         return future;
     }
 
+    public NulsDigestData getTxHash() {
+        return txHash;
+    }
 }

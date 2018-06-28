@@ -46,7 +46,7 @@ import java.util.concurrent.Future;
  */
 public class ProtocolCacheHandler {
 
-    public static final InventoryFilter TX_FILTER = new InventoryFilter(10000, 10000000);
+    public static final InventoryFilter TX_FILTER = new InventoryFilter(10000, 1000000);
     public static final InventoryFilter SMALL_BLOCK_FILTER = new InventoryFilter(100, 1000000);
 
     private static DataCacher<Block> blockByHashCacher = new DataCacher<>(MessageDataType.BLOCK);

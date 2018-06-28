@@ -24,7 +24,6 @@
  */
 package io.nuls.protocol.base.handler;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -33,7 +32,6 @@ import io.nuls.network.model.Node;
 import io.nuls.protocol.base.cache.ProtocolCacheHandler;
 import io.nuls.protocol.base.download.tx.TransactionContainer;
 import io.nuls.protocol.base.download.tx.TransactionDownloadProcessor;
-import io.nuls.protocol.base.utils.filter.InventoryFilter;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.message.ForwardTxMessage;
 import io.nuls.protocol.message.GetTxMessage;
@@ -41,7 +39,6 @@ import io.nuls.protocol.message.GetTxMessage;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author facjas
@@ -80,7 +77,7 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
             return;
         }
 //        inventoryFilter.insert(hash.getDigestBytes());
-        txDownloadProcessor.offer(new TransactionContainer(fromNode, future));
+        txDownloadProcessor.offer(new TransactionContainer(fromNode, future,hash));
 
 
     }
