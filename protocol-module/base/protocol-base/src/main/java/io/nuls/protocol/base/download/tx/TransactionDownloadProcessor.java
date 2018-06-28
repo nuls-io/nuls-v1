@@ -29,12 +29,12 @@ import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.validate.ValidateResult;
-import io.nuls.network.model.Node;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.service.TransactionService;
 
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -74,15 +74,13 @@ public class TransactionDownloadProcessor implements Runnable {
 
     private void process() {
 
-        Transaction tx = null;
-        Node fromNode = null;
+        Transaction tx;
         try {
             TransactionContainer container = queue.take();
             if (null == container || container.getFuture() == null) {
                 return;
             }
             tx = container.getFuture().get(10, TimeUnit.SECONDS);
-            fromNode = container.getNode();
         } catch (Exception e) {
             Log.error(e);
             return;
@@ -95,25 +93,8 @@ public class TransactionDownloadProcessor implements Runnable {
         if (size % 100 == 0) {
             Log.error("tx count:::::" + size);
         }
-
-        if (tx.isSystemTx()) {
-            return;
-        }
-        ValidateResult result = tx.verify();
-        if (result.isFailed()) {
-            return;
-        }
-
-        Transaction tempTx = temporaryCacheManager.getTx(tx.getHash());
-        if (tempTx != null) {
-            consensusService.newTx(tx);
-            return;
-        }
-
         try {
-            temporaryCacheManager.cacheTx(tx);
             consensusService.newTx(tx);
-            transactionService.forwardTx(tx, fromNode);
         } catch (Exception e) {
             Log.error(e);
         }
