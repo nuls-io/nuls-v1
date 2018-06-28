@@ -497,6 +497,7 @@ public class PocConsensusResource {
         if (saveResult.isFailed()) {
             return saveResult.toRpcClientResult();
         }
+        transactionService.newTx(tx);
         Result sendResult = this.transactionService.forwardTx(tx, null);
         if (sendResult.isFailed()) {
             accountLedgerService.rollbackTransaction(tx);

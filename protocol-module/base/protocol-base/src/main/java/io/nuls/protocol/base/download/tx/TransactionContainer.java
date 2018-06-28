@@ -23,51 +23,33 @@
  *
  */
 
-package io.nuls.protocol.base.utils.filter;
+package io.nuls.protocol.base.download.tx;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import io.nuls.kernel.model.Transaction;
+import io.nuls.network.model.Node;
+
+import java.util.concurrent.Future;
 
 /**
- * 向量清单过滤器
- *
- * @author ln
+ * @author: Niels Wang
+ * @date: 2018/6/28
  */
-public class InventoryFilter {
+public class TransactionContainer {
 
-    private final int maxCount;
-    private final int elements;
-    private AtomicInteger size = new AtomicInteger(0);
+    private Node node;
+    private Future<Transaction> future;
 
-    private BloomFilter filter;
-
-    public InventoryFilter(int maxCount, int elements) {
-        this.maxCount = maxCount;
-        this.elements = elements;
-        filter = new BloomFilter(elements, 0.0001, randomLong());
+    public TransactionContainer(Node node, Future<Transaction> future) {
+        this.node = node;
+        this.future = future;
     }
 
-    public BloomFilter getFilter() {
-        return filter;
+    public Node getNode() {
+        return node;
     }
 
-    public void insert(byte[] object) {
-        filter.insert(object);
-        int count = size.incrementAndGet();
-        if (count >= maxCount) {
-            this.clear();
-        }
+    public Future<Transaction> getFuture() {
+        return future;
     }
 
-    public boolean contains(byte[] object) {
-        return filter.contains(object);
-    }
-
-    public void clear() {
-        filter = new BloomFilter(elements, 0.0001, randomLong());
-        size.set(0);
-    }
-
-    private long randomLong() {
-        return (long) (Math.random() * Long.MAX_VALUE);
-    }
 }

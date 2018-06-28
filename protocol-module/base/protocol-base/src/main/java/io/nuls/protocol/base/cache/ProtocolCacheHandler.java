@@ -28,6 +28,7 @@ package io.nuls.protocol.base.cache;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.protocol.base.utils.filter.InventoryFilter;
 import io.nuls.protocol.constant.MessageDataType;
@@ -54,16 +55,16 @@ public class ProtocolCacheHandler {
     private static DataCacher<BlockHashResponse> blockHashesCacher = new DataCacher<>(MessageDataType.HASHES);
     private static DataCacher<CompleteParam> taskCacher = new DataCacher<>(MessageDataType.BLOCKS);
     private static DataCacher<NulsDigestData> reactCacher = new DataCacher<>(MessageDataType.REQUEST);
-    private static DataCacher<Boolean> txCacher = new DataCacher<>(MessageDataType.TRANSACTION);
+    private static DataCacher<Transaction> txCacher = new DataCacher<>(MessageDataType.TRANSACTION);
     private static DataCacher<Boolean> smallBlockCacher = new DataCacher<>(MessageDataType.SMALL_BLOCK);
 
-    public static CompletableFuture<Boolean> addGetTxRequest(NulsDigestData txHash) {
+    public static CompletableFuture<Transaction> addGetTxRequest(NulsDigestData txHash) {
         return txCacher.addFuture(txHash);
     }
 
-    public static void receiveTx(NulsDigestData txHash) {
-        TX_FILTER.insert(txHash.getDigestBytes());
-        txCacher.callback(txHash, true);
+    public static void receiveTx(Transaction tx) {
+        TX_FILTER.insert(tx.getHash().getDigestBytes());
+        txCacher.callback(tx.getHash(), tx);
     }
 
     public static void removeTxFuture(NulsDigestData txHash) {

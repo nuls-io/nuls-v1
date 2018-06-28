@@ -24,19 +24,20 @@
  */
 package io.nuls.protocol.base.handler;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.model.Transaction;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
 import io.nuls.protocol.base.cache.ProtocolCacheHandler;
+import io.nuls.protocol.base.download.tx.TransactionContainer;
+import io.nuls.protocol.base.download.tx.TransactionDownloadProcessor;
 import io.nuls.protocol.base.utils.filter.InventoryFilter;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.message.ForwardTxMessage;
 import io.nuls.protocol.message.GetTxMessage;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author facjas
@@ -45,6 +46,8 @@ import java.util.concurrent.TimeUnit;
 public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMessage> {
 
     private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
+
+    private TransactionDownloadProcessor txDownloadProcessor = TransactionDownloadProcessor.getInstance();
 
     @Override
     public void onMessage(ForwardTxMessage message, Node fromNode) {
@@ -58,29 +61,16 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
             return;
         }
 
-        //todo 某个条件下清空过滤器
-
         GetTxMessage getTxMessage = new GetTxMessage();
         getTxMessage.setMsgBody(hash);
-        CompletableFuture<Boolean> future = ProtocolCacheHandler.addGetTxRequest(hash);
-        Result result = messageBusService.sendToNode(getTxMessage, fromNode, false);
+        CompletableFuture<Transaction> future = ProtocolCacheHandler.addGetTxRequest(hash);
+        Result result = messageBusService.sendToNode(getTxMessage, fromNode, true);
         if (result.isFailed()) {
             ProtocolCacheHandler.removeTxFuture(hash);
             return;
         }
-        boolean complete;
-        try {
-            complete = future.get(30L, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            Log.warn("get small block failed:" + hash.getDigestHex(), e);
-            return;
-        } finally {
-            ProtocolCacheHandler.removeTxFuture(hash);
-        }
-        if (complete) {
-            inventoryFilter.insert(hash.getDigestBytes());
-        }
-
+        inventoryFilter.insert(hash.getDigestBytes());
+        txDownloadProcessor.offer(new TransactionContainer(fromNode, future));
     }
 
 }
