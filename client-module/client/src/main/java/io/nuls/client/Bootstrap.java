@@ -28,6 +28,8 @@ package io.nuls.client;
 import io.nuls.client.rpc.RpcServerManager;
 import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.client.rpc.resources.util.FileUtil;
+import io.nuls.client.storage.LanguageService;
+import io.nuls.client.storage.impl.LanguageServiceImpl;
 import io.nuls.client.version.VersionManager;
 import io.nuls.client.web.view.WebViewBootstrap;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
@@ -35,13 +37,17 @@ import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
+import io.nuls.db.service.DBService;
 import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
+import io.nuls.kernel.i18n.I18nUtils;
+import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Result;
 import io.nuls.kernel.module.service.ModuleService;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.model.Node;
@@ -66,7 +72,6 @@ public class Bootstrap {
         }
     }
 
-
     private static void sysStart() throws Exception {
         do {
             MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
@@ -77,8 +82,17 @@ public class Bootstrap {
             String ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP, RpcConstant.DEFAULT_IP);
             int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);
             RpcServerManager.getInstance().startServer(ip, port);
+
+            LanguageService languageService = NulsContext.getServiceBean(LanguageService.class);
+            String languageDB = (String) languageService.getLanguage().getData();
+            String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
+            I18nUtils.setLanguage(language);
+            if (null == languageDB) {
+                languageService.saveLanguage(language);
+            }
         } while (false);
         TaskManager.asynExecuteRunnable(new WebViewBootstrap());
+
 
         while (true) {
             try {

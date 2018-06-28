@@ -23,13 +23,15 @@
  *
  */
 
-package io.nuls.core.kernel.rpc.resource;
+package io.nuls.client.rpc.resources;
 
+import io.nuls.client.storage.LanguageService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.i18n.I18nUtils;
+import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
@@ -53,6 +55,9 @@ import java.util.Map;
 @Component
 public class SystemResource {
 
+    @Autowired
+    private LanguageService languageService;
+
     @PUT
     @Path("/lang/{language}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -65,6 +70,7 @@ public class SystemResource {
         }
         try {
             I18nUtils.setLanguage(language);
+            languageService.saveLanguage(language);
         } catch (NulsException e) {
             Log.error(e);
             Result.getFailed(e.getErrorCode());
