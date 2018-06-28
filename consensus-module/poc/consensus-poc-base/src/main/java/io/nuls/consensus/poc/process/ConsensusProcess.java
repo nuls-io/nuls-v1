@@ -54,6 +54,7 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
@@ -79,6 +80,8 @@ public class ConsensusProcess {
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
     private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
+
+    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
 
     private boolean hasPacking;
@@ -250,7 +253,8 @@ public class ConsensusProcess {
 
     private void broadcastSmallBlock(Block block) {
         SmallBlock smallBlock = ConsensusTool.getSmallBlock(block);
-        blockService.forwardBlock(smallBlock, null);
+        temporaryCacheManager.cacheSmallBlock(smallBlock);
+        blockService.forwardBlock(block.getHeader().getHash(), null);
     }
 
     private Block doPacking(MeetingMember self, MeetingRound round) throws NulsException, IOException {

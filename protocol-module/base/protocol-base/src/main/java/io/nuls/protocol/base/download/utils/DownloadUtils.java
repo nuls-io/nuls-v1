@@ -46,7 +46,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by ln on 2018/4/8.
+ *
+ * @author ln
+ * @date 2018/4/8
  */
 public class DownloadUtils {
 
@@ -57,12 +59,12 @@ public class DownloadUtils {
             return null;
         }
         GetBlockMessage message = new GetBlockMessage(hash);
-        Future<Block> future = ProtocolCacheHandler.addGetBlockRequest(hash);
+        Future<Block> future = ProtocolCacheHandler.addGetBlockByHashRequest(hash);
         Future<NulsDigestData> reactFuture = ProtocolCacheHandler.addRequest(hash);
         Result result = messageBusService.sendToNode(message, node, false);
         Log.error("start request:"+new Date().toLocaleString()+" ::: "+hash);
         if (!result.isSuccess()) {
-            ProtocolCacheHandler.removeBlockFuture(hash);
+            ProtocolCacheHandler.removeBlockByHashFuture(hash);
             ProtocolCacheHandler.removeRequest(hash);
             return null;
         }
@@ -74,7 +76,7 @@ public class DownloadUtils {
             Log.error(node.getId(),e);
             return null;
         } finally {
-            ProtocolCacheHandler.removeBlockFuture(hash);
+            ProtocolCacheHandler.removeBlockByHashFuture(hash);
             ProtocolCacheHandler.removeRequest(hash);
         }
     }
@@ -104,7 +106,7 @@ public class DownloadUtils {
         List<Map<NulsDigestData, Future<Block>>> blockFutures = new ArrayList<>();
         for(long i = startHeight ; i <= endHeight ; i++) {
             NulsDigestData hash = NulsDigestData.calcDigestData(SerializeUtils.uint64ToByteArray(i));
-            Future<Block> blockFuture = ProtocolCacheHandler.addGetBlockRequest(hash);
+            Future<Block> blockFuture = ProtocolCacheHandler.addGetBlockByHeightRequest(hash);
 
             Map<NulsDigestData, Future<Block>> blockFutureMap = new HashMap<>();
             blockFutureMap.put(hash, blockFuture);
@@ -118,7 +120,7 @@ public class DownloadUtils {
 
             for(Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
                 for (Map.Entry<NulsDigestData, Future<Block>> entry : blockFutureMap.entrySet()) {
-                    ProtocolCacheHandler.removeBlockFuture(entry.getKey());
+                    ProtocolCacheHandler.removeBlockByHeightFuture(entry.getKey());
                 }
             }
             return resultList;
@@ -145,7 +147,7 @@ public class DownloadUtils {
 
             for(Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
                 for (Map.Entry<NulsDigestData, Future<Block>> entry : blockFutureMap.entrySet()) {
-                    ProtocolCacheHandler.removeBlockFuture(entry.getKey());
+                    ProtocolCacheHandler.removeBlockByHeightFuture(entry.getKey());
                 }
             }
         }

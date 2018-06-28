@@ -64,6 +64,7 @@ public class TemporaryCacheManager {
      */
     public void cacheSmallBlock(SmallBlock smallBlock) {
         smallBlockCacheMap.put(smallBlock.getHeader().getHash(), smallBlock);
+        smallBlockCacheMap.remove(smallBlock.getHeader().getPreHash());
     }
 
     /**
@@ -137,7 +138,7 @@ public class TemporaryCacheManager {
         return smallBlockCacheMap.size();
     }
 
-    public int getTxCount(){
+    public int getTxCount() {
         return txCacheMap.size();
     }
 }

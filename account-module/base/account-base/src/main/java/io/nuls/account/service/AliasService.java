@@ -154,6 +154,9 @@ public class AliasService {
             if (saveResult.isFailed()) {
                 return saveResult;
             }
+
+            this.transactionService.newTx(tx);
+
             Result sendResult = this.transactionService.forwardTx(tx, null);
             if (sendResult.isFailed()) {
                 accountLedgerService.rollbackTransaction(tx);

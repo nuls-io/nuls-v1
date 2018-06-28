@@ -118,11 +118,11 @@ public interface BlockService {
      * 转发区块给连接的其他对等节点，允许一个列外（不转发给它）
      * Forward block to other peers of the connection, allowing one column (not forward to it)
      *
-     * @param block       完整区块/the whole block
+     * @param hash       区块摘要/the hash of block
      * @param excludeNode 需要排除的节点，一般是因为从该节点处接收的本区块/The nodes that need to be excluded are generally due to the block received from the node.
      * @return 转发结果/forward results
      */
-    Result forwardBlock(SmallBlock block, Node excludeNode);
+    Result forwardBlock(NulsDigestData hash, Node excludeNode);
 
     /**
      * 广播区块给连接的其他对等节点
