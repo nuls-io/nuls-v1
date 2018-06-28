@@ -57,6 +57,7 @@ public interface AccountLedgerService {
 
     /**
      * 创建交易
+     * Create Transaction
      *
      * @param inputs
      * @param outputs
@@ -66,6 +67,7 @@ public interface AccountLedgerService {
 
     /**
      * 签名交易
+     * Sign Transaction
      *
      * @param txHex
      * @param priKey
@@ -77,6 +79,7 @@ public interface AccountLedgerService {
 
     /**
      * 广播交易
+     * Broadcast Transaction
      *
      * @param txHex
      * @return

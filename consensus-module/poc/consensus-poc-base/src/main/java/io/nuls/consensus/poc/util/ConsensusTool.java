@@ -221,8 +221,8 @@ public class ConsensusTool {
             }
         });
 
-        Coin agentReword = new Coin(self.getRewardAddress(), Na.valueOf(DoubleUtils.longValue(caReward)), unlockHeight);
-        rewardList.add(0, agentReword);
+        Coin agentReward = new Coin(self.getRewardAddress(), Na.valueOf(DoubleUtils.longValue(caReward)), unlockHeight);
+        rewardList.add(0, agentReward);
 
         return rewardList;
     }

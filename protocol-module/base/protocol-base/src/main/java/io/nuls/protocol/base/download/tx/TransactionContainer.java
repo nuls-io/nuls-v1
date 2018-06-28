@@ -22,29 +22,34 @@
  * SOFTWARE.
  *
  */
-package io.nuls.protocol.base.handler;
+
+package io.nuls.protocol.base.download.tx;
 
 import io.nuls.kernel.model.Transaction;
-import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.base.cache.ProtocolCacheHandler;
-import io.nuls.protocol.message.TransactionMessage;
+
+import java.util.concurrent.Future;
 
 /**
- * @author Niels
- * @date 2018/1/8
+ * @author: Niels Wang
+ * @date: 2018/6/28
  */
-public class TransactionMessageHandler extends AbstractMessageHandler<TransactionMessage> {
+public class TransactionContainer {
 
-    @Override
-    public void onMessage(TransactionMessage message, Node fromNode) {
+    private Node node;
+    private Future<Transaction> future;
 
-        Transaction tx = message.getMsgBody();
-        if (null == tx) {
-            return;
-        }
+    public TransactionContainer(Node node, Future<Transaction> future) {
+        this.node = node;
+        this.future = future;
+    }
 
-        ProtocolCacheHandler.receiveTx(tx);
+    public Node getNode() {
+        return node;
+    }
+
+    public Future<Transaction> getFuture() {
+        return future;
     }
 
 }

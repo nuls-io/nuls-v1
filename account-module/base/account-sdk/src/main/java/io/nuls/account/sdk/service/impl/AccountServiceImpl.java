@@ -3,16 +3,13 @@ package io.nuls.account.sdk.service.impl;
 import io.nuls.account.sdk.constant.AccountConstant;
 import io.nuls.account.sdk.model.AccountDto;
 import io.nuls.account.sdk.model.AccountKeyStoreDto;
-import io.nuls.account.sdk.model.AssetDto;
 import io.nuls.account.sdk.service.AccountService;
-import io.nuls.sdk.SDKBootstrap;
 import io.nuls.sdk.constant.AccountErrorCode;
 import io.nuls.sdk.crypto.AESEncrypt;
 import io.nuls.sdk.crypto.ECKey;
 import io.nuls.sdk.crypto.Hex;
 import io.nuls.sdk.exception.NulsException;
 import io.nuls.sdk.model.Account;
-import io.nuls.sdk.model.Address;
 import io.nuls.sdk.model.Na;
 import io.nuls.sdk.model.Result;
 import io.nuls.sdk.model.dto.BalanceDto;
@@ -531,53 +528,6 @@ public class AccountServiceImpl implements AccountService {
         map.put("value", Hex.encode(account.getEncryptedPriKey()));
         return Result.getSuccess().setData(map);
     }
-
-    /**
-     * -----------------------------------Test------------------------------
-     */
-    public static void main(String[] args) {
-        SDKBootstrap.sdkStart();
-        AccountService as = new AccountServiceImpl();
-        try {
-//            System.out.println(JSONUtils.obj2json(as.createAccount(3,"nuls123456")));
-//            System.out.println(JSONUtils.obj2json(as.createOfflineAccount(2, "nuls123456")));
-//            System.out.println(JSONUtils.obj2json(as.getAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
-//            System.out.println(JSONUtils.obj2json(as.getAliasFee("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "charlie")));
-//            System.out.println(JSONUtils.obj2json(as.getAccountList(1, 100)));
-//            System.out.println(JSONUtils.obj2json(as.getAddressByAlias("charlie")));
-//            System.out.println(JSONUtils.obj2json(as.getPrikey("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "nuls111111")));
-//            System.out.println(JSONUtils.obj2json(as.isAliasUsable("charlie")));
-//            System.out.println(JSONUtils.obj2json(as.backupAccount("2ChDcC1nvki521xXhYAUzYXt4RLNuLs", "/Users/lichao/Downloads", "nuls111111")));
-//            System.out.println(JSONUtils.obj2json(as.importAccountByKeystore("/Users/lichao/Downloads/2ChDcC1nvki521xXhYAUzYXt4RLNuLs.accountkeystore","nuls111111",true)));
-//            System.out.println(JSONUtils.obj2json(as.importAccountByPriKey("74ffeeec0b2d6552a07eb7f5691a6da13278f87025283ca474741f35b247f55d",
-//                    "nuls123456",true)));
-//            System.out.println(JSONUtils.obj2json(as.isEncrypted("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
-//            System.out.println(JSONUtils.obj2json(as.removeAccount("2CZxWCRn49qTdpHfU4x2p4Pm1P6RnU8", "nuls123456")));
-//            System.out.println(JSONUtils.obj2json(as.setPassword("2CiANt4bUihwuwrzFFKgA91mC3U4dRT","nuls123456")));
-//            System.out.println(JSONUtils.obj2json(as.resetPassword("2CiANt4bUihwuwrzFFKgA91mC3U4dRT","nuls123456", "nuls111111")));
-//            System.out.println(JSONUtils.obj2json(as.setAlias("2CiU1CmB6c9jmSLDNBe6PouA7NgNULS","firstbloods", "nuls123456")));
-//            System.out.println(JSONUtils.obj2json(as.createOfflineAccount(2)));
-
-//            System.out.println(JSONUtils.obj2json(as.setPasswordOffline(
-//                    "2CinqyeuVQDCwjAwLDfgQaFBc5QzFFw",
-//                    "01315f71eb607c076969974549d26c6326cda462e959190afc6a8621fe9da3f2",
-//                    "nuls123456")));
-
-//            System.out.println(JSONUtils.obj2json(as.resetPasswordOffline(
-//                    "2CinqyeuVQDCwjAwLDfgQaFBc5QzFFw",
-//                    "275c2f9532c25c981ca56974e91f2b8232901542ad5150b1193ae52337d2310645436a345adfde8158e3966d2acfb7eb",
-//                    "nuls123456", "nuls111111")));
-
-            System.out.println(JSONUtils.obj2json(as.getWalletTotalBalance()));
-            System.out.println(JSONUtils.obj2json(as.getAssets("2ChDcC1nvki521xXhYAUzYXt4RLNuLs")));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * ---------------------------------------------------------------------
-     */
 
     @Override
     public Result updatePasswordByKeystore(FileReader fileReader, String password) {
