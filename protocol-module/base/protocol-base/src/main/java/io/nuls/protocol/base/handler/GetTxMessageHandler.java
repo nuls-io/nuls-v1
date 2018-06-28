@@ -60,7 +60,10 @@ public class GetTxMessageHandler extends AbstractMessageHandler<GetTxMessage> {
 
         TransactionMessage txMessage = new TransactionMessage();
         txMessage.setMsgBody(tx);
-        messageBusService.sendToNode(txMessage, fromNode, true);
+        Result result = messageBusService.sendToNode(txMessage, fromNode, true);
+        if(!result.isSuccess()) {
+            Log.error("send error to node : " + fromNode.getId());
+        }
     }
 
     private void sendNotFound(NulsDigestData hash, Node fromNode) {

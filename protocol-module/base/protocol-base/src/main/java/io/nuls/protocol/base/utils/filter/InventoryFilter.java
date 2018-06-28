@@ -54,7 +54,7 @@ public class InventoryFilter {
         filter.insert(object);
         int count = size.incrementAndGet();
         if (count >= maxCount) {
-            this.clear();
+//            this.clear();
         }
     }
 
