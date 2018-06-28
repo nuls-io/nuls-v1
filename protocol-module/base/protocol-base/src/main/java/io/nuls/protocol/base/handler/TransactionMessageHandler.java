@@ -70,7 +70,7 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
             return;
         }
 
-        ProtocolCacheHandler.receiveTx(tx.getHash());
+//        ProtocolCacheHandler.receiveTx(tx.getHash());
 
         if (tx.isSystemTx()) {
             return;

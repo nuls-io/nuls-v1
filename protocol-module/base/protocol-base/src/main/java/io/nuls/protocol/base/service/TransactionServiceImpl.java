@@ -154,6 +154,11 @@ public class TransactionServiceImpl implements TransactionService {
         return messageBusService.broadcast(message, null, true);
     }
 
+    @Override
+    public Result newTx(Transaction tx) {
+        return consensusService.newTx(tx);
+    }
+
     /**
      * 冲突检测，检测如果传入的交易列表中有相冲突的交易，则返回失败，写明失败原因及所有的应该舍弃的交易列表
      * <p>

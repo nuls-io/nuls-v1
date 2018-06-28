@@ -60,24 +60,24 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
 
         GetTxMessage getTxMessage = new GetTxMessage();
         getTxMessage.setMsgBody(hash);
-        CompletableFuture<Boolean> future = ProtocolCacheHandler.addGetTxRequest(hash);
+//        CompletableFuture<Boolean> future = ProtocolCacheHandler.addGetTxRequest(hash);
         Result result = messageBusService.sendToNode(getTxMessage, fromNode, true);
         if (result.isFailed()) {
             ProtocolCacheHandler.removeTxFuture(hash);
             return;
         }
-        boolean complete;
-        try {
-            complete = future.get(30L, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            Log.warn("get small block failed:" + hash.getDigestHex(), e);
-            return;
-        } finally {
-            ProtocolCacheHandler.removeTxFuture(hash);
-        }
-        if (complete) {
+//        boolean complete;
+//        try {
+//            complete = future.get(30L, TimeUnit.SECONDS);
+//        } catch (Exception e) {
+//            Log.warn("get small block failed:" + hash.getDigestHex(), e);
+//            return;
+//        } finally {
+//            ProtocolCacheHandler.removeTxFuture(hash);
+//        }
+//        if (complete) {
             inventoryFilter.insert(hash.getDigestBytes());
-        }
+//        }
 
     }
 

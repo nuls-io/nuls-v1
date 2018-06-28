@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author ln
@@ -65,13 +66,17 @@ public class MessageClassificationProcessor<E extends BaseMessage> implements Ev
         ProcessData processData = disruptorData.getData();
         Class<? extends BaseMessage> serviceId = processData.getData().getClass();
         Set<NulsMessageHandler> handlers = handlerManager.getHandlerList(serviceId);
-        ExecutorService handlerExecutor = handlerService.get(serviceId);
+        ThreadPoolExecutor handlerExecutor = (ThreadPoolExecutor) handlerService.get(serviceId);
         if (handlerExecutor == null) {
             handlerExecutor = TaskManager.createThreadPool(1, Integer.MAX_VALUE, new NulsThreadFactory(MessageBusConstant.MODULE_ID_MESSAGE_BUS, "disruptor-processor"));
             handlerService.put(serviceId, handlerExecutor);
         }
         for (NulsMessageHandler handler : handlers) {
             handlerExecutor.execute(new NulsMessageCall(processData, handler));
+            int size = handlerExecutor.getQueue().size();
+            if (size > 10) {
+                System.out.println(serviceId + " queue size::::::::::::::::::::" + size);
+            }
         }
     }
 
