@@ -24,6 +24,7 @@
  */
 package io.nuls.protocol.base.handler;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -37,7 +38,10 @@ import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.message.ForwardTxMessage;
 import io.nuls.protocol.message.GetTxMessage;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author facjas
@@ -49,18 +53,24 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
 
     private TransactionDownloadProcessor txDownloadProcessor = TransactionDownloadProcessor.getInstance();
 
+    private Set<NulsDigestData> set = new HashSet<>();
+
     @Override
     public void onMessage(ForwardTxMessage message, Node fromNode) {
         if (message == null || fromNode == null || null == message.getMsgBody()) {
             return;
         }
         NulsDigestData hash = message.getMsgBody();
-        InventoryFilter inventoryFilter = ProtocolCacheHandler.TX_FILTER;
-        boolean constains = inventoryFilter.contains(hash.getDigestBytes());
-        if (constains) {
+//        InventoryFilter inventoryFilter = ProtocolCacheHandler.TX_FILTER;
+//        boolean constains = inventoryFilter.contains(hash.getDigestBytes());
+        if (!set.add(hash)) {
+//            Log.error("重复交易：：：：" + hash.getDigestHex());
             return;
         }
-
+        if (set.size() >= 100000) {
+            set.clear();
+            set.add(hash);
+        }
         GetTxMessage getTxMessage = new GetTxMessage();
         getTxMessage.setMsgBody(hash);
         CompletableFuture<Transaction> future = ProtocolCacheHandler.addGetTxRequest(hash);
@@ -69,7 +79,7 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
             ProtocolCacheHandler.removeTxFuture(hash);
             return;
         }
-        inventoryFilter.insert(hash.getDigestBytes());
+//        inventoryFilter.insert(hash.getDigestBytes());
         txDownloadProcessor.offer(new TransactionContainer(fromNode, future));
 
 
