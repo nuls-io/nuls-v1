@@ -37,8 +37,10 @@ import io.nuls.kernel.utils.TransactionManager;
 import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.protocol.base.download.tx.TransactionDownloadProcessor;
 import io.nuls.protocol.base.handler.*;
 import io.nuls.protocol.base.service.DownloadServiceImpl;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.*;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.model.tx.TransferTransaction;
@@ -113,6 +115,7 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         messageBusService.subscribeMessage(CompleteMessage.class, new CompleteHandler());
         messageBusService.subscribeMessage(ReactMessage.class, new ReactMessageHandler());
 
+        TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "Tx-Download", TransactionDownloadProcessor.getInstance());
         messageBusService.subscribeMessage(GetTxMessage.class, new GetTxMessageHandler());
         messageBusService.subscribeMessage(GetSmallBlockMessage.class, new GetSmallBlockHandler());
         messageBusService.subscribeMessage(ForwardSmallBlockMessage.class, new ForwardSmallBlockHandler());

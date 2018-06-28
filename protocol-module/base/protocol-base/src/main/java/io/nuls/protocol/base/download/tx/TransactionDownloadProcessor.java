@@ -35,6 +35,7 @@ import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.service.TransactionService;
 
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author: Niels Wang
@@ -50,6 +51,8 @@ public class TransactionDownloadProcessor implements Runnable {
 
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
     private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
+
+    private AtomicInteger count = new AtomicInteger(0);
 
     private TransactionDownloadProcessor() {
     }
@@ -87,6 +90,10 @@ public class TransactionDownloadProcessor implements Runnable {
 
         if (null == tx || tx.isSystemTx()) {
             return;
+        }
+        int size = count.incrementAndGet();
+        if (size % 100 == 0) {
+            Log.error("tx count:::::" + size);
         }
 
         if (tx.isSystemTx()) {
