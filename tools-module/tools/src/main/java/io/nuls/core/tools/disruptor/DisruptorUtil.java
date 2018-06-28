@@ -117,7 +117,7 @@ public class DisruptorUtil<T extends DisruptorData> {
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
         RingBuffer<DisruptorData> ringBuffer = disruptor.getRingBuffer();
 
-        locker.lock();
+//        locker.lock();
         try {
             //请求下一个事件序号；
             long sequence = ringBuffer.next();
@@ -132,7 +132,7 @@ public class DisruptorUtil<T extends DisruptorData> {
                 ringBuffer.publish(sequence);
             }
         } finally {
-            locker.unlock();
+//            locker.unlock();
         }
     }
 
