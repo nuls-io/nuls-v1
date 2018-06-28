@@ -29,6 +29,7 @@
         <module>client-module</module>
         <module>tools-module</module>
         <module>message-bus-module</module>
+        <module>sdk-module</module>
     </modules>
     <dependencies>
         <dependency>

@@ -37,47 +37,5 @@
     <groupId>io.nuls.sdk-module</groupId>
     <artifactId>nuls-sdk</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.nuls.account-ledger-module</groupId>
-            <artifactId>account-ledger-sdk</artifactId>
-            <version>0.9.11</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.account-module</groupId>
-            <artifactId>account-sdk</artifactId>
-            <version>0.9.11</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.consensus-module</groupId>
-            <artifactId>consensus-poc-sdk</artifactId>
-            <version>0.9.11</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.core-module</groupId>
-            <artifactId>kernel-sdk</artifactId>
-            <version>0.9.11</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.ledger-module</groupId>
-            <artifactId>ledger-utxo-sdk</artifactId>
-            <version>0.9.11</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.protocol-module</groupId>
-            <artifactId>protocol-sdk</artifactId>
-            <version>0.9.11</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.contract-module</groupId>
-            <artifactId>contract-sdk</artifactId>
-            <version>0.9.11</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.network-module</groupId>
-            <artifactId>network-sdk</artifactId>
-            <version>0.9.11</version>
-        </dependency>
-    </dependencies>
 
 </project>

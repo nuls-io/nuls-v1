@@ -159,11 +159,10 @@ public interface AccountLedgerService {
     Result transferFee(byte[] from, byte[] to, Na values, String remark, Na price);
 
     /**
-     * 创建交易
-     *
-     * @param inputsKey
-     * @param outputs
-     * @param remark
+     * create a transaction by inputs data and outputs data
+     * @param inputsKey key of utxo
+     * @param outputs new utxos
+     * @param remark remarks of transaction
      * @return
      */
     Result createTransaction(List<byte[]> inputsKey, List<Coin> outputs, byte[] remark);
@@ -202,12 +201,16 @@ public interface AccountLedgerService {
     Result importLedgerByAddress(String address);
 
     /**
-     * 查询交易列表
+     *
+     * @param address
+     * @return
      */
     Result<List<TransactionInfo>> getTxInfoList(byte[] address);
 
     /**
-     * 查询锁定的未花费交易
+     *
+     * @param address
+     * @return
      */
     Result<List<Coin>> getLockedUtxo(byte[] address);
 }
