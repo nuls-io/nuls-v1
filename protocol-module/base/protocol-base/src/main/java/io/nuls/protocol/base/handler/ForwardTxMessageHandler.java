@@ -61,7 +61,7 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
         GetTxMessage getTxMessage = new GetTxMessage();
         getTxMessage.setMsgBody(hash);
         CompletableFuture<Boolean> future = ProtocolCacheHandler.addGetTxRequest(hash);
-        Result result = messageBusService.sendToNode(getTxMessage, fromNode, false);
+        Result result = messageBusService.sendToNode(getTxMessage, fromNode, true);
         if (result.isFailed()) {
             ProtocolCacheHandler.removeTxFuture(hash);
             return;
