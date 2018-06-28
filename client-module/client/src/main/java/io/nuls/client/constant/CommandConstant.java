@@ -41,4 +41,6 @@ public interface CommandConstant {
     String CMD_SYS = "sys";
     String CMD_ACCT = "account";
 
+    String DB_LANGUAGE = "language";
+
 }
