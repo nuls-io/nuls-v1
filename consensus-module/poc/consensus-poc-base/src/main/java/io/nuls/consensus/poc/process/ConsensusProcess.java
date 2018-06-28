@@ -308,8 +308,8 @@ public class ConsensusProcess {
             }
 
             Transaction tx = txContainer.getTx();
-
-            if ((totalSize + tx.size()) > ProtocolConstant.MAX_BLOCK_SIZE) {
+            long txSize = tx.size();
+            if ((totalSize + txSize) > ProtocolConstant.MAX_BLOCK_SIZE) {
                 txMemoryPool.addInFirst(txContainer, false);
                 break;
             }
@@ -367,7 +367,7 @@ public class ConsensusProcess {
             tx.setBlockHeight(bd.getHeight());
             packingTxList.add(tx);
 
-            totalSize += tx.size();
+            totalSize += txSize;
         }
         ValidateResult validateResult = null;
         while (null == validateResult || validateResult.isFailed()) {
