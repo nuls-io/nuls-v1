@@ -64,6 +64,7 @@ public class InventoryFilter {
 
     public void clear() {
         filter = new BloomFilter(elements, 0.0001, randomLong());
+        this.size = new AtomicInteger(0);
     }
 
     private long randomLong() {

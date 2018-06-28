@@ -58,8 +58,6 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
             return;
         }
 
-        //todo 某个条件下清空过滤器
-
         GetTxMessage getTxMessage = new GetTxMessage();
         getTxMessage.setMsgBody(hash);
         CompletableFuture<Boolean> future = ProtocolCacheHandler.addGetTxRequest(hash);
