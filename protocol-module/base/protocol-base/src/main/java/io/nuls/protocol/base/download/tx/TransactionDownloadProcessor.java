@@ -58,8 +58,6 @@ public class TransactionDownloadProcessor implements Runnable {
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
     protected MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
-    private AtomicInteger count = new AtomicInteger(0);
-
     private TransactionDownloadProcessor() {
     }
 
@@ -82,7 +80,7 @@ public class TransactionDownloadProcessor implements Runnable {
 
         Transaction tx = null;
         Future<Transaction> future;
-        NulsDigestData txHash;
+        NulsDigestData txHash = null;
         Node fromNode;
         try {
             TransactionContainer container = queue.take();
@@ -95,6 +93,8 @@ public class TransactionDownloadProcessor implements Runnable {
         } catch (Exception e) {
             Log.error(e);
             return;
+        } finally {
+            ProtocolCacheHandler.removeTxFuture(txHash);
         }
         int i = 0;
         while (i < 3) {
@@ -115,10 +115,6 @@ public class TransactionDownloadProcessor implements Runnable {
 
         if (null == tx || tx.isSystemTx()) {
             return;
-        }
-        int size = count.incrementAndGet();
-        if (size % 100 == 0) {
-            Log.error("tx count:::::" + size);
         }
         try {
             consensusService.newTx(tx);
