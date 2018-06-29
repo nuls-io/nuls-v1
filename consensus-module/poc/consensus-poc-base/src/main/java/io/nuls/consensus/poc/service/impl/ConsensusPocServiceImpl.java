@@ -53,7 +53,6 @@ import java.util.List;
 
 /**
  * @author ln
- * @date 2018/5/5
  */
 @Service
 public class ConsensusPocServiceImpl implements ConsensusService {

@@ -40,7 +40,6 @@ import java.io.IOException;
 
 /**
  * @author ln
- * @date 2018/5/10
  */
 public class AgentPo extends BaseNulsData {
 

@@ -31,7 +31,6 @@ import io.nuls.protocol.message.GetBlockMessage;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/22
  */
 public class BlockRequest {
     private GetBlockMessage message;

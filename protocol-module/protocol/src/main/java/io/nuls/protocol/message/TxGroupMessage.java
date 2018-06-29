@@ -33,7 +33,6 @@ import io.nuls.protocol.model.TxGroup;
  * When a peer requests a transaction, the message is answered, and the content is one or more transactions.
  *
  * @author Niels
- * @date 2017/11/13
  */
 public class TxGroupMessage extends BaseProtocolMessage<TxGroup> {
 

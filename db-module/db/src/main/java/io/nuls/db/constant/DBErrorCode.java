@@ -32,7 +32,6 @@ import io.nuls.kernel.constant.KernelErrorCode;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/5/9
  */
 public interface DBErrorCode extends KernelErrorCode {
 

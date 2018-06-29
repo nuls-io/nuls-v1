@@ -8,7 +8,6 @@ import java.util.List;
 
 /**
  * @author: Charlie
- * @date: 2018/6/12
  */
 public interface AccountLedgerService {
 

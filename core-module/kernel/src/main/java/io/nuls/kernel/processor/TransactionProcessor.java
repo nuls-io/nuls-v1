@@ -39,7 +39,6 @@ import java.util.List;
  * Implement this interface class, you need to add {@link io.nuls.kernel.lite.annotation.Service} annotation
  *
  * @author Niels
- * @date 2017/12/14
  */
 public interface TransactionProcessor<T extends Transaction> extends ConflictDetectProcessor {
 

@@ -56,7 +56,6 @@ import java.util.List;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/5/14
  */
 public class UtxoLedgerServiceImplTest {
 

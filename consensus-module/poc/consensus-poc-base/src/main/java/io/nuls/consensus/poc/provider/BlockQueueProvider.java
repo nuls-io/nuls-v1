@@ -36,7 +36,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * @author ln
- * @date 2018/4/13
  */
 public class BlockQueueProvider {
 

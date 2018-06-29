@@ -32,7 +32,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author: Charlie
- * @date: 2018/5/24
  */
 @ApiModel(value = "重置密码KeyStore表单数据")
 public class AccountKeyStoreResetPasswordForm {

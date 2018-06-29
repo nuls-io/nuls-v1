@@ -31,7 +31,6 @@ import io.nuls.kernel.utils.AddressTool;
  * SYSTEM CONSTANT
  *
  * @author Niels
- * @date 2017/9/26
  */
 public interface NulsConstant {
 

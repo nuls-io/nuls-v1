@@ -38,7 +38,6 @@ import java.util.List;
  * Block/transaction download service interface.
  *
  * @author Niels
- * @date 2018/4/10
  */
 public interface DownloadService {
 

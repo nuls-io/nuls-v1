@@ -35,7 +35,6 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/26
  */
 public class DataCacher<T> {
 

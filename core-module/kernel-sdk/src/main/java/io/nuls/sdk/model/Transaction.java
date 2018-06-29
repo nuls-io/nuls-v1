@@ -36,7 +36,6 @@ import java.util.*;
 
 /**
  * @author Niels
- * @date 2017/10/30
  */
 public abstract class Transaction<T extends TransactionLogicData> extends BaseNulsData implements Cloneable {
 

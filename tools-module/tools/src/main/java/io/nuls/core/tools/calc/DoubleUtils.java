@@ -31,7 +31,6 @@ import java.text.DecimalFormat;
 
 /**
  * @author: Niels Wang
- * @date: 2018/3/20
  */
 public class DoubleUtils {
 

@@ -37,7 +37,6 @@ import io.nuls.ledger.service.LedgerService;
 
 /**
  * @author Niels
- * @date 2017/12/4
  */
 public class StopAgentTransaction extends Transaction<StopAgent> {
 

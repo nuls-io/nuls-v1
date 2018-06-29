@@ -30,7 +30,6 @@ import io.nuls.kernel.module.BaseModuleBootstrap;
 
 /**
  * @author Niels
- * @date 2017/10/18
  */
 public abstract class AbstractConsensusModule extends BaseModuleBootstrap {
     public AbstractConsensusModule() {

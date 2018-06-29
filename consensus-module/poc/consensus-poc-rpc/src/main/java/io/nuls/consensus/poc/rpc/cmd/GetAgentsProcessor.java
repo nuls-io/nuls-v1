@@ -44,7 +44,6 @@ import java.util.Map;
  * Get all the agent nodes
  *
  * @author: Charlie
- * @date: 2018/5/29
  */
 public class GetAgentsProcessor implements CommandProcessor {
 

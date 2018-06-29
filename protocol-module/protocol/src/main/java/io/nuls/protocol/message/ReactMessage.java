@@ -33,7 +33,6 @@ import io.nuls.protocol.model.ReactParam;
 
 /**
  * @author ln
- * @date 2018/05/29
  */
 public class ReactMessage extends BaseProtocolMessage<ReactParam> {
 

@@ -74,7 +74,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Facjas
- * @date 2018/5/10.
  */
 @Service
 public class AccountLedgerServiceImpl implements AccountLedgerService, InitializingBean {

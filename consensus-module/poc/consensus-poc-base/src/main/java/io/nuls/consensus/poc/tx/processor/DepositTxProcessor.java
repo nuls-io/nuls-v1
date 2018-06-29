@@ -51,7 +51,6 @@ import java.util.*;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/13
  */
 @Component
 public class DepositTxProcessor implements TransactionProcessor<DepositTransaction> {

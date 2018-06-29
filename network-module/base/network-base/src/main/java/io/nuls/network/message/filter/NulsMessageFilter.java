@@ -27,7 +27,6 @@ import io.nuls.protocol.message.base.BaseMessage;
 
 /**
  * @author vivi
- * @Date 2017.11.01
  */
 public interface NulsMessageFilter {
 

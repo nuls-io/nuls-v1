@@ -33,7 +33,6 @@ import io.nuls.sdk.constant.KernelErrorCode;
 /**
  * Mapping RpcClientResult
  * @author Charlie
- * @date 2018/6/8
  */
 public class Result {
 

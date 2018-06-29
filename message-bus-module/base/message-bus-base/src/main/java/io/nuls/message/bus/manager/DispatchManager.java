@@ -40,7 +40,6 @@ import io.nuls.protocol.message.base.BaseMessage;
  * Message processing manager.
  *
  * @author: Charlie
- * @date: 2018/5/6
  */
 public class DispatchManager<M extends BaseMessage> {
 

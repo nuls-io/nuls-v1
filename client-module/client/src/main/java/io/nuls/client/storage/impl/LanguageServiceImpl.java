@@ -13,7 +13,6 @@ import io.nuls.kernel.model.Result;
 
 /**
  * @author: Charlie
- * @date: 2018/6/28
  */
 @Service
 public class LanguageServiceImpl implements LanguageService, InitializingBean {

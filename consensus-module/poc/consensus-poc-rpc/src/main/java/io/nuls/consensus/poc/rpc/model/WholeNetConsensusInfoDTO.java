@@ -30,7 +30,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author: Niels Wang
- * @date: 2018/3/20
  */
 @ApiModel(value = "wholeNetConsensusInfoJSON")
 public class WholeNetConsensusInfoDTO {

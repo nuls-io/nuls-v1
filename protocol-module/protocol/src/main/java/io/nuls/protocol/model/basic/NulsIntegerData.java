@@ -38,7 +38,6 @@ import java.io.IOException;
  * Controlled, int type encapsulation.
  *
  * @author Niels
- * @date 2018/3/12
  */
 public class NulsIntegerData extends BasicTypeData<Integer> {
     public NulsIntegerData() {

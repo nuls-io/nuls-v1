@@ -46,7 +46,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/28
  */
 public class TransactionDownloadProcessor implements Runnable {
 

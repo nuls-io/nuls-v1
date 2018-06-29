@@ -30,7 +30,6 @@ import io.nuls.kernel.model.Na;
 
 /**
  * @author ln
- * @date 2018/4/22
  */
 public interface PocConsensusConstant {
 

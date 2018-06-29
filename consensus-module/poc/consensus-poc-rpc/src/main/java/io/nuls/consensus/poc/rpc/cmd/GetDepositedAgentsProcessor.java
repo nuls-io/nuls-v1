@@ -43,7 +43,6 @@ import java.util.Map;
  * 根据地址查询该账户委托的节点列表(返回节点信息列表)
  * Get a list of deposited agent info based on your account
  * @author: Charlie
- * @date: 2018/5/29
  */
 public class GetDepositedAgentsProcessor implements CommandProcessor {
 

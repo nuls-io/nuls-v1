@@ -32,7 +32,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author Niels
- * @date 2018/3/14
  */
 @ApiModel(value = "申请参与共识表单数据")
 public class DepositForm {

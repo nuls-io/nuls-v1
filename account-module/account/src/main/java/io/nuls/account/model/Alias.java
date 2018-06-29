@@ -37,7 +37,6 @@ import java.util.Set;
 
 /**
  * @author: Charlie
- * @date: 2018/5/9
  */
 public class Alias extends TransactionLogicData {
 

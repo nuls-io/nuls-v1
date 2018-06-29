@@ -32,7 +32,6 @@ import java.lang.annotation.*;
  * the system is automatically assigned to the field during the initialization phase.
  *
  * @author Niels Wang
- * @date 2018/1/30
  */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)

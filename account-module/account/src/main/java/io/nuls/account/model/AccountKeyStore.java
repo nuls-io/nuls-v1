@@ -26,7 +26,6 @@ package io.nuls.account.model;
 
 /**
  * @author Facjas
- * @date 2018/5/9.
  */
 public class AccountKeyStore {
 

@@ -34,7 +34,6 @@ import java.io.IOException;
 
 /**
  * @author Niels
- * @date 2017/12/26
  */
 public class StringFileLoader {
 

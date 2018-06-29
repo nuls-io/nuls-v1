@@ -28,7 +28,6 @@ package io.nuls.contract.entity.form;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/4/20
  */
 public class ContractCreate extends ContractBase {
 

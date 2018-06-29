@@ -31,7 +31,6 @@ import io.nuls.kernel.utils.CommandBuilder;
 
 /**
  * @author: Charlie
- * @date: 2018/5/30
  */
 public class ExitProcessor implements CommandProcessor {
 

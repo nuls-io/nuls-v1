@@ -30,7 +30,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author: Charlie
- * @date: 2018/4/18
  */
 @ApiModel(value = "创建账户表单数据")
 public class AccountCreateForm {

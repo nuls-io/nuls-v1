@@ -32,7 +32,6 @@ import org.ehcache.event.CacheEventListener;
 
 /**
  * @author Niels
- * @date 2018/1/23
  */
 public class EhcacheListener implements CacheEventListener {
 

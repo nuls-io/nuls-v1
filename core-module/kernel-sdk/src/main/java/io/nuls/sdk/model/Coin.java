@@ -36,7 +36,6 @@ import java.io.IOException;
 /**
  *
  * @author ln
- * @date 2018/5/5
  */
 public class Coin extends BaseNulsData {
 

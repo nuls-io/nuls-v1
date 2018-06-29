@@ -32,7 +32,6 @@ import java.util.List;
 
 /**
  * @author: Charlie
- * @date: 2018/5/6
  */
 public class NulsMessageFilterChain {
     private List<NulsMessageFilter> list = new ArrayList<>();

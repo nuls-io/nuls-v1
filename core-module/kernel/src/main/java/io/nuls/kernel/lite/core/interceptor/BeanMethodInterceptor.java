@@ -33,7 +33,6 @@ import java.lang.reflect.Method;
  * you need to define your own interceptor to implement the interface.
  *
  * @author: Niels Wang
- * @date: 2018/1/30
  */
 public interface BeanMethodInterceptor {
     /**

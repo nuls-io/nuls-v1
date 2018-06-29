@@ -31,7 +31,6 @@ package io.nuls.sdk.constant;
  * This class integrates internationalization operations, and all information that needs internationalization should be used.
  *
  * @author: Niels Wang
- * @date: 2018/5/5
  */
 public class ErrorCode {
     /**

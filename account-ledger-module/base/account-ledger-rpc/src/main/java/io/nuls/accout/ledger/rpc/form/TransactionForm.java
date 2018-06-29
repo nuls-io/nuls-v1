@@ -33,7 +33,6 @@ import java.util.List;
 
 /**
  * @author Facjas
- * @date 2018/5/15.
  */
 @ApiModel(value = "创建交易")
 public class TransactionForm {

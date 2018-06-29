@@ -37,7 +37,6 @@ import java.util.Set;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/11
  */
 public class CancelDeposit extends TransactionLogicData {
 

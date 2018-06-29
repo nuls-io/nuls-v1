@@ -33,7 +33,6 @@ import io.nuls.protocol.model.SmallBlock;
  * The message for send new SmallBlock;
  *
  * @author Niels
- * @date 2017/11/13
  */
 public class SmallBlockMessage extends BaseProtocolMessage<SmallBlock> {
     public SmallBlockMessage() {

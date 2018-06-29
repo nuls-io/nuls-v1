@@ -33,7 +33,6 @@ import io.nuls.kernel.exception.NulsRuntimeException;
  * An exception is thrown when the object instance in the system object pool is not in the right state.
  *
  * @author Niels
- * @date 2018/2/1
  */
 public class BeanStatusException extends NulsRuntimeException {
     public BeanStatusException(ErrorCode message) {

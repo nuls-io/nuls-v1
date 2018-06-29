@@ -33,7 +33,6 @@ import io.nuls.protocol.message.NotFoundMessage;
 
 /**
  * @author: Niels Wang
- * @date: 2018/4/9
  */
 public class NotFoundHander extends AbstractMessageHandler<NotFoundMessage> {
     /**

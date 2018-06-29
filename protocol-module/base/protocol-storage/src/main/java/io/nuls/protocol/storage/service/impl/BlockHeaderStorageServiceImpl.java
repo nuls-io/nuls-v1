@@ -48,7 +48,6 @@ import java.io.IOException;
  * Block header data storage service implementation class.
  *
  * @author: Niels Wang
- * @date: 2018/5/8`
  */
 
 @Service

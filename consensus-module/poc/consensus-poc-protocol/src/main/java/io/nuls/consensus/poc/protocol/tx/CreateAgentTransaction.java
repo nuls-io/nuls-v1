@@ -34,7 +34,6 @@ import io.nuls.kernel.utils.NulsByteBuffer;
 
 /**
  * @author Niels
- * @date 2017/12/4
  */
 public class CreateAgentTransaction extends Transaction<Agent> {
 

@@ -29,7 +29,6 @@ import io.nuls.kernel.model.Transaction;
 
 /**
  * @author ln
- * @date 2018/5/25
  */
 public class TxContainer {
 

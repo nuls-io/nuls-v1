@@ -40,7 +40,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/5/8
  */
 public class AccountLedgerModuleBootstrap extends AbstractAccountLedgerModule {
 

@@ -54,7 +54,6 @@ import java.util.List;
 
 /**
  * @author: Charlie
- * @date: 2018/5/11
  */
 @Component
 public class AliasTransactionValidator implements NulsDataValidator<AliasTransaction> {

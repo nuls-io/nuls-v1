@@ -38,7 +38,6 @@ import java.util.List;
  * The chain is initialized and assembled every time a method is executed.
  *
  * @author Niels Wang
- * @date 2018/1/30
  */
 public class MultipleBeanMethodInterceptorChain extends BeanMethodInterceptorChain {
 

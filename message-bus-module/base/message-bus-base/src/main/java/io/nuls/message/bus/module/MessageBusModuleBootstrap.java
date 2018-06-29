@@ -29,7 +29,6 @@ import io.nuls.message.bus.manager.DispatchManager;
 
 /**
  * @author: Charlie
- * @date: 2018/5/6
  */
 public class MessageBusModuleBootstrap extends AbstractMessageBusModule {
 

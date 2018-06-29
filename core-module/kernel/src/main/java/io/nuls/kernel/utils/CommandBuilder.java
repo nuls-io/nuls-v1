@@ -6,7 +6,6 @@ import io.nuls.core.tools.str.StringUtils;
 /**
  * @Desription:
  * @Author: PierreLuo
- * @Date:
  */
 public class CommandBuilder {
     private StringBuilder builder = new StringBuilder();

@@ -34,7 +34,6 @@ import io.nuls.protocol.model.TxGroup;
 
 /**
  * @author facjas
- * @date 2017/11/16
  */
 public class TxGroupHandler extends AbstractMessageHandler<TxGroupMessage> {
 

@@ -38,7 +38,6 @@ import io.nuls.protocol.service.TransactionService;
 
 /**
  * @author Niels
- * @date 2018/1/8
  */
 public class TransactionMessageHandler extends AbstractMessageHandler<TransactionMessage> {
 

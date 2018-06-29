@@ -32,7 +32,6 @@ import io.nuls.kernel.module.manager.ServiceManager;
 
 /**
  * @author Niels
- * @date 2017/9/26
  */
 public abstract class BaseModuleBootstrap {
 

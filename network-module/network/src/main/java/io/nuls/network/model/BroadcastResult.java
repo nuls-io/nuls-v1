@@ -32,7 +32,6 @@ import java.util.List;
 
 /**
  * @author vivi
- * @Date 2017.11.01
  */
 public class BroadcastResult implements Cloneable {
 

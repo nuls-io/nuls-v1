@@ -41,7 +41,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Niels
- * @date 2017/9/26
  */
 public class ModuleManager {
 

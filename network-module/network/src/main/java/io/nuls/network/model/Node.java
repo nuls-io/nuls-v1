@@ -40,7 +40,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author vivi
- * @Date 2017.11.01
  */
 public class Node extends BaseNulsData {
 

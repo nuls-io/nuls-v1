@@ -59,7 +59,6 @@ import java.util.Set;
 
 /**
  * @author Niels
- * @date 2018/5/17
  */
 @Component
 public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTransaction> {

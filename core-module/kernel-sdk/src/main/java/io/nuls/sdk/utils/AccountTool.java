@@ -38,7 +38,6 @@ import java.math.BigInteger;
 
 /**
  * @author: Charlie
- * @date: 2018/5/9
  */
 public class AccountTool {
     /**

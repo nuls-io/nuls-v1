@@ -4,7 +4,6 @@ import io.nuls.sdk.model.Result;
 
 /**
  * @author: Charlie
- * @date: 2018/6/13
  */
 public interface BlockService {
 

@@ -56,7 +56,6 @@ import java.util.Map;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/13
  */
 @Path("/client")
 @Api(value = "/client", description = "Client")

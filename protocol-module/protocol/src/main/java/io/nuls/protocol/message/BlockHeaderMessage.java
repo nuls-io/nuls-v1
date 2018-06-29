@@ -34,7 +34,6 @@ import io.nuls.protocol.constant.ProtocolConstant;
  * The host class of the block header in the network message.
  *
  * @author Niels
- * @date 2017/11/13
  */
 public class BlockHeaderMessage extends BaseProtocolMessage<BlockHeader> {
     public BlockHeaderMessage() {

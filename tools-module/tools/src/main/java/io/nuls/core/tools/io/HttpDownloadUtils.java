@@ -35,7 +35,6 @@ import java.net.URL;
 
 /**
  * @author Niels
- * @date 2018/3/5
  */
 public class HttpDownloadUtils {
 

@@ -36,7 +36,6 @@ import org.spongycastle.util.Arrays;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/9
  */
 public class AddressTool {
 

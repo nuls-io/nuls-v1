@@ -31,7 +31,6 @@ import io.nuls.kernel.thread.BaseThread;
 
 /**
  * @author Niels
- * @date 2017/11/27
  */
 public class ModuleProcess extends BaseThread {
     private final ModuleRunner runner;

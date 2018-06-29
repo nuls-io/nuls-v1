@@ -47,7 +47,6 @@ import java.util.Set;
  * System default service interceptor.
  *
  * @author Niels
- * @date 2018/1/31
  */
 public class ModularServiceMethodInterceptor implements MethodInterceptor {
     /**

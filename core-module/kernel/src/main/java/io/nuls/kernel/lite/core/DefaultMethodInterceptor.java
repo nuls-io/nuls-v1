@@ -35,7 +35,6 @@ import java.lang.reflect.Method;
  * The system's default method interceptor is used for the aop underlying implementation.
  *
  * @author: Niels Wang
- * @date: 2018/1/30
  */
 class DefaultMethodInterceptor implements MethodInterceptor {
     /**

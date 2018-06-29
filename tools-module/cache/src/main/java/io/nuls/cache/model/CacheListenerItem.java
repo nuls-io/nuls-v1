@@ -27,7 +27,6 @@ package io.nuls.cache.model;
 
 /**
  * @author Niels
- * @date 2018/1/23
  */
 public class CacheListenerItem<K, V> {
 

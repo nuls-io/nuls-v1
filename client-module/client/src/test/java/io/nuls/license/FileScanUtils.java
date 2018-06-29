@@ -33,7 +33,6 @@ import java.io.FileWriter;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/5
  */
 public class FileScanUtils {
 

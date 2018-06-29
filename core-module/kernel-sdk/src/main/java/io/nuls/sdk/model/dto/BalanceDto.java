@@ -31,7 +31,6 @@ import java.util.Map;
 
 /**
  * @author: Charlie
- * @date: 2018/6/10
  */
 public class BalanceDto {
 

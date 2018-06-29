@@ -44,7 +44,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author ln
- * @date 2018-05-23
  */
 public class MessageClassificationProcessor<E extends BaseMessage> implements EventHandler<DisruptorData<ProcessData<E>>> {
 

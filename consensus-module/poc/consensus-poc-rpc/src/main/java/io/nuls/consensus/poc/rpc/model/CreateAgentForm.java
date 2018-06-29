@@ -32,7 +32,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author Niels
- * @date 2018/3/14
  */
 @ApiModel(value = "创建共识(代理)节点表单数据")
 public class CreateAgentForm {

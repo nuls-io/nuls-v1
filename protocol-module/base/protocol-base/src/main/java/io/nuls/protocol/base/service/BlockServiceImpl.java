@@ -52,7 +52,6 @@ import java.util.List;
  * Block processing service classes.
  *
  * @author: Niels Wang
- * @date: 2018/5/8
  */
 @Service("blockService")
 public class BlockServiceImpl implements BlockService {

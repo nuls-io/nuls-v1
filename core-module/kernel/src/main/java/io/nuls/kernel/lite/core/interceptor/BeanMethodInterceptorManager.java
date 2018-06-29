@@ -38,7 +38,6 @@ import java.util.Map;
  * Interceptor manager.
  *
  * @author Niels Wang
- * @date 2018/1/30
  */
 public class BeanMethodInterceptorManager {
 

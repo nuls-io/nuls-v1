@@ -29,7 +29,6 @@ import io.nuls.sdk.model.Na;
 
 /**
  * @author: Charlie
- * @date: 2018/5/9
  */
 public interface AccountConstant {
 

@@ -29,7 +29,6 @@ import io.nuls.consensus.poc.constant.ConsensusStatus;
 
 /**
  * @author ln
- * @date 2018/4/13
  */
 public class ConsensusStatusContext {
 

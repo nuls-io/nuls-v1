@@ -33,7 +33,6 @@ import javax.ws.rs.QueryParam;
 
 /**
  * @author: Charlie
- * @date: 2018/5/13
  */
 @ApiModel(value = "获取设置账户别名手续费表单数据")
 public class AccountAliasFeeForm {

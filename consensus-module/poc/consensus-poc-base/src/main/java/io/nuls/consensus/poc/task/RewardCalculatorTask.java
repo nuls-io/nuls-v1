@@ -27,7 +27,6 @@ package io.nuls.consensus.poc.task;
 
 import io.nuls.consensus.poc.process.RewardStatisticsProcess; /**
  * @author: Niels Wang
- * @date: 2018/5/25
  */
 public class RewardCalculatorTask implements Runnable {
 

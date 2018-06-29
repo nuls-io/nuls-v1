@@ -48,7 +48,6 @@ import java.util.concurrent.*;
 
 /**
  * @author ln
- * @date 2018/4/8
  */
 public class DownloadProcessor extends Thread {
 

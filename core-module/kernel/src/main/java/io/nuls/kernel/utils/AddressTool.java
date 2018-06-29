@@ -38,7 +38,6 @@ import io.nuls.kernel.script.P2PKHScriptSig;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/9
  */
 public class AddressTool {
 

@@ -28,7 +28,6 @@ import java.util.Properties;
 
 /**
  * @author Niels
- * @date 2018/1/5
  */
 public class PropertiesEntity {
 

@@ -41,7 +41,6 @@ import java.io.IOException;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/9
  */
 @ApiModel(value = "blockJSON 区块信息(包含区块头信息, 交易信息), 只返回对应的部分数据")
 public class BlockHeaderDto {

@@ -42,7 +42,6 @@ import io.nuls.kernel.utils.AddressTool;
 
 /**
  * @author: Charlie
- * @date: 2018/5/14
  */
 @Service
 public class AccountBaseService {

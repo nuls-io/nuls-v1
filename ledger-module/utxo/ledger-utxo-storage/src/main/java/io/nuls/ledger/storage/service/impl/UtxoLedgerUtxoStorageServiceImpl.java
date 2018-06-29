@@ -44,7 +44,6 @@ import java.util.List;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/5/8
  */
 @Service
 public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageService,InitializingBean {

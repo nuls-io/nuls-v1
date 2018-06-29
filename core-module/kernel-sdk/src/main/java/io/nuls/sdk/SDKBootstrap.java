@@ -6,7 +6,6 @@ import io.nuls.sdk.utils.StringUtils;
 
 /**
  * @author: Charlie
- * @date: 2018/6/10
  */
 public class SDKBootstrap {
 

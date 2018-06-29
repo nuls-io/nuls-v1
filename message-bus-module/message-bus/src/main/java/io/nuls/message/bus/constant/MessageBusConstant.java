@@ -31,7 +31,6 @@ import io.nuls.kernel.constant.NulsConstant;
  * 消息总线相关的常量和一些通用的常量定义在这里
  * The relevant constants of the message-bus and some general constants are defined here.
  * @author: Charlie
- * @date: 2018/5/6
  */
 public interface MessageBusConstant extends NulsConstant {
 

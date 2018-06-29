@@ -41,7 +41,6 @@ import java.util.List;
  * Request transaction list data encapsulation.
  *
  * @author Niels
- * @date 2017/12/18
  */
 public class GetTxGroupParam extends BaseNulsData {
 

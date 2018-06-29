@@ -46,7 +46,6 @@
 //
 ///**
 // * @author: Niels Wang
-// * @date: 2018/5/22
 // */
 //public class BlockSendThread implements Runnable {
 //

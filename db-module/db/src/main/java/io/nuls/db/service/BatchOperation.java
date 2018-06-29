@@ -28,7 +28,6 @@ import io.nuls.kernel.model.Result;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/5/9
  */
 public interface BatchOperation {
 

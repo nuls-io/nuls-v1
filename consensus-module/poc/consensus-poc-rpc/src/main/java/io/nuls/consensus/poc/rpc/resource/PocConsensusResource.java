@@ -79,7 +79,6 @@ import java.util.*;
 
 /**
  * @author Niels
- * @date 2018/5/15
  */
 @Path("/consensus")
 @Api(value = "/consensus", description = "poc-consensus")

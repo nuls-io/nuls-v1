@@ -28,7 +28,6 @@ package io.nuls.consensus.poc.protocol.constant;
 
 /**
  * @author Niels
- * @date 2018/3/22
  */
 public enum PunishType {
 

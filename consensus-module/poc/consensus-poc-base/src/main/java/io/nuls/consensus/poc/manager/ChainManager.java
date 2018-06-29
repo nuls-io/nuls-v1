@@ -37,7 +37,6 @@ import java.util.List;
 /**
  *
  * @author ln
- * @date 2018/4/13
  */
 public class ChainManager {
 

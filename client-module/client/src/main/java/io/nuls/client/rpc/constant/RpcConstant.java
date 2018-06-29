@@ -27,7 +27,6 @@ package io.nuls.client.rpc.constant;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/10
  */
 public interface RpcConstant {
 

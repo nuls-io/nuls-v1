@@ -31,7 +31,6 @@ import io.nuls.kernel.validate.ValidateResult;
 
 /**
  * @author Niels
- * @date 2017/12/19
  */
 @Component
 public class TxRemarkValidator implements NulsDataValidator<Transaction> {

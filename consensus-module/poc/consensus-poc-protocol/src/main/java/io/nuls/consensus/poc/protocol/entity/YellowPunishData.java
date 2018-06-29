@@ -41,7 +41,6 @@ import java.util.Set;
 
 /**
  * @author Niels
- * @date 2017/12/28
  */
 public class YellowPunishData extends TransactionLogicData {
     private List<byte[]> addressList = new ArrayList<>();

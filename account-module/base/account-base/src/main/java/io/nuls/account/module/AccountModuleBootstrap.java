@@ -30,7 +30,6 @@ import io.nuls.kernel.context.NulsContext;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/13
  */
 public class AccountModuleBootstrap extends AbstractAccountModuleBootstrap {
     /**

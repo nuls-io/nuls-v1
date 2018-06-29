@@ -39,7 +39,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Niels
- * @date 2017/10/10
  */
 public class DisruptorUtil<T extends DisruptorData> {
 

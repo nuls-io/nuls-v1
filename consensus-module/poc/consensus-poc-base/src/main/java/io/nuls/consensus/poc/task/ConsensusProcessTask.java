@@ -31,7 +31,6 @@ import io.nuls.core.tools.log.Log;
 /**
  *
  * @author ln
- * @date 2018/4/13
  */
 public class ConsensusProcessTask implements Runnable {
 

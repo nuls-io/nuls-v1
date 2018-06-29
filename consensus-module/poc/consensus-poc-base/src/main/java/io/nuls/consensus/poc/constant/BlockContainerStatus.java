@@ -29,7 +29,6 @@ package io.nuls.consensus.poc.constant;
 /**
  *
  * @author ln
- * @date 2018/4/13
  */
 public final class BlockContainerStatus {
 

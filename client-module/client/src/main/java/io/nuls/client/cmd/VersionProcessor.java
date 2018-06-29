@@ -33,7 +33,6 @@ import io.nuls.kernel.utils.RestFulUtils;
 
 /**
  * @author: Charlie
- * @date: 2018/5/30
  */
 public class VersionProcessor implements CommandProcessor {
 

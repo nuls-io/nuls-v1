@@ -37,7 +37,6 @@ import java.util.Map;
  * 用于不同的handler之间共享交易数据，交易缓存池中的数据已经放入，直到自动销毁前，不做清理
  *
  * @author Niels
- * @date 2017/12/12
  */
 public class TemporaryCacheManager {
     private static final TemporaryCacheManager INSTANCE = new TemporaryCacheManager();

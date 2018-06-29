@@ -33,7 +33,6 @@ import java.util.Map;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/5/14
  */
 public class TransactionDto {
 

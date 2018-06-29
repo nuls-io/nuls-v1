@@ -55,7 +55,6 @@ import java.util.Map;
 
 /**
  * @author facjas
- * @date 2017/11/16
  */
 public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage> {
 

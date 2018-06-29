@@ -30,7 +30,6 @@ import io.nuls.kernel.module.BaseModuleBootstrap;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/5/7
  */
 public abstract class AbstractDBModule extends BaseModuleBootstrap {
 

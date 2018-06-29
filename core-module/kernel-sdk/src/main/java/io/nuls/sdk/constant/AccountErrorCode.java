@@ -28,7 +28,6 @@ package io.nuls.sdk.constant;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/5
  */
 public interface AccountErrorCode {
 

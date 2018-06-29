@@ -29,7 +29,6 @@ import io.nuls.kernel.i18n.I18nUtils;
 
 /**
  * @author Niels
- * @date 2017/12/28
  */
 public enum PunishReasonEnum {
     /**

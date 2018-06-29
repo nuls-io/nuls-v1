@@ -35,7 +35,6 @@ import java.io.IOException;
 
 /**
  * @author: Charlie
- * @date: 2018/5/11
  */
 public class AliasPo extends BaseNulsData {
 

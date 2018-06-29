@@ -29,7 +29,6 @@ package io.nuls.kernel.constant;
  * The module runs state enumeration.
  *
  * @author: Niels Wang
- * @date: 2018/5/5
  */
 public enum ModuleStatusEnum {
     /**

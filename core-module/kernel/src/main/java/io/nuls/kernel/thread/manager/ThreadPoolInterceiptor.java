@@ -31,7 +31,6 @@ import java.lang.reflect.Method;
 
 /**
  * @author Niels
- * @date 2017/11/27
  */
 public class ThreadPoolInterceiptor implements MethodInterceptor {
     @Override

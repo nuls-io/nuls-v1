@@ -43,7 +43,6 @@ import java.util.jar.JarFile;
  * including the class in the jar file and the class under the folder.
  *
  * @author Niels Wang
- * @date 2018/1/30
  */
 public class ScanUtil {
     private static final ClassLoader CLASS_LOADER = ScanUtil.class.getClassLoader();

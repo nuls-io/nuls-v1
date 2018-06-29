@@ -48,7 +48,6 @@ import java.util.Map;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/22
  */
 @Path("/sys")
 @Api(value = "/sys", description = "System")

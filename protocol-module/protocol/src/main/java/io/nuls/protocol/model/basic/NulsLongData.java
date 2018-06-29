@@ -38,7 +38,6 @@ import java.io.IOException;
  * Controlled, long type encapsulation.
  *
  * @author Niels
- * @date 2018/3/12
  */
 public class NulsLongData extends BasicTypeData<Long> {
     public NulsLongData() {

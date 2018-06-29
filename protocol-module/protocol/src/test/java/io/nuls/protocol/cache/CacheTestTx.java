@@ -31,7 +31,6 @@ import io.nuls.kernel.utils.NulsByteBuffer;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/7
  */
 public class CacheTestTx extends Transaction {
     public CacheTestTx() {

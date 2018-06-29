@@ -32,7 +32,6 @@ import io.nuls.kernel.model.NulsDigestData;
 /**
  *
  * @author ln
- * @date 2018/5/8
  */
 public interface OrphanStorageService {
 

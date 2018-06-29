@@ -27,7 +27,6 @@ package io.nuls.consensus.poc.rpc.model;
 
 /**
  * @author: Niels Wang
- * @date: 2018/3/20
  */
 public class ConsensusInfoDTO {
 

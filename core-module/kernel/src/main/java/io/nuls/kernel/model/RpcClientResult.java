@@ -33,7 +33,6 @@ import java.util.Map;
 
 /**
  * @author Niels
- * @date 2017/10/31
  */
 public class RpcClientResult {
 

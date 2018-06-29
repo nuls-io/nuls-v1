@@ -33,7 +33,6 @@ import io.nuls.core.tools.log.Log;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/21
  */
 public class NulsExceptionHandler implements ExceptionHandler<Object> {
     /**

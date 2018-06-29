@@ -45,7 +45,6 @@ import java.util.Set;
 
 /**
  * @author Niels
- * @date 2017/12/10
  */
 public class Agent extends TransactionLogicData {
 

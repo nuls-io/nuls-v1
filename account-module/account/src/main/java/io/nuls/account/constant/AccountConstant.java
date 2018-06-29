@@ -33,7 +33,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author: Charlie
- * @date: 2018/5/9
  */
 public interface AccountConstant extends NulsConstant {
 

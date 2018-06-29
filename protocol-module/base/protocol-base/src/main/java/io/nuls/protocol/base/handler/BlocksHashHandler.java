@@ -32,7 +32,6 @@ import io.nuls.protocol.message.BlocksHashMessage;
 
 /**
  * @author Niels
- * @date 2018/1/16
  */
 public class BlocksHashHandler extends AbstractMessageHandler<BlocksHashMessage> {
 

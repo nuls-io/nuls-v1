@@ -32,7 +32,6 @@ import io.nuls.kernel.exception.NulsException;
  * Initialize the object interface.
  *
  * @author: Niels Wang
- * @date: 2018/5/9
  */
 public interface InitializingBean {
 

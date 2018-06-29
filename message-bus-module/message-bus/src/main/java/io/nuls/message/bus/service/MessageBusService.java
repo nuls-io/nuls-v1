@@ -37,7 +37,6 @@ import java.util.List;
  * The message-bus module provides the definition of the external service interface
  *
  * @author: Charlie
- * @date: 2018/5/4
  */
 public interface MessageBusService {
 

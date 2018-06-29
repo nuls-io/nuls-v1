@@ -38,7 +38,6 @@ import java.util.Map;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/8
  */
 public class AssemblyBlockUtil {
     public static Block assemblyBlock(BlockHeader header, Map<NulsDigestData, Transaction> txMap, List<NulsDigestData> txHashList) {

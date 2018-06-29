@@ -45,7 +45,6 @@ import java.util.Map;
 
 /**
  * @author: Charlie
- * @date: 2018/05/28
  */
 public class GetAccountTxListProcessor implements CommandProcessor {
 

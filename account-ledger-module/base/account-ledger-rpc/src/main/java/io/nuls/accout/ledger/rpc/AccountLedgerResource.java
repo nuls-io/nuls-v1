@@ -25,7 +25,6 @@
 
 /**
  * @author: Facjas
- * @date: 2018/5/8
  */
 package io.nuls.accout.ledger.rpc;
 

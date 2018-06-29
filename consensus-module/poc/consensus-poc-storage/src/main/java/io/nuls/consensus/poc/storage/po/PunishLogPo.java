@@ -37,7 +37,6 @@ import java.util.Arrays;
 
 /**
  * @author Niels
- * @date 2018/3/22
  */
 public class PunishLogPo extends BaseNulsData {
     private byte type;

@@ -38,7 +38,6 @@ import java.util.Map;
  * 依赖于slf4j
  *
  * @author Niels
- * @date [2017年9月25日]
  */
 public final class Log {
     /**

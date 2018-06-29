@@ -37,7 +37,6 @@ import java.io.IOException;
  * The base class for all messages transmitted over the network defines the basic format of the network message.
  *
  * @author Niels
- * @date 2017/11/7
  */
 public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
 

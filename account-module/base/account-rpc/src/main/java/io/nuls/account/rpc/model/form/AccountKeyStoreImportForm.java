@@ -32,7 +32,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author: Charlie
- * @date: 2018/5/16
  */
 @ApiModel(value = "导入账户KeyStore表单数据")
 public class AccountKeyStoreImportForm {

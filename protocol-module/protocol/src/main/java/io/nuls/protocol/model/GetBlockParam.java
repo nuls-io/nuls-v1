@@ -38,7 +38,6 @@ import java.io.IOException;
  * Request block or request block header data encapsulation.
  *
  * @author Niels
- * @date 2017/12/18
  */
 public class GetBlockParam extends BaseNulsData {
 

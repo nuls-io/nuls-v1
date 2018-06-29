@@ -31,7 +31,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author: Charlie
- * @date: 2018/5/13
  */
 @ApiModel(value = "设置账户别名表单数据")
 public class AccountAliasForm {

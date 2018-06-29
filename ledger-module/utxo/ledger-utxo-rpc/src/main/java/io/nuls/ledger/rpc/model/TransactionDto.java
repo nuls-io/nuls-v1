@@ -44,7 +44,6 @@ import java.util.List;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/5/14
  */
 @ApiModel(value = "transactionDtoJSON")
 public class TransactionDto {

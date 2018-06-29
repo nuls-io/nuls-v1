@@ -26,7 +26,6 @@ package io.nuls.kernel.model;
 
 /**
  * @author vivi
- * @date 2017/11/23.
  */
 public interface NulsVersion {
 

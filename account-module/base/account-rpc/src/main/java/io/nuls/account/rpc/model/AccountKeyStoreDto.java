@@ -34,7 +34,6 @@ import java.util.Map;
 
 /**
  * @author: Charlie
- * @date: 2018/5/15
  */
 @ApiModel(value = "导出账户JSON")
 public class AccountKeyStoreDto {

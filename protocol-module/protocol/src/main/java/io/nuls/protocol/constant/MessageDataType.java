@@ -33,7 +33,6 @@ package io.nuls.protocol.constant;
  * NotFound results are divided into several categories according to the data obtained, and specific categories are defined in this class.
  *
  * @author: Niels Wang
- * @date: 2018/4/9
  */
 public enum MessageDataType {
     /**

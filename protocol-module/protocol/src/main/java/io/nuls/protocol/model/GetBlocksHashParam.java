@@ -38,7 +38,6 @@ import java.io.IOException;
  * Request block hashes data encapsulation.
  *
  * @author Niels
- * @date 2018/2/8
  */
 public class GetBlocksHashParam extends BaseNulsData {
 

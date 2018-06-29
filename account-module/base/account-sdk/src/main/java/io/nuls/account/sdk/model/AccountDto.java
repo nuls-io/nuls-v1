@@ -34,7 +34,6 @@ import java.util.Map;
 
 /**
  * @author: Charlie
- * @date: 2018/6/8
  */
 public class AccountDto {
 

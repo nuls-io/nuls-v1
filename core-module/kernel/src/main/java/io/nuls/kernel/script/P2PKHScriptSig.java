@@ -39,7 +39,6 @@ import java.io.IOException;
 
 /**
  * @author Facjas
- * @date 2018/3/8.
  */
 public class P2PKHScriptSig extends Script {
 

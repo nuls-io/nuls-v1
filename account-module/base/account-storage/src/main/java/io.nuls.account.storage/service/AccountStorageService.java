@@ -36,7 +36,6 @@ import java.util.List;
  * Account data storage service interface
  *
  * @author: Charlie
- * @date: 2018/5/9
  */
 public interface AccountStorageService {
 

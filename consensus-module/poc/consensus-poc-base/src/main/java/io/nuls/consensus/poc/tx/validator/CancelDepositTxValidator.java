@@ -45,7 +45,6 @@ import java.util.Arrays;
 
 /**
  * @author Niels
- * @date 2018/5/17
  */
 @Component
 public class CancelDepositTxValidator implements NulsDataValidator<CancelDepositTransaction> {

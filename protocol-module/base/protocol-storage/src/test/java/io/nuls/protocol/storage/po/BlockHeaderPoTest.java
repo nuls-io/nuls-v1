@@ -43,7 +43,6 @@ import static org.junit.Assert.*;
  * Block header model unit test tool class.
  *
  * @author: Niels Wang
- * @date: 2018/5/8
  */
 public class BlockHeaderPoTest {
 

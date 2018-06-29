@@ -43,7 +43,6 @@ import java.util.Properties;
  * a readable string of different languages, depending on the language set by the system.
  *
  * @author Niels
- * @date 2017/9/27
  */
 public class I18nUtils {
     /**

@@ -34,7 +34,6 @@ import io.nuls.protocol.storage.po.BlockHeaderPo;
  * Block header data storage service interface.
  *
  * @author: Niels Wang
- * @date: 2018/5/8
  */
 public interface BlockHeaderStorageService {
 

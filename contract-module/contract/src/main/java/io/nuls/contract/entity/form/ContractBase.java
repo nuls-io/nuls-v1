@@ -28,7 +28,6 @@ package io.nuls.contract.entity.form;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/4/21
  */
 public class ContractBase {
     private String sender;

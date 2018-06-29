@@ -48,7 +48,6 @@ import java.util.concurrent.TimeUnit;
 /**
  *
  * @author ln
- * @date 2018/4/8
  */
 public class DownloadUtils {
 

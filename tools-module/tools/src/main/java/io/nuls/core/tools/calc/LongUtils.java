@@ -32,7 +32,6 @@ import java.math.BigInteger;
  * Long integer computing utility class.
  *
  * @author: Niels Wang
- * @date: 2018/5/9
  */
 public class LongUtils {
 

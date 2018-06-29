@@ -40,7 +40,6 @@ import java.util.List;
 
 /**
  * @author Niels
- * @date 2017/11/7
  */
 public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 

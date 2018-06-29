@@ -35,7 +35,6 @@ import java.util.Set;
 
 /**
  * @author Facjas
- * @date 2018/5/10.
  */
 public interface LocalUtxoStorageService {
 

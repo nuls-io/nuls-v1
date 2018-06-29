@@ -45,7 +45,6 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/8
  */
 public class BlockServiceImplTest {
 

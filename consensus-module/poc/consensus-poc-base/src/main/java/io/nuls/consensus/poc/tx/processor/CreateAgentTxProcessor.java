@@ -56,7 +56,6 @@ import java.util.Set;
 
 /**
  * @author ln
- * @date 2018/5/10
  */
 @Component
 public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentTransaction> {

@@ -33,7 +33,6 @@ import io.nuls.protocol.message.BlockMessage;
 
 /**
  * @author facjas
- * @date 2017/11/16
  */
 public class BlockMessageHandler extends AbstractMessageHandler<BlockMessage> {
 

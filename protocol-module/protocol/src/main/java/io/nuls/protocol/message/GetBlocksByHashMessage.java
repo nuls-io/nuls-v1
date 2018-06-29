@@ -34,7 +34,6 @@ import io.nuls.protocol.model.GetBlocksByHashParam;
  * The message for get block or blocks
  *
  * @author Niels
- * @date 2017/11/13
  */
 public class GetBlocksByHashMessage extends BaseProtocolMessage<GetBlocksByHashParam> {
 

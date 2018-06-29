@@ -32,7 +32,6 @@ import java.util.regex.Pattern;
 
 /**
  * @author vivi
- * @date 2017/11/22.
  */
 public class IpUtil {
     private static final Pattern pattern = Pattern.compile("\\<dd class\\=\"fz24\">(.*?)\\<\\/dd>");

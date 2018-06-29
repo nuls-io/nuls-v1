@@ -32,7 +32,6 @@ import io.nuls.kernel.model.Result;
 
 /**
  * @author Niels
- * @date 2017/11/16
  */
 public class ValidateResult<T> extends Result<T> {
 

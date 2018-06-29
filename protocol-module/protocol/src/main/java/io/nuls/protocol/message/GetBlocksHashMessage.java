@@ -34,7 +34,6 @@ import io.nuls.protocol.model.GetBlocksHashParam;
  * The message of gets the block header summary list from the peer node.
  *
  * @author Niels
- * @date 2018/1/15
  */
 public class GetBlocksHashMessage extends BaseProtocolMessage<GetBlocksHashParam> {
 

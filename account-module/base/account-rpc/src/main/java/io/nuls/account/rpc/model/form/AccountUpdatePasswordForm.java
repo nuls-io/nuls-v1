@@ -31,7 +31,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author: Charlie
- * @date: 2018/4/18
  */
 @ApiModel(value = "重置钱包密码单数据")
 public class AccountUpdatePasswordForm {

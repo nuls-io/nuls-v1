@@ -52,7 +52,6 @@ import io.nuls.protocol.service.DownloadService;
 
 /**
  * @author Niels
- * @date 2017/11/7
  */
 public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
 

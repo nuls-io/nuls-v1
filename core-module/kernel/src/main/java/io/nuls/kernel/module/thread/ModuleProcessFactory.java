@@ -31,7 +31,6 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Niels
- * @date 2017/11/27
  */
 public class ModuleProcessFactory implements ThreadFactory {
 

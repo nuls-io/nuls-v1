@@ -61,7 +61,6 @@ import java.util.List;
  * Account module internal function service class
  *
  * @author: Charlie
- * @date: 2018/5/11
  */
 @Service
 public class AliasService {

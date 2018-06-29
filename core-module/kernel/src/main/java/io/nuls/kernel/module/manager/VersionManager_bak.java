@@ -47,7 +47,6 @@ import java.util.Map;
 
 /**
  * @author: Niels Wang
- * @date: 2018/3/1
  */
 public class VersionManager_bak {
 

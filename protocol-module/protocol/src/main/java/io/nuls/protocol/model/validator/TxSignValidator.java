@@ -36,7 +36,6 @@ import java.io.IOException;
 
 /**
  * @author Niels
- * @date 2017/11/20
  */
 @Component
 public class TxSignValidator implements NulsDataValidator<Transaction> {

@@ -38,7 +38,6 @@ import java.util.*;
  * The key values used by the cache provide some basic methods for storing the structure.
  *
  * @author Niels
- * @date 2017/12/20
  */
 public class CacheMap<K, V> {
 

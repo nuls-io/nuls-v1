@@ -30,7 +30,6 @@ import io.nuls.core.tools.crypto.Hex;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/13
  */
 public interface VersionConstant {
 

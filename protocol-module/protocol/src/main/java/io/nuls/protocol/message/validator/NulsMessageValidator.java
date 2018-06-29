@@ -35,7 +35,6 @@ import io.nuls.protocol.message.base.BaseMessage;
  * network message validator
  *
  * @author Niels
- * @date 2017/12/4
  */
 @Component
 public class NulsMessageValidator implements NulsDataValidator<BaseMessage> {

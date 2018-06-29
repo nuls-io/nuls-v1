@@ -33,7 +33,6 @@ import io.nuls.protocol.constant.ProtocolConstant;
  * The host class of the block in the network message.
  *
  * @author Niels
- * @date 2017/11/13
  */
 public class BlockMessage extends BaseProtocolMessage<Block> {
     public BlockMessage() {

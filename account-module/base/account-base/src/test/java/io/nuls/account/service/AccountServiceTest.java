@@ -42,7 +42,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/4
  */
 public class AccountServiceTest {
 

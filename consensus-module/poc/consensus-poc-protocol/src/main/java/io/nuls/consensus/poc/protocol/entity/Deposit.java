@@ -38,7 +38,6 @@ import java.util.Set;
 
 /**
  * @author Niels
- * @date 2017/12/4
  */
 public class Deposit extends TransactionLogicData {
 

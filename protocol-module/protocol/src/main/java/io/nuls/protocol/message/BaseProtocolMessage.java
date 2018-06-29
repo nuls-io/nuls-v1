@@ -33,7 +33,6 @@ import io.nuls.protocol.message.base.BaseMessage;
  * The protocol module message base class is used to normalize all messages for this module.
  *
  * @author Niels
- * @date 2017/11/7
  */
 public abstract class BaseProtocolMessage<T extends BaseNulsData> extends BaseMessage<T> {
 

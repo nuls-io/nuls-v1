@@ -28,7 +28,6 @@ import java.util.List;
 
 /**
  * @author Niels
- * @date 2018/1/16
  */
 public class DownloadRound {
 

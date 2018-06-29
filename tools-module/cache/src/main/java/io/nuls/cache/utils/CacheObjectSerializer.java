@@ -36,7 +36,6 @@ import java.nio.ByteBuffer;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/6
  */
 public class CacheObjectSerializer<T> implements Serializer<T> {
 

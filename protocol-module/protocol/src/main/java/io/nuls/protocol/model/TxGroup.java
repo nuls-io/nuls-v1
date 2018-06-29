@@ -44,7 +44,6 @@ import java.util.Map;
  * The encapsulation of the transaction list used to return a peer request.
  *
  * @author Niels
- * @date 2018/1/3
  */
 public class TxGroup extends BaseNulsData {
 

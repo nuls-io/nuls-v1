@@ -44,7 +44,6 @@ import java.util.List;
  * and the transaction generated in the packaging process (other transactions that must not be made by other nodes).
  *
  * @author Niels
- * @date 2018/1/2
  */
 public class SmallBlock extends BaseNulsData {
     /**

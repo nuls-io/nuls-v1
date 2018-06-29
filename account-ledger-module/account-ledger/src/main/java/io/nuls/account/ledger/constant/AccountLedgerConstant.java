@@ -28,7 +28,6 @@ import io.nuls.kernel.constant.NulsConstant;
 /**
  * @Desription:
  * @Author: Facjas
- * @Date: 2018/5/10
  */
 public interface AccountLedgerConstant extends NulsConstant {
 

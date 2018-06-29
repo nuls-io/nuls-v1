@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Niels
- * @date 2017/11/24
  */
 public class NulsThreadFactory implements ThreadFactory {
     private final short moduleId;

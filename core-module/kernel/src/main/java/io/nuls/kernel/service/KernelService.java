@@ -34,7 +34,6 @@ import io.nuls.kernel.model.Result;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/5
  */
 @Service
 public class KernelService {

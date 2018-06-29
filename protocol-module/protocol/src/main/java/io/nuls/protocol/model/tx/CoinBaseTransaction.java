@@ -35,7 +35,6 @@ import java.util.Arrays;
 
 /**
  * @author Niels
- * @date 2017/12/4
  */
 public class CoinBaseTransaction extends Transaction {
 

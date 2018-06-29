@@ -30,7 +30,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/13
  */
 @ApiModel(value = "upgradeProcessJSON")
 public class UpgradeProcessDTO {

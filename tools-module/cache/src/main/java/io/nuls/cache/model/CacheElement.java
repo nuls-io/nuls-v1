@@ -26,7 +26,6 @@ package io.nuls.cache.model;
 /**
  *
  * @author Niels
- * @date 2017/10/18
  *
  */
 public class CacheElement<T> {

@@ -41,7 +41,6 @@ import java.util.Set;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/6
  */
 public class NulsSwaggerSerializers extends SwaggerSerializers {
 

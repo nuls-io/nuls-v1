@@ -30,7 +30,6 @@ package io.nuls.protocol.storage.constant;
  * The protocol module stores a collection of related constants.
  *
  * @author: Niels Wang
- * @date: 2018/5/8
  */
 public interface ProtocolStorageConstant {
     /**

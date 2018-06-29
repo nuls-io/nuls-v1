@@ -29,7 +29,6 @@ package io.nuls.kernel.constant;
  * Enumeration of transaction status
  *
  * @author Niels
- * @date 2017-11-11
  */
 public enum TxStatusEnum {
 

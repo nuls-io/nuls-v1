@@ -31,7 +31,6 @@ import io.nuls.network.model.Node;
 
 /**
  * @author ln
- * @date 2018/4/13
  */
 public class BlockContainer {
 

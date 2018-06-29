@@ -49,7 +49,6 @@ import java.io.IOException;
 
 /**
  * @author Niels
- * @date 2017/9/28
  */
 public class RpcServerFilter implements ContainerRequestFilter, ContainerResponseFilter, ExceptionMapper<Exception> {
 

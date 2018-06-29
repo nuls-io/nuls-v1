@@ -30,7 +30,6 @@ import io.nuls.core.tools.log.Log;
 
 /**
  * @author Niels
- * @date 2018/5/18
  */
 public class RewardStatisticsProcessTask implements Runnable {
 

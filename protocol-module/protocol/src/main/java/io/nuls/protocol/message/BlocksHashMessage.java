@@ -31,7 +31,6 @@ import io.nuls.protocol.model.BlockHashResponse;
 
 /**
  * @author Niels
- * @date 2018/1/15
  */
 public class BlocksHashMessage extends BaseProtocolMessage<BlockHashResponse> {
 

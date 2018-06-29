@@ -30,7 +30,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author: Charlie
- * @date: 2018/5/23
  */
 @ApiModel(value = "私钥密码表单数据")
 public class AccountPriKeyChangePasswordForm {

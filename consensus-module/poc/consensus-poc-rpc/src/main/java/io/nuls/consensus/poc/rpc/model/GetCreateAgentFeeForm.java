@@ -33,7 +33,6 @@ import javax.ws.rs.QueryParam;
 
 /**
  * @author Niels
- * @date 2018/3/14
  */
 @ApiModel(value = "获取创建共识(代理)节点表单数据")
 public class GetCreateAgentFeeForm {

@@ -35,7 +35,6 @@ import java.io.InputStream;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/13
  */
 public class ShutdownHook extends Thread {
 

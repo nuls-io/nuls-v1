@@ -49,7 +49,6 @@ import java.util.List;
 
 /**
  * @author Niels
- * @date 2018/5/14
  */
 @Component
 public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunishTransaction> {

@@ -38,7 +38,6 @@ import java.util.*;
 
 /**
  * @author ln
- * @date 2018/5/5
  */
 public class CoinData extends BaseNulsData {
 

@@ -36,7 +36,6 @@ import java.util.Collection;
 
 /**
  * @author Niels
- * @date 2017/9/28
  */
 public class NulsResourceConfig extends ResourceConfig {
 

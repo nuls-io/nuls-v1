@@ -35,7 +35,6 @@ import java.io.IOException;
 
 /**
  * @author ln
- * @date 2018/05/26
  */
 public class CompleteParam extends BaseNulsData {
 

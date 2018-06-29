@@ -29,7 +29,6 @@ import io.nuls.sdk.utils.StringUtils;
 
 /**
  * @author Niels
- * @date 2017/9/26
  */
 public class NulsRuntimeException extends RuntimeException {
 

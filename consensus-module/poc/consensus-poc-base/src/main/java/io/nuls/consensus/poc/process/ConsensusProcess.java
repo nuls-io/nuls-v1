@@ -66,7 +66,6 @@ import java.util.*;
 
 /**
  * @author ln
- * @date 2018/4/13
  */
 public class ConsensusProcess {
 

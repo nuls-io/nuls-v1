@@ -38,7 +38,6 @@ import java.io.IOException;
  * Controlled, double type encapsulation.
  *
  * @author Niels
- * @date 2018/3/12
  */
 public class NulsDoubleData extends BasicTypeData<Double> {
 

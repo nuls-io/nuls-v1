@@ -36,7 +36,6 @@ import io.nuls.kernel.utils.SerializeUtils;
 
 /**
  * @author: Chralie
- * @date: 2018/5/4
  */
 public class Address {
 

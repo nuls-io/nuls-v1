@@ -29,7 +29,6 @@ package io.nuls.sdk.model;
  * Enumeration of transaction status
  *
  * @author Niels
- * @date 2017-11-11
  */
 public enum TxStatusEnum {
 

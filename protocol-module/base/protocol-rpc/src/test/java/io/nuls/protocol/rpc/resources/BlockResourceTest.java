@@ -36,7 +36,6 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/31
  */
 public class BlockResourceTest {
 

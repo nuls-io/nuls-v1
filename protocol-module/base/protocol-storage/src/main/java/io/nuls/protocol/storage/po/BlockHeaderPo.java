@@ -39,7 +39,6 @@ import java.util.List;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/8
  */
 public class BlockHeaderPo extends BaseNulsData {
 

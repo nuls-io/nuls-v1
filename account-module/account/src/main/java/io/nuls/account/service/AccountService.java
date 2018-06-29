@@ -43,7 +43,6 @@ import java.util.List;
  * account service definition
  *
  * @author: Niels Wang
- * @date: 2018/5/4
  */
 public interface AccountService {
 

@@ -38,7 +38,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 /**
  * @author Niels
- * @date 2017/10/31
  */
 public class RestFulUtils {
 

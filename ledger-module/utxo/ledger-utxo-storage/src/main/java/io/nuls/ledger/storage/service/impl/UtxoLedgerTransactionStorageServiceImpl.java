@@ -41,7 +41,6 @@ import java.io.IOException;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/5/13
  */
 @Service
 public class UtxoLedgerTransactionStorageServiceImpl implements UtxoLedgerTransactionStorageService, InitializingBean {

@@ -44,7 +44,6 @@ import java.util.Map;
  * Get a consensus node information According to agent hash
  *
  * @author: Charlie
- * @date: 2018/5/29
  */
 public class GetAgentProcessor implements CommandProcessor {
 

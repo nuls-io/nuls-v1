@@ -38,7 +38,6 @@ import io.nuls.protocol.model.basic.NulsStringData;
  * The message body has only a string of message classes.
  *
  * @author Niels
- * @date 2018/1/22
  */
 public class CommonStringMessage extends BaseProtocolMessage<NulsStringData> {
 

@@ -40,7 +40,6 @@ import java.io.IOException;
  * magic parameters, message body size, parity, encryption algorithm id, module id, message type information.
  *
  * @author Niels
- * @date 2017/11/7
  */
 public class MessageHeader extends BaseNulsData {
     /**

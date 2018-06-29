@@ -38,7 +38,6 @@ import java.io.IOException;
  * Controlled, string type encapsulation.
  *
  * @author Niels
- * @date 2018/3/12
  */
 public class NulsStringData extends BasicTypeData<String> {
 

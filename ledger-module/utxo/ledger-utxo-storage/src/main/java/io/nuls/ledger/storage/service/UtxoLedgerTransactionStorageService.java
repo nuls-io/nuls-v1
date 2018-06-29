@@ -30,7 +30,6 @@ import io.nuls.kernel.model.Transaction;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/5/13
  */
 public interface UtxoLedgerTransactionStorageService {
 

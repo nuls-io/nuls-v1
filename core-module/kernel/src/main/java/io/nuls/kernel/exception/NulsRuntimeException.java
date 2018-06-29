@@ -30,7 +30,6 @@ import io.nuls.kernel.constant.ErrorCode;
 
 /**
  * @author Niels
- * @date 2017/9/26
  */
 public class NulsRuntimeException extends RuntimeException {
 

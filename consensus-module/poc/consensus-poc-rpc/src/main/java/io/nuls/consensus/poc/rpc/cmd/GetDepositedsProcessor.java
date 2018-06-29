@@ -45,7 +45,6 @@ import java.util.Map;
  * Get a list of deposited info based on your account
  *
  * @author: Charlie
- * @date: 2018/5/29
  */
 public class GetDepositedsProcessor implements CommandProcessor {
 

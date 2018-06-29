@@ -40,7 +40,6 @@ import io.nuls.protocol.model.NotFound;
 
 /**
  * @author facjas
- * @date 2017/11/16
  */
 public class GetTxMessageHandler extends AbstractMessageHandler<GetTxMessage> {
 

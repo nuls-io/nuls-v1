@@ -32,7 +32,6 @@ import java.util.Comparator;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/22
  */
 public class AgentComparator implements Comparator<Agent> {
 

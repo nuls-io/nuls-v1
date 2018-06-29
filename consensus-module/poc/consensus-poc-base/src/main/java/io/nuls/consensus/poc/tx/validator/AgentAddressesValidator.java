@@ -42,7 +42,6 @@ import java.util.List;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/13
  */
 @Component
 public class AgentAddressesValidator extends BaseConsensusProtocolValidator<CreateAgentTransaction> {

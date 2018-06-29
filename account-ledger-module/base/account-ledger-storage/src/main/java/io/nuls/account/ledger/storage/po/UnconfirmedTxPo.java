@@ -39,7 +39,6 @@ import java.io.IOException;
 /**
  *
  * @author ln
- * @date 2018-06-11
  */
 public class UnconfirmedTxPo extends BaseNulsData {
 

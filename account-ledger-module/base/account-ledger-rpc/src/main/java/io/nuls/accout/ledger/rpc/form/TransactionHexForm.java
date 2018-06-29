@@ -31,7 +31,6 @@ import javax.ws.rs.QueryParam;
 
 /**
  * @author Facjas
- * @date 2018/5/15.
  */
 @ApiModel(value = "交易签名数据")
 public class TransactionHexForm {

@@ -34,7 +34,6 @@ import java.util.Arrays;
 
 /**
  * @author Niels
- * @date 2017/11/20
  */
 public class TransferTransaction extends Transaction {
 

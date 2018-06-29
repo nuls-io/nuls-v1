@@ -28,7 +28,6 @@ import java.io.InputStream;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/15
  */
 public class Test {
 

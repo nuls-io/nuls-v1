@@ -44,7 +44,6 @@ import io.nuls.protocol.service.BlockService;
 
 /**
  * @author Niels
- * @date 2018/1/16
  */
 public class GetBlocksHashHandler extends AbstractMessageHandler<GetBlocksHashMessage> {
 

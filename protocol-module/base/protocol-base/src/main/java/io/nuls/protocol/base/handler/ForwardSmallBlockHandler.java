@@ -41,7 +41,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author facjas
- * @date 2017/11/16
  */
 public class ForwardSmallBlockHandler extends AbstractMessageHandler<ForwardSmallBlockMessage> {
 

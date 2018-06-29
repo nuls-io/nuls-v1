@@ -55,7 +55,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author ln
- * @date 2018/4/8
  */
 public class DownloadThreadManager implements Callable<Boolean> {
 

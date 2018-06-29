@@ -37,7 +37,6 @@ import java.util.List;
  * between multiple interceptors sequence formed a chain of interceptors, behind each blocker can decide whether to continue the interceptor
  *
  * @author Niels Wang
- * @date 2018/1/30
  */
 public class BeanMethodInterceptorChain {
 

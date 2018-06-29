@@ -38,7 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Niels
- * @date 2017/11/28
  */
 public class ServiceManager {
     private static final ServiceManager INSTANCE = new ServiceManager();

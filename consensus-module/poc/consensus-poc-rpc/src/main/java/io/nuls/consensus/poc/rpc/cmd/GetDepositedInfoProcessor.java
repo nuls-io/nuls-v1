@@ -38,7 +38,6 @@ import java.util.Map;
  * 根据账户地址获取该账户参与的所有委托(共识)信息的总览
  * According to the account address to obtain all information on the deposit of the account
  * @author: Charlie
- * @date: 2018/5/29
  */
 public class GetDepositedInfoProcessor implements CommandProcessor {
 

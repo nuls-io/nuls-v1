@@ -34,7 +34,6 @@ import java.util.Properties;
 
 /**
  * @author Niels
- * @date 2017/9/26
  */
 public class ConfigLoader {
 

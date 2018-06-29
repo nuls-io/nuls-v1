@@ -44,7 +44,6 @@ import java.io.IOException;
 
 /**
  * @author facjas
- * @date 2017/11/16
  */
 public class GetBlocksByHashHandler extends AbstractMessageHandler<GetBlocksByHashMessage> {
 

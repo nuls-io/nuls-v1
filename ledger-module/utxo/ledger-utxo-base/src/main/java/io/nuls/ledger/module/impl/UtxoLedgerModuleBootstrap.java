@@ -31,7 +31,6 @@ import io.nuls.ledger.module.AbstractLedgerModule;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/5/8
  */
 public class UtxoLedgerModuleBootstrap extends AbstractLedgerModule {
 

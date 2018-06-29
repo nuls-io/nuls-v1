@@ -32,7 +32,6 @@ import java.io.Serializable;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/6
  */
 public class CacheMapParams {
     private int heapMb;

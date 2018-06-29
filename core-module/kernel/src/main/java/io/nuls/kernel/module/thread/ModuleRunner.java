@@ -33,7 +33,6 @@ import io.nuls.kernel.module.manager.ModuleManager;
 
 /**
  * @author Niels
- * @date 2017/11/24
  */
 public class ModuleRunner implements Runnable {
 

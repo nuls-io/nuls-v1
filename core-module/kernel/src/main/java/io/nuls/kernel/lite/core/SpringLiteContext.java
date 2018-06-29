@@ -52,7 +52,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * implements a simple dependency injection and aspect-oriented programming for dynamic proxy implementations.
  *
  * @author Niels Wang
- * @date 2018/1/30
  */
 public class SpringLiteContext {
 

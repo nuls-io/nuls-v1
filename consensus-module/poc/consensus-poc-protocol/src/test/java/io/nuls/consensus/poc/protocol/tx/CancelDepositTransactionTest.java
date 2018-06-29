@@ -34,7 +34,6 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/12
  */
 public class CancelDepositTransactionTest extends TxSerializeTest {
 

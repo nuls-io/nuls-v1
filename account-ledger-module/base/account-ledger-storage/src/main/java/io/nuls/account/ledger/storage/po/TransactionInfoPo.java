@@ -38,7 +38,6 @@ import java.util.List;
 
 /**
  * @author Facjas
- * @date 2018/5/10.
  */
 public class TransactionInfoPo extends BaseNulsData {
 

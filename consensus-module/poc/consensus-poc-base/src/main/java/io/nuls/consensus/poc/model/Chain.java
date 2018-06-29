@@ -40,7 +40,6 @@ import java.util.Set;
 
 /**
  * @author ln
- * @date 2018/4/13
  */
 public class Chain implements Cloneable {
 

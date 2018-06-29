@@ -28,7 +28,6 @@ import io.nuls.kernel.constant.NulsConstant;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/5/7
  */
 public interface LedgerConstant extends NulsConstant {
 

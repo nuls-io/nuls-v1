@@ -36,7 +36,6 @@ import io.nuls.protocol.constant.ProtocolConstant;
  * The message for send a new transaction
  *
  * @author Niels
- * @date 2017/11/8
  */
 public class TransactionMessage extends BaseProtocolMessage<Transaction> {
 

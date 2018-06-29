@@ -37,7 +37,6 @@ import io.nuls.protocol.model.SmallBlock;
  * The block handles the service interface.
  *
  * @author Niels
- * @date 2017/11/10
  */
 public interface BlockService {
     /**

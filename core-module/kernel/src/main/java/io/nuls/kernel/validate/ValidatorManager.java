@@ -41,7 +41,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Niels
- * @date 2018/1/26
  */
 public class ValidatorManager {
 

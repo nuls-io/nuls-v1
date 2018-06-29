@@ -31,7 +31,6 @@ import java.util.Map;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/9
  */
 public class BlockHeaderDto {
 

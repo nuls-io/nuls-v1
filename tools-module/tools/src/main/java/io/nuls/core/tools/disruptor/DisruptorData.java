@@ -27,7 +27,6 @@ package io.nuls.core.tools.disruptor;
 /**
  *
  * @author Niels
- * @date 2017/11/6
  */
 public class DisruptorData<T> {
 

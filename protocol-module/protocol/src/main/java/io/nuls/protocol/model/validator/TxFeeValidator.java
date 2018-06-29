@@ -35,7 +35,6 @@ import io.nuls.protocol.constant.ProtocolConstant;
 
 /**
  * @author Niels
- * @date 2017/11/20
  */
 @Component
 public class TxFeeValidator implements NulsDataValidator<Transaction> {

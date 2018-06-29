@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/13
  */
 public class VersionManager {
 

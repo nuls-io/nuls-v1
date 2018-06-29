@@ -34,7 +34,6 @@ import java.io.Serializable;
 
 /**
  * @author vivi
- * @date 2017/12/12.
  */
 public class Result<T> implements Serializable {
 

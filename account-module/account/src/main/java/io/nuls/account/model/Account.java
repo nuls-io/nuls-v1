@@ -42,7 +42,6 @@ import java.util.Arrays;
 
 /**
  * @author: Charlie
- * @date: 2018/5/4
  */
 public class Account extends BaseNulsData {
 

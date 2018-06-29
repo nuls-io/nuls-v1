@@ -35,7 +35,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author Niels
- * @date 2017/10/9
  */
 public class StringUtils {
 

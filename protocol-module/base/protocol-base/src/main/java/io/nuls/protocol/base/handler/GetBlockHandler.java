@@ -42,7 +42,6 @@ import io.nuls.protocol.service.BlockService;
 
 /**
  * @author facjas
- * @date 2017/11/16
  */
 public class GetBlockHandler extends AbstractMessageHandler<GetBlockMessage> {
 

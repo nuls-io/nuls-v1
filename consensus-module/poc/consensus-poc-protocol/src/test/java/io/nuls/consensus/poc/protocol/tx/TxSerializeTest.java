@@ -41,7 +41,6 @@ import static junit.framework.TestCase.assertTrue;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/12
  */
 public class TxSerializeTest {
 

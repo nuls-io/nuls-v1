@@ -34,7 +34,6 @@ import io.nuls.protocol.model.GetTxGroupParam;
  * The message of gets the transaction list from the peer node.
  *
  * @author Niels
- * @date 2017/11/13
  */
 public class GetTxGroupRequest extends BaseProtocolMessage<GetTxGroupParam> {
 

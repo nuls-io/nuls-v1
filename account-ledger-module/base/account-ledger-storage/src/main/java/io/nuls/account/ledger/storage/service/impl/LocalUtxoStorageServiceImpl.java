@@ -45,7 +45,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Facjas
- * @date 2018/5/10.
  */
 @Component
 public class LocalUtxoStorageServiceImpl implements LocalUtxoStorageService, InitializingBean {

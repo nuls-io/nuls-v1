@@ -42,7 +42,6 @@ import java.lang.reflect.Field;
 
 /**
  * @author Niels
- * @date 2018/1/5
  */
 public class MicroKernelBootstrap extends BaseModuleBootstrap {
     private static final MicroKernelBootstrap INSTANCE = new MicroKernelBootstrap();

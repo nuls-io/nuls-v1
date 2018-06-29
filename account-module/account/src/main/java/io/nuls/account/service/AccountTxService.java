@@ -32,7 +32,6 @@ import java.util.List;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/5
  */
 public interface AccountTxService {
 

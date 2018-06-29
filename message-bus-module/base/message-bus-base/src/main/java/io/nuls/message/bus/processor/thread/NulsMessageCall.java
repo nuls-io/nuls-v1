@@ -32,7 +32,6 @@ import io.nuls.protocol.message.base.BaseMessage;
 
 /**
  * @author: Charlie
- * @date: 2018/5/6
  */
 public class NulsMessageCall<T extends BaseMessage> implements Runnable {
 

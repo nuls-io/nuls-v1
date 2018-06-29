@@ -49,7 +49,6 @@ import java.util.*;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/24
  */
 @Component
 public class PocRewardCacheService {

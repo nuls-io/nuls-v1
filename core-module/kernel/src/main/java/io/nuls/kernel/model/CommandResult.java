@@ -34,7 +34,6 @@ import java.util.Map;
 
 /**
  * @author Niels
- * @date 2018/3/7
  */
 public class CommandResult {
 

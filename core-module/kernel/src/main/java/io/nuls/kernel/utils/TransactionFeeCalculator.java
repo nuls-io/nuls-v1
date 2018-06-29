@@ -31,7 +31,6 @@ import io.nuls.kernel.model.Na;
 
 /**
  * @author Niels
- * @date 2018/5/15
  */
 public class TransactionFeeCalculator {
 

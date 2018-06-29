@@ -31,7 +31,6 @@ import io.nuls.kernel.constant.KernelErrorCode;
 
 /**
  * @author: Charlie
- * @date: 2018/5/8
  */
 public interface MessageBusErrorCode extends KernelErrorCode {
 

@@ -31,7 +31,6 @@ import io.nuls.protocol.model.CompleteParam;
 
 /**
  * @author ln
- * @date 2018/05/26
  */
 public class CompleteMessage extends BaseProtocolMessage<CompleteParam> {
 

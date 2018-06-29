@@ -37,7 +37,6 @@ import java.io.IOException;
 
 /**
  * @author vivi
- * @date 2017/10/30
  */
 public class BlockHeader extends BaseNulsData {
 

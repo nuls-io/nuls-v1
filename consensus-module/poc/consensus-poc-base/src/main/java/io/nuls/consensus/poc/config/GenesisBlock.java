@@ -51,7 +51,6 @@ import java.util.Map;
 
 /**
  * @author Niels
- * @date 2017/11/10
  */
 public final class GenesisBlock extends Block {
 

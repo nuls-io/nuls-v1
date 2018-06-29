@@ -46,7 +46,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/13
  */
 public class UpgradeThread implements Runnable {
 

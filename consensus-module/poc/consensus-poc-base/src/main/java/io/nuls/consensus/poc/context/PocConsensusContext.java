@@ -30,7 +30,6 @@ import io.nuls.consensus.poc.manager.ChainManager;
 /**
  *
  * @author ln
- * @date 2018/5/8
  */
 public class PocConsensusContext {
 

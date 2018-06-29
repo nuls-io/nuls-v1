@@ -31,7 +31,6 @@ import io.nuls.protocol.constant.ProtocolConstant;
  * An abstract class of the protocol module launcher used to bind module id.
  *
  * @author Niels
- * @date 2017/11/7
  */
 public abstract class AbstractProtocolModule extends BaseModuleBootstrap {
     public AbstractProtocolModule() {

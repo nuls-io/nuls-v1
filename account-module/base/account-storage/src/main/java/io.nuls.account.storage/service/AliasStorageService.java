@@ -32,7 +32,6 @@ import java.util.List;
 
 /**
  * @author: Charlie
- * @date: 2018/5/12
  */
 public interface AliasStorageService {
 

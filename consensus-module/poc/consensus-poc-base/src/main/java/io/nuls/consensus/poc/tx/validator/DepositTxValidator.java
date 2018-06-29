@@ -79,7 +79,6 @@ import java.util.*;
 
 /**
  * @author ln
- * @date 2018/5/10
  */
 @Component
 public class DepositTxValidator extends BaseConsensusProtocolValidator<DepositTransaction> {

@@ -43,7 +43,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/24
  */
 @Component
 public class RewardStatisticsProcess {

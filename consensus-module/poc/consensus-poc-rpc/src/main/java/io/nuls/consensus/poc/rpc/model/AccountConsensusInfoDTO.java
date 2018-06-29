@@ -27,7 +27,6 @@ package io.nuls.consensus.poc.rpc.model;
 
 /**
  * @author Niels
- * @date 2018/5/16
  */
 public class AccountConsensusInfoDTO {
     private int agentCount;

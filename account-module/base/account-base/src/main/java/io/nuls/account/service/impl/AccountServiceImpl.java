@@ -64,7 +64,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author: Charlie
- * @date: 2018/5/9
  */
 @Service
 public class AccountServiceImpl implements AccountService {

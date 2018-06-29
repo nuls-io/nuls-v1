@@ -32,7 +32,6 @@ import io.nuls.protocol.message.base.BaseMessage;
  * The Nuls event filter.
  *
  * @author: Charlie
- * @date: 2018/5/6
  */
 public interface NulsMessageFilter<T extends BaseMessage> {
 

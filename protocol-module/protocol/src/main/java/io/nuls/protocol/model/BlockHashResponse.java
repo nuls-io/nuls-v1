@@ -41,7 +41,6 @@ import java.util.List;
  * Block hash table reply data encapsulation.
  *
  * @author Niels
- * @date 2018/1/15
  */
 public class BlockHashResponse extends BaseNulsData {
     /**

@@ -38,7 +38,6 @@ import java.util.Map;
 /**
  * RPC暂时未实现
  * @author: Charlie
- * @date: 2018/5/28
  */
 public class GetBlockHeaderListProcessor implements CommandProcessor {
 

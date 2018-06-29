@@ -40,7 +40,6 @@ import java.util.List;
  * Time service class:Used to synchronize network standard time.
  *
  * @author vivi
- * @date 2017/11/21
  */
 public class TimeService implements Runnable {
 

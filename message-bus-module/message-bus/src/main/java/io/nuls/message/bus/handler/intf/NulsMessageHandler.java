@@ -34,7 +34,6 @@ import io.nuls.protocol.message.base.BaseMessage;
 /**
  * 消息处理器接口
  * @author: Charlie
- * @date: 2018/5/6
  */
 public interface NulsMessageHandler<T extends BaseMessage> {
 

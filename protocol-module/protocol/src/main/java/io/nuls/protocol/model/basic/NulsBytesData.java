@@ -38,7 +38,6 @@ import java.io.IOException;
  * Controlled, byte array type encapsulation.
  *
  * @author Niels
- * @date 2018/3/12
  */
 public class NulsBytesData extends BasicTypeData<byte[]> {
 

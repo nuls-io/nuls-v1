@@ -39,7 +39,6 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * @author Niels
- * @date 2018/5/16
  */
 public class DepositDTO {
 

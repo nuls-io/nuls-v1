@@ -4,7 +4,6 @@ import io.nuls.sdk.constant.ErrorCode;
 
 /**
  * @author: Charlie
- * @date: 2018/6/19
  */
 public class ErrorData {
 

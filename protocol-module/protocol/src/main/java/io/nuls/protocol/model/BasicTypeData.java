@@ -32,7 +32,6 @@ import io.protostuff.Tag;
  * Controlled, Basic type encapsulation.
  *
  * @author Niels
- * @date 2017/12/7
  */
 public abstract class BasicTypeData<T> extends BaseNulsData {
 

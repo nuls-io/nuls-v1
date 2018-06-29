@@ -32,7 +32,6 @@ import io.nuls.kernel.validate.ValidateResult;
 
 /**
  * @author Niels
- * @date 2017/11/17
  */
 @Component
 public class BlockFieldValidator implements NulsDataValidator<Block> {

@@ -31,7 +31,6 @@ import java.io.IOException;
 
 /**
  * @author: Niels Wang
- * @date: 2018/4/17
  */
 public interface NulsData {
 

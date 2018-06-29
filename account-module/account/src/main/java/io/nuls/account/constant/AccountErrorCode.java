@@ -29,7 +29,6 @@ import io.nuls.kernel.constant.ErrorCode;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/5
  */
 public interface AccountErrorCode {
 

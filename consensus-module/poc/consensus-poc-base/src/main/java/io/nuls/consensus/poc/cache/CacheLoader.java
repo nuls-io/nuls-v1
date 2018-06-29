@@ -58,7 +58,6 @@ import java.util.List;
  * The cmd that loads the cache when the system starts.
  *
  * @author ln
- * @date 2018/4/13
  */
 public class CacheLoader {
     /**

@@ -36,7 +36,6 @@ import io.nuls.protocol.message.base.BaseMessage;
  * 消息处理器的实现类(抽象的)
  * Message cmd implementation class (abstract)
  * @author: Charlie
- * @date: 2018/5/6
  */
 public abstract class AbstractMessageHandler<T extends BaseMessage> implements NulsMessageHandler<T> {
 

@@ -29,7 +29,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author Facjas
- * @date 2018/5/15.
  */
 @ApiModel(value = "转账表单数据")
 public class TransferForm {

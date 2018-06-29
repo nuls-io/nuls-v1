@@ -33,7 +33,6 @@ import java.io.IOException;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/4/21
  */
 public class CreateContractData extends BaseNulsData {
 

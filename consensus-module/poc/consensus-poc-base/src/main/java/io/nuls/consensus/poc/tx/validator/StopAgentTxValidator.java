@@ -53,7 +53,6 @@ import java.util.*;
 
 /**
  * @author Niels
- * @date 2018/5/17
  */
 @Component
 public class StopAgentTxValidator implements NulsDataValidator<StopAgentTransaction> {

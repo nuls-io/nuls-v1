@@ -38,7 +38,6 @@ import java.util.List;
 
 /**
  * @author Niels
- * @date 2017/12/25
  */
 public class MeetingMember implements Comparable<MeetingMember> {
     private long roundIndex;

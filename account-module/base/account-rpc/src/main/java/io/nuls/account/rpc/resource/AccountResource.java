@@ -75,7 +75,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author: Charlie
- * @date: 2018/5/13
  */
 @Path("/account")
 @Api(value = "account", description = "account")

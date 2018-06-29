@@ -33,7 +33,6 @@ import java.util.List;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/21
  */
 //todo
 public class Compatible0910 {

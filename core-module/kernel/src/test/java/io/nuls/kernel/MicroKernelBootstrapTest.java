@@ -34,7 +34,6 @@ import static org.junit.Assert.*;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/7
  */
 public class MicroKernelBootstrapTest {
 

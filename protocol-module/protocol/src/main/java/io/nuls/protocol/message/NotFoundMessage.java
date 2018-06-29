@@ -35,7 +35,6 @@ import io.nuls.protocol.model.NotFound;
  * "Unable to find" feedback on the host class in the network message.
  *
  * @author: Niels Wang
- * @date: 2018/4/9
  */
 public class NotFoundMessage extends BaseProtocolMessage<NotFound> {
     public NotFoundMessage() {

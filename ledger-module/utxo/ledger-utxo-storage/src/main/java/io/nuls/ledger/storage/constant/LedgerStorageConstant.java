@@ -29,7 +29,6 @@ package io.nuls.ledger.storage.constant;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/5/8
  */
 public interface LedgerStorageConstant {
 

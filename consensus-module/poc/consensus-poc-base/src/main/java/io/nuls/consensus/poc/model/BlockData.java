@@ -32,7 +32,6 @@ import java.util.List;
 
 /**
  * @author Niels
- * @date 2017/12/26
  */
 public class BlockData {
     private long height;

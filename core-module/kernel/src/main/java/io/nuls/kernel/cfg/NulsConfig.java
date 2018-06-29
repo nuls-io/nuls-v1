@@ -34,7 +34,6 @@ import io.nuls.core.tools.cfg.IniEntity;
  * Used to manage system configuration items and system version information.
  *
  * @author: Niels Wang
- * @date: 2018/4/17
  */
 public class NulsConfig {
 

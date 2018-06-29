@@ -53,7 +53,6 @@ import static io.nuls.db.constant.DBConstant.BASE_AREA_NAME;
 /**
  * @desription:
  * @author: PierreLuo
- * @date:
  */
 public class LevelDBManager {
 

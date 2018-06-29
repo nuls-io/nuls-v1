@@ -38,7 +38,6 @@ import java.util.*;
 
 /**
  * @author Niels
- * @date 2017/12/25
  */
 public class MeetingRound {
 

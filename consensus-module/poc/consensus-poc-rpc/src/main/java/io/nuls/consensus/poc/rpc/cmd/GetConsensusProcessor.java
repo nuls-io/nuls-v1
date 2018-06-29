@@ -36,7 +36,6 @@ import java.util.Map;
 
 /**
  * @author: Charlie
- * @date: 2018/5/28
  */
 public class GetConsensusProcessor implements CommandProcessor {
 

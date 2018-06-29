@@ -37,7 +37,6 @@ import java.util.List;
 
 /**
  * @author facjas
- * @date 2017/11/20
  */
 public class NulsDigestData extends BaseNulsData {
 

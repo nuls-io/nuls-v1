@@ -35,7 +35,6 @@ import java.util.Collection;
 
 /**
  * @author vivi
- * @date 2017/11/21
  */
 public class NodeDiscoverHandler implements Runnable {
 

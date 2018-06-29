@@ -40,7 +40,6 @@ import java.util.Map;
 
 /**
  * @author: Charlie
- * @date: 2018/5/25
  */
 public class GetAccountProcessor implements CommandProcessor {
 

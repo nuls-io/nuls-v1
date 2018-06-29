@@ -27,7 +27,6 @@ package io.nuls.core.tools.str;
 
 /**
  * @author Niels
- * @date 2018/3/5
  */
 public class VersionUtils {
 

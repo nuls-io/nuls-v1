@@ -28,7 +28,6 @@ import org.glassfish.grizzly.http.server.Request;
 
 /**
  * @author Niels
- * @date 2017/9/28
  */
 public class HttpContextHelper {
 

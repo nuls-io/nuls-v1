@@ -27,7 +27,6 @@ package io.nuls.client.rpc.resources.model;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/13
  */
 public class JarSig {
     private String fileName;

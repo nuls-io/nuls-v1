@@ -34,7 +34,6 @@ import io.nuls.protocol.constant.ProtocolConstant;
 
 /**
  * @author Niels
- * @date 2017/11/17
  */
 @Component
 public class BlockMaxSizeValidator implements NulsDataValidator<Block> {

@@ -30,7 +30,6 @@ import io.nuls.kernel.lite.annotation.Component;
 
 /**
  * @author: Niels Wang
- * @date: 2018/3/1
  */
 @Component
 public class KernelMavenInfo implements NulsVersion {

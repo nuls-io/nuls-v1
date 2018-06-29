@@ -33,7 +33,6 @@ import java.util.concurrent.Future;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/28
  */
 public class TransactionContainer {
 

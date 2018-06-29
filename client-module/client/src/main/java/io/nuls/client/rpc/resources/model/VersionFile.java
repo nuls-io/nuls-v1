@@ -30,7 +30,6 @@ import java.util.List;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/13
  */
 public class VersionFile {
     private String version;

@@ -32,7 +32,6 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * @author Niels
- * @date 2018/5/17
  */
 public class Int48Test {
     @Test

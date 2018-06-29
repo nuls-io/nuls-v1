@@ -32,7 +32,6 @@ import io.nuls.protocol.service.DownloadService;
 
 /**
  * @author Niels
- * @date 2018/5/18
  */
 public class BlockMonitorProcessTask implements Runnable {
 

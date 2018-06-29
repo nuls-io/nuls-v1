@@ -48,7 +48,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author ln
- * @date 2018/5/8
  */
 public class ConsensusScheduler {
 

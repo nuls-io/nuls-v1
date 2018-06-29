@@ -37,7 +37,6 @@ import java.io.IOException;
 
 /**
  * @author: Niels Wang
- * @date: 2018/4/9
  */
 public class NotFound extends BaseNulsData {
     /**

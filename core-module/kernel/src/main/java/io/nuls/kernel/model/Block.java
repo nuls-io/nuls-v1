@@ -37,7 +37,6 @@ import java.util.List;
 
 /**
  * @author win10
- * @date 2017/10/30
  */
 public class Block extends BaseNulsData implements Cloneable {
 

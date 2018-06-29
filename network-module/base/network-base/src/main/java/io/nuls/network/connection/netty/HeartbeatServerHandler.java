@@ -35,7 +35,6 @@ import io.nuls.core.tools.log.Log;
 /**
  * @desription:
  * @author: PierreLuo
- * @date:
  */
 public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
 

@@ -40,7 +40,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Niels
- * @date 2017/10/27
  */
 public class EhCacheManager {
     private static final EhCacheManager INSTANCE = new EhCacheManager();

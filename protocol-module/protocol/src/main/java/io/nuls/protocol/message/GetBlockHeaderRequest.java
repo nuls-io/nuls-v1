@@ -35,7 +35,6 @@
 // * The message for get block-header of block-headers
 // *
 // * @author Niels
-// * @date 2017/11/13
 // */
 //public class GetBlockHeaderRequest extends BaseProtocolMessage<GetBlocksByHashParam> {
 //

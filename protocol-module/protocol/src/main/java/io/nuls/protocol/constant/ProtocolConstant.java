@@ -32,7 +32,6 @@ import io.nuls.kernel.constant.NulsConstant;
  * The relevant constants of the protocol and some general constants are defined here.
  *
  * @author: Niels Wang
- * @date: 2018/4/17
  */
 public interface ProtocolConstant extends NulsConstant {
 

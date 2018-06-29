@@ -44,7 +44,6 @@ import static org.junit.Assert.*;
  * Temporary cache manager test class, test temporary cache storage, fetch, delete, clean, destroy function.
  *
  * @author: Niels Wang
- * @date: 2018/5/7
  */
 public class TemporaryCacheManagerTest {
 

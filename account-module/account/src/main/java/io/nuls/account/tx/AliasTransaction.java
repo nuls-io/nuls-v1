@@ -36,7 +36,6 @@ import io.nuls.kernel.utils.NulsByteBuffer;
 
 /**
  * @author: Charlie
- * @date: 2018/5/11
  */
 public class AliasTransaction extends Transaction<Alias> {
 

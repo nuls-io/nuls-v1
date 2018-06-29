@@ -30,7 +30,6 @@ import io.nuls.cache.model.CacheListenerItem;
 
 /**
  * @author Niels
- * @date 2018/1/23
  */
 public interface NulsCacheListener<K, V> {
 

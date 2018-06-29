@@ -32,7 +32,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author Niels
- * @date 2018/3/14
  */
 @ApiModel(value = "删除共识节点表单数据")
 public class StopAgentForm {

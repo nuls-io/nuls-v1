@@ -54,7 +54,6 @@ import java.util.List;
 
 /**
  * @author Niels
- * @date 2018/5/14
  */
 @Component
 public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunishTransaction> {

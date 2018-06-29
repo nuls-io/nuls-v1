@@ -31,7 +31,6 @@ import io.nuls.ledger.constant.LedgerConstant;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/5/8
  */
 public abstract class AbstractLedgerModule extends BaseModuleBootstrap {
     public AbstractLedgerModule() {

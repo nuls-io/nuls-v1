@@ -44,7 +44,6 @@ import java.util.Map;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/13
  */
 public class SyncVersionRunner implements Runnable {
     /**

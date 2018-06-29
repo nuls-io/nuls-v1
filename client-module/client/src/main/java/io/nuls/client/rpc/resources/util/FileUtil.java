@@ -35,7 +35,6 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/13
  */
 public final class FileUtil {
 

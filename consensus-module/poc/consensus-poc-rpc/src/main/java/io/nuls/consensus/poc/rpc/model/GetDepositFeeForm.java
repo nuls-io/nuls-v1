@@ -33,7 +33,6 @@ import javax.ws.rs.QueryParam;
 
 /**
  * @author Niels
- * @date 2018/3/14
  */
 @ApiModel(value = "获取参与共识手续费表单数据")
 public class GetDepositFeeForm {

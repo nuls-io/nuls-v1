@@ -35,7 +35,6 @@ import java.util.Set;
 
 /**
  * @author Niels
- * @date 2017/12/28
  */
 public class RedPunishData extends TransactionLogicData {
     private byte[] address;

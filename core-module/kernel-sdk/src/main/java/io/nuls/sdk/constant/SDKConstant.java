@@ -2,7 +2,6 @@ package io.nuls.sdk.constant;
 
 /**
  * @author: Charlie
- * @date: 2018/6/11
  */
 public interface SDKConstant {
 

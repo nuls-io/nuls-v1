@@ -30,7 +30,6 @@ import io.nuls.core.tools.str.StringUtils;
 
 /**
  * @author Niels
- * @date 2018/3/7
  */
 @Deprecated
 public class AccountParamForm {

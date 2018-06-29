@@ -29,7 +29,6 @@ import io.nuls.kernel.model.Block;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/24
  */
 public class RewardStatisticsParam {
 

@@ -29,7 +29,6 @@ import io.nuls.kernel.model.Na;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/24
  */
 public class RewardItem {
     private long time;

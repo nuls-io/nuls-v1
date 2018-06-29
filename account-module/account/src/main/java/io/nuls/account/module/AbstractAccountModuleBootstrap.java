@@ -30,7 +30,6 @@ import io.nuls.kernel.module.BaseModuleBootstrap;
 
 /**
  * @author: Niels Wang
- * @date: 2018/5/13
  */
 public abstract class AbstractAccountModuleBootstrap extends BaseModuleBootstrap {
     public AbstractAccountModuleBootstrap( ) {

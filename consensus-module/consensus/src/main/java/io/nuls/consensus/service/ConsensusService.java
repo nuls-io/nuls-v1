@@ -35,7 +35,6 @@ import java.util.List;
 /**
  *
  * @author ln
- * @date 2018/5/4
  */
 public interface ConsensusService {
 

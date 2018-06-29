@@ -36,7 +36,6 @@ import static org.junit.Assert.*;
 
 /**
  * @author: Niels Wang
- * @date: 2018/6/23
  */
 public class RedPunishValidatorTest {
 

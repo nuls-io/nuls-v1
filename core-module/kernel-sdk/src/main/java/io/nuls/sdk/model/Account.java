@@ -38,7 +38,6 @@ import java.util.Arrays;
 
 /**
  * @author: Charlie
- * @date: 2018/6/10
  */
 public class Account {
 

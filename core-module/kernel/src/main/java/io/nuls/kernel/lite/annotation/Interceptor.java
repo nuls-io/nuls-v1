@@ -34,7 +34,6 @@ import java.lang.annotation.*;
  * which intercepts all methods or objects that annotate the specified annotation.
  *
  * @author: Niels Wang
- * @date: 2018/1/30
  */
 
 @Target({ElementType.TYPE})

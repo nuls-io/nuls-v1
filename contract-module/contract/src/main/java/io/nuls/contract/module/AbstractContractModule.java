@@ -31,7 +31,6 @@ import io.nuls.kernel.module.BaseModuleBootstrap;
 /**
  * @desription:
  * @author: PierreLuo
- * @date: 2018/4/20
  */
 public abstract class AbstractContractModule extends BaseModuleBootstrap {
     public AbstractContractModule() {
