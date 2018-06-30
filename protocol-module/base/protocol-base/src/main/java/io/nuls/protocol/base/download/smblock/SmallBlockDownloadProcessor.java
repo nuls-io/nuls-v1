@@ -127,6 +127,7 @@ public class SmallBlockDownloadProcessor implements Runnable {
         }
         if (smallBlock == null) {
             ProtocolCacheHandler.removeSmallBlockFuture(blockhash);
+            return;
         }
         BlockHeader header = smallBlock.getHeader();
         BlockHeader theBlockHeader = blockService.getBlockHeader(header.getHash()).getData();
