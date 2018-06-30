@@ -48,6 +48,7 @@ public class DataCacher<T> {
 
     public CompletableFuture<T> addFuture(NulsDigestData hash) {
         CompletableFuture future = new CompletableFuture<>();
+        Log.info(type + "创建future：：：" + hash);
         cacher.put(hash, future);
         return future;
     }
@@ -65,6 +66,7 @@ public class DataCacher<T> {
             return false;
         }
         future.complete(t);
+        Log.info(type + "完成并删除future：：：" + hash);
         cacher.remove(hash);
         return true;
     }
@@ -75,10 +77,13 @@ public class DataCacher<T> {
             return;
         }
         future.complete(null);
+        Log.info(type + "not fount删除future：：：" + hash);
         cacher.remove(hash);
     }
 
     public void removeFuture(NulsDigestData hash) {
+
+        Log.info(type + "调用删除future：：：" + hash);
         cacher.remove(hash);
     }
 }

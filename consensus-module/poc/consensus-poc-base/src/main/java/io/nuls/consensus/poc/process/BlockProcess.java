@@ -111,7 +111,7 @@ public class BlockProcess {
      */
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
 
-        long t = System.currentTimeMillis();
+//        long t = System.currentTimeMillis();
 
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
         Block block = blockContainer.getBlock();
@@ -174,7 +174,7 @@ public class BlockProcess {
                     // Verify that the block transaction is valid, save the block if the verification passes, and discard the block if it fails
                     // 验证区块交易是否合法，如果验证通过则保存区块，如果失败则丢弃该块
 
-                    long time = System.currentTimeMillis();
+//                    long time = System.currentTimeMillis();
                     List<Future<Boolean>> futures = new ArrayList<>();
 
                     for (Transaction tx : block.getTxs()) {
@@ -219,11 +219,11 @@ public class BlockProcess {
                             break;
                         }
                     }
-                    Log.info("验证交易耗时：" + (System.currentTimeMillis() - time));
+//                    Log.info("验证交易耗时：" + (System.currentTimeMillis() - time));
                     if (!success) {
                         break;
                     }
-                    time = System.currentTimeMillis();
+//                    time = System.currentTimeMillis();
 
                     // save block
                     Result result = blockService.saveBlock(block);
@@ -234,21 +234,21 @@ public class BlockProcess {
                         RewardStatisticsProcess.addBlock(block);
                         BlockLog.debug("save block height : " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                     }
-                    Log.info("保存耗时：" + (System.currentTimeMillis() - time));
+//                    Log.info("保存耗时：" + (System.currentTimeMillis() - time));
                 } while (false);
             } catch (Exception e) {
                 Log.error("save block error : " + e.getMessage(), e);
             }
             if (success) {
-                t = System.currentTimeMillis();
+//                t = System.currentTimeMillis();
                 NulsContext.getInstance().setBestBlock(block);
                 //remove tx from memory pool
 //                removeTxFromMemoryPool(block);
-                Log.info("移除内存交易耗时：" + (System.currentTimeMillis() - t));
-                t = System.currentTimeMillis();
+//                Log.info("移除内存交易耗时：" + (System.currentTimeMillis() - t));
+//                t = System.currentTimeMillis();
                 // 转发区块
                 forwardingBlock(blockContainer);
-                Log.info("转发区块耗时：" + (System.currentTimeMillis() - t));
+//                Log.info("转发区块耗时：" + (System.currentTimeMillis() - t));
                 return true;
             } else {
                 chainManager.getMasterChain().rollback(block);

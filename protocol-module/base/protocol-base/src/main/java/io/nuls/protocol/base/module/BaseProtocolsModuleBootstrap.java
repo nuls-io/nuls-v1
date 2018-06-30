@@ -27,6 +27,7 @@ package io.nuls.protocol.base.module;
 
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.core.tools.log.Log;
+import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -77,7 +78,14 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
                 throw new NulsRuntimeException(e);
             }
         } else {
+
+
             if (!block0.getHeader().getHash().equals(genesisBlock.getHeader().getHash())) {
+                if (block0.getHeader().getHash().getDigestHex().equals("0020c68810e7fcbb1281e7e053fa100bc0b0a8184d5f7b4dd07e1093072077ee7bf9")) {
+                    clearAllData();
+                    start();
+                    return;
+                }
                 throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
             }
         }
@@ -96,6 +104,15 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
             ((DownloadServiceImpl) NulsContext.getServiceBean(DownloadService.class)).start();
         } else {
             start();
+        }
+    }
+
+    private void clearAllData() {
+        DBService dbService = NulsContext.getServiceBean(DBService.class);
+        String[] areas = dbService.listArea();
+        for (String area : areas) {
+            dbService.destroyArea(area);
+            dbService.createArea(area);
         }
     }
 
