@@ -1,34 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
-
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-    <scm>
-        <tag>0.9.11</tag>
-        <url>https://github.com/nuls-io/nuls</url>
-        <connection>https://github.com/nuls-io/nuls.git</connection>
-        <developerConnection>https://nuls.io/</developerConnection>
-    </scm>
-    <developers>
-        <developer>
-            <name>ViviZhou</name>
-            <email>251556768@qq.com</email>
-            <organization>ViviZhou</organization>
-        </developer>
-    </developers>
-
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>io.nuls</groupId>
     <artifactId>nuls</artifactId>
     <version>0.9.11</version>
@@ -56,7 +29,6 @@
         <module>client-module</module>
         <module>tools-module</module>
         <module>message-bus-module</module>
-        <module>sdk-module</module>
     </modules>
     <dependencies>
         <dependency>
@@ -71,34 +43,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.7.1</version>
                 <configuration>
-                    <argLine>-Xms1024m -Xmx4096m  -XX:NewSize=256m -XX:MaxNewSize=256m</argLine>
-                    <skipTests>true</skipTests>
+                    <argLine>-Xms1024m -Xmx8192m  -XX:NewSize=256m -XX:MaxNewSize=256m</argLine>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <encoding>UTF-8</encoding>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-
         </plugins>
-
     </build>
 </project>
