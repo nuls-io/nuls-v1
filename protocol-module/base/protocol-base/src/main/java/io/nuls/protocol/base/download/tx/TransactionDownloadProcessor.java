@@ -93,14 +93,13 @@ public class TransactionDownloadProcessor implements Runnable {
         } catch (Exception e) {
             Log.error(e);
             return;
-        } finally {
-            ProtocolCacheHandler.removeTxFuture(txHash);
         }
         int i = 0;
         while (i < 3) {
             i++;
             try {
                 tx = future.get(5, TimeUnit.SECONDS);
+                ProtocolCacheHandler.removeTxFuture(txHash);
             } catch (Exception e) {
                 future = ProtocolCacheHandler.addGetTxRequest(txHash);
                 GetTxMessage getTxMessage = new GetTxMessage();
@@ -113,7 +112,11 @@ public class TransactionDownloadProcessor implements Runnable {
             }
         }
 
-        if (null == tx || tx.isSystemTx()) {
+        if (null == tx) {
+            ProtocolCacheHandler.removeTxFuture(txHash);
+            return;
+        }
+        if (tx.isSystemTx()) {
             return;
         }
         try {

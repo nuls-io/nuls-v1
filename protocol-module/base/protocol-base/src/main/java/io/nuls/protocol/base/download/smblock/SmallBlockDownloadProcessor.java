@@ -107,14 +107,13 @@ public class SmallBlockDownloadProcessor implements Runnable {
         } catch (Exception e) {
             Log.error(e);
             return;
-        } finally {
-            ProtocolCacheHandler.removeSmallBlockFuture(blockhash);
         }
         int i = 0;
         while (i < 3) {
             i++;
             try {
                 smallBlock = future.get(5, TimeUnit.SECONDS);
+                ProtocolCacheHandler.removeSmallBlockFuture(blockhash);
             } catch (Exception e) {
                 future = ProtocolCacheHandler.addGetSmallBlockRequest(blockhash);
                 GetSmallBlockMessage getSmallBlockMessage = new GetSmallBlockMessage();
@@ -125,6 +124,9 @@ public class SmallBlockDownloadProcessor implements Runnable {
                     continue;
                 }
             }
+        }
+        if (smallBlock == null) {
+            ProtocolCacheHandler.removeSmallBlockFuture(blockhash);
         }
         BlockHeader header = smallBlock.getHeader();
         BlockHeader theBlockHeader = blockService.getBlockHeader(header.getHash()).getData();
