@@ -37,10 +37,6 @@ public interface VersionConstant {
 
     ECKey EC_KEY = ECKey.fromPublicOnly(Hex.decode(PUBLIC_KEY));
 
-
-    String ROOT_URL = "https://raw.githubusercontent.com/nuls-io/nuls-wallet-release/master/";
-    String VERDION_JSON_URL = ROOT_URL + "version.json";
-
     /**
      * 状态：0：未开始,1：下载中,2：安装中,3：等待重启,4：失败
      */
