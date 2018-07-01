@@ -88,7 +88,7 @@ public class DownloadUtils {
             return resultList;
         }
 
-        Log.info("download block " + startHeight + " , " + endHeight + " from : " + node.getId());
+//        Log.info("download block " + startHeight + " , " + endHeight + " from : " + node.getId());
 
         GetBlocksByHeightMessage message = new GetBlocksByHeightMessage(startHeight, endHeight);
 

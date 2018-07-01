@@ -23,6 +23,7 @@
  */
 package io.nuls.ledger.storage.service.impl;
 
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.BatchOperation;
@@ -46,7 +47,7 @@ import java.util.List;
  * @author: PierreLuo
  */
 @Service
-public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageService,InitializingBean {
+public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageService, InitializingBean {
 
     /**
      * 通用数据存储服务
@@ -54,6 +55,7 @@ public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageSe
      */
     @Autowired
     private DBService dbService;
+
     /**
      * 该方法在所有属性被设置之后调用，用于辅助对象初始化
      * This method is invoked after all properties are set, and is used to assist object initialization.
@@ -74,6 +76,7 @@ public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageSe
     @Override
     public Result saveUtxo(byte[] owner, Coin coin) {
         try {
+            Log.info("save utxo::" + Hex.encode(owner));
             return dbService.put(LedgerStorageConstant.DB_NAME_LEDGER_UTXO, owner, coin.serialize());
         } catch (IOException e) {
             Log.error(e);
@@ -86,9 +89,9 @@ public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageSe
         byte[] utxoBytes = getUtxoBytes(owner);
         Coin coin = null;
         try {
-            if(utxoBytes != null) {
+            if (utxoBytes != null) {
                 coin = new Coin();
-                coin.parse(utxoBytes,0);
+                coin.parse(utxoBytes, 0);
             }
         } catch (NulsException e) {
             Log.error(e);

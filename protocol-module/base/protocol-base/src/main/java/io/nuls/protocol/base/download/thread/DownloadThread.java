@@ -58,9 +58,9 @@ public class DownloadThread implements Callable<ResultMessage> {
     public ResultMessage call() throws Exception {
         List<Block> blockList = null;
         try {
-            Log.info("download thread : " + Thread.currentThread().getName() + " ,  startHeight : " + startHeight + ", size : " + size + " , from node : " + node.getId() + " , startHash : " + startHash + " , endHash : " + endHash);
+//            Log.info("download thread : " + Thread.currentThread().getName() + " ,  startHeight : " + startHeight + ", size : " + size + " , from node : " + node.getId() + " , startHash : " + startHash + " , endHash : " + endHash);
             blockList = DownloadUtils.getBlocks(node, startHeight, startHeight + size - 1);
-            Log.info("download complete thread : " + Thread.currentThread().getName() + " ,  startHeight : " + startHeight + ", size : " + size + " , from node : " + node.getId() + " , get data size : " + (blockList == null ? 0 : blockList.size()));
+//            Log.info("download complete thread : " + Thread.currentThread().getName() + " ,  startHeight : " + startHeight + ", size : " + size + " , from node : " + node.getId() + " , get data size : " + (blockList == null ? 0 : blockList.size()));
         } catch (Exception e) {
             Log.error(e.getMessage());
         }
