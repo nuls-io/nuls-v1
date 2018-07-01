@@ -257,8 +257,8 @@ public class LevelDBManager {
     }
 
     public static Result destroyArea(String areaName) {
-        if (!baseCheckArea(areaName)) {
-            return Result.getFailed(DBErrorCode.DB_AREA_NOT_EXIST);
+        if (StringUtils.isBlank(areaName)) {
+            return Result.getFailed(DBErrorCode.NULL_PARAMETER);
         }
         if (StringUtils.isBlank(dataPath) || !checkPathLegal(areaName)) {
             return Result.getFailed(DBErrorCode.DB_AREA_CREATE_PATH_ERROR);
