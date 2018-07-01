@@ -88,7 +88,7 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
                 }
             }
             if (null == agent) {
-                return ValidateResult.getFailedResult(CLASS_NAME,PocConsensusErrorCode.BIFURCATION);
+                return result;
             }
 
             RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
@@ -100,7 +100,7 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
                 byte[] header2 = otherBlockHeader.serialize();
                 redPunishData.setEvidence(ArraysTool.concatenate(header1, header2));
             } catch (Exception e) {
-                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.SYS_UNKOWN_EXCEPTION);
+                return result;
             }
             redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
             redPunishTransaction.setTxData(redPunishData);
@@ -109,7 +109,7 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
                 coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress(), PocConsensusConstant.RED_PUNISH_LOCK_TIME);
             } catch (IOException e) {
                 Log.error(e);
-                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
+                return result;
             }
             redPunishTransaction.setCoinData(coinData);
             try {
@@ -119,7 +119,7 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
                 return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.BIFURCATION);
             }
             this.consensusService.newTx(redPunishTransaction);
-            return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.BIFURCATION);
+            return result;
         }
 
         return result;

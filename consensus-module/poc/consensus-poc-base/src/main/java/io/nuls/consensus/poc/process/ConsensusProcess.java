@@ -220,8 +220,7 @@ public class ConsensusProcess {
         if (thisIndex == 1) {
             MeetingRound preRound = round.getPreRound();
             if (preRound == null) {
-                //FIXME
-                Log.error("这里完成前必须处理掉");
+                Log.error("PreRound is null!");
                 return true;
             }
             preMember = preRound.getMember(preRound.getMemberCount());
