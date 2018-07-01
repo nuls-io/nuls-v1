@@ -112,8 +112,8 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         String[] areas = dbService.listArea();
         for (String area : areas) {
 //            dbService.destroyArea(area);
-//            dbService.createArea(area);
             dbService.clearArea(area);
+            dbService.createArea(area);
         }
     }
 
