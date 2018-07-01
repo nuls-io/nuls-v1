@@ -298,11 +298,9 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
             for (Coin from : froms) {
                 fromBytes = from.getOwner();
-                fromOfFromCoin = from.getFrom();
-                if (fromOfFromCoin == null) {
-                    // 验证是否可花费, 校验的coinData的fromUTXO，检查数据库中是否存在此UTXO
-                    fromOfFromCoin = utxoLedgerUtxoStorageService.getUtxo(fromBytes);
-                }
+                // 验证是否可花费, 校验的coinData的fromUTXO，检查数据库中是否存在此UTXO
+                fromOfFromCoin = utxoLedgerUtxoStorageService.getUtxo(fromBytes);
+
                 // 检查txList中是否存在此UTXO
                 if (temporaryToMap != null && fromOfFromCoin == null) {
                     fromOfFromCoin = temporaryToMap.get(asString(fromBytes));
