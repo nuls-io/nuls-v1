@@ -31,12 +31,14 @@
         <artifactId>client-module</artifactId>
         <groupId>io.nuls</groupId>
         <version>0.9.11</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.client-module</groupId>
     <artifactId>client</artifactId>
-
+    <version>0.9.11</version>
+    <packaging>pom</packaging>
     <properties>
         <glassfish.jersey.version>2.27</glassfish.jersey.version>
     </properties>
@@ -292,6 +294,7 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                 </configuration>
+                <version>3.7.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

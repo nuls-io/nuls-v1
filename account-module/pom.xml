@@ -9,7 +9,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <groupId>io.nuls</groupId>
     <artifactId>account-module</artifactId>
     <packaging>pom</packaging>
     <version>0.9.11</version>

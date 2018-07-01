@@ -109,6 +109,7 @@ public interface AccountLedgerService {
      *
      * @param address account address
      * @return return balance of account, return 0 if  account is not a local account
+     * @throws NulsException NulsException
      */
     Result<Balance> getBalance(byte[] address) throws NulsException;
 
@@ -118,7 +119,9 @@ public interface AccountLedgerService {
      * @param address account address
      * @param amount  amount want to use
      * @param size    size of transaction ,to calc the fee
+     * @param price price 1/KB
      * @return return balance of account, return 0 if  account is not a local account
+     * @throws NulsException NulsException
      */
     CoinDataResult getCoinData(byte[] address, Na amount, int size, Na price) throws NulsException;
 
@@ -159,6 +162,7 @@ public interface AccountLedgerService {
      * @param tx tx
      * @param ecKey ecKey
      * @return Transaction
+     * @throws IOException IOException
      */
     Transaction signTransaction(Transaction tx, ECKey ecKey) throws IOException;
 

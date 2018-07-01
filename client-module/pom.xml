@@ -37,7 +37,7 @@
 
     <groupId>io.nuls</groupId>
     <artifactId>client-module</artifactId>
-    
+    <version>0.9.11</version>
     <packaging>pom</packaging>
     <modules>
         <module>client</module>

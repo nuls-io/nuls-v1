@@ -48,7 +48,7 @@ public interface AccountLedgerService {
     /**
      * Get account balance
      *
-     * @param address
+     * @param address address
      * @return If the operation is successful, 'success' is true, and data is BalanceDto
      * If the operation fails, "success" is false and the result has error information
      */

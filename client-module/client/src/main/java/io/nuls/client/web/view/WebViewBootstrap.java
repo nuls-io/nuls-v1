@@ -63,9 +63,9 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         startWebView(null);
     }
 
-    /**
-     * 程序入口
-     */
+//    /**
+//     * 程序入口
+//     */
     public void startWebView(String[] args) {
         String os = System.getProperty("os.name").toUpperCase();
         if (!os.startsWith("WINDOWS") && !os.startsWith("MAC OS")) {
@@ -74,9 +74,9 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         launch(args);
     }
 
-    /**
-     * 启动方法
-     */
+//    /**
+//     * 启动方法
+//     */
     @Override
     public void start(final Stage stage) throws Exception {
 
@@ -112,9 +112,9 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
 
     }
 
-    /**
-     * 停止
-     */
+//    /**
+//     * 停止
+//     */
     @Override
     public void stop() throws Exception {
         System.exit(0);
@@ -184,9 +184,9 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         return popupMenu;
     }
 
-    /**
-     * 事件监听处理
-     */
+//    /**
+//     * 事件监听处理
+//     */
     @Override
     public void actionPerformed(ActionEvent e) {
 
@@ -203,9 +203,9 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         }
     }
 
-    /**
-     * 显示窗口
-     */
+//    /**
+//     * 显示窗口
+//     */
     public void openBrowse() {
         int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);
         String url = "http://127.0.0.1:" + port;
@@ -257,9 +257,9 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
     }
 
 
-    /**
-     * 隐藏窗口
-     */
+//    /**
+//     * 隐藏窗口
+//     */
     public void hide() {
         Platform.runLater(new Runnable() {
             @Override
@@ -269,9 +269,9 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         });
     }
 
-    /**
-     * 程序退出
-     */
+//    /**
+//     * 程序退出
+//     */
     public void exit() {
         SystemTray.getSystemTray().remove(trayIcon);
         Platform.exit();
