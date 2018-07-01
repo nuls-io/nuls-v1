@@ -82,8 +82,8 @@ public class ConsensusProcess {
 
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
-
     private boolean hasPacking;
+    private long memoryPoolLastClearTime;
 
     public ConsensusProcess(ChainManager chainManager) {
         this.chainManager = chainManager;
@@ -91,25 +91,11 @@ public class ConsensusProcess {
 
     public void process() {
         boolean canPackage = checkCanPackage();
-        if (!canPackage || false) {
+        if (!canPackage) {
+            clearTxMemoryPool();
             return;
         }
         doWork();
-    }
-
-    private boolean checkCanPackage() {
-        if (!ConsensusConfig.isPartakePacking()) {
-            return false;
-        }
-        // wait consensus ready running
-        if (ConsensusStatusContext.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_RUNNING.ordinal()) {
-            return false;
-        }
-        // check network status
-        if (networkService.getAvailableNodes().size() == 0) {
-            return false;
-        }
-        return true;
     }
 
     private void doWork() {
@@ -123,16 +109,19 @@ public class ConsensusProcess {
         //check i am is a consensus node
         MeetingMember member = round.getMyMember();
         if (member == null) {
+            clearTxMemoryPool();
             return;
         }
         if (!hasPacking && member.getPackStartTime() < TimeService.currentTimeMillis() && member.getPackEndTime() > TimeService.currentTimeMillis()) {
             hasPacking = true;
             try {
-                Log.debug("当前网络时间： " + DateUtil.convertDate(new Date(TimeService.currentTimeMillis())) + " , 我的打包开始时间: " +
-                        DateUtil.convertDate(new Date(member.getPackStartTime())) + " , 我的打包结束时间: " +
-                        DateUtil.convertDate(new Date(member.getPackEndTime())) + " , 当前轮开始时间: " +
-                        DateUtil.convertDate(new Date(round.getStartTime())) + " , 当前轮结束开始时间: " +
-                        DateUtil.convertDate(new Date(round.getEndTime())));
+                if(Log.isDebugEnabled()) {
+                    Log.debug("当前网络时间： " + DateUtil.convertDate(new Date(TimeService.currentTimeMillis())) + " , 我的打包开始时间: " +
+                            DateUtil.convertDate(new Date(member.getPackStartTime())) + " , 我的打包结束时间: " +
+                            DateUtil.convertDate(new Date(member.getPackEndTime())) + " , 当前轮开始时间: " +
+                            DateUtil.convertDate(new Date(round.getStartTime())) + " , 当前轮结束开始时间: " +
+                            DateUtil.convertDate(new Date(round.getEndTime())));
+                }
                 packing(member, round);
             } catch (Exception e) {
                 Log.error(e);
@@ -183,6 +172,28 @@ public class ConsensusProcess {
         } else {
             Log.error("make a block, but save block error");
         }
+    }
+
+    private void clearTxMemoryPool() {
+        if(TimeService.currentTimeMillis() - memoryPoolLastClearTime > 60000L) {
+            txMemoryPool.clear();
+            memoryPoolLastClearTime = TimeService.currentTimeMillis();
+        }
+    }
+
+    private boolean checkCanPackage() {
+        if (!ConsensusConfig.isPartakePacking()) {
+            return false;
+        }
+        // wait consensus ready running
+        if (ConsensusStatusContext.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_RUNNING.ordinal()) {
+            return false;
+        }
+        // check network status
+        if (networkService.getAvailableNodes().size() == 0) {
+            return false;
+        }
+        return true;
     }
 
     private boolean waitReceiveNewestBlock(MeetingMember self, MeetingRound round) {
@@ -286,10 +297,6 @@ public class ConsensusProcess {
         Map<String, Coin> toMaps = new HashMap<>();
         Set<String> fromSet = new HashSet<>();
 
-        long t1 = 0, t2 = 0;
-
-        long time = System.currentTimeMillis();
-
         while (true) {
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 500L) {
                 break;
@@ -317,21 +324,6 @@ public class ConsensusProcess {
             if (repeatTx != null) {
                 continue;
             }
-
-//            long t = System.currentTimeMillis();
-
-//            ValidateResult result = tx.verify();
-//
-//            t1 += (System.currentTimeMillis() - t);
-//
-//            if (result.isFailed()) {
-//                if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
-//                    txContainer.setPackageCount(txContainer.getPackageCount() + 1);
-//                    txMemoryPool.add(txContainer, true);
-//                }
-//                Log.warn(result.getMsg());
-//                continue;
-//            }
 
             ValidateResult result = ValidateResult.getSuccessResult();
             if (!tx.isSystemTx()) {
@@ -392,10 +384,6 @@ public class ConsensusProcess {
 
         Log.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtil.convertDate(new Date(self.getPackEndTime())));
-
-        t2 = System.currentTimeMillis() - time;
-        Log.debug("打包总耗时：" + t2 + " ms");
-//        Log.info("验证交易总耗时：" + t1 + " ms");
 
         return newBlock;
     }
