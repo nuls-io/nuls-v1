@@ -135,9 +135,6 @@ public final class Na implements Comparable<Na>, Serializable {
         return new Na(LongUtils.add(this.value, value.value));
     }
 
-    /**
-     * Alias for add
-     */
     public Na plus(final Na value) {
         return add(value);
     }
@@ -146,9 +143,6 @@ public final class Na implements Comparable<Na>, Serializable {
         return new Na(LongUtils.sub(this.value, value.value));
     }
 
-    /**
-     * Alias for subtract
-     */
     public Na minus(final Na value) {
         return subtract(value);
     }
@@ -157,16 +151,10 @@ public final class Na implements Comparable<Na>, Serializable {
         return new Na(LongUtils.mul(this.value, factor));
     }
 
-    /**
-     * Alias for multiply
-     */
     public Na times(final long factor) {
         return multiply(factor);
     }
 
-    /**
-     * Alias for multiply
-     */
     public Na times(final int factor) {
         return multiply(factor);
     }
@@ -175,16 +163,10 @@ public final class Na implements Comparable<Na>, Serializable {
         return new Na(LongUtils.div(this.value, divisor));
     }
 
-    /**
-     * Alias for divide
-     */
     public Na div(final long divisor) {
         return divide(divisor);
     }
 
-    /**
-     * Alias for divide
-     */
     public Na div(final int divisor) {
         return divide(divisor);
     }
@@ -196,38 +178,38 @@ public final class Na implements Comparable<Na>, Serializable {
     public long divide(final Na divisor) {
         return LongUtils.div(this.value, divisor.value);
     }
-
-    /**
-     * Returns true if and only if this instance represents a monetary value greater than zero,
-     * otherwise false.
-     */
+//
+//    /**
+//     * Returns true if and only if this instance represents a monetary value greater than zero,
+//     * otherwise false.
+//     */
     @JsonIgnore
     public boolean isPositive() {
         return signum() == 1;
     }
 
-    /**
-     * Returns true if and only if this instance represents a monetary value less than zero,
-     * otherwise false.
-     */
+//    /**
+//     * Returns true if and only if this instance represents a monetary value less than zero,
+//     * otherwise false.
+//     */
     @JsonIgnore
     public boolean isNegative() {
         return signum() == -1;
     }
 
-    /**
-     * Returns true if and only if this instance represents zero monetary value,
-     * otherwise false.
-     */
+//    /**
+//     * Returns true if and only if this instance represents zero monetary value,
+//     * otherwise false.
+//     */
     @JsonIgnore
     public boolean isZero() {
         return signum() == 0;
     }
 
-    /**
-     * Returns true if the monetary value represented by this instance is greater than that
-     * of the given other Na, otherwise false.
-     */
+//    /**
+//     * Returns true if the monetary value represented by this instance is greater than that
+//     * of the given other Na, otherwise false.
+//     */
     public boolean isGreaterThan(Na other) {
         return compareTo(other) > 0;
     }
@@ -236,10 +218,10 @@ public final class Na implements Comparable<Na>, Serializable {
         return compareTo(other) >= 0;
     }
 
-    /**
-     * Returns true if the monetary value represented by this instance is less than that
-     * of the given other Na, otherwise false.
-     */
+//    /**
+//     * Returns true if the monetary value represented by this instance is less than that
+//     * of the given other Na, otherwise false.
+//     */
     public boolean isLessThan(Na other) {
         return compareTo(other) < 0;
     }
@@ -299,12 +281,12 @@ public final class Na implements Comparable<Na>, Serializable {
         return toText();
     }
 
-    /**
-     * Long 或者 Integer Na 转成 NUSL(double)
-     * 如果是double类型说明已经是NUSL 则直接返回
-     * @param object
-     * @return
-     */
+//    /**
+//     * Long 或者 Integer Na 转成 NUSL(double)
+//     * 如果是double类型说明已经是NUSL 则直接返回
+//     * @param object
+//     * @return
+//     */
     public static double naToNuls(Object object) {
         if (null == object) {
             return 0;

@@ -158,7 +158,7 @@ public interface AccountService {
     /**
      * Get the account information list
      *
-     * @param pageNumber
+     * @param pageNumber pageNumber
      * @param pageSize   1~100
      * @return If the operation is successful, 'success' is true and data is List<AccountDto>;
      * If the operation fails, "success" is false and the result has error information
@@ -272,7 +272,6 @@ public interface AccountService {
      */
     Result importAccountByPriKey(String privateKey, String password, boolean overwrite);
 
-
     /**
      * Import account according to privateKey
      *
@@ -374,7 +373,6 @@ public interface AccountService {
      * @return
      */
     Result resetPasswordOffline(String address, String encryptedPriKey, String password, String newPassword);
-
 
     /**
      * Change the account password by keystore file

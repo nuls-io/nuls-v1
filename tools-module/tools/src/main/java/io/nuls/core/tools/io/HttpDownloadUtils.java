@@ -50,9 +50,9 @@ public class HttpDownloadUtils {
     }
 
 
-    /**
-     * 从输入流中获取字节数组
-     */
+//    /**
+//     * 从输入流中获取字节数组
+//     */
     public static byte[] readInputStream(InputStream inputStream) throws IOException {
         byte[] buffer = new byte[inputStream.available()];
         int len = 0;

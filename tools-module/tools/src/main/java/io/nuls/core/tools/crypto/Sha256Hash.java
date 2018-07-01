@@ -48,18 +48,12 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
 
     private final byte[] bytes;
 
-    /**
-     * Use {@link #wrap(byte[])} instead.
-     */
     @Deprecated
     public Sha256Hash(byte[] rawHashBytes) {
         Util.checkState(rawHashBytes.length == LENGTH);
         this.bytes = rawHashBytes;
     }
 
-    /**
-     * Use {@link #wrap(String)} instead.
-     */
     @Deprecated
     public Sha256Hash(String hexString) {
     	Util.checkState(hexString.length() == LENGTH * 2);
@@ -100,7 +94,6 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
         return wrap(Util.reverseBytes(rawHashBytes));
     }
 
-    /** Use {@link #of(byte[])} instead: this old name is ambiguous. */
     @Deprecated
     public static Sha256Hash create(byte[] contents) {
         return of(contents);
@@ -116,7 +109,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
         return wrap(hash(contents));
     }
 
-    /** Use {@link #twiceOf(byte[])} instead: this old name is ambiguous. */
+
     @Deprecated
     public static Sha256Hash createDouble(byte[] contents) {
         return twiceOf(contents);
@@ -216,10 +209,6 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
         return digest.digest(digest.digest());
     }
 
-    /**
-     * Calculates the hash of hash on the given byte ranges. This is equivalent to
-     * concatenating the two ranges and then passing the result to {@link #hashTwice(byte[])}.
-     */
     public static byte[] hashTwice(byte[] input1, int offset1, int length1,
                                    byte[] input2, int offset2, int length2) {
         MessageDigest digest = newDigest();
@@ -243,6 +232,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
      * Returns the last four bytes of the wrapped hash. This should be unique enough to be a suitable hash code even for
      * blocks, where the goal is to try and get the first bytes to be zeros (i.e. the value as a big integer lower
      * than the target value).
+     * @return int
      */
     @Override
     public int hashCode() {
@@ -257,6 +247,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
 
     /**
      * Returns the bytes interpreted as a positive integer.
+     * @return BigInteger
      */
     public BigInteger toBigInteger() {
         return new BigInteger(1, bytes);
@@ -264,6 +255,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
 
     /**
      * Returns the internal byte array, without defensively copying. Therefore do NOT modify the returned array.
+     * @return byte[]
      */
     public byte[] getBytes() {
         return bytes;
@@ -271,6 +263,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
 
     /**
      * Returns a reversed copy of the internal byte array.
+     * @return byte[]
      */
     public byte[] getReversedBytes() {
         return Util.reverseBytes(bytes);

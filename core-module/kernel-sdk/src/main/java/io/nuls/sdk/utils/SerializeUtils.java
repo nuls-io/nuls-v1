@@ -43,9 +43,7 @@ import java.util.List;
  * @author somebody
  */
 public class SerializeUtils {
-    /**
-     * @auther somebody
-     */
+
     public static final Charset CHARSET = Charset.forName(SDKConstant.DEFAULT_ENCODING);
     private static final int MAGIC_8 = 8;
     private static final int MAGIC_0X80 = 0x80;
@@ -55,13 +53,13 @@ public class SerializeUtils {
     public static final String SIGNED_MESSAGE_HEADER = "RiceChain Signed Message:\n";
     public static final byte[] SIGNED_MESSAGE_HEADER_BYTES = SIGNED_MESSAGE_HEADER.getBytes(CHARSET);
 
-    /**
-     * MPI encoded numbers are produced by the OpenSSL BN_bn2mpi function. They consist of
-     * a 4 byte big endian length field, followed by the stated number of bytes representing
-     * the number in big endian format (with a sign bit).
-     *
-     * @param hasLength can be set to false if the given array is missing the 4 byte length field
-     */
+//    /**
+//     * MPI encoded numbers are produced by the OpenSSL BN_bn2mpi function. They consist of
+//     * a 4 byte big endian length field, followed by the stated number of bytes representing
+//     * the number in big endian format (with a sign bit).
+//     *
+//     * @param hasLength can be set to false if the given array is missing the 4 byte length field
+//     */
     public static BigInteger decodeMPI(byte[] mpi, boolean hasLength) {
         byte[] buf;
         if (hasLength) {
@@ -82,13 +80,13 @@ public class SerializeUtils {
         return isNegative ? result.negate() : result;
     }
 
-    /**
-     * MPI encoded numbers are produced by the OpenSSL BN_bn2mpi function. They consist of
-     * a 4 byte big endian length field, followed by the stated number of bytes representing
-     * the number in big endian format (with a sign bit).
-     *
-     * @param includeLength indicates whether the 4 byte length field should be included
-     */
+//    /**
+//     * MPI encoded numbers are produced by the OpenSSL BN_bn2mpi function. They consist of
+//     * a 4 byte big endian length field, followed by the stated number of bytes representing
+//     * the number in big endian format (with a sign bit).
+//     *
+//     * @param includeLength indicates whether the 4 byte length field should be included
+//     */
     public static byte[] encodeMPI(BigInteger value, boolean includeLength) {
         if (value.equals(BigInteger.ZERO)) {
             if (!includeLength) {
@@ -129,11 +127,11 @@ public class SerializeUtils {
         }
     }
 
-    /**
-     * Given a textual message, returns a byte buffer formatted as follows:</p>
-     * <p>
-     * <tt>[24] "Bitcoin Signed Message:\n" [message.length as a varint] message</p></tt>
-     */
+//    /**
+//     * Given a textual message, returns a byte buffer formatted as follows:</p>
+//     * <p>
+//     * <tt>[24] "Bitcoin Signed Message:\n" [message.length as a varint] message</p></tt>
+//     */
     public static byte[] formatMessageForSigning(String message) {
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -166,16 +164,16 @@ public class SerializeUtils {
         }
     }
 
-    /**
-     * Returns a copy of the given byte array in reverse order.
-     */
+//    /**
+//     * Returns a copy of the given byte array in reverse order.
+//     */
     public static byte[] reverseBytes(byte[] bytes) {
         return Util.reverseBytes(bytes);
     }
 
-    /**
-     * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format.
-     */
+//    /**
+//     * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format.
+//     */
     public static long readUint32LE(byte[] bytes, int offset) {
         return (bytes[offset] & 0xffL) |
                 ((bytes[offset + 1] & 0xffL) << 8) |
@@ -195,10 +193,9 @@ public class SerializeUtils {
                 ((bytes[offset + 3] & 0xff) << 24);
     }
 
-
-    /**
-     * Parse 8 bytes from the byte array (starting at the offset) as signed 64-bit integer in little endian format.
-     */
+//    /**
+//     * Parse 8 bytes from the byte array (starting at the offset) as signed 64-bit integer in little endian format.
+//     */
     public static long readInt64LE(byte[] bytes, int offset) {
         return (bytes[offset] & 0xffL) |
                 ((bytes[offset + 1] & 0xffL) << 8) |
@@ -210,9 +207,9 @@ public class SerializeUtils {
                 ((bytes[offset + 7] & 0xffL) << 56);
     }
 
-    /**
-     * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in big endian format.
-     */
+//    /**
+//     * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in big endian format.
+//     */
     public static long readUint32BE(byte[] bytes, int offset) {
         return ((bytes[offset] & 0xffL) << 24) |
                 ((bytes[offset + 1] & 0xffL) << 16) |
@@ -220,17 +217,17 @@ public class SerializeUtils {
                 (bytes[offset + 3] & 0xffL);
     }
 
-    /**
-     * Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in big endian format.
-     */
+//    /**
+//     * Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in big endian format.
+//     */
     public static int readUint16BE(byte[] bytes, int offset) {
         return ((bytes[offset] & 0xff) << 8) |
                 (bytes[offset + 1] & 0xff);
     }
 
-    /**
-     * Calculates RIPEMD160(SHA256(input)). This is used in Address calculations.
-     */
+//    /**
+//     * Calculates RIPEMD160(SHA256(input)). This is used in Address calculations.
+//     */
     public static byte[] sha256hash160(byte[] input) {
         byte[] sha256 = Sha256Hash.hash(input);
         RIPEMD160Digest digest = new RIPEMD160Digest();
@@ -240,14 +237,14 @@ public class SerializeUtils {
         return out;
     }
 
-    /**
-     * The regular {@link BigInteger#toByteArray()} method isn't quite what we often need: it appends a
-     * leading zero to indicate that the number is positive and may need padding.
-     *
-     * @param b        the integer to format into a byte array
-     * @param numBytes the desired size of the resulting byte array
-     * @return numBytes byte long array.
-     */
+//    /**
+//     * The regular {@link BigInteger#toByteArray()} method isn't quite what we often need: it appends a
+//     * leading zero to indicate that the number is positive and may need padding.
+//     *
+//     * @param b        the integer to format into a byte array
+//     * @param numBytes the desired size of the resulting byte array
+//     * @return numBytes byte long array.
+//     */
     public static byte[] bigIntegerToBytes(BigInteger b, int numBytes) {
         if (b == null) {
             return null;
@@ -267,7 +264,6 @@ public class SerializeUtils {
         out[offset + 3] = (byte) (0xFF & val);
     }
 
-    /** Write 2 bytes to the output stream as unsigned 16-bit integer in little endian format. */
     public static void uint16ToByteStreamLE(int val, OutputStream stream) throws IOException {
         stream.write((int) (0xFF & val));
         stream.write((int) (0xFF & (val >> 8)));
@@ -344,11 +340,11 @@ public class SerializeUtils {
         stream.write(double2Bytes(val));
     }
 
-    /**
-     * 把double转为byte
-     *
-     * @return byte[]
-     */
+//    /**
+//     * 把double转为byte
+//     *
+//     * @return byte[]
+//     */
     public static byte[] double2Bytes(double d) {
         long value = Double.doubleToRawLongBits(d);
         byte[] byteRet = new byte[MAGIC_8];
@@ -358,11 +354,11 @@ public class SerializeUtils {
         return byteRet;
     }
 
-    /**
-     * 把byte[]转double
-     *
-     * @return double
-     */
+//    /**
+//     * 把byte[]转double
+//     *
+//     * @return double
+//     */
     public static double bytes2Double(byte[] arr) {
         long value = 0;
         for (int i = 0; i < MAGIC_8; i++) {
@@ -509,13 +505,13 @@ public class SerializeUtils {
         return bytes;
     }
 
-    /** Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in little endian format. */
+//    /** Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in little endian format. */
     public static int readUint16(byte[] bytes, int offset) {
         return (bytes[offset] & 0xff) |
                 ((bytes[offset + 1] & 0xff) << 8);
     }
 
-    /** Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format. */
+//    /** Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format. */
     public static long readUint32(byte[] bytes, int offset) {
         return (bytes[offset] & 0xffl) |
                 ((bytes[offset + 1] & 0xffl) << 8) |

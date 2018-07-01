@@ -25,47 +25,43 @@ package io.nuls.db.service;
 
 import io.nuls.kernel.model.Result;
 
-/**
- * @desription:
- * @author: PierreLuo
- */
 public interface BatchOperation {
-
-    /**
-     * 增加或者更新操作
-     * Add or update operations.
-     *
-     * @param key
-     * @param value
-     * @return
-     */
+//
+//    /**
+//     * 增加或者更新操作
+//     * Add or update operations.
+//     *
+//     * @param key
+//     * @param value
+//     * @return
+//     */
     Result put(byte[] key, byte[] value);
 
-    /**
-     * 存储或者更新对象
-     * Add or update the object
-     *
-     * @param area
-     * @param key
-     * @param value 需要存储或者更新的对象/Objects that need to be added or updated.
-     * @return
-     */
+//    /**
+//     * 存储或者更新对象
+//     * Add or update the object
+//     *
+//     * @param area
+//     * @param key
+//     * @param value 需要存储或者更新的对象/Objects that need to be added or updated.
+//     * @return
+//     */
     <T> Result putModel(byte[] key, T value);
 
-    /**
-     * 删除操作
-     * Delete operation
-     *
-     * @param key
-     * @return
-     */
+//    /**
+//     * 删除操作
+//     * Delete operation
+//     *
+//     * @param key
+//     * @return
+//     */
     Result delete(byte[] key);
 
-    /**
-     * 执行批量操作
-     * Perform batch operation
-     *
-     * @return
-     */
+//    /**
+//     * 执行批量操作
+//     * Perform batch operation
+//     *
+//     * @return
+//     */
     Result executeBatch();
 }

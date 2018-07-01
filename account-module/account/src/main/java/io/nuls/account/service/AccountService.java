@@ -39,7 +39,6 @@ import java.util.List;
 
 /**
  * 账户模块提供给外部的服务接口定义
- * <p>
  * account service definition
  *
  * @author: Niels Wang
@@ -48,7 +47,6 @@ public interface AccountService {
 
     /**
      * 创建指定个数的账户（包含地址）
-     * <p>
      * Create a specified number of accounts,and encrypt the accounts,
      * all the accounts are encrypted by the same password
      * if the password is NULL or "", the accounts will be unencrypted.
@@ -72,7 +70,6 @@ public interface AccountService {
 
     /**
      * 创建指定个数的账户（包含地址）
-     * <p>
      * Create an account and encrypt it,
      * if the password is NULL or "", the accounts will be unencrypted.
      *
@@ -83,18 +80,14 @@ public interface AccountService {
 
     /**
      * 创建一个账户
-     * <p>
      * Create an unencrypted account
-     *
      * @return the account list created(only one account in the list).
      */
     Result<List<Account>> createAccount();
 
     /**
      * 根据账户标识删除对应的账户
-     * <p>
      * delete an account by address.
-     *
      * @param address  the address of the account you want to delete.
      * @param password the password of the account.
      * @return the result of the operation.
@@ -104,10 +97,9 @@ public interface AccountService {
 
     /**
      * 根据keyStore重置密码
-     * <p>
      * Reset password by keyStore.
-     *
      * @param keyStore the keyStore of the account.
+     * @param password the password of account
      * @return the result of the operation.
      */
     Result<Account> updatePasswordByAccountKeyStore(AccountKeyStore keyStore, String password);
@@ -119,10 +111,10 @@ public interface AccountService {
      * 3.从数据库搜索此账户的别名,没有搜到则不设置(别名不从keyStore中获取,因为可能被更改)
      * 4.保存账户
      * 5.导入账户账本交易等信息
-     * <p>
      * import an account form account key store.
      *
      * @param keyStore the keyStore of the account.
+     * @param password the password of account
      * @return the result of the operation.
      */
     Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore, String password);
@@ -134,7 +126,6 @@ public interface AccountService {
      * 3.从数据库搜索此账户的别名,没有搜到则不设置(别名不从keyStore中获取,因为可能被更改)
      * 4.保存账户
      * 5.导入账户账本交易等信息
-     * <p>
      * import an account form account key store.
      *
      * @param keyStore the keyStore of the account.
@@ -142,22 +133,20 @@ public interface AccountService {
      */
     Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore);
 
-
-    /**
-     * 根据私钥和密码导入账户
-     * import an account from plant private key and encrypt the account.
-     */
+//    /**
+//     * 根据私钥和密码导入账户
+//     * import an account from plant private key and encrypt the account.
+//     */
     Result<Account> importAccount(String prikey, String password);
 
-    /**
-     * 据私钥和密码导入账户
-     * import an unencrypted account by plant private key.
-     */
+//    /**
+//     * 据私钥和密码导入账户
+//     * import an unencrypted account by plant private key.
+//     */
     Result<Account> importAccount(String prikey);
 
     /**
      * 导出账户到keyStore
-     * <p>
      * export an account to an account key store.
      *
      * @param address  the address of the account.
@@ -168,7 +157,6 @@ public interface AccountService {
 
     /**
      * 根据账户地址byte[]获取完整的账户信息
-     * <p>
      * Query account information by address.
      *
      * @param address the address of the account you want to query.
@@ -178,7 +166,6 @@ public interface AccountService {
 
     /**
      * 根据账户地址字符串获取完整的账户信息
-     * <p>
      * Query account by address.
      *
      * @param address the address of the account you want to query.
@@ -242,10 +229,9 @@ public interface AccountService {
 
     /**
      * Verify the account password.
-     *
-     * @param account
-     * @param password
-     * @return
+     * @param account account
+     * @param password password
+     * @return Result
      */
     Result validPassword(Account account, String password);
 
@@ -274,6 +260,7 @@ public interface AccountService {
      * @param account  Signed account
      * @param password Account password
      * @return The NulsSignData object.
+     * @throws NulsException nulsException
      */
     NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
 
@@ -284,6 +271,7 @@ public interface AccountService {
      * @param data    Data to be signed.
      * @param account Signed account
      * @return The NulsSignData object.
+     * @throws NulsException nulsException
      */
     NulsSignData signData(byte[] data, Account account) throws NulsException;
 
@@ -294,6 +282,7 @@ public interface AccountService {
      * @param data  Data to be signed.
      * @param ecKey eckey.
      * @return The NulsSignData object.
+     * @throws NulsException nulsException
      */
     NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException;
 
@@ -305,6 +294,7 @@ public interface AccountService {
      * @param account  account to sign.
      * @param password password of account.
      * @return the NulsSignData object.
+     * @throws NulsException nulsException
      */
     NulsSignData signDigest(byte[] digest, Account account, String password) throws NulsException;
 
@@ -334,6 +324,7 @@ public interface AccountService {
      * Query the balance of all accounts.
      *
      * @return Balance object.
+     * @throws NulsException nulsException
      */
     Result<Balance> getBalance() throws NulsException;
 
@@ -343,6 +334,7 @@ public interface AccountService {
      *
      * @param account the account.
      * @return Balance object.
+     * @throws NulsException nulsException
      */
     Result<Balance> getBalance(Account account) throws NulsException;
 
@@ -352,6 +344,7 @@ public interface AccountService {
      *
      * @param address the address of the account.
      * @return Balance object.
+     * @throws NulsException nulsException
      */
     Result<Balance> getBalance(Address address) throws NulsException;
 
@@ -361,6 +354,7 @@ public interface AccountService {
      *
      * @param address the address of the account.
      * @return Balance object.
+     * @throws NulsException nulsException
      */
     Result<Balance> getBalance(String address) throws NulsException;
 
@@ -369,7 +363,7 @@ public interface AccountService {
      * 根据账户地址字节数组获取账户别名
      * Get an account alias based on the array of account address bytes
      *
-     * @param address
+     * @param address the address of the account.
      * @return alias string
      */
     Result<String> getAlias(byte[] address);
@@ -378,20 +372,19 @@ public interface AccountService {
      * 根据账户地址获取账户别名
      * Get account alias according to account address
      *
-     * @param address
+     * @param address the address of the account.
      * @return alias string
      */
     Result<String> getAlias(String address);
 
-
-    /**
-     * 获取设置别名交易手续费
-     * Gets to set the alias transaction fee
-     *
-     * @param address
-     * @param aliasName
-     * @return
-     */
+//    /**
+//     * 获取设置别名交易手续费
+//     * Gets to set the alias transaction fee
+//     *
+//     * @param address
+//     * @param aliasName
+//     * @return
+//     */
     Result<Na> getAliasFee(String address, String aliasName);
 
 }

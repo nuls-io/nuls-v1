@@ -4,8 +4,7 @@ package io.nuls.kernel.utils;
 import io.nuls.core.tools.str.StringUtils;
 
 /**
- * @Desription:
- * @Author: PierreLuo
+ * @author: Niels Wang
  */
 public class CommandBuilder {
     private StringBuilder builder = new StringBuilder();

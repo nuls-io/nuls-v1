@@ -127,6 +127,7 @@ public class Base58 {
      * removed from the returned data.
      *
      * @param input the base58-encoded string to decode (which should include the checksum)
+     * @return byte
      * @throws Exception if the input is not base 58 or the checksum does not validate.
      */
     public static byte[] decodeChecked(String input) throws Exception {

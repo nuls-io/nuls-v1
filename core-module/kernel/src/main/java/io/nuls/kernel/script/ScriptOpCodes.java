@@ -417,9 +417,9 @@ public class ScriptOpCodes {
         OP_CODE_NAME_MAP.put("PUBKEY", OP_PUBKEY);
     }
 
-    /**
-     * Converts the given OpCode into a string (eg "0", "PUSHDATA", or "NON_OP(10)")
-     */
+//    /**
+//     * Converts the given OpCode into a string (eg "0", "PUSHDATA", or "NON_OP(10)")
+//     */
     public static String getOpCodeName(int opcode) {
         if (OP_CODE_MAP.containsKey(opcode)) {
             return OP_CODE_MAP.get(opcode);
@@ -428,9 +428,9 @@ public class ScriptOpCodes {
         return "NON_OP(" + opcode + ")";
     }
 
-    /**
-     * Converts the given pushdata OpCode into a string (eg "PUSHDATA2", or "PUSHDATA(23)")
-     */
+//    /**
+//     * Converts the given pushdata OpCode into a string (eg "PUSHDATA2", or "PUSHDATA(23)")
+//     */
     public static String getPushDataName(int opcode) {
         if (OP_CODE_MAP.containsKey(opcode)) {
             return OP_CODE_MAP.get(opcode);
@@ -438,10 +438,10 @@ public class ScriptOpCodes {
 
         return "PUSHDATA(" + opcode + ")";
     }
-
-    /**
-     * Converts the given OpCodeName into an int
-     */
+//
+//    /**
+//     * Converts the given OpCodeName into an int
+//     */
     public static int getOpCode(String opCodeName) {
         if (OP_CODE_NAME_MAP.containsKey(opCodeName)) {
             return OP_CODE_NAME_MAP.get(opCodeName);

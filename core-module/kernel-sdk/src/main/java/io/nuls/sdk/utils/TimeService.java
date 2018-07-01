@@ -100,7 +100,7 @@ public class TimeService implements Runnable {
      * 连接公用网站，获取对方的网络时间，
      * 有一个获取成功就立刻返回
      *
-     * @return
+     * @return long
      */
     private long getWebTime() {
         for (int i = 0; i < urlList.size(); i++) {
@@ -160,8 +160,7 @@ public class TimeService implements Runnable {
     /**
      * 获取当前网络时间毫秒数
      * Gets the current network time in milliseconds.
-     *
-     * @return
+     * @return long
      */
     public static long currentTimeMillis() {
         return System.currentTimeMillis() + netTimeOffset;
@@ -171,7 +170,7 @@ public class TimeService implements Runnable {
      * 获取网络时间偏移值
      * Gets the network time offset.
      *
-     * @return
+     * @return long
      */
     public static long getNetTimeOffset() {
         return netTimeOffset;

@@ -72,26 +72,26 @@ public class VarInt {
         }
     }
 
-    /**
-     * Returns the original number of bytes used to encode the value if it was
-     * deserialized from a byte array, or the minimum encoded size if it was not.
-     */
+//    /**
+//     * Returns the original number of bytes used to encode the value if it was
+//     * deserialized from a byte array, or the minimum encoded size if it was not.
+//     */
     public int getOriginalSizeInBytes() {
         return originallyEncodedSize;
     }
 
-    /**
-     * Returns the minimum encoded size of the value.
-     */
+//    /**
+//     * Returns the minimum encoded size of the value.
+//     */
     public final int getSizeInBytes() {
         return sizeOf(value);
     }
 
-    /**
-     * Returns the minimum encoded size of the given unsigned long value.
-     *
-     * @param value the unsigned long value (beware widening conversion of negatives!)
-     */
+//    /**
+//     * Returns the minimum encoded size of the given unsigned long value.
+//     *
+//     * @param value the unsigned long value (beware widening conversion of negatives!)
+//     */
     public static int sizeOf(long value) {
         // if negative, it's actually a very large unsigned long value
         if (value < 0) {
@@ -114,11 +114,11 @@ public class VarInt {
         return 9;
     }
 
-    /**
-     * Encodes the value into its minimal representation.
-     *
-     * @return the minimal encoded bytes of the value
-     */
+//    /**
+//     * Encodes the value into its minimal representation.
+//     *
+//     * @return the minimal encoded bytes of the value
+//     */
     public byte[] encode() {
         byte[] bytes;
         switch (sizeOf(value)) {

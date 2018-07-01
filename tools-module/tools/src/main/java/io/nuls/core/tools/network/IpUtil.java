@@ -49,10 +49,6 @@ public class IpUtil {
         return ips;
     }
 
-
-    /**
-     * @return
-     */
     private static ArrayList<String> getLocalIP() {
         ArrayList<String> iplist = new ArrayList<>();
         boolean loop = false;
@@ -117,9 +113,6 @@ public class IpUtil {
         return iplist;
     }
 
-    /**
-     * lower is server
-     */
     public static boolean judgeLocalIsServer(String localIP, String remoteIP) {
         long local = ipToLong(localIP);
         long remote = ipToLong(remoteIP);

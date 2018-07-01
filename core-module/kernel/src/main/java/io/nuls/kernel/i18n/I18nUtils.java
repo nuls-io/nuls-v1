@@ -92,12 +92,12 @@ public class I18nUtils {
         }
     }
 
-    /**
-     * 设置系统语言，切换语言包
-     * Set up the system language and switch the language package.
-     *
-     * @param lang 语言标识/Language identification
-     */
+//    /**
+//     * 设置系统语言，切换语言包
+//     * Set up the system language and switch the language package.
+//     *
+//     * @param lang 语言标识/Language identification
+//     */
     public static void setLanguage(String lang) throws NulsException {
         if (StringUtils.isBlank(lang)) {
             throw new NulsException(KernelErrorCode.LANGUAGE_CANNOT_SET_NULL);

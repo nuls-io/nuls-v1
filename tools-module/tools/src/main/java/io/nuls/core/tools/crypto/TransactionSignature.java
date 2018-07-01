@@ -30,21 +30,24 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 
-/**
- * A TransactionSignature wraps an {@link io.nuls.core.tools.crypto.ECKey.ECDSASignature} and adds methods for handling
- * the additional SIGHASH mode byte that is used.
- */
+///**
+// * A TransactionSignature wraps an {@link io.nuls.core.tools.crypto.ECKey.ECDSASignature} and adds methods for handling
+// * the additional SIGHASH mode byte that is used.
+// */
 public class TransactionSignature extends ECKey.ECDSASignature {
     public final int sighashFlags;
 
-    /** Constructs a signature with the given components and SIGHASH_ALL. */
+//    /** Constructs a signature with the given components and SIGHASH_ALL. */
 //    public TransactionSignature(BigInteger r, BigInteger s) {
 //        this(r, s, Transaction.SigHash.ALL.value);
 //    }
-
-    /**
-     * Constructs a signature with the given components and raw sighash flag bytes (needed for rule compatibility).
-     */
+//
+//    /**
+//     * Constructs a signature with the given components and raw sighash flag bytes (needed for rule compatibility).
+//     * @param r
+//     * @param s
+//     * @param sighashFlags
+//     */
     public TransactionSignature(BigInteger r, BigInteger s, int sighashFlags) {
         super(r, s);
         this.sighashFlags = sighashFlags;

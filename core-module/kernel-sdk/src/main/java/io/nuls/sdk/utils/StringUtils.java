@@ -24,8 +24,6 @@
  */
 package io.nuls.sdk.utils;
 
-import io.nuls.sdk.model.Na;
-
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -62,12 +60,12 @@ public class StringUtils {
         return (isNull(para)) ? null : para.trim();
     }
 
-    /**
-     *  Check the difficulty of the password
-     *  length between 8 and 20, the combination of characters and numbers
-     *
-     * @return boolean
-     */
+//    /**
+//     *  Check the difficulty of the password
+//     *  length between 8 and 20, the combination of characters and numbers
+//     *
+//     * @return boolean
+//     */
     public static boolean validPassword(String password) {
         if (isBlank(password)) {
             return false;
@@ -85,11 +83,11 @@ public class StringUtils {
         }
     }
 
-    /**
-     * 别名规则:只允许使用小写字母、数字、下划线（下划线不能在两端）1~20字节
-     * @param alias
-     * @return
-     */
+//    /**
+//     * 别名规则:只允许使用小写字母、数字、下划线（下划线不能在两端）1~20字节
+//     * @param alias
+//     * @return
+//     */
     public static boolean validAlias(String alias) {
         try {
             if (isBlank(alias)) {
@@ -156,11 +154,11 @@ public class StringUtils {
 
     private static final Pattern GT_ZERO_NUMBER_PATTERN = Pattern.compile("([1-9][0-9]*(\\.\\d+)?)|(0\\.\\d*[1-9]+0*)");
 
-    /**
-     * 验证是大于0的数(包含小数,不限位数)
-     * @param str
-     * @return
-     */
+//    /**
+//     * 验证是大于0的数(包含小数,不限位数)
+//     * @param str
+//     * @return
+//     */
     public static boolean isNumberGtZero(String str) {
         if (StringUtils.isBlank(str)) {
             return false;
@@ -172,11 +170,11 @@ public class StringUtils {
         return true;
     }
 
-    /**
-     * 去掉小数多余的.与0
-     * @param s
-     * @return
-     */
+//    /**
+//     * 去掉小数多余的.与0
+//     * @param s
+//     * @return
+//     */
     private static String subZeroAndDot(String s){
         if(s.indexOf(".") > 0){
             s = s.replaceAll("0+?$", "");
@@ -187,12 +185,12 @@ public class StringUtils {
 
     private static final Pattern NULS_PATTERN = Pattern.compile("([1-9]\\d*(\\.\\d{1,8})?)|(0\\.\\d{1,8})");
 
-    /**
-     * 匹配是否是nuls
-     * 验证是大于0的数(包括小数, 小数点后有效位超过8位则不合法)
-     * @param str
-     * @return
-     */
+//    /**
+//     * 匹配是否是nuls
+//     * 验证是大于0的数(包括小数, 小数点后有效位超过8位则不合法)
+//     * @param str
+//     * @return
+//     */
     public static boolean isNuls(String str) {
         if (StringUtils.isBlank(str)) {
             return false;
@@ -207,11 +205,11 @@ public class StringUtils {
 
     private static final Pattern GT_ZERO_NUMBER_LIMIT_2_PATTERN = Pattern.compile("([1-9]\\d*(\\.\\d{1,2})?)|(0\\.\\d{1,2})");
 
-    /**
-     * 验证是大于0的数(包括小数, 小数点后有效位超过2位则不合法)
-     * @param str
-     * @return
-     */
+//    /**
+//     * 验证是大于0的数(包括小数, 小数点后有效位超过2位则不合法)
+//     * @param str
+//     * @return
+//     */
     public static boolean isNumberGtZeroLimitTwo(String str) {
         if (StringUtils.isBlank(str)) {
             return false;

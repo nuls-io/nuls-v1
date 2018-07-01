@@ -61,12 +61,12 @@ public class DisruptorUtil<T extends DisruptorData> {
         }
     };
 
-    /**
-     * create a disruptor
-     *
-     * @param name           The title of the disruptor
-     * @param ringBufferSize The size of ringBuffer
-     */
+//    /**
+//     * create a disruptor
+//     *
+//     * @param name           The title of the disruptor
+//     * @param ringBufferSize The size of ringBuffer
+//     */
     public Disruptor<DisruptorData> createDisruptor(String name, int ringBufferSize, ThreadFactory factory) {
         if (DISRUPTOR_MAP.keySet().contains(name)) {
             throw new RuntimeException("create disruptor faild,the name is repetitive!");
@@ -88,18 +88,18 @@ public class DisruptorUtil<T extends DisruptorData> {
         return disruptor;
     }
 
-    /**
-     * start a disruptor service
-     */
+//    /**
+//     * start a disruptor service
+//     */
     public void start(String name) {
         Disruptor<DisruptorData> disruptor = DISRUPTOR_MAP.get(name);
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
         disruptor.start();
     }
 
-    /**
-     * start a disruptor service
-     */
+//    /**
+//     * start a disruptor service
+//     */
     public void shutdown(String name) {
         Disruptor<DisruptorData> disruptor = DISRUPTOR_MAP.get(name);
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);
@@ -107,9 +107,9 @@ public class DisruptorUtil<T extends DisruptorData> {
     }
 
 
-    /**
-     * add the data obj to the disruptor named the field name
-     */
+//    /**
+//     * add the data obj to the disruptor named the field name
+//     */
     public void offer(String name, Object obj) {
 
         Disruptor<DisruptorData> disruptor = DISRUPTOR_MAP.get(name);
@@ -135,9 +135,9 @@ public class DisruptorUtil<T extends DisruptorData> {
         }
     }
 
-    /**
-     * add some message to worker pool of the disruptor
-     */
+//    /**
+//     * add some message to worker pool of the disruptor
+//     */
     public EventHandlerGroup<T> handleEventsWithWorkerPool(String name, WorkHandler<DisruptorData>... handler) {
         Disruptor disruptor = DISRUPTOR_MAP.get(name);
         AssertUtil.canNotEmpty(disruptor, "the disruptor is not exist!name:" + name);

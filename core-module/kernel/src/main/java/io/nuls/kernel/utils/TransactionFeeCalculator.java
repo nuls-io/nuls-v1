@@ -39,12 +39,12 @@ public class TransactionFeeCalculator {
 
     public static final int KB = 1024;
 
-    /**
-     * 根据交易大小计算需要交纳的手续费
-     * According to the transaction size calculate the handling fee.
-     *
-     * @param size 交易大小/size of the transaction
-     */
+//    /**
+//     * 根据交易大小计算需要交纳的手续费
+//     * According to the transaction size calculate the handling fee.
+//     *
+//     * @param size 交易大小/size of the transaction
+//     */
     public static final Na getTransferFee(int size) {
         Na fee = MIN_PRECE_PRE_1024_BYTES.multiply(size / KB);
         if (size % KB > 0) {
@@ -53,12 +53,12 @@ public class TransactionFeeCalculator {
         return fee;
     }
 
-    /**
-     * 根据交易大小计算需要交纳的手续费
-     * According to the transaction size calculate the handling fee.
-     *
-     * @param size 交易大小/size of the transaction
-     */
+//    /**
+//     * 根据交易大小计算需要交纳的手续费
+//     * According to the transaction size calculate the handling fee.
+//     *
+//     * @param size 交易大小/size of the transaction
+//     */
     public static final Na getMaxFee(int size) {
         Na fee = OTHER_PRECE_PRE_1024_BYTES.multiply(size / KB);
         if (size % KB > 0) {
@@ -67,12 +67,12 @@ public class TransactionFeeCalculator {
         return fee;
     }
 
-    /**
-     * 根据交易大小计算需要交纳的手续费
-     * According to the transaction size calculate the handling fee.
-     *
-     * @param size 交易大小/size of the transaction
-     */
+//    /**
+//     * 根据交易大小计算需要交纳的手续费
+//     * According to the transaction size calculate the handling fee.
+//     *
+//     * @param size 交易大小/size of the transaction
+//     */
     public static final Na getFee(int size, Na price) {
         if (price.isLessThan(MIN_PRECE_PRE_1024_BYTES)) {
             throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);

@@ -38,12 +38,6 @@ public class Base58 {
         }
     }
 
-    /**
-     * Encodes the given bytes as a base58 string (no checksum is appended).
-     *
-     * @param input the bytes to encode
-     * @return the base58-encoded string
-     */
     public static String encode(byte[] input) {
         if (input.length == 0) {
             return "";
@@ -74,13 +68,7 @@ public class Base58 {
         return new String(encoded, outputStart, encoded.length - outputStart);
     }
 
-    /**
-     * Decodes the given base58 string into the original data bytes.
-     *
-     * @param input the base58-encoded string to decode
-     * @return the decoded data bytes
-     * @throws Exception if the given string is not a valid base58 string
-     */
+
     public static byte[] decode(String input) throws Exception {
         if (input.length() == 0) {
             return new byte[0];
@@ -121,14 +109,6 @@ public class Base58 {
         return new BigInteger(1, decode(input));
     }
 
-    /**
-     * Decodes the given base58 string into the original data bytes, using the checksum in the
-     * last 4 bytes of the decoded data to verify that the rest are correct. The checksum is
-     * removed from the returned data.
-     *
-     * @param input the base58-encoded string to decode (which should include the checksum)
-     * @throws Exception if the input is not base 58 or the checksum does not validate.
-     */
     public static byte[] decodeChecked(String input) throws Exception {
         byte[] decoded  = decode(input);
         if (decoded.length < 4) {
@@ -143,18 +123,6 @@ public class Base58 {
         return data;
     }
 
-    /**
-     * Divides a number, represented as an array of bytes each containing a single digit
-     * in the specified base, by the given divisor. The given number is modified in-place
-     * to contain the quotient, and the return value is the remainder.
-     *
-     * @param number the number to divide
-     * @param firstDigit the index within the array of the first non-zero digit
-     *        (this is used for optimization by skipping the leading zeros)
-     * @param base the base in which the number's digits are represented (up to 256)
-     * @param divisor the number to divide by (up to 256)
-     * @return the remainder of the division operation
-     */
     private static byte divmod(byte[] number, int firstDigit, int base, int divisor) {
         // this is just long division which accounts for the base of the input digits
         int remainder = 0;

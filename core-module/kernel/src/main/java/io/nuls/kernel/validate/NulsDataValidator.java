@@ -32,9 +32,5 @@ import io.nuls.kernel.model.NulsData;
  */
 public interface NulsDataValidator<T extends NulsData> {
 
-    /**
-     * @param data
-     * @return
-     */
     ValidateResult validate(T data) throws NulsException;
 }
