@@ -13,7 +13,7 @@
     <groupId>io.nuls.db-module</groupId>
     <artifactId>db-leveldb</artifactId>
     <version>0.9.11</version>
-    <packaging>pom</packaging>
+
     <name>db-leveldb</name>
 
     <dependencies>

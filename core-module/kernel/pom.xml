@@ -12,7 +12,7 @@
     <groupId>io.nuls.core-module</groupId>
     <artifactId>kernel</artifactId>
     <version>0.9.11</version>
-    <packaging>pom</packaging>
+
 
     <dependencies>
         <!-- https://mvnrepository.com/artifact/cglib/cglib -->

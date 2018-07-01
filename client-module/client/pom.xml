@@ -38,7 +38,7 @@
     <groupId>io.nuls.client-module</groupId>
     <artifactId>client</artifactId>
     <version>0.9.11</version>
-    <packaging>pom</packaging>
+
     <properties>
         <glassfish.jersey.version>2.27</glassfish.jersey.version>
     </properties>

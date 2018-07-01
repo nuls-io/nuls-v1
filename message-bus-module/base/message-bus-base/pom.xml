@@ -13,7 +13,7 @@
     <groupId>io.nuls.message-bus-module</groupId>
     <artifactId>message-bus-base</artifactId>
     <version>0.9.11</version>
-    <packaging>pom</packaging>
+
 
     <dependencies>
         <dependency>

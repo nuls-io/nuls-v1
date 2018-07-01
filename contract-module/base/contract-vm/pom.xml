@@ -13,6 +13,6 @@
     <groupId>io.nuls.contract-module</groupId>
     <artifactId>contract-vm</artifactId>
     <version>0.9.11</version>
-    <packaging>pom</packaging>
+
 
 </project>

@@ -13,7 +13,7 @@
     <groupId>io.nuls.core-module</groupId>
     <artifactId>kernel-rpc</artifactId>
     <version>0.9.11</version>
-    <packaging>pom</packaging>
+
 
     <dependencies>
         <dependency>

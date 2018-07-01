@@ -366,6 +366,7 @@ public class ChainContainer implements Cloneable {
         if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
             BlockLog.debug("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
             Log.error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+            return false;
         }
         YellowPunishTransaction yellowPunishTransaction = null;
         try {
@@ -408,7 +409,7 @@ public class ChainContainer implements Cloneable {
             }
             for (RedPunishTransaction redTx : redPunishTxList) {
                 if (!punishAddress.contains(AddressTool.getStringAddressByBytes(redTx.getTxData().getAddress()))) {
-                    BlockLog.debug("There is a wrong red punish tx!"+ block.getHeader().getHash());
+                    BlockLog.debug("There is a wrong red punish tx!" + block.getHeader().getHash());
                     return false;
                 }
             }

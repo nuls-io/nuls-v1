@@ -11,7 +11,7 @@
     <groupId>io.nuls.contract-module</groupId>
     <artifactId>contract</artifactId>
     <version>0.9.11</version>
-    <packaging>pom</packaging>
+
 
     <dependencies>
         <dependency>

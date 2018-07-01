@@ -12,7 +12,7 @@
     <groupId>io.nuls.db-module</groupId>
     <artifactId>db</artifactId>
     <version>0.9.11</version>
-    <packaging>pom</packaging>
+
     <name>db</name>
 
 </project>

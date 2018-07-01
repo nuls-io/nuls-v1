@@ -64,7 +64,6 @@ public class Bootstrap {
     public static void main(String[] args) {
         Thread.currentThread().setName("Nuls");
         try {
-            copyWebFiles();
             sysStart();
         } catch (Exception e) {
             Log.error(e);
@@ -73,8 +72,10 @@ public class Bootstrap {
     }
 
     private static void copyWebFiles() {
-        File source = new File(Bootstrap.class.getClassLoader().getResource("").getPath() + "/temp/conf/client-web/");
+        String path = Bootstrap.class.getClassLoader().getResource("").getPath() + "/temp/" + NulsConfig.VERSION + "/conf/client-web/";
+        File source = new File(path);
         if (!source.exists()) {
+            Log.info("source not exists:" + path);
             return;
         }
         Log.info("do the files copy!");
@@ -92,6 +93,7 @@ public class Bootstrap {
             initModules();
             String ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP, RpcConstant.DEFAULT_IP);
             int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);
+            copyWebFiles();
             RpcServerManager.getInstance().startServer(ip, port);
 
             LanguageService languageService = NulsContext.getServiceBean(LanguageService.class);

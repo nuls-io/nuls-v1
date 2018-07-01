@@ -36,7 +36,7 @@
     <groupId>io.nuls.consensus-module</groupId>
     <artifactId>consensus</artifactId>
     <version>0.9.11</version>
-    <packaging>pom</packaging>
+
 
 
 </project>

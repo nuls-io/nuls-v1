@@ -13,7 +13,7 @@
     <groupId>io.nuls.account-ledger-module</groupId>
     <artifactId>account-ledger-storage</artifactId>
     <version>0.9.11</version>
-    <packaging>pom</packaging>
+
 
     <dependencies>
         <dependency>

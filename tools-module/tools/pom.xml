@@ -37,7 +37,7 @@
     <groupId>io.nuls.tools-module</groupId>
     <artifactId>tools</artifactId>
     <version>0.9.11</version>
-    <packaging>pom</packaging>
+
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

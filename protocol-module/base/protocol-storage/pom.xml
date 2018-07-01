@@ -13,7 +13,7 @@
     <groupId>io.nuls.protocol-module</groupId>
     <artifactId>protocol-storage</artifactId>
     <version>0.9.11</version>
-    <packaging>pom</packaging>
+
 
     <dependencies>
         <dependency>

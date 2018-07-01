@@ -13,6 +13,6 @@
     <groupId>io.nuls.network-module</groupId>
     <artifactId>network-sdk</artifactId>
     <version>0.9.11</version>
-    <packaging>pom</packaging>
+
 
 </project>
