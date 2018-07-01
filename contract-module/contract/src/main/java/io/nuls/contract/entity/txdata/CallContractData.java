@@ -31,10 +31,6 @@ import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 
-/**
- * @desription:
- * @author: PierreLuo
- */
 public class CallContractData extends BaseNulsData {
 
     private byte[] address;

@@ -56,9 +56,7 @@ public class TemporaryCacheManager {
 
     /**
      * 将一个SmallBlock放入内存中，若不主动删除，则在缓存存满或者存在时间超过1000秒时，自动清理
-     * <p>
      * Store a SmallBlock in memory, cache it full or exist for over 1000 seconds, and clean it automatically.
-     *
      * @param smallBlock 要放入内存中的对象
      */
     public void cacheSmallBlock(SmallBlock smallBlock) {
@@ -71,6 +69,7 @@ public class TemporaryCacheManager {
      * get SmallBlock by block header digest data
      *
      * @param hash blockHash
+     * @return SmallBlock
      */
     public SmallBlock getSmallBlock(NulsDigestData hash) {
         if (null == smallBlockCacheMap) {
@@ -81,9 +80,9 @@ public class TemporaryCacheManager {
 
     /**
      * 缓存一个交易，缓存的标识就是交易的hash对象，该交易在内存中存在，直到内存大小达到限制或者存活时间超过1000秒
-     * <p>
      * Cache a transaction where the identity of the cache is the hash object of the transaction,
      * which exists in memory until the memory size is limited or survived for more than 1000 seconds.
+     * @param tx transaction
      */
     public void cacheTx(Transaction tx) {
         txCacheMap.put(tx.getHash(), tx);
@@ -106,6 +105,7 @@ public class TemporaryCacheManager {
     /**
      * 根据区块摘要对象从缓存中移出一个SmallBlock，移除后再获取时将返回null
      * A SmallBlock is removed from the cache based on the block summary object, and null is returned when it is removed.
+     * @param hash transaction digest data
      */
     public void removeSmallBlock(NulsDigestData hash) {
         if (null == smallBlockCacheMap) {

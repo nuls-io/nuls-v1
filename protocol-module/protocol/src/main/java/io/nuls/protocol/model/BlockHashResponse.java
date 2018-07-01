@@ -47,14 +47,12 @@ public class BlockHashResponse extends BaseNulsData {
      * 请求消息的hash值
      * the digest data of the request message
      */
-
     private NulsDigestData requestMessageHash;
 
     /**
      * 返回的hash列表
      * Returns a list of hashes.
      */
-
     private List<NulsDigestData> hashList = new ArrayList<>();
 
     @Override
@@ -91,10 +89,10 @@ public class BlockHashResponse extends BaseNulsData {
     }
 
 
-    /**
-     * 返回的hash列表
-     * Returns a list of hashes.
-     */
+//    /**
+//     * 返回的hash列表
+//     * Returns a list of hashes.
+//     */
     public List<NulsDigestData> getHashList() {
         return hashList;
     }

@@ -25,10 +25,7 @@ package io.nuls.account.ledger.constant;
 
 import io.nuls.kernel.constant.NulsConstant;
 
-/**
- * @Desription:
- * @Author: Facjas
- */
+
 public interface AccountLedgerConstant extends NulsConstant {
 
     short MODULE_ID_ACCOUNTLEDGER = 9;

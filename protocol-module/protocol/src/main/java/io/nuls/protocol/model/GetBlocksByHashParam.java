@@ -82,11 +82,11 @@ public class GetBlocksByHashParam extends BaseNulsData {
         this.endHash = byteBuffer.readHash();
     }
 
-    /**
-     * 起始摘要，当只请求一个时，就是目标摘要，当请求多个时，是第一个的前一个摘要
-     * The initial hash, when only one request is requested,
-     * is the target hash, and when multiple requests are requested, it is the previous of the first hash.
-     */
+//    /**
+//     * 起始摘要，当只请求一个时，就是目标摘要，当请求多个时，是第一个的前一个摘要
+//     * The initial hash, when only one request is requested,
+//     * is the target hash, and when multiple requests are requested, it is the previous of the first hash.
+//     */
     public NulsDigestData getStartHash() {
         return startHash;
     }

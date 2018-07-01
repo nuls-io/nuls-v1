@@ -30,10 +30,6 @@ import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 
 import java.io.IOException;
 
-/**
- * @desription:
- * @author: PierreLuo
- */
 public class DeleteContractData extends BaseNulsData {
 
     private byte[] address;

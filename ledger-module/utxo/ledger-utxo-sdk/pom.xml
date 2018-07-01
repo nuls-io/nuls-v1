@@ -33,6 +33,11 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <groupId>io.nuls.ledger-module</groupId>
+    <artifactId>ledger-utxo-sdk</artifactId>
+    <version>0.9.11</version>
+    <packaging>pom</packaging>
+
     <dependencies>
         <dependency>
             <groupId>io.nuls.core-module</groupId>
@@ -45,9 +50,5 @@
             <version>2.27</version>
         </dependency>
     </dependencies>
-
-    <groupId>io.nuls.ledger-module</groupId>
-    <artifactId>ledger-utxo-sdk</artifactId>
-
 
 </project>

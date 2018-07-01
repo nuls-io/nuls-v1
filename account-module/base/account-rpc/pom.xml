@@ -12,6 +12,9 @@
 
     <groupId>io.nuls.account-module</groupId>
     <artifactId>account-rpc</artifactId>
+    <version>0.9.11</version>
+    <packaging>pom</packaging>
+
     <dependencies>
         <dependency>
             <groupId>io.swagger</groupId>

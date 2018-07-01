@@ -25,10 +25,6 @@
 
 package io.nuls.contract.dto;
 
-/**
- * @desription:
- * @author: PierreLuo
- */
 public class ContractResult {
     private String contractAddress;
     private long naUsed;

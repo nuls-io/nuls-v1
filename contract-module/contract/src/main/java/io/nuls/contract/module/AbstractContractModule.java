@@ -28,10 +28,7 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.module.BaseModuleBootstrap;
 
-/**
- * @desription:
- * @author: PierreLuo
- */
+
 public abstract class AbstractContractModule extends BaseModuleBootstrap {
     public AbstractContractModule() {
         super(ContractConstant.MODULE_ID_CONTRACT);

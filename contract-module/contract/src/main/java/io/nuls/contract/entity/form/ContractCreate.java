@@ -25,10 +25,7 @@
 
 package io.nuls.contract.entity.form;
 
-/**
- * @desription:
- * @author: PierreLuo
- */
+
 public class ContractCreate extends ContractBase {
 
     private byte[] contractCode;

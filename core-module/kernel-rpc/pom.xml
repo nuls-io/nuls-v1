@@ -8,9 +8,13 @@
         <version>0.9.11</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.nuls.core-module</groupId>
     <artifactId>kernel-rpc</artifactId>
+    <version>0.9.11</version>
+    <packaging>pom</packaging>
+
     <dependencies>
         <dependency>
             <groupId>io.swagger</groupId>

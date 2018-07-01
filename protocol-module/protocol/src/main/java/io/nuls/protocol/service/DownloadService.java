@@ -47,7 +47,7 @@ public interface DownloadService {
      *
      * @param hash 区块摘要/block hash
      * @param node 指定的节点/Specified node
-     * @return 区块及结果/ block & results
+     * @return 区块及结果/ block  results
      */
     Result<Block> downloadBlock(NulsDigestData hash, Node node);
 
@@ -64,12 +64,14 @@ public interface DownloadService {
     /**
      * 返回下载是否完成的结果
      * Returns the results of the download.
+     * @return Result
      */
     Result isDownloadSuccess();
 
     /**
      * 重新检查当前状态是否需要重新同步区块，如果需要则下载
      * Recheck whether the current state needs to be resynchronized, and download if necessary.
+     * @return Result
      */
     Result reset();
 

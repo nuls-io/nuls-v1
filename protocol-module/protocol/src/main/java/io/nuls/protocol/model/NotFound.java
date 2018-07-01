@@ -68,9 +68,6 @@ public class NotFound extends BaseNulsData {
         return size;
     }
 
-    /**
-     * serialize important field
-     */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write((byte) type.getCode());
@@ -85,7 +82,7 @@ public class NotFound extends BaseNulsData {
 
     /**
      * 数据类型 {@link MessageDataType}
-     * data type
+     * @return MessageDataType
      */
     public MessageDataType getType() {
         return type;
@@ -98,6 +95,7 @@ public class NotFound extends BaseNulsData {
     /**
      * 数据摘要
      * request hash
+     * @return NulsDigestData
      */
     public NulsDigestData getHash() {
         return hash;
