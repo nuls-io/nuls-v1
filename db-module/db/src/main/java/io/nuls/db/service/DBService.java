@@ -240,4 +240,6 @@ public interface DBService {
 //     */
     Result destroyArea(String areaName);
 
+    Result clearArea(String area);
+
 }
