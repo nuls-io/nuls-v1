@@ -954,4 +954,31 @@ public class LevelDBManager {
             return null;
         }
     }
+
+    public static Result clearArea(String area) {
+        if (!baseCheckArea(area)) {
+            return Result.getFailed();
+        }
+        DBIterator iterator = null;
+        try {
+            DB db = AREAS.get(area);
+            iterator = db.iterator();
+            for (iterator.seekToFirst(); iterator.hasNext(); iterator.next()) {
+               db.delete(iterator.peekNext().getKey());
+            }
+            return Result.getSuccess();
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed();
+        } finally {
+            // Make sure you close the iterator to avoid resource leaks.
+            if (iterator != null) {
+                try {
+                    iterator.close();
+                } catch (IOException e) {
+                    //skip it
+                }
+            }
+        }
+    }
 }

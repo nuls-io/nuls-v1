@@ -56,7 +56,7 @@ public class RewardStatisticsProcess {
     @Autowired
     private AccountService accountService;
 
-    private static BlockingQueue<RewardStatisticsParam> queue = new LinkedBlockingDeque<>(100);
+    private static BlockingQueue<RewardStatisticsParam> queue = new LinkedBlockingDeque<>(1000);
 
     @Autowired
     private PocRewardCacheService service;

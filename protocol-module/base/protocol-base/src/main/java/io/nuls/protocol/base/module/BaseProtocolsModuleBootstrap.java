@@ -27,6 +27,7 @@ package io.nuls.protocol.base.module;
 
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.core.tools.log.Log;
+import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -37,6 +38,7 @@ import io.nuls.kernel.utils.TransactionManager;
 import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.protocol.base.download.smblock.SmallBlockDownloadProcessor;
 import io.nuls.protocol.base.download.tx.TransactionDownloadProcessor;
 import io.nuls.protocol.base.handler.*;
 import io.nuls.protocol.base.service.DownloadServiceImpl;
@@ -76,7 +78,14 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
                 throw new NulsRuntimeException(e);
             }
         } else {
+
+
             if (!block0.getHeader().getHash().equals(genesisBlock.getHeader().getHash())) {
+                if (block0.getHeader().getHash().getDigestHex().equals("0020c68810e7fcbb1281e7e053fa100bc0b0a8184d5f7b4dd07e1093072077ee7bf9")) {
+                    clearAllData();
+                    start();
+                    return;
+                }
                 throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
             }
         }
@@ -98,6 +107,16 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         }
     }
 
+    private void clearAllData() {
+        DBService dbService = NulsContext.getServiceBean(DBService.class);
+        String[] areas = dbService.listArea();
+        for (String area : areas) {
+//            dbService.destroyArea(area);
+//            dbService.createArea(area);
+            dbService.clearArea(area);
+        }
+    }
+
     private void initHandlers() {
         MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
         messageBusService.subscribeMessage(BlockMessage.class, new BlockMessageHandler());
@@ -116,6 +135,8 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
 
         TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "Tx-Download", TransactionDownloadProcessor.getInstance());
         messageBusService.subscribeMessage(GetTxMessage.class, new GetTxMessageHandler());
+
+        TaskManager.createAndRunThread(ProtocolConstant.MODULE_ID_PROTOCOL, "SmallBlock-Download", SmallBlockDownloadProcessor.getInstance());
         messageBusService.subscribeMessage(GetSmallBlockMessage.class, new GetSmallBlockHandler());
         messageBusService.subscribeMessage(ForwardSmallBlockMessage.class, new ForwardSmallBlockHandler());
         messageBusService.subscribeMessage(ForwardTxMessage.class, new ForwardTxMessageHandler());

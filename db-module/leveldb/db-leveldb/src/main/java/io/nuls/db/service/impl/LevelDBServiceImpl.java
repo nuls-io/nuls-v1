@@ -148,7 +148,15 @@ public class LevelDBServiceImpl implements DBService {
     }
 
     @Override
-    public Result destroyArea(String areaName) {
-        return LevelDBManager.destroyArea(areaName);
+    public Result destroyArea(String area) {
+        return LevelDBManager.destroyArea(area);
+    }
+
+    /**
+     * 清空Area
+     */
+    @Override
+    public Result clearArea(String area) {
+        return LevelDBManager.clearArea(area);
     }
 }

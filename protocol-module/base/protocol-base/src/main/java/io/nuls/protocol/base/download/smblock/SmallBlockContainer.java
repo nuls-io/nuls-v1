@@ -23,33 +23,38 @@
  *
  */
 
-package io.nuls.consensus.poc.temp;
+package io.nuls.protocol.base.download.smblock;
 
-import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.Transaction;
-import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.network.model.Node;
+import io.nuls.protocol.model.SmallBlock;
 
-import java.util.List;
+import java.util.concurrent.Future;
 
 /**
  * @author: Niels Wang
  */
-//todo
-public class Compatible0910 {
+public class SmallBlockContainer {
 
-    public static boolean isCompatible(Transaction tx) {
-        if (tx.getType() == ProtocolConstant.TX_TYPE_COINBASE && tx.getBlockHeight() < 20000) {
-            List<Coin> list = tx.getCoinData().getTo();
-            boolean result = true;
-            for (int i = 1; i < list.size(); i++) {
-                result = list.get(i).getNa().equals(0D);
-                if (!result) {
-                    return result;
-                }
+    private final NulsDigestData blockHash;
+    private final Node node;
+    private final Future<SmallBlock> future;
 
-            }
-            return result;
-        }
-        return false;
+    public SmallBlockContainer(Node node, Future<SmallBlock> future, NulsDigestData hash) {
+        this.node = node;
+        this.future = future;
+        this.blockHash = hash;
+    }
+
+    public Node getNode() {
+        return node;
+    }
+
+    public Future<SmallBlock> getFuture() {
+        return future;
+    }
+
+    public NulsDigestData getBlockHash() {
+        return blockHash;
     }
 }

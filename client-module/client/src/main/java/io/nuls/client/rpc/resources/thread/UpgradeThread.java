@@ -78,7 +78,7 @@ public class UpgradeThread implements Runnable {
                 return;
             }
             process.setPercentage(1);
-            VersionFile versionJson = getVersionJson(versionFileHash);
+            VersionFile versionJson = getVersionJson(syncor, versionFileHash);
             if (null == versionJson) {
                 return;
             }
@@ -90,7 +90,7 @@ public class UpgradeThread implements Runnable {
             if (!newDir.exists()) {
                 newDir.mkdirs();
             }
-            String urlRoot = VersionConstant.ROOT_URL + "/" + version;
+            String urlRoot = syncor.getRootUrl() + "/" + version;
             boolean result = this.download(urlRoot + "/bin.zip", newDirPath + "/bin.zip", versionJson.getBinSig());
             if (!result) {
                 deleteTemp(root + "/temp/");
@@ -173,14 +173,14 @@ public class UpgradeThread implements Runnable {
         FileUtil.deleteFolder(new File(tempPath));
     }
 
-    private VersionFile getVersionJson(String versionFileHash) {
+    private VersionFile getVersionJson(SyncVersionRunner syncor, String versionFileHash) {
         if (!upgrading) {
             setFailedMessage("The upgrade has stopped");
             return null;
         }
         String jsonStr = null;
         try {
-            byte[] bytes = HttpDownloadUtils.download(VersionConstant.ROOT_URL + "/" + version + "/version.json");
+            byte[] bytes = HttpDownloadUtils.download(syncor.getRootUrl() + "/" + version + "/version.json");
             String hash = Hex.encode(Sha256Hash.hash(bytes));
             if (!hash.equals(versionFileHash)) {
                 setFailedMessage("Signature verification is incorrect:" + version + "/version.json");
