@@ -102,13 +102,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     }
 
     private Result saveCoinData(Transaction tx) throws IOException {
-        byte[] txHashBytes = tx.getHash().serialize();
-        BatchOperation batch = utxoLedgerUtxoStorageService.createWriteBatch();
         CoinData coinData = tx.getCoinData();
         //TestLog+
 //        Log.info("=============="+tx.getClass().getSimpleName()+"交易：hash-"+tx.getHash().getDigestHex());
         //TestLog-
         if (coinData != null) {
+            BatchOperation batch = utxoLedgerUtxoStorageService.createWriteBatch();
             // 删除utxo已花费 - from
             List<Coin> froms = coinData.getFrom();
             for (Coin from : froms) {
@@ -122,8 +121,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 batch.delete(from.getOwner());
             }
             // 保存utxo - to
+            byte[] txHashBytes = tx.getHash().serialize();
             List<Coin> tos = coinData.getTo();
-            byte[] indexBytes;
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
                     byte[] owner = Arrays.concatenate(txHashBytes, new VarInt(i).encode());

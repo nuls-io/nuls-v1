@@ -213,9 +213,10 @@ public class BlockServiceImpl implements BlockService {
         if (null == block || block.getHeader() == null || block.getTxs() == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
+        long height = block.getHeader().getHeight();
         List<Transaction> savedList = new ArrayList<>();
         for (Transaction transaction : block.getTxs()) {
-            transaction.setBlockHeight(block.getHeader().getHeight());
+            transaction.setBlockHeight(height);
             Result result = transactionService.commitTx(transaction, block.getHeader());
             if (result.isSuccess()) {
                 result = ledgerService.saveTx(transaction);
