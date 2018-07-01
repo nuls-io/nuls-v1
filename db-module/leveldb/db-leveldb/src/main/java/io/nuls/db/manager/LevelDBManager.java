@@ -959,7 +959,15 @@ public class LevelDBManager {
         if (!baseCheckArea(area)) {
             return Result.getFailed();
         }
-        DBIterator iterator = null;
+        try {
+            closeArea(area);
+            return destroyArea(area);
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed();
+        }
+
+        /*DBIterator iterator = null;
         try {
             DB db = AREAS.get(area);
             iterator = db.iterator();
@@ -979,6 +987,6 @@ public class LevelDBManager {
                     //skip it
                 }
             }
-        }
+        }*/
     }
 }
