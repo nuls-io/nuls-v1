@@ -84,9 +84,6 @@ public class SmallBlock extends BaseNulsData {
         return size;
     }
 
-    /**
-     * serialize important field
-     */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(header);
@@ -122,6 +119,7 @@ public class SmallBlock extends BaseNulsData {
     /**
      * 区块头
      * block header
+     * @return BlockHeader
      */
     public BlockHeader getHeader() {
         return header;
@@ -131,10 +129,10 @@ public class SmallBlock extends BaseNulsData {
         this.header = header;
     }
 
-    /**
-     * 交易摘要列表
-     * transaction hash list
-     */
+//    /**
+//     * 交易摘要列表
+//     * transaction hash list
+//     */
     public List<NulsDigestData> getTxHashList() {
         return txHashList;
     }
@@ -143,10 +141,10 @@ public class SmallBlock extends BaseNulsData {
         this.txHashList = txHashList;
     }
 
-    /**
-     * 共识交易列表（其他节点一定没有的交易）
-     * Consensus trading list (transactions that no other node must have)
-     */
+//    /**
+//     * 共识交易列表（其他节点一定没有的交易）
+//     * Consensus trading list (transactions that no other node must have)
+//     */
     public List<Transaction> getSubTxList() {
         return subTxList;
     }

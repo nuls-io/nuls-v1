@@ -25,10 +25,7 @@
 
 package io.nuls.contract.entity.form;
 
-/**
- * @desription:
- * @author: PierreLuo
- */
+
 public class ContractBase {
     private String sender;
     private long naLimit;

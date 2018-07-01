@@ -12,6 +12,9 @@
 
     <groupId>io.nuls.network-module</groupId>
     <artifactId>network-protocol</artifactId>
+    <version>0.9.11</version>
+    <packaging>pom</packaging>
+    
     <dependencies>
         <dependency>
             <groupId>io.nuls.protocol-module</groupId>

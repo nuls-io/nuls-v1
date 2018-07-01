@@ -117,10 +117,10 @@ public class TxGroup extends BaseNulsData {
         }
     }
 
-    /**
-     * 应答的交易列表
-     * transaction list for response
-     */
+//    /**
+//     * 应答的交易列表
+//     * transaction list for response
+//     */
     public List<Transaction> getTxList() {
         return txList;
     }
@@ -134,10 +134,10 @@ public class TxGroup extends BaseNulsData {
         return txMap.get(hash);
     }
 
-    /**
-     * 交易整理的hashmap
-     * The transaction is sorted into a hashmap.
-     */
+//    /**
+//     * 交易整理的hashmap
+//     * The transaction is sorted into a hashmap.
+//     */
     public Map<NulsDigestData, Transaction> getTxMap() {
         if (null == txMap) {
             initTxMap();

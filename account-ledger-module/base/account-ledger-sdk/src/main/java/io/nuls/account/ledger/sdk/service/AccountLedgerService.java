@@ -27,7 +27,7 @@ public interface AccountLedgerService {
      * @param toAddress Beneficiary account Address
      * @param password  Remittance account password
      * @param amount    Transfer amount
-     * @param remark
+     * @param remark remark
      * @return If the operation is successful, 'success' is true
      * If the operation fails, "success" is false and the result has error information
      */
@@ -39,7 +39,7 @@ public interface AccountLedgerService {
      * @param address   Remittance account address
      * @param toAddress Beneficiary account Address
      * @param amount    Transfer amount
-     * @param remark
+     * @param remark remark
      * @return If the operation is successful, 'success' is true
      * If the operation fails, "success" is false and the result has error information
      */
@@ -58,9 +58,9 @@ public interface AccountLedgerService {
      * 创建交易
      * Create Transaction
      *
-     * @param inputs
-     * @param outputs
-     * @return
+     * @param inputs inputs
+     * @param outputs outputs
+     * @return Result
      */
     Result createTransaction(List<InputDto> inputs, List<OutputDto> outputs, String remark);
 
@@ -68,11 +68,11 @@ public interface AccountLedgerService {
      * 签名交易
      * Sign Transaction
      *
-     * @param txHex
-     * @param priKey
-     * @param address
-     * @param password
-     * @return
+     * @param txHex txHex
+     * @param priKey  priKey
+     * @param address address
+     * @param password password
+     * @return Result
      */
     Result signTransaction(String txHex, String priKey, String address, String password);
 
@@ -80,8 +80,8 @@ public interface AccountLedgerService {
      * 广播交易
      * Broadcast Transaction
      *
-     * @param txHex
-     * @return
+     * @param txHex txHex
+     * @return Result
      */
     Result broadcastTransaction(String txHex);
 }

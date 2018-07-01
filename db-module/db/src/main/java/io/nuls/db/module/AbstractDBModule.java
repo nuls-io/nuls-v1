@@ -27,10 +27,6 @@ package io.nuls.db.module;
 import io.nuls.db.constant.DBConstant;
 import io.nuls.kernel.module.BaseModuleBootstrap;
 
-/**
- * @desription:
- * @author: PierreLuo
- */
 public abstract class AbstractDBModule extends BaseModuleBootstrap {
 
     protected AbstractDBModule() {

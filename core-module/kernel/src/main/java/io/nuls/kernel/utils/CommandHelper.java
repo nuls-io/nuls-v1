@@ -47,11 +47,11 @@ public class CommandHelper {
         }
         return true;
     }
-
-    /**
-     * 获取用户的新密码 必填
-     * @return
-     */
+//
+//    /**
+//     * 获取用户的新密码 必填
+//     * @return
+//     */
     public static String getNewPwd() {
         System.out.print("Please enter the new password(8-20 characters, the combination of letters and numbers).\nEnter your new password:");
         ConsoleReader reader = null;
@@ -79,10 +79,10 @@ public class CommandHelper {
     }
 
 
-    /**
-     * 确认新密码
-     * @param newPwd
-     */
+//    /**
+//     * 确认新密码
+//     * @param newPwd
+//     */
     public static void confirmPwd(String newPwd) {
         System.out.print("Please confirm new password:");
         ConsoleReader reader = null;
@@ -107,21 +107,21 @@ public class CommandHelper {
             }
         }
     }
-
-    /**
-     * 得到用户输入的密码,必须输入
-     * 提示信息为默认
-     * @return
-     */
+//
+//    /**
+//     * 得到用户输入的密码,必须输入
+//     * 提示信息为默认
+//     * @return
+//     */
     public static String getPwd() {
         return getPwd(null);
     }
 
-    /**
-     * 得到用户输入的密码,必须输入
-     * @param prompt 提示信息
-     * @return
-     */
+//    /**
+//     * 得到用户输入的密码,必须输入
+//     * @param prompt 提示信息
+//     * @return
+//     */
     public static String getPwd(String prompt) {
         if(StringUtils.isBlank(prompt)){
             prompt = "Please enter the password.\nEnter your password:";
@@ -150,12 +150,12 @@ public class CommandHelper {
             }
         }
     }
-
-    /**
-     * 得到用户输入的密码,允许不输入
-     * @param prompt
-     * @return
-     */
+//
+//    /**
+//     * 得到用户输入的密码,允许不输入
+//     * @param prompt
+//     * @return
+//     */
     public static String getPwdOptional(String prompt) {
         if(StringUtils.isBlank(prompt)){
             prompt = "Please enter the password (password is between 8 and 20 inclusive of numbers and letters), " +
@@ -185,12 +185,12 @@ public class CommandHelper {
             }
         }
     }
-
-    /**
-     *  得到用户输入的密码,允许不输入
-     *  提示信息为默认
-     * @return
-     */
+//
+//    /**
+//     *  得到用户输入的密码,允许不输入
+//     *  提示信息为默认
+//     * @return
+//     */
     public static String getPwdOptional() {
         return getPwdOptional(null);
     }
@@ -280,29 +280,29 @@ public class CommandHelper {
     }
 
 
-    /**
-     * 根据账户获取密码
-     * 1.如果账户有密码, 则让用户输入密码
-     * 2.如果账户没有设置密码, 直接返回
-     *
-     * @param address
-     * @param restFul
-     * @return RpcClientResult
-     */
+//    /**
+//     * 根据账户获取密码
+//     * 1.如果账户有密码, 则让用户输入密码
+//     * 2.如果账户没有设置密码, 直接返回
+//     *
+//     * @param address
+//     * @param restFul
+//     * @return RpcClientResult
+//     */
     public static RpcClientResult getPassword(String address, RestFulUtils restFul) {
        return getPassword(address, restFul, null);
     }
 
-    /**
-     * 根据账户获取密码
-     * 1.如果账户有密码, 则让用户输入密码
-     * 2.如果账户没有设置密码, 直接返回
-     *
-     * @param address
-     * @param restFul
-     * @param prompt 自定义提示
-     * @return RpcClientResult
-     */
+//    /**
+//     * 根据账户获取密码
+//     * 1.如果账户有密码, 则让用户输入密码
+//     * 2.如果账户没有设置密码, 直接返回
+//     *
+//     * @param address
+//     * @param restFul
+//     * @param prompt 自定义提示
+//     * @return RpcClientResult
+//     */
     public static RpcClientResult getPassword(String address, RestFulUtils restFul, String prompt) {
         if (StringUtils.isBlank(address)) {
             return RpcClientResult.getFailed("address is wrong");

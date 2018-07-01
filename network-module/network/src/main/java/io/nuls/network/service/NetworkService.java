@@ -55,7 +55,7 @@ public interface NetworkService {
      * get node by id
      *
      * @param nodeId the id of node
-     * @return
+     * @return Node
      */
     Node getNode(String nodeId);
 
@@ -63,7 +63,7 @@ public interface NetworkService {
      * 获取所有节点
      * get all nodes
      *
-     * @return
+     * @return Map
      */
     Map<String, Node> getNodes();
 
@@ -71,7 +71,7 @@ public interface NetworkService {
      * 获取已连接的节点
      * get connected nodes
      *
-     * @return
+     * @return Collection
      */
     Collection<Node> getAvailableNodes();
 
@@ -79,7 +79,7 @@ public interface NetworkService {
      * 获取可连接的节点
      * get connectable nodes
      *
-     * @return
+     * @return List
      */
     List<Node> getCanConnectNodes();
 
@@ -87,8 +87,8 @@ public interface NetworkService {
      * 根据名字获取节点组
      * get NodeGroup by name
      *
-     * @param groupName
-     * @return
+     * @param  groupName groupName
+     * @return NodeGroup
      */
     NodeGroup getNodeGroup(String groupName);
 
@@ -98,7 +98,7 @@ public interface NetworkService {
      *
      * @param nulsData message
      * @param asyn     Whether or not asynchronous
-     * @return
+     * @return BroadcastResult
      */
     BroadcastResult sendToAllNode(BaseNulsData nulsData, boolean asyn);
 
@@ -106,20 +106,20 @@ public interface NetworkService {
      * 发送消息
      * Send message to all connected nodes
      *
-     * @param event
+     * @param event event
      * @param excludeNode node that does not need to be send
      * @param asyn        Whether or not asynchronous
-     * @return
+     * @return BroadcastResult
      */
     BroadcastResult sendToAllNode(BaseNulsData event, Node excludeNode, boolean asyn);
 
     /**
      * send message to node
      *
-     * @param event
-     * @param node
+     * @param event event
+     * @param node node
      * @param asyn  Whether or not asynchronous
-     * @return
+     * @return BroadcastResult
      */
     BroadcastResult sendToNode(BaseNulsData event, Node node, boolean asyn);
 
@@ -127,10 +127,10 @@ public interface NetworkService {
      * 发送消息给节点组
      * send message to nodeGroup
      *
-     * @param event
-     * @param groupName
-     * @param asyn
-     * @return
+     * @param  event event
+     * @param groupName groupName
+     * @param asyn asyn
+     * @return BroadcastResult
      */
     BroadcastResult sendToGroup(BaseNulsData event, String groupName, boolean asyn);
 
@@ -138,11 +138,11 @@ public interface NetworkService {
      * 发送消息给节点组
      * send message to nodeGroup
      *
-     * @param event
-     * @param groupName
+     * @param event event
+     * @param groupName groupName
      * @param excludeNode node that does not need to be send
-     * @param asyn
-     * @return
+     * @param asyn asyn
+     * @return BroadcastResult
      */
     BroadcastResult sendToGroup(BaseNulsData event, String groupName, Node excludeNode, boolean asyn);
 
@@ -156,7 +156,7 @@ public interface NetworkService {
      * 获取网络配置信息
      * Get network configuration information
      *
-     * @return
+     * @return NetworkParam
      */
     NetworkParam getNetworkParam();
 }

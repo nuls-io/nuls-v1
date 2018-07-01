@@ -43,11 +43,7 @@ import java.math.BigInteger;
  * @author: Charlie
  */
 public class AccountTool {
-    /**
-     * create a new address
-     *
-     * @return Address
-     */
+
     public static final int CREATE_MAX_SIZE = 100;
 
     public static Address newAddress(ECKey key) throws NulsException {
@@ -84,9 +80,9 @@ public class AccountTool {
         return createAccount(null);
     }
 
-    /**
-     * Generate the corresponding account management private key or transaction private key according to the seed private key and password
-     */
+//    /**
+//     * Generate the corresponding account management private key or transaction private key according to the seed private key and password
+//     */
     public static BigInteger genPrivKey(byte[] encryptedPriKey, byte[] pw) {
         byte[] privSeedSha256 = Sha256Hash.hash(encryptedPriKey);
         //get sha256 of encryptedPriKey and  sha256 of pw，

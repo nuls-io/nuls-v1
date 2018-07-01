@@ -36,6 +36,8 @@
 
     <groupId>io.nuls.ledger-module</groupId>
     <artifactId>ledger-utxo-base</artifactId>
+    <version>0.9.11</version>
+    <packaging>pom</packaging>
 
     <dependencies>
         <dependency>

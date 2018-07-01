@@ -130,7 +130,6 @@ public class BloomFilter {
         return true;
     }
     
-    /** Insert the given arbitrary data into the filter */
     public synchronized void insert(byte[] object) {
         for (int i = 0; i < hashFuncs; i++)
             setBitLE(data, murmurHash3(data, nTweak, i, object));

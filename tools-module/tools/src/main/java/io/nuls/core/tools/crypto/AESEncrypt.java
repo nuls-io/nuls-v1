@@ -52,20 +52,10 @@ public class AESEncrypt {
 
     }
 
-    /**
-     * 加密
-     *
-     * @return EncryptedData
-     */
     public static EncryptedData encrypt(byte[] plainBytes, KeyParameter aesKey) {
         return encrypt(plainBytes, null, aesKey);
     }
 
-    /**
-     * 加密
-     *
-     * @return EncryptedData
-     */
     public static EncryptedData encrypt(byte[] plainBytes, byte[] iv, KeyParameter aesKey) throws RuntimeException {
         Util.checkNotNull(plainBytes);
         Util.checkNotNull(aesKey);
@@ -103,11 +93,6 @@ public class AESEncrypt {
         return decrypt(data, new KeyParameter(Sha256Hash.hash(password.getBytes(charset))));
     }
 
-    /**
-     * 解密
-     *
-     * @return byte[]
-     */
     public static byte[] decrypt(EncryptedData dataToDecrypt, KeyParameter aesKey) throws CryptoException {
         Util.checkNotNull(dataToDecrypt);
         Util.checkNotNull(aesKey);

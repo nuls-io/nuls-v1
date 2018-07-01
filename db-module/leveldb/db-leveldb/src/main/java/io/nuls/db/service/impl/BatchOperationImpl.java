@@ -1,18 +1,14 @@
 /**
  * MIT License
- * <p>
  * Copyright (c) 2017-2018 nuls.io
- * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,10 +29,6 @@ import org.iq80.leveldb.WriteBatch;
 
 import java.io.IOException;
 
-/**
- * @desription:
- * @author: PierreLuo
- */
 public class BatchOperationImpl implements BatchOperation {
 
     private static final Result FAILED_NULL = Result.getFailed(DBErrorCode.NULL_PARAMETER);
@@ -65,11 +57,6 @@ public class BatchOperationImpl implements BatchOperation {
         return SUCCESS;
     }
 
-    /**
-     * @param key
-     * @param value
-     * @return
-     */
     @Override
     public Result put(byte[] key, byte[] value) {
         if(key == null || value == null) {
@@ -79,13 +66,6 @@ public class BatchOperationImpl implements BatchOperation {
         return SUCCESS;
     }
 
-    /**
-     * @param area
-     * @param key
-     * @param value 需要存储或者更新的对象/Objects that need to be added or updated.
-     * @param <T>
-     * @return
-     */
     @Override
     public <T> Result putModel(byte[] key, T value) {
         if(key == null || value == null) {
@@ -95,10 +75,6 @@ public class BatchOperationImpl implements BatchOperation {
         return put(key, bytes);
     }
 
-    /**
-     * @param key
-     * @return
-     */
     @Override
     public Result delete(byte[] key) {
         if(key == null) {
@@ -116,9 +92,6 @@ public class BatchOperationImpl implements BatchOperation {
         return isClose;
     }
 
-    /**
-     * @return
-     */
     @Override
     public Result executeBatch() {
         // 检查逻辑关闭

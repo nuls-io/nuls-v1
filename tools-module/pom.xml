@@ -33,8 +33,10 @@
         <version>0.9.11</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+    <groupId>io.nuls</groupId>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>tools-module</artifactId>
+    <version>0.9.11</version>
     <packaging>pom</packaging>
     <modules>
         <module>tools</module>

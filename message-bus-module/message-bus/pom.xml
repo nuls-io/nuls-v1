@@ -11,6 +11,9 @@
 
     <groupId>io.nuls.message-bus-module</groupId>
     <artifactId>message-bus</artifactId>
+    <version>0.9.11</version>
+    <packaging>pom</packaging>
+
     <dependencies>
         <dependency>
             <groupId>io.nuls.core-module</groupId>

@@ -59,13 +59,13 @@ public class MultipleBeanMethodInterceptorChain extends BeanMethodInterceptorCha
     protected MethodProxy methodProxy;
 
 
-    /**
-     * 初始化多重拦截器链
-     * Initialize multiple interceptor chains.
-     *
-     * @param annotations 注解列表
-     * @param chainList   拦截器链列表
-     */
+//    /**
+//     * 初始化多重拦截器链
+//     * Initialize multiple interceptor chains.
+//     *
+//     * @param annotations 注解列表
+//     * @param chainList   拦截器链列表
+//     */
     public MultipleBeanMethodInterceptorChain(List<Annotation> annotations, List<BeanMethodInterceptorChain> chainList) {
         if (null == annotations || annotations.isEmpty()) {
             return;
@@ -75,30 +75,30 @@ public class MultipleBeanMethodInterceptorChain extends BeanMethodInterceptorCha
         }
     }
 
-    /**
-     * 将一条拦截器链加入到多重拦截器链中
-     * Add an interceptor chain to the multiple interceptor chain,
-     *
-     * @param annotation                 该拦截器链对应的注解、The comment for the interceptor chain.
-     * @param beanMethodInterceptorChain 拦截器链
-     */
+//    /**
+//     * 将一条拦截器链加入到多重拦截器链中
+//     * Add an interceptor chain to the multiple interceptor chain,
+//     *
+//     * @param annotation                 该拦截器链对应的注解、The comment for the interceptor chain.
+//     * @param beanMethodInterceptorChain 拦截器链
+//     */
     private void fillInterceptorList(Annotation annotation, BeanMethodInterceptorChain beanMethodInterceptorChain) {
         for (BeanMethodInterceptor interceptor : beanMethodInterceptorChain.interceptorList) {
             annotationList.add(annotation);
             interceptorList.add(interceptor);
         }
     }
-
-    /**
-     * 开始执行拦截器链
-     * Start executing the interceptor chain.
-     *
-     * @param annotation  拦截方法的注解实例/Annotation instances of the intercepting method.
-     * @param object      方法所属对象/Method owner
-     * @param method      方法定义/Method definition
-     * @param params      方法参数列表/Method parameter list
-     * @param methodProxy 方法代理器
-     */
+//
+//    /**
+//     * 开始执行拦截器链
+//     * Start executing the interceptor chain.
+//     *
+//     * @param annotation  拦截方法的注解实例/Annotation instances of the intercepting method.
+//     * @param object      方法所属对象/Method owner
+//     * @param method      方法定义/Method definition
+//     * @param params      方法参数列表/Method parameter list
+//     * @param methodProxy 方法代理器
+//     */
     @Override
     public Object startInterceptor(Annotation annotation, Object object, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
         this.methodProxy = methodProxy;

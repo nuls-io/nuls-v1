@@ -24,11 +24,6 @@
  */
 package io.nuls.core.tools.BloomFilter;
 
-/**
- * author Facjas
- * date 2018/5/10.
- */
-
 import static java.lang.Math.E;
 import static java.lang.Math.log;
 import static java.lang.Math.max;
@@ -141,9 +136,6 @@ public class BloomFilter {
         return true;
     }
 
-    /**
-     * Insert the given arbitrary data into the filter
-     */
     public synchronized void insert(byte[] object) {
         for (int i = 0; i < hashFuncs; i++) {
             setBitLE(data, murmurHash3(data, nTweak, i, object));

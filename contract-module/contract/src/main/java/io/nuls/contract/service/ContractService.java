@@ -30,10 +30,6 @@ import io.nuls.contract.entity.form.ContractDelete;
 import io.nuls.contract.entity.form.ContractUpdate;
 import io.nuls.kernel.model.Result;
 
-/**
- * @desription:
- * @author: PierreLuo
- */
 public interface ContractService {
 
     Result<ContractResult> createContract(ContractCreate create);

@@ -458,9 +458,6 @@ public class Util {
         }
     }
 
-    /**
-     * Returns a copy of the given byte array in reverse order.
-     */
     public static byte[] reverseBytes(byte[] bytes) {
         // We could use the XOR trick here but it's easier to understand if we don't. If we find this is really a
         // performance issue the matter can be revisited.

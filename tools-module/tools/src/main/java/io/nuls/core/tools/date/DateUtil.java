@@ -50,12 +50,12 @@ public class DateUtil {
         return df.format(date);
     }
 
-    /**
-     * 把日期转换成yyyy-MM-dd HH:mm:ss格式
-     *
-     * @param date
-     * @return String
-     */
+//    /**
+//     * 把日期转换成yyyy-MM-dd HH:mm:ss格式
+//     *
+//     * @param date
+//     * @return String
+//     */
     public static String convertDate(Date date) {
         if (date == null) {
             return EMPTY_SRING;
@@ -63,13 +63,13 @@ public class DateUtil {
         return new SimpleDateFormat(DEFAULT_PATTERN).format(date);
     }
 
-    /**
-     * 把日期转换成pattern格式
-     *
-     * @param date
-     * @param pattern
-     * @return String
-     */
+//    /**
+//     * 把日期转换成pattern格式
+//     *
+//     * @param date
+//     * @param pattern
+//     * @return String
+//     */
     public static String convertDate(Date date, String pattern) {
         if (date == null) {
             return EMPTY_SRING;
@@ -77,10 +77,10 @@ public class DateUtil {
         return new SimpleDateFormat(pattern).format(date);
     }
 
-    /**
-     * @param date
-     * @return Date
-     */
+//    /**
+//     * @param date
+//     * @return Date
+//     */
     public static Date convertStringToDate(String date) {
         try {
             return new SimpleDateFormat(DEFAULT_PATTERN).parse(date);
@@ -89,11 +89,11 @@ public class DateUtil {
         return new Date();
     }
 
-    /**
-     * @param date
-     * @param pattern
-     * @return Date
-     */
+//    /**
+//     * @param date
+//     * @param pattern
+//     * @return Date
+//     */
     public static Date convertStringToDate(String date, String pattern) {
         try {
             return new SimpleDateFormat(pattern).parse(date);
@@ -101,37 +101,37 @@ public class DateUtil {
             throw new RuntimeException(e.getMessage());
         }
     }
-
-    /**
-     * 判断传入的日期是不是当月的第一天
-     *
-     * @param date
-     * @return boolean
-     */
+//
+//    /**
+//     * 判断传入的日期是不是当月的第一天
+//     *
+//     * @param date
+//     * @return boolean
+//     */
     public static boolean isFirstDayInMonth(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.get(Calendar.DAY_OF_MONTH) == 1;
     }
 
-    /**
-     * 判断传入的日期是不是当年的第一天
-     *
-     * @param date
-     * @return boolean
-     */
+//    /**
+//     * 判断传入的日期是不是当年的第一天
+//     *
+//     * @param date
+//     * @return boolean
+//     */
     public static boolean isFirstDayInYear(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         return calendar.get(Calendar.DAY_OF_YEAR) == 1;
     }
 
-    /**
-     * 去点时分秒后返回
-     *
-     * @param date
-     * @return Date
-     */
+//    /**
+//     * 去点时分秒后返回
+//     *
+//     * @param date
+//     * @return Date
+//     */
     public static Date rounding(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -141,13 +141,13 @@ public class DateUtil {
         return calendar.getTime();
     }
 
-    /**
-     * 把时间加上day天后返回，如果传负数代表减day天
-     *
-     * @param date
-     * @param day
-     * @return Date
-     */
+//    /**
+//     * 把时间加上day天后返回，如果传负数代表减day天
+//     *
+//     * @param date
+//     * @param day
+//     * @return Date
+//     */
     public static Date dateAdd(Date date, int day) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -155,13 +155,13 @@ public class DateUtil {
         return calendar.getTime();
     }
 
-    /**
-     * 多少个月前后的今天
-     *
-     * @param date
-     * @param month
-     * @return Date
-     */
+//    /**
+//     * 多少个月前后的今天
+//     *
+//     * @param date
+//     * @param month
+//     * @return Date
+//     */
     public static Date dateAddMonth(Date date, int month) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -169,11 +169,11 @@ public class DateUtil {
         return calendar.getTime();
     }
 
-    /**
-     * 获取上一个月的第一天
-     *
-     * @return Date
-     */
+//    /**
+//     * 获取上一个月的第一天
+//     *
+//     * @return Date
+//     */
     public static Date getFirstDayOfPreviousMonth() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
@@ -184,20 +184,20 @@ public class DateUtil {
         return calendar.getTime();
     }
 
-    /**
-     * 获取本月的第一天
-     *
-     * @return Date
-     */
+//    /**
+//     * 获取本月的第一天
+//     *
+//     * @return Date
+//     */
     public static Date getFirstDayOfMonth() {
         return getFirstDayOfMonth(new Date());
     }
 
-    /**
-     * 获取本月的第一天
-     *
-     * @return Date
-     */
+//    /**
+//     * 获取本月的第一天
+//     * @param date
+//     * @return Date
+//     */
     public static Date getFirstDayOfMonth(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -208,11 +208,11 @@ public class DateUtil {
         return calendar.getTime();
     }
 
-    /**
-     * 获取上一年的第一天
-     *
-     * @return Date
-     */
+//    /**
+//     * 获取上一年的第一天
+//     *
+//     * @return Date
+//     */
     public static Date getFirstDayOfPreviousYear() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR) - 1);
@@ -267,12 +267,12 @@ public class DateUtil {
         return obj == null || EMPTY_SRING.equals(obj);
     }
 
-    /**
-     * 获取星期几
-     *
-     * @param c
-     * @return String
-     */
+//    /**
+//     * 获取星期几
+//     *
+//     * @param c
+//     * @return String
+//     */
     public static String getWeekDay(Calendar c) {
         if (c == null) {
             return "星期一";
@@ -301,13 +301,14 @@ public class DateUtil {
         return "星期一";
     }
 
-    /**
-     * 时间标签
-     *
-     * @param startTime
-     * @param endTime
-     * @return String
-     */
+//    /**
+//     * 时间标签
+//     *
+//     * @param startTime
+//     * @param endTime
+//     * @param showSuffix
+//     * @return String
+//     */
     public static String convertLebalFull(Date startTime, Date endTime,
                                           boolean showSuffix) {
         if (startTime == null || endTime == null) {
@@ -322,13 +323,14 @@ public class DateUtil {
         return label;
     }
 
-    /**
-     * 时间标签
-     *
-     * @param startTime
-     * @param endTime
-     * @return String
-     */
+//    /**
+//     * 时间标签
+//     *
+//     * @param startTime
+//     * @param endTime
+//     * @param showSuffix
+//     * @return String
+//     */
     public static String convertLebal(Date startTime, Date endTime,
                                       boolean showSuffix) {
         if (startTime == null || endTime == null) {
@@ -390,13 +392,13 @@ public class DateUtil {
         return rounding(dateAdd(new Date(), -1));
     }
 
-    /**
-     * 获取两个日期之间的间隔天数
-     *
-     * @param startTime
-     * @param endTime
-     * @return int
-     */
+//    /**
+//     * 获取两个日期之间的间隔天数
+//     *
+//     * @param startTime
+//     * @param endTime
+//     * @return int
+//     */
     public static int getBetweenDateDays(Date startTime, Date endTime) {
         if (startTime == null || endTime == null) {
             return 0;
@@ -411,13 +413,13 @@ public class DateUtil {
         return rounding(dateAdd(new Date(), 1));
     }
 
-    /**
-     * 检查传入的时间是否在当前时间小时数之后
-     *
-     * @param date
-     * @param time
-     * @return boolean
-     */
+//    /**
+//     * 检查传入的时间是否在当前时间小时数之后
+//     *
+//     * @param date
+//     * @param time
+//     * @return boolean
+//     */
     public static boolean checkAfterTime(Date date, String time) {
         Date dateTime = convertStringToDate(convertDate(date, "yyyy-MM-dd").concat(" ").concat(time));
         return dateTime.before(date);

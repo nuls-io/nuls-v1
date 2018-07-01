@@ -59,11 +59,11 @@ public class RequestUtil {
         return null;
     }
 
-    /**
-     * 从输入流中获取字节数组
-     *
-     * @return byte[]
-     */
+//    /**
+//     * 从输入流中获取字节数组
+//     *
+//     * @return byte[]
+//     */
     public static byte[] readInputStream(InputStream inputStream) throws IOException {
         byte[] buffer = new byte[1024];
         int len = 0;
@@ -139,11 +139,11 @@ public class RequestUtil {
         return sb.toString();
     }
 
-    /**
-     * get方法请求远程服务器
-     *
-     * @return String
-     */
+//    /**
+//     * get方法请求远程服务器
+//     *
+//     * @return String
+//     */
     public static String doGet(String url, String encoding) {
         StringBuffer sb = new StringBuffer();
         InputStreamReader is = null;

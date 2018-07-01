@@ -12,6 +12,9 @@
 
     <groupId>io.nuls.account-module</groupId>
     <artifactId>account-storage</artifactId>
+    <packaging>pom</packaging>
+    <version>0.9.11</version>
+
     <dependencies>
         <dependency>
             <groupId>io.nuls.account-module</groupId>

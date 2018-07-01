@@ -12,7 +12,8 @@
 
     <groupId>io.nuls.network-module</groupId>
     <artifactId>network-storage</artifactId>
-
+    <version>0.9.11</version>
+    <packaging>pom</packaging>
 
     <dependencies>
         <dependency>

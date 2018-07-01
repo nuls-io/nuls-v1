@@ -50,17 +50,17 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
 
     }
 
-    /**
-     * 初始化基础消息的消息头
-     */
+//    /**
+//     * 初始化基础消息的消息头
+//     */
     public BaseMessage(short moduleId, short msgType) {
         this.header = new MessageHeader(moduleId, msgType);
     }
 
 
-    /**
-     * serialize important field
-     */
+//    /**
+//     * serialize important field
+//     */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write(header.serialize());

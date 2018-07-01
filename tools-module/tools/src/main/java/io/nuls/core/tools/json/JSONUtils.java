@@ -46,9 +46,9 @@ public final class JSONUtils {
         return OBJECT_MAPPER;
     }
 
-    /**
-     * javaBean,list,array convert to json string
-     */
+//    /**
+//     * javaBean,list,array convert to json string
+//     */
     public static String obj2json(Object obj) throws Exception {
         return OBJECT_MAPPER.writeValueAsString(obj);
     }
@@ -57,9 +57,9 @@ public final class JSONUtils {
         return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
 
-    /**
-     * json string convert to javaBean
-     */
+//    /**
+//     * json string convert to javaBean
+//     */
     public static <T> T json2pojo(String jsonStr, Class<T> clazz)
             throws Exception {
         return OBJECT_MAPPER.readValue(jsonStr, clazz);
@@ -70,17 +70,17 @@ public final class JSONUtils {
         return OBJECT_MAPPER.readValue(json, javaType);
     }
 
-    /**
-     * json string convert to map
-     */
+//    /**
+//     * json string convert to map
+//     */
     public static <T> Map<String, Object> json2map(String jsonStr)
             throws Exception {
         return OBJECT_MAPPER.readValue(jsonStr, Map.class);
     }
 
-    /**
-     * json string convert to map with javaBean
-     */
+//    /**
+//     * json string convert to map with javaBean
+//     */
     public static <T> Map<String, T> json2map(String jsonStr, Class<T> clazz)
             throws Exception {
         Map<String, Map<String, Object>> map = OBJECT_MAPPER.readValue(jsonStr,
@@ -92,10 +92,10 @@ public final class JSONUtils {
         }
         return result;
     }
-
-    /**
-     * json array string convert to list with javaBean
-     */
+//
+//    /**
+//     * json array string convert to list with javaBean
+//     */
     public static <T> List<T> json2list(String jsonArrayStr, Class<T> clazz)
             throws Exception {
         List<Map<String, Object>> list = OBJECT_MAPPER.readValue(jsonArrayStr,
@@ -108,9 +108,9 @@ public final class JSONUtils {
         return result;
     }
 
-    /**
-     * map convert to javaBean
-     */
+//    /**
+//     * map convert to javaBean
+//     */
     public static <T> T map2pojo(Map map, Class<T> clazz) {
         return OBJECT_MAPPER.convertValue(map, clazz);
     }

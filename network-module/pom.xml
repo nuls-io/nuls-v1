@@ -9,7 +9,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>io.nuls</groupId>
     <artifactId>network-module</artifactId>
+    <version>0.9.11</version>
     <packaging>pom</packaging>
     <modules>
         <module>network</module>

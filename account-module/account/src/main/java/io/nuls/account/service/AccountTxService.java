@@ -37,11 +37,11 @@ public interface AccountTxService {
 
     Result<Transaction> saveAccountTx(Transaction tx);
 
-    /**
-     * 先检查是否跟自己相关，相关的情况才保存
-     * @param tx
-     * @return
-     */
+//    /**
+//     * 先检查是否跟自己相关，相关的情况才保存
+//     * @param tx
+//     * @return
+//     */
     Result<Transaction> checkAndSaveAccountTx(Transaction tx);
 
     Result removeAccountTx(NulsDigestData txHash);

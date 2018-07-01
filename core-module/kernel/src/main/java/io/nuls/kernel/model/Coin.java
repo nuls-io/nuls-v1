@@ -63,9 +63,6 @@ public class Coin extends BaseNulsData {
         this.lockTime = lockTime;
     }
 
-    /**
-     * serialize important field
-     */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBytesWithLength(owner);
@@ -125,7 +122,7 @@ public class Coin extends BaseNulsData {
     /**
      * 根据当前时间和当前最新高度，判断coin是否可用
      *
-     * @return
+     * @return boolean
      */
     public boolean usable() {
         long bestHeight = NulsContext.getInstance().getBestHeight();

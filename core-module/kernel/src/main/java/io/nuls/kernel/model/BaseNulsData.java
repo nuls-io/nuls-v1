@@ -45,9 +45,6 @@ import java.util.Arrays;
  */
 public abstract class BaseNulsData implements NulsData, Serializable, Cloneable {
 
-    /**
-     * First, serialize the version field
-     */
     @Override
     public final byte[] serialize() throws IOException {
         ByteArrayOutputStream bos = null;
@@ -76,9 +73,6 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
         }
     }
 
-    /**
-     * serialize important field
-     */
     protected abstract void serializeToStream(NulsOutputStreamBuffer stream) throws IOException;
 
 
@@ -94,9 +88,6 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
 
     public abstract void parse(NulsByteBuffer byteBuffer) throws NulsException;
 
-    /**
-     * @throws NulsException
-     */
     public final ValidateResult verify() {
         ValidateResult result = ValidatorManager.startDoValidator(this);
         return result;

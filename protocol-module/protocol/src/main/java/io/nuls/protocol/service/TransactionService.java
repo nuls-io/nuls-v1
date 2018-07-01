@@ -80,6 +80,8 @@ public interface TransactionService {
 
     /**
      * cache the transaction for consensus
+     * @param tx transaction
+     * @return Result
      */
     Result newTx(Transaction tx);
 

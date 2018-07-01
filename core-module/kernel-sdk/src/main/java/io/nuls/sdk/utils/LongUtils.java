@@ -35,55 +35,34 @@ import java.math.BigInteger;
  */
 public class LongUtils {
 
-    /**
-     * 加法
-     */
     public static long add(long val1, long val2) {
         BigInteger value1 = BigInteger.valueOf(val1);
         BigInteger value2 = BigInteger.valueOf(val2);
         return value1.add(value2).longValue();
     }
 
-    /**
-     * 减法
-     */
     public static long sub(long val1, long val2) {
         BigInteger value1 = BigInteger.valueOf(val1);
         BigInteger value2 = BigInteger.valueOf(val2);
         return value1.subtract(value2).longValue();
     }
 
-    /**
-     * 乘法
-     */
     public static long mul(long val1, long val2) {
         BigInteger value1 = BigInteger.valueOf(val1);
         BigInteger value2 = BigInteger.valueOf(val2);
         return value1.multiply(value2).longValue();
     }
 
-    /**
-     * 除法
-     */
     public static double exactDiv(long val1, long val2) {
         return DoubleUtils.div(val1, val2);
     }
 
-    /**
-     * 除法,结果是long型
-     */
     public static long div(long val1, long val2) {
         BigInteger value1 = BigInteger.valueOf(val1);
         BigInteger value2 = BigInteger.valueOf(val2);
         return value1.divide(value2).longValue();
     }
 
-    /**
-     * 求模
-     * @param val1
-     * @param val2
-     * @return
-     */
     public static long mod(long val1, long val2) {
         BigInteger value1 = BigInteger.valueOf(val1);
         BigInteger value2 = BigInteger.valueOf(val2);
