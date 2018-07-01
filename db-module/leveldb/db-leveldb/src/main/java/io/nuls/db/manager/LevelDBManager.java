@@ -257,21 +257,22 @@ public class LevelDBManager {
     }
 
     public static Result destroyArea(String areaName) {
-        if (StringUtils.isBlank(areaName)) {
-            return Result.getFailed(DBErrorCode.NULL_PARAMETER);
+        if (!baseCheckArea(areaName)) {
+            return Result.getFailed(DBErrorCode.DB_AREA_NOT_EXIST);
         }
         if (StringUtils.isBlank(dataPath) || !checkPathLegal(areaName)) {
             return Result.getFailed(DBErrorCode.DB_AREA_CREATE_PATH_ERROR);
         }
         Result result;
         try {
+            DB db = AREAS.remove(areaName);
+            db.close();
             File dir = new File(dataPath + File.separator + areaName);
             if (!dir.exists()) {
                 return Result.getFailed(DBErrorCode.DB_AREA_NOT_EXIST);
             }
             String filePath = dataPath + File.separator + areaName + File.separator + BASE_DB_NAME;
             destroyDB(filePath);
-            AREAS.remove(areaName);
             AREAS_COMPARATOR.remove(areaName);
             delete(BASE_AREA_NAME, bytes(areaName + "-comparator"));
             delete(BASE_AREA_NAME, bytes(areaName + "-cacheSize"));
@@ -960,7 +961,6 @@ public class LevelDBManager {
             return Result.getFailed();
         }
         try {
-            closeArea(area);
             return destroyArea(area);
         } catch (Exception e) {
             Log.error(e);
