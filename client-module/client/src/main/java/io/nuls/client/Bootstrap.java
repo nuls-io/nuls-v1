@@ -64,11 +64,23 @@ public class Bootstrap {
     public static void main(String[] args) {
         Thread.currentThread().setName("Nuls");
         try {
+            copyWebFiles();
             sysStart();
         } catch (Exception e) {
             Log.error(e);
             System.exit(-1);
         }
+    }
+
+    private static void copyWebFiles() {
+        File source = new File(Bootstrap.class.getClassLoader().getResource("").getPath() + "/temp/conf/client-web/");
+        if (!source.exists()) {
+            return;
+        }
+        Log.info("do the files copy!");
+        File target = new File(Bootstrap.class.getClassLoader().getResource("").getPath() + "/conf/client-web/");
+        FileUtil.deleteFolder(target);
+        FileUtil.copyFolder(source, target);
     }
 
     private static void sysStart() throws Exception {

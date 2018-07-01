@@ -26,10 +26,7 @@
 package io.nuls.client.rpc;
 
 import io.nuls.core.tools.log.Log;
-import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
-import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.grizzly.http.server.NetworkListener;
-import org.glassfish.grizzly.http.server.ServerConfiguration;
+import org.glassfish.grizzly.http.server.*;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.glassfish.grizzly.strategies.WorkerThreadIOStrategy;
@@ -42,6 +39,7 @@ import javax.servlet.ServletRegistration;
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
 
 /**
  * @author: Niels Wang
@@ -65,7 +63,7 @@ public class RpcServerManager {
         WebappContext webappContext = new WebappContext("NULS-RPC-SERVER", "/api");
 
         ServletRegistration servletRegistration = webappContext.addServlet("jersey-servlet", ServletContainer.class);
-        servletRegistration.setInitParameter("javax.ws.rs.Application","io.nuls.client.rpc.config.NulsResourceConfig");
+        servletRegistration.setInitParameter("javax.ws.rs.Application", "io.nuls.client.rpc.config.NulsResourceConfig");
         servletRegistration.addMapping("/api/*");
 
         httpServer = new HttpServer();
@@ -118,6 +116,10 @@ public class RpcServerManager {
     }
 
     public void shutdown() {
+        Map<HttpHandler, HttpHandlerRegistration[]> mapping = httpServer.getServerConfiguration().getHttpHandlersWithMapping();
+        for (HttpHandler handler : mapping.keySet()) {
+            handler.destroy();
+        }
         httpServer.shutdown();
     }
 

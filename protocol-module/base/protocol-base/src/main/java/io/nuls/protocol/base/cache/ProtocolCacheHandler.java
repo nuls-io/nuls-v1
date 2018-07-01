@@ -73,7 +73,7 @@ public class ProtocolCacheHandler {
 
     public static void receiveSmallBlock(SmallBlock smBlock) {
         NulsDigestData blockHash = smBlock.getHeader().getHash();
-        Log.error("receive small block:" + blockHash);
+//        Log.error("receive small block:" + blockHash);
         SMALL_BLOCK_FILTER.insert(blockHash.getDigestBytes());
         smallBlockCacher.callback(blockHash, smBlock);
     }

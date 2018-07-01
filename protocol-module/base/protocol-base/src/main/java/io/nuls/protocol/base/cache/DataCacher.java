@@ -82,7 +82,6 @@ public class DataCacher<T> {
     }
 
     public void removeFuture(NulsDigestData hash) {
-
 //        Log.info(type + "调用删除future：：：" + hash);
         cacher.remove(hash);
     }

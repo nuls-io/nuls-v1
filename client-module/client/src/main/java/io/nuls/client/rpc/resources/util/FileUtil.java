@@ -259,6 +259,7 @@ public final class FileUtil {
         byte[] bytes = new byte[0];
         OutputStream outputStream = null;
         try {
+
             outputStream = new FileOutputStream(file);
             outputStream.write(bytes);
             outputStream.flush();
