@@ -104,7 +104,6 @@ public class ConsensusProcess {
         }
         MeetingRound round = chainManager.getMasterChain().getOrResetCurrentRound();
         if (round == null) {
-            clearTxMemoryPool();
             return;
         }
         //check i am is a consensus node
