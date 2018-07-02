@@ -375,7 +375,6 @@ public class AccountServiceImpl implements AccountService {
      * 根据账户地址字符串,获取账户对象(内部调用)
      * Get account object based on account address string
      *
-     * @param address
      * @return Account
      */
     private Account getAccountByAddress(String address) {
@@ -426,10 +425,10 @@ public class AccountServiceImpl implements AccountService {
         if (accountCacheService.localAccountMaps != null) {
             Collection<Account> values = accountCacheService.localAccountMaps.values();
             Iterator<Account> iterator = values.iterator();
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 list.add(iterator.next());
             }
-        }else {
+        } else {
             accountCacheService.localAccountMaps = new ConcurrentHashMap<>();
             Result<List<AccountPo>> result = accountStorageService.getAccountList();
             if (result.isFailed()) {
@@ -730,5 +729,17 @@ public class AccountServiceImpl implements AccountService {
             Log.error(e);
             return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION);
         }
+    }
+
+    /**
+     * 临时方法，后续去除
+     */
+    @Override
+    public void clearCache() {
+        AccountCacheService cacheService = AccountCacheService.getInstance();
+        if (null != cacheService.localAccountMaps) {
+            cacheService.localAccountMaps.clear();
+        }
+        cacheService.clear();
     }
 }

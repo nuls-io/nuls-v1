@@ -77,7 +77,6 @@ public class AccountCacheService {
      * Get accounts based on account address
      *
      * @param address Account to be operated
-     * @return
      */
     public Account getAccountByAddress(String address) {
         List<Account> list = this.getAccountList();
@@ -92,8 +91,6 @@ public class AccountCacheService {
     /**
      * 验证账户是否存在
      * Verify the existence of the account
-     * @param address
-     * @return
      */
     public boolean contains(byte[] address) {
         return this.cacheMap.containsKey(AddressTool.getStringAddressByBytes(address));
@@ -102,6 +99,7 @@ public class AccountCacheService {
     /**
      * 获取所有账户
      * Get all accounts
+     *
      * @return List<Account>
      */
     public List<Account> getAccountList() {
@@ -118,6 +116,9 @@ public class AccountCacheService {
 
 
     public void clear() {
+        if (null == cacheMap) {
+            return;
+        }
         this.cacheMap.clear();
     }
 
@@ -128,7 +129,6 @@ public class AccountCacheService {
     /**
      * 缓存多个账户
      * Cache multiple accounts
-     * @param list
      */
     public void putAccountList(List<Account> list) {
         if (null != list) {

@@ -387,4 +387,8 @@ public interface AccountService {
 //     */
     Result<Na> getAliasFee(String address, String aliasName);
 
+    /**
+     * 临时方法，后续去除
+     */
+    void clearCache();
 }

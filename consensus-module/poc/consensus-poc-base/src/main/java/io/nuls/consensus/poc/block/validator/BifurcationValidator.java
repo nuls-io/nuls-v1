@@ -67,10 +67,10 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
 
     @Override
     public ValidateResult validate(BlockHeader header) {
-        if (header.getHeight() == 0L) {
-            return ValidateResult.getSuccessResult();
-        }
         ValidateResult result = ValidateResult.getSuccessResult();
+        if (header.getHeight() == 0L) {
+            return result;
+        }
         if (header.getHeight() > NulsContext.getInstance().getBestHeight()) {
             return result;
         }
@@ -100,6 +100,7 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
                 byte[] header2 = otherBlockHeader.serialize();
                 redPunishData.setEvidence(ArraysTool.concatenate(header1, header2));
             } catch (Exception e) {
+                Log.error(e);
                 return result;
             }
             redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
@@ -116,7 +117,7 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
                 redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
             } catch (IOException e) {
                 Log.error(e);
-                return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.BIFURCATION);
+                return result;
             }
             this.consensusService.newTx(redPunishTransaction);
             return result;

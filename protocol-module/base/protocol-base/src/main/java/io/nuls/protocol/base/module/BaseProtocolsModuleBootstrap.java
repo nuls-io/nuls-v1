@@ -25,9 +25,12 @@
 package io.nuls.protocol.base.module;
 
 
+import io.nuls.account.model.Account;
+import io.nuls.account.service.AccountService;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.core.tools.log.Log;
 import io.nuls.db.service.DBService;
+import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -50,7 +53,8 @@ import io.nuls.protocol.module.AbstractProtocolModule;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.DownloadService;
 
-;
+;import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Niels
@@ -78,10 +82,10 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
                 throw new NulsRuntimeException(e);
             }
         } else {
-
-
             if (!block0.getHeader().getHash().equals(genesisBlock.getHeader().getHash())) {
                 if (block0.getHeader().getHash().getDigestHex().equals("0020c68810e7fcbb1281e7e053fa100bc0b0a8184d5f7b4dd07e1093072077ee7bf9")) {
+                    AccountService accountService = NulsContext.getServiceBean(AccountService.class);
+                    accountService.clearCache();
                     clearAllData();
                     start();
                     return;
