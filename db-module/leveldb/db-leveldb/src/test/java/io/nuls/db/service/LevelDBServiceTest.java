@@ -34,6 +34,7 @@ import io.nuls.db.manager.LevelDBManager;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.impl.LevelDBServiceImpl;
 import io.nuls.kernel.cfg.NulsConfig;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.P2PKHScriptSig;
@@ -249,10 +250,16 @@ public class LevelDBServiceTest {
         Coin coin;
         String strAddress;
         Na balance;
+        Address address;
+        byte[] hash160;
         for (byte[] bytes : valueList) {
             coin = new Coin();
             coin.parse(bytes,0);
-            strAddress = AddressTool.getStringAddressByBytes(coin.getOwner());
+            //
+            hash160 = new byte[20];
+            System.arraycopy(coin.getOwner(), 2, hash160, 0, 20);
+            address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, hash160);
+            strAddress = address.toString();
             balance = balanceMap.get(strAddress);
             if(balance == null) {
                 balance = Na.ZERO;
