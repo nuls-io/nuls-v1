@@ -75,7 +75,7 @@ Using stop.sh stop the nuls process.
 
 ### Process EntryPoint
 
-> nuls/node/src/main/java/io/nuls/Bootstrap.java
+> nuls/client-module/client/src/main/java/io/nuls/client/Bootstrap.java
 
 ## License
 
