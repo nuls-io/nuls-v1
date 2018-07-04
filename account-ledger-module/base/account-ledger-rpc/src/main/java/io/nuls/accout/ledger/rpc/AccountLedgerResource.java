@@ -598,7 +598,7 @@ public class AccountLedgerResource {
                 result = Result.getFailed(LedgerErrorCode.DATA_NOT_FOUND);
             } else {
                 Transaction tx = txResult.getData();
-                tx.setStatus(TxStatusEnum.CONFIRMED);
+                tx.setStatus(TxStatusEnum.UNCONFIRM);
                 TransactionDto txDto = null;
                 CoinData coinData = tx.getCoinData();
                 if (coinData != null) {
