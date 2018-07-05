@@ -67,12 +67,8 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
         if (tempTx == null) {
             transactionService.newTx(tx);
             transactionService.forwardTx(tx, fromNode);
-//            ProtocolCacheHandler.receiveTx(tx);
         } else {
-            NotFound notFound = new NotFound();
-            notFound.setHash(tx.getHash());
-            notFound.setType(MessageDataType.TRANSACTION);
-            ProtocolCacheHandler.notFound(notFound);
+            transactionService.newTx(tx);
         }
     }
 

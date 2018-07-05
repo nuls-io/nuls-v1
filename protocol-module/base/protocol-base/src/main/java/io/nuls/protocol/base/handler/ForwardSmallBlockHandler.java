@@ -72,14 +72,11 @@ public class ForwardSmallBlockHandler extends AbstractMessageHandler<ForwardSmal
         }
         GetSmallBlockMessage getSmallBlockMessage = new GetSmallBlockMessage();
         getSmallBlockMessage.setMsgBody(hash);
-        CompletableFuture<SmallBlock> future = ProtocolCacheHandler.addGetSmallBlockRequest(hash);
         Result result = messageBusService.sendToNode(getSmallBlockMessage, fromNode, true);
-//        Log.error("ask small block:" + hash);
         if (result.isFailed()) {
-            ProtocolCacheHandler.removeSmallBlockFuture(hash);
+            set.remove(hash);
             return;
         }
-        smallBlockDownloadProcessor.offer(new SmallBlockContainer(fromNode, future, hash));
     }
 
 }

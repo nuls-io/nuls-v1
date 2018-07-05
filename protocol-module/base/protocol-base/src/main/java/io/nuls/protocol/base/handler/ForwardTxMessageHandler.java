@@ -48,6 +48,7 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
     private TransactionDownloadProcessor txDownloadProcessor = TransactionDownloadProcessor.getInstance();
 
     private Set<NulsDigestData> set = new HashSet<>();
+    private Set<NulsDigestData> tempSet = new HashSet<>();
 
     @Override
     public void onMessage(ForwardTxMessage message, Node fromNode) {
@@ -55,22 +56,29 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
             return;
         }
         NulsDigestData hash = message.getMsgBody();
+        int size = set.size();
+        if(size % 100 == 0) {
+            System.out.println(size);
+        }
         if (!set.add(hash)) {
             return;
         }
+        tempSet.add(hash);
         if (set.size() >= 100000) {
             set.clear();
-            set.add(hash);
+            set.addAll(tempSet);
+            tempSet.clear();
+        }
+        if(tempSet.size() == 50000) {
+            tempSet.clear();
         }
         GetTxMessage getTxMessage = new GetTxMessage();
         getTxMessage.setMsgBody(hash);
-        CompletableFuture<Transaction> future = ProtocolCacheHandler.addGetTxRequest(hash);
-        Result result = messageBusService.sendToNode(getTxMessage, fromNode, false);
+        Result result = messageBusService.sendToNode(getTxMessage, fromNode, true);
         if (result.isFailed()) {
-            ProtocolCacheHandler.removeTxFuture(hash);
+            set.remove(hash);
             return;
         }
-        txDownloadProcessor.offer(new TransactionContainer(fromNode, future, hash));
     }
 
 }
