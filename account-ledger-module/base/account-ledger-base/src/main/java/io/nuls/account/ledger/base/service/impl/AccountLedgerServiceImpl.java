@@ -425,28 +425,28 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 //每次累加一条未花费余额时，需要重新计算手续费
                 Na fee = TransactionFeeCalculator.getFee(size, price);
                 values = values.add(coin.getNa());
-                if (values.isGreaterOrEquals(amount.add(fee))) {
-                    //余额足够后，需要判断是否找零，如果有找零，则需要重新计算手续费
+
+                //需要判断是否找零，如果有找零，则需要重新计算手续费
+                if (values.isGreaterThan(amount.add(fee))) {
                     Na change = values.subtract(amount.add(fee));
-                    if (change.isGreaterThan(Na.ZERO)) {
-                        Coin changeCoin = new Coin();
-                        changeCoin.setOwner(address);
-                        changeCoin.setNa(change);
+                    Coin changeCoin = new Coin();
+                    changeCoin.setOwner(address);
+                    changeCoin.setNa(change);
 
-                        fee = TransactionFeeCalculator.getFee(size + changeCoin.size(), price);
-                        if (values.isLessThan(amount.add(fee))) {
-                            continue;
-                        }
-                        coinDataResult.setChange(changeCoin);
+                    fee = TransactionFeeCalculator.getFee(size + changeCoin.size(), price);
+                    if (values.isLessThan(amount.add(fee))) {
+                        continue;
                     }
-
+                    coinDataResult.setChange(changeCoin);
+                }
+                coinDataResult.setFee(fee);
+                if (values.isGreaterOrEquals(amount.add(fee))) {
                     enough = true;
                     coinDataResult.setEnough(true);
-                    coinDataResult.setFee(fee);
-                    coinDataResult.setCoinList(coins);
                     break;
                 }
             }
+            coinDataResult.setCoinList(coins);
             if (!enough) {
                 coinDataResult.setEnough(false);
                 return coinDataResult;
