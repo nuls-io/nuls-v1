@@ -56,10 +56,6 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
             return;
         }
         NulsDigestData hash = message.getMsgBody();
-        int size = set.size();
-        if(size % 100 == 0) {
-            System.out.println(size);
-        }
         if (!set.add(hash)) {
             return;
         }
