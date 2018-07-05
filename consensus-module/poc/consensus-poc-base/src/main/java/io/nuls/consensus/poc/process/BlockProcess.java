@@ -27,6 +27,7 @@
 package io.nuls.consensus.poc.process;
 
 import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.poc.block.validator.BifurcationUtil;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
@@ -75,6 +76,7 @@ public class BlockProcess {
     private ChainManager chainManager;
     private OrphanBlockProvider orphanBlockProvider;
     private TxMemoryPool txMemoryPool = TxMemoryPool.getInstance();
+    private BifurcationUtil bifurcationUtil = BifurcationUtil.getInstance();
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
@@ -127,6 +129,7 @@ public class BlockProcess {
         // and whether the expanded round of information is valid
         // 验证区块，需要验证的内容有：区块大小是否超过限制、区块头属性是否合法、梅克尔树根是否正确、签名是否正确、扩展的轮次信息是否合法
         block.verifyWithException();
+        bifurcationUtil.validate(block.getHeader());
 
         ValidateResult<List<Transaction>> validateResult = ledgerService.verifyDoubleSpend(block);
         if (validateResult.isFailed() && validateResult.getErrorCode().equals(LedgerErrorCode.LEDGER_DOUBLE_SPENT)) {

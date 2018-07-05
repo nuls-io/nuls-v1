@@ -54,10 +54,18 @@ import java.util.List;
 /**
  * @author: Niels Wang
  */
-@Component
-public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
+public class BifurcationUtil {
 
-    private static String CLASS_NAME = BifurcationValidator.class.getName();
+    private static final BifurcationUtil INSTANCE = new BifurcationUtil();
+
+    private static String CLASS_NAME = BifurcationUtil.class.getName();
+
+    private BifurcationUtil() {
+    }
+
+    public static BifurcationUtil getInstance() {
+        return INSTANCE;
+    }
 
     @Autowired
     private BlockService blockService;
@@ -65,7 +73,6 @@ public class BifurcationValidator implements NulsDataValidator<BlockHeader> {
     @Autowired
     private ConsensusService consensusService;
 
-    @Override
     public ValidateResult validate(BlockHeader header) {
         ValidateResult result = ValidateResult.getSuccessResult();
         if (header.getHeight() == 0L) {
