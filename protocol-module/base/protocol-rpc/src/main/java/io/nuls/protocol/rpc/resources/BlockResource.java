@@ -25,7 +25,6 @@
 
 package io.nuls.protocol.rpc.resources;
 
-import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
