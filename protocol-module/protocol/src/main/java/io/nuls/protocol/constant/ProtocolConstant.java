@@ -26,6 +26,7 @@
 package io.nuls.protocol.constant;
 
 import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.model.Na;
 
 /**
  * 协议相关的常量和一些通用的常量定义在这里
@@ -157,5 +158,12 @@ public interface ProtocolConstant extends NulsConstant {
     short PROTOCOL_FORWARD_NEW_BLOCK = 18;
     short PROTOCOL_GET_SMALL_BLOCK = 19;
     short PROTOCOL_GET_TRANSACTION = 20;
+
+
+    /**
+     * 最小转账金额
+     * Minimum transfer amount
+     */
+    Na MININUM_TRANSFER_ammount = Na.parseNuls(0.01);
 
 }

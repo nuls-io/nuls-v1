@@ -38,8 +38,7 @@ public class AddressTest {
 
     @Test
     public void test() {
-        //short chainId = 8964;
-        short chainId = 1;
+        short chainId = 8964;
         while (true) {
             ECKey ecKey = new ECKey();
             String address = getAddress(chainId, ecKey.getPubKey());
