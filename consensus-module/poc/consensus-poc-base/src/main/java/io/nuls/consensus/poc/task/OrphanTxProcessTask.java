@@ -88,7 +88,7 @@ public class OrphanTxProcessTask implements Runnable {
                 }
             } else if (!result.getErrorCode().equals(TransactionErrorCode.ORPHAN_TX)) {
                 pool.removeOrphan(tx.getHash());
-            } else if (tx.getTime() <= (TimeService.currentTimeMillis() - 60000000L)) {
+            } else if (tx.getTime() <= (TimeService.currentTimeMillis() - 600000000L)) {
                 pool.removeOrphan(tx.getHash());
             }
         }
