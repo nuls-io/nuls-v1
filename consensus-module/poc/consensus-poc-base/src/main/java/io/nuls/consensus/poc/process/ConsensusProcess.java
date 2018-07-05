@@ -92,7 +92,6 @@ public class ConsensusProcess {
     public void process() {
         boolean canPackage = checkCanPackage();
         if (!canPackage) {
-            clearTxMemoryPool();
             return;
         }
         doWork();
@@ -115,7 +114,7 @@ public class ConsensusProcess {
         if (!hasPacking && member.getPackStartTime() < TimeService.currentTimeMillis() && member.getPackEndTime() > TimeService.currentTimeMillis()) {
             hasPacking = true;
             try {
-                if(Log.isDebugEnabled()) {
+                if (Log.isDebugEnabled()) {
                     Log.debug("当前网络时间： " + DateUtil.convertDate(new Date(TimeService.currentTimeMillis())) + " , 我的打包开始时间: " +
                             DateUtil.convertDate(new Date(member.getPackStartTime())) + " , 我的打包结束时间: " +
                             DateUtil.convertDate(new Date(member.getPackEndTime())) + " , 当前轮开始时间: " +
@@ -175,7 +174,7 @@ public class ConsensusProcess {
     }
 
     private void clearTxMemoryPool() {
-        if(TimeService.currentTimeMillis() - memoryPoolLastClearTime > 60000L) {
+        if (TimeService.currentTimeMillis() - memoryPoolLastClearTime > 60000L) {
             txMemoryPool.clear();
             memoryPoolLastClearTime = TimeService.currentTimeMillis();
         }
@@ -183,6 +182,7 @@ public class ConsensusProcess {
 
     private boolean checkCanPackage() {
         if (!ConsensusConfig.isPartakePacking()) {
+            this.clearTxMemoryPool();
             return false;
         }
         // wait consensus ready running
@@ -190,7 +190,7 @@ public class ConsensusProcess {
             return false;
         }
         // check network status
-        if (networkService.getAvailableNodes().size() == 0) {
+        if (networkService.getAvailableNodes().size() < ProtocolConstant.ALIVE_MIN_NODE_COUNT) {
             return false;
         }
         return true;

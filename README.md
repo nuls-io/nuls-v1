@@ -64,8 +64,8 @@ nuls>mvn clean package
 
 ```shell
 $ mvn clean package
-$ cd node/target
-$ tar zxvf nuls-node.tar.gz
+$ cd client-module/client/target
+$ tar -zxvf nuls-node.tar.gz
 $ cd bin
 ```
 Using start.sh running the nuls process.  
