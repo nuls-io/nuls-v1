@@ -42,9 +42,9 @@ public class TemporaryCacheManager {
     private static final TemporaryCacheManager INSTANCE = new TemporaryCacheManager();
 
     private CacheMap<NulsDigestData, SmallBlock> smallBlockCacheMap = new CacheMap<>("temp-small-block-cache", 16, NulsDigestData.class, SmallBlock.class, 1000, 0, null);
-//    private CacheMap<NulsDigestData, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 128, NulsDigestData.class, Transaction.class, 0, 3600);
+    private CacheMap<NulsDigestData, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 128, NulsDigestData.class, Transaction.class, 0, 3600);
 
-    private Map<NulsDigestData, Transaction> txCacheMap = new HashMap<>();
+//    private Map<NulsDigestData, Transaction> txCacheMap = new HashMap<>();
 
     private TemporaryCacheManager() {
 
