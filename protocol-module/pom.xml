@@ -5,12 +5,12 @@
     <parent>
         <artifactId>nuls</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.0</version>
+        <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.nuls</groupId>
     <artifactId>protocol-module</artifactId>
-    <version>1.0</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -24,7 +24,7 @@
         <dependency>
             <groupId>io.nuls.core-module</groupId>
             <artifactId>kernel</artifactId>
-            <version>1.0</version>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 

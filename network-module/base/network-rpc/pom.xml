@@ -5,21 +5,21 @@
     <parent>
         <artifactId>network-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.0</version>
+        <version>1.0.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.network-module</groupId>
     <artifactId>network-rpc</artifactId>
-    <version>1.0</version>
+    <version>1.0.0</version>
 
     
     <dependencies>
         <dependency>
             <groupId>io.nuls.core-module</groupId>
             <artifactId>kernel</artifactId>
-            <version>1.0</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
@@ -44,12 +44,12 @@
         <dependency>
             <groupId>io.nuls.network-module</groupId>
             <artifactId>network</artifactId>
-            <version>1.0</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>io.nuls.network-module</groupId>
             <artifactId>network-base</artifactId>
-            <version>1.0</version>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 
