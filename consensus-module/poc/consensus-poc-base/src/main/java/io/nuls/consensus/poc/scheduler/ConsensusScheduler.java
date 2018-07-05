@@ -79,7 +79,7 @@ public class ConsensusScheduler {
             Log.warn(e.getMessage());
         }
 
-        threadPool = TaskManager.createScheduledThreadPool(5,
+        threadPool = TaskManager.createScheduledThreadPool(6,
                 new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, "consensus-poll-control"));
 
         BlockProcess blockProcess = new BlockProcess(chainManager, orphanBlockProvider);
@@ -99,6 +99,8 @@ public class ConsensusScheduler {
         TaskManager.createAndRunThread(ConsensusConstant.MODULE_ID_CONSENSUS, "poc-reward-cache", new RewardStatisticsProcessTask(NulsContext.getServiceBean(RewardStatisticsProcess.class)));
 
         threadPool.scheduleAtFixedRate(new RewardCalculatorTask(NulsContext.getServiceBean(RewardStatisticsProcess.class)), ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND, ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND, TimeUnit.SECONDS);
+
+        threadPool.scheduleAtFixedRate(new OrphanTxProcessTask(), 5, 5, TimeUnit.SECONDS);
         return true;
     }
 

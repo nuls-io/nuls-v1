@@ -335,7 +335,7 @@ public class ConsensusProcess {
                     continue;
                 }
 
-                if (result.getErrorCode() == TransactionErrorCode.ORPHAN_TX) {
+                if (result.getErrorCode().equals(TransactionErrorCode.ORPHAN_TX)) {
                     txMemoryPool.add(txContainer, true);
                     txContainer.setPackageCount(txContainer.getPackageCount() + 1);
                 }

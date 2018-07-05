@@ -33,12 +33,13 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.RpcClientResult;
+import io.nuls.kernel.model.*;
+import io.nuls.kernel.utils.AddressTool;
+import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.rpc.model.BlockDto;
 import io.nuls.protocol.rpc.model.BlockHeaderDto;
+import io.nuls.protocol.rpc.model.InputDto;
+import io.nuls.protocol.rpc.model.TransactionDto;
 import io.nuls.protocol.service.BlockService;
 import io.swagger.annotations.*;
 
@@ -57,6 +58,9 @@ public class BlockResource {
 
     @Autowired
     private BlockService blockService;
+
+    @Autowired
+    private LedgerService ledgerService;
 
     @GET
     @Path("/header/height/{height}")
@@ -140,7 +144,9 @@ public class BlockResource {
             result = Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         } else {
             result = Result.getSuccess();
-            result.setData(new BlockDto(block));
+            BlockDto dto = new BlockDto(block);
+            fillBlockTxInputAddress(dto);
+            result.setData(dto);
 
         }
         return result.toRpcClientResult();
@@ -165,7 +171,9 @@ public class BlockResource {
         if (block == null) {
             result = Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         } else {
-            result.setData(new BlockDto(block));
+            BlockDto dto = new BlockDto(block);
+            fillBlockTxInputAddress(dto);
+            result.setData(dto);
         }
         return result.toRpcClientResult();
     }
@@ -257,11 +265,33 @@ public class BlockResource {
             if (null == block) {
                 break;
             }
-            list.add(new BlockDto(block));
+            BlockDto dto = new BlockDto(block);
+            fillBlockTxInputAddress(dto);
+            list.add(dto);
         }
         Map<String, List<BlockDto>> map = new HashMap<>();
         map.put("list", list);
         return Result.getSuccess().setData(map).toRpcClientResult();
+
+    }
+
+    private void fillBlockTxInputAddress(BlockDto dto) {
+        for (TransactionDto transaction : dto.getTxList()) {
+            if (transaction.getInputs() == null || transaction.getInputs().isEmpty()) {
+                continue;
+            }
+            for (InputDto inputDto : transaction.getInputs()) {
+                Transaction tx;
+                try {
+                    tx = ledgerService.getTx(NulsDigestData.fromDigestHex(inputDto.getFromHash()));
+                } catch (NulsException e) {
+                    Log.error(e);
+                    continue;
+                }
+                Coin coin = tx.getCoinData().getTo().get(inputDto.getFromIndex());
+                inputDto.setAddress(AddressTool.getStringAddressByBytes(coin.getOwner()));
+            }
+        }
 
     }
 }
