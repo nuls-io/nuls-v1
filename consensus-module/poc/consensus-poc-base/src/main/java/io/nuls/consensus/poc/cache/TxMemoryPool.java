@@ -27,6 +27,7 @@
 package io.nuls.consensus.poc.cache;
 
 import io.nuls.cache.CacheMap;
+import io.nuls.cache.LimitHashMap;
 import io.nuls.consensus.poc.container.TxContainer;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
@@ -48,7 +49,7 @@ public final class TxMemoryPool {
     private Map<NulsDigestData, TxContainer> container;
     private Queue<NulsDigestData> txHashQueue;
 
-    private CacheMap<NulsDigestData, TxContainer> orphanContainer;
+    private LimitHashMap<NulsDigestData, TxContainer> orphanContainer;
     private Queue<NulsDigestData> orphanTxHashQueue;
 
     private TxMemoryPool() {
@@ -56,7 +57,8 @@ public final class TxMemoryPool {
         container = new ConcurrentHashMap<>();
 
         orphanTxHashQueue = new LinkedBlockingDeque<>();
-        orphanContainer = new CacheMap<>("orphan-txs", 256, NulsDigestData.class, TxContainer.class, 3600, 0, null);
+//        orphanContainer = new CacheMap<>("orphan-txs", 256, NulsDigestData.class, TxContainer.class, 3600, 0, null);
+        this.orphanContainer = new LimitHashMap(200000);
     }
 
     public static TxMemoryPool getInstance() {
