@@ -59,7 +59,7 @@ public class ForwardSmallBlockHandler extends AbstractMessageHandler<ForwardSmal
 
     @Override
     public void onMessage(ForwardSmallBlockMessage message, Node fromNode) {
-        if (message == null || fromNode == null || null == message.getMsgBody()) {
+        if (message == null || fromNode == null || !fromNode.isHandShake() || null == message.getMsgBody()) {
             return;
         }
         NulsDigestData hash = message.getMsgBody();

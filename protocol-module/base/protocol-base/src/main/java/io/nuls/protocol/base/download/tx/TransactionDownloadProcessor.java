@@ -97,10 +97,16 @@ public class TransactionDownloadProcessor implements Runnable {
         int i = 0;
         while (i < 3) {
             i++;
+            if (!fromNode.isHandShake()) {
+                break;
+            }
             try {
                 tx = future.get(5, TimeUnit.SECONDS);
                 ProtocolCacheHandler.removeTxFuture(txHash);
             } catch (Exception e) {
+                if (!fromNode.isHandShake()) {
+                    break;
+                }
                 future = ProtocolCacheHandler.addGetTxRequest(txHash);
                 GetTxMessage getTxMessage = new GetTxMessage();
                 getTxMessage.setMsgBody(txHash);

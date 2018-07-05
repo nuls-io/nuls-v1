@@ -79,7 +79,7 @@ public class ConsensusScheduler {
             Log.warn(e.getMessage());
         }
 
-        threadPool = TaskManager.createScheduledThreadPool(4,
+        threadPool = TaskManager.createScheduledThreadPool(5,
                 new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, "consensus-poll-control"));
 
         BlockProcess blockProcess = new BlockProcess(chainManager, orphanBlockProvider);

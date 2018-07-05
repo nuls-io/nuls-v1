@@ -111,10 +111,16 @@ public class SmallBlockDownloadProcessor implements Runnable {
         int i = 0;
         while (i < 3) {
             i++;
+            if (!fromNode.isHandShake()) {
+                break;
+            }
             try {
                 smallBlock = future.get(5, TimeUnit.SECONDS);
                 ProtocolCacheHandler.removeSmallBlockFuture(blockhash);
             } catch (Exception e) {
+                if (!fromNode.isHandShake()) {
+                    break;
+                }
                 future = ProtocolCacheHandler.addGetSmallBlockRequest(blockhash);
                 GetSmallBlockMessage getSmallBlockMessage = new GetSmallBlockMessage();
                 getSmallBlockMessage.setMsgBody(blockhash);

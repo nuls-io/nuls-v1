@@ -93,6 +93,19 @@ public class AddressTool {
         } catch (Exception e) {
             return false;
         }
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+        short chainId;
+        byte type;
+        try {
+            chainId = byteBuffer.readShort();
+            type = byteBuffer.readByte();
+        } catch (NulsException e) {
+            Log.error(e);
+            return false;
+        }
+        if (NulsContext.DEFAULT_CHAIN_ID != chainId || NulsContext.DEFAULT_ADDRESS_TYPE != type) {
+            return false;
+        }
         try {
             checkXOR(bytes);
         } catch (Exception e) {

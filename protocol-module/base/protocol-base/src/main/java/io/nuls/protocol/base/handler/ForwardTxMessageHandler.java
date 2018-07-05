@@ -51,7 +51,7 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
 
     @Override
     public void onMessage(ForwardTxMessage message, Node fromNode) {
-        if (message == null || fromNode == null || null == message.getMsgBody()) {
+        if (message == null || fromNode == null || !fromNode.isHandShake() || null == message.getMsgBody()) {
             return;
         }
         NulsDigestData hash = message.getMsgBody();
@@ -70,7 +70,7 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
             ProtocolCacheHandler.removeTxFuture(hash);
             return;
         }
-        txDownloadProcessor.offer(new TransactionContainer(fromNode, future,hash));
+        txDownloadProcessor.offer(new TransactionContainer(fromNode, future, hash));
     }
 
 }
