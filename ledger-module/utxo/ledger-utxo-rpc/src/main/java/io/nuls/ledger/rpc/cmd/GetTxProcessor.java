@@ -77,7 +77,7 @@ public class GetTxProcessor implements CommandProcessor {
         if(StringUtils.isBlank(hash)) {
             return CommandResult.getFailed(KernelErrorCode.PARAMETER_ERROR.getMsg());
         }
-        RpcClientResult result = restFul.get("/tx/hash/" + hash, null);
+        RpcClientResult result = restFul.get("/accountledger/tx/" + hash, null);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
