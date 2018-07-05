@@ -25,9 +25,7 @@
 package io.nuls.kernel.context;
 
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Block;
@@ -49,7 +47,7 @@ public class NulsContext {
      * The default chain id (nuls main chain), the chain id affects the generation of the address,
      * and the current address begins with "Ns".8964.
      */
-    public static short DEFAULT_CHAIN_ID = NulsConfig.NULS_CONFIG.getCfgValue(NulsConstant.CFG_SYSTEM_SECTION, "chain.id", (short) 8964);
+    public static short DEFAULT_CHAIN_ID = 8964;
 
     /**
      * 默认的地址类型，一条链可以包含几种地址类型，地址类型包含在地址中
@@ -125,7 +123,6 @@ public class NulsContext {
 
     /**
      * get zhe only instance of NulsContext
-     *
      * @return NulsContext
      */
     public static final NulsContext getInstance() {
@@ -199,7 +196,6 @@ public class NulsContext {
     /**
      * 获取缓存的网络最新高度
      * Gets the latest height of the cached network.
-     *
      * @return Long
      */
     public Long getNetBestBlockHeightWithNull() {
