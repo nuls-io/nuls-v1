@@ -42,7 +42,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @desription:
  * @author: PierreLuo
  */
 @ApiModel(value = "transactionDtoJSON")
