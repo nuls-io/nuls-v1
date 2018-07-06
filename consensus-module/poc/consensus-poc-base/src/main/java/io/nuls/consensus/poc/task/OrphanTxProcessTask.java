@@ -66,29 +66,26 @@ public class OrphanTxProcessTask implements Runnable {
             return;
         }
         Collections.sort(orphanTxList, TransactionTimeComparator.getInstance());
-        List<Transaction> txList = pool.getAll();
+//        List<Transaction> txList = pool.getAll();
         Map<String, Coin> temporaryToMap = new HashMap<>();
         Set<String> temporaryFromSet = new HashSet<>();
 
-        for (Transaction tx : txList) {
-            if (null == tx.getCoinData() || null == tx.getCoinData().getTo()) {
-                continue;
-            }
-            for (Coin coin : tx.getCoinData().getTo()) {
-                temporaryToMap.put(Base64.getEncoder().encodeToString(coin.getOwner()), coin);
-            }
-        }
+//        for (Transaction tx : txList) {
+//            if (null == tx.getCoinData() || null == tx.getCoinData().getTo()) {
+//                continue;
+//            }
+//            for (Coin coin : tx.getCoinData().getTo()) {
+//                temporaryToMap.put(Base64.getEncoder().encodeToString(coin.getOwner()), coin);
+//            }
+//        }
         for (Transaction tx : orphanTxList) {
             ValidateResult result = ledgerService.verifyCoinData(tx, temporaryToMap, temporaryFromSet);
             if (result.isSuccess()) {
                 pool.add(new TxContainer(tx), false);
                 pool.removeOrphan(tx.getHash());
-                for (Coin coin : tx.getCoinData().getTo()) {
-                    temporaryToMap.put(Base64.getEncoder().encodeToString(coin.getOwner()), coin);
-                }
             } else if (!result.getErrorCode().equals(TransactionErrorCode.ORPHAN_TX)) {
                 pool.removeOrphan(tx.getHash());
-            } else if (tx.getTime() <= (TimeService.currentTimeMillis() - 600000000L)) {
+            } else if (tx.getTime() <= (TimeService.currentTimeMillis() - 600000L)) {
                 pool.removeOrphan(tx.getHash());
             }
         }
