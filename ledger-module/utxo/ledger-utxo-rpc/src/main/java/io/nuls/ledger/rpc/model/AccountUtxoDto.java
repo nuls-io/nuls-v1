@@ -21,33 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.ledger.storage.service;
+package io.nuls.ledger.rpc.model;
 
-import io.nuls.db.model.Entry;
-import io.nuls.db.service.BatchOperation;
 import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.Result;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
 /**
- * @desription:
  * @author: PierreLuo
  */
-public interface UtxoLedgerUtxoStorageService {
+@ApiModel(value = "AccountUtxoDtoJSON")
+public class AccountUtxoDto {
 
-    BatchOperation createWriteBatch();
+    @ApiModelProperty(name = "utxoDtoList", value = "未花费金额")
+    private List<UtxoDto> utxoDtoList;
 
-    Result saveUtxo(byte[] owner, Coin coin);
+    public List<UtxoDto> getUtxoDtoList() {
+        return utxoDtoList;
+    }
 
-    Coin getUtxo(byte[] owner);
-
-    Result deleteUtxo(byte[] owner);
-
-    byte[] getUtxoBytes(byte[] owner);
-
-    List<byte[]> getAllUtxoBytes();
-
-    List<Entry<byte[], byte[]>> getAllUtxoEntryBytes();
-
+    public void setUtxoDtoList(List<UtxoDto> utxoDtoList) {
+        this.utxoDtoList = utxoDtoList;
+    }
 }
