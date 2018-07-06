@@ -271,7 +271,7 @@ public class ChainContainer implements Cloneable {
                 Log.error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeader.getHash());
                 return false;
             }
-            if (!isDownload && (roundData.getRoundStartTime() + (roundData.getPackingIndexOfRound()) * ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS) > TimeService.currentTimeMillis()) {
+            if (!isDownload && (roundData.getRoundStartTime() + (roundData.getPackingIndexOfRound() - 1) * ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS) > TimeService.currentTimeMillis() + ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS) {
                 Log.error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash());
                 return false;
             }
