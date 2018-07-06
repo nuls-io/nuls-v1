@@ -24,7 +24,12 @@
  */
 package io.nuls.protocol.utils;
 
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.NulsByteBuffer;
 
 import java.util.Comparator;
 
@@ -49,6 +54,31 @@ public class TransactionTimeComparator implements Comparator<Transaction> {
             return -1;
         } else if (o1.getTime() > o2.getTime()) {
             return 1;
+        } else {
+            for (Coin coin : o1.getCoinData().getFrom()) {
+                NulsByteBuffer buffer = new NulsByteBuffer(coin.getOwner());
+                NulsDigestData hash = null;
+                try {
+                    hash = buffer.readHash();
+                } catch (NulsException e) {
+                    Log.error(e);
+                }
+                if(o2.getHash().equals(hash)){
+                    return 1;
+                }
+            }
+            for (Coin coin : o2.getCoinData().getFrom()) {
+                NulsByteBuffer buffer = new NulsByteBuffer(coin.getOwner());
+                NulsDigestData hash = null;
+                try {
+                    hash = buffer.readHash();
+                } catch (NulsException e) {
+                    Log.error(e);
+                }
+                if(o1.getHash().equals(hash)){
+                    return -1;
+                }
+            }
         }
         return 0;
     }
