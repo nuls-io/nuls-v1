@@ -85,8 +85,8 @@ public class OrphanTxProcessTask implements Runnable {
                 System.out.println("删除孤儿交易2:::::" + result.getMsg());
             }
         }
-        for (int i = list.size() - 1; i >= 0; i--) {
-            pool.addInFirst(new TxContainer(list.get(i)), false);
+        for (int i = 0; i < list.size(); i++) {
+            pool.add(new TxContainer(list.get(i)), false);
         }
     }
 }
