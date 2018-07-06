@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author: Niels Wang
@@ -37,7 +38,7 @@ import java.util.Map;
 public class LimitHashMap<K, V> {
 
     private final int maxSize;
-    private Map<K, V> map = new HashMap();
+    private Map<K, V> map = new ConcurrentHashMap<>();
 
     private LinkedList<K> queue = new LinkedList<>();
 

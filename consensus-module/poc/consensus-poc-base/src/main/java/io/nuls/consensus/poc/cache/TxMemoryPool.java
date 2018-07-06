@@ -196,6 +196,14 @@ public final class TxMemoryPool {
         return container.size() + orphanContainer.size();
     }
 
+    public int getPoolSize() {
+        return container.size() ;
+    }
+
+    public int getOrphanPoolSize() {
+        return  orphanContainer.size();
+    }
+
     public void removeOrphan(NulsDigestData hash) {
         this.orphanContainer.remove(hash);
     }
