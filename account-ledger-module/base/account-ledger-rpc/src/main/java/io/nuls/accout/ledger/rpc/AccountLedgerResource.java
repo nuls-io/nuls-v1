@@ -245,13 +245,17 @@ public class AccountLedgerResource {
             outputs.add(to);
         }
 
-        List<byte[]> inputsKey = new ArrayList<>();
+        List<Coin> inputs = new ArrayList<>();
         for (int i = 0; i < form.getInputs().size(); i++) {
             InputDto inputDto = form.getInputs().get(i);
             byte[] key = Arrays.concatenate(Hex.decode(inputDto.getFromHash()), new VarInt(inputDto.getFromIndex()).encode());
-            inputsKey.add(key);
+            Coin coin = new Coin();
+            coin.setOwner(key);
+            coin.setLockTime(inputDto.getLockTime());
+            coin.setNa(Na.valueOf(inputDto.getValue()));
+            inputs.add(coin);
         }
-        Result result = accountLedgerService.createTransaction(inputsKey, outputs, remark);
+        Result result = accountLedgerService.createTransaction(inputs, outputs, remark);
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("value", (String) result.getData());
@@ -314,22 +318,22 @@ public class AccountLedgerResource {
             Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(data));
             tx = accountLedgerService.signTransaction(tx, key);
 
-            Result validateResult = tx.verify();
-            if (validateResult.isFailed()) {
-                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
-            }
+//            Result validateResult = tx.verify();
+//            if (validateResult.isFailed()) {
+//                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
+//            }
 
-            for (Coin coin : tx.getCoinData().getFrom()) {
-                Coin utxo = ledgerService.getUtxo(coin.getOwner());
-                if (utxo == null) {
-                    return Result.getFailed(LedgerErrorCode.UTXO_NOT_FOUND).toRpcClientResult();
-                }
-
-                if (!form.getAddress().equals(AddressTool.getStringAddressByBytes(utxo.getOwner()))) {
-                    return Result.getFailed(LedgerErrorCode.INVALID_INPUT).toRpcClientResult();
-                }
-
-            }
+//            for (Coin coin : tx.getCoinData().getFrom()) {
+//                Coin utxo = ledgerService.getUtxo(coin.getOwner());
+//                if (utxo == null) {
+//                    return Result.getFailed(LedgerErrorCode.UTXO_NOT_FOUND).toRpcClientResult();
+//                }
+//
+//                if (!form.getAddress().equals(AddressTool.getStringAddressByBytes(utxo.getOwner()))) {
+//                    return Result.getFailed(LedgerErrorCode.INVALID_INPUT).toRpcClientResult();
+//                }
+//
+//            }
 
             Map<String, String> map = new HashMap<>();
             map.put("value", Hex.encode(tx.serialize()));
@@ -354,10 +358,10 @@ public class AccountLedgerResource {
         try {
             byte[] data = Hex.decode(form.getTxHex());
             Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(data));
-            ValidateResult validateResult = tx.verify();
-            if (validateResult.isFailed()) {
-                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
-            }
+//            ValidateResult validateResult = tx.verify();
+//            if (validateResult.isFailed()) {
+//                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
+//            }
             Result result = accountLedgerService.broadcast(tx);
             if (result.isSuccess()) {
                 Map<String, Object> map = new HashMap<>();

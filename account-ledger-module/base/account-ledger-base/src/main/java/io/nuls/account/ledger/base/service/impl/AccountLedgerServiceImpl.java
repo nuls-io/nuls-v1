@@ -586,28 +586,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result createTransaction(List<byte[]> inputsKey, List<Coin> outputs, byte[] remark) {
+    public Result createTransaction(List<Coin> inputs, List<Coin> outputs, byte[] remark) {
         TransferTransaction tx = new TransferTransaction();
         CoinData coinData = new CoinData();
         coinData.setTo(outputs);
+        coinData.setFrom(inputs);
         tx.setRemark(remark);
-        //验证地址是否一致
-        byte[] owner = null;
-        for (int i = 0; i < inputsKey.size(); i++) {
-            Coin coin = ledgerService.getUtxo(inputsKey.get(i));
-            if (coin == null) {
-                return Result.getFailed(LedgerErrorCode.UTXO_NOT_FOUND);
-            }
-            if (i == 0) {
-                owner = coin.getOwner();
-            } else {
-                if (!Arrays.equals(coin.getOwner(), owner)) {
-                    return Result.getFailed(LedgerErrorCode.INVALID_INPUT);
-                }
-            }
-            coin.setOwner(inputsKey.get(i));
-            coinData.getFrom().add(coin);
-        }
 
         tx.setCoinData(coinData);
         tx.setTime(TimeService.currentTimeMillis());

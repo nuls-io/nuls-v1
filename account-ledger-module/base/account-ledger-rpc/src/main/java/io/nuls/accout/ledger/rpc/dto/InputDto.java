@@ -48,8 +48,11 @@ public class InputDto {
     @ApiModelProperty(name = "value", value = "转入金额")
     private Long value;
 
-    public InputDto() {
+    @ApiModelProperty(name = "lockTime", value = "锁定时间")
+    private Long lockTime = 0L;
 
+    public InputDto() {
+        this.lockTime = 0L;
     }
 
     public InputDto(Coin input) {
@@ -57,6 +60,7 @@ public class InputDto {
         this.fromIndex = AccountLegerUtils.getIndex(input.getOwner());
         this.address = AddressTool.getStringAddressByBytes(input.getFrom().getOwner());
         this.value = input.getFrom().getNa().getValue();
+        this.lockTime = input.getFrom().getLockTime();
     }
 
     public String getAddress() {
@@ -89,5 +93,13 @@ public class InputDto {
 
     public void setFromIndex(Integer fromIndex) {
         this.fromIndex = fromIndex;
+    }
+
+    public Long getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(Long lockTime) {
+        this.lockTime = lockTime;
     }
 }
