@@ -52,7 +52,7 @@ public class InputDto {
     private Long lockTime;
 
     public InputDto() {
-
+        this.lockTime = 0L;
     }
 
     public InputDto(Coin input) {
