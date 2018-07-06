@@ -28,7 +28,6 @@ package io.nuls.consensus.poc.task;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.container.TxContainer;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
@@ -50,6 +49,8 @@ public class OrphanTxProcessTask implements Runnable {
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
 
+    private TransactionTimeComparator txComparator = TransactionTimeComparator.getInstance();
+
     @Override
     public void run() {
         try {
@@ -61,23 +62,15 @@ public class OrphanTxProcessTask implements Runnable {
     }
 
     private void process() {
+
         List<Transaction> orphanTxList = pool.getAllOrphan();
         if (orphanTxList.isEmpty()) {
             return;
         }
-        Collections.sort(orphanTxList, TransactionTimeComparator.getInstance());
-//        List<Transaction> txList = pool.getAll();
+        Collections.sort(orphanTxList, txComparator);
         Map<String, Coin> temporaryToMap = new HashMap<>();
         Set<String> temporaryFromSet = new HashSet<>();
 
-//        for (Transaction tx : txList) {
-//            if (null == tx.getCoinData() || null == tx.getCoinData().getTo()) {
-//                continue;
-//            }
-//            for (Coin coin : tx.getCoinData().getTo()) {
-//                temporaryToMap.put(Base64.getEncoder().encodeToString(coin.getOwner()), coin);
-//            }
-//        }
         List<Transaction> list = new ArrayList<>();
         for (Transaction tx : orphanTxList) {
             ValidateResult result = ledgerService.verifyCoinData(tx, temporaryToMap, temporaryFromSet);

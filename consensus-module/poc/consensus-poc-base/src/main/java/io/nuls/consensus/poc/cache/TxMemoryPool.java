@@ -97,25 +97,6 @@ public final class TxMemoryPool {
     }
 
     /**
-     * Get a TxContainer through hash, do not removeSmallBlock the memory pool after obtaining
-     * <p>
-     * 通过hash获取某笔交易，获取之后不移除内存池
-     *
-     * @return TxContainer
-     */
-    public TxContainer get(NulsDigestData hash) {
-//        try {
-//            TxContainer tx = container.get(hash);
-//            if (tx == null) {
-//                tx = orphanContainer.get(hash);
-//            }
-//            return tx;
-//        } finally {
-//        }
-        return null;
-    }
-
-    /**
      * Get a TxContainer, the first TxContainer received, removed from the memory pool after acquisition
      * <p>
      * 获取一笔交易，最先收到的交易，获取之后从内存池中移除
