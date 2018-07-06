@@ -73,7 +73,7 @@ public class MessageClassificationProcessor<E extends BaseMessage> implements Ev
         for (NulsMessageHandler handler : handlers) {
             handlerExecutor.execute(new NulsMessageCall(processData, handler));
             int size = handlerExecutor.getQueue().size();
-            if (size > 100) {
+            if (size > 100 && (size % 100 == 0)) {
                 Log.info(serviceId + " queue size::::::::::::::::::::" + size);
             }
         }

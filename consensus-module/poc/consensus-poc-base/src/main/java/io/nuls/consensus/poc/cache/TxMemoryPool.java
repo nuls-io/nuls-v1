@@ -26,7 +26,6 @@
 
 package io.nuls.consensus.poc.cache;
 
-import io.nuls.cache.CacheMap;
 import io.nuls.cache.LimitHashMap;
 import io.nuls.consensus.poc.container.TxContainer;
 import io.nuls.kernel.model.NulsDigestData;
