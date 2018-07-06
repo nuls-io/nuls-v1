@@ -60,15 +60,15 @@ public class TxMemoryPoolTest {
 
         assertNull(tempTx);
 
-        tempTx = txMemoryPool.get(tx.getTx().getHash());
-        assertNull(tempTx);
-
-        txMemoryPool.add(tx, false);
-        tempTx = txMemoryPool.get(tx.getTx().getHash());
-        assertEquals(tempTx, tx);
-
-        tempTx = txMemoryPool.get(tx.getTx().getHash());
-        assertEquals(tempTx, tx);
+//        tempTx = txMemoryPool.get(tx.getTx().getHash());
+//        assertNull(tempTx);
+//
+//        txMemoryPool.add(tx, false);
+//        tempTx = txMemoryPool.get(tx.getTx().getHash());
+//        assertEquals(tempTx, tx);
+//
+//        tempTx = txMemoryPool.get(tx.getTx().getHash());
+//        assertEquals(tempTx, tx);
 
         TxContainer tx2 = new TxContainer(new TestTransaction());
         txMemoryPool.add(tx2, true);
