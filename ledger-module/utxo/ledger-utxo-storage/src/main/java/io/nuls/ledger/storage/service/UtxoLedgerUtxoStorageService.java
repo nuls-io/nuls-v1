@@ -49,5 +49,4 @@ public interface UtxoLedgerUtxoStorageService {
     List<byte[]> getAllUtxoBytes();
 
     List<Entry<byte[], byte[]>> getAllUtxoEntryBytes();
-
 }
