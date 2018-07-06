@@ -137,6 +137,10 @@ public class TemporaryCacheManager {
         this.txCacheMap.clear();
     }
 
+    public boolean containsTx(NulsDigestData txHash) {
+        return txCacheMap.containsKey(txHash);
+    }
+
     public int getSmallBlockCount() {
         return smallBlockCacheMap.size();
     }

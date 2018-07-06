@@ -547,8 +547,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             if (saveResult.isFailed()) {
                 return saveResult;
             }
-            transactionService.newTx(tx);
-            Result sendResult = transactionService.forwardTx(tx, null);
+//            transactionService.newTx(tx);
+            Result sendResult = transactionService.broadcastTx(tx);
             if (sendResult.isFailed()) {
                 this.rollbackTransaction(tx);
                 return sendResult;
