@@ -16,15 +16,18 @@ public class MultiAddressTransferTest extends BaseTest {
 
         System.out.println(list.size());
 
-//        for(Map info : list) {
-//            Map map = test.sendOfflineTx(info, "6HgdZToMi1jKaHVvwvjBQdaqjjtLeDhN");
-//            if (map == null || !(boolean) map.get("success")) {
-//                System.err.println("失败：" + map);
-//                continue;
-//            }
-//            info.put("value", info.get("balance"));
-//            info.put("txHash", ((Map) map.get("data")).get("value"));
-//        }
+        for(int i = 0 ; i < 10 ; i ++) {
+            for (Map info : list) {
+                Map map = test.sendOfflineTx(info, "Nse9Jxd1VdLWEoZxe3fWkXxus8TKgJyd");
+                if (map == null || !(boolean) map.get("success")) {
+                    System.err.println("失败：" + map);
+                    continue;
+                }
+                info.put("value", info.get("balance"));
+                info.put("txHash", ((Map) map.get("data")).get("value"));
+                info.put("index", 1);
+            }
+        }
 
         try {
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("./address.txt"));
@@ -147,13 +150,13 @@ public class MultiAddressTransferTest extends BaseTest {
 
                     for(Map m : list) {
                         count++;
-                        Map result = send("6HgiXXd93yEqnyMVRPqoZgitbpr4U1Hd", (String) m.get("address"), 180000000L, "", "");
+                        Map result = send("NsdxPhTQiT1kaCUs7dLMyW7nhDXwcT5u", (String) m.get("address"), 100000000L, "", "");
                         System.out.println("第 " + count + " 条发送结果：" + result);
                         String txHash = (String)((Map)result.get("data")).get("value");
                         m.put("txHash", txHash);
                         m.put("index", 0);
-                        m.put("value", 180000000L);
-                        Thread.sleep(100L);
+                        m.put("value", 100000000L);
+                        Thread.sleep(10L);
                     }
                     addressList.addAll(list);
                 } catch (Exception e) {
