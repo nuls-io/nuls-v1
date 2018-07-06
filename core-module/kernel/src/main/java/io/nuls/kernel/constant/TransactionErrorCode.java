@@ -49,4 +49,6 @@ public interface TransactionErrorCode {
     ErrorCode TOO_SMALL_AMOUNT = ErrorCode.init("LED012", "12012");
 
 
+    ErrorCode TX_SIZE_TOO_BIG = ErrorCode.init("LED013","12013");
+
 }

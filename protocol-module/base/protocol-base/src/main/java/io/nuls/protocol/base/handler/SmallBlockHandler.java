@@ -58,6 +58,14 @@ import java.util.Map;
  */
 public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage> {
 
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
+
+    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+
+    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
+
+    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
+
     @Override
     public void onMessage(SmallBlockMessage event, Node fromNode) {
         SmallBlock smallBlock = event.getMsgBody();
@@ -65,7 +73,61 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
             Log.warn("recieved a null smallBlock!");
             return;
         }
-        ProtocolCacheHandler.receiveSmallBlock(smallBlock);
+        BlockHeader header = smallBlock.getHeader();
 
+        BlockHeader theBlockHeader = blockService.getBlockHeader(header.getHash()).getData();
+        if (null != theBlockHeader) {
+            return;
+        }
+
+        ValidateResult result = header.verify();
+        boolean isOrphan = result.getErrorCode() == TransactionErrorCode.ORPHAN_TX || result.getErrorCode() == TransactionErrorCode.ORPHAN_BLOCK;
+
+        BlockLog.debug("recieve new block from(" + fromNode.getId() + "), tx count : " + header.getTxCount() + " , tx pool count : " + consensusService.getMemoryTxs().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", addressHex:" + Hex.encode(header.getPackingAddress()) +
+                "\n and verify block result: " + result.isSuccess() + " , verify message : " + result.getMsg() + " , isOrphan : " + isOrphan);
+
+        if (result.isFailed() && !isOrphan) {
+            BlockLog.debug("discard a SmallBlock:" + smallBlock.getHeader().getHash() + ", from:" + fromNode.getId() + " ,reason:" + result.getMsg());
+            return;
+        }
+        Map<NulsDigestData, Transaction> txMap = new HashMap<>();
+        for (Transaction tx : smallBlock.getSubTxList()) {
+            txMap.put(tx.getHash(), tx);
+        }
+        List<NulsDigestData> needHashList = new ArrayList<>();
+        for (NulsDigestData hash : smallBlock.getTxHashList()) {
+            Transaction tx = txMap.get(hash);
+            if (null == tx) {
+                tx = temporaryCacheManager.getTx(hash);
+                if (tx != null) {
+                    smallBlock.getSubTxList().add(tx);
+                    txMap.put(hash, tx);
+                }
+            }
+            if (null == tx) {
+                needHashList.add(hash);
+            }
+        }
+        if (!needHashList.isEmpty()) {
+            Log.info("block height : " + header.getHeight() + ", tx count : " + header.getTxCount() + " , get group tx of " + needHashList.size());
+            TxGroup txGroup = this.downloadService.downloadTxGroup(needHashList, fromNode).getData();
+            if (null == txGroup) {
+                Log.warn("get txgroup failed!block height:{},node:{},blockHash:{}", header.getHeight(), fromNode.getId(), header.getHash());
+                return;
+            }
+            Log.info("block height : " + header.getHeight() + " get group tx success ");
+
+            for (NulsDigestData hash : needHashList) {
+                Transaction tx = txGroup.getTx(hash);
+                if (null == tx) {
+                    Log.warn("get txgroup wrong!block height:{},node:{},blockHash:{}", header.getHeight(), fromNode.getId(), header.getHash());
+                    return;
+                }
+                txMap.put(tx.getHash(), tx);
+            }
+        }
+
+        Block block = AssemblyBlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
+        consensusService.newBlock(block, fromNode);
     }
 }

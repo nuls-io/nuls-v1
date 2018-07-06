@@ -33,13 +33,13 @@ public interface NetworkConstant {
     /**
      * -----------[netty configs ]------------
      */
-    int READ_IDEL_TIME_OUT = 30;
-    int WRITE_IDEL_TIME_OUT = 30;
-    int ALL_IDEL_TIME_OUT = 30;
+    int READ_IDEL_TIME_OUT = 60;
+    int WRITE_IDEL_TIME_OUT = 60;
+    int ALL_IDEL_TIME_OUT = 60;
     int MAX_FRAME_LENGTH = 10 * 1024 * 1024;
-    int CONNETCI_TIME_OUT = 5000;
+    int CONNETCI_TIME_OUT = 6000;
     int SAME_IP_MAX_COUNT = 10;
-    int CONEECT_FAIL_MAX_COUNT = 6;
+    int CONNECT_FAIL_MAX_COUNT = 6;
 
     /**
      * --------[network configs] -------

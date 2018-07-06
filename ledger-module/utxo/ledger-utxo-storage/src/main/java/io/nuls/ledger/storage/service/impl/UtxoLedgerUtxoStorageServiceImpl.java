@@ -26,6 +26,7 @@ package io.nuls.ledger.storage.service.impl;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.db.constant.DBErrorCode;
+import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -118,5 +119,9 @@ public class UtxoLedgerUtxoStorageServiceImpl implements UtxoLedgerUtxoStorageSe
         return dbService.valueList(LedgerStorageConstant.DB_NAME_LEDGER_UTXO);
     }
 
+    @Override
+    public List<Entry<byte[], byte[]>> getAllUtxoEntryBytes() {
+        return dbService.entryList(LedgerStorageConstant.DB_NAME_LEDGER_UTXO);
+    }
 
 }

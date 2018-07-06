@@ -27,10 +27,12 @@ package io.nuls.consensus.poc.container;
 
 import io.nuls.kernel.model.Transaction;
 
+import java.io.Serializable;
+
 /**
  * @author ln
  */
-public class TxContainer {
+public class TxContainer implements Serializable{
 
     private Transaction tx;
     private int packageCount;

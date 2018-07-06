@@ -334,7 +334,7 @@ public class NodeManager implements Runnable {
             handShakeNodes.remove(node.getId());
         }
 
-        if (node.getFailCount() <= NetworkConstant.CONEECT_FAIL_MAX_COUNT) {
+        if (node.getFailCount() <= NetworkConstant.CONNECT_FAIL_MAX_COUNT) {
             node.setLastFailTime(TimeService.currentTimeMillis());
             if (!disConnectNodes.containsKey(node.getId())) {
                 disConnectNodes.put(node.getId(), node);
