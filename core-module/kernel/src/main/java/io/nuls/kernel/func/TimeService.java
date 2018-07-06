@@ -111,7 +111,9 @@ public class TimeService implements Runnable {
                 sum += value;
             }
         }
-        netTimeOffset = sum / count;
+        if(count > 0) {
+            netTimeOffset = sum / count;
+        }
 
         lastSyncTime = currentTimeMillis();
     }
