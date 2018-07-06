@@ -53,9 +53,7 @@ public class LimitHashMapTest {
             Transaction transaction = new TransferTransaction();
             transaction.setTime(System.currentTimeMillis());
             transaction.setHash(NulsDigestData.calcDigestData(transaction.serializeForHash()));
-            if (i % 10 == 0) {
                 hashList.add(transaction.getHash());
-            }
             long start = System.nanoTime();
             map.put(transaction.getHash(), transaction);
             use += (System.nanoTime() - start);
@@ -75,7 +73,12 @@ public class LimitHashMapTest {
         for (NulsDigestData key : hashList) {
             map.get(key);
         }
-        System.out.println("查询20000次用时：" + (System.currentTimeMillis() - start) + "ms");
+        System.out.println("查询200000次用时：" + (System.currentTimeMillis() - start) + "ms");
+        start = System.currentTimeMillis();
+        for (NulsDigestData key : hashList) {
+            map.containsKey(key);
+        }
+        System.out.println("判断是否包含200000次用时：" + (System.currentTimeMillis() - start) + "ms");
         assertTrue(true);
 
     }
@@ -89,9 +92,7 @@ public class LimitHashMapTest {
             Transaction transaction = new TransferTransaction();
             transaction.setTime(System.currentTimeMillis());
             transaction.setHash(NulsDigestData.calcDigestData(transaction.serializeForHash()));
-            if (i % 10 == 0) {
                 hashList.add(transaction.getHash());
-            }
             long start = System.nanoTime();
             map.put(transaction.getHash(), transaction);
             use += (System.nanoTime() - start);
@@ -101,7 +102,12 @@ public class LimitHashMapTest {
         for (NulsDigestData key : hashList) {
             map.get(key);
         }
-        System.out.println("查询20000次用时：" + (System.currentTimeMillis() - start) + "ms");
+        System.out.println("查询200000次用时：" + (System.currentTimeMillis() - start) + "ms");
+        start = System.currentTimeMillis();
+        for (NulsDigestData key : hashList) {
+            map.containsKey(key);
+        }
+        System.out.println("判断是否包含200000次用时：" + (System.currentTimeMillis() - start) + "ms");
         assertTrue(true);
 
     }

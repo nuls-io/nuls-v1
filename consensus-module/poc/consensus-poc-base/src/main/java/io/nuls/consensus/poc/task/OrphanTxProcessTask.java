@@ -86,8 +86,10 @@ public class OrphanTxProcessTask implements Runnable {
                 pool.removeOrphan(tx.getHash());
             } else if (!result.getErrorCode().equals(TransactionErrorCode.ORPHAN_TX)) {
                 pool.removeOrphan(tx.getHash());
+                System.out.println("删除孤儿交易1:::::" + result.getMsg());
             } else if (tx.getTime() <= (TimeService.currentTimeMillis() - 600000L)) {
                 pool.removeOrphan(tx.getHash());
+                System.out.println("删除孤儿交易2:::::" + result.getMsg());
             }
         }
         for (int i = list.size() - 1; i >= 0; i--) {

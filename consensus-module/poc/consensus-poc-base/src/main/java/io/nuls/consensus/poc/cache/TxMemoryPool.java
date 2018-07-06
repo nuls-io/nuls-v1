@@ -47,12 +47,10 @@ public final class TxMemoryPool {
     private Queue<TxContainer> txQueue;
 
     private LimitHashMap<NulsDigestData, TxContainer> orphanContainer;
-    private Queue<NulsDigestData> orphanTxHashQueue;
 
     private TxMemoryPool() {
         txQueue = new LinkedBlockingDeque<>();
 
-        orphanTxHashQueue = new LinkedBlockingDeque<>();
 //        orphanContainer = new CacheMap<>("orphan-txs", 256, NulsDigestData.class, TxContainer.class, 3600, 0, null);
         this.orphanContainer = new LimitHashMap(200000);
     }
@@ -70,7 +68,6 @@ public final class TxMemoryPool {
             if (isOrphan) {
                 NulsDigestData hash = tx.getTx().getHash();
                 orphanContainer.put(hash, tx);
-                ((LinkedBlockingDeque) orphanTxHashQueue).addFirst(hash);
             } else {
                 ((LinkedBlockingDeque) txQueue).addFirst(tx);
             }
@@ -91,7 +88,6 @@ public final class TxMemoryPool {
 //            }
             if (isOrphan) {
                 orphanContainer.put(hash, tx);
-                orphanTxHashQueue.offer(hash);
             } else {
                 txQueue.offer(tx);
             }
@@ -154,7 +150,6 @@ public final class TxMemoryPool {
 //            txHashQueue.remove(hash);
 //        } else {
             orphanContainer.remove(hash);
-            orphanTxHashQueue.remove(hash);
 //        }
         return true;
     }
@@ -167,7 +162,6 @@ public final class TxMemoryPool {
         try {
             txQueue.clear();
 
-            orphanTxHashQueue.clear();
             orphanContainer.clear();
         } finally {
         }
@@ -175,10 +169,6 @@ public final class TxMemoryPool {
 
     public int size() {
         return txQueue.size();
-    }
-
-    public int orphanSize() {
-        return orphanTxHashQueue.size();
     }
 
     public int getPoolSize() {
