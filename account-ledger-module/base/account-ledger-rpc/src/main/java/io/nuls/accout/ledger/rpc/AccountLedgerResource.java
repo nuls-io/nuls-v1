@@ -253,6 +253,7 @@ public class AccountLedgerResource {
             coin.setOwner(key);
             coin.setLockTime(inputDto.getLockTime());
             coin.setNa(Na.valueOf(inputDto.getValue()));
+            inputs.add(coin);
         }
         Result result = accountLedgerService.createTransaction(inputs, outputs, remark);
         if (result.isSuccess()) {
