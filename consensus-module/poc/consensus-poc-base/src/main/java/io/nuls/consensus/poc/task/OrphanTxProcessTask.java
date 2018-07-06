@@ -27,7 +27,6 @@ package io.nuls.consensus.poc.task;
 
 import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.container.TxContainer;
-import io.nuls.consensus.poc.util.TxContainerTimeComparator;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
@@ -52,8 +51,6 @@ public class OrphanTxProcessTask implements Runnable {
 
     private TransactionTimeComparator txComparator = TransactionTimeComparator.getInstance();
 
-    private TxContainerTimeComparator containerTimeComparator = TxContainerTimeComparator.getInstance();
-
     @Override
     public void run() {
         try {
@@ -65,8 +62,6 @@ public class OrphanTxProcessTask implements Runnable {
     }
 
     private void process() {
-
-        Collections.sort(pool.getTxQueue(), containerTimeComparator);
 
         List<Transaction> orphanTxList = pool.getAllOrphan();
         if (orphanTxList.isEmpty()) {

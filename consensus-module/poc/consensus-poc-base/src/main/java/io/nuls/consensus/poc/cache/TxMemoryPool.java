@@ -44,12 +44,12 @@ public final class TxMemoryPool {
 
     private final static TxMemoryPool INSTANCE = new TxMemoryPool();
 
-    private LinkedList<TxContainer> txQueue;
+    private Queue<TxContainer> txQueue;
 
     private LimitHashMap<NulsDigestData, TxContainer> orphanContainer;
 
     private TxMemoryPool() {
-        txQueue = new LinkedList<>();
+        txQueue = new LinkedBlockingDeque<>();
 
 //        orphanContainer = new CacheMap<>("orphan-txs", 256, NulsDigestData.class, TxContainer.class, 3600, 0, null);
         this.orphanContainer = new LimitHashMap(200000);
@@ -69,7 +69,7 @@ public final class TxMemoryPool {
                 NulsDigestData hash = tx.getTx().getHash();
                 orphanContainer.put(hash, tx);
             } else {
-                txQueue.addFirst(tx);
+                ((LinkedBlockingDeque) txQueue).addFirst(tx);
             }
             return true;
         } finally {
@@ -97,25 +97,6 @@ public final class TxMemoryPool {
     }
 
     /**
-     * Get a TxContainer through hash, do not removeSmallBlock the memory pool after obtaining
-     * <p>
-     * 通过hash获取某笔交易，获取之后不移除内存池
-     *
-     * @return TxContainer
-     */
-    public TxContainer get(NulsDigestData hash) {
-//        try {
-//            TxContainer tx = container.get(hash);
-//            if (tx == null) {
-//                tx = orphanContainer.get(hash);
-//            }
-//            return tx;
-//        } finally {
-//        }
-        return null;
-    }
-
-    /**
      * Get a TxContainer, the first TxContainer received, removed from the memory pool after acquisition
      * <p>
      * 获取一笔交易，最先收到的交易，获取之后从内存池中移除
@@ -129,7 +110,7 @@ public final class TxMemoryPool {
     public List<Transaction> getAll() {
         List<Transaction> txs = new ArrayList<>();
         Iterator<TxContainer> it = txQueue.iterator();
-        while (it.hasNext()) {
+        while(it.hasNext()) {
             txs.add(it.next().getTx());
         }
         return txs;
@@ -149,7 +130,7 @@ public final class TxMemoryPool {
 //        if (obj != null) {
 //            txHashQueue.remove(hash);
 //        } else {
-        orphanContainer.remove(hash);
+            orphanContainer.remove(hash);
 //        }
         return true;
     }
@@ -172,18 +153,14 @@ public final class TxMemoryPool {
     }
 
     public int getPoolSize() {
-        return txQueue.size();
+        return txQueue.size() ;
     }
 
     public int getOrphanPoolSize() {
-        return orphanContainer.size();
+        return  orphanContainer.size();
     }
 
     public void removeOrphan(NulsDigestData hash) {
         this.orphanContainer.remove(hash);
-    }
-
-    public LinkedList<TxContainer> getTxQueue() {
-        return txQueue;
     }
 }
