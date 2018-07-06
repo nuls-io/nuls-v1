@@ -107,7 +107,7 @@ public class BroadcastHandler {
         BroadcastResult result = new BroadcastResult();
         try {
             int successCount = 0;
-
+            //大于10个时,随机选10个来广播
             if (nodeList.size() > 10) {
                 Set<Integer> set = new HashSet<>();
                 while (true) {
@@ -148,7 +148,6 @@ public class BroadcastHandler {
                     return br;
                 }
             }
-
 
             if (successCount == 0) {
                 return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_FAIL);
