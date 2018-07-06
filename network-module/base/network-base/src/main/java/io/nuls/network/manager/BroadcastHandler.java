@@ -109,45 +109,33 @@ public class BroadcastHandler {
             int successCount = 0;
 
             if (nodeList.size() > 10) {
-                //随机10个,不重复
-                Integer[] randomNum = new Integer[10];
-                int factor = 12;
-                Random rand = new Random();
-                for (int i = 0; i < 10; i++) {
-                    boolean flag = true;
-                    while (true) {
-                        int ran = rand.nextInt(factor);
-                        for (int j = 0; j <= i; j++) {
-                            if (null != randomNum[j] && randomNum[j] == ran) {
-                                flag = false;
-                                break;
-                            }
-                            flag = true;
-                        }
-                        if (flag == true) {
-                            randomNum[i] = ran;
-                            break;
-                        }
+                Set<Integer> set = new HashSet<>();
+                while (true) {
+                    Random rand = new Random();
+                    int ran = rand.nextInt(nodeList.size());
+                    set.add(ran);
+                    if (set.size() == 11) {
+                        break;
                     }
                 }
-                Arrays.sort(randomNum);
 
-                int randomNumIndex = 0;
                 int nodeListIndex = 0;
                 Collection<Node> nodeBroadcastList = new ArrayList<>();
                 for (Node node : nodeList) {
-                    if (randomNum[randomNumIndex] == nodeListIndex) {
-                        //add
+                    if (set.contains(nodeListIndex)) {
+                        if (excludeNode != null && node.getId().equals(excludeNode.getId())) {
+                            nodeListIndex++;
+                            continue;
+                        }
                         nodeBroadcastList.add(node);
-                        if (randomNumIndex < randomNum.length-1) {
-                            randomNumIndex++;
+                        if(nodeBroadcastList.size() == 10){
+                            break;
                         }
                     }
                     nodeListIndex++;
                 }
                 nodeList = nodeBroadcastList;
             }
-
             for (Node node : nodeList) {
                 if (excludeNode != null && node.getId().equals(excludeNode.getId())) {
                     continue;
@@ -160,6 +148,7 @@ public class BroadcastHandler {
                     return br;
                 }
             }
+
 
             if (successCount == 0) {
                 return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_FAIL);
