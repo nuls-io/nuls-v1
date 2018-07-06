@@ -78,16 +78,20 @@ public class OrphanTxProcessTask implements Runnable {
 //                temporaryToMap.put(Base64.getEncoder().encodeToString(coin.getOwner()), coin);
 //            }
 //        }
+        List<Transaction> list = new ArrayList<>();
         for (Transaction tx : orphanTxList) {
             ValidateResult result = ledgerService.verifyCoinData(tx, temporaryToMap, temporaryFromSet);
             if (result.isSuccess()) {
-                pool.add(new TxContainer(tx), false);
+                list.add(tx);
                 pool.removeOrphan(tx.getHash());
             } else if (!result.getErrorCode().equals(TransactionErrorCode.ORPHAN_TX)) {
                 pool.removeOrphan(tx.getHash());
             } else if (tx.getTime() <= (TimeService.currentTimeMillis() - 600000L)) {
                 pool.removeOrphan(tx.getHash());
             }
+        }
+        for (int i = list.size() - 1; i >= 0; i--) {
+            pool.addInFirst(new TxContainer(list.get(i)), false);
         }
     }
 }
