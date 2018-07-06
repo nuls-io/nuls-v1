@@ -98,11 +98,6 @@ public class LimitHashMapTest {
         }
         System.out.println("插入20万条累计用时：" + use + "纳秒");
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 100000; i++) {
-            map.size();
-        }
-        System.out.println("map size 100000次用时：" + (System.currentTimeMillis() - start) + "ms");
-        start = System.currentTimeMillis();
         for (NulsDigestData key : hashList) {
             map.get(key);
         }
