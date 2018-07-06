@@ -53,7 +53,7 @@ public class TransferValidator implements NulsDataValidator<TransferTransaction>
             if (ArraysTool.arrayEquals(coin.getOwner(), address)) {
                 continue;
             }
-            if (coin.getNa().isLessThan(ProtocolConstant.MININUM_TRANSFER_ammount)) {
+            if (coin.getNa().isLessThan(ProtocolConstant.MININUM_TRANSFER_AMOUNT)) {
                 return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TOO_SMALL_AMOUNT);
             }
         }
