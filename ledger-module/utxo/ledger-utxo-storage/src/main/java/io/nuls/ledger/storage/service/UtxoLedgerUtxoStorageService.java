@@ -23,6 +23,7 @@
  */
 package io.nuls.ledger.storage.service;
 
+import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.NulsDigestData;
@@ -49,4 +50,5 @@ public interface UtxoLedgerUtxoStorageService {
 
     List<byte[]> getAllUtxoBytes();
 
+    List<Entry<byte[], byte[]>> getAllUtxoEntryBytes();
 }
