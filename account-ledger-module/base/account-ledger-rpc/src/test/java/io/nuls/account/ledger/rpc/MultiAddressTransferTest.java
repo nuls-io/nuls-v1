@@ -150,7 +150,7 @@ public class MultiAddressTransferTest extends BaseTest {
 
                     for(Map m : list) {
                         count++;
-                        Map result = send("NsdxPhTQiT1kaCUs7dLMyW7nhDXwcT5u", (String) m.get("address"), 100000000L, "", "");
+                        Map result = send("Nse1x7DiwZotyEnHUPScMakoUUZVnpB5", (String) m.get("address"), 100000000L, "", "");
                         System.out.println("第 " + count + " 条发送结果：" + result);
                         String txHash = (String)((Map)result.get("data")).get("value");
                         m.put("txHash", txHash);

@@ -46,6 +46,7 @@ import java.util.concurrent.CompletableFuture;
 public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMessage> {
 
     private TransactionDownloadProcessor txDownloadProcessor = TransactionDownloadProcessor.getInstance();
+    private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
 
     private Set<NulsDigestData> set = new HashSet<>();
     private Set<NulsDigestData> tempSet = new HashSet<>();
@@ -58,6 +59,8 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
         NulsDigestData hash = message.getMsgBody();
         if (!set.add(hash)) {
             return;
+        } else if (cacheManager.containsTx(hash)) {
+            return;
         }
         tempSet.add(hash);
         if (set.size() >= 100000) {
@@ -65,7 +68,7 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
             set.addAll(tempSet);
             tempSet.clear();
         }
-        if(tempSet.size() == 50000) {
+        if (tempSet.size() == 50000) {
             tempSet.clear();
         }
         GetTxMessage getTxMessage = new GetTxMessage();
