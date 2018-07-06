@@ -38,9 +38,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.protocol.message.base.BaseMessage;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class BroadcastHandler {
 
@@ -109,6 +107,47 @@ public class BroadcastHandler {
         BroadcastResult result = new BroadcastResult();
         try {
             int successCount = 0;
+
+            if (nodeList.size() > 10) {
+                //随机10个,不重复
+                Integer[] randomNum = new Integer[10];
+                int factor = 12;
+                Random rand = new Random();
+                for (int i = 0; i < 10; i++) {
+                    boolean flag = true;
+                    while (true) {
+                        int ran = rand.nextInt(factor);
+                        for (int j = 0; j <= i; j++) {
+                            if (null != randomNum[j] && randomNum[j] == ran) {
+                                flag = false;
+                                break;
+                            }
+                            flag = true;
+                        }
+                        if (flag == true) {
+                            randomNum[i] = ran;
+                            break;
+                        }
+                    }
+                }
+                Arrays.sort(randomNum);
+
+                int randomNumIndex = 0;
+                int nodeListIndex = 0;
+                Collection<Node> nodeBroadcastList = new ArrayList<>();
+                for (Node node : nodeList) {
+                    if (randomNum[randomNumIndex] == nodeListIndex) {
+                        //add
+                        nodeBroadcastList.add(node);
+                        if (randomNumIndex < randomNum.length-1) {
+                            randomNumIndex++;
+                        }
+                    }
+                    nodeListIndex++;
+                }
+                nodeList = nodeBroadcastList;
+            }
+
             for (Node node : nodeList) {
                 if (excludeNode != null && node.getId().equals(excludeNode.getId())) {
                     continue;
@@ -121,6 +160,7 @@ public class BroadcastHandler {
                     return br;
                 }
             }
+
             if (successCount == 0) {
                 return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_FAIL);
             }
