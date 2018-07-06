@@ -26,7 +26,6 @@ package io.nuls.protocol.base.handler;
 
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
@@ -38,9 +37,6 @@ import io.nuls.protocol.message.TransactionMessage;
 import io.nuls.protocol.model.NotFound;
 import io.nuls.protocol.service.TransactionService;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * @author Niels
  */
@@ -48,8 +44,6 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
 
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
     private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
-
-    private Set<NulsDigestData> countSet = new HashSet<>();
 
     @Override
     public void onMessage(TransactionMessage message, Node fromNode) {
@@ -68,11 +62,6 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
             return;
-        }
-        countSet.add(tx.getHash());
-        int count = countSet.size();
-        if (count % 1000 == 0) {
-            System.out.println("================================" + count);
         }
         Transaction tempTx = temporaryCacheManager.getTx(tx.getHash());
         if (tempTx == null) {
