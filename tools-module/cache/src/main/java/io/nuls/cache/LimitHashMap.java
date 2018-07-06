@@ -52,14 +52,18 @@ public class LimitHashMap<K, V> {
         if (maxSize > queue.size()) {
             return;
         }
-        int count = maxSize / 50;
+        int count = maxSize / 2;
         for (int i = 0; i < count; i++) {
             K key = queue.poll();
             if (null == key) {
                 return;
             }
             map.remove(key);
+            if (count % 100 == 0 && count > queue.size()) {
+                break;
+            }
         }
+
     }
 
     public void remove(K k) {
