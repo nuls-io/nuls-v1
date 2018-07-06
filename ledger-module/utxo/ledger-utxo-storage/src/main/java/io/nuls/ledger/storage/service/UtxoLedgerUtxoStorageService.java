@@ -26,9 +26,7 @@ package io.nuls.ledger.storage.service;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
 
 import java.util.List;
 

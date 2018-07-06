@@ -81,17 +81,6 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
                 Log.error(e);
                 throw new NulsRuntimeException(e);
             }
-        } else {
-            if (!block0.getHeader().getHash().equals(genesisBlock.getHeader().getHash())) {
-                if (block0.getHeader().getHash().getDigestHex().equals("0020c68810e7fcbb1281e7e053fa100bc0b0a8184d5f7b4dd07e1093072077ee7bf9")) {
-                    AccountService accountService = NulsContext.getServiceBean(AccountService.class);
-                    accountService.clearCache();
-                    clearAllData();
-                    start();
-                    return;
-                }
-                throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
-            }
         }
         Block block = blockService.getBestBlock().getData();
         while (null != block && block.verify().isFailed()) {
@@ -108,16 +97,6 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
             ((DownloadServiceImpl) NulsContext.getServiceBean(DownloadService.class)).start();
         } else {
             start();
-        }
-    }
-
-    private void clearAllData() {
-        DBService dbService = NulsContext.getServiceBean(DBService.class);
-        String[] areas = dbService.listArea();
-        for (String area : areas) {
-//            dbService.destroyArea(area);
-            dbService.clearArea(area);
-            dbService.createArea(area);
         }
     }
 

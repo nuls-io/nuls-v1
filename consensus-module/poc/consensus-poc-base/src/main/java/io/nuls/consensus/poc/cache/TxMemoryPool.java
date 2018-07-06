@@ -26,33 +26,35 @@
 
 package io.nuls.consensus.poc.cache;
 
+import io.nuls.cache.LimitHashMap;
 import io.nuls.consensus.poc.container.TxContainer;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
- * Created by ln on 2018/4/13.
+ * 交易 缓存
+ *
+ * @author ln
+ * @date 2018/4/13
  */
 public final class TxMemoryPool {
 
     private final static TxMemoryPool INSTANCE = new TxMemoryPool();
 
-    private Map<NulsDigestData, TxContainer> container;
-    private Queue<NulsDigestData> txHashQueue;
+    private Queue<TxContainer> txQueue;
 
-    private Map<NulsDigestData, TxContainer> orphanContainer;
+    private LimitHashMap<NulsDigestData, TxContainer> orphanContainer;
     private Queue<NulsDigestData> orphanTxHashQueue;
 
     private TxMemoryPool() {
-        txHashQueue = new LinkedBlockingDeque<>();
-        container = new ConcurrentHashMap<>();
+        txQueue = new LinkedBlockingDeque<>();
 
         orphanTxHashQueue = new LinkedBlockingDeque<>();
-        orphanContainer = new ConcurrentHashMap<>();
+//        orphanContainer = new CacheMap<>("orphan-txs", 256, NulsDigestData.class, TxContainer.class, 3600, 0, null);
+        this.orphanContainer = new LimitHashMap(200000);
     }
 
     public static TxMemoryPool getInstance() {
@@ -61,20 +63,16 @@ public final class TxMemoryPool {
 
     public boolean addInFirst(TxContainer tx, boolean isOrphan) {
         try {
-            if(tx == null || tx.getTx() == null) {
+            if (tx == null || tx.getTx() == null) {
                 return false;
             }
             //check Repeatability
-            NulsDigestData hash = tx.getTx().getHash();
-            if (orphanContainer.containsKey(hash) || container.containsKey(hash)) {
-                return false;
-            }
             if (isOrphan) {
+                NulsDigestData hash = tx.getTx().getHash();
                 orphanContainer.put(hash, tx);
                 ((LinkedBlockingDeque) orphanTxHashQueue).addFirst(hash);
             } else {
-                container.put(hash, tx);
-                ((LinkedBlockingDeque) txHashQueue).addFirst(hash);
+                ((LinkedBlockingDeque) txQueue).addFirst(tx);
             }
             return true;
         } finally {
@@ -83,20 +81,19 @@ public final class TxMemoryPool {
 
     public boolean add(TxContainer tx, boolean isOrphan) {
         try {
-            if(tx == null || tx.getTx() == null) {
+            if (tx == null || tx.getTx() == null) {
                 return false;
             }
             //check Repeatability
             NulsDigestData hash = tx.getTx().getHash();
-            if (orphanContainer.containsKey(hash) || container.containsKey(hash)) {
-                return false;
-            }
+//            if (orphanContainer.containsKey(hash)) {
+//                return false;
+//            }
             if (isOrphan) {
                 orphanContainer.put(hash, tx);
                 orphanTxHashQueue.offer(hash);
             } else {
-                container.put(hash, tx);
-                txHashQueue.offer(hash);
+                txQueue.offer(tx);
             }
             return true;
         } finally {
@@ -105,61 +102,39 @@ public final class TxMemoryPool {
 
     /**
      * Get a TxContainer through hash, do not removeSmallBlock the memory pool after obtaining
-     *
+     * <p>
      * 通过hash获取某笔交易，获取之后不移除内存池
-     * @param hash
+     *
      * @return TxContainer
      */
     public TxContainer get(NulsDigestData hash) {
-        try {
-            TxContainer tx = container.get(hash);
-            if (tx == null) {
-                tx = orphanContainer.get(hash);
-            }
-            return tx;
-        } finally {
-        }
+//        try {
+//            TxContainer tx = container.get(hash);
+//            if (tx == null) {
+//                tx = orphanContainer.get(hash);
+//            }
+//            return tx;
+//        } finally {
+//        }
+        return null;
     }
 
     /**
      * Get a TxContainer, the first TxContainer received, removed from the memory pool after acquisition
-     *
+     * <p>
      * 获取一笔交易，最先收到的交易，获取之后从内存池中移除
+     *
      * @return TxContainer
      */
     public TxContainer get() {
-        TxContainer tx = null;
-        NulsDigestData hash = txHashQueue.poll();
-        if(hash != null) {
-            tx = container.remove(hash);
-        } else {
-            hash = orphanTxHashQueue.poll();
-            if (hash != null) {
-                tx = orphanContainer.remove(hash);
-            }
-        }
-        return tx;
-    }
-
-    /**
-     * Get a TxContainer, removed from the memory pool after acquisition
-     *
-     * 获取一笔交易，获取之后从内存池中移除
-     * @return TxContainer
-     */
-    public TxContainer getAndRemove(NulsDigestData hash) {
-        TxContainer tx = container.remove(hash);
-        if (tx == null) {
-            tx = orphanContainer.remove(hash);
-        }
-        return tx;
+        return txQueue.poll();
     }
 
     public List<Transaction> getAll() {
         List<Transaction> txs = new ArrayList<>();
-        Collection<TxContainer> list = container.values();
-        for(TxContainer txContainer : list) {
-            txs.add(txContainer.getTx());
+        Iterator<TxContainer> it = txQueue.iterator();
+        while(it.hasNext()) {
+            txs.add(it.next().getTx());
         }
         return txs;
     }
@@ -167,31 +142,30 @@ public final class TxMemoryPool {
     public List<Transaction> getAllOrphan() {
         List<Transaction> txs = new ArrayList<>();
         Collection<TxContainer> list = orphanContainer.values();
-        for(TxContainer txContainer : list) {
+        for (TxContainer txContainer : list) {
             txs.add(txContainer.getTx());
         }
         return txs;
     }
 
     public boolean remove(NulsDigestData hash) {
-        TxContainer obj = container.remove(hash);
-        if(obj != null) {
-            txHashQueue.remove(hash);
-        } else {
+//        TxContainer obj = container.remove(hash);
+//        if (obj != null) {
+//            txHashQueue.remove(hash);
+//        } else {
             orphanContainer.remove(hash);
             orphanTxHashQueue.remove(hash);
-        }
+//        }
         return true;
     }
 
     public boolean exist(NulsDigestData hash) {
-        return container.containsKey(hash) || orphanContainer.containsKey(hash);
+        return /*container.containsKey(hash) || */orphanContainer.containsKey(hash);
     }
 
     public void clear() {
         try {
-            txHashQueue.clear();
-            container.clear();
+            txQueue.clear();
 
             orphanTxHashQueue.clear();
             orphanContainer.clear();
@@ -200,6 +174,22 @@ public final class TxMemoryPool {
     }
 
     public int size() {
-        return container.size() + orphanContainer.size();
+        return txQueue.size();
+    }
+
+    public int orphanSize() {
+        return orphanTxHashQueue.size();
+    }
+
+    public int getPoolSize() {
+        return txQueue.size() ;
+    }
+
+    public int getOrphanPoolSize() {
+        return  orphanContainer.size();
+    }
+
+    public void removeOrphan(NulsDigestData hash) {
+        this.orphanContainer.remove(hash);
     }
 }

@@ -23,9 +23,7 @@
  */
 package io.nuls.protocol.model.validator;
 
-import io.nuls.kernel.constant.ErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.validate.NulsDataValidator;
@@ -39,14 +37,12 @@ public class TxFieldValidator implements NulsDataValidator<Transaction> {
 
     public final static int MAX_REMARK_LEN = 100;
     public final static int MAX_TX_TYPE = 10000;
-    public static final int MAX_TX_SIZE = 100000;
     public static final int MAX_TX_DATA_SIZE = 1024;
 
 
     @Override
     public ValidateResult validate(Transaction tx) {
         boolean result = true;
-        ErrorCode errorCode =  KernelErrorCode.DATA_FIELD_CHECK_ERROR;
         do {
             if (tx == null) {
                 result = false;
@@ -72,14 +68,9 @@ public class TxFieldValidator implements NulsDataValidator<Transaction> {
                 result = false;
                 break;
             }
-            if (tx.size() > MAX_TX_SIZE) {
-                result = false;
-                errorCode = TransactionErrorCode.TX_SIZE_TOO_BIG;
-                break;
-            }
         } while (false);
         if (!result) {
-            return ValidateResult.getFailedResult(this.getClass().getName(),errorCode);
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_FIELD_CHECK_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }

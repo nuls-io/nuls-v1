@@ -38,9 +38,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.protocol.message.base.BaseMessage;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class BroadcastHandler {
 
@@ -109,6 +107,35 @@ public class BroadcastHandler {
         BroadcastResult result = new BroadcastResult();
         try {
             int successCount = 0;
+            //大于10个时,随机选10个来广播
+            if (nodeList.size() > 10) {
+                Set<Integer> set = new HashSet<>();
+                while (true) {
+                    Random rand = new Random();
+                    int ran = rand.nextInt(nodeList.size());
+                    set.add(ran);
+                    if (set.size() == 11) {
+                        break;
+                    }
+                }
+
+                int nodeListIndex = 0;
+                Collection<Node> nodeBroadcastList = new ArrayList<>();
+                for (Node node : nodeList) {
+                    if (set.contains(nodeListIndex)) {
+                        if (excludeNode != null && node.getId().equals(excludeNode.getId())) {
+                            nodeListIndex++;
+                            continue;
+                        }
+                        nodeBroadcastList.add(node);
+                        if(nodeBroadcastList.size() == 10){
+                            break;
+                        }
+                    }
+                    nodeListIndex++;
+                }
+                nodeList = nodeBroadcastList;
+            }
             for (Node node : nodeList) {
                 if (excludeNode != null && node.getId().equals(excludeNode.getId())) {
                     continue;
@@ -121,6 +148,7 @@ public class BroadcastHandler {
                     return br;
                 }
             }
+
             if (successCount == 0) {
                 return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_FAIL);
             }

@@ -25,6 +25,7 @@
 package io.nuls.protocol.cache;
 
 import io.nuls.cache.CacheMap;
+import io.nuls.cache.LimitHashMap;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.model.SmallBlock;
@@ -42,9 +43,9 @@ public class TemporaryCacheManager {
     private static final TemporaryCacheManager INSTANCE = new TemporaryCacheManager();
 
     private CacheMap<NulsDigestData, SmallBlock> smallBlockCacheMap = new CacheMap<>("temp-small-block-cache", 16, NulsDigestData.class, SmallBlock.class, 1000, 0, null);
-    private CacheMap<NulsDigestData, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 128, NulsDigestData.class, Transaction.class, 0, 3600);
+//    private CacheMap<NulsDigestData, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 128, NulsDigestData.class, Transaction.class, 0, 3600);
 
-//    private Map<NulsDigestData, Transaction> txCacheMap = new HashMap<>();
+    private LimitHashMap<NulsDigestData, Transaction> txCacheMap = new LimitHashMap<>(200000);
 
     private TemporaryCacheManager() {
 
@@ -57,6 +58,7 @@ public class TemporaryCacheManager {
     /**
      * 将一个SmallBlock放入内存中，若不主动删除，则在缓存存满或者存在时间超过1000秒时，自动清理
      * Store a SmallBlock in memory, cache it full or exist for over 1000 seconds, and clean it automatically.
+     *
      * @param smallBlock 要放入内存中的对象
      */
     public void cacheSmallBlock(SmallBlock smallBlock) {
@@ -82,6 +84,7 @@ public class TemporaryCacheManager {
      * 缓存一个交易，缓存的标识就是交易的hash对象，该交易在内存中存在，直到内存大小达到限制或者存活时间超过1000秒
      * Cache a transaction where the identity of the cache is the hash object of the transaction,
      * which exists in memory until the memory size is limited or survived for more than 1000 seconds.
+     *
      * @param tx transaction
      */
     public void cacheTx(Transaction tx) {
@@ -105,6 +108,7 @@ public class TemporaryCacheManager {
     /**
      * 根据区块摘要对象从缓存中移出一个SmallBlock，移除后再获取时将返回null
      * A SmallBlock is removed from the cache based on the block summary object, and null is returned when it is removed.
+     *
      * @param hash transaction digest data
      */
     public void removeSmallBlock(NulsDigestData hash) {
@@ -131,6 +135,10 @@ public class TemporaryCacheManager {
     public void destroy() {
         this.smallBlockCacheMap.destroy();
         this.txCacheMap.clear();
+    }
+
+    public boolean containsTx(NulsDigestData txHash) {
+        return txCacheMap.containsKey(txHash);
     }
 
     public int getSmallBlockCount() {

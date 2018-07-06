@@ -42,7 +42,7 @@ public class AddressTest {
         while (true) {
             ECKey ecKey = new ECKey();
             String address = getAddress(chainId, ecKey.getPubKey());
-                System.out.println(address + ":::::::" + ecKey.getPrivateKeyAsHex());
+                System.out.println(address );//+ ":::::::" + ecKey.getPrivateKeyAsHex());
         }
     }
 
