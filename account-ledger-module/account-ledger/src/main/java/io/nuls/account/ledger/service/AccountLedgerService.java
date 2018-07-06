@@ -150,12 +150,12 @@ public interface AccountLedgerService {
 
     /**
      * create a transaction by inputs data and outputs data
-     * @param inputsKey key of utxo
+     * @param inputs used utxos
      * @param outputs new utxos
      * @param remark remarks of transaction
      * @return Result
      */
-    Result createTransaction(List<byte[]> inputsKey, List<Coin> outputs, byte[] remark);
+    Result createTransaction(List<Coin> inputs, List<Coin> outputs, byte[] remark);
 
     /**
      * 签名交易
