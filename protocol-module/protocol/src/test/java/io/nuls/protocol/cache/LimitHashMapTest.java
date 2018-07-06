@@ -25,6 +25,7 @@
 
 package io.nuls.protocol.cache;
 
+import io.nuls.cache.CacheMap;
 import io.nuls.cache.LimitHashMap;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
@@ -68,6 +69,37 @@ public class LimitHashMapTest {
         start = System.currentTimeMillis();
         for (int i = 0; i < 100000; i++) {
             map.getMap().size();
+        }
+        System.out.println("map size 100000次用时：" + (System.currentTimeMillis() - start) + "ms");
+        start = System.currentTimeMillis();
+        for (NulsDigestData key : hashList) {
+            map.get(key);
+        }
+        System.out.println("查询20000次用时：" + (System.currentTimeMillis() - start) + "ms");
+        assertTrue(true);
+
+    }
+
+    @Test
+    public void test1() throws IOException {
+        CacheMap<NulsDigestData, Transaction> map = new CacheMap<>("a-test", 128, NulsDigestData.class, Transaction.class);
+        long use = 0;
+        List<NulsDigestData> hashList = new ArrayList<>();
+        for (int i = 0; i < 200000; i++) {
+            Transaction transaction = new TransferTransaction();
+            transaction.setTime(System.currentTimeMillis());
+            transaction.setHash(NulsDigestData.calcDigestData(transaction.serializeForHash()));
+            if (i % 10 == 0) {
+                hashList.add(transaction.getHash());
+            }
+            long start = System.nanoTime();
+            map.put(transaction.getHash(), transaction);
+            use += (System.nanoTime() - start);
+        }
+        System.out.println("插入20万条累计用时：" + use + "纳秒");
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 100000; i++) {
+            map.size();
         }
         System.out.println("map size 100000次用时：" + (System.currentTimeMillis() - start) + "ms");
         start = System.currentTimeMillis();
