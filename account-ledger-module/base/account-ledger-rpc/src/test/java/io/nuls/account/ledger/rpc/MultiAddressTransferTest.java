@@ -10,17 +10,22 @@ import java.util.Map;
 
 public class MultiAddressTransferTest extends BaseTest {
 
+
+    static long t,t1,t2,t3,t4;
+
     public static void main(String[] args) {
         MultiAddressTransferTest test = new MultiAddressTransferTest();
         List<Map> list = test.genOrLoadAddress();
 
         System.out.println(list.size());
 
+        long time = System.currentTimeMillis();
+
         for(int i = 0 ; i < 10 ; i ++) {
             for (Map info : list) {
                 Map map = test.sendOfflineTx(info, "Nse9Jxd1VdLWEoZxe3fWkXxus8TKgJyd");
                 if (map == null || !(boolean) map.get("success")) {
-                    System.err.println("失败：" + map);
+                    System.err.println("失败3：" + map);
                     continue;
                 }
                 info.put("value", info.get("balance"));
@@ -28,6 +33,12 @@ public class MultiAddressTransferTest extends BaseTest {
                 info.put("index", 1);
             }
         }
+
+        System.out.println("结果：");
+        System.out.println("总耗时：" + (System.currentTimeMillis() - time));
+        System.out.println("t1 ：" + t1 / 1000000);
+        System.out.println("t2 ：" + t2 / 1000000);
+        System.out.println("t3 ：" + t3 / 1000000);
 
         try {
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("./address.txt"));
@@ -41,18 +52,27 @@ public class MultiAddressTransferTest extends BaseTest {
 
     private Map sendOfflineTx(Map info, String toAddress) {
 
+        t = System.nanoTime();
         Map map = createTx(info, toAddress);
+        t1 += (System.nanoTime() - t);
+        t = System.nanoTime();
+
         if(map == null || !(boolean) map.get("success")) {
-            System.err.println("失败：" + map);
+            System.err.println("失败1：" + map);
             return map;
         }
         map = singTx(info, map);
-        System.out.println(map);
+        t2 += (System.nanoTime() - t);
+        t = System.nanoTime();
+
         if(map == null || !(boolean) map.get("success")) {
-            System.err.println("失败：" + map);
+            System.err.println("失败2：" + map);
             return map;
         }
         map = broadcastTx(map);
+
+        t3 += (System.nanoTime() - t);
+
         return map;
     }
 
@@ -79,8 +99,6 @@ public class MultiAddressTransferTest extends BaseTest {
 
         String param = "{\"txHex\":\"" + hex + "\", \"address\": \""+ info.get("address") + "\",\"priKey\": \"" + privateKey + "\", \"password\": \"\"}";
 
-        System.out.println(param);
-
         String url = "http://127.0.0.1:8001/api/accountledger/transaction/sign";
         String res = post(url, param, "utf-8");
         try {
@@ -97,7 +115,7 @@ public class MultiAddressTransferTest extends BaseTest {
         long value = (long) info.get("value");
         long balance = (value - 1100000L);
 
-        String param = "{\"inputs\": [{\"fromHash\":\"" + info.get("txHash") + "\", \"fromIndex\": "+ info.get("index") + ",\"address\": \"" + address + "\", \"value\": " + value + "}], \"outputs\": [{\"address\":\"" + toAddress + "\", \"value\":1000000,\"lockTime\": 0},{\"address\":\""+ address +"\", \"value\":" + balance + ",\"lockTime\": 0}],\"remark\":\"\"}";
+        String param = "{\"inputs\": [{\"fromHash\":\"" + info.get("txHash") + "\", \"fromIndex\": "+ info.get("index") + ",\"address\": \"" + address + "\", \"value\": " + value + ", \"lockTime\":0}], \"outputs\": [{\"address\":\"" + toAddress + "\", \"value\":1000000,\"lockTime\": 0},{\"address\":\""+ address +"\", \"value\":" + balance + ",\"lockTime\": 0}],\"remark\":\"\"}";
         String url = "http://127.0.0.1:8001/api/accountledger/transaction";
         String res = post(url, param, "utf-8");
         try {
@@ -140,6 +158,7 @@ public class MultiAddressTransferTest extends BaseTest {
             String url = "http://127.0.0.1:8001/api/account/offline";
 
             int count = 0;
+            long amount = 1000000000L;
             for (int i = 0; i < 100; i++) {
                 String res = post(url, param, "utf-8");
 
@@ -150,12 +169,12 @@ public class MultiAddressTransferTest extends BaseTest {
 
                     for(Map m : list) {
                         count++;
-                        Map result = send("Nse1x7DiwZotyEnHUPScMakoUUZVnpB5", (String) m.get("address"), 100000000L, "", "");
+                        Map result = send("Nse3nddic6tgPUpV3UwhenT4fKFPTHMA", (String) m.get("address"), amount, "", "");
                         System.out.println("第 " + count + " 条发送结果：" + result);
                         String txHash = (String)((Map)result.get("data")).get("value");
                         m.put("txHash", txHash);
                         m.put("index", 0);
-                        m.put("value", 100000000L);
+                        m.put("value", amount);
                         Thread.sleep(10L);
                     }
                     addressList.addAll(list);
