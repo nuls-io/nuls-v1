@@ -49,7 +49,7 @@ public class InputDto {
     private Long value;
 
     @ApiModelProperty(name = "lockTime", value = "锁定时间")
-    private Long lockTime;
+    private Long lockTime = 0L;
 
     public InputDto() {
         this.lockTime = 0L;
