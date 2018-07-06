@@ -155,7 +155,10 @@ public class CheckUnConfirmTxThread implements Runnable {
                     if (!AccountLegerUtils.isLocalAccount(fromCoin.getOwner())) {
                         continue;
                     }
-
+                    Coin fromCoinFromLedger = ledgerService.getUtxo(fromSource);
+                    if(fromCoinFromLedger == null || !fromCoinFromLedger.usable()){
+                        continue;
+                    }
                     fromList.add(new Entry<>(from.getOwner(), fromCoin.serialize()));
                 } catch (IOException e) {
                     throw new NulsRuntimeException(e);
