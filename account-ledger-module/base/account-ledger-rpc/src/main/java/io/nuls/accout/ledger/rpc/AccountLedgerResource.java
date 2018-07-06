@@ -319,17 +319,17 @@ public class AccountLedgerResource {
 //                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
 //            }
 
-            for (Coin coin : tx.getCoinData().getFrom()) {
-                Coin utxo = ledgerService.getUtxo(coin.getOwner());
-                if (utxo == null) {
-                    return Result.getFailed(LedgerErrorCode.UTXO_NOT_FOUND).toRpcClientResult();
-                }
-
-                if (!form.getAddress().equals(AddressTool.getStringAddressByBytes(utxo.getOwner()))) {
-                    return Result.getFailed(LedgerErrorCode.INVALID_INPUT).toRpcClientResult();
-                }
-
-            }
+//            for (Coin coin : tx.getCoinData().getFrom()) {
+//                Coin utxo = ledgerService.getUtxo(coin.getOwner());
+//                if (utxo == null) {
+//                    return Result.getFailed(LedgerErrorCode.UTXO_NOT_FOUND).toRpcClientResult();
+//                }
+//
+//                if (!form.getAddress().equals(AddressTool.getStringAddressByBytes(utxo.getOwner()))) {
+//                    return Result.getFailed(LedgerErrorCode.INVALID_INPUT).toRpcClientResult();
+//                }
+//
+//            }
 
             Map<String, String> map = new HashMap<>();
             map.put("value", Hex.encode(tx.serialize()));
