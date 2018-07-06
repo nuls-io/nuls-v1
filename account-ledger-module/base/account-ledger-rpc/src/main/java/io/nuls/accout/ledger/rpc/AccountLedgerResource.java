@@ -245,13 +245,16 @@ public class AccountLedgerResource {
             outputs.add(to);
         }
 
-        List<byte[]> inputsKey = new ArrayList<>();
+        List<Coin> inputs = new ArrayList<>();
         for (int i = 0; i < form.getInputs().size(); i++) {
             InputDto inputDto = form.getInputs().get(i);
             byte[] key = Arrays.concatenate(Hex.decode(inputDto.getFromHash()), new VarInt(inputDto.getFromIndex()).encode());
-            inputsKey.add(key);
+            Coin coin = new Coin();
+            coin.setOwner(key);
+            coin.setLockTime(inputDto.getLockTime());
+            coin.setNa(Na.valueOf(inputDto.getValue()));
         }
-        Result result = accountLedgerService.createTransaction(inputsKey, outputs, remark);
+        Result result = accountLedgerService.createTransaction(inputs, outputs, remark);
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("value", (String) result.getData());
