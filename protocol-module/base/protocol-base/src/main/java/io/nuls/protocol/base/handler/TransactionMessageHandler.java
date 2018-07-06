@@ -25,6 +25,7 @@
 package io.nuls.protocol.base.handler;
 
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
@@ -66,7 +67,9 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
         Transaction tempTx = temporaryCacheManager.getTx(tx.getHash());
         if (tempTx == null) {
             transactionService.newTx(tx);
-            transactionService.forwardTx(tx, fromNode);
+            if(TimeService.currentTimeMillis() - tx.getTime() < 300000L) {
+                transactionService.forwardTx(tx, fromNode);
+            }
         } else {
             transactionService.newTx(tx);
         }
