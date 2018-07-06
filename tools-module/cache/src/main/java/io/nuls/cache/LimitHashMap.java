@@ -87,4 +87,12 @@ public class LimitHashMap<K, V> {
     public Collection<V> values() {
         return map.values();
     }
+
+    public Map<K, V> getMap() {
+        return map;
+    }
+
+    public LinkedList<K> getQueue() {
+        return queue;
+    }
 }
