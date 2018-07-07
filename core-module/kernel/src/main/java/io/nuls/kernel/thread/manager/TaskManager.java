@@ -40,7 +40,7 @@ public class TaskManager {
     private static final TaskTable THREAD_DATA_CACHE = TaskTable.getInstance();
 
     private static final String TEMPORARY_THREAD_POOL_NAME = "temporary";
-    private static final int TEMPORARY_THREAD_POOL_COUNT = 10;
+    private static final int TEMPORARY_THREAD_POOL_COUNT = 4;
     private static final int TEMPORARY_THREAD_POOL_QUEUE_SIZE = 1000;
     private static final ThreadPoolExecutor TEMPORARY_THREAD_POOL;
 

@@ -70,8 +70,8 @@ public class RpcServerManager {
         NetworkListener listener = new NetworkListener("grizzly2", ip, port);
         TCPNIOTransport transport = listener.getTransport();
         ThreadPoolConfig workerPool = ThreadPoolConfig.defaultConfig()
-                .setCorePoolSize(8)
-                .setMaxPoolSize(16)
+                .setCorePoolSize(4)
+                .setMaxPoolSize(4)
                 .setQueueLimit(1000)
                 .setThreadFactory((new ThreadFactoryBuilder()).setNameFormat("grizzly-http-server-%d").build());
         transport.configureBlocking(false);

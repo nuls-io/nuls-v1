@@ -34,7 +34,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static junit.framework.TestCase.assertTrue;
 
@@ -53,7 +55,7 @@ public class LimitHashMapTest {
             Transaction transaction = new TransferTransaction();
             transaction.setTime(System.currentTimeMillis());
             transaction.setHash(NulsDigestData.calcDigestData(transaction.serializeForHash()));
-                hashList.add(transaction.getHash());
+            hashList.add(transaction.getHash());
             long start = System.nanoTime();
             map.put(transaction.getHash(), transaction);
             use += (System.nanoTime() - start);
@@ -97,7 +99,7 @@ public class LimitHashMapTest {
             Transaction transaction = new TransferTransaction();
             transaction.setTime(System.currentTimeMillis());
             transaction.setHash(NulsDigestData.calcDigestData(transaction.serializeForHash()));
-                hashList.add(transaction.getHash());
+            hashList.add(transaction.getHash());
             long start = System.nanoTime();
             map.put(transaction.getHash(), transaction);
             use += (System.nanoTime() - start);
@@ -121,4 +123,37 @@ public class LimitHashMapTest {
         assertTrue(true);
 
     }
+
+    @Test
+    public void testSet() {
+        List<NulsDigestData> list = new ArrayList<>();
+        for (int i = 0; i < 1000000; i++) {
+            list.add(NulsDigestData.calcDigestData((i + "").getBytes()));
+        }
+        Set<NulsDigestData> set = new HashSet<>();
+        long start = System.nanoTime();
+        for (NulsDigestData hash : list) {
+            set.add(hash);
+        }
+        System.out.println("放入set中100万条用时：" + (System.nanoTime() - start)/1000000 + "ms");
+        Set<NulsDigestData> set2 = new HashSet<>();
+        start = System.nanoTime();
+        set2.addAll(set);
+        System.out.println("addAll 100万条用时：" + (System.nanoTime() - start)/1000000 + "ms");
+        start = System.nanoTime();
+        for (NulsDigestData hash : list) {
+            set2.remove(hash);
+        }
+        System.out.println("remove100万条用时：" + (System.nanoTime() - start)/1000000 + "ms");
+        start = System.nanoTime();
+        for (NulsDigestData hash : list) {
+            set.contains(hash);
+        }
+        System.out.println("contains100万条用时：" + (System.nanoTime() - start)/1000000 + "ms");
+        start = System.nanoTime();
+        set.clear();
+        System.out.println("clear100万条用时：" + (System.nanoTime() - start)/1000000 + "ms");
+
+    }
+
 }
