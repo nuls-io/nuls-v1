@@ -103,6 +103,10 @@ public class TimeService implements Runnable {
 
             long netTime = getWebTime(urlList.get(i));
 
+            if (netTime == 0) {
+                continue;
+            }
+
             long localEndTime = System.currentTimeMillis();
 
             long value = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
@@ -111,7 +115,7 @@ public class TimeService implements Runnable {
                 sum += value;
             }
         }
-        if(count > 0) {
+        if (count > 0) {
             netTimeOffset = sum / count;
         }
 
@@ -128,13 +132,15 @@ public class TimeService implements Runnable {
         try {
             NTPUDPClient client = new NTPUDPClient();
             client.open();
-
             client.setDefaultTimeout(1000);
-
+            client.setSoTimeout(1000);
             InetAddress inetAddress = InetAddress.getByName(address);
+            Log.debug("start ask time....");
             TimeInfo timeInfo = client.getTime(inetAddress);
+            Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
+            Log.error(e);
             return 0L;
         }
     }
