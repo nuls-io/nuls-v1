@@ -97,10 +97,11 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
         for (NulsDigestData hash : smallBlock.getTxHashList()) {
             Transaction tx = txMap.get(hash);
             if (null == tx) {
-                tx = temporaryCacheManager.getTx(hash);
-                if(null == tx) {
-                    tx = transactionCacheStorageService.getTx(hash);
-                }
+//                tx = temporaryCacheManager.getTx(hash);
+//                if(null == tx) {
+//                    tx = transactionCacheStorageService.getTx(hash);
+//                }
+                tx = transactionCacheStorageService.getTx(hash);
                 if (tx != null) {
                     smallBlock.getSubTxList().add(tx);
                     txMap.put(hash, tx);

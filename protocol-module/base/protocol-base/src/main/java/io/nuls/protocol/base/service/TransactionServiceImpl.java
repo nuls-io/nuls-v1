@@ -41,6 +41,7 @@ import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.ForwardTxMessage;
 import io.nuls.protocol.message.TransactionMessage;
 import io.nuls.protocol.service.TransactionService;
+import io.nuls.protocol.storage.service.TransactionCacheStorageService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,11 +56,12 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private MessageBusService messageBusService;
-
     @Autowired
     private LedgerService ledgerService;
     @Autowired
     private ConsensusService consensusService;
+    @Autowired
+    private TransactionCacheStorageService transactionCacheStorageService;
 
     /**
      * 确认交易时调用的方法，对交易相关的业务进行提交操作
@@ -134,7 +136,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
     @Override
     public Result forwardTxAndCacche(Transaction tx, Node excludeNode) {
-        temporaryCacheManager.cacheTx(tx);
+//        temporaryCacheManager.cacheTx(tx);
+//        transactionCacheStorageService.putTx(tx);
         return forwardTx(tx, excludeNode);
     }
 

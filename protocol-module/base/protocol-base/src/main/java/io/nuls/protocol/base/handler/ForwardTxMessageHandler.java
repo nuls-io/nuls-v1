@@ -62,14 +62,13 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
         } else if (cacheManager.containsTx(hash)) {
             return;
         }
-        tempSet.add(hash);
-        if (set.size() >= 100000) {
+        int size = set.size();
+        if (size >= 1000000) {
             set.clear();
             set.addAll(tempSet);
             tempSet.clear();
-        }
-        if (tempSet.size() == 50000) {
-            tempSet.clear();
+        } else if (size >= 900000) {
+            tempSet.add(hash);
         }
         GetTxMessage getTxMessage = new GetTxMessage();
         getTxMessage.setMsgBody(hash);

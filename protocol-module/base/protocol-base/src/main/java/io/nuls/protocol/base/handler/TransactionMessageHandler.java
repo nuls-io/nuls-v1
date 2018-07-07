@@ -44,9 +44,25 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
     private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
     private TransactionCacheStorageService transactionCacheStorageService = NulsContext.getServiceBean(TransactionCacheStorageService.class);
 
+    long count,t,t1,t2,t3,t4,t5;
+
+    long time = System.currentTimeMillis();
 
     @Override
     public void onMessage(TransactionMessage message, Node fromNode) {
+
+        count ++;
+        if((System.currentTimeMillis() - time) > 5000L) {
+            time = System.currentTimeMillis();
+
+            System.out.println();
+            System.out.println("count : " + count);
+            System.out.println("t1 : " + t1/1000000L);
+            System.out.println("t2 : " + t2/1000000L);
+            System.out.println("t3 : " + t3/1000000L);
+//            System.out.println("t4 : " + t4/1000000L);
+//            System.out.println("t5 : " + t5/1000000L);
+        }
 
         Transaction tx = message.getMsgBody();
         if (null == tx) {
@@ -55,19 +71,60 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
         if (tx.isSystemTx()) {
             return;
         }
-        if (TimeService.currentTimeMillis() - tx.getTime() > 600000L) {
-            return;
-        }
 
-        ValidateResult result = tx.verify();
-        if (result.isFailed()) {
-            return;
-        }
-        if (temporaryCacheManager.cacheTx(tx)) {
-            transactionService.newTx(tx);
-            transactionCacheStorageService.putTx(tx);
-            transactionService.forwardTx(tx, fromNode);
-        }
+        t = System.nanoTime();
+
+        transactionCacheStorageService.putTx(tx);
+
+        t1 += (System.nanoTime() - t);
+        t = System.nanoTime();
+
+        transactionService.forwardTx(tx, fromNode);
+
+        t2 += (System.nanoTime() - t);
+        t = System.nanoTime();
+
+
+        transactionService.newTx(tx);
+        t3 += (System.nanoTime() - t);
+
+//        t = System.nanoTime();
+//
+//        ValidateResult result = tx.verify();
+//        t1 += (System.nanoTime() - t);
+//        t = System.nanoTime();
+//
+//        if (result.isFailed()) {
+//            return;
+//        }
+//        if (temporaryCacheManager.cacheTx(tx)) {
+//
+//            t2 += (System.nanoTime() - t);
+//            t = System.nanoTime();
+//
+//            transactionService.newTx(tx);
+//
+//
+//            t3 += (System.nanoTime() - t);
+//            t = System.nanoTime();
+//
+//
+//            transactionCacheStorageService.putTx(tx);
+//
+//
+//            t4 += (System.nanoTime() - t);
+//            t = System.nanoTime();
+//
+//
+//            transactionService.forwardTx(tx, fromNode);
+//
+//
+//            t5 += (System.nanoTime() - t);
+//            t = System.nanoTime();
+//
+//            return;
+//        }
+//        t2 += (System.nanoTime() - t);
     }
 
 }

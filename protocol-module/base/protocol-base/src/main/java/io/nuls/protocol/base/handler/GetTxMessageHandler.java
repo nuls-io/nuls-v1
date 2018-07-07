@@ -53,10 +53,11 @@ public class GetTxMessageHandler extends AbstractMessageHandler<GetTxMessage> {
         if (message == null || fromNode == null || null == message.getMsgBody()) {
             return;
         }
-        Transaction tx = cacheManager.getTx(message.getMsgBody());
-        if(null == tx) {
-            tx = transactionCacheStorageService.getTx(message.getMsgBody());
-        }
+//        Transaction tx = cacheManager.getTx(message.getMsgBody());
+//        if(null == tx) {
+//            tx = transactionCacheStorageService.getTx(message.getMsgBody());
+//        }
+        Transaction tx = transactionCacheStorageService.getTx(message.getMsgBody());
         if (null == tx) {
             sendNotFound(message.getMsgBody(), fromNode);
             return;

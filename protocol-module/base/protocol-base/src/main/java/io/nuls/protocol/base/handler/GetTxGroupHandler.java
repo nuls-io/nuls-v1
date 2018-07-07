@@ -80,10 +80,11 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
         List<Transaction> txList = new ArrayList<>();
 
         for (NulsDigestData hash : getTxGroupParam.getTxHashList()) {
-            Transaction tx = temporaryCacheManager.getTx(hash);
-            if(tx == null) {
-                tx = transactionCacheStorageService.getTx(hash);
-            }
+//            Transaction tx = temporaryCacheManager.getTx(hash);
+//            if(tx == null) {
+//                tx = transactionCacheStorageService.getTx(hash);
+//            }
+            Transaction tx = transactionCacheStorageService.getTx(hash);
             if (tx == null) {
                 tx = ledgerService.getTx(hash);
             }
