@@ -24,6 +24,7 @@
  */
 package io.nuls.protocol.storage.service.impl;
 
+import io.nuls.core.tools.crypto.Util;
 import io.nuls.core.tools.log.Log;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.DBService;
@@ -43,6 +44,9 @@ import java.io.IOException;
 public class TransactionCacheStorageServiceImpl implements TransactionCacheStorageService, InitializingBean {
 
     private final static String TRANSACTION_CACHE_KEY_NAME = "transaction_cache";
+    private final static byte[] LAST_KEY = "last_key".getBytes();
+    private final static byte[] START_KEY = "start_key".getBytes();
+    private int lastIndex = 0;
 
     /**
      * 通用数据存储服务
@@ -56,6 +60,14 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
         Result result = this.dbService.createArea(TRANSACTION_CACHE_KEY_NAME);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
+        }
+        byte[] lastKeyBytes = dbService.get(TRANSACTION_CACHE_KEY_NAME, LAST_KEY);
+        if(lastKeyBytes != null) {
+            lastIndex = Util.byteToInt(lastKeyBytes);
+        }
+        byte[] startIndexBytes = dbService.get(TRANSACTION_CACHE_KEY_NAME, START_KEY);
+        if(startIndexBytes == null) {
+            dbService.put(TRANSACTION_CACHE_KEY_NAME, START_KEY, Util.intToBytes(1));
         }
     }
 
@@ -73,7 +85,52 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
         }
         // 保存交易
         Result result = dbService.putModel(TRANSACTION_CACHE_KEY_NAME, txHashBytes, tx);
+
+        if(!result.isSuccess()) {
+            return result.isSuccess();
+        }
+        lastIndex++;
+        byte[] lastIndexBytes = Util.intToBytes(lastIndex);
+        result = dbService.put(TRANSACTION_CACHE_KEY_NAME, lastIndexBytes, txHashBytes);
+        if(!result.isSuccess()) {
+            removeTx(tx.getHash());
+            return result.isSuccess();
+        }
+        result = dbService.put(TRANSACTION_CACHE_KEY_NAME, LAST_KEY, lastIndexBytes);
         return result.isSuccess();
+    }
+
+    @Override
+    public int getMaxIndex() {
+        byte[] lastIndexBytes = dbService.get(TRANSACTION_CACHE_KEY_NAME, LAST_KEY);
+        if(lastIndexBytes == null) {
+            return 0;
+        }
+        return Util.byteToInt(lastIndexBytes);
+    }
+
+    @Override
+    public Transaction pollTx() {
+        int startIndex = 0;
+        byte[] startIndexBytes = dbService.get(TRANSACTION_CACHE_KEY_NAME, START_KEY);
+        if(startIndexBytes != null) {
+            startIndex = Util.byteToInt(startIndexBytes);
+        }
+
+        byte[] hashBytes = dbService.get(TRANSACTION_CACHE_KEY_NAME, startIndexBytes);
+        if(hashBytes == null) {
+            return null;
+        }
+        NulsDigestData hash = new NulsDigestData();
+        try {
+            hash.parse(hashBytes, 0);
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+        Transaction tx = getTx(hash);
+        startIndex++;
+        dbService.put(TRANSACTION_CACHE_KEY_NAME, START_KEY, Util.intToBytes(startIndex));
+        return tx;
     }
 
     @Override

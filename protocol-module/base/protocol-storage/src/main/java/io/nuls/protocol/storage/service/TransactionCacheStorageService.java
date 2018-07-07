@@ -10,4 +10,8 @@ public interface TransactionCacheStorageService {
     Transaction getTx(NulsDigestData hash);
 
     boolean removeTx(NulsDigestData hash);
+
+    int getMaxIndex();
+
+    Transaction pollTx();
 }
