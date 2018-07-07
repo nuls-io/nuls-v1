@@ -110,10 +110,8 @@ public class TimeService implements Runnable {
             long localEndTime = System.currentTimeMillis();
 
             long value = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
-            if (value > 0) {
-                count++;
-                sum += value;
-            }
+            count++;
+            sum += value;
         }
         if (count > 0) {
             netTimeOffset = sum / count;
