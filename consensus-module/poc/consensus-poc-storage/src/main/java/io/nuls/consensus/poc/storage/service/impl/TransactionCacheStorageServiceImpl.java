@@ -40,7 +40,6 @@ import io.nuls.kernel.model.Transaction;
 
 import java.io.IOException;
 
-@Service
 public class TransactionCacheStorageServiceImpl implements TransactionCacheStorageService, InitializingBean {
 
     private final static String TRANSACTION_CACHE_KEY_NAME = "transaction_cache";

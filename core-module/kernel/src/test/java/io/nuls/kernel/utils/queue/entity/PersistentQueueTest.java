@@ -53,7 +53,6 @@ public class PersistentQueueTest {
             txList.add(tx);
         }
 
-
         long start = System.currentTimeMillis();
         for (Transaction tx : txList) {
             txQueue.offer(tx.serialize());
@@ -62,7 +61,7 @@ public class PersistentQueueTest {
 
         start = System.currentTimeMillis();
         for (int i = 0; i < 1000000; i ++) {
-            txQueue.poll();
+            txQueue.take();
         }
         System.out.println("取出100万次用时：" + (System.currentTimeMillis() - start) + "ms");
 
