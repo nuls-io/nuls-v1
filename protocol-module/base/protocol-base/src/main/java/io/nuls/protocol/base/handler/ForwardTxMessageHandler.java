@@ -28,6 +28,7 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
+import io.nuls.protocol.base.cache.TransactionDuplicateRemoval;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.message.ForwardTxMessage;
 import io.nuls.protocol.message.GetTxMessage;
@@ -40,34 +41,21 @@ import java.util.Set;
  */
 public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMessage> {
 
-    private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
-
-    private Set<NulsDigestData> set = new HashSet<>();
-    private Set<NulsDigestData> tempSet = new HashSet<>();
-
     @Override
     public void onMessage(ForwardTxMessage message, Node fromNode) {
         if (message == null || fromNode == null || !fromNode.isHandShake() || null == message.getMsgBody()) {
             return;
         }
         NulsDigestData hash = message.getMsgBody();
-        if (!set.add(hash)) {
+        boolean consains = TransactionDuplicateRemoval.FILTER.contains(hash.getDigestBytes());
+        if (consains) {
             return;
         }
-
-        int size = set.size();
-        if (size >= 1000000) {
-            set.clear();
-            set.addAll(tempSet);
-            tempSet.clear();
-        } else if (size >= 900000) {
-            tempSet.add(hash);
-        }
+        TransactionDuplicateRemoval.FILTER.insert(hash.getDigestBytes());
         GetTxMessage getTxMessage = new GetTxMessage();
         getTxMessage.setMsgBody(hash);
         Result result = messageBusService.sendToNode(getTxMessage, fromNode, true);
         if (result.isFailed()) {
-            set.remove(hash);
             return;
         }
     }
