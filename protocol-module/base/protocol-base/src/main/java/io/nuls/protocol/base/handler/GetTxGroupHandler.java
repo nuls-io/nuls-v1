@@ -75,9 +75,6 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
             return;
         }
 
-        // react request
-        messageBusService.sendToNode(new ReactMessage(requestHash), fromNode, true);
-
         TxGroupMessage txGroupMessage = new TxGroupMessage();
         TxGroup txGroup = new TxGroup();
         List<Transaction> txList = new ArrayList<>();
