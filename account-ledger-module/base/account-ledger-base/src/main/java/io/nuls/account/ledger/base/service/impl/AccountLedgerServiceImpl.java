@@ -694,6 +694,23 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         return result;
     }
 
+    @Override
+    public Result<Integer> deleteUnconfirmedTx(byte[] address) {
+        Result result = getAllUnconfirmedTransaction();
+        if (result.getData() == null) {
+            return Result.getSuccess().setData(new Integer(0));
+        }
+        List<Transaction> txs = (List<Transaction>) result.getData();
+        int i = 0;
+        for (Transaction tx : txs) {
+            if (Arrays.equals(tx.getAddressFromSig(), address)) {
+                unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
+            }
+            i++;
+        }
+        return Result.getSuccess().setData(new Integer(i));
+    }
+
     protected Result<Integer> importConfirmedTransaction(Transaction tx, byte[] address) {
 
         if (!AccountLegerUtils.isTxRelatedToAddress(tx, address)) {

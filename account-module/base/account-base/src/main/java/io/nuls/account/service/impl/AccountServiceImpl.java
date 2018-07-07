@@ -159,6 +159,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
+        accountLedgerService.deleteUnconfirmedTx(account.getAddress().getAddressBytes());
         accountCacheService.localAccountMaps.remove(account.getAddress().getBase58());
         return Result.getSuccess().setData(true);
     }
