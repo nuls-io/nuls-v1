@@ -122,7 +122,7 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
                     Log.error(e);
                     return;
                 }
-                temporaryCacheManager.cacheSmallBlock(requestHash, smallBlock);
+                temporaryCacheManager.cacheSmallBlockWithRequest(requestHash, smallBlock);
             }
             return;
         }

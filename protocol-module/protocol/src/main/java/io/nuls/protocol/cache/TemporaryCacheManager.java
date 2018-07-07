@@ -39,6 +39,7 @@ public class TemporaryCacheManager {
     private static final TemporaryCacheManager INSTANCE = new TemporaryCacheManager();
 
     private LimitHashMap<NulsDigestData, SmallBlock> smallBlockCacheMap = new LimitHashMap<>(100);
+    private LimitHashMap<NulsDigestData, NulsDigestData> smallBlockHashCacheMap = new LimitHashMap<>(100);
 //    private CacheMap<NulsDigestData, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 128, NulsDigestData.class, Transaction.class, 0, 3600);
 
     private LimitHashMap<NulsDigestData, Transaction> txCacheMap = new LimitHashMap<>(200000);
@@ -57,8 +58,14 @@ public class TemporaryCacheManager {
      *
      * @param smallBlock 要放入内存中的对象
      */
-    public void cacheSmallBlock(NulsDigestData requestHash, SmallBlock smallBlock) {
-        smallBlockCacheMap.put(requestHash, smallBlock);
+    public void cacheSmallBlock(SmallBlock smallBlock) {
+        smallBlockCacheMap.put(smallBlock.getHeader().getHash(), smallBlock);
+    }
+
+    public void cacheSmallBlockWithRequest(NulsDigestData requestHash, SmallBlock smallBlock) {
+        NulsDigestData blockHash = smallBlock.getHeader().getHash();
+        smallBlockHashCacheMap.put(requestHash, blockHash);
+        smallBlockCacheMap.put(blockHash, smallBlock);
     }
 
     /**
@@ -68,11 +75,13 @@ public class TemporaryCacheManager {
      * @param requestHash getTxGroupRequestHash
      * @return SmallBlock
      */
-    public SmallBlock getSmallBlock(NulsDigestData requestHash) {
-        if (null == smallBlockCacheMap) {
-            return null;
-        }
-        return smallBlockCacheMap.get(requestHash);
+    public SmallBlock getSmallBlockByRequest(NulsDigestData requestHash) {
+
+        return getSmallBlockByHash(smallBlockHashCacheMap.get(requestHash));
+    }
+    public SmallBlock getSmallBlockByHash(NulsDigestData blockHash) {
+
+        return smallBlockCacheMap.get(blockHash);
     }
 
     /**

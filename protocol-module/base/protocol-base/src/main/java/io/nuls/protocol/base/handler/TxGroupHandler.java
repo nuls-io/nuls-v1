@@ -63,7 +63,7 @@ public class TxGroupHandler extends AbstractMessageHandler<TxGroupMessage> {
             return;
         }
 
-        SmallBlock smallBlock = temporaryCacheManager.getSmallBlock(txGroup.getRequestHash());
+        SmallBlock smallBlock = temporaryCacheManager.getSmallBlockByRequest(txGroup.getRequestHash());
         if (null == smallBlock) {
             return;
         }

@@ -55,7 +55,7 @@ public class GetSmallBlockHandler extends AbstractMessageHandler<GetSmallBlockMe
             return;
         }
         NulsDigestData blockHash = message.getMsgBody();
-        SmallBlock smallBlock = cacheManager.getSmallBlock(blockHash);
+        SmallBlock smallBlock = cacheManager.getSmallBlockByHash(blockHash);
         if (null == smallBlock) {
             Block block = NulsContext.getInstance().getBestBlock();
             if (null == block) {

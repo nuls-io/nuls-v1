@@ -78,16 +78,14 @@ public class TemporaryCacheManagerTest {
         BlockHeader header = new BlockHeader();
         NulsDigestData hash = NulsDigestData.calcDigestData("abcdefg".getBytes());
         header.setHash(hash);
-        smallBlock.setHeader(header);
-        NulsDigestData requestHash = NulsDigestData.calcDigestData(new byte[]{0});
-        manager.cacheSmallBlock(requestHash, smallBlock);
+        manager.cacheSmallBlock(smallBlock);
         assertTrue(true);
 
         this.getSmallBlock(hash, smallBlock);
 
         this.removeSmallBlock(hash);
 
-        manager.cacheSmallBlock(requestHash, smallBlock);
+        manager.cacheSmallBlock(smallBlock);
 
         this.clear();
     }
@@ -101,7 +99,7 @@ public class TemporaryCacheManagerTest {
      * @param smallBlock 已存入缓存的小区快，The cached community is fast.
      */
     private void getSmallBlock(NulsDigestData hash, SmallBlock smallBlock) {
-        SmallBlock sb = manager.getSmallBlock(NulsDigestData.calcDigestData("abcdefg".getBytes()));
+        SmallBlock sb = manager.getSmallBlockByHash(NulsDigestData.calcDigestData("abcdefg".getBytes()));
         assertEquals(sb.getHeader().getHash(), smallBlock.getHeader().getHash());
     }
 
@@ -152,7 +150,7 @@ public class TemporaryCacheManagerTest {
      * Remove the corresponding block from the cache according to the block summary object, and determine whether the removal is successful.
      */
     public void removeSmallBlock(NulsDigestData hash) {
-        SmallBlock smallBlock = manager.getSmallBlock(hash);
+        SmallBlock smallBlock = manager.getSmallBlockByHash(hash);
         assertNotNull(smallBlock);
     }
 
