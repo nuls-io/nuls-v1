@@ -202,4 +202,13 @@ public interface AccountLedgerService {
      * @return Result
      */
     Result<List<Coin>> getLockedUtxo(byte[] address);
+
+    /**
+     * delete unconfirmed transactions of an account
+     *
+     * @param address address
+     * @return Result
+     */
+    Result<Integer> deleteUnconfirmedTx(byte[] address);
+
 }
