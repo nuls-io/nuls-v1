@@ -45,7 +45,6 @@ import java.util.concurrent.CompletableFuture;
  */
 public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMessage> {
 
-    private TransactionDownloadProcessor txDownloadProcessor = TransactionDownloadProcessor.getInstance();
     private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
 
     private Set<NulsDigestData> set = new HashSet<>();

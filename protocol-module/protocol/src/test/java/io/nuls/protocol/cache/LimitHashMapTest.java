@@ -79,6 +79,11 @@ public class LimitHashMapTest {
             map.containsKey(key);
         }
         System.out.println("判断是否包含200000次用时：" + (System.currentTimeMillis() - start) + "ms");
+        start = System.currentTimeMillis();
+        for (NulsDigestData key : hashList) {
+            map.remove(key);
+        }
+        System.out.println("删除200000次用时：" + (System.currentTimeMillis() - start) + "ms");
         assertTrue(true);
 
     }
@@ -108,6 +113,11 @@ public class LimitHashMapTest {
             map.containsKey(key);
         }
         System.out.println("判断是否包含200000次用时：" + (System.currentTimeMillis() - start) + "ms");
+        start = System.currentTimeMillis();
+        for (NulsDigestData key : hashList) {
+            map.remove(key);
+        }
+        System.out.println("删除200000次用时：" + (System.currentTimeMillis() - start) + "ms");
         assertTrue(true);
 
     }
