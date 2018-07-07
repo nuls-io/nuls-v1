@@ -42,27 +42,8 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
 
     private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
 
-    long count,t,t1,t2,t3,t4,t5;
-
-    long time = System.currentTimeMillis();
-
-    private Set<NulsDigestData> hashs = new HashSet<>();
-
     @Override
     public void onMessage(TransactionMessage message, Node fromNode) {
-
-        count ++;
-        if((System.currentTimeMillis() - time) > 5000L) {
-            time = System.currentTimeMillis();
-
-            System.out.println();
-            System.out.println("count : " + count);
-            System.out.println("t1 : " + t1/1000000L);
-            System.out.println("t2 : " + t2/1000000L);
-//            System.out.println("t3 : " + t3/1000000L);
-//            System.out.println("t4 : " + t4/1000000L);
-//            System.out.println("t5 : " + t5/1000000L);
-        }
 
         Transaction tx = message.getMsgBody();
         if (null == tx) {
@@ -71,21 +52,7 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
         if (tx.isSystemTx()) {
             return;
         }
-
-        hashs.add(tx.getHash());
-        int size = hashs.size();
-        if(size % 100 == 0) {
-            System.out.println("size : " + size);
-        }
-        t = System.nanoTime();
         transactionService.newTx(tx);
-
-        t1 += (System.nanoTime() - t);
-        t = System.nanoTime();
-
-        transactionService.forwardTx(tx, fromNode);
-
-        t2 += (System.nanoTime() - t);
     }
 
 }

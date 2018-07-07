@@ -25,10 +25,9 @@
 
 package io.nuls.consensus.poc.storage.service.impl;
 
-import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
+import io.nuls.consensus.poc.storage.service.TransactionQueueStorageService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.TransactionManager;
@@ -41,11 +40,11 @@ import java.io.IOException;
  * @date: 2018/7/8
  */
 @Component
-public class TransactionCacheQueueServiceImpl implements TransactionCacheStorageService {
+public class TransactionQueueStorageServiceImpl implements TransactionQueueStorageService {
 
     private PersistentQueue queue = new PersistentQueue("tx-cache-queue", 10000000L);
 
-    public TransactionCacheQueueServiceImpl() throws Exception {
+    public TransactionQueueStorageServiceImpl() throws Exception {
     }
 
     @Override
@@ -57,24 +56,6 @@ public class TransactionCacheQueueServiceImpl implements TransactionCacheStorage
             Log.error(e);
         }
         return false;
-    }
-
-    @Override
-    public Transaction getTx(NulsDigestData hash) {
-        // todo auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean removeTx(NulsDigestData hash) {
-        // todo auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public int getStartIndex() {
-        // todo auto-generated method stub
-        return 0;
     }
 
     @Override

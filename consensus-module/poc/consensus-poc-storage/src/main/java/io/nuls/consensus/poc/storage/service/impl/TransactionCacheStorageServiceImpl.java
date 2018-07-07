@@ -32,7 +32,7 @@ import io.nuls.db.service.DBService;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
-import io.nuls.kernel.lite.annotation.Service;
+import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
@@ -40,6 +40,7 @@ import io.nuls.kernel.model.Transaction;
 
 import java.io.IOException;
 
+@Component
 public class TransactionCacheStorageServiceImpl implements TransactionCacheStorageService, InitializingBean {
 
     private final static String TRANSACTION_CACHE_KEY_NAME = "transaction_cache";
@@ -81,16 +82,16 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
         // 保存交易
         Result result = dbService.putModel(TRANSACTION_CACHE_KEY_NAME, txHashBytes, tx);
 
-        if(!result.isSuccess()) {
-            return result.isSuccess();
-        }
-        lastIndex++;
-        byte[] lastIndexBytes = Util.intToBytes(lastIndex);
-        result = dbService.put(TRANSACTION_CACHE_KEY_NAME, lastIndexBytes, txHashBytes);
-        if(!result.isSuccess()) {
-            removeTx(tx.getHash());
-            return result.isSuccess();
-        }
+//        if(!result.isSuccess()) {
+//            return result.isSuccess();
+//        }
+//        lastIndex++;
+//        byte[] lastIndexBytes = Util.intToBytes(lastIndex);
+//        result = dbService.put(TRANSACTION_CACHE_KEY_NAME, lastIndexBytes, txHashBytes);
+//        if(!result.isSuccess()) {
+//            removeTx(tx.getHash());
+//            return result.isSuccess();
+//        }
 //        result = dbService.put(TRANSACTION_CACHE_KEY_NAME, LAST_KEY, lastIndexBytes);
         return result.isSuccess();
     }

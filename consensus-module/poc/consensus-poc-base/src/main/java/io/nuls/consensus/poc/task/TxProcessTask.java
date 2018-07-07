@@ -26,22 +26,21 @@
 package io.nuls.consensus.poc.task;
 
 import io.nuls.consensus.poc.cache.TxMemoryPool;
-import io.nuls.consensus.poc.container.TxContainer;
 import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
+import io.nuls.consensus.poc.storage.service.TransactionQueueStorageService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.ledger.util.LedgerUtil;
+import io.nuls.protocol.service.TransactionService;
 import io.nuls.protocol.utils.TransactionTimeComparator;
-import org.spongycastle.util.Times;
 
 import java.util.*;
 
@@ -55,6 +54,9 @@ public class TxProcessTask implements Runnable {
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private TransactionCacheStorageService transactionCacheStorageService = NulsContext.getServiceBean(TransactionCacheStorageService.class);
+    private TransactionQueueStorageService transactionQueueStorageService = NulsContext.getServiceBean(TransactionQueueStorageService.class);
+
+    private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
 
     private TransactionTimeComparator txComparator = TransactionTimeComparator.getInstance();
 
@@ -85,7 +87,7 @@ public class TxProcessTask implements Runnable {
 
     private void doTask() {
         Transaction tx = null;
-        while ((tx = transactionCacheStorageService.pollTx()) != null && orphanTxList.size() < maxOrphanSize) {
+        while ((tx = transactionQueueStorageService.pollTx()) != null && orphanTxList.size() < maxOrphanSize) {
             size++;
             processTx(tx, false);
         }
@@ -129,6 +131,9 @@ public class TxProcessTask implements Runnable {
                     temporaryToMap.remove(key);
                 }
                 count++;
+
+                transactionCacheStorageService.putTx(tx);
+                transactionService.forwardTx(tx, null);
 
                 return true;
             } else if (validateResult.getErrorCode().equals(TransactionErrorCode.ORPHAN_TX) && !isOrphanTx) {

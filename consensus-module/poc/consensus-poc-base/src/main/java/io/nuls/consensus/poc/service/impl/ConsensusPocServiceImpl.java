@@ -35,6 +35,7 @@ import io.nuls.consensus.poc.process.RewardStatisticsProcess;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
 import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
+import io.nuls.consensus.poc.storage.service.TransactionQueueStorageService;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
@@ -65,6 +66,8 @@ public class ConsensusPocServiceImpl implements ConsensusService {
     @Autowired
     private LedgerService ledgerService;
     @Autowired
+    private TransactionQueueStorageService transactionQueueStorageService;
+    @Autowired
     private TransactionCacheStorageService transactionCacheStorageService;
 
     @Override
@@ -81,7 +84,7 @@ public class ConsensusPocServiceImpl implements ConsensusService {
 //        }
 
 //        boolean success = txMemoryPool.add(new TxContainer(tx), false);
-        boolean success =  transactionCacheStorageService.putTx(tx);
+        boolean success =  transactionQueueStorageService.putTx(tx);
         return new Result(success, null);
     }
 
