@@ -82,11 +82,8 @@ public final class TxMemoryPool {
                 return false;
             }
             //check Repeatability
-            NulsDigestData hash = tx.getTx().getHash();
-//            if (orphanContainer.containsKey(hash)) {
-//                return false;
-//            }
             if (isOrphan) {
+                NulsDigestData hash = tx.getTx().getHash();
                 orphanContainer.put(hash, tx);
             } else {
                 txQueue.offer(tx);

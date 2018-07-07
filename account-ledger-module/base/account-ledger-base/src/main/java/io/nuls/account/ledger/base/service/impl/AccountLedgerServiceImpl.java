@@ -548,7 +548,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 return saveResult;
             }
 //            transactionService.newTx(tx);
-            Result sendResult = transactionService.broadcastTx(tx);
+            Result sendResult = transactionService.forwardTxAndCacche(tx, null);
             if (sendResult.isFailed()) {
                 this.rollbackTransaction(tx);
                 return sendResult;
@@ -621,7 +621,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Transaction signTransaction(Transaction tx, ECKey ecKey) throws IOException {
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         P2PKHScriptSig sig = new P2PKHScriptSig();
         sig.setPublicKey(ecKey.getPubKey());
         sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), ecKey));
@@ -631,7 +630,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result broadcast(Transaction tx) {
-        return transactionService.forwardTx(tx, null);
+        return transactionService.forwardTxAndCacche(tx,null);
     }
 
 
