@@ -117,7 +117,7 @@ public class TxProcessTask implements Runnable {
 
             Transaction tempTx = ledgerService.getTx(tx.getHash());
             if(tempTx != null) {
-                return false;
+                return isOrphanTx;
             }
 
             ValidateResult validateResult = ledgerService.verifyCoinData(tx, temporaryToMap, temporaryFromSet);
