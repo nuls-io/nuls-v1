@@ -137,7 +137,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Result forwardTxAndCacche(Transaction tx, Node excludeNode) {
 //        temporaryCacheManager.cacheTx(tx);
-//        transactionCacheStorageService.putTx(tx);
+        transactionCacheStorageService.putTx(tx);
         return forwardTx(tx, excludeNode);
     }
 
@@ -154,8 +154,8 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionMessage message = new TransactionMessage();
         message.setMsgBody(tx);
 
-        consensusService.newTx(tx);
-        temporaryCacheManager.cacheTx(tx);
+//        consensusService.newTx(tx);
+//        temporaryCacheManager.cacheTx(tx);
 
         return messageBusService.broadcast(message, null, true);
     }

@@ -630,7 +630,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result broadcast(Transaction tx) {
-        return transactionService.forwardTxAndCacche(tx,null);
+        return transactionService.broadcastTx(tx);
     }
 
 

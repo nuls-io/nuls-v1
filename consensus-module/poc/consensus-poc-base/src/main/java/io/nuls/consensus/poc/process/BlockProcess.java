@@ -177,7 +177,7 @@ public class BlockProcess {
                     // Verify that the block transaction is valid, save the block if the verification passes, and discard the block if it fails
                     // 验证区块交易是否合法，如果验证通过则保存区块，如果失败则丢弃该块
 
-//                    long time = System.currentTimeMillis();
+                    long time = System.currentTimeMillis();
                     List<Future<Boolean>> futures = new ArrayList<>();
 
                     for (Transaction tx : block.getTxs()) {
@@ -222,11 +222,11 @@ public class BlockProcess {
                             break;
                         }
                     }
-//                    Log.info("验证交易耗时：" + (System.currentTimeMillis() - time));
+                    Log.info("验证交易耗时：" + (System.currentTimeMillis() - time));
                     if (!success) {
                         break;
                     }
-//                    time = System.currentTimeMillis();
+                    time = System.currentTimeMillis();
 
                     // save block
                     Result result = blockService.saveBlock(block);
@@ -237,7 +237,7 @@ public class BlockProcess {
                         RewardStatisticsProcess.addBlock(block);
                         BlockLog.debug("save block height : " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                     }
-//                    Log.info("保存耗时：" + (System.currentTimeMillis() - time));
+                    Log.info("保存耗时：" + (System.currentTimeMillis() - time));
                 } while (false);
             } catch (Exception e) {
                 Log.error("save block error : " + e.getMessage(), e);
