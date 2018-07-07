@@ -70,20 +70,19 @@ public class TransactionTimeComparator implements Comparator<Transaction> {
                     return 1;
                 }
             }
-//            for (Coin coin : o2.getCoinData().getFrom()) {
-//                NulsByteBuffer buffer = new NulsByteBuffer(coin.getOwner());
-//                NulsDigestData hash = null;
-//                try {
-//                    hash = buffer.readHash();
-//                } catch (NulsException e) {
-//                    Log.error(e);
-//                }
-//                if (o1.getHash().equals(hash)) {
-//                    return -1;
-//                }
-//            }
-            return -1;
+            for (Coin coin : o2.getCoinData().getFrom()) {
+                NulsByteBuffer buffer = new NulsByteBuffer(coin.getOwner());
+                NulsDigestData hash = null;
+                try {
+                    hash = buffer.readHash();
+                } catch (NulsException e) {
+                    Log.error(e);
+                }
+                if (o1.getHash().equals(hash)) {
+                    return -1;
+                }
+            }
         }
-//        return 0;
+        return 0;
     }
 }
