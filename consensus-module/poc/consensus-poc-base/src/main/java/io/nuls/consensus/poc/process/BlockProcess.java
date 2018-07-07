@@ -42,6 +42,7 @@ import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
+import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.log.BlockLog;
@@ -80,6 +81,7 @@ public class BlockProcess {
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
+    private TransactionCacheStorageService transactionCacheStorageService = NulsContext.getServiceBean(TransactionCacheStorageService.class);
 
     private ExecutorService signExecutor = TaskManager.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, ""));
 
@@ -243,12 +245,11 @@ public class BlockProcess {
                 Log.error("save block error : " + e.getMessage(), e);
             }
             if (success) {
-//                t = System.currentTimeMillis();
+                long t = System.currentTimeMillis();
                 NulsContext.getInstance().setBestBlock(block);
-                //remove tx from memory pool
-//                removeTxFromMemoryPool(block);
-//                Log.info("移除内存交易耗时：" + (System.currentTimeMillis() - t));
-//                t = System.currentTimeMillis();
+                // remove tx from memory pool
+                removeTxFromMemoryPool(block);
+                Log.info("移除内存交易耗时：" + (System.currentTimeMillis() - t));
                 // 转发区块
                 forwardingBlock(blockContainer);
 //                Log.info("转发区块耗时：" + (System.currentTimeMillis() - t));
@@ -305,10 +306,7 @@ public class BlockProcess {
     public boolean removeTxFromMemoryPool(Block block) {
         boolean success = true;
         for (Transaction tx : block.getTxs()) {
-            boolean result = txMemoryPool.remove(tx.getHash());
-            if (!result) {
-                success = result;
-            }
+            transactionCacheStorageService.removeTx(tx.getHash());
         }
         return success;
     }
