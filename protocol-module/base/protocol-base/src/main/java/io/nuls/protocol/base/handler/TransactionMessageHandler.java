@@ -55,9 +55,6 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
         if (tx.isSystemTx()) {
             return;
         }
-        if (TimeService.currentTimeMillis() - tx.getTime() > 600000L) {
-            return;
-        }
 
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
