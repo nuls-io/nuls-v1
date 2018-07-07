@@ -29,35 +29,28 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.MessageDataType;
 import io.nuls.protocol.message.*;
 import io.nuls.protocol.model.NotFound;
-import io.nuls.protocol.storage.service.TransactionCacheStorageService;
+import io.nuls.protocol.service.TransactionService;
 
 /**
  * @author facjas
  */
 public class GetTxMessageHandler extends AbstractMessageHandler<GetTxMessage> {
 
-    private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
-    private TransactionCacheStorageService transactionCacheStorageService = NulsContext.getServiceBean(TransactionCacheStorageService.class);
+    private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
 
     @Override
     public void onMessage(GetTxMessage message, Node fromNode) {
         if (message == null || fromNode == null || null == message.getMsgBody()) {
             return;
         }
-//        Transaction tx = cacheManager.getTx(message.getMsgBody());
-//        if(null == tx) {
-//            tx = transactionCacheStorageService.getTx(message.getMsgBody());
-//        }
-        Transaction tx = transactionCacheStorageService.getTx(message.getMsgBody());
+        Transaction tx = transactionService.getTx(message.getMsgBody());
         if (null == tx) {
             sendNotFound(message.getMsgBody(), fromNode);
             return;

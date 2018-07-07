@@ -38,7 +38,6 @@ import io.nuls.consensus.poc.task.*;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.protocol.constant.ProtocolConstant;
@@ -100,7 +99,7 @@ public class ConsensusScheduler {
 
         threadPool.scheduleAtFixedRate(new RewardCalculatorTask(NulsContext.getServiceBean(RewardStatisticsProcess.class)), ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND, ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND, TimeUnit.SECONDS);
 
-        threadPool.scheduleAtFixedRate(new OrphanTxProcessTask(), 5, 5, TimeUnit.SECONDS);
+        threadPool.scheduleAtFixedRate(new TxProcessTask(), 5, 1, TimeUnit.SECONDS);
         return true;
     }
 

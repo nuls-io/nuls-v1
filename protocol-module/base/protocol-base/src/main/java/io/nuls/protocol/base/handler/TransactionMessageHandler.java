@@ -25,28 +25,28 @@
 package io.nuls.protocol.base.handler;
 
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.func.TimeService;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.message.TransactionMessage;
 import io.nuls.protocol.service.TransactionService;
-import io.nuls.protocol.storage.service.TransactionCacheStorageService;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Niels
  */
 public class TransactionMessageHandler extends AbstractMessageHandler<TransactionMessage> {
 
-    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
     private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
-    private TransactionCacheStorageService transactionCacheStorageService = NulsContext.getServiceBean(TransactionCacheStorageService.class);
 
     long count,t,t1,t2,t3,t4,t5;
 
     long time = System.currentTimeMillis();
+
+    private Set<NulsDigestData> hashs = new HashSet<>();
 
     @Override
     public void onMessage(TransactionMessage message, Node fromNode) {
@@ -59,7 +59,7 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
             System.out.println("count : " + count);
             System.out.println("t1 : " + t1/1000000L);
             System.out.println("t2 : " + t2/1000000L);
-            System.out.println("t3 : " + t3/1000000L);
+//            System.out.println("t3 : " + t3/1000000L);
 //            System.out.println("t4 : " + t4/1000000L);
 //            System.out.println("t5 : " + t5/1000000L);
         }
@@ -72,9 +72,13 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
             return;
         }
 
+        hashs.add(tx.getHash());
+        int size = hashs.size();
+        if(size % 100 == 0) {
+            System.out.println("size : " + size);
+        }
         t = System.nanoTime();
-
-        transactionCacheStorageService.putTx(tx);
+        transactionService.newTx(tx);
 
         t1 += (System.nanoTime() - t);
         t = System.nanoTime();
@@ -82,49 +86,6 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
         transactionService.forwardTx(tx, fromNode);
 
         t2 += (System.nanoTime() - t);
-        t = System.nanoTime();
-
-
-        transactionService.newTx(tx);
-        t3 += (System.nanoTime() - t);
-
-//        t = System.nanoTime();
-//
-//        ValidateResult result = tx.verify();
-//        t1 += (System.nanoTime() - t);
-//        t = System.nanoTime();
-//
-//        if (result.isFailed()) {
-//            return;
-//        }
-//        if (temporaryCacheManager.cacheTx(tx)) {
-//
-//            t2 += (System.nanoTime() - t);
-//            t = System.nanoTime();
-//
-//            transactionService.newTx(tx);
-//
-//
-//            t3 += (System.nanoTime() - t);
-//            t = System.nanoTime();
-//
-//
-//            transactionCacheStorageService.putTx(tx);
-//
-//
-//            t4 += (System.nanoTime() - t);
-//            t = System.nanoTime();
-//
-//
-//            transactionService.forwardTx(tx, fromNode);
-//
-//
-//            t5 += (System.nanoTime() - t);
-//            t = System.nanoTime();
-//
-//            return;
-//        }
-//        t2 += (System.nanoTime() - t);
     }
 
 }

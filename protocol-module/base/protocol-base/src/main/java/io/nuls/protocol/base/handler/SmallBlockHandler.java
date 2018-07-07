@@ -30,23 +30,18 @@ import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.base.cache.ProtocolCacheHandler;
 import io.nuls.protocol.base.utils.AssemblyBlockUtil;
 import io.nuls.protocol.cache.TemporaryCacheManager;
-import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.GetTxGroupRequest;
 import io.nuls.protocol.message.SmallBlockMessage;
 import io.nuls.protocol.model.GetTxGroupParam;
 import io.nuls.protocol.model.SmallBlock;
-import io.nuls.protocol.model.TxGroup;
 import io.nuls.protocol.service.BlockService;
-import io.nuls.protocol.service.DownloadService;
-import io.nuls.protocol.storage.service.TransactionCacheStorageService;
+import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,7 +58,7 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
 
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
-    private TransactionCacheStorageService transactionCacheStorageService = NulsContext.getServiceBean(TransactionCacheStorageService.class);
+    private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
 
     @Override
     public void onMessage(SmallBlockMessage event, Node fromNode) {
@@ -97,11 +92,7 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
         for (NulsDigestData hash : smallBlock.getTxHashList()) {
             Transaction tx = txMap.get(hash);
             if (null == tx) {
-//                tx = temporaryCacheManager.getTx(hash);
-//                if(null == tx) {
-//                    tx = transactionCacheStorageService.getTx(hash);
-//                }
-                tx = transactionCacheStorageService.getTx(hash);
+                tx = transactionService.getTx(hash);
                 if (tx != null) {
                     smallBlock.getSubTxList().add(tx);
                     txMap.put(hash, tx);

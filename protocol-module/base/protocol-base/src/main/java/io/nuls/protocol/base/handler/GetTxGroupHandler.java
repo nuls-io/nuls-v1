@@ -29,19 +29,16 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.MessageDataType;
 import io.nuls.protocol.message.GetTxGroupRequest;
 import io.nuls.protocol.message.NotFoundMessage;
-import io.nuls.protocol.message.ReactMessage;
 import io.nuls.protocol.message.TxGroupMessage;
 import io.nuls.protocol.model.GetTxGroupParam;
 import io.nuls.protocol.model.NotFound;
 import io.nuls.protocol.model.TxGroup;
-import io.nuls.protocol.storage.service.TransactionCacheStorageService;
+import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,9 +49,7 @@ import java.util.List;
  */
 public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest> {
 
-    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
-    private TransactionCacheStorageService transactionCacheStorageService = NulsContext.getServiceBean(TransactionCacheStorageService.class);
+    private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
 
     @Override
     public void onMessage(GetTxGroupRequest message, Node fromNode) {
@@ -80,14 +75,7 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
         List<Transaction> txList = new ArrayList<>();
 
         for (NulsDigestData hash : getTxGroupParam.getTxHashList()) {
-//            Transaction tx = temporaryCacheManager.getTx(hash);
-//            if(tx == null) {
-//                tx = transactionCacheStorageService.getTx(hash);
-//            }
-            Transaction tx = transactionCacheStorageService.getTx(hash);
-            if (tx == null) {
-                tx = ledgerService.getTx(hash);
-            }
+            Transaction tx = transactionService.getTx(hash);
             if (tx != null) {
                 txList.add(tx);
             } else {

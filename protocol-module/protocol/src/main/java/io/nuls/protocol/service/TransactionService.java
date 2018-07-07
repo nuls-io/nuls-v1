@@ -25,6 +25,7 @@
 
 package io.nuls.protocol.service;
 
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.validate.ValidateResult;
@@ -97,4 +98,6 @@ public interface TransactionService {
      * Operation result: success returns successResult. When failure, data returns the discard list, and MSG returns the cause of conflict.
      */
     ValidateResult conflictDetect(List<Transaction> txList);
+
+    Transaction getTx(NulsDigestData hash);
 }

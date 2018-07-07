@@ -1,4 +1,4 @@
-package io.nuls.protocol.storage.service;
+package io.nuls.consensus.poc.storage.service;
 
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
@@ -11,7 +11,7 @@ public interface TransactionCacheStorageService {
 
     boolean removeTx(NulsDigestData hash);
 
-    int getMaxIndex();
+    int getStartIndex();
 
     Transaction pollTx();
 }

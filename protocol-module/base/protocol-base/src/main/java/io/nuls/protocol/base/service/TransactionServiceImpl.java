@@ -28,6 +28,7 @@ package io.nuls.protocol.base.service;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.TransactionProcessor;
@@ -41,7 +42,6 @@ import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.ForwardTxMessage;
 import io.nuls.protocol.message.TransactionMessage;
 import io.nuls.protocol.service.TransactionService;
-import io.nuls.protocol.storage.service.TransactionCacheStorageService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +60,6 @@ public class TransactionServiceImpl implements TransactionService {
     private LedgerService ledgerService;
     @Autowired
     private ConsensusService consensusService;
-    @Autowired
-    private TransactionCacheStorageService transactionCacheStorageService;
 
     /**
      * 确认交易时调用的方法，对交易相关的业务进行提交操作
@@ -136,8 +134,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
     @Override
     public Result forwardTxAndCacche(Transaction tx, Node excludeNode) {
-//        temporaryCacheManager.cacheTx(tx);
-        transactionCacheStorageService.putTx(tx);
+        consensusService.newTx(tx);
         return forwardTx(tx, excludeNode);
     }
 
@@ -150,13 +147,9 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Result broadcastTx(Transaction tx) {
-
         TransactionMessage message = new TransactionMessage();
         message.setMsgBody(tx);
-
-//        consensusService.newTx(tx);
-//        temporaryCacheManager.cacheTx(tx);
-
+        consensusService.newTx(tx);
         return messageBusService.broadcast(message, null, true);
     }
 
@@ -200,5 +193,10 @@ public class TransactionServiceImpl implements TransactionService {
             }
         }
         return result;
+    }
+
+    @Override
+    public Transaction getTx(NulsDigestData hash) {
+        return consensusService.getTx(hash);
     }
 }
