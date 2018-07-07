@@ -264,7 +264,7 @@ public class ConsensusProcess {
 
     private void broadcastSmallBlock(Block block) {
         SmallBlock smallBlock = ConsensusTool.getSmallBlock(block);
-        temporaryCacheManager.cacheSmallBlock(smallBlock);
+        temporaryCacheManager.cacheSmallBlock(requestHash, smallBlock);
         blockService.forwardBlock(block.getHeader().getHash(), null);
     }
 

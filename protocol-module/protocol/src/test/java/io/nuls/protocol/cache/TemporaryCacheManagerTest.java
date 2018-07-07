@@ -79,14 +79,14 @@ public class TemporaryCacheManagerTest {
         NulsDigestData hash = NulsDigestData.calcDigestData("abcdefg".getBytes());
         header.setHash(hash);
         smallBlock.setHeader(header);
-        manager.cacheSmallBlock(smallBlock);
+        manager.cacheSmallBlock(requestHash, smallBlock);
         assertTrue(true);
 
         this.getSmallBlock(hash, smallBlock);
 
         this.removeSmallBlock(hash);
 
-        manager.cacheSmallBlock(smallBlock);
+        manager.cacheSmallBlock(requestHash, smallBlock);
 
         this.clear();
     }

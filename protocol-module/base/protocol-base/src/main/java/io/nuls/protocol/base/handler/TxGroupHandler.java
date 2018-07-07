@@ -24,18 +24,36 @@
  */
 package io.nuls.protocol.base.handler;
 
+import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.*;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
 import io.nuls.protocol.base.cache.ProtocolCacheHandler;
+import io.nuls.protocol.base.utils.AssemblyBlockUtil;
+import io.nuls.protocol.cache.TemporaryCacheManager;
+import io.nuls.protocol.message.GetTxGroupRequest;
 import io.nuls.protocol.message.TxGroupMessage;
+import io.nuls.protocol.model.GetTxGroupParam;
+import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.model.TxGroup;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author facjas
  */
 public class TxGroupHandler extends AbstractMessageHandler<TxGroupMessage> {
+
+    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
+
+    private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
     @Override
     public void onMessage(TxGroupMessage message, Node fromNode) throws NulsException {
@@ -44,6 +62,32 @@ public class TxGroupHandler extends AbstractMessageHandler<TxGroupMessage> {
             Log.warn("recieved a null txGroup form " + fromNode.getId());
             return;
         }
-        ProtocolCacheHandler.receiveTxGroup(txGroup);
+
+        SmallBlock smallBlock = temporaryCacheManager.getSmallBlock(txGroup.getRequestHash());
+        if (null == smallBlock) {
+            return;
+        }
+        BlockHeader header = smallBlock.getHeader();
+        Map<NulsDigestData, Transaction> txMap = new HashMap<>();
+        for (Transaction tx : smallBlock.getSubTxList()) {
+            txMap.put(tx.getHash(), tx);
+        }
+        for(Transaction tx :txGroup.getTxList()) {
+            txMap.put(tx.getHash(), tx);
+        }
+        for (NulsDigestData hash : smallBlock.getTxHashList()) {
+            Transaction tx = txMap.get(hash);
+            if (null == tx) {
+                tx = temporaryCacheManager.getTx(hash);
+            }
+            if (tx != null) {
+                smallBlock.getSubTxList().add(tx);
+                txMap.put(hash, tx);
+            }
+        }
+
+        Block block = AssemblyBlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
+        consensusService.newBlock(block, fromNode);
+
     }
 }

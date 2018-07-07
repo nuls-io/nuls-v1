@@ -31,10 +31,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
@@ -42,12 +39,15 @@ import io.nuls.protocol.base.cache.ProtocolCacheHandler;
 import io.nuls.protocol.base.utils.AssemblyBlockUtil;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.message.GetTxGroupRequest;
 import io.nuls.protocol.message.SmallBlockMessage;
+import io.nuls.protocol.model.GetTxGroupParam;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.model.TxGroup;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.DownloadService;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,9 +61,6 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
     private ConsensusService consensusService = NulsContext.getServiceBean(ConsensusService.class);
 
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
-
-    private DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
-
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
     @Override
@@ -110,21 +107,24 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
         }
         if (!needHashList.isEmpty()) {
             Log.info("block height : " + header.getHeight() + ", tx count : " + header.getTxCount() + " , get group tx of " + needHashList.size());
-            TxGroup txGroup = this.downloadService.downloadTxGroup(needHashList, fromNode).getData();
-            if (null == txGroup) {
-                Log.warn("get txgroup failed!block height:{},node:{},blockHash:{}", header.getHeight(), fromNode.getId(), header.getHash());
-                return;
-            }
-            Log.info("block height : " + header.getHeight() + " get group tx success ");
-
-            for (NulsDigestData hash : needHashList) {
-                Transaction tx = txGroup.getTx(hash);
-                if (null == tx) {
-                    Log.warn("get txgroup wrong!block height:{},node:{},blockHash:{}", header.getHeight(), fromNode.getId(), header.getHash());
+            GetTxGroupRequest request = new GetTxGroupRequest();
+            GetTxGroupParam param = new GetTxGroupParam();
+            param.setTxHashList(needHashList);
+            request.setMsgBody(param);
+            Result sendResult = this.messageBusService.sendToNode(request, fromNode, true);
+            if (sendResult.isFailed()) {
+                Log.warn("get tx group failed,height:" + header.getHeight());
+            } else {
+                NulsDigestData requestHash = null;
+                try {
+                    requestHash = NulsDigestData.calcDigestData(request.getMsgBody().serialize());
+                } catch (IOException e) {
+                    Log.error(e);
                     return;
                 }
-                txMap.put(tx.getHash(), tx);
+                temporaryCacheManager.cacheSmallBlock(requestHash, smallBlock);
             }
+            return;
         }
 
         Block block = AssemblyBlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());

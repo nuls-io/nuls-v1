@@ -24,7 +24,6 @@
  */
 package io.nuls.protocol.cache;
 
-import io.nuls.cache.CacheMap;
 import io.nuls.cache.LimitHashMap;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
@@ -39,7 +38,7 @@ import io.nuls.protocol.model.SmallBlock;
 public class TemporaryCacheManager {
     private static final TemporaryCacheManager INSTANCE = new TemporaryCacheManager();
 
-    private CacheMap<NulsDigestData, SmallBlock> smallBlockCacheMap = new CacheMap<>("temp-small-block-cache", 16, NulsDigestData.class, SmallBlock.class, 1000, 0, null);
+    private LimitHashMap<NulsDigestData, SmallBlock> smallBlockCacheMap = new LimitHashMap<>(100);
 //    private CacheMap<NulsDigestData, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 128, NulsDigestData.class, Transaction.class, 0, 3600);
 
     private LimitHashMap<NulsDigestData, Transaction> txCacheMap = new LimitHashMap<>(200000);
@@ -58,23 +57,22 @@ public class TemporaryCacheManager {
      *
      * @param smallBlock 要放入内存中的对象
      */
-    public void cacheSmallBlock(SmallBlock smallBlock) {
-        smallBlockCacheMap.put(smallBlock.getHeader().getHash(), smallBlock);
-        smallBlockCacheMap.remove(smallBlock.getHeader().getPreHash());
+    public void cacheSmallBlock(NulsDigestData requestHash, SmallBlock smallBlock) {
+        smallBlockCacheMap.put(requestHash, smallBlock);
     }
 
     /**
      * 根据区块hash获取完整的SmallBlock
      * get SmallBlock by block header digest data
      *
-     * @param hash blockHash
+     * @param requestHash getTxGroupRequestHash
      * @return SmallBlock
      */
-    public SmallBlock getSmallBlock(NulsDigestData hash) {
+    public SmallBlock getSmallBlock(NulsDigestData requestHash) {
         if (null == smallBlockCacheMap) {
             return null;
         }
-        return smallBlockCacheMap.get(hash);
+        return smallBlockCacheMap.get(requestHash);
     }
 
     /**
@@ -130,7 +128,7 @@ public class TemporaryCacheManager {
      * destroy cache
      */
     public void destroy() {
-        this.smallBlockCacheMap.destroy();
+        this.smallBlockCacheMap.clear();
         this.txCacheMap.clear();
     }
 
