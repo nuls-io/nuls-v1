@@ -44,9 +44,9 @@ public class PersistentQueueTest {
     @Test
     public void test() throws Exception {
 //        FQueue  txQueue = new FQueue("tx-1", 1000001L);
-        PersistentQueue  txQueue = new PersistentQueue("tx-12", 1000001L);
+        PersistentQueue txQueue = new PersistentQueue("tx-121", 1000001L);
         this.txList = new ArrayList<>();
-        for (int i = 0; i <1000000; i++) {
+        for (int i = 0; i < 1000000; i++) {
             Transaction tx = new TestTransaction();
             tx.setTime(1);
             tx.setRemark("sdfsdfsdfsdfsdfsdfaaadsfasdfsadfsdfasdfasdfasdfasdfasdfsadfaaaaaaaaaaaaaaaaaaaaaabsdsadfsadfsdfsdfsdfsdfsdfsdfsdfaaadsfasdfsadfsdfasdfasdfasdfasdfasdfsadfaaaaaaaaaaaaaaaaaaaaaabsdsadfsadfsdfsdfsdfsdfsdfsdfsdfaa".getBytes());
@@ -60,11 +60,17 @@ public class PersistentQueueTest {
         System.out.println("存入100万条用时：" + (System.currentTimeMillis() - start) + "ms");
 
         start = System.currentTimeMillis();
-        for (int i = 0; i < 1000000; i ++) {
-            txQueue.take();
+        int i = 0;
+        while (true) {
+            i++;
+            byte[] bytes = txQueue.poll();
+            System.out.println(i + ":::::::" + bytes);
+            if (null == bytes) {
+                break;
+            }
         }
         System.out.println("取出100万次用时：" + (System.currentTimeMillis() - start) + "ms");
-
+//
         assertTrue(true);
     }
 }

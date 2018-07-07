@@ -137,7 +137,6 @@ public class TimeService implements Runnable {
             Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
-            Log.error(e);
             return 0L;
         }
     }
