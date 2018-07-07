@@ -60,6 +60,9 @@ public class TxProcessTask implements Runnable {
     private Set<String> temporaryFromSet = new HashSet<>();
 
     private Set<NulsDigestData> verifySuccessHashs = new HashSet<>();
+    private Map<NulsDigestData, NulsDigestData> orphanTxDependHashs = new HashMap<>();
+
+    private List<Transaction> orphanTxList = new ArrayList<>();
 
     int count = 0;
     int size = 0;
@@ -71,7 +74,19 @@ public class TxProcessTask implements Runnable {
         } catch (Exception e) {
             Log.error(e);
         }
+        try {
+            doOrphanTxTask();
+        } catch (Exception e) {
+            Log.error(e);
+        }
         System.out.println("count: " + count + " , size : " + size);
+    }
+
+    private void doOrphanTxTask() {
+        orphanTxList.sort(txComparator);
+        for(Transaction tx : orphanTxList) {
+            processTx(tx);
+        }
     }
 
     private void doTask() {
@@ -96,22 +111,45 @@ public class TxProcessTask implements Runnable {
 
             ValidateResult validateResult = ledgerService.verifyCoinData(tx, temporaryToMap, temporaryFromSet);
             if (validateResult.isSuccess()) {
-                pool.add(tx, false);
-
-                List<Coin> fromCoins = tx.getCoinData().getFrom();
-                for(Coin coin : fromCoins) {
-                    String key = LedgerUtil.asString(coin.getOwner());
-                    temporaryFromSet.remove(key);
-                    temporaryToMap.remove(key);
+                if(!verifySuccessHashs.add(tx.getHash())) {
+                    return;
                 }
+                pool.add(new TxContainer(tx), false);
 
-                verifySuccessHashs.add(tx.getHash());
+//                List<Coin> fromCoins = tx.getCoinData().getFrom();
+//                for(Coin coin : fromCoins) {
+//                    String key = LedgerUtil.asString(coin.getOwner());
+//                    temporaryFromSet.remove(key);
+//                    temporaryToMap.remove(key);
+//                }
                 count++;
+
+//                checkOrphanTx(tx);
             } else if (validateResult.getErrorCode().equals(TransactionErrorCode.ORPHAN_TX)) {
                 processOrphanTx(tx);
             }
         } catch (Exception e) {
             Log.error(e);
+        }
+    }
+
+    private void checkOrphanTx(Transaction tx) {
+        if(orphanTxDependHashs.containsKey(tx.getHash())) {
+            NulsDigestData dependTxHash = orphanTxDependHashs.remove(tx.getHash());
+            Transaction orphanTx = transactionCacheStorageService.getTx(orphanTxDependHashs.get(dependTxHash));
+
+            if(orphanTx == null) {
+                Log.warn("");
+                return;
+            }
+            if(!verifySuccessHashs.add(orphanTx.getHash())) {
+                return;
+            }
+
+            pool.add(new TxContainer(orphanTx), false);
+            count++;
+
+            checkOrphanTx(orphanTx);
         }
     }
 
@@ -139,17 +177,17 @@ public class TxProcessTask implements Runnable {
             return;
         }
 
-        // find in cache
-        boolean hashFound = true;
-        for(NulsDigestData hash : notFoundHashs) {
-            if(!verifySuccessHashs.contains(hash)) {
-                hashFound = false;
-                break;
-            }
-        }
+        orphanTxList.add(tx);
+//
+//        transactionCacheStorageService.putTx(tx);
+//        // find in cache
+//        boolean hashFound = true;
+//        for(NulsDigestData hash : notFoundHashs) {
+//            orphanTxDependHashs.put(hash, tx.getHash());
+//        }
 
-        if(!hashFound) {
-            transactionCacheStorageService.putTx(tx);
-        }
+//        if(!hashFound) {
+//            transactionCacheStorageService.putTx(tx);
+//        }
     }
 }
