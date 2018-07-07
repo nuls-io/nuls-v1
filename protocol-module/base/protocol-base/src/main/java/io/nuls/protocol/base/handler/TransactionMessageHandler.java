@@ -29,6 +29,7 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
+import io.nuls.protocol.base.cache.TransactionDuplicateRemoval;
 import io.nuls.protocol.message.TransactionMessage;
 import io.nuls.protocol.service.TransactionService;
 
@@ -52,6 +53,12 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
         if (tx.isSystemTx()) {
             return;
         }
+        NulsDigestData hash = tx.getHash();
+        boolean consains = TransactionDuplicateRemoval.FILTER.contains(hash.getDigestBytes());
+        if (consains) {
+            return;
+        }
+        TransactionDuplicateRemoval.FILTER.insert(hash.getDigestBytes());
         transactionService.newTx(tx);
     }
 
