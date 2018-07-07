@@ -66,7 +66,7 @@ public interface ProtocolConstant extends NulsConstant {
      * 最大区块大小（不包含区块头）
      * Maximum block size (excluding block headers)
      */
-    long MAX_BLOCK_SIZE = 5 * 1024 * 1024L;
+    long MAX_BLOCK_SIZE = 2 * 1024 * 1024L;
 
     /**
      * 协议模块的所有消息类型定义
