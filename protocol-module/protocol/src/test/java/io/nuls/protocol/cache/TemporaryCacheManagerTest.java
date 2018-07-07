@@ -79,6 +79,7 @@ public class TemporaryCacheManagerTest {
         NulsDigestData hash = NulsDigestData.calcDigestData("abcdefg".getBytes());
         header.setHash(hash);
         smallBlock.setHeader(header);
+        NulsDigestData requestHash = NulsDigestData.calcDigestData(new byte[]{0});
         manager.cacheSmallBlock(requestHash, smallBlock);
         assertTrue(true);
 
