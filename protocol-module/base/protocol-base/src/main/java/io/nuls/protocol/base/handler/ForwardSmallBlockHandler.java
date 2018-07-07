@@ -24,27 +24,17 @@
  */
 package io.nuls.protocol.base.handler;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.base.cache.ProtocolCacheHandler;
-import io.nuls.protocol.base.download.smblock.SmallBlockContainer;
-import io.nuls.protocol.base.download.smblock.SmallBlockDownloadProcessor;
-import io.nuls.protocol.base.download.tx.TransactionContainer;
-import io.nuls.protocol.base.download.tx.TransactionDownloadProcessor;
-import io.nuls.protocol.base.utils.filter.InventoryFilter;
 import io.nuls.protocol.message.ForwardSmallBlockMessage;
 import io.nuls.protocol.message.GetSmallBlockMessage;
-import io.nuls.protocol.model.SmallBlock;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author facjas
@@ -55,7 +45,6 @@ public class ForwardSmallBlockHandler extends AbstractMessageHandler<ForwardSmal
 
     private Set<NulsDigestData> set = new HashSet<>();
 
-    private SmallBlockDownloadProcessor smallBlockDownloadProcessor = SmallBlockDownloadProcessor.getInstance();
 
     @Override
     public void onMessage(ForwardSmallBlockMessage message, Node fromNode) {

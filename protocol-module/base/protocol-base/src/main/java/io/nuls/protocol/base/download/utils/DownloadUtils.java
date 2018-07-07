@@ -196,32 +196,4 @@ public class DownloadUtils {
         }
         return response.getHashList();
     }
-
-    public static TxGroup getTxGroup(List<NulsDigestData> txHashList, Node node) throws Exception {
-        GetTxGroupRequest request = new GetTxGroupRequest();
-        GetTxGroupParam param = new GetTxGroupParam();
-        param.setTxHashList(txHashList);
-        request.setMsgBody(param);
-        NulsDigestData requestHash = NulsDigestData.calcDigestData(request.getMsgBody().serialize());
-        Future<TxGroup> future = ProtocolCacheHandler.addGetTxGroupRequest(requestHash);
-        Future<NulsDigestData> reactFuture = ProtocolCacheHandler.addRequest(requestHash);
-
-        Result result = messageBusService.sendToNode(request, node, false);
-        if (result.isFailed()) {
-            ProtocolCacheHandler.removeTxGroupFuture(requestHash);
-            ProtocolCacheHandler.removeRequest(requestHash);
-            return null;
-        }
-        try {
-            reactFuture.get(1L, TimeUnit.SECONDS);
-            TxGroup txGroup = future.get(30L, TimeUnit.SECONDS);
-            return txGroup;
-        } catch (Exception e) {
-            Log.error(node.getId() + ",get txgroup failed!");
-            Log.error(e);
-            ProtocolCacheHandler.removeTxGroupFuture(request.getHash());
-            ProtocolCacheHandler.removeRequest(requestHash);
-            throw e;
-        }
-    }
 }

@@ -31,7 +31,6 @@ import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
-import io.nuls.consensus.poc.container.TxContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.BlockData;
@@ -155,7 +154,7 @@ public class ConsensusProcess {
                     if (txHashList.contains(transaction.getHash())) {
                         continue;
                     }
-                    txMemoryPool.add(new TxContainer(transaction), false);
+                    txMemoryPool.add(transaction, false);
                 }
                 start = System.currentTimeMillis();
                 block = doPacking(self, round);
@@ -316,9 +315,9 @@ public class ConsensusProcess {
                 break;
             }
             start = System.nanoTime();
-            TxContainer txContainer = txMemoryPool.get();
+            Transaction tx = txMemoryPool.get();
             getTxUse += (System.nanoTime() - start);
-            if (txContainer == null) {
+            if (tx == null) {
                 try {
                     sleepTIme += 100;
                     Thread.sleep(100L);
@@ -328,12 +327,11 @@ public class ConsensusProcess {
                 continue;
             }
 
-            Transaction tx = txContainer.getTx();
             start = System.nanoTime();
             long txSize = tx.size();
             sizeTime += (System.nanoTime() - start);
             if ((totalSize + txSize) > ProtocolConstant.MAX_BLOCK_SIZE) {
-                txMemoryPool.addInFirst(txContainer, false);
+                txMemoryPool.addInFirst(tx, false);
                 break;
             }
             count++;
@@ -352,12 +350,11 @@ public class ConsensusProcess {
             }
             start = System.nanoTime();
             if (result.isFailed()) {
-                if (txContainer.getTx() == null || txContainer.getPackageCount() >= 2) {
+                if (tx == null) {
                     continue;
                 }
                 if (result.getErrorCode().equals(TransactionErrorCode.ORPHAN_TX)) {
-                    txMemoryPool.add(txContainer, true);
-                    txContainer.setPackageCount(txContainer.getPackageCount() + 1);
+                    txMemoryPool.add(tx, true);
                 }
                 failed1Use += (System.nanoTime() - start);
                 continue;

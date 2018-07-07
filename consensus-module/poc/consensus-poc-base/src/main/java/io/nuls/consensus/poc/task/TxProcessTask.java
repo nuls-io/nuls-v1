@@ -96,7 +96,7 @@ public class TxProcessTask implements Runnable {
 
             ValidateResult validateResult = ledgerService.verifyCoinData(tx, temporaryToMap, temporaryFromSet);
             if (validateResult.isSuccess()) {
-                pool.add(new TxContainer(tx), false);
+                pool.add(tx, false);
 
                 List<Coin> fromCoins = tx.getCoinData().getFrom();
                 for(Coin coin : fromCoins) {

@@ -27,11 +27,13 @@
 package io.nuls.consensus.poc.cache;
 
 import io.nuls.cache.LimitHashMap;
-import io.nuls.consensus.poc.container.TxContainer;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -44,9 +46,9 @@ public final class TxMemoryPool {
 
     private final static TxMemoryPool INSTANCE = new TxMemoryPool();
 
-    private Queue<TxContainer> txQueue;
+    private Queue<Transaction> txQueue;
 
-    private LimitHashMap<NulsDigestData, TxContainer> orphanContainer;
+    private LimitHashMap<NulsDigestData, Transaction> orphanContainer;
 
     private TxMemoryPool() {
         txQueue = new LinkedBlockingDeque<>();
@@ -59,14 +61,14 @@ public final class TxMemoryPool {
         return INSTANCE;
     }
 
-    public boolean addInFirst(TxContainer tx, boolean isOrphan) {
+    public boolean addInFirst(Transaction tx, boolean isOrphan) {
         try {
-            if (tx == null || tx.getTx() == null) {
+            if (tx == null) {
                 return false;
             }
             //check Repeatability
             if (isOrphan) {
-                NulsDigestData hash = tx.getTx().getHash();
+                NulsDigestData hash = tx.getHash();
                 orphanContainer.put(hash, tx);
             } else {
                 ((LinkedBlockingDeque) txQueue).addFirst(tx);
@@ -76,14 +78,14 @@ public final class TxMemoryPool {
         }
     }
 
-    public boolean add(TxContainer tx, boolean isOrphan) {
+    public boolean add(Transaction tx, boolean isOrphan) {
         try {
-            if (tx == null || tx.getTx() == null) {
+            if (tx == null) {
                 return false;
             }
             //check Repeatability
             if (isOrphan) {
-                NulsDigestData hash = tx.getTx().getHash();
+                NulsDigestData hash = tx.getHash();
                 orphanContainer.put(hash, tx);
             } else {
                 txQueue.offer(tx);
@@ -100,26 +102,21 @@ public final class TxMemoryPool {
      *
      * @return TxContainer
      */
-    public TxContainer get() {
+    public Transaction get() {
         return txQueue.poll();
     }
 
     public List<Transaction> getAll() {
         List<Transaction> txs = new ArrayList<>();
-        Iterator<TxContainer> it = txQueue.iterator();
-        while(it.hasNext()) {
-            txs.add(it.next().getTx());
+        Iterator<Transaction> it = txQueue.iterator();
+        while (it.hasNext()) {
+            txs.add(it.next());
         }
         return txs;
     }
 
     public List<Transaction> getAllOrphan() {
-        List<Transaction> txs = new ArrayList<>();
-        Collection<TxContainer> list = orphanContainer.values();
-        for (TxContainer txContainer : list) {
-            txs.add(txContainer.getTx());
-        }
-        return txs;
+        return new ArrayList<>(orphanContainer.values());
     }
 
     public boolean remove(NulsDigestData hash) {
@@ -127,7 +124,7 @@ public final class TxMemoryPool {
 //        if (obj != null) {
 //            txHashQueue.remove(hash);
 //        } else {
-            orphanContainer.remove(hash);
+        orphanContainer.remove(hash);
 //        }
         return true;
     }
@@ -150,11 +147,11 @@ public final class TxMemoryPool {
     }
 
     public int getPoolSize() {
-        return txQueue.size() ;
+        return txQueue.size();
     }
 
     public int getOrphanPoolSize() {
-        return  orphanContainer.size();
+        return orphanContainer.size();
     }
 
     public void removeOrphan(NulsDigestData hash) {

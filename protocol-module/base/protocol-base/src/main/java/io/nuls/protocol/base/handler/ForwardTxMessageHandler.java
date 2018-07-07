@@ -26,19 +26,14 @@ package io.nuls.protocol.base.handler;
 
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.base.cache.ProtocolCacheHandler;
-import io.nuls.protocol.base.download.tx.TransactionContainer;
-import io.nuls.protocol.base.download.tx.TransactionDownloadProcessor;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.message.ForwardTxMessage;
 import io.nuls.protocol.message.GetTxMessage;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * @author facjas

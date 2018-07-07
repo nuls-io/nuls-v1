@@ -79,7 +79,6 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
             if (tx != null) {
                 txList.add(tx);
             } else {
-                this.sendNotFound(requestHash, fromNode);
                 return;
             }
         }
@@ -93,16 +92,6 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
 
         txGroupMessage.setMsgBody(txGroup);
         messageBusService.sendToNode(txGroupMessage, fromNode, true);
-    }
-
-    private void sendNotFound(NulsDigestData hash, Node fromNode) {
-        NotFoundMessage event = new NotFoundMessage();
-        NotFound data = new NotFound(MessageDataType.TRANSACTIONS, hash);
-        event.setMsgBody(data);
-        Result result = this.messageBusService.sendToNode(event, fromNode, true);
-        if (result.isFailed()) {
-            Log.warn("send not found failed:" + fromNode.getId() + ", hash:" + hash);
-        }
     }
 
 }

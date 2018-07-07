@@ -26,15 +26,13 @@ package io.nuls.protocol.base.handler;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.constant.MessageDataType;
-import io.nuls.protocol.message.*;
-import io.nuls.protocol.model.NotFound;
+import io.nuls.protocol.message.GetTxMessage;
+import io.nuls.protocol.message.TransactionMessage;
 import io.nuls.protocol.service.TransactionService;
 
 /**
@@ -52,25 +50,14 @@ public class GetTxMessageHandler extends AbstractMessageHandler<GetTxMessage> {
         }
         Transaction tx = transactionService.getTx(message.getMsgBody());
         if (null == tx) {
-            sendNotFound(message.getMsgBody(), fromNode);
             return;
         }
 
         TransactionMessage txMessage = new TransactionMessage();
         txMessage.setMsgBody(tx);
         Result result = messageBusService.sendToNode(txMessage, fromNode, true);
-        if(!result.isSuccess()) {
+        if (!result.isSuccess()) {
             Log.error("send error to node : " + fromNode.getId());
-        }
-    }
-
-    private void sendNotFound(NulsDigestData hash, Node fromNode) {
-        NotFoundMessage event = new NotFoundMessage();
-        NotFound data = new NotFound(MessageDataType.TRANSACTION, hash);
-        event.setMsgBody(data);
-        Result result = this.messageBusService.sendToNode(event, fromNode, true);
-        if (result.isFailed()) {
-            Log.warn("send not found failed:" + fromNode.getId() + ", hash:" + hash);
         }
     }
 

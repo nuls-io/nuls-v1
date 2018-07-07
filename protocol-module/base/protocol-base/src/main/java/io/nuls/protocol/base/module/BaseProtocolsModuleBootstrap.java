@@ -25,13 +25,8 @@
 package io.nuls.protocol.base.module;
 
 
-import io.nuls.account.model.Account;
-import io.nuls.account.service.AccountService;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.core.tools.log.Log;
-import io.nuls.db.service.DBService;
-import io.nuls.kernel.cfg.NulsConfig;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -41,11 +36,8 @@ import io.nuls.kernel.utils.TransactionManager;
 import io.nuls.message.bus.constant.MessageBusConstant;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.protocol.base.download.smblock.SmallBlockDownloadProcessor;
-import io.nuls.protocol.base.download.tx.TransactionDownloadProcessor;
 import io.nuls.protocol.base.handler.*;
 import io.nuls.protocol.base.service.DownloadServiceImpl;
-import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.message.*;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.model.tx.TransferTransaction;
@@ -53,8 +45,7 @@ import io.nuls.protocol.module.AbstractProtocolModule;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.DownloadService;
 
-;import java.util.Collection;
-import java.util.List;
+;
 
 /**
  * @author Niels
