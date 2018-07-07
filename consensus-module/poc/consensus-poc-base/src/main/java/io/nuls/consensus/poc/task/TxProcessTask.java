@@ -59,9 +59,6 @@ public class TxProcessTask implements Runnable {
     private Map<String, Coin> temporaryToMap = new HashMap<>();
     private Set<String> temporaryFromSet = new HashSet<>();
 
-    private Set<NulsDigestData> verifySuccessHashs = new HashSet<>();
-    private Map<NulsDigestData, NulsDigestData> orphanTxDependHashs = new HashMap<>();
-
     private List<Transaction> orphanTxList = new ArrayList<>();
 
     int count = 0;
@@ -84,8 +81,14 @@ public class TxProcessTask implements Runnable {
 
     private void doOrphanTxTask() {
         orphanTxList.sort(txComparator);
-        for(Transaction tx : orphanTxList) {
-            processTx(tx);
+
+        Iterator<Transaction> it = orphanTxList.iterator();
+        while(it.hasNext()) {
+            Transaction tx = it.next();
+            boolean success = processTx(tx, true);
+            if(success) {
+                it.remove();
+            }
         }
     }
 
@@ -93,15 +96,15 @@ public class TxProcessTask implements Runnable {
         Transaction tx = null;
         while((tx = transactionCacheStorageService.pollTx()) != null) {
             size++;
-            processTx(tx);
+            processTx(tx, false);
         }
     }
 
-    private void processTx(Transaction tx) {
+    private boolean processTx(Transaction tx, boolean isOrphanTx) {
         try {
             Result result = tx.verify();
             if(result.isFailed()) {
-                return;
+                return false;
             }
 
 //            Transaction tempTx = ledgerService.getTx(tx.getHash());
@@ -111,83 +114,27 @@ public class TxProcessTask implements Runnable {
 
             ValidateResult validateResult = ledgerService.verifyCoinData(tx, temporaryToMap, temporaryFromSet);
             if (validateResult.isSuccess()) {
-                if(!verifySuccessHashs.add(tx.getHash())) {
-                    return;
-                }
                 pool.add(new TxContainer(tx), false);
 
-//                List<Coin> fromCoins = tx.getCoinData().getFrom();
-//                for(Coin coin : fromCoins) {
-//                    String key = LedgerUtil.asString(coin.getOwner());
-//                    temporaryFromSet.remove(key);
-//                    temporaryToMap.remove(key);
-//                }
+                List<Coin> fromCoins = tx.getCoinData().getFrom();
+                for(Coin coin : fromCoins) {
+                    String key = LedgerUtil.asString(coin.getOwner());
+                    temporaryFromSet.remove(key);
+                    temporaryToMap.remove(key);
+                }
                 count++;
 
-//                checkOrphanTx(tx);
-            } else if (validateResult.getErrorCode().equals(TransactionErrorCode.ORPHAN_TX)) {
+                return true;
+            } else if (validateResult.getErrorCode().equals(TransactionErrorCode.ORPHAN_TX) && !isOrphanTx) {
                 processOrphanTx(tx);
             }
         } catch (Exception e) {
             Log.error(e);
         }
-    }
-
-    private void checkOrphanTx(Transaction tx) {
-        if(orphanTxDependHashs.containsKey(tx.getHash())) {
-            NulsDigestData dependTxHash = orphanTxDependHashs.remove(tx.getHash());
-            Transaction orphanTx = transactionCacheStorageService.getTx(orphanTxDependHashs.get(dependTxHash));
-
-            if(orphanTx == null) {
-                Log.warn("");
-                return;
-            }
-            if(!verifySuccessHashs.add(orphanTx.getHash())) {
-                return;
-            }
-
-            pool.add(new TxContainer(orphanTx), false);
-            count++;
-
-            checkOrphanTx(orphanTx);
-        }
+        return false;
     }
 
     private void processOrphanTx(Transaction tx) throws NulsException {
-        //获取相关交易
-        List<Coin> fromCoins = tx.getCoinData().getFrom();
-        Set<NulsDigestData> fromHashSets = new HashSet<>();
-        for(Coin coin : fromCoins) {
-            byte[] hashBytes = LedgerUtil.getTxHashBytes(coin.getOwner());
-            NulsDigestData txHash = new NulsDigestData();
-            txHash.parse(hashBytes, 0);
-            fromHashSets.add(txHash);
-        }
-
-        List<NulsDigestData> notFoundHashs = new ArrayList<>();
-        for(NulsDigestData hash : fromHashSets) {
-            Transaction fromTx = ledgerService.getTx(hash);
-            if(fromTx == null) {
-                notFoundHashs.add(hash);
-            }
-        }
-
-        if(notFoundHashs.size() == 0) {
-            count ++;
-            return;
-        }
-
         orphanTxList.add(tx);
-//
-//        transactionCacheStorageService.putTx(tx);
-//        // find in cache
-//        boolean hashFound = true;
-//        for(NulsDigestData hash : notFoundHashs) {
-//            orphanTxDependHashs.put(hash, tx.getHash());
-//        }
-
-//        if(!hashFound) {
-//            transactionCacheStorageService.putTx(tx);
-//        }
     }
 }
