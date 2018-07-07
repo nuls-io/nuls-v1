@@ -32,6 +32,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
@@ -40,6 +41,7 @@ import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.ledger.util.LedgerUtil;
 import io.nuls.protocol.utils.TransactionTimeComparator;
+import org.spongycastle.util.Times;
 
 import java.util.*;
 
@@ -61,6 +63,8 @@ public class TxProcessTask implements Runnable {
 
     private List<Transaction> orphanTxList = new ArrayList<>();
 
+    private static int maxOrphanSize = 200000;
+
     int count = 0;
     int size = 0;
 
@@ -79,31 +83,33 @@ public class TxProcessTask implements Runnable {
         System.out.println("count: " + count + " , size : " + size);
     }
 
-    private void doOrphanTxTask() {
-        orphanTxList.sort(txComparator);
-
-        Iterator<Transaction> it = orphanTxList.iterator();
-        while(it.hasNext()) {
-            Transaction tx = it.next();
-            boolean success = processTx(tx, true);
-            if(success) {
-                it.remove();
-            }
-        }
-    }
-
     private void doTask() {
         Transaction tx = null;
-        while((tx = transactionCacheStorageService.pollTx()) != null) {
+        while ((tx = transactionCacheStorageService.pollTx()) != null && orphanTxList.size() < maxOrphanSize) {
             size++;
             processTx(tx, false);
         }
     }
 
+
+    private void doOrphanTxTask() {
+        orphanTxList.sort(txComparator);
+
+        Iterator<Transaction> it = orphanTxList.iterator();
+        while (it.hasNext()) {
+            Transaction tx = it.next();
+            boolean success = processTx(tx, true);
+            if (success) {
+                it.remove();
+            }
+        }
+    }
+
+
     private boolean processTx(Transaction tx, boolean isOrphanTx) {
         try {
             Result result = tx.verify();
-            if(result.isFailed()) {
+            if (result.isFailed()) {
                 return false;
             }
 
@@ -117,7 +123,7 @@ public class TxProcessTask implements Runnable {
                 pool.add(tx, false);
 
                 List<Coin> fromCoins = tx.getCoinData().getFrom();
-                for(Coin coin : fromCoins) {
+                for (Coin coin : fromCoins) {
                     String key = LedgerUtil.asString(coin.getOwner());
                     temporaryFromSet.remove(key);
                     temporaryToMap.remove(key);
@@ -127,6 +133,8 @@ public class TxProcessTask implements Runnable {
                 return true;
             } else if (validateResult.getErrorCode().equals(TransactionErrorCode.ORPHAN_TX) && !isOrphanTx) {
                 processOrphanTx(tx);
+            } else if (isOrphanTx) {
+                return tx.getTime() < (TimeService.currentTimeMillis() - 3600000L);
             }
         } catch (Exception e) {
             Log.error(e);
