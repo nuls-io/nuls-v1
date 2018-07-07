@@ -63,8 +63,6 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
         Result result = this.dbService.createArea(TRANSACTION_CACHE_KEY_NAME);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
-        } else {
-            dbService.destroyArea(TRANSACTION_CACHE_KEY_NAME);
         }
         startIndex = 1;
     }
