@@ -58,21 +58,15 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
 
     @Override
     public void afterPropertiesSet() throws NulsException {
+        dbService.destroyArea(TRANSACTION_CACHE_KEY_NAME);
+
         Result result = this.dbService.createArea(TRANSACTION_CACHE_KEY_NAME);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
-        }
-        byte[] lastKeyBytes = dbService.get(TRANSACTION_CACHE_KEY_NAME, LAST_KEY);
-        if(lastKeyBytes != null) {
-            lastIndex = Util.byteToInt(lastKeyBytes);
-        }
-        byte[] startIndexBytes = dbService.get(TRANSACTION_CACHE_KEY_NAME, START_KEY);
-        if(startIndexBytes == null) {
-            dbService.put(TRANSACTION_CACHE_KEY_NAME, START_KEY, Util.intToBytes(1));
-            startIndex = 1;
         } else {
-            startIndex = Util.byteToInt(startIndexBytes);
+            dbService.destroyArea(TRANSACTION_CACHE_KEY_NAME);
         }
+        startIndex = 1;
     }
 
     @Override
@@ -100,7 +94,7 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
             removeTx(tx.getHash());
             return result.isSuccess();
         }
-        result = dbService.put(TRANSACTION_CACHE_KEY_NAME, LAST_KEY, lastIndexBytes);
+//        result = dbService.put(TRANSACTION_CACHE_KEY_NAME, LAST_KEY, lastIndexBytes);
         return result.isSuccess();
     }
 
@@ -115,15 +109,19 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
 
     @Override
     public Transaction pollTx() {
+
         byte[] startIndexBytes = Util.intToBytes(startIndex);
 
         byte[] hashBytes = dbService.get(TRANSACTION_CACHE_KEY_NAME, startIndexBytes);
         if(hashBytes == null) {
             return null;
         }
+
         Transaction tx = dbService.getModel(TRANSACTION_CACHE_KEY_NAME, hashBytes, Transaction.class);
+
         startIndex++;
-        dbService.put(TRANSACTION_CACHE_KEY_NAME, START_KEY, Util.intToBytes(startIndex));
+//        dbService.put(TRANSACTION_CACHE_KEY_NAME, START_KEY, Util.intToBytes(startIndex));
+
         return tx;
     }
 
