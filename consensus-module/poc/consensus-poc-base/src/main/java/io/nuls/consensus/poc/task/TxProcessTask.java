@@ -82,7 +82,7 @@ public class TxProcessTask implements Runnable {
         } catch (Exception e) {
             Log.error(e);
         }
-        System.out.println("count: " + count + " , size : " + size);
+        System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
     }
 
     private void doTask() {
@@ -115,10 +115,10 @@ public class TxProcessTask implements Runnable {
                 return false;
             }
 
-//            Transaction tempTx = ledgerService.getTx(tx.getHash());
-//            if(tempTx != null) {
-//                return;
-//            }
+            Transaction tempTx = ledgerService.getTx(tx.getHash());
+            if(tempTx != null) {
+                return false;
+            }
 
             ValidateResult validateResult = ledgerService.verifyCoinData(tx, temporaryToMap, temporaryFromSet);
             if (validateResult.isSuccess()) {

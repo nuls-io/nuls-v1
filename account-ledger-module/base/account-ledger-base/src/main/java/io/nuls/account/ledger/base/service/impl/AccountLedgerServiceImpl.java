@@ -548,7 +548,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 return saveResult;
             }
 //            transactionService.newTx(tx);
-            Result sendResult = transactionService.forwardTxAndCacche(tx, null);
+            Result sendResult = transactionService.broadcastTx(tx);
             if (sendResult.isFailed()) {
                 this.rollbackTransaction(tx);
                 return sendResult;
