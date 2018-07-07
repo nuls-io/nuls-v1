@@ -50,6 +50,9 @@ public class TransactionTimeComparator implements Comparator<Transaction> {
 
     @Override
     public int compare(Transaction o1, Transaction o2) {
+        if (o1.getHash().equals(o2.getHash())) {
+            return 0;
+        }
         if (o1.getTime() < o2.getTime()) {
             return -1;
         } else if (o1.getTime() > o2.getTime()) {
@@ -63,7 +66,7 @@ public class TransactionTimeComparator implements Comparator<Transaction> {
                 } catch (NulsException e) {
                     Log.error(e);
                 }
-                if(o2.getHash().equals(hash)){
+                if (o2.getHash().equals(hash)) {
                     return 1;
                 }
             }
@@ -75,7 +78,7 @@ public class TransactionTimeComparator implements Comparator<Transaction> {
                 } catch (NulsException e) {
                     Log.error(e);
                 }
-                if(o1.getHash().equals(hash)){
+                if (o1.getHash().equals(hash)) {
                     return -1;
                 }
             }
