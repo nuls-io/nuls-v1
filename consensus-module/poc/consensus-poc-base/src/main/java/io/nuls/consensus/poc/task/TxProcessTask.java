@@ -86,6 +86,11 @@ public class TxProcessTask implements Runnable {
     }
 
     private void doTask() {
+
+        if (TxMemoryPool.getInstance().getPoolSize() >= 1000000L) {
+            return;
+        }
+
         Transaction tx = null;
         while ((tx = transactionQueueStorageService.pollTx()) != null && orphanTxList.size() < maxOrphanSize) {
             size++;
@@ -116,7 +121,7 @@ public class TxProcessTask implements Runnable {
             }
 
             Transaction tempTx = ledgerService.getTx(tx.getHash());
-            if(tempTx != null) {
+            if (tempTx != null) {
                 return isOrphanTx;
             }
 
