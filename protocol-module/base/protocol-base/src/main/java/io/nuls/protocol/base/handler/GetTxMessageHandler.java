@@ -37,6 +37,7 @@ import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.MessageDataType;
 import io.nuls.protocol.message.*;
 import io.nuls.protocol.model.NotFound;
+import io.nuls.protocol.storage.service.TransactionCacheStorageService;
 
 /**
  * @author facjas
@@ -45,6 +46,7 @@ public class GetTxMessageHandler extends AbstractMessageHandler<GetTxMessage> {
 
     private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
+    private TransactionCacheStorageService transactionCacheStorageService = NulsContext.getServiceBean(TransactionCacheStorageService.class);
 
     @Override
     public void onMessage(GetTxMessage message, Node fromNode) {
@@ -52,6 +54,9 @@ public class GetTxMessageHandler extends AbstractMessageHandler<GetTxMessage> {
             return;
         }
         Transaction tx = cacheManager.getTx(message.getMsgBody());
+        if(null == tx) {
+            tx = transactionCacheStorageService.getTx(message.getMsgBody());
+        }
         if (null == tx) {
             sendNotFound(message.getMsgBody(), fromNode);
             return;

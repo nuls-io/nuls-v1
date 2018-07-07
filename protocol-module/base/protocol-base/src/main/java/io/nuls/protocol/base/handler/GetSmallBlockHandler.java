@@ -24,28 +24,20 @@
  */
 package io.nuls.protocol.base.handler;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.Transaction;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
 import io.nuls.protocol.cache.TemporaryCacheManager;
-import io.nuls.protocol.constant.MessageDataType;
 import io.nuls.protocol.message.*;
-import io.nuls.protocol.model.NotFound;
 import io.nuls.protocol.model.SmallBlock;
-import io.nuls.protocol.service.BlockService;
 
 /**
  * @author facjas
  */
 public class GetSmallBlockHandler extends AbstractMessageHandler<GetSmallBlockMessage> {
 
-    private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
     private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
 
@@ -57,33 +49,10 @@ public class GetSmallBlockHandler extends AbstractMessageHandler<GetSmallBlockMe
         NulsDigestData blockHash = message.getMsgBody();
         SmallBlock smallBlock = cacheManager.getSmallBlockByHash(blockHash);
         if (null == smallBlock) {
-            Block block = NulsContext.getInstance().getBestBlock();
-            if (null == block) {
-                sendNotFound(blockHash, fromNode);
-                return;
-            }
-            smallBlock = new SmallBlock();
-            smallBlock.setHeader(block.getHeader());
-            smallBlock.setTxHashList(block.getTxHashList());
-            for (Transaction tx : block.getTxs()) {
-                if (tx.isSystemTx()) {
-                    smallBlock.addBaseTx(tx);
-                }
-            }
+            return;
         }
         SmallBlockMessage smallBlockMessage = new SmallBlockMessage();
         smallBlockMessage.setMsgBody(smallBlock);
         messageBusService.sendToNode(smallBlockMessage, fromNode, true);
     }
-
-    private void sendNotFound(NulsDigestData hash, Node fromNode) {
-        NotFoundMessage event = new NotFoundMessage();
-        NotFound data = new NotFound(MessageDataType.SMALL_BLOCK, hash);
-        event.setMsgBody(data);
-        Result result = this.messageBusService.sendToNode(event, fromNode, true);
-        if (result.isFailed()) {
-            Log.warn("send not found failed:" + fromNode.getId() + ", hash:" + hash);
-        }
-    }
-
 }

@@ -46,6 +46,7 @@ import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.model.TxGroup;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.DownloadService;
+import io.nuls.protocol.storage.service.TransactionCacheStorageService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,6 +63,7 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
 
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
+    private TransactionCacheStorageService transactionCacheStorageService = NulsContext.getServiceBean(TransactionCacheStorageService.class);
 
     @Override
     public void onMessage(SmallBlockMessage event, Node fromNode) {
@@ -96,6 +98,9 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
             Transaction tx = txMap.get(hash);
             if (null == tx) {
                 tx = temporaryCacheManager.getTx(hash);
+                if(null == tx) {
+                    tx = transactionCacheStorageService.getTx(hash);
+                }
                 if (tx != null) {
                     smallBlock.getSubTxList().add(tx);
                     txMap.put(hash, tx);

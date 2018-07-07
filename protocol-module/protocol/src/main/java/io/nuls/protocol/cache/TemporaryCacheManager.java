@@ -42,7 +42,7 @@ public class TemporaryCacheManager {
     private LimitHashMap<NulsDigestData, NulsDigestData> smallBlockHashCacheMap = new LimitHashMap<>(100);
 //    private CacheMap<NulsDigestData, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 128, NulsDigestData.class, Transaction.class, 0, 3600);
 
-    private LimitHashMap<NulsDigestData, Transaction> txCacheMap = new LimitHashMap<>(200000);
+    private LimitHashMap<NulsDigestData, Transaction> txCacheMap = new LimitHashMap<>(100000);
 
     private TemporaryCacheManager() {
 
