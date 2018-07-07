@@ -156,7 +156,7 @@ public class AliasService {
 
             this.transactionService.newTx(tx);
 
-            Result sendResult = this.transactionService.forwardTx(tx, null);
+            Result sendResult = this.transactionService.forwardTxAndCacche(tx, null);
             if (sendResult.isFailed()) {
                 accountLedgerService.rollbackTransaction(tx);
                 return sendResult;

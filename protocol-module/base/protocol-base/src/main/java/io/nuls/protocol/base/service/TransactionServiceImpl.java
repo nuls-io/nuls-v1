@@ -128,10 +128,14 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Result forwardTx(Transaction tx, Node excludeNode) {
-        temporaryCacheManager.cacheTx(tx);
         ForwardTxMessage message = new ForwardTxMessage();
         message.setMsgBody(tx.getHash());
         return messageBusService.broadcast(message, excludeNode, true);
+    }
+    @Override
+    public Result forwardTxAndCacche(Transaction tx, Node excludeNode) {
+        temporaryCacheManager.cacheTx(tx);
+        return forwardTx(tx, excludeNode);
     }
 
     /**

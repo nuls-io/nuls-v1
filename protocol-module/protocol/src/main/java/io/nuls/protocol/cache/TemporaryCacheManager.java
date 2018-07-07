@@ -30,9 +30,6 @@ import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.model.SmallBlock;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Used for sharing temporary data between multiple hander.
  * 用于不同的handler之间共享交易数据，交易缓存池中的数据已经放入，直到自动销毁前，不做清理
@@ -87,8 +84,8 @@ public class TemporaryCacheManager {
      *
      * @param tx transaction
      */
-    public void cacheTx(Transaction tx) {
-        txCacheMap.put(tx.getHash(), tx);
+    public boolean cacheTx(Transaction tx) {
+        return txCacheMap.put(tx.getHash(), tx);
     }
 
     /**

@@ -47,24 +47,27 @@ public class LimitHashMap<K, V> {
         this.maxSize = maxSize;
     }
 
-    public void put(K k, V v) {
-        map.put(k, v);
+    public boolean put(K k, V v) {
+        V other = map.put(k, v);
+        if(other != null) {
+            return false;
+        }
         queue.offer(k);
         if (maxSize > queue.size()) {
-            return;
+            return true;
         }
         int count = maxSize / 2;
         for (int i = 0; i < count; i++) {
             K key = queue.poll();
             if (null == key) {
-                return;
+                return true;
             }
             map.remove(key);
             if (count % 100 == 0 && count > queue.size()) {
                 break;
             }
         }
-
+        return true;
     }
 
     public void remove(K k) {

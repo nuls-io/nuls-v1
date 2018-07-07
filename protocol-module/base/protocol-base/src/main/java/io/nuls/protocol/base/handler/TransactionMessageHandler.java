@@ -53,24 +53,19 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
             return;
         }
         if (tx.isSystemTx()) {
-            NotFound notFound = new NotFound();
-            notFound.setHash(tx.getHash());
-            notFound.setType(MessageDataType.TRANSACTION);
-            ProtocolCacheHandler.notFound(notFound);
             return;
         }
+        if (TimeService.currentTimeMillis() - tx.getTime() > 600000L) {
+            return;
+        }
+
         ValidateResult result = tx.verify();
         if (result.isFailed()) {
             return;
         }
-        Transaction tempTx = temporaryCacheManager.getTx(tx.getHash());
-        if (tempTx == null) {
+        if (temporaryCacheManager.cacheTx(tx)) {
             transactionService.newTx(tx);
-            if (TimeService.currentTimeMillis() - tx.getTime() < 300000L) {
-                transactionService.forwardTx(tx, fromNode);
-            }
-        } else {
-            transactionService.newTx(tx);
+            transactionService.forwardTx(tx, fromNode);
         }
     }
 
