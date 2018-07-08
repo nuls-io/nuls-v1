@@ -636,50 +636,15 @@ public class AccountLedgerResource {
                     // 组装to数据
                     List<Coin> tos = coinData.getTo();
                     if (tos != null && tos.size() > 0) {
-                        byte[] txHashBytes = tx.getHash().serialize();
                         String txHash = hash;
                         OutputDto outputDto = null;
-                        Coin to, temp;
-                        long bestHeight = NulsContext.getInstance().getBestHeight();
-                        long currentTime = TimeService.currentTimeMillis();
-                        long lockTime;
+                        Coin to;
                         for (int i = 0, length = tos.size(); i < length; i++) {
                             to = tos.get(i);
                             outputDto = new OutputDto(to);
                             outputDto.setTxHash(txHash);
                             outputDto.setIndex(i);
-                            temp = ledgerService.getUtxo(Arrays.concatenate(txHashBytes, new VarInt(i).encode()));
-                            if (temp == null) {
-                                // 已花费
-                                outputDto.setStatus(3);
-                            } else {
-                                lockTime = temp.getLockTime();
-                                if (lockTime < 0) {
-                                    // 共识锁定
-                                    outputDto.setStatus(2);
-                                } else if (lockTime == 0) {
-                                    // 正常未花费
-                                    outputDto.setStatus(0);
-                                } else if (lockTime > NulsConstant.BlOCKHEIGHT_TIME_DIVIDE) {
-                                    // 判定是否时间高度锁定
-                                    if (lockTime > currentTime) {
-                                        // 时间高度锁定
-                                        outputDto.setStatus(1);
-                                    } else {
-                                        // 正常未花费
-                                        outputDto.setStatus(0);
-                                    }
-                                } else {
-                                    // 判定是否区块高度锁定
-                                    if (lockTime > bestHeight) {
-                                        // 区块高度锁定
-                                        outputDto.setStatus(1);
-                                    } else {
-                                        // 正常未花费
-                                        outputDto.setStatus(0);
-                                    }
-                                }
-                            }
+                            outputDto.setStatus(0);
                             outputDtoList.add(outputDto);
                         }
                     }
@@ -752,7 +717,7 @@ public class AccountLedgerResource {
                             outputDto = new OutputDto(to);
                             outputDto.setTxHash(txHash);
                             outputDto.setIndex(i);
-                            temp = (Coin) localUtxoService.getUtxo(Arrays.concatenate(txHashBytes, new VarInt(i).encode())).getData();
+                            temp = ledgerService.getUtxo(Arrays.concatenate(txHashBytes, new VarInt(i).encode()));
                             if (temp == null) {
                                 // 已花费
                                 outputDto.setStatus(3);
