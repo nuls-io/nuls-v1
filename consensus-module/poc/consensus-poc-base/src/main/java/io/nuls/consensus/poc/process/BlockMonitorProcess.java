@@ -34,6 +34,7 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.protocol.service.DownloadService;
 
 import java.util.HashSet;
 import java.util.List;
@@ -44,7 +45,7 @@ import java.util.Set;
  */
 public class BlockMonitorProcess {
 
-    private final static long RESET_TIME_INTERVAL =  PocConsensusConstant.RESET_SYSTEM_TIME_INTERVAL * 60 * 1000L;
+    private final static long RESET_TIME_INTERVAL = PocConsensusConstant.RESET_SYSTEM_TIME_INTERVAL * 60 * 1000L;
 
     private final ChainManager chainManager;
 
@@ -63,8 +64,10 @@ public class BlockMonitorProcess {
                 break;
             }
         }
+        DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
         if ((addressSet.size() == 1 && ConsensusConfig.getSeedNodeList().size() > 1) ||
-                NulsContext.getInstance().getBestBlock().getHeader().getTime() < (TimeService.currentTimeMillis() - RESET_TIME_INTERVAL)) {
+                (downloadService.isDownloadSuccess().isSuccess() &&
+                        NulsContext.getInstance().getBestBlock().getHeader().getTime() < (TimeService.currentTimeMillis() - RESET_TIME_INTERVAL))) {
             NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
         }
     }
