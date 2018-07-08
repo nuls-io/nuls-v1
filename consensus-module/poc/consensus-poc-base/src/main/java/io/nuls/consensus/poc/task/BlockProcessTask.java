@@ -36,6 +36,7 @@ import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.service.DownloadService;
@@ -68,12 +69,17 @@ public class BlockProcessTask implements Runnable {
             doTask();
         } catch (Exception e) {
             Log.error(e);
+        } catch (Error e) {
+            Log.error(e);
+        } catch (Throwable e) {
+            Log.error(e);
         } finally {
             Lockers.CHAIN_LOCK.unlock();
         }
     }
 
     private void doTask() {
+
         //wait consensus ready running
         if (ConsensusStatusContext.getConsensusStatus().ordinal() <= ConsensusStatus.LOADING_CACHE.ordinal()) {
             return;
@@ -103,7 +109,8 @@ public class BlockProcessTask implements Runnable {
                 long time = System.currentTimeMillis();
                 blockProcess.addBlock(blockContainer);
                 Log.info("add 区块 " + blockContainer.getBlock().getHeader().getHeight() + " 耗时 " + (System.currentTimeMillis() - time) + " ms , tx count : " + blockContainer.getBlock().getHeader().getTxCount());
-            } catch (IOException e) {
+            } catch (Exception e) {
+                e.printStackTrace();
                 Log.error("add block fail , error : " + e.getMessage(), e);
             }
         }
