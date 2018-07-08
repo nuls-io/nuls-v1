@@ -705,6 +705,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         for (Transaction tx : txs) {
             if (Arrays.equals(tx.getAddressFromSig(), address)) {
                 unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
+                localUtxoService.deleteUtxoOfTransaction(tx);
                 i++;
             }
 

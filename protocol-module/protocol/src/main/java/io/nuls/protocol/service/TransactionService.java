@@ -69,7 +69,6 @@ public interface TransactionService {
      * @return 转发结果/forward results
      */
     Result forwardTx(Transaction tx, Node excludeNode);
-    Result forwardTxAndCacche(Transaction tx, Node excludeNode);
 
     /**
      * 广播交易给连接的其他对等节点

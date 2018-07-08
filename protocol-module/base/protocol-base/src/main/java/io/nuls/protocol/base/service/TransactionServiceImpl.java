@@ -132,11 +132,6 @@ public class TransactionServiceImpl implements TransactionService {
         message.setMsgBody(tx.getHash());
         return messageBusService.broadcast(message, excludeNode, true);
     }
-    @Override
-    public Result forwardTxAndCacche(Transaction tx, Node excludeNode) {
-        consensusService.newTx(tx);
-        return forwardTx(tx, excludeNode);
-    }
 
     /**
      * 广播交易给连接的其他对等节点
