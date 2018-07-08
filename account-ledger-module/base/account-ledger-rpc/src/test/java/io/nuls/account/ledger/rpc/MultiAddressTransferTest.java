@@ -169,7 +169,7 @@ public class MultiAddressTransferTest extends BaseTest {
 
                     for(Map m : list) {
                         count++;
-                        Map result = send("Nse3nddic6tgPUpV3UwhenT4fKFPTHMA", (String) m.get("address"), amount, "", "");
+                        Map result = send("NsduWRoBQcdTw6vxBVmVWtLBxLSyaSVr", (String) m.get("address"), amount, "", "");
                         System.out.println("第 " + count + " 条发送结果：" + result);
                         String txHash = (String)((Map)result.get("data")).get("value");
                         m.put("txHash", txHash);

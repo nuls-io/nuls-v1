@@ -56,11 +56,11 @@ public class BroadcastHandler {
 
     private NodeManager nodeManager = NodeManager.getInstance();
 
-    public BroadcastResult broadcastToAllNode(BaseMessage msg, Node excludeNode, boolean asyn) {
+    public BroadcastResult broadcastToAllNode(BaseMessage msg, Node excludeNode, boolean asyn, int percent) {
         if (nodeManager.getAvailableNodes().isEmpty()) {
             return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_NODE_EMPTY);
         }
-        return broadcastToList(nodeManager.getAvailableNodes(), msg, excludeNode, asyn);
+        return broadcastToList(nodeManager.getAvailableNodes(), msg, excludeNode, asyn, percent);
     }
 
     public BroadcastResult broadcastToHalfNode(BaseMessage msg, Node excludeNode, boolean asyn) {
@@ -77,7 +77,7 @@ public class BroadcastHandler {
             }
         }
 
-        return broadcastToList(nodeList, msg, excludeNode, asyn);
+        return broadcastToList(nodeList, msg, excludeNode, asyn, 50);
     }
 
     public BroadcastResult broadcastToNode(BaseMessage msg, Node sendNode, boolean asyn) {
@@ -92,7 +92,7 @@ public class BroadcastHandler {
         if (group == null || group.size() == 0) {
             return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_NODE_EMPTY);
         }
-        return broadcastToList(group.getNodes().values(), msg, null, asyn);
+        return broadcastToList(group.getNodes().values(), msg, null, asyn, 100);
     }
 
     public BroadcastResult broadcastToNodeGroup(BaseMessage msg, String groupName, Node excludeNode, boolean asyn) {
@@ -100,21 +100,25 @@ public class BroadcastHandler {
         if (group == null || group.size() == 0) {
             return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_NODE_EMPTY);
         }
-        return broadcastToList(group.getNodes().values(), msg, excludeNode, asyn);
+        return broadcastToList(group.getNodes().values(), msg, excludeNode, asyn, 100);
     }
 
-    private BroadcastResult broadcastToList(Collection<Node> nodeList, BaseMessage message, Node excludeNode, boolean asyn) {
+    private BroadcastResult broadcastToList(Collection<Node> nodeList, BaseMessage message, Node excludeNode, boolean asyn, int percent) {
         BroadcastResult result = new BroadcastResult();
         try {
             int successCount = 0;
-            //大于10个时,随机选10个来广播
-            if (nodeList.size() > 10) {
+            //根据百分比决定直接广播给多少个节点
+            if (percent < 100) {
+                int needCount = nodeList.size() * percent / 100;
+                if (needCount < 5) {
+                    needCount = 5;
+                }
                 Set<Integer> set = new HashSet<>();
                 while (true) {
                     Random rand = new Random();
                     int ran = rand.nextInt(nodeList.size());
                     set.add(ran);
-                    if (set.size() == 11) {
+                    if (set.size() == needCount + 1) {
                         break;
                     }
                 }
@@ -128,7 +132,7 @@ public class BroadcastHandler {
                             continue;
                         }
                         nodeBroadcastList.add(node);
-                        if(nodeBroadcastList.size() == 10){
+                        if (nodeBroadcastList.size() == needCount) {
                             break;
                         }
                     }

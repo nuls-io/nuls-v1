@@ -82,7 +82,7 @@ public interface MessageBusService {
      * @param aysn        是否异步 Asynchronous execution
      * @return Return all broadcasted node id list
      */
-    Result<List<String>> broadcast(BaseMessage message, Node excludeNode, boolean aysn);
+    Result<List<String>> broadcast(BaseMessage message, Node excludeNode, boolean aysn, int percent);
 
 
     /**

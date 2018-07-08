@@ -79,15 +79,15 @@ public class NetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public BroadcastResult sendToAllNode(BaseNulsData nulsData, boolean asyn) {
+    public BroadcastResult sendToAllNode(BaseNulsData nulsData, boolean asyn, int percent) {
         BaseMessage baseMessage = (BaseMessage) nulsData;
-        return broadcastHandler.broadcastToAllNode(baseMessage, null, asyn);
+        return broadcastHandler.broadcastToAllNode(baseMessage, null, asyn, percent);
     }
 
     @Override
-    public BroadcastResult sendToAllNode(BaseNulsData nulsData, Node excludeNode, boolean asyn) {
+    public BroadcastResult sendToAllNode(BaseNulsData nulsData, Node excludeNode, boolean asyn, int percent) {
         BaseMessage baseMessage = (BaseMessage) nulsData;
-        return broadcastHandler.broadcastToAllNode(baseMessage, excludeNode, asyn);
+        return broadcastHandler.broadcastToAllNode(baseMessage, excludeNode, asyn,percent);
     }
 
     @Override

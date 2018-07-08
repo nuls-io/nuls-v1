@@ -130,7 +130,7 @@ public class TransactionServiceImpl implements TransactionService {
     public Result forwardTx(Transaction tx, Node excludeNode) {
         ForwardTxMessage message = new ForwardTxMessage();
         message.setMsgBody(tx.getHash());
-        return messageBusService.broadcast(message, excludeNode, true);
+        return messageBusService.broadcast(message, excludeNode, true, 50);
     }
 
     /**
@@ -145,7 +145,7 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionMessage message = new TransactionMessage();
         message.setMsgBody(tx);
         consensusService.newTx(tx);
-        return messageBusService.broadcast(message, null, true);
+        return messageBusService.broadcast(message, null, true, 50);
     }
 
     @Override

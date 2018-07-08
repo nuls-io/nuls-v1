@@ -409,7 +409,7 @@ public class NodeManager implements Runnable {
         String externalIp = getNetworkStorageService().getExternalIp();
         P2PNodeBody p2PNodeBody = new P2PNodeBody(externalIp, networkParam.getPort());
         P2PNodeMessage message = new P2PNodeMessage(p2PNodeBody);
-        broadcastHandler.broadcastToAllNode(message, null, true);
+        broadcastHandler.broadcastToAllNode(message, null, true,100);
     }
 
     private boolean checkFullHandShake(Node node) {

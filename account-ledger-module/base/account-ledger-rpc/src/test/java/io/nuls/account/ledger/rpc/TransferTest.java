@@ -37,7 +37,7 @@ public class TransferTest extends BaseTest {
 
     public static List<String> getAddressList() {
         if (list.isEmpty()) {
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < 100; i++) {
                 list.add(AddressTool.getStringAddressByBytes(AddressTool.getAddress(new ECKey().getPubKey())));
             }
         }
@@ -47,7 +47,7 @@ public class TransferTest extends BaseTest {
     private static int successCount = 0;
 
     public static void main(String[] args) {
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 10; i++) {
             doit();
         }
     }
@@ -56,7 +56,7 @@ public class TransferTest extends BaseTest {
         List<String> addressList = getAddressList();
 
         for (String toAddress : addressList) {
-            String address = "Nse9XfuzZQn7jofrV5uABiNLQwFadV2K";
+            String address = "Nse4hSu5rrgwmeHrewU9BR1kKzbAb9dH";
 //            String toAddress = "2Cg7BLHWBSxMhq3FpjR9BrkyxXp4m4j";
             long amount = 2018000L;
             String password = "";
