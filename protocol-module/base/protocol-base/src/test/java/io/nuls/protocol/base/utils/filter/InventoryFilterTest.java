@@ -29,11 +29,8 @@ import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.utils.SerializeUtils;
-import io.nuls.protocol.base.cache.TransactionDuplicateRemoval;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import org.junit.Test;
-import sun.plugin2.message.Serializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,8 +38,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.Assert.*;
 
 /**
  * @author: Niels Wang
