@@ -108,7 +108,7 @@ public class BroadcastHandler {
         try {
             int successCount = 0;
             //根据百分比决定直接广播给多少个节点
-            if (percent < 100) {
+            if (nodeList.size() > 5 && percent < 100) {
                 int needCount = nodeList.size() * percent / 100;
                 if (needCount < 5) {
                     needCount = 5;
