@@ -33,6 +33,7 @@ import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.protocol.service.DownloadService;
 
@@ -53,6 +54,8 @@ public class BlockMonitorProcess {
         this.chainManager = chainManager;
     }
 
+    private NulsDigestData lastBestHash;
+
     public void doProcess() {
         List<Block> blockList = chainManager.getMasterChain().getChain().getBlockList();
         int count = 0;
@@ -65,10 +68,15 @@ public class BlockMonitorProcess {
             }
         }
         DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
+        Block bestBlock = NulsContext.getInstance().getBestBlock();
         if ((addressSet.size() == 1 && ConsensusConfig.getSeedNodeList().size() > 1) ||
                 (downloadService.isDownloadSuccess().isSuccess() &&
-                        NulsContext.getInstance().getBestBlock().getHeader().getTime() < (TimeService.currentTimeMillis() - RESET_TIME_INTERVAL))) {
+                        bestBlock.getHeader().getTime() < (TimeService.currentTimeMillis() - RESET_TIME_INTERVAL)) ||
+                bestBlock.getHeader().getHash().equals(lastBestHash)) {
+            lastBestHash = bestBlock.getHeader().getHash();
             NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
+        } else {
+            lastBestHash = bestBlock.getHeader().getHash();
         }
     }
 }
