@@ -36,8 +36,8 @@ import java.util.Set;
  */
 public class HashSetDuplicateProcessor {
 
-    private static Set<NulsDigestData> SET1 = new HashSet<>();
-    private static Set<NulsDigestData> SET2 = new HashSet<>();
+    private Set<NulsDigestData> SET1 = new HashSet<>();
+    private Set<NulsDigestData> SET2 = new HashSet<>();
     private final int maxSize;
     private final int percent90;
 
