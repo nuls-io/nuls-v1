@@ -81,7 +81,7 @@ public class ConsensusScheduler {
                 new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, "consensus-poll-control"));
 
         BlockProcess blockProcess = new BlockProcess(chainManager, orphanBlockProvider);
-        threadPool.scheduleAtFixedRate(new BlockProcessTask(blockProcess), 1000L, 100L, TimeUnit.MILLISECONDS);
+        threadPool.scheduleAtFixedRate(new BlockProcessTask(blockProcess), 1000L, 300L, TimeUnit.MILLISECONDS);
 
         ForkChainProcess forkChainProcess = new ForkChainProcess(chainManager);
         threadPool.scheduleAtFixedRate(new ForkChainProcessTask(forkChainProcess), 1000L, 1000L, TimeUnit.MILLISECONDS);
