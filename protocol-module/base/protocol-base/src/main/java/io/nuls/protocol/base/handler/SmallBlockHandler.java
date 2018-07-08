@@ -34,6 +34,7 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
+import io.nuls.protocol.base.cache.SmallBlockDuplicateRemoval;
 import io.nuls.protocol.base.utils.AssemblyBlockUtil;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.message.GetTxGroupRequest;
@@ -67,7 +68,12 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
             Log.warn("recieved a null smallBlock!");
             return;
         }
+
         BlockHeader header = smallBlock.getHeader();
+        if (!SmallBlockDuplicateRemoval.needProcess(header.getHash())) {
+            return;
+        }
+
 
         BlockHeader theBlockHeader = blockService.getBlockHeader(header.getHash()).getData();
         if (null != theBlockHeader) {
