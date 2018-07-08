@@ -185,12 +185,12 @@ public class CommandHelper {
             }
         }
     }
-//
-//    /**
-//     *  得到用户输入的密码,允许不输入
-//     *  提示信息为默认
-//     * @return
-//     */
+
+    /**
+     *  得到用户输入的密码,允许不输入
+     *  提示信息为默认
+     * @return
+     */
     public static String getPwdOptional() {
         return getPwdOptional(null);
     }

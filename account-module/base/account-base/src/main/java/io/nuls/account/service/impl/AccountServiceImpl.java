@@ -225,6 +225,9 @@ public class AccountServiceImpl implements AccountService {
         if (null == keyStore || null == keyStore.getAddress()) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
+        if(!AddressTool.validAddress(keyStore.getAddress())){
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
         Account account;
         byte[] priKey = null;
         if (null != keyStore.getPrikey() && keyStore.getPrikey().length > 0) {
