@@ -57,6 +57,7 @@ import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
@@ -76,7 +77,6 @@ public class BlockProcess {
 
     private ChainManager chainManager;
     private OrphanBlockProvider orphanBlockProvider;
-    private TxMemoryPool txMemoryPool = TxMemoryPool.getInstance();
     private BifurcationUtil bifurcationUtil = BifurcationUtil.getInstance();
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
@@ -84,6 +84,8 @@ public class BlockProcess {
     private TransactionCacheStorageService transactionCacheStorageService = NulsContext.getServiceBean(TransactionCacheStorageService.class);
 
     private ExecutorService signExecutor = TaskManager.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, ""));
+
+    private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
 
     public BlockProcess(ChainManager chainManager, OrphanBlockProvider orphanBlockProvider) {
         this.chainManager = chainManager;
@@ -290,6 +292,8 @@ public class BlockProcess {
         if (blockContainer.getNode() == null) {
             return;
         }
+        SmallBlock smallBlock = ConsensusTool.getSmallBlock(blockContainer.getBlock());
+        cacheManager.cacheSmallBlock(smallBlock);
         Result result = blockService.forwardBlock(blockContainer.getBlock().getHeader().getHash(), blockContainer.getNode());
         if (!result.isSuccess()) {
             Log.warn("forward the block failed, block height: " + blockContainer.getBlock().getHeader().getHeight() + " , hash : " + blockContainer.getBlock().getHeader().getHash());
