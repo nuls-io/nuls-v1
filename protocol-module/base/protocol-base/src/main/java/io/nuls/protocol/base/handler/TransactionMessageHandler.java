@@ -54,11 +54,7 @@ public class TransactionMessageHandler extends AbstractMessageHandler<Transactio
             return;
         }
         NulsDigestData hash = tx.getHash();
-        boolean consains = TransactionDuplicateRemoval.FILTER.contains(hash.getDigestBytes());
-        if (consains) {
-            return;
-        }
-        TransactionDuplicateRemoval.FILTER.insert(hash.getDigestBytes());
+        TransactionDuplicateRemoval.insert(hash);
         transactionService.newTx(tx);
     }
 

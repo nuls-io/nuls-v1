@@ -25,7 +25,12 @@
 
 package io.nuls.protocol.base.cache;
 
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.protocol.base.utils.filter.InventoryFilter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 用于接收交易去重
@@ -35,6 +40,13 @@ import io.nuls.protocol.base.utils.filter.InventoryFilter;
  */
 public class TransactionDuplicateRemoval {
 
-    public static InventoryFilter FILTER = new InventoryFilter(1,52428800);
+    private static InventoryFilter FILTER = new InventoryFilter( 1000000);
 
+    public static boolean mightContain(NulsDigestData hash) {
+        return FILTER.contains(hash.getDigestBytes());
+    }
+
+    public static void insert(NulsDigestData hash) {
+        FILTER.insert(hash.getDigestBytes());
+    }
 }

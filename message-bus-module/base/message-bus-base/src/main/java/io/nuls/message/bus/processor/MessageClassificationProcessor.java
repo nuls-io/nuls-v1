@@ -67,13 +67,13 @@ public class MessageClassificationProcessor<E extends BaseMessage> implements Ev
         Set<NulsMessageHandler> handlers = handlerManager.getHandlerList(serviceId);
         ThreadPoolExecutor handlerExecutor = (ThreadPoolExecutor) handlerService.get(serviceId);
         if (handlerExecutor == null) {
-            handlerExecutor = TaskManager.createThreadPool(1, Integer.MAX_VALUE, new NulsThreadFactory(MessageBusConstant.MODULE_ID_MESSAGE_BUS, "disruptor-processor"));
+            handlerExecutor = TaskManager.createThreadPool(1, 1000000, new NulsThreadFactory(MessageBusConstant.MODULE_ID_MESSAGE_BUS, "disruptor-processor"));
             handlerService.put(serviceId, handlerExecutor);
         }
         for (NulsMessageHandler handler : handlers) {
             handlerExecutor.execute(new NulsMessageCall(processData, handler));
             int size = handlerExecutor.getQueue().size();
-            if (size > 100 && (size % 100 == 0)) {
+            if (size > 1000 && (size % 1000 == 0)) {
                 Log.info(serviceId + " queue size::::::::::::::::::::" + size);
             }
         }
