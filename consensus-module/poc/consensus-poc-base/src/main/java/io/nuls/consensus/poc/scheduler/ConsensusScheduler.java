@@ -73,7 +73,6 @@ public class ConsensusScheduler {
         cacheManager = new CacheManager(chainManager);
         try {
             initDatas();
-            ConsensusStatusContext.setConsensusStatus(ConsensusStatus.WAIT_RUNNING);
         } catch (Exception e) {
             Log.warn(e.getMessage());
         }
@@ -123,7 +122,9 @@ public class ConsensusScheduler {
 
     private void initDatas() {
         try {
+            ConsensusStatusContext.setConsensusStatus(ConsensusStatus.LOADING_CACHE);
             cacheManager.load();
+            ConsensusStatusContext.setConsensusStatus(ConsensusStatus.WAIT_RUNNING);
         } catch (Exception e) {
             throw new NulsRuntimeException(e);
         }
