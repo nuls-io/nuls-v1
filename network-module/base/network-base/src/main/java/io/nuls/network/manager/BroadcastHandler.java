@@ -107,11 +107,12 @@ public class BroadcastHandler {
         BroadcastResult result = new BroadcastResult();
         try {
             int successCount = 0;
+            int minCount = 5;
             //根据百分比决定直接广播给多少个节点
-            if (nodeList.size() > 5 && percent < 100) {
+            if (nodeList.size() > minCount && percent < 100) {
                 int needCount = nodeList.size() * percent / 100;
-                if (needCount < 5) {
-                    needCount = 5;
+                if (needCount < minCount) {
+                    needCount = minCount;
                 }
                 Set<Integer> set = new HashSet<>();
                 while (true) {
