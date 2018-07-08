@@ -48,7 +48,7 @@ public class PersistentQueueTest {
         this.txList = new ArrayList<>();
         for (int i = 0; i < 1000000; i++) {
             Transaction tx = new TestTransaction();
-            tx.setTime(1);
+            tx.setTime(i);
             tx.setRemark("sdfsdfsdfsdfsdfsdfaaadsfasdfsadfsdfasdfasdfasdfasdfasdfsadfaaaaaaaaaaaaaaaaaaaaaabsdsadfsadfsdfsdfsdfsdfsdfsdfsdfaaadsfasdfsadfsdfasdfasdfasdfasdfasdfsadfaaaaaaaaaaaaaaaaaaaaaabsdsadfsadfsdfsdfsdfsdfsdfsdfsdfaa".getBytes());
             txList.add(tx);
         }

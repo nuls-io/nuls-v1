@@ -25,7 +25,12 @@
 
 package io.nuls.protocol.base.utils.filter;
 
+import com.google.common.hash.BloomFilter;
+import com.google.common.hash.Funnels;
+
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 向量清单过滤器
@@ -34,16 +39,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class InventoryFilter {
 
-    private final int maxCount;
     private final int elements;
     private AtomicInteger size = new AtomicInteger(0);
 
-    private BloomFilter filter;
+    private BloomFilter<byte[]> filter;
 
-    public InventoryFilter(int maxCount, int elements) {
-        this.maxCount = maxCount;
+//    private Lock lock = new ReentrantLock();
+
+    public InventoryFilter(int elements) {
         this.elements = elements;
-        filter = new BloomFilter(elements, 0.0001, randomLong());
+        filter = BloomFilter.create(Funnels.byteArrayFunnel(), elements, 0.00001);
     }
 
     public BloomFilter getFilter() {
@@ -51,23 +56,23 @@ public class InventoryFilter {
     }
 
     public void insert(byte[] object) {
-        filter.insert(object);
+//        lock.lock();
+//        try {
+        filter.put(object);
         int count = size.incrementAndGet();
-        if (count >= maxCount) {
-//            this.clear();
+        if (count >= elements - 100) {
+            this.clear();
         }
+//        } finally {
+//            lock.unlock();
+//        }
     }
 
     public boolean contains(byte[] object) {
-        return filter.contains(object);
+        return filter.mightContain(object);
     }
 
     public void clear() {
-        filter = new BloomFilter(elements, 0.0001, randomLong());
-        size.set(0);
-    }
-
-    private long randomLong() {
-        return (long) (Math.random() * Long.MAX_VALUE);
+        filter = BloomFilter.create(Funnels.byteArrayFunnel(), elements, 0.00001);
     }
 }

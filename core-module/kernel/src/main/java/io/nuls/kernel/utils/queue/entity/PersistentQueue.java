@@ -58,7 +58,7 @@ public class PersistentQueue {
      * @param maxSize   单个文件最大大小fileLimitLength
      */
     public PersistentQueue(String queueName, long maxSize) throws Exception {
-        this.queueName = PersistentQueue.class.getClassLoader().getResource("").getPath() + "/queue/" + queueName;
+        this.queueName = PersistentQueue.class.getClassLoader().getResource("").getPath() + "/data/queue/" + queueName;
         this.maxSize = maxSize;
         this.queue = new FQueue(this.queueName, maxSize);
     }

@@ -47,11 +47,11 @@ public class ForwardTxMessageHandler extends AbstractMessageHandler<ForwardTxMes
             return;
         }
         NulsDigestData hash = message.getMsgBody();
-        boolean consains = TransactionDuplicateRemoval.FILTER.contains(hash.getDigestBytes());
+        boolean consains = TransactionDuplicateRemoval.mightContain(hash);
         if (consains) {
             return;
         }
-        TransactionDuplicateRemoval.FILTER.insert(hash.getDigestBytes());
+        TransactionDuplicateRemoval.insert(hash);
         GetTxMessage getTxMessage = new GetTxMessage();
         getTxMessage.setMsgBody(hash);
         Result result = messageBusService.sendToNode(getTxMessage, fromNode, true);
