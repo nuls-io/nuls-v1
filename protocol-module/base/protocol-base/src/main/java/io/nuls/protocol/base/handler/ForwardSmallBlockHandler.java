@@ -30,6 +30,7 @@ import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
+import io.nuls.protocol.base.cache.SmallBlockDuplicateRemoval;
 import io.nuls.protocol.message.ForwardSmallBlockMessage;
 import io.nuls.protocol.message.GetSmallBlockMessage;
 
@@ -43,27 +44,20 @@ public class ForwardSmallBlockHandler extends AbstractMessageHandler<ForwardSmal
 
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
-    private Set<NulsDigestData> set = new HashSet<>();
-
-
     @Override
     public void onMessage(ForwardSmallBlockMessage message, Node fromNode) {
         if (message == null || fromNode == null || !fromNode.isHandShake() || null == message.getMsgBody()) {
             return;
         }
         NulsDigestData hash = message.getMsgBody();
-        if (!set.add(hash)) {
+        if (!SmallBlockDuplicateRemoval.needDownloadSmallBlock(hash)) {
             return;
-        }
-        if (set.size() >= 100) {
-            set.clear();
-            set.add(hash);
         }
         GetSmallBlockMessage getSmallBlockMessage = new GetSmallBlockMessage();
         getSmallBlockMessage.setMsgBody(hash);
         Result result = messageBusService.sendToNode(getSmallBlockMessage, fromNode, true);
         if (result.isFailed()) {
-            set.remove(hash);
+            SmallBlockDuplicateRemoval.removeForward(hash);
             return;
         }
     }
