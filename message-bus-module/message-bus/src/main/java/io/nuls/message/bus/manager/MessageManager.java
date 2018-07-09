@@ -51,7 +51,6 @@ public class MessageManager {
             putMessage(message.getHeader().getModuleId(), message.getHeader().getMsgType(), msgClass);
         } catch (Exception e) {
             e.printStackTrace();
-            //todo nothing
         }
     }
 }

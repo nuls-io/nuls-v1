@@ -49,7 +49,7 @@ public class TransferTransaction extends Transaction {
         super(type);
     }
 
-    //todo 看不懂
+    //todo 临时方案
     @Override
     public String getInfo(byte[] address) {
         boolean isTransfer = false;

@@ -44,7 +44,6 @@ public class CacheTestTx extends Transaction {
 
     @Override
     public String getInfo(byte[] address) {
-        // todo auto-generated method stub
         return null;
     }
 }

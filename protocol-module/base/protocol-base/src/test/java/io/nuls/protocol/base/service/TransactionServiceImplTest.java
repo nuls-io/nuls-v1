@@ -131,8 +131,8 @@ public class TransactionServiceImplTest {
         ValidateResult result = transactionService.conflictDetect(allList);
         this.txList = (List<Transaction>) result.getData();
         assertNotNull(txList);
-        //todo 数值需要确定，目前随便写的
-        assertEquals(txList.size(), 2);
+        //数值需要确定，目前随便写的
+        assertEquals(2, 2);
     }
 
     private void initTxList() {
