@@ -182,6 +182,7 @@ public class ClientResource {
 
             }
         });
+        t.setDaemon(false);
         t.start();
         Map<String, Boolean> map = new HashMap<>();
         map.put("value", true);
