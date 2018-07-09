@@ -5,14 +5,14 @@
     <parent>
         <artifactId>network-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.0.0</version>
+        <version>0.9.12</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.network-module</groupId>
     <artifactId>network-sdk</artifactId>
-    <version>1.0.0</version>
+    <version>0.9.12</version>
 
 
 </project>

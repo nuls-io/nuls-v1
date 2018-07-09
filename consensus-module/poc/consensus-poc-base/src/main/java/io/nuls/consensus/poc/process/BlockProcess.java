@@ -188,7 +188,8 @@ public class BlockProcess {
                         Future<Boolean> res = signExecutor.submit(new Callable<Boolean>() {
                             @Override
                             public Boolean call() throws Exception {
-                                return tx.verify().isSuccess();
+                                boolean result = tx.verify().isSuccess();
+                                return result;
                             }
                         });
                         futures.add(res);

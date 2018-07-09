@@ -25,6 +25,7 @@
 
 package io.nuls.client.rpc.resources;
 
+import io.nuls.client.Bootstrap;
 import io.nuls.client.rpc.RpcServerManager;
 import io.nuls.client.rpc.resources.dto.UpgradeProcessDTO;
 import io.nuls.client.rpc.resources.dto.VersionDto;
@@ -170,18 +171,17 @@ public class ClientResource {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(1500L);
+                    Thread.sleep(1000L);
                 } catch (InterruptedException e) {
                     Log.error(e);
                 }
                 RpcServerManager.getInstance().shutdown();
                 ConnectionManager.getInstance().shutdown();
-
-                Runtime.getRuntime().addShutdownHook(new ShutdownHook());
-                System.exit(0);
+                Bootstrap.exit();
 
             }
         });
+        t.setDaemon(false);
         t.start();
         Map<String, Boolean> map = new HashMap<>();
         map.put("value", true);

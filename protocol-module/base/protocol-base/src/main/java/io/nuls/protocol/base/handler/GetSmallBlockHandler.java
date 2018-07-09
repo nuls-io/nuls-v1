@@ -46,11 +46,13 @@ public class GetSmallBlockHandler extends AbstractMessageHandler<GetSmallBlockMe
         if (message == null || fromNode == null || null == message.getMsgBody()) {
             return;
         }
+//        System.out.println("请求区块：" + message.getHash() + "," + fromNode.getIp());
         NulsDigestData blockHash = message.getMsgBody();
         SmallBlock smallBlock = cacheManager.getSmallBlockByHash(blockHash);
         if (null == smallBlock) {
             return;
         }
+//        System.out.println("发送小区块：" + message.getHash() + "," + fromNode.getIp());
         SmallBlockMessage smallBlockMessage = new SmallBlockMessage();
         smallBlockMessage.setMsgBody(smallBlock);
         messageBusService.sendToNode(smallBlockMessage, fromNode, true);

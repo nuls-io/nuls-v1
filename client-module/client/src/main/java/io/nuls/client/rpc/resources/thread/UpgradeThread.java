@@ -123,6 +123,7 @@ public class UpgradeThread implements Runnable {
                     deleteTemp(root + "/temp/");
                     return;
                 }
+                count++;
                 process.setPercentage(20 + (count * 70) / (size));
             }
             process.setStatus(VersionConstant.INSTALLING);

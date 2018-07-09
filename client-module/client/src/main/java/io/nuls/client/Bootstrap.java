@@ -27,6 +27,7 @@ package io.nuls.client;
 
 import io.nuls.client.rpc.RpcServerManager;
 import io.nuls.client.rpc.constant.RpcConstant;
+import io.nuls.client.rpc.resources.thread.ShutdownHook;
 import io.nuls.client.rpc.resources.util.FileUtil;
 import io.nuls.client.storage.LanguageService;
 import io.nuls.client.storage.impl.LanguageServiceImpl;
@@ -61,6 +62,8 @@ import java.util.*;
  * @author: Niels Wang
  */
 public class Bootstrap {
+    private static boolean exitNow;
+
     public static void main(String[] args) {
         Thread.currentThread().setName("Nuls");
         try {
@@ -106,15 +109,20 @@ public class Bootstrap {
         } while (false);
         TaskManager.asynExecuteRunnable(new WebViewBootstrap());
 
-
+        int i = 0;
         while (true) {
+            if(exitNow){
+                Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+                System.exit(0);
+            }
             try {
                 //todo 后续启动一个系统监视线程
-                Thread.sleep(10000L);
+                Thread.sleep(1000L);
             } catch (InterruptedException e) {
                 Log.error(e);
             }
-            if (null != NulsContext.getInstance().getBestBlock()) {
+            if (i > 10) {
+                i = 0;
                 Log.info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-  netTime : " + (DateUtil.convertDate(new Date(TimeService.currentTimeMillis()))));
                 Block bestBlock = NulsContext.getInstance().getBestBlock();
                 Collection<Node> nodes = NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
@@ -123,6 +131,8 @@ public class Bootstrap {
                 for (Node node : nodes) {
                     Log.info(node.getBestBlockHeight() + ", " + node.getId() + ", " + node.getBestBlockHash());
                 }
+            } else {
+                i++;
             }
         }
     }
@@ -157,5 +167,10 @@ public class Bootstrap {
             map.put(moduleName, className);
         }
         return map;
+    }
+
+    public static void exit() {
+        exitNow = true;
+
     }
 }

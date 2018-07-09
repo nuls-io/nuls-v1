@@ -25,6 +25,7 @@
 
 package io.nuls.client.cmd;
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
@@ -94,7 +95,7 @@ public class UpgradeProcessor implements CommandProcessor {
             try {
                 Thread.sleep(500L);
             } catch (InterruptedException e) {
-                System.out.print(e.getMessage());
+                Log.error(e.getMessage());
             }
         }
         result = restFul.post("/client/restart", "");

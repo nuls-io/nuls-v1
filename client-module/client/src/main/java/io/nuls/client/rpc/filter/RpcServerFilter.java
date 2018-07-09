@@ -79,7 +79,7 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
 
     @Override
     public Response toResponse(Exception e) {
-        System.out.println("---------------" + request.getRequestURI());
+//        System.out.println("---------------" + request.getRequestURI());
         Log.error(e);
         RpcClientResult result;
         if (e instanceof NulsException) {
