@@ -67,8 +67,8 @@ public class TxProcessTask implements Runnable {
 
     private static int maxOrphanSize = 200000;
 
-    int count = 0;
-    int size = 0;
+//    int count = 0;
+//    int size = 0;
 
     @Override
     public void run() {
@@ -82,7 +82,7 @@ public class TxProcessTask implements Runnable {
         } catch (Exception e) {
             Log.error(e);
         }
-        System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
+//        System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
     }
 
     private void doTask() {
@@ -93,7 +93,7 @@ public class TxProcessTask implements Runnable {
 
         Transaction tx = null;
         while ((tx = transactionQueueStorageService.pollTx()) != null && orphanTxList.size() < maxOrphanSize) {
-            size++;
+//            size++;
             processTx(tx, false);
         }
     }
@@ -135,7 +135,7 @@ public class TxProcessTask implements Runnable {
                     temporaryFromSet.remove(key);
                     temporaryToMap.remove(key);
                 }
-                count++;
+//                count++;
 
                 transactionCacheStorageService.putTx(tx);
                 transactionService.forwardTx(tx, null);
