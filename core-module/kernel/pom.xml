@@ -5,13 +5,13 @@
     <parent>
         <artifactId>core-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>0.9.12</version>
+        <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.nuls.core-module</groupId>
     <artifactId>kernel</artifactId>
-    <version>0.9.12</version>
+    <version>1.0.0</version>
 
 
     <dependencies>
@@ -24,7 +24,7 @@
         <dependency>
             <groupId>io.nuls.tools-module</groupId>
             <artifactId>tools</artifactId>
-            <version>0.9.12</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>

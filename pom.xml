@@ -16,7 +16,7 @@
         </license>
     </licenses>
     <scm>
-        <tag>0.9.11</tag>
+        <tag>1.0.0</tag>
         <url>https://github.com/nuls-io/nuls</url>
         <connection>https://github.com/nuls-io/nuls.git</connection>
         <developerConnection>https://nuls.io/</developerConnection>
@@ -31,7 +31,7 @@
 
     <groupId>io.nuls</groupId>
     <artifactId>nuls</artifactId>
-    <version>0.9.12</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>nuls</name>
