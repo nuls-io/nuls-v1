@@ -76,4 +76,7 @@
             <version>25.1-jre</version>
         </dependency>
     </dependencies>
+    <build>
+        <finalName>${artifactId}-${version}</finalName>
+    </build>
 </project>

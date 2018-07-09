@@ -57,4 +57,8 @@ public class NetworkMessageHandlerFactory {
     public BaseNetworkMeesageHandler getHandler(BaseMessage message) {
         return handlerMap.get(message.getClass().getName());
     }
+
+    public BaseNetworkMeesageHandler getHandler(String handlerKey) {
+        return handlerMap.get(handlerKey);
+    }
 }

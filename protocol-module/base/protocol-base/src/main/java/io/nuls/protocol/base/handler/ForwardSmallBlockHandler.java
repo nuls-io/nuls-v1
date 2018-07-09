@@ -50,9 +50,12 @@ public class ForwardSmallBlockHandler extends AbstractMessageHandler<ForwardSmal
             return;
         }
         NulsDigestData hash = message.getMsgBody();
+//        System.out.println("接收到转发：" + hash + ", node:" + fromNode.getId());
         if (!SmallBlockDuplicateRemoval.needDownloadSmallBlock(hash)) {
+//            System.out.println("丢弃转发：" + hash + ", node:" + fromNode.getId());
             return;
         }
+        System.out.println("请求区块：" + hash + ", node:" + fromNode.getId());
         GetSmallBlockMessage getSmallBlockMessage = new GetSmallBlockMessage();
         getSmallBlockMessage.setMsgBody(hash);
         Result result = messageBusService.sendToNode(getSmallBlockMessage, fromNode, true);

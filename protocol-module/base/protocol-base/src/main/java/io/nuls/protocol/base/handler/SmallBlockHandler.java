@@ -70,6 +70,8 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
         }
 
         BlockHeader header = smallBlock.getHeader();
+
+        System.out.println("下载到pre：" + header.getHeight() + " ," + header.getHash() + ", 来源：" + fromNode.getIp());
         if (!SmallBlockDuplicateRemoval.needProcess(header.getHash())) {
             return;
         }
@@ -82,7 +84,7 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
 
         ValidateResult result = header.verify();
         boolean isOrphan = result.getErrorCode() == TransactionErrorCode.ORPHAN_TX || result.getErrorCode() == TransactionErrorCode.ORPHAN_BLOCK;
-//        System.out.println("下载到：" + header.getHeight() + " ," + header.getHash() + ", 来源：" + fromNode.getIp());
+        System.out.println("下载到：" + header.getHeight() + " ," + header.getHash() + ", 来源：" + fromNode.getIp());
         BlockLog.debug("recieve new block from(" + fromNode.getId() + "), tx count : " + header.getTxCount() + " , tx pool count : " + consensusService.getMemoryTxs().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", addressHex:" + Hex.encode(header.getPackingAddress()) +
                 "\n and verify block result: " + result.isSuccess() + " , verify message : " + result.getMsg() + " , isOrphan : " + isOrphan);
 

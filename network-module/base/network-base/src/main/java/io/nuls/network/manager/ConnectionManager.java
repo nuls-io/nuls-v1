@@ -41,6 +41,8 @@ import io.nuls.network.message.filter.MessageFilterChain;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
+import io.nuls.network.protocol.message.VersionMessage;
+import io.nuls.network.util.HeartBeatThread;
 import io.nuls.network.util.NetworkThreadPool;
 import io.nuls.protocol.message.base.BaseMessage;
 import io.nuls.protocol.message.base.MessageHeader;
@@ -72,6 +74,8 @@ public class ConnectionManager {
 
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
+    private HeartBeatThread heartBeatThread;
+
     public void init() {
         nodeManager = NodeManager.getInstance();
         broadcastHandler = BroadcastHandler.getInstance();
@@ -92,6 +96,9 @@ public class ConnectionManager {
                 }
             }
         }, false);
+        ;
+        heartBeatThread = new HeartBeatThread(messageHandlerFactory.getHandler(VersionMessage.class.getName()));
+        TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "heart-beat", this.heartBeatThread);
     }
 
     public void connectionNode(Node node) {
@@ -161,7 +168,13 @@ public class ConnectionManager {
     }
 
     private void asynExecute(BaseMessage message, Node node) {
+
+        if (message.getHeader().getMsgType() == NetworkConstant.NETWORK_VERSION) {
+            heartBeatThread.offerMessage(message, node);
+            return;
+        }
         BaseNetworkMeesageHandler handler = messageHandlerFactory.getHandler(message);
+
         TaskManager.asynExecuteRunnable(new Runnable() {
             @Override
             public void run() {
