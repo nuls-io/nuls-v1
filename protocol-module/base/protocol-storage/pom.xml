@@ -5,28 +5,28 @@
     <parent>
         <artifactId>protocol-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.0.0</version>
+        <version>0.9.12</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.protocol-module</groupId>
     <artifactId>protocol-storage</artifactId>
-    <version>1.0.0</version>
+    <version>0.9.12</version>
 
 
     <dependencies>
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db-leveldb</artifactId>
-            <version>1.0.0</version>
+            <version>0.9.12</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>io.nuls.db-module</groupId>
             <artifactId>db</artifactId>
-            <version>1.0.0</version>
+            <version>0.9.12</version>
         </dependency>
     </dependencies>
 
