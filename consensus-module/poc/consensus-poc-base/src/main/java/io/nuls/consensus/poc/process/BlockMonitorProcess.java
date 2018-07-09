@@ -58,7 +58,7 @@ public class BlockMonitorProcess {
 
     public void doProcess() {
         Block bestBlock = NulsContext.getInstance().getBestBlock();
-        if (bestBlock.getHeader().getHash().equals(lastBestHash)) {
+        if (bestBlock.getHeader().getHash().equals(lastBestHash) && bestBlock.getHeader().getTime() < (TimeService.currentTimeMillis() - RESET_TIME_INTERVAL)) {
             lastBestHash = bestBlock.getHeader().getHash();
             NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
             return;
