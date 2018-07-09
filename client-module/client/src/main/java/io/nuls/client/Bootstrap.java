@@ -171,6 +171,5 @@ public class Bootstrap {
 
     public static void exit() {
         exitNow = true;
-
     }
 }

@@ -172,16 +172,14 @@ public class ClientResource {
             public void run() {
                 try {
                     Thread.sleep(1000L);
-                } catch (InterruptedException e) {
+                    RpcServerManager.getInstance().shutdown();
+                    ConnectionManager.getInstance().shutdown();
+                } catch (Exception e) {
                     Log.error(e);
                 }
-                RpcServerManager.getInstance().shutdown();
-                ConnectionManager.getInstance().shutdown();
                 Bootstrap.exit();
-
             }
         });
-        t.setDaemon(false);
         t.start();
         Map<String, Boolean> map = new HashMap<>();
         map.put("value", true);
