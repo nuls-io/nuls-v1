@@ -41,8 +41,9 @@ import io.nuls.protocol.model.tx.TransferTransaction;
  * @author: Niels Wang
  * @date: 2018/7/5
  */
-//todo @Component 为了兼容9.11，关闭限制
+@Component
 public class TransferValidator implements NulsDataValidator<TransferTransaction> {
+
     @Override
     public ValidateResult validate(TransferTransaction tx) throws NulsException {
         byte[] script = tx.getScriptSig();
