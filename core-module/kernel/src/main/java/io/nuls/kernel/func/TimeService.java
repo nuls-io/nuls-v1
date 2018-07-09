@@ -94,13 +94,28 @@ public class TimeService implements Runnable {
      * 同步网络时间
      */
     private void syncWebTime() {
-        long localBeforeTime = System.currentTimeMillis();
 
-        long netTime = getWebTime();
+        int count = 0;
+        long sum = 0L;
 
-        long localEndTime = System.currentTimeMillis();
+        for (int i = 0; i < urlList.size(); i++) {
+            long localBeforeTime = System.currentTimeMillis();
 
-        netTimeOffset = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
+            long netTime = getWebTime(urlList.get(i));
+
+            if (netTime == 0) {
+                continue;
+            }
+
+            long localEndTime = System.currentTimeMillis();
+
+            long value = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
+            count++;
+            sum += value;
+        }
+        if (count > 0) {
+            netTimeOffset = sum / count;
+        }
 
         lastSyncTime = currentTimeMillis();
     }
@@ -108,27 +123,23 @@ public class TimeService implements Runnable {
     /**
      * 获取网络时间
      * todo 可优化为哪个地址延迟小使用哪个
+     *
      * @return long
      */
-    private long getWebTime() {
-        NTPUDPClient client = new NTPUDPClient();
+    private long getWebTime(String address) {
         try {
+            NTPUDPClient client = new NTPUDPClient();
             client.open();
-        } catch (SocketException e) {
-            Log.error(e);
+            client.setDefaultTimeout(1000);
+            client.setSoTimeout(1000);
+            InetAddress inetAddress = InetAddress.getByName(address);
+            Log.debug("start ask time....");
+            TimeInfo timeInfo = client.getTime(inetAddress);
+            Log.debug("done!");
+            return timeInfo.getMessage().getTransmitTimeStamp().getTime();
+        } catch (Exception e) {
             return 0L;
         }
-        for (int i = 0; i < urlList.size(); i++) {
-            client.setDefaultTimeout(1000);
-            try {
-                InetAddress inetAddress = InetAddress.getByName(urlList.get(i));
-                TimeInfo timeInfo = client.getTime(inetAddress);
-                return timeInfo.getMessage().getTransmitTimeStamp().getTime();
-            } catch (Exception e) {
-                continue;
-            }
-        }
-        return 0L;
     }
 
     /**
@@ -172,6 +183,7 @@ public class TimeService implements Runnable {
     /**
      * 获取当前网络时间毫秒数
      * Gets the current network time in milliseconds.
+     *
      * @return long
      */
     public static long currentTimeMillis() {
@@ -181,6 +193,7 @@ public class TimeService implements Runnable {
     /**
      * 获取网络时间偏移值
      * Gets the network time offset.
+     *
      * @return long
      */
     public static long getNetTimeOffset() {

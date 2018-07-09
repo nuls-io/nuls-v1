@@ -24,13 +24,10 @@
  */
 package io.nuls.protocol.cache;
 
-import io.nuls.cache.CacheMap;
+import io.nuls.cache.LimitHashMap;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.model.SmallBlock;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Used for sharing temporary data between multiple hander.
@@ -41,10 +38,11 @@ import java.util.Map;
 public class TemporaryCacheManager {
     private static final TemporaryCacheManager INSTANCE = new TemporaryCacheManager();
 
-    private CacheMap<NulsDigestData, SmallBlock> smallBlockCacheMap = new CacheMap<>("temp-small-block-cache", 16, NulsDigestData.class, SmallBlock.class, 1000, 0, null);
+    private LimitHashMap<NulsDigestData, SmallBlock> smallBlockCacheMap = new LimitHashMap<>(100);
+    private LimitHashMap<NulsDigestData, NulsDigestData> smallBlockHashCacheMap = new LimitHashMap<>(100);
 //    private CacheMap<NulsDigestData, Transaction> txCacheMap = new CacheMap<>("temp-tx-cache", 128, NulsDigestData.class, Transaction.class, 0, 3600);
 
-    private Map<NulsDigestData, Transaction> txCacheMap = new HashMap<>();
+    private LimitHashMap<NulsDigestData, Transaction> txCacheMap = new LimitHashMap<>(100000);
 
     private TemporaryCacheManager() {
 
@@ -57,35 +55,44 @@ public class TemporaryCacheManager {
     /**
      * 将一个SmallBlock放入内存中，若不主动删除，则在缓存存满或者存在时间超过1000秒时，自动清理
      * Store a SmallBlock in memory, cache it full or exist for over 1000 seconds, and clean it automatically.
+     *
      * @param smallBlock 要放入内存中的对象
      */
     public void cacheSmallBlock(SmallBlock smallBlock) {
         smallBlockCacheMap.put(smallBlock.getHeader().getHash(), smallBlock);
-        smallBlockCacheMap.remove(smallBlock.getHeader().getPreHash());
+    }
+
+    public void cacheSmallBlockWithRequest(NulsDigestData requestHash, SmallBlock smallBlock) {
+        NulsDigestData blockHash = smallBlock.getHeader().getHash();
+        smallBlockHashCacheMap.put(requestHash, blockHash);
+        smallBlockCacheMap.put(blockHash, smallBlock);
     }
 
     /**
      * 根据区块hash获取完整的SmallBlock
      * get SmallBlock by block header digest data
      *
-     * @param hash blockHash
+     * @param requestHash getTxGroupRequestHash
      * @return SmallBlock
      */
-    public SmallBlock getSmallBlock(NulsDigestData hash) {
-        if (null == smallBlockCacheMap) {
-            return null;
-        }
-        return smallBlockCacheMap.get(hash);
+    public SmallBlock getSmallBlockByRequest(NulsDigestData requestHash) {
+
+        return getSmallBlockByHash(smallBlockHashCacheMap.get(requestHash));
+    }
+    public SmallBlock getSmallBlockByHash(NulsDigestData blockHash) {
+
+        return smallBlockCacheMap.get(blockHash);
     }
 
     /**
      * 缓存一个交易，缓存的标识就是交易的hash对象，该交易在内存中存在，直到内存大小达到限制或者存活时间超过1000秒
      * Cache a transaction where the identity of the cache is the hash object of the transaction,
      * which exists in memory until the memory size is limited or survived for more than 1000 seconds.
+     *
      * @param tx transaction
      */
-    public void cacheTx(Transaction tx) {
-        txCacheMap.put(tx.getHash(), tx);
+    public boolean cacheTx(Transaction tx) {
+        return txCacheMap.put(tx.getHash(), tx);
     }
 
     /**
@@ -105,6 +112,7 @@ public class TemporaryCacheManager {
     /**
      * 根据区块摘要对象从缓存中移出一个SmallBlock，移除后再获取时将返回null
      * A SmallBlock is removed from the cache based on the block summary object, and null is returned when it is removed.
+     *
      * @param hash transaction digest data
      */
     public void removeSmallBlock(NulsDigestData hash) {
@@ -129,8 +137,12 @@ public class TemporaryCacheManager {
      * destroy cache
      */
     public void destroy() {
-        this.smallBlockCacheMap.destroy();
+        this.smallBlockCacheMap.clear();
         this.txCacheMap.clear();
+    }
+
+    public boolean containsTx(NulsDigestData txHash) {
+        return txCacheMap.containsKey(txHash);
     }
 
     public int getSmallBlockCount() {

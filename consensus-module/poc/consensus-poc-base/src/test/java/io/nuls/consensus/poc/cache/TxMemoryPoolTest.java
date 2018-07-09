@@ -27,7 +27,6 @@
 package io.nuls.consensus.poc.cache;
 
 import io.nuls.consensus.poc.TestTransaction;
-import io.nuls.consensus.poc.container.TxContainer;
 import io.nuls.kernel.model.Transaction;
 import org.junit.Test;
 
@@ -46,13 +45,13 @@ public class TxMemoryPoolTest {
     public void test() {
         assertNotNull(txMemoryPool);
 
-        TxContainer tx = new TxContainer(new TestTransaction());
+        Transaction tx = new TestTransaction();
 
         boolean success = txMemoryPool.add(tx, false);
 
         assertTrue(success);
 
-        TxContainer tempTx = txMemoryPool.get();
+        Transaction tempTx = txMemoryPool.get();
 
         assertEquals(tx, tempTx);
 
@@ -60,17 +59,17 @@ public class TxMemoryPoolTest {
 
         assertNull(tempTx);
 
-        tempTx = txMemoryPool.get(tx.getTx().getHash());
-        assertNull(tempTx);
+//        tempTx = txMemoryPool.get(tx.getTx().getHash());
+//        assertNull(tempTx);
+//
+//        txMemoryPool.add(tx, false);
+//        tempTx = txMemoryPool.get(tx.getTx().getHash());
+//        assertEquals(tempTx, tx);
+//
+//        tempTx = txMemoryPool.get(tx.getTx().getHash());
+//        assertEquals(tempTx, tx);
 
-        txMemoryPool.add(tx, false);
-        tempTx = txMemoryPool.get(tx.getTx().getHash());
-        assertEquals(tempTx, tx);
-
-        tempTx = txMemoryPool.get(tx.getTx().getHash());
-        assertEquals(tempTx, tx);
-
-        TxContainer tx2 = new TxContainer(new TestTransaction());
+        Transaction tx2 = new TestTransaction();
         txMemoryPool.add(tx2, true);
 
         tempTx = txMemoryPool.get();
@@ -87,21 +86,21 @@ public class TxMemoryPoolTest {
 
         txMemoryPool.add(tx2, true);
         List<Transaction> list = txMemoryPool.getAll();
-        assertEquals(list.size() , 0);
+        assertEquals(list.size(), 0);
 
         list = txMemoryPool.getAllOrphan();
-        assertEquals(list.size() , 1);
+        assertEquals(list.size(), 1);
 
-        success = txMemoryPool.exist(tx.getTx().getHash());
+        success = txMemoryPool.exist(tx.getHash());
         assertFalse(success);
 
-        success = txMemoryPool.exist(tx2.getTx().getHash());
+        success = txMemoryPool.exist(tx2.getHash());
         assertTrue(success);
 
-        success = txMemoryPool.remove(tx2.getTx().getHash());
+        success = txMemoryPool.remove(tx2.getHash());
         assertTrue(success);
 
-        success = txMemoryPool.exist(tx2.getTx().getHash());
+        success = txMemoryPool.exist(tx2.getHash());
         assertFalse(success);
     }
 }

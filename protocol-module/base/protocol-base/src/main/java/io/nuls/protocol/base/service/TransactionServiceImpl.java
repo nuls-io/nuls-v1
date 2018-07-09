@@ -28,6 +28,7 @@ package io.nuls.protocol.base.service;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.TransactionProcessor;
@@ -55,7 +56,6 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private MessageBusService messageBusService;
-
     @Autowired
     private LedgerService ledgerService;
     @Autowired
@@ -128,10 +128,9 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Result forwardTx(Transaction tx, Node excludeNode) {
-        temporaryCacheManager.cacheTx(tx);
         ForwardTxMessage message = new ForwardTxMessage();
         message.setMsgBody(tx.getHash());
-        return messageBusService.broadcast(message, excludeNode, true);
+        return messageBusService.broadcast(message, excludeNode, true, 50);
     }
 
     /**
@@ -143,14 +142,10 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public Result broadcastTx(Transaction tx) {
-
         TransactionMessage message = new TransactionMessage();
         message.setMsgBody(tx);
-
         consensusService.newTx(tx);
-        temporaryCacheManager.cacheTx(tx);
-
-        return messageBusService.broadcast(message, null, true);
+        return messageBusService.broadcast(message, null, true, 50);
     }
 
     @Override
@@ -193,5 +188,10 @@ public class TransactionServiceImpl implements TransactionService {
             }
         }
         return result;
+    }
+
+    @Override
+    public Transaction getTx(NulsDigestData hash) {
+        return consensusService.getTx(hash);
     }
 }

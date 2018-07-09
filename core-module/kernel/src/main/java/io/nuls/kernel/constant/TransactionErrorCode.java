@@ -43,9 +43,12 @@ public interface TransactionErrorCode {
     ErrorCode ORPHAN_BLOCK = ErrorCode.init("LED007", "12007");
     ErrorCode UTXO_NOT_FOUND = ErrorCode.init("LED008", "12008");
     ErrorCode FEE_NOT_RIGHT = ErrorCode.init("LED009", "12009");
-    ErrorCode ROLLBACK_TRANSACTION_FAILED= ErrorCode.init("LED010", "12010");
+    ErrorCode ROLLBACK_TRANSACTION_FAILED = ErrorCode.init("LED010", "12010");
 
-    ErrorCode TRANSACTION_REPEATED= ErrorCode.init("LED010", "12011");
+    ErrorCode TRANSACTION_REPEATED = ErrorCode.init("LED011", "12011");
+    ErrorCode TOO_SMALL_AMOUNT = ErrorCode.init("LED012", "12012");
 
+
+    ErrorCode TX_SIZE_TOO_BIG = ErrorCode.init("LED013","12013");
 
 }

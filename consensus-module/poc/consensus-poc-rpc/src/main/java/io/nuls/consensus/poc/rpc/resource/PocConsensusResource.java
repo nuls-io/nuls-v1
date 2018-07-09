@@ -497,7 +497,7 @@ public class PocConsensusResource {
             return saveResult.toRpcClientResult();
         }
         transactionService.newTx(tx);
-        Result sendResult = this.transactionService.forwardTx(tx, null);
+        Result sendResult = this.transactionService.broadcastTx(tx);
         if (sendResult.isFailed()) {
             accountLedgerService.rollbackTransaction(tx);
             return sendResult.toRpcClientResult();
@@ -1049,7 +1049,7 @@ public class PocConsensusResource {
         if (null == depositTransaction) {
             return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND).toRpcClientResult();
         }
-        cancelDeposit.setAddress(AddressTool.getAddress(depositTxHash));
+        cancelDeposit.setAddress(account.getAddress().getAddressBytes());
         cancelDeposit.setJoinTxHash(hash);
         tx.setTxData(cancelDeposit);
         CoinData coinData = new CoinData();

@@ -29,18 +29,16 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.MessageDataType;
 import io.nuls.protocol.message.GetTxGroupRequest;
 import io.nuls.protocol.message.NotFoundMessage;
-import io.nuls.protocol.message.ReactMessage;
 import io.nuls.protocol.message.TxGroupMessage;
 import io.nuls.protocol.model.GetTxGroupParam;
 import io.nuls.protocol.model.NotFound;
 import io.nuls.protocol.model.TxGroup;
+import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,8 +49,7 @@ import java.util.List;
  */
 public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest> {
 
-    private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
-    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
+    private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
 
     @Override
     public void onMessage(GetTxGroupRequest message, Node fromNode) {
@@ -73,22 +70,15 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
             return;
         }
 
-        // react request
-        messageBusService.sendToNode(new ReactMessage(requestHash), fromNode, true);
-
         TxGroupMessage txGroupMessage = new TxGroupMessage();
         TxGroup txGroup = new TxGroup();
         List<Transaction> txList = new ArrayList<>();
 
         for (NulsDigestData hash : getTxGroupParam.getTxHashList()) {
-            Transaction tx = temporaryCacheManager.getTx(hash);
-            if (tx == null) {
-                tx = ledgerService.getTx(hash);
-            }
+            Transaction tx = transactionService.getTx(hash);
             if (tx != null) {
                 txList.add(tx);
             } else {
-                this.sendNotFound(requestHash, fromNode);
                 return;
             }
         }
@@ -102,16 +92,6 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
 
         txGroupMessage.setMsgBody(txGroup);
         messageBusService.sendToNode(txGroupMessage, fromNode, true);
-    }
-
-    private void sendNotFound(NulsDigestData hash, Node fromNode) {
-        NotFoundMessage event = new NotFoundMessage();
-        NotFound data = new NotFound(MessageDataType.TRANSACTIONS, hash);
-        event.setMsgBody(data);
-        Result result = this.messageBusService.sendToNode(event, fromNode, true);
-        if (result.isFailed()) {
-            Log.warn("send not found failed:" + fromNode.getId() + ", hash:" + hash);
-        }
     }
 
 }

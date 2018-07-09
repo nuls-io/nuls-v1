@@ -61,11 +61,6 @@ public class ConsensusDownloadServiceImpl implements DownloadService {
     }
 
     @Override
-    public Result<TxGroup> downloadTxGroup(List<NulsDigestData> txHashList, Node node) {
-        return null;
-    }
-
-    @Override
     public Result isDownloadSuccess() {
         return new Result(isDownloadSuccess, null);
     }

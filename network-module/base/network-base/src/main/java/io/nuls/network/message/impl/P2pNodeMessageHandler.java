@@ -72,7 +72,7 @@ public class P2pNodeMessageHandler implements BaseNetworkMeesageHandler {
         nodeManager.addNode(newNode);
         nodeCacheManager.cacheNode(nodeBody);
         //广播交易
-        broadcastHandler.broadcastToAllNode(message, node, true);
+        broadcastHandler.broadcastToAllNode(message, node, true,100);
         return null;
     }
 }

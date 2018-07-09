@@ -25,8 +25,10 @@
 
 package io.nuls.sdk.utils;
 
-import java.net.URL;
-import java.net.URLConnection;
+import org.apache.commons.net.ntp.NTPUDPClient;
+import org.apache.commons.net.ntp.TimeInfo;
+
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,11 +41,16 @@ import java.util.List;
 public class TimeService implements Runnable {
 
     private TimeService() {
-        urlList.add("http://time.inchain.org");         //inchain
-        urlList.add("https://www.baidu.com");           //baidu
-        urlList.add("https://www.alibaba.com");         //alibaba
-        urlList.add("https://github.com/");             //github
-//        syncWebTime();
+        urlList.add("sgp.ntp.org.cn");
+        urlList.add("cn.ntp.org.cn");
+        urlList.add("time1.apple.com");
+        urlList.add("ntp3.aliyun.com");
+        urlList.add("ntp5.aliyun.com");
+        urlList.add("us.ntp.org.cn");
+        urlList.add("kr.ntp.org.cn");
+        urlList.add("de.ntp.org.cn");
+        urlList.add("jp.ntp.org.cn");
+        urlList.add("ntp7.aliyun.com");
     }
 
     private static TimeService instance = new TimeService();
@@ -84,38 +91,52 @@ public class TimeService implements Runnable {
      * 同步网络时间
      */
     private void syncWebTime() {
-        long localBeforeTime = System.currentTimeMillis();
 
-        long netTime = getWebTime();
+        int count = 0;
+        long sum = 0L;
 
-        long localEndTime = System.currentTimeMillis();
+        for (int i = 0; i < urlList.size(); i++) {
+            long localBeforeTime = System.currentTimeMillis();
 
-        netTimeOffset = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
+            long netTime = getWebTime(urlList.get(i));
+
+            if (netTime == 0) {
+                continue;
+            }
+
+            long localEndTime = System.currentTimeMillis();
+
+            long value = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
+            count++;
+            sum += value;
+        }
+        if (count > 0) {
+            netTimeOffset = sum / count;
+        }
 
         lastSyncTime = currentTimeMillis();
     }
 
     /**
      * 获取网络时间
-     * 连接公用网站，获取对方的网络时间，
-     * 有一个获取成功就立刻返回
+     * todo 可优化为哪个地址延迟小使用哪个
      *
      * @return long
      */
-    private long getWebTime() {
-        for (int i = 0; i < urlList.size(); i++) {
-            try {
-                URL url = new URL(urlList.get(i));
-                URLConnection conn = url.openConnection();
-                conn.connect();
-                long time = conn.getDate();
-                return time;
-            } catch (Exception e) {
-                // try to connect next
-                continue;
-            }
+    private long getWebTime(String address) {
+        try {
+            NTPUDPClient client = new NTPUDPClient();
+            client.open();
+            client.setDefaultTimeout(1000);
+            client.setSoTimeout(1000);
+            InetAddress inetAddress = InetAddress.getByName(address);
+            Log.debug("start ask time....");
+            TimeInfo timeInfo = client.getTime(inetAddress);
+            Log.debug("done!");
+            return timeInfo.getMessage().getTransmitTimeStamp().getTime();
+        } catch (Exception e) {
+            return 0L;
         }
-        return 0;
     }
 
     /**
@@ -123,6 +144,7 @@ public class TimeService implements Runnable {
      * Start the time synchronization thread.
      */
     public void start() {
+
         Log.debug("----------- TimeService start -------------");
         Thread thread = new Thread(this);
         thread.run();
@@ -160,6 +182,7 @@ public class TimeService implements Runnable {
     /**
      * 获取当前网络时间毫秒数
      * Gets the current network time in milliseconds.
+     *
      * @return long
      */
     public static long currentTimeMillis() {

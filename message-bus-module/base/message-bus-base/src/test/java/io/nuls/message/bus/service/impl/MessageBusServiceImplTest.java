@@ -144,7 +144,7 @@ public class MessageBusServiceImplTest {
         BlockMessage blockMessage = new BlockMessage();
         Node node = new Node("192.168.1.90",8003,1);
         boolean aysn = true;
-        Result<List<String>> result =  messageBusService.broadcast(blockMessage, node, aysn);
+        Result<List<String>> result =  messageBusService.broadcast(blockMessage, node, aysn,100);
         assertTrue(result.isSuccess());
         assertTrue(result.getData().size()>0);
     }

@@ -83,4 +83,6 @@ public interface ConsensusService {
      */
     List<Transaction> getMemoryTxs();
 
+    Transaction getTx(NulsDigestData hash);
+
 }

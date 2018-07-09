@@ -334,7 +334,7 @@ public class NodeManager implements Runnable {
             handShakeNodes.remove(node.getId());
         }
 
-        if (node.getFailCount() <= NetworkConstant.CONEECT_FAIL_MAX_COUNT) {
+        if (node.getFailCount() <= NetworkConstant.CONNECT_FAIL_MAX_COUNT) {
             node.setLastFailTime(TimeService.currentTimeMillis());
             if (!disConnectNodes.containsKey(node.getId())) {
                 disConnectNodes.put(node.getId(), node);
@@ -409,7 +409,7 @@ public class NodeManager implements Runnable {
         String externalIp = getNetworkStorageService().getExternalIp();
         P2PNodeBody p2PNodeBody = new P2PNodeBody(externalIp, networkParam.getPort());
         P2PNodeMessage message = new P2PNodeMessage(p2PNodeBody);
-        broadcastHandler.broadcastToAllNode(message, null, true);
+        broadcastHandler.broadcastToAllNode(message, null, true,100);
     }
 
     private boolean checkFullHandShake(Node node) {

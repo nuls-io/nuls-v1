@@ -50,16 +50,16 @@ public enum MessageDataType {
      * 获取交易组找不到时，返回的Not Found 类型
      * When the transactions cannot be Found, the returned Not Found type.
      */
-    TRANSACTIONS(3),
+//    TRANSACTIONS(3),
     /**
      * 获取区块头摘要找不到时，返回的Not Found 类型
      * When the block header digest data cannot be Found, the returned Not Found type.
      */
     HASHES(4),
 
-    SMALL_BLOCK(5),
-
-    TRANSACTION(6),
+//    SMALL_BLOCK(5),
+//
+//    TRANSACTION(6),
 
     REQUEST(7),
 
@@ -98,8 +98,8 @@ public enum MessageDataType {
                 return BLOCK;
             case 2:
                 return BLOCKS;
-            case 3:
-                return TRANSACTIONS;
+//            case 3:
+//                return TRANSACTIONS;
             case 4:
                 return HASHES;
             default:

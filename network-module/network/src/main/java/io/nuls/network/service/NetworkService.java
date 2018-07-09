@@ -100,7 +100,7 @@ public interface NetworkService {
      * @param asyn     Whether or not asynchronous
      * @return BroadcastResult
      */
-    BroadcastResult sendToAllNode(BaseNulsData nulsData, boolean asyn);
+    BroadcastResult sendToAllNode(BaseNulsData nulsData, boolean asyn, int percent);
 
     /**
      * 发送消息
@@ -111,7 +111,7 @@ public interface NetworkService {
      * @param asyn        Whether or not asynchronous
      * @return BroadcastResult
      */
-    BroadcastResult sendToAllNode(BaseNulsData event, Node excludeNode, boolean asyn);
+    BroadcastResult sendToAllNode(BaseNulsData event, Node excludeNode, boolean asyn, int percent);
 
     /**
      * send message to node

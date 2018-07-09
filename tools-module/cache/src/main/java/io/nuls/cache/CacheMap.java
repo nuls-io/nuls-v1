@@ -70,6 +70,7 @@ public class CacheMap<K, V> {
         this.cacheManager.createCache(cacheName, params);
     }
 
+    @Deprecated
     public int size() {
         return this.keySet().size();
     }

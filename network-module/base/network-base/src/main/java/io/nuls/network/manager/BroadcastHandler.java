@@ -38,9 +38,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.protocol.message.base.BaseMessage;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class BroadcastHandler {
 
@@ -58,11 +56,11 @@ public class BroadcastHandler {
 
     private NodeManager nodeManager = NodeManager.getInstance();
 
-    public BroadcastResult broadcastToAllNode(BaseMessage msg, Node excludeNode, boolean asyn) {
+    public BroadcastResult broadcastToAllNode(BaseMessage msg, Node excludeNode, boolean asyn, int percent) {
         if (nodeManager.getAvailableNodes().isEmpty()) {
             return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_NODE_EMPTY);
         }
-        return broadcastToList(nodeManager.getAvailableNodes(), msg, excludeNode, asyn);
+        return broadcastToList(nodeManager.getAvailableNodes(), msg, excludeNode, asyn, percent);
     }
 
     public BroadcastResult broadcastToHalfNode(BaseMessage msg, Node excludeNode, boolean asyn) {
@@ -79,7 +77,7 @@ public class BroadcastHandler {
             }
         }
 
-        return broadcastToList(nodeList, msg, excludeNode, asyn);
+        return broadcastToList(nodeList, msg, excludeNode, asyn, 50);
     }
 
     public BroadcastResult broadcastToNode(BaseMessage msg, Node sendNode, boolean asyn) {
@@ -94,7 +92,7 @@ public class BroadcastHandler {
         if (group == null || group.size() == 0) {
             return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_NODE_EMPTY);
         }
-        return broadcastToList(group.getNodes().values(), msg, null, asyn);
+        return broadcastToList(group.getNodes().values(), msg, null, asyn, 100);
     }
 
     public BroadcastResult broadcastToNodeGroup(BaseMessage msg, String groupName, Node excludeNode, boolean asyn) {
@@ -102,13 +100,47 @@ public class BroadcastHandler {
         if (group == null || group.size() == 0) {
             return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_NODE_EMPTY);
         }
-        return broadcastToList(group.getNodes().values(), msg, excludeNode, asyn);
+        return broadcastToList(group.getNodes().values(), msg, excludeNode, asyn, 100);
     }
 
-    private BroadcastResult broadcastToList(Collection<Node> nodeList, BaseMessage message, Node excludeNode, boolean asyn) {
+    private BroadcastResult broadcastToList(Collection<Node> nodeList, BaseMessage message, Node excludeNode, boolean asyn, int percent) {
         BroadcastResult result = new BroadcastResult();
         try {
             int successCount = 0;
+            int minCount = 5;
+            //根据百分比决定直接广播给多少个节点
+            if (nodeList.size() > minCount && percent < 100) {
+                int needCount = nodeList.size() * percent / 100;
+                if (needCount < minCount) {
+                    needCount = minCount;
+                }
+                Set<Integer> set = new HashSet<>();
+                while (true) {
+                    Random rand = new Random();
+                    int ran = rand.nextInt(nodeList.size());
+                    set.add(ran);
+                    if (set.size() == needCount + 1) {
+                        break;
+                    }
+                }
+
+                int nodeListIndex = 0;
+                Collection<Node> nodeBroadcastList = new ArrayList<>();
+                for (Node node : nodeList) {
+                    if (set.contains(nodeListIndex)) {
+                        if (excludeNode != null && node.getId().equals(excludeNode.getId())) {
+                            nodeListIndex++;
+                            continue;
+                        }
+                        nodeBroadcastList.add(node);
+                        if (nodeBroadcastList.size() == needCount) {
+                            break;
+                        }
+                    }
+                    nodeListIndex++;
+                }
+                nodeList = nodeBroadcastList;
+            }
             for (Node node : nodeList) {
                 if (excludeNode != null && node.getId().equals(excludeNode.getId())) {
                     continue;
@@ -121,6 +153,7 @@ public class BroadcastHandler {
                     return br;
                 }
             }
+
             if (successCount == 0) {
                 return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_FAIL);
             }

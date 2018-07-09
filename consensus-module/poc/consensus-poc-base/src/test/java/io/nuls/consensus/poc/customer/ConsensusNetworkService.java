@@ -73,12 +73,12 @@ public class ConsensusNetworkService implements NetworkService {
     }
 
     @Override
-    public BroadcastResult sendToAllNode(BaseNulsData event, boolean asyn) {
+    public BroadcastResult sendToAllNode(BaseNulsData event, boolean asyn, int percent) {
         return null;
     }
 
     @Override
-    public BroadcastResult sendToAllNode(BaseNulsData event, Node excludeNode, boolean asyn) {
+    public BroadcastResult sendToAllNode(BaseNulsData event, Node excludeNode, boolean asyn, int percent) {
         return null;
     }
 

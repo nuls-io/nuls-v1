@@ -33,7 +33,9 @@ import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.protocol.service.DownloadService;
 
 import java.util.HashSet;
 import java.util.List;
@@ -44,7 +46,7 @@ import java.util.Set;
  */
 public class BlockMonitorProcess {
 
-    private final static long RESET_TIME_INTERVAL =  PocConsensusConstant.RESET_SYSTEM_TIME_INTERVAL * 60 * 1000L;
+    private final static long RESET_TIME_INTERVAL = PocConsensusConstant.RESET_SYSTEM_TIME_INTERVAL * 60 * 1000L;
 
     private final ChainManager chainManager;
 
@@ -52,7 +54,16 @@ public class BlockMonitorProcess {
         this.chainManager = chainManager;
     }
 
+    private NulsDigestData lastBestHash;
+
     public void doProcess() {
+        Block bestBlock = NulsContext.getInstance().getBestBlock();
+        if (bestBlock.getHeader().getHash().equals(lastBestHash) && bestBlock.getHeader().getTime() < (TimeService.currentTimeMillis() - RESET_TIME_INTERVAL)) {
+            lastBestHash = bestBlock.getHeader().getHash();
+            NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
+            return;
+        }
+        lastBestHash = bestBlock.getHeader().getHash();
         List<Block> blockList = chainManager.getMasterChain().getChain().getBlockList();
         int count = 0;
         Set<String> addressSet = new HashSet<>();
@@ -63,8 +74,13 @@ public class BlockMonitorProcess {
                 break;
             }
         }
-        if ((addressSet.size() == 1 && ConsensusConfig.getSeedNodeList().size() > 1) ||
-                NulsContext.getInstance().getBestBlock().getHeader().getTime() < (TimeService.currentTimeMillis() - RESET_TIME_INTERVAL)) {
+        DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
+        if (addressSet.size() == 1 && ConsensusConfig.getSeedNodeList().size() > 1) {
+            NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
+            return;
+        }
+        if (downloadService.isDownloadSuccess().isSuccess() &&
+                bestBlock.getHeader().getTime() < (TimeService.currentTimeMillis() - RESET_TIME_INTERVAL)) {
             NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
         }
     }

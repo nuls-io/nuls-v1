@@ -159,6 +159,7 @@ public class AccountServiceImpl implements AccountService {
         if (result.isFailed()) {
             return result;
         }
+        accountLedgerService.deleteUnconfirmedTx(account.getAddress().getAddressBytes());
         accountCacheService.localAccountMaps.remove(account.getAddress().getBase58());
         return Result.getSuccess().setData(true);
     }
@@ -223,6 +224,9 @@ public class AccountServiceImpl implements AccountService {
     public Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore, String password) {
         if (null == keyStore || null == keyStore.getAddress()) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+        }
+        if(!AddressTool.validAddress(keyStore.getAddress())){
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Account account;
         byte[] priKey = null;

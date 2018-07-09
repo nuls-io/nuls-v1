@@ -30,9 +30,9 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.constant.MessageBusErrorCode;
+import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.manager.DispatchManager;
 import io.nuls.message.bus.manager.HandlerManager;
-import io.nuls.message.bus.handler.intf.NulsMessageHandler;
 import io.nuls.message.bus.manager.MessageManager;
 import io.nuls.message.bus.model.ProcessData;
 import io.nuls.message.bus.service.MessageBusService;
@@ -80,8 +80,8 @@ public class MessageBusServiceImpl implements MessageBusService {
     }
 
     @Override
-    public Result<List<String>> broadcast(BaseMessage message, Node excludeNode, boolean aysn) {
-        BroadcastResult result = networkService.sendToAllNode(message, excludeNode, aysn);
+    public Result<List<String>> broadcast(BaseMessage message, Node excludeNode, boolean aysn, int percent) {
+        BroadcastResult result = networkService.sendToAllNode(message, excludeNode, aysn, percent);
         return getNodeIdListResult(result);
     }
 

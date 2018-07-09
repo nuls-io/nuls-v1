@@ -425,28 +425,28 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 //每次累加一条未花费余额时，需要重新计算手续费
                 Na fee = TransactionFeeCalculator.getFee(size, price);
                 values = values.add(coin.getNa());
-                if (values.isGreaterOrEquals(amount.add(fee))) {
-                    //余额足够后，需要判断是否找零，如果有找零，则需要重新计算手续费
+
+                //需要判断是否找零，如果有找零，则需要重新计算手续费
+                if (values.isGreaterThan(amount.add(fee))) {
                     Na change = values.subtract(amount.add(fee));
-                    if (change.isGreaterThan(Na.ZERO)) {
-                        Coin changeCoin = new Coin();
-                        changeCoin.setOwner(address);
-                        changeCoin.setNa(change);
+                    Coin changeCoin = new Coin();
+                    changeCoin.setOwner(address);
+                    changeCoin.setNa(change);
 
-                        fee = TransactionFeeCalculator.getFee(size + changeCoin.size(), price);
-                        if (values.isLessThan(amount.add(fee))) {
-                            continue;
-                        }
-                        coinDataResult.setChange(changeCoin);
+                    fee = TransactionFeeCalculator.getFee(size + changeCoin.size(), price);
+                    if (values.isLessThan(amount.add(fee))) {
+                        continue;
                     }
-
+                    coinDataResult.setChange(changeCoin);
+                }
+                coinDataResult.setFee(fee);
+                if (values.isGreaterOrEquals(amount.add(fee))) {
                     enough = true;
                     coinDataResult.setEnough(true);
-                    coinDataResult.setFee(fee);
-                    coinDataResult.setCoinList(coins);
                     break;
                 }
             }
+            coinDataResult.setCoinList(coins);
             if (!enough) {
                 coinDataResult.setEnough(false);
                 return coinDataResult;
@@ -490,6 +490,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     fee = TransactionFeeCalculator.getFee(size + changeCoin.size(), price);
                     if (values.isLessThan(amount.add(fee))) {
                         continue;
+                    } else {
+                        break;
                     }
                 }
             }
@@ -545,8 +547,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             if (saveResult.isFailed()) {
                 return saveResult;
             }
-            transactionService.newTx(tx);
-            Result sendResult = transactionService.forwardTx(tx, null);
+//            transactionService.newTx(tx);
+            Result sendResult = transactionService.broadcastTx(tx);
             if (sendResult.isFailed()) {
                 this.rollbackTransaction(tx);
                 return sendResult;
@@ -577,34 +579,19 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         CoinData coinData = new CoinData();
         Coin toCoin = new Coin(to, values);
         coinData.getTo().add(toCoin);
-        Na fee = getTxFee(from, values, tx.size(), price);
+        tx.setCoinData(coinData);
+        Na fee = getTxFee(from, values, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, price);
         Result result = Result.getSuccess().setData(fee);
         return result;
     }
 
     @Override
-    public Result createTransaction(List<byte[]> inputsKey, List<Coin> outputs, byte[] remark) {
+    public Result createTransaction(List<Coin> inputs, List<Coin> outputs, byte[] remark) {
         TransferTransaction tx = new TransferTransaction();
         CoinData coinData = new CoinData();
         coinData.setTo(outputs);
+        coinData.setFrom(inputs);
         tx.setRemark(remark);
-        //验证地址是否一致
-        byte[] owner = null;
-        for (int i = 0; i < inputsKey.size(); i++) {
-            Coin coin = ledgerService.getUtxo(inputsKey.get(i));
-            if (coin == null) {
-                return Result.getFailed(LedgerErrorCode.UTXO_NOT_FOUND);
-            }
-            if (i == 0) {
-                owner = coin.getOwner();
-            } else {
-                if (!Arrays.equals(coin.getOwner(), owner)) {
-                    return Result.getFailed(LedgerErrorCode.INVALID_INPUT);
-                }
-            }
-            coin.setOwner(inputsKey.get(i));
-            coinData.getFrom().add(coin);
-        }
 
         tx.setCoinData(coinData);
         tx.setTime(TimeService.currentTimeMillis());
@@ -634,7 +621,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Transaction signTransaction(Transaction tx, ECKey ecKey) throws IOException {
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         P2PKHScriptSig sig = new P2PKHScriptSig();
         sig.setPublicKey(ecKey.getPubKey());
         sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), ecKey));
@@ -644,7 +630,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Result broadcast(Transaction tx) {
-        return transactionService.forwardTx(tx, null);
+        return transactionService.broadcastTx(tx);
     }
 
 
@@ -706,6 +692,25 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 //        Collections.sort(coinList, CoinComparator.getInstance());
         result.setData(lockCoinList);
         return result;
+    }
+
+    @Override
+    public Result<Integer> deleteUnconfirmedTx(byte[] address) {
+        Result result = getAllUnconfirmedTransaction();
+        if (result.getData() == null) {
+            return Result.getSuccess().setData(new Integer(0));
+        }
+        List<Transaction> txs = (List<Transaction>) result.getData();
+        int i = 0;
+        for (Transaction tx : txs) {
+            if (Arrays.equals(tx.getAddressFromSig(), address)) {
+                unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
+                localUtxoService.deleteUtxoOfTransaction(tx);
+                i++;
+            }
+
+        }
+        return Result.getSuccess().setData(new Integer(i));
     }
 
     protected Result<Integer> importConfirmedTransaction(Transaction tx, byte[] address) {

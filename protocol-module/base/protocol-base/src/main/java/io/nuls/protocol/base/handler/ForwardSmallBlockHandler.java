@@ -24,27 +24,18 @@
  */
 package io.nuls.protocol.base.handler;
 
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.base.cache.ProtocolCacheHandler;
-import io.nuls.protocol.base.download.smblock.SmallBlockContainer;
-import io.nuls.protocol.base.download.smblock.SmallBlockDownloadProcessor;
-import io.nuls.protocol.base.download.tx.TransactionContainer;
-import io.nuls.protocol.base.download.tx.TransactionDownloadProcessor;
-import io.nuls.protocol.base.utils.filter.InventoryFilter;
+import io.nuls.protocol.base.cache.SmallBlockDuplicateRemoval;
 import io.nuls.protocol.message.ForwardSmallBlockMessage;
 import io.nuls.protocol.message.GetSmallBlockMessage;
-import io.nuls.protocol.model.SmallBlock;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author facjas
@@ -53,33 +44,22 @@ public class ForwardSmallBlockHandler extends AbstractMessageHandler<ForwardSmal
 
     private MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
-    private Set<NulsDigestData> set = new HashSet<>();
-
-    private SmallBlockDownloadProcessor smallBlockDownloadProcessor = SmallBlockDownloadProcessor.getInstance();
-
     @Override
     public void onMessage(ForwardSmallBlockMessage message, Node fromNode) {
-        if (message == null || fromNode == null || null == message.getMsgBody()) {
+        if (message == null || fromNode == null || !fromNode.isHandShake() || null == message.getMsgBody()) {
             return;
         }
         NulsDigestData hash = message.getMsgBody();
-        if (!set.add(hash)) {
+        if (!SmallBlockDuplicateRemoval.needDownloadSmallBlock(hash)) {
             return;
-        }
-        if (set.size() >= 100) {
-            set.clear();
-            set.add(hash);
         }
         GetSmallBlockMessage getSmallBlockMessage = new GetSmallBlockMessage();
         getSmallBlockMessage.setMsgBody(hash);
-        CompletableFuture<SmallBlock> future = ProtocolCacheHandler.addGetSmallBlockRequest(hash);
         Result result = messageBusService.sendToNode(getSmallBlockMessage, fromNode, true);
-//        Log.error("ask small block:" + hash);
         if (result.isFailed()) {
-            ProtocolCacheHandler.removeSmallBlockFuture(hash);
+            SmallBlockDuplicateRemoval.removeForward(hash);
             return;
         }
-        smallBlockDownloadProcessor.offer(new SmallBlockContainer(fromNode, future, hash));
     }
 
 }

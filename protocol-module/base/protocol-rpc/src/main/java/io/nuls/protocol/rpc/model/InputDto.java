@@ -25,7 +25,6 @@
 
 package io.nuls.protocol.rpc.model;
 
-import io.nuls.core.tools.crypto.Base58;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.utils.NulsByteBuffer;
