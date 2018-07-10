@@ -61,7 +61,7 @@ public class DownloadUtils {
         Future<Block> future = ProtocolCacheHandler.addGetBlockByHashRequest(hash);
         Future<NulsDigestData> reactFuture = ProtocolCacheHandler.addRequest(hash);
         Result result = messageBusService.sendToNode(message, node, false);
-        Log.error("start request:"+new Date().toLocaleString()+" ::: "+hash);
+//        Log.error("start request:"+new Date().toLocaleString()+" ::: "+hash);
         if (!result.isSuccess()) {
             ProtocolCacheHandler.removeBlockByHashFuture(hash);
             ProtocolCacheHandler.removeRequest(hash);
