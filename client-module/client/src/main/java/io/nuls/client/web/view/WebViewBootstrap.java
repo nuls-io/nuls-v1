@@ -209,6 +209,9 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
     public void openBrowse() {
         String ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP, RpcConstant.DEFAULT_IP);
         int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);
+        if("0.0.0.0".equals(ip)){
+            ip = RpcConstant.DEFAULT_IP;
+        }
         String url = "http://" + ip + ":" + port;
         openURL(url);
     }
