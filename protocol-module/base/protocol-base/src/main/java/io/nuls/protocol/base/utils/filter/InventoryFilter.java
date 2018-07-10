@@ -29,8 +29,6 @@ import com.google.common.hash.BloomFilter;
 import com.google.common.hash.Funnels;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 向量清单过滤器
