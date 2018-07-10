@@ -36,6 +36,8 @@
 
     <groupId>io.nuls.sdk-module</groupId>
     <artifactId>nuls-sdk</artifactId>
-
-
+    <version>1.0.0</version>
+    <build>
+        <finalName>${artifactId}-${version}</finalName>
+    </build>
 </project>

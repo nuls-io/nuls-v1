@@ -83,4 +83,7 @@
             <version>3.6</version>
         </dependency>
     </dependencies>
+    <build>
+        <finalName>${artifactId}-${version}</finalName>
+    </build>
 </project>

@@ -62,6 +62,8 @@
             <version>1.0.0</version>
         </dependency>
     </dependencies>
-
+    <build>
+        <finalName>${artifactId}-${version}</finalName>
+    </build>
 
 </project>

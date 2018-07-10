@@ -13,6 +13,7 @@
     <groupId>io.nuls.contract-module</groupId>
     <artifactId>contract-base</artifactId>
     <version>1.0.0</version>
-
-
+    <build>
+        <finalName>${artifactId}-${version}</finalName>
+    </build>
 </project>

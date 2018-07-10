@@ -15,12 +15,13 @@
 
 
     <dependencies>
-
         <dependency>
             <groupId>io.nuls.core-module</groupId>
             <artifactId>kernel</artifactId>
             <version>1.0.0</version>
         </dependency>
-
     </dependencies>
+    <build>
+        <finalName>${artifactId}-${version}</finalName>
+    </build>
 </project>

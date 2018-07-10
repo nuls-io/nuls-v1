@@ -55,5 +55,4 @@
     <build>
         <finalName>${artifactId}-${version}</finalName>
     </build>
-
 </project>

@@ -58,4 +58,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <build>
+        <finalName>${artifactId}-${version}</finalName>
+    </build>
 </project>

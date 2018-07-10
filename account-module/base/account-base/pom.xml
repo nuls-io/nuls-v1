@@ -56,37 +56,8 @@
             <artifactId>db-leveldb</artifactId>
             <version>1.0.0</version>
         </dependency>
-
-        <!-- test -->
-        <dependency>
-            <groupId>io.nuls.account-ledger-module</groupId>
-            <artifactId>account-ledger-base</artifactId>
-            <version>1.0.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.account-ledger-module</groupId>
-            <artifactId>account-ledger-storage</artifactId>
-            <version>1.0.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.message-bus-module</groupId>
-            <artifactId>message-bus-base</artifactId>
-            <version>1.0.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.ledger-module</groupId>
-            <artifactId>ledger-utxo-base</artifactId>
-            <version>1.0.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.ledger-module</groupId>
-            <artifactId>ledger-utxo-storage</artifactId>
-            <version>1.0.0</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
+    <build>
+        <finalName>${artifactId}-${version}</finalName>
+    </build>
 </project>

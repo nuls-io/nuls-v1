@@ -52,5 +52,7 @@
             <version>4.0.1</version>
         </dependency>
     </dependencies>
-
+    <build>
+        <finalName>${artifactId}-${version}</finalName>
+    </build>
 </project>
