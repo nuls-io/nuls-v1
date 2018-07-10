@@ -59,6 +59,7 @@ import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
+import io.nuls.protocol.utils.SmallBlockDuplicateRemoval;
 
 import java.io.IOException;
 import java.util.*;
@@ -264,6 +265,7 @@ public class ConsensusProcess {
     private void broadcastSmallBlock(Block block) {
         SmallBlock smallBlock = ConsensusTool.getSmallBlock(block);
         temporaryCacheManager.cacheSmallBlock(smallBlock);
+        SmallBlockDuplicateRemoval.needDownloadSmallBlock(smallBlock.getHeader().getHash());
         blockService.broadcastBlock(smallBlock);
     }
 
