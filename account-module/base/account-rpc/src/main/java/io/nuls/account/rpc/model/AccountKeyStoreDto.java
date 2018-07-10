@@ -65,7 +65,15 @@ public class AccountKeyStoreDto {
         accountKeyStore.setAddress(this.address);
         accountKeyStore.setAlias(this.alias);
         accountKeyStore.setEncryptedPrivateKey(this.encryptedPrivateKey);
-        accountKeyStore.setPrikey(null == this.prikey ? null : Hex.decode(this.prikey));
+        if(null == this.prikey || "null".equals(this.prikey) || "".equals(prikey.trim())){
+            accountKeyStore.setPrikey(null);
+        }else{
+            try {
+                accountKeyStore.setPrikey(Hex.decode(this.prikey.trim()));
+            } catch (Exception e) {
+                accountKeyStore.setPrikey(null);
+            }
+        }
         accountKeyStore.setPubKey(Hex.decode(this.pubKey));
         return accountKeyStore;
     }
