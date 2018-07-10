@@ -51,6 +51,7 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
     @Autowired
     private DBService dbService;
 
+    @Override
     public List<Node> getLocalNodeList() {
         List<NodePo> poList = getDbService().values(NetworkStorageConstant.DB_NAME_NETWORK_NODE, NodePo.class);
         if (poList == null) {
@@ -63,6 +64,7 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
         return nodeList;
     }
 
+    @Override
     public List<Node> getLocalNodeList(int size, Set<String> ipSet) {
         List<Node> nodeList = new ArrayList<>();
         List<NodePo> poList = getDbService().values(NetworkStorageConstant.DB_NAME_NETWORK_NODE, NodePo.class);
@@ -84,6 +86,7 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
         return nodeList;
     }
 
+    @Override
     public void saveNode(Node node) {
         NodePo po = getDbService().getModel(NetworkStorageConstant.DB_NAME_NETWORK_NODE, bytes(node.getId()), NodePo.class);
         if (po != null) {
@@ -94,6 +97,7 @@ public class NetworkStorageServiceImpl implements NetworkStorageService, Initial
         getDbService().putModel(NetworkStorageConstant.DB_NAME_NETWORK_NODE, bytes(node.getId()), po);
     }
 
+    @Override
     public void deleteNode(String nodeId) {
         getDbService().delete(NetworkStorageConstant.DB_NAME_NETWORK_NODE, bytes(nodeId));
     }

@@ -66,7 +66,9 @@ public class IpUtil {
                 netlist.add(0, ni);
                 InetAddress ip;
                 for (NetworkInterface list : netlist) {
-                    if (loop == false) break;
+                    if (loop == false) {
+                        break;
+                    }
                     Enumeration<?> card = list.getInetAddresses();
                     while (card.hasMoreElements()) {
                         while (true) {
@@ -116,8 +118,9 @@ public class IpUtil {
     public static boolean judgeLocalIsServer(String localIP, String remoteIP) {
         long local = ipToLong(localIP);
         long remote = ipToLong(remoteIP);
-        if (local < remote)
+        if (local < remote) {
             return true;
+        }
         return false;
     }
 
@@ -137,8 +140,9 @@ public class IpUtil {
     }
 
     public static String getNodeId(InetSocketAddress socketAddress) {
-        if (socketAddress == null)
+        if (socketAddress == null) {
             return null;
+        }
         return socketAddress.getHostString() + ":" + socketAddress.getPort();
     }
 }
