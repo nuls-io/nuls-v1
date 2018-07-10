@@ -332,30 +332,10 @@ public class PocConsensusResource {
         NulsDigestData createTxHash = agent.getTxHash();
         stopAgent.setCreateTxHash(createTxHash);
         tx.setTxData(stopAgent);
-        CoinData coinData = new CoinData();
-        List<Coin> toList = new ArrayList<>();
-        toList.add(new Coin(stopAgent.getAddress(), agent.getDeposit(), 0));
-        coinData.setTo(toList);
-        CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);
-        if (null == transaction) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND).toRpcClientResult();
-        }
-        List<Coin> fromList = new ArrayList<>();
-        for (int index = 0; index < transaction.getCoinData().getTo().size(); index++) {
-            Coin coin = transaction.getCoinData().getTo().get(index);
-            if (coin.getLockTime() == -1L && coin.getNa().equals(agent.getDeposit())) {
-                coin.setOwner(ArraysTool.concatenate(transaction.getHash().serialize(), new VarInt(index).encode()));
-                fromList.add(coin);
-                break;
-            }
-        }
-        if (fromList.isEmpty()) {
-            return Result.getFailed(KernelErrorCode.DATA_ERROR).toRpcClientResult();
-        }
-        coinData.setFrom(fromList);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
-        coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, PocConsensusConstant.STOP_AGENT_LOCK_TIME);
         tx.setCoinData(coinData);
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
         return Result.getSuccess().setData(resultFee).toRpcClientResult();
     }
