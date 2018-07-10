@@ -56,6 +56,8 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
     private HttpServletRequest request;
     @Context
     private HttpServletResponse response;
+    private String[] ipArray;
+    private boolean all = false;
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -96,16 +98,27 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
     }
 
     private boolean whiteSheetVerifier(HttpServletRequest request) {
-        String ips = null;
-        try {
-            ips = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_REQUEST_WHITE_SHEET);
-        } catch (Exception e) {
-            Log.error(e);
+        if (all) {
+            return true;
         }
-        if (StringUtils.isBlank(ips)) {
-            return false;
+        if (ipArray == null) {
+            String ips = null;
+            try {
+                ips = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_REQUEST_WHITE_SHEET);
+            } catch (Exception e) {
+                Log.error(e);
+            }
+            if (StringUtils.isBlank(ips)) {
+                return false;
+            }
+            this.ipArray = ips.split(RpcConstant.WHITE_SHEET_SPLIT);
+            for (String ip : ipArray) {
+                if (ip.equals("0.0.0.0")) {
+                    this.all = true;
+                    return true;
+                }
+            }
         }
-        String[] ipArray = ips.split(RpcConstant.WHITE_SHEET_SPLIT);
         String realIp = request.getRemoteAddr();
         for (String ip : ipArray) {
             if (ip.equals(realIp)) {
