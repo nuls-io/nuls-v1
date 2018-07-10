@@ -52,6 +52,7 @@ public class AccountKeyStoreDto {
     public AccountKeyStoreDto() {
 
     }
+
     public AccountKeyStoreDto(AccountKeyStore accountKeyStore) {
         this.address = accountKeyStore.getAddress();
         this.encryptedPrivateKey = null == accountKeyStore.getEncryptedPrivateKey() ? null : accountKeyStore.getEncryptedPrivateKey();
@@ -60,14 +61,14 @@ public class AccountKeyStoreDto {
         this.prikey = null == accountKeyStore.getPrikey() ? null : Hex.encode(accountKeyStore.getPrikey());
     }
 
-    public AccountKeyStore toAccountKeyStore(){
+    public AccountKeyStore toAccountKeyStore() {
         AccountKeyStore accountKeyStore = new AccountKeyStore();
         accountKeyStore.setAddress(this.address);
         accountKeyStore.setAlias(this.alias);
         accountKeyStore.setEncryptedPrivateKey(this.encryptedPrivateKey);
-        if(null == this.prikey || "null".equals(this.prikey) || "".equals(prikey.trim())){
+        if (null == this.prikey || "null".toUpperCase().equals(this.prikey.trim().toUpperCase()) || "".equals(prikey.trim())) {
             accountKeyStore.setPrikey(null);
-        }else{
+        } else {
             try {
                 accountKeyStore.setPrikey(Hex.decode(this.prikey.trim()));
             } catch (Exception e) {
@@ -79,11 +80,11 @@ public class AccountKeyStoreDto {
     }
 
     public AccountKeyStoreDto(Map<String, Object> map) {
-        this.address = (String)map.get("address");
-        this.encryptedPrivateKey = null == map.get("encryptedPrivateKey") ? null : (String)map.get("encryptedPrivateKey");
-        this.alias = null == map.get("alias") ? null : (String)map.get("alias");
-        this.pubKey = null == map.get("pubKey") ? null : (String)map.get("pubKey");
-        this.prikey = null == map.get("prikey") ? null : (String)map.get("prikey");
+        this.address = (String) map.get("address");
+        this.encryptedPrivateKey = null == map.get("encryptedPrivateKey") ? null : (String) map.get("encryptedPrivateKey");
+        this.alias = null == map.get("alias") ? null : (String) map.get("alias");
+        this.pubKey = null == map.get("pubKey") ? null : (String) map.get("pubKey");
+        this.prikey = null == map.get("prikey") ? null : (String) map.get("prikey");
     }
 
     public String getAddress() {
