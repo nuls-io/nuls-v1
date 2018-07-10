@@ -145,9 +145,6 @@ public class BroadcastHandler {
                 if (excludeNode != null && node.getId().equals(excludeNode.getId())) {
                     continue;
                 }
-                if ("192.168.1.188".equals(node.getIp())) {
-                    continue;
-                }
                 BroadcastResult br = broadcastToNode(message, node, asyn);
                 if (br.isSuccess()) {
                     successCount++;
