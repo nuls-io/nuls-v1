@@ -23,13 +23,9 @@
  *
  */
 
-package io.nuls.protocol.base.cache;
+package io.nuls.protocol.utils;
 
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.protocol.base.utils.filter.InventoryFilter;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * 用于接收交易去重
