@@ -42,7 +42,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 
 /**
- * 印链桌面客户端（钱包）
+ * 钱包界面启动类
  *
  * @author ln
  */

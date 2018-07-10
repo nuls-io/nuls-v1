@@ -75,7 +75,7 @@
                 <configuration>
                     <forkCount>3</forkCount>
                     <reuseForks>true</reuseForks>
-                    <argLine>-Xms1024m -Xmx4096m  -XX:NewSize=256m -XX:MaxNewSize=256m</argLine>
+                    <argLine>-Xms4096m -Xmx4096m</argLine>
                     <skipTests>true</skipTests>
                 </configuration>
             </plugin>
