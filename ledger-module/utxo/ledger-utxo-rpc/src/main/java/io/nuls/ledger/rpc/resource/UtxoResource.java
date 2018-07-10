@@ -80,6 +80,7 @@ public class UtxoResource {
         try {
             List<Coin> coinList = getAllUtxoByAddress(address);
             int limitValue = limit.intValue();
+            boolean isLoadAll = (limitValue == 0);
             AccountUtxoDto accountUtxoDto = new AccountUtxoDto();
             List<UtxoDto> list = new LinkedList<>();
             int i = 0;
@@ -90,11 +91,13 @@ public class UtxoResource {
                 if (coin.getNa().equals(Na.ZERO)) {
                     continue;
                 }
-                list.add(new UtxoDto(coin));
-                i++;
-                if(i >= limitValue) {
-                    break;
+                if(!isLoadAll) {
+                    if(i >= limitValue) {
+                        break;
+                    }
+                    i++;
                 }
+                list.add(new UtxoDto(coin));
             }
             accountUtxoDto.setUtxoDtoList(list);
             result = Result.getSuccess().setData(accountUtxoDto);
