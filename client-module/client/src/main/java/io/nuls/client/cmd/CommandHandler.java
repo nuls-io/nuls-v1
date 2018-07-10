@@ -154,7 +154,10 @@ public class CommandHandler {
         } else {
             String ip = null;
             try {
-                ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, "server.ip");
+                ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, "server.ip").trim();
+                if("0.0.0.0".equals(ip)){
+                    ip = RpcConstant.DEFAULT_IP;
+                }
             } catch (Exception e) {
                 ip = RpcConstant.DEFAULT_IP;
             }
