@@ -21,6 +21,7 @@ SERVER_HOME="$( cd -P "$( dirname "$SOURCE"  )" && cd .. && pwd  )"
 
 export logdir="$SERVER_HOME/logs"
 
+CLASSPATH=$SERVER_HOME
 # add conf to classpath
 if [ -d "$SERVER_HOME/conf" ]; then
   CLASSPATH=${CLASSPATH}:$SERVER_HOME/conf
