@@ -68,7 +68,8 @@ public class BlockMonitorProcess {
         }
         lastBestHash = bestBlock.getHeader().getHash();
         List<Block> blockList = chainManager.getMasterChain().getChain().getBlockList();
-        if (blockList.size() < 10) {
+        int minCount = 10;
+        if (blockList.size() < minCount) {
             return;
         }
         int count = 0;
@@ -76,12 +77,12 @@ public class BlockMonitorProcess {
         for (Block block : blockList) {
             addressSet.add(AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
             count++;
-            if (count > 10) {
+            if (count > minCount) {
                 break;
             }
         }
         DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
-        if (addressSet.size() == 1 && ConsensusConfig.getSeedNodeList().size() > 1) {
+        if (count > minCount && addressSet.size() == 1 && ConsensusConfig.getSeedNodeList().size() > 1) {
             NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
             return;
         }
