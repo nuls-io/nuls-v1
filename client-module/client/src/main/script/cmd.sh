@@ -1,9 +1,25 @@
 #!/bin/sh
-cd ..
-rootdir=$PWD
-cd bin
+PRG="$0"
 
-LIBS=$rootdir/libs
+while [ -h "$PRG" ]; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '.*/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
+
+SOURCE="$0"
+while [ -h "$SOURCE"  ]; do # resolve $SOURCE until the file is no longer a symlink
+    DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd  )"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /*  ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SERVER_HOME="$( cd -P "$( dirname "$SOURCE"  )" && cd .. && pwd  )"
+
+LIBS=$SERVER_HOME/libs
 PUB_LIB=""
 MAIN_CLASS=io.nuls.client.cmd.CommandHandler
 
@@ -13,6 +29,19 @@ do
  PUB_LIB="$PUB_LIB:""$jar"
 done
 
-CONF_PATH=$rootdir/conf
+if [ -z "$JAVA_HOME" ]; then
+  JAVA_HOME=$SERVER_HOME/jre
+fi
+if [ -z "$JAVA_HOME" ]; then
+  echo "The JAVA_HOME environment variable is not defined"
+  echo "This environment variable is needed to run this program"
+  exit 1
+fi
+
+# Get standard environment variables
+JAVA_OPTS="-Xms128m -Xmx128m"
+
+
+CONF_PATH=$SERVER_HOME/conf
 CLASSPATH=$CLASSPATH:$CONF_PATH:$PUB_LIB:.
-$rootdir/jre/bin/java -Xms128m -Xmx512m -XX:NewSize=256m -XX:MaxNewSize=256m -classpath $CLASSPATH $MAIN_CLASS
+$JAVA_HOME/bin/java $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS

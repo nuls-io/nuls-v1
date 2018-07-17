@@ -24,6 +24,7 @@
  */
 package io.nuls.consensus.poc.config;
 
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.Address;
 import io.nuls.account.service.AccountService;
 import io.nuls.consensus.poc.model.BlockRoundData;
@@ -60,8 +61,9 @@ public final class GenesisBlock extends Block {
     private static final String CONFIG_FILED_HEIGHT = "height";
     private static final String CONFIG_FILED_TXS = "txs";
     private static final String CONFIG_FILED_ADDRESS = "address";
-    private static final String CONFIG_FILED_NULS = "nuls";
-    private static final String CONFIG_FILED_UNLOCK_HEIGHT = "unlockHeight";
+    private static final String CONFIG_FILED_AMOUNT = "amount";
+    private static final String CONFIG_FILED_LOCK_TIME = "lockTime";
+    private static final String CONFIG_FILED_REMARK = "remark";
     private static final String priKey = "009cf05b6b3fe8c09b84c13783140c0f1958e8841f8b6f894ef69431522bc65712";
 
     private static GenesisBlock INSTANCE = new GenesisBlock();
@@ -121,19 +123,23 @@ public final class GenesisBlock extends Block {
             String address = (String) map.get(CONFIG_FILED_ADDRESS);
             AssertUtil.canNotEmpty(address, KernelErrorCode.NULL_PARAMETER.getMsg());
 
-            Double nuls = Double.valueOf("" + map.get(CONFIG_FILED_NULS));
-            AssertUtil.canNotEmpty(nuls, KernelErrorCode.NULL_PARAMETER.getMsg());
-            Long height = Long.valueOf("" + map.get(CONFIG_FILED_UNLOCK_HEIGHT));
+            Double amount = Double.valueOf("" + map.get(CONFIG_FILED_AMOUNT));
+            AssertUtil.canNotEmpty(amount, KernelErrorCode.NULL_PARAMETER.getMsg());
+            Long lockTime = Long.valueOf("" + map.get(CONFIG_FILED_LOCK_TIME));
 
             Address ads = Address.fromHashs(address);
 
-            Coin coin = new Coin(ads.getAddressBytes(), Na.parseNuls(nuls), height == null ? 0 : height.longValue());
+            Coin coin = new Coin(ads.getAddressBytes(), Na.parseNuls(amount), lockTime == null ? 0 : lockTime.longValue());
             coinData.addTo(coin);
         }
 
         CoinBaseTransaction tx = new CoinBaseTransaction();
         tx.setTime(this.blockTime);
         tx.setCoinData(coinData);
+        String remark = (String) jsonMap.get(CONFIG_FILED_REMARK);
+        if(StringUtils.isNotBlank(remark)) {
+            tx.setRemark(Hex.decode(remark));
+        }
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         List<Transaction> txlist = new ArrayList<>();
         txlist.add(tx);

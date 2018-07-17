@@ -30,12 +30,9 @@ import io.nuls.kernel.model.Result;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
-import io.nuls.protocol.base.cache.SmallBlockDuplicateRemoval;
+import io.nuls.protocol.utils.SmallBlockDuplicateRemoval;
 import io.nuls.protocol.message.ForwardSmallBlockMessage;
 import io.nuls.protocol.message.GetSmallBlockMessage;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author facjas

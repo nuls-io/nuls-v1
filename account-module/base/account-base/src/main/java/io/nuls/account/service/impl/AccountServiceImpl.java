@@ -254,21 +254,23 @@ public class AccountServiceImpl implements AccountService {
         }
         account.setAddress(new Address(keyStore.getAddress()));
 
+        Alias aliasDb = null;
         if (StringUtils.isNotBlank(keyStore.getAlias())) {
-            Alias aliasDb = aliasService.getAlias(keyStore.getAlias());
-            if (null != aliasDb && AddressTool.getStringAddressByBytes(aliasDb.getAddress()).equals(account.getAddress().toString())) {
-                account.setAlias(aliasDb.getAlias());
-            } else {
-                List<AliasPo> list = aliasStorageService.getAliasList().getData();
-                for (AliasPo aliasPo : list) {
-                    //如果全网别名中的地址有和当前导入的账户地址相同,则赋值别名到账户中
-                    if (AddressTool.getStringAddressByBytes(aliasPo.getAddress()).equals(account.getAddress().toString())) {
-                        account.setAlias(aliasPo.getAlias());
-                        break;
-                    }
+            aliasDb = aliasService.getAlias(keyStore.getAlias());
+        }
+        if (null != aliasDb && AddressTool.getStringAddressByBytes(aliasDb.getAddress()).equals(account.getAddress().toString())) {
+            account.setAlias(aliasDb.getAlias());
+        } else {
+            List<AliasPo> list = aliasStorageService.getAliasList().getData();
+            for (AliasPo aliasPo : list) {
+                //如果全网别名中的地址有和当前导入的账户地址相同,则赋值别名到账户中
+                if (AddressTool.getStringAddressByBytes(aliasPo.getAddress()).equals(account.getAddress().toString())) {
+                    account.setAlias(aliasPo.getAlias());
+                    break;
                 }
             }
         }
+
         account.setPubKey(keyStore.getPubKey());
         if (StringUtils.validPassword(password)) {
             try {

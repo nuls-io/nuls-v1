@@ -33,8 +33,6 @@ public class ContractBase {
     private transient String password;
     private String remark;
 
-    //todo world status
-
     public String getSender() {
         return sender;
     }

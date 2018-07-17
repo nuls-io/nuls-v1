@@ -23,32 +23,47 @@
  *
  */
 
-import java.io.IOException;
-import java.io.InputStream;
+package io.nuls.network.util;
+
+import io.nuls.core.tools.log.Log;
+import io.nuls.network.message.impl.VersionMessageHandler;
+import io.nuls.network.model.Node;
+import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
+import io.nuls.protocol.message.base.BaseMessage;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author: Niels Wang
+ * @date: 2018/7/10
  */
-public class Test {
+public class HeartBeatThread implements Runnable {
 
-    public static void main(String[] args) throws IOException {
-        String path = Test.class.getClassLoader().getResource("").getPath();
-        callCmd(path + "\\bin\\upgrade.bat 0.9.11");
+    private final BaseNetworkMeesageHandler handler;
+    private BlockingQueue<MessageContainer> queue = new LinkedBlockingQueue<>();
+
+    public HeartBeatThread(BaseNetworkMeesageHandler handler) {
+        this.handler = handler;
     }
 
-    public static void callCmd(String locationCmd) {
-        try {
-            Process child = Runtime.getRuntime().exec(locationCmd);
-            InputStream in = child.getInputStream();
-            int c;
-            while ((c = in.read()) != -1) {
-                System.out.print(c);
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                process();
+            } catch (Throwable e) {
+                Log.error(e);
             }
-            in.close();
-            System.out.println("done");
-            System.exit(0);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+    }
+
+    private void process() throws InterruptedException {
+        MessageContainer mc = queue.take();
+        handler.process(mc.getMessage(), mc.getNode());
+    }
+
+    public void offerMessage(BaseMessage message, Node node) {
+        queue.offer(new MessageContainer(message, node));
     }
 }

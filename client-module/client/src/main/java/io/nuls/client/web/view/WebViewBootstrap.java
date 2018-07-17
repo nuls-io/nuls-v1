@@ -42,7 +42,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 
 /**
- * 印链桌面客户端（钱包）
+ * 钱包界面启动类
  *
  * @author ln
  */
@@ -63,7 +63,7 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         startWebView(null);
     }
 
-//    /**
+    //    /**
 //     * 程序入口
 //     */
     public void startWebView(String[] args) {
@@ -74,7 +74,7 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         launch(args);
     }
 
-//    /**
+    //    /**
 //     * 启动方法
 //     */
     @Override
@@ -112,7 +112,7 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
 
     }
 
-//    /**
+    //    /**
 //     * 停止
 //     */
     @Override
@@ -184,7 +184,7 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         return popupMenu;
     }
 
-//    /**
+    //    /**
 //     * 事件监听处理
 //     */
     @Override
@@ -203,12 +203,16 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         }
     }
 
-//    /**
+    //    /**
 //     * 显示窗口
 //     */
     public void openBrowse() {
+        String ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP, RpcConstant.DEFAULT_IP);
         int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);
-        String url = "http://127.0.0.1:" + port;
+        if("0.0.0.0".equals(ip)){
+            ip = RpcConstant.DEFAULT_IP;
+        }
+        String url = "http://" + ip + ":" + port;
         openURL(url);
     }
 
@@ -257,7 +261,7 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
     }
 
 
-//    /**
+    //    /**
 //     * 隐藏窗口
 //     */
     public void hide() {
@@ -269,7 +273,7 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         });
     }
 
-//    /**
+    //    /**
 //     * 程序退出
 //     */
     public void exit() {

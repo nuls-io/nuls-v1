@@ -58,6 +58,9 @@ public class BlockMonitorProcess {
 
     public void doProcess() {
         Block bestBlock = NulsContext.getInstance().getBestBlock();
+        if (bestBlock.getHeader().getHeight() == 0) {
+            return;
+        }
         if (bestBlock.getHeader().getHash().equals(lastBestHash) && bestBlock.getHeader().getTime() < (TimeService.currentTimeMillis() - RESET_TIME_INTERVAL)) {
             lastBestHash = bestBlock.getHeader().getHash();
             NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
@@ -65,17 +68,21 @@ public class BlockMonitorProcess {
         }
         lastBestHash = bestBlock.getHeader().getHash();
         List<Block> blockList = chainManager.getMasterChain().getChain().getBlockList();
+        int minCount = 10;
+        if (blockList.size() < minCount) {
+            return;
+        }
         int count = 0;
         Set<String> addressSet = new HashSet<>();
         for (Block block : blockList) {
             addressSet.add(AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
             count++;
-            if (count > 10) {
+            if (count > minCount) {
                 break;
             }
         }
         DownloadService downloadService = NulsContext.getServiceBean(DownloadService.class);
-        if (addressSet.size() == 1 && ConsensusConfig.getSeedNodeList().size() > 1) {
+        if (count > minCount && addressSet.size() == 1 && ConsensusConfig.getSeedNodeList().size() > 1) {
             NulsContext.getServiceBean(ConsensusPocServiceImpl.class).reset();
             return;
         }

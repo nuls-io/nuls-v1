@@ -241,7 +241,7 @@ public class DownloadThreadManager implements Callable<Boolean> {
         }
 
         List<Node> nodes = newestInfos.getNodes();
-        //todo 这里逻辑感觉不完整
+
         for (Node node : nodes) {
             Block remoteBlock = DownloadUtils.getBlockByHash(localBestBlock.getHeader().getHash(), node);
             if (remoteBlock != null && remoteBlock.getHeader().getHeight() == localBestBlock.getHeader().getHeight()) {

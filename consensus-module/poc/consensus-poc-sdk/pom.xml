@@ -29,14 +29,16 @@
     <parent>
         <artifactId>consensus-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>0.9.12</version>
+        <version>1.0.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.consensus-module</groupId>
     <artifactId>consensus-poc-sdk</artifactId>
-    <version>0.9.12</version>
+    <version>1.0.0</version>
 
-
+    <build>
+        <finalName>${artifactId}-${version}</finalName>
+    </build>
 </project>

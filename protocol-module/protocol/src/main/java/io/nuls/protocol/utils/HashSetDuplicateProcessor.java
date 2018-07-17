@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.protocol.base.cache;
+package io.nuls.protocol.utils;
 
 import io.nuls.kernel.model.NulsDigestData;
 

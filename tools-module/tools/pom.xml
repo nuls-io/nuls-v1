@@ -30,13 +30,13 @@
     <parent>
         <artifactId>tools-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>0.9.12</version>
+        <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.nuls.tools-module</groupId>
     <artifactId>tools</artifactId>
-    <version>0.9.12</version>
+    <version>1.0.0</version>
 
 
     <properties>
@@ -114,7 +114,8 @@
             <artifactId>disruptor</artifactId>
             <version>3.4.2</version>
         </dependency>
-
     </dependencies>
-
+    <build>
+        <finalName>${artifactId}-${version}</finalName>
+    </build>
 </project>
