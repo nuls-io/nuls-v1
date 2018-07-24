@@ -49,14 +49,26 @@ Use Alibaba Java Coding Guidelines [@Github](https://github.com/alibaba/p3c).
 
 ### Getting Sources
 
+
 ```shell
 git clone https://github.com/nuls-io/nuls.git && cd nuls
 ```
 
 ### Building Sources
 
+Make sure installed JDK 1.8 & maven 3.3+
+
 ```shell
-nuls>mvn clean package
+$ mvn -v
+Apache Maven 3.5.4 (1edded0938998edf8bf061f1ceb3cfdeccf443fe; 2018-06-18T02:33:14+08:00)
+Maven home: /usr/local/Cellar/maven/3.5.4/libexec
+Java version: 1.8.0_171, vendor: Oracle Corporation, runtime: /Library/Java/JavaVirtualMachines/jdk1.8.0_171.jdk/Contents/Home/jre
+```
+
+Build
+
+```shell
+$ mvn clean package
 ```
 > You may be need add command line argument "-Dmaven.test.skip=true" at this stage.
 
@@ -65,8 +77,9 @@ nuls>mvn clean package
 ```shell
 $ mvn clean package
 $ cd client-module/client/target
-$ tar -zxvf nuls-node.tar.gz
-$ cd bin
+$ mkdir nuls-node
+$ tar -zxvf nuls-node.tar.gz -C nuls-node
+$ cd nuls-node/bin
 ```
 Using start.sh running the nuls process.  
 Using stop.sh stop the nuls process.
