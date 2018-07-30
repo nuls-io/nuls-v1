@@ -34,7 +34,7 @@ import io.nuls.kernel.utils.AddressTool;
  */
 public interface NulsConstant {
 
-    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
+    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("6Hgj7rKSbC6SQr81k4NMfkoZ47mxAwMV");
 
     /**
      * 系统配置文件名称
@@ -93,6 +93,11 @@ public interface NulsConstant {
      */
     int TX_TYPE_TRANSFER = 2;
 
+    /**
+     * 业务数据承载交易的类型
+     * Type of business data bearing transaction
+     */
+    int TX_TYPE_DATA = 10;
 
     /**
      * 空值占位符

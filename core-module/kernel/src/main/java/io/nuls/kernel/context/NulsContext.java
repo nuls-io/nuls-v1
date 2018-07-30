@@ -47,7 +47,7 @@ public class NulsContext {
      * The default chain id (nuls main chain), the chain id affects the generation of the address,
      * and the current address begins with "Ns".8964.
      */
-    public static short DEFAULT_CHAIN_ID = 8964;
+    public static short DEFAULT_CHAIN_ID = 1;
 
     /**
      * 默认的地址类型，一条链可以包含几种地址类型，地址类型包含在地址中
@@ -75,6 +75,16 @@ public class NulsContext {
      * Network latest block height.
      */
     private Long netBestBlockHeight = 0L;
+
+    public int getStop() {
+        return stop;
+    }
+
+    private int stop = 0;
+
+    public void exit(int stop) {
+        this.stop = stop;
+    }
 
     /**
      * 获取创世块
@@ -123,6 +133,7 @@ public class NulsContext {
 
     /**
      * get zhe only instance of NulsContext
+     *
      * @return NulsContext
      */
     public static final NulsContext getInstance() {
@@ -196,6 +207,7 @@ public class NulsContext {
     /**
      * 获取缓存的网络最新高度
      * Gets the latest height of the cached network.
+     *
      * @return Long
      */
     public Long getNetBestBlockHeightWithNull() {

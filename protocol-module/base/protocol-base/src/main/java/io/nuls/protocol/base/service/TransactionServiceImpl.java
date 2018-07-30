@@ -26,6 +26,8 @@
 package io.nuls.protocol.base.service;
 
 import io.nuls.consensus.service.ConsensusService;
+import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.NulsDigestData;
@@ -115,6 +117,12 @@ public class TransactionServiceImpl implements TransactionService {
                 return result;
             }
         }
+        try {
+            ledgerService.rollbackTx(tx);
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }
         return Result.getSuccess();
     }
 
@@ -165,7 +173,7 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public ValidateResult conflictDetect(List<Transaction> txList) {
-        if (null == txList || txList.size() <= 1) {
+        if (null == txList || txList.isEmpty()) {
             return ValidateResult.getSuccessResult();
         }
 //        ValidateResult result = ledgerService.verifyDoubleSpend(txList);

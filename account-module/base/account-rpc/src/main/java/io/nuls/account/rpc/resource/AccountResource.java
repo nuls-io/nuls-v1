@@ -344,7 +344,7 @@ public class AccountResource {
             return new RpcClientResult(false, AccountErrorCode.ALIAS_NOT_EXIST);
         }
         Map<String, String> map = new HashMap<>();
-        map.put("value",AddressTool.getStringAddressByBytes(aliasObj.getAddress()));
+        map.put("value", AddressTool.getStringAddressByBytes(aliasObj.getAddress()));
         return Result.getSuccess().setData(map).toRpcClientResult();
     }
 
@@ -401,7 +401,7 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
-    public RpcClientResult getPrikey(@PathParam("address") String address, @ApiParam(name = "form", value = "查询私钥表单数据", required = true)
+    public RpcClientResult getPrikey(@PathParam("address") String address, @ApiParam(name = "form", value = "密码表单数据", required = true)
             AccountPasswordForm form) {
         if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
@@ -414,6 +414,23 @@ public class AccountResource {
         }
         return result.toRpcClientResult();
     }
+
+    @POST
+    @Path("/prikey")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("[获取本地所有账户的私钥] 调用获取本地账户私钥时，本地账户的加密信息必须一致(要么都没有密码，要么所有账户密码是一致的），否则将返回错误信息")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult getAllPrikey(@ApiParam(name = "form", value = "密码表单数据") AccountPasswordForm form) {
+        String password = form.getPassword();
+        if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
+        }
+        Result result = accountBaseService.getAllPrivateKey(form.getPassword());
+        return result.toRpcClientResult();
+    }
+
 
     @POST
     @Path("/lock/{address}")
@@ -485,6 +502,32 @@ public class AccountResource {
     }
 
     @POST
+    @Path("/remark/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "设置账户备注", notes = "备注只在本地显示")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult setRemark(@ApiParam(name = "address", value = "账户地址", required = true)
+                                       @PathParam("address") String address,
+                                       @ApiParam(name = "form", value = "备注") AccountRemarkForm accountRemarkForm) {
+        String remark = accountRemarkForm.getRemark();
+        if (!AddressTool.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (StringUtils.isBlank(remark)) {
+            remark = null;
+        }
+        Result result = accountBaseService.setRemark(address, remark);
+        if (result.isSuccess()) {
+            Map<String, Boolean> map = new HashMap<>();
+            map.put("value", (Boolean) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
+
+    @POST
     @Path("/password/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "[设密码] 设置账户密码")
@@ -493,7 +536,7 @@ public class AccountResource {
     })
     public RpcClientResult setPassword(@ApiParam(name = "address", value = "账户地址", required = true)
                                        @PathParam("address") String address,
-                                       @ApiParam(name = "form", value = "设置钱包密码表单数据", required = true)
+                                       @ApiParam(name = "form", value = "密码表单数据", required = true)
                                                AccountPasswordForm form) {
         if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
@@ -914,6 +957,50 @@ public class AccountResource {
         }
     }
 
+
+    @POST
+    @Path("/import/prikeys")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "[导入] 根据私钥集合导入账户,如果设置密码,则所有导入的账户为统一的密码, 所有账户不管本地是否已存在, 都会强制覆盖导入", notes = "返回账户地址")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult importAccountByPriKeys(@ApiParam(name = "form", value = "导入账户表单数据", required = true) AccountPriKeysPasswordForm form) {
+
+        List<String> list = form.getPriKey();
+        List<String> success = new ArrayList<>();
+        String password = form.getPassword();
+        if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
+        }
+        for (String priKey : list) {
+            if (!ECKey.isValidPrivteHex(priKey)) {
+                //rollback
+              /*  for (String address : success) {
+                    accountService.removeAccount(address, form.getPassword());
+                }*/
+                Result result = Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+                result.setMsg(result.getMsg() + ", 已导入成功" + success.size() + "个");
+                return result.toRpcClientResult();
+            }
+            Result result = accountService.importAccount(priKey, password);
+            if (result.isSuccess()) {
+                Account account = (Account) result.getData();
+                success.add(account.getAddress().toString());
+            } else {
+                //rollback
+                /*for (String address : success) {
+                    accountService.removeAccount(address, form.getPassword());
+                }
+                return result.toRpcClientResult();*/
+                result.setMsg(result.getMsg() + ", 已导入成功" + success.size() + "个");
+                return result.toRpcClientResult();
+            }
+        }
+        Map<String, List<String>> map = new HashMap<>();
+        map.put("list", success);
+        return Result.getSuccess().setData(map).toRpcClientResult();
+    }
 
     @POST
     @Path("/import/pri")

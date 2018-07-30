@@ -249,7 +249,6 @@ public class BlockServiceImpl implements BlockService {
         for (int i = savedList.size() - 1; i >= 0; i--) {
             Transaction tx = savedList.get(i);
             transactionService.rollbackTx(tx, blockHeader);
-            ledgerService.rollbackTx(tx);
         }
     }
 

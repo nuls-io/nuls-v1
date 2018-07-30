@@ -56,6 +56,8 @@ public class AccountPo {
 
     private int status;
 
+    private String remark;
+
     public AccountPo(){
     }
     public AccountPo(Account account){
@@ -68,6 +70,7 @@ public class AccountPo {
         this.encryptedPriKey = account.getEncryptedPriKey();
         this.extend = account.getExtend();
         this.status = account.getStatus();
+        this.remark = account.getRemark();
     }
 
     public Account toAccount(){
@@ -89,6 +92,7 @@ public class AccountPo {
             account.setEcKey(ECKey.fromEncrypted(new EncryptedData(this.getEncryptedPriKey()), this.getPubKey()));
         }
         account.setStatus(this.getStatus());
+        account.setRemark(this.remark);
         return account;
     }
 
@@ -164,5 +168,11 @@ public class AccountPo {
         this.status = status;
     }
 
+    public String getRemark() {
+        return remark;
+    }
 
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 }

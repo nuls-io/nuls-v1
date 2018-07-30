@@ -474,6 +474,13 @@ public class PocConsensusResource {
         }
         Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
         if (saveResult.isFailed()) {
+            if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
+                //重新算一次交易(不超出最大交易数据大小下)的最大金额
+                Na maxAmount = accountLedgerService.getMaxAmountOfOnce(account.getAddress().getAddressBytes(), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES).getData();
+                Result rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
+                rs.setMsg(rs.getMsg() + maxAmount.toDouble());
+                return rs.toRpcClientResult();
+            }
             return saveResult.toRpcClientResult();
         }
         transactionService.newTx(tx);
@@ -638,7 +645,8 @@ public class PocConsensusResource {
         }
         Set<String> memberSet = new HashSet<>();
         Na total = Na.ZERO;
-        for (Deposit deposit : depositList) {
+        for (int i = 0; i < depositList.size(); i++) {
+            Deposit deposit = depositList.get(i);
             if (!agent.getTxHash().equals(deposit.getAgentHash())) {
                 continue;
             }

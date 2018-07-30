@@ -5,4 +5,3 @@ do
    echo "NULS has stopped."
    break;
 done
-

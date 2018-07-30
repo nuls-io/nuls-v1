@@ -25,6 +25,7 @@
  */
 package io.nuls.network.model;
 
+import io.netty.channel.Channel;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
@@ -53,8 +54,6 @@ public class Node extends BaseNulsData {
 
     private long magicNumber;
 
-    private String channelId;
-
     private Long lastTime;
 
     private Long lastFailTime;
@@ -74,6 +73,8 @@ public class Node extends BaseNulsData {
     private boolean canConnect;
 
     private boolean testConnect;
+
+    private Channel channel;
 
     @Override
     public int size() {
@@ -146,6 +147,7 @@ public class Node extends BaseNulsData {
     public void destroy() {
         this.lastFailTime = TimeService.currentTimeMillis();
         this.setFailCount(this.getFailCount() + 1);
+        this.channel = null;
         this.status = Node.WAIT;
     }
 
@@ -201,14 +203,6 @@ public class Node extends BaseNulsData {
 
     public void setType(int type) {
         this.type = type;
-    }
-
-    public String getChannelId() {
-        return channelId;
-    }
-
-    public void setChannelId(String channelId) {
-        this.channelId = channelId;
     }
 
     public String getIp() {
@@ -351,5 +345,13 @@ public class Node extends BaseNulsData {
 
     public void setTestConnect(boolean testConnect) {
         this.testConnect = testConnect;
+    }
+
+    public Channel getChannel() {
+        return channel;
+    }
+
+    public void setChannel(Channel channel) {
+        this.channel = channel;
     }
 }

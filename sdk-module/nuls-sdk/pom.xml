@@ -30,14 +30,14 @@
     <parent>
         <artifactId>sdk-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.0.0</version>
+        <version>1.0.1-BETA</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.sdk-module</groupId>
     <artifactId>nuls-sdk</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-BETA</version>
     <build>
-        <finalName>${artifactId}-${version}</finalName>
+        <finalName>${project.artifactId}-${project.version}</finalName>
     </build>
 </project>

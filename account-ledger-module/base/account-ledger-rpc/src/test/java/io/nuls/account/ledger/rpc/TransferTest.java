@@ -37,9 +37,10 @@ public class TransferTest extends BaseTest {
 
     public static List<String> getAddressList() {
         if (list.isEmpty()) {
-            for (int i = 0; i < 100; i++) {
-                list.add(AddressTool.getStringAddressByBytes(AddressTool.getAddress(new ECKey().getPubKey())));
-            }
+//            for (int i = 0; i < 100; i++) {
+//                list.add(AddressTool.getStringAddressByBytes(AddressTool.getAddress(new ECKey().getPubKey())));
+//            }
+            list.add("NsdxMKjpm1Hp2FFmxXW1t9pwJ7JQXXxo");
         }
         return list;
     }
@@ -47,7 +48,7 @@ public class TransferTest extends BaseTest {
     private static int successCount = 0;
 
     public static void main(String[] args) {
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100000; i++) {
             doit();
         }
     }
@@ -56,15 +57,15 @@ public class TransferTest extends BaseTest {
         List<String> addressList = getAddressList();
 
         for (String toAddress : addressList) {
-            String address = "Nse4N9aeec5ViyeQnjanJzW7NjtqvV8n";
+            String address = "NsduwnPecJT2DQmGDYogDn7ZmchaRQ8V";
 //            String toAddress = "2Cg7BLHWBSxMhq3FpjR9BrkyxXp4m4j";
-            long amount = 2018000L;
+            long amount = 1001000L;
             String password = "";
             String remark = "test";
 
             String param = "{\"address\": \"" + address + "\", \"toAddress\": \"" + toAddress + "\", \"password\": \"" + password + "\", \"amount\": \"" + amount + "\", \"remark\": \"" + remark + "\"}";
 
-            String url = "http://127.0.0.1:8001/api/accountledger/transfer";
+            String url = "http://127.0.0.1:6001/api/accountledger/transfer";
 
 
             for (int i = 0; i < 1; i++) {

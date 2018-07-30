@@ -25,6 +25,7 @@
 
 package io.nuls.network.manager;
 
+import io.netty.channel.Channel;
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
@@ -33,7 +34,6 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.thread.manager.TaskManager;
-import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
@@ -220,15 +220,21 @@ public class NodeManager implements Runnable {
         try {
             //同一ip地址，不再重复连接
             Collection<Node> nodeMap = getNodes().values();
+            int count = 0;
             for (Node n : nodeMap) {
                 if (node.getIp().equals(n.getIp()) && n.getType() == Node.OUT) {
                     return false;
                 }
+                if (node.isCanConnect()) {
+                    count++;
+                }
+            }
+            if (count >= 50) {
+                return false;
             }
 
             node.setType(Node.OUT);
             node.setTestConnect(false);
-
             disConnectNodes.put(node.getId(), node);
             connectionManager.connectionNode(node);
             return true;
@@ -240,7 +246,7 @@ public class NodeManager implements Runnable {
     /**
      * 处理已经成功连接的节点
      */
-    public boolean processConnectedNode(Node node) {
+    public boolean processConnectedNode(Node node, Channel channel) {
         lock.lock();
         try {
             if (connectedNodes.containsKey(node.getId()) || handShakeNodes.containsKey(node.getId())) {
@@ -254,6 +260,7 @@ public class NodeManager implements Runnable {
                     }
                 }
             }
+            node.setChannel(channel);
             disConnectNodes.remove(node.getId());
             connectedNodes.put(node.getId(), node);
             return true;
@@ -279,12 +286,9 @@ public class NodeManager implements Runnable {
     public void removeNode(Node node) {
         lock.lock();
         try {
-            if (StringUtils.isNotBlank(node.getChannelId())) {
-                SocketChannel channel = NioChannelMap.get(node.getChannelId());
-                if (channel != null) {
-                    channel.close();
-                    return;
-                }
+            if (node.getChannel() != null && node.getChannel().isActive()) {
+                node.getChannel().close();
+                return;
             }
             node.destroy();
             removeNodeFromGroup(node);
@@ -407,9 +411,11 @@ public class NodeManager implements Runnable {
      */
     public void broadNodeSever() {
         String externalIp = getNetworkStorageService().getExternalIp();
-        P2PNodeBody p2PNodeBody = new P2PNodeBody(externalIp, networkParam.getPort());
-        P2PNodeMessage message = new P2PNodeMessage(p2PNodeBody);
-        broadcastHandler.broadcastToAllNode(message, null, true,100);
+        if (!StringUtils.isBlank(externalIp)) {
+            P2PNodeBody p2PNodeBody = new P2PNodeBody(externalIp, networkParam.getPort());
+            P2PNodeMessage message = new P2PNodeMessage(p2PNodeBody);
+            broadcastHandler.broadcastToAllNode(message, null, true, 100);
+        }
     }
 
     private boolean checkFullHandShake(Node node) {
@@ -492,7 +498,7 @@ public class NodeManager implements Runnable {
         for (Node n : nodes) {
             if (seedIpList.contains(n.getIp())) {
                 count++;
-                if (count > 2) {
+                if (count > 1) {
                     removeNode(n);
                 }
             }
@@ -531,10 +537,10 @@ public class NodeManager implements Runnable {
 //
 //            System.out.println("--------handShakeNodes:" + handShakeNodes.size());
 //            for (Node node : handShakeNodes.values()) {
-//                System.out.println(node.toString() + ",blockHeight:" + node.getBestBlockHeight());
+//                System.out.println(node.toString());
 //            }
 
-            if (handShakeNodes.size() > networkParam.getMaxOutCount()) {
+            if (handShakeNodes.size() > 9) {
                 removeSeedNode();
             } else if (handShakeNodes.size() <= 2) {
                 //如果已连接成功数太少，立刻尝试连接种子节点
@@ -562,5 +568,4 @@ public class NodeManager implements Runnable {
             }
         }
     }
-
 }

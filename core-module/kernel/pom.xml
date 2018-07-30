@@ -5,13 +5,13 @@
     <parent>
         <artifactId>core-module</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.0.0</version>
+        <version>1.0.1-BETA</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.nuls.core-module</groupId>
     <artifactId>kernel</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-BETA</version>
 
 
     <dependencies>
@@ -24,7 +24,7 @@
         <dependency>
             <groupId>io.nuls.tools-module</groupId>
             <artifactId>tools</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1-BETA</version>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -48,7 +48,7 @@
         </dependency>
     </dependencies>
     <build>
-        <finalName>${artifactId}-${version}</finalName>
+        <finalName>${project.artifactId}-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

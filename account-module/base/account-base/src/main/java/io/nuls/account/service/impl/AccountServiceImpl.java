@@ -303,7 +303,7 @@ public class AccountServiceImpl implements AccountService {
         try {
             account = AccountTool.createAccount(prikey);
         } catch (NulsException e) {
-            return Result.getFailed(AccountErrorCode.FAILED);
+            return Result.getFailed(AccountErrorCode.PRIVATE_KEY_WRONG);
         }
         if (StringUtils.validPassword(password)) {
             try {

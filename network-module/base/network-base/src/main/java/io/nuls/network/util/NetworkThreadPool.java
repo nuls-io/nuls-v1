@@ -1,38 +1,45 @@
 package io.nuls.network.util;
 
-import io.netty.buffer.ByteBuf;
 import io.nuls.core.tools.log.Log;
 import io.nuls.network.connection.netty.NettyClient;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.ConnectionManager;
+import io.nuls.network.manager.NetworkMessageHandlerFactory;
 import io.nuls.network.manager.NodeManager;
+import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
+import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
+import io.nuls.protocol.message.base.BaseMessage;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executors;
 
 public class NetworkThreadPool {
 
-    private static final ExecutorService executor = new ThreadPoolExecutor(10, 20, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(2000));//CPU核数4-10倍
+    private static final ExecutorService executor = Executors.newCachedThreadPool();
 
-    public static void doRead(ByteBuf buffer, Node node) {
+    public static void asynNetworkMessage(BaseMessage message, Node node, HeartBeatThread heartBeatThread, NetworkMessageHandlerFactory messageHandlerFactory, ConnectionManager connectionManager) {
         executor.submit(new Runnable() {
             @Override
             public void run() {
+                if (message.getHeader().getMsgType() == NetworkConstant.NETWORK_VERSION) {
+                    heartBeatThread.offerMessage(message, node);
+                    return;
+                }
+                BaseNetworkMeesageHandler handler = messageHandlerFactory.getHandler(message);
                 try {
-                    ConnectionManager.getInstance().receiveMessage(buffer, node);
+                    NetworkEventResult messageResult = handler.process(message, node);
+                    connectionManager.processMessageResult(messageResult, node);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     Log.error(e);
-                    NodeManager.getInstance().removeNode(node);
-                } finally {
-                    buffer.release();
                 }
             }
         });
     }
 
     public static void doConnect(Node node) {
+
         executor.submit(new Runnable() {
             @Override
             public void run() {

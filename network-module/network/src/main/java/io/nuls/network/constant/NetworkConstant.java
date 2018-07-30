@@ -33,9 +33,9 @@ public interface NetworkConstant {
     /**
      * -----------[netty configs ]------------
      */
-    int READ_IDEL_TIME_OUT = 60;
-    int WRITE_IDEL_TIME_OUT = 60;
-    int ALL_IDEL_TIME_OUT = 60;
+    int READ_IDEL_TIME_OUT = 0;
+    int WRITE_IDEL_TIME_OUT = 0;
+    int ALL_IDEL_TIME_OUT = 100;
     int MAX_FRAME_LENGTH = 10 * 1024 * 1024;
     int CONNETCI_TIME_OUT = 6000;
     int SAME_IP_MAX_COUNT = 10;

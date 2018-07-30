@@ -453,6 +453,7 @@ public class AccountLedgerResource {
             if (tx == null) {
                 continue;
             }
+            info.setBlockHeight(tx.getBlockHeight());
             info.setInfo(tx.getInfo(addressBytes));
             infoDtoList.add(new TransactionInfoDto(info));
 
@@ -771,7 +772,7 @@ public class AccountLedgerResource {
 
 
     /**
-     * 计算交易实际发生的金额
+     * 计算交易实际发生的金额(只用于转账)
      * Calculate the actual amount of the transaction.
      */
     private void calTransactionValue(TransactionDto txDto) {

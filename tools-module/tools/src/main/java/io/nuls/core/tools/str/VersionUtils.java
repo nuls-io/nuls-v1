@@ -41,6 +41,8 @@ public class VersionUtils {
         }
         version0 = version0.replace("-SNAPSHOT", "");
         version1 = version1.replace("-SNAPSHOT", "");
+        version0 = version0.replace("-BETA", "");
+        version1 = version1.replace("-BETA", "");
         String[] array0 = version0.split("\\.");
         String[] array1 = version1.split("\\.");
         if (array0.length != 3 || array1.length != 3) {
@@ -77,6 +79,8 @@ public class VersionUtils {
         }
         version0 = version0.replace("-SNAPSHOT", "");
         version1 = version1.replace("-SNAPSHOT", "");
+        version0 = version0.replace("-BETA", "");
+        version1 = version1.replace("-BETA", "");
         String[] array0 = version0.split("\\.");
         String[] array1 = version1.split("\\.");
         if (array0.length != 3 || array1.length != 3) {

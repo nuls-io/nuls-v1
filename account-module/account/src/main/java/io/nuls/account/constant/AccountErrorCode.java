@@ -56,4 +56,8 @@ public interface AccountErrorCode {
     ErrorCode ACCOUNT_UNENCRYPTED = ErrorCode.init("ACT020", "50020");
     ErrorCode ALIAS_CONFLICT = ErrorCode.init("ACT021", "50021");
     ErrorCode ACCOUNT_ALREADY_HAS_ALIAS = ErrorCode.init("ACT022", "50022");
+    ErrorCode HAVE_ENCRYPTED_ACCOUNT = ErrorCode.init("ACT023", "50023");
+    ErrorCode HAVE_UNENCRYPTED_ACCOUNT = ErrorCode.init("ACT024", "50024");
+    ErrorCode PRIVATE_KEY_WRONG = ErrorCode.init("ACT025", "50025");
+    ErrorCode NICKNAME_TOO_LONG = ErrorCode.init("ACT026", "50026");
 }

@@ -74,6 +74,8 @@ public interface KernelErrorCode {
     ErrorCode VERSION_NOT_NEWEST = ErrorCode.init("SYS031", "20031");
     ErrorCode SERIALIZE_ERROR = ErrorCode.init("SYS032", "20032");
 
+    ErrorCode DATA_SIZE_ERROR_EXTEND = ErrorCode.init("SYS033", "10033");
+
 
     /*
      * ----------  Consensus Network code   --------

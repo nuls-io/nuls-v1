@@ -26,6 +26,7 @@
 package io.nuls.network.connection.netty;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -66,8 +67,6 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
-//        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-//        Log.info("---------------------- server channelRegistered ------------------------- " + nodeId);
 
         String remoteIP = channel.remoteAddress().getHostString();
         //查看是否是本机尝试连接本机地址 ，如果是直接关闭连接
@@ -111,7 +110,6 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             if (n.getIp().equals(remoteIP)) {
                 count++;
                 if (count >= NetworkConstant.SAME_IP_MAX_COUNT) {
-//                    System.out.println("-------------超过10个-----" + nodeId);
                     ctx.channel().close();
                     return;
                 }
@@ -122,16 +120,17 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        SocketChannel channel = (SocketChannel) ctx.channel();
+
+        Channel channel = ctx.channel();
+        SocketChannel socketChannel = (SocketChannel) ctx.channel();
 //        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
 //        System.out.println("---------------------- server channelActive ------------------------- " + nodeId);
 
         String channelId = ctx.channel().id().asLongText();
-        NioChannelMap.add(channelId, channel);
-        Node node = new Node(channel.remoteAddress().getHostString(), channel.remoteAddress().getPort(), Node.IN);
-        node.setChannelId(channelId);
+//        NioChannelMap.add(channelId, channel);
+        Node node = new Node(socketChannel.remoteAddress().getHostString(), socketChannel.remoteAddress().getPort(), Node.IN);
         node.setStatus(Node.CONNECT);
-        boolean success = nodeManager.processConnectedNode(node);
+        boolean success = nodeManager.processConnectedNode(node, channel);
         if (!success) {
             ctx.channel().close();
             return;
@@ -139,7 +138,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         //握手成功时，告知对方其自身的外网ip地址
         NetworkMessageBody body = new NetworkMessageBody(NetworkConstant.HANDSHAKE_SEVER_TYPE, networkParam.getPort(),
                 NulsContext.getInstance().getBestHeight(), NulsContext.getInstance().getBestBlock().getHeader().getHash(),
-                channel.remoteAddress().getHostString());
+                socketChannel.remoteAddress().getHostString());
         HandshakeMessage handshakeMessage = new HandshakeMessage(body);
         broadcastHandler.broadcastToNode(handshakeMessage, node, false);
     }
@@ -188,22 +187,9 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
 //        Log.info(" ---------------------- server channelInactive ------------------------- " + nodeId);
 
-        String channelId = ctx.channel().id().asLongText();
-        NioChannelMap.remove(channelId);
         Node node = nodeManager.getNode(nodeId);
-
         if (node != null) {
-            if (channelId.equals(node.getChannelId())) {
-                nodeManager.removeNode(nodeId);
-            }
-//            else {
-//                Log.info("--------------server channel id different----------------------");
-//                Log.info("--------------server channel id different----------------------");
-//                Log.info("--------------server channel id different----------------------");
-//                Log.info("--------node:" + node.getId() + ",type:" + node.getType());
-//                Log.info(node.getChannelId());
-//                Log.info(channelId);
-//            }
+            nodeManager.removeNode(nodeId);
         }
     }
 

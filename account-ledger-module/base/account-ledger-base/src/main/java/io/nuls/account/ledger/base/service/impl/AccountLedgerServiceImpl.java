@@ -63,6 +63,7 @@ import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.ledger.util.LedgerUtil;
 import io.nuls.protocol.model.tx.TransferTransaction;
+import io.nuls.protocol.model.validator.TxMaxSizeValidator;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
 
@@ -105,7 +106,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     private Lock lock = new ReentrantLock();
     private Lock saveLock = new ReentrantLock();
 
-    // 保存本地已使用的交易，Save locally used transactions
+    //todo 这里有问题 保存本地已使用的交易，Save locally used transactions
     private Set<String> usedTxSets;
 
     @Override
@@ -219,7 +220,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
     }
 
-    private void initUsedTxSets() {
+    public void resetUsedTxSets() {
+        usedTxSets = null;
+    }
+
+    public void initUsedTxSets() {
         usedTxSets = new HashSet<>();
         List<Transaction> allUnconfirmedTxs = unconfirmedTransactionStorageService.loadAllUnconfirmedList().getData();
         for (Transaction tx : allUnconfirmedTxs) {
@@ -437,7 +442,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     if (values.isLessThan(amount.add(fee))) {
                         continue;
                     }
-                    coinDataResult.setChange(changeCoin);
+                    changeCoin.setNa(values.subtract(amount.add(fee)));
+                    if (!changeCoin.getNa().equals(Na.ZERO)) {
+                        coinDataResult.setChange(changeCoin);
+                    }
                 }
                 coinDataResult.setFee(fee);
                 if (values.isGreaterOrEquals(amount.add(fee))) {
@@ -452,6 +460,49 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 return coinDataResult;
             }
             return coinDataResult;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+
+    /**
+     * 根据账户计算一次交易(不超出最大交易数据大小下)的最大金额
+     */
+    @Override
+    public Result<Na> getMaxAmountOfOnce(byte[] address, Transaction tx, Na price) {
+        lock.lock();
+        try {
+            tx.setCoinData(null);
+            int targetSize = TxMaxSizeValidator.MAX_TX_SIZE - tx.size() - 76;
+            List<Coin> coinList = balanceManager.getCoinListByAddress(address);
+            if (coinList.isEmpty()) {
+                return Result.getSuccess().setData(Na.ZERO);
+            }
+            Collections.sort(coinList, CoinComparator.getInstance());
+            Na max = Na.ZERO;
+            int size = 0;
+            //将所有余额从小到大排序后，累计未花费的余额
+            for (int i = 0; i < coinList.size(); i++) {
+                Coin coin = coinList.get(i);
+                if (!coin.usable()) {
+                    continue;
+                }
+                if (coin.getNa().equals(Na.ZERO)) {
+                    continue;
+                }
+                size += coin.size();
+                if (i == 127) {
+                    size += 1;
+                }
+                if (size > targetSize) {
+                    break;
+                }
+                max = max.add(coin.getNa());
+            }
+            Na fee = TransactionFeeCalculator.getFee(size, price);
+            max = max.subtract(fee);
+            return Result.getSuccess().setData(max);
         } finally {
             lock.unlock();
         }
@@ -493,11 +544,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     } else {
                         break;
                     }
+                } else {
+                    break;
                 }
             }
         }
         return fee;
     }
+
 
     @Override
     public Result transfer(byte[] from, byte[] to, Na values, String password, String remark, Na price) {
@@ -529,7 +583,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             if (price == null) {
                 price = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES;
             }
-            CoinDataResult coinDataResult = getCoinData(from, values, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, price);
+            CoinDataResult coinDataResult = getCoinData(from, values, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH + coinData.size(), price);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(LedgerErrorCode.BALANCE_NOT_ENOUGH);
             }
@@ -543,11 +597,19 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             sig.setPublicKey(account.getPubKey());
             sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
             tx.setScriptSig(sig.serialize());
+
             Result saveResult = verifyAndSaveUnconfirmedTransaction(tx);
             if (saveResult.isFailed()) {
+                if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
+                    //重新算一次交易(不超出最大交易数据大小下)的最大金额
+                    Na maxAmount = getMaxAmountOfOnce(from, tx, price).getData();
+                    Result rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
+                    rs.setMsg(rs.getMsg() + maxAmount.toDouble());
+                    return rs;
+                }
                 return saveResult;
             }
-//            transactionService.newTx(tx);
+//          transactionService.newTx(tx);
             Result sendResult = transactionService.broadcastTx(tx);
             if (sendResult.isFailed()) {
                 this.rollbackTransaction(tx);
