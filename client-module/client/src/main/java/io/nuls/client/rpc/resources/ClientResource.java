@@ -38,6 +38,7 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.core.tools.str.VersionUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
@@ -177,10 +178,24 @@ public class ClientResource {
                 } catch (Exception e) {
                     Log.error(e);
                 }
-                Bootstrap.exit();
+                NulsContext.getInstance().exit(2);
             }
         });
         t.start();
+        Map<String, Boolean> map = new HashMap<>();
+        map.put("value", true);
+        return Result.getSuccess().setData(map).toRpcClientResult();
+    }
+
+    @POST
+    @Path("/stop")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "停止系统")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Boolean.class)
+    })
+    public RpcClientResult stopSystem() {
+        NulsContext.getInstance().exit(1);
         Map<String, Boolean> map = new HashMap<>();
         map.put("value", true);
         return Result.getSuccess().setData(map).toRpcClientResult();

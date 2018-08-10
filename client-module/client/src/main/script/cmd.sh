@@ -28,11 +28,11 @@ for jar in `find $LIBS -name "*.jar"`
 do
  PUB_LIB="$PUB_LIB:""$jar"
 done
-
-if [ -z "$JAVA_HOME" ]; then
-  JAVA_HOME=$SERVER_HOME/jre
+NULS_JAVA_HOME=$SERVER_HOME/jre
+if [ ! -d ${NULS_JAVA_HOME} ]; then
+  NULS_JAVA_HOME=${JAVA_HOME}
 fi
-if [ -z "$JAVA_HOME" ]; then
+if [ ! -d ${NULS_JAVA_HOME} ]; then
   echo "The JAVA_HOME environment variable is not defined"
   echo "This environment variable is needed to run this program"
   exit 1
@@ -44,4 +44,4 @@ JAVA_OPTS="-Xms128m -Xmx128m"
 
 CONF_PATH=$SERVER_HOME/conf
 CLASSPATH=$CLASSPATH:$CONF_PATH:$PUB_LIB:.
-$JAVA_HOME/bin/java $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
+$NULS_JAVA_HOME/bin/java $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS

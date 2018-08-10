@@ -28,7 +28,6 @@ package io.nuls.network.message.impl;
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.NodeManager;
@@ -62,10 +61,11 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
     @Override
     public NetworkEventResult process(BaseMessage message, Node node) {
         HandshakeMessage handshakeMessage = (HandshakeMessage) message;
-        SocketChannel socketChannel = NioChannelMap.get(node.getChannelId());
+        SocketChannel socketChannel = (SocketChannel) node.getChannel();
         NetworkMessageBody body = handshakeMessage.getMsgBody();
 
-        boolean isServer = false;
+
+        boolean isServer = false;     //当前节点是否作为服务端处理握手消息
         boolean isSuccess = false;
 
         if (body.getHandshakeType() == NetworkConstant.HANDSHAKE_SEVER_TYPE) {
@@ -109,6 +109,8 @@ public class HandshakeMessageHandler implements BaseNetworkMeesageHandler {
             for (int i = nodeList.size() - 1; i >= 0; i--) {
                 Node n = nodeList.get(i);
                 if (nodeManager.isSeedNode(n.getIp())) {
+                    nodeList.remove(i);
+                } else if (n.getId().equals(node.getId())) {
                     nodeList.remove(i);
                 }
             }

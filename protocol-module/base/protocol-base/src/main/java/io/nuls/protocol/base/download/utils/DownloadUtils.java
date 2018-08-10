@@ -46,7 +46,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
  * @author ln
  */
 public class DownloadUtils {
@@ -54,7 +53,7 @@ public class DownloadUtils {
     private static MessageBusService messageBusService = NulsContext.getServiceBean(MessageBusService.class);
 
     public static Block getBlockByHash(NulsDigestData hash, Node node) {
-        if(hash == null || node == null) {
+        if (hash == null || node == null) {
             return null;
         }
         GetBlockMessage message = new GetBlockMessage(hash);
@@ -72,7 +71,7 @@ public class DownloadUtils {
             Block block = future.get(30L, TimeUnit.SECONDS);
             return block;
         } catch (Exception e) {
-            Log.error(node.getId(),e);
+            Log.error(node.getId(), e);
             return null;
         } finally {
             ProtocolCacheHandler.removeBlockByHashFuture(hash);
@@ -82,9 +81,10 @@ public class DownloadUtils {
 
     public static List<Block> getBlocks(Node node, long startHeight, long endHeight) throws Exception {
 
+        Log.info("getBlocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId());
         List<Block> resultList = new ArrayList<>();
 
-        if(node == null || startHeight < 0L || startHeight > endHeight) {
+        if (node == null || startHeight < 0L || startHeight > endHeight) {
             return resultList;
         }
 
@@ -103,7 +103,7 @@ public class DownloadUtils {
         Future<NulsDigestData> reactFuture = ProtocolCacheHandler.addRequest(requestHash);
 
         List<Map<NulsDigestData, Future<Block>>> blockFutures = new ArrayList<>();
-        for(long i = startHeight ; i <= endHeight ; i++) {
+        for (long i = startHeight; i <= endHeight; i++) {
             NulsDigestData hash = NulsDigestData.calcDigestData(SerializeUtils.uint64ToByteArray(i));
             Future<Block> blockFuture = ProtocolCacheHandler.addGetBlockByHeightRequest(hash);
 
@@ -113,11 +113,12 @@ public class DownloadUtils {
         }
 
         Result result = messageBusService.sendToNode(message, node, false);
+        Log.info("sended.......");
         if (!result.isSuccess()) {
             ProtocolCacheHandler.removeTaskFuture(message.getHash());
             ProtocolCacheHandler.removeRequest(requestHash);
 
-            for(Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
+            for (Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
                 for (Map.Entry<NulsDigestData, Future<Block>> entry : blockFutureMap.entrySet()) {
                     ProtocolCacheHandler.removeBlockByHeightFuture(entry.getKey());
                 }
@@ -128,8 +129,8 @@ public class DownloadUtils {
         try {
             reactFuture.get(1L, TimeUnit.SECONDS);
             CompleteParam taskResult = taskFuture.get(60L, TimeUnit.SECONDS);
-            if(taskResult.isSuccess()) {
-                for(Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
+            if (taskResult.isSuccess()) {
+                for (Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
                     for (Map.Entry<NulsDigestData, Future<Block>> entry : blockFutureMap.entrySet()) {
                         Block block = entry.getValue().get(30L, TimeUnit.SECONDS);
                         resultList.add(block);
@@ -144,7 +145,7 @@ public class DownloadUtils {
             ProtocolCacheHandler.removeTaskFuture(requestHash);
             ProtocolCacheHandler.removeRequest(requestHash);
 
-            for(Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
+            for (Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
                 for (Map.Entry<NulsDigestData, Future<Block>> entry : blockFutureMap.entrySet()) {
                     ProtocolCacheHandler.removeBlockByHeightFuture(entry.getKey());
                 }
@@ -155,11 +156,11 @@ public class DownloadUtils {
 
     public static List<NulsDigestData> getBlocksHash(Node node, long startHeight, long endHeight) {
 
-        if(node == null || startHeight < 0L || endHeight < 0L || startHeight > endHeight) {
+        if (node == null || startHeight < 0L || endHeight < 0L || startHeight > endHeight) {
             return new ArrayList<>();
         }
 
-        if(endHeight - startHeight >= 10000) {
+        if (endHeight - startHeight >= 10000) {
             Log.warn("get block hash more the 10000");
             return new ArrayList<>();
         }

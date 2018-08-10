@@ -60,12 +60,12 @@ public class StringUtils {
         return (isNull(para)) ? null : para.trim();
     }
 
-//    /**
-//     *  Check the difficulty of the password
-//     *  length between 8 and 20, the combination of characters and numbers
-//     *
-//     * @return boolean
-//     */
+    /**
+     *  Check the difficulty of the password
+     *  length between 8 and 20, the combination of characters and numbers
+     *
+     * @return boolean
+     */
     public static boolean validPassword(String password) {
         if (isBlank(password)) {
             return false;
@@ -83,11 +83,11 @@ public class StringUtils {
         }
     }
 
-//    /**
-//     * 别名规则:只允许使用小写字母、数字、下划线（下划线不能在两端）1~20字节
-//     * @param alias
-//     * @return
-//     */
+    /**
+     * 别名规则:只允许使用小写字母、数字、下划线（下划线不能在两端）1~20字节
+     * @param alias
+     * @return
+     */
     public static boolean validAlias(String alias) {
         try {
             if (isBlank(alias)) {
@@ -103,6 +103,27 @@ public class StringUtils {
             } else {
                 return false;
             }
+        } catch (UnsupportedEncodingException e) {
+            return false;
+        }
+    }
+
+    /**
+     * 备注规则: 可以为空,或者不大于60字节
+     * @param remark
+     * @return
+     */
+    public static boolean validRemark(String remark) {
+        try {
+            if (null == remark) {
+                return true;
+            }
+            remark = remark.trim();
+            byte[] aliasBytes = remark.getBytes("UTF-8");
+            if (aliasBytes.length < 0 || aliasBytes.length > 60) {
+                return false;
+            }
+            return true;
         } catch (UnsupportedEncodingException e) {
             return false;
         }

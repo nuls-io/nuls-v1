@@ -27,7 +27,6 @@ package io.nuls.account.service;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.Account;
-import io.nuls.kernel.model.Address;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.core.tools.crypto.Hex;
@@ -38,6 +37,8 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.utils.AddressTool;
+
+import java.util.*;
 
 
 /**
@@ -53,6 +54,29 @@ public class AccountBaseService {
     private AccountStorageService accountStorageService;
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
+
+    public Result setRemark(String address, String remark){
+        if (!AddressTool.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        Account account = accountService.getAccount(address).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        if (StringUtils.isBlank(remark)) {
+            remark = null;
+        }
+        if (!StringUtils.validRemark(remark)) {
+            return Result.getFailed(AccountErrorCode.NICKNAME_TOO_LONG);
+        }
+        account.setRemark(remark);
+        Result result = accountStorageService.updateAccount(new AccountPo(account));
+        if (result.isFailed()) {
+            return Result.getFailed(AccountErrorCode.FAILED);
+        }
+        accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+        return Result.getSuccess().setData(true);
+    }
 
     /**
      * 获取账户私钥
@@ -73,9 +97,6 @@ public class AccountBaseService {
         //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
         if (account.isEncrypted() && account.isLocked()) {
             try {
-                if (!account.validatePassword(password)) {
-                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-                }
                 byte[] priKeyBytes = account.getPriKey(password);
                 return Result.getSuccess().setData(Hex.encode(priKeyBytes));
             } catch (NulsException e) {
@@ -85,6 +106,53 @@ public class AccountBaseService {
             return Result.getSuccess().setData(Hex.encode(account.getPriKey()));
         }
     }
+
+    /**
+     * 获取所有本地账户账户私钥，必须保证所有账户密码一致，
+     * 如果本地账户中的密码不一致，将返回错误信息
+     * Get the all local private keys
+     *
+     * @param password
+     * @return
+     */
+    public Result getAllPrivateKey(String password) {
+        Collection<Account> localAccountList = accountService.getAccountList().getData();
+        if (localAccountList == null || localAccountList.isEmpty()) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        if (StringUtils.isNotBlank(password) && !StringUtils.validPassword(password)) {
+            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+        }
+        List<String> list = new ArrayList<>();
+        for (Account account : localAccountList) {
+            if (account.isEncrypted()){
+                if(StringUtils.isBlank(password)){
+                    //如果有账户是加密的，但是没有传密码,则返回错误信息；
+                    return Result.getFailed(AccountErrorCode.HAVE_ENCRYPTED_ACCOUNT);
+                }
+                try {
+                    byte[] priKeyBytes = account.getPriKey(password);
+                    list.add(Hex.encode(priKeyBytes));
+                } catch (NulsException e) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            }else {
+                if (StringUtils.isNotBlank(password)) {
+                    //账户集合中有未加密账户，但是参数传了密码
+                    return Result.getFailed(AccountErrorCode.HAVE_UNENCRYPTED_ACCOUNT);
+                }
+                list.add(Hex.encode(account.getPriKey()));
+            }
+        }
+        Map<String, List<String>> map = new HashMap<>();
+        map.put("value", list);
+        return Result.getSuccess().setData(map);
+    }
+
+    public Result getAllPrivateKey() {
+        return getAllPrivateKey(null);
+    }
+
 
     /**
      * 设置密码

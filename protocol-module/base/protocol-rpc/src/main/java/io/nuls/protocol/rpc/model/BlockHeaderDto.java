@@ -98,7 +98,7 @@ public class BlockHeaderDto {
         this.size = block.getHeader().size();
         Na fee = Na.ZERO;
         for (Transaction tx : block.getTxs()) {
-            fee.add(tx.getFee());
+            fee = fee.add(tx.getFee());
             if (tx.getType() == ProtocolConstant.TX_TYPE_COINBASE) {
                 setBlockReward(tx);
             }

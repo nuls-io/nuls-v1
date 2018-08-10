@@ -93,6 +93,11 @@ public interface NulsConstant {
      */
     int TX_TYPE_TRANSFER = 2;
 
+    /**
+     * 业务数据承载交易的类型
+     * Type of business data bearing transaction
+     */
+    int TX_TYPE_DATA = 10;
 
     /**
      * 空值占位符

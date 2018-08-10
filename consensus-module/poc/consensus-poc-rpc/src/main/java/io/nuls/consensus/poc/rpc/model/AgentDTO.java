@@ -25,6 +25,7 @@
 
 package io.nuls.consensus.poc.rpc.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.core.tools.crypto.Base58;
@@ -75,6 +76,7 @@ public class AgentDTO {
 
     private String agentId;
 
+    @JsonIgnore
     private String introduction;
 
     private long time;

@@ -59,6 +59,9 @@ public class AccountDto {
     @ApiModelProperty(name = "encrypted", value = "账户是否加密")
     private boolean encrypted;
 
+    @ApiModelProperty(name = "remark", value = "账户备注")
+    private String remark;
+
 
     public AccountDto() {
 
@@ -80,6 +83,7 @@ public class AccountDto {
             this.priKey = Hex.encode(account.getPriKey());
             this.encryptedPriKey = "";
         }
+        this.remark = account.getRemark();
     }
 
     public String getAddress() {
@@ -144,5 +148,13 @@ public class AccountDto {
 
     public void setEncryptedPriKey(String encryptedPriKey) {
         this.encryptedPriKey = encryptedPriKey;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

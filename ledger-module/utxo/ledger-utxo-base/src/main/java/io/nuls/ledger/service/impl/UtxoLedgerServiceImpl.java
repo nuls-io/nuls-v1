@@ -296,7 +296,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             Coin fromOfFromCoin = null;
             byte[] fromAdressBytes = null;
 
-            for (Coin from : froms) {
+            for (int i = 0; i < froms.size(); i++) {
+                Coin from = froms.get(i);
                 fromBytes = from.getOwner();
                 // 验证是否可花费, 校验的coinData的fromUTXO，检查数据库中是否存在此UTXO
                 fromOfFromCoin = utxoLedgerUtxoStorageService.getUtxo(fromBytes);
@@ -347,6 +348,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
 
                 // 验证与待确认交易列表中是否有双花，既是待校验交易的fromUtxo是否和txList中的fromUtxo重复，有重复则是双花
                 if (temporaryFromSet != null && !temporaryFromSet.add(asString(fromBytes))) {
+                    if (i > 0) {
+                        for (int x = 0; x < i; x++) {
+                            Coin _from = froms.get(i);
+                            temporaryFromSet.remove(asString(_from.getOwner()));
+                        }
+                    }
                     return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT);
                 }
 
@@ -385,7 +392,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     /**
      * 双花验证不通过的交易需要放入result的data中，一次只验证一对双花的交易
      *
-     * @return ValidateResult<List                                                                                                                                                                                                                                                               <                                                                                                                                                                                                                                                               Transaction>>
+     * @return ValidateResult<List                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               <                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               Transaction>>
      */
     @Override
     public ValidateResult<List<Transaction>> verifyDoubleSpend(Block block) {
@@ -398,7 +405,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     /**
      * 双花验证不通过的交易需要放入result的data中，一次只验证一对双花的交易
      *
-     * @return ValidateResult<List                                                                                                                                                                                                                                                               <                                                                                                                                                                                                                                                               Transaction>>
+     * @return ValidateResult<List                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               <                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               Transaction>>
      */
     @Override
     public ValidateResult<List<Transaction>> verifyDoubleSpend(List<Transaction> txList) {

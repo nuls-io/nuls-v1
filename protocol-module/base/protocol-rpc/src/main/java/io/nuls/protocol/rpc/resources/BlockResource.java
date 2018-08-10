@@ -36,10 +36,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.ledger.service.LedgerService;
-import io.nuls.protocol.rpc.model.BlockDto;
-import io.nuls.protocol.rpc.model.BlockHeaderDto;
-import io.nuls.protocol.rpc.model.InputDto;
-import io.nuls.protocol.rpc.model.TransactionDto;
+import io.nuls.protocol.rpc.model.*;
 import io.nuls.protocol.service.BlockService;
 import io.swagger.annotations.*;
 
@@ -146,6 +143,7 @@ public class BlockResource {
             result = Result.getSuccess();
             BlockDto dto = new BlockDto(block);
             fillBlockTxInputAddress(dto);
+            calTransactionValue(dto);
             result.setData(dto);
 
         }
@@ -173,6 +171,7 @@ public class BlockResource {
         } else {
             BlockDto dto = new BlockDto(block);
             fillBlockTxInputAddress(dto);
+            calTransactionValue(dto);
             result.setData(dto);
         }
         return result.toRpcClientResult();
@@ -267,6 +266,7 @@ public class BlockResource {
             }
             BlockDto dto = new BlockDto(block);
             fillBlockTxInputAddress(dto);
+            calTransactionValue(dto);
             list.add(dto);
         }
         Map<String, List<BlockDto>> map = new HashMap<>();
@@ -292,6 +292,73 @@ public class BlockResource {
                 inputDto.setAddress(AddressTool.getStringAddressByBytes(coin.getOwner()));
             }
         }
+
+    }
+
+    /**
+     * 计算交易实际发生的金额(通用)
+     * Calculate the actual amount of the transaction.
+     */
+    private void calTransactionValue(BlockDto dto) {
+        for (TransactionDto txDto : dto.getTxList()) {
+            if (txDto == null) {
+                break;
+            }
+            Set<String> inputAdressSet = null;
+            if (txDto.getInputs() != null && !txDto.getInputs().isEmpty()) {
+                List<InputDto> inputDtoList = txDto.getInputs();
+                inputAdressSet = new HashSet<>(inputDtoList.size());
+                for (InputDto inputDto : inputDtoList) {
+                    inputAdressSet.add(inputDto.getAddress());
+                }
+            }
+            Na value = Na.ZERO;
+            List<OutputDto> outputDtoList = txDto.getOutputs();
+            for (OutputDto outputDto : outputDtoList) {
+                if (null != inputAdressSet && inputAdressSet.contains(outputDto.getAddress())) {
+                    continue;
+                }
+                value = value.add(Na.valueOf(outputDto.getValue()));
+            }
+            txDto.setValue(value.getValue());
+        }
+    }
+
+
+    @GET()
+    @Path("/info")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("查询最近五块区块的基本信息（用于开发调试）")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = BlockInfoDto.class)
+    })
+    public RpcClientResult getBlockInfoList() throws IOException {
+        Block bestBlock = NulsContext.getInstance().getBestBlock();
+        List<BlockInfoDto> list = new ArrayList<>();
+        int count = 0;
+        NulsDigestData preHash = null;
+        while (count < 5) {
+            count++;
+            BlockHeader header = null;
+            if (null != preHash) {
+                header = blockService.getBlockHeader(preHash).getData();
+            } else {
+                header = bestBlock.getHeader();
+            }
+            if (null == header) {
+                return RpcClientResult.getFailed(KernelErrorCode.DATA_ERROR);
+            }
+            BlockInfoDto dto = new BlockInfoDto();
+            dto.setHeight(header.getHeight());
+            dto.setHash(header.getHash().getDigestHex());
+            dto.setPackingAddress(AddressTool.getStringAddressByBytes(header.getPackingAddress()));
+            dto.setTxCount(header.getTxCount());
+            list.add(dto);
+            preHash = header.getPreHash();
+        }
+        Map<String, List<BlockInfoDto>> map = new HashMap<>();
+        map.put("list", list);
+        return Result.getSuccess().setData(map).toRpcClientResult();
 
     }
 }

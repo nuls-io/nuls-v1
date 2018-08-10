@@ -42,7 +42,7 @@ public class KernelService {
         return Result.getSuccess().setData(NulsConfig.VERSION);
     }
 
-    public Result<Boolean> setLanguage(String lang) {
+    public Result setLanguage(String lang) {
         try {
             I18nUtils.setLanguage(lang);
         } catch (NulsException e) {

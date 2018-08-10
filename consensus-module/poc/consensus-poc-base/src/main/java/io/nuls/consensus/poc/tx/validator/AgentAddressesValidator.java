@@ -54,9 +54,9 @@ public class AgentAddressesValidator extends BaseConsensusProtocolValidator<Crea
         Agent agent = data.getTxData();
         for (byte[] address : ConsensusConfig.getSeedNodeList()) {
             if (Arrays.equals(address, agent.getAgentAddress())) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
+                return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_EXIST);
             } else if (Arrays.equals(address, agent.getPackingAddress())) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
+                return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.AGENT_PACKING_EXIST);
             }
         }
         long count = 0;

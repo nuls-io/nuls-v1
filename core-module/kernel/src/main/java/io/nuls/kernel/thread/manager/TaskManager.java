@@ -101,6 +101,10 @@ public class TaskManager {
             Log.info("Task Queue 100 Size Warning!!! Task info is " + runnable.toString());
         }
         TEMPORARY_THREAD_POOL.execute(runnable);
+        int i = TEMPORARY_THREAD_POOL.getQueue().size();
+        if (1 > 10) {
+            System.out.println("thread pool size:" + i);
+        }
     }
 
     public static final void createAndRunThread(short moduleId, String threadName, Runnable runnable) {

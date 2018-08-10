@@ -362,6 +362,11 @@ public class AccountLedgerResource {
 //            if (validateResult.isFailed()) {
 //                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
 //            }
+//            validateResult = this.ledgerService.verifyCoinData(tx,new HashMap<>(),new HashSet<>());
+//            if (validateResult.isFailed()) {
+//                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
+//            }
+
             Result result = accountLedgerService.broadcast(tx);
             if (result.isSuccess()) {
                 Map<String, Object> map = new HashMap<>();
@@ -453,6 +458,7 @@ public class AccountLedgerResource {
             if (tx == null) {
                 continue;
             }
+            info.setBlockHeight(tx.getBlockHeight());
             info.setInfo(tx.getInfo(addressBytes));
             infoDtoList.add(new TransactionInfoDto(info));
 
@@ -771,7 +777,7 @@ public class AccountLedgerResource {
 
 
     /**
-     * 计算交易实际发生的金额
+     * 计算交易实际发生的金额(只用于转账)
      * Calculate the actual amount of the transaction.
      */
     private void calTransactionValue(TransactionDto txDto) {

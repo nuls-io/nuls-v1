@@ -40,6 +40,7 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.service.DownloadService;
+import io.nuls.protocol.service.TransactionService;
 
 import java.io.IOException;
 import java.util.List;
@@ -57,6 +58,8 @@ public class BlockProcessTask implements Runnable {
     private boolean first = true;
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+
+    private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
 
     public BlockProcessTask(BlockProcess blockProcess) {
         this.blockProcess = blockProcess;
@@ -92,15 +95,13 @@ public class BlockProcessTask implements Runnable {
                     for (int index = txList.size() - 1; index >= 0; index--) {
                         Transaction tx = blockContainer.getBlock().getTxs().get(index);
                         Transaction _tx = ledgerService.getTx(tx.getHash());
-                        if (null == _tx) {
-                            continue;
-                        }
-                        if (tx.getBlockHeight() != _tx.getBlockHeight()) {
+
+                        if (null != _tx && tx.getBlockHeight() != _tx.getBlockHeight()) {
                             continue;
                         }
                         try {
-                            ledgerService.rollbackTx(tx);
-                        } catch (NulsException e) {
+                            transactionService.rollbackTx(tx,blockContainer.getBlock().getHeader());
+                        } catch (Exception e) {
                             Log.error(e);
                         }
                     }
@@ -108,7 +109,7 @@ public class BlockProcessTask implements Runnable {
                 }
                 long time = System.currentTimeMillis();
                 blockProcess.addBlock(blockContainer);
-                Log.info("add 区块 " + blockContainer.getBlock().getHeader().getHeight() + " 耗时 " + (System.currentTimeMillis() - time) + " ms , tx count : " + blockContainer.getBlock().getHeader().getTxCount());
+//                Log.info("add 区块 " + blockContainer.getBlock().getHeader().getHeight() + " 耗时 " + (System.currentTimeMillis() - time) + " ms , tx count : " + blockContainer.getBlock().getHeader().getTxCount());
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.error("add block fail , error : " + e.getMessage(), e);

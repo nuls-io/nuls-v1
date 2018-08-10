@@ -31,6 +31,8 @@ import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.RestFulUtils;
 
+import java.util.Map;
+
 /**
  * @author: Charlie
  */
@@ -69,6 +71,13 @@ public class VersionProcessor implements CommandProcessor {
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
+        Map<String, Object> map = ((Map)result.getData());
+        if(null != map) {
+            String infromation = (String)map.get("infromation");
+            map.put("infromation", infromation.replaceAll("\r|\n", ""));
+        }
+        result.setData(map);
+
         return CommandResult.getResult(result);
     }
 }

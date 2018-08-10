@@ -33,7 +33,6 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.message.bus.service.MessageBusService;
-import io.nuls.network.connection.netty.NettyClient;
 import io.nuls.network.connection.netty.NettyServer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
@@ -104,6 +103,19 @@ public class ConnectionManager {
     public void connectionNode(Node node) {
         node.setStatus(Node.CONNECT);
         NetworkThreadPool.doConnect(node);
+//        TaskManager.asynExecuteRunnable(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    NettyClient client = new NettyClient(node);
+//                    System.out.println("-----------------------run----" + node.getId());
+//                    client.start();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    Log.error(e);
+//                }
+//            }
+//        });
 //        TaskManager.createAndRunThread(NetworkConstant.NETWORK_MODULE_ID, "node connection", new Runnable() {
 //            @Override
 //            public void run() {
@@ -168,37 +180,37 @@ public class ConnectionManager {
     }
 
     private void asynExecute(BaseMessage message, Node node) {
-
-        if (message.getHeader().getMsgType() == NetworkConstant.NETWORK_VERSION) {
-            heartBeatThread.offerMessage(message, node);
-            return;
-        }
-        BaseNetworkMeesageHandler handler = messageHandlerFactory.getHandler(message);
-
-        TaskManager.asynExecuteRunnable(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    NetworkEventResult messageResult = handler.process(message, node);
-                    processMessageResult(messageResult, node);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Log.error(e);
-                }
-            }
-
-            @Override
-            public String toString() {
-                StringBuilder log = new StringBuilder();
-                log.append("event: " + message.toString())
-                        .append(", hash: " + message.getHash())
-                        .append(", Node: " + node.toString());
-                return log.toString();
-            }
-        });
+        NetworkThreadPool.asynNetworkMessage(message, node, heartBeatThread, messageHandlerFactory, this);
+//        if (message.getHeader().getMsgType() == NetworkConstant.NETWORK_VERSION) {
+//            heartBeatThread.offerMessage(message, node);
+//            return;
+//        }
+//        BaseNetworkMeesageHandler handler = messageHandlerFactory.getHandler(message);
+//
+//        TaskManager.asynExecuteRunnable(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    NetworkEventResult messageResult = handler.process(message, node);
+//                    processMessageResult(messageResult, node);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    Log.error(e);
+//                }
+//            }
+//
+//            @Override
+//            public String toString() {
+//                StringBuilder log = new StringBuilder();
+//                log.append("event: " + message.toString())
+//                        .append(", hash: " + message.getHash())
+//                        .append(", Node: " + node.toString());
+//                return log.toString();
+//            }
+//        });
     }
 
-    public void processMessageResult(NetworkEventResult messageResult, Node node) throws IOException {
+    public void processMessageResult(NetworkEventResult messageResult, Node node) {
         if (!node.isAlive()) {
             return;
         }

@@ -93,7 +93,7 @@ public interface AccountLedgerService {
      * @param tx transaction to rollbackTransaction
      * @return return the tx count rollbacked
      */
-    Result<Integer> rollbackTransaction(Transaction tx);
+    Result<Integer> deleteTransaction(Transaction tx);
 
     /**
      * rollbackTransaction a tx list in account ledger.
@@ -102,7 +102,7 @@ public interface AccountLedgerService {
      * @param txs transactions to rollbackTransaction
      * @return return the tx count rollbacked
      */
-    Result<Integer> rollbackTransaction(List<Transaction> txs);
+    Result<Integer> rollbackTransactions(List<Transaction> txs);
 
     /**
      * get the balance of an local account.
@@ -211,4 +211,13 @@ public interface AccountLedgerService {
      */
     Result<Integer> deleteUnconfirmedTx(byte[] address);
 
+    /**
+     * 根据账户计算一次交易(不超出最大交易数据大小下)的最大金额
+     * Calculate the maximum amount of a transaction (not exceeding the maximum transaction data size) based on the account
+     * @param address
+     * @param tx
+     * @param price
+     * @return
+     */
+    Result<Na> getMaxAmountOfOnce(byte[] address, Transaction tx, Na price);
 }

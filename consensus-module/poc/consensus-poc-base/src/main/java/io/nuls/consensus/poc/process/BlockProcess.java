@@ -227,7 +227,7 @@ public class BlockProcess {
                             break;
                         }
                     }
-                    Log.info("验证交易耗时：" + (System.currentTimeMillis() - time));
+//                    Log.info("验证交易耗时：" + (System.currentTimeMillis() - time));
                     if (!success) {
                         break;
                     }
@@ -242,7 +242,7 @@ public class BlockProcess {
                         RewardStatisticsProcess.addBlock(block);
                         BlockLog.debug("save block height : " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                     }
-                    Log.info("保存耗时：" + (System.currentTimeMillis() - time));
+//                    Log.info("保存耗时：" + (System.currentTimeMillis() - time));
                 } while (false);
             } catch (Exception e) {
                 Log.error("save block error : " + e.getMessage(), e);
@@ -252,7 +252,7 @@ public class BlockProcess {
                 NulsContext.getInstance().setBestBlock(block);
                 // remove tx from memory pool
                 removeTxFromMemoryPool(block);
-                Log.info("移除内存交易耗时：" + (System.currentTimeMillis() - t));
+//                Log.info("移除内存交易耗时：" + (System.currentTimeMillis() - t));
                 // 转发区块
                 forwardingBlock(blockContainer);
 //                Log.info("转发区块耗时：" + (System.currentTimeMillis() - t));

@@ -62,7 +62,6 @@ import java.util.*;
  * @author: Niels Wang
  */
 public class Bootstrap {
-    private static boolean exitNow;
 
     public static void main(String[] args) {
         Thread.currentThread().setName("Nuls");
@@ -110,13 +109,16 @@ public class Bootstrap {
         TaskManager.asynExecuteRunnable(new WebViewBootstrap());
 
         int i = 0;
+        Map<NulsDigestData, List<Node>> map = new HashMap<>();
+        NulsContext context = NulsContext.getInstance();
         while (true) {
-            if(exitNow){
-                Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+            if (context.getStop() > 0) {
+                if (context.getStop() == 2) {
+                    Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+                }
                 System.exit(0);
             }
             try {
-                //todo 后续启动一个系统监视线程
                 Thread.sleep(1000L);
             } catch (InterruptedException e) {
                 Log.error(e);
@@ -126,10 +128,24 @@ public class Bootstrap {
                 Log.info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-  netTime : " + (DateUtil.convertDate(new Date(TimeService.currentTimeMillis()))));
                 Block bestBlock = NulsContext.getInstance().getBestBlock();
                 Collection<Node> nodes = NulsContext.getServiceBean(NetworkService.class).getAvailableNodes();
-
                 Log.info("bestHeight:" + bestBlock.getHeader().getHeight() + " , txCount : " + bestBlock.getHeader().getTxCount() + " , tx memory pool count : " + TxMemoryPool.getInstance().size() + " - " + TxMemoryPool.getInstance().getOrphanPoolSize() + " , hash : " + bestBlock.getHeader().getHash() + ",nodeCount:" + nodes.size());
+                map.clear();
                 for (Node node : nodes) {
-                    Log.info(node.getBestBlockHeight() + ", " + node.getId() + ", " + node.getBestBlockHash());
+                    List<Node> ips = map.get(node.getBestBlockHash());
+                    if (null == ips) {
+                        ips = new ArrayList<>();
+                        map.put(node.getBestBlockHash(), ips);
+                    }
+                    ips.add(node);
+                }
+                for (NulsDigestData key : map.keySet()) {
+                    List<Node> nodeList = map.get(key);
+                    long height = nodeList.get(0).getBestBlockHeight();
+                    StringBuilder ids = new StringBuilder();
+                    for (Node node : nodeList) {
+                        ids.append("," + node.getId());
+                    }
+                    Log.info("height:" + height + ",count:" + nodeList.size() + ", hash:" + key.getDigestHex() + ids);
                 }
             } else {
                 i++;
@@ -169,7 +185,4 @@ public class Bootstrap {
         return map;
     }
 
-    public static void exit() {
-        exitNow = true;
-    }
 }

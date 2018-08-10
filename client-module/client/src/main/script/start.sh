@@ -20,7 +20,7 @@ done
 
 SERVER_HOME="$( cd -P "$( dirname "$SOURCE"  )" && cd .. && pwd  )"
 
-export LOG_DIR=${SERVER_HOME}/logs
+export logdir=${SERVER_HOME}/logs
 
 CLASSPATH=${SERVER_HOME}
 # add conf to classpath
@@ -44,18 +44,18 @@ JAVA_OPTS="-server -Xms4096m -Xmx4096m"
 
 MAIN_CLASS=io.nuls.client.Bootstrap
 
-if [ ! -d ${LOG_DIR} ]; then
-  mkdir ${LOG_DIR}
+if [ ! -d ${logdir} ]; then
+  mkdir ${logdir}
 fi
 
-# 优先检查包内是否存在 jre
-if [ -x ${SERVER_HOME}/jre/bin/java ]; then
+# check jre exist
+if  [ -x ${SERVER_HOME}/jre/bin/java ]; then
   nohup ${SERVER_HOME}/jre/bin/java ${JAVA_OPTS} -classpath ${CLASSPATH} ${MAIN_CLASS} 1>${SERVER_HOME}/logs/stdout.log 0>${SERVER_HOME}/logs/stderr.log 2>&1 &
   exit 0
 fi
 
 JAVA_BIN=`which java`
-# 尝试使用 JAVA_HOME jre
+# try to use JAVA_HOME jre
 if [ -x ${JAVA_BIN} ]; then
   nohup ${JAVA_BIN} ${JAVA_OPTS} -classpath ${CLASSPATH} ${MAIN_CLASS} 1>${SERVER_HOME}/logs/stdout.log 0>${SERVER_HOME}/logs/stderr.log 2>&1 &
   exit 0

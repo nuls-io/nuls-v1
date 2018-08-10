@@ -76,6 +76,16 @@ public class NulsContext {
      */
     private Long netBestBlockHeight = 0L;
 
+    public int getStop() {
+        return stop;
+    }
+
+    private int stop = 0;
+
+    public void exit(int stop) {
+        this.stop = stop;
+    }
+
     /**
      * 获取创世块
      * get the block height is 0
@@ -123,6 +133,7 @@ public class NulsContext {
 
     /**
      * get zhe only instance of NulsContext
+     *
      * @return NulsContext
      */
     public static final NulsContext getInstance() {
@@ -196,6 +207,7 @@ public class NulsContext {
     /**
      * 获取缓存的网络最新高度
      * Gets the latest height of the cached network.
+     *
      * @return Long
      */
     public Long getNetBestBlockHeightWithNull() {

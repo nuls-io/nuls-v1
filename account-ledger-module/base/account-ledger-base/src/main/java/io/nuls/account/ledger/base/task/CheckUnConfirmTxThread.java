@@ -26,6 +26,7 @@ package io.nuls.account.ledger.base.task;
 
 import io.nuls.account.ledger.base.manager.BalanceManager;
 import io.nuls.account.ledger.base.service.TransactionInfoService;
+import io.nuls.account.ledger.base.service.impl.AccountLedgerServiceImpl;
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.ledger.storage.po.TransactionInfoPo;
@@ -52,7 +53,7 @@ import java.util.*;
 public class CheckUnConfirmTxThread implements Runnable {
 
     @Autowired
-    private AccountLedgerService accountLedgerService;
+    private AccountLedgerServiceImpl accountLedgerService;
 
     @Autowired
     private TransactionService transactionService;
@@ -121,6 +122,7 @@ public class CheckUnConfirmTxThread implements Runnable {
     }
 
     private void deleteUnconfirmedTransaction(Transaction tx) {
+        accountLedgerService.resetUsedTxSets();
         unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
         TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
         transactionInfoService.deleteTransactionInfo(txInfoPo);

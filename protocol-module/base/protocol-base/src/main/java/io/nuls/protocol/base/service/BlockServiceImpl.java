@@ -224,13 +224,13 @@ public class BlockServiceImpl implements BlockService {
             if (result.isSuccess()) {
                 savedList.add(transaction);
             } else {
-                this.rollbackTxList(savedList, block.getHeader());
+                this.rollbackTxList(savedList, block.getHeader(), false);
                 return result;
             }
         }
         Result result = this.blockHeaderStorageService.saveBlockHeader(PoConvertUtil.toBlockHeaderPo(block));
         if (result.isFailed()) {
-            this.rollbackTxList(savedList, block.getHeader());
+            this.rollbackTxList(savedList, block.getHeader(), false);
             return result;
         }
         try {
@@ -245,12 +245,27 @@ public class BlockServiceImpl implements BlockService {
      * 保存区块失败时，需要将已经存储的交易回滚
      * When you fail to save the block, you need to roll back the already stored transaction.
      */
-    private void rollbackTxList(List<Transaction> savedList, BlockHeader blockHeader) throws NulsException {
+    private boolean rollbackTxList(List<Transaction> savedList, BlockHeader blockHeader, boolean Atomicity) throws NulsException {
+        List<Transaction> rollbackedList = new ArrayList<>();
         for (int i = savedList.size() - 1; i >= 0; i--) {
             Transaction tx = savedList.get(i);
-            transactionService.rollbackTx(tx, blockHeader);
-            ledgerService.rollbackTx(tx);
+            Result result = transactionService.rollbackTx(tx, blockHeader);
+            if (Atomicity) {
+                if (result.isFailed()) {
+                    break;
+                } else {
+                    rollbackedList.add(tx);
+                }
+            }
         }
+        if (Atomicity && savedList.size() != rollbackedList.size()) {
+            for (int i = rollbackedList.size() - 1; i >= 0; i--) {
+                Transaction tx = rollbackedList.get(i);
+                transactionService.commitTx(tx, blockHeader);
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -266,7 +281,10 @@ public class BlockServiceImpl implements BlockService {
         if (null == block) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
-        this.rollbackTxList(block.getTxs(), block.getHeader());
+        boolean b = this.rollbackTxList(block.getTxs(), block.getHeader(),true);
+        if (!b) {
+            return Result.getFailed(KernelErrorCode.DATA_ERROR);
+        }
         BlockHeaderPo po = new BlockHeaderPo();
         po.setHash(block.getHeader().getHash());
         po.setHeight(block.getHeader().getHeight());
@@ -276,7 +294,7 @@ public class BlockServiceImpl implements BlockService {
             return result;
         }
         try {
-            accountLedgerService.rollbackTransaction(block.getTxs());
+            accountLedgerService.rollbackTransactions(block.getTxs());
         } catch (Exception e) {
             Log.warn("rollbackTransaction local tx failed", e);
         }

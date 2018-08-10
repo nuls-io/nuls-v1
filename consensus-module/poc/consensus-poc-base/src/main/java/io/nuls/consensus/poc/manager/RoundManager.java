@@ -163,7 +163,7 @@ public class RoundManager {
                 return round;
             }
 
-            MeetingRound nextRound = getNextRound(null, false);
+            MeetingRound nextRound = getNextRound(roundData, false);
             if (round != null && nextRound.getIndex() <= round.getIndex()) {
                 return nextRound;
             }
@@ -257,7 +257,7 @@ public class RoundManager {
 
         round.calcLocalPacker(getAccountService().getAccountList().getData());
 
-        ConsensusLog.debug("calculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
+        ConsensusLog.debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
     }
 

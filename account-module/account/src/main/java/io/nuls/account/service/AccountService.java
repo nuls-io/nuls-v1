@@ -92,7 +92,7 @@ public interface AccountService {
      * @param password the password of the account.
      * @return the result of the operation.
      */
-    Result<Boolean> removeAccount(String address, String password);
+    Result removeAccount(String address, String password);
 
 
     /**
@@ -202,7 +202,7 @@ public interface AccountService {
 
     /**
      * 根据账户验证账户是否加密
-     * Verify weather the account is encrypted according to the account.
+     * Verify whether the account is encrypted according to the account.
      *
      * @param account the account to be verified.
      * @return the result of the operation.
@@ -211,7 +211,7 @@ public interface AccountService {
 
     /**
      * 根据账户的地址对象验证账户是否加密
-     * Verify weather the account is encrypted according to the account's address object.
+     * Verify whether the account is encrypted according to the account's address object.
      *
      * @param address The address of the account to be verified.
      * @return the result of the operation.
@@ -220,7 +220,7 @@ public interface AccountService {
 
     /**
      * 根据账户的地址字符串验证账户是否加密
-     * Verify weather the account is encrypted according to the account's address string.
+     * Verify whether the account is encrypted.
      *
      * @param address The address of the account to be verified.
      * @return the result of the operation.

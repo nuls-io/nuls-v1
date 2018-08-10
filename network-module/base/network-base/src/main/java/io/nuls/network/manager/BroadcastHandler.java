@@ -27,10 +27,8 @@ package io.nuls.network.manager;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.socket.SocketChannel;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.network.connection.netty.NioChannelMap;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.BroadcastResult;
@@ -166,16 +164,15 @@ public class BroadcastHandler {
     }
 
     public BroadcastResult broadcastToANode(BaseMessage message, Node node, boolean asyn) {
-        if (!node.isAlive() && node.getChannelId() == null) {
-            return new BroadcastResult(false, NetworkErrorCode.NET_NODE_NOT_FOUND);
+        if (!node.isAlive()) {
+            return new BroadcastResult(false, NetworkErrorCode.NET_NODE_DEAD);
         }
-        SocketChannel channel = NioChannelMap.get(node.getChannelId());
-        if (channel == null) {
-            return new BroadcastResult(false, NetworkErrorCode.NET_NODE_NOT_FOUND);
+        if (node.getChannel() == null || !node.getChannel().isActive()) {
+            return new BroadcastResult(false, NetworkErrorCode.NET_NODE_MISS_CHANNEL);
         }
         try {
             message.getHeader().setMagicNumber(networkParam.getPacketMagic());
-            ChannelFuture future = channel.writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
+            ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
             if (!asyn) {
                 future.await();
                 boolean success = future.isSuccess();

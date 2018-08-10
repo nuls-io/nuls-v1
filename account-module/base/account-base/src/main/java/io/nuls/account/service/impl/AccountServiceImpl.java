@@ -140,7 +140,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<Boolean> removeAccount(String address, String password) {
+    public Result removeAccount(String address, String password) {
 
         if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
@@ -303,7 +303,7 @@ public class AccountServiceImpl implements AccountService {
         try {
             account = AccountTool.createAccount(prikey);
         } catch (NulsException e) {
-            return Result.getFailed(AccountErrorCode.FAILED);
+            return Result.getFailed(AccountErrorCode.PRIVATE_KEY_WRONG);
         }
         if (StringUtils.validPassword(password)) {
             try {
@@ -488,7 +488,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<Boolean> isEncrypted(Account account) {
+    public Result isEncrypted(Account account) {
         if (null == account || null == account.getAddress()) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
@@ -500,12 +500,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<Boolean> isEncrypted(Address address) {
+    public Result isEncrypted(Address address) {
         return isEncrypted(address.toString());
     }
 
     @Override
-    public Result<Boolean> isEncrypted(String address) {
+    public Result isEncrypted(String address) {
         if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
@@ -532,7 +532,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result<Boolean> verifyAddressFormat(String address) {
+    public Result verifyAddressFormat(String address) {
         if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }

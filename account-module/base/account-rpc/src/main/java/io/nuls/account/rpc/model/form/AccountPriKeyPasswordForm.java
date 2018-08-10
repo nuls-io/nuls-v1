@@ -31,7 +31,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * @author: Charlie
  */
-@ApiModel(value = "私钥密码表单数据")
+@ApiModel(value = "私钥导入密码表单数据")
 public class AccountPriKeyPasswordForm {
 
     @ApiModelProperty(name = "priKey", value = "私钥", required = true)
