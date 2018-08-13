@@ -173,7 +173,6 @@ public class ClientResource {
             public void run() {
                 try {
                     Thread.sleep(1000L);
-                    RpcServerManager.getInstance().shutdown();
                     ConnectionManager.getInstance().shutdown();
                 } catch (Exception e) {
                     Log.error(e);
