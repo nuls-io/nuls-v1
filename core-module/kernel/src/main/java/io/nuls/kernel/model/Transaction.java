@@ -87,6 +87,34 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         stream.writeBytesWithLength(scriptSig);
     }
 
+    public byte[] serializeForHash() throws IOException {
+        ByteArrayOutputStream bos = null;
+        try {
+            int size = size() - SerializeUtils.sizeOfBytes(scriptSig);
+
+            bos = new UnsafeByteArrayOutputStream(size);
+            NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
+            if (size == 0) {
+                bos.write(NulsConstant.PLACE_HOLDER);
+            } else {
+                buffer.writeVarInt(type);
+                buffer.writeVarInt(time);
+                buffer.writeBytesWithLength(remark);
+                buffer.writeNulsData(txData);
+                buffer.writeNulsData(coinData);
+            }
+            return bos.toByteArray();
+        } finally {
+            if (bos != null) {
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    throw e;
+                }
+            }
+        }
+    }
+
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         type = byteBuffer.readUint16();
@@ -287,33 +315,19 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         return new ArrayList<>(addresses);
     }
 
-    public byte[] serializeForHash() throws IOException {
-        ByteArrayOutputStream bos = null;
-        try {
-            int size = size() - SerializeUtils.sizeOfBytes(scriptSig);
-
-            bos = new UnsafeByteArrayOutputStream(size);
-            NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
-            if (size == 0) {
-                bos.write(NulsConstant.PLACE_HOLDER);
-            } else {
-                buffer.writeVarInt(type);
-                buffer.writeVarInt(time);
-                buffer.writeBytesWithLength(remark);
-                buffer.writeNulsData(txData);
-                buffer.writeNulsData(coinData);
-            }
-            return bos.toByteArray();
-        } finally {
-            if (bos != null) {
-                try {
-                    bos.close();
-                } catch (IOException e) {
-                    throw e;
-                }
-            }
-        }
-    }
-
     public abstract String getInfo(byte[] address);
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "type=" + type +
+                ", coinData=" + coinData +
+                ", txData=" + txData +
+                ", time=" + time +
+                ", hash=" + hash +
+                ", blockHeight=" + blockHeight +
+                ", status=" + status +
+                ", size=" + size +
+                '}';
+    }
 }

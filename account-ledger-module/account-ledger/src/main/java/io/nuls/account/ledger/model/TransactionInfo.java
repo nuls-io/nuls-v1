@@ -48,6 +48,15 @@ public class TransactionInfo {
 
     private String info;
 
+    /**
+     * contract address
+     */
+    private byte[] contractAddress;
+    /**
+     * contract token symbol
+     */
+    private String symbol;
+
     public NulsDigestData getTxHash() {
         return txHash;
     }
@@ -102,5 +111,30 @@ public class TransactionInfo {
 
     public void setInfo(String info) {
         this.info = info;
+    }
+
+    public byte[] getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(byte[] contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public int compareTo(long thatTime) {
+        if(this.time > thatTime) {
+            return -1;
+        } else if(this.time < thatTime) {
+            return 1;
+        }
+        return 0;
     }
 }

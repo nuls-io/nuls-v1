@@ -26,7 +26,7 @@
 package io.nuls.consensus.poc.tx.processor;
 
 import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.consensus.poc.model.BlockRoundData;
+import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
@@ -39,7 +39,6 @@ import io.nuls.consensus.poc.storage.service.DepositStorageService;
 import io.nuls.consensus.poc.storage.service.PunishLogStorageService;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -93,7 +92,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
             }
         }
         if (null == agent) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST);
         }
         List<DepositPo> depositPoList = depositStorageService.getList();
         List<DepositPo> updatedList = new ArrayList<>();
@@ -138,7 +137,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
     public Result onCommit(RedPunishTransaction tx, Object secondaryData) {
         RedPunishData punishData = tx.getTxData();
         BlockHeader header = (BlockHeader) secondaryData;
-        BlockRoundData roundData = new BlockRoundData(header.getExtend());
+        BlockExtendsData roundData = new BlockExtendsData(header.getExtend());
         PunishLogPo punishLogPo = new PunishLogPo();
         punishLogPo.setAddress(punishData.getAddress());
         punishLogPo.setHeight(tx.getBlockHeight());

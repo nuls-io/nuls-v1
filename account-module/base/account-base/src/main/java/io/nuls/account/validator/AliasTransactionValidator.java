@@ -82,9 +82,6 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
                 return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
             }
         }
-//        if (!AddressTool.validAddress(alias.getAddress())) {
-//            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
-//        }
         if (!StringUtils.validAlias(alias.getAlias())) {
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_FORMAT_WRONG);
         }
@@ -93,11 +90,11 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_EXIST);
         }
         if (tx.isSystemTx()) {
-            return ValidateResult.getFailedResult(alias.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
+            return ValidateResult.getFailedResult(alias.getClass().getName(), TransactionErrorCode.TX_TYPE_ERROR);
         }
         CoinData coinData = tx.getCoinData();
         if (null == coinData) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
+            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.COINDATA_NOT_FOUND);
         }
         P2PKHScriptSig sig = new P2PKHScriptSig();
         try {
@@ -107,7 +104,7 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
         if (!Arrays.equals(tx.getTxData().getAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
-            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
+            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
             return result;
         }

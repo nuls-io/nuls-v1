@@ -1,0 +1,91 @@
+package io.nuls.contract.vm;
+
+import io.nuls.contract.vm.code.ClassCode;
+import io.nuls.contract.vm.code.ClassCodeLoader;
+import io.nuls.contract.vm.program.impl.ProgramConstants;
+import org.apache.commons.lang3.ArrayUtils;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class VMFactory {
+
+    public static final Map<String, ClassCode> VM_INIT_CLASS_CODES = new LinkedHashMap();
+
+    public static final VM VM;
+
+    private static final String[] IGNORE_CLINIT;
+
+    static {
+        IGNORE_CLINIT = new String[]{
+                "java/io/File",
+                "java/io/FileDescriptor",
+                "java/io/ObjectInputStream",
+                "java/io/ObjectOutputStream",
+                "java/io/ObjectStreamClass",
+                "java/io/ObjectStreamClass$FieldReflector",
+                "java/lang/SecurityManager",
+                "java/lang/invoke/BoundMethodHandle",
+                "java/lang/invoke/BoundMethodHandle$SpeciesData",
+                "java/lang/invoke/DirectMethodHandle",
+                "java/lang/invoke/Invokers",
+                "java/lang/invoke/LambdaForm",
+                "java/lang/invoke/LambdaForm$BasicType",
+                "java/lang/invoke/LambdaForm$NamedFunction",
+                "java/lang/invoke/MethodHandle",
+                "java/lang/invoke/MethodHandles$Lookup",
+                "java/lang/invoke/MethodType",
+                "java/lang/ref/Reference",
+                "java/lang/reflect/AccessibleObject",
+                "java/math/BigDecimal",
+                "java/net/InetAddress",
+                "java/net/NetworkInterface",
+                "java/nio/charset/Charset",
+                "java/security/ProtectionDomain",
+                "java/security/Provider",
+                "java/time/OffsetTime",
+                "java/time/ZoneOffset",
+                "java/util/Locale",
+                "java/util/Locale$1",
+                "java/util/Random",
+                "sun/misc/URLClassPath",
+                "sun/security/util/Debug",
+                "sun/util/locale/BaseLocale",
+        };
+    }
+
+    static {
+        String[] classes = ArrayUtils.addAll(ProgramConstants.VM_INIT_CLASS_NAMES, ProgramConstants.CONTRACT_USED_CLASS_NAMES);
+        classes = ArrayUtils.addAll(classes, ProgramConstants.CONTRACT_LAZY_USED_CLASS_NAMES);
+        classes = ArrayUtils.addAll(classes, ProgramConstants.SDK_CLASS_NAMES);
+        for (int i = 0; i < classes.length; i++) {
+            ClassCodeLoader.load(VM_INIT_CLASS_CODES, classes[i], ClassCodeLoader::loadFromResource);
+        }
+        VM = newVM();
+        MethodArea.INIT_CLASS_CODES.putAll(VM.getMethodArea().getClassCodes());
+        Heap.INIT_OBJECTS.putAll(VM.getHeap().getObjects());
+        Heap.INIT_ARRAYS.putAll(VM.getHeap().getArrays());
+    }
+
+    public static void init() {
+
+    }
+
+    public static VM createVM() {
+        return new VM(VM);
+    }
+
+    public static VM newVM() {
+        VM vm = new VM();
+        for (String key : VM_INIT_CLASS_CODES.keySet()) {
+            ClassCode classCode = VM_INIT_CLASS_CODES.get(key);
+            if (ArrayUtils.contains(IGNORE_CLINIT, key)) {
+                continue;
+            }
+            //System.out.println(key);
+            vm.getMethodArea().loadClassCode(classCode);
+        }
+        return vm;
+    }
+
+}

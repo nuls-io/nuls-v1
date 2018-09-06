@@ -25,19 +25,20 @@
 
 package io.nuls.account.ledger.constant;
 
-import io.nuls.kernel.constant.ErrorCode;
+
+import io.nuls.kernel.constant.KernelErrorCode;
 
 /**
  * @author: Niels Wang
  */
-public interface AccountLedgerErrorCode {
+public interface AccountLedgerErrorCode extends KernelErrorCode {
 
-    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("AL001", "90001");
-    ErrorCode ADDRESS_ERROR = ErrorCode.init("AL004", "90004");
-    ErrorCode SUCCESS = ErrorCode.init("AL010", "90010");
-    ErrorCode FAILED = ErrorCode.init("AL011", "90011");
-    ErrorCode PARAMETER_ERROR = ErrorCode.init("AL012", "90012");
-    ErrorCode IO_ERROR = ErrorCode.init("AL013", "90013");
-    ErrorCode SOURCE_TX_NOT_EXSITS = ErrorCode.init("AL014", "90014");
-    ErrorCode UNKNOW_ERROR = ErrorCode.init("AL015", "90015");
+//    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("90001");
+//    ErrorCode ADDRESS_ERROR = ErrorCode.init("90004");
+//    ErrorCode SUCCESS = ErrorCode.init("90010");
+//    ErrorCode FAILED = ErrorCode.init("90011");
+//    ErrorCode PARAMETER_ERROR = ErrorCode.init("90012");
+//    ErrorCode IO_ERROR = ErrorCode.init("90013");
+//    ErrorCode SOURCE_TX_NOT_EXSITS = ErrorCode.init("90014");
+//    ErrorCode UNKNOW_ERROR = ErrorCode.init("90015");
 }

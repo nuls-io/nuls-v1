@@ -39,22 +39,22 @@ import io.nuls.protocol.model.SmallBlock;
  * @author Niels
  */
 public interface BlockService {
-//    /**
-//     * 获取创世块（从存储中）
-//     * Get the creation block (from storage)
-//     */
+    /**
+     * 获取创世块（从存储中）
+     * Get the creation block (from storage)
+     */
     Result<Block>  getGengsisBlock();
 
-//    /**
-//     * 获取最新的区块（从存储中）
-//     * Get the highest block (from storage)
-//     */
+    /**
+     * 获取最新的区块（从存储中）
+     * Get the highest block (from storage)
+     */
     Result<Block> getBestBlock();
 
-//    /**
-//     * 获取最新的区块头（从存储中）
-//     * Get the highest block header (from storage)
-//     */
+    /**
+     * 获取最新的区块头（从存储中）
+     * Get the highest block header (from storage)
+     */
     Result<BlockHeader> getBestBlockHeader();
 
     /**
@@ -99,7 +99,8 @@ public interface BlockService {
      *
      * @param block 完整区块/whole block
      * @return 操作结果/operating result
-     * @throws NulsException 保存区块有可能出现异常，请捕获后谨慎处理/There may be exceptions to the save block, please handle it carefully after capture.
+     * @throws NulsException 保存区块有可能出现异常，请捕获后谨慎处理
+     * There may be exceptions to the save block, please handle it carefully after capture.
      */
     Result saveBlock(Block block) throws NulsException;
 
@@ -109,7 +110,8 @@ public interface BlockService {
      *
      * @param block 完整区块/whole block
      * @return 操作结果/operating result
-     * @throws NulsException 回滚区块有可能出现异常，请捕获后谨慎处理/There may be exceptions to the roll back block, please handle it carefully after capture.
+     * @throws NulsException 回滚区块有可能出现异常，请捕获后谨慎处理
+     * There may be exceptions to the roll back block, please handle it carefully after capture.
      */
     Result rollbackBlock(Block block) throws NulsException;
 
@@ -118,7 +120,8 @@ public interface BlockService {
      * Forward block to other peers of the connection, allowing one column (not forward to it)
      *
      * @param hash       区块摘要/the hash of block
-     * @param excludeNode 需要排除的节点，一般是因为从该节点处接收的本区块/The nodes that need to be excluded are generally due to the block received from the node.
+     * @param excludeNode 需要排除的节点，一般是因为从该节点处接收的本区块
+     *                    The nodes that need to be excluded are generally due to the block received from the node.
      * @return 转发结果/forward results
      */
     Result forwardBlock(NulsDigestData hash, Node excludeNode);

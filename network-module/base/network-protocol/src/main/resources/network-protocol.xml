@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nuls-protocol>
+    <messages>
+        <message id="getNodesMsg_V1" class="io.nuls.network.protocol.message.GetNodesMessage"/>
+        <message id="nodesMsg_V1" class="io.nuls.network.protocol.message.NodesMessage"/>
+        <message id="handshakeMsg_V1" class="io.nuls.network.protocol.message.HandshakeMessage"/>
+        <message id="getVersionMsg_V1" class="io.nuls.network.protocol.message.GetVersionMessage"/>
+        <message id="versionMsg_V1" class="io.nuls.network.protocol.message.VersionMessage"/>
+        <message id="p2pNodeMsg_V1" class="io.nuls.network.protocol.message.P2PNodeMessage"/>
+    </messages>
+</nuls-protocol>

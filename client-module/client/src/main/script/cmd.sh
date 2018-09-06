@@ -30,7 +30,7 @@ do
 done
 NULS_JAVA_HOME=$SERVER_HOME/jre
 if [ ! -d ${NULS_JAVA_HOME} ]; then
-  NULS_JAVA_HOME =${JAVA_HOME}
+  NULS_JAVA_HOME=${JAVA_HOME}
 fi
 if [ ! -d ${NULS_JAVA_HOME} ]; then
   echo "The JAVA_HOME environment variable is not defined"

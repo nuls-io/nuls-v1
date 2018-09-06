@@ -103,7 +103,7 @@ public class CoinData extends BaseNulsData {
             }
         }
         size += SerializeUtils.sizeOfVarInt(to == null ? 0 : to.size());
-        if (null != from) {
+        if (null != to) {
             for (Coin coin : to) {
                 size += SerializeUtils.sizeOfNulsData(coin);
             }

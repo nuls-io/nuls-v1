@@ -24,6 +24,7 @@
  */
 package io.nuls.protocol.model.validator;
 
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Block;
@@ -31,6 +32,7 @@ import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.constant.ProtocolErroeCode;
 
 /**
  * @author Niels
@@ -41,17 +43,18 @@ public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
     @Override
     public ValidateResult validate(Block data) {
         if (data == null) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_NOT_FOUND);
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NULL_PARAMETER);
         }
         long length = 0L;
         for (Transaction tx : data.getTxs()) {
-            if (tx.isSystemTx()) {
+            // pierre add 验证区块大小 - 合约内部转账交易不能跳过
+            if (tx.isSystemTx() && tx.getType() != ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
                 continue;
             }
             length += tx.size();
         }
         if (length > ProtocolConstant.MAX_BLOCK_SIZE) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.BLOCK_TOO_BIG);
+            return ValidateResult.getFailedResult(this.getClass().getName(), ProtocolErroeCode.BLOCK_TOO_BIG);
         }
         return ValidateResult.getSuccessResult();
     }

@@ -31,5 +31,7 @@ import io.nuls.kernel.constant.TransactionErrorCode;
 
 public interface LedgerErrorCode extends TransactionErrorCode, KernelErrorCode {
 
-    ErrorCode LEDGER_DOUBLE_SPENT = ErrorCode.init("LEDGER002", "69981");
+//    ErrorCode LEDGER_DOUBLE_SPENT = ErrorCode.init("80000");
+    ErrorCode LEDGER_P2PKH_SCRIPT_ERROR = ErrorCode.init("80001");
+
 }

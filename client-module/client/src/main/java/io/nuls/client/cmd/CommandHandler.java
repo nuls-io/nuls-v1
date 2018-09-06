@@ -49,6 +49,7 @@ import io.nuls.network.rpc.cmd.GetNetNodesProcessor;
 import io.nuls.protocol.rpc.cmd.GetBestBlockHeaderProcessor;
 import io.nuls.protocol.rpc.cmd.GetBlockHeaderProcessor;
 import io.nuls.protocol.rpc.cmd.GetBlockProcessor;
+import io.nuls.utxo.accounts.rpc.cmd.GetUtxoAccountsProcessor;
 import jline.console.ConsoleReader;
 import jline.console.completer.ArgumentCompleter;
 import jline.console.completer.Completer;
@@ -136,7 +137,10 @@ public class CommandHandler {
         register(new HelpProcessor());
         register(new VersionProcessor());
         register(new UpgradeProcessor());
-
+        /**
+         * utxoAccounts
+         */
+        register(new GetUtxoAccountsProcessor());
         sdkInit();
     }
 

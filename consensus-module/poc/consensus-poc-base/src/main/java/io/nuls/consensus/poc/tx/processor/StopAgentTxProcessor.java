@@ -79,7 +79,7 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
     public Result onRollback(StopAgentTransaction tx, Object secondaryData) {
         AgentPo agentPo = agentStorageService.get(tx.getTxData().getCreateTxHash());
         if (null == agentPo || agentPo.getDelHeight() < 0) {
-            throw new NulsRuntimeException(KernelErrorCode.DATA_NOT_FOUND);
+            throw new NulsRuntimeException(PocConsensusErrorCode.AGENT_NOT_EXIST);
         }
         agentPo.setDelHeight(-1L);
         List<DepositPo> depositPoList = depositStorageService.getList();
@@ -108,7 +108,7 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
         }
         AgentPo agentPo = agentStorageService.get(tx.getTxData().getCreateTxHash());
         if (null == agentPo || agentPo.getDelHeight() > 0) {
-            throw new NulsRuntimeException(KernelErrorCode.DATA_NOT_FOUND);
+            throw new NulsRuntimeException(PocConsensusErrorCode.AGENT_NOT_EXIST);
         }
         List<DepositPo> depositPoList = depositStorageService.getList();
         for (DepositPo depositPo : depositPoList) {

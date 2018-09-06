@@ -40,6 +40,8 @@ import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageServi
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
+import io.nuls.contract.constant.ContractErrorCode;
+import io.nuls.contract.service.ContractService;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
@@ -47,6 +49,7 @@ import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -103,6 +106,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Autowired
     private TransactionInfoService transactionInfoService;
 
+    @Autowired
+    private ContractService contractService;
+
     private Lock lock = new ReentrantLock();
     private Lock saveLock = new ReentrantLock();
 
@@ -137,7 +143,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     savedTxList.add(tx);
                 }
             } else {
-                rollbackTransaction(savedTxList, false);
+                rollbackTransactions(savedTxList, false);
                 return result;
             }
         }
@@ -309,15 +315,15 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result<Integer> rollbackTransaction(List<Transaction> txs) {
-        Result result = rollbackTransaction(txs, true);
+    public Result<Integer> rollbackTransactions(List<Transaction> txs) {
+        Result result = rollbackTransactions(txs, true);
         if (result.isSuccess()) {
             balanceManager.refreshBalanceIfNesessary();
         }
         return result;
     }
 
-    private Result<Integer> rollbackTransaction(List<Transaction> txs, boolean isCheckMine) {
+    private Result<Integer> rollbackTransactions(List<Transaction> txs, boolean isCheckMine) {
         List<Transaction> txListToRollback;
         if (isCheckMine) {
             txListToRollback = filterLocalTransaction(txs);
@@ -327,14 +333,32 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         for (int i = txListToRollback.size() - 1; i >= 0; i--) {
             rollbackTransaction(txListToRollback.get(i));
         }
-        for (int i = 0; i < txListToRollback.size(); i++) {
-            verifyAndSaveUnconfirmedTransaction(txListToRollback.get(i));
-        }
         return Result.getSuccess().setData(new Integer(txListToRollback.size()));
     }
 
+    private Result<Integer> rollbackTransaction(Transaction tx) {
+        if (!AccountLegerUtils.isLocalTransaction(tx)) {
+            return Result.getSuccess().setData(new Integer(0));
+        }
+
+        List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx);
+        if (addresses == null || addresses.size() == 0) {
+            return Result.getSuccess().setData(new Integer(0));
+        }
+        if (tx.isSystemTx()) {
+            return deleteTransaction(tx);
+        }
+        TransactionInfoPo txInfoPo = new TransactionInfoPo(tx);
+        Result result = transactionInfoService.saveTransactionInfo(txInfoPo, addresses);
+        if (result.isFailed()) {
+            return result;
+        }
+        result = unconfirmedTransactionStorageService.saveUnconfirmedTx(tx.getHash(), tx);
+        return result;
+    }
+
     @Override
-    public Result<Integer> rollbackTransaction(Transaction tx) {
+    public Result<Integer> deleteTransaction(Transaction tx) {
         if (!AccountLegerUtils.isLocalTransaction(tx)) {
             return Result.getSuccess().setData(new Integer(0));
         }
@@ -375,19 +399,19 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result<Balance> getBalance(byte[] address) throws NulsException {
+    public Result<Balance> getBalance(byte[] address) {
         if (address == null || address.length != Address.ADDRESS_LENGTH) {
-            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
 
         if (!AccountLegerUtils.isLocalAccount(address)) {
-            return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
 
         Balance balance = balanceManager.getBalance(address).getData();
 
         if (balance == null) {
-            return Result.getFailed(AccountLedgerErrorCode.ACCOUNT_NOT_EXIST);
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
 
         return Result.getSuccess().setData(balance);
@@ -398,7 +422,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         if (null == price) {
             throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
         }
-
         lock.lock();
         try {
             CoinDataResult coinDataResult = new CoinDataResult();
@@ -474,7 +497,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         lock.lock();
         try {
             tx.setCoinData(null);
-            int targetSize = TxMaxSizeValidator.MAX_TX_SIZE - tx.size() - 76;
+            //默认coindata中to为两条2*38
+            int txSize = tx.size() + 76;
+            if(null == tx.getScriptSig()){
+                txSize = txSize + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH;
+            }
+            //计算目标size，coindata中from的总大小
+            int targetSize = TxMaxSizeValidator.MAX_TX_SIZE - txSize;
             List<Coin> coinList = balanceManager.getCoinListByAddress(address);
             if (coinList.isEmpty()) {
                 return Result.getSuccess().setData(Na.ZERO);
@@ -503,6 +532,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Na fee = TransactionFeeCalculator.getFee(size, price);
             max = max.subtract(fee);
             return Result.getSuccess().setData(max);
+        } catch (Exception e){
+            return Result.getFailed(TransactionErrorCode.DATA_ERROR);
         } finally {
             lock.unlock();
         }
@@ -561,13 +592,18 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 return accountResult;
             }
             Account account = accountResult.getData();
-
-            if (accountService.isEncrypted(account).isSuccess() && account.isLocked()) {
+            if (account.isEncrypted() && account.isLocked()) {
                 AssertUtil.canNotEmpty(password, "the password can not be empty");
                 if (!account.validatePassword(password)) {
                     return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
             }
+
+            // 检查to是否为合约地址，如果是合约地址，则返回错误
+            if(contractService.isContractAddress(to)) {
+                return Result.getFailed(ContractErrorCode.NON_CONTRACTUAL_TRANSACTION_NO_TRANSFER);
+            }
+
             TransferTransaction tx = new TransferTransaction();
             if (StringUtils.isNotBlank(remark)) {
                 try {
@@ -585,7 +621,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             CoinDataResult coinDataResult = getCoinData(from, values, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH + coinData.size(), price);
             if (!coinDataResult.isEnough()) {
-                return Result.getFailed(LedgerErrorCode.BALANCE_NOT_ENOUGH);
+                return Result.getFailed(AccountLedgerErrorCode.INSUFFICIENT_BALANCE);
             }
             coinData.setFrom(coinDataResult.getCoinList());
             if (coinDataResult.getChange() != null) {
@@ -598,13 +634,17 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
             tx.setScriptSig(sig.serialize());
 
+            // 保存未确认交易到本地账户
             Result saveResult = verifyAndSaveUnconfirmedTransaction(tx);
             if (saveResult.isFailed()) {
                 if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
                     //重新算一次交易(不超出最大交易数据大小下)的最大金额
-                    Na maxAmount = getMaxAmountOfOnce(from, tx, price).getData();
-                    Result rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
-                    rs.setMsg(rs.getMsg() + maxAmount.toDouble());
+                    Result rs = getMaxAmountOfOnce(from, tx, price);
+                    if(rs.isSuccess()){
+                        Na maxAmount = (Na)rs.getData();
+                        rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
+                        rs.setMsg(rs.getMsg() + maxAmount.toDouble());
+                    }
                     return rs;
                 }
                 return saveResult;
@@ -612,7 +652,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 //          transactionService.newTx(tx);
             Result sendResult = transactionService.broadcastTx(tx);
             if (sendResult.isFailed()) {
-                this.rollbackTransaction(tx);
+                this.deleteTransaction(tx);
                 return sendResult;
             }
             return Result.getSuccess().setData(tx.getHash().getDigestHex());
@@ -702,14 +742,17 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result importLedgerByAddress(String address) {
         if (address == null || !AddressTool.validAddress(address)) {
-            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
+
+        // 初始化NRC20资产
+        contractService.initAllTokensByAccount(address);
 
         byte[] addressBytes = null;
         try {
             addressBytes = AddressTool.getAddress(address);
         } catch (Exception e) {
-            return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
 
         long start = 0;

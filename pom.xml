@@ -7,7 +7,6 @@
         <artifactId>oss-parent</artifactId>
         <version>7</version>
     </parent>
-
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -31,7 +30,7 @@
 
     <groupId>io.nuls</groupId>
     <artifactId>nuls</artifactId>
-    <version>1.0.1-BETA</version>
+    <version>1.1.0-BETA</version>
     <packaging>pom</packaging>
 
     <name>nuls</name>
@@ -57,6 +56,7 @@
         <module>tools-module</module>
         <module>message-bus-module</module>
         <module>sdk-module</module>
+        <module>utxo-accounts-module</module>
     </modules>
     <dependencies>
         <dependency>

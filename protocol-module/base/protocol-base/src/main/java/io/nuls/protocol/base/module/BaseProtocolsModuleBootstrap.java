@@ -38,6 +38,7 @@ import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.protocol.base.handler.*;
 import io.nuls.protocol.base.service.DownloadServiceImpl;
+import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.message.*;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
 import io.nuls.protocol.model.tx.TransferTransaction;
@@ -56,6 +57,15 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
     public void init() {
         TransactionManager.putTx(CoinBaseTransaction.class, null);
         TransactionManager.putTx(TransferTransaction.class, null);
+
+        try {
+            NulsVersionManager.init();
+            NulsVersionManager.test();
+            System.out.println(NulsVersionManager.getProtocolContainer(1));
+        } catch (Exception e) {
+            Log.error(e);
+            System.exit(-1);
+        }
     }
 
     @Override
@@ -89,6 +99,7 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         } else {
             start();
         }
+
     }
 
     private void initHandlers() {

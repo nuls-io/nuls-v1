@@ -34,6 +34,7 @@ import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.db.model.Entry;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -41,6 +42,7 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.protocol.constant.ProtocolErroeCode;
 
 import java.io.IOException;
 import java.util.*;
@@ -115,7 +117,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                         continue;
                     }
                     if (sourceTx == null) {
-                        return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
+                        return Result.getFailed(TransactionErrorCode.TX_NOT_EXIST);
                     }
                     int index = (int) new VarInt(fromIndex, 0).value;
                     fromOfFromCoin = sourceTx.getCoinData().getTo().get(index);
@@ -236,7 +238,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                         continue;
                     }
                     if (sourceTx == null) {
-                        return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
+                        return Result.getFailed(TransactionErrorCode.TX_NOT_EXIST);
                     }
                     fromOfFromCoin = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value);
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nuls-protocol>
+    <txs>
+        <tx id="createAgentTx_V1" class="io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction"/>
+        <tx id="depositTx_V1" class="io.nuls.consensus.poc.protocol.tx.DepositTransaction"/>
+        <tx id="cancelDepositTx_V1" class="io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction"/>
+        <tx id="stopAgentTx_V1" class="io.nuls.consensus.poc.protocol.tx.StopAgentTransaction"/>
+        <tx id="redPunishTx_V1" class="io.nuls.consensus.poc.protocol.tx.RedPunishTransaction"/>
+        <tx id="yellowPunishTx_V1" class="io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction"/>
+    </txs>
+</nuls-protocol>

@@ -92,7 +92,7 @@ public interface AccountService {
      * @param password the password of the account.
      * @return the result of the operation.
      */
-    Result<Boolean> removeAccount(String address, String password);
+    Result removeAccount(String address, String password);
 
 
     /**
@@ -133,16 +133,16 @@ public interface AccountService {
      */
     Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore);
 
-//    /**
-//     * 根据私钥和密码导入账户
-//     * import an account from plant private key and encrypt the account.
-//     */
+    /**
+     * 根据私钥和密码导入账户
+     * import an account from plant private key and encrypt the account.
+     */
     Result<Account> importAccount(String prikey, String password);
 
-//    /**
-//     * 据私钥和密码导入账户
-//     * import an unencrypted account by plant private key.
-//     */
+    /**
+     * 据私钥和密码导入账户
+     * import an unencrypted account by plant private key.
+     */
     Result<Account> importAccount(String prikey);
 
     /**
@@ -201,48 +201,30 @@ public interface AccountService {
     Result<Address> getAddress(byte[] pubKey);
 
     /**
-     * 根据账户验证账户是否加密
-     * Verify weather the account is encrypted according to the account.
-     *
-     * @param account the account to be verified.
-     * @return the result of the operation.
-     */
-    Result isEncrypted(Account account);
-
-    /**
-     * 根据账户的地址对象验证账户是否加密
-     * Verify weather the account is encrypted according to the account's address object.
-     *
-     * @param address The address of the account to be verified.
-     * @return the result of the operation.
-     */
-    Result isEncrypted(Address address);
-
-    /**
      * 根据账户的地址字符串验证账户是否加密
-     * Verify weather the account is encrypted according to the account's address string.
+     * Verify whether the account is encrypted.
      *
      * @param address The address of the account to be verified.
      * @return the result of the operation.
      */
     Result isEncrypted(String address);
 
-    /**
-     * Verify the account password.
-     * @param account account
-     * @param password password
-     * @return Result
-     */
-    Result validPassword(Account account, String password);
+//    /**
+//     * Verify the account password.
+//     * @param account account
+//     * @param password password
+//     * @return Result
+//     */
+//    Result validPassword(Account account, String password);
 
-    /**
-     * 验证地址字符串的格式
-     * Verify the format of the address string.
-     *
-     * @param address To verify the address string.
-     * @return the result of the operation.
-     */
-    Result verifyAddressFormat(String address);
+//    /**
+//     * 验证地址字符串的格式
+//     * Verify the format of the address string.
+//     *
+//     * @param address To verify the address string.
+//     * @return the result of the operation.
+//     */
+//    Result verifyAddressFormat(String address);
 
     /**
      * 获取所有账户集合
@@ -252,39 +234,39 @@ public interface AccountService {
      */
     Result<Collection<Account>> getAccountList();
 
-    /**
-     * 数据签名
-     * Sign data.
-     *
-     * @param data     Data to be signed.
-     * @param account  Signed account
-     * @param password Account password
-     * @return The NulsSignData object.
-     * @throws NulsException nulsException
-     */
-    NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
-
-    /**
-     * 数据签名(无密码)
-     * Sign data.(no password)
-     *
-     * @param data    Data to be signed.
-     * @param account Signed account
-     * @return The NulsSignData object.
-     * @throws NulsException nulsException
-     */
-    NulsSignData signData(byte[] data, Account account) throws NulsException;
-
-    /**
-     * 数据签名
-     * Sign data.
-     *
-     * @param data  Data to be signed.
-     * @param ecKey eckey.
-     * @return The NulsSignData object.
-     * @throws NulsException nulsException
-     */
-    NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException;
+//    /**
+//     * 数据签名
+//     * Sign data.
+//     *
+//     * @param data     Data to be signed.
+//     * @param account  Signed account
+//     * @param password Account password
+//     * @return The NulsSignData object.
+//     * @throws NulsException nulsException
+//     */
+//    NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
+//
+//    /**
+//     * 数据签名(无密码)
+//     * Sign data.(no password)
+//     *
+//     * @param data    Data to be signed.
+//     * @param account Signed account
+//     * @return The NulsSignData object.
+//     * @throws NulsException nulsException
+//     */
+//    NulsSignData signData(byte[] data, Account account) throws NulsException;
+//
+//    /**
+//     * 数据签名
+//     * Sign data.
+//     *
+//     * @param data  Data to be signed.
+//     * @param ecKey eckey.
+//     * @return The NulsSignData object.
+//     * @throws NulsException nulsException
+//     */
+//    NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException;
 
     /**
      * 数据签名
@@ -308,16 +290,16 @@ public interface AccountService {
      */
     NulsSignData signDigest(byte[] digest, ECKey ecKey);
 
-    /**
-     * 验证签名
-     * Verify the signature.
-     *
-     * @param data     data to be validated.
-     * @param signData signature.
-     * @param pubKey   dublic key of account.
-     * @return the result of the opration
-     */
-    Result verifySignData(byte[] data, NulsSignData signData, byte[] pubKey);
+//    /**
+//     * 验证签名
+//     * Verify the signature.
+//     *
+//     * @param data     data to be validated.
+//     * @param signData signature.
+//     * @param pubKey   dublic key of account.
+//     * @return the result of the opration
+//     */
+//    Result verifySignData(byte[] data, NulsSignData signData, byte[] pubKey);
 
     /**
      * 获取所有的账户的余额
@@ -327,36 +309,36 @@ public interface AccountService {
      * @throws NulsException nulsException
      */
     Result<Balance> getBalance() throws NulsException;
+//
+//    /**
+//     * 根据账户获取账户余额
+//     * Query the balance of an account.
+//     *
+//     * @param account the account.
+//     * @return Balance object.
+//     * @throws NulsException nulsException
+//     */
+//    Result<Balance> getBalance(Account account) throws NulsException;
 
-    /**
-     * 根据账户获取账户余额
-     * Query the balance of an account.
-     *
-     * @param account the account.
-     * @return Balance object.
-     * @throws NulsException nulsException
-     */
-    Result<Balance> getBalance(Account account) throws NulsException;
-
-    /**
-     * 根据账户地址对象获取账户余额
-     * Query the balance of an account.
-     *
-     * @param address the address of the account.
-     * @return Balance object.
-     * @throws NulsException nulsException
-     */
-    Result<Balance> getBalance(Address address) throws NulsException;
-
-    /**
-     * 根据账户地址字符串获取账户余额
-     * Query the balance of an account.
-     *
-     * @param address the address of the account.
-     * @return Balance object.
-     * @throws NulsException nulsException
-     */
-    Result<Balance> getBalance(String address) throws NulsException;
+//    /**
+//     * 根据账户地址对象获取账户余额
+//     * Query the balance of an account.
+//     *
+//     * @param address the address of the account.
+//     * @return Balance object.
+//     * @throws NulsException nulsException
+//     */
+//    Result<Balance> getBalance(Address address) throws NulsException;
+//
+//    /**
+//     * 根据账户地址字符串获取账户余额
+//     * Query the balance of an account.
+//     *
+//     * @param address the address of the account.
+//     * @return Balance object.
+//     * @throws NulsException nulsException
+//     */
+//    Result<Balance> getBalance(String address) throws NulsException;
 
 
     /**
@@ -377,18 +359,4 @@ public interface AccountService {
      */
     Result<String> getAlias(String address);
 
-//    /**
-//     * 获取设置别名交易手续费
-//     * Gets to set the alias transaction fee
-//     *
-//     * @param address
-//     * @param aliasName
-//     * @return
-//     */
-    Result<Na> getAliasFee(String address, String aliasName);
-
-    /**
-     * 临时方法，后续去除
-     */
-    void clearCache();
 }

@@ -24,23 +24,151 @@
 package io.nuls.contract.service;
 
 import io.nuls.contract.dto.ContractResult;
-import io.nuls.contract.entity.form.ContractCall;
-import io.nuls.contract.entity.form.ContractCreate;
-import io.nuls.contract.entity.form.ContractDelete;
-import io.nuls.contract.entity.form.ContractUpdate;
-import io.nuls.kernel.model.Result;
+import io.nuls.contract.dto.ContractTokenInfo;
+import io.nuls.contract.dto.ContractTokenTransferInfoPo;
+import io.nuls.contract.dto.ContractTransfer;
+import io.nuls.contract.entity.tx.ContractTransferTransaction;
+import io.nuls.kernel.model.*;
+import io.nuls.kernel.validate.ValidateResult;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface ContractService {
 
-    Result<ContractResult> createContract(ContractCreate create);
 
-    Result<ContractResult> callContract(ContractCall call);
+    /**
+     * 是否为合约地址
+     *
+     * @param addressBytes
+     * @return
+     */
+    boolean isContractAddress(byte[] addressBytes);
 
-    Result<ContractResult> deleteContract(ContractDelete delete);
 
-    Result<ContractResult> updateContract(ContractUpdate update);
+    /**
+     * 保存 txInfo : key -> contractAddress + txHash, status is confirmed
+     * 保存 UTXO : key -> txHash + index
+     *
+     * @param txs
+     * @return
+     */
+    Result<Integer> saveConfirmedTransactionList(List<Transaction> txs);
 
-    Result<Object> getContractInfo(String address);
+    /**
+     * 回滚合约交易
+     *
+     * @param txs
+     * @return
+     */
+    Result<Integer> rollbackTransactionList(List<Transaction> txs);
 
-    Result<Object> getVmStatus();
+
+    /**
+     * 保存合约执行结果
+     *
+     * @param hash
+     * @param contractResult
+     * @return
+     */
+    Result saveContractExecuteResult(NulsDigestData hash, ContractResult contractResult);
+
+    /**
+     * 删除合约执行结果
+     *
+     * @param hash
+     * @return
+     */
+    Result deleteContractExecuteResult(NulsDigestData hash);
+
+    /**
+     * 获取合约执行结果
+     *
+     * @param hash
+     * @return
+     */
+    ContractResult getContractExecuteResult(NulsDigestData hash);
+
+
+    /**
+     * 执行合约
+     *
+     * @param tx
+     * @param height
+     * @param stateRoot
+     * @return
+     */
+    Result<ContractResult> invokeContract(Transaction tx, long height, byte[] stateRoot);
+
+    /**
+     * 打包或者验证区块时，创建合约临时余额区
+     *
+     */
+    void createContractTempBalance();
+
+    /**
+     * 移除合约临时余额区
+     *
+     */
+    void removeContractTempBalance();
+
+    /**
+     * 获取账户下指定合约的token余额
+     *
+     * @param address
+     * @param contractAddress
+     * @return
+     */
+    Result<ContractTokenInfo> getContractTokenViaVm(String address, String contractAddress);
+
+    /**
+     * 初始化账户下所有合约token
+     *
+     * @param address
+     * @param contractAddress
+     * @return
+     */
+    Result initAllTokensByAccount(String address);
+
+    /**
+     * 获取账户下代币资产列表
+     *
+     * @param address
+     * @return
+     */
+    Result<List<ContractTokenInfo>> getAllTokensByAccount(String address);
+
+    /**
+     * 是否为Token合约地址
+     *
+     * @param address
+     * @return
+     */
+    boolean isTokenContractAddress(String address);
+
+    /**
+     * 获取账户下Token转账列表
+     *
+     * @param address
+     * @return
+     */
+    Result<List<ContractTokenTransferInfoPo>> getTokenTransferInfoList(String address);
+
+    /**
+     * 获取账户指定交易下Token转账列表
+     *
+     * @param address
+     * @param hash
+     * @return
+     */
+    Result<List<ContractTokenTransferInfoPo>> getTokenTransferInfoList(String address, NulsDigestData hash);
+
+    Result<byte[]> handleContractResult(Transaction tx, ContractResult contractResult, byte[] stateRoot, long time, Map<String,Coin> toMaps, Map<String, Coin> contractUsedCoinMap);
+
+    Result saveContractTransferTx(ContractTransferTransaction transferTx);
+    Result rollbackContractTransferTx(ContractTransferTransaction transferTx);
+
+    Result<byte[]> verifyContractResult(Transaction tx, ContractResult contractResult, byte[] stateRoot, long time, Map<String,Coin> toMaps, Map<String,Coin> contractUsedCoinMap);
+    Result<byte[]> verifyContractResult(Transaction tx, ContractResult contractResult, byte[] stateRoot, long time, Map<String,Coin> toMaps, Map<String,Coin> contractUsedCoinMap, Long blockHeight);
 }

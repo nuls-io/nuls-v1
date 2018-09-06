@@ -40,7 +40,10 @@ import io.nuls.account.service.AccountBaseService;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
+import io.nuls.account.tx.AliasTransaction;
 import io.nuls.account.util.AccountTool;
+import io.nuls.contract.dto.ContractTokenInfo;
+import io.nuls.contract.service.ContractService;
 import io.nuls.core.tools.crypto.AESEncrypt;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
@@ -48,16 +51,17 @@ import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.Address;
-import io.nuls.kernel.model.Result;
-import io.nuls.kernel.model.RpcClientResult;
+import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
+import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.swagger.annotations.*;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -93,12 +97,14 @@ public class AccountResource {
     @Autowired
     private AccountLedgerService accountLedgerService;
 
+    @Autowired
+    private ContractService contractService;
+
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
     private ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
 
     private Map<String, ScheduledFuture> accountUnlockSchedulerMap = new HashMap<>();
-    private Result rs;
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -264,7 +270,7 @@ public class AccountResource {
         }
         Account account = rs.getData();
         boolean result = account.validatePassword(form.getPassword());
-        Map<String, Boolean> map = new HashMap<>();
+        Map<String, Boolean> map = new HashMap<>(2);
         map.put("value", result);
         return Result.getSuccess().setData(map).toRpcClientResult();
     }
@@ -308,7 +314,22 @@ public class AccountResource {
         if (StringUtils.isBlank(form.getAlias())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        Result result = accountService.getAliasFee(form.getAddress(), form.getAlias());
+        Result result = aliasService.getAliasFee(form.getAddress(), form.getAlias());
+        AliasTransaction tx = new AliasTransaction();
+        Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
+                TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        Map<String, Long> map = new HashMap<>();
+        Long fee = null;
+        Long maxAmount = null;
+        if (result.isSuccess()) {
+            fee = ((Na) result.getData()).getValue();
+        }
+        if (rs.isSuccess()) {
+            maxAmount = ((Na) rs.getData()).getValue();
+        }
+        map.put("fee", fee);
+        map.put("maxAmount", maxAmount);
+        result.setData(map);
         return result.toRpcClientResult();
     }
 
@@ -375,23 +396,32 @@ public class AccountResource {
         if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        try {
-            Address addr = new Address(address);
-            Result<Balance> result = accountLedgerService.getBalance(addr.getAddressBytes());
-            if (result.isFailed()) {
-                return result.toRpcClientResult();
-            }
-            Balance balance = result.getData();
-            List<AssetDto> dtoList = new ArrayList<>();
-            dtoList.add(new AssetDto("NULS", balance));
-
-            Map<String, List<AssetDto>> map = new HashMap<>();
-            map.put("list", dtoList);
-            return Result.getSuccess().setData(map).toRpcClientResult();
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(AccountErrorCode.FAILED).toRpcClientResult();
+        Address addr = new Address(address);
+        Result<Balance> result = accountLedgerService.getBalance(addr.getAddressBytes());
+        if (result.isFailed()) {
+            return result.toRpcClientResult();
         }
+        Balance balance = result.getData();
+        List<AssetDto> dtoList = new ArrayList<>();
+        dtoList.add(new AssetDto("NULS", balance));
+
+        Result<List<ContractTokenInfo>> allTokenListResult = contractService.getAllTokensByAccount(address);
+        if(allTokenListResult.isSuccess()) {
+            List<ContractTokenInfo> tokenInfoList = allTokenListResult.getData();
+            if(tokenInfoList != null && tokenInfoList.size() > 0) {
+                for(ContractTokenInfo tokenInfo : tokenInfoList) {
+                    if(tokenInfo.isLock()) {
+                        continue;
+                    }
+                    dtoList.add(new AssetDto(tokenInfo));
+                }
+            }
+        }
+
+
+        Map<String, List<AssetDto>> map = new HashMap<>();
+        map.put("list", dtoList);
+        return Result.getSuccess().setData(map).toRpcClientResult();
     }
 
     @POST
@@ -571,7 +601,7 @@ public class AccountResource {
         String password = form.getPassword();
 
         if (StringUtils.isBlank(address) || !AddressTool.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if (StringUtils.isBlank(priKey) || !ECKey.isValidPrivteHex(priKey)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
@@ -581,7 +611,7 @@ public class AccountResource {
         }
 
         //验证地址是否正确
-        ECKey key = ECKey.fromPrivate(new BigInteger(Hex.decode(priKey)));
+        ECKey key = ECKey.fromPrivate(new BigInteger(1, Hex.decode(priKey)));
         try {
             String newAddress = AccountTool.newAddress(key).getBase58();
             if (!newAddress.equals(address)) {
@@ -617,7 +647,7 @@ public class AccountResource {
         String newPassword = form.getNewPassword();
 
         if (StringUtils.isBlank(address) || !AddressTool.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if (StringUtils.isBlank(priKey)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
@@ -975,10 +1005,6 @@ public class AccountResource {
         }
         for (String priKey : list) {
             if (!ECKey.isValidPrivteHex(priKey)) {
-                //rollback
-              /*  for (String address : success) {
-                    accountService.removeAccount(address, form.getPassword());
-                }*/
                 Result result = Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
                 result.setMsg(result.getMsg() + ", 已导入成功" + success.size() + "个");
                 return result.toRpcClientResult();
@@ -988,11 +1014,6 @@ public class AccountResource {
                 Account account = (Account) result.getData();
                 success.add(account.getAddress().toString());
             } else {
-                //rollback
-                /*for (String address : success) {
-                    accountService.removeAccount(address, form.getPassword());
-                }
-                return result.toRpcClientResult();*/
                 result.setMsg(result.getMsg() + ", 已导入成功" + success.size() + "个");
                 return result.toRpcClientResult();
             }
@@ -1023,7 +1044,7 @@ public class AccountResource {
         if (!form.getOverwrite()) {
             ECKey key = null;
             try {
-                key = ECKey.fromPrivate(new BigInteger(Hex.decode(form.getPriKey())));
+                key = ECKey.fromPrivate(new BigInteger(1, Hex.decode(form.getPriKey())));
             } catch (Exception e) {
                 return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
             }

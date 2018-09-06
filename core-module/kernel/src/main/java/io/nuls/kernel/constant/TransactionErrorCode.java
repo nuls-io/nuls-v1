@@ -29,26 +29,22 @@ package io.nuls.kernel.constant;
 /**
  * Created by ln on 2018/5/6.
  */
-public interface TransactionErrorCode {
+public interface TransactionErrorCode extends KernelErrorCode {
 
-    /*
-     * ------------  transaction Exception code   -------------
-     */
-    ErrorCode UTXO_UNUSABLE = ErrorCode.init("LED001", "12001");
-    ErrorCode UTXO_STATUS_CHANGE = ErrorCode.init("LED002", "12002");
-    ErrorCode BALANCE_NOT_ENOUGH = ErrorCode.init("LED003", "12003");
-    ErrorCode INVALID_INPUT = ErrorCode.init("LED004", "12004");
-    ErrorCode INVALID_AMOUNT = ErrorCode.init("LED005", "12005");
-    ErrorCode ORPHAN_TX = ErrorCode.init("LED006", "12006");
-    ErrorCode ORPHAN_BLOCK = ErrorCode.init("LED007", "12007");
-    ErrorCode UTXO_NOT_FOUND = ErrorCode.init("LED008", "12008");
-    ErrorCode FEE_NOT_RIGHT = ErrorCode.init("LED009", "12009");
-    ErrorCode ROLLBACK_TRANSACTION_FAILED = ErrorCode.init("LED010", "12010");
-
-    ErrorCode TRANSACTION_REPEATED = ErrorCode.init("LED011", "12011");
-    ErrorCode TOO_SMALL_AMOUNT = ErrorCode.init("LED012", "12012");
-
-
-    ErrorCode TX_SIZE_TOO_BIG = ErrorCode.init("LED013","12013");
-
+    ErrorCode UTXO_UNUSABLE = ErrorCode.init("31001");
+    ErrorCode UTXO_STATUS_CHANGE = ErrorCode.init("31002");
+    ErrorCode INVALID_INPUT = ErrorCode.init("31004");
+    ErrorCode INVALID_AMOUNT = ErrorCode.init("31005");
+    ErrorCode ORPHAN_TX = ErrorCode.init("31006");
+    ErrorCode ORPHAN_BLOCK = ErrorCode.init("31007");
+    ErrorCode TX_DATA_VALIDATION_ERROR = ErrorCode.init("31008");
+    ErrorCode FEE_NOT_RIGHT = ErrorCode.init("31009");
+    ErrorCode ROLLBACK_TRANSACTION_FAILED = ErrorCode.init("31010");
+    ErrorCode TRANSACTION_REPEATED = ErrorCode.init("31011");
+    ErrorCode TOO_SMALL_AMOUNT = ErrorCode.init("31012");
+    ErrorCode TX_SIZE_TOO_BIG = ErrorCode.init("31013");
+    ErrorCode SAVE_TX_ERROR = ErrorCode.init("31014");
+    ErrorCode TX_NOT_EXIST = ErrorCode.init("31015");
+    ErrorCode COINDATA_NOT_FOUND = ErrorCode.init("31016");
+    ErrorCode TX_TYPE_ERROR = ErrorCode.init("31017");
 }

@@ -25,11 +25,10 @@
 
 package io.nuls.protocol.rpc.model;
 
-import io.nuls.kernel.model.Address;
-import io.nuls.consensus.poc.model.BlockRoundData;
+import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
-import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.*;
@@ -53,6 +52,9 @@ public class BlockHeaderDto {
 
     @ApiModelProperty(name = "merkleHash", value = "梅克尔hash")
     private String merkleHash;
+
+    @ApiModelProperty(name = "stateRoot", value = "智能合约世界状态根")
+    private String stateRoot;
 
     @ApiModelProperty(name = "time", value = "区块生成时间")
     private Long time;
@@ -109,7 +111,7 @@ public class BlockHeaderDto {
     private void setBlockReward(Transaction tx) {
         CoinData coinData = tx.getCoinData();
         if (null == coinData) {
-            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
+            throw new NulsRuntimeException(TransactionErrorCode.COINDATA_NOT_FOUND);
         }
         Na rewardNa = Na.ZERO;
         for (Coin coin : coinData.getTo()) {
@@ -123,6 +125,7 @@ public class BlockHeaderDto {
         this.hash = header.getHash().getDigestHex();
         this.preHash = header.getPreHash().getDigestHex();
         this.merkleHash = header.getMerkleHash().getDigestHex();
+        this.stateRoot = Hex.encode(header.getStateRoot());
         this.time = header.getTime();
         this.height = header.getHeight();
         this.txCount = header.getTxCount();
@@ -130,7 +133,7 @@ public class BlockHeaderDto {
         this.scriptSign = Hex.encode(header.getScriptSig().serialize());
         this.confirmCount = bestBlockHeight - this.height;
         try {
-            BlockRoundData roundData = new BlockRoundData(header.getExtend());
+            BlockExtendsData roundData = new BlockExtendsData(header.getExtend());
             this.roundIndex = roundData.getRoundIndex();
             this.roundStartTime = roundData.getRoundStartTime();
             this.consensusMemberCount = roundData.getConsensusMemberCount();
@@ -266,5 +269,13 @@ public class BlockHeaderDto {
 
     public void setSize(int size) {
         this.size = size;
+    }
+
+    public String getStateRoot() {
+        return stateRoot;
+    }
+
+    public void setStateRoot(String stateRoot) {
+        this.stateRoot = stateRoot;
     }
 }

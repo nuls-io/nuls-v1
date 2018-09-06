@@ -24,6 +24,7 @@
  */
 package io.nuls.kernel.model;
 
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -34,6 +35,7 @@ import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * @author vivi
@@ -48,6 +50,10 @@ public class BlockHeader extends BaseNulsData {
     private long txCount;
     private P2PKHScriptSig scriptSign;
     private byte[] extend;
+    /**
+     * pierre add 智能合约世界状态根
+     */
+    private byte[] stateRoot;
 
     private transient int size;
     private transient byte[] packingAddress;
@@ -72,6 +78,7 @@ public class BlockHeader extends BaseNulsData {
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBytes(extend);
         size += SerializeUtils.sizeOfNulsData(scriptSign);
+        size += SerializeUtils.sizeOfBytes(stateRoot);
         return size;
     }
 
@@ -84,6 +91,7 @@ public class BlockHeader extends BaseNulsData {
         stream.writeUint32(txCount);
         stream.writeBytesWithLength(extend);
         stream.writeNulsData(scriptSign);
+        stream.writeBytesWithLength(stateRoot);
     }
 
     @Override
@@ -100,6 +108,7 @@ public class BlockHeader extends BaseNulsData {
             Log.error(e);
         }
         this.scriptSign = byteBuffer.readNulsData(new P2PKHScriptSig());
+        this.stateRoot = byteBuffer.readByLengthByte();
     }
 
     private NulsDigestData forceCalcHash() {
@@ -197,5 +206,30 @@ public class BlockHeader extends BaseNulsData {
 
     public void setPackingAddress(byte[] packingAddress) {
         this.packingAddress = packingAddress;
+    }
+
+    public byte[] getStateRoot() {
+        return stateRoot;
+    }
+
+    public void setStateRoot(byte[] stateRoot) {
+        this.stateRoot = stateRoot;
+    }
+
+    @Override
+    public String toString() {
+        return "BlockHeader{" +
+                "hash=" + hash.getDigestHex() +
+                ", preHash=" + preHash.getDigestHex() +
+                ", merkleHash=" + merkleHash.getDigestHex() +
+                ", time=" + time +
+                ", height=" + height +
+                ", txCount=" + txCount +
+                ", scriptSign=" + scriptSign +
+                //", extend=" + Arrays.toString(extend) +
+                ", stateRoot=" + Hex.encode(stateRoot) +
+                ", size=" + size +
+                ", packingAddress=" + (packingAddress == null ? packingAddress : AddressTool.getStringAddressByBytes(packingAddress)) +
+                '}';
     }
 }

@@ -51,9 +51,9 @@ public class ErrorCode {
 
     }
 
-    protected ErrorCode(String code, String msg) {
+    protected ErrorCode(String code) {
         this.code = code;
-        this.msg = msg;
+        this.msg = code;
         if (null == code) {
             throw new RuntimeException("the errorcode code cann't be null!");
         }
@@ -72,8 +72,8 @@ public class ErrorCode {
         return code;
     }
 
-    public static final ErrorCode init(String code, String msg) {
-        return new ErrorCode(code, msg);
+    public static final ErrorCode init(String code) {
+        return new ErrorCode(code);
     }
 
     @Override

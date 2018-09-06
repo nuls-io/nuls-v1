@@ -27,7 +27,7 @@ package io.nuls.consensus.poc.config;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.Address;
 import io.nuls.account.service.AccountService;
-import io.nuls.consensus.poc.model.BlockRoundData;
+import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.io.StringFileLoader;
@@ -59,6 +59,7 @@ public final class GenesisBlock extends Block {
 
     private static final String CONFIG_FILED_TIME = "time";
     private static final String CONFIG_FILED_HEIGHT = "height";
+    private static final String CONFIG_FILED_STATE_ROOT = "stateRoot";
     private static final String CONFIG_FILED_TXS = "txs";
     private static final String CONFIG_FILED_ADDRESS = "address";
     private static final String CONFIG_FILED_AMOUNT = "amount";
@@ -149,11 +150,13 @@ public final class GenesisBlock extends Block {
 
     private void fillHeader(Map<String, Object> jsonMap) throws NulsException {
         Integer height = (Integer) jsonMap.get(CONFIG_FILED_HEIGHT);
+        String stateRoot = (String) jsonMap.get(CONFIG_FILED_STATE_ROOT);
         AssertUtil.canNotEmpty(height, KernelErrorCode.CONFIG_ERROR.getMsg());
 
         BlockHeader header = new BlockHeader();
         this.setHeader(header);
         header.setHeight(height);
+        header.setStateRoot(Hex.decode(stateRoot));
         header.setTime(blockTime);
         header.setPreHash(NulsDigestData.calcDigestData(new byte[35]));
         header.setTxCount(this.getTxs().size());
@@ -163,7 +166,7 @@ public final class GenesisBlock extends Block {
         }
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
 
-        BlockRoundData data = new BlockRoundData();
+        BlockExtendsData data = new BlockExtendsData();
         data.setRoundIndex(1);
         data.setRoundStartTime(header.getTime() - ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000);
         data.setConsensusMemberCount(1);
@@ -185,11 +188,11 @@ public final class GenesisBlock extends Block {
 
     private NulsSignData signature(byte[] bytes) throws NulsException {
         AccountService service = NulsContext.getServiceBean(AccountService.class);
-        return service.signDigest(bytes, ECKey.fromPrivate(new BigInteger(Hex.decode(priKey))));
+        return service.signDigest(bytes, ECKey.fromPrivate(new BigInteger(1, Hex.decode(priKey))));
     }
 
     private byte[] getGenesisPubkey() {
-        return ECKey.fromPrivate(new BigInteger(Hex.decode(priKey))).getPubKey();
+        return ECKey.fromPrivate(new BigInteger(1, Hex.decode(priKey))).getPubKey();
     }
 }
 

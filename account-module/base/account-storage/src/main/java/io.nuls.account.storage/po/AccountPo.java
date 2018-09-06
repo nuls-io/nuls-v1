@@ -87,7 +87,7 @@ public class AccountPo {
         account.setPubKey(this.getPubKey());
         account.setEncryptedPriKey(this.getEncryptedPriKey());
         if (this.getPriKey() != null && this.getPriKey().length > 1) {
-            account.setEcKey(ECKey.fromPrivate(new BigInteger(account.getPriKey())));
+            account.setEcKey(ECKey.fromPrivate(new BigInteger(1, account.getPriKey())));
         } else {
             account.setEcKey(ECKey.fromEncrypted(new EncryptedData(this.getEncryptedPriKey()), this.getPubKey()));
         }

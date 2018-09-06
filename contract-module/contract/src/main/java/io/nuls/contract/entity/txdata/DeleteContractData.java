@@ -1,18 +1,18 @@
 /**
  * MIT License
- * <p>
+ *
  * Copyright (c) 2017-2018 nuls.io
- * <p>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * <p>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,30 +23,65 @@
  */
 package io.nuls.contract.entity.txdata;
 
+
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.model.TransactionLogicData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
-public class DeleteContractData extends BaseNulsData {
+/**
+ * @Author: PierreLuo
+ */
+public class DeleteContractData extends TransactionLogicData implements ContractData{
 
-    private byte[] address;
+    private byte[] sender;
     private byte[] contractAddress;
-    private byte[] naLimit;
-    private byte price;
-    private byte argsCount;
-    private Object[] args;
 
-    public byte[] getAddress() {
-        return address;
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfBytes(sender);
+        size += SerializeUtils.sizeOfBytes(contractAddress);
+        return size;
     }
 
-    public void setAddress(byte[] address) {
-        this.address = address;
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeBytesWithLength(sender);
+        stream.writeBytesWithLength(contractAddress);
     }
 
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.sender = byteBuffer.readByLengthByte();
+        this.contractAddress = byteBuffer.readByLengthByte();
+    }
+
+    @Override
+    public long getGasLimit() {
+        return 0L;
+    }
+
+    @Override
+    public byte[] getSender() {
+        return sender;
+    }
+
+    @Override
+    public long getPrice() {
+        return 0L;
+    }
+
+    public void setSender(byte[] sender) {
+        this.sender = sender;
+    }
+
+    @Override
     public byte[] getContractAddress() {
         return contractAddress;
     }
@@ -55,56 +90,10 @@ public class DeleteContractData extends BaseNulsData {
         this.contractAddress = contractAddress;
     }
 
-    public byte[] getNaLimit() {
-        return naLimit;
-    }
-
-    public void setNaLimit(byte[] naLimit) {
-        this.naLimit = naLimit;
-    }
-
-    public byte getPrice() {
-        return price;
-    }
-
-    public void setPrice(byte price) {
-        this.price = price;
-    }
-
-    public byte getArgsCount() {
-        return argsCount;
-    }
-
-    public void setArgsCount(byte argsCount) {
-        this.argsCount = argsCount;
-    }
-
-    public Object[] getArgs() {
-        return args;
-    }
-
-    public void setArgs(Object[] args) {
-        this.args = args;
-    }
-
-    /**
-     * serialize important field
-     */
     @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        // todo auto-generated method stub
-
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        // todo auto-generated method stub
-
-    }
-
-    @Override
-    public int size() {
-        // todo auto-generated method stub
-        return 0;
+    public Set<byte[]> getAddresses() {
+        Set<byte[]> addressSet = new HashSet<>();
+        addressSet.add(contractAddress);
+        return addressSet;
     }
 }

@@ -245,7 +245,7 @@ public class CommandHelper {
             case 9:
                 return "stop_agent";
             default:
-                return null;
+                return type.toString();
         }
     }
 
@@ -260,7 +260,7 @@ public class CommandHelper {
                 return "consensus";
 
             default:
-                return null;
+                return status.toString();
         }
     }
 
@@ -275,7 +275,7 @@ public class CommandHelper {
                 return "unConfirm";
 
             default:
-                return null;
+                return status.toString();
         }
     }
 

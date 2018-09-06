@@ -36,6 +36,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.protocol.constant.ProtocolErroeCode;
 import io.nuls.protocol.rpc.model.*;
 import io.nuls.protocol.service.BlockService;
 import io.swagger.annotations.*;
@@ -71,7 +72,7 @@ public class BlockResource {
         AssertUtil.canNotEmpty(height);
         Result<Block> blockResult = blockService.getBlock(height);
         if (blockResult.isFailed()) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND).toRpcClientResult();
+            return blockResult.toRpcClientResult();
         }
         BlockHeaderDto dto = null;
         try {
@@ -106,7 +107,7 @@ public class BlockResource {
             Log.error(e);
         }
         if (block == null) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND).toRpcClientResult();
+            return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL).toRpcClientResult();
         }
         try {
             result.setData(new BlockHeaderDto(block));
@@ -138,7 +139,7 @@ public class BlockResource {
             Log.error(e);
         }
         if (block == null) {
-            result = Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            result = Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         } else {
             result = Result.getSuccess();
             BlockDto dto = new BlockDto(block);
@@ -167,7 +168,7 @@ public class BlockResource {
 
         Block block = blockService.getBlock(height).getData();
         if (block == null) {
-            result = Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            result = Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         } else {
             BlockDto dto = new BlockDto(block);
             fillBlockTxInputAddress(dto);
@@ -233,7 +234,7 @@ public class BlockResource {
             Log.error(e);
         }
         if (block == null) {
-            result = Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            result = Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         } else {
             result = Result.getSuccess();
             Map<String, String> map = new HashMap<>();

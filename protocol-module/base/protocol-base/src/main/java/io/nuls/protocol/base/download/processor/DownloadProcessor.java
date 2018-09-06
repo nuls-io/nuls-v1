@@ -34,6 +34,7 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.base.constant.DownloadStatus;
@@ -246,9 +247,8 @@ public class DownloadProcessor extends Thread {
         }
 
         if (nodes == null || nodes.size() == 0) {
-            throw new NulsRuntimeException(KernelErrorCode.NET_NODE_NOT_FOUND);
+            throw new NulsRuntimeException(NetworkErrorCode.NET_NODE_NOT_FOUND);
         }
-
         return new NetworkNewestBlockInfos(bestHeight, bestHash, nodes);
     }
 

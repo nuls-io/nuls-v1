@@ -70,9 +70,7 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
         }
 
         BlockHeader header = smallBlock.getHeader();
-        if(header.getHeight()==260){
-            return;
-        }
+
         if (!SmallBlockDuplicateRemoval.needProcess(header.getHash())) {
             return;
         }

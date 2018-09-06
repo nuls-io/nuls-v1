@@ -24,10 +24,10 @@
  */
 package io.nuls.protocol.message.validator;
 
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.protocol.message.base.BaseMessage;
 
 /**
@@ -49,15 +49,15 @@ public class NulsMessageValidator implements NulsDataValidator<BaseMessage> {
     @Override
     public ValidateResult validate(BaseMessage data) {
         if (data.getHeader() == null || data.getMsgBody() == null) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NET_MESSAGE_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(), NetworkErrorCode.NET_MESSAGE_ERROR);
         }
 
         if (data.getHeader().getLength() != data.getMsgBody().size()) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NET_MESSAGE_LENGTH_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(), NetworkErrorCode.NET_MESSAGE_LENGTH_ERROR);
         }
 
         if (data.getHeader().getXor() != data.caculateXor()) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NET_MESSAGE_XOR_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(), NetworkErrorCode.NET_MESSAGE_XOR_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }

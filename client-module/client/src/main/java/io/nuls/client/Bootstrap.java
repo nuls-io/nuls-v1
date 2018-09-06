@@ -30,30 +30,25 @@ import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.client.rpc.resources.thread.ShutdownHook;
 import io.nuls.client.rpc.resources.util.FileUtil;
 import io.nuls.client.storage.LanguageService;
-import io.nuls.client.storage.impl.LanguageServiceImpl;
-import io.nuls.client.version.VersionManager;
+import io.nuls.protocol.base.version.NulsVersionManager;
+import io.nuls.client.version.WalletVersionManager;
 import io.nuls.client.web.view.WebViewBootstrap;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
-import io.nuls.consensus.poc.config.ConsensusConfig;
-import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
-import io.nuls.db.service.DBService;
 import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.i18n.I18nUtils;
-import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.module.service.ModuleService;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
-import io.nuls.protocol.service.BlockService;
+import io.nuls.protocol.storage.service.VersionManagerStorageService;
 
 import java.io.File;
 import java.util.*;
@@ -66,6 +61,7 @@ public class Bootstrap {
     public static void main(String[] args) {
         Thread.currentThread().setName("Nuls");
         try {
+
             sysStart();
         } catch (Exception e) {
             Log.error(e);
@@ -91,7 +87,7 @@ public class Bootstrap {
             MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
             mk.init();
             mk.start();
-            VersionManager.start();
+            WalletVersionManager.start();
             initModules();
             String ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP, RpcConstant.DEFAULT_IP);
             int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);

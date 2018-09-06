@@ -27,25 +27,24 @@ package io.nuls.network.constant;
 
 
 import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 
 /**
  * Created by Niels on 2017/9/27.
  */
-public interface NetworkErrorCode {
-    /*
-     * ----------  Network Exception code   --------
-     */
-    ErrorCode NET_SERVER_START_ERROR = ErrorCode.init("NET001", "40001");
-    ErrorCode NET_MESSAGE_ERROR = ErrorCode.init("NET002", "40002");
-    ErrorCode NET_MESSAGE_XOR_ERROR = ErrorCode.init("NET003", "40003");
-    ErrorCode NET_MESSAGE_LENGTH_ERROR = ErrorCode.init("NET004", "40004");
-    ErrorCode NET_NODE_GROUP_ALREADY_EXISTS = ErrorCode.init("NET006", "40006");
-    ErrorCode NET_NODE_AREA_ALREADY_EXISTS = ErrorCode.init("NET007", "40007");
-    ErrorCode NET_NODE_GROUP_NOT_FOUND = ErrorCode.init("NET008", "40008");
-    ErrorCode NET_NODE_AREA_NOT_FOUND = ErrorCode.init("NET009", "40009");
-    ErrorCode NET_NODE_NOT_FOUND = ErrorCode.init("NET010", "40010");
-    ErrorCode NET_BROADCAST_FAIL = ErrorCode.init("NET011", "40011");
-    ErrorCode NET_BROADCAST_NODE_EMPTY = ErrorCode.init("NET012", "40012");
-    ErrorCode NET_NODE_DEAD = ErrorCode.init("NET013", "40013");
-    ErrorCode NET_NODE_MISS_CHANNEL = ErrorCode.init("NET014", "40014");
+public interface NetworkErrorCode extends KernelErrorCode {
+
+    ErrorCode NET_SERVER_START_ERROR = ErrorCode.init("40001");
+    ErrorCode NET_MESSAGE_ERROR = ErrorCode.init("40002");
+    ErrorCode NET_MESSAGE_XOR_ERROR = ErrorCode.init("40003");
+    ErrorCode NET_MESSAGE_LENGTH_ERROR = ErrorCode.init("40004");
+    ErrorCode NET_NODE_GROUP_ALREADY_EXISTS = ErrorCode.init("40006");
+    ErrorCode NET_NODE_AREA_ALREADY_EXISTS = ErrorCode.init("40007");
+    ErrorCode NET_NODE_GROUP_NOT_FOUND = ErrorCode.init("40008");
+    ErrorCode NET_NODE_AREA_NOT_FOUND = ErrorCode.init("40009");
+    ErrorCode NET_NODE_NOT_FOUND = ErrorCode.init("40010");
+    ErrorCode NET_BROADCAST_FAIL = ErrorCode.init("40011");
+    ErrorCode NET_BROADCAST_NODE_EMPTY = ErrorCode.init("40012");
+    ErrorCode NET_NODE_DEAD = ErrorCode.init("40013");
+    ErrorCode NET_NODE_MISS_CHANNEL = ErrorCode.init("40014");
 }

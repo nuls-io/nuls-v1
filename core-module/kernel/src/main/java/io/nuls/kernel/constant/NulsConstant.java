@@ -34,7 +34,19 @@ import io.nuls.kernel.utils.AddressTool;
  */
 public interface NulsConstant {
 
-    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("6Hgj7rKSbC6SQr81k4NMfkoZ47mxAwMV");
+    /**
+     * 当前主网协议版本(用于系统升级)
+     * System protocol version.
+     */
+    int PROTOCOL_VERSION = 2;
+
+    /**
+     * nuls版本升级主配置文件名
+     * The nuls version upgrades the main configuration file
+     */
+    String NULS_VERSION_XML = "nuls-version.xml";
+
+    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
 
     /**
      * 系统配置文件名称
@@ -93,6 +105,9 @@ public interface NulsConstant {
      */
     int TX_TYPE_TRANSFER = 2;
 
+
+    int TX_TYPE_PROTOCOL = 10;
+
     /**
      * 业务数据承载交易的类型
      * Type of business data bearing transaction
@@ -116,4 +131,5 @@ public interface NulsConstant {
      * 大于该值表示按照时间锁定
      */
     long BlOCKHEIGHT_TIME_DIVIDE = 1000000000000L;
+
 }

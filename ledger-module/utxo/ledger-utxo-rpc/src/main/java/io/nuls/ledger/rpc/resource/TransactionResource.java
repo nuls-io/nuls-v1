@@ -26,6 +26,7 @@ package io.nuls.ledger.rpc.resource;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.constant.TxStatusEnum;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -87,7 +88,7 @@ public class TransactionResource {
         try {
             Transaction tx = ledgerService.getTx(NulsDigestData.fromDigestHex(hash));
             if (tx == null) {
-                result = Result.getFailed(LedgerErrorCode.DATA_NOT_FOUND);
+                result = Result.getFailed(TransactionErrorCode.TX_NOT_EXIST);
             } else {
                 tx.setStatus(TxStatusEnum.CONFIRMED);
                 TransactionDto txDto = null;

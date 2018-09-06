@@ -40,6 +40,7 @@ import java.util.List;
  * @author: Niels Wang
  */
 public interface TransactionService {
+
     /**
      * 确认交易时调用的方法，对交易相关的业务进行提交操作
      * Identify the method that is invoked during the transaction and submit the transaction related business.
@@ -65,7 +66,8 @@ public interface TransactionService {
      * Forward Transaction to other peers of the connection, allowing one column (not forward to it)
      *
      * @param tx          完整交易/the whole transaction
-     * @param excludeNode 需要排除的节点，一般是因为从该节点处接收的本交易/The nodes that need to be excluded are generally due to the transaction received from the node.
+     * @param excludeNode 需要排除的节点，一般是因为从该节点处接收的本交易/The nodes that need to be excluded are generally
+     *                    due to the transaction received from the node.
      * @return 转发结果/forward results
      */
     Result forwardTx(Transaction tx, Node excludeNode);
@@ -80,7 +82,9 @@ public interface TransactionService {
     Result broadcastTx(Transaction tx);
 
     /**
+     * 将交易缓存到共识交易池
      * cache the transaction for consensus
+     *
      * @param tx transaction
      * @return Result
      */
@@ -94,9 +98,16 @@ public interface TransactionService {
      *
      * @param txList 需要检查的交易列表/A list of transactions to be checked.
      * @return 操作结果：成功则返回successResult，失败时，data中返回丢弃列表，msg中返回冲突原因
-     * Operation result: success returns successResult. When failure, data returns the discard list, and MSG returns the cause of conflict.
+     * Operation result: success returns successResult. When failure, data returns the discard list,
+     * and MSG returns the cause of conflict.
      */
     ValidateResult conflictDetect(List<Transaction> txList);
 
+    /**
+     * 根据交易hash获取交易信息
+     * get transaction by tx hash
+     * @param hash
+     * @return
+     */
     Transaction getTx(NulsDigestData hash);
 }

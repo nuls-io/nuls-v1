@@ -26,13 +26,10 @@
 
 package io.nuls.consensus.poc;
 
+import io.nuls.consensus.poc.model.*;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.container.ChainContainer;
-import io.nuls.consensus.poc.model.BlockRoundData;
-import io.nuls.consensus.poc.model.Chain;
-import io.nuls.consensus.poc.model.MeetingMember;
-import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.core.tools.crypto.ECKey;
@@ -155,7 +152,8 @@ public class BaseChainTest extends BaseTest {
 
         MeetingRound round = chainContainer.initRound();
 
-        BlockRoundData nextRoundData = new BlockRoundData();
+        BlockExtendsData nextRoundData = new BlockExtendsData();
+
         nextRoundData.setRoundIndex(round.getIndex() + 1);
         nextRoundData.setRoundStartTime(round.getEndTime());
 

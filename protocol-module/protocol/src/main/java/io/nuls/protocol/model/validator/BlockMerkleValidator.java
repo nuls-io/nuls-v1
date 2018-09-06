@@ -30,6 +30,7 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.protocol.constant.ProtocolErroeCode;
 
 /**
  * @author Niels
@@ -39,7 +40,7 @@ public class BlockMerkleValidator implements NulsDataValidator<Block> {
 
     @Override
     public ValidateResult validate(Block data) {
-        ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.MERKLE_HASH_WRONG);
+        ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), ProtocolErroeCode.MERKLE_HASH_WRONG);
         do {
             if (null == data) {
                 result.setMsg("Data is null!");

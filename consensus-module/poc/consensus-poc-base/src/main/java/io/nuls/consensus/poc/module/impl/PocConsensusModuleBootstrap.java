@@ -47,6 +47,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
     public void init() throws Exception {
         ConsensusStatusContext.setConsensusStatus(ConsensusStatus.INITING);
         ConsensusConfig.initConfiguration();
+
     }
 
     @Override

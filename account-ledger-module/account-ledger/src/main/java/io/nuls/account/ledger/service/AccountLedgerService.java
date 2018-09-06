@@ -93,7 +93,7 @@ public interface AccountLedgerService {
      * @param tx transaction to rollbackTransaction
      * @return return the tx count rollbacked
      */
-    Result<Integer> rollbackTransaction(Transaction tx);
+    Result<Integer> deleteTransaction(Transaction tx);
 
     /**
      * rollbackTransaction a tx list in account ledger.
@@ -102,7 +102,7 @@ public interface AccountLedgerService {
      * @param txs transactions to rollbackTransaction
      * @return return the tx count rollbacked
      */
-    Result<Integer> rollbackTransaction(List<Transaction> txs);
+    Result<Integer> rollbackTransactions(List<Transaction> txs);
 
     /**
      * get the balance of an local account.
@@ -111,7 +111,7 @@ public interface AccountLedgerService {
      * @return return balance of account, return 0 if  account is not a local account
      * @throws NulsException NulsException
      */
-    Result<Balance> getBalance(byte[] address) throws NulsException;
+    Result<Balance> getBalance(byte[] address);
 
     /**
      * get usable coinData
@@ -220,4 +220,15 @@ public interface AccountLedgerService {
      * @return
      */
     Result<Na> getMaxAmountOfOnce(byte[] address, Transaction tx, Na price);
+
+    /**
+     * Get the fee for the transfer transaction
+     *
+     * @param address
+     * @param amount
+     * @param size
+     * @param price
+     * @return
+     */
+    Na getTxFee(byte[] address, Na amount, int size, Na price);
 }

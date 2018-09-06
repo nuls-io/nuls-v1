@@ -26,38 +26,41 @@
 package io.nuls.consensus.poc.protocol.constant;
 
 import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 
 /**
  * @author: Niels Wang
  */
-public interface PocConsensusErrorCode {
-    ErrorCode CS_UNKOWN_EXCEPTION = ErrorCode.init("CS000", "70000");
-    ErrorCode TIME_OUT = ErrorCode.init("CS001", "70001");
-    ErrorCode DEPOSIT_ERROR = ErrorCode.init("CS002", "70002");
-    ErrorCode DEPOSIT_NOT_ENOUGH = ErrorCode.init("CS003", "70003");
-    ErrorCode CONSENSUS_EXCEPTION = ErrorCode.init("CS004", "70004");
-    ErrorCode COMMISSION_RATE_OUT_OF_RANGE = ErrorCode.init("cs005", "70005");
-    ErrorCode LACK_OF_CREDIT = ErrorCode.init("cs006", "70006");
-    ErrorCode DEPOSIT_OVER_COUNT = ErrorCode.init("cs007", "70007");
-    ErrorCode DEPOSIT_TOO_MUCH = ErrorCode.init("cs008", "70008");
-    ErrorCode AGENT_STOPPED = ErrorCode.init("cs009","70009");
+public interface PocConsensusErrorCode extends KernelErrorCode {
 
-    ErrorCode DEPOSIT_WAS_CANCELED = ErrorCode.init("cs010","70010");
-    ErrorCode DEPOSIT_NEVER_CANCELED = ErrorCode.init("cs011","70011");
-    ErrorCode UPDATE_DEPOSIT_FAILED = ErrorCode.init("cs012","70012");
-    ErrorCode SAVE_ERROR = ErrorCode.init("cs013","70013");
-    ErrorCode UPDATE_AGENT_FAILED = ErrorCode.init("cs014","70014");
-    ErrorCode LOCK_TIME_NOT_REACHED = ErrorCode.init("cs015","70015");
+    ErrorCode TIME_OUT = ErrorCode.init("70001");
+    ErrorCode DEPOSIT_ERROR = ErrorCode.init("70002");
+    ErrorCode DEPOSIT_NOT_ENOUGH = ErrorCode.init("70003");
+    ErrorCode CONSENSUS_EXCEPTION = ErrorCode.init("70004");
+    ErrorCode COMMISSION_RATE_OUT_OF_RANGE = ErrorCode.init("70005");
+    ErrorCode LACK_OF_CREDIT = ErrorCode.init("70006");
+    ErrorCode DEPOSIT_OVER_COUNT = ErrorCode.init("70007");
+    ErrorCode DEPOSIT_TOO_MUCH = ErrorCode.init("70008");
+    ErrorCode AGENT_STOPPED = ErrorCode.init("70009");
 
-    ErrorCode AGENT_NOT_EXIST = ErrorCode.init("cs016","70016");
-    ErrorCode AGENT_EXIST = ErrorCode.init("cs017","70017");
-    ErrorCode AGENT_PUNISHED = ErrorCode.init("cs018","70018");
-    ErrorCode BIFURCATION = ErrorCode.init("cs019","70019");
-    ErrorCode YELLOW_PUNISH_TX_WRONG = ErrorCode.init("cs020","70020");
-    ErrorCode ADDRESS_IS_CONSENSUS_SEED = ErrorCode.init("cs021","70021");
-    ErrorCode TRANSACTIONS_NEVER_DOUBLE_SPEND = ErrorCode.init("cs022","70022");
-    ErrorCode WRONG_RED_PUNISH_REASON = ErrorCode.init("cs023","70023");
-    ErrorCode AGENT_PACKING_EXIST = ErrorCode.init("cs024","70024");
+    ErrorCode DEPOSIT_WAS_CANCELED = ErrorCode.init("70010");
+    ErrorCode DEPOSIT_NEVER_CANCELED = ErrorCode.init("70011");
+    ErrorCode UPDATE_DEPOSIT_FAILED = ErrorCode.init("70012");
+
+    ErrorCode UPDATE_AGENT_FAILED = ErrorCode.init("70014");
+    ErrorCode LOCK_TIME_NOT_REACHED = ErrorCode.init("70015");
+
+    ErrorCode AGENT_NOT_EXIST = ErrorCode.init("70016");
+    ErrorCode AGENT_EXIST = ErrorCode.init("70017");
+    ErrorCode AGENT_PUNISHED = ErrorCode.init("70018");
+    ErrorCode BIFURCATION = ErrorCode.init("70019");
+    ErrorCode YELLOW_PUNISH_TX_WRONG = ErrorCode.init("70020");
+    ErrorCode ADDRESS_IS_CONSENSUS_SEED = ErrorCode.init("70021");
+    ErrorCode TRANSACTIONS_NEVER_DOUBLE_SPEND = ErrorCode.init("70022");
+    ErrorCode WRONG_RED_PUNISH_REASON = ErrorCode.init("70023");
+    ErrorCode AGENT_PACKING_EXIST = ErrorCode.init("70024");
+    ErrorCode AGENTADDR_AND_PACKING_SAME = ErrorCode.init("70025");
+    ErrorCode REWARDADDR_PACKING_SAME = ErrorCode.init("70026");
 
 
 }

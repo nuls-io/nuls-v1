@@ -25,9 +25,7 @@
 
 package io.nuls.consensus.poc.tx.validator;
 
-import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.protocol.tx.CancelDepositTransaction;
-import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.service.DepositStorageService;
 import io.nuls.core.tools.log.Log;
@@ -66,7 +64,7 @@ public class CancelDepositTxValidator implements NulsDataValidator<CancelDeposit
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
         if (!Arrays.equals(depositPo.getAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
-            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
+            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
             return result;
         }

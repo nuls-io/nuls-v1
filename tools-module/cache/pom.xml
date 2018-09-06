@@ -5,14 +5,14 @@
     <parent>
         <groupId>io.nuls</groupId>
         <artifactId>tools-module</artifactId>
-        <version>1.0.1-BETA</version>
+        <version>1.1.0-BETA</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls.tools-module</groupId>
     <artifactId>cache</artifactId>
-    <version>1.0.1-BETA</version>
+    <version>1.1.0-BETA</version>
 
 
     <dependencies>
@@ -24,7 +24,7 @@
         <dependency>
             <groupId>io.nuls.tools-module</groupId>
             <artifactId>tools</artifactId>
-            <version>1.0.1-BETA</version>
+            <version>1.1.0-BETA</version>
         </dependency>
         <dependency>
             <groupId>io.protostuff</groupId>

@@ -30,11 +30,13 @@ import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  *
@@ -49,6 +51,13 @@ public class Coin extends BaseNulsData {
     private long lockTime;
 
     private transient Coin from;
+
+    private transient byte[] address;
+
+    /**
+     * 合约组装CoinData时使用
+     */
+    private transient String key;
 
     public Coin() {
     }
@@ -119,6 +128,23 @@ public class Coin extends BaseNulsData {
         this.lockTime = lockTime;
     }
 
+    public String getKey() {
+        return key;
+    }
+
+    public Coin setKey(String key) {
+        this.key = key;
+        return this;
+    }
+
+    public byte[] getAddress() {
+        return address;
+    }
+
+    public void setAddress(byte[] address) {
+        this.address = address;
+    }
+
     /**
      * 根据当前时间和当前最新高度，判断coin是否可用
      *
@@ -153,5 +179,16 @@ public class Coin extends BaseNulsData {
                 return false;
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Coin{" +
+                "owner=" + AddressTool.getStringAddressByBytes(owner) +
+                ", na=" + na.getValue() +
+                ", lockTime=" + lockTime +
+                ", from=" + from +
+                ", key='" + key + '\'' +
+                '}';
     }
 }

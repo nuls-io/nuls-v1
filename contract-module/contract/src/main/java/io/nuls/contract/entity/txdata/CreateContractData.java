@@ -23,32 +23,114 @@
  */
 package io.nuls.contract.entity.txdata;
 
+
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.BaseNulsData;
+import io.nuls.kernel.model.TransactionLogicData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
-public class CreateContractData extends BaseNulsData {
+/**
+ * @Author: PierreLuo
+ */
+public class CreateContractData extends TransactionLogicData implements ContractData{
 
-    private byte[] address;
+    private byte[] sender;
     private byte[] contractAddress;
+    private long value;
     private int codeLen;
     private byte[] code;
-    private byte[] naLimit;
-    private byte price;
+    private long gasLimit;
+    private long price;
     private byte argsCount;
-    private Object[] args;
+    private String[][] args;
 
-    public byte[] getAddress() {
-        return address;
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfBytes(sender);
+        size += SerializeUtils.sizeOfBytes(contractAddress);
+        size += SerializeUtils.sizeOfVarInt(value);
+        size += SerializeUtils.sizeOfVarInt(codeLen);
+        size += SerializeUtils.sizeOfBytes(code);
+        size += SerializeUtils.sizeOfVarInt(gasLimit);
+        size += SerializeUtils.sizeOfVarInt(price);
+        size += 1;
+        if(args != null) {
+            for(String[] arg : args) {
+                size += 1;
+                for(String str : arg) {
+                    size += SerializeUtils.sizeOfString(str);
+                }
+            }
+        }
+        return size;
     }
 
-    public void setAddress(byte[] address) {
-        this.address = address;
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeBytesWithLength(sender);
+        stream.writeBytesWithLength(contractAddress);
+        stream.writeVarInt(value);
+        stream.writeVarInt(codeLen);
+        stream.writeBytesWithLength(code);
+        stream.writeVarInt(gasLimit);
+        stream.writeVarInt(price);
+        stream.write(argsCount);
+        if(args != null) {
+            for(String[] arg : args) {
+                stream.write((byte) arg.length);
+                for(String str : arg){
+                    stream.writeString(str);
+                }
+            }
+        }
     }
 
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.sender = byteBuffer.readByLengthByte();
+        this.contractAddress = byteBuffer.readByLengthByte();
+        this.value = (long) byteBuffer.readVarInt();
+        this.codeLen = (int) byteBuffer.readVarInt();
+        this.code = byteBuffer.readByLengthByte();
+        this.gasLimit = (long) byteBuffer.readVarInt();
+        this.price = (long) byteBuffer.readVarInt();
+        this.argsCount = byteBuffer.readByte();
+        byte length = this.argsCount;
+        this.args = new String[length][];
+        for(byte i = 0; i < length; i++) {
+            byte argCount = byteBuffer.readByte();
+            String[] arg = new String[argCount];
+            for(byte k = 0; k < argCount; k++) {
+                arg[k] = byteBuffer.readString();
+            }
+            args[i] = arg;
+        }
+    }
+
+    public long getValue() {
+        return value;
+    }
+
+    public void setValue(long value) {
+        this.value = value;
+    }
+
+    @Override
+    public byte[] getSender() {
+        return sender;
+    }
+
+    public void setSender(byte[] sender) {
+        this.sender = sender;
+    }
+
+    @Override
     public byte[] getContractAddress() {
         return contractAddress;
     }
@@ -73,19 +155,21 @@ public class CreateContractData extends BaseNulsData {
         this.code = code;
     }
 
-    public byte[] getNaLimit() {
-        return naLimit;
+    @Override
+    public long getGasLimit() {
+        return gasLimit;
     }
 
-    public void setNaLimit(byte[] naLimit) {
-        this.naLimit = naLimit;
+    public void setGasLimit(long gasLimit) {
+        this.gasLimit = gasLimit;
     }
 
-    public byte getPrice() {
+    @Override
+    public long getPrice() {
         return price;
     }
 
-    public void setPrice(byte price) {
+    public void setPrice(long price) {
         this.price = price;
     }
 
@@ -97,32 +181,18 @@ public class CreateContractData extends BaseNulsData {
         this.argsCount = argsCount;
     }
 
-    public Object[] getArgs() {
+    public String[][] getArgs() {
         return args;
     }
 
-    public void setArgs(Object[] args) {
+    public void setArgs(String[][] args) {
         this.args = args;
     }
 
-    /**
-     * serialize important field
-     */
     @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        // todo auto-generated method stub
-
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        // todo auto-generated method stub
-
-    }
-
-    @Override
-    public int size() {
-        // todo auto-generated method stub
-        return 0;
+    public Set<byte[]> getAddresses() {
+        Set<byte[]> addressSet = new HashSet<>();
+        addressSet.add(contractAddress);
+        return addressSet;
     }
 }

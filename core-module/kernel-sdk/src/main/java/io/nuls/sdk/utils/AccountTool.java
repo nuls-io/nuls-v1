@@ -57,7 +57,7 @@ public class AccountTool {
             key = new ECKey();
         } else {
             try {
-                key = ECKey.fromPrivate(new BigInteger(Hex.decode(prikey)));
+                key = ECKey.fromPrivate(new BigInteger(1, Hex.decode(prikey)));
             } catch (Exception e) {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR, e);
             }

@@ -34,13 +34,16 @@ import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
 import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.util.ConsensusTool;
-import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.*;
+import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.CoinData;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.validate.ValidateResult;
@@ -70,7 +73,7 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
     public ValidateResult validate(RedPunishTransaction data) {
         RedPunishData punishData = data.getTxData();
         if (ConsensusConfig.getSeedNodeStringList().contains(AddressTool.getStringAddressByBytes(punishData.getAddress()))) {
-            return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
+            return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.ADDRESS_IS_CONSENSUS_SEED);
         }
         if (punishData.getReasonCode() == PunishReasonEnum.DOUBLE_SPEND.getCode()) {
             SmallBlock smallBlock = new SmallBlock();
@@ -87,11 +90,11 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
             }
             List<NulsDigestData> txHashList = smallBlock.getTxHashList();
             if (!header.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(txHashList))) {
-                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
+                return ValidateResult.getFailedResult(CLASS_NAME, TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
             }
             List<Transaction> txList = smallBlock.getSubTxList();
             if (null == txList || txList.size() < 2) {
-                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
+                return ValidateResult.getFailedResult(CLASS_NAME, TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
             }
             result = ledgerService.verifyDoubleSpend(txList);
             if (result.isSuccess()) {
@@ -114,18 +117,18 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
                 return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_NOT_FOUND);
             }
             if (header1.getHeight() != header2.getHeight() || !header1.getPreHash().equals(header2.getPreHash())) {
-                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
+                return ValidateResult.getFailedResult(CLASS_NAME, TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
             }
             ValidateResult result = validator.validate(header1);
             if (result.isFailed()) {
-                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
+                return ValidateResult.getFailedResult(CLASS_NAME, TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
             }
             result = validator.validate(header2);
             if (result.isFailed()) {
-                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
+                return ValidateResult.getFailedResult(CLASS_NAME, TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
             }
             if (!Arrays.equals(header1.getScriptSig().getPublicKey(), header2.getScriptSig().getPublicKey())) {
-                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
+                return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.SIGNATURE_ERROR);
             }
         } else {
             return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.WRONG_RED_PUNISH_REASON);
@@ -135,7 +138,7 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
             return verifyCoinData(data);
         } catch (IOException e) {
             Log.error(e);
-            return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
+            return ValidateResult.getFailedResult(CLASS_NAME, TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
         }
     }
 
@@ -155,7 +158,7 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
         }
         CoinData coinData = ConsensusTool.getStopAgentCoinData(theAgent, PocConsensusConstant.RED_PUNISH_LOCK_TIME);
         if (!Arrays.equals(coinData.serialize(), tx.getCoinData().serialize())) {
-            return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.DATA_ERROR);
+            return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.SERIALIZE_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }

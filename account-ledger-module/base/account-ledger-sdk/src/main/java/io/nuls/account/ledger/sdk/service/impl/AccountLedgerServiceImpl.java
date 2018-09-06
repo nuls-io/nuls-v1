@@ -242,7 +242,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR, "priKey error");
         }
 
-        ECKey key = ECKey.fromPrivate(new BigInteger(Hex.decode(priKey)));
+        ECKey key = ECKey.fromPrivate(new BigInteger(1, Hex.decode(priKey)));
         try {
             String newAddress = AccountTool.newAddress(key).getBase58();
             if (!newAddress.equals(address)) {

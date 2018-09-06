@@ -60,6 +60,8 @@ public class BlockHeaderPo extends BaseNulsData {
 
     private byte[] extend;
 
+    private byte[] stateRoot;
+
     private List<NulsDigestData> txHashList;
 
 
@@ -72,6 +74,7 @@ public class BlockHeaderPo extends BaseNulsData {
         size += SerializeUtils.sizeOfVarInt(height);
         size += SerializeUtils.sizeOfVarInt(txCount);
         size += SerializeUtils.sizeOfBytes(extend);
+        size += SerializeUtils.sizeOfBytes(stateRoot);
         size += SerializeUtils.sizeOfNulsData(scriptSign);
         for (NulsDigestData hash : txHashList) {
             size += SerializeUtils.sizeOfNulsData(hash);
@@ -87,6 +90,7 @@ public class BlockHeaderPo extends BaseNulsData {
         stream.writeVarInt(height);
         stream.writeVarInt(txCount);
         stream.writeBytesWithLength(extend);
+        stream.writeBytesWithLength(stateRoot);
         stream.writeNulsData(scriptSign);
         for (NulsDigestData hash : txHashList) {
             stream.writeNulsData(hash);
@@ -101,6 +105,7 @@ public class BlockHeaderPo extends BaseNulsData {
         this.height = byteBuffer.readVarInt();
         this.txCount = byteBuffer.readVarInt();
         this.extend = byteBuffer.readByLengthByte();
+        this.stateRoot = byteBuffer.readByLengthByte();
         this.scriptSign = byteBuffer.readNulsData(new P2PKHScriptSig());
         this.txHashList = new ArrayList<>();
         for (int i = 0; i < txCount; i++) {
@@ -181,6 +186,14 @@ public class BlockHeaderPo extends BaseNulsData {
 
     public void setExtend(byte[] extend) {
         this.extend = extend;
+    }
+
+    public byte[] getStateRoot() {
+        return stateRoot;
+    }
+
+    public void setStateRoot(byte[] stateRoot) {
+        this.stateRoot = stateRoot;
     }
 
     public List<NulsDigestData> getTxHashList() {

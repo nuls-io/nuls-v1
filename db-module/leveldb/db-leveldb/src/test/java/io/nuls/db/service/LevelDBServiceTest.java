@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.nuls.db.manager.LevelDBManager.*;
 import static org.iq80.leveldb.impl.Iq80DBFactory.asString;
@@ -68,7 +69,7 @@ public class LevelDBServiceTest {
     private static String key;
 
     @BeforeClass
-    public static void init() {
+    public void init() {
         dbService = new LevelDBServiceImpl();
         dbService.createArea(areaName);
         area = "pierre-test";
@@ -652,7 +653,38 @@ public class LevelDBServiceTest {
     }
 
     @AfterClass
-    public static void after() {
+    public void after() {
         close();
+    }
+
+    public static void main(String[] args) throws Exception {
+        LevelDBManager.init();
+        List<Entry<byte[], byte[]>> rawList = LevelDBManager.entryList("contract_ledger_utxo");
+        Map<String, Long> balanceMap = new ConcurrentHashMap<>();
+        List<Coin> coinList = new ArrayList<>();
+        Coin coin;
+        String strAddress;
+        byte[] fromOwner;
+        Long balance;
+        for (Entry<byte[], byte[]> coinEntry : rawList) {
+            coin = new Coin();
+            try {
+                coin.parse(coinEntry.getValue(), 0);
+                strAddress = AddressTool.getStringAddressByBytes(coin.getOwner());
+            } catch (NulsException e) {
+                Log.error("parse contract coin error form db", e);
+                continue;
+            }
+            balance = balanceMap.get(strAddress);
+            if(balance == null) {
+                balance = 0L;
+            }
+            balance += coin.getNa().getValue();
+            balanceMap.put(strAddress, balance);
+        }
+
+        for(Map.Entry<String, Long> entry : balanceMap.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
     }
 }

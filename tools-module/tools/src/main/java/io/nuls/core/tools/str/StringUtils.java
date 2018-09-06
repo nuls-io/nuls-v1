@@ -36,6 +36,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class StringUtils {
 
+    /**
+     * NULS
+     */
+    private static final String NULS = "NULS";
+
+    public static final String EMPTY = "";
+
     public static boolean isBlank(String str) {
         return null == str || str.trim().length() == 0;
     }
@@ -99,6 +106,35 @@ public class StringUtils {
                 return false;
             }
             if (alias.matches("^([a-z0-9]+[a-z0-9_]*[a-z0-9]+)|[a-z0-9]+${1,20}")) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (UnsupportedEncodingException e) {
+            return false;
+        }
+    }
+
+    /**
+     * token命名规则:只允许使用大、小写字母、数字、下划线（下划线不能在两端）1~20字节
+     * @param name
+     * @return
+     */
+    public static boolean validTokenNameOrSymbol(String name) {
+        try {
+            if (isBlank(name)) {
+                return false;
+            }
+
+            if(NULS.equalsIgnoreCase(name)) {
+                return false;
+            }
+            name = name.trim();
+            byte[] aliasBytes = name.getBytes("UTF-8");
+            if (aliasBytes.length < 1 || aliasBytes.length > 20) {
+                return false;
+            }
+            if (name.matches("^([a-zA-Z0-9]+[a-zA-Z0-9_]*[a-zA-Z0-9]+)|[a-zA-Z0-9]+${1,20}")) {
                 return true;
             } else {
                 return false;

@@ -25,7 +25,7 @@
 
 package io.nuls.consensus.poc.tx.processor;
 
-import io.nuls.consensus.poc.model.BlockRoundData;
+import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.YellowPunishData;
 import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
@@ -65,7 +65,7 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
             boolean result = punishLogStorageService.delete(this.getPoKey(address, PunishType.YELLOW.getCode(), tx.getBlockHeight(), deleteIndex++));
             if (!result) {
                 BlockHeader header = (BlockHeader) secondaryData;
-                BlockRoundData roundData = new BlockRoundData(header.getExtend());
+                BlockExtendsData roundData = new BlockExtendsData(header.getExtend());
                 int index = 1;
                 for (byte[] bytes : deletedList) {
                     PunishLogPo po = new PunishLogPo();
@@ -89,7 +89,7 @@ public class YellowPunishTxProcessor implements TransactionProcessor<YellowPunis
     public Result onCommit(YellowPunishTransaction tx, Object secondaryData) {
         YellowPunishData punishData = tx.getTxData();
         BlockHeader header = (BlockHeader) secondaryData;
-        BlockRoundData roundData = new BlockRoundData(header.getExtend());
+        BlockExtendsData roundData = new BlockExtendsData(header.getExtend());
         List<PunishLogPo> savedList = new ArrayList<>();
         int index = 1;
         for (byte[] address : punishData.getAddressList()) {

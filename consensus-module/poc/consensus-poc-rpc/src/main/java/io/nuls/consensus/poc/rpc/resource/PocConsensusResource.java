@@ -47,6 +47,7 @@ import io.nuls.consensus.poc.protocol.util.PoConvertUtil;
 import io.nuls.consensus.poc.rpc.model.*;
 import io.nuls.consensus.poc.rpc.utils.AgentComparator;
 import io.nuls.consensus.poc.service.impl.PocRewardCacheService;
+import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.array.ArraysTool;
@@ -263,7 +264,16 @@ public class PocConsensusResource {
             tx.getCoinData().getTo().add(result.getChange());
         }
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        return Result.getSuccess().setData(fee).toRpcClientResult();
+        Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAgentAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        Map<String, Long> map = new HashMap<>();
+        Long maxAmount = null;
+        if (rs.isSuccess()) {
+            maxAmount = ((Na) rs.getData()).getValue();
+        }
+        map.put("fee", fee.getValue());
+        map.put("maxAmount", maxAmount);
+        rs.setData(map);
+        return Result.getSuccess().setData(rs).toRpcClientResult();
     }
 
     @GET
@@ -295,7 +305,16 @@ public class PocConsensusResource {
             tx.getCoinData().getTo().add(result.getChange());
         }
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        return Result.getSuccess().setData(fee).toRpcClientResult();
+        Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        Map<String, Long> map = new HashMap<>();
+        Long maxAmount = null;
+        if (rs.isSuccess()) {
+            maxAmount = ((Na) rs.getData()).getValue();
+        }
+        map.put("fee", fee.getValue());
+        map.put("maxAmount", maxAmount);
+        rs.setData(map);
+        return Result.getSuccess().setData(rs).toRpcClientResult();
     }
 
     @GET
@@ -337,7 +356,16 @@ public class PocConsensusResource {
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        return Result.getSuccess().setData(resultFee).toRpcClientResult();
+        Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(address), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        Map<String, Long> map = new HashMap<>();
+        Long maxAmount = null;
+        if (rs.isSuccess()) {
+            maxAmount = ((Na) rs.getData()).getValue();
+        }
+        map.put("fee", resultFee.getValue());
+        map.put("maxAmount", maxAmount);
+        rs.setData(map);
+        return Result.getSuccess().setData(rs).toRpcClientResult();
     }
 
 
@@ -459,7 +487,7 @@ public class PocConsensusResource {
                     tx.getCoinData().getTo().add(result.getChange());
                 }
             } else {
-                return Result.getFailed(TransactionErrorCode.BALANCE_NOT_ENOUGH).toRpcClientResult();
+                return Result.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE).toRpcClientResult();
             }
         }
         try {
@@ -476,17 +504,22 @@ public class PocConsensusResource {
         if (saveResult.isFailed()) {
             if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
                 //重新算一次交易(不超出最大交易数据大小下)的最大金额
-                Na maxAmount = accountLedgerService.getMaxAmountOfOnce(account.getAddress().getAddressBytes(), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES).getData();
-                Result rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
-                rs.setMsg(rs.getMsg() + maxAmount.toDouble());
+                Result rs = accountLedgerService.getMaxAmountOfOnce(account.getAddress().getAddressBytes(), tx,
+                        TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                if(rs.isSuccess()){
+                    Na maxAmount = (Na)rs.getData();
+                    rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
+                    rs.setMsg(rs.getMsg() + maxAmount.toDouble());
+                }
                 return rs.toRpcClientResult();
+
             }
             return saveResult.toRpcClientResult();
         }
         transactionService.newTx(tx);
         Result sendResult = this.transactionService.broadcastTx(tx);
         if (sendResult.isFailed()) {
-            accountLedgerService.rollbackTransaction(tx);
+            accountLedgerService.deleteTransaction(tx);
             return sendResult.toRpcClientResult();
         }
         return Result.getSuccess().toRpcClientResult();
@@ -972,7 +1005,7 @@ public class PocConsensusResource {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         if (null == depositTransaction) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND).toRpcClientResult();
+            return Result.getFailed(TransactionErrorCode.TX_NOT_EXIST).toRpcClientResult();
         }
         cancelDeposit.setAddress(AddressTool.getAddress(form.getAddress()));
         cancelDeposit.setJoinTxHash(hash);
@@ -1035,7 +1068,7 @@ public class PocConsensusResource {
         NulsDigestData hash = NulsDigestData.fromDigestHex(depositTxHash);
         DepositTransaction depositTransaction = (DepositTransaction) ledgerService.getTx(hash);
         if (null == depositTransaction) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND).toRpcClientResult();
+            return Result.getFailed(TransactionErrorCode.TX_NOT_EXIST).toRpcClientResult();
         }
         cancelDeposit.setAddress(account.getAddress().getAddressBytes());
         cancelDeposit.setJoinTxHash(hash);
@@ -1061,6 +1094,39 @@ public class PocConsensusResource {
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-        return Result.getSuccess().setData(resultFee).toRpcClientResult();
+        Result rs = accountLedgerService.getMaxAmountOfOnce(account.getAddress().getAddressBytes(), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        Map<String, Long> map = new HashMap<>();
+        Long maxAmount = null;
+        if (rs.isSuccess()) {
+            maxAmount = ((Na) rs.getData()).getValue();
+        }
+        map.put("fee", resultFee.getValue());
+        map.put("maxAmount", maxAmount);
+        rs.setData(map);
+        return Result.getSuccess().setData(rs).toRpcClientResult();
+    }
+
+
+    @GET
+    @Path("/redPunish/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "根据地址查询该账户是否被红牌惩罚过")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Boolean.class)
+    })
+    public RpcClientResult getRedPunishByAddress(@ApiParam(name = "address", value = "账户地址", required = true)
+                                                 @PathParam("address") String address) {
+        if (!AddressTool.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        List<PunishLogPo> list = PocConsensusContext.getChainManager().getMasterChain().getChain().getRedPunishList();
+        boolean rs = false;
+        for (PunishLogPo po : list) {
+            if (Arrays.equals(AddressTool.getAddress(address), po.getAddress())) {
+                rs = true;
+                break;
+            }
+        }
+        return Result.getSuccess().setData(rs).toRpcClientResult();
     }
 }

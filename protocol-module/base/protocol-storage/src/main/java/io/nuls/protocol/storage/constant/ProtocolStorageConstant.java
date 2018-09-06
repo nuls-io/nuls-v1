@@ -25,6 +25,9 @@
 
 package io.nuls.protocol.storage.constant;
 
+import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.str.StringUtils;
+
 /**
  * 协议模块存储功能相关常量集合
  * The protocol module stores a collection of related constants.
@@ -49,4 +52,15 @@ public interface ProtocolStorageConstant {
      * The index value of the latest block hash stored in the database.
      */
     String BEST_BLOCK_HASH_INDEX = "best_block_hash_index";
+
+    /**
+     * 版本升级存储数据表名称
+     */
+    String NULS_VERSION_MANAGER = "nuls_version_manager";
+
+    /**
+     * 存储当前主网运行中的版本数据key
+     */
+    byte[] MAIN_VERSION_KEY = StringUtils.bytes("mainVersion");
+
 }

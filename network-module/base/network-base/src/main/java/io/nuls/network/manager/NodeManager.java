@@ -525,20 +525,20 @@ public class NodeManager implements Runnable {
                 e.printStackTrace();
             }
 
-//            System.out.println("--------disConnectNodes:" + disConnectNodes.size());
-//            for (Node node : disConnectNodes.values()) {
-//                System.out.println(node.toString());
-//            }
-//
-//            System.out.println("--------connectedNodes:" + connectedNodes.size());
-//            for (Node node : connectedNodes.values()) {
-//                System.out.println(node.toString());
-//            }
-//
-//            System.out.println("--------handShakeNodes:" + handShakeNodes.size());
-//            for (Node node : handShakeNodes.values()) {
-//                System.out.println(node.toString());
-//            }
+            /*System.out.println("--------disConnectNodes:" + disConnectNodes.size());
+            for (Node node : disConnectNodes.values()) {
+                System.out.println(node.toString());
+            }
+
+            System.out.println("--------connectedNodes:" + connectedNodes.size());
+            for (Node node : connectedNodes.values()) {
+                System.out.println(node.toString());
+            }
+
+            System.out.println("--------handShakeNodes:" + handShakeNodes.size());
+            for (Node node : handShakeNodes.values()) {
+                System.out.println(node.toString());
+            }*/
 
             if (handShakeNodes.size() > 9) {
                 removeSeedNode();

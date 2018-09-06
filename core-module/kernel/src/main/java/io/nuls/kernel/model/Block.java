@@ -67,7 +67,7 @@ public class Block extends BaseNulsData implements Cloneable {
         try {
             txs = TransactionManager.getInstances(byteBuffer, header.getTxCount());
         } catch (Exception e) {
-            throw new NulsRuntimeException(KernelErrorCode.PARSE_OBJECT_ERROR);
+            throw new NulsRuntimeException(KernelErrorCode.DESERIALIZE_ERROR);
         }
         for (Transaction tx : txs) {
             tx.setBlockHeight(header.getHeight());
@@ -103,5 +103,13 @@ public class Block extends BaseNulsData implements Cloneable {
             list.add(tx.getHash());
         }
         return list;
+    }
+
+    @Override
+    public String toString() {
+        return "Block{" +
+                "header=" + header.toString() +
+                ", txs=" + txs.size() +
+                '}';
     }
 }

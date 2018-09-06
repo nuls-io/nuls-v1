@@ -141,7 +141,7 @@ public interface LedgerService {
     /**
      * Get the entire network of UTXO
      *
-     * 获取全网UTXO
+     * 获取全网UTXO资金之和
      * @return long
      */
     long getWholeUTXO();

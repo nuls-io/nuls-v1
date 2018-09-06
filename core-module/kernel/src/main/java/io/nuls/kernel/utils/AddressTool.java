@@ -103,12 +103,41 @@ public class AddressTool {
             Log.error(e);
             return false;
         }
-        if (NulsContext.DEFAULT_CHAIN_ID != chainId || NulsContext.DEFAULT_ADDRESS_TYPE != type) {
+        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+            return false;
+        }
+        if (NulsContext.DEFAULT_ADDRESS_TYPE != type && NulsContext.CONTRACT_ADDRESS_TYPE != type) {
             return false;
         }
         try {
             checkXOR(bytes);
         } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean validContractAddress(byte[] addressBytes) {
+        if (addressBytes == null) {
+            return false;
+        }
+        if (addressBytes.length != Address.ADDRESS_LENGTH) {
+            return false;
+        }
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(addressBytes);
+        short chainId;
+        byte type;
+        try {
+            chainId = byteBuffer.readShort();
+            type = byteBuffer.readByte();
+        } catch (NulsException e) {
+            Log.error(e);
+            return false;
+        }
+        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+            return false;
+        }
+        if (NulsContext.CONTRACT_ADDRESS_TYPE != type) {
             return false;
         }
         return true;

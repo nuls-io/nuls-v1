@@ -54,18 +54,18 @@ public class TransferTest extends BaseTest {
     }
 
     private static void doit() {
-        List<String> addressList = getAddressList();
-
-        for (String toAddress : addressList) {
-            String address = "NsduwnPecJT2DQmGDYogDn7ZmchaRQ8V";
-//            String toAddress = "2Cg7BLHWBSxMhq3FpjR9BrkyxXp4m4j";
+//        List<String> addressList = getAddressList();
+//
+//        for (String toAddress : addressList) {
+            String address = "Nse9W51tsj5thb2RfpLs2QLKPc2hP4pC";
+            String toAddress = "Nse4iay7oYCkCv2YVZsAcF2zaezJ2qbM";
             long amount = 1001000L;
             String password = "";
             String remark = "test";
 
             String param = "{\"address\": \"" + address + "\", \"toAddress\": \"" + toAddress + "\", \"password\": \"" + password + "\", \"amount\": \"" + amount + "\", \"remark\": \"" + remark + "\"}";
 
-            String url = "http://127.0.0.1:6001/api/accountledger/transfer";
+            String url = "http://127.0.0.1:8001/api/accountledger/transfer";
 
 
             for (int i = 0; i < 1; i++) {
@@ -74,8 +74,13 @@ public class TransferTest extends BaseTest {
                     successCount++;
                 }
                 System.out.println(successCount + "  " + res);
+                try {
+                    Thread.sleep(10L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        }
+//        }
 
     }
 
