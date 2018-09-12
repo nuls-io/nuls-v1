@@ -31,12 +31,6 @@
 
         <dependency>
             <groupId>io.nuls.contract-module</groupId>
-            <artifactId>contract-sdk</artifactId>
-            <version>1.1.0-BETA</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.nuls.contract-module</groupId>
             <artifactId>contract-ledger</artifactId>
             <version>1.1.0-BETA</version>
         </dependency>
@@ -65,6 +59,12 @@
             <artifactId>protocol-base</artifactId>
             <version>1.1.0-BETA</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nuls.sdk</groupId>
+            <artifactId>sdk-contract</artifactId>
+            <version>1.1.0</version>
         </dependency>
 
         <!-- apache commons -->
