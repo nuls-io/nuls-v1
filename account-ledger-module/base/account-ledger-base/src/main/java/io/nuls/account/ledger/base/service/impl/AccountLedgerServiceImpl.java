@@ -43,7 +43,6 @@ import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageServi
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
-import io.nuls.account.util.AccountTool;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.service.ContractService;
 import io.nuls.core.tools.crypto.ECKey;
@@ -62,8 +61,9 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.*;
-
-import io.nuls.kernel.script.*;
+import io.nuls.kernel.script.P2PHKSignature;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.validate.ValidateResult;
@@ -76,7 +76,6 @@ import io.nuls.protocol.model.validator.TxMaxSizeValidator;
 import io.nuls.protocol.model.validator.TxRemarkValidator;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
-import io.nuls.sdk.script.P2PKHScriptSig;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
