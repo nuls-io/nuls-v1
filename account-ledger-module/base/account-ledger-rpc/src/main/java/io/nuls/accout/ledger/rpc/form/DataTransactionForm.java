@@ -16,6 +16,9 @@ public class DataTransactionForm {
     @ApiModelProperty(name = "data", value = "密码")
     private String data;
 
+    @ApiModelProperty(name = "remark", value = "备注")
+    private String remark;
+
     public String getPassword() {
         return password;
     }
@@ -37,5 +40,13 @@ public class DataTransactionForm {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }
