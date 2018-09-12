@@ -15,7 +15,6 @@
 
     <modules>
         <module>protocol</module>
-        <module>base/protocol-sdk</module>
         <module>base/protocol-rpc</module>
         <module>base/protocol-storage</module>
         <module>base/protocol-base</module>

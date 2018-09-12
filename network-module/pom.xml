@@ -19,7 +19,6 @@
         <module>base/network-protocol</module>
         <module>base/network-storage</module>
         <module>base/network-rpc</module>
-        <module>base/network-sdk</module>
     </modules>
 
 

@@ -44,7 +44,6 @@
         <module>poc/consensus-poc-protocol</module>
         <module>poc/consensus-poc-storage</module>
         <module>poc/consensus-poc-rpc</module>
-        <module>poc/consensus-poc-sdk</module>
     </modules>
 
 

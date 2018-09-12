@@ -43,7 +43,6 @@
         <module>utxo/ledger-utxo-base</module>
         <module>utxo/ledger-utxo-storage</module>
         <module>utxo/ledger-utxo-rpc</module>
-        <module>utxo/ledger-utxo-sdk</module>
     </modules>
 
     <dependencies>

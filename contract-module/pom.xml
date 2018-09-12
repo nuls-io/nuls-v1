@@ -19,7 +19,6 @@
         <module>base/contract-base</module>
         <module>base/contract-vm</module>
         <module>base/contract-storage</module>
-        <module>base/contract-sdk</module>
         <module>base/contract-tx</module>
         <module>base/contract-rpc</module>
         <module>base/contract-ledger</module>

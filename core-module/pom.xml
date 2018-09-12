@@ -15,6 +15,5 @@
     <modules>
         <module>kernel</module>
         <module>kernel-rpc</module>
-        <module>kernel-sdk</module>
     </modules>
 </project>

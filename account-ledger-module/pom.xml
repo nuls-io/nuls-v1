@@ -17,7 +17,6 @@
         <module>account-ledger</module>
         <module>base/account-ledger-storage</module>
         <module>base/account-ledger-rpc</module>
-        <module>base/account-ledger-sdk</module>
         <module>base/account-ledger-base</module>
     </modules>
 </project>
