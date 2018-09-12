@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
 package io.nuls.utxo.accounts.service.impl;
 
 import io.nuls.contract.dto.ContractResult;
@@ -103,11 +127,11 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
      */
     private void buildUtxoAccountsBalance(Map<String, UtxoAccountsBalancePo> utxoAccountsMap, Coin coin, Transaction tx, int txIndex, boolean isInput) {
         long netBlockHeight = NulsContext.getInstance().getNetBestBlockHeight();
-        String address = AddressTool.getStringAddressByBytes(coin.getAddress());
+        String address = AddressTool.getStringAddressByBytes(coin.getOwner());
         UtxoAccountsBalancePo balance = utxoAccountsMap.get(address);
         if (null == balance) {
             balance = new UtxoAccountsBalancePo();
-            balance.setOwner(coin.getAddress());
+            balance.setOwner(coin.getOwner());
             utxoAccountsMap.put(address, balance);
         }
         if (isInput) {
@@ -145,7 +169,7 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
             }
             balance.setOutputBalance(balance.getOutputBalance() + (coin.getNa()).getValue());
         }
-        balance.setOwner(coin.getOwner());
+//        balance.setOwner(coin.getOwner());
         balance.setBlockHeight(tx.getBlockHeight());
         balance.setTxIndex(txIndex);
     }
