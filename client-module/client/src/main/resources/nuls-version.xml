@@ -65,6 +65,7 @@
                 <tx ref="contractTransferTx_V1"/>
                 <tx ref="createContractTx_V1"/>
                 <tx ref="deleteContractTx_V1"/>
+                <tx ref="dappTx_V1"/>
             </txs>
         </protocol>
         <!--<protocol version="3" block="" extend="2" percent="75" delay="60">-->
