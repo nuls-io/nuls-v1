@@ -6,30 +6,61 @@ import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.protocol.message.base.BaseMessage;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class ProtocolContainer<T extends BaseNulsData> {
-
+    /**
+     * 协议版本号
+     */
     private Integer version;
-
+    /**
+     * 协议对应区块
+     */
     private Class<T> blockClass;
-
+    /***协议生效覆盖率*/
     private int percent;
+    /***当前出块轮次*/
+    private long roundIndex;
+    /***延迟生效区块数*/
+    private long delay;
+    /**
+     * 当前延迟区块数
+     */
+    private long currentDelay;
 
-    private int delay;
-
-    private int currentDelay;
-
+    /**
+     * 当前轮新协议打包出块地址
+     */
     private Set<String> addressSet;
 
+    /**
+     * 协议生效时的区块高度
+     */
+    private Long effectiveHeight;
+    /**
+     * 协议生效状态
+     */
     private int status;
-
+    /**
+     * 协议未生效
+     */
     public static final int INVALID = 0;
-
+    /**
+     * 协议覆盖率已达到，处于延迟生效
+     */
     public static final int DELAY_LOCK = 1;
-
+    /**
+     * 协议已生效
+     */
     public static final int VALID = 2;
+
+
+    public ProtocolContainer() {
+        addressSet = new HashSet<>();
+    }
+
     /**
      * 该版本所生效的Transaction协议，map的key是交易的类型
      */
@@ -65,6 +96,14 @@ public class ProtocolContainer<T extends BaseNulsData> {
         return null;
     }
 
+    public boolean containsTxType(int type) {
+        return txMap.containsKey(type);
+    }
+
+    public boolean containsMessageType(int moduleId, int type) {
+        return messageMap.containsKey(moduleId + "-" + type);
+    }
+
     public Integer getVersion() {
         return version;
     }
@@ -73,11 +112,11 @@ public class ProtocolContainer<T extends BaseNulsData> {
         this.version = version;
     }
 
-    public int getDelay() {
+    public long getDelay() {
         return delay;
     }
 
-    public void setDelay(int delay) {
+    public void setDelay(long delay) {
         this.delay = delay;
     }
 
@@ -113,11 +152,32 @@ public class ProtocolContainer<T extends BaseNulsData> {
         this.status = status;
     }
 
-    public int getCurrentDelay() {
+    public long getCurrentDelay() {
         return currentDelay;
     }
 
-    public void setCurrentDelay(int currentDelay) {
+    public void setCurrentDelay(long currentDelay) {
         this.currentDelay = currentDelay;
     }
+
+    public long getRoundIndex() {
+        return roundIndex;
+    }
+
+    public void setRoundIndex(long roundIndex) {
+        this.roundIndex = roundIndex;
+    }
+
+    public Long getEffectiveHeight() {
+        return effectiveHeight;
+    }
+
+    public void setEffectiveHeight(Long effectiveHeight) {
+        this.effectiveHeight = effectiveHeight;
+    }
+
+    public String getProtocolKey() {
+        return version + "-" + percent + "-" + delay;
+    }
+
 }

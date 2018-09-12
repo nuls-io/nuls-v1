@@ -10,7 +10,7 @@ public class Newarray {
 
     public static void newarray(Frame frame) {
         VariableType type;
-        int length = frame.getOperandStack().popInt();
+        int length = frame.operandStack.popInt();
         if (length < 0) {
             frame.throwNegativeArraySizeException();
             return;
@@ -45,8 +45,8 @@ public class Newarray {
             }
         }
 
-        ObjectRef arrayRef = frame.getHeap().newArray(type, length);
-        frame.getOperandStack().pushRef(arrayRef);
+        ObjectRef arrayRef = frame.heap.newArray(type, length);
+        frame.operandStack.pushRef(arrayRef);
 
         //Log.result(frame.getCurrentOpCode(), arrayRef);
     }

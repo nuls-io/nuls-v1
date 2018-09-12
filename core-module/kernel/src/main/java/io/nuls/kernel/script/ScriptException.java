@@ -22,13 +22,10 @@
  * SOFTWARE.
  *
  */
+
 package io.nuls.kernel.script;
 
-/**
- * Created by win10 on 2017/10/30.
- */
-public class ScriptException extends RuntimeException{
-
+public class ScriptException extends RuntimeException  {
     public ScriptException(String msg) {
         super(msg);
     }

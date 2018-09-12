@@ -49,7 +49,7 @@ public class InputDto {
     public InputDto(Coin input) {
         this.fromHash = LedgerUtil.getTxHash(input.getOwner());
         this.fromIndex = LedgerUtil.getIndex(input.getOwner());
-        this.address = AddressTool.getStringAddressByBytes(input.getFrom().getOwner());
+        this.address = AddressTool.getStringAddressByBytes(input.getFrom().getAddress());
         this.value = input.getFrom().getNa().getValue();
     }
 

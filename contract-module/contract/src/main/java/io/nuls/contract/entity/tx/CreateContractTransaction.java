@@ -27,6 +27,7 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.entity.txdata.CreateContractData;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.NulsByteBuffer;
@@ -41,6 +42,8 @@ public class CreateContractTransaction extends Transaction<CreateContractData> i
     private ContractResult contractResult;
 
     private transient Na returnNa;
+
+    private transient BlockHeader blockHeader;
 
     public CreateContractTransaction() {
         super(ContractConstant.TX_TYPE_CREATE_CONTRACT);
@@ -69,6 +72,16 @@ public class CreateContractTransaction extends Transaction<CreateContractData> i
     @Override
     public void setReturnNa(Na returnNa) {
         this.returnNa = returnNa;
+    }
+
+    @Override
+    public BlockHeader getBlockHeader() {
+        return blockHeader;
+    }
+
+    @Override
+    public void setBlockHeader(BlockHeader blockHeader) {
+        this.blockHeader = blockHeader;
     }
 
     @Override

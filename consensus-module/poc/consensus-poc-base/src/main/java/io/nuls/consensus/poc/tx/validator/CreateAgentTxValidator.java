@@ -38,7 +38,9 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.CoinData;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.SignatureUtil;
+import io.nuls.kernel.script.TransactionSignature;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 
@@ -92,14 +94,20 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
         if (!isDepositOk(agent.getDeposit(), tx.getCoinData())) {
             return ValidateResult.getFailedResult(this.getClass().getName(), SeverityLevelEnum.FLAGRANT_FOUL, PocConsensusErrorCode.DEPOSIT_ERROR);
         }
-        P2PKHScriptSig sig = new P2PKHScriptSig();
+        TransactionSignature sig = new TransactionSignature();
         try {
-            sig.parse(tx.getScriptSig(),0);
+            sig.parse(tx.getTransactionSignature(),0);
         } catch (NulsException e) {
             Log.error(e);
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
-        if (!Arrays.equals(agent.getAgentAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
+        try {
+            if (!SignatureUtil.containsAddress(tx,agent.getAgentAddress())) {
+                ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
+                result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
+                return result;
+            }
+        } catch (NulsException e) {
             ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
             return result;
@@ -111,7 +119,8 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
             if (coin.getLockTime() == PocConsensusConstant.CONSENSUS_LOCK_TIME) {
                 lockCount++;
             }
-            addressSet.add(AddressTool.getStringAddressByBytes(coin.getOwner()));
+            //addressSet.add(AddressTool.getStringAddressByBytes(coin.()));
+            addressSet.add(AddressTool.getStringAddressByBytes(coin.getAddress()));
         }
         if (lockCount > 1) {
             return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);

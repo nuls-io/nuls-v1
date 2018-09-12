@@ -37,4 +37,6 @@ public interface UtxoAccountsStorageService {
 
     Transaction getTx(NulsDigestData hash);
     Result<Block> getBlock(long height);
+
+
 }

@@ -33,7 +33,6 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.dto.ContractTokenTransferInfoPo;
-import io.nuls.contract.entity.BlockHeaderDto;
 import io.nuls.contract.entity.tx.CallContractTransaction;
 import io.nuls.contract.entity.tx.CreateContractTransaction;
 import io.nuls.contract.entity.tx.DeleteContractTransaction;
@@ -41,10 +40,12 @@ import io.nuls.contract.entity.txdata.CallContractData;
 import io.nuls.contract.entity.txdata.CreateContractData;
 import io.nuls.contract.entity.txdata.DeleteContractData;
 import io.nuls.contract.helper.VMHelper;
+import io.nuls.contract.ledger.manager.ContractBalanceManager;
 import io.nuls.contract.service.ContractTxService;
 import io.nuls.contract.storage.po.ContractAddressInfoPo;
 import io.nuls.contract.storage.service.ContractAddressStorageService;
 import io.nuls.contract.storage.service.ContractTokenTransferStorageService;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramCall;
 import io.nuls.contract.vm.program.ProgramCreate;
@@ -52,6 +53,7 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.calc.LongUtils;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.map.MapUtil;
 import io.nuls.core.tools.param.AssertUtil;
@@ -66,7 +68,8 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.utils.VarInt;
@@ -75,9 +78,7 @@ import io.nuls.protocol.service.TransactionService;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -102,6 +103,8 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
     private VMHelper vmHelper;
     @Autowired
     private VMContext vmContext;
+    @Autowired
+    private ContractBalanceManager contractBalanceManager;
 
     private ProgramExecutor programExecutor;
 
@@ -114,13 +117,13 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
      * 创建生成智能合约的交易
      * 如果是创建合约的交易，交易仅仅用于创建合约，合约内部不执行复杂逻辑
      *
-     * @param sender          交易创建者
-     * @param gasLimit        最大gas消耗
-     * @param price           执行合约单价
-     * @param contractCode    合约代码
-     * @param args            参数列表
-     * @param password        账户密码
-     * @param remark          备注
+     * @param sender       交易创建者
+     * @param gasLimit     最大gas消耗
+     * @param price        执行合约单价
+     * @param contractCode 合约代码
+     * @param args         参数列表
+     * @param password     账户密码
+     * @param remark       备注
      * @return
      */
     @Override
@@ -173,16 +176,18 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
              */
             CoinData coinData = new CoinData();
             // 向智能合约账户转账
-            if(!Na.ZERO.equals(value)) {
+            if (!Na.ZERO.equals(value)) {
                 Coin toCoin = new Coin(contractAddressBytes, value);
                 coinData.getTo().add(toCoin);
             }
 
-            // 当前区块高度
             BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
+            // 当前区块高度
             long blockHeight = blockHeader.getHeight();
             // 当前区块状态根
-            byte[] prevStateRoot = blockHeader.getStateRoot();
+            byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+            AssertUtil.canNotEmpty(prevStateRoot, "All features of the smart contract are locked.");
+
             // 执行VM验证合法性
             ProgramCreate programCreate = new ProgramCreate();
             programCreate.setContractAddress(contractAddressBytes);
@@ -192,16 +197,16 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             programCreate.setGasLimit(gasLimit.longValue());
             programCreate.setNumber(blockHeight);
             programCreate.setContractCode(contractCode);
-            if(args != null) {
+            if (args != null) {
                 programCreate.setArgs(args);
             }
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             ProgramResult programResult = track.create(programCreate);
 
-            // 执行结果revert=true(合约不合法)时，交易直接返回错误，不上链，不消耗Gas，
-            if(!programResult.isSuccess() && programResult.isRevert()) {
+            // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas，
+            if(!programResult.isSuccess()) {
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
-                result.setMsg(programResult.getErrorMessage());
+                result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 return result;
             }
             /*long gasUsed = programResult.getGasUsed();
@@ -221,15 +226,15 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             createContractData.setPrice(price);
             createContractData.setCodeLen(contractCode.length);
             createContractData.setCode(contractCode);
-            if(args != null) {
+            if (args != null) {
                 createContractData.setArgsCount((byte) args.length);
-                if(args.length > 0) {
+                if (args.length > 0) {
                     createContractData.setArgs(args);
                 }
             }
             tx.setTxData(createContractData);
 
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, totalNa, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, totalNa, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -240,11 +245,21 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             }
             tx.setCoinData(coinData);
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+
             // 交易签名
-            P2PKHScriptSig sig = new P2PKHScriptSig();
-            sig.setPublicKey(account.getPubKey());
-            sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
-            tx.setScriptSig(sig.serialize());
+
+            List<ECKey> signEckeys = new ArrayList<>();
+            List<ECKey> pubEckeys = new ArrayList<>();
+
+            //如果最后一位为1则表示该交易包含普通签名
+            if ((coinDataResult.getSignType() & 0x01) == 0x01) {
+                signEckeys.add(account.getEcKey());
+            }
+            //如果倒数第二位位为1则表示该交易包含脚本签名
+            if ((coinDataResult.getSignType() & 0x02) == 0x02) {
+                pubEckeys.add(account.getEcKey());
+            }
+            SignatureUtil.createTransactionSignture(tx, signEckeys, pubEckeys);
 
             // 保存未确认交易到本地账本
             Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
@@ -252,8 +267,8 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
                     //重新算一次交易(不超出最大交易数据大小下)的最大金额
                     Result rs = accountLedgerService.getMaxAmountOfOnce(senderBytes, tx, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
-                    if(rs.isSuccess()){
-                        Na maxAmount = (Na)rs.getData();
+                    if (rs.isSuccess()) {
+                        Na maxAmount = (Na) rs.getData();
                         rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
                         rs.setMsg(rs.getMsg() + maxAmount.toDouble());
                     }
@@ -293,26 +308,25 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
     }
 
     /**
-     *  key: accountAddress
-     *  value(Map):
-     *      key: contractAddress
-     *      value(Map):
-     *          key: txHash / contractAddress / time/ success(optional)
-     *          value: txHash-V / contractAddress-V / time-V/ success-V(true,false)
-     *
+     * key: accountAddress
+     * value(Map):
+     * key: contractAddress
+     * value(Map):
+     * key: txHash / contractAddress / time/ success(optional)
+     * value: txHash-V / contractAddress-V / time-V/ success-V(true,false)
      */
     private static final Map<String, Map<String, Map<String, String>>> LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION = MapUtil.createLinkedHashMap(4);
     private ReentrantLock lock = new ReentrantLock();
 
     private void saveLocalUnconfirmedCreateContractTransaction(String sender, Map<String, String> resultMap, long time) {
         lock.lock();
-        try{
+        try {
             LinkedHashMap<String, String> map = MapUtil.createLinkedHashMap(3);
             map.putAll(resultMap);
             map.put("time", String.valueOf(time));
             String contractAddress = map.get("contractAddress");
             Map<String, Map<String, String>> unconfirmedOfAccountMap = LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION.get(sender);
-            if(unconfirmedOfAccountMap == null) {
+            if (unconfirmedOfAccountMap == null) {
                 unconfirmedOfAccountMap = MapUtil.createLinkedHashMap(4);
                 unconfirmedOfAccountMap.put(contractAddress, map);
                 LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION.put(sender, unconfirmedOfAccountMap);
@@ -323,9 +337,10 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             lock.unlock();
         }
     }
+
     public LinkedList<Map<String, String>> getLocalUnconfirmedCreateContractTransaction(String sender) {
         Map<String, Map<String, String>> unconfirmedOfAccountMap = LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION.get(sender);
-        if(unconfirmedOfAccountMap == null) {
+        if (unconfirmedOfAccountMap == null) {
             return null;
         }
         return new LinkedList<>(unconfirmedOfAccountMap.values());
@@ -333,18 +348,18 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
 
     public void removeLocalUnconfirmedCreateContractTransaction(String sender, String contractAddress, ContractResult contractResult) {
         lock.lock();
-        try{
+        try {
             Map<String, Map<String, String>> unconfirmedOfAccountMap = LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION.get(sender);
-            if(unconfirmedOfAccountMap == null) {
+            if (unconfirmedOfAccountMap == null) {
                 return;
             }
             // 合约创建成功，删除未确认交易
-            if(contractResult.isSuccess()) {
+            if (contractResult.isSuccess()) {
                 unconfirmedOfAccountMap.remove(contractAddress);
             } else {
                 // 合约执行失败，保留未确认交易，并标注错误信息
                 Map<String, String> dataMap = unconfirmedOfAccountMap.get(contractAddress);
-                if(dataMap != null) {
+                if (dataMap != null) {
                     dataMap.put("success", "false");
                     dataMap.put("msg", contractResult.getErrorMessage());
                 }
@@ -356,9 +371,9 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
 
     public void removeLocalUnconfirmedCreateContractTransaction(String sender, String contractAddress) {
         lock.lock();
-        try{
+        try {
             Map<String, Map<String, String>> unconfirmedOfAccountMap = LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION.get(sender);
-            if(unconfirmedOfAccountMap == null) {
+            if (unconfirmedOfAccountMap == null) {
                 return;
             }
             unconfirmedOfAccountMap.remove(contractAddress);
@@ -370,15 +385,15 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
     @Override
     public void removeLocalFailedUnconfirmedCreateContractTransaction(String sender, String contractAddress) {
         lock.lock();
-        try{
+        try {
             Map<String, Map<String, String>> unconfirmedOfAccountMap = LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION.get(sender);
-            if(unconfirmedOfAccountMap == null) {
+            if (unconfirmedOfAccountMap == null) {
                 return;
             }
             Map<String, String> dataMap = unconfirmedOfAccountMap.get(contractAddress);
-            if(dataMap != null) {
+            if (dataMap != null) {
                 String success = dataMap.get("success");
-                if("false".equals(success)) {
+                if ("false".equals(success)) {
                     unconfirmedOfAccountMap.remove(contractAddress);
                 }
             }
@@ -391,13 +406,13 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
      * 预创建生成智能合约的交易
      * 用于测试合约是否能正确创建
      *
-     * @param sender          交易创建者
-     * @param gasLimit        最大gas消耗
-     * @param price           执行合约单价
-     * @param contractCode    合约代码
-     * @param args            参数列表
-     * @param password        账户密码
-     * @param remark          备注
+     * @param sender       交易创建者
+     * @param gasLimit     最大gas消耗
+     * @param price        执行合约单价
+     * @param contractCode 合约代码
+     * @param args         参数列表
+     * @param password     账户密码
+     * @param remark       备注
      * @return
      */
     @Override
@@ -450,16 +465,18 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
              */
             CoinData coinData = new CoinData();
             // 向智能合约账户转账
-            if(!Na.ZERO.equals(value)) {
+            if (!Na.ZERO.equals(value)) {
                 Coin toCoin = new Coin(contractAddressBytes, value);
                 coinData.getTo().add(toCoin);
             }
 
-            // 当前区块高度
             BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
+            // 当前区块高度
             long blockHeight = blockHeader.getHeight();
             // 当前区块状态根
-            byte[] prevStateRoot = blockHeader.getStateRoot();
+            byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+            AssertUtil.canNotEmpty(prevStateRoot, "All features of the smart contract are locked.");
+
             // 执行VM验证合法性
             ProgramCreate programCreate = new ProgramCreate();
             programCreate.setContractAddress(contractAddressBytes);
@@ -469,16 +486,16 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             programCreate.setGasLimit(gasLimit.longValue());
             programCreate.setNumber(blockHeight);
             programCreate.setContractCode(contractCode);
-            if(args != null) {
+            if (args != null) {
                 programCreate.setArgs(args);
             }
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             ProgramResult programResult = track.create(programCreate);
 
-            // 执行结果revert=true(合约不合法)时，交易直接返回错误，不上链，不消耗Gas，
-            if(!programResult.isSuccess() && programResult.isRevert()) {
+            // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas，
+            if(!programResult.isSuccess()) {
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
-                result.setMsg(programResult.getErrorMessage());
+                result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 return result;
             }
             long gasUsed = gasLimit.longValue();
@@ -495,15 +512,15 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             createContractData.setPrice(price);
             createContractData.setCodeLen(contractCode.length);
             createContractData.setCode(contractCode);
-            if(args != null) {
+            if (args != null) {
                 createContractData.setArgsCount((byte) args.length);
-                if(args.length > 0) {
+                if (args.length > 0) {
                     createContractData.setArgs(args);
                 }
             }
             tx.setTxData(createContractData);
 
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, totalNa, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, totalNa, tx.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -563,11 +580,12 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             byte[] senderBytes = AddressTool.getAddress(sender);
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
 
-            // 当前区块高度
             BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
+            // 当前区块高度
             long blockHeight = blockHeader.getHeight();
             // 当前区块状态根
-            byte[] prevStateRoot = blockHeader.getStateRoot();
+            byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+            AssertUtil.canNotEmpty(prevStateRoot, "All features of the smart contract are locked.");
 
             // 组装VM执行数据
             ProgramCall programCall = new ProgramCall();
@@ -579,7 +597,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             programCall.setArgs(args);
 
             // 如果方法是不上链的合约调用，同步执行合约代码，不改变状态根，并返回值
-            if(vmHelper.checkIsViewMethod(methodName, contractAddressBytes)) {
+            if (vmHelper.checkIsViewMethod(methodName, contractAddressBytes)) {
                 programCall.setValue(BigInteger.ZERO);
                 programCall.setGasLimit(ContractConstant.CONTRACT_CONSTANT_GASLIMIT);
                 programCall.setPrice(ContractConstant.CONTRACT_CONSTANT_PRICE);
@@ -587,9 +605,9 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 ProgramExecutor track = programExecutor.begin(prevStateRoot);
                 ProgramResult programResult = track.call(programCall);
                 Result result = null;
-                if(!programResult.isSuccess()) {
+                if (!programResult.isSuccess()) {
                     result = Result.getFailed(ContractErrorCode.DATA_ERROR);
-                    result.setMsg(programResult.getErrorMessage());
+                    result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 } else {
                     result = Result.getSuccess();
                     result.setData(programResult.getResult());
@@ -623,7 +641,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
              */
             CoinData coinData = new CoinData();
             // 向智能合约账户转账
-            if(!Na.ZERO.equals(value)) {
+            if (!Na.ZERO.equals(value)) {
                 Coin toCoin = new Coin(contractAddressBytes, value);
                 coinData.getTo().add(toCoin);
             }
@@ -632,10 +650,10 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             ProgramResult programResult = track.call(programCall);
 
-            // 执行结果revert=true(合约不合法)时，交易直接返回错误，不上链，不消耗Gas
-            if(!programResult.isSuccess() && programResult.isRevert()) {
+            // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas
+            if(!programResult.isSuccess()) {
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
-                result.setMsg(programResult.getErrorMessage());
+                result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 return result;
             }
             /*long gasUsed = programResult.getGasUsed();
@@ -655,13 +673,13 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             callContractData.setGasLimit(gasLimit.longValue());
             callContractData.setMethodName(methodName);
             callContractData.setMethodDesc(methodDesc);
-            if(args != null) {
+            if (args != null) {
                 callContractData.setArgsCount((byte) args.length);
                 callContractData.setArgs(args);
             }
             tx.setTxData(callContractData);
 
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, totalNa, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, totalNa, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -673,58 +691,102 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             tx.setCoinData(coinData);
 
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-            // 交易签名
-            P2PKHScriptSig sig = new P2PKHScriptSig();
-            sig.setPublicKey(account.getPubKey());
-            sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
-            tx.setScriptSig(sig.serialize());
+            //生成签名
+            List<ECKey> signEckeys = new ArrayList<>();
+            List<ECKey> scriptEckeys = new ArrayList<>();;
+            ECKey eckey = account.getEcKey(password);
 
-            // 保存未确认Token转账
-            Result<ContractAddressInfoPo> contractAddressInfoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
-            ContractAddressInfoPo po = contractAddressInfoResult.getData();
-            byte[] infoKey = null;
-            if(po != null && po.isNrc20() && ContractConstant.NRC20_METHOD_TRANSFER.equals(methodName)) {
-                byte[] txHashBytes = tx.getHash().serialize();
-                infoKey = ArraysTool.concatenate(senderBytes, txHashBytes, new VarInt(0).encode());
-                ContractTokenTransferInfoPo tokenTransferInfoPo = new ContractTokenTransferInfoPo();
-                try {
-                    String to = args[0][0];
-                    String tokenValue = args[1][0];
-                    tokenTransferInfoPo.setTo(AddressTool.getAddress(to));
-                    tokenTransferInfoPo.setValue(new BigInteger(tokenValue));
-                } catch (Exception e) {
-                    Log.error(e);
-                    Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
-                    result.setMsg(e.getMessage());
-                    return result;
-                }
-                tokenTransferInfoPo.setFrom(senderBytes);
-                tokenTransferInfoPo.setName(po.getNrc20TokenName());
-                tokenTransferInfoPo.setSymbol(po.getNrc20TokenSymbol());
-                tokenTransferInfoPo.setDecimals(po.getDecimals());
-                tokenTransferInfoPo.setTime(tx.getTime());
-                tokenTransferInfoPo.setContractAddress(contractAddressBytes);
-                tokenTransferInfoPo.setBlockHeight(tx.getBlockHeight());
-                tokenTransferInfoPo.setTxHash(txHashBytes);
-                tokenTransferInfoPo.setStatus((byte) 0);
-                Result result = contractTokenTransferStorageService.saveTokenTransferInfo(infoKey, tokenTransferInfoPo);
-                if(result.isFailed()) {
-                    return result;
-                }
+            //如果最后一位为1则表示该交易包含普通签名
+            if((coinDataResult.getSignType() & 0x01) == 0x01){
+                signEckeys.add(eckey);
             }
+            //如果倒数第二位位为1则表示该交易包含脚本签名
+            if((coinDataResult.getSignType() & 0x02) == 0x02){
+                scriptEckeys.add(eckey);
+            }
+            SignatureUtil.createTransactionSignture(tx,scriptEckeys,signEckeys);
+
+            //TODO pierre 代码结构需优化，先实现功能
+            // 保存未确认Token转账
+            byte[] infoKey = null;
+            do {
+                Result<ContractAddressInfoPo> contractAddressInfoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
+                ContractAddressInfoPo po = contractAddressInfoResult.getData();
+                if(po != null && po.isNrc20() &&
+                        (ContractConstant.NRC20_METHOD_TRANSFER.equals(methodName)
+                                || ContractConstant.NRC20_METHOD_TRANSFER_FROM.equals(methodName))) {
+                    byte[] txHashBytes = tx.getHash().serialize();
+                    infoKey = ArraysTool.concatenate(senderBytes, txHashBytes, new VarInt(0).encode());
+                    ContractTokenTransferInfoPo tokenTransferInfoPo = new ContractTokenTransferInfoPo();
+                    if(ContractConstant.NRC20_METHOD_TRANSFER.equals(methodName)) {
+                        try {
+                            String to = args[0][0];
+                            String tokenValue = args[1][0];
+                            BigInteger token = new BigInteger(tokenValue);
+                            Result result = contractBalanceManager.subtractContractToken(sender, contractAddress, token);
+                            if(result.isFailed()) {
+                                return result;
+                            }
+                            contractBalanceManager.addContractToken(to, contractAddress, token);
+                            tokenTransferInfoPo.setFrom(senderBytes);
+                            tokenTransferInfoPo.setTo(AddressTool.getAddress(to));
+                            tokenTransferInfoPo.setValue(token);
+                        } catch (Exception e) {
+                            Log.error(e);
+                            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
+                            result.setMsg(e.getMessage());
+                            return result;
+                        }
+                    } else {
+                        try {
+                            String from = args[0][0];
+                            String to = args[1][0];
+                            String tokenValue = args[2][0];
+                            BigInteger token = new BigInteger(tokenValue);
+                            Result result = contractBalanceManager.subtractContractToken(sender, contractAddress, token);
+                            if(result.isFailed()) {
+                                return result;
+                            }
+                            contractBalanceManager.addContractToken(to, contractAddress, token);
+                            tokenTransferInfoPo.setFrom(AddressTool.getAddress(from));
+                            tokenTransferInfoPo.setTo(AddressTool.getAddress(to));
+                            tokenTransferInfoPo.setValue(token);
+                        } catch (Exception e) {
+                            Log.error(e);
+                            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
+                            result.setMsg(e.getMessage());
+                            return result;
+                        }
+                    }
+
+                    tokenTransferInfoPo.setName(po.getNrc20TokenName());
+                    tokenTransferInfoPo.setSymbol(po.getNrc20TokenSymbol());
+                    tokenTransferInfoPo.setDecimals(po.getDecimals());
+                    tokenTransferInfoPo.setTime(tx.getTime());
+                    tokenTransferInfoPo.setContractAddress(contractAddressBytes);
+                    tokenTransferInfoPo.setBlockHeight(tx.getBlockHeight());
+                    tokenTransferInfoPo.setTxHash(txHashBytes);
+                    tokenTransferInfoPo.setStatus((byte) 0);
+                    Result result = contractTokenTransferStorageService.saveTokenTransferInfo(infoKey, tokenTransferInfoPo);
+                    if(result.isFailed()) {
+                        return result;
+                    }
+                }
+            } while (false);
+
 
 
             // 保存未确认交易到本地账本
             Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
             if (saveResult.isFailed()) {
-                if(infoKey != null) {
+                if (infoKey != null) {
                     contractTokenTransferStorageService.deleteTokenTransferInfo(infoKey);
                 }
                 if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
                     //重新算一次交易(不超出最大交易数据大小下)的最大金额
                     Result rs = accountLedgerService.getMaxAmountOfOnce(senderBytes, tx, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
-                    if(rs.isSuccess()){
-                        Na maxAmount = (Na)rs.getData();
+                    if (rs.isSuccess()) {
+                        Na maxAmount = (Na) rs.getData();
                         rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
                         rs.setMsg(rs.getMsg() + maxAmount.toDouble());
                     }
@@ -738,7 +800,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             if (sendResult.isFailed()) {
                 // 失败则回滚
                 accountLedgerService.deleteTransaction(tx);
-                if(infoKey != null) {
+                if (infoKey != null) {
                     contractTokenTransferStorageService.deleteTokenTransferInfo(infoKey);
                 }
                 return sendResult;
@@ -762,7 +824,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
     }
 
     public Result transferFee(String sender, Na value, Long gasLimit, Long price, String contractAddress,
-                                 String methodName, String methodDesc, String[][] args, String remark) {
+                              String methodName, String methodDesc, String[][] args, String remark) {
         try {
             AssertUtil.canNotEmpty(sender, "the sender address can not be empty");
             AssertUtil.canNotEmpty(contractAddress, "the contractAddress can not be empty");
@@ -779,11 +841,12 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             byte[] senderBytes = AddressTool.getAddress(sender);
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
 
-            // 当前区块高度
             BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
+            // 当前区块高度
             long blockHeight = blockHeader.getHeight();
             // 当前区块状态根
-            byte[] prevStateRoot = blockHeader.getStateRoot();
+            byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+            AssertUtil.canNotEmpty(prevStateRoot, "All features of the smart contract are locked.");
 
             CallContractTransaction tx = new CallContractTransaction();
             if (StringUtils.isNotBlank(remark)) {
@@ -798,7 +861,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
 
             CoinData coinData = new CoinData();
             // 向智能合约账户转账
-            if(!Na.ZERO.equals(value)) {
+            if (!Na.ZERO.equals(value)) {
                 Coin toCoin = new Coin(contractAddressBytes, value);
                 coinData.getTo().add(toCoin);
             }
@@ -817,13 +880,13 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             callContractData.setGasLimit(gasLimit.longValue());
             callContractData.setMethodName(methodName);
             callContractData.setMethodDesc(methodDesc);
-            if(args != null) {
+            if (args != null) {
                 callContractData.setArgsCount((byte) args.length);
                 callContractData.setArgs(args);
             }
             tx.setTxData(callContractData);
 
-            Na fee = accountLedgerService.getTxFee(senderBytes, totalNa, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+            Na fee = accountLedgerService.getTxFee(senderBytes, totalNa, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
             fee = fee.add(imputedGasUsedNa);
             return Result.getSuccess().setData(new Object[]{fee, tx});
         } catch (Exception e) {
@@ -892,7 +955,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             CoinData coinData = new CoinData();
 
             // 总花费 终止智能合约的交易手续费按普通交易计算手续费
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, Na.ZERO, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(senderBytes, Na.ZERO, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -903,11 +966,21 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             }
             tx.setCoinData(coinData);
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-            // 交易签名
-            P2PKHScriptSig sig = new P2PKHScriptSig();
-            sig.setPublicKey(account.getPubKey());
-            sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
-            tx.setScriptSig(sig.serialize());
+
+            //生成签名
+            List<ECKey> signEckeys = new ArrayList<>();
+            List<ECKey> scriptEckeys = new ArrayList<>();;
+            ECKey eckey = account.getEcKey(password);
+
+            //如果最后一位为1则表示该交易包含普通签名
+            if((coinDataResult.getSignType() & 0x01) == 0x01){
+                signEckeys.add(eckey);
+            }
+            //如果倒数第二位位为1则表示该交易包含脚本签名
+            if((coinDataResult.getSignType() & 0x02) == 0x02){
+                scriptEckeys.add(eckey);
+            }
+            SignatureUtil.createTransactionSignture(tx,scriptEckeys,signEckeys);
 
             // 保存删除合约的交易到本地账本
             Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
@@ -915,8 +988,8 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
                     //重新算一次交易(不超出最大交易数据大小下)的最大金额
                     Result rs = accountLedgerService.getMaxAmountOfOnce(senderBytes, tx, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
-                    if(rs.isSuccess()){
-                        Na maxAmount = (Na)rs.getData();
+                    if (rs.isSuccess()) {
+                        Na maxAmount = (Na) rs.getData();
                         rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
                         rs.setMsg(rs.getMsg() + maxAmount.toDouble());
                     }

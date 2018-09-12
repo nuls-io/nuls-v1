@@ -6,7 +6,7 @@ import io.nuls.contract.vm.util.Log;
 public class Aconst {
 
     public static void aconst_null(final Frame frame) {
-        frame.getOperandStack().pushRef(null);
+        frame.operandStack.pushRef(null);
 
         //Log.opcode(frame.getCurrentOpCode());
     }

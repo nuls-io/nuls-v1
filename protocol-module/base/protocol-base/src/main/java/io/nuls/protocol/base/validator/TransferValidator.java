@@ -25,13 +25,12 @@
 
 package io.nuls.protocol.base.validator;
 
-import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.script.P2PKHScriptSig;
-import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.script.SignatureUtil;
+import io.nuls.kernel.script.TransactionSignature;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.protocol.constant.ProtocolConstant;
@@ -46,14 +45,21 @@ public class TransferValidator implements NulsDataValidator<TransferTransaction>
 
     @Override
     public ValidateResult validate(TransferTransaction tx) throws NulsException {
-        byte[] script = tx.getScriptSig();
-        P2PKHScriptSig sig = new P2PKHScriptSig();
-        sig.parse(script, 0);
-        byte[] address = AddressTool.getAddress(sig);
+        byte[] script = tx.getTransactionSignature();
+        TransactionSignature signature = new TransactionSignature();
+        signature.parse(script, 0);
+
         for (Coin coin : tx.getCoinData().getTo()) {
-            if (ArraysTool.arrayEquals(coin.getOwner(), address)) {
+            byte[] owner = coin.getOwner();
+            if (owner.length > 23) {
+                owner = coin.getAddress();
+            }
+            // Keep the change maybe a very small coin
+            if (SignatureUtil.containsAddress(tx, owner)) {
+                // When the receiver sign this tx,Allow it transfer small coin
                 continue;
             }
+
             if (coin.getNa().isLessThan(ProtocolConstant.MININUM_TRANSFER_AMOUNT)) {
                 return ValidateResult.getFailedResult(this.getClass().getSimpleName(), TransactionErrorCode.TOO_SMALL_AMOUNT);
             }

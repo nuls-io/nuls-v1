@@ -170,7 +170,9 @@ public class UtxoResource {
                 Log.info("parse coin form db error");
                 continue;
             }
-            if (Arrays.equals(coin.getOwner(), addressBytes)) {
+            //if (Arrays.equals(coin.(), addressBytes))
+            if (Arrays.equals(coin.getAddress(), addressBytes))
+            {
                 coin.setOwner(coinEntryBytes.getKey());
                 coinList.add(coin);
             }

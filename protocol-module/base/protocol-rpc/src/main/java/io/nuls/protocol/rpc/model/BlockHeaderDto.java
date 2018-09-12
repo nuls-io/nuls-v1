@@ -125,12 +125,11 @@ public class BlockHeaderDto {
         this.hash = header.getHash().getDigestHex();
         this.preHash = header.getPreHash().getDigestHex();
         this.merkleHash = header.getMerkleHash().getDigestHex();
-        this.stateRoot = Hex.encode(header.getStateRoot());
         this.time = header.getTime();
         this.height = header.getHeight();
         this.txCount = header.getTxCount();
         this.packingAddress = Address.fromHashs(header.getPackingAddress()).getBase58();
-        this.scriptSign = Hex.encode(header.getScriptSig().serialize());
+        this.scriptSign = Hex.encode(header.getBlockSignature().serialize());
         this.confirmCount = bestBlockHeight - this.height;
         try {
             BlockExtendsData roundData = new BlockExtendsData(header.getExtend());
@@ -138,6 +137,9 @@ public class BlockHeaderDto {
             this.roundStartTime = roundData.getRoundStartTime();
             this.consensusMemberCount = roundData.getConsensusMemberCount();
             this.packingIndexOfRound = roundData.getPackingIndexOfRound();
+            if(roundData.getStateRoot() != null) {
+                this.stateRoot = Hex.encode(roundData.getStateRoot());
+            }
         } catch (Exception e) {
             Log.error(e);
         }

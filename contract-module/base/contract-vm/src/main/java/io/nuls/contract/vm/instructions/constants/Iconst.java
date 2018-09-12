@@ -34,7 +34,7 @@ public class Iconst {
     }
 
     private static void iconst(Frame frame, int value) {
-        frame.getOperandStack().pushInt(value);
+        frame.operandStack.pushInt(value);
 
         //Log.opcode(frame.getCurrentOpCode());
     }

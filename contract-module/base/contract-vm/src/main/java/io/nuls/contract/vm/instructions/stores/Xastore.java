@@ -7,103 +7,103 @@ import io.nuls.contract.vm.util.Log;
 public class Xastore {
 
     public static void iastore(final Frame frame) {
-        int value = frame.getOperandStack().popInt();
-        int index = frame.getOperandStack().popInt();
-        ObjectRef arrayRef = frame.getOperandStack().popRef();
+        int value = frame.operandStack.popInt();
+        int index = frame.operandStack.popInt();
+        ObjectRef arrayRef = frame.operandStack.popRef();
         if (!frame.checkArray(arrayRef, index)) {
             return;
         }
-        frame.getHeap().putArray(arrayRef, index, value);
+        frame.heap.putArray(arrayRef, index, value);
 
         //Log.result(frame.getCurrentOpCode(), arrayRef, index, value);
     }
 
     public static void lastore(final Frame frame) {
-        long value = frame.getOperandStack().popLong();
-        int index = frame.getOperandStack().popInt();
-        ObjectRef arrayRef = frame.getOperandStack().popRef();
+        long value = frame.operandStack.popLong();
+        int index = frame.operandStack.popInt();
+        ObjectRef arrayRef = frame.operandStack.popRef();
         if (!frame.checkArray(arrayRef, index)) {
             return;
         }
-        frame.getHeap().putArray(arrayRef, index, value);
+        frame.heap.putArray(arrayRef, index, value);
 
         //Log.result(frame.getCurrentOpCode(), arrayRef, index, value);
     }
 
     public static void fastore(final Frame frame) {
-        float value = frame.getOperandStack().popFloat();
-        int index = frame.getOperandStack().popInt();
-        ObjectRef arrayRef = frame.getOperandStack().popRef();
+        float value = frame.operandStack.popFloat();
+        int index = frame.operandStack.popInt();
+        ObjectRef arrayRef = frame.operandStack.popRef();
         if (!frame.checkArray(arrayRef, index)) {
             return;
         }
-        frame.getHeap().putArray(arrayRef, index, value);
+        frame.heap.putArray(arrayRef, index, value);
 
         //Log.result(frame.getCurrentOpCode(), arrayRef, index, value);
     }
 
     public static void dastore(final Frame frame) {
-        double value = frame.getOperandStack().popDouble();
-        int index = frame.getOperandStack().popInt();
-        ObjectRef arrayRef = frame.getOperandStack().popRef();
+        double value = frame.operandStack.popDouble();
+        int index = frame.operandStack.popInt();
+        ObjectRef arrayRef = frame.operandStack.popRef();
         if (!frame.checkArray(arrayRef, index)) {
             return;
         }
-        frame.getHeap().putArray(arrayRef, index, value);
+        frame.heap.putArray(arrayRef, index, value);
 
         //Log.result(frame.getCurrentOpCode(), arrayRef, index, value);
     }
 
     public static void aastore(final Frame frame) {
-        ObjectRef value = frame.getOperandStack().popRef();
-        int index = frame.getOperandStack().popInt();
-        ObjectRef arrayRef = frame.getOperandStack().popRef();
+        ObjectRef value = frame.operandStack.popRef();
+        int index = frame.operandStack.popInt();
+        ObjectRef arrayRef = frame.operandStack.popRef();
         if (!frame.checkArray(arrayRef, index)) {
             return;
         }
-        frame.getHeap().putArray(arrayRef, index, value);
+        frame.heap.putArray(arrayRef, index, value);
 
         //Log.result(frame.getCurrentOpCode(), arrayRef, index, value);
     }
 
     public static void bastore(final Frame frame) {
-        int i = frame.getOperandStack().popInt();
-        int index = frame.getOperandStack().popInt();
-        ObjectRef arrayRef = frame.getOperandStack().popRef();
+        int i = frame.operandStack.popInt();
+        int index = frame.operandStack.popInt();
+        ObjectRef arrayRef = frame.operandStack.popRef();
         if (!frame.checkArray(arrayRef, index)) {
             return;
         }
         if (arrayRef.getVariableType().getComponentType().isBoolean()) {
             boolean value = i == 1 ? true : false;
-            frame.getHeap().putArray(arrayRef, index, value);
+            frame.heap.putArray(arrayRef, index, value);
             //Log.result(frame.getCurrentOpCode(), arrayRef, index, value);
         } else {
             byte value = (byte) i;
-            frame.getHeap().putArray(arrayRef, index, value);
+            frame.heap.putArray(arrayRef, index, value);
             //Log.result(frame.getCurrentOpCode(), arrayRef, index, value);
         }
     }
 
     public static void castore(final Frame frame) {
-        char value = frame.getOperandStack().popChar();
-        int index = frame.getOperandStack().popInt();
-        ObjectRef arrayRef = frame.getOperandStack().popRef();
+        char value = frame.operandStack.popChar();
+        int index = frame.operandStack.popInt();
+        ObjectRef arrayRef = frame.operandStack.popRef();
         if (!frame.checkArray(arrayRef, index)) {
             return;
         }
-        frame.getHeap().putArray(arrayRef, index, value);
+        frame.heap.putArray(arrayRef, index, value);
 
         //Log.result(frame.getCurrentOpCode(), arrayRef, index, value);
     }
 
     public static void sastore(final Frame frame) {
-        short value = frame.getOperandStack().popShort();
-        int index = frame.getOperandStack().popInt();
-        ObjectRef arrayRef = frame.getOperandStack().popRef();
+        short value = frame.operandStack.popShort();
+        int index = frame.operandStack.popInt();
+        ObjectRef arrayRef = frame.operandStack.popRef();
         if (!frame.checkArray(arrayRef, index)) {
             return;
         }
-        frame.getHeap().putArray(arrayRef, index, value);
+        frame.heap.putArray(arrayRef, index, value);
 
         //Log.result(frame.getCurrentOpCode(), arrayRef, index, value);
     }

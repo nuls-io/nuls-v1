@@ -25,7 +25,10 @@
 package io.nuls.protocol.storage.service;
 
 import io.nuls.kernel.model.Result;
-import io.nuls.protocol.storage.po.UpgradeInfoPo;
+import io.nuls.protocol.storage.po.ProtocolInfoPo;
+import io.nuls.protocol.storage.po.ProtocolTempInfoPo;
+
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -51,20 +54,46 @@ public interface VersionManagerStorageService {
     Integer getMainVersion();
 
     /**
-     * 保存已经升级新版程序的节点数
-     * Save the number of nodes that have upgraded the new version of the program
      *
-     * @param upgradeInfoPo 某个版本的升级信息
+     * @param protocolInfoPo 某个版本的升级信息
      * @return Result 结果
      */
-    Result saveUpgradeCount(UpgradeInfoPo upgradeInfoPo);
+    Result saveProtocolInfoPo(ProtocolInfoPo protocolInfoPo);
 
     /**
-     * 获取已经升级新版程序的节点数
-     * Gets the number of nodes that have upgraded the new version of the program
      *
      * @param version 版本号
-     * @return UpgradeInfoPo 对应版本的升级信息
+     * @return ProtocolInfoPo 对应版本的升级信息
      */
-    UpgradeInfoPo getUpgradeCount(int version);
+    ProtocolInfoPo getProtocolInfoPo(int version);
+
+    /**
+     * 保存升级新版的临时数据
+     * Save the number of nodes that have upgraded the new version of the program
+     *
+     * @param tempInfoPo 某个版本的升级信息
+     * @return Result 结果
+     */
+    Result saveProtocolTempInfoPo(ProtocolTempInfoPo tempInfoPo);
+
+    /**
+     * 获取升级新版的临时数据
+     * Gets the number of nodes that have upgraded the new version of the program
+     *
+     * @param key 版本号
+     * @return ProtocolTempInfoPo 对应版本的升级信息
+     */
+    ProtocolTempInfoPo getProtocolTempInfoPo(String key);
+
+    /**
+     * 获取所有升级新版的临时数据
+     * @return
+     */
+    Map<String,ProtocolTempInfoPo> getProtocolTempMap();
+
+    void removeProtocolTempInfo(String key);
+
+    Result saveChangeTxHashBlockHeight(Long effectiveHeight);
+
+    Long getChangeTxHashBlockHeight();
 }

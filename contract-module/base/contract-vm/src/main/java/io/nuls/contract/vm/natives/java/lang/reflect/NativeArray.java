@@ -22,7 +22,7 @@ public class NativeArray {
 
     public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = null;
-        switch (methodCode.getName()) {
+        switch (methodCode.name) {
             case "newArray":
                 result = newArray(methodCode, methodArgs, frame);
                 break;
@@ -34,10 +34,10 @@ public class NativeArray {
     }
 
     private static Result newArray(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        ObjectRef componentType = (ObjectRef) methodArgs.getInvokeArgs()[0];
-        int length = (int) methodArgs.getInvokeArgs()[1];
+        ObjectRef componentType = (ObjectRef) methodArgs.invokeArgs[0];
+        int length = (int) methodArgs.invokeArgs[1];
         VariableType variableType = VariableType.valueOf("[" + componentType.getRef());
-        ObjectRef array = frame.getHeap().newArray(variableType, length);
+        ObjectRef array = frame.heap.newArray(variableType, length);
         Result result = NativeMethod.result(methodCode, array, frame);
         return result;
     }

@@ -22,7 +22,7 @@ public class NativeUnsafe {
 
     public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = null;
-        switch (methodCode.getName()) {
+        switch (methodCode.name) {
             case "compareAndSwapLong":
                 result = compareAndSwapLong(methodCode, methodArgs, frame);
                 break;
@@ -37,14 +37,14 @@ public class NativeUnsafe {
     }
 
     private static Result compareAndSwapLong(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        int bits = (int) methodArgs.getInvokeArgs()[0];
+        int bits = (int) methodArgs.invokeArgs[0];
         float f = Float.intBitsToFloat(bits);
         Result result = NativeMethod.result(methodCode, f, frame);
         return result;
     }
 
     private static Result compareAndSwapObject(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        float value = (float) methodArgs.getInvokeArgs()[0];
+        float value = (float) methodArgs.invokeArgs[0];
         int bits = Float.floatToRawIntBits(value);
         Result result = NativeMethod.result(methodCode, bits, frame);
         return result;

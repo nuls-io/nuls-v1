@@ -8,8 +8,6 @@ import io.nuls.contract.sdk.annotation.View;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.contract.vm.util.Utils.classNameReplace;
-
 public class ProgramConstants {
 
     public static final String CONTRACT_INTERFACE_NAME = classNameReplace(Contract.class.getName());
@@ -57,6 +55,8 @@ public class ProgramConstants {
     };
 
     public static final Class[] VM_INIT_CLASSES = new Class[]{
+            Object.class,
+            Class.class,
             StrictMath.class,
             RuntimeException.class,
             ArrayIndexOutOfBoundsException.class,
@@ -93,6 +93,10 @@ public class ProgramConstants {
             VM_INIT_CLASS_NAMES[i] = classNameReplace(VM_INIT_CLASSES[i].getName());
         }
         VM_INIT_CLASS_NAMES[length] = "java/lang/CharacterDataLatin1";
+    }
+
+    public static String classNameReplace(String s) {
+        return s.replace('.', '/');
     }
 
 }

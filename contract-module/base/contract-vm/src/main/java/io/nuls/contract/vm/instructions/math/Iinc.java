@@ -10,9 +10,9 @@ public class Iinc {
         IincInsnNode iincInsnNode = frame.iincInsnNode();
         int index = iincInsnNode.var;
         int incr = iincInsnNode.incr;
-        int value = frame.getLocalVariables().getInt(index);
+        int value = frame.localVariables.getInt(index);
         int result = value + incr;
-        frame.getLocalVariables().setInt(index, result);
+        frame.localVariables.setInt(index, result);
 
         //Log.result(frame.getCurrentOpCode(), result, value, "+", incr);
     }

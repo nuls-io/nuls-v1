@@ -290,7 +290,8 @@ public class BlockResource {
                     continue;
                 }
                 Coin coin = tx.getCoinData().getTo().get(inputDto.getFromIndex());
-                inputDto.setAddress(AddressTool.getStringAddressByBytes(coin.getOwner()));
+                //inputDto.setAddress(AddressTool.getStringAddressByBytes(coin.()));
+                inputDto.setAddress(AddressTool.getStringAddressByBytes(coin.getAddress()));
             }
         }
 

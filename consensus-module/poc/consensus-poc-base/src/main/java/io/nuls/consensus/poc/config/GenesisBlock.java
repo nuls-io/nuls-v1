@@ -24,8 +24,6 @@
  */
 package io.nuls.consensus.poc.config;
 
-import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.model.Address;
 import io.nuls.account.service.AccountService;
 import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.core.tools.crypto.ECKey;
@@ -34,12 +32,14 @@ import io.nuls.core.tools.io.StringFileLoader;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.BlockSignature;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
@@ -59,7 +59,6 @@ public final class GenesisBlock extends Block {
 
     private static final String CONFIG_FILED_TIME = "time";
     private static final String CONFIG_FILED_HEIGHT = "height";
-    private static final String CONFIG_FILED_STATE_ROOT = "stateRoot";
     private static final String CONFIG_FILED_TXS = "txs";
     private static final String CONFIG_FILED_ADDRESS = "address";
     private static final String CONFIG_FILED_AMOUNT = "amount";
@@ -150,13 +149,11 @@ public final class GenesisBlock extends Block {
 
     private void fillHeader(Map<String, Object> jsonMap) throws NulsException {
         Integer height = (Integer) jsonMap.get(CONFIG_FILED_HEIGHT);
-        String stateRoot = (String) jsonMap.get(CONFIG_FILED_STATE_ROOT);
         AssertUtil.canNotEmpty(height, KernelErrorCode.CONFIG_ERROR.getMsg());
 
         BlockHeader header = new BlockHeader();
         this.setHeader(header);
         header.setHeight(height);
-        header.setStateRoot(Hex.decode(stateRoot));
         header.setTime(blockTime);
         header.setPreHash(NulsDigestData.calcDigestData(new byte[35]));
         header.setTxCount(this.getTxs().size());
@@ -179,11 +176,11 @@ public final class GenesisBlock extends Block {
         }
         header.setHash(NulsDigestData.calcDigestData(header));
 
-        P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
+        BlockSignature p2PKHScriptSig = new BlockSignature();
         NulsSignData signData = this.signature(header.getHash().getDigestBytes());
         p2PKHScriptSig.setSignData(signData);
         p2PKHScriptSig.setPublicKey(getGenesisPubkey());
-        header.setScriptSig(p2PKHScriptSig);
+        header.setBlockSignature(p2PKHScriptSig);
     }
 
     private NulsSignData signature(byte[] bytes) throws NulsException {

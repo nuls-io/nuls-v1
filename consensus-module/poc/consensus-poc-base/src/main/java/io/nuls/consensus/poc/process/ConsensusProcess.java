@@ -46,7 +46,6 @@ import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
-import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
@@ -293,6 +292,8 @@ public class ConsensusProcess {
         if (NulsVersionManager.getCurrentVersion() > 1) {
             extendsData.setMainVersion(NulsVersionManager.getMainVersion());
             extendsData.setCurrentVersion(NulsVersionManager.getCurrentVersion());
+            extendsData.setPercent(NulsVersionManager.getCurrentProtocolContainer().getPercent());
+            extendsData.setDelay(NulsVersionManager.getCurrentProtocolContainer().getDelay());
         }
 
         StringBuilder str = new StringBuilder();
@@ -319,7 +320,7 @@ public class ConsensusProcess {
         /**
          * pierre add 智能合约相关
          */
-        byte[] stateRoot = bestBlock.getHeader().getStateRoot();
+        byte[] stateRoot = ConsensusTool.getStateRoot(bestBlock.getHeader());
         // 更新世界状态根
         bd.setStateRoot(stateRoot);
         long height = bestBlock.getHeader().getHeight();
@@ -459,6 +460,10 @@ public class ConsensusProcess {
 
 
         start = System.nanoTime();
+
+        // 更新本地打包最终世界状态根
+        bd.getExtendsData().setStateRoot(bd.getStateRoot());
+
         Block newBlock = ConsensusTool.createBlock(bd, round.getLocalPacker());
         long createBlockUser = System.nanoTime() - start;
         Log.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
@@ -509,8 +514,9 @@ public class ConsensusProcess {
                 RedPunishData redPunishData = new RedPunishData();
                 redPunishData.setAddress(address);
                 redPunishData.setReasonCode(PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode());
+                redPunishData.setEvidence(bestBlock.serialize());
                 redPunishTransaction.setTxData(redPunishData);
-                CoinData coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress(), PocConsensusConstant.RED_PUNISH_LOCK_TIME);
+                CoinData coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress(), bestBlock.getHeader().getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME);
                 redPunishTransaction.setCoinData(coinData);
                 redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
                 txList.add(redPunishTransaction);

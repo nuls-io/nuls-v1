@@ -10,7 +10,7 @@ public class Lookupswitch {
     public static void lookupswitch(final Frame frame) {
         LookupSwitchInsnNode lookup = frame.lookupSwitchInsnNode();
         LabelNode labelNode = lookup.dflt;
-        int key = frame.getOperandStack().popInt();
+        int key = frame.operandStack.popInt();
         for (int i = 0; i < lookup.keys.size(); i++) {
             int k = lookup.keys.get(i);
             if (k == key) {

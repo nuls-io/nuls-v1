@@ -119,8 +119,8 @@ public class TransactionDto {
                 this.setRemark(Hex.encode(tx.getRemark()));
             }
         }
-        if (tx.getScriptSig() != null) {
-            this.setScriptSig(Hex.encode(tx.getScriptSig()));
+        if (tx.getTransactionSignature() != null) {
+            this.setScriptSig(Hex.encode(tx.getTransactionSignature()));
         }
 
         CoinData coinData = tx.getCoinData();

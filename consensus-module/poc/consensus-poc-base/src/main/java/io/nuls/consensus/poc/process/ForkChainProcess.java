@@ -39,6 +39,7 @@ import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
+import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
@@ -71,6 +72,8 @@ public class ForkChainProcess {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private ContractService contractService = NulsContext.getServiceBean(ContractService.class);
     private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
+
+    private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
 
     public ForkChainProcess(ChainManager chainManager) {
         this.chainManager = chainManager;
@@ -429,9 +432,9 @@ public class ForkChainProcess {
              * pierre add 智能合约相关
              */
             long bestHeight = preBlock.getHeader().getHeight();
-            byte[] stateRoot = preBlock.getHeader().getStateRoot();
+            byte[] stateRoot = ConsensusTool.getStateRoot(preBlock.getHeader());
             preBlock = newBlock;
-            byte[] receiveStateRoot = newBlock.getHeader().getStateRoot();
+            byte[] receiveStateRoot = ConsensusTool.getStateRoot(newBlock.getHeader());
             Result<ContractResult> invokeContractResult = null;
             ContractResult contractResult = null;
             Map<String, Coin> contractUsedCoinMap = new HashMap<>();
@@ -509,6 +512,8 @@ public class ForkChainProcess {
                 Result result = blockService.saveBlock(newBlock);
                 boolean success = result.isSuccess();
                 if (success) {
+                    //更新版本协议内容
+                    nulsProtocolProcess.processProtocolUpGrade(newBlock.getHeader());
                     successList.add(newBlock);
                 } else {
                     ChainLog.debug("save block error : " + result.getMsg() + " , block height : " + newBlock.getHeader().getHeight() + " , hash: " + newBlock.getHeader().getHash());
@@ -520,7 +525,7 @@ public class ForkChainProcess {
                 changeSuccess = false;
                 break;
             }
-            Log.info("=========================================切换主链, 高度: {} 验证结束. - ", newBlock.getHeader().getHeight());
+            //Log.info("=========================================切换主链, 高度: {} 验证结束. - ", newBlock.getHeader().getHeight());
         }
 
         ChainLog.debug("add new blocks complete, result {}, success count is {} , now service best block : {} - {}", changeSuccess, successList.size(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
@@ -536,29 +541,27 @@ public class ForkChainProcess {
         } else {
             //Fallback status
             //回退状态
-            Log.info("=========================================切换失败，回滚区块. + ");
+            //Log.info("=========================================切换失败，回滚区块. + ");
             Collections.reverse(successList);
             for (Block rollBlock : successList) {
-                Result result = blockService.rollbackBlock(rollBlock);
-                if(result.isSuccess()) {
-                    Log.info("=========================================切换失败，回滚区块成功, 高度: {}.", rollBlock.getHeader().getHeight());
-                } else {
-                    Log.info("=========================================切换失败，回滚区块失败, 高度: {}.", rollBlock.getHeader().getHeight());
+                Result rs = blockService.rollbackBlock(rollBlock);
+                if (rs.isSuccess()) {
+                    //回滚版本更新统计数据
+                    nulsProtocolProcess.processProtoclRollback(rollBlock.getHeader());
                 }
                 RewardStatisticsProcess.rollbackBlock(rollBlock);
             }
 
             Collections.reverse(rollbackBlockList);
             for (Block addBlock : rollbackBlockList) {
-                Result result = blockService.saveBlock(addBlock);
-                if(result.isSuccess()) {
-                    Log.info("=========================================切换失败，恢复区块成功, 高度: {}.", addBlock.getHeader().getHeight());
-                } else {
-                    Log.info("=========================================切换失败，恢复区块失败, 高度: {}.", addBlock.getHeader().getHeight());
+                Result rs = blockService.saveBlock(addBlock);
+                if (rs.isSuccess()) {
+                    //更新版本协议内容
+                    nulsProtocolProcess.processProtocolUpGrade(addBlock.getHeader());
                 }
                 RewardStatisticsProcess.addBlock(addBlock);
             }
-            Log.info("=========================================切换失败，回滚区块. - ");
+            //Log.info("=========================================切换失败，回滚区块. - ");
         }
         return changeSuccess;
     }
@@ -570,15 +573,21 @@ public class ForkChainProcess {
             try {
                 boolean success = blockService.rollbackBlock(rollbackBlock).isSuccess();
                 if (success) {
-                    Log.info("=========================================回滚区块成功, 高度: {}.", rollbackBlock.getHeader().getHeight());
+                    //回滚版本更新统计数据
+                    nulsProtocolProcess.processProtoclRollback(rollbackBlock.getHeader());
+                    //Log.info("=========================================回滚区块成功, 高度: {}.", rollbackBlock.getHeader().getHeight());
                     RewardStatisticsProcess.rollbackBlock(rollbackBlock);
                     rollbackList.add(rollbackBlock);
                 } else {
                     Collections.reverse(rollbackList);
                     for (Block block : rollbackList) {
                         try {
-                            Log.info("=========================================回滚区块失败, 高度: {}.", rollbackBlock.getHeader().getHeight());
-                            blockService.saveBlock(block);
+                            //Log.info("=========================================回滚区块失败, 高度: {}.", rollbackBlock.getHeader().getHeight());
+                            Result rs = blockService.saveBlock(block);
+                            if (rs.isSuccess()) {
+                                //更新版本协议内容
+                                nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
+                            }
                             RewardStatisticsProcess.addBlock(block);
                         } catch (Exception ex) {
                             Log.error("Rollback failed, failed to save block during recovery", ex);
@@ -592,7 +601,11 @@ public class ForkChainProcess {
                 Collections.reverse(rollbackList);
                 for (Block block : rollbackList) {
                     try {
-                        blockService.saveBlock(block);
+                        Result rs = blockService.saveBlock(block);
+                        if (rs.isSuccess()) {
+                            //更新版本协议内容
+                            nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
+                        }
                         RewardStatisticsProcess.addBlock(block);
                     } catch (Exception ex) {
                         Log.error("Rollback failed, failed to save block during recovery", ex);

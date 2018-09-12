@@ -7,8 +7,8 @@ public class Istore {
 
     public static void istore(final Frame frame) {
         int index = frame.varInsnNode().var;
-        int value = frame.getOperandStack().popInt();
-        frame.getLocalVariables().setInt(index, value);
+        int value = frame.operandStack.popInt();
+        frame.localVariables.setInt(index, value);
 
         //Log.result(frame.getCurrentOpCode(), value, index);
     }

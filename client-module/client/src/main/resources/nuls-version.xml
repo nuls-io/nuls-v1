@@ -25,10 +25,6 @@
                 <tx ref="stopAgentTx_V1"/>
                 <tx ref="redPunishTx_V1"/>
                 <tx ref="yellowPunishTx_V1"/>
-                <tx ref="callContractTx_V1"/>
-                <tx ref="contractTransferTx_V1"/>
-                <tx ref="createContractTx_V1"/>
-                <tx ref="deleteContractTx_V1"/>
             </txs>
 
             <messages>
@@ -58,5 +54,20 @@
             </messages>
         </protocol>
 
+        <!-- extend 版本继承哪个版本-->
+        <protocol version="2" block="" extend="1" percent="60" delay="30000">
+            <!-- 当前版本作废的交易协议-->
+            <!--<tx-discards>-->
+            <!--<tx-discard ref="transferTx_V1"/>-->
+            <!--</tx-discards>-->
+            <txs>
+                <tx ref="callContractTx_V1"/>
+                <tx ref="contractTransferTx_V1"/>
+                <tx ref="createContractTx_V1"/>
+                <tx ref="deleteContractTx_V1"/>
+            </txs>
+        </protocol>
+        <!--<protocol version="3" block="" extend="2" percent="75" delay="60">-->
+        <!--</protocol>-->
     </protocols>
 </nuls-version>

@@ -7,8 +7,8 @@ public class Lload {
 
     public static void lload(final Frame frame) {
         int index = frame.varInsnNode().var;
-        long value = frame.getLocalVariables().getLong(index);
-        frame.getOperandStack().pushLong(value);
+        long value = frame.localVariables.getLong(index);
+        frame.operandStack.pushLong(value);
 
         //Log.result(frame.getCurrentOpCode(), value, index);
     }

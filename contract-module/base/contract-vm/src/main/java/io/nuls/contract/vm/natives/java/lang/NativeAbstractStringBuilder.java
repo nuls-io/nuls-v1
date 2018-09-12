@@ -22,7 +22,7 @@ public class NativeAbstractStringBuilder {
 
     public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = null;
-        switch (methodCode.getName()) {
+        switch (methodCode.name) {
             case "append":
                 result = append(methodCode, methodArgs, frame);
                 break;
@@ -34,11 +34,11 @@ public class NativeAbstractStringBuilder {
     }
 
     private static Result append(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        ObjectRef objectRef = methodArgs.getObjectRef();
-        Object a = methodArgs.getInvokeArgs()[0];
-        ObjectRef ref = frame.getHeap().newString(a.toString());
-        MethodCode append = frame.getMethodArea().loadMethod(TYPE, "append", "(Ljava/lang/String;)Ljava/lang/AbstractStringBuilder;");
-        frame.getVm().run(append, new Object[]{objectRef, ref}, false);
+        ObjectRef objectRef = methodArgs.objectRef;
+        Object a = methodArgs.invokeArgs[0];
+        ObjectRef ref = frame.heap.newString(a.toString());
+        MethodCode append = frame.methodArea.loadMethod(TYPE, "append", "(Ljava/lang/String;)Ljava/lang/AbstractStringBuilder;");
+        frame.vm.run(append, new Object[]{objectRef, ref}, false);
         Result result = NativeMethod.result(methodCode, objectRef, frame);
         return result;
     }

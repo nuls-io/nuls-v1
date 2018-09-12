@@ -24,6 +24,7 @@
 package io.nuls.contract.rpc.model;
 
 import io.nuls.contract.dto.ContractTokenInfo;
+import io.nuls.contract.util.ContractUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -42,7 +43,7 @@ public class ContractTokenInfoDto {
     @ApiModelProperty(name = "name", value = "token名称")
     private String name;
     @ApiModelProperty(name = "amount", value = "token数量")
-    private BigInteger amount;
+    private String amount;
 
     public ContractTokenInfoDto() {
     }
@@ -50,7 +51,7 @@ public class ContractTokenInfoDto {
     public ContractTokenInfoDto(ContractTokenInfo info) {
         this.contractAddress = info.getContractAddress();
         this.name = info.getName();
-        this.amount = info.getAmount();
+        this.amount = ContractUtil.bigInteger2String(info.getAmount());
     }
 
     public String getContractAddress() {
@@ -69,11 +70,11 @@ public class ContractTokenInfoDto {
         this.name = name;
     }
 
-    public BigInteger getAmount() {
+    public String getAmount() {
         return amount;
     }
 
-    public void setAmount(BigInteger amount) {
+    public void setAmount(String amount) {
         this.amount = amount;
     }
 }

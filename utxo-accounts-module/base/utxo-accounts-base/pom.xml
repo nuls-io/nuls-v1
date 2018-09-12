@@ -36,6 +36,11 @@
             <artifactId>utxo-accounts</artifactId>
             <version>1.1.0-BETA</version>
         </dependency>
+        <dependency>
+            <groupId>io.nuls.contract-module</groupId>
+            <artifactId>contract</artifactId>
+            <version>1.1.0-BETA</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>${project.artifactId}-${project.version}</finalName>

@@ -6,25 +6,25 @@ import io.nuls.contract.vm.util.Log;
 public class F2x {
 
     public static void f2i(Frame frame) {
-        float value = frame.getOperandStack().popFloat();
+        float value = frame.operandStack.popFloat();
         int result = (int) value;
-        frame.getOperandStack().pushInt(result);
+        frame.operandStack.pushInt(result);
 
         //Log.result(frame.getCurrentOpCode(), result, value);
     }
 
     public static void f2l(Frame frame) {
-        float value = frame.getOperandStack().popFloat();
+        float value = frame.operandStack.popFloat();
         long result = (long) value;
-        frame.getOperandStack().pushLong(result);
+        frame.operandStack.pushLong(result);
 
         //Log.result(frame.getCurrentOpCode(), result, value);
     }
 
     public static void f2d(Frame frame) {
-        float value = frame.getOperandStack().popFloat();
+        float value = frame.operandStack.popFloat();
         double result = (double) value;
-        frame.getOperandStack().pushDouble(result);
+        frame.operandStack.pushDouble(result);
 
         //Log.result(frame.getCurrentOpCode(), result, value);
     }

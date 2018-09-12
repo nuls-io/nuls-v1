@@ -6,7 +6,7 @@ import io.nuls.contract.vm.util.Log;
 public class IfCmp {
 
     public static void ifeq(Frame frame) {
-        int value1 = frame.getOperandStack().popInt();
+        int value1 = frame.operandStack.popInt();
         int value2 = 0;
         boolean result = value1 == value2;
         if (result) {
@@ -17,7 +17,7 @@ public class IfCmp {
     }
 
     public static void ifne(Frame frame) {
-        int value1 = frame.getOperandStack().popInt();
+        int value1 = frame.operandStack.popInt();
         int value2 = 0;
         boolean result = value1 != value2;
         if (result) {
@@ -28,7 +28,7 @@ public class IfCmp {
     }
 
     public static void iflt(Frame frame) {
-        int value1 = frame.getOperandStack().popInt();
+        int value1 = frame.operandStack.popInt();
         int value2 = 0;
         boolean result = value1 < value2;
         if (result) {
@@ -39,7 +39,7 @@ public class IfCmp {
     }
 
     public static void ifge(Frame frame) {
-        int value1 = frame.getOperandStack().popInt();
+        int value1 = frame.operandStack.popInt();
         int value2 = 0;
         boolean result = value1 >= value2;
         if (result) {
@@ -50,7 +50,7 @@ public class IfCmp {
     }
 
     public static void ifgt(Frame frame) {
-        int value1 = frame.getOperandStack().popInt();
+        int value1 = frame.operandStack.popInt();
         int value2 = 0;
         boolean result = value1 > value2;
         if (result) {
@@ -61,7 +61,7 @@ public class IfCmp {
     }
 
     public static void ifle(Frame frame) {
-        int value1 = frame.getOperandStack().popInt();
+        int value1 = frame.operandStack.popInt();
         int value2 = 0;
         boolean result = value1 <= value2;
         if (result) {

@@ -22,8 +22,8 @@ public class Invokevirtual {
         String methodDesc = methodInsnNode.desc;
 
         List<VariableType> variableTypes = VariableType.parseArgs(methodDesc);
-        MethodArgs methodArgs = new MethodArgs(variableTypes, frame.getOperandStack(), false);
-        ObjectRef objectRef = methodArgs.getObjectRef();
+        MethodArgs methodArgs = new MethodArgs(variableTypes, frame.operandStack, false);
+        ObjectRef objectRef = methodArgs.objectRef;
         if (objectRef == null) {
             frame.throwNullPointerException();
             return;
@@ -43,7 +43,7 @@ public class Invokevirtual {
             className = "java/lang/Object";
         }
 
-        MethodCode methodCode = frame.getMethodArea().loadMethod(className, methodName, methodDesc);
+        MethodCode methodCode = frame.methodArea.loadMethod(className, methodName, methodDesc);
 
         //Log.opcode(frame.getCurrentOpCode(), objectRef, methodName, methodDesc);
 
@@ -52,7 +52,7 @@ public class Invokevirtual {
             return;
         }
 
-        frame.getVm().run(methodCode, methodArgs.getFrameArgs(), true);
+        frame.vm.run(methodCode, methodArgs.frameArgs, true);
     }
 
 }

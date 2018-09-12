@@ -23,7 +23,7 @@ public class NativeSystem {
 
     public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = null;
-        switch (methodCode.getName()) {
+        switch (methodCode.name) {
             case "arraycopy":
                 result = arraycopy(methodCode, methodArgs, frame);
                 break;
@@ -35,7 +35,7 @@ public class NativeSystem {
     }
 
     private static Result arraycopy(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Object[] args = methodArgs.getInvokeArgs();
+        Object[] args = methodArgs.invokeArgs;
         ObjectRef srcObjectRef = (ObjectRef) args[0];
         int srcPos = (int) args[1];
         ObjectRef destObjectRef = (ObjectRef) args[2];
@@ -46,7 +46,7 @@ public class NativeSystem {
                 && frame.checkArray(srcObjectRef, srcPos + length - 1)
                 && frame.checkArray(destObjectRef, destPos)
                 && frame.checkArray(destObjectRef, destPos + length - 1)) {
-            frame.getHeap().arraycopy(srcObjectRef, srcPos, destObjectRef, destPos, length);
+            frame.heap.arraycopy(srcObjectRef, srcPos, destObjectRef, destPos, length);
         }
 
         Result result = NativeMethod.result(methodCode, null, frame);

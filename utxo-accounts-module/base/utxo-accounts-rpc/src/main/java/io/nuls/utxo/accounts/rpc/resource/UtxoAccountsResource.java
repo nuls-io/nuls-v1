@@ -78,6 +78,8 @@ public class UtxoAccountsResource {
             AccountBalanceDto accountBalance=new AccountBalanceDto();
             accountBalance.setAddress(AddressTool.getStringAddressByBytes(dbAccountsBalance.getOwner()));
             long totalNa=dbAccountsBalance.getOutputBalance()-(dbAccountsBalance.getInputBalance());
+            totalNa+=dbAccountsBalance.getContractToBalance();
+            totalNa-=dbAccountsBalance.getContractFromBalance();
             accountBalance.setNuls( new BigDecimal(totalNa).toPlainString());
             long timeLockedNa=0;
             long heightLockedNa=0;
@@ -111,6 +113,8 @@ public class UtxoAccountsResource {
             accountBalance.setSynBlockHeight(String.valueOf(synBlockHeight));
             long netHeight= NulsContext.getInstance().getNetBestBlockHeight();
             accountBalance.setNetBlockHeight(String.valueOf(netHeight));
+            accountBalance.setContractIn(String.valueOf(dbAccountsBalance.getContractToBalance()));
+            accountBalance.setContractOut(String.valueOf(dbAccountsBalance.getContractFromBalance()));
             return Result.getSuccess().setData(accountBalance).toRpcClientResult();
         } catch (NulsException e) {
             Log.error(e);

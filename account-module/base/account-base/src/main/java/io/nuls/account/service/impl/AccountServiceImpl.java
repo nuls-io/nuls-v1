@@ -48,6 +48,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -55,7 +56,10 @@ import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.ScriptUtil;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.SerializeUtils;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -234,25 +238,34 @@ public class AccountServiceImpl implements AccountService {
                 return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
             }
             priKey = keyStore.getPrikey();
+            try {
+                account = AccountTool.createAccount(Hex.encode(priKey));
+            } catch (NulsException e) {
+                return Result.getFailed(e.getErrorCode());
+            }
+            //如果私钥生成的地址和keystore的地址不相符，说明私钥错误
+            if(!account.getAddress().getBase58().equals(keyStore.getAddress())){
+                return Result.getFailed(AccountErrorCode.PRIVATE_KEY_WRONG);
+            }
         } else if (null == keyStore.getPrikey() && null != keyStore.getEncryptedPrivateKey()) {
             if (!StringUtils.validPassword(password)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
             try {
                 priKey = AESEncrypt.decrypt(Hex.decode(keyStore.getEncryptedPrivateKey()), password);
-            } catch (Exception e) {
+                account = AccountTool.createAccount(Hex.encode(priKey));
+            } catch (CryptoException e) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            } catch (NulsException e) {
+                return Result.getFailed(e.getErrorCode());
+            }
+            //如果私钥生成的地址和keystore的地址不相符，说明密码错误
+            if(!account.getAddress().getBase58().equals(keyStore.getAddress())){
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         } else {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        try {
-            account = AccountTool.createAccount(Hex.encode(priKey));
-        } catch (NulsException e) {
-            return Result.getFailed(e.getErrorCode());
-        }
-        account.setAddress(new Address(keyStore.getAddress()));
-
         Alias aliasDb = null;
         if (StringUtils.isNotBlank(keyStore.getAlias())) {
             aliasDb = aliasService.getAlias(keyStore.getAlias());
@@ -269,8 +282,6 @@ public class AccountServiceImpl implements AccountService {
                 }
             }
         }
-
-        account.setPubKey(keyStore.getPubKey());
         if (StringUtils.validPassword(password)) {
             try {
                 account.encrypt(password);
@@ -463,7 +474,7 @@ public class AccountServiceImpl implements AccountService {
         list.sort(new Comparator<Account>() {
             @Override
             public int compare(Account o1, Account o2) {
-                return (int) (o2.getCreateTime() - o1.getCreateTime());
+                return (o2.getCreateTime().compareTo(o1.getCreateTime()));
             }
         });
         return Result.getSuccess().setData(list);
@@ -517,11 +528,7 @@ public class AccountServiceImpl implements AccountService {
         //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
         if (account.isEncrypted() && account.isLocked()) {
             AssertUtil.canNotEmpty(password, "password can not be empty");
-            try {
-                return this.signDigest(digest, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
-            } catch (CryptoException e) {
-                throw new NulsException(AccountErrorCode.DECRYPT_ACCOUNT_ERROR);
-            }
+            return this.signDigest(digest, account.getPriKey(password));
         } else {
             return this.signDigest(digest, account.getPriKey());
         }
@@ -593,5 +600,27 @@ public class AccountServiceImpl implements AccountService {
             }
         }
         return Result.getSuccess().setData(alias);
+    }
+
+    @Override
+    public Result<Address> createMultiAccount(List<String> pubkeys, int m) {
+        locker.lock();
+        try {
+            Script redeemScript = ScriptUtil.creatRredeemScript(pubkeys,m);
+            Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
+            /*Account account = AccountTool.createAccount();
+            AccountPo po = new AccountPo(account);
+            Result result = accountStorageService.saveAccount(po);
+            if (result.isFailed()) {
+                return result;
+            }
+            accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);*/
+            return Result.getSuccess().setData(address);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsRuntimeException(KernelErrorCode.FAILED);
+        } finally {
+            locker.unlock();
+        }
     }
 }

@@ -8,8 +8,8 @@ public class Aload {
 
     public static void aload(final Frame frame) {
         int index = frame.varInsnNode().var;
-        ObjectRef objectRef = frame.getLocalVariables().getRef(index);
-        frame.getOperandStack().pushRef(objectRef);
+        ObjectRef objectRef = frame.localVariables.getRef(index);
+        frame.operandStack.pushRef(objectRef);
 
         //Log.result(frame.getCurrentOpCode(), objectRef, index);
     }

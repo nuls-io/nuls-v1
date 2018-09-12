@@ -17,6 +17,8 @@ public class UtxoAccountsBalancePo extends BaseNulsData {
     private Long outputBalance;
     private Long lockedPermanentBalance;
     private Long unLockedPermanentBalance;
+    private Long contractFromBalance;
+    private Long contractToBalance;
     private Long blockHeight=0L;
     private int txIndex=0;
     private List<LockedBalance> lockedTimeList=new ArrayList<>();
@@ -26,6 +28,8 @@ public class UtxoAccountsBalancePo extends BaseNulsData {
         this.outputBalance=0L;
         this.lockedPermanentBalance=0L;
         this.unLockedPermanentBalance=0L;
+        this.contractFromBalance=0L;
+        this.contractToBalance=0L;
     }
 
 
@@ -54,7 +58,21 @@ public class UtxoAccountsBalancePo extends BaseNulsData {
         this.outputBalance = outputBalance;
     }
 
+    public Long getContractFromBalance() {
+        return contractFromBalance;
+    }
 
+    public void setContractFromBalance(Long contractFromBalance) {
+        this.contractFromBalance = contractFromBalance;
+    }
+
+    public Long getContractToBalance() {
+        return contractToBalance;
+    }
+
+    public void setContractToBalance(Long contractToBalance) {
+        this.contractToBalance = contractToBalance;
+    }
 
     public Long getBlockHeight() {
         return blockHeight;
@@ -111,6 +129,8 @@ public class UtxoAccountsBalancePo extends BaseNulsData {
         stream.writeInt64(outputBalance);
         stream.writeInt64(lockedPermanentBalance);
         stream.writeInt64(unLockedPermanentBalance);
+        stream.writeInt64(contractFromBalance);
+        stream.writeInt64(contractToBalance);
         stream.writeInt64(blockHeight);
         stream.writeUint32(txIndex);
         int lockedTimeListSize = lockedTimeList == null ? 0 : lockedTimeList.size();
@@ -138,6 +158,8 @@ public class UtxoAccountsBalancePo extends BaseNulsData {
         this.outputBalance=byteBuffer.readInt64();
         this.lockedPermanentBalance=byteBuffer.readInt64();
         this.unLockedPermanentBalance=byteBuffer.readInt64();
+        this.contractFromBalance=byteBuffer.readInt64();
+        this.contractToBalance=byteBuffer.readInt64();
         this.blockHeight=byteBuffer.readInt64();
         this.txIndex=byteBuffer.readInt32();
         int lockedTimeCount = (int) byteBuffer.readVarInt();
@@ -169,6 +191,8 @@ public class UtxoAccountsBalancePo extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfBytes(owner);
+        size += SerializeUtils.sizeOfInt64();
+        size += SerializeUtils.sizeOfInt64();
         size += SerializeUtils.sizeOfInt64();
         size += SerializeUtils.sizeOfInt64();
         size += SerializeUtils.sizeOfInt64();

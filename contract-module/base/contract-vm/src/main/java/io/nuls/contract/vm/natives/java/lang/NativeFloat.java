@@ -24,7 +24,7 @@ public class NativeFloat {
 
     public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = null;
-        switch (methodCode.getName()) {
+        switch (methodCode.name) {
             case "intBitsToFloat":
                 result = intBitsToFloat(methodCode, methodArgs, frame);
                 break;
@@ -48,22 +48,22 @@ public class NativeFloat {
     }
 
     private static Result intBitsToFloat(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        int bits = (int) methodArgs.getInvokeArgs()[0];
+        int bits = (int) methodArgs.invokeArgs[0];
         float f = Float.intBitsToFloat(bits);
         Result result = NativeMethod.result(methodCode, f, frame);
         return result;
     }
 
     private static Result floatToRawIntBits(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        float value = (float) methodArgs.getInvokeArgs()[0];
+        float value = (float) methodArgs.invokeArgs[0];
         int bits = Float.floatToRawIntBits(value);
         Result result = NativeMethod.result(methodCode, bits, frame);
         return result;
     }
 
     private static Result parseFloat(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        ObjectRef objectRef = (ObjectRef) methodArgs.getInvokeArgs()[0];
-        String s = frame.getHeap().runToString(objectRef);
+        ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
+        String s = frame.heap.runToString(objectRef);
         float f;
         try {
             f = Float.parseFloat(s);
@@ -76,17 +76,17 @@ public class NativeFloat {
     }
 
     private static Result toString(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        float f = (float) methodArgs.getInvokeArgs()[0];
+        float f = (float) methodArgs.invokeArgs[0];
         String s = Float.toString(f);
-        ObjectRef ref = frame.getHeap().newString(s);
+        ObjectRef ref = frame.heap.newString(s);
         Result result = NativeMethod.result(methodCode, ref, frame);
         return result;
     }
 
     private static Result toHexString(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        float f = (float) methodArgs.getInvokeArgs()[0];
+        float f = (float) methodArgs.invokeArgs[0];
         String s = Float.toHexString(f);
-        ObjectRef ref = frame.getHeap().newString(s);
+        ObjectRef ref = frame.heap.newString(s);
         Result result = NativeMethod.result(methodCode, ref, frame);
         return result;
     }

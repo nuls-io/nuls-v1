@@ -359,4 +359,15 @@ public interface AccountService {
      */
     Result<String> getAlias(String address);
 
+    /**
+     * 创建多重签名账户
+     * Create a specified number of accounts,and encrypt the accounts,
+     * all the accounts are encrypted by the same password
+     * if the password is NULL or "", the accounts will be unencrypted.
+     *
+     * @param pubkeys   公钥列表
+     * @param m         至少需要几个签名验证通过
+     * @return the account list created.
+     */
+    Result<Address> createMultiAccount(List<String> pubkeys, int m);
 }

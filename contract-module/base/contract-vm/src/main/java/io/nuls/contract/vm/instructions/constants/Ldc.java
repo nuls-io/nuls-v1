@@ -13,22 +13,22 @@ public class Ldc {
         //Log.opcode(frame.getCurrentOpCode(), value);
 
         if (value instanceof Integer) {
-            frame.getOperandStack().pushInt((int) value);
+            frame.operandStack.pushInt((int) value);
         } else if (value instanceof Long) {
-            frame.getOperandStack().pushLong((long) value);
+            frame.operandStack.pushLong((long) value);
         } else if (value instanceof Float) {
-            frame.getOperandStack().pushFloat((float) value);
+            frame.operandStack.pushFloat((float) value);
         } else if (value instanceof Double) {
-            frame.getOperandStack().pushDouble((double) value);
+            frame.operandStack.pushDouble((double) value);
         } else if (value instanceof String) {
             String str = (String) value;
-            ObjectRef objectRef = frame.getHeap().newString(str);
-            frame.getOperandStack().pushRef(objectRef);
+            ObjectRef objectRef = frame.heap.newString(str);
+            frame.operandStack.pushRef(objectRef);
         } else if (value instanceof Type) {
             Type type = (Type) value;
             String desc = type.getDescriptor();
-            ObjectRef objectRef = frame.getHeap().getClassRef(desc);
-            frame.getOperandStack().pushRef(objectRef);
+            ObjectRef objectRef = frame.heap.getClassRef(desc);
+            frame.operandStack.pushRef(objectRef);
         } else {
             throw new IllegalArgumentException("unknown ldc cst");
         }

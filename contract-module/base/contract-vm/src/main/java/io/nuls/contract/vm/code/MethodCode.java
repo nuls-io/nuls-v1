@@ -1,467 +1,332 @@
 package io.nuls.contract.vm.code;
 
+import com.google.common.base.Joiner;
 import io.nuls.contract.vm.program.ProgramMethodArg;
+import io.nuls.contract.vm.program.impl.ProgramDescriptors;
+import io.nuls.contract.vm.util.Constants;
+import org.apache.commons.collections4.ListUtils;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+
+import static io.nuls.contract.vm.util.Utils.arrayListInitialCapacity;
 
 public class MethodCode {
 
-    private int access;
+    public static final String VIEW_ANNOTATION_DESC = "Lio/nuls/contract/sdk/annotation/View;";
+    public static final String PAYABLE_ANNOTATION_DESC = "Lio/nuls/contract/sdk/annotation/Payable;";
+    public static final String REQUIRED_ANNOTATION_DESC = "Lio/nuls/contract/sdk/annotation/Required;";
+
+    /**
+     * The method's access flags (see {@link Opcodes}). This field also indicates if the method is
+     * synthetic and/or deprecated.
+     */
+    public final int access;
+
+    /**
+     * The method's name.
+     */
+    public final String name;
+
+    /**
+     * The method's descriptor (see {@link Type}).
+     */
+    public final String desc;
+
+    /**
+     * The method's signature. May be <tt>null</tt>.
+     */
+    public final String signature;
+
+    /**
+     * The internal names of the method's exception classes (see {@link Type#getInternalName()}).
+     */
+    public final List<String> exceptions;
+
+    /**
+     * The method parameter info (access flags and name)
+     */
+    public final List<ParameterNode> parameters;
+
+    /**
+     * The runtime visible annotations of this method. May be <tt>null</tt>.
+     */
+    public final List<AnnotationNode> visibleAnnotations;
+
+    /**
+     * The runtime invisible annotations of this method. May be <tt>null</tt>.
+     */
+    public final List<AnnotationNode> invisibleAnnotations;
+
+    /**
+     * The runtime visible type annotations of this method. May be <tt>null</tt>.
+     */
+    public final List<TypeAnnotationNode> visibleTypeAnnotations;
+
+    /**
+     * The runtime invisible type annotations of this method. May be <tt>null</tt>.
+     */
+    public final List<TypeAnnotationNode> invisibleTypeAnnotations;
+
+    /**
+     * The non standard attributes of this method. May be <tt>null</tt>.
+     */
+    public final List<Attribute> attrs;
+
+    /**
+     * The default value of this annotation interface method. This field must be a {@link Byte},
+     * {@link Boolean}, {@link Character}, {@link Short}, {@link Integer}, {@link Long}, {@link
+     * Float}, {@link Double}, {@link String} or {@link Type}, or an two elements String array (for
+     * enumeration values), a {@link AnnotationNode}, or a {@link List} of values of one of the
+     * preceding types. May be <tt>null</tt>.
+     */
+    public final Object annotationDefault;
+
+    /**
+     * The number of method parameters than can have runtime visible annotations. This number must be
+     * less or equal than the number of parameter types in the method descriptor (the default value 0
+     * indicates that all the parameters described in the method descriptor can have annotations). It
+     * can be strictly less when a method has synthetic parameters and when these parameters are
+     * ignored when computing parameter indices for the purpose of parameter annotations (see
+     * https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7.18).
+     */
+    public final int visibleAnnotableParameterCount;
+
+    /**
+     * The runtime visible parameter annotations of this method. These lists are lists of {@link
+     * AnnotationNode} objects. May be <tt>null</tt>.
+     */
+    public final List<AnnotationNode>[] visibleParameterAnnotations;
+
+    /**
+     * The number of method parameters than can have runtime invisible annotations. This number must
+     * be less or equal than the number of parameter types in the method descriptor (the default value
+     * 0 indicates that all the parameters described in the method descriptor can have annotations).
+     * It can be strictly less when a method has synthetic parameters and when these parameters are
+     * ignored when computing parameter indices for the purpose of parameter annotations (see
+     * https://docs.oracle.com/javase/specs/jvms/se9/html/jvms-4.html#jvms-4.7.18).
+     */
+    public final int invisibleAnnotableParameterCount;
+
+    /**
+     * The runtime invisible parameter annotations of this method. These lists are lists of {@link
+     * AnnotationNode} objects. May be <tt>null</tt>.
+     */
+    public final List<AnnotationNode>[] invisibleParameterAnnotations;
+
+    /**
+     * The instructions of this method.
+     */
+    public final InsnList instructions;
 
-    private String name;
+    /**
+     * The try catch blocks of this method.
+     */
+    public final List<TryCatchBlockNode> tryCatchBlocks;
 
-    private String desc;
+    /**
+     * The maximum stack size of this method.
+     */
+    public final int maxStack;
 
-    private String normalDesc;
+    /**
+     * The maximum number of local variables of this method.
+     */
+    public final int maxLocals;
 
-    private String signature;
+    /**
+     * The local variables of this method. May be <tt>null</tt>
+     */
+    //public final List<LocalVariableNode> localVariables;
+    public final List<LocalVariableCode> localVariables;
 
-    private List<String> exceptions;
+    /**
+     * The visible local variable annotations of this method. May be <tt>null</tt>
+     */
+    public final List<LocalVariableAnnotationNode> visibleLocalVariableAnnotations;
 
-    private List<ParameterNode> parameters;
+    /**
+     * The invisible local variable annotations of this method. May be <tt>null</tt>
+     */
+    public final List<LocalVariableAnnotationNode> invisibleLocalVariableAnnotations;
 
-    private List<AnnotationNode> visibleAnnotations;
+    /**
+     * Whether the accept method has been called on this object.
+     */
+    //private final boolean visited;
 
-    private List<AnnotationNode> invisibleAnnotations;
+    public final ClassCode classCode;
 
-    private List<TypeAnnotationNode> visibleTypeAnnotations;
+    public final String className;
 
-    private List<TypeAnnotationNode> invisibleTypeAnnotations;
+    public final String nameDesc;
 
-    private List<Attribute> attrs;
+    public final String fullName;
 
-    private Object annotationDefault;
+    public final boolean isPublic;
 
-    private List<AnnotationNode>[] visibleParameterAnnotations;
+    public final boolean isStatic;
 
-    private List<AnnotationNode>[] invisibleParameterAnnotations;
+    public final boolean isAbstract;
 
-    private InsnList instructions;
+    public final boolean isNative;
 
-    private List<TryCatchBlockNode> tryCatchBlocks;
+    public final boolean isClinit;
 
-    private int maxStack;
+    public final boolean isConstructor;
 
-    private int maxLocals;
+    public final VariableType returnVariableType;
 
-    private List<LocalVariableCode> localVariables;
+    public final List<VariableType> argsVariableType;
 
-    private List<LocalVariableAnnotationNode> visibleLocalVariableAnnotations;
+    //contract
 
-    private List<LocalVariableAnnotationNode> invisibleLocalVariableAnnotations;
+    public final String returnArg;
 
-    //private boolean visited;
+    public final List<ProgramMethodArg> args;
 
-    private ClassCode classCode;
+    public final String normalDesc;
 
-    private VariableType returnVariableType;
-
-    private String returnArg;
-
-    private List<VariableType> argsVariableType;
-
-    private List<ProgramMethodArg> args;
-
-    public int getAccess() {
-        return access;
-    }
-
-    public void setAccess(int access) {
-        this.access = access;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public void setDesc(String desc) {
-        this.desc = desc;
-    }
-
-    public String getNormalDesc() {
-        return normalDesc;
-    }
-
-    public void setNormalDesc(String normalDesc) {
-        this.normalDesc = normalDesc;
-    }
-
-    public String getSignature() {
-        return signature;
-    }
-
-    public void setSignature(String signature) {
-        this.signature = signature;
-    }
-
-    public List<String> getExceptions() {
-        return exceptions;
-    }
-
-    public void setExceptions(List<String> exceptions) {
-        this.exceptions = exceptions;
-    }
-
-    public List<ParameterNode> getParameters() {
-        return parameters;
-    }
-
-    public void setParameters(List<ParameterNode> parameters) {
-        this.parameters = parameters;
-    }
-
-    public List<AnnotationNode> getVisibleAnnotations() {
-        return visibleAnnotations;
-    }
-
-    public void setVisibleAnnotations(List<AnnotationNode> visibleAnnotations) {
-        this.visibleAnnotations = visibleAnnotations;
-    }
-
-    public List<AnnotationNode> getInvisibleAnnotations() {
-        return invisibleAnnotations;
-    }
-
-    public void setInvisibleAnnotations(List<AnnotationNode> invisibleAnnotations) {
-        this.invisibleAnnotations = invisibleAnnotations;
-    }
-
-    public List<TypeAnnotationNode> getVisibleTypeAnnotations() {
-        return visibleTypeAnnotations;
-    }
-
-    public void setVisibleTypeAnnotations(List<TypeAnnotationNode> visibleTypeAnnotations) {
-        this.visibleTypeAnnotations = visibleTypeAnnotations;
-    }
-
-    public List<TypeAnnotationNode> getInvisibleTypeAnnotations() {
-        return invisibleTypeAnnotations;
-    }
-
-    public void setInvisibleTypeAnnotations(List<TypeAnnotationNode> invisibleTypeAnnotations) {
-        this.invisibleTypeAnnotations = invisibleTypeAnnotations;
-    }
-
-    public List<Attribute> getAttrs() {
-        return attrs;
-    }
-
-    public void setAttrs(List<Attribute> attrs) {
-        this.attrs = attrs;
-    }
-
-    public Object getAnnotationDefault() {
-        return annotationDefault;
-    }
-
-    public void setAnnotationDefault(Object annotationDefault) {
-        this.annotationDefault = annotationDefault;
-    }
-
-    public List<AnnotationNode>[] getVisibleParameterAnnotations() {
-        return visibleParameterAnnotations;
-    }
-
-    public void setVisibleParameterAnnotations(List<AnnotationNode>[] visibleParameterAnnotations) {
-        this.visibleParameterAnnotations = visibleParameterAnnotations;
-    }
-
-    public List<AnnotationNode>[] getInvisibleParameterAnnotations() {
-        return invisibleParameterAnnotations;
-    }
-
-    public void setInvisibleParameterAnnotations(List<AnnotationNode>[] invisibleParameterAnnotations) {
-        this.invisibleParameterAnnotations = invisibleParameterAnnotations;
-    }
-
-    public InsnList getInstructions() {
-        return instructions;
-    }
-
-    public void setInstructions(InsnList instructions) {
-        this.instructions = instructions;
-    }
-
-    public List<TryCatchBlockNode> getTryCatchBlocks() {
-        return tryCatchBlocks;
-    }
-
-    public void setTryCatchBlocks(List<TryCatchBlockNode> tryCatchBlocks) {
-        this.tryCatchBlocks = tryCatchBlocks;
-    }
-
-    public int getMaxStack() {
-        return maxStack;
-    }
-
-    public void setMaxStack(int maxStack) {
-        this.maxStack = maxStack;
-    }
-
-    public int getMaxLocals() {
-        return maxLocals;
-    }
-
-    public void setMaxLocals(int maxLocals) {
-        this.maxLocals = maxLocals;
-    }
-
-    public List<LocalVariableCode> getLocalVariables() {
-        return localVariables;
-    }
-
-    public void setLocalVariables(List<LocalVariableCode> localVariables) {
-        this.localVariables = localVariables;
-    }
-
-    public List<LocalVariableAnnotationNode> getVisibleLocalVariableAnnotations() {
-        return visibleLocalVariableAnnotations;
-    }
-
-    public void setVisibleLocalVariableAnnotations(List<LocalVariableAnnotationNode> visibleLocalVariableAnnotations) {
-        this.visibleLocalVariableAnnotations = visibleLocalVariableAnnotations;
-    }
-
-    public List<LocalVariableAnnotationNode> getInvisibleLocalVariableAnnotations() {
-        return invisibleLocalVariableAnnotations;
-    }
-
-    public void setInvisibleLocalVariableAnnotations(List<LocalVariableAnnotationNode> invisibleLocalVariableAnnotations) {
-        this.invisibleLocalVariableAnnotations = invisibleLocalVariableAnnotations;
-    }
-
-    public ClassCode getClassCode() {
-        return classCode;
-    }
-
-    public void setClassCode(ClassCode classCode) {
+    public MethodCode(ClassCode classCode, MethodNode methodNode) {
+        access = methodNode.access;
+        name = methodNode.name;
+        desc = methodNode.desc;
+        signature = methodNode.signature;
+        exceptions = ListUtils.emptyIfNull(methodNode.exceptions);
+        parameters = ListUtils.emptyIfNull(methodNode.parameters);
+        visibleAnnotations = ListUtils.emptyIfNull(methodNode.visibleAnnotations);
+        invisibleAnnotations = ListUtils.emptyIfNull(methodNode.invisibleAnnotations);
+        visibleTypeAnnotations = ListUtils.emptyIfNull(methodNode.visibleTypeAnnotations);
+        invisibleTypeAnnotations = ListUtils.emptyIfNull(methodNode.invisibleTypeAnnotations);
+        attrs = ListUtils.emptyIfNull(methodNode.attrs);
+        annotationDefault = methodNode.annotationDefault;
+        visibleAnnotableParameterCount = methodNode.visibleAnnotableParameterCount;
+        visibleParameterAnnotations = methodNode.visibleParameterAnnotations;
+        invisibleAnnotableParameterCount = methodNode.invisibleAnnotableParameterCount;
+        invisibleParameterAnnotations = methodNode.invisibleParameterAnnotations;
+        instructions = methodNode.instructions;
+        tryCatchBlocks = ListUtils.emptyIfNull(methodNode.tryCatchBlocks);
+        maxStack = methodNode.maxStack;
+        maxLocals = methodNode.maxLocals;
+        //localVariables = ListUtils.emptyIfNull(methodNode.localVariables);
+        visibleLocalVariableAnnotations = ListUtils.emptyIfNull(methodNode.visibleLocalVariableAnnotations);
+        invisibleLocalVariableAnnotations = ListUtils.emptyIfNull(methodNode.invisibleLocalVariableAnnotations);
+        //
         this.classCode = classCode;
-    }
+        className = classCode.name;
+        nameDesc = name + desc;
+        fullName = className + "." + nameDesc;
+        isPublic = (access & Opcodes.ACC_PUBLIC) != 0;
+        isStatic = (access & Opcodes.ACC_STATIC) != 0;
+        isAbstract = (access & Opcodes.ACC_ABSTRACT) != 0;
+        isNative = (access & Opcodes.ACC_NATIVE) != 0;
+        isClinit = Constants.CLINIT_NAME.equals(name);
+        isConstructor = Constants.CONSTRUCTOR_NAME.equals(name);
+        //
+        final List<VariableType> variableTypes = VariableType.parseAll(desc);
+        final int last = variableTypes.size() - 1;
+        returnVariableType = variableTypes.get(last);
+        argsVariableType = variableTypes.subList(0, last);
 
-    public VariableType getReturnVariableType() {
-        return returnVariableType;
-    }
+        final List<LocalVariableNode> localVariableNodes = ListUtils.emptyIfNull(methodNode.localVariables);
+        localVariables = new ArrayList<>(arrayListInitialCapacity(localVariableNodes.size()));
+        for (LocalVariableNode localVariableNode : localVariableNodes) {
+            localVariables.add(new LocalVariableCode(localVariableNode));
+        }
 
-    public void setReturnVariableType(VariableType returnVariableType) {
-        this.returnVariableType = returnVariableType;
-    }
+        //contract
+        returnArg = ProgramDescriptors.getNormalDesc(returnVariableType);
+        args = new ArrayList<>(arrayListInitialCapacity(argsVariableType.size()));
+        final List<String> stringArgs = new ArrayList<>(arrayListInitialCapacity(argsVariableType.size()));
+        int index = 0;
+        if (!isStatic) {
+            index += 1;
+        }
+        for (int i = 0; i < argsVariableType.size(); i++) {
+            final VariableType variableType = argsVariableType.get(i);
+            if (i > 0) {
+                final VariableType previousVariableType = argsVariableType.get(i - 1);
+                if (previousVariableType.isLong() || previousVariableType.isDouble()) {
+                    index += 1;
+                }
+            }
+            String name = "var" + (i + 1);
 
-    public String getReturnArg() {
-        return returnArg;
-    }
+            LocalVariableCode localVariableCode = getLocalVariableCode(index);
+            index++;
+            if (localVariableCode != null) {
+                name = localVariableCode.name;
+                if (isConstructor && classCode.isSyntheticField(name)) {
+                    continue;
+                }
+//                if (!variableType.equals(localVariableCode.variableType)) {
+//                    System.out.println();
+//                }
+            }
 
-    public void setReturnArg(String returnArg) {
-        this.returnArg = returnArg;
-    }
+            final String normalDesc = ProgramDescriptors.getNormalDesc(variableType);
+            final String stringArg = normalDesc + " " + name;
+            stringArgs.add(stringArg);
+            final ProgramMethodArg arg = new ProgramMethodArg(normalDesc, name, hasRequiredAnnotation(i));
+            args.add(arg);
+        }
 
-    public List<VariableType> getArgsVariableType() {
-        return argsVariableType;
-    }
+        StringBuilder sb = new StringBuilder();
+        sb.append("(");
+        sb.append(Joiner.on(", ").join(stringArgs));
+        sb.append(") return ");
+        sb.append(returnArg);
+        normalDesc = sb.toString();
 
-    public void setArgsVariableType(List<VariableType> argsVariableType) {
-        this.argsVariableType = argsVariableType;
-    }
-
-    public List<ProgramMethodArg> getArgs() {
-        return args;
-    }
-
-    public void setArgs(List<ProgramMethodArg> args) {
-        this.args = args;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        MethodCode that = (MethodCode) o;
-
-        if (access != that.access) return false;
-        if (maxStack != that.maxStack) return false;
-        if (maxLocals != that.maxLocals) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (desc != null ? !desc.equals(that.desc) : that.desc != null) return false;
-        if (normalDesc != null ? !normalDesc.equals(that.normalDesc) : that.normalDesc != null) return false;
-        if (signature != null ? !signature.equals(that.signature) : that.signature != null) return false;
-        if (exceptions != null ? !exceptions.equals(that.exceptions) : that.exceptions != null) return false;
-        if (parameters != null ? !parameters.equals(that.parameters) : that.parameters != null) return false;
-        if (visibleAnnotations != null ? !visibleAnnotations.equals(that.visibleAnnotations) : that.visibleAnnotations != null)
-            return false;
-        if (invisibleAnnotations != null ? !invisibleAnnotations.equals(that.invisibleAnnotations) : that.invisibleAnnotations != null)
-            return false;
-        if (visibleTypeAnnotations != null ? !visibleTypeAnnotations.equals(that.visibleTypeAnnotations) : that.visibleTypeAnnotations != null)
-            return false;
-        if (invisibleTypeAnnotations != null ? !invisibleTypeAnnotations.equals(that.invisibleTypeAnnotations) : that.invisibleTypeAnnotations != null)
-            return false;
-        if (attrs != null ? !attrs.equals(that.attrs) : that.attrs != null) return false;
-        if (annotationDefault != null ? !annotationDefault.equals(that.annotationDefault) : that.annotationDefault != null)
-            return false;
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
-        if (!Arrays.equals(visibleParameterAnnotations, that.visibleParameterAnnotations)) return false;
-        // Probably incorrect - comparing Object[] arrays with Arrays.equals
-        if (!Arrays.equals(invisibleParameterAnnotations, that.invisibleParameterAnnotations)) return false;
-        if (instructions != null ? !instructions.equals(that.instructions) : that.instructions != null) return false;
-        if (tryCatchBlocks != null ? !tryCatchBlocks.equals(that.tryCatchBlocks) : that.tryCatchBlocks != null)
-            return false;
-        if (localVariables != null ? !localVariables.equals(that.localVariables) : that.localVariables != null)
-            return false;
-        if (visibleLocalVariableAnnotations != null ? !visibleLocalVariableAnnotations.equals(that.visibleLocalVariableAnnotations) : that.visibleLocalVariableAnnotations != null)
-            return false;
-        if (invisibleLocalVariableAnnotations != null ? !invisibleLocalVariableAnnotations.equals(that.invisibleLocalVariableAnnotations) : that.invisibleLocalVariableAnnotations != null)
-            return false;
-        if (classCode != null ? !classCode.equals(that.classCode) : that.classCode != null) return false;
-        if (returnVariableType != null ? !returnVariableType.equals(that.returnVariableType) : that.returnVariableType != null)
-            return false;
-        if (returnArg != null ? !returnArg.equals(that.returnArg) : that.returnArg != null) return false;
-        if (argsVariableType != null ? !argsVariableType.equals(that.argsVariableType) : that.argsVariableType != null)
-            return false;
-        return args != null ? args.equals(that.args) : that.args == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = access;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (desc != null ? desc.hashCode() : 0);
-        result = 31 * result + (normalDesc != null ? normalDesc.hashCode() : 0);
-        result = 31 * result + (signature != null ? signature.hashCode() : 0);
-        result = 31 * result + (exceptions != null ? exceptions.hashCode() : 0);
-        result = 31 * result + (parameters != null ? parameters.hashCode() : 0);
-        result = 31 * result + (visibleAnnotations != null ? visibleAnnotations.hashCode() : 0);
-        result = 31 * result + (invisibleAnnotations != null ? invisibleAnnotations.hashCode() : 0);
-        result = 31 * result + (visibleTypeAnnotations != null ? visibleTypeAnnotations.hashCode() : 0);
-        result = 31 * result + (invisibleTypeAnnotations != null ? invisibleTypeAnnotations.hashCode() : 0);
-        result = 31 * result + (attrs != null ? attrs.hashCode() : 0);
-        result = 31 * result + (annotationDefault != null ? annotationDefault.hashCode() : 0);
-        result = 31 * result + Arrays.hashCode(visibleParameterAnnotations);
-        result = 31 * result + Arrays.hashCode(invisibleParameterAnnotations);
-        result = 31 * result + (instructions != null ? instructions.hashCode() : 0);
-        result = 31 * result + (tryCatchBlocks != null ? tryCatchBlocks.hashCode() : 0);
-        result = 31 * result + maxStack;
-        result = 31 * result + maxLocals;
-        result = 31 * result + (localVariables != null ? localVariables.hashCode() : 0);
-        result = 31 * result + (visibleLocalVariableAnnotations != null ? visibleLocalVariableAnnotations.hashCode() : 0);
-        result = 31 * result + (invisibleLocalVariableAnnotations != null ? invisibleLocalVariableAnnotations.hashCode() : 0);
-        result = 31 * result + (classCode != null ? classCode.hashCode() : 0);
-        result = 31 * result + (returnVariableType != null ? returnVariableType.hashCode() : 0);
-        result = 31 * result + (returnArg != null ? returnArg.hashCode() : 0);
-        result = 31 * result + (argsVariableType != null ? argsVariableType.hashCode() : 0);
-        result = 31 * result + (args != null ? args.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "MethodCode{" +
-                "access=" + access +
-                ", name='" + name + '\'' +
-                ", desc='" + desc + '\'' +
-                ", normalDesc='" + normalDesc + '\'' +
-                ", signature='" + signature + '\'' +
-                ", exceptions=" + exceptions +
-                ", parameters=" + parameters +
-                ", visibleAnnotations=" + visibleAnnotations +
-                ", invisibleAnnotations=" + invisibleAnnotations +
-                ", visibleTypeAnnotations=" + visibleTypeAnnotations +
-                ", invisibleTypeAnnotations=" + invisibleTypeAnnotations +
-                ", attrs=" + attrs +
-                ", annotationDefault=" + annotationDefault +
-                ", visibleParameterAnnotations=" + Arrays.toString(visibleParameterAnnotations) +
-                ", invisibleParameterAnnotations=" + Arrays.toString(invisibleParameterAnnotations) +
-                ", instructions=" + instructions +
-                ", tryCatchBlocks=" + tryCatchBlocks +
-                ", maxStack=" + maxStack +
-                ", maxLocals=" + maxLocals +
-                ", localVariables=" + localVariables +
-                ", visibleLocalVariableAnnotations=" + visibleLocalVariableAnnotations +
-                ", invisibleLocalVariableAnnotations=" + invisibleLocalVariableAnnotations +
-                ", classCode=" + classCode +
-                ", returnVariableType=" + returnVariableType +
-                ", returnArg='" + returnArg + '\'' +
-                ", argsVariableType=" + argsVariableType +
-                ", args=" + args +
-                '}';
-    }
-
-    public boolean isPublic() {
-        return (access & Opcodes.ACC_PUBLIC) != 0;
-    }
-
-    public boolean isStatic() {
-        return (access & Opcodes.ACC_STATIC) != 0;
-    }
-
-    public boolean isAbstract() {
-        return (access & Opcodes.ACC_ABSTRACT) != 0;
-    }
-
-    public boolean isNative() {
-        return (access & Opcodes.ACC_NATIVE) != 0;
-    }
-
-    public boolean isNotAbstract() {
-        return !isAbstract();
-    }
-
-    public boolean isConstructor() {
-        return "<init>".equals(this.name);
+//        String desc = ProgramDescriptors.parseDesc(normalDesc);
+//        if (!desc.equals(desc)) {
+//            System.out.println();
+//        }
     }
 
     public boolean hasViewAnnotation() {
-        return hasAnnotation("Lio/nuls/contract/sdk/annotation/View;");
+        return hasAnnotation(VIEW_ANNOTATION_DESC);
     }
 
     public boolean hasPayableAnnotation() {
-        return hasAnnotation("Lio/nuls/contract/sdk/annotation/Payable;");
+        return hasAnnotation(PAYABLE_ANNOTATION_DESC);
     }
 
     public boolean hasAnnotation(String annotation) {
-        boolean isView = this.visibleAnnotations.stream()
-                .filter(annotationNode -> annotation.equals(annotationNode.desc))
-                .count() >= 1;
-        return isView;
+        return visibleAnnotations.stream()
+                .anyMatch(annotationNode -> annotation.equals(annotationNode.desc));
     }
 
-    public boolean hasRequiredAnnotation(int i) {
-        List<AnnotationNode>[] annotations = getVisibleParameterAnnotations();
-        if (annotations == null || annotations.length < 1 || annotations.length <= i) {
+    private boolean hasRequiredAnnotation(int i) {
+        if (!(visibleParameterAnnotations != null && visibleParameterAnnotations.length > 0 && visibleParameterAnnotations.length > i)) {
             return false;
         }
-        List<AnnotationNode> list = annotations[i];
+        List<AnnotationNode> list = visibleParameterAnnotations[i];
         if (list == null) {
             return false;
         }
-        boolean b = list.stream()
-                .filter(annotationNode -> "Lio/nuls/contract/sdk/annotation/Required;".equals(annotationNode.desc))
-                .count() >= 1;
-        return b;
+        return list.stream().anyMatch(annotationNode -> REQUIRED_ANNOTATION_DESC.equals(annotationNode.desc));
     }
 
     public LocalVariableCode getLocalVariableCode(int index) {
-        return getLocalVariables().stream().filter(localVariableCode -> localVariableCode.index == index)
+        return localVariables.stream().filter(localVariableCode -> localVariableCode.index == index)
                 .findFirst().orElse(null);
     }
 
     public boolean isClass(String className) {
-        return Objects.equals(this.classCode.getName(), className);
+        return this.className.equals(className);
     }
 
     public boolean isMethod(String name, String desc) {
-        return Objects.equals(this.name, name) && Objects.equals(this.desc, desc);
+        return this.name.equals(name) && this.desc.equals(desc);
+    }
+
+    public boolean isMethod(String className, String name, String desc) {
+        return this.className.equals(className) && this.name.equals(name) && this.desc.equals(desc);
     }
 
 }

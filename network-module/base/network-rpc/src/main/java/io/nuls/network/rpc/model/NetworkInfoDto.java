@@ -47,6 +47,9 @@ public class NetworkInfoDto {
     @ApiModelProperty(name = "outCount", value = "主动连接节点数量")
     private int outCount;
 
+    @ApiModelProperty(name = "mastUpGrade", value = "是否需要强制升级")
+    private boolean mastUpGrade;
+
     public NetworkInfoDto() {
 
     }
@@ -95,5 +98,13 @@ public class NetworkInfoDto {
 
     public void setOutCount(int outCount) {
         this.outCount = outCount;
+    }
+
+    public boolean isMastUpGrade() {
+        return mastUpGrade;
+    }
+
+    public void setMastUpGrade(boolean mastUpGrade) {
+        this.mastUpGrade = mastUpGrade;
     }
 }

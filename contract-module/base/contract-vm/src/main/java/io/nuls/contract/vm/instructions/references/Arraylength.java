@@ -7,13 +7,13 @@ import io.nuls.contract.vm.util.Log;
 public class Arraylength {
 
     public static void arraylength(Frame frame) {
-        ObjectRef arrayRef = frame.getOperandStack().popRef();
+        ObjectRef arrayRef = frame.operandStack.popRef();
         if (arrayRef == null) {
             frame.throwNullPointerException();
             return;
         }
         int length = arrayRef.getDimensions()[0];
-        frame.getOperandStack().pushInt(length);
+        frame.operandStack.pushInt(length);
 
         //Log.result(frame.getCurrentOpCode(), length);
     }

@@ -7,8 +7,8 @@ public class Dstore {
 
     public static void dstore(final Frame frame) {
         int index = frame.varInsnNode().var;
-        double value = frame.getOperandStack().popDouble();
-        frame.getLocalVariables().setDouble(index, value);
+        double value = frame.operandStack.popDouble();
+        frame.localVariables.setDouble(index, value);
 
         //Log.result(frame.getCurrentOpCode(), value, index);
     }

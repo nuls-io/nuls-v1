@@ -36,6 +36,7 @@ import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.account.storage.service.AliasStorageService;
 import io.nuls.account.tx.AliasTransaction;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -45,7 +46,8 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.ledger.service.LedgerService;
@@ -127,7 +129,7 @@ public class AliasService {
             Alias alias = new Alias(addressBytes, aliasName);
             tx.setTxData(alias);
 
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -146,9 +148,22 @@ public class AliasService {
 
             tx.setCoinData(coinData);
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-            NulsSignData nulsSignData = accountService.signDigest(tx.getHash().getDigestBytes(), account, password);
-            P2PKHScriptSig scriptSig = new P2PKHScriptSig(nulsSignData, account.getPubKey());
-            tx.setScriptSig(scriptSig.serialize());
+
+            //生成签名
+            List<ECKey> signEckeys = new ArrayList<>();
+            List<ECKey> scriptEckeys = new ArrayList<>();;
+            ECKey eckey = account.getEcKey(password);
+
+            //如果最后一位为1则表示该交易包含普通签名
+            if((coinDataResult.getSignType() & 0x01) == 0x01){
+                signEckeys.add(eckey);
+            }
+            //如果倒数第二位位为1则表示该交易包含脚本签名
+            if((coinDataResult.getSignType() & 0x02) == 0x02){
+                scriptEckeys.add(eckey);
+            }
+            SignatureUtil.createTransactionSignture(tx,scriptEckeys,signEckeys);
+
             Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
             if (saveResult.isFailed()) {
                 if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
@@ -282,7 +297,7 @@ public class AliasService {
             tx.setTime(TimeService.currentTimeMillis());
             Alias alias = new Alias(addressBytes, aliasName);
             tx.setTxData(alias);
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
             if (!coinDataResult.isEnough()) {
                 return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
@@ -298,7 +313,7 @@ public class AliasService {
             Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
             coinData.addTo(coin);
             tx.setCoinData(coinData);
-            Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+            Na fee = TransactionFeeCalculator.getMaxFee(tx.size() );
             return Result.getSuccess().setData(fee);
         } catch (Exception e) {
             Log.error(e);

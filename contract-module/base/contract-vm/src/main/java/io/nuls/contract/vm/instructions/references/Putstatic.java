@@ -1,6 +1,7 @@
 package io.nuls.contract.vm.instructions.references;
 
 import io.nuls.contract.vm.Frame;
+import io.nuls.contract.vm.code.Descriptors;
 import io.nuls.contract.vm.util.Log;
 import org.objectweb.asm.tree.FieldInsnNode;
 
@@ -12,14 +13,14 @@ public class Putstatic {
         String fieldName = fieldInsnNode.name;
         String fieldDesc = fieldInsnNode.desc;
         Object value;
-        if ("J".equals(fieldDesc)) {
-            value = frame.getOperandStack().popLong();
-        } else if ("D".equals(fieldDesc)) {
-            value = frame.getOperandStack().popDouble();
+        if (Descriptors.LONG_DESC.equals(fieldDesc)) {
+            value = frame.operandStack.popLong();
+        } else if (Descriptors.DOUBLE_DESC.equals(fieldDesc)) {
+            value = frame.operandStack.popDouble();
         } else {
-            value = frame.getOperandStack().pop();
+            value = frame.operandStack.pop();
         }
-        frame.getHeap().putStatic(className, fieldName, value);
+        frame.heap.putStatic(className, fieldName, value);
 
         //Log.result(frame.getCurrentOpCode(), value, className, fieldName);
     }

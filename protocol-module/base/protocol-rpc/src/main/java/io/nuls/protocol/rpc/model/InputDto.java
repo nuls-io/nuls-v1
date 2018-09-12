@@ -50,7 +50,6 @@ public class InputDto {
     private Long value;
 
     public InputDto(Coin input) {
-
         NulsByteBuffer byteBuffer = new NulsByteBuffer(input.getOwner());
         try {
             this.fromHash = byteBuffer.readHash().getDigestHex();

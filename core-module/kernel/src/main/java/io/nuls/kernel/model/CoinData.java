@@ -166,8 +166,7 @@ public class CoinData extends BaseNulsData {
         }
         if (to != null && to.size() != 0) {
             for (int i = 0; i < to.size(); i++) {
-                byte[] owner = to.get(i).getOwner();
-
+                byte[] owner = to.get(i).getAddress();
                 boolean hasExist = false;
                 for(byte[] address : addressSet) {
                     if(Arrays.equals(owner, address)) {
@@ -175,7 +174,6 @@ public class CoinData extends BaseNulsData {
                         break;
                     }
                 }
-
                 if(!hasExist) {
                     addressSet.add(owner);
                 }

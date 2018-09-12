@@ -38,15 +38,14 @@ import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.protocol.base.handler.*;
 import io.nuls.protocol.base.service.DownloadServiceImpl;
-import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.message.*;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
+import io.nuls.protocol.model.tx.DataTransaction;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.module.AbstractProtocolModule;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.DownloadService;
 
-;
 
 /**
  * @author Niels
@@ -57,15 +56,7 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
     public void init() {
         TransactionManager.putTx(CoinBaseTransaction.class, null);
         TransactionManager.putTx(TransferTransaction.class, null);
-
-        try {
-            NulsVersionManager.init();
-            NulsVersionManager.test();
-            System.out.println(NulsVersionManager.getProtocolContainer(1));
-        } catch (Exception e) {
-            Log.error(e);
-            System.exit(-1);
-        }
+        TransactionManager.putTx(DataTransaction.class, null);
     }
 
     @Override
@@ -73,6 +64,7 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         this.waitForDependencyRunning(MessageBusConstant.MODULE_ID_MESSAGE_BUS);
         this.waitForDependencyInited(ConsensusConstant.MODULE_ID_CONSENSUS, NetworkConstant.NETWORK_MODULE_ID);
         BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+
         Block block0 = blockService.getGengsisBlock().getData();
         Block genesisBlock = NulsContext.getInstance().getGenesisBlock();
         if (null == block0) {

@@ -33,6 +33,7 @@ import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.dto.ContractTokenInfo;
 import io.nuls.contract.dto.ContractTokenTransferInfoPo;
+import io.nuls.contract.entity.ContractInfoDto;
 import io.nuls.contract.entity.tx.CreateContractTransaction;
 import io.nuls.contract.entity.txdata.ContractData;
 import io.nuls.contract.entity.txdata.CreateContractData;
@@ -61,6 +62,7 @@ import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.map.MapUtil;
 import io.nuls.core.tools.page.Page;
+import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.db.model.Entry;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -193,7 +195,7 @@ public class ContractResource implements InitializingBean {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "获取智能合约构造函数")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = ProgramMethod.class)
+            @ApiResponse(code = 200, message = "success", response = ContractInfoDto.class)
     })
     public RpcClientResult contractConstructor(@ApiParam(name = "createForm", value = "创建智能合约", required = true) ContractCode code) {
         if (code == null) {
@@ -206,11 +208,14 @@ public class ContractResource implements InitializingBean {
         }
 
         byte[] contractCodeBytes = Hex.decode(contractCode);
-        ProgramMethod constructor = vmHelper.getConstructor(contractCodeBytes);
-        if(constructor == null) {
+        ContractInfoDto contractInfoDto = vmHelper.getConstructor(contractCodeBytes);
+        if(contractInfoDto == null || contractInfoDto.getConstructor() == null) {
             return Result.getFailed(ContractErrorCode.ILLEGAL_CONTRACT).toRpcClientResult();
         }
-        return Result.getSuccess().setData(constructor).toRpcClientResult();
+        Map<String, Object> resultMap = MapUtil.createLinkedHashMap(2);
+        resultMap.put("constructor", contractInfoDto.getConstructor());
+        resultMap.put("isNrc20", contractInfoDto.isNrc20());
+        return Result.getSuccess().setData(resultMap).toRpcClientResult();
     }
 
     @POST
@@ -292,7 +297,8 @@ public class ContractResource implements InitializingBean {
             BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
             long blockHeight = blockHeader.getHeight();
             // 当前区块状态根
-            byte[] prevStateRoot = blockHeader.getStateRoot();
+            byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+            AssertUtil.canNotEmpty(prevStateRoot, "All features of the smart contract are locked.");
             // 执行VM估算Gas消耗
             ProgramCreate programCreate = new ProgramCreate();
             programCreate.setContractAddress(contractAddressBytes);
@@ -311,7 +317,7 @@ public class ContractResource implements InitializingBean {
             ProgramResult programResult = track.create(programCreate);
             if(!programResult.isSuccess()) {
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
-                result.setMsg(programResult.getErrorMessage());
+                result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 return result.toRpcClientResult();
             }
             long gasUsed = programResult.getGasUsed();
@@ -494,10 +500,12 @@ public class ContractResource implements InitializingBean {
             Result result = null;
             if(!programResult.isSuccess()) {
                 result = Result.getFailed(ContractErrorCode.DATA_ERROR);
-                result.setMsg(programResult.getErrorMessage());
+                result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
             } else {
                 result = Result.getSuccess();
-                result.setData(programResult.getResult());
+                Map<String, String> resultMap = MapUtil.createLinkedHashMap(2);
+                resultMap.put("result", programResult.getResult());
+                result.setData(resultMap);
             }
             return result.toRpcClientResult();
         } catch (Exception e) {
@@ -538,7 +546,8 @@ public class ContractResource implements InitializingBean {
             BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
             long blockHeight = blockHeader.getHeight();
             // 当前区块状态根
-            byte[] prevStateRoot = blockHeader.getStateRoot();
+            byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
+            AssertUtil.canNotEmpty(prevStateRoot, "All features of the smart contract are locked.");
 
 
             long price = call.getPrice();
@@ -582,7 +591,7 @@ public class ContractResource implements InitializingBean {
             ProgramResult programResult = track.call(programCall);
             if(!programResult.isSuccess()) {
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
-                result.setMsg(programResult.getErrorMessage());
+                result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 return result.toRpcClientResult();
             }
             long gasUsed = programResult.getGasUsed();
@@ -676,8 +685,28 @@ public class ContractResource implements InitializingBean {
         }
 
         try {
-            boolean isContractAddress = contractAddressStorageService.isExistContractAddress(AddressTool.getAddress(address));
-            return Result.getSuccess().setData(isContractAddress).toRpcClientResult();
+            byte[] contractAddressBytes = AddressTool.getAddress(address);
+            boolean isContractAddress = contractAddressStorageService.isExistContractAddress(contractAddressBytes);
+            boolean isPayable = false;
+
+            if(isContractAddress) {
+                byte[] prevStateRoot = ContractUtil.getStateRoot(NulsContext.getInstance().getBestBlock().getHeader());
+                ProgramExecutor track = programExecutor.begin(prevStateRoot);
+                ProgramStatus status = track.status(contractAddressBytes);
+                List<ProgramMethod> methods = track.method(contractAddressBytes);
+                for(ProgramMethod method : methods) {
+                    if(ContractConstant.BALANCE_TRIGGER_METHOD_NAME.equals(method.getName())) {
+                        isPayable = method.isPayable();
+                        break;
+                    }
+                }
+            }
+
+            Map<String, Object> resultMap = MapUtil.createLinkedHashMap(2);
+            resultMap.put("isContractAddress", isContractAddress);
+            resultMap.put("isPayable", isPayable);
+
+            return Result.getSuccess().setData(resultMap).toRpcClientResult();
         } catch (Exception e) {
             return Result.getFailed().setData(e.getMessage()).toRpcClientResult();
         }
@@ -726,7 +755,7 @@ public class ContractResource implements InitializingBean {
                 return Result.getFailed(ContractErrorCode.CONTRACT_LOCK).toRpcClientResult();
             }
 
-            byte[] prevStateRoot = NulsContext.getInstance().getBestStateRoot();
+            byte[] prevStateRoot = ContractUtil.getStateRoot(NulsContext.getInstance().getBestBlock().getHeader());
 
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             ProgramStatus status = track.status(contractAddressBytes);
@@ -779,7 +808,7 @@ public class ContractResource implements InitializingBean {
                 resultMap.put("nrc20TokenName", contractAddressInfoPo.getNrc20TokenName());
                 resultMap.put("nrc20TokenSymbol", contractAddressInfoPo.getNrc20TokenSymbol());
                 resultMap.put("decimals", contractAddressInfoPo.getDecimals());
-                resultMap.put("totalSupply", contractAddressInfoPo.getTotalSupply());
+                resultMap.put("totalSupply", ContractUtil.bigInteger2String(contractAddressInfoPo.getTotalSupply()));
             }
             resultMap.put("status", status.name());
             resultMap.put("method", methods);
@@ -1201,7 +1230,9 @@ public class ContractResource implements InitializingBean {
                 Log.info("parse coin form db error");
                 continue;
             }
-            if (Arrays.equals(coin.getOwner(), addressBytes)) {
+            //todo tag if (Arrays.equals(coin.(), addressBytes))
+            if (Arrays.equals(coin.getAddress(), addressBytes))
+            {
                 coin.setOwner(coinEntryBytes.getKey());
                 coinList.add(coin);
             }
@@ -1634,7 +1665,7 @@ public class ContractResource implements InitializingBean {
                 }
             }
 
-            byte[] prevStateRoot = NulsContext.getInstance().getBestStateRoot();
+            byte[] prevStateRoot = ContractUtil.getStateRoot(NulsContext.getInstance().getBestBlock().getHeader());
 
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             byte[] contractAddressBytes = null;
@@ -1782,55 +1813,32 @@ public class ContractResource implements InitializingBean {
 
 
     @POST
-    @Path("/upload/create")
+    @Path("/upload/constructor")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @ApiOperation(value = "上传jar包创建智能合约")
+    @ApiOperation(value = "上传jar包返回代码构造函数")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
-    public RpcClientResult upload(@ApiParam(name = "jarfile", value = "智能合约代码jar包", required = true)@FormDataParam("jarfile") InputStream jarfile,
-                                  @ApiParam(name = "sender", value = "交易创建者", required = true)@FormDataParam("sender")String sender,
-                                  @ApiParam(name = "gasLimit", value = "最大gas消耗", required = true)@FormDataParam("gasLimit")Long gasLimit,
-                                  @ApiParam(name = "price", value = "执行合约单价", required = true)@FormDataParam("price")Long price,
-                                  @ApiParam(name = "args", value = "参数列表(以逗号分隔)", required = false)@FormDataParam("args")String args,
-                                  @ApiParam(name = "password", value = "交易创建者账户密码", required = false)@FormDataParam("password")String password,
-                                  @ApiParam(name = "remark", value = "备注", required = false)@FormDataParam("remark")String remark) {
-
+    public RpcClientResult upload(@ApiParam(name = "jarfile", value = "智能合约代码jar包", required = true)@FormDataParam("jarfile") InputStream jarfile) {
         if (null == jarfile) {
             return Result.getFailed(AccountErrorCode.NULL_PARAMETER).toRpcClientResult();
         }
-        if (gasLimit == null || gasLimit < 0) {
-            return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
-        }
-        if (price == null || price < 0) {
-            return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
-        }
-
-        if (!AddressTool.validAddress(sender)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
-        }
-
-        String[][] argsArray = null;
-        if(StringUtils.isNotBlank(args)) {
-            argsArray = ContractUtil.twoDimensionalArray(args.split(","));
-        }
-
-        byte[] contractCode = null;
         try {
-            contractCode = IOUtils.toByteArray(jarfile);
+            byte[] contractCode = IOUtils.toByteArray(jarfile);
+            ContractInfoDto contractInfoDto = vmHelper.getConstructor(contractCode);
+            if(contractInfoDto == null || contractInfoDto.getConstructor() == null) {
+                return Result.getFailed(ContractErrorCode.ILLEGAL_CONTRACT).toRpcClientResult();
+            }
+            Map<String, Object> resultMap = MapUtil.createLinkedHashMap(2);
+            resultMap.put("constructor", contractInfoDto.getConstructor());
+            resultMap.put("isNrc20", contractInfoDto.isNrc20());
+            resultMap.put("code", Hex.encode(contractCode));
+            return Result.getSuccess().setData(resultMap).toRpcClientResult();
         } catch (IOException e) {
             Log.error(e);
             return Result.getFailed(ContractErrorCode.DATA_ERROR).toRpcClientResult();
         }
-
-        return contractTxService.contractCreateTx(sender,
-                gasLimit,
-                price,
-                contractCode,
-                argsArray,
-                password,
-                remark).toRpcClientResult();
     }
 
 

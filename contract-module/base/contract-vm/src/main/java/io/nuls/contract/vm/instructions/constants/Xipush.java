@@ -15,7 +15,7 @@ public class Xipush {
 
     private static void xipush(final Frame frame) {
         int value = frame.intInsnNode().operand;
-        frame.getOperandStack().pushInt(value);
+        frame.operandStack.pushInt(value);
 
         //Log.opcode(frame.getCurrentOpCode(), value);
     }

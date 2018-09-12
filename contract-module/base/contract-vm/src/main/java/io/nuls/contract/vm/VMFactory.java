@@ -10,65 +10,70 @@ import java.util.Map;
 
 public class VMFactory {
 
-    public static final Map<String, ClassCode> VM_INIT_CLASS_CODES = new LinkedHashMap();
+    public static final Map<String, ClassCode> VM_INIT_CLASS_CODES = new LinkedHashMap(1024);
 
-    public static final VM VM;
+    public static VM VM;
 
-    private static final String[] IGNORE_CLINIT;
+    private static final String[] IGNORE_CLINIT = new String[]{
+            "java/io/File",
+            "java/io/FileDescriptor",
+            "java/io/ObjectInputStream",
+            "java/io/ObjectOutputStream",
+            "java/io/ObjectStreamClass",
+            "java/io/ObjectStreamClass$FieldReflector",
+            "java/lang/SecurityManager",
+            "java/lang/invoke/BoundMethodHandle",
+            "java/lang/invoke/BoundMethodHandle$SpeciesData",
+            "java/lang/invoke/DirectMethodHandle",
+            "java/lang/invoke/Invokers",
+            "java/lang/invoke/LambdaForm",
+            "java/lang/invoke/LambdaForm$BasicType",
+            "java/lang/invoke/LambdaForm$NamedFunction",
+            "java/lang/invoke/MethodHandle",
+            "java/lang/invoke/MethodHandles$Lookup",
+            "java/lang/invoke/MethodType",
+            "java/lang/ref/Reference",
+            "java/lang/reflect/AccessibleObject",
+            "java/math/BigDecimal",
+            "java/net/InetAddress",
+            "java/net/NetworkInterface",
+            "java/nio/charset/Charset",
+            "java/security/ProtectionDomain",
+            "java/security/Provider",
+            "java/time/OffsetTime",
+            "java/time/ZoneOffset",
+            "java/util/Locale",
+            "java/util/Locale$1",
+            "java/util/Random",
+            "sun/misc/URLClassPath",
+            "sun/security/util/Debug",
+            "sun/util/locale/BaseLocale",
+    };
 
-    static {
-        IGNORE_CLINIT = new String[]{
-                "java/io/File",
-                "java/io/FileDescriptor",
-                "java/io/ObjectInputStream",
-                "java/io/ObjectOutputStream",
-                "java/io/ObjectStreamClass",
-                "java/io/ObjectStreamClass$FieldReflector",
-                "java/lang/SecurityManager",
-                "java/lang/invoke/BoundMethodHandle",
-                "java/lang/invoke/BoundMethodHandle$SpeciesData",
-                "java/lang/invoke/DirectMethodHandle",
-                "java/lang/invoke/Invokers",
-                "java/lang/invoke/LambdaForm",
-                "java/lang/invoke/LambdaForm$BasicType",
-                "java/lang/invoke/LambdaForm$NamedFunction",
-                "java/lang/invoke/MethodHandle",
-                "java/lang/invoke/MethodHandles$Lookup",
-                "java/lang/invoke/MethodType",
-                "java/lang/ref/Reference",
-                "java/lang/reflect/AccessibleObject",
-                "java/math/BigDecimal",
-                "java/net/InetAddress",
-                "java/net/NetworkInterface",
-                "java/nio/charset/Charset",
-                "java/security/ProtectionDomain",
-                "java/security/Provider",
-                "java/time/OffsetTime",
-                "java/time/ZoneOffset",
-                "java/util/Locale",
-                "java/util/Locale$1",
-                "java/util/Random",
-                "sun/misc/URLClassPath",
-                "sun/security/util/Debug",
-                "sun/util/locale/BaseLocale",
-        };
-    }
+    public static final String[] INIT_CLASS_CACHE = new String[]{
+            "java/lang/Byte$ByteCache",
+            "java/lang/Short$ShortCache",
+            "java/lang/Character$CharacterCache",
+            //"java/lang/Integer$IntegerCache",
+            "java/lang/Long$LongCache",
+    };
 
-    static {
+    public static void init() {
         String[] classes = ArrayUtils.addAll(ProgramConstants.VM_INIT_CLASS_NAMES, ProgramConstants.CONTRACT_USED_CLASS_NAMES);
         classes = ArrayUtils.addAll(classes, ProgramConstants.CONTRACT_LAZY_USED_CLASS_NAMES);
         classes = ArrayUtils.addAll(classes, ProgramConstants.SDK_CLASS_NAMES);
+        classes = ArrayUtils.addAll(classes, INIT_CLASS_CACHE);
+        for (String className : classes) {
+            VM_INIT_CLASS_CODES.put(className, ClassCodeLoader.loadFromResource(className));
+        }
         for (int i = 0; i < classes.length; i++) {
-            ClassCodeLoader.load(VM_INIT_CLASS_CODES, classes[i], ClassCodeLoader::loadFromResource);
+            VM_INIT_CLASS_CODES.putAll(ClassCodeLoader.loadAll(classes[i], ClassCodeLoader::loadFromResource));
         }
         VM = newVM();
         MethodArea.INIT_CLASS_CODES.putAll(VM.getMethodArea().getClassCodes());
+        MethodArea.INIT_METHOD_CODES.putAll(VM.getMethodArea().getMethodCodes());
         Heap.INIT_OBJECTS.putAll(VM.getHeap().getObjects());
         Heap.INIT_ARRAYS.putAll(VM.getHeap().getArrays());
-    }
-
-    public static void init() {
-
     }
 
     public static VM createVM() {

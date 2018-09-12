@@ -10,7 +10,7 @@ public class Tableswitch {
     public static void tableswitch(final Frame frame) {
         TableSwitchInsnNode table = frame.tableSwitchInsnNode();
         LabelNode labelNode = table.dflt;
-        int index = frame.getOperandStack().popInt();
+        int index = frame.operandStack.popInt();
         int min = table.min;
         int max = table.max;
         int size = max - min + 1;

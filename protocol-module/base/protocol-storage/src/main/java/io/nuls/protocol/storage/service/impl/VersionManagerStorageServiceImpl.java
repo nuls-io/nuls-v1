@@ -9,8 +9,14 @@ import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Result;
 import io.nuls.protocol.storage.constant.ProtocolStorageConstant;
-import io.nuls.protocol.storage.po.UpgradeInfoPo;
+import io.nuls.protocol.storage.po.ProtocolInfoPo;
+import io.nuls.protocol.storage.po.ProtocolTempInfoPo;
 import io.nuls.protocol.storage.service.VersionManagerStorageService;
+
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -31,7 +37,17 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
      */
     @Override
     public void afterPropertiesSet() {
-        Result result = this.dbService.createArea(ProtocolStorageConstant.NULS_VERSION_MANAGER);
+        Result result = this.dbService.createArea(ProtocolStorageConstant.NULS_VERSION_AREA);
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+            throw new NulsRuntimeException(result.getErrorCode());
+        }
+
+        result = this.dbService.createArea(ProtocolStorageConstant.NULS_PROTOCOL_AREA);
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+            throw new NulsRuntimeException(result.getErrorCode());
+        }
+
+        result = this.dbService.createArea(ProtocolStorageConstant.PROTOCOL_TEMP_AREA);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
@@ -39,23 +55,72 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
 
     @Override
     public Result saveMainVersion(int version) {
-        return dbService.put(ProtocolStorageConstant.NULS_VERSION_MANAGER, ProtocolStorageConstant.MAIN_VERSION_KEY, Util.intToBytes(version));
+        return dbService.put(ProtocolStorageConstant.NULS_VERSION_AREA, ProtocolStorageConstant.MAIN_VERSION_KEY, Util.intToBytes(version));
     }
 
     @Override
     public Integer getMainVersion() {
-        byte[] mainVersion = dbService.get(ProtocolStorageConstant.NULS_VERSION_MANAGER, ProtocolStorageConstant.MAIN_VERSION_KEY);
+        byte[] mainVersion = dbService.get(ProtocolStorageConstant.NULS_VERSION_AREA, ProtocolStorageConstant.MAIN_VERSION_KEY);
         return null == mainVersion ? null : Util.byteToInt(mainVersion);
     }
 
     @Override
-    public Result saveUpgradeCount(UpgradeInfoPo upgradeInfoPo) {
-        return dbService.putModel(ProtocolStorageConstant.NULS_VERSION_MANAGER, Util.intToBytes(upgradeInfoPo.getVersion()), upgradeInfoPo);
+    public Result saveProtocolInfoPo(ProtocolInfoPo upgradeInfoPo) {
+        return dbService.putModel(ProtocolStorageConstant.NULS_PROTOCOL_AREA, Util.intToBytes(upgradeInfoPo.getVersion()), upgradeInfoPo);
     }
 
     @Override
-    public UpgradeInfoPo getUpgradeCount(int version) {
-        return (UpgradeInfoPo)dbService.getModel(ProtocolStorageConstant.NULS_VERSION_MANAGER, Util.intToBytes(version));
+    public ProtocolInfoPo getProtocolInfoPo(int version) {
+        return (ProtocolInfoPo) dbService.getModel(ProtocolStorageConstant.NULS_PROTOCOL_AREA, Util.intToBytes(version));
     }
 
+    @Override
+    public Result saveProtocolTempInfoPo(ProtocolTempInfoPo tempInfoPo) {
+        try {
+            return dbService.putModel(ProtocolStorageConstant.PROTOCOL_TEMP_AREA, tempInfoPo.getProtocolKey().getBytes("utf-8"), tempInfoPo);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return Result.getFailed();
+    }
+
+    @Override
+    public ProtocolTempInfoPo getProtocolTempInfoPo(String key) {
+        try {
+            return dbService.getModel(ProtocolStorageConstant.PROTOCOL_TEMP_AREA, key.getBytes("utf-8"), ProtocolTempInfoPo.class);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Map<String, ProtocolTempInfoPo> getProtocolTempMap() {
+        List<ProtocolTempInfoPo> list = dbService.values(ProtocolStorageConstant.PROTOCOL_TEMP_AREA, ProtocolTempInfoPo.class);
+        Map<String, ProtocolTempInfoPo> map = new HashMap<>();
+        if (null == list) {
+            return map;
+        }
+        for (ProtocolTempInfoPo protocolTempInfoPo : list) {
+            map.put((protocolTempInfoPo.getProtocolKey()), protocolTempInfoPo);
+        }
+        return map;
+    }
+
+    @Override
+    public void removeProtocolTempInfo(String key) {
+        dbService.delete(ProtocolStorageConstant.PROTOCOL_TEMP_AREA, key.getBytes());
+    }
+
+    @Override
+    public Result saveChangeTxHashBlockHeight(Long effectiveHeight) {
+        return dbService.put(ProtocolStorageConstant.NULS_VERSION_AREA, ProtocolStorageConstant.CHANGE_HASH_HEIGHT_KEY, Util.longToBytes(effectiveHeight));
+
+    }
+
+    @Override
+    public Long getChangeTxHashBlockHeight() {
+        byte[] height = dbService.get(ProtocolStorageConstant.NULS_VERSION_AREA, ProtocolStorageConstant.CHANGE_HASH_HEIGHT_KEY);
+        return height == null ? null : Long.valueOf(Util.byteToInt(height));
+    }
 }

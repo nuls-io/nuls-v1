@@ -13,7 +13,7 @@ public class NativeString {
 
     public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = null;
-        switch (methodCode.getName()) {
+        switch (methodCode.name) {
             case "intern":
                 result = intern(methodCode, methodArgs, frame);
                 break;
@@ -25,7 +25,7 @@ public class NativeString {
     }
 
     private static Result intern(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        ObjectRef objectRef = methodArgs.getObjectRef();
+        ObjectRef objectRef = methodArgs.objectRef;
         Result result = NativeMethod.result(methodCode, objectRef, frame);
         return result;
     }

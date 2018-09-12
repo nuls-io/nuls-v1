@@ -18,7 +18,7 @@ public class Fconst {
     }
 
     private static void fconst(Frame frame, float value) {
-        frame.getOperandStack().pushFloat(value);
+        frame.operandStack.pushFloat(value);
 
         //Log.opcode(frame.getCurrentOpCode());
     }

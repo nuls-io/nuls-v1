@@ -5,11 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.ArrayType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import io.nuls.contract.vm.ObjectRef;
+import org.apache.commons.io.IOUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class JsonUtils {
 
@@ -47,7 +52,8 @@ public class JsonUtils {
         }
     }
 
-    public static String encodeArray(Object value, Class<?> elementType) {
+    public static byte[] encodeArray(Object value, Class<?> elementType) {
+        String json;
         if (elementType == ObjectRef.class) {
             int length = Array.getLength(value);
             String[] array = new String[length];
@@ -57,13 +63,15 @@ public class JsonUtils {
                     array[i] = objectRef.getEncoded();
                 }
             }
-            return toJson(array);
+            json = toJson(array);
         } else {
-            return toJson(value);
+            json = toJson(value);
         }
+        return compress(json);
     }
 
-    public static Object decodeArray(String value, Class<?> elementType) {
+    public static Object decodeArray(byte[] bytes, Class<?> elementType) {
+        String value = decompress(bytes);
         if (elementType == ObjectRef.class) {
             Object array = toArray(value, String.class);
             int length = Array.getLength(array);
@@ -152,6 +160,33 @@ public class JsonUtils {
             default:
                 throw new IllegalArgumentException("unknown string");
         }
+    }
+
+    public static byte[] compress(String data) {
+//        try {
+//            ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length());
+//            GZIPOutputStream gzip = new GZIPOutputStream(bos);
+//            gzip.write(data.getBytes());
+//            gzip.close();
+//            byte[] compressed = bos.toByteArray();
+//            bos.close();
+//            return compressed;
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+        return data.getBytes();
+    }
+
+    public static String decompress(byte[] compressed) {
+//        try {
+//            ByteArrayInputStream bis = new ByteArrayInputStream(compressed);
+//            GZIPInputStream gis = new GZIPInputStream(bis);
+//            byte[] bytes = IOUtils.toByteArray(gis);
+//            return new String(bytes);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+        return new String(compressed);
     }
 
 }

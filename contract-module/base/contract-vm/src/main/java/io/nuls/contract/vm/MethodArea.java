@@ -4,16 +4,16 @@ import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.ClassCodeLoader;
 import io.nuls.contract.vm.code.FieldCode;
 import io.nuls.contract.vm.code.MethodCode;
-import io.nuls.contract.vm.util.Log;
-import io.nuls.contract.vm.util.Utils;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 public class MethodArea {
 
-    public static final Map<String, ClassCode> INIT_CLASS_CODES = new LinkedHashMap<>();
+    public static final Map<String, ClassCode> INIT_CLASS_CODES = new HashMap<>(1024);
+
+    public static final Map<String, MethodCode> INIT_METHOD_CODES = new HashMap<>(1024);
 
     private static final String[] IGNORE_CLINIT;
 
@@ -21,42 +21,54 @@ public class MethodArea {
         IGNORE_CLINIT = new String[]{};
     }
 
-    private final VM vm;
+    private VM vm;
 
-    private final Map<String, ClassCode> classCodes = new LinkedHashMap<>();
+    private final Map<String, ClassCode> classCodes = new HashMap<>(1024);
 
-    public MethodArea(VM vm) {
+    private final Map<String, MethodCode> methodCodes = new HashMap<>(1024);
+
+    public MethodArea() {
+    }
+
+    public void setVm(VM vm) {
         this.vm = vm;
     }
 
     public MethodCode loadMethod(String className, String methodName, String methodDesc) {
+        final String fullName = className + "." + methodName + methodDesc;
+        if (INIT_METHOD_CODES.containsKey(fullName)) {
+            return INIT_METHOD_CODES.get(fullName);
+        }
+        if (methodCodes.containsKey(fullName)) {
+            return methodCodes.get(fullName);
+        }
         ClassCode classCode = loadClass(className);
         MethodCode methodCode = classCode.getMethodCode(methodName, methodDesc);
-        if (methodCode == null && classCode.getSuperName() != null) {
-            methodCode = loadSuperMethod(classCode.getSuperName(), methodName, methodDesc);
+        if (methodCode == null && classCode.superName != null) {
+            methodCode = loadSuperMethod(classCode.superName, methodName, methodDesc);
         }
         if (methodCode == null) {
-            for (String interfaceName : classCode.getInterfaces()) {
+            for (String interfaceName : classCode.interfaces) {
                 methodCode = loadMethod(interfaceName, methodName, methodDesc);
                 if (methodCode != null) {
                     break;
                 }
             }
         }
+        methodCodes.put(fullName, methodCode);
         return methodCode;
     }
 
     private MethodCode loadSuperMethod(String className, String methodName, String methodDesc) {
         ClassCode classCode = loadClass(className);
         MethodCode methodCode = classCode.getMethodCode(methodName, methodDesc);
-        if (methodCode == null && classCode.getSuperName() != null) {
-            methodCode = loadSuperMethod(classCode.getSuperName(), methodName, methodDesc);
+        if (methodCode == null && classCode.superName != null) {
+            methodCode = loadSuperMethod(classCode.superName, methodName, methodDesc);
         }
         return methodCode;
     }
 
     public ClassCode loadClass(String className) {
-        className = Utils.classNameReplace(className);
         if (INIT_CLASS_CODES.containsKey(className)) {
             return INIT_CLASS_CODES.get(className);
         } else {
@@ -77,7 +89,7 @@ public class MethodArea {
     }
 
     public void loadClassCode(ClassCode classCode) {
-        String className = classCode.getName();
+        String className = classCode.name;
         if (!INIT_CLASS_CODES.containsKey(className)) {
             if (!this.classCodes.containsKey(className)) {
                 this.classCodes.put(className, classCode);
@@ -88,13 +100,13 @@ public class MethodArea {
     }
 
     private void clinit(ClassCode classCode) {
-        if (ArrayUtils.contains(IGNORE_CLINIT, classCode.getName())) {
+        if (ArrayUtils.contains(IGNORE_CLINIT, classCode.name)) {
             return;
         }
 
-        for (FieldCode fieldCode : classCode.getFields()) {
-            if (fieldCode.isStatic() && fieldCode.isNotFinal()) {
-                this.vm.getHeap().putStatic(classCode.getName(), fieldCode.getName(), fieldCode.getVariableType().getDefaultValue());
+        for (FieldCode fieldCode : classCode.fields.values()) {
+            if (fieldCode.isStatic && !fieldCode.isFinal) {
+                this.vm.getHeap().putStatic(classCode.name, fieldCode.name, fieldCode.variableType.getDefaultValue());
             }
         }
 
@@ -106,6 +118,10 @@ public class MethodArea {
 
     public Map<String, ClassCode> getClassCodes() {
         return classCodes;
+    }
+
+    public Map<String, MethodCode> getMethodCodes() {
+        return methodCodes;
     }
 
 }

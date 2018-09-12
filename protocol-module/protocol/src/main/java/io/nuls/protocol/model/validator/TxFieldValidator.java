@@ -23,8 +23,6 @@
  */
 package io.nuls.protocol.model.validator;
 
-import io.nuls.contract.constant.ContractConstant;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Transaction;
@@ -38,9 +36,7 @@ import io.nuls.kernel.validate.ValidateResult;
 public class TxFieldValidator implements NulsDataValidator<Transaction> {
 
     public final static int MAX_REMARK_LEN = 100;
-    public final static int MAX_TX_TYPE = 10000;
-    public static final int MAX_TX_DATA_SIZE = 30 * 1024;
-    public static final int MAX_TX_CONTRACT_CREATE_DATA_SIZE = 100 * 1024;
+    public final static int MAX_TX_TYPE = 60000;
 
 
     @Override
@@ -66,21 +62,6 @@ public class TxFieldValidator implements NulsDataValidator<Transaction> {
             if (tx.getRemark() != null && tx.getRemark().length > MAX_REMARK_LEN) {
                 result = false;
                 break;
-            }
-            if (tx.getTxData() != null) {
-                int size = tx.getTxData().size();
-                if(tx.getType() == ContractConstant.TX_TYPE_CREATE_CONTRACT) {
-                    if(size > MAX_TX_CONTRACT_CREATE_DATA_SIZE) {
-                        result = false;
-                        break;
-                    }
-                } else {
-                    if(size > MAX_TX_DATA_SIZE) {
-                        result = false;
-                        break;
-                    }
-                }
-
             }
         } while (false);
         if (!result) {

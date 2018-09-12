@@ -36,6 +36,8 @@ public class UtxoAccountsBalanceServiceImpl implements UtxoAccountsBalanceServic
             UtxoAccountsBalance accountBalance=new UtxoAccountsBalance();
             accountBalance.setOwner(dbAccountsBalance.getOwner());
             long totalNa=dbAccountsBalance.getOutputBalance()-(dbAccountsBalance.getInputBalance());
+            totalNa+=dbAccountsBalance.getContractToBalance();
+            totalNa-=dbAccountsBalance.getContractFromBalance();
             accountBalance.setBalance(Na.valueOf(totalNa));
             long permanentLockedNa=dbAccountsBalance.getLockedPermanentBalance()-(dbAccountsBalance.getUnLockedPermanentBalance());
             long lockedNa=permanentLockedNa;

@@ -31,7 +31,6 @@ import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
-import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.constant.ProtocolConstant;
 
 import java.io.IOException;
@@ -52,6 +51,14 @@ public class BlockExtendsData extends BaseNulsData {
     private Integer mainVersion;
 
     private Integer currentVersion;
+
+    private Integer percent;
+
+    private Long delay;
+
+    private byte[] stateRoot;
+
+
 
     public long getRoundEndTime() {
         return roundStartTime + consensusMemberCount * ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L;
@@ -111,6 +118,9 @@ public class BlockExtendsData extends BaseNulsData {
         if (currentVersion != null) {
             size += SerializeUtils.sizeOfUint32();  // mainVersion
             size += SerializeUtils.sizeOfUint32();  // currentVersion
+            size += SerializeUtils.sizeOfUint16();  // percent;
+            size += SerializeUtils.sizeOfUint32();  // delay;
+            size += SerializeUtils.sizeOfBytes(stateRoot);
         }
         return size;
     }
@@ -124,6 +134,9 @@ public class BlockExtendsData extends BaseNulsData {
         if (currentVersion != null) {
             stream.writeUint32(mainVersion);
             stream.writeUint32(currentVersion);
+            stream.writeUint16(percent);
+            stream.writeUint32(delay);
+            stream.writeBytesWithLength(stateRoot);
         }
     }
 
@@ -136,6 +149,9 @@ public class BlockExtendsData extends BaseNulsData {
         if (!byteBuffer.isFinished()) {
             this.mainVersion = byteBuffer.readInt32();
             this.currentVersion = byteBuffer.readInt32();
+            this.percent = byteBuffer.readUint16();
+            this.delay = byteBuffer.readUint32();
+            this.stateRoot = byteBuffer.readByLengthByte();
         }
     }
 
@@ -155,4 +171,34 @@ public class BlockExtendsData extends BaseNulsData {
         this.currentVersion = currentVersion;
     }
 
+    public Integer getPercent() {
+        return percent;
+    }
+
+    public void setPercent(Integer percent) {
+        this.percent = percent;
+    }
+
+    public Long getDelay() {
+        return delay;
+    }
+
+    public void setDelay(Long delay) {
+        this.delay = delay;
+    }
+
+    public String getProtocolKey() {
+        if (currentVersion != null && currentVersion > 1) {
+            return this.currentVersion + "-" + this.percent + "-" + this.delay;
+        }
+        return null;
+    }
+
+    public byte[] getStateRoot() {
+        return stateRoot;
+    }
+
+    public void setStateRoot(byte[] stateRoot) {
+        this.stateRoot = stateRoot;
+    }
 }

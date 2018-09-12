@@ -43,6 +43,9 @@ public class OutputDto {
     @ApiModelProperty(name = "address", value = "地址")
     private String address;
 
+    @ApiModelProperty(name = "script", value = "锁定脚本")
+    private String script;
+
     @ApiModelProperty(name = "value", value = "数量")
     private Long value;
 
@@ -54,7 +57,8 @@ public class OutputDto {
     private Integer status;
 
     public OutputDto(Coin output) {
-        this.address = AddressTool.getStringAddressByBytes(output.getOwner());
+        this.address = AddressTool.getStringAddressByBytes(output.getAddress());
+        this.script = AddressTool.getStringAddressByBytes(output.getOwner());
         this.value = output.getNa().getValue();
         this.lockTime = output.getLockTime();
     }

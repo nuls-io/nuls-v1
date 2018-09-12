@@ -10,14 +10,8 @@ public class ProgramResult {
 
     private String result;
 
-    /**
-     * 有错误，还原状态
-     */
     private boolean revert;
 
-    /**
-     * 有错误，状态改变
-     */
     private boolean error;
 
     private String errorMessage;
@@ -27,8 +21,6 @@ public class ProgramResult {
     private BigInteger balance;
 
     private BigInteger nonce;
-
-    private boolean view;
 
     private List<ProgramTransfer> transfers = new ArrayList<>();
 
@@ -47,7 +39,6 @@ public class ProgramResult {
     }
 
     public void view() {
-        this.view = true;
         this.transfers = new ArrayList<>();
         this.events = new ArrayList<>();
     }
@@ -139,14 +130,6 @@ public class ProgramResult {
         this.events = events;
     }
 
-    public boolean isView() {
-        return view;
-    }
-
-    public void setView(boolean view) {
-        this.view = view;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -157,7 +140,6 @@ public class ProgramResult {
         if (gasUsed != that.gasUsed) return false;
         if (revert != that.revert) return false;
         if (error != that.error) return false;
-        if (view != that.view) return false;
         if (result != null ? !result.equals(that.result) : that.result != null) return false;
         if (errorMessage != null ? !errorMessage.equals(that.errorMessage) : that.errorMessage != null) return false;
         if (stackTrace != null ? !stackTrace.equals(that.stackTrace) : that.stackTrace != null) return false;
@@ -177,7 +159,6 @@ public class ProgramResult {
         result1 = 31 * result1 + (stackTrace != null ? stackTrace.hashCode() : 0);
         result1 = 31 * result1 + (balance != null ? balance.hashCode() : 0);
         result1 = 31 * result1 + (nonce != null ? nonce.hashCode() : 0);
-        result1 = 31 * result1 + (view ? 1 : 0);
         result1 = 31 * result1 + (transfers != null ? transfers.hashCode() : 0);
         result1 = 31 * result1 + (events != null ? events.hashCode() : 0);
         return result1;
@@ -194,7 +175,6 @@ public class ProgramResult {
                 ", stackTrace=" + stackTrace +
                 ", balance=" + balance +
                 ", nonce=" + nonce +
-                ", view=" + view +
                 ", transfers=" + transfers +
                 ", events=" + events +
                 '}';

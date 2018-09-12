@@ -33,15 +33,14 @@ import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
 import io.nuls.core.tools.crypto.ECKey;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.script.BlockSignature;
+
 import io.nuls.kernel.utils.AddressTool;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
@@ -106,7 +105,7 @@ public class BaseChainTest extends BaseTest {
 
         NulsSignData signData = signDigest(agentTx.getHash().getDigestBytes(), ecKey);
 
-        agentTx.setScriptSig(signData.getSignBytes());
+        agentTx.setTransactionSignature(signData.getSignBytes());
         agentTx.getTxData().setTxHash(agentTx.getHash());
 
         // add the agent tx into agent list
@@ -188,11 +187,11 @@ public class BaseChainTest extends BaseTest {
 
         NulsSignData signData = signDigest(blockHeader.getHash().getDigestBytes(), ecKey);
 
-        P2PKHScriptSig sig = new P2PKHScriptSig();
+        BlockSignature sig = new BlockSignature();
         sig.setSignData(signData);
         sig.setPublicKey(ecKey.getPubKey());
 
-        blockHeader.setScriptSig(sig);
+        blockHeader.setBlockSignature(sig);
 
         return block;
     }

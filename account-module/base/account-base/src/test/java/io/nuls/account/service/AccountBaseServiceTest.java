@@ -80,7 +80,7 @@ public class AccountBaseServiceTest {
         accountBaseService.setPassword(account.getAddress().toString(),"nuls123456");
         Account acc = accountService.getAccount(account.getAddress()).getData();
         try {
-            assertTrue(acc.decrypt("nuls123456"));
+            assertTrue(acc.unlock("nuls123456"));
             assertArrayEquals(acc.getPriKey(), account.getPriKey());
         } catch (NulsException e) {
             e.printStackTrace();
@@ -94,8 +94,8 @@ public class AccountBaseServiceTest {
         accountBaseService.changePassword(account.getAddress().toString(),"nuls123456", "nuls111111");
         Account acc = accountService.getAccount(account.getAddress()).getData();
         try {
-            assertFalse(acc.decrypt("nuls123456"));
-            assertTrue(acc.decrypt("nuls111111"));
+            assertFalse(acc.unlock("nuls123456"));
+            assertTrue(acc.unlock("nuls111111"));
             assertArrayEquals(acc.getPriKey(), account.getPriKey());
         } catch (NulsException e) {
 

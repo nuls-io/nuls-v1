@@ -6,6 +6,7 @@ import io.nuls.contract.vm.ObjectRef;
 import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.natives.NativeMethod;
+import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.Log;
 import org.objectweb.asm.tree.MethodInsnNode;
 
@@ -17,14 +18,18 @@ public class Invokespecial {
         String methodName = methodInsnNode.name;
         String methodDesc = methodInsnNode.desc;
 
-        MethodCode methodCode = frame.getMethodArea().loadMethod(className, methodName, methodDesc);
+        MethodCode methodCode = frame.methodArea.loadMethod(className, methodName, methodDesc);
 
-        MethodArgs methodArgs = new MethodArgs(methodCode.getArgsVariableType(), frame.getOperandStack(), false);
-        ObjectRef objectRef = methodArgs.getObjectRef();
+        MethodArgs methodArgs = new MethodArgs(methodCode.argsVariableType, frame.operandStack, false);
+        ObjectRef objectRef = methodArgs.objectRef;
+        if (objectRef == null) {
+            frame.throwNullPointerException();
+            return;
+        }
 
         //Log.opcode(frame.getCurrentOpCode(), className, methodName, methodDesc);
 
-        if ("java/lang/Object".equals(className) && "<init>".equals(methodName)) {
+        if (Constants.OBJECT_CLASS_NAME.equals(className) && Constants.CONSTRUCTOR_NAME.equals(methodName)) {
             return;
         }
 
@@ -33,7 +38,7 @@ public class Invokespecial {
             return;
         }
 
-        frame.getVm().run(methodCode, methodArgs.getFrameArgs(), true);
+        frame.vm.run(methodCode, methodArgs.frameArgs, true);
     }
 
 }

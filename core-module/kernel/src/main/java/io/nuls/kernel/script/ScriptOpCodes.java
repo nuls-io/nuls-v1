@@ -1,38 +1,28 @@
 /*
- * MIT License
+ * Copyright 2013 Google Inc.
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-
-
 
 package io.nuls.kernel.script;
 
-import java.util.HashMap;
+import com.google.common.collect.ImmutableMap;
+
 import java.util.Map;
 
 /**
  * Various constants that define the assembly-like scripting language that forms part of the Bitcoin protocol.
- * See   for details. Also provides a method to convert them to a string.
+ * See {@link org.bitcoinj.script.Script} for details. Also provides a method to convert them to a string.
  */
 public class ScriptOpCodes {
     // push value
@@ -159,6 +149,7 @@ public class ScriptOpCodes {
     // expansion
     public static final int OP_NOP1 = 0xb0;
     /** Deprecated by BIP 65 */
+    @Deprecated
     public static final int OP_NOP2 = OP_CHECKLOCKTIMEVERIFY;
     public static final int OP_NOP3 = 0xb2;
     public static final int OP_NOP4 = 0xb3;
@@ -168,284 +159,261 @@ public class ScriptOpCodes {
     public static final int OP_NOP8 = 0xb7;
     public static final int OP_NOP9 = 0xb8;
     public static final int OP_NOP10 = 0xb9;
-    
-    //OP_MG 交易类型判断，栈顶元素是否是帐户管理类交易  Transaction.VERSION_REGISTER, Transaction.VERSION_CHANGEPWD
-    public static final int OP_VERMG = 0xc1;
-    //交易类型判断，栈顶元素是否是资金交易  Transaction.VERSION_PAY
-    public static final int OP_VERTR = 0xc2;
-    //根据栈顶元素的交易hash获取公匙和hash160
-    public static final int OP_PUBKEY = 0xc3;
-    
     public static final int OP_INVALIDOPCODE = 0xff;
 
-    private static final Map<Integer, String> OP_CODE_MAP = new HashMap<Integer, String>();
-    private static final Map<String, Integer> OP_CODE_NAME_MAP = new HashMap<String, Integer>();
-    
-    static {
-    	OP_CODE_MAP.put(OP_0, "0");
-        OP_CODE_MAP.put(OP_0, "0");
-        OP_CODE_MAP.put(OP_PUSHDATA1, "PUSHDATA1");
-        OP_CODE_MAP.put(OP_PUSHDATA2, "PUSHDATA2");
-        OP_CODE_MAP.put(OP_PUSHDATA4, "PUSHDATA4");
-        OP_CODE_MAP.put(OP_1NEGATE, "1NEGATE");
-        OP_CODE_MAP.put(OP_RESERVED, "RESERVED");
-        OP_CODE_MAP.put(OP_1, "1");
-        OP_CODE_MAP.put(OP_2, "2");
-        OP_CODE_MAP.put(OP_3, "3");
-        OP_CODE_MAP.put(OP_4, "4");
-        OP_CODE_MAP.put(OP_5, "5");
-        OP_CODE_MAP.put(OP_6, "6");
-        OP_CODE_MAP.put(OP_7, "7");
-        OP_CODE_MAP.put(OP_8, "8");
-        OP_CODE_MAP.put(OP_9, "9");
-        OP_CODE_MAP.put(OP_10, "10");
-        OP_CODE_MAP.put(OP_11, "11");
-        OP_CODE_MAP.put(OP_12, "12");
-        OP_CODE_MAP.put(OP_13, "13");
-        OP_CODE_MAP.put(OP_14, "14");
-        OP_CODE_MAP.put(OP_15, "15");
-        OP_CODE_MAP.put(OP_16, "16");
-        OP_CODE_MAP.put(OP_NOP, "NOP");
-        OP_CODE_MAP.put(OP_VER, "VER");
-        OP_CODE_MAP.put(OP_IF, "IF");
-        OP_CODE_MAP.put(OP_NOTIF, "NOTIF");
-        OP_CODE_MAP.put(OP_VERIF, "VERIF");
-        OP_CODE_MAP.put(OP_VERNOTIF, "VERNOTIF");
-        OP_CODE_MAP.put(OP_ELSE, "ELSE");
-        OP_CODE_MAP.put(OP_ENDIF, "ENDIF");
-        OP_CODE_MAP.put(OP_VERIFY, "VERIFY");
-        OP_CODE_MAP.put(OP_RETURN, "RETURN");
-        OP_CODE_MAP.put(OP_TOALTSTACK, "TOALTSTACK");
-        OP_CODE_MAP.put(OP_FROMALTSTACK, "FROMALTSTACK");
-        OP_CODE_MAP.put(OP_2DROP, "2DROP");
-        OP_CODE_MAP.put(OP_2DUP, "2DUP");
-        OP_CODE_MAP.put(OP_3DUP, "3DUP");
-        OP_CODE_MAP.put(OP_2OVER, "2OVER");
-        OP_CODE_MAP.put(OP_2ROT, "2ROT");
-        OP_CODE_MAP.put(OP_2SWAP, "2SWAP");
-        OP_CODE_MAP.put(OP_IFDUP, "IFDUP");
-        OP_CODE_MAP.put(OP_DEPTH, "DEPTH");
-        OP_CODE_MAP.put(OP_DROP, "DROP");
-        OP_CODE_MAP.put(OP_DUP, "DUP");
-        OP_CODE_MAP.put(OP_NIP, "NIP");
-        OP_CODE_MAP.put(OP_OVER, "OVER");
-        OP_CODE_MAP.put(OP_PICK, "PICK");
-        OP_CODE_MAP.put(OP_ROLL, "ROLL");
-        OP_CODE_MAP.put(OP_ROT, "ROT");
-        OP_CODE_MAP.put(OP_SWAP, "SWAP");
-        OP_CODE_MAP.put(OP_TUCK, "TUCK");
-        OP_CODE_MAP.put(OP_CAT, "CAT");
-        OP_CODE_MAP.put(OP_SUBSTR, "SUBSTR");
-        OP_CODE_MAP.put(OP_LEFT, "LEFT");
-        OP_CODE_MAP.put(OP_RIGHT, "RIGHT");
-        OP_CODE_MAP.put(OP_SIZE, "SIZE");
-        OP_CODE_MAP.put(OP_INVERT, "INVERT");
-        OP_CODE_MAP.put(OP_AND, "AND");
-        OP_CODE_MAP.put(OP_OR, "OR");
-        OP_CODE_MAP.put(OP_XOR, "XOR");
-        OP_CODE_MAP.put(OP_EQUAL, "EQUAL");
-        OP_CODE_MAP.put(OP_EQUALVERIFY, "EQUALVERIFY");
-        OP_CODE_MAP.put(OP_RESERVED1, "RESERVED1");
-        OP_CODE_MAP.put(OP_RESERVED2, "RESERVED2");
-        OP_CODE_MAP.put(OP_1ADD, "1ADD");
-        OP_CODE_MAP.put(OP_1SUB, "1SUB");
-        OP_CODE_MAP.put(OP_2MUL, "2MUL");
-        OP_CODE_MAP.put(OP_2DIV, "2DIV");
-        OP_CODE_MAP.put(OP_NEGATE, "NEGATE");
-        OP_CODE_MAP.put(OP_ABS, "ABS");
-        OP_CODE_MAP.put(OP_NOT, "NOT");
-        OP_CODE_MAP.put(OP_0NOTEQUAL, "0NOTEQUAL");
-        OP_CODE_MAP.put(OP_ADD, "ADD");
-        OP_CODE_MAP.put(OP_SUB, "SUB");
-        OP_CODE_MAP.put(OP_MUL, "MUL");
-        OP_CODE_MAP.put(OP_DIV, "DIV");
-        OP_CODE_MAP.put(OP_MOD, "MOD");
-        OP_CODE_MAP.put(OP_LSHIFT, "LSHIFT");
-        OP_CODE_MAP.put(OP_RSHIFT, "RSHIFT");
-        OP_CODE_MAP.put(OP_BOOLAND, "BOOLAND");
-        OP_CODE_MAP.put(OP_BOOLOR, "BOOLOR");
-        OP_CODE_MAP.put(OP_NUMEQUAL, "NUMEQUAL");
-        OP_CODE_MAP.put(OP_NUMEQUALVERIFY, "NUMEQUALVERIFY");
-        OP_CODE_MAP.put(OP_NUMNOTEQUAL, "NUMNOTEQUAL");
-        OP_CODE_MAP.put(OP_LESSTHAN, "LESSTHAN");
-        OP_CODE_MAP.put(OP_GREATERTHAN, "GREATERTHAN");
-        OP_CODE_MAP.put(OP_LESSTHANOREQUAL, "LESSTHANOREQUAL");
-        OP_CODE_MAP.put(OP_GREATERTHANOREQUAL, "GREATERTHANOREQUAL");
-        OP_CODE_MAP.put(OP_MIN, "MIN");
-        OP_CODE_MAP.put(OP_MAX, "MAX");
-        OP_CODE_MAP.put(OP_WITHIN, "WITHIN");
-        OP_CODE_MAP.put(OP_RIPEMD160, "RIPEMD160");
-        OP_CODE_MAP.put(OP_SHA1, "SHA1");
-        OP_CODE_MAP.put(OP_SHA256, "SHA256");
-        OP_CODE_MAP.put(OP_HASH160, "HASH160");
-        OP_CODE_MAP.put(OP_HASH256, "HASH256");
-        OP_CODE_MAP.put(OP_CODESEPARATOR, "CODESEPARATOR");
-        OP_CODE_MAP.put(OP_CHECKSIG, "CHECKSIG");
-        OP_CODE_MAP.put(OP_CHECKSIGVERIFY, "CHECKSIGVERIFY");
-        OP_CODE_MAP.put(OP_CHECKMULTISIG, "CHECKMULTISIG");
-        OP_CODE_MAP.put(OP_CHECKMULTISIGVERIFY, "CHECKMULTISIGVERIFY");
-        OP_CODE_MAP.put(OP_NOP1, "NOP1");
-        OP_CODE_MAP.put(OP_CHECKLOCKTIMEVERIFY, "CHECKLOCKTIMEVERIFY");
-        OP_CODE_MAP.put(OP_NOP3, "NOP3");
-        OP_CODE_MAP.put(OP_NOP4, "NOP4");
-        OP_CODE_MAP.put(OP_NOP5, "NOP5");
-        OP_CODE_MAP.put(OP_NOP6, "NOP6");
-        OP_CODE_MAP.put(OP_NOP7, "NOP7");
-        OP_CODE_MAP.put(OP_NOP8, "NOP8");
-        OP_CODE_MAP.put(OP_NOP9, "NOP9");
-        OP_CODE_MAP.put(OP_NOP10, "NOP10");
-        
-        OP_CODE_MAP.put(OP_VERMG, "VERMG");
-        OP_CODE_MAP.put(OP_VERTR, "VERTR");
-        OP_CODE_MAP.put(OP_PUBKEY, "PUBKEY");
-        
-        OP_CODE_NAME_MAP.put("0", OP_0);
-        OP_CODE_NAME_MAP.put("PUSHDATA1", OP_PUSHDATA1);
-        OP_CODE_NAME_MAP.put("PUSHDATA2", OP_PUSHDATA2);
-        OP_CODE_NAME_MAP.put("PUSHDATA4", OP_PUSHDATA4);
-        OP_CODE_NAME_MAP.put("1NEGATE", OP_1NEGATE);
-        OP_CODE_NAME_MAP.put("RESERVED", OP_RESERVED);
-        OP_CODE_NAME_MAP.put("1", OP_1);
-        OP_CODE_NAME_MAP.put("2", OP_2);
-        OP_CODE_NAME_MAP.put("3", OP_3);
-        OP_CODE_NAME_MAP.put("4", OP_4);
-        OP_CODE_NAME_MAP.put("5", OP_5);
-        OP_CODE_NAME_MAP.put("6", OP_6);
-        OP_CODE_NAME_MAP.put("7", OP_7);
-        OP_CODE_NAME_MAP.put("8", OP_8);
-        OP_CODE_NAME_MAP.put("9", OP_9);
-        OP_CODE_NAME_MAP.put("10", OP_10);
-        OP_CODE_NAME_MAP.put("11", OP_11);
-        OP_CODE_NAME_MAP.put("12", OP_12);
-        OP_CODE_NAME_MAP.put("13", OP_13);
-        OP_CODE_NAME_MAP.put("14", OP_14);
-        OP_CODE_NAME_MAP.put("15", OP_15);
-        OP_CODE_NAME_MAP.put("16", OP_16);
-        OP_CODE_NAME_MAP.put("NOP", OP_NOP);
-        OP_CODE_NAME_MAP.put("VER", OP_VER);
-        OP_CODE_NAME_MAP.put("IF", OP_IF);
-        OP_CODE_NAME_MAP.put("NOTIF", OP_NOTIF);
-        OP_CODE_NAME_MAP.put("VERIF", OP_VERIF);
-        OP_CODE_NAME_MAP.put("VERNOTIF", OP_VERNOTIF);
-        OP_CODE_NAME_MAP.put("ELSE", OP_ELSE);
-        OP_CODE_NAME_MAP.put("ENDIF", OP_ENDIF);
-        OP_CODE_NAME_MAP.put("VERIFY", OP_VERIFY);
-        OP_CODE_NAME_MAP.put("RETURN", OP_RETURN);
-        OP_CODE_NAME_MAP.put("TOALTSTACK", OP_TOALTSTACK);
-        OP_CODE_NAME_MAP.put("FROMALTSTACK", OP_FROMALTSTACK);
-        OP_CODE_NAME_MAP.put("2DROP", OP_2DROP);
-        OP_CODE_NAME_MAP.put("2DUP", OP_2DUP);
-        OP_CODE_NAME_MAP.put("3DUP", OP_3DUP);
-        OP_CODE_NAME_MAP.put("2OVER", OP_2OVER);
-        OP_CODE_NAME_MAP.put("2ROT", OP_2ROT);
-        OP_CODE_NAME_MAP.put("2SWAP", OP_2SWAP);
-        OP_CODE_NAME_MAP.put("IFDUP", OP_IFDUP);
-        OP_CODE_NAME_MAP.put("DEPTH", OP_DEPTH);
-        OP_CODE_NAME_MAP.put("DROP", OP_DROP);
-        OP_CODE_NAME_MAP.put("DUP", OP_DUP);
-        OP_CODE_NAME_MAP.put("NIP", OP_NIP);
-        OP_CODE_NAME_MAP.put("OVER", OP_OVER);
-        OP_CODE_NAME_MAP.put("PICK", OP_PICK);
-        OP_CODE_NAME_MAP.put("ROLL", OP_ROLL);
-        OP_CODE_NAME_MAP.put("ROT", OP_ROT);
-        OP_CODE_NAME_MAP.put("SWAP", OP_SWAP);
-        OP_CODE_NAME_MAP.put("TUCK", OP_TUCK);
-        OP_CODE_NAME_MAP.put("CAT", OP_CAT);
-        OP_CODE_NAME_MAP.put("SUBSTR", OP_SUBSTR);
-        OP_CODE_NAME_MAP.put("LEFT", OP_LEFT);
-        OP_CODE_NAME_MAP.put("RIGHT", OP_RIGHT);
-        OP_CODE_NAME_MAP.put("SIZE", OP_SIZE);
-        OP_CODE_NAME_MAP.put("INVERT", OP_INVERT);
-        OP_CODE_NAME_MAP.put("AND", OP_AND);
-        OP_CODE_NAME_MAP.put("OR", OP_OR);
-        OP_CODE_NAME_MAP.put("XOR", OP_XOR);
-        OP_CODE_NAME_MAP.put("EQUAL", OP_EQUAL);
-        OP_CODE_NAME_MAP.put("EQUALVERIFY", OP_EQUALVERIFY);
-        OP_CODE_NAME_MAP.put("RESERVED1", OP_RESERVED1);
-        OP_CODE_NAME_MAP.put("RESERVED2", OP_RESERVED2);
-        OP_CODE_NAME_MAP.put("1ADD", OP_1ADD);
-        OP_CODE_NAME_MAP.put("1SUB", OP_1SUB);
-        OP_CODE_NAME_MAP.put("2MUL", OP_2MUL);
-        OP_CODE_NAME_MAP.put("2DIV", OP_2DIV);
-        OP_CODE_NAME_MAP.put("NEGATE", OP_NEGATE);
-        OP_CODE_NAME_MAP.put("ABS", OP_ABS);
-        OP_CODE_NAME_MAP.put("NOT", OP_NOT);
-        OP_CODE_NAME_MAP.put("0NOTEQUAL", OP_0NOTEQUAL);
-        OP_CODE_NAME_MAP.put("ADD", OP_ADD);
-        OP_CODE_NAME_MAP.put("SUB", OP_SUB);
-        OP_CODE_NAME_MAP.put("MUL", OP_MUL);
-        OP_CODE_NAME_MAP.put("DIV", OP_DIV);
-        OP_CODE_NAME_MAP.put("MOD", OP_MOD);
-        OP_CODE_NAME_MAP.put("LSHIFT", OP_LSHIFT);
-        OP_CODE_NAME_MAP.put("RSHIFT", OP_RSHIFT);
-        OP_CODE_NAME_MAP.put("BOOLAND", OP_BOOLAND);
-        OP_CODE_NAME_MAP.put("BOOLOR", OP_BOOLOR);
-        OP_CODE_NAME_MAP.put("NUMEQUAL", OP_NUMEQUAL);
-        OP_CODE_NAME_MAP.put("NUMEQUALVERIFY", OP_NUMEQUALVERIFY);
-        OP_CODE_NAME_MAP.put("NUMNOTEQUAL", OP_NUMNOTEQUAL);
-        OP_CODE_NAME_MAP.put("LESSTHAN", OP_LESSTHAN);
-        OP_CODE_NAME_MAP.put("GREATERTHAN", OP_GREATERTHAN);
-        OP_CODE_NAME_MAP.put("LESSTHANOREQUAL", OP_LESSTHANOREQUAL);
-        OP_CODE_NAME_MAP.put("GREATERTHANOREQUAL", OP_GREATERTHANOREQUAL);
-        OP_CODE_NAME_MAP.put("MIN", OP_MIN);
-        OP_CODE_NAME_MAP.put("MAX", OP_MAX);
-        OP_CODE_NAME_MAP.put("WITHIN", OP_WITHIN);
-        OP_CODE_NAME_MAP.put("RIPEMD160", OP_RIPEMD160);
-        OP_CODE_NAME_MAP.put("SHA1", OP_SHA1);
-        OP_CODE_NAME_MAP.put("SHA256", OP_SHA256);
-        OP_CODE_NAME_MAP.put("HASH160", OP_HASH160);
-        OP_CODE_NAME_MAP.put("HASH256", OP_HASH256);
-        OP_CODE_NAME_MAP.put("CODESEPARATOR", OP_CODESEPARATOR);
-        OP_CODE_NAME_MAP.put("CHECKSIG", OP_CHECKSIG);
-        OP_CODE_NAME_MAP.put("CHECKSIGVERIFY", OP_CHECKSIGVERIFY);
-        OP_CODE_NAME_MAP.put("CHECKMULTISIG", OP_CHECKMULTISIG);
-        OP_CODE_NAME_MAP.put("CHECKMULTISIGVERIFY", OP_CHECKMULTISIGVERIFY);
-        OP_CODE_NAME_MAP.put("NOP1", OP_NOP1);
-        OP_CODE_NAME_MAP.put("CHECKLOCKTIMEVERIFY", OP_CHECKLOCKTIMEVERIFY);
-        OP_CODE_NAME_MAP.put("NOP2", OP_NOP2);
-        OP_CODE_NAME_MAP.put("NOP3", OP_NOP3);
-        OP_CODE_NAME_MAP.put("NOP4", OP_NOP4);
-        OP_CODE_NAME_MAP.put("NOP5", OP_NOP5);
-        OP_CODE_NAME_MAP.put("NOP6", OP_NOP6);
-        OP_CODE_NAME_MAP.put("NOP7", OP_NOP7);
-        OP_CODE_NAME_MAP.put("NOP8", OP_NOP8);
-        OP_CODE_NAME_MAP.put("NOP9", OP_NOP9);
-        OP_CODE_NAME_MAP.put("NOP10", OP_NOP10);
+    private static final Map<Integer, String> opCodeMap = ImmutableMap.<Integer, String>builder()
+        .put(OP_0, "0")
+        .put(OP_PUSHDATA1, "PUSHDATA1")
+        .put(OP_PUSHDATA2, "PUSHDATA2")
+        .put(OP_PUSHDATA4, "PUSHDATA4")
+        .put(OP_1NEGATE, "1NEGATE")
+        .put(OP_RESERVED, "RESERVED")
+        .put(OP_1, "1")
+        .put(OP_2, "2")
+        .put(OP_3, "3")
+        .put(OP_4, "4")
+        .put(OP_5, "5")
+        .put(OP_6, "6")
+        .put(OP_7, "7")
+        .put(OP_8, "8")
+        .put(OP_9, "9")
+        .put(OP_10, "10")
+        .put(OP_11, "11")
+        .put(OP_12, "12")
+        .put(OP_13, "13")
+        .put(OP_14, "14")
+        .put(OP_15, "15")
+        .put(OP_16, "16")
+        .put(OP_NOP, "NOP")
+        .put(OP_VER, "VER")
+        .put(OP_IF, "IF")
+        .put(OP_NOTIF, "NOTIF")
+        .put(OP_VERIF, "VERIF")
+        .put(OP_VERNOTIF, "VERNOTIF")
+        .put(OP_ELSE, "ELSE")
+        .put(OP_ENDIF, "ENDIF")
+        .put(OP_VERIFY, "VERIFY")
+        .put(OP_RETURN, "RETURN")
+        .put(OP_TOALTSTACK, "TOALTSTACK")
+        .put(OP_FROMALTSTACK, "FROMALTSTACK")
+        .put(OP_2DROP, "2DROP")
+        .put(OP_2DUP, "2DUP")
+        .put(OP_3DUP, "3DUP")
+        .put(OP_2OVER, "2OVER")
+        .put(OP_2ROT, "2ROT")
+        .put(OP_2SWAP, "2SWAP")
+        .put(OP_IFDUP, "IFDUP")
+        .put(OP_DEPTH, "DEPTH")
+        .put(OP_DROP, "DROP")
+        .put(OP_DUP, "DUP")
+        .put(OP_NIP, "NIP")
+        .put(OP_OVER, "OVER")
+        .put(OP_PICK, "PICK")
+        .put(OP_ROLL, "ROLL")
+        .put(OP_ROT, "ROT")
+        .put(OP_SWAP, "SWAP")
+        .put(OP_TUCK, "TUCK")
+        .put(OP_CAT, "CAT")
+        .put(OP_SUBSTR, "SUBSTR")
+        .put(OP_LEFT, "LEFT")
+        .put(OP_RIGHT, "RIGHT")
+        .put(OP_SIZE, "SIZE")
+        .put(OP_INVERT, "INVERT")
+        .put(OP_AND, "AND")
+        .put(OP_OR, "OR")
+        .put(OP_XOR, "XOR")
+        .put(OP_EQUAL, "EQUAL")
+        .put(OP_EQUALVERIFY, "EQUALVERIFY")
+        .put(OP_RESERVED1, "RESERVED1")
+        .put(OP_RESERVED2, "RESERVED2")
+        .put(OP_1ADD, "1ADD")
+        .put(OP_1SUB, "1SUB")
+        .put(OP_2MUL, "2MUL")
+        .put(OP_2DIV, "2DIV")
+        .put(OP_NEGATE, "NEGATE")
+        .put(OP_ABS, "ABS")
+        .put(OP_NOT, "NOT")
+        .put(OP_0NOTEQUAL, "0NOTEQUAL")
+        .put(OP_ADD, "ADD")
+        .put(OP_SUB, "SUB")
+        .put(OP_MUL, "MUL")
+        .put(OP_DIV, "DIV")
+        .put(OP_MOD, "MOD")
+        .put(OP_LSHIFT, "LSHIFT")
+        .put(OP_RSHIFT, "RSHIFT")
+        .put(OP_BOOLAND, "BOOLAND")
+        .put(OP_BOOLOR, "BOOLOR")
+        .put(OP_NUMEQUAL, "NUMEQUAL")
+        .put(OP_NUMEQUALVERIFY, "NUMEQUALVERIFY")
+        .put(OP_NUMNOTEQUAL, "NUMNOTEQUAL")
+        .put(OP_LESSTHAN, "LESSTHAN")
+        .put(OP_GREATERTHAN, "GREATERTHAN")
+        .put(OP_LESSTHANOREQUAL, "LESSTHANOREQUAL")
+        .put(OP_GREATERTHANOREQUAL, "GREATERTHANOREQUAL")
+        .put(OP_MIN, "MIN")
+        .put(OP_MAX, "MAX")
+        .put(OP_WITHIN, "WITHIN")
+        .put(OP_RIPEMD160, "RIPEMD160")
+        .put(OP_SHA1, "SHA1")
+        .put(OP_SHA256, "SHA256")
+        .put(OP_HASH160, "HASH160")
+        .put(OP_HASH256, "HASH256")
+        .put(OP_CODESEPARATOR, "CODESEPARATOR")
+        .put(OP_CHECKSIG, "CHECKSIG")
+        .put(OP_CHECKSIGVERIFY, "CHECKSIGVERIFY")
+        .put(OP_CHECKMULTISIG, "CHECKMULTISIG")
+        .put(OP_CHECKMULTISIGVERIFY, "CHECKMULTISIGVERIFY")
+        .put(OP_NOP1, "NOP1")
+        .put(OP_CHECKLOCKTIMEVERIFY, "CHECKLOCKTIMEVERIFY")
+        .put(OP_NOP3, "NOP3")
+        .put(OP_NOP4, "NOP4")
+        .put(OP_NOP5, "NOP5")
+        .put(OP_NOP6, "NOP6")
+        .put(OP_NOP7, "NOP7")
+        .put(OP_NOP8, "NOP8")
+        .put(OP_NOP9, "NOP9")
+        .put(OP_NOP10, "NOP10").build();
 
-        OP_CODE_NAME_MAP.put("VERMG", OP_VERMG);
-        OP_CODE_NAME_MAP.put("VERTR", OP_VERTR);
-        OP_CODE_NAME_MAP.put("PUBKEY", OP_PUBKEY);
-    }
+    private static final Map<String, Integer> opCodeNameMap = ImmutableMap.<String, Integer>builder()
+        .put("0", OP_0)
+        .put("PUSHDATA1", OP_PUSHDATA1)
+        .put("PUSHDATA2", OP_PUSHDATA2)
+        .put("PUSHDATA4", OP_PUSHDATA4)
+        .put("1NEGATE", OP_1NEGATE)
+        .put("RESERVED", OP_RESERVED)
+        .put("1", OP_1)
+        .put("2", OP_2)
+        .put("3", OP_3)
+        .put("4", OP_4)
+        .put("5", OP_5)
+        .put("6", OP_6)
+        .put("7", OP_7)
+        .put("8", OP_8)
+        .put("9", OP_9)
+        .put("10", OP_10)
+        .put("11", OP_11)
+        .put("12", OP_12)
+        .put("13", OP_13)
+        .put("14", OP_14)
+        .put("15", OP_15)
+        .put("16", OP_16)
+        .put("NOP", OP_NOP)
+        .put("VER", OP_VER)
+        .put("IF", OP_IF)
+        .put("NOTIF", OP_NOTIF)
+        .put("VERIF", OP_VERIF)
+        .put("VERNOTIF", OP_VERNOTIF)
+        .put("ELSE", OP_ELSE)
+        .put("ENDIF", OP_ENDIF)
+        .put("VERIFY", OP_VERIFY)
+        .put("RETURN", OP_RETURN)
+        .put("TOALTSTACK", OP_TOALTSTACK)
+        .put("FROMALTSTACK", OP_FROMALTSTACK)
+        .put("2DROP", OP_2DROP)
+        .put("2DUP", OP_2DUP)
+        .put("3DUP", OP_3DUP)
+        .put("2OVER", OP_2OVER)
+        .put("2ROT", OP_2ROT)
+        .put("2SWAP", OP_2SWAP)
+        .put("IFDUP", OP_IFDUP)
+        .put("DEPTH", OP_DEPTH)
+        .put("DROP", OP_DROP)
+        .put("DUP", OP_DUP)
+        .put("NIP", OP_NIP)
+        .put("OVER", OP_OVER)
+        .put("PICK", OP_PICK)
+        .put("ROLL", OP_ROLL)
+        .put("ROT", OP_ROT)
+        .put("SWAP", OP_SWAP)
+        .put("TUCK", OP_TUCK)
+        .put("CAT", OP_CAT)
+        .put("SUBSTR", OP_SUBSTR)
+        .put("LEFT", OP_LEFT)
+        .put("RIGHT", OP_RIGHT)
+        .put("SIZE", OP_SIZE)
+        .put("INVERT", OP_INVERT)
+        .put("AND", OP_AND)
+        .put("OR", OP_OR)
+        .put("XOR", OP_XOR)
+        .put("EQUAL", OP_EQUAL)
+        .put("EQUALVERIFY", OP_EQUALVERIFY)
+        .put("RESERVED1", OP_RESERVED1)
+        .put("RESERVED2", OP_RESERVED2)
+        .put("1ADD", OP_1ADD)
+        .put("1SUB", OP_1SUB)
+        .put("2MUL", OP_2MUL)
+        .put("2DIV", OP_2DIV)
+        .put("NEGATE", OP_NEGATE)
+        .put("ABS", OP_ABS)
+        .put("NOT", OP_NOT)
+        .put("0NOTEQUAL", OP_0NOTEQUAL)
+        .put("ADD", OP_ADD)
+        .put("SUB", OP_SUB)
+        .put("MUL", OP_MUL)
+        .put("DIV", OP_DIV)
+        .put("MOD", OP_MOD)
+        .put("LSHIFT", OP_LSHIFT)
+        .put("RSHIFT", OP_RSHIFT)
+        .put("BOOLAND", OP_BOOLAND)
+        .put("BOOLOR", OP_BOOLOR)
+        .put("NUMEQUAL", OP_NUMEQUAL)
+        .put("NUMEQUALVERIFY", OP_NUMEQUALVERIFY)
+        .put("NUMNOTEQUAL", OP_NUMNOTEQUAL)
+        .put("LESSTHAN", OP_LESSTHAN)
+        .put("GREATERTHAN", OP_GREATERTHAN)
+        .put("LESSTHANOREQUAL", OP_LESSTHANOREQUAL)
+        .put("GREATERTHANOREQUAL", OP_GREATERTHANOREQUAL)
+        .put("MIN", OP_MIN)
+        .put("MAX", OP_MAX)
+        .put("WITHIN", OP_WITHIN)
+        .put("RIPEMD160", OP_RIPEMD160)
+        .put("SHA1", OP_SHA1)
+        .put("SHA256", OP_SHA256)
+        .put("HASH160", OP_HASH160)
+        .put("HASH256", OP_HASH256)
+        .put("CODESEPARATOR", OP_CODESEPARATOR)
+        .put("CHECKSIG", OP_CHECKSIG)
+        .put("CHECKSIGVERIFY", OP_CHECKSIGVERIFY)
+        .put("CHECKMULTISIG", OP_CHECKMULTISIG)
+        .put("CHECKMULTISIGVERIFY", OP_CHECKMULTISIGVERIFY)
+        .put("NOP1", OP_NOP1)
+        .put("CHECKLOCKTIMEVERIFY", OP_CHECKLOCKTIMEVERIFY)
+        .put("NOP2", OP_NOP2)
+        .put("NOP3", OP_NOP3)
+        .put("NOP4", OP_NOP4)
+        .put("NOP5", OP_NOP5)
+        .put("NOP6", OP_NOP6)
+        .put("NOP7", OP_NOP7)
+        .put("NOP8", OP_NOP8)
+        .put("NOP9", OP_NOP9)
+        .put("NOP10", OP_NOP10).build();
 
-//    /**
-//     * Converts the given OpCode into a string (eg "0", "PUSHDATA", or "NON_OP(10)")
-//     */
+    /**
+     * Converts the given OpCode into a string (eg "0", "PUSHDATA", or "NON_OP(10)")
+     */
     public static String getOpCodeName(int opcode) {
-        if (OP_CODE_MAP.containsKey(opcode)) {
-            return OP_CODE_MAP.get(opcode);
-        }
+        if (opCodeMap.containsKey(opcode))
+            return opCodeMap.get(opcode);
 
         return "NON_OP(" + opcode + ")";
     }
 
-//    /**
-//     * Converts the given pushdata OpCode into a string (eg "PUSHDATA2", or "PUSHDATA(23)")
-//     */
+    /**
+     * Converts the given pushdata OpCode into a string (eg "PUSHDATA2", or "PUSHDATA(23)")
+     */
     public static String getPushDataName(int opcode) {
-        if (OP_CODE_MAP.containsKey(opcode)) {
-            return OP_CODE_MAP.get(opcode);
-        }
+        if (opCodeMap.containsKey(opcode))
+            return opCodeMap.get(opcode);
 
         return "PUSHDATA(" + opcode + ")";
     }
-//
-//    /**
-//     * Converts the given OpCodeName into an int
-//     */
+
+    /**
+     * Converts the given OpCodeName into an int
+     */
     public static int getOpCode(String opCodeName) {
-        if (OP_CODE_NAME_MAP.containsKey(opCodeName)) {
-            return OP_CODE_NAME_MAP.get(opCodeName);
-        }
+        if (opCodeNameMap.containsKey(opCodeName))
+            return opCodeNameMap.get(opCodeName);
 
         return OP_INVALIDOPCODE;
     }

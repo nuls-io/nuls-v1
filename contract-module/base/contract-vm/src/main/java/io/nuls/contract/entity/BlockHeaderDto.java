@@ -1,6 +1,7 @@
 package io.nuls.contract.entity;
 
 
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.kernel.model.BlockHeader;
 
@@ -28,7 +29,7 @@ public class BlockHeaderDto implements Serializable {
         this.time = header.getTime();
         this.height = header.getHeight();
         this.packingAddress = header.getPackingAddress();
-        this.stateRoot = header.getStateRoot();
+        this.stateRoot = ContractUtil.getStateRoot(header);
     }
 
     public String getHash() {

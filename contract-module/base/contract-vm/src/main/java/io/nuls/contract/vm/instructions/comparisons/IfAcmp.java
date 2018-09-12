@@ -9,8 +9,8 @@ import java.util.Objects;
 public class IfAcmp {
 
     public static void if_acmpeq(Frame frame) {
-        ObjectRef value2 = frame.getOperandStack().popRef();
-        ObjectRef value1 = frame.getOperandStack().popRef();
+        ObjectRef value2 = frame.operandStack.popRef();
+        ObjectRef value1 = frame.operandStack.popRef();
         boolean result = Objects.equals(value1, value2);
         if (result) {
             frame.jump();
@@ -20,8 +20,8 @@ public class IfAcmp {
     }
 
     public static void if_acmpne(Frame frame) {
-        ObjectRef value2 = frame.getOperandStack().popRef();
-        ObjectRef value1 = frame.getOperandStack().popRef();
+        ObjectRef value2 = frame.operandStack.popRef();
+        ObjectRef value1 = frame.operandStack.popRef();
         boolean result = !Objects.equals(value1, value2);
         if (result) {
             frame.jump();

@@ -14,6 +14,8 @@ public class AccountBalanceDto {
     private String permanentLocked;
     private String timeLocked;
     private String heightLocked;
+    private String contractIn;
+    private String contractOut;
     private List<LockedBalance> lockedTimeList=new ArrayList<>();
     private List<LockedBalance> lockedHeightList=new ArrayList<>();
 
@@ -80,6 +82,22 @@ public class AccountBalanceDto {
 
     public void setHeightLocked(String heightLocked) {
         this.heightLocked = heightLocked;
+    }
+
+    public String getContractIn() {
+        return contractIn;
+    }
+
+    public void setContractIn(String contractIn) {
+        this.contractIn = contractIn;
+    }
+
+    public String getContractOut() {
+        return contractOut;
+    }
+
+    public void setContractOut(String contractOut) {
+        this.contractOut = contractOut;
     }
 
     public List<LockedBalance> getLockedTimeList() {

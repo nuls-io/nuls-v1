@@ -1,297 +1,231 @@
 package io.nuls.contract.vm.code;
 
+import io.nuls.contract.vm.util.Constants;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AnnotationNode;
-import org.objectweb.asm.tree.InnerClassNode;
-import org.objectweb.asm.tree.ModuleNode;
-import org.objectweb.asm.tree.TypeAnnotationNode;
+import org.objectweb.asm.tree.*;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+
+import static io.nuls.contract.vm.util.Utils.arrayListInitialCapacity;
+import static io.nuls.contract.vm.util.Utils.hashMapInitialCapacity;
 
 public class ClassCode {
 
-    private int version;
+    /**
+     * The class version. The minor version is stored in the 16 most significant bits, and the major
+     * version in the 16 least significant bits.
+     */
+    public final int version;
 
-    private int access;
+    /**
+     * The class's access flags (see {@link org.objectweb.asm.Opcodes}). This field also indicates if
+     * the class is deprecated.
+     */
+    public final int access;
 
-    private String name;
+    /**
+     * The internal name of this class (see {@link org.objectweb.asm.Type#getInternalName}).
+     */
+    public final String name;
 
-    private String signature;
+    /**
+     * The signature of this class. May be <tt>null</tt>.
+     */
+    public final String signature;
 
-    private String superName;
+    /**
+     * The internal of name of the super class (see {@link org.objectweb.asm.Type#getInternalName}).
+     * For interfaces, the super class is {@link Object}. May be <tt>null</tt>, but only for the
+     * {@link Object} class.
+     */
+    public final String superName;
 
-    private List<String> interfaces;
+    /**
+     * The internal names of the interfaces directly implemented by this class (see {@link
+     * org.objectweb.asm.Type#getInternalName}).
+     */
+    public final List<String> interfaces;
 
-    private String sourceFile;
+    /**
+     * The name of the source file from which this class was compiled. May be <tt>null</tt>.
+     */
+    public final String sourceFile;
 
-    private String sourceDebug;
+    /**
+     * The correspondence between source and compiled elements of this class. May be <tt>null</tt>.
+     */
+    public final String sourceDebug;
 
-    private ModuleNode module;
+    /**
+     * The module stored in this class. May be <tt>null</tt>.
+     */
+    public final ModuleNode module;
 
-    private String outerClass;
+    /**
+     * The internal name of the enclosing class of this class. May be <tt>null</tt>.
+     */
+    public final String outerClass;
 
-    private String outerMethod;
+    /**
+     * The name of the method that contains this class, or <tt>null</tt> if this class is not enclosed
+     * in a method.
+     */
+    public final String outerMethod;
 
-    private String outerMethodDesc;
+    /**
+     * The descriptor of the method that contains this class, or <tt>null</tt> if this class is not
+     * enclosed in a method.
+     */
+    public final String outerMethodDesc;
 
-    private List<AnnotationNode> visibleAnnotations;
+    /**
+     * The runtime visible annotations of this class. May be <tt>null</tt>.
+     */
+    public final List<AnnotationNode> visibleAnnotations;
 
-    private List<AnnotationNode> invisibleAnnotations;
+    /**
+     * The runtime invisible annotations of this class. May be <tt>null</tt>.
+     */
+    public final List<AnnotationNode> invisibleAnnotations;
 
-    private List<TypeAnnotationNode> visibleTypeAnnotations;
+    /**
+     * The runtime visible type annotations of this class. May be <tt>null</tt>.
+     */
+    public final List<TypeAnnotationNode> visibleTypeAnnotations;
 
-    private List<TypeAnnotationNode> invisibleTypeAnnotations;
+    /**
+     * The runtime invisible type annotations of this class. May be <tt>null</tt>.
+     */
+    public final List<TypeAnnotationNode> invisibleTypeAnnotations;
 
-    private List<Attribute> attrs;
+    /**
+     * The non standard attributes of this class. May be <tt>null</tt>.
+     */
+    public final List<Attribute> attrs;
 
-    private List<InnerClassNode> innerClasses;
+    /**
+     * The inner classes of this class.
+     */
+    public final List<InnerClassNode> innerClasses;
 
-    private List<FieldCode> fields;
+    /**
+     * <b>Experimental, use at your own risk. This field will be renamed when it becomes stable, this
+     * will break existing code using it</b>. The internal name of the nest host class of this class.
+     * May be <tt>null</tt>.
+     */
+    public final String nestHostClassExperimental;
 
-    private List<MethodCode> methods;
+    /**
+     * <b>Experimental, use at your own risk. This field will be renamed when it becomes stable, this
+     * will break existing code using it</b>. The internal names of the nest members of this class.
+     * May be <tt>null</tt>.
+     */
+    public final List<String> nestMembersExperimental;
 
-    private VariableType variableType;
+    /**
+     * The fields of this class.
+     */
+    //public final List<FieldNode> fields;
+    public final Map<String, FieldCode> fields;
 
-    public int getVersion() {
-        return version;
-    }
+    /**
+     * The methods of this class.
+     */
+    //public final List<MethodNode> methods;
+    public final List<MethodCode> methods;
+    private final Map<String, MethodCode> methodMap;
 
-    public void setVersion(int version) {
-        this.version = version;
-    }
+    public final VariableType variableType;
 
-    public int getAccess() {
-        return access;
-    }
+    public final boolean isInterface;
 
-    public void setAccess(int access) {
-        this.access = access;
-    }
+    public final boolean isSuper;
 
-    public String getName() {
-        return name;
-    }
+    public final boolean isAbstract;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public final boolean isV1_6;
 
-    public String getSignature() {
-        return signature;
-    }
+    public final boolean isV1_8;
 
-    public void setSignature(String signature) {
-        this.signature = signature;
-    }
+    public final String simpleName;
 
-    public String getSuperName() {
-        return superName;
-    }
-
-    public void setSuperName(String superName) {
-        this.superName = superName;
-    }
-
-    public List<String> getInterfaces() {
-        return interfaces;
-    }
-
-    public void setInterfaces(List<String> interfaces) {
-        this.interfaces = interfaces;
-    }
-
-    public String getSourceFile() {
-        return sourceFile;
-    }
-
-    public void setSourceFile(String sourceFile) {
-        this.sourceFile = sourceFile;
-    }
-
-    public String getSourceDebug() {
-        return sourceDebug;
-    }
-
-    public void setSourceDebug(String sourceDebug) {
-        this.sourceDebug = sourceDebug;
-    }
-
-    public ModuleNode getModule() {
-        return module;
-    }
-
-    public void setModule(ModuleNode module) {
-        this.module = module;
-    }
-
-    public String getOuterClass() {
-        return outerClass;
-    }
-
-    public void setOuterClass(String outerClass) {
-        this.outerClass = outerClass;
-    }
-
-    public String getOuterMethod() {
-        return outerMethod;
-    }
-
-    public void setOuterMethod(String outerMethod) {
-        this.outerMethod = outerMethod;
-    }
-
-    public String getOuterMethodDesc() {
-        return outerMethodDesc;
-    }
-
-    public void setOuterMethodDesc(String outerMethodDesc) {
-        this.outerMethodDesc = outerMethodDesc;
-    }
-
-    public List<AnnotationNode> getVisibleAnnotations() {
-        return visibleAnnotations;
-    }
-
-    public void setVisibleAnnotations(List<AnnotationNode> visibleAnnotations) {
-        this.visibleAnnotations = visibleAnnotations;
-    }
-
-    public List<AnnotationNode> getInvisibleAnnotations() {
-        return invisibleAnnotations;
-    }
-
-    public void setInvisibleAnnotations(List<AnnotationNode> invisibleAnnotations) {
-        this.invisibleAnnotations = invisibleAnnotations;
-    }
-
-    public List<TypeAnnotationNode> getVisibleTypeAnnotations() {
-        return visibleTypeAnnotations;
-    }
-
-    public void setVisibleTypeAnnotations(List<TypeAnnotationNode> visibleTypeAnnotations) {
-        this.visibleTypeAnnotations = visibleTypeAnnotations;
-    }
-
-    public List<TypeAnnotationNode> getInvisibleTypeAnnotations() {
-        return invisibleTypeAnnotations;
-    }
-
-    public void setInvisibleTypeAnnotations(List<TypeAnnotationNode> invisibleTypeAnnotations) {
-        this.invisibleTypeAnnotations = invisibleTypeAnnotations;
-    }
-
-    public List<Attribute> getAttrs() {
-        return attrs;
-    }
-
-    public void setAttrs(List<Attribute> attrs) {
-        this.attrs = attrs;
-    }
-
-    public List<InnerClassNode> getInnerClasses() {
-        return innerClasses;
-    }
-
-    public void setInnerClasses(List<InnerClassNode> innerClasses) {
-        this.innerClasses = innerClasses;
-    }
-
-    public List<FieldCode> getFields() {
-        return fields;
-    }
-
-    public void setFields(List<FieldCode> fields) {
-        this.fields = fields;
-    }
-
-    public List<MethodCode> getMethods() {
-        return methods;
-    }
-
-    public void setMethods(List<MethodCode> methods) {
-        this.methods = methods;
-    }
-
-    public VariableType getVariableType() {
-        return variableType;
-    }
-
-    public void setVariableType(VariableType variableType) {
-        this.variableType = variableType;
+    public ClassCode(ClassNode classNode) {
+        version = classNode.version;
+        access = classNode.access;
+        name = classNode.name;
+        signature = classNode.signature;
+        superName = classNode.superName;
+        interfaces = ListUtils.emptyIfNull(classNode.interfaces);
+        sourceFile = classNode.sourceFile;
+        sourceDebug = classNode.sourceDebug;
+        module = classNode.module;
+        outerClass = classNode.outerClass;
+        outerMethod = classNode.outerMethod;
+        outerMethodDesc = classNode.outerMethodDesc;
+        visibleAnnotations = ListUtils.emptyIfNull(classNode.visibleAnnotations);
+        invisibleAnnotations = ListUtils.emptyIfNull(classNode.invisibleAnnotations);
+        visibleTypeAnnotations = ListUtils.emptyIfNull(classNode.visibleTypeAnnotations);
+        invisibleTypeAnnotations = ListUtils.emptyIfNull(classNode.invisibleTypeAnnotations);
+        attrs = ListUtils.emptyIfNull(classNode.attrs);
+        innerClasses = ListUtils.emptyIfNull(classNode.innerClasses);
+        nestHostClassExperimental = classNode.nestHostClassExperimental;
+        nestMembersExperimental = ListUtils.emptyIfNull(classNode.nestMembersExperimental);
+        //fields = ListUtils.emptyIfNull(classNode.fields);
+        //methods = ListUtils.emptyIfNull(classNode.methods);
+        final List<FieldNode> fieldNodes = ListUtils.emptyIfNull(classNode.fields);
+        fields = new LinkedHashMap<>(hashMapInitialCapacity(fieldNodes.size()));
+        for (FieldNode fieldNode : fieldNodes) {
+            final FieldCode fieldCode = new FieldCode(fieldNode);
+            fields.put(fieldCode.name, fieldCode);
+        }
+        final List<MethodNode> methodNodes = ListUtils.emptyIfNull(classNode.methods);
+        methods = new ArrayList<>(arrayListInitialCapacity(methodNodes.size()));
+        methodMap = new HashMap<>(hashMapInitialCapacity(methodNodes.size() * 2));
+        for (MethodNode methodNode : methodNodes) {
+            final MethodCode methodCode = new MethodCode(this, methodNode);
+            methods.add(methodCode);
+            methodMap.put(methodCode.nameDesc, methodCode);
+            if (!methodMap.containsKey(methodCode.name)) {
+                methodMap.put(methodCode.name, methodCode);
+            }
+        }
+        variableType = VariableType.valueOf(name);
+        isInterface = (access & Opcodes.ACC_INTERFACE) != 0;
+        isSuper = (access & Opcodes.ACC_SUPER) != 0;
+        isAbstract = (access & Opcodes.ACC_ABSTRACT) != 0;
+        isV1_6 = (version & Opcodes.V1_6) != 0;
+        isV1_8 = (version & Opcodes.V1_8) != 0;
+        simpleName = getSimpleName();
     }
 
     public MethodCode getMethodCode(String methodName, String methodDesc) {
         if (StringUtils.isEmpty(methodDesc)) {
-            return getMethodCode(methodName);
+            return this.methodMap.get(methodName);
+        } else {
+            return this.methodMap.get(methodName + methodDesc);
         }
-        return this.methods.stream().filter(methodCode ->
-                Objects.equals(methodCode.getName(), methodName) &&
-                        Objects.equals(methodCode.getDesc(), methodDesc)
-        ).findFirst().orElse(null);
     }
 
-    public MethodCode getMethodCode(String methodName) {
-        return this.methods.stream().filter(methodCode ->
-                Objects.equals(methodCode.getName(), methodName)
-        ).findFirst().orElse(null);
-    }
-
-    public boolean isInterface() {
-        return (access & Opcodes.ACC_INTERFACE) != 0;
-    }
-
-    public boolean isSuper() {
-        return (access & Opcodes.ACC_SUPER) != 0;
-    }
-
-    public boolean isAbstract() {
-        return (access & Opcodes.ACC_ABSTRACT) != 0;
-    }
-
-    public boolean isNotAbstract() {
-        return !isAbstract();
-    }
-
-    public boolean isV1_6() {
-        return (version & Opcodes.V1_6) != 0;
-    }
-
-    public boolean isV1_7() {
-        return (version & Opcodes.V1_7) != 0;
-    }
-
-    public boolean isV1_8() {
-        return (version & Opcodes.V1_8) != 0;
-    }
-
-    public String getSimpleName() {
-        int i = this.name.lastIndexOf("$");
+    private String getSimpleName() {
+        int i = this.name.lastIndexOf(Constants.DOLLAR);
         if (i > 0) {
             return this.name.substring(i + 1);
+        } else {
+            i = this.name.lastIndexOf(Constants.CLASS_SEPARATOR);
+            if (i > 0) {
+                return this.name.substring(i + 1);
+            } else {
+                return this.name;
+            }
         }
-        i = this.name.lastIndexOf("/");
-        if (i > 0) {
-            return this.name.substring(i + 1);
-        }
-        return this.name;
     }
 
-    public boolean isSynthetic(String fieldName) {
-        return fields.stream()
-                .filter(FieldCode::isSynthetic)
-                .filter(fieldCode -> fieldCode.getName().equals(fieldName))
-                .count() > 0;
-    }
-
-    public FieldCode getFieldCode(String fieldName) {
-        return fields.stream()
-                .filter(fieldCode -> !fieldCode.isSynthetic())
-                .filter(fieldCode -> fieldCode.getName().equals(fieldName))
-                .findFirst()
-                .orElse(null);
+    public boolean isSyntheticField(String fieldName) {
+        FieldCode fieldCode = fields.get(fieldName);
+        return fieldCode != null && fieldCode.isSynthetic;
     }
 
 }

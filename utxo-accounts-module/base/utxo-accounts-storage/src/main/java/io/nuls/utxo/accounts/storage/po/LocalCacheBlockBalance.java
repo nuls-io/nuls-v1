@@ -63,6 +63,8 @@ public class LocalCacheBlockBalance extends BaseNulsData{
                 stream.writeInt64(balance.getOutputBalance());
                 stream.writeInt64(balance.getLockedPermanentBalance());
                 stream.writeInt64(balance.getUnLockedPermanentBalance());
+                stream.writeInt64(balance.getContractFromBalance());
+                stream.writeInt64(balance.getContractToBalance());
                 stream.writeInt64(balance.getBlockHeight());
                 stream.writeUint32(balance.getTxIndex());
                 int lockedTimeListSize = balance.getLockedTimeList() == null ? 0 :  balance.getLockedTimeList() .size();

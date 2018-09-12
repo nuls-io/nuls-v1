@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class ProgramTime {
 
-    public static final Map<String, ProgramTime> cache = new HashMap<>();
+    public static final Map<String, ProgramTime> cache = new HashMap<>(1024);
 
     private long num;
     private long total;

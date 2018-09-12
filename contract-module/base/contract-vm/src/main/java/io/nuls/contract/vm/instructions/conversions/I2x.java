@@ -6,49 +6,49 @@ import io.nuls.contract.vm.util.Log;
 public class I2x {
 
     public static void i2l(Frame frame) {
-        int value = frame.getOperandStack().popInt();
+        int value = frame.operandStack.popInt();
         long result = (long) value;
-        frame.getOperandStack().pushLong(result);
+        frame.operandStack.pushLong(result);
 
         //Log.result(frame.getCurrentOpCode(), result, value);
     }
 
     public static void i2f(Frame frame) {
-        int value = frame.getOperandStack().popInt();
+        int value = frame.operandStack.popInt();
         float result = (float) value;
-        frame.getOperandStack().pushFloat(result);
+        frame.operandStack.pushFloat(result);
 
         //Log.result(frame.getCurrentOpCode(), result, value);
     }
 
     public static void i2d(Frame frame) {
-        int value = frame.getOperandStack().popInt();
+        int value = frame.operandStack.popInt();
         double result = (double) value;
-        frame.getOperandStack().pushDouble(result);
+        frame.operandStack.pushDouble(result);
 
         //Log.result(frame.getCurrentOpCode(), result, value);
     }
 
     public static void i2b(Frame frame) {
-        int value = frame.getOperandStack().popInt();
+        int value = frame.operandStack.popInt();
         byte result = (byte) value;
-        frame.getOperandStack().pushByte(result);
+        frame.operandStack.pushByte(result);
 
         //Log.result(frame.getCurrentOpCode(), result, value);
     }
 
     public static void i2c(Frame frame) {
-        int value = frame.getOperandStack().popInt();
+        int value = frame.operandStack.popInt();
         char result = (char) value;
-        frame.getOperandStack().pushChar(result);
+        frame.operandStack.pushChar(result);
 
         //Log.result(frame.getCurrentOpCode(), result, value);
     }
 
     public static void i2s(Frame frame) {
-        int value = frame.getOperandStack().popInt();
+        int value = frame.operandStack.popInt();
         short result = (short) value;
-        frame.getOperandStack().pushShort(result);
+        frame.operandStack.pushShort(result);
 
         //Log.result(frame.getCurrentOpCode(), result, value);
     }

@@ -7,8 +7,8 @@ public class Fload {
 
     public static void fload(final Frame frame) {
         int index = frame.varInsnNode().var;
-        float value = frame.getLocalVariables().getFloat(index);
-        frame.getOperandStack().pushFloat(value);
+        float value = frame.localVariables.getFloat(index);
+        frame.operandStack.pushFloat(value);
 
         //Log.result(frame.getCurrentOpCode(), value, index);
     }

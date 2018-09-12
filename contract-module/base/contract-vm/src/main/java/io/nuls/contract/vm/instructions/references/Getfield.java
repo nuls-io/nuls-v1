@@ -2,6 +2,7 @@ package io.nuls.contract.vm.instructions.references;
 
 import io.nuls.contract.vm.Frame;
 import io.nuls.contract.vm.ObjectRef;
+import io.nuls.contract.vm.code.Descriptors;
 import io.nuls.contract.vm.util.Log;
 import org.objectweb.asm.tree.FieldInsnNode;
 
@@ -11,18 +12,18 @@ public class Getfield {
         FieldInsnNode fieldInsnNode = frame.fieldInsnNode();
         String fieldName = fieldInsnNode.name;
         String fieldDesc = fieldInsnNode.desc;
-        ObjectRef objectRef = frame.getOperandStack().popRef();
+        ObjectRef objectRef = frame.operandStack.popRef();
         if (objectRef == null) {
             frame.throwNullPointerException();
             return;
         }
-        Object value = frame.getHeap().getField(objectRef, fieldName);
-        if ("J".equals(fieldDesc)) {
-            frame.getOperandStack().pushLong((long) value);
-        } else if ("D".equals(fieldDesc)) {
-            frame.getOperandStack().pushDouble((double) value);
+        Object value = frame.heap.getField(objectRef, fieldName);
+        if (Descriptors.LONG_DESC.equals(fieldDesc)) {
+            frame.operandStack.pushLong((long) value);
+        } else if (Descriptors.DOUBLE_DESC.equals(fieldDesc)) {
+            frame.operandStack.pushDouble((double) value);
         } else {
-            frame.getOperandStack().push(value);
+            frame.operandStack.push(value);
         }
 
         //Log.result(frame.getCurrentOpCode(), value, objectRef, fieldName);

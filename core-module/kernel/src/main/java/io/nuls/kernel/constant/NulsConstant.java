@@ -35,12 +35,6 @@ import io.nuls.kernel.utils.AddressTool;
 public interface NulsConstant {
 
     /**
-     * 当前主网协议版本(用于系统升级)
-     * System protocol version.
-     */
-    int PROTOCOL_VERSION = 2;
-
-    /**
      * nuls版本升级主配置文件名
      * The nuls version upgrades the main configuration file
      */
@@ -109,6 +103,16 @@ public interface NulsConstant {
     int TX_TYPE_PROTOCOL = 10;
 
     /**
+     * 多地址转账交易的类型
+     * the type of the Multiple address transfer transaction
+     */
+    int TX_TYPE_TRANSFER_MULTIPLE = 11;
+    /**
+     * 零钱换整
+     * the type of the Multiple address transfer transaction
+     */
+    int TX_TYPE_CHANGE_WHOLE = 12;
+    /**
      * 业务数据承载交易的类型
      * Type of business data bearing transaction
      */
@@ -131,5 +135,11 @@ public interface NulsConstant {
      * 大于该值表示按照时间锁定
      */
     long BlOCKHEIGHT_TIME_DIVIDE = 1000000000000L;
+
+    /**
+     * 脚本标识位
+     * Null placeholder.
+     */
+    byte[] SIGN_HOLDER = new byte[]{(byte) 0x00, (byte) 0x00};
 
 }

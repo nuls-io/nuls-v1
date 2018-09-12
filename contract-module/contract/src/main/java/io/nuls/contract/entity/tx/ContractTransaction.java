@@ -24,6 +24,7 @@
 package io.nuls.contract.entity.tx;
 
 import io.nuls.contract.dto.ContractResult;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Na;
 
 /**
@@ -39,4 +40,7 @@ public interface ContractTransaction {
 
     void setReturnNa(Na returnNa);
 
+    BlockHeader getBlockHeader();
+
+    void setBlockHeader(BlockHeader blockHeader);
 }

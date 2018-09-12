@@ -39,7 +39,11 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.P2PHKSignature;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.SignatureUtil;
+import io.nuls.kernel.script.TransactionSignature;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -115,11 +119,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             List<Coin> froms = coinData.getFrom();
             for (Coin from : froms) {
                 //TestLog+
-//                Coin preFrom = utxoLedgerUtxoStorageService.getUtxo(from.getOwner());
+//                Coin preFrom = utxoLedgerUtxoStorageService.getUtxo(from.());
 //                if (preFrom != null) {
-//                    Log.info("花费：height: +" + tx.getBlockHeight() + ", “+txHash-" + tx.getHash() + ", " + Hex.encode(from.getOwner()));
+//                    Log.info("花费：height: +" + tx.getBlockHeight() + ", “+txHash-" + tx.getHash() + ", " + Hex.encode(from.()));
 //                }
-//                Log.info("delete utxo:" + Hex.encode(from.getOwner()));
+//                Log.info("delete utxo:" + Hex.encode(from.()));
                 //TestLog-
                 batch.delete(from.getOwner());
             }
@@ -198,7 +202,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     Transaction fromTx = utxoLedgerTransactionStorageService.getTx(fromTxHash);
                     recovery = fromTx.getCoinData().getTo().get(fromIndex);
                     recovery.setFrom(from.getFrom());
-//                    Log.info("rollback save utxo:::" + Hex.encode(from.getOwner()));
+//                    Log.info("rollback save utxo:::" + Hex.encode(from.()));
                     batch.put(from.getOwner(), recovery.serialize());
                 } catch (IOException e) {
                     Log.error(e);
@@ -269,6 +273,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         if (transaction == null || transaction.getCoinData() == null) {
             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.NULL_PARAMETER);
         }
+
         try {
             /*
             校验开始
@@ -276,15 +281,25 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             CoinData coinData = transaction.getCoinData();
             List<Coin> froms = coinData.getFrom();
             int fromSize = froms.size();
-            P2PKHScriptSig p2PKHScriptSig = null;
-            // 公钥hash160
-            byte[] user = null;
-            // 获取交易的公钥及签名脚本
+            TransactionSignature transactionSignature = new TransactionSignature();
+            //TODO: 交易验证
+//            P2PKHScriptSig p2PKHScriptSig = null;
+//            // 公钥hash160
+//            byte[] user = null;
+//            // 获取交易的公钥及签名脚本
+//            if (transaction.needVerifySignature() && fromSize > 0) {
+//                try {
+//                    p2PKHScriptSig = P2PKHScriptSig.createFromBytes(transaction.getTransactionSignature());
+//                    user = p2PKHScriptSig.getSignerHash160();
+//                } catch (NulsException e) {
+//                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_P2PKH_SCRIPT_ERROR);
+//                }
+//
+            //交易签名反序列化
             if (transaction.needVerifySignature() && fromSize > 0) {
                 try {
-                    p2PKHScriptSig = P2PKHScriptSig.createFromBytes(transaction.getScriptSig());
-                    user = p2PKHScriptSig.getSignerHash160();
-                } catch (NulsException e) {
+                    transactionSignature.parse(transaction.getTransactionSignature(),0);
+                }catch (NulsException e){
                     return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_P2PKH_SCRIPT_ERROR);
                 }
             }
@@ -298,7 +313,10 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             // 保存在数据库中或者txList中的utxo数据
             Coin fromOfFromCoin = null;
             byte[] fromAddressBytes = null;
-
+            /**
+             * 存放真实地址（如果为脚本验证的情况fromAddressBytes存的是脚本信息）
+             * */
+            byte[] realAddressBytes = null;
             for (int i = 0; i < froms.size(); i++) {
                 Coin from = froms.get(i);
                 fromBytes = from.getOwner();
@@ -318,23 +336,51 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     }
                 } else {
                     fromAddressBytes = fromOfFromCoin.getOwner();
+                    realAddressBytes = fromOfFromCoin.getAddress();
                     // pierre add 非合约转账交易，验证fromAdress是否是合约地址，如果是，则返回失败，非合约转账交易不能转出合约地址资产
-                    if(transaction.getType() != ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
-                        boolean isContractAddress = contractService.isContractAddress(fromAddressBytes);
-                        if(isContractAddress) {
+                    if (transaction.getType() != ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
+                        boolean isContractAddress = contractService.isContractAddress(realAddressBytes);
+                        if (isContractAddress) {
                             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.DATA_ERROR);
                         }
                     }
 
                     // 验证地址中的公钥hash160和交易中的公钥hash160是否相等，不相等则说明这笔utxo不属于交易发出者
-                    if (transaction.needVerifySignature() && !AddressTool.checkPublicKeyHash(fromAddressBytes, user)) {
-                        Log.warn("public key hash160 check error.");
-                        return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_INPUT);
+                    //TODO: 交易验证逻辑待完善
+//                    if (transaction.needVerifySignature() && !AddressTool.checkPublicKeyHash(fromAddressBytes, user)) {
+//                        Log.warn("public key hash160 check error.");
+//                        return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_INPUT);
+//                    }
+                    boolean signtureValidFlag = false;
+                    if(transaction.needVerifySignature()){
+                        if(transactionSignature != null){
+                            if(fromAddressBytes != null && fromAddressBytes.length != 23 && transactionSignature.getScripts() != null && transactionSignature.getScripts().size()>0){
+                                Script scriptPubkey = new Script(fromAddressBytes);
+                                for (Script scriptSig:transactionSignature.getScripts()) {
+                                    signtureValidFlag = scriptSig.correctlyNulsSpends(transaction,0,scriptPubkey);
+                                    if(signtureValidFlag)
+                                        break;
+                                }
+                            }
+                            else {
+                                if(transactionSignature.getP2PHKSignatures() != null && transactionSignature.getP2PHKSignatures().size() != 0){
+                                    for (P2PHKSignature signature:transactionSignature.getP2PHKSignatures()) {
+                                        signtureValidFlag = AddressTool.checkPublicKeyHash(realAddressBytes,signature.getSignerHash160());
+                                        if(signtureValidFlag)
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        if(!signtureValidFlag){
+                            Log.warn("public key hash160 check error.");
+                            return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_INPUT);
+                        }
                     }
-                    if (java.util.Arrays.equals(fromOfFromCoin.getOwner(), NulsConstant.BLACK_HOLE_ADDRESS)) {
+                    if (java.util.Arrays.equals(realAddressBytes, NulsConstant.BLACK_HOLE_ADDRESS)) {
                         return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.ADDRESS_IS_BLOCK_HOLE);
                     }
-                    if (NulsContext.DEFAULT_CHAIN_ID != SerializeUtils.bytes2Short(fromAddressBytes)) {
+                    if (NulsContext.DEFAULT_CHAIN_ID != SerializeUtils.bytes2Short(realAddressBytes)) {
                         return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.ADDRESS_IS_NOT_BELONGS_TO_CHAIN);
                     }
                 }
@@ -572,4 +618,5 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         }
         return utxoLedgerUtxoStorageService.getUtxo(owner);
     }
+
 }

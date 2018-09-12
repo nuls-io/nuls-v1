@@ -50,15 +50,16 @@ import io.nuls.contract.service.ContractService;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.calc.DoubleUtils;
 import io.nuls.core.tools.calc.LongUtils;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
-import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.BlockSignature;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.ByteArrayWrapper;
 import io.nuls.kernel.utils.VarInt;
@@ -131,13 +132,13 @@ public class ConsensusTool {
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
 
-        P2PKHScriptSig scriptSig = new P2PKHScriptSig();
+        BlockSignature scriptSig = new BlockSignature();
 
         NulsSignData signData = accountService.signDigest(header.getHash().getDigestBytes(), account.getEcKey());
         scriptSig.setSignData(signData);
         scriptSig.setPublicKey(account.getPubKey());
-        header.setScriptSig(scriptSig);
-        header.setStateRoot(blockData.getStateRoot());
+        header.setBlockSignature(scriptSig);
+        //header.setStateRoot(blockData.getStateRoot());
 
         return block;
     }
@@ -285,7 +286,7 @@ public class ConsensusTool {
                 Coin rewardCoin = null;
 
                 for (Coin coin : rewardList) {
-                    if (Arrays.equals(coin.getOwner(), deposit.getAddress())) {
+                    if (Arrays.equals(coin.getAddress(), deposit.getAddress())) {
                         rewardCoin = coin;
                         break;
                     }
@@ -364,14 +365,25 @@ public class ConsensusTool {
         return punishTx;
     }
 
+    /**
+     * 获取停止节点的coinData
+     * @param agent
+     * @param lockTime 锁定的结束时间点(锁定开始时间点+锁定时长)，之前为锁定的时长。Charlie
+     * @return
+     * @throws IOException
+     */
     public static CoinData getStopAgentCoinData(Agent agent, long lockTime) throws IOException {
+        return getStopAgentCoinData(agent, lockTime, null);
+    }
+
+    public static CoinData getStopAgentCoinData(Agent agent, long lockTime, BlockHeader blockHeader) throws IOException {
         if (null == agent) {
             return null;
         }
         NulsDigestData createTxHash = agent.getTxHash();
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
-        toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), TimeService.currentTimeMillis() + lockTime));
+        toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), lockTime));
         coinData.setTo(toList);
         CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);
         if (null == transaction) {
@@ -394,8 +406,9 @@ public class ConsensusTool {
         List<Deposit> deposits = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
         List<String> addressList = new ArrayList<>();
         Map<String, Coin> toMap = new HashMap<>();
+        long blockHeight = null == blockHeader ? -1 : blockHeader.getHeight();
         for (Deposit deposit : deposits) {
-            if (deposit.getDelHeight() > 0) {
+            if (deposit.getDelHeight() > 0 && (blockHeight <= 0 || deposit.getDelHeight() < blockHeight)) {
                 continue;
             }
             if (!deposit.getAgentHash().equals(agent.getTxHash())) {
@@ -440,6 +453,28 @@ public class ConsensusTool {
             }
         }
         return null;
+    }
+
+    public static byte[] getStateRoot(BlockHeader blockHeader) {
+        if(blockHeader == null || blockHeader.getExtend() == null) {
+            return null;
+        }
+        byte[] stateRoot = blockHeader.getStateRoot();
+        if(stateRoot != null && stateRoot.length > 0) {
+            return stateRoot;
+        }
+        try {
+            BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
+            stateRoot = extendsData.getStateRoot();
+            if((stateRoot == null || stateRoot.length == 0) && NulsContext.MAIN_NET_VERSION > 1) {
+                stateRoot = Hex.decode(NulsContext.INITIAL_STATE_ROOT);
+            }
+            blockHeader.setStateRoot(stateRoot);
+            return stateRoot;
+        }catch (Exception e) {
+            Log.error("parse stateRoot of blockHeader error.", e);
+            return null;
+        }
     }
 
 }

@@ -130,7 +130,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     continue;
                 }
 
-                byte[] toAddress = fromOfFromCoin.getOwner();
+                byte[] toAddress = fromOfFromCoin.getAddress();
 
                 boolean addressIsMatch = false;
                 for(byte[] addresses : addressesList) {
@@ -160,7 +160,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             byte[] toAddress;
             for (int i = 0, length = tos.size(); i < length; i++) {
                 to = tos.get(i);
-                toAddress = to.getOwner();
+                toAddress = to.getAddress();
 
                 boolean addressIsMatch = false;
                 for(byte[] addresses : addressesList) {
@@ -202,7 +202,8 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             byte[] outKey;
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
-                    if(!AccountLegerUtils.isLocalAccount(tos.get(i).getOwner())) {
+                    //if(!AccountLegerUtils.isLocalAccount(tos.get(i).getOwner()))
+                    if(!AccountLegerUtils.isLocalAccount(tos.get(i).getAddress())) {
                         continue;
                     }
                     outKey = ArraysTool.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
@@ -250,7 +251,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     continue;
                 }
 
-                address = fromOfFromCoin.getOwner();
+                address = fromOfFromCoin.getAddress();
                 if(!AccountLegerUtils.isLocalAccount(address)) {
                     continue;
                 }
@@ -285,7 +286,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     try {
                         byte[] outKey = ArraysTool.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
                         saveUTXO(outKey, needUnLockUtxoNew.serialize());
-                        addresses.add(to.getOwner());
+                        addresses.add(to.getAddress());
                     } catch (IOException e) {
                         throw new NulsRuntimeException(e);
                     }
@@ -310,7 +311,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     try {
                         byte[] outKey = ArraysTool.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
                         saveUTXO(outKey, to.serialize());
-                        addresses.add(to.getOwner());
+                        addresses.add(to.getAddress());
                     } catch (IOException e) {
                         throw new NulsRuntimeException(e);
                     }

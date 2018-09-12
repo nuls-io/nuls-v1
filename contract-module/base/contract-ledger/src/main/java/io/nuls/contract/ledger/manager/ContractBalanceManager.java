@@ -113,7 +113,8 @@ public class ContractBalanceManager {
             coin = new Coin();
             try {
                 coin.parse(coinEntry.getValue(), 0);
-                strAddress = asString(coin.getOwner());
+                //strAddress = asString(coin.getOwner());
+                strAddress = asString(coin.getAddress());
             } catch (NulsException e) {
                 Log.error("parse contract coin error form db", e);
                 continue;
@@ -222,7 +223,7 @@ public class ContractBalanceManager {
             if(deleteUtxoList != null) {
                 //Log.info("减少UTXO数量: {}", deleteUtxoList.size());
                 for (Coin coin : deleteUtxoList) {
-                    strAddress = asString(coin.getAddress());
+                    strAddress = asString(coin.getTempOwner());
                     balance = balanceMap.get(strAddress);
                     if(balance == null) {
                         balance = new ContractBalance();
@@ -247,7 +248,7 @@ public class ContractBalanceManager {
             if(addUtxoList != null) {
                 //Log.info("增加UTXO数量: {}", addUtxoList.size());
                 for (Coin coin : addUtxoList) {
-                    strAddress = asString(coin.getAddress());
+                    strAddress = asString(coin.getTempOwner());
                     balance = balanceMap.get(strAddress);
                     if(balance == null) {
                         balance = new ContractBalance();
@@ -256,13 +257,13 @@ public class ContractBalanceManager {
                     if (coin.usable()) {
                         balance.addUsable(coin.getNa());
                         //Log.info("====[{}]增加可用余额: {}, 当前可用余额: {}",
-                        //        AddressTool.getStringAddressByBytes(coin.getOwner()),
+                        //        AddressTool.getStringAddressByBytes(coin.()),
                         //        coin.getNa(),
                         //        balance.getUsable());
                     } else {
                         balance.addLocked(coin.getNa());
                         //Log.info("====[{}]增加锁定余额: {}, 当前余额: {}",
-                        //        AddressTool.getStringAddressByBytes(coin.getOwner()),
+                        //        AddressTool.getStringAddressByBytes(coin.()),
                         //        coin.getNa(),
                         //        balance.getUsable());
                     }
@@ -286,8 +287,9 @@ public class ContractBalanceManager {
                 Log.info("parse coin form db error");
                 continue;
             }
-            if (Arrays.equals(coin.getOwner(), address)) {
-                coin.setFrom(new Coin(address, coin.getNa(), coin.getLockTime()));
+            //if (Arrays.equals(coin.(), address))
+            if (Arrays.equals(coin.getAddress(), address))
+            {
                 coin.setOwner(coinEntry.getKey());
                 coin.setKey(asString(coinEntry.getKey()));
                 coinList.add(coin);
@@ -385,5 +387,60 @@ public class ContractBalanceManager {
             resultList.add(info);
         }
         return Result.getSuccess().setData(resultList);
+    }
+
+    public Result subtractContractToken(String account, String contract, BigInteger token) {
+        tokenLock.lock();
+        try {
+            Map<String, ContractTokenInfo> tokens = contractTokenOfLocalAccount.get(account);
+            if(tokens == null) {
+                return Result.getSuccess();
+            } else {
+                ContractTokenInfo info = tokens.get(contract);
+                if(info == null) {
+                    return Result.getSuccess();
+                }
+                BigInteger currentToken = info.getAmount();
+                if(currentToken == null) {
+                    return Result.getSuccess();
+                } else {
+                    if(currentToken.compareTo(token) < 0) {
+                        return Result.getFailed(ContractErrorCode.INSUFFICIENT_BALANCE);
+                    }
+                    currentToken = currentToken.subtract(token);
+                    tokens.put(contract, info.setAmount(currentToken));
+                }
+            }
+            return Result.getSuccess();
+        } finally {
+            tokenLock.unlock();
+        }
+    }
+
+    public Result addContractToken(String account, String contract, BigInteger token) {
+        tokenLock.lock();
+        try {
+            Map<String, ContractTokenInfo> tokens = contractTokenOfLocalAccount.get(account);
+            do {
+                if(tokens == null) {
+                    break;
+                } else {
+                    ContractTokenInfo info = tokens.get(contract);
+                    if(info == null) {
+                        return Result.getSuccess();
+                    }
+                    BigInteger currentToken = info.getAmount();
+                    if(currentToken == null) {
+                        break;
+                    } else {
+                        currentToken = currentToken.add(token);
+                        tokens.put(contract, info.setAmount(currentToken));
+                    }
+                }
+            } while(false);
+        } finally {
+            tokenLock.unlock();
+        }
+        return Result.getSuccess();
     }
 }

@@ -1,142 +1,93 @@
 package io.nuls.contract.vm.code;
 
+import org.apache.commons.collections4.ListUtils;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AnnotationNode;
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.TypeAnnotationNode;
 
 import java.util.List;
 
 public class FieldCode {
 
-    private int access;
+    /**
+     * The field's access flags (see {@link org.objectweb.asm.Opcodes}). This field also indicates if
+     * the field is synthetic and/or deprecated.
+     */
+    public final int access;
 
-    private String name;
+    /**
+     * The field's name.
+     */
+    public final String name;
 
-    private String desc;
+    /**
+     * The field's descriptor (see {@link org.objectweb.asm.Type}).
+     */
+    public final String desc;
 
-    private String signature;
+    /**
+     * The field's signature. May be <tt>null</tt>.
+     */
+    public final String signature;
 
-    private Object value;
+    /**
+     * The field's initial value. This field, which may be <tt>null</tt> if the field does not have an
+     * initial value, must be an {@link Integer}, a {@link Float}, a {@link Long}, a {@link Double} or
+     * a {@link String}.
+     */
+    public final Object value;
 
-    private List<AnnotationNode> visibleAnnotations;
+    /**
+     * The runtime visible annotations of this field. May be <tt>null</tt>.
+     */
+    public final List<AnnotationNode> visibleAnnotations;
 
-    private List<AnnotationNode> invisibleAnnotations;
+    /**
+     * The runtime invisible annotations of this field. May be <tt>null</tt>.
+     */
+    public final List<AnnotationNode> invisibleAnnotations;
 
-    private List<TypeAnnotationNode> visibleTypeAnnotations;
+    /**
+     * The runtime visible type annotations of this field. May be <tt>null</tt>.
+     */
+    public final List<TypeAnnotationNode> visibleTypeAnnotations;
 
-    private List<TypeAnnotationNode> invisibleTypeAnnotations;
+    /**
+     * The runtime invisible type annotations of this field. May be <tt>null</tt>.
+     */
+    public final List<TypeAnnotationNode> invisibleTypeAnnotations;
 
-    private List<Attribute> attrs;
+    /**
+     * The non standard attributes of this field. * May be <tt>null</tt>.
+     */
+    public final List<Attribute> attrs;
 
-    private VariableType variableType;
+    public final VariableType variableType;
 
-    public int getAccess() {
-        return access;
-    }
+    public final boolean isStatic;
 
-    public void setAccess(int access) {
-        this.access = access;
-    }
+    public final boolean isFinal;
 
-    public String getName() {
-        return name;
-    }
+    public final boolean isSynthetic;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public void setDesc(String desc) {
-        this.desc = desc;
-    }
-
-    public String getSignature() {
-        return signature;
-    }
-
-    public void setSignature(String signature) {
-        this.signature = signature;
-    }
-
-    public Object getValue() {
-        return value;
-    }
-
-    public void setValue(Object value) {
-        this.value = value;
-    }
-
-    public List<AnnotationNode> getVisibleAnnotations() {
-        return visibleAnnotations;
-    }
-
-    public void setVisibleAnnotations(List<AnnotationNode> visibleAnnotations) {
-        this.visibleAnnotations = visibleAnnotations;
-    }
-
-    public List<AnnotationNode> getInvisibleAnnotations() {
-        return invisibleAnnotations;
-    }
-
-    public void setInvisibleAnnotations(List<AnnotationNode> invisibleAnnotations) {
-        this.invisibleAnnotations = invisibleAnnotations;
-    }
-
-    public List<TypeAnnotationNode> getVisibleTypeAnnotations() {
-        return visibleTypeAnnotations;
-    }
-
-    public void setVisibleTypeAnnotations(List<TypeAnnotationNode> visibleTypeAnnotations) {
-        this.visibleTypeAnnotations = visibleTypeAnnotations;
-    }
-
-    public List<TypeAnnotationNode> getInvisibleTypeAnnotations() {
-        return invisibleTypeAnnotations;
-    }
-
-    public void setInvisibleTypeAnnotations(List<TypeAnnotationNode> invisibleTypeAnnotations) {
-        this.invisibleTypeAnnotations = invisibleTypeAnnotations;
-    }
-
-    public List<Attribute> getAttrs() {
-        return attrs;
-    }
-
-    public void setAttrs(List<Attribute> attrs) {
-        this.attrs = attrs;
-    }
-
-    public VariableType getVariableType() {
-        return variableType;
-    }
-
-    public void setVariableType(VariableType variableType) {
-        this.variableType = variableType;
-    }
-
-    public boolean isStatic() {
-        return (access & Opcodes.ACC_STATIC) != 0;
-    }
-
-    public boolean isNotStatic() {
-        return !isStatic();
-    }
-
-    public boolean isFinal() {
-        return (access & Opcodes.ACC_FINAL) != 0;
-    }
-
-    public boolean isNotFinal() {
-        return !isFinal();
-    }
-
-    public boolean isSynthetic() {
-        return (access & Opcodes.ACC_SYNTHETIC) != 0;
+    public FieldCode(FieldNode fieldNode) {
+        access = fieldNode.access;
+        name = fieldNode.name;
+        desc = fieldNode.desc;
+        signature = fieldNode.signature;
+        value = fieldNode.value;
+        visibleAnnotations = ListUtils.emptyIfNull(fieldNode.visibleAnnotations);
+        invisibleAnnotations = ListUtils.emptyIfNull(fieldNode.invisibleAnnotations);
+        visibleTypeAnnotations = ListUtils.emptyIfNull(fieldNode.visibleTypeAnnotations);
+        invisibleTypeAnnotations = ListUtils.emptyIfNull(fieldNode.invisibleTypeAnnotations);
+        attrs = ListUtils.emptyIfNull(fieldNode.attrs);
+        //
+        variableType = VariableType.valueOf(desc);
+        isStatic = (access & Opcodes.ACC_STATIC) != 0;
+        isFinal = (access & Opcodes.ACC_FINAL) != 0;
+        isSynthetic = (access & Opcodes.ACC_SYNTHETIC) != 0;
     }
 
 }

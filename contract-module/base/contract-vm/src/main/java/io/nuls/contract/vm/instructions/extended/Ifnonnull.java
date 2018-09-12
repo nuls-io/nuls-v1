@@ -7,7 +7,7 @@ import io.nuls.contract.vm.util.Log;
 public class Ifnonnull {
 
     public static void ifnonnull(final Frame frame) {
-        ObjectRef value = frame.getOperandStack().popRef();
+        ObjectRef value = frame.operandStack.popRef();
         boolean result = value != null;
         if (result) {
             frame.jump();

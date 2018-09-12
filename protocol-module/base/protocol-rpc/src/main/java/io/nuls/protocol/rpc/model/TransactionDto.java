@@ -26,18 +26,15 @@
 package io.nuls.protocol.rpc.model;
 
 import io.nuls.core.tools.crypto.Hex;
-import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.TxStatusEnum;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Transaction;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -110,8 +107,8 @@ public class TransactionDto {
                 this.setRemark(Hex.encode(tx.getRemark()));
             }
         }
-        if (tx.getScriptSig() != null) {
-            this.setScriptSig(Hex.encode(tx.getScriptSig()));
+        if (tx.getTransactionSignature() != null) {
+            this.setScriptSig(Hex.encode(tx.getTransactionSignature()));
         }
 
         CoinData coinData = tx.getCoinData();

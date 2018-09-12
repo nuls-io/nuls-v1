@@ -33,6 +33,7 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.map.MapUtil;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Transaction;
@@ -56,6 +57,8 @@ public class CallContractTransaction extends Transaction<CallContractData> imple
 
     private transient Na returnNa;
 
+    private transient BlockHeader blockHeader;
+
     public CallContractTransaction() {
         super(ContractConstant.TX_TYPE_CALL_CONTRACT);
     }
@@ -69,7 +72,7 @@ public class CallContractTransaction extends Transaction<CallContractData> imple
     public String getInfo(byte[] address) {
         boolean isTransfer = false;
         Coin to = coinData.getTo().get(0);
-        if (!Arrays.equals(address, to.getOwner())) {
+        if (!Arrays.equals(address, to.getAddress())) {
             isTransfer = true;
         }
         if (isTransfer) {
@@ -101,6 +104,16 @@ public class CallContractTransaction extends Transaction<CallContractData> imple
             resultFee = resultFee.minus(returnNa);
         }
         return resultFee;
+    }
+
+    @Override
+    public BlockHeader getBlockHeader() {
+        return blockHeader;
+    }
+
+    @Override
+    public void setBlockHeader(BlockHeader blockHeader) {
+        this.blockHeader = blockHeader;
     }
 
     @Override

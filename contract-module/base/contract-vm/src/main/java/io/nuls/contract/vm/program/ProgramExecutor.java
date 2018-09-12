@@ -6,6 +6,8 @@ public interface ProgramExecutor {
 
     ProgramExecutor begin(byte[] prevStateRoot);
 
+    ProgramExecutor startTracking();
+
     void commit();
 
     byte[] getRoot();

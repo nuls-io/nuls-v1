@@ -4,6 +4,7 @@ import io.nuls.contract.entity.BlockHeaderDto;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
+import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.instructions.comparisons.*;
 import io.nuls.contract.vm.instructions.constants.Ldc;
 import io.nuls.contract.vm.instructions.control.*;
@@ -36,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Array;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,15 +85,28 @@ public class VM {
 
     public VM() {
         this.vmStack = new VMStack(VM_STACK_MAX_SIZE);
-        this.heap = new Heap(this);
-        this.methodArea = new MethodArea(this);
+        this.heap = new Heap(BigInteger.ZERO);
+        this.heap.setVm(this);
+        this.methodArea = new MethodArea();
+        this.methodArea.setVm(this);
         this.result = new Result();
     }
 
     public VM(VM vm) {
         this.vmStack = new VMStack(VM_STACK_MAX_SIZE);
-        this.heap = new Heap(this, vm.heap);
-        this.methodArea = new MethodArea(this);
+        this.heap = new Heap(vm.heap.getObjectRefCount());
+        this.heap.setVm(this);
+        this.methodArea = new MethodArea();
+        this.methodArea.setVm(this);
+        this.result = new Result();
+    }
+
+    public VM(Heap heap, MethodArea methodArea) {
+        this.vmStack = new VMStack(VM_STACK_MAX_SIZE);
+        this.heap = heap;
+        this.heap.setVm(this);
+        this.methodArea = methodArea;
+        this.methodArea.setVm(this);
         this.result = new Result();
     }
 
@@ -133,7 +148,7 @@ public class VM {
 
     public void run(MethodCode methodCode, Object[] args, boolean pushResult) {
         Frame frame = new Frame(this, methodCode, args);
-        if ("java/util/HashMap".equals(methodCode.getClassCode().getName()) && "resize".equals(methodCode.getName())) {
+        if ("java/util/HashMap".equals(methodCode.classCode.name) && "resize".equals(methodCode.name)) {
             frame.setAddGas(false);
         }
         this.vmStack.push(frame);
@@ -156,10 +171,10 @@ public class VM {
     private Object[] runArgs(ObjectRef objectRef, MethodCode methodCode, String[][] args) {
         final List runArgs = new ArrayList();
         runArgs.add(objectRef);
-        final List<VariableType> argsVariableType = methodCode.getArgsVariableType();
+        final List<VariableType> argsVariableType = methodCode.argsVariableType;
         for (int i = 0; i < argsVariableType.size(); i++) {
             final VariableType variableType = argsVariableType.get(i);
-            final ProgramMethodArg programMethodArg = methodCode.getArgs().get(i);
+            final ProgramMethodArg programMethodArg = methodCode.args.get(i);
             final String[] arg = args[i];
             String realArg = null;
             if (arg != null && arg.length > 0) {
@@ -242,8 +257,8 @@ public class VM {
         }
         if (!this.vmStack.isEmpty()) {
             final Frame frame = this.vmStack.lastElement();
-            //Log.runMethod(frame.getMethodCode());
-            while (frame.getCurrentInsnNode() != null && !frame.getResult().isEnded()) {
+            //Log.runMethod(frame.methodCode);
+            while (frame.getCurrentInsnNode() != null && !frame.result.isEnded()) {
                 step(frame);
                 frame.step();
                 if (isEnd()) {
@@ -255,18 +270,18 @@ public class VM {
                 }
             }
             this.popFrame();
-            //Log.endMethod(frame.getMethodCode());
-            this.resultValue = frame.getResult().getValue();
+            //Log.endMethod(frame.methodCode);
+            this.resultValue = frame.result.getValue();
             if (!this.vmStack.isEmpty()) {
                 final Frame lastFrame = this.vmStack.lastElement();
-                if (frame.getResult().getVariableType().isNotVoid()) {
+                if (frame.result.getVariableType().isNotVoid()) {
                     if (pushResult) {
-                        lastFrame.getOperandStack().push(frame.getResult().getValue(), frame.getResult().getVariableType());
+                        lastFrame.operandStack.push(frame.result.getValue(), frame.result.getVariableType());
                     }
                 }
-                //Log.continueMethod(lastFrame.getMethodCode());
+                //Log.continueMethod(lastframe.methodCode);
             } else {
-                this.result = frame.getResult();
+                this.result = frame.result;
             }
         }
         endTime();
@@ -306,71 +321,71 @@ public class VM {
                 break;
             case ACONST_NULL:
                 //Aconst.aconst_null(frame);
-                frame.getOperandStack().pushRef(null);
+                frame.operandStack.pushRef(null);
                 break;
             case ICONST_M1:
                 //Iconst.iconst_m1(frame);
-                frame.getOperandStack().pushInt(-1);
+                frame.operandStack.pushInt(-1);
                 break;
             case ICONST_0:
                 //Iconst.iconst_0(frame);
-                frame.getOperandStack().pushInt(0);
+                frame.operandStack.pushInt(0);
                 break;
             case ICONST_1:
                 //Iconst.iconst_1(frame);
-                frame.getOperandStack().pushInt(1);
+                frame.operandStack.pushInt(1);
                 break;
             case ICONST_2:
                 //Iconst.iconst_2(frame);
-                frame.getOperandStack().pushInt(2);
+                frame.operandStack.pushInt(2);
                 break;
             case ICONST_3:
                 //Iconst.iconst_3(frame);
-                frame.getOperandStack().pushInt(3);
+                frame.operandStack.pushInt(3);
                 break;
             case ICONST_4:
                 //Iconst.iconst_4(frame);
-                frame.getOperandStack().pushInt(4);
+                frame.operandStack.pushInt(4);
                 break;
             case ICONST_5:
                 //Iconst.iconst_5(frame);
-                frame.getOperandStack().pushInt(5);
+                frame.operandStack.pushInt(5);
                 break;
             case LCONST_0:
                 //Lconst.lconst_0(frame);
-                frame.getOperandStack().pushLong(0L);
+                frame.operandStack.pushLong(0L);
                 break;
             case LCONST_1:
                 //Lconst.lconst_1(frame);
-                frame.getOperandStack().pushLong(1L);
+                frame.operandStack.pushLong(1L);
                 break;
             case FCONST_0:
                 //Fconst.fconst_0(frame);
-                frame.getOperandStack().pushFloat(0.0F);
+                frame.operandStack.pushFloat(0.0F);
                 break;
             case FCONST_1:
                 //Fconst.fconst_1(frame);
-                frame.getOperandStack().pushFloat(1.0F);
+                frame.operandStack.pushFloat(1.0F);
                 break;
             case FCONST_2:
                 //Fconst.fconst_2(frame);
-                frame.getOperandStack().pushFloat(2.0F);
+                frame.operandStack.pushFloat(2.0F);
                 break;
             case DCONST_0:
                 //Dconst.dconst_0(frame);
-                frame.getOperandStack().pushDouble(0.0D);
+                frame.operandStack.pushDouble(0.0D);
                 break;
             case DCONST_1:
                 //Dconst.dconst_1(frame);
-                frame.getOperandStack().pushDouble(1.0D);
+                frame.operandStack.pushDouble(1.0D);
                 break;
             case BIPUSH:
                 //Xipush.bipush(frame);
-                frame.getOperandStack().pushInt(frame.intInsnNode().operand);
+                frame.operandStack.pushInt(frame.intInsnNode().operand);
                 break;
             case SIPUSH:
                 //Xipush.sipush(frame);
-                frame.getOperandStack().pushInt(frame.intInsnNode().operand);
+                frame.operandStack.pushInt(frame.intInsnNode().operand);
                 break;
             case LDC:
                 Ldc.ldc(frame);
@@ -984,9 +999,9 @@ public class VM {
                 break;
             case NEWARRAY:
             case ANEWARRAY:
-                int count = frame.getOperandStack().popInt();
+                int count = frame.operandStack.popInt();
                 gasCost = Math.max(count, 1) * GasCost.NEWARRAY;
-                frame.getOperandStack().pushInt(count);
+                frame.operandStack.pushInt(count);
                 break;
             case ARRAYLENGTH:
             case ATHROW:
@@ -1001,14 +1016,14 @@ public class VM {
                 int size = 1;
                 int[] dimensions = new int[multiANewArrayInsnNode.dims];
                 for (int i = multiANewArrayInsnNode.dims - 1; i >= 0; i--) {
-                    int length = frame.getOperandStack().popInt();
+                    int length = frame.operandStack.popInt();
                     if (length > 0) {
                         size *= length;
                     }
                     dimensions[i] = length;
                 }
                 for (int dimension : dimensions) {
-                    frame.getOperandStack().pushInt(dimension);
+                    frame.operandStack.pushInt(dimension);
                 }
                 gasCost = size * GasCost.MULTIANEWARRAY;
                 break;
@@ -1038,6 +1053,15 @@ public class VM {
             throw new RuntimeException(String.format("vmContext is null, number: %s", number));
         }
     }
+
+//    public BlockHeaderDto getBlockHeader(long number) {
+//        BlockHeaderDto blockHeaderDto = new BlockHeaderDto();
+//        blockHeaderDto.setHash("afafaf");
+//        blockHeaderDto.setHeight(100);
+//        blockHeaderDto.setPackingAddress(AddressTool.getAddress("NsdwCuCKs2AXFfUT7PxXXJPm2XxybX6H"));
+//        blockHeaderDto.setTime(1535012808001L);
+//        return blockHeaderDto;
+//    }
 
     public static int getVmStackMaxSize() {
         return VM_STACK_MAX_SIZE;

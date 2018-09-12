@@ -56,7 +56,9 @@ public class CoinBaseTransaction extends Transaction {
     public String getInfo(byte[] address) {
         Na to = Na.ZERO;
         for (Coin coin : coinData.getTo()) {
-            if (Arrays.equals(address, coin.getOwner())) {
+            //if (Arrays.equals(address, coin.()))
+            if (Arrays.equals(address, coin.getAddress()))
+            {
                 to = to.add(coin.getNa());
             }
         }

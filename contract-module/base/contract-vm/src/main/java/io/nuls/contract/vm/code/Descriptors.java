@@ -10,17 +10,30 @@ public class Descriptors {
 
     public static final BiMap<String, String> DESCRIPTORS;
 
+    public static final String VOID = "void";
+    public static final String BYTE = "byte";
+    public static final String CHAR = "char";
+    public static final String DOUBLE = "double";
+    public static final String FLOAT = "float";
+    public static final String INT = "int";
+    public static final String LONG = "long";
+    public static final String SHORT = "short";
+    public static final String BOOLEAN = "boolean";
+
+    public static final String DOUBLE_DESC = "D";
+    public static final String LONG_DESC = "J";
+
     static {
         DESCRIPTORS = HashBiMap.create();
-        DESCRIPTORS.put("void", "V");
-        DESCRIPTORS.put("byte", "B");
-        DESCRIPTORS.put("char", "C");
-        DESCRIPTORS.put("double", "D");
-        DESCRIPTORS.put("float", "F");
-        DESCRIPTORS.put("int", "I");
-        DESCRIPTORS.put("long", "J");
-        DESCRIPTORS.put("short", "S");
-        DESCRIPTORS.put("boolean", "Z");
+        DESCRIPTORS.put(VOID, "V");
+        DESCRIPTORS.put(BYTE, "B");
+        DESCRIPTORS.put(CHAR, "C");
+        DESCRIPTORS.put(DOUBLE, DOUBLE_DESC);
+        DESCRIPTORS.put(FLOAT, "F");
+        DESCRIPTORS.put(INT, "I");
+        DESCRIPTORS.put(LONG, LONG_DESC);
+        DESCRIPTORS.put(SHORT, "S");
+        DESCRIPTORS.put(BOOLEAN, "Z");
     }
 
     public static List<String> parse(String desc) {
@@ -33,9 +46,7 @@ public class Descriptors {
         StringBuilder sb = new StringBuilder();
         List<String> descList = new ArrayList<>();
 
-        for (int i = 0; i < desc.length(); i++) {
-            char c = desc.charAt(i);
-
+        for (char c : desc.toCharArray()) {
             if ('[' == c) {
                 sb.append(c);
             } else if ('(' == c) {

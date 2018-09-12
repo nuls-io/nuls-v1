@@ -8,8 +8,8 @@ public class Astore {
 
     public static void astore(final Frame frame) {
         int index = frame.varInsnNode().var;
-        ObjectRef objectRef = frame.getOperandStack().popRef();
-        frame.getLocalVariables().setRef(index, objectRef);
+        ObjectRef objectRef = frame.operandStack.popRef();
+        frame.localVariables.setRef(index, objectRef);
 
         //Log.result(frame.getCurrentOpCode(), objectRef, index);
     }

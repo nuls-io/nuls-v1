@@ -6,10 +6,10 @@ import io.nuls.contract.vm.util.Log;
 public class Swap {
 
     public static void swap(final Frame frame) {
-        Object value1 = frame.getOperandStack().pop();
-        Object value2 = frame.getOperandStack().pop();
-        frame.getOperandStack().push(value1);
-        frame.getOperandStack().push(value2);
+        Object value1 = frame.operandStack.pop();
+        Object value2 = frame.operandStack.pop();
+        frame.operandStack.push(value1);
+        frame.operandStack.push(value2);
 
         //Log.opcode(frame.getCurrentOpCode(), value1, value2);
     }

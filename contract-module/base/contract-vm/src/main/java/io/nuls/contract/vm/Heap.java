@@ -13,24 +13,21 @@ import org.ethereum.vm.DataWord;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Heap {
 
-    public static final Map<ObjectRef, Map<String, Object>> INIT_OBJECTS = new LinkedHashMap<>();
+    public static final Map<ObjectRef, Map<String, Object>> INIT_OBJECTS = new HashMap<>(1024);
 
-    public static final Map<String, Object> INIT_ARRAYS = new LinkedHashMap<>();
+    public static final Map<String, Object> INIT_ARRAYS = new HashMap<>(1024);
 
-    private final VM vm;
+    private VM vm;
 
-    private final Map<ObjectRef, Map<String, Object>> objects = new LinkedHashMap<>();
+    private final Map<ObjectRef, Map<String, Object>> objects = new HashMap<>(1024);
 
-    private final Map<String, Object> arrays = new LinkedHashMap<>();
+    private final Map<String, Object> arrays = new HashMap<>(1024);
 
-    private final Set<ObjectRef> changes = new LinkedHashSet<>();
+    private final Set<ObjectRef> changes = new HashSet<>(1024);
 
     private ObjectRef contract;
 
@@ -38,22 +35,16 @@ public class Heap {
 
     private Repository repository;
 
-    private BigInteger objectRefCount = BigInteger.ZERO;
+    private BigInteger objectRefCount;
 
     private static final DataWord OBJECT_REF_COUNT = new DataWord("objectRefCount".getBytes());
 
-    public Heap(VM vm) {
-        this.vm = vm;
+    public Heap(BigInteger objectRefCount) {
+        this.objectRefCount = new BigInteger(objectRefCount.toString());
     }
 
-    public Heap(VM vm, Heap heap) {
+    public void setVm(VM vm) {
         this.vm = vm;
-//        for (ObjectRef objectRef : heap.objects.keySet()) {
-//            this.objects.put(objectRef, CloneUtils.clone(heap.objects.get(objectRef)));
-//        }
-//        CloneUtils.clone(heap.arrays, this.arrays);
-//        this.changes.addAll(heap.changes);
-        this.objectRefCount = new BigInteger(heap.objectRefCount.toString());
     }
 
     public ObjectRef newObjectRef(String ref, String desc, int... dimensions) {
@@ -72,7 +63,7 @@ public class Heap {
     }
 
     public ObjectRef newObject(String ref, ClassCode classCode) {
-        ObjectRef objectRef = newObjectRef(ref, classCode.getVariableType().getDesc());
+        ObjectRef objectRef = newObjectRef(ref, classCode.variableType.getDesc());
         initFields(classCode, objectRef);
         return objectRef;
     }
@@ -108,6 +99,11 @@ public class Heap {
             }
         }
         return fields;
+    }
+
+    public void putFields(ObjectRef objectRef, Map<String, Object> fields) {
+        objects.put(objectRef, fields);
+        change(objectRef);
     }
 
     public Map<String, Object> putFields(ObjectRef objectRef) {
@@ -162,10 +158,10 @@ public class Heap {
 
     private ObjectRef getStaticObjectRef(String className) {
         ClassCode classCode = this.vm.getMethodArea().loadClass(className);
-        ObjectRef objectRef = new ObjectRef(classCode.getName(), classCode.getVariableType().getDesc());
+        ObjectRef objectRef = new ObjectRef(classCode.name, classCode.variableType.getDesc());
         Map<String, Object> map = getFieldsInit(objectRef);
         if (map == null) {
-            objectRef = newObjectRef(classCode.getName(), classCode.getVariableType().getDesc());
+            objectRef = newObjectRef(classCode.name, classCode.variableType.getDesc());
         }
         return objectRef;
     }
@@ -241,7 +237,7 @@ public class Heap {
         if (!arrayRef.getVariableType().getComponentType().isPrimitive()) {
             clazz = ObjectRef.class;
         }
-        Object object = JsonUtils.decodeArray(new String(value), clazz);
+        Object object = JsonUtils.decodeArray(value, clazz);
         return object;
     }
 
@@ -485,7 +481,10 @@ public class Heap {
     }
 
     public ObjectRef loadContract(byte[] address, ClassCode contractCode, Repository repository) {
-        ObjectRef objectRef = new ObjectRef(NativeAddress.toString(address), contractCode.getVariableType().getDesc());
+        if (this.contract != null) {
+            return this.contract;
+        }
+        ObjectRef objectRef = new ObjectRef(NativeAddress.toString(address), contractCode.variableType.getDesc());
         this.contract = objectRef;
         this.address = address;
         this.repository = repository;
@@ -500,9 +499,9 @@ public class Heap {
     }
 
     public Map<DataWord, DataWord> contractState() {
-        Map<DataWord, DataWord> contractState = new LinkedHashMap<>();
+        Map<DataWord, DataWord> contractState = new HashMap<>(1024);
         contractState.put(OBJECT_REF_COUNT, new DataWord(this.objectRefCount));
-        Set<ObjectRef> stateObjectRefs = new LinkedHashSet<>();
+        Set<ObjectRef> stateObjectRefs = new HashSet<>();
         String className = this.contract.getVariableType().getType();
         ObjectRef staticObjectRef = getStaticObjectRef(className);
         stateObjectRefs(stateObjectRefs, staticObjectRef);
@@ -527,8 +526,8 @@ public class Heap {
                         if (!objectRef.getVariableType().getComponentType().isPrimitive()) {
                             clazz = ObjectRef.class;
                         }
-                        String v = JsonUtils.encodeArray(object, clazz);
-                        contractState.put(new DataWord(arrayKey.getBytes()), new DataWord(v.getBytes()));
+                        byte[] bytes = JsonUtils.encodeArray(object, clazz);
+                        contractState.put(new DataWord(arrayKey.getBytes()), new DataWord(bytes));
                     }
                 }
             }
@@ -573,13 +572,13 @@ public class Heap {
     }
 
     private void initFields(ClassCode classCode, ObjectRef objectRef) {
-        if (StringUtils.isNotBlank(classCode.getSuperName())) {
-            ClassCode superClassCode = this.vm.getMethodArea().loadClass(classCode.getSuperName());
+        if (StringUtils.isNotBlank(classCode.superName)) {
+            ClassCode superClassCode = this.vm.getMethodArea().loadClass(classCode.superName);
             initFields(superClassCode, objectRef);
         }
-        for (FieldCode fieldCode : classCode.getFields()) {
-            if (fieldCode.isNotStatic()) {
-                putField(objectRef, fieldCode.getName(), fieldCode.getVariableType().getDefaultValue());
+        for (FieldCode fieldCode : classCode.fields.values()) {
+            if (!fieldCode.isStatic) {
+                putField(objectRef, fieldCode.name, fieldCode.variableType.getDefaultValue());
             }
         }
     }
@@ -627,6 +626,10 @@ public class Heap {
 
     public Map<String, Object> getArrays() {
         return arrays;
+    }
+
+    public BigInteger getObjectRefCount() {
+        return objectRefCount;
     }
 
 }

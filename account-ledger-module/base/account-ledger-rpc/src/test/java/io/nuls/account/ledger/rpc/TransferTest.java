@@ -57,15 +57,15 @@ public class TransferTest extends BaseTest {
 //        List<String> addressList = getAddressList();
 //
 //        for (String toAddress : addressList) {
-            String address = "Nse9W51tsj5thb2RfpLs2QLKPc2hP4pC";
-            String toAddress = "Nse4iay7oYCkCv2YVZsAcF2zaezJ2qbM";
+            String address = "Nse7e3BJ4pZGVsfMMA2hmWqYmwZYW1RX";
+            String toAddress = "Nse2Jiw9YNSZqm7oecuK1H7cNPH7LaLQ";//01385ef69371c8fe003d2339158333e6b383eaf7a93a38a77d022cf06024c82a
             long amount = 1001000L;
             String password = "";
             String remark = "test";
 
             String param = "{\"address\": \"" + address + "\", \"toAddress\": \"" + toAddress + "\", \"password\": \"" + password + "\", \"amount\": \"" + amount + "\", \"remark\": \"" + remark + "\"}";
 
-            String url = "http://127.0.0.1:8001/api/accountledger/transfer";
+            String url = "http://127.0.0.1:7001/api/accountledger/transfer";
 
 
             for (int i = 0; i < 1; i++) {
@@ -75,7 +75,7 @@ public class TransferTest extends BaseTest {
                 }
                 System.out.println(successCount + "  " + res);
                 try {
-                    Thread.sleep(10L);
+                    Thread.sleep(70L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

@@ -28,9 +28,12 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.dto.ContractTokenInfo;
+import io.nuls.contract.dto.ContractTokenTransferInfoPo;
+import io.nuls.contract.entity.ContractInfoDto;
+import io.nuls.contract.entity.tx.CreateContractTransaction;
+import io.nuls.contract.entity.txdata.CreateContractData;
 import io.nuls.contract.ledger.manager.ContractBalanceManager;
 import io.nuls.contract.storage.po.ContractAddressInfoPo;
-import io.nuls.contract.dto.ContractTokenTransferInfoPo;
 import io.nuls.contract.storage.service.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.VMContext;
@@ -40,7 +43,6 @@ import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.core.tools.array.ArraysTool;
-import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.map.MapUtil;
 import io.nuls.core.tools.str.StringUtils;
@@ -50,7 +52,6 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
-import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -58,7 +59,6 @@ import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
 
 import java.math.BigInteger;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -84,6 +84,9 @@ public class VMHelper implements InitializingBean {
 
     private ConcurrentHashMap<String, Long> accountLastedPriceMap = MapUtil.createConcurrentHashMap(4);
 
+    private static final BigInteger MAXIMUM_DECIMALS = BigInteger.valueOf(18L);
+    private static final BigInteger MAXIMUM_TOTAL_SUPPLY = BigInteger.valueOf(2L).pow(256).subtract(BigInteger.ONE);
+
     @Override
     public void afterPropertiesSet() throws NulsException {
         programExecutor = new ProgramExecutorImpl(vmContext, dbService);
@@ -96,7 +99,7 @@ public class VMHelper implements InitializingBean {
     public boolean checkIsViewMethod(String methodName, byte[] contractAddressBytes) {
         BlockHeader header = NulsContext.getInstance().getBestBlock().getHeader();
         // 当前区块状态根
-        byte[] currentStateRoot = header.getStateRoot();
+        byte[] currentStateRoot = ContractUtil.getStateRoot(header);
 
         ProgramExecutor track = programExecutor.begin(currentStateRoot);
         List<ProgramMethod> methods = track.method(contractAddressBytes);
@@ -113,18 +116,21 @@ public class VMHelper implements InitializingBean {
         return isViewMethod;
     }
 
-    public ProgramMethod getConstructor(byte[] contractCode) {
+    public ContractInfoDto getConstructor(byte[] contractCode) {
         try {
+            ContractInfoDto dto = new ContractInfoDto();
             List<ProgramMethod> programMethods = programExecutor.jarMethod(contractCode);
             if(programMethods == null || programMethods.size() == 0) {
                 return null;
             }
             for(ProgramMethod method : programMethods) {
                 if(ContractConstant.CONTRACT_CONSTRUCTOR.equals(method.getName())) {
-                    return method;
+                    dto.setConstructor(method);
+                    break;
                 }
             }
-            return null;
+            dto.setNrc20(this.checkNrc20Contract(programMethods));
+            return dto;
         } catch (Exception e) {
             Log.error(e);
             return null;
@@ -140,16 +146,20 @@ public class VMHelper implements InitializingBean {
         BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
         long blockHeight = blockHeader.getHeight();
         // 当前区块状态根
-        byte[] currentStateRoot = blockHeader.getStateRoot();
+        byte[] currentStateRoot = ContractUtil.getStateRoot(blockHeader);
 
-        return this.invokeViewMethod(currentStateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, args);
+        return this.invokeViewMethod(null, currentStateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, args);
     }
 
-    private ProgramResult invokeViewMethod(byte[] stateRoot, long blockHeight, byte[] contractAddressBytes, String methodName, String methodDesc, Object... args) {
-        return this.invokeViewMethod(stateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, ContractUtil.twoDimensionalArray(args));
+    private ProgramResult invokeViewMethod(ProgramExecutor executor, byte[] stateRoot, long blockHeight, byte[] contractAddressBytes, String methodName, String methodDesc, Object... args) {
+        return this.invokeViewMethod(executor, stateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, ContractUtil.twoDimensionalArray(args));
     }
 
     public ProgramResult invokeViewMethod(byte[] stateRoot, long blockHeight, byte[] contractAddressBytes, String methodName, String methodDesc, String[][] args) {
+        return this.invokeViewMethod(null, stateRoot, blockHeight, contractAddressBytes, methodName, methodDesc, args);
+    }
+
+    public ProgramResult invokeViewMethod(ProgramExecutor executor, byte[] stateRoot, long blockHeight, byte[] contractAddressBytes, String methodName, String methodDesc, String[][] args) {
 
         ProgramCall programCall = new ProgramCall();
         programCall.setContractAddress(contractAddressBytes);
@@ -161,7 +171,12 @@ public class VMHelper implements InitializingBean {
         programCall.setMethodDesc(methodDesc);
         programCall.setArgs(args);
 
-        ProgramExecutor track = programExecutor.begin(stateRoot);
+        ProgramExecutor track = null;
+        if(executor == null) {
+            track = programExecutor.begin(stateRoot);
+        } else {
+            track = executor.startTracking();
+        }
         ProgramResult programResult = track.call(programCall);
 
         return programResult;
@@ -179,13 +194,14 @@ public class VMHelper implements InitializingBean {
         String address = AddressTool.getStringAddressByBytes(sender);
         Long price = accountLastedPriceMap.get(address);
         if(price == null) {
-            price = 20L;
-            accountLastedPriceMap.put(address, price);
+            price = ContractConstant.CONTRACT_MINIMUM_PRICE;
         }
+        price = price < ContractConstant.CONTRACT_MINIMUM_PRICE ? ContractConstant.CONTRACT_MINIMUM_PRICE : price;
+        accountLastedPriceMap.put(address, price);
         return price;
     }
 
-    public void dealEvents(Transaction tx, ContractResult contractResult, ContractAddressInfoPo po) {
+    public void dealEvents(byte[] newestStateRoot, Transaction tx, ContractResult contractResult, ContractAddressInfoPo po) {
         if(po == null) {
             return;
         }
@@ -194,8 +210,6 @@ public class VMHelper implements InitializingBean {
             return;
         }
         try {
-
-            byte[] stateRoot = contractResult.getStateRoot();
             byte[] contractAddress = contractResult.getContractAddress();
             String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddress);
             List<String> events = contractResult.getEvents();
@@ -225,11 +239,11 @@ public class VMHelper implements InitializingBean {
 
                     // byte[] outKey = ArraysTool.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
                     if(from != null) {
-                        this.refreshTokenBalance(stateRoot, po, AddressTool.getStringAddressByBytes(from), contractAddressStr);
+                        this.refreshTokenBalance(newestStateRoot, po, AddressTool.getStringAddressByBytes(from), contractAddressStr);
                         this.saveTokenTransferInfo(from, txHashBytes, new VarInt(i).encode(), tokenTransferInfoPo);
                     }
                     if(to != null) {
-                        this.refreshTokenBalance(stateRoot, po, AddressTool.getStringAddressByBytes(to), contractAddressStr);
+                        this.refreshTokenBalance(newestStateRoot, po, AddressTool.getStringAddressByBytes(to), contractAddressStr);
                         this.saveTokenTransferInfo(to, txHashBytes, new VarInt(i).encode(), tokenTransferInfoPo);
                     }
                 }
@@ -244,11 +258,15 @@ public class VMHelper implements InitializingBean {
     }
 
     public void refreshTokenBalance(byte[] stateRoot, ContractAddressInfoPo po, String address, String contractAddress) {
+        this.refreshTokenBalance(null, stateRoot, po, address, contractAddress);
+    }
+
+    public void refreshTokenBalance(ProgramExecutor executor, byte[] stateRoot, ContractAddressInfoPo po, String address, String contractAddress) {
         long blockHeight = po.getBlockHeight();
         long bestBlockHeight = NulsContext.getInstance().getBestHeight();
         String tokenName = po.getNrc20TokenName();
         byte[] contractAddressBytes = po.getContractAddress();
-        ProgramResult programResult = this.invokeViewMethod(stateRoot, bestBlockHeight, contractAddressBytes, NRC20_METHOD_BALANCE_OF, null, address);
+        ProgramResult programResult = this.invokeViewMethod(executor, stateRoot, bestBlockHeight, contractAddressBytes, NRC20_METHOD_BALANCE_OF, null, address);
         Result<ContractTokenInfo> result = null;
         if(!programResult.isSuccess()) {
             return;
@@ -258,9 +276,7 @@ public class VMHelper implements InitializingBean {
 
     }
 
-    private boolean checkNrc20Contract(byte[] stateRoot, byte[] contractAddress) {
-        ProgramExecutor track = programExecutor.begin(stateRoot);
-        List<ProgramMethod> methods = track.method(contractAddress);
+    private boolean checkNrc20Contract(List<ProgramMethod> methods) {
         if(methods == null || methods.size() == 0) {
             return false;
         }
@@ -289,19 +305,28 @@ public class VMHelper implements InitializingBean {
         return true;
     }
 
-    public Result validateNrc20Contract(Transaction tx, ContractResult contractResult) {
+    private boolean checkNrc20Contract(byte[] contractCode) {
+        List<ProgramMethod> methods = programExecutor.jarMethod(contractCode);
+        if(methods == null || methods.size() == 0) {
+            return false;
+        }
+        return checkNrc20Contract(methods);
+    }
+
+    public Result validateNrc20Contract(ProgramExecutor track, CreateContractTransaction tx, ContractResult contractResult) {
         if(contractResult == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
+        CreateContractData createContractData = tx.getTxData();
         byte[] stateRoot = contractResult.getStateRoot();
         byte[] contractAddress = contractResult.getContractAddress();
         long blockHeight = tx.getBlockHeight();
         long bestBlockHeight = NulsContext.getInstance().getBestHeight();
-        boolean isNrc20 = this.checkNrc20Contract(stateRoot, contractAddress);
+        boolean isNrc20 = this.checkNrc20Contract(createContractData.getCode());
         contractResult.setNrc20(isNrc20);
         if(isNrc20) {
             // NRC20 tokenName 验证代币名称格式
-            ProgramResult programResult = this.invokeViewMethod(stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
+            ProgramResult programResult = this.invokeViewMethod(track, stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
             if(programResult.isSuccess()) {
                 String tokenName = programResult.getResult();
                 if(StringUtils.isNotBlank(tokenName)) {
@@ -311,7 +336,7 @@ public class VMHelper implements InitializingBean {
                 }
             }
             // NRC20 tokenSymbol 验证代币符号的格式
-            programResult = this.invokeViewMethod(stateRoot, bestBlockHeight, contractAddress, "symbol", null, null);
+            programResult = this.invokeViewMethod(track, stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_SYMBOL, null, null);
             if(programResult.isSuccess()) {
                 String symbol = programResult.getResult();
                 if(StringUtils.isNotBlank(symbol)) {
@@ -320,8 +345,43 @@ public class VMHelper implements InitializingBean {
                     }
                 }
             }
+
+            programResult = this.invokeViewMethod(track, stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_DECIMALS, null, null);
+            if(programResult.isSuccess()) {
+                String decimals = programResult.getResult();
+                if(StringUtils.isNotBlank(decimals)) {
+                    try {
+                        BigInteger decimalsBig = new BigInteger(decimals);
+                        if(decimalsBig.compareTo(BigInteger.ZERO) < 0 || decimalsBig.compareTo(MAXIMUM_DECIMALS) > 0) {
+                            return Result.getFailed(ContractErrorCode.CONTRACT_NRC20_MAXIMUM_DECIMALS);
+                        }
+                    } catch (Exception e) {
+                        Log.error("Get nrc20 decimals error.", e);
+                        // skip it
+                    }
+                }
+            }
+            programResult = this.invokeViewMethod(track, stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_TOTAL_SUPPLY, null, null);
+            if(programResult.isSuccess()) {
+                String totalSupply = programResult.getResult();
+                if(StringUtils.isNotBlank(totalSupply)) {
+                    try {
+                        BigInteger totalSupplyBig = new BigInteger(totalSupply);
+                        if(totalSupplyBig.compareTo(BigInteger.ZERO) <= 0 || totalSupplyBig.compareTo(MAXIMUM_TOTAL_SUPPLY) > 0) {
+                            return Result.getFailed(ContractErrorCode.CONTRACT_NRC20_MAXIMUM_TOTAL_SUPPLY);
+                        }
+                    } catch (Exception e) {
+                        Log.error("Get nrc20 totalSupply error.", e);
+                        // skip it
+                    }
+                }
+            }
         }
         return Result.getSuccess();
+    }
+
+    public static void main(String[] args) {
+        System.out.println(BigInteger.valueOf(2L).pow(256));
     }
 
 }

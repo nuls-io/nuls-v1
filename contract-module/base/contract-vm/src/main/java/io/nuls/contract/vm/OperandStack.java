@@ -1,5 +1,6 @@
 package io.nuls.contract.vm;
 
+import io.nuls.contract.vm.code.Descriptors;
 import io.nuls.contract.vm.code.VariableType;
 
 import java.util.Stack;
@@ -21,28 +22,28 @@ public class OperandStack extends Stack {
     public Object push(Object value, VariableType variableType) {
         if (variableType.isPrimitive()) {
             switch (variableType.getType()) {
-                case "int":
+                case Descriptors.INT:
                     value = pushInt((int) value);
                     break;
-                case "long":
+                case Descriptors.LONG:
                     value = pushLong((long) value);
                     break;
-                case "float":
+                case Descriptors.FLOAT:
                     value = pushFloat((float) value);
                     break;
-                case "double":
+                case Descriptors.DOUBLE:
                     value = pushDouble((double) value);
                     break;
-                case "boolean":
+                case Descriptors.BOOLEAN:
                     value = pushBoolean((boolean) value);
                     break;
-                case "byte":
+                case Descriptors.BYTE:
                     value = pushByte((byte) value);
                     break;
-                case "char":
+                case Descriptors.CHAR:
                     value = pushChar((char) value);
                     break;
-                case "short":
+                case Descriptors.SHORT:
                     value = pushShort((short) value);
                     break;
                 default:

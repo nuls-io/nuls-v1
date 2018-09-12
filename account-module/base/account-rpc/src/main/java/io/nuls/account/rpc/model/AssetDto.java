@@ -27,6 +27,7 @@ package io.nuls.account.rpc.model;
 
 import io.nuls.account.model.Balance;
 import io.nuls.contract.dto.ContractTokenInfo;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.kernel.model.Na;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -43,29 +44,29 @@ public class AssetDto {
     private String address;
 
     @ApiModelProperty(name = "balance", value = "余额")
-    private BigInteger balance;
+    private String balance;
 
     @ApiModelProperty(name = "usable", value = "可用余额")
-    private BigInteger usable;
+    private String usable;
 
     @ApiModelProperty(name = "locked", value = "锁定余额")
-    private BigInteger locked;
+    private String locked;
 
-    @ApiModelProperty(name = "decimals", value = "货币小数位精度")
+    @ApiModelProperty(name = "decimals", value = "货币小数位数")
     private long decimals;
 
     public AssetDto(String asset, Balance balance) {
-        this.balance = BigInteger.valueOf(balance.getBalance().getValue());
-        this.usable = BigInteger.valueOf(balance.getUsable().getValue());
-        this.locked = BigInteger.valueOf(balance.getLocked().getValue());
+        this.balance = BigInteger.valueOf(balance.getBalance().getValue()).toString();
+        this.usable = BigInteger.valueOf(balance.getUsable().getValue()).toString();
+        this.locked = BigInteger.valueOf(balance.getLocked().getValue()).toString();
         this.asset = asset;
         this.decimals = Na.SMALLEST_UNIT_EXPONENT;
     }
 
     public AssetDto(ContractTokenInfo tokenInfo) {
-        this.balance = tokenInfo.getAmount();
+        this.balance = ContractUtil.bigInteger2String(tokenInfo.getAmount());
         this.usable = this.balance;
-        this.locked = BigInteger.ZERO;
+        this.locked = BigInteger.ZERO.toString();
         this.asset = tokenInfo.getSymbol();
         this.address = tokenInfo.getContractAddress();
         this.decimals = tokenInfo.getDecimals();
@@ -87,27 +88,27 @@ public class AssetDto {
         this.address = address;
     }
 
-    public BigInteger getBalance() {
+    public String getBalance() {
         return balance;
     }
 
-    public void setBalance(BigInteger balance) {
+    public void setBalance(String balance) {
         this.balance = balance;
     }
 
-    public BigInteger getUsable() {
+    public String getUsable() {
         return usable;
     }
 
-    public void setUsable(BigInteger usable) {
+    public void setUsable(String usable) {
         this.usable = usable;
     }
 
-    public BigInteger getLocked() {
+    public String getLocked() {
         return locked;
     }
 
-    public void setLocked(BigInteger locked) {
+    public void setLocked(String locked) {
         this.locked = locked;
     }
 

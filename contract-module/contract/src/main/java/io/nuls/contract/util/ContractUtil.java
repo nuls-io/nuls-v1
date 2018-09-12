@@ -29,8 +29,10 @@ import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.VarInt;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -46,6 +48,11 @@ import static io.nuls.contract.constant.ContractConstant.*;
  * @date: 2018/8/25
  */
 public class ContractUtil {
+
+    /**
+     * 此长度来源于BlockExtendsData中定长变量的字节总数
+     */
+    private static final int BLOCK_EXTENDS_DATA_FIX_LENGTH = 28;
 
     public static String[][] twoDimensionalArray(Object[] args) {
         if (args == null) {
@@ -146,6 +153,49 @@ public class ContractUtil {
             }
         }
         return false;
+    }
+
+    public static byte[] getStateRoot(BlockHeader blockHeader) {
+        if(blockHeader == null || blockHeader.getExtend() == null) {
+            return null;
+        }
+        byte[] stateRoot = blockHeader.getStateRoot();
+        if(stateRoot != null && stateRoot.length > 0) {
+            return stateRoot;
+        }
+        try {
+            byte[] extend = blockHeader.getExtend();
+            if(extend.length > BLOCK_EXTENDS_DATA_FIX_LENGTH) {
+                VarInt varInt = new VarInt(extend, BLOCK_EXTENDS_DATA_FIX_LENGTH);
+                int lengthFieldSize = varInt.getOriginalSizeInBytes();
+                int stateRootlength = (int) varInt.value;
+                stateRoot = new byte[stateRootlength];
+                System.arraycopy(extend, BLOCK_EXTENDS_DATA_FIX_LENGTH + lengthFieldSize, stateRoot, 0, stateRootlength);
+                blockHeader.setStateRoot(stateRoot);
+                return stateRoot;
+            }
+        } catch (Exception e) {
+            Log.error("parse stateRoot error.", e);
+        }
+        return null;
+    }
+
+    public static String bigInteger2String(BigInteger bigInteger) {
+        if(bigInteger == null) {
+            return null;
+        }
+        return bigInteger.toString();
+    }
+
+    public static String simplifyErrorMsg(String errorMsg) {
+        if(StringUtils.isBlank(errorMsg)) {
+            return null;
+        }
+        if(errorMsg.contains("Exception:")) {
+            String[] msgs = errorMsg.split("Exception:", 2);
+            return msgs[1].trim();
+        }
+        return errorMsg;
     }
 
 }

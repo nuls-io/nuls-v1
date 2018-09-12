@@ -1,11 +1,17 @@
 package io.nuls.contract.vm.program.impl;
 
 import io.nuls.contract.util.VMContext;
-import io.nuls.contract.vm.*;
+import io.nuls.contract.vm.ObjectRef;
+import io.nuls.contract.vm.Result;
+import io.nuls.contract.vm.VM;
+import io.nuls.contract.vm.VMFactory;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.ClassCodeLoader;
 import io.nuls.contract.vm.code.ClassCodes;
 import io.nuls.contract.vm.code.MethodCode;
+import io.nuls.contract.vm.exception.ErrorException;
+import io.nuls.contract.vm.exception.RevertException;
+import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.db.service.DBService;
@@ -28,23 +34,21 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private static final Logger log = LoggerFactory.getLogger(ProgramExecutorImpl.class);
 
-    private VMContext vmContext;
+    private final VMContext vmContext;
 
-    private Source<byte[], byte[]> source;
+    private final Source<byte[], byte[]> source;
 
-    private Repository repository;
+    private final Repository repository;
 
-    private byte[] prevStateRoot;
+    private final byte[] prevStateRoot;
 
-    private boolean canCommit;
+    private final Map<String, VM> vmCache;
 
-    private boolean committed;
-
-    private boolean view;
-
-    private long beginTime;
+    private final long beginTime;
 
     private long currentTime;
+
+    private boolean revert;
 
     static {
         ClassCodeLoader.init();
@@ -53,42 +57,55 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     public ProgramExecutorImpl(VMContext vmContext, DBService dbService) {
-        this(vmContext, new KeyValueSource(dbService), null, null);
+        this(vmContext, new KeyValueSource(dbService), null, null, null);
     }
 
-    private ProgramExecutorImpl(VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot) {
+    private ProgramExecutorImpl(VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot, Map<String, VM> vmCache) {
         this.vmContext = vmContext;
         this.source = source;
         this.repository = repository;
         this.prevStateRoot = prevStateRoot;
         this.beginTime = this.currentTime = System.currentTimeMillis();
+        this.vmCache = vmCache;
     }
 
     @Override
     public ProgramExecutor begin(byte[] prevStateRoot) {
-        log.debug("begin vm root: {}", Hex.toHexString(prevStateRoot));
+        if (log.isDebugEnabled()) {
+            log.debug("begin vm root: {}", Hex.toHexString(prevStateRoot));
+        }
         Repository repository = new RepositoryRoot(source, prevStateRoot);
-        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot);
+        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, new HashMap<>(1024));
+    }
+
+    @Override
+    public ProgramExecutor startTracking() {
+        if (log.isDebugEnabled()) {
+            log.debug("startTracking");
+        }
+        Repository track = repository.startTracking();
+        return new ProgramExecutorImpl(vmContext, source, track, null, vmCache);
     }
 
     @Override
     public void commit() {
-        if (canCommit && !view) {
+        if (!revert) {
             repository.commit();
-            committed = true;
+            logTime("commit");
         }
-        logTime("commit");
     }
 
     @Override
     public byte[] getRoot() {
         byte[] root;
-        if (committed) {
+        if (!revert) {
             root = repository.getRoot();
         } else {
             root = this.prevStateRoot;
         }
-        log.debug("end vm root: {}, runtime: {}", Hex.toHexString(root), System.currentTimeMillis() - beginTime);
+        if (log.isDebugEnabled()) {
+            log.debug("end vm root: {}, runtime: {}", Hex.toHexString(root), System.currentTimeMillis() - beginTime);
+        }
         return root;
     }
 
@@ -146,6 +163,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             AccountState accountState = repository.getAccountState(programInvoke.getContractAddress());
             logTime("load account state");
             if (accountState == null) {
+                if (programInvoke.getData() == null) {
+                    return revert("contract code can't be null");
+                }
                 classCodes = ClassCodeLoader.loadJarCache(programInvoke.getData());
                 logTime("load new code");
                 ProgramChecker.check(classCodes);
@@ -167,7 +187,20 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 logTime("load code");
             }
 
-            VM vm = VMFactory.createVM();
+            VM vm;
+            if (vmCache == null) {
+                vm = VMFactory.createVM();
+            } else {
+                String contractAddress = NativeAddress.toString(programInvoke.getContractAddress());
+                vm = vmCache.get(contractAddress);
+                if (vm == null) {
+                    vm = VMFactory.createVM();
+                } else {
+                    //vm = new VM(vm.getHeap(), vm.getMethodArea());
+                    vm = VMFactory.createVM();
+                }
+                vmCache.put(contractAddress, vm);
+            }
 
             logTime("load vm");
 
@@ -177,20 +210,20 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             ClassCode contractClassCode = getContractClassCode(classCodes);
             String methodDesc = ProgramDescriptors.parseDesc(programInvoke.getMethodDesc());
-            MethodCode methodCode = vm.getMethodArea().loadMethod(contractClassCode.getName(), programInvoke.getMethodName(), methodDesc);
+            MethodCode methodCode = vm.getMethodArea().loadMethod(contractClassCode.name, programInvoke.getMethodName(), methodDesc);
 
             if (methodCode == null) {
                 return revert(String.format("can't find method %s.%s", programInvoke.getMethodName(), programInvoke.getMethodDesc()));
             }
-            if (!methodCode.isPublic()) {
+            if (!methodCode.isPublic) {
                 return revert("can only invoke public method");
             }
             if (!methodCode.hasPayableAnnotation() && programInvoke.getValue().compareTo(BigInteger.ZERO) > 0) {
                 return revert("not a payable method");
             }
-            if (methodCode.getArgsVariableType().size() != programInvoke.getArgs().length) {
+            if (methodCode.argsVariableType.size() != programInvoke.getArgs().length) {
                 return revert(String.format("require %s parameters in method [%s%s]",
-                        methodCode.getArgsVariableType().size(), methodCode.getName(), methodCode.getNormalDesc()));
+                        methodCode.argsVariableType.size(), methodCode.name, methodCode.normalDesc));
             }
 
             logTime("load method");
@@ -244,6 +277,10 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
                 logTime("contract exception");
 
+                this.revert = true;
+
+                programResult.setGasUsed(vm.getGasUsed());
+
                 return programResult;
             }
 
@@ -272,18 +309,18 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 }
             }
 
-            if (methodCode.isPublic() && methodCode.hasViewAnnotation()) {
-                view = true;
+            if (methodCode.isPublic && methodCode.hasViewAnnotation()) {
+                this.revert = true;
                 programResult.view();
             }
 
-            this.canCommit = true;
-
             logTime("contract return");
+
+            programResult.setGasUsed(vm.getGasUsed());
 
             return programResult;
         } catch (ErrorException e) {
-            log.error("", e);
+            //log.error("", e);
             ProgramResult programResult = new ProgramResult();
             programResult.setGasUsed(e.getGasUsed());
             //programResult.setStackTrace(e.getStackTraceMessage());
@@ -306,6 +343,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     private ProgramResult revert(String errorMessage, String stackTrace) {
+        this.revert = true;
         ProgramResult programResult = new ProgramResult();
         programResult.setStackTrace(stackTrace);
         logTime("revert");
@@ -329,13 +367,12 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
         ProgramResult programResult = new ProgramResult();
 
-        this.canCommit = true;
-
         return programResult;
     }
 
     @Override
     public ProgramStatus status(byte[] address) {
+        this.revert = true;
         AccountState accountState = repository.getAccountState(address);
         if (accountState == null) {
             return ProgramStatus.not_found;
@@ -351,26 +388,28 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     @Override
     public List<ProgramMethod> method(byte[] address) {
+        this.revert = true;
         byte[] codes = repository.getCode(address);
         return jarMethod(codes);
     }
 
     @Override
     public List<ProgramMethod> jarMethod(byte[] jarData) {
+        this.revert = true;
         if (jarData == null || jarData.length < 1) {
             return new ArrayList<>();
         }
-        Map<String, ClassCode> classCodes = ClassCodeLoader.loadJar(jarData);
+        Map<String, ClassCode> classCodes = ClassCodeLoader.loadJarCache(jarData);
         return getProgramMethods(classCodes);
     }
 
     private static List<ProgramMethod> getProgramMethods(Map<String, ClassCode> classCodes) {
         List<ProgramMethod> programMethods = getProgramMethodCodes(classCodes).stream().map(methodCode -> {
             ProgramMethod method = new ProgramMethod();
-            method.setName(methodCode.getName());
-            method.setDesc(methodCode.getNormalDesc());
-            method.setArgs(methodCode.getArgs());
-            method.setReturnArg(methodCode.getReturnArg());
+            method.setName(methodCode.name);
+            method.setDesc(methodCode.normalDesc);
+            method.setArgs(methodCode.args);
+            method.setReturnArg(methodCode.returnArg);
             method.setView(methodCode.hasViewAnnotation());
             method.setPayable(methodCode.hasPayableAnnotation());
             method.setEvent(false);
@@ -390,27 +429,27 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     private static ClassCode getContractClassCode(Map<String, ClassCode> classCodes) {
-        return classCodes.values().stream().filter(classCode -> classCode.getInterfaces().contains(ProgramConstants.CONTRACT_INTERFACE_NAME)).findFirst().orElse(null);
+        return classCodes.values().stream().filter(classCode -> classCode.interfaces.contains(ProgramConstants.CONTRACT_INTERFACE_NAME)).findFirst().orElse(null);
     }
 
     private static void contractMethods(Map<String, MethodCode> methodCodes, Map<String, ClassCode> classCodes, ClassCode classCode, boolean isSupperClass) {
-        classCode.getMethods().stream().filter(methodCode -> {
-            if (methodCode.isPublic() && methodCode.isNotAbstract()) {
+        classCode.methods.stream().filter(methodCode -> {
+            if (methodCode.isPublic && !methodCode.isAbstract) {
                 return true;
             } else {
                 return false;
             }
         }).forEach(methodCode -> {
-            if (isSupperClass && "<init>".equals(methodCode.getName())) {
-            } else if ("<clinit>".equals(methodCode.getName())) {
+            if (isSupperClass && "<init>".equals(methodCode.name)) {
+            } else if ("<clinit>".equals(methodCode.name)) {
             } else {
-                String name = methodCode.getName() + "." + methodCode.getDesc();
+                String name = methodCode.name + "." + methodCode.desc;
                 methodCodes.putIfAbsent(name, methodCode);
             }
         });
-        String superName = classCode.getSuperName();
+        String superName = classCode.superName;
         if (StringUtils.isNotEmpty(superName)) {
-            classCodes.values().stream().filter(code -> superName.equals(code.getName())).findFirst()
+            classCodes.values().stream().filter(code -> superName.equals(code.name)).findFirst()
                     .ifPresent(code -> {
                         contractMethods(methodCodes, classCodes, code, true);
                     });
@@ -426,18 +465,22 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     private static Set<ProgramMethod> getEventConstructor(Map<String, ClassCode> classCodes) {
-        Set<MethodCode> methodCodes = new LinkedHashSet<>();
+        Map<String, MethodCode> methodCodes = new LinkedHashMap<>();
         getEventClassCodes(classCodes).forEach(classCode -> {
-            methodCodes.addAll(classCode.getMethods());
+            for (MethodCode methodCode : classCode.methods) {
+                if (methodCode.isConstructor) {
+                    methodCodes.put(methodCode.fullName, methodCode);
+                }
+            }
         });
-        return methodCodes.stream()
-                .filter(methodCode -> methodCode.isConstructor())
+        return methodCodes.values().stream()
+                .filter(methodCode -> methodCode.isConstructor)
                 .map(methodCode -> {
                     ProgramMethod method = new ProgramMethod();
-                    method.setName(methodCode.getClassCode().getSimpleName());
-                    method.setDesc(methodCode.getNormalDesc());
-                    method.setArgs(methodCode.getArgs());
-                    method.setReturnArg(methodCode.getReturnArg());
+                    method.setName(methodCode.classCode.simpleName);
+                    method.setDesc(methodCode.normalDesc);
+                    method.setArgs(methodCode.args);
+                    method.setReturnArg(methodCode.returnArg);
                     method.setView(methodCode.hasViewAnnotation());
                     method.setPayable(methodCode.hasPayableAnnotation());
                     method.setEvent(true);
@@ -447,11 +490,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private static List<ClassCode> getEventClassCodes(Map<String, ClassCode> classCodes) {
         ClassCodes allCodes = new ClassCodes(classCodes);
-        ClassCode contractClassCode = getContractClassCode(classCodes);
-        Set<ClassCode> contractClassCodes = allCodes.allClasses(contractClassCode);
-        ClassCodes contractAllCodes = new ClassCodes(contractClassCodes);
-        return contractClassCodes.stream().filter(classCode -> classCode.isNotAbstract()
-                && contractAllCodes.instanceOf(classCode, ProgramConstants.EVENT_INTERFACE_NAME))
+        return classCodes.values().stream().filter(classCode -> !classCode.isAbstract
+                && allCodes.instanceOf(classCode, ProgramConstants.EVENT_INTERFACE_NAME))
                 .collect(Collectors.toList());
     }
 

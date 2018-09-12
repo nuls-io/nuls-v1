@@ -31,6 +31,7 @@ import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.locker.Lockers;
+import io.nuls.consensus.poc.process.NulsProtocolProcess;
 import io.nuls.consensus.poc.process.RewardStatisticsProcess;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
@@ -60,6 +61,8 @@ public class ConsensusPocServiceImpl implements ConsensusService {
     private TxMemoryPool txMemoryPool = TxMemoryPool.getInstance();
 
     private BlockQueueProvider blockQueueProvider = BlockQueueProvider.getInstance();
+
+    private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
 
     @Autowired
     private BlockService blockService;
@@ -122,6 +125,8 @@ public class ConsensusPocServiceImpl implements ConsensusService {
             if (!success) {
                 PocConsensusContext.getChainManager().getMasterChain().addBlock(block);
             } else {
+                //回滚版本更新统计数据
+                nulsProtocolProcess.processProtoclRollback(block.getHeader());
                 RewardStatisticsProcess.rollbackBlock(block);
                 NulsContext.getInstance().setBestBlock(PocConsensusContext.getChainManager().getMasterChain().getBestBlock());
             }

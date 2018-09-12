@@ -31,17 +31,16 @@ package io.nuls.accout.ledger.rpc;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.base.service.LocalUtxoService;
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
+import io.nuls.account.ledger.constant.AccountLedgerConstant;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
+import io.nuls.account.ledger.model.MultipleAddressTransferModel;
 import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Balance;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.accout.ledger.rpc.dto.*;
-import io.nuls.accout.ledger.rpc.form.TransactionForm;
-import io.nuls.accout.ledger.rpc.form.TransactionHexForm;
-import io.nuls.accout.ledger.rpc.form.TransferFeeForm;
-import io.nuls.accout.ledger.rpc.form.TransferForm;
+import io.nuls.accout.ledger.rpc.form.*;
 import io.nuls.accout.ledger.rpc.util.UtxoDtoComparator;
 import io.nuls.contract.dto.ContractTokenTransferInfoPo;
 import io.nuls.contract.service.ContractService;
@@ -77,6 +76,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -164,6 +164,143 @@ public class AccountLedgerResource {
         return result.toRpcClientResult();
     }
 
+    @POST
+    @Path("/changeWhole")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "零钱汇整", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult changeWhole(@ApiParam(name = "form", value = "零钱汇整", required = true) ChangeToWholeTransactionForm form) {
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        Result result = accountLedgerService.changeWhole(AddressTool.getAddress(form.getAddress()), form.getPassword(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+        if (result.isSuccess()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("value", (String) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
+
+    public RpcClientResult dapp(@ApiParam(name = "form", value = "零钱汇整", required = true) DataTransactionForm form) {
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (StringUtils.isBlank(form.getData())) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        byte[] bytes;
+        try {
+            bytes = form.getData().getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+
+        return null;
+    }
+
+    @POST
+    @Path("/multipleAddressTransfer")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "多地址转账（from多个地址的密码必须一样）", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult multipleAddressTransfer(@ApiParam(name = "form", value = "创建多账户转账交易", required = true)
+                                                           MulitpleTransactionForm form) {
+        List<MultipleAddressTransferModel> fromModelList = new ArrayList<>();
+        List<MultipleAddressTransferModel> toModelList = new ArrayList<>();
+        if (form.getInputs() == null || form.getOutputs() == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        for (MulipleTxFromDto from : form.getInputs()) {
+            MultipleAddressTransferModel model = new MultipleAddressTransferModel();
+            if (!AddressTool.validAddress(from.getAddress())) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            }
+            if (from.getAmount() <= 0) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+            model.setAddress(AddressTool.getAddress(from.getAddress()));
+            model.setAmount(from.getAmount());
+            fromModelList.add(model);
+        }
+        if (!validTxRemark(form.getRemark())) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        for (MultipleTxToDto to : form.getOutputs()) {
+            MultipleAddressTransferModel model = new MultipleAddressTransferModel();
+            if (!AddressTool.validAddress(to.getToAddress())) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            }
+            model.setAddress(AddressTool.getAddress(to.getToAddress()));
+            model.setAmount(to.getAmount());
+            toModelList.add(model);
+        }
+        Result result = accountLedgerService.multipleAddressTransfer(fromModelList, toModelList, form.getPassword(), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+        if (result.isSuccess()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("value", (String) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
+
+    @GET
+    @Path("/estimateFee/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "预估手续费—做零钱换整功能", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult estimateFee(@ApiParam(name = "address", value = "预估手续费—做零钱换整功能", required = true)
+                                       @PathParam("address") String address) {
+        if (address == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        Result result = accountLedgerService.estimateFee(AddressTool.getAddress(address), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+        Long fee = null;
+        if (result.isSuccess()) {
+            fee = ((Na) result.getData()).getValue();
+        }
+        Map<String, Long> map = new HashMap<>();
+        map.put("fee", fee);
+        result.setData(map);
+        return result.toRpcClientResult();
+    }
+
+    @GET
+    @Path("/getTotalUTXO/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "获取总额和多少条utxo—做零钱换整功能", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult getTotalUTXO(@ApiParam(name = "address", value = "获取总额和多少条utxo—做零钱换整功能", required = true)
+                                        @PathParam("address") String address) {
+        if (address == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        Result result = accountLedgerService.getAvailableTotalUTXO(AddressTool.getAddress(address));
+        if (!result.isSuccess()) {
+            return Result.getFailed(AccountErrorCode.FAILED).toRpcClientResult();
+        }
+        return result.toRpcClientResult();
+    }
 
     @GET
     @Path("/transfer/fee")
@@ -199,6 +336,10 @@ public class AccountLedgerResource {
             Log.error(e);
         }
         tx.setTime(TimeService.currentTimeMillis());
+        CoinData coinData = new CoinData();
+        Coin toCoin = new Coin(AddressTool.getAddress(form.getToAddress()), value);
+        coinData.getTo().add(toCoin);
+        tx.setCoinData(coinData);
         Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
                 TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
         Map<String, Long> map = new HashMap<>();
@@ -343,12 +484,12 @@ public class AccountLedgerResource {
 //            }
 
 //            for (Coin coin : tx.getCoinData().getFrom()) {
-//                Coin utxo = ledgerService.getUtxo(coin.getOwner());
+//                Coin utxo = ledgerService.getUtxo(coin.());
 //                if (utxo == null) {
 //                    return Result.getFailed(LedgerErrorCode.UTXO_NOT_FOUND).toRpcClientResult();
 //                }
 //
-//                if (!form.getAddress().equals(AddressTool.getStringAddressByBytes(utxo.getOwner()))) {
+//                if (!form.getAddress().equals(AddressTool.getStringAddressByBytes(utxo.()))) {
 //                    return Result.getFailed(LedgerErrorCode.INVALID_INPUT).toRpcClientResult();
 //                }
 //
@@ -377,21 +518,43 @@ public class AccountLedgerResource {
         try {
             byte[] data = Hex.decode(form.getTxHex());
             Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(data));
-//            ValidateResult validateResult = tx.verify();
-//            if (validateResult.isFailed()) {
-//                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
-//            }
-//            validateResult = this.ledgerService.verifyCoinData(tx,new HashMap<>(),new HashSet<>());
-//            if (validateResult.isFailed()) {
-//                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
-//            }
-
             Result result = accountLedgerService.broadcast(tx);
             if (result.isSuccess()) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("value", tx.getHash().getDigestHex());
                 result.setData(map);
             }
+            return result.toRpcClientResult();
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(LedgerErrorCode.DATA_PARSE_ERROR).toRpcClientResult();
+
+        }
+    }
+
+    @POST
+    @Path("/transaction/valiTransaction")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "验证交易是否正确", notes = "result.data: resultJson 返回验证结果")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult valiTransaction(@ApiParam(name = "form", value = "验证交易是否正确", required = true) TransactionHexForm form) {
+        if (StringUtils.isBlank(form.getTxHex())) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        try {
+            byte[] data = Hex.decode(form.getTxHex());
+            Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(data));
+            ValidateResult validateResult = tx.verify();
+            if (validateResult.isFailed()) {
+                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
+            }
+            validateResult = this.ledgerService.verifyCoinData(tx, new HashMap<>(), new HashSet<>());
+            if (validateResult.isFailed() && !validateResult.getErrorCode().equals(TransactionErrorCode.ORPHAN_TX)) {
+                return Result.getFailed(validateResult.getErrorCode()).toRpcClientResult();
+            }
+            Result result = Result.getSuccess();
             return result.toRpcClientResult();
         } catch (Exception e) {
             Log.error(e);
@@ -447,15 +610,15 @@ public class AccountLedgerResource {
 
         Set<String> hashCheckSet = MapUtil.createHashSet(8);
         // 合约token代币转账交易记录
-        if(isNeedQueryToken) {
+        if (isNeedQueryToken) {
             Result<List<ContractTokenTransferInfoPo>> listResult = contractService.getTokenTransferInfoList(address);
 
             List<ContractTokenTransferInfoPo> list = listResult.getData();
-            if(list != null && list.size() > 0) {
+            if (list != null && list.size() > 0) {
                 List<ContractTokenTransferInfoPo> tokenInfoList = null;
-                if(!isEmptyAssetType) {
+                if (!isEmptyAssetType) {
                     String contractAddress = assetType;
-                    if(AddressTool.validAddress(contractAddress)) {
+                    if (AddressTool.validAddress(contractAddress)) {
                         byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
                         tokenInfoList = list.stream().filter(po -> Arrays.areEqual(contractAddressBytes, po.getContractAddress())).collect(Collectors.toList());
                     }
@@ -463,7 +626,7 @@ public class AccountLedgerResource {
                     tokenInfoList = list;
                 }
                 TransactionInfo info = null;
-                for(ContractTokenTransferInfoPo po : tokenInfoList) {
+                for (ContractTokenTransferInfoPo po : tokenInfoList) {
                     info = new TransactionInfo();
                     // 临时type，用于区分资产类型 - 基础币和代币
                     info.setTxType(1000);
@@ -488,7 +651,7 @@ public class AccountLedgerResource {
         }
 
         // 基础币交易记录
-        if(isNeedQueryNuls) {
+        if (isNeedQueryNuls) {
             Result<List<TransactionInfo>> rawResult = accountLedgerService.getTxInfoList(addressBytes);
             if (rawResult.isFailed()) {
                 dtoResult.setSuccess(false);
@@ -497,7 +660,7 @@ public class AccountLedgerResource {
             }
 
             List<TransactionInfo> infoList = rawResult.getData();
-            if(infoList != null && infoList.size() > 0) {
+            if (infoList != null && infoList.size() > 0) {
                 // 过滤掉既是调用合约的交易类型，又是代币转账类型的交易
                 List<TransactionInfo> baseList = infoList.stream().filter(info -> hashCheckSet.add(info.getTxHash().getDigestHex())).collect(Collectors.toList());
 
@@ -544,7 +707,7 @@ public class AccountLedgerResource {
             }
             info.setBlockHeight(tx.getBlockHeight());
             // 非合约Token转账
-            if(info.getTxType() != 1000) {
+            if (info.getTxType() != 1000) {
                 info.setInfo(tx.getInfo(addressBytes));
             }
             infoDtoList.add(new TransactionInfoDto(info));

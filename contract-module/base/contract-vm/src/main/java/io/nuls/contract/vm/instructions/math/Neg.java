@@ -6,33 +6,33 @@ import io.nuls.contract.vm.util.Log;
 public class Neg {
 
     public static void ineg(final Frame frame) {
-        int value = frame.getOperandStack().popInt();
+        int value = frame.operandStack.popInt();
         int result = -value;
-        frame.getOperandStack().pushInt(result);
+        frame.operandStack.pushInt(result);
 
         //Log.result(frame.getCurrentOpCode(), result, "-", value);
     }
 
     public static void lneg(final Frame frame) {
-        long value = frame.getOperandStack().popLong();
+        long value = frame.operandStack.popLong();
         long result = -value;
-        frame.getOperandStack().pushLong(result);
+        frame.operandStack.pushLong(result);
 
         //Log.result(frame.getCurrentOpCode(), result, "-", value);
     }
 
     public static void fneg(final Frame frame) {
-        float value = frame.getOperandStack().popFloat();
+        float value = frame.operandStack.popFloat();
         float result = -value;
-        frame.getOperandStack().pushFloat(result);
+        frame.operandStack.pushFloat(result);
 
         //Log.result(frame.getCurrentOpCode(), result, "-", value);
     }
 
     public static void dneg(final Frame frame) {
-        double value = frame.getOperandStack().popDouble();
+        double value = frame.operandStack.popDouble();
         double result = -value;
-        frame.getOperandStack().pushDouble(result);
+        frame.operandStack.pushDouble(result);
 
         //Log.result(frame.getCurrentOpCode(), result, "-", value);
     }

@@ -12,7 +12,7 @@ public class NativeMsg {
 
     public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = null;
-        switch (methodCode.getName()) {
+        switch (methodCode.name) {
             case "gasleft":
                 result = gasleft(methodCode, methodArgs, frame);
                 break;
@@ -36,27 +36,27 @@ public class NativeMsg {
     }
 
     private static Result gasleft(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = NativeMethod.result(methodCode, frame.getVm().getGasLeft(), frame);
+        Result result = NativeMethod.result(methodCode, frame.vm.getGasLeft(), frame);
         return result;
     }
 
     private static Result sender(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = NativeMethod.result(methodCode, frame.getVm().getProgramContext().getSender(), frame);
+        Result result = NativeMethod.result(methodCode, frame.vm.getProgramContext().getSender(), frame);
         return result;
     }
 
     private static Result value(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = NativeMethod.result(methodCode, frame.getVm().getProgramContext().getValue(), frame);
+        Result result = NativeMethod.result(methodCode, frame.vm.getProgramContext().getValue(), frame);
         return result;
     }
 
     private static Result gasprice(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = NativeMethod.result(methodCode, frame.getVm().getProgramContext().getGasPrice(), frame);
+        Result result = NativeMethod.result(methodCode, frame.vm.getProgramContext().getGasPrice(), frame);
         return result;
     }
 
     private static Result address(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = NativeMethod.result(methodCode, frame.getVm().getProgramContext().getAddress(), frame);
+        Result result = NativeMethod.result(methodCode, frame.vm.getProgramContext().getAddress(), frame);
         return result;
     }
 

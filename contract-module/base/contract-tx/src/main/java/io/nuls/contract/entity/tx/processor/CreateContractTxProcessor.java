@@ -43,6 +43,7 @@ import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -137,18 +138,20 @@ public class CreateContractTxProcessor implements TransactionProcessor<CreateCon
         info.setNrc20(isNrc20Contract);
         // 获取 token tracker
         if(isNrc20Contract) {
+            BlockHeader blockHeader = tx.getBlockHeader();
+            byte[] newestStateRoot = blockHeader.getStateRoot();
             // NRC20 token 标准方法获取名称数据
-            ProgramResult programResult = vmHelper.invokeViewMethod(stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
+            ProgramResult programResult = vmHelper.invokeViewMethod(newestStateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
             if(programResult.isSuccess()) {
                 String tokenName = programResult.getResult();
                 info.setNrc20TokenName(tokenName);
             }
-            programResult = vmHelper.invokeViewMethod(stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_SYMBOL, null, null);
+            programResult = vmHelper.invokeViewMethod(newestStateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_SYMBOL, null, null);
             if(programResult.isSuccess()) {
                 String symbol = programResult.getResult();
                 info.setNrc20TokenSymbol(symbol);
             }
-            programResult = vmHelper.invokeViewMethod(stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_DECIMALS, null, null);
+            programResult = vmHelper.invokeViewMethod(newestStateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_DECIMALS, null, null);
             if(programResult.isSuccess()) {
                 String decimals = programResult.getResult();
                 if(StringUtils.isNotBlank(decimals)) {
@@ -160,7 +163,7 @@ public class CreateContractTxProcessor implements TransactionProcessor<CreateCon
                     }
                 }
             }
-            programResult = vmHelper.invokeViewMethod(stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_TOTAL_SUPPLY, null, null);
+            programResult = vmHelper.invokeViewMethod(newestStateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_TOTAL_SUPPLY, null, null);
             if(programResult.isSuccess()) {
                 String totalSupply = programResult.getResult();
                 if(StringUtils.isNotBlank(totalSupply)) {
@@ -173,9 +176,9 @@ public class CreateContractTxProcessor implements TransactionProcessor<CreateCon
                 }
             }
             // 刷新创建者的token余额
-            vmHelper.refreshTokenBalance(stateRoot, info, senderStr, contractAddressStr);
+            vmHelper.refreshTokenBalance(newestStateRoot, info, senderStr, contractAddressStr);
             // 处理合约事件
-            vmHelper.dealEvents(tx, contractResult, info);
+            vmHelper.dealEvents(newestStateRoot, tx, contractResult, info);
         }
 
         Result result = contractAddressStorageService.saveContractAddress(contractAddress, info);

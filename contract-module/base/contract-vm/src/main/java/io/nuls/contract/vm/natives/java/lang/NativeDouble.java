@@ -24,7 +24,7 @@ public class NativeDouble {
 
     public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = null;
-        switch (methodCode.getName()) {
+        switch (methodCode.name) {
             case "doubleToRawLongBits":
                 result = doubleToRawLongBits(methodCode, methodArgs, frame);
                 break;
@@ -48,22 +48,22 @@ public class NativeDouble {
     }
 
     private static Result doubleToRawLongBits(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        double value = (double) methodArgs.getInvokeArgs()[0];
+        double value = (double) methodArgs.invokeArgs[0];
         long bits = Double.doubleToRawLongBits(value);
         Result result = NativeMethod.result(methodCode, bits, frame);
         return result;
     }
 
     private static Result longBitsToDouble(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        long bits = (long) methodArgs.getInvokeArgs()[0];
+        long bits = (long) methodArgs.invokeArgs[0];
         double d = Double.longBitsToDouble(bits);
         Result result = NativeMethod.result(methodCode, d, frame);
         return result;
     }
 
     private static Result parseDouble(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        ObjectRef objectRef = (ObjectRef) methodArgs.getInvokeArgs()[0];
-        String s = frame.getHeap().runToString(objectRef);
+        ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
+        String s = frame.heap.runToString(objectRef);
         double d;
         try {
             d = Double.parseDouble(s);
@@ -76,17 +76,17 @@ public class NativeDouble {
     }
 
     private static Result toString(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        double d = (double) methodArgs.getInvokeArgs()[0];
+        double d = (double) methodArgs.invokeArgs[0];
         String s = Double.toString(d);
-        ObjectRef ref = frame.getHeap().newString(s);
+        ObjectRef ref = frame.heap.newString(s);
         Result result = NativeMethod.result(methodCode, ref, frame);
         return result;
     }
 
     private static Result toHexString(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        double d = (double) methodArgs.getInvokeArgs()[0];
+        double d = (double) methodArgs.invokeArgs[0];
         String s = Double.toHexString(d);
-        ObjectRef ref = frame.getHeap().newString(s);
+        ObjectRef ref = frame.heap.newString(s);
         Result result = NativeMethod.result(methodCode, ref, frame);
         return result;
     }

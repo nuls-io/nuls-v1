@@ -229,7 +229,7 @@ public class AccountBaseService {
             if (!account.validatePassword(oldPassword)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
-            account.decrypt(oldPassword);
+            account.unlock(oldPassword);
             account.encrypt(newPassword, true);
             AccountPo po = new AccountPo(account);
             Result result = accountStorageService.updateAccount(po);

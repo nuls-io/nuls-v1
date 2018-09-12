@@ -27,7 +27,7 @@ public class ProgramChecker {
 
     public static void checkJdkVersion(Map<String, ClassCode> classCodes) {
         for (ClassCode classCode : classCodes.values()) {
-            if (!classCode.isV1_6() && !classCode.isV1_8()) {
+            if (!classCode.isV1_6 && !classCode.isV1_8) {
                 throw new RuntimeException("class version must be 1.6 or 1.8");
             }
         }
@@ -35,7 +35,7 @@ public class ProgramChecker {
 
     public static void checkContractNum(Map<String, ClassCode> classCodes) {
         List<ClassCode> contractClassCodes = classCodes.values().stream()
-                .filter(classCode -> classCode.getInterfaces().contains(ProgramConstants.CONTRACT_INTERFACE_NAME))
+                .filter(classCode -> classCode.interfaces.contains(ProgramConstants.CONTRACT_INTERFACE_NAME))
                 .collect(Collectors.toList());
         int contractCount = contractClassCodes.size();
         if (contractCount != 1) {
@@ -46,21 +46,21 @@ public class ProgramChecker {
     public static void checkContractMethodArgs(Map<String, ClassCode> classCodes) {
         final List<MethodCode> list = ProgramExecutorImpl.getProgramMethodCodes(classCodes);
         for (MethodCode methodCode : list) {
-            final List<VariableType> variableTypes = methodCode.getArgsVariableType();
+            final List<VariableType> variableTypes = methodCode.argsVariableType;
             for (VariableType variableType : variableTypes) {
                 if (variableType.isPrimitive()) {
                     //
                 } else if (variableType.isArray()) {
                     if (variableType.getDimensions() > 1) {
-                        throw new RuntimeException(String.format("only one-dimensional array can be used in method %s.%s", methodCode.getClassCode().getName(), methodCode.getName()));
+                        throw new RuntimeException(String.format("only one-dimensional array can be used in method %s.%s", methodCode.classCode.name, methodCode.name));
                     } else if (!(variableType.isPrimitiveType() || variableType.getComponentType().isStringType() || variableType.getComponentType().isWrapperType())) {
-                        throw new RuntimeException(String.format("only primitive type array and string array can be used in method %s.%s", methodCode.getClassCode().getName(), methodCode.getName()));
+                        throw new RuntimeException(String.format("only primitive type array and string array can be used in method %s.%s", methodCode.classCode.name, methodCode.name));
                     } else {
                         //
                     }
                 } else {
                     if (!hasConstructor(variableType, classCodes)) {
-                        throw new RuntimeException(String.format("%s can't be used in method %s.%s", variableType.getType(), methodCode.getClassCode().getName(), methodCode.getName()));
+                        throw new RuntimeException(String.format("%s can't be used in method %s.%s", variableType.getType(), methodCode.classCode.name, methodCode.name));
                     } else {
                         //
                     }
@@ -72,7 +72,7 @@ public class ProgramChecker {
     public static void checkStaticField(Map<String, ClassCode> classCodes) {
         List<FieldCode> fieldCodes = new ArrayList<>();
         classCodes.values().stream().forEach(classCode -> {
-            List<FieldCode> list = classCode.getFields().stream().filter(FieldCode::isStatic).collect(Collectors.toList());
+            List<FieldCode> list = classCode.fields.values().stream().filter(fieldCode -> fieldCode.isStatic).collect(Collectors.toList());
             fieldCodes.addAll(list);
         });
         if (fieldCodes.size() > 0) {
@@ -82,7 +82,7 @@ public class ProgramChecker {
 
     public static void checkClass(Map<String, ClassCode> classCodes) {
         Set<String> allClass = allClass(classCodes);
-        Set<String> classCodeNames = classCodes.values().stream().map(ClassCode::getName).collect(Collectors.toSet());
+        Set<String> classCodeNames = classCodes.values().stream().map(classCode -> classCode.name).collect(Collectors.toSet());
         Collection<String> classes = CollectionUtils.removeAll(allClass, classCodeNames);
         Collection<String> classes1 = CollectionUtils.removeAll(classes, Arrays.asList(ProgramConstants.SDK_CLASS_NAMES));
         Collection<String> classes2 = CollectionUtils.removeAll(classes1, Arrays.asList(ProgramConstants.CONTRACT_USED_CLASS_NAMES));
@@ -93,20 +93,20 @@ public class ProgramChecker {
     }
 
     public static void checkMethod(Map<String, ClassCode> classCodes) {
-        Map<MethodCode, Object> methodCodes = new LinkedHashMap();
+        Map<String, Object> methodCodes = new HashMap(1024);
         for (ClassCode classCode : classCodes.values()) {
-            for (MethodCode methodCode : classCode.getMethods()) {
-                Object o = methodCodes.get(methodCode);
+            for (MethodCode methodCode : classCode.methods) {
+                Object o = methodCodes.get(methodCode.fullName);
                 if (o == null) {
                     o = isSupportMethod(methodCode, methodCodes, classCodes);
-                    methodCodes.put(methodCode, o);
+                    methodCodes.put(methodCode.fullName, o);
                 }
                 if (!Boolean.TRUE.equals(o)) {
                     if (o != null) {
                         MethodInsnNode methodInsnNode = (MethodInsnNode) o;
                         throw new RuntimeException(String.format("can't use method: %s.%s%s", methodInsnNode.owner, methodInsnNode.name, methodInsnNode.desc));
                     } else {
-                        throw new RuntimeException(String.format("can't use method: %s.%s%s", methodCode.getClassCode().getName(), methodCode.getName(), methodCode.getDesc()));
+                        throw new RuntimeException(String.format("can't use method: %s.%s%s", methodCode.classCode.name, methodCode.name, methodCode.desc));
                     }
                 }
             }
@@ -115,14 +115,14 @@ public class ProgramChecker {
 
     public static void checkOpCode(Map<String, ClassCode> classCodes) {
         for (ClassCode classCode : classCodes.values()) {
-            for (MethodCode methodCode : classCode.getMethods()) {
+            for (MethodCode methodCode : classCode.methods) {
                 checkOpCode(methodCode);
             }
         }
     }
 
     public static void checkOpCode(MethodCode methodCode) {
-        ListIterator<AbstractInsnNode> listIterator = methodCode.getInstructions().iterator();
+        ListIterator<AbstractInsnNode> listIterator = methodCode.instructions.iterator();
         while (listIterator.hasNext()) {
             AbstractInsnNode abstractInsnNode = listIterator.next();
             if (abstractInsnNode != null && abstractInsnNode.getOpcode() > 0) {
@@ -145,30 +145,30 @@ public class ProgramChecker {
                 }
                 if (nonsupport) {
                     int line = getLine(abstractInsnNode);
-                    throw new RuntimeException(String.format("nonsupport opcode: class(%s), line(%d)", methodCode.getClassCode().getName(), line));
+                    throw new RuntimeException(String.format("nonsupport opcode: class(%s), line(%d)", methodCode.classCode.name, line));
                 }
             }
         }
     }
 
     public static Set<String> allClass(Map<String, ClassCode> classCodes) {
-        Set<String> set = new LinkedHashSet<>();
+        Set<String> set = new HashSet<>();
         for (ClassCode classCode : classCodes.values()) {
-            set.add(classCode.getName());
-            set.add(classCode.getSuperName());
-            set.addAll(classCode.getInterfaces());
-            for (InnerClassNode innerClassNode : classCode.getInnerClasses()) {
+            set.add(classCode.name);
+            set.add(classCode.superName);
+            set.addAll(classCode.interfaces);
+            for (InnerClassNode innerClassNode : classCode.innerClasses) {
                 set.add(innerClassNode.name);
             }
-            for (FieldCode fieldCode : classCode.getFields()) {
-                set.add(fieldCode.getDesc());
+            for (FieldCode fieldCode : classCode.fields.values()) {
+                set.add(fieldCode.desc);
             }
-            for (MethodCode methodCode : classCode.getMethods()) {
+            for (MethodCode methodCode : classCode.methods) {
                 set.addAll(allClass(methodCode));
             }
         }
 
-        Set<String> classes = new LinkedHashSet<>();
+        Set<String> classes = new HashSet<>();
         for (String s : set) {
             if (s == null) {
                 continue;
@@ -194,12 +194,12 @@ public class ProgramChecker {
     }
 
     public static Set<String> allClass(MethodCode methodCode) {
-        Set<String> set = new LinkedHashSet<>();
-        set.add(methodCode.getReturnVariableType().getType());
-        for (VariableType variableType : methodCode.getArgsVariableType()) {
+        Set<String> set = new HashSet<>();
+        set.add(methodCode.returnVariableType.getType());
+        for (VariableType variableType : methodCode.argsVariableType) {
             set.add(variableType.getType());
         }
-        ListIterator<AbstractInsnNode> listIterator = methodCode.getInstructions().iterator();
+        ListIterator<AbstractInsnNode> listIterator = methodCode.instructions.iterator();
         while (listIterator.hasNext()) {
             AbstractInsnNode abstractInsnNode = listIterator.next();
             if (abstractInsnNode instanceof MultiANewArrayInsnNode) {
@@ -223,28 +223,28 @@ public class ProgramChecker {
 
     public static Set<String> notSupportMethods = new TreeSet<>();
 
-    public static Object isSupportMethod(MethodCode methodCode, Map<MethodCode, Object> methodCodes, Map<String, ClassCode> classCodeMap) {
-        if (!methodCodes.containsKey(methodCode)) {
-            methodCodes.put(methodCode, null);
+    public static Object isSupportMethod(MethodCode methodCode, Map<String, Object> methodCodes, Map<String, ClassCode> classCodeMap) {
+        if (!methodCodes.containsKey(methodCode.fullName)) {
+            methodCodes.put(methodCode.fullName, null);
 //            if (NativeMethod.isSupport(methodCode)) {
 //                return Boolean.TRUE;
 //            }
-//            String methodFullName = String.format("%s.%s%s", methodCode.getClassCode().getName(), methodCode.getName(), methodCode.getDesc());
-//            if (methodCode.getClassCode().getName().startsWith("sun/")) {
+//            String methodFullName = String.format("%s.%s%s", methodCode.classCode.name, methodCode.name, methodCode.desc);
+//            if (methodCode.classCode.name.startsWith("sun/")) {
 //                notSupportMethods.add(methodFullName);
 //                log.warn("not support sun method " + methodFullName);
 //                return null;
 //            }
 //            if (methodCode.getInstructions().size() <= 0) {
 //                if (methodCode.isNative()) {
-//                    if (ArrayUtils.contains(NativeMethod.SUPPORT_CLASSES, methodCode.getClassCode().getName())) {
+//                    if (ArrayUtils.contains(NativeMethod.SUPPORT_CLASSES, methodCode.classCode.name)) {
 //                        return Boolean.TRUE;
 //                    } else {
 //                        notSupportMethods.add(methodFullName);
 //                        log.warn("not support native method " + methodFullName);
 //                        return null;
 //                    }
-//                } else if (methodCode.getClassCode().isInterface() || methodCode.isAbstract()) {
+//                } else if (methodCode.classCode.isInterface() || methodCode.isAbstract()) {
 //                    return Boolean.TRUE;
 //                } else {
 //                    notSupportMethods.add(methodFullName);
@@ -252,7 +252,7 @@ public class ProgramChecker {
 //                    return null;
 //                }
 //            }
-            ListIterator<AbstractInsnNode> listIterator = methodCode.getInstructions().iterator();
+            ListIterator<AbstractInsnNode> listIterator = methodCode.instructions.iterator();
             while (listIterator.hasNext()) {
                 AbstractInsnNode abstractInsnNode = listIterator.next();
                 if (!(abstractInsnNode instanceof MethodInsnNode)) {
@@ -285,14 +285,14 @@ public class ProgramChecker {
 
     public static MethodCode getMethodCode(ClassCode classCode, String methodName, String methodDesc, Map<String, ClassCode> classCodeMap) {
         MethodCode methodCode = classCode.getMethodCode(methodName, methodDesc);
-        if (methodCode == null && classCode.getSuperName() != null) {
-            ClassCode superClassCode = getClassCode(classCode.getSuperName(), classCodeMap);
+        if (methodCode == null && classCode.superName != null) {
+            ClassCode superClassCode = getClassCode(classCode.superName, classCodeMap);
             if (superClassCode != null) {
                 methodCode = getMethodCode(superClassCode, methodName, methodDesc, classCodeMap);
             }
         }
         if (methodCode == null) {
-            for (String interfaceName : classCode.getInterfaces()) {
+            for (String interfaceName : classCode.interfaces) {
                 ClassCode interfaceClassCode = getClassCode(interfaceName, classCodeMap);
                 methodCode = getMethodCode(interfaceClassCode, methodName, methodDesc, classCodeMap);
                 if (methodCode != null) {
@@ -310,22 +310,11 @@ public class ProgramChecker {
         return ((LineNumberNode) abstractInsnNode).line;
     }
 
-    public static Map<String, ClassCode> classCodeMap(Map<String, ClassCode> classCodes) {
-        Map<String, ClassCode> classCodeMap = new LinkedHashMap<>();
-        classCodeMap.putAll(ClassCodeLoader.RESOURCE_CLASS_CODES);
-        for (ClassCode classCode : classCodes.values()) {
-            if (!classCodeMap.containsKey(classCode.getName())) {
-                classCodeMap.put(classCode.getName(), classCode);
-            }
-        }
-        return classCodeMap;
-    }
-
     public static boolean hasConstructor(VariableType variableType, Map<String, ClassCode> classCodeMap) {
         ClassCode classCode = getClassCode(variableType.getType(), classCodeMap);
         if (classCode != null) {
             MethodCode methodCode = classCode.getMethodCode("<init>", "(Ljava/lang/String;)V");
-            if (methodCode != null && methodCode.isPublic()) {
+            if (methodCode != null && methodCode.isPublic) {
                 return true;
             }
         }
@@ -335,7 +324,7 @@ public class ProgramChecker {
     private static ClassCode getClassCode(String className, Map<String, ClassCode> classCodeMap) {
         ClassCode classCode = classCodeMap.get(className);
         if (classCode == null) {
-            classCode = ClassCodeLoader.RESOURCE_CLASS_CODES.get(className);
+            classCode = ClassCodeLoader.getFromResource(className);
         }
         return classCode;
     }

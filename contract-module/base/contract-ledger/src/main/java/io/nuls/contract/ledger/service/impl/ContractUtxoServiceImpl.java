@@ -131,7 +131,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
                         fromOfFromCoin = sourceTx.getCoinData().getTo().get((int) new VarInt(utxoFromIndex, 0).value);
                     }
                     from.setFrom(fromOfFromCoin);
-                    from.setAddress(fromOfFromCoin.getOwner());
+                    from.setTempOwner(fromOfFromCoin.getOwner());
 
                     fromList.add(fromSource);
                 }
@@ -152,11 +152,12 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
             byte[] outKey;
             for (int i = 0, length = tos.size(); i < length; i++) {
                 to = tos.get(i);
-                toAddress = to.getOwner();
+                //toAddress = to.getOwner();
+                toAddress = to.getAddress();
                 if (!ContractLedgerUtil.isLegalContractAddress(toAddress)) {
                     continue;
                 }
-                to.setAddress(toAddress);
+                to.setTempOwner(toAddress);
                 contractTos.add(to);
                 try {
                     outKey = ArraysTool.concatenate(txHashBytes, new VarInt(i).encode());
@@ -199,11 +200,12 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
             byte[] toAddress;
             for (int i = 0, length = tos.size(); i < length; i++) {
                 to = tos.get(i);
-                toAddress = to.getOwner();
+                //toAddress = to.();
+                toAddress = to.getAddress();
                 if(!ContractLedgerUtil.isLegalContractAddress(toAddress)) {
                     continue;
                 }
-                to.setAddress(toAddress);
+                to.setTempOwner(toAddress);
                 contractTos.add(to);
                 outKey = ArraysTool.concatenate(txHashBytes, new VarInt(i).encode());
                 toList.add(outKey);
@@ -239,7 +241,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
 
                     sourceTxCoinTo = sourceTx.getCoinData().getTo().get((int) new VarInt(utxoFromIndex, 0).value);
                     from.setFrom(sourceTxCoinTo);
-                    from.setAddress(sourceTxCoinTo.getOwner());
+                    from.setTempOwner(sourceTxCoinTo.getAddress());
                     try {
                         fromList.add(new Entry<byte[], byte[]>(fromSource, sourceTxCoinTo.serialize()));
                     } catch (IOException e) {

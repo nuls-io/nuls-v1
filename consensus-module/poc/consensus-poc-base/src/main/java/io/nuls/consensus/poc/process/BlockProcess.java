@@ -29,6 +29,7 @@ package io.nuls.consensus.poc.process;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.block.validator.BifurcationUtil;
+import io.nuls.consensus.poc.cache.TxMemoryPool;
 import io.nuls.consensus.poc.constant.BlockContainerStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.BlockContainer;
@@ -47,16 +48,8 @@ import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
 import io.nuls.consensus.poc.util.ConsensusTool;
-import io.nuls.consensus.service.ConsensusService;
-import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.dto.ContractResult;
-import io.nuls.contract.dto.ContractTransfer;
-import io.nuls.contract.entity.tx.CallContractTransaction;
-import io.nuls.contract.entity.tx.ContractTransaction;
-import io.nuls.contract.entity.tx.ContractTransferTransaction;
 import io.nuls.contract.service.ContractService;
-import io.nuls.contract.util.ContractUtil;
-import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
@@ -68,7 +61,6 @@ import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
-import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.cache.TemporaryCacheManager;
@@ -101,6 +93,7 @@ public class BlockProcess {
 
     private ExecutorService signExecutor = TaskManager.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, ""));
 
+    private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
     private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
 
     public BlockProcess(ChainManager chainManager, OrphanBlockProvider orphanBlockProvider) {
@@ -148,7 +141,7 @@ public class BlockProcess {
         if (extendsData.getCurrentVersion() == null && NulsVersionManager.getMainVersion() > 1) {
             Log.info("------block currentVersion low, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
             return false;
-        } else if (NulsVersionManager.getMainVersion() > extendsData.getCurrentVersion()) {
+        } else if (null != extendsData.getCurrentVersion() && extendsData.getCurrentVersion() < NulsVersionManager.getMainVersion()) {
             Log.info("------block currentVersion low, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
             return false;
         }
@@ -164,7 +157,7 @@ public class BlockProcess {
         if (validateResult.isFailed() && validateResult.getErrorCode().equals(TransactionErrorCode.TRANSACTION_REPEATED)) {
             RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
             RedPunishData redPunishData = new RedPunishData();
-            byte[] packingAddress = AddressTool.getAddress(block.getHeader().getScriptSig());
+            byte[] packingAddress = AddressTool.getAddress(block.getHeader().getBlockSignature().getPublicKey());
             List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
             Agent agent = null;
             for (Agent a : agentList) {
@@ -189,10 +182,10 @@ public class BlockProcess {
             redPunishData.setEvidence(smallBlock.serialize());
             redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
             redPunishTransaction.setTxData(redPunishData);
-            CoinData coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress(), PocConsensusConstant.RED_PUNISH_LOCK_TIME);
+            CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, smallBlock.getHeader().getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME);
             redPunishTransaction.setCoinData(coinData);
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
-            NulsContext.getServiceBean(ConsensusService.class).newTx(redPunishTransaction);
+            TxMemoryPool.getInstance().add(redPunishTransaction, false);
             return false;
         }
 
@@ -236,16 +229,14 @@ public class BlockProcess {
                     /**
                      * pierre add 智能合约相关
                      */
-                    Block bestBlock = NulsContext.getInstance().getBestBlock();
-                    long bestHeight = bestBlock.getHeader().getHeight();
-                    byte[] receiveStateRoot = block.getHeader().getStateRoot();
-                    byte[] stateRoot = bestBlock.getHeader().getStateRoot();
+                    BlockHeader bestBlockHeader = NulsContext.getInstance().getBestBlock().getHeader();
+                    long bestHeight = bestBlockHeader.getHeight();
+                    byte[] receiveStateRoot = ConsensusTool.getStateRoot(block.getHeader());
+                    byte[] stateRoot = ConsensusTool.getStateRoot(bestBlockHeader);
                     Result<ContractResult> invokeContractResult = null;
                     ContractResult contractResult = null;
                     Map<String, Coin> contractUsedCoinMap = new HashMap<>();
 
-                    // 为本次验证区块增加一个合约的临时余额区，用于记录本次合约地址余额的变化
-                    contractService.createContractTempBalance();
                     for (Transaction tx : txs) {
 
                         if (tx.isSystemTx()) {
@@ -259,30 +250,21 @@ public class BlockProcess {
                             break;
                         }
 
-                        // 验证区块时发现智能合约交易就调用智能合约
-                        if(ContractUtil.isContractTransaction(tx)) {
-                            invokeContractResult = contractService.invokeContract(tx, bestHeight, stateRoot);
-                            contractResult = invokeContractResult.getData();
-                            if (contractResult != null) {
-                                Result<byte[]> handleContractResult = contractService.verifyContractResult(
-                                        tx, contractResult,
-                                        stateRoot, block.getHeader().getTime(),
-                                        toMaps, contractUsedCoinMap);
-                                // 更新世界状态
-                                stateRoot = handleContractResult.getData();
-                            }
-                        }
                     }
-                    // 验证区块交易结束后移除临时余额区
-                    contractService.removeContractTempBalance();
-                    if (contractResult != null) {
-                        // 验证世界状态根
-                        if (!Arrays.equals(receiveStateRoot, stateRoot)) {
-                            Log.info("contract stateRoot incorrect.");
-                            success = false;
-                            break;
-                        }
+
+                    if (!success) {
+                        break;
                     }
+
+                    stateRoot = contractService.processTxs(txs, bestHeight, block, stateRoot, toMaps, contractUsedCoinMap).getData();
+
+                    // 验证世界状态根
+                    if ((receiveStateRoot != null || stateRoot != null) && !Arrays.equals(receiveStateRoot, stateRoot)) {
+                        Log.info("contract stateRoot incorrect.");
+                        success = false;
+                        break;
+                    }
+
 
                     // 验证CoinBase交易
                     Object[] objects = (Object[]) verifyAndAddBlockResult.getData();
@@ -323,6 +305,8 @@ public class BlockProcess {
                     if (!success) {
                         Log.warn("save block fail : reason : " + result.getMsg() + ", block height : " + block.getHeader().getHeight() + ", hash : " + block.getHeader().getHash());
                     } else {
+                        //更新版本协议内容
+                        nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
                         RewardStatisticsProcess.addBlock(block);
                         BlockLog.debug("save block height : " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                     }
@@ -343,6 +327,7 @@ public class BlockProcess {
                 // 转发区块
                 forwardingBlock(blockContainer);
 //                Log.info("转发区块耗时：" + (System.currentTimeMillis() - t));
+
                 return true;
             } else {
                 chainManager.getMasterChain().rollback(block);

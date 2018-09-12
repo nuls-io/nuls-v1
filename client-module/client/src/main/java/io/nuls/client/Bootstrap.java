@@ -30,7 +30,6 @@ import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.client.rpc.resources.thread.ShutdownHook;
 import io.nuls.client.rpc.resources.util.FileUtil;
 import io.nuls.client.storage.LanguageService;
-import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.client.version.WalletVersionManager;
 import io.nuls.client.web.view.WebViewBootstrap;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
@@ -46,12 +45,16 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.module.service.ModuleService;
 import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
-import io.nuls.protocol.storage.service.VersionManagerStorageService;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.nio.charset.Charset;
 import java.util.*;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author: Niels Wang
@@ -61,7 +64,10 @@ public class Bootstrap {
     public static void main(String[] args) {
         Thread.currentThread().setName("Nuls");
         try {
-
+            System.setProperty("file.encoding", UTF_8.name());
+            Field charset = Charset.class.getDeclaredField("defaultCharset");
+            charset.setAccessible(true);
+            charset.set(null, UTF_8);
             sysStart();
         } catch (Exception e) {
             Log.error(e);
@@ -102,8 +108,38 @@ public class Bootstrap {
                 languageService.saveLanguage(language);
             }
         } while (false);
-        TaskManager.asynExecuteRunnable(new WebViewBootstrap());
 
+        // if isDaemon flag is true, don't launch the WebView
+        boolean isDaemon = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_DAEMON, false);
+        if (!isDaemon) {
+            TaskManager.asynExecuteRunnable(new WebViewBootstrap());
+        }
+
+        /** -----------------------  test Charlie ----------------------- */
+     /* w:while (true) {
+            Thread.sleep(500);
+            for (BaseModuleBootstrap bmb : ModuleManager.getInstance().getModuleList()) {
+                if(bmb.getStatus() != ModuleStatusEnum.RUNNING){
+                    continue w;
+                }
+            }
+            break;
+
+        }
+        if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("LINUX") != -1) {
+            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
+            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
+            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
+            NulsContext.getInstance().exit(1);
+        } else {
+            NulsContext.mastUpGrade = true;
+            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
+            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
+            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
+            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
+
+        }*/
+        /** -----------------------  test  ----------------------- */
         int i = 0;
         Map<NulsDigestData, List<Node>> map = new HashMap<>();
         NulsContext context = NulsContext.getInstance();
@@ -113,6 +149,11 @@ public class Bootstrap {
                     Runtime.getRuntime().addShutdownHook(new ShutdownHook());
                 }
                 System.exit(0);
+            }
+            if (NulsContext.mastUpGrade) {
+                //如果强制升级标志开启，停止网络连接
+                ConnectionManager.getInstance().shutdown();
+                Log.error(">>>>>> The new protocol version has taken effect, the network connection has been disconnected **********");
             }
             try {
                 Thread.sleep(1000L);

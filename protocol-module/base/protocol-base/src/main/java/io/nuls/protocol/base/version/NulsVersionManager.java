@@ -1,93 +1,141 @@
 package io.nuls.protocol.base.version;
 
-
-import io.nuls.core.tools.json.JSONUtils;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.protocol.base.utils.xml.NulsVersionHandler;
 import io.nuls.protocol.base.utils.xml.XmlLoader;
 import io.nuls.protocol.message.base.BaseMessage;
-import io.nuls.protocol.storage.po.UpgradeInfoPo;
+import io.nuls.protocol.storage.po.ProtocolInfoPo;
+import io.nuls.protocol.storage.po.ProtocolTempInfoPo;
 import io.nuls.protocol.storage.service.VersionManagerStorageService;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class NulsVersionManager {
 
     /**
-     * 主网运行中的版本
-     */
-    private static volatile Integer mainVersion;
-
-    /**
-     * 本次升级的新版本
-     */
-    private static volatile Integer currentVersion;
-
-    /**
      * 存放所有配置文件里对应的消息
      */
-    private static Map<String, Class<? extends BaseMessage>> messageProtocolMap = new HashMap<>();
-
+    private static Map<String, Class<? extends BaseMessage>> messageProtocolMap = new ConcurrentHashMap<>();
     /**
      * 存放所有配置文件里对应的交易
      */
-    private static Map<String, Class<? extends Transaction>> txProtocolMap = new HashMap<>();
-
-
+    private static Map<String, Class<? extends Transaction>> txProtocolMap = new ConcurrentHashMap<>();
     /**
-     * 存放所有版本的协议容器
+     * 存放所有钱包版本的协议容器
      */
-    private static Map<Integer, ProtocolContainer> containerMap = new HashMap<>();
+    private static Map<Integer, ProtocolContainer> containerMap = new ConcurrentHashMap<>();
 
-    //TODO 开发调试方法
-    public static void test() {
-        for (Map.Entry<String, Class<? extends Transaction>> entry : txProtocolMap.entrySet()) {
-            System.out.println(entry.getValue());
-        }
-        System.out.println();
-        for (Map.Entry<String, Class<? extends BaseMessage>> entry : messageProtocolMap.entrySet()) {
-            System.out.println(entry.getValue());
-        }
-        System.out.println();
-        for (Map.Entry<Integer, ProtocolContainer> entry : containerMap.entrySet()) {
-            System.out.println("----- ProtocolContainer -----");
-            try {
-                System.out.println(JSONUtils.obj2PrettyJson(entry));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            System.out.println("-----------------------------");
-        }
-    }
+    private static VersionManagerStorageService versionManagerStorageService;
 
+//    public static void test() {
+//        for (Map.Entry<String, Class<? extends Transaction>> entry : txProtocolMap.entrySet()) {
+//            System.out.println(entry.getValue());
+//        }
+//        System.out.println();
+//        for (Map.Entry<String, Class<? extends BaseMessage>> entry : messageProtocolMap.entrySet()) {
+//            System.out.println(entry.getValue());
+//        }
+//        for (Map.Entry<Integer, ProtocolContainer> entry : containerMap.entrySet()) {
+//            System.out.println("----- ProtocolContainer -----");
+//            try {
+//                System.out.println(JSONUtils.obj2PrettyJson(entry));
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            System.out.println("-----------------------------");
+//        }
+//    }
 
     public static void init() throws Exception {
         loadConfig();
-        loadVersion();
-    }
-
-    private static void loadVersion() {
         VersionManagerStorageService vmss = NulsContext.getServiceBean(VersionManagerStorageService.class);
-        mainVersion = vmss.getMainVersion();
-        if (mainVersion == null) {
-            mainVersion = 1;
+        Integer mainVersion = vmss.getMainVersion();
+        if (mainVersion != null) {
+            NulsContext.MAIN_NET_VERSION = mainVersion;
         }
-        currentVersion = NulsConstant.PROTOCOL_VERSION;
+        NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = vmss.getChangeTxHashBlockHeight();
+    }
 
-        //从数据库获取当前待升级新版本覆盖量
-        for (Map.Entry<Integer, ProtocolContainer> entry : containerMap.entrySet()) {
-            ProtocolContainer protocolContainer = entry.getValue();
-            UpgradeInfoPo upgradeInfoPo = vmss.getUpgradeCount(protocolContainer.getVersion());
-//            protocolContainer.setUpgradeCount(null == upgradeInfoPo ? 0 : upgradeInfoPo.getUpgradeCount());
+    /***
+     * 读取数据库里已经保存的版本升级信息
+     */
+    public static void loadVersion() {
+        //获取当前已存储的主网版本信息
+        VersionManagerStorageService vmss = NulsContext.getServiceBean(VersionManagerStorageService.class);
+        checkHasLaterVersion();
+        //从数据库获取各个版本的升级信息，赋值到对应的协议容器里
+        for (ProtocolContainer protocolContainer : containerMap.values()) {
+            ProtocolInfoPo protocolInfoPo = vmss.getProtocolInfoPo(protocolContainer.getVersion());
+            if (protocolContainer.getVersion() == 1) {
+                protocolContainer.setStatus(ProtocolContainer.VALID);
+                protocolContainer.setEffectiveHeight(0L);
+            } else if (protocolInfoPo != null) {
+                protocolContainer.setCurrentDelay(protocolInfoPo.getCurrentDelay());
+                protocolContainer.setStatus(protocolInfoPo.getStatus());
+                protocolContainer.setAddressSet(protocolInfoPo.getAddressSet());
+            }
+            //如果有对应版本的临时协议数据时，将临时数据赋值到container上，然后删除临时数据
+            ProtocolTempInfoPo tempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(protocolContainer.getProtocolKey());
+            if (tempInfoPo != null) {
+                protocolContainer.setRoundIndex(tempInfoPo.getRoundIndex());
+                protocolContainer.setCurrentDelay(tempInfoPo.getCurrentDelay());
+                protocolContainer.setAddressSet(tempInfoPo.getAddressSet());
+                protocolContainer.setStatus(tempInfoPo.getStatus());
+                protocolContainer.setEffectiveHeight(tempInfoPo.getEffectiveHeight());
+                protocolInfoPo = new ProtocolInfoPo(tempInfoPo);
+                getVersionManagerStorageService().saveProtocolInfoPo(protocolInfoPo);
+                getVersionManagerStorageService().removeProtocolTempInfo(tempInfoPo.getProtocolKey());
+            }
+
+            //赋值完成后，检查是否有超过当前主网版本的协议已生效，有则修改当前主网协议版本号
+            if (protocolContainer.getStatus() == ProtocolContainer.VALID) {
+                if (NulsContext.MAIN_NET_VERSION < protocolContainer.getVersion()) {
+                    NulsContext.MAIN_NET_VERSION = protocolContainer.getVersion();
+                    getVersionManagerStorageService().saveMainVersion(NulsContext.MAIN_NET_VERSION);
+                    //如果是版本号为2的协议生效后，记录一下生效区块的高度，从当前高度后的交易，序列化hash方法需要改变
+                    if (protocolContainer.getVersion() == 2) {
+                        getVersionManagerStorageService().saveChangeTxHashBlockHeight(protocolContainer.getEffectiveHeight());
+                        NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = protocolContainer.getEffectiveHeight();
+                    }
+                }
+            }
         }
     }
 
-    private static void loadConfig() throws Exception {
+    /**
+     * 读取配置文件信息，生成协议容器
+     *
+     * @throws Exception
+     */
+    public static void loadConfig() throws Exception {
         XmlLoader.loadXml(NulsConstant.NULS_VERSION_XML, new NulsVersionHandler());
+    }
+
+    /**
+     * 检查是否有更高版本，如果有切生效的话，需要强制升级
+     */
+    private static void checkHasLaterVersion() {
+        Map<String, ProtocolTempInfoPo> protocolTempMap = getVersionManagerStorageService().getProtocolTempMap();
+        for (ProtocolTempInfoPo tempInfoPo : protocolTempMap.values()) {
+            if (tempInfoPo.getVersion() > NulsContext.CURRENT_PROTOCOL_VERSION) {
+                if (tempInfoPo.getStatus() == ProtocolContainer.VALID) {
+                    //linux系统直接停止运行
+                    //其他有桌面程序的系统检查到NulsContext.mastUpGrade = true时，在页面上提示需强制升级
+                    if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("LINUX") != -1) {
+                        Log.error("The version is too low to upgrade");
+                        NulsContext.getInstance().exit(0);
+                        return;
+                    } else {
+                        NulsContext.mastUpGrade = true;
+                        return;
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -96,7 +144,7 @@ public class NulsVersionManager {
      * @return ProtocolContainer 协议容器
      */
     public static ProtocolContainer getCurrentProtocolContainer() {
-        return containerMap.get(currentVersion);
+        return containerMap.get(NulsContext.CURRENT_PROTOCOL_VERSION);
     }
 
     /**
@@ -105,7 +153,11 @@ public class NulsVersionManager {
      * @return ProtocolContainer 协议容器
      */
     public static ProtocolContainer getMainProtocolContainer() {
-        return containerMap.get(mainVersion);
+        return containerMap.get(NulsContext.MAIN_NET_VERSION);
+    }
+
+    public static Map<Integer, ProtocolContainer> getAllProtocolContainers() {
+        return containerMap;
     }
 
     /**
@@ -210,19 +262,18 @@ public class NulsVersionManager {
     }
 
     public static Integer getMainVersion() {
-        return mainVersion;
-    }
-
-    public static void setMainVersion(int mainVersion) {
-        NulsVersionManager.mainVersion = mainVersion;
+        return NulsContext.MAIN_NET_VERSION;
     }
 
     public static Integer getCurrentVersion() {
-        return currentVersion;
+        return NulsContext.CURRENT_PROTOCOL_VERSION;
     }
 
-
-    public static void setCurrentVersion(int currentVersion) {
-        NulsVersionManager.currentVersion = currentVersion;
+    private static VersionManagerStorageService getVersionManagerStorageService() {
+        if (versionManagerStorageService == null) {
+            versionManagerStorageService = NulsContext.getServiceBean(VersionManagerStorageService.class);
+        }
+        return versionManagerStorageService;
     }
+
 }

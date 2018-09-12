@@ -25,37 +25,86 @@
  */
 package io.nuls.consensus.poc.module.impl;
 
-import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.module.AbstractConsensusModule;
+import io.nuls.consensus.poc.block.validator.BifurcationUtil;
+import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
+import io.nuls.consensus.poc.model.Evidence;
+import io.nuls.consensus.poc.process.NulsProtocolProcess;
 import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
+import io.nuls.consensus.poc.storage.po.EvidencePo;
+import io.nuls.consensus.poc.storage.service.BifurcationEvidenceStorageService;
+import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.ModuleStatusEnum;
+import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.Result;
 import io.nuls.kernel.thread.BaseThread;
 import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.service.BlockService;
 
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
  */
 public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
+    private boolean protocolInited;
+
     @Override
     public void init() throws Exception {
         ConsensusStatusContext.setConsensusStatus(ConsensusStatus.INITING);
         ConsensusConfig.initConfiguration();
+        BifurcationEvidenceStorageService bes = NulsContext.getServiceBean(BifurcationEvidenceStorageService.class);
 
+        Map<String, List<EvidencePo>> map = bes.getBifurcationEvidence();
+        if (null != map) {
+            BifurcationUtil.getInstance().setBifurcationEvidenceMap(Evidence.bifurcationEvidencePoMapToMap(map));
+        }
     }
 
     @Override
     public void start() {
         this.waitForDependencyRunning(ProtocolConstant.MODULE_ID_PROTOCOL);
+        if (!protocolInited) {
+            protocolInited = true;
+            initNulsProtocol();
+        }
         ConsensusScheduler.getInstance().start();
         this.registerHandlers();
         Log.info("the POC consensus module is started!");
+    }
+
+    private void initNulsProtocol() {
+        try {
+            //针对第一版本升级时的特殊处理
+            NulsVersionManager.init();
+            BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+            if (NulsContext.MAIN_NET_VERSION == 1 && NulsContext.CURRENT_PROTOCOL_VERSION == 2) {
+                long bestHeight = blockService.getBestBlockHeader().getData().getHeight();
+                for (long i = 1; i <= bestHeight; i++) {
+                    Result<BlockHeader> result = blockService.getBlockHeader(i);
+                    if (result.isSuccess()) {
+                        NulsProtocolProcess.getInstance().processProtocolUpGrade(result.getData());
+                    }
+                }
+            } else {
+                NulsVersionManager.loadVersion();
+            }
+
+        } catch (Exception e) {
+            Log.error(e);
+            System.exit(-1);
+        }
     }
 
     private void registerHandlers() {

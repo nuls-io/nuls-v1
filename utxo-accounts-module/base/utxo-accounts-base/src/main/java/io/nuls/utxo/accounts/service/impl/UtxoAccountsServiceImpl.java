@@ -1,5 +1,8 @@
 package io.nuls.utxo.accounts.service.impl;
 
+import io.nuls.contract.dto.ContractResult;
+import io.nuls.contract.dto.ContractTransfer;
+import io.nuls.contract.service.ContractService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -8,6 +11,7 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.utxo.accounts.util.UtxoAccountsUtil;
 import io.nuls.utxo.accounts.constant.UtxoAccountsConstant;
 import io.nuls.utxo.accounts.service.UtxoAccountsService;
 import io.nuls.utxo.accounts.storage.constant.UtxoAccountsStorageConstant;
@@ -24,6 +28,8 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
     private static ByteBuffer buffer = ByteBuffer.allocate(8);
     @Autowired
     UtxoAccountsStorageService utxoAccountsStorageService;
+    @Autowired
+    ContractService contractService;
     private boolean isPermanentLocked(int txType){
         if(txType == UtxoAccountsConstant.TX_TYPE_REGISTER_AGENT || txType ==UtxoAccountsConstant.TX_TYPE_JOIN_CONSENSUS){
             return true;
@@ -36,6 +42,23 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
         }
         return false;
     }
+    private byte[] getInputAddress(Coin from){
+        byte[] fromHash;
+        int fromIndex;
+        byte[]  owner = from.getOwner();
+        // owner拆分出txHash和index
+        fromHash = UtxoAccountsUtil.getTxHashBytes(owner);
+        fromIndex = UtxoAccountsUtil.getIndex(owner);
+        NulsDigestData  fromHashObj = new NulsDigestData();
+        try {
+            fromHashObj.parse(fromHash, 0);
+            Transaction  outPutTx = utxoAccountsStorageService.getTx(fromHashObj);
+           return outPutTx.getCoinData().getTo().get(fromIndex).getOwner();
+        } catch (NulsException e) {
+            Log.error(e);
+           return null;
+        }
+    }
     private boolean buildUtxoAccountsMap(Map<String,UtxoAccountsBalancePo> utxoAccountsMap, Block block){
         List<Transaction> txs = block.getTxs();
         int txIndex=0;
@@ -45,13 +68,25 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
             }
             List<Coin> from =tx.getCoinData().getFrom();
             List<Coin> to =tx.getCoinData().getTo();
-            byte[] inputOwner= tx.getAddressFromSig();
-            for(Coin inputCoin:from){
-                inputCoin.setOwner(inputOwner);
-                buildUtxoAccountsBalance(utxoAccountsMap,inputCoin,tx,txIndex,true);
+
+            // TODO: 兰处理
+//            byte[] inputOwner= tx.getAddressFromSig();
+//            if(null !=from && from.size()>0 && null == inputOwner){
+//                Log.error("inputOwner is null,blockHeight:"+block.getHeader().getHeight());
+//            }
+            for (Coin inputCoin : from) {
+                byte []inputOwner=getInputAddress(inputCoin);
+//                inputCoin.setOwner(inputOwner);
+                buildUtxoAccountsBalance(utxoAccountsMap, inputCoin, tx, txIndex, true);
             }
-            for(Coin outputCoin:to){
-                buildUtxoAccountsBalance(utxoAccountsMap,outputCoin,tx,txIndex,false);
+            for (Coin outputCoin : to) {
+                buildUtxoAccountsBalance(utxoAccountsMap, outputCoin, tx, txIndex, false);
+            }
+            //增加智能合约内部交易逻辑
+            if(tx.getType() == UtxoAccountsConstant.TX_TYPE_CALL_CONTRACT){
+                ContractResult contractExecuteResult=contractService.getContractExecuteResult(tx.getHash());
+                List<ContractTransfer> transferList=contractExecuteResult.getTransfers();
+                buildContractTranfersBalance(utxoAccountsMap,transferList,block.getHeader().getHeight(),txIndex);
             }
             txIndex++;
         }
@@ -68,11 +103,11 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
      */
     private void buildUtxoAccountsBalance(Map<String,UtxoAccountsBalancePo> utxoAccountsMap, Coin coin, Transaction tx, int txIndex, boolean isInput){
         long netBlockHeight = NulsContext.getInstance().getNetBestBlockHeight();
-        String address=AddressTool.getStringAddressByBytes(coin.getOwner());
+        String address=AddressTool.getStringAddressByBytes(coin.getAddress());
         UtxoAccountsBalancePo balance=utxoAccountsMap.get(address);
-        if(balance==null){
+        if(null == balance){
             balance=new UtxoAccountsBalancePo();
-            balance.setOwner(coin.getOwner());
+            balance.setOwner(coin.getAddress());
             utxoAccountsMap.put(address,balance);
         }
         if(isInput) {
@@ -84,7 +119,7 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
         }else{
             if(isPermanentLocked(tx.getType())){
               //add locked balance
-                if(coin.getLockTime()==-1) {
+                if(coin.getLockTime() == -1) {
                     balance.setLockedPermanentBalance(balance.getLockedPermanentBalance()+(coin.getNa().getValue()));
                 }
             }else {
@@ -110,17 +145,53 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
             }
             balance.setOutputBalance(balance.getOutputBalance()+(coin.getNa()).getValue());
         }
-        balance.setOwner(coin.getOwner());
+        //balance.setOwner(coin.getOwner());
+        balance.setOwner(coin.getAddress());
         balance.setBlockHeight(tx.getBlockHeight());
         balance.setTxIndex(txIndex);
     }
 
     /**
-     * build utxoAccounts  to list
+     *
      * @param utxoAccountsMap
-     * @return
-     * @throws NulsException
+     * @param transferList
+     * @param blockHeight
+     * @param txIndex
      */
+    private void buildContractTranfersBalance(Map<String,UtxoAccountsBalancePo> utxoAccountsMap,
+                                              List<ContractTransfer> transferList,long blockHeight, int txIndex) {
+        for(ContractTransfer contractTransfer:transferList){
+            byte[] from=contractTransfer.getFrom();
+            byte[] to=contractTransfer.getTo();
+            String addressFrom=AddressTool.getStringAddressByBytes(from);
+            String addressTo=AddressTool.getStringAddressByBytes(to);
+            UtxoAccountsBalancePo balanceFrom=utxoAccountsMap.get(addressFrom);
+            UtxoAccountsBalancePo balanceTo=utxoAccountsMap.get(addressTo);
+            if(null == balanceFrom){
+                balanceFrom=new UtxoAccountsBalancePo();
+                balanceFrom.setOwner(from);
+                utxoAccountsMap.put(addressFrom,balanceFrom);
+            }
+            balanceFrom.setBlockHeight(blockHeight);
+            balanceFrom.setTxIndex(txIndex);
+            balanceFrom.setContractFromBalance(balanceFrom.getContractFromBalance()+contractTransfer.getValue().getValue());
+            if(null == balanceTo){
+                balanceTo=new UtxoAccountsBalancePo();
+                balanceTo.setOwner(to);
+                utxoAccountsMap.put(addressTo,balanceTo);
+            }
+            balanceTo.setBlockHeight(blockHeight);
+            balanceTo.setTxIndex(txIndex);
+            balanceTo.setContractToBalance(balanceTo.getContractToBalance()+contractTransfer.getValue().getValue());
+        }
+    }
+
+        /**
+         * build utxoAccounts  to list
+         * @param utxoAccountsMap
+         * @return
+         * @throws NulsException
+         */
     private   List<UtxoAccountsBalancePo> utxoAccountsMapToList(Map<String,UtxoAccountsBalancePo> utxoAccountsMap,LocalCacheBlockBalance preSnapshot)
             throws NulsException{
         List<UtxoAccountsBalancePo> list=new ArrayList<>();
@@ -142,6 +213,8 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
                     newBalance.setTxIndex(balance.getTxIndex());
                     newBalance.setOutputBalance(localBalance.getOutputBalance()+(balance.getOutputBalance()));
                     newBalance.setInputBalance(localBalance.getInputBalance()+(balance.getInputBalance()));
+                    newBalance.setContractFromBalance(localBalance.getContractFromBalance()+(balance.getContractFromBalance()));
+                    newBalance.setContractToBalance(localBalance.getContractToBalance()+(balance.getContractToBalance()));
                     newBalance.setLockedPermanentBalance(localBalance.getLockedPermanentBalance()+(balance.getLockedPermanentBalance()));
                     newBalance.setUnLockedPermanentBalance(localBalance.getUnLockedPermanentBalance()+(balance.getUnLockedPermanentBalance()));
                     clearLockedBalance(localBalance,balance,newBalance);

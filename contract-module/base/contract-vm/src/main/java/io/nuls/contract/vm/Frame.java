@@ -7,23 +7,23 @@ import org.objectweb.asm.tree.*;
 
 public class Frame {
 
-    private final VM vm;
+    public final VM vm;
 
-    private final Heap heap;
+    public final Heap heap;
 
-    private final MethodArea methodArea;
+    public final MethodArea methodArea;
 
-    private final MethodCode methodCode;
+    public final MethodCode methodCode;
 
-    private final int maxStack;
+    public final int maxStack;
 
-    private final int maxLocals;
+    public final int maxLocals;
 
-    private final OperandStack operandStack;
+    public final OperandStack operandStack;
 
-    private final LocalVariables localVariables;
+    public final LocalVariables localVariables;
 
-    private final Result result;
+    public final Result result;
 
     private AbstractInsnNode currentInsnNode;
 
@@ -36,12 +36,12 @@ public class Frame {
         this.heap = vm.getHeap();
         this.methodArea = vm.getMethodArea();
         this.methodCode = methodCode;
-        this.maxStack = this.methodCode.getMaxStack();
-        this.maxLocals = this.methodCode.getMaxLocals();
+        this.maxStack = this.methodCode.maxStack;
+        this.maxLocals = this.methodCode.maxLocals;
         this.operandStack = new OperandStack(this.maxStack);
         this.localVariables = new LocalVariables(this.maxLocals, args);
-        this.result = new Result(this.methodCode.getReturnVariableType());
-        this.currentInsnNode = this.methodCode.getInstructions().getFirst();
+        this.result = new Result(this.methodCode.returnVariableType);
+        this.currentInsnNode = this.methodCode.instructions.getFirst();
     }
 
     public void step() {
@@ -142,11 +142,11 @@ public class Frame {
 
     public void nonsupportOpCode() {
         int line = getLine();
-        throw new RuntimeException(String.format("nonsupport opcode：class(%s), line(%d)", methodCode.getClassCode().getName(), line));
+        throw new RuntimeException(String.format("nonsupport opcode：class(%s), line(%d)", methodCode.classCode.name, line));
     }
 
     public void nonsupportMethod(MethodCode methodCode) {
-        throw new RuntimeException("nonsupport method: " + methodCode.getClassCode().getName() + "." + methodCode.getName() + methodCode.getDesc());
+        throw new RuntimeException("nonsupport method: " + methodCode.classCode.name + "." + methodCode.name + methodCode.desc);
     }
 
     public InsnNode insnNode() {
@@ -213,48 +213,8 @@ public class Frame {
         return (LineNumberNode) this.currentInsnNode;
     }
 
-    public VM getVm() {
-        return vm;
-    }
-
-    public Heap getHeap() {
-        return heap;
-    }
-
-    public MethodArea getMethodArea() {
-        return methodArea;
-    }
-
-    public MethodCode getMethodCode() {
-        return methodCode;
-    }
-
-    public int getMaxStack() {
-        return maxStack;
-    }
-
-    public int getMaxLocals() {
-        return maxLocals;
-    }
-
-    public OperandStack getOperandStack() {
-        return operandStack;
-    }
-
-    public LocalVariables getLocalVariables() {
-        return localVariables;
-    }
-
-    public Result getResult() {
-        return result;
-    }
-
     public AbstractInsnNode getCurrentInsnNode() {
         return currentInsnNode;
-    }
-
-    public OpCode getCurrentOpCode() {
-        return currentOpCode;
     }
 
     public boolean isAddGas() {

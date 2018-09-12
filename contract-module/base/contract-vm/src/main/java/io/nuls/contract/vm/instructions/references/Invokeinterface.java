@@ -19,19 +19,19 @@ public class Invokeinterface {
         String interfaceMethodDesc = methodInsnNode.desc;
 
         List<VariableType> variableTypes = VariableType.parseArgs(interfaceMethodDesc);
-        MethodArgs methodArgs = new MethodArgs(variableTypes, frame.getOperandStack(), false);
-        ObjectRef objectRef = methodArgs.getObjectRef();
+        MethodArgs methodArgs = new MethodArgs(variableTypes, frame.operandStack, false);
+        ObjectRef objectRef = methodArgs.objectRef;
         if (objectRef == null) {
             frame.throwNullPointerException();
             return;
         }
 
         String className = objectRef.getVariableType().getType();
-        MethodCode methodCode = frame.getMethodArea().loadMethod(className, interfaceMethodName, interfaceMethodDesc);
+        MethodCode methodCode = frame.methodArea.loadMethod(className, interfaceMethodName, interfaceMethodDesc);
 
         //Log.opcode(frame.getCurrentOpCode(), className, interfaceMethodName, interfaceMethodDesc);
 
-        frame.getVm().run(methodCode, methodArgs.getFrameArgs(), true);
+        frame.vm.run(methodCode, methodArgs.frameArgs, true);
     }
 
 }

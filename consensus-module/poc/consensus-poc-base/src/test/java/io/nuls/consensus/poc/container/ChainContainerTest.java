@@ -32,7 +32,6 @@ import io.nuls.consensus.poc.BaseChainTest;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import org.junit.Before;
@@ -233,7 +232,7 @@ public class ChainContainerTest extends BaseChainTest {
 
         NulsSignData signData = signDigest(agentTx.getHash().getDigestBytes(), ecKey);
 
-        agentTx.setScriptSig(signData.getSignBytes());
+        agentTx.setTransactionSignature(signData.getSignBytes());
 
         // add the agent tx into agent list
         txs.add(agentTx);

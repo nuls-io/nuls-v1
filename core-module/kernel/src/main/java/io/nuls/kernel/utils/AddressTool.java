@@ -34,7 +34,7 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Address;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
 
 /**
  * @author: Niels Wang
@@ -69,13 +69,6 @@ public class AddressTool {
             xor ^= body[i];
         }
         return xor;
-    }
-
-    public static byte[] getAddress(P2PKHScriptSig scriptSig) {
-        if (scriptSig == null) {
-            return null;
-        }
-        return getAddress(scriptSig.getPublicKey());
     }
 
     public static boolean validAddress(String address) {

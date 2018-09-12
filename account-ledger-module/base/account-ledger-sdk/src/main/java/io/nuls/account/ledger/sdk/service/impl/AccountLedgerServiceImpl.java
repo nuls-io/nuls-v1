@@ -188,7 +188,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService {
 
         Transaction tx = TransactionTool.createTransferTx(inputsList, outputList, remarkBytes);
         //计算交易手续费最小值
-        int size = tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH;
+        int size = tx.size();
         Na minFee = TransactionFeeCalculator.getTransferFee(size);
         //计算inputs和outputs的差额 ，求手续费
         Na fee = Na.ZERO;

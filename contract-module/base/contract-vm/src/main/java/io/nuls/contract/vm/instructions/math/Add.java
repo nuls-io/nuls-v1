@@ -6,37 +6,37 @@ import io.nuls.contract.vm.util.Log;
 public class Add {
 
     public static void iadd(final Frame frame) {
-        int value2 = frame.getOperandStack().popInt();
-        int value1 = frame.getOperandStack().popInt();
+        int value2 = frame.operandStack.popInt();
+        int value1 = frame.operandStack.popInt();
         int result = value1 + value2;
-        frame.getOperandStack().pushInt(result);
+        frame.operandStack.pushInt(result);
 
         //Log.result(frame.getCurrentOpCode(), result, value1, "+", value2);
     }
 
     public static void ladd(final Frame frame) {
-        long value2 = frame.getOperandStack().popLong();
-        long value1 = frame.getOperandStack().popLong();
+        long value2 = frame.operandStack.popLong();
+        long value1 = frame.operandStack.popLong();
         long result = value1 + value2;
-        frame.getOperandStack().pushLong(result);
+        frame.operandStack.pushLong(result);
 
         //Log.result(frame.getCurrentOpCode(), result, value1, "+", value2);
     }
 
     public static void fadd(final Frame frame) {
-        float value2 = frame.getOperandStack().popFloat();
-        float value1 = frame.getOperandStack().popFloat();
+        float value2 = frame.operandStack.popFloat();
+        float value1 = frame.operandStack.popFloat();
         float result = value1 + value2;
-        frame.getOperandStack().pushFloat(result);
+        frame.operandStack.pushFloat(result);
 
         //Log.result(frame.getCurrentOpCode(), result, value1, "+", value2);
     }
 
     public static void dadd(final Frame frame) {
-        double value2 = frame.getOperandStack().popDouble();
-        double value1 = frame.getOperandStack().popDouble();
+        double value2 = frame.operandStack.popDouble();
+        double value1 = frame.operandStack.popDouble();
         double result = value1 + value2;
-        frame.getOperandStack().pushDouble(result);
+        frame.operandStack.pushDouble(result);
 
         //Log.result(frame.getCurrentOpCode(), result, value1, "+", value2);
     }

@@ -30,6 +30,7 @@ import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
+import io.nuls.kernel.script.Script;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
@@ -51,13 +52,12 @@ public class Coin extends BaseNulsData {
     private long lockTime;
 
     private transient Coin from;
-
-    private transient byte[] address;
-
     /**
      * 合约组装CoinData时使用
      */
     private transient String key;
+
+    private transient byte[] tempOwner;
 
     public Coin() {
     }
@@ -137,12 +137,12 @@ public class Coin extends BaseNulsData {
         return this;
     }
 
-    public byte[] getAddress() {
-        return address;
+    public byte[] getTempOwner() {
+        return tempOwner;
     }
 
-    public void setAddress(byte[] address) {
-        this.address = address;
+    public void setTempOwner(byte[] tempOwner) {
+        this.tempOwner = tempOwner;
     }
 
     /**
@@ -181,6 +181,10 @@ public class Coin extends BaseNulsData {
         }
     }
 
+    public boolean isP2Script() {
+        return false;
+    }
+
     @Override
     public String toString() {
         return "Coin{" +
@@ -190,5 +194,25 @@ public class Coin extends BaseNulsData {
                 ", from=" + from +
                 ", key='" + key + '\'' +
                 '}';
+    }
+
+    public byte[] getAddress(){
+        byte [] address = new byte[23];
+        //如果owner不是存放的脚本则直接返回owner
+        if(owner == null || owner.length == 23)
+            return owner;
+        else{
+            Script scriptPubkey = new Script(owner);
+            //如果为P2PKH类型交易则从第四位开始返回23个字节
+            if(scriptPubkey.isSentToAddress()){
+                System.arraycopy(owner, 3, address, 0, 23);
+            }
+            //如果为P2SH或multi类型的UTXO则从第三位开始返回23个字节
+            else if(scriptPubkey.isPayToScriptHash()){
+                scriptPubkey.isSentToMultiSig();
+                System.arraycopy(owner, 2, address, 0, 23);
+            }
+        }
+        return address;
     }
 }

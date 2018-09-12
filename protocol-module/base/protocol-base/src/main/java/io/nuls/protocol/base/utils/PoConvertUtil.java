@@ -25,6 +25,7 @@
 
 package io.nuls.protocol.base.utils;
 
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.protocol.storage.po.BlockHeaderPo;
@@ -44,7 +45,7 @@ public class PoConvertUtil {
         header.setTime(po.getTime());
         header.setMerkleHash(po.getMerkleHash());
         header.setTxCount(po.getTxCount());
-        header.setScriptSig(po.getScriptSign());
+        header.setBlockSignature(po.getScriptSign());
         //pierre add contract stateRoot
         header.setStateRoot(po.getStateRoot());
         return header;
@@ -60,10 +61,10 @@ public class PoConvertUtil {
         po.setHeight(block.getHeader().getHeight());
         po.setTxCount(block.getHeader().getTxCount());
         po.setPackingAddress(block.getHeader().getPackingAddress());
-        po.setScriptSign(block.getHeader().getScriptSig());
+        po.setScriptSign(block.getHeader().getBlockSignature());
         po.setExtend(block.getHeader().getExtend());
         po.setTxHashList(block.getTxHashList());
-        po.setStateRoot(block.getHeader().getStateRoot());
+        po.setStateRoot(ContractUtil.getStateRoot(block.getHeader()));
         return po;
     }
 }

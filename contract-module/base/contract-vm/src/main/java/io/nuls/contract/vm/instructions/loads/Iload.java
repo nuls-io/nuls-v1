@@ -7,8 +7,8 @@ public class Iload {
 
     public static void iload(final Frame frame) {
         int index = frame.varInsnNode().var;
-        int value = frame.getLocalVariables().getInt(index);
-        frame.getOperandStack().pushInt(value);
+        int value = frame.localVariables.getInt(index);
+        frame.operandStack.pushInt(value);
 
         //Log.result(frame.getCurrentOpCode(), value, index);
     }

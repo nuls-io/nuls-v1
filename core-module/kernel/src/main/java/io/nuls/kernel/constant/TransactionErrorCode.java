@@ -47,4 +47,5 @@ public interface TransactionErrorCode extends KernelErrorCode {
     ErrorCode TX_NOT_EXIST = ErrorCode.init("31015");
     ErrorCode COINDATA_NOT_FOUND = ErrorCode.init("31016");
     ErrorCode TX_TYPE_ERROR = ErrorCode.init("31017");
+    ErrorCode TX_NOT_EFFECTIVE = ErrorCode.init("31018");
 }

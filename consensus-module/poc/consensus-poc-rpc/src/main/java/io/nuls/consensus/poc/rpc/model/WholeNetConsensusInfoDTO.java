@@ -25,6 +25,7 @@
 
 package io.nuls.consensus.poc.rpc.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -41,6 +42,7 @@ public class WholeNetConsensusInfoDTO {
     private long totalDeposit;
 
     @ApiModelProperty(name = "rewardOfDay", value = "24小时共识奖励")
+    @JsonIgnore
     private long rewardOfDay;
 
     @ApiModelProperty(name = "consensusAccountNumber", value = "参与共识账户总数量")

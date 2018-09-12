@@ -4,8 +4,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 public class ClassCodeCacheKey {
 
-    private byte[] bytes;
-    private String key;
+    private final byte[] bytes;
+    private final String key;
 
     public ClassCodeCacheKey(byte[] bytes) {
         this.bytes = bytes;

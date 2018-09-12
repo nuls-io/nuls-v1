@@ -142,7 +142,10 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
             if (tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
                 RedPunishTransaction transaction = (RedPunishTransaction) tx;
                 addressSet.add(AddressTool.getStringAddressByBytes(transaction.getTxData().getAddress()));
-            } else if (tx.getType() == ConsensusConstant.TX_TYPE_STOP_AGENT) {
+            }
+        }
+        for (Transaction tx : txList) {
+            if (tx.getType() == ConsensusConstant.TX_TYPE_STOP_AGENT) {
                 StopAgentTransaction transaction = (StopAgentTransaction) tx;
                 if (!hashSet.add(transaction.getTxData().getCreateTxHash())) {
                     ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TRANSACTION_REPEATED);

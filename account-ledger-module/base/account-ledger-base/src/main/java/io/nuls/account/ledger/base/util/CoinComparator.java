@@ -43,6 +43,12 @@ public class CoinComparator implements Comparator<Coin> {
 
     @Override
     public int compare(Coin o1, Coin o2) {
+        if(o1 == null) {
+            return 1;
+        }
+        if(o2 == null) {
+            return -1;
+        }
         return o1.getNa().compareTo(o2.getNa());
     }
 }

@@ -14,7 +14,7 @@ public class Dconst {
     }
 
     private static void dconst(Frame frame, double value) {
-        frame.getOperandStack().pushDouble(value);
+        frame.operandStack.pushDouble(value);
 
         //Log.opcode(frame.getCurrentOpCode());
     }

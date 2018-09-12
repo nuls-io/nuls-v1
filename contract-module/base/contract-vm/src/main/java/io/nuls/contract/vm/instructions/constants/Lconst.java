@@ -14,7 +14,7 @@ public class Lconst {
     }
 
     private static void lconst(Frame frame, long value) {
-        frame.getOperandStack().pushLong(value);
+        frame.operandStack.pushLong(value);
 
         //Log.opcode(frame.getCurrentOpCode());
     }

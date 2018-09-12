@@ -63,6 +63,8 @@ public interface ContractConstant extends NulsConstant {
 
     long MAX_GASLIMIT = 10000000;
 
+    long CONTRACT_MINIMUM_PRICE = 27;
+
     /**
      *
      */

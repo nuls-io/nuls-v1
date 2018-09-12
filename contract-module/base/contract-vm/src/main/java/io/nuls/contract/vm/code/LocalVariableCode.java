@@ -44,6 +44,7 @@ public class LocalVariableCode {
         start = localVariableNode.start;
         end = localVariableNode.end;
         index = localVariableNode.index;
+        //
         variableType = VariableType.valueOf(desc);
     }
 

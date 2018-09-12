@@ -27,6 +27,7 @@ package io.nuls.account.rpc.resource;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.AccountKeyStore;
@@ -45,6 +46,7 @@ import io.nuls.account.util.AccountTool;
 import io.nuls.contract.dto.ContractTokenInfo;
 import io.nuls.contract.service.ContractService;
 import io.nuls.core.tools.crypto.AESEncrypt;
+import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.json.JSONUtils;
@@ -53,6 +55,7 @@ import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
@@ -316,6 +319,31 @@ public class AccountResource {
         }
         Result result = aliasService.getAliasFee(form.getAddress(), form.getAlias());
         AliasTransaction tx = new AliasTransaction();
+        tx.setTime(TimeService.currentTimeMillis());
+        Alias alias = new Alias(AddressTool.getAddress(form.getAddress()), form.getAlias());
+        tx.setTxData(alias);
+
+        try {
+            CoinDataResult coinDataResult = accountLedgerService.getCoinData(AddressTool.getAddress(form.getAddress()), AccountConstant.ALIAS_NA, tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            if (!coinDataResult.isEnough()) {
+                return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE).toRpcClientResult();
+            }
+            CoinData coinData = new CoinData();
+            coinData.setFrom(coinDataResult.getCoinList());
+            Coin change = coinDataResult.getChange();
+            if (null != change) {
+                //创建toList
+                List<Coin> toList = new ArrayList<>();
+                toList.add(change);
+                coinData.setTo(toList);
+            }
+            Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
+            coinData.addTo(coin);
+            tx.setCoinData(coinData);
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
+        }
         Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
                 TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         Map<String, Long> map = new HashMap<>();
@@ -406,11 +434,11 @@ public class AccountResource {
         dtoList.add(new AssetDto("NULS", balance));
 
         Result<List<ContractTokenInfo>> allTokenListResult = contractService.getAllTokensByAccount(address);
-        if(allTokenListResult.isSuccess()) {
+        if (allTokenListResult.isSuccess()) {
             List<ContractTokenInfo> tokenInfoList = allTokenListResult.getData();
-            if(tokenInfoList != null && tokenInfoList.size() > 0) {
-                for(ContractTokenInfo tokenInfo : tokenInfoList) {
-                    if(tokenInfo.isLock()) {
+            if (tokenInfoList != null && tokenInfoList.size() > 0) {
+                for (ContractTokenInfo tokenInfo : tokenInfoList) {
+                    if (tokenInfo.isLock()) {
                         continue;
                     }
                     dtoList.add(new AssetDto(tokenInfo));
@@ -461,6 +489,22 @@ public class AccountResource {
         return result.toRpcClientResult();
     }
 
+    @GET
+    @Path("/validate/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("[验证地址格式是否正确]")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult validateAddress(@ApiParam(name = "address", value = "账户地址", required = true)
+                                           @PathParam("address") String address) {
+        Result result = Result.getSuccess();
+        Map<String, Object> map = new HashMap<>();
+        map.put("value", AddressTool.validAddress(address));
+        result.setData(map);
+        return result.toRpcClientResult();
+
+    }
 
     @POST
     @Path("/lock/{address}")
@@ -539,8 +583,8 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult setRemark(@ApiParam(name = "address", value = "账户地址", required = true)
-                                       @PathParam("address") String address,
-                                       @ApiParam(name = "form", value = "备注") AccountRemarkForm accountRemarkForm) {
+                                     @PathParam("address") String address,
+                                     @ApiParam(name = "form", value = "备注") AccountRemarkForm accountRemarkForm) {
         String remark = accountRemarkForm.getRemark();
         if (!AddressTool.validAddress(address)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
@@ -661,6 +705,10 @@ public class AccountResource {
 
         try {
             byte[] priKeyBytes = AESEncrypt.decrypt(Hex.decode(priKey), password);
+            Account tempAccount = AccountTool.createAccount(Hex.encode(priKeyBytes));
+            if (!address.equals(tempAccount.getAddress().getBase58())) {
+                return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
             Result result = getEncryptedPrivateKey(address, Hex.encode(priKeyBytes), newPassword);
             if (result.isSuccess()) {
                 Map<String, Boolean> map = new HashMap<>();
@@ -1090,5 +1138,33 @@ public class AccountResource {
             result.setData(map);
         }
         return result.toRpcClientResult();
+    }
+
+    @POST
+    @Path("/createMultiAccount")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "[创建] 创建多重签名账户 ", notes = "result.data: List<String>")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult createMultiAccount(@ApiParam(name = "form", value = "账户表单数据", required = true)
+                                                      MultiAccountCreateForm form) {
+        if (null == form || null == form.getPubkeys() || form.getPubkeys().size() == 0) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        if (form.getM() == 0)
+            form.setM(form.getPubkeys().size());
+        Result result = accountService.createMultiAccount(form.getPubkeys(), form.getM());
+        if (result.isFailed()) {
+            return result.toRpcClientResult();
+        }
+       /* List<Account> listAccount = (List<Account>) result.getData();
+        List<String> list = new ArrayList<>();
+        for (Account account : listAccount) {
+            list.add(account.getAddress().toString());
+        }*/
+        Address address = (Address) result.getData();
+        Map<String, String> map = new HashMap<>();
+        map.put("address", address.toString());
+        return Result.getSuccess().setData(map).toRpcClientResult();
     }
 }

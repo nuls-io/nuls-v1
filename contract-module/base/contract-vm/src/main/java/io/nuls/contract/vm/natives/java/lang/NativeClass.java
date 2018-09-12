@@ -34,7 +34,7 @@ public class NativeClass {
 
     public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = null;
-        switch (methodCode.getName()) {
+        switch (methodCode.name) {
             case "getPrimitiveClass":
                 result = getPrimitiveClass(methodCode, methodArgs, frame);
                 break;
@@ -70,16 +70,16 @@ public class NativeClass {
     }
 
     private static Result getPrimitiveClass(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        ObjectRef objectRef = (ObjectRef) methodArgs.getInvokeArgs()[0];
-        String name = frame.getHeap().runToString(objectRef);
+        ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
+        String name = frame.heap.runToString(objectRef);
         VariableType variableType = VariableType.valueOf(name);
-        ObjectRef classRef = frame.getHeap().getClassRef(variableType.getDesc());
+        ObjectRef classRef = frame.heap.getClassRef(variableType.getDesc());
         Result result = NativeMethod.result(methodCode, classRef, frame);
         return result;
     }
 
     private static Result getComponentType(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        ObjectRef objectRef = methodArgs.getObjectRef();
+        ObjectRef objectRef = methodArgs.objectRef;
         VariableType variableType;
         if (objectRef.getVariableType().isArray()) {
             variableType = objectRef.getVariableType();
@@ -88,14 +88,14 @@ public class NativeClass {
         }
         ObjectRef classRef = null;
         if (variableType.isArray()) {
-            classRef = frame.getHeap().getClassRef(variableType.getComponentType().getDesc());
+            classRef = frame.heap.getClassRef(variableType.getComponentType().getDesc());
         }
         Result result = NativeMethod.result(methodCode, classRef, frame);
         return result;
     }
 
     private static Result isArray(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        ObjectRef objectRef = methodArgs.getObjectRef();
+        ObjectRef objectRef = methodArgs.objectRef;
         VariableType variableType;
         if (objectRef.getVariableType().isArray()) {
             variableType = objectRef.getVariableType();
@@ -108,7 +108,7 @@ public class NativeClass {
     }
 
     private static Result isPrimitive(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        ObjectRef objectRef = methodArgs.getObjectRef();
+        ObjectRef objectRef = methodArgs.objectRef;
         VariableType variableType;
         if (objectRef.getVariableType().isArray()) {
             variableType = objectRef.getVariableType();
@@ -121,7 +121,7 @@ public class NativeClass {
     }
 
     private static Result isInterface(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        ObjectRef objectRef = methodArgs.getObjectRef();
+        ObjectRef objectRef = methodArgs.objectRef;
         VariableType variableType;
         if (objectRef.getVariableType().isArray()) {
             variableType = objectRef.getVariableType();
@@ -130,8 +130,8 @@ public class NativeClass {
         }
         boolean b = false;
         if (!variableType.isArray() && !variableType.isPrimitiveType()) {
-            ClassCode classCode = frame.getMethodArea().loadClass(variableType.getType());
-            b = classCode.isInterface();
+            ClassCode classCode = frame.methodArea.loadClass(variableType.getType());
+            b = classCode.isInterface;
         }
         Result result = NativeMethod.result(methodCode, b, frame);
         return result;
@@ -144,7 +144,7 @@ public class NativeClass {
     }
 
     private static Result getGenericSignature0(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        ObjectRef objectRef = methodArgs.getObjectRef();
+        ObjectRef objectRef = methodArgs.objectRef;
         VariableType variableType;
         if (objectRef.getVariableType().isArray()) {
             variableType = objectRef.getVariableType();
@@ -153,16 +153,16 @@ public class NativeClass {
         }
         ObjectRef ref = null;
         if (!variableType.isPrimitiveType()) {
-            ClassCode classCode = frame.getMethodArea().loadClass(variableType.getType());
-            String signature = classCode.getSignature();
-            ref = frame.getHeap().newString(signature);
+            ClassCode classCode = frame.methodArea.loadClass(variableType.getType());
+            String signature = classCode.signature;
+            ref = frame.heap.newString(signature);
         }
         Result result = NativeMethod.result(methodCode, ref, frame);
         return result;
     }
 
     private static Result getName0(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        ObjectRef objectRef = methodArgs.getObjectRef();
+        ObjectRef objectRef = methodArgs.objectRef;
         VariableType variableType;
         if (objectRef.getVariableType().isArray()) {
             variableType = objectRef.getVariableType();
@@ -179,13 +179,13 @@ public class NativeClass {
             }
         }
         name = name.replace('/', '.');
-        ObjectRef ref = frame.getHeap().newString(name);
+        ObjectRef ref = frame.heap.newString(name);
         Result result = NativeMethod.result(methodCode, ref, frame);
         return result;
     }
 
     private static Result getInterfaces(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        ObjectRef objectRef = methodArgs.getObjectRef();
+        ObjectRef objectRef = methodArgs.objectRef;
         VariableType variableType;
         if (objectRef.getVariableType().isArray()) {
             variableType = objectRef.getVariableType();
@@ -194,18 +194,18 @@ public class NativeClass {
         }
         ObjectRef array;
         if (!variableType.isPrimitiveType()) {
-            ClassCode classCode = frame.getMethodArea().loadClass(variableType.getType());
-            List<String> interfaces = classCode.getInterfaces();
+            ClassCode classCode = frame.methodArea.loadClass(variableType.getType());
+            List<String> interfaces = classCode.interfaces;
             int length = interfaces.size();
-            array = frame.getHeap().newArray(VariableType.valueOf("[Ljava/lang/Class;"), length);
+            array = frame.heap.newArray(VariableType.valueOf("[Ljava/lang/Class;"), length);
             for (int i = 0; i < length; i++) {
                 String interfaceName = interfaces.get(i);
                 VariableType interfaceType = VariableType.valueOf(interfaceName);
-                ObjectRef ref = frame.getHeap().getClassRef(interfaceType.getDesc());
-                frame.getHeap().putArray(array, i, ref);
+                ObjectRef ref = frame.heap.getClassRef(interfaceType.getDesc());
+                frame.heap.putArray(array, i, ref);
             }
         } else {
-            array = frame.getHeap().newArray(VariableType.valueOf("[Ljava/lang/Class;"), 0);
+            array = frame.heap.newArray(VariableType.valueOf("[Ljava/lang/Class;"), 0);
         }
         Result result = NativeMethod.result(methodCode, array, frame);
         return result;

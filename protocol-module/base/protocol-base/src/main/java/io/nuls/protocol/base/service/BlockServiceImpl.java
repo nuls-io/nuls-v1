@@ -245,7 +245,6 @@ public class BlockServiceImpl implements BlockService {
         } catch (Exception e) {
             Log.warn("save local tx failed", e);
         }
-
         return Result.getSuccess();
     }
 

@@ -26,6 +26,7 @@ package io.nuls.network.connection.netty;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
+import io.nuls.kernel.context.NulsContext;
 
 import java.util.List;
 
@@ -37,11 +38,13 @@ public class NulsMessageEncoder extends MessageToMessageEncoder<ByteBuf> {
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         int length = msg.readableBytes();
-        // old protocol
-        out.add(ctx.alloc().buffer(8).writeLong(length));
-        out.add(msg.retain());
-
-        // new protocol
-        //out.add(msg.retain());
+        if(NulsContext.MAIN_NET_VERSION > 1) {
+            // new protocol
+            out.add(msg.retain());
+        } else if(NulsContext.MAIN_NET_VERSION == 1){
+            // old protocol
+            out.add(ctx.alloc().buffer(8).writeLong(length));
+            out.add(msg.retain());
+        }
     }
 }

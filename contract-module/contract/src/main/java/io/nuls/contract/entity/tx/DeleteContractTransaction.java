@@ -27,6 +27,7 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.entity.txdata.DeleteContractData;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.NulsByteBuffer;
@@ -42,7 +43,7 @@ public class DeleteContractTransaction extends Transaction<DeleteContractData> i
 
     private transient Na returnNa;
 
-    //private List<Entry<byte[], byte[]>> deleteList;
+    private transient BlockHeader blockHeader;
 
     public DeleteContractTransaction() {
         super(ContractConstant.TX_TYPE_DELETE_CONTRACT);
@@ -74,6 +75,16 @@ public class DeleteContractTransaction extends Transaction<DeleteContractData> i
     }
 
     @Override
+    public BlockHeader getBlockHeader() {
+        return blockHeader;
+    }
+
+    @Override
+    public void setBlockHeader(BlockHeader blockHeader) {
+        this.blockHeader = blockHeader;
+    }
+
+    @Override
     public Na getFee() {
         Na resultFee = super.getFee();
         if(returnNa != null) {
@@ -82,10 +93,4 @@ public class DeleteContractTransaction extends Transaction<DeleteContractData> i
         return resultFee;
     }
 
-    /*public List<Entry<byte[], byte[]>> getDeleteList() {
-        return deleteList;
-    }
-    public void setDeleteList(List<Entry<byte[], byte[]>> deleteList) {
-        this.deleteList = deleteList;
-    }*/
 }

@@ -21,7 +21,7 @@ public class NativeMethod {
 
         Result result = null;
 
-        switch (methodCode.getClassCode().getName()) {
+        switch (methodCode.classCode.name) {
             case NativeCharacter.TYPE:
                 if (NativeCharacter.isSupport(methodCode)) {
                     result = NativeCharacter.run(methodCode, methodArgs, frame);
@@ -62,17 +62,17 @@ public class NativeMethod {
                 break;
         }
 
-        if (methodCode.getInstructions().size() > 0) {
+        if (methodCode.instructions.size() > 0) {
             return null;
         }
 
-        if ("registerNatives".equals(methodCode.getName())) {
-            return new Result(methodCode.getReturnVariableType());
+        if ("registerNatives".equals(methodCode.name)) {
+            return new Result(methodCode.returnVariableType);
         }
 
         //Log.nativeMethod(methodCode);
 
-        switch (methodCode.getClassCode().getName()) {
+        switch (methodCode.classCode.name) {
             case NativeClass.TYPE:
                 result = NativeClass.run(methodCode, methodArgs, frame);
                 break;
@@ -123,16 +123,16 @@ public class NativeMethod {
     }
 
     public static Result result(MethodCode methodCode, Object resultValue, Frame frame) {
-        VariableType variableType = methodCode.getReturnVariableType();
+        VariableType variableType = methodCode.returnVariableType;
         Result result = new Result(variableType);
         if (variableType.isNotVoid()) {
             result.value(resultValue);
             if (resultValue == null) {
-                frame.getOperandStack().pushRef(null);
+                frame.operandStack.pushRef(null);
             } else if (variableType.isPrimitive()) {
-                frame.getOperandStack().push(resultValue, variableType);
+                frame.operandStack.push(resultValue, variableType);
             } else if (resultValue instanceof ObjectRef) {
-                frame.getOperandStack().pushRef((ObjectRef) resultValue);
+                frame.operandStack.pushRef((ObjectRef) resultValue);
             } else {
                 throw new IllegalArgumentException("unknown result value");
             }

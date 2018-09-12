@@ -14,7 +14,7 @@ public class NativeLocale {
     public static final String TYPE = "java/util/Locale";
 
     public static boolean isSupport(MethodCode methodCode) {
-        if (methodCode.isClass(TYPE) && "initDefault".equals(methodCode.getName())) {
+        if (methodCode.isClass(TYPE) && "initDefault".equals(methodCode.name)) {
             return true;
         } else {
             return false;
@@ -23,7 +23,7 @@ public class NativeLocale {
 
     public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = null;
-        switch (methodCode.getName()) {
+        switch (methodCode.name) {
             case "initDefault":
                 result = initDefault(methodCode, methodArgs, frame);
                 break;
@@ -42,19 +42,19 @@ public class NativeLocale {
         String variant = locale.getVariant();
 
         Object[] args = new Object[]{
-                frame.getHeap().newString(language),
-                frame.getHeap().newString(script),
-                frame.getHeap().newString(country),
-                frame.getHeap().newString(variant),
+                frame.heap.newString(language),
+                frame.heap.newString(script),
+                frame.heap.newString(country),
+                frame.heap.newString(variant),
                 null
         };
 
-        MethodCode methodCode1 = frame.getMethodArea().loadMethod(TYPE, "getInstance",
+        MethodCode methodCode1 = frame.methodArea.loadMethod(TYPE, "getInstance",
                 "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lsun/util/locale/LocaleExtensions;)Ljava/util/Locale;");
 
-        frame.getVm().run(methodCode1, args, true);
+        frame.vm.run(methodCode1, args, true);
 
-        ObjectRef objectRef = (ObjectRef) frame.getVm().getResult().getValue();
+        ObjectRef objectRef = (ObjectRef) frame.vm.getResult().getValue();
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
         return result;

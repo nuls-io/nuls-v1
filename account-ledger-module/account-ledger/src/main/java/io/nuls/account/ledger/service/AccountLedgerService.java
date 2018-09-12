@@ -25,6 +25,7 @@
 
 package io.nuls.account.ledger.service;
 
+import io.nuls.account.ledger.model.MultipleAddressTransferModel;
 import io.nuls.account.ledger.model.TransactionInfo;
 import io.nuls.account.model.Balance;
 import io.nuls.account.ledger.model.CoinDataResult;
@@ -39,6 +40,7 @@ import io.nuls.kernel.model.Transaction;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface AccountLedgerService {
 
@@ -222,6 +224,27 @@ public interface AccountLedgerService {
     Result<Na> getMaxAmountOfOnce(byte[] address, Transaction tx, Na price);
 
     /**
+     * 多地址转账
+     * @param fromModelList
+     * @param toModelList
+     * @param password
+     * @param remark
+     * @param price
+     * @return
+     */
+
+    Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromModelList, List<MultipleAddressTransferModel>  toModelList, String password, String remark, Na price);
+
+    /**
+     * 零钱汇整
+     * @param address 自己转给自己的地址
+     * @param password
+     * @param price
+     * @return
+     */
+    Result changeWhole(byte[] address, String password,  Na price);
+
+    /**
      * Get the fee for the transfer transaction
      *
      * @param address
@@ -231,4 +254,19 @@ public interface AccountLedgerService {
      * @return
      */
     Na getTxFee(byte[] address, Na amount, int size, Na price);
+
+    /**
+     * 零钱换整手续费预估
+     * @param address
+     * @param price
+     * @return
+     */
+    Result estimateFee(byte[] address, Na price);
+
+    /**
+     * 获取可用总额和有多少条utxo--零钱汇整功能
+     * @param address
+     * @return
+     */
+    Result getAvailableTotalUTXO(byte[] address);
 }

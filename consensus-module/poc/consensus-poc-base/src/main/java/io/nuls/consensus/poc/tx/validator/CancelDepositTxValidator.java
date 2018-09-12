@@ -34,7 +34,9 @@ import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.SignatureUtil;
+import io.nuls.kernel.script.TransactionSignature;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
@@ -51,19 +53,19 @@ public class CancelDepositTxValidator implements NulsDataValidator<CancelDeposit
     private DepositStorageService depositStorageService;
 
     @Override
-    public ValidateResult validate(CancelDepositTransaction data) {
+    public ValidateResult validate(CancelDepositTransaction data) throws NulsException {
         DepositPo depositPo = depositStorageService.get(data.getTxData().getJoinTxHash());
         if(null==depositPo||depositPo.getDelHeight()>0){
             return ValidateResult.getFailedResult(this.getClass().getName(),KernelErrorCode.DATA_NOT_FOUND);
         }
-        P2PKHScriptSig sig = new P2PKHScriptSig();
+        TransactionSignature sig = new TransactionSignature();
         try {
-            sig.parse(data.getScriptSig(), 0);
+            sig.parse(data.getTransactionSignature(), 0);
         } catch (NulsException e) {
             Log.error(e);
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
-        if (!Arrays.equals(depositPo.getAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
+        if (!SignatureUtil.containsAddress(data,depositPo.getAddress())) {
             ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
             return result;

@@ -37,13 +37,16 @@ import io.nuls.contract.storage.po.ContractAddressInfoPo;
 import io.nuls.contract.storage.service.ContractAddressStorageService;
 import io.nuls.contract.storage.service.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.processor.TransactionProcessor;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
@@ -223,9 +226,14 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
             }
             contractResult.setNrc20(contractAddressInfoPo.isNrc20());
 
+            BlockHeader blockHeader = tx.getBlockHeader();
+            byte[] newestStateRoot = blockHeader.getStateRoot();
+
             // 处理合约执行失败 - 没有transferEvent的情况, 直接从数据库中获取, 若是本地创建的交易，获取到修改为失败交易
             if(!contractResult.isSuccess()) {
-                if(contractAddressInfoPo != null && contractAddressInfoPo.isNrc20() && ContractConstant.NRC20_METHOD_TRANSFER.equals(callContractData.getMethodName())) {
+                if(contractAddressInfoPo != null && contractAddressInfoPo.isNrc20() &&
+                        (ContractConstant.NRC20_METHOD_TRANSFER.equals(callContractData.getMethodName())
+                        || ContractConstant.NRC20_METHOD_TRANSFER_FROM.equals(callContractData.getMethodName()))) {
                     byte[] txHashBytes = tx.getHash().serialize();
                     byte[] infoKey = ArraysTool.concatenate(callContractData.getSender(), txHashBytes, new VarInt(0).encode());
                     Result<ContractTokenTransferInfoPo> infoResult = contractTokenTransferStorageService.getTokenTransferInfo(infoKey);
@@ -233,12 +241,22 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                     if(po != null) {
                         po.setStatus((byte) 2);
                         contractTokenTransferStorageService.saveTokenTransferInfo(infoKey, po);
+
+                        // 刷新token余额
+                        String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddress);
+                        if(po.getFrom() != null) {
+                            vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getFrom()), contractAddressStr);
+                        }
+                        if(po.getTo() != null) {
+                            vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getTo()), contractAddressStr);
+                        }
                     }
                 }
             }
 
             // 处理合约事件
-            vmHelper.dealEvents(tx, contractResult, contractAddressInfoPo);
+
+            vmHelper.dealEvents(newestStateRoot, tx, contractResult, contractAddressInfoPo);
 
         } catch (Exception e) {
             Log.error("save call contract tx error.", e);

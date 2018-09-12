@@ -12,7 +12,7 @@ public class Multianewarray {
         MultiANewArrayInsnNode multiANewArrayInsnNode = frame.multiANewArrayInsnNode();
         int[] dimensions = new int[multiANewArrayInsnNode.dims];
         for (int i = multiANewArrayInsnNode.dims - 1; i >= 0; i--) {
-            int length = frame.getOperandStack().popInt();
+            int length = frame.operandStack.popInt();
             if (length < 0) {
                 frame.throwNegativeArraySizeException();
                 return;
@@ -20,8 +20,8 @@ public class Multianewarray {
             dimensions[i] = length;
         }
         VariableType variableType = VariableType.valueOf(multiANewArrayInsnNode.desc);
-        ObjectRef arrayRef = frame.getHeap().newArray(variableType, dimensions);
-        frame.getOperandStack().pushRef(arrayRef);
+        ObjectRef arrayRef = frame.heap.newArray(variableType, dimensions);
+        frame.operandStack.pushRef(arrayRef);
 
         //Log.result(frame.getCurrentOpCode(), arrayRef);
     }

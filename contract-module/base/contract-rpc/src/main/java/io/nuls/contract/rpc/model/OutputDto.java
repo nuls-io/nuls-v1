@@ -53,7 +53,7 @@ public class OutputDto {
     private Integer status;
 
     public OutputDto(Coin output) {
-        this.address = AddressTool.getStringAddressByBytes(output.getOwner());
+        this.address = AddressTool.getStringAddressByBytes(output.getAddress());
         this.value = output.getNa().getValue();
         this.lockTime = output.getLockTime();
     }

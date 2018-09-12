@@ -10,17 +10,30 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import static io.nuls.contract.vm.util.Utils.arrayListInitialCapacity;
+
 public class VariableType {
 
-    private static LoadingCache<String, VariableType> CACHE;
+    private static final LoadingCache<String, VariableType> CACHE;
+    private static final LoadingCache<String, List<VariableType>> CACHE_LIST;
 
     static {
         CACHE = CacheBuilder.newBuilder()
+                .initialCapacity(10240)
                 .expireAfterAccess(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, VariableType>() {
                     @Override
                     public VariableType load(String desc) {
                         return new VariableType(desc);
+                    }
+                });
+        CACHE_LIST = CacheBuilder.newBuilder()
+                .initialCapacity(10240)
+                .expireAfterAccess(10, TimeUnit.MINUTES)
+                .build(new CacheLoader<String, List<VariableType>>() {
+                    @Override
+                    public List<VariableType> load(String desc) {
+                        return parseList(desc);
                     }
                 });
     }
@@ -133,27 +146,22 @@ public class VariableType {
         }
     }
 
-    public static VariableType parseReturn(String desc) {
-        List<String> list = Descriptors.parse(desc, true);
-        if (list.size() < 1) {
-            throw new IllegalArgumentException();
-        }
-        String type = list.get(list.size() - 1);
-        return valueOf(type);
-    }
-
     public static List<VariableType> parseArgs(String desc) {
-        List<VariableType> args = new ArrayList<>();
-        List<String> list = Descriptors.parse(desc);
-        for (String type : list) {
-            args.add(valueOf(type));
-        }
-        return args;
+        List<VariableType> args = parseAll(desc);
+        return args.subList(0, args.size() - 1);
     }
 
     public static List<VariableType> parseAll(String desc) {
-        List<VariableType> args = new ArrayList<>();
+        try {
+            return CACHE_LIST.get(desc);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static List<VariableType> parseList(String desc) {
         List<String> list = Descriptors.parse(desc, true);
+        List<VariableType> args = new ArrayList<>(arrayListInitialCapacity(list.size()));
         for (String type : list) {
             args.add(valueOf(type));
         }
@@ -161,7 +169,7 @@ public class VariableType {
     }
 
     public boolean isVoid() {
-        return "void".equals(this.type);
+        return Descriptors.VOID.equals(this.type);
     }
 
     public boolean isNotVoid() {
@@ -169,62 +177,62 @@ public class VariableType {
     }
 
     public boolean isByte() {
-        return primitive && "byte".equals(this.type);
+        return primitive && Descriptors.BYTE.equals(this.type);
     }
 
     public boolean isChar() {
-        return primitive && "char".equals(this.type);
+        return primitive && Descriptors.CHAR.equals(this.type);
     }
 
     public boolean isDouble() {
-        return primitive && "double".equals(this.type);
+        return primitive && Descriptors.DOUBLE.equals(this.type);
     }
 
     public boolean isFloat() {
-        return primitive && "float".equals(this.type);
+        return primitive && Descriptors.FLOAT.equals(this.type);
     }
 
     public boolean isInt() {
-        return primitive && "int".equals(this.type);
+        return primitive && Descriptors.INT.equals(this.type);
     }
 
     public boolean isLong() {
-        return primitive && "long".equals(this.type);
+        return primitive && Descriptors.LONG.equals(this.type);
     }
 
     public boolean isShort() {
-        return primitive && "short".equals(this.type);
+        return primitive && Descriptors.SHORT.equals(this.type);
     }
 
     public boolean isBoolean() {
-        return primitive && "boolean".equals(this.type);
+        return primitive && Descriptors.BOOLEAN.equals(this.type);
     }
 
     public Object defaultValue() {
         Object defaultValue = null;
         switch (this.type) {
-            case "int":
+            case Descriptors.INT:
                 defaultValue = 0;
                 break;
-            case "long":
+            case Descriptors.LONG:
                 defaultValue = 0L;
                 break;
-            case "float":
+            case Descriptors.FLOAT:
                 defaultValue = 0.0F;
                 break;
-            case "double":
+            case Descriptors.DOUBLE:
                 defaultValue = 0.0D;
                 break;
-            case "boolean":
+            case Descriptors.BOOLEAN:
                 defaultValue = false;
                 break;
-            case "byte":
+            case Descriptors.BYTE:
                 defaultValue = (byte) 0;
                 break;
-            case "char":
+            case Descriptors.CHAR:
                 defaultValue = '\u0000';
                 break;
-            case "short":
+            case Descriptors.SHORT:
                 defaultValue = (short) 0;
                 break;
             default:
@@ -239,28 +247,28 @@ public class VariableType {
             return clazz;
         }
         switch (this.type) {
-            case "int":
+            case Descriptors.INT:
                 clazz = Integer.TYPE;
                 break;
-            case "long":
+            case Descriptors.LONG:
                 clazz = Long.TYPE;
                 break;
-            case "float":
+            case Descriptors.FLOAT:
                 clazz = Float.TYPE;
                 break;
-            case "double":
+            case Descriptors.DOUBLE:
                 clazz = Double.TYPE;
                 break;
-            case "boolean":
+            case Descriptors.BOOLEAN:
                 clazz = Boolean.TYPE;
                 break;
-            case "byte":
+            case Descriptors.BYTE:
                 clazz = Byte.TYPE;
                 break;
-            case "char":
+            case Descriptors.CHAR:
                 clazz = Character.TYPE;
                 break;
-            case "short":
+            case Descriptors.SHORT:
                 clazz = Short.TYPE;
                 break;
             default:
@@ -276,36 +284,36 @@ public class VariableType {
             } else {
                 String s = value.toString();
                 switch (this.type) {
-                    case "int":
+                    case Descriptors.INT:
                         value = Integer.valueOf(s).intValue();
                         break;
-                    case "long":
+                    case Descriptors.LONG:
                         value = Long.valueOf(s).longValue();
                         break;
-                    case "float":
+                    case Descriptors.FLOAT:
                         value = Float.valueOf(s).floatValue();
                         break;
-                    case "double":
+                    case Descriptors.DOUBLE:
                         value = Double.valueOf(s).doubleValue();
                         break;
-                    case "boolean":
+                    case Descriptors.BOOLEAN:
                         if ("true".equalsIgnoreCase(s) || "1".equals(s)) {
                             value = true;
                         } else {
                             value = false;
                         }
                         break;
-                    case "byte":
+                    case Descriptors.BYTE:
                         value = Byte.valueOf(s).byteValue();
                         break;
-                    case "char":
+                    case Descriptors.CHAR:
                         if (value instanceof Integer) {
                             value = (char) ((Integer) value).intValue();
                         } else {
                             value = s.charAt(0);
                         }
                         break;
-                    case "short":
+                    case Descriptors.SHORT:
                         value = Short.valueOf(s).shortValue();
                         break;
                     default:

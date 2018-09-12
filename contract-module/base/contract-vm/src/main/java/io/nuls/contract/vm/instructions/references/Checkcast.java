@@ -12,10 +12,10 @@ public class Checkcast {
         TypeInsnNode typeInsnNode = frame.typeInsnNode();
         String desc = typeInsnNode.desc;
         VariableType variableType = VariableType.valueOf(desc);
-        ObjectRef objectRef = frame.getOperandStack().popRef();
+        ObjectRef objectRef = frame.operandStack.popRef();
 
         if (objectRef == null || Instanceof.instanceof_(objectRef, variableType, frame)) {
-            frame.getOperandStack().pushRef(objectRef);
+            frame.operandStack.pushRef(objectRef);
         } else {
             frame.throwClassCastException();
         }

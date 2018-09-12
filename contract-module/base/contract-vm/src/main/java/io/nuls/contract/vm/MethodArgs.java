@@ -8,11 +8,11 @@ import java.util.List;
 
 public class MethodArgs {
 
-    private Object[] frameArgs;
+    public final Object[] frameArgs;
 
-    private Object[] invokeArgs;
+    public final Object[] invokeArgs;
 
-    private ObjectRef objectRef;
+    public final ObjectRef objectRef;
 
     public MethodArgs(List<VariableType> argsVariableType, OperandStack operandStack, boolean isStatic) {
         int size = argsVariableType.size();
@@ -30,23 +30,13 @@ public class MethodArgs {
         if (!isStatic) {
             this.objectRef = (ObjectRef) operandStack.pop();
             frameList.add(this.objectRef);
+        } else {
+            this.objectRef = null;
         }
         Collections.reverse(frameList);
         Collections.reverse(invokeList);
         this.frameArgs = frameList.toArray();
         this.invokeArgs = invokeList.toArray();
-    }
-
-    public Object[] getFrameArgs() {
-        return frameArgs;
-    }
-
-    public Object[] getInvokeArgs() {
-        return invokeArgs;
-    }
-
-    public ObjectRef getObjectRef() {
-        return objectRef;
     }
 
 }

@@ -16,7 +16,7 @@ public class NativeBlock {
 
     public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = null;
-        switch (methodCode.getName()) {
+        switch (methodCode.name) {
             case "getBlockHeader":
                 result = getBlockHeader(methodCode, methodArgs, frame);
                 break;
@@ -31,14 +31,14 @@ public class NativeBlock {
     }
 
     private static Result getBlockHeader(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        long blockNumber = (long) methodArgs.getInvokeArgs()[0];
+        long blockNumber = (long) methodArgs.invokeArgs[0];
         ObjectRef objectRef = getBlockHeader(blockNumber, frame);
         Result result = NativeMethod.result(methodCode, objectRef, frame);
         return result;
     }
 
     private static Result currentBlockHeader(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        long blockNumber = frame.getVm().getProgramContext().getNumber();
+        long blockNumber = frame.vm.getProgramContext().getNumber();
         ObjectRef objectRef = getBlockHeader(blockNumber, frame);
         Result result = NativeMethod.result(methodCode, objectRef, frame);
         return result;
@@ -47,26 +47,26 @@ public class NativeBlock {
     private static ObjectRef getBlockHeader(long blockNumber, Frame frame) {
 
         String fieldName = "BlockHeader$" + blockNumber;
-        Object object = frame.getHeap().getStatic(VariableType.BLOCK_HEADER_TYPE.getType(), fieldName);
+        Object object = frame.heap.getStatic(VariableType.BLOCK_HEADER_TYPE.getType(), fieldName);
         if (object != null) {
             return (ObjectRef) object;
         }
 
-        BlockHeaderDto blockHeaderDto = frame.getVm().getBlockHeader(blockNumber);
+        BlockHeaderDto blockHeaderDto = frame.vm.getBlockHeader(blockNumber);
 
         if (blockHeaderDto != null) {
-            ObjectRef objectRef = frame.getHeap().newObject(VariableType.BLOCK_HEADER_TYPE);
-            frame.getHeap().putField(objectRef, "hash", frame.getHeap().newString(blockHeaderDto.getHash()));
-            frame.getHeap().putField(objectRef, "time", blockHeaderDto.getTime());
-            frame.getHeap().putField(objectRef, "height", blockHeaderDto.getHeight());
-            ObjectRef packingAddress = frame.getHeap().newAddress(NativeAddress.toString(blockHeaderDto.getPackingAddress()));
-            frame.getHeap().putField(objectRef, "packingAddress", packingAddress);
+            ObjectRef objectRef = frame.heap.newObject(VariableType.BLOCK_HEADER_TYPE);
+            frame.heap.putField(objectRef, "hash", frame.heap.newString(blockHeaderDto.getHash()));
+            frame.heap.putField(objectRef, "time", blockHeaderDto.getTime());
+            frame.heap.putField(objectRef, "height", blockHeaderDto.getHeight());
+            ObjectRef packingAddress = frame.heap.newAddress(NativeAddress.toString(blockHeaderDto.getPackingAddress()));
+            frame.heap.putField(objectRef, "packingAddress", packingAddress);
             String stateRoot = null;
             if (blockHeaderDto.getStateRoot() != null) {
                 stateRoot = Hex.toHexString(blockHeaderDto.getStateRoot());
             }
-            frame.getHeap().putField(objectRef, "stateRoot", frame.getHeap().newString(stateRoot));
-            frame.getHeap().putStatic(VariableType.BLOCK_HEADER_TYPE.getType(), fieldName, objectRef);
+            frame.heap.putField(objectRef, "stateRoot", frame.heap.newString(stateRoot));
+            frame.heap.putStatic(VariableType.BLOCK_HEADER_TYPE.getType(), fieldName, objectRef);
             return objectRef;
         }
 

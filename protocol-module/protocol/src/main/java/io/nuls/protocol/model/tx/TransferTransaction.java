@@ -81,13 +81,14 @@ public class TransferTransaction extends Transaction {
             }
             fromTx = getLedgerService().getTx(fromHashObj);
             fromUtxo = fromTx.getCoinData().getTo().get(fromIndex);
-            if (Arrays.equals(address, fromUtxo.getOwner())) {
+            //if (Arrays.equals(address, fromUtxo.()))
+            if (Arrays.equals(address, fromUtxo.getAddress())) {
                 value = value - fromUtxo.getNa().getValue();
             }
         }
 
         for (Coin to : coinData.getTo()) {
-            if (Arrays.equals(address, to.getOwner())) {
+            if (Arrays.equals(address, to.getAddress())) {
                 value = value + to.getNa().getValue();
             }
         }

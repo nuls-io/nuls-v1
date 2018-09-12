@@ -51,6 +51,7 @@ import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.array.ArraysTool;
+import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.param.AssertUtil;
@@ -64,7 +65,8 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.utils.VarInt;
@@ -141,7 +143,6 @@ public class PocConsensusResource {
         }
 
         dto.setAgentCount(agentList.size());
-        dto.setRewardOfDay(this.rewardCacheService.getAllReward().getValue());
         dto.setTotalDeposit(totalDeposit);
         dto.setConsensusAccountNumber(agentList.size());
         dto.setPackingAgentCount(packingAgentCount);
@@ -258,12 +259,12 @@ public class PocConsensusResource {
         toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), -1));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         tx.getCoinData().setFrom(result.getCoinList());
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
         }
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAgentAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;
@@ -299,12 +300,12 @@ public class PocConsensusResource {
         toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), -1));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         tx.getCoinData().setFrom(result.getCoinList());
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
         }
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;
@@ -351,11 +352,11 @@ public class PocConsensusResource {
         NulsDigestData createTxHash = agent.getTxHash();
         stopAgent.setCreateTxHash(createTxHash);
         tx.setTxData(stopAgent);
-        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, PocConsensusConstant.STOP_AGENT_LOCK_TIME);
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent,TimeService.currentTimeMillis() +  PocConsensusConstant.STOP_AGENT_LOCK_TIME);
         tx.setCoinData(coinData);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
-        Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size() );
         Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(address), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;
@@ -416,7 +417,7 @@ public class PocConsensusResource {
         toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         RpcClientResult result1 = this.txProcessing(tx, result, account, form.getPassword());
         if (!result1.isSuccess()) {
             return result1;
@@ -468,7 +469,7 @@ public class PocConsensusResource {
         toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
 
         RpcClientResult result1 = this.txProcessing(tx, result, account, form.getPassword());
         if (!result1.isSuccess()) {
@@ -492,10 +493,12 @@ public class PocConsensusResource {
         }
         try {
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-            P2PKHScriptSig sig = new P2PKHScriptSig();
-            sig.setPublicKey(account.getPubKey());
-            sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
-            tx.setScriptSig(sig.serialize());
+            //生成签名
+            List<ECKey> signEckeys = new ArrayList<>();
+            ECKey eckey = account.getEcKey(password);
+            signEckeys.add(eckey);
+            SignatureUtil.createTransactionSignture(tx,null,signEckeys);
+
         } catch (Exception e) {
             Log.error(e);
             return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
@@ -571,10 +574,10 @@ public class PocConsensusResource {
         stopAgent.setCreateTxHash(agent.getTxHash());
         tx.setTxData(stopAgent);
 
-        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, PocConsensusConstant.STOP_AGENT_LOCK_TIME);
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME);
 
         tx.setCoinData(coinData);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         RpcClientResult result1 = this.txProcessing(tx, null, account, form.getPassword());
         if (!result1.isSuccess()) {
@@ -1028,7 +1031,7 @@ public class PocConsensusResource {
         }
         coinData.setFrom(fromList);
         tx.setCoinData(coinData);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() );
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         RpcClientResult result1 = this.txProcessing(tx, null, account, form.getPassword());
         if (!result1.isSuccess()) {
@@ -1091,9 +1094,9 @@ public class PocConsensusResource {
         }
         coinData.setFrom(fromList);
         tx.setCoinData(coinData);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() );
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
-        Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
+        Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size() );
         Result rs = accountLedgerService.getMaxAmountOfOnce(account.getAddress().getAddressBytes(), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;

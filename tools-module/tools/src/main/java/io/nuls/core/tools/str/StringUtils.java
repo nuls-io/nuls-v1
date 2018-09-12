@@ -126,10 +126,11 @@ public class StringUtils {
                 return false;
             }
 
-            if(NULS.equalsIgnoreCase(name)) {
+            String upperCaseName = name.toUpperCase();
+            if(upperCaseName.contains(NULS)) {
                 return false;
             }
-            name = name.trim();
+
             byte[] aliasBytes = name.getBytes("UTF-8");
             if (aliasBytes.length < 1 || aliasBytes.length > 20) {
                 return false;

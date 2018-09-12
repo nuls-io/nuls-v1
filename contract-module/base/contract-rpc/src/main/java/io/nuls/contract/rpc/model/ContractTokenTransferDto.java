@@ -24,6 +24,7 @@
 package io.nuls.contract.rpc.model;
 
 import io.nuls.contract.dto.ContractTokenTransferInfoPo;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -41,7 +42,7 @@ public class ContractTokenTransferDto {
     @ApiModelProperty(name = "to", value = "收款方")
     private String to;
     @ApiModelProperty(name = "value", value = "转账金额")
-    private BigInteger value;
+    private String value;
 
     public ContractTokenTransferDto(ContractTokenTransferInfoPo po) {
         if(po.getFrom() != null) {
@@ -50,7 +51,7 @@ public class ContractTokenTransferDto {
         if(po.getTo() != null) {
             this.to = AddressTool.getStringAddressByBytes(po.getTo());
         }
-        this.value = po.getValue();
+        this.value = ContractUtil.bigInteger2String(po.getValue());
     }
 
     public String getFrom() {
@@ -69,11 +70,11 @@ public class ContractTokenTransferDto {
         this.to = to;
     }
 
-    public BigInteger getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(BigInteger value) {
+    public void setValue(String value) {
         this.value = value;
     }
 }

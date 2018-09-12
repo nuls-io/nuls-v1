@@ -24,7 +24,6 @@
  */
 package io.nuls.protocol.model.validator;
 
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.validate.NulsDataValidator;
@@ -39,9 +38,9 @@ public class HeaderSignValidator implements NulsDataValidator<BlockHeader> {
 
     @Override
     public ValidateResult validate(BlockHeader data) {
-        if (data.getScriptSig() == null) {
+        if (data.getBlockSignature() == null) {
             return ValidateResult.getFailedResult(this.getClass().getName(), ProtocolErroeCode.BLOCK_HEADER_SIGN_CHECK_FAILED);
         }
-        return data.getScriptSig().verifySign(data.getHash());
+        return data.getBlockSignature().verifySignature(data.getHash());
     }
 }

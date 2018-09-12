@@ -108,7 +108,7 @@ public class Block extends BaseNulsData implements Cloneable {
     @Override
     public String toString() {
         return "Block{" +
-                "header=" + header.toString() +
+                //"header=" + header.toString() +
                 ", txs=" + txs.size() +
                 '}';
     }

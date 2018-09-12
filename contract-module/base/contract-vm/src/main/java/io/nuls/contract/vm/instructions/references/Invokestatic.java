@@ -16,9 +16,9 @@ public class Invokestatic {
         String methodName = methodInsnNode.name;
         String methodDesc = methodInsnNode.desc;
 
-        MethodCode methodCode = frame.getMethodArea().loadMethod(className, methodName, methodDesc);
+        MethodCode methodCode = frame.methodArea.loadMethod(className, methodName, methodDesc);
 
-        MethodArgs methodArgs = new MethodArgs(methodCode.getArgsVariableType(), frame.getOperandStack(), true);
+        MethodArgs methodArgs = new MethodArgs(methodCode.argsVariableType, frame.operandStack, true);
 
         //Log.opcode(frame.getCurrentOpCode(), className, methodName, methodDesc);
 
@@ -27,7 +27,7 @@ public class Invokestatic {
             return;
         }
 
-        frame.getVm().run(methodCode, methodArgs.getFrameArgs(), true);
+        frame.vm.run(methodCode, methodArgs.frameArgs, true);
     }
 
 }

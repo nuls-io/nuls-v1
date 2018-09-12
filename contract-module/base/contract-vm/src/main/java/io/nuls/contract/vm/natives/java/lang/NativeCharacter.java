@@ -20,7 +20,7 @@ public class NativeCharacter {
 
     public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = null;
-        switch (methodCode.getName()) {
+        switch (methodCode.name) {
             case "digit":
                 result = digit(methodCode, methodArgs, frame);
                 break;
@@ -31,14 +31,14 @@ public class NativeCharacter {
     }
 
     private static Result digit(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Object first = methodArgs.getInvokeArgs()[0];
+        Object first = methodArgs.invokeArgs[0];
         int codePoint;
         if (first instanceof Character) {
             codePoint = (int) ((Character) first).charValue();
         } else {
             codePoint = (int) first;
         }
-        int radix = (int) methodArgs.getInvokeArgs()[1];
+        int radix = (int) methodArgs.invokeArgs[1];
         int i = Character.digit(codePoint, radix);
         Result result = NativeMethod.result(methodCode, i, frame);
         return result;

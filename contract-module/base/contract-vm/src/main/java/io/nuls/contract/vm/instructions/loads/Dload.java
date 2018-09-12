@@ -7,8 +7,8 @@ public class Dload {
 
     public static void dload(final Frame frame) {
         int index = frame.varInsnNode().var;
-        double value = frame.getLocalVariables().getDouble(index);
-        frame.getOperandStack().pushDouble(value);
+        double value = frame.localVariables.getDouble(index);
+        frame.operandStack.pushDouble(value);
 
         //Log.result(frame.getCurrentOpCode(), value, index);
     }
