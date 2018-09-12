@@ -75,7 +75,6 @@ import io.nuls.protocol.model.validator.TxMaxSizeValidator;
 import io.nuls.protocol.model.validator.TxRemarkValidator;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
-import io.nuls.sdk.script.P2PKHScriptSig;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
