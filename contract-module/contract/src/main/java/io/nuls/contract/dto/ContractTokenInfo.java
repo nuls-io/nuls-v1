@@ -40,6 +40,7 @@ public class ContractTokenInfo {
     private BigInteger amount;
     private long decimals;
     private long blockHeight;
+    private int status;
 
     public ContractTokenInfo() {
     }
@@ -105,5 +106,17 @@ public class ContractTokenInfo {
 
     public boolean isLock() {
         return ContractUtil.isLockContract(this.blockHeight);
+    }
+
+    public boolean isStop() {
+        return ContractUtil.isStopContract(this.status);
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

@@ -26,6 +26,7 @@
 package io.nuls.account.rpc.model;
 
 import io.nuls.account.model.Balance;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.dto.ContractTokenInfo;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.kernel.model.Na;
@@ -52,8 +53,11 @@ public class AssetDto {
     @ApiModelProperty(name = "locked", value = "锁定余额")
     private String locked;
 
-    @ApiModelProperty(name = "decimals", value = "货币小数位数")
+    @ApiModelProperty(name = "decimals", value = "资产小数位数")
     private long decimals;
+
+    @ApiModelProperty(name = "status", value = "资产状态")
+    private int status;
 
     public AssetDto(String asset, Balance balance) {
         this.balance = BigInteger.valueOf(balance.getBalance().getValue()).toString();
@@ -61,6 +65,7 @@ public class AssetDto {
         this.locked = BigInteger.valueOf(balance.getLocked().getValue()).toString();
         this.asset = asset;
         this.decimals = Na.SMALLEST_UNIT_EXPONENT;
+        this.status = ContractConstant.NORMAL;
     }
 
     public AssetDto(ContractTokenInfo tokenInfo) {
@@ -70,6 +75,7 @@ public class AssetDto {
         this.asset = tokenInfo.getSymbol();
         this.address = tokenInfo.getContractAddress();
         this.decimals = tokenInfo.getDecimals();
+        this.status = tokenInfo.getStatus();
     }
 
     public String getAsset() {
@@ -118,5 +124,13 @@ public class AssetDto {
 
     public void setDecimals(long decimals) {
         this.decimals = decimals;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }
