@@ -14,8 +14,10 @@ import io.nuls.protocol.storage.po.BlockProtocolInfoPo;
 import io.nuls.protocol.storage.po.ProtocolInfoPo;
 import io.nuls.protocol.storage.po.ProtocolTempInfoPo;
 import io.nuls.protocol.storage.service.VersionManagerStorageService;
+import org.checkerframework.checker.units.qual.A;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,12 +105,39 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
 
     @Override
     public Result saveBlockProtocolInfoPo(BlockProtocolInfoPo protocolInfoPo) {
+        List<Long> blockHeightIndexs = dbService.getModel(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), List.class);
+        if (blockHeightIndexs == null) {
+            blockHeightIndexs = new ArrayList<>();
+        }
+        blockHeightIndexs.add(protocolInfoPo.getBlockHeight());
+        dbService.putModel(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), blockHeightIndexs);
         return dbService.putModel(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA, new VarInt(protocolInfoPo.getBlockHeight()).encode(), protocolInfoPo);
+    }
+
+    @Override
+    public List<Long> getBlockProtocolIndex(int version) {
+        return dbService.getModel(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX, Util.intToBytes(version), List.class);
+    }
+
+    @Override
+    public void saveBlockProtocolIndex(int version, List<Long> list) {
+        dbService.putModel(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX, Util.intToBytes(version), list);
     }
 
     @Override
     public BlockProtocolInfoPo getBlockProtocolInfoPo(long blockHeight) {
         return dbService.getModel(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA, new VarInt(blockHeight).encode(), BlockProtocolInfoPo.class);
+    }
+
+    public void clearBlockProtocol(long blockHeight, int version) {
+        dbService.delete(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX, Util.intToBytes(version));
+        dbService.delete(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA, new VarInt(blockHeight).encode());
+    }
+
+
+    @Override
+    public void deleteBlockProtocol(long blockHeight) {
+        dbService.delete(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA, new VarInt(blockHeight).encode());
     }
 
     @Override
@@ -140,4 +169,5 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
         byte[] height = dbService.get(ProtocolStorageConstant.NULS_VERSION_AREA, ProtocolStorageConstant.CHANGE_HASH_HEIGHT_KEY);
         return height == null ? null : Long.valueOf(Util.byteToInt(height));
     }
+
 }

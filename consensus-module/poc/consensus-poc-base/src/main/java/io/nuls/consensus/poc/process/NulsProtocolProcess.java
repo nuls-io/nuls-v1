@@ -345,7 +345,6 @@ public class NulsProtocolProcess {
         return blockService;
     }
 
-
     public void processProtocolRollback(BlockHeader blockHeader) {
         BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
         //临时处理为空的情况，判断为空是由于第一个版本的区块不包含版本信息字段
@@ -359,11 +358,24 @@ public class NulsProtocolProcess {
                 //如果block对应的协议已经生效，并且当前块的高度大于协议生效时的高度，则不需要处理
                 return;
             }
-            BlockProtocolInfoPo blockProtocolInfoPo = getVersionManagerStorageService().getBlockProtocolInfoPo(blockHeader.getHeight() - 1);
-            if (blockProtocolInfoPo != null) {
-                ProtocolTransferTool.copyFromBlockProtocolInfoPo(blockProtocolInfoPo, protocolContainer);
-                saveProtocolInfo(protocolContainer);
+            //查找当前版本存储的区块对应索引
+            List<Long> blockHeightIndex = getVersionManagerStorageService().getBlockProtocolIndex(protocolContainer.getVersion());
+            //如果索引为空或者索引长度为1，回滚后container所有数据重置
+            if (blockHeightIndex == null || blockHeightIndex.size() == 1) {
+                protocolContainer.reset();
+                getVersionManagerStorageService().clearBlockProtocol(blockHeader.getHeight(), protocolContainer.getVersion());
+            } else {
+                if (blockHeader.getHeight() == blockHeightIndex.get(blockHeightIndex.size() - 1)) {
+                    blockHeightIndex.remove(blockHeightIndex.size() - 1);
+                    getVersionManagerStorageService().saveBlockProtocolIndex(protocolContainer.getVersion(), blockHeightIndex);
+                    getVersionManagerStorageService().deleteBlockProtocol(blockHeader.getHeight());
+                    BlockProtocolInfoPo blockProtocolInfoPo = getVersionManagerStorageService().getBlockProtocolInfoPo(blockHeightIndex.get(blockHeightIndex.size() - 1));
+                    if (blockProtocolInfoPo != null) {
+                        ProtocolTransferTool.copyFromBlockProtocolInfoPo(blockProtocolInfoPo, protocolContainer);
+                    }
+                }
             }
+            saveProtocolInfo(protocolContainer);
         } else {
 
         }

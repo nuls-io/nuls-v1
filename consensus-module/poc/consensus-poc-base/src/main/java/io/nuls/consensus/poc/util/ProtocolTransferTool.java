@@ -44,17 +44,10 @@ public class ProtocolTransferTool {
     }
 
     public static void copyFromBlockProtocolInfoPo(BlockProtocolInfoPo infoPo, ProtocolContainer container) {
-        if (infoPo.getVersion() == container.getVersion()) {
-            container.setStatus(infoPo.getStatus());
-            container.setEffectiveHeight(infoPo.getEffectiveHeight());
-            container.setRoundIndex(infoPo.getRoundIndex());
-            container.setAddressSet(infoPo.getAddressSet());
-            container.setCurrentDelay(infoPo.getCurrentDelay());
-        } else {
-            Log.error("-------------!!!!!!!!!!!!!!!!居然version不一样--------------");
-            Log.error("-------------------infoPo.version = " + infoPo.getVersion());
-            Log.error("-------------------container.version = " + container.getVersion());
-        }
-
+        container.setStatus(infoPo.getStatus());
+        container.setEffectiveHeight(infoPo.getEffectiveHeight());
+        container.setRoundIndex(infoPo.getRoundIndex());
+        container.setAddressSet(infoPo.getAddressSet());
+        container.setCurrentDelay(infoPo.getCurrentDelay());
     }
 }

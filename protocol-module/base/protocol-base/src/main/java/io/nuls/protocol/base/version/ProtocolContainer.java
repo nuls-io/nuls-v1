@@ -180,4 +180,11 @@ public class ProtocolContainer<T extends BaseNulsData> {
         return version + "-" + percent + "-" + delay;
     }
 
+    public void reset() {
+        this.currentDelay = 0;
+        this.roundIndex = 0;
+        this.status = ProtocolContainer.INVALID;
+        this.effectiveHeight = null;
+        this.addressSet.clear();
+    }
 }

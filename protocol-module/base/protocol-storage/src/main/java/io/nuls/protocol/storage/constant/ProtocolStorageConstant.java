@@ -68,6 +68,8 @@ public interface ProtocolStorageConstant {
     String BLOCK_PROTOCOL_AREA = "block_protocol_area";
 
     String BLOCK_TMEP_PROTOCOL_AREA = "block_temp_protocol_area";
+
+    String BLOCK_PROTOCOL_INDEX = "block_protocol_index";
     /**
      * 存储当前主网运行中的版本数据key
      */

@@ -29,6 +29,7 @@ import io.nuls.protocol.storage.po.BlockProtocolInfoPo;
 import io.nuls.protocol.storage.po.ProtocolInfoPo;
 import io.nuls.protocol.storage.po.ProtocolTempInfoPo;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -88,8 +89,13 @@ public interface VersionManagerStorageService {
 
     Result saveBlockProtocolInfoPo(BlockProtocolInfoPo protocolInfoPo);
 
+    List<Long> getBlockProtocolIndex(int version);
+
+    void saveBlockProtocolIndex(int version, List<Long> list);
+
     BlockProtocolInfoPo getBlockProtocolInfoPo(long blockHeight);
 
+    void clearBlockProtocol(long blockHeight, int version);
     /**
      * 获取所有升级新版的临时数据
      * @return
@@ -101,4 +107,6 @@ public interface VersionManagerStorageService {
     Result saveChangeTxHashBlockHeight(Long effectiveHeight);
 
     Long getChangeTxHashBlockHeight();
+
+    void deleteBlockProtocol(long blockHeight);
 }
