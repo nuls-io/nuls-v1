@@ -4,7 +4,7 @@ import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.ClassCodeLoader;
 import io.nuls.contract.vm.code.FieldCode;
 import io.nuls.contract.vm.code.MethodCode;
-import org.apache.commons.lang3.ArrayUtils;
+import io.nuls.contract.vm.util.Constants;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,12 +14,6 @@ public class MethodArea {
     public static final Map<String, ClassCode> INIT_CLASS_CODES = new HashMap<>(1024);
 
     public static final Map<String, MethodCode> INIT_METHOD_CODES = new HashMap<>(1024);
-
-    private static final String[] IGNORE_CLINIT;
-
-    static {
-        IGNORE_CLINIT = new String[]{};
-    }
 
     private VM vm;
 
@@ -100,17 +94,13 @@ public class MethodArea {
     }
 
     private void clinit(ClassCode classCode) {
-        if (ArrayUtils.contains(IGNORE_CLINIT, classCode.name)) {
-            return;
-        }
-
         for (FieldCode fieldCode : classCode.fields.values()) {
             if (fieldCode.isStatic && !fieldCode.isFinal) {
                 this.vm.getHeap().putStatic(classCode.name, fieldCode.name, fieldCode.variableType.getDefaultValue());
             }
         }
 
-        MethodCode methodCode = classCode.getMethodCode("<clinit>", "()V");
+        MethodCode methodCode = classCode.getMethodCode(Constants.CLINIT_NAME, Constants.CLINIT_DESC);
         if (methodCode != null) {
             this.vm.run(methodCode, null, true);
         }

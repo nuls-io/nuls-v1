@@ -6,38 +6,34 @@ import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.natives.NativeMethod;
 
+import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+
 public class NativeCharacter {
 
     public static final String TYPE = "java/lang/Character";
 
-    public static boolean isSupport(MethodCode methodCode) {
-        if (methodCode.isClass(TYPE) && (methodCode.isMethod("digit", "(II)I"))) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    public static final String digit = TYPE + "." + "digit" + "(II)I";
 
-    public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = null;
-        switch (methodCode.name) {
-            case "digit":
-                result = digit(methodCode, methodArgs, frame);
-                break;
+    public static Result override(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
+        switch (methodCode.fullName) {
+            case digit:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return digit(methodCode, methodArgs, frame);
+                }
             default:
-                break;
+                return null;
         }
-        return result;
     }
 
+    /**
+     * override
+     *
+     * @see Character#digit(int, int)
+     */
     private static Result digit(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Object first = methodArgs.invokeArgs[0];
-        int codePoint;
-        if (first instanceof Character) {
-            codePoint = (int) ((Character) first).charValue();
-        } else {
-            codePoint = (int) first;
-        }
+        int codePoint = (int) methodArgs.invokeArgs[0];
         int radix = (int) methodArgs.invokeArgs[1];
         int i = Character.digit(codePoint, radix);
         Result result = NativeMethod.result(methodCode, i, frame);

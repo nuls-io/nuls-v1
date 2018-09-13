@@ -12,105 +12,90 @@ import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeMsg;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeUtils;
 import io.nuls.contract.vm.natives.java.lang.*;
 import io.nuls.contract.vm.natives.java.lang.reflect.NativeArray;
-import io.nuls.contract.vm.natives.java.util.NativeLocale;
-import io.nuls.contract.vm.util.Log;
 
 public class NativeMethod {
 
-    public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+    private static final String registerNatives = "registerNatives";
+
+    public static final Result SUCCESS = new Result();
+
+    public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
 
         Result result = null;
 
-        switch (methodCode.classCode.name) {
-            case NativeCharacter.TYPE:
-                if (NativeCharacter.isSupport(methodCode)) {
-                    result = NativeCharacter.run(methodCode, methodArgs, frame);
-                    return result;
-                }
-                break;
+        switch (methodCode.className) {
             case NativeAbstractStringBuilder.TYPE:
-                if (NativeAbstractStringBuilder.isSupport(methodCode)) {
-                    result = NativeAbstractStringBuilder.run(methodCode, methodArgs, frame);
-                    return result;
-                }
+                result = NativeAbstractStringBuilder.override(methodCode, methodArgs, frame, check);
                 break;
-            case NativeFloat.TYPE:
-                if (NativeFloat.isSupport(methodCode)) {
-                    result = NativeFloat.run(methodCode, methodArgs, frame);
-                    return result;
-                }
+            case NativeCharacter.TYPE:
+                result = NativeCharacter.override(methodCode, methodArgs, frame, check);
+                break;
+            case NativeClass.TYPE:
+                result = NativeClass.override(methodCode, methodArgs, frame, check);
                 break;
             case NativeDouble.TYPE:
-                if (NativeDouble.isSupport(methodCode)) {
-                    result = NativeDouble.run(methodCode, methodArgs, frame);
-                    return result;
-                }
+                result = NativeDouble.override(methodCode, methodArgs, frame, check);
                 break;
-//            case NativeLocale.TYPE:
-//                if (NativeLocale.isSupport(methodCode)) {
-//                    result = NativeLocale.run(methodCode, methodArgs, frame);
-//                    return result;
-//                }
-//                break;
-            case NativeClass.TYPE:
-                if (NativeClass.isSupport(methodCode)) {
-                    result = NativeClass.run(methodCode, methodArgs, frame);
-                    return result;
-                }
+            case NativeFloat.TYPE:
+                result = NativeFloat.override(methodCode, methodArgs, frame, check);
                 break;
             default:
                 break;
+        }
+
+        if (result != null) {
+            return result;
         }
 
         if (methodCode.instructions.size() > 0) {
             return null;
         }
 
-        if ("registerNatives".equals(methodCode.name)) {
+        if (registerNatives.equals(methodCode.name)) {
             return new Result(methodCode.returnVariableType);
         }
 
         //Log.nativeMethod(methodCode);
 
-        switch (methodCode.classCode.name) {
+        switch (methodCode.className) {
+            case NativeArray.TYPE:
+                result = NativeArray.nativeRun(methodCode, methodArgs, frame, check);
+                break;
             case NativeClass.TYPE:
-                result = NativeClass.run(methodCode, methodArgs, frame);
+                result = NativeClass.nativeRun(methodCode, methodArgs, frame, check);
                 break;
             case NativeDouble.TYPE:
-                result = NativeDouble.run(methodCode, methodArgs, frame);
+                result = NativeDouble.nativeRun(methodCode, methodArgs, frame, check);
                 break;
             case NativeFloat.TYPE:
-                result = NativeFloat.run(methodCode, methodArgs, frame);
+                result = NativeFloat.nativeRun(methodCode, methodArgs, frame, check);
                 break;
             case NativeObject.TYPE:
-                result = NativeObject.run(methodCode, methodArgs, frame);
-                break;
-            case NativeSystem.TYPE:
-                result = NativeSystem.run(methodCode, methodArgs, frame);
+                result = NativeObject.nativeRun(methodCode, methodArgs, frame, check);
                 break;
             case NativeStrictMath.TYPE:
-                result = NativeStrictMath.run(methodCode, methodArgs, frame);
+                result = NativeStrictMath.nativeRun(methodCode, methodArgs, frame, check);
                 break;
             case NativeString.TYPE:
-                result = NativeString.run(methodCode, methodArgs, frame);
+                result = NativeString.nativeRun(methodCode, methodArgs, frame, check);
+                break;
+            case NativeSystem.TYPE:
+                result = NativeSystem.nativeRun(methodCode, methodArgs, frame, check);
                 break;
             case NativeThrowable.TYPE:
-                result = NativeThrowable.run(methodCode, methodArgs, frame);
-                break;
-            case NativeBlock.TYPE:
-                result = NativeBlock.run(methodCode, methodArgs, frame);
-                break;
-            case NativeUtils.TYPE:
-                result = NativeUtils.run(methodCode, methodArgs, frame);
-                break;
-            case NativeMsg.TYPE:
-                result = NativeMsg.run(methodCode, methodArgs, frame);
+                result = NativeThrowable.nativeRun(methodCode, methodArgs, frame, check);
                 break;
             case NativeAddress.TYPE:
-                result = NativeAddress.run(methodCode, methodArgs, frame);
+                result = NativeAddress.nativeRun(methodCode, methodArgs, frame, check);
                 break;
-            case NativeArray.TYPE:
-                result = NativeArray.run(methodCode, methodArgs, frame);
+            case NativeBlock.TYPE:
+                result = NativeBlock.nativeRun(methodCode, methodArgs, frame, check);
+                break;
+            case NativeMsg.TYPE:
+                result = NativeMsg.nativeRun(methodCode, methodArgs, frame, check);
+                break;
+            case NativeUtils.TYPE:
+                result = NativeUtils.nativeRun(methodCode, methodArgs, frame, check);
                 break;
             default:
                 frame.nonsupportMethod(methodCode);
@@ -120,6 +105,10 @@ public class NativeMethod {
         //Log.nativeMethodResult(result);
 
         return result;
+    }
+
+    public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        return run(methodCode, methodArgs, frame, false);
     }
 
     public static Result result(MethodCode methodCode, Object resultValue, Frame frame) {
@@ -138,38 +127,6 @@ public class NativeMethod {
             }
         }
         return result;
-    }
-
-    public static final String[] SUPPORT_CLASSES = new String[]{
-            NativeAddress.TYPE,
-            NativeBlock.TYPE,
-            NativeMsg.TYPE,
-            NativeUtils.TYPE,
-//            NativeClass.TYPE,
-            NativeDouble.TYPE,
-            NativeFloat.TYPE,
-            NativeObject.TYPE,
-            NativeStrictMath.TYPE,
-            NativeString.TYPE,
-//            NativeSystem.TYPE,
-            NativeThrowable.TYPE,
-//            "java/security/AccessController",
-    };
-
-    public static boolean isSupport(MethodCode methodCode) {
-        if (NativeArray.isSupport(methodCode)
-                || NativeAbstractStringBuilder.isSupport(methodCode)
-                || NativeClass.isSupport(methodCode)
-                || NativeDouble.isSupport(methodCode)
-                || NativeFloat.isSupport(methodCode)
-                || NativeSystem.isSupport(methodCode)
-//                || NativeLocale.isSupport(methodCode)
-//                || NativeUnsafe.isSupport(methodCode)
-        ) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
 }

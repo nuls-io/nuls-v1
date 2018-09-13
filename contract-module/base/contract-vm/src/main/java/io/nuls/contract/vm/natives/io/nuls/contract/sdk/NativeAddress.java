@@ -1,5 +1,6 @@
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
+import io.nuls.contract.sdk.Address;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.exception.ErrorException;
@@ -14,42 +15,55 @@ import io.nuls.kernel.utils.AddressTool;
 import java.math.BigInteger;
 import java.util.Arrays;
 
+import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+
 public class NativeAddress {
 
     public static final String TYPE = "io/nuls/contract/sdk/Address";
 
-    public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = null;
-        switch (methodCode.name) {
-            case "balance":
-                result = balance(methodCode, methodArgs, frame);
-                break;
-            case "transfer":
-                result = transfer(methodCode, methodArgs, frame);
-                break;
-            case "call":
-                result = call(methodCode, methodArgs, frame);
-                break;
-//            case "toString":
-//                result = toString(methodCode, methodArgs, frame);
-//                break;
-//            case "toBytes":
-//                result = toBytes(methodCode, methodArgs, frame);
-//                break;
-            case "valid":
-                result = valid(methodCode, methodArgs, frame);
-                break;
+    public static Result nativeRun(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
+        switch (methodCode.fullName) {
+            case balance:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return balance(methodCode, methodArgs, frame);
+                }
+            case transfer:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return transfer(methodCode, methodArgs, frame);
+                }
+            case call:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return call(methodCode, methodArgs, frame);
+                }
+            case valid:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return valid(methodCode, methodArgs, frame);
+                }
             default:
                 frame.nonsupportMethod(methodCode);
-                break;
+                return null;
         }
-        return result;
     }
 
     private static BigInteger balance(byte[] address, Frame frame) {
         return frame.vm.getRepository().getBalance(address);
     }
 
+    public static final String balance = TYPE + "." + "balance" + "()Ljava/math/BigInteger;";
+
+    /**
+     * native
+     *
+     * @see Address#balance()
+     */
     private static Result balance(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
         String address = frame.heap.runToString(objectRef);
@@ -59,6 +73,13 @@ public class NativeAddress {
         return result;
     }
 
+    public static final String transfer = TYPE + "." + "transfer" + "(Ljava/math/BigInteger;)V";
+
+    /**
+     * native
+     *
+     * @see Address#transfer(BigInteger)
+     */
     private static Result transfer(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef addressRef = methodArgs.objectRef;
         ObjectRef valueRef = (ObjectRef) methodArgs.invokeArgs[0];
@@ -100,6 +121,13 @@ public class NativeAddress {
         return result;
     }
 
+    public static final String call = TYPE + "." + "call" + "(Ljava/lang/String;Ljava/lang/String;[[Ljava/lang/String;Ljava/math/BigInteger;)V";
+
+    /**
+     * native
+     *
+     * @see Address#call(String, String, String[][], BigInteger)
+     */
     private static Result call(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef addressRef = methodArgs.objectRef;
         ObjectRef methodNameRef = (ObjectRef) methodArgs.invokeArgs[0];
@@ -178,24 +206,13 @@ public class NativeAddress {
 
     }
 
-//    private static Result toString(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-//        ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
-//        byte[] bytes = (byte[]) frame.heap.getObject(objectRef);
-//        String str = toString(bytes);
-//        ObjectRef ref = frame.heap.newString(str);
-//        Result result = NativeMethod.result(methodCode, ref, frame);
-//        return result;
-//    }
-//
-//    private static Result toBytes(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-//        ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
-//        String str = (String) frame.heap.getObject(objectRef);
-//        byte[] bytes = toBytes(str);
-//        ObjectRef ref = frame.heap.newArray(bytes);
-//        Result result = NativeMethod.result(methodCode, ref, frame);
-//        return result;
-//    }
+    public static final String valid = TYPE + "." + "valid" + "(Ljava/lang/String;)V";
 
+    /**
+     * native
+     *
+     * @see Address#valid(String)
+     */
     private static Result valid(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
         String str = frame.heap.runToString(objectRef);
