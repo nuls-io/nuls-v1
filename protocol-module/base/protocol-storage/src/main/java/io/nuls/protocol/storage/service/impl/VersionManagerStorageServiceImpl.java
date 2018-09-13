@@ -56,7 +56,22 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
             throw new NulsRuntimeException(result.getErrorCode());
         }
 
+        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX);
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+            throw new NulsRuntimeException(result.getErrorCode());
+        }
+
+        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA);
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+            throw new NulsRuntimeException(result.getErrorCode());
+        }
+
         result = this.dbService.createArea(ProtocolStorageConstant.PROTOCOL_TEMP_AREA);
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+            throw new NulsRuntimeException(result.getErrorCode());
+        }
+
+        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_TMEP_PROTOCOL_AREA);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
@@ -132,6 +147,17 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
     public void clearBlockProtocol(long blockHeight, int version) {
         dbService.delete(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX, Util.intToBytes(version));
         dbService.delete(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA, new VarInt(blockHeight).encode());
+    }
+
+    @Override
+    public Result saveBlockProtocolTempInfoPo(BlockProtocolInfoPo protocolInfoPo) {
+        List<Long> blockHeightIndexs = dbService.getModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), List.class);
+        if (blockHeightIndexs == null) {
+            blockHeightIndexs = new ArrayList<>();
+        }
+        blockHeightIndexs.add(protocolInfoPo.getBlockHeight());
+        dbService.putModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), blockHeightIndexs);
+        return dbService.putModel(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA, new VarInt(protocolInfoPo.getBlockHeight()).encode(), protocolInfoPo);
     }
 
 

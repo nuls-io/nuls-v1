@@ -96,6 +96,9 @@ public interface VersionManagerStorageService {
     BlockProtocolInfoPo getBlockProtocolInfoPo(long blockHeight);
 
     void clearBlockProtocol(long blockHeight, int version);
+
+
+    Result saveBlockProtocolTempInfoPo(BlockProtocolInfoPo protocolInfoPo);
     /**
      * 获取所有升级新版的临时数据
      * @return
