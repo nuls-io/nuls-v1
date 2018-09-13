@@ -24,9 +24,9 @@ public class Heap {
 
     private VM vm;
 
-    private final Map<ObjectRef, Map<String, Object>> objects = new HashMap<>(1024);
+    public final HeapMap<ObjectRef, Map<String, Object>> objects = new HeapMap<>(1024);
 
-    private final Map<String, Object> arrays = new HashMap<>(1024);
+    public final HeapMap<String, Object> arrays = new HeapMap<>(1024);
 
     private final Set<ObjectRef> changes = new HashSet<>(1024);
 
@@ -619,14 +619,6 @@ public class Heap {
         } else {
             return false;
         }
-    }
-
-    public Map<ObjectRef, Map<String, Object>> getObjects() {
-        return objects;
-    }
-
-    public Map<String, Object> getArrays() {
-        return arrays;
     }
 
     public BigInteger getObjectRefCount() {
