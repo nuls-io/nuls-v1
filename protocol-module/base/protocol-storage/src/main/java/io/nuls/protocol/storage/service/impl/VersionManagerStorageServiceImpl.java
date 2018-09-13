@@ -8,7 +8,9 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Result;
+import io.nuls.kernel.utils.VarInt;
 import io.nuls.protocol.storage.constant.ProtocolStorageConstant;
+import io.nuls.protocol.storage.po.BlockProtocolInfoPo;
 import io.nuls.protocol.storage.po.ProtocolInfoPo;
 import io.nuls.protocol.storage.po.ProtocolTempInfoPo;
 import io.nuls.protocol.storage.service.VersionManagerStorageService;
@@ -43,6 +45,11 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
         }
 
         result = this.dbService.createArea(ProtocolStorageConstant.NULS_PROTOCOL_AREA);
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+            throw new NulsRuntimeException(result.getErrorCode());
+        }
+
+        result = this.dbService.createArea(ProtocolStorageConstant.PROTOCOL_TEMP_AREA);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
@@ -92,6 +99,16 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public Result saveBlockProtocolInfoPo(BlockProtocolInfoPo protocolInfoPo) {
+        return dbService.putModel(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA, new VarInt(protocolInfoPo.getBlockHeight()).encode(), protocolInfoPo);
+    }
+
+    @Override
+    public BlockProtocolInfoPo getBlockProtocolInfoPo(long blockHeight) {
+        return dbService.getModel(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA, new VarInt(blockHeight).encode(), BlockProtocolInfoPo.class);
     }
 
     @Override

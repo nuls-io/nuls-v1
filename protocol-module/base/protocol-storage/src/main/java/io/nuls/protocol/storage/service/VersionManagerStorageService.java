@@ -25,6 +25,7 @@
 package io.nuls.protocol.storage.service;
 
 import io.nuls.kernel.model.Result;
+import io.nuls.protocol.storage.po.BlockProtocolInfoPo;
 import io.nuls.protocol.storage.po.ProtocolInfoPo;
 import io.nuls.protocol.storage.po.ProtocolTempInfoPo;
 
@@ -84,6 +85,10 @@ public interface VersionManagerStorageService {
      * @return ProtocolTempInfoPo 对应版本的升级信息
      */
     ProtocolTempInfoPo getProtocolTempInfoPo(String key);
+
+    Result saveBlockProtocolInfoPo(BlockProtocolInfoPo protocolInfoPo);
+
+    BlockProtocolInfoPo getBlockProtocolInfoPo(long blockHeight);
 
     /**
      * 获取所有升级新版的临时数据

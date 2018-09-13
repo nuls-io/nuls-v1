@@ -12,6 +12,7 @@ import io.nuls.kernel.utils.AddressTool;
 import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.base.version.ProtocolContainer;
 import io.nuls.protocol.service.BlockService;
+import io.nuls.protocol.storage.po.BlockProtocolInfoPo;
 import io.nuls.protocol.storage.po.ProtocolInfoPo;
 import io.nuls.protocol.storage.po.ProtocolTempInfoPo;
 import io.nuls.protocol.storage.service.VersionManagerStorageService;
@@ -154,7 +155,6 @@ public class NulsProtocolProcess {
                 container.setStatus(ProtocolContainer.DELAY_LOCK);
                 container.setCurrentDelay(1);
             }
-            saveProtocolInfo(container);
 
             Log.info("========== 统计协议 ==========");
             Log.info("========== 协议覆盖率：" + rate + " -->>> " + container.getPercent());
@@ -176,7 +176,6 @@ public class NulsProtocolProcess {
 //            }
             container.setCurrentDelay(container.getCurrentDelay() + 1);
 
-
             //如果已经达到延迟块数，则新协议生效，从下一区块开始，走新协议
             if (container.getCurrentDelay() >= container.getDelay()) {
                 container.setStatus(ProtocolContainer.VALID);
@@ -194,7 +193,6 @@ public class NulsProtocolProcess {
                 Log.info("********** 生效协议当前轮次：" + container.getRoundIndex());
                 Log.info("********** 生效协议AddressSet：" + Arrays.toString(container.getAddressSet().toArray()));
             } else {
-                saveProtocolInfo(container);
                 Log.info("========== 统计协议 ==========");
                 Log.info("========== 协议version：" + container.getVersion());
                 Log.info("========== 当前高度：" + blockHeader.getHeight());
@@ -205,6 +203,8 @@ public class NulsProtocolProcess {
                 Log.info("========== 协议AddressSet：" + Arrays.toString(container.getAddressSet().toArray()));
             }
         }
+        saveProtocolInfo(container);
+        saveBLockProtocolInfo(blockHeader, container);
     }
 
     private void calcTempProtocolCoverageRate(ProtocolTempInfoPo tempInfoPo, BlockExtendsData extendsData, BlockHeader blockHeader) {
@@ -220,7 +220,7 @@ public class NulsProtocolProcess {
                 tempInfoPo.setStatus(ProtocolContainer.DELAY_LOCK);
                 tempInfoPo.setCurrentDelay(1);
             }
-            Result result = getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
+            getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
             Log.info("========== 统计Temp协议 未定义 ==========");
             Log.info("========== 协议覆盖率：" + rate + " -->>>" + tempInfoPo.getPercent());
             Log.info("========== 协议version：" + tempInfoPo.getVersion());
@@ -242,7 +242,6 @@ public class NulsProtocolProcess {
 //                tempInfoPo.setCurrentDelay(tempInfoPo.getCurrentDelay() + 1);
 //            }
             tempInfoPo.setCurrentDelay(tempInfoPo.getCurrentDelay() + 1);
-
 
             //如果已经达到延迟块数，则新协议生效，从下一区块开始，走新协议
             if (tempInfoPo.getCurrentDelay() >= tempInfoPo.getDelay()) {
@@ -281,26 +280,6 @@ public class NulsProtocolProcess {
             }
         }
     }
-
-
-//    /**
-//     * 每一轮出块结束后，判断可升级的版本覆盖率，如果未达到覆盖率直接清空覆盖率和已延迟块重新计算
-//     */
-//    private void checkProtocolCoverageRateWithRoundEnd(MeetingRound currentRound, MeetingMember currentMember) {
-//        if (currentMember.getPackingIndexOfRound() == currentRound.getMemberCount()) {
-//            for (ProtocolContainer container : NulsVersionManager.getAllProtocolContainers().values()) {
-//                if (container.getStatus() != ProtocolContainer.VALID) {
-//                    container.getAddressSet().clear();
-//                    int rate = calcRate(container);
-//                    if (rate < container.getPercent()) {
-//                        container.setCurrentDelay(0);
-//                        container.setStatus(ProtocolContainer.INVALID);
-//                        saveProtocolInfo(container);
-//                    }
-//                }
-//            }
-//        }
-//    }
 
     /**
      * 协议升级
@@ -347,6 +326,11 @@ public class NulsProtocolProcess {
         getVersionManagerStorageService().saveProtocolInfoPo(infoPo);
     }
 
+    private void saveBLockProtocolInfo(BlockHeader blockHeader, ProtocolContainer container) {
+        BlockProtocolInfoPo infoPo = ProtocolTransferTool.toBlockProtocolInfoPo(blockHeader, container);
+        getVersionManagerStorageService().saveBlockProtocolInfoPo(infoPo);
+    }
+
     private VersionManagerStorageService getVersionManagerStorageService() {
         if (versionManagerStorageService == null) {
             versionManagerStorageService = NulsContext.getServiceBean(VersionManagerStorageService.class);
@@ -361,11 +345,7 @@ public class NulsProtocolProcess {
         return blockService;
     }
 
-    /**
-     * 回滚协议升级的数据
-     *
-     * @param blockHeader
-     */
+
     public void processProtocolRollback(BlockHeader blockHeader) {
         BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
         //临时处理为空的情况，判断为空是由于第一个版本的区块不包含版本信息字段
@@ -379,56 +359,85 @@ public class NulsProtocolProcess {
                 //如果block对应的协议已经生效，并且当前块的高度大于协议生效时的高度，则不需要处理
                 return;
             }
-            //通过高度判断该block否是恰好是一个协议生效的块
-            if (null != protocolContainer.getEffectiveHeight() && protocolContainer.getEffectiveHeight() == blockHeader.getHeight()) {
-                //回退恰好一个协议生效的块
-                rollbackUpgradeBlock(protocolContainer, blockHeader, extendsData);
-            } else {
-                rollbackContainerBlock(protocolContainer, blockHeader, extendsData);
+            BlockProtocolInfoPo blockProtocolInfoPo = getVersionManagerStorageService().getBlockProtocolInfoPo(blockHeader.getHeight() - 1);
+            if (blockProtocolInfoPo != null) {
+                ProtocolTransferTool.copyFromBlockProtocolInfoPo(blockProtocolInfoPo, protocolContainer);
+                saveProtocolInfo(protocolContainer);
             }
-            saveProtocolInfo(protocolContainer);
-            /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
-            Log.info("@@@@@@@@@@@@@@ 回滚 统计协议 @@@@@@@@@@@@@@");
-            Log.info("@@@@@@@ 协议version：" + protocolContainer.getVersion());
-            Log.info("@@@@@@@ 当前高度：" + blockHeader.getHeight());
-            Log.info("@@@@@@@ 当前hash：" + blockHeader.getHash());
-            Log.info("@@@@@@@ 协议状态：" + protocolContainer.getStatus());
-            Log.info("@@@@@@@ 协议当前延迟块数：" + protocolContainer.getCurrentDelay());
-            Log.info("@@@@@@@ 协议当前轮次：" + protocolContainer.getRoundIndex());
-            Log.info("@@@@@@@ 协议AddressSet：" + Arrays.toString(protocolContainer.getAddressSet().toArray()));
-            /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
         } else {
-            //如果没有,则从临时的协议容器里获取
-            ProtocolTempInfoPo tempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(extendsData.getProtocolKey());
-            if (tempInfoPo != null) {
-                if (tempInfoPo.getStatus() == ProtocolContainer.VALID && tempInfoPo.getEffectiveHeight() < blockHeader.getHeight()) {
-                    //如果block对应的协议已经生效，并且当前块的高度大于协议生效时的高度，则不需要处理
-                    return;
-                }
-                //通过高度判断该block否是恰好是一个协议生效的块
-                if (null != tempInfoPo.getEffectiveHeight() && tempInfoPo.getEffectiveHeight() == blockHeader.getHeight()) {
-                    //回退恰好一个协议生效的块
-                    rollbackUpgradeBlockTemp(tempInfoPo, blockHeader, extendsData);
-                } else {
-                    rollbackContainerBlockTemp(tempInfoPo, blockHeader, extendsData);
-                }
-                getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
 
-                /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
-                Log.info("@@@@@@@@@@@@@@ 回滚 Temp 统计协议 @@@@@@@@@@@@@@");
-                Log.info("@@@@@@@ 协议version：" + tempInfoPo.getVersion());
-                Log.info("@@@@@@@ 当前高度：" + blockHeader.getHeight());
-                Log.info("@@@@@@@ 当前hash：" + blockHeader.getHash());
-                Log.info("@@@@@@@ 协议状态：" + tempInfoPo.getStatus());
-                Log.info("@@@@@@@ 协议当前延迟块数：" + tempInfoPo.getCurrentDelay());
-                Log.info("@@@@@@@ 协议当前轮次：" + tempInfoPo.getRoundIndex());
-                Log.info("@@@@@@@ 协议AddressSet：" + Arrays.toString(tempInfoPo.getAddressSet().toArray()));
-                /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
-
-            }
         }
-
     }
+
+
+//    /**
+//     * 回滚协议升级的数据
+//     *
+//     * @param blockHeader
+//     */
+//    public void processProtocolRollback(BlockHeader blockHeader) {
+//        BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
+//        //临时处理为空的情况，判断为空是由于第一个版本的区块不包含版本信息字段
+//        if (extendsData.getCurrentVersion() == null) {
+//            return;
+//        }
+//        //首先确定回滚块的协议对象
+//        ProtocolContainer protocolContainer = NulsVersionManager.getProtocolContainer(extendsData.getCurrentVersion());
+//        if (protocolContainer != null) {
+//            if (protocolContainer.getStatus() == ProtocolContainer.VALID && protocolContainer.getEffectiveHeight() < blockHeader.getHeight()) {
+//                //如果block对应的协议已经生效，并且当前块的高度大于协议生效时的高度，则不需要处理
+//                return;
+//            }
+//            //通过高度判断该block否是恰好是一个协议生效的块
+//            if (null != protocolContainer.getEffectiveHeight() && protocolContainer.getEffectiveHeight() == blockHeader.getHeight()) {
+//                //回退恰好一个协议生效的块
+//                rollbackUpgradeBlock(protocolContainer, blockHeader, extendsData);
+//            } else {
+//                rollbackContainerBlock(protocolContainer, blockHeader, extendsData);
+//            }
+//            saveProtocolInfo(protocolContainer);
+//            /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
+//            Log.info("@@@@@@@@@@@@@@ 回滚 统计协议 @@@@@@@@@@@@@@");
+//            Log.info("@@@@@@@ 协议version：" + protocolContainer.getVersion());
+//            Log.info("@@@@@@@ 当前高度：" + blockHeader.getHeight());
+//            Log.info("@@@@@@@ 当前hash：" + blockHeader.getHash());
+//            Log.info("@@@@@@@ 协议状态：" + protocolContainer.getStatus());
+//            Log.info("@@@@@@@ 协议当前延迟块数：" + protocolContainer.getCurrentDelay());
+//            Log.info("@@@@@@@ 协议当前轮次：" + protocolContainer.getRoundIndex());
+//            Log.info("@@@@@@@ 协议AddressSet：" + Arrays.toString(protocolContainer.getAddressSet().toArray()));
+//            /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
+//        } else {
+//            //如果没有,则从临时的协议容器里获取
+//            ProtocolTempInfoPo tempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(extendsData.getProtocolKey());
+//            if (tempInfoPo != null) {
+//                if (tempInfoPo.getStatus() == ProtocolContainer.VALID && tempInfoPo.getEffectiveHeight() < blockHeader.getHeight()) {
+//                    //如果block对应的协议已经生效，并且当前块的高度大于协议生效时的高度，则不需要处理
+//                    return;
+//                }
+//                //通过高度判断该block否是恰好是一个协议生效的块
+//                if (null != tempInfoPo.getEffectiveHeight() && tempInfoPo.getEffectiveHeight() == blockHeader.getHeight()) {
+//                    //回退恰好一个协议生效的块
+//                    rollbackUpgradeBlockTemp(tempInfoPo, blockHeader, extendsData);
+//                } else {
+//                    rollbackContainerBlockTemp(tempInfoPo, blockHeader, extendsData);
+//                }
+//                getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
+//
+//                /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
+//                Log.info("@@@@@@@@@@@@@@ 回滚 Temp 统计协议 @@@@@@@@@@@@@@");
+//                Log.info("@@@@@@@ 协议version：" + tempInfoPo.getVersion());
+//                Log.info("@@@@@@@ 当前高度：" + blockHeader.getHeight());
+//                Log.info("@@@@@@@ 当前hash：" + blockHeader.getHash());
+//                Log.info("@@@@@@@ 协议状态：" + tempInfoPo.getStatus());
+//                Log.info("@@@@@@@ 协议当前延迟块数：" + tempInfoPo.getCurrentDelay());
+//                Log.info("@@@@@@@ 协议当前轮次：" + tempInfoPo.getRoundIndex());
+//                Log.info("@@@@@@@ 协议AddressSet：" + Arrays.toString(tempInfoPo.getAddressSet().toArray()));
+//                /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
+//
+//            }
+//        }
+//
+//    }
 
 
     /**
@@ -469,7 +478,7 @@ public class NulsProtocolProcess {
                     int rate = calcRate(addressSet.size(), currentRoundBlockHeaderList.size());
                     //如果覆盖率达到或者状态已处于延迟块统计中者继续统计
                     if (rate >= protocolContainer.getPercent() || protocolContainer.getStatus() == ProtocolContainer.DELAY_LOCK) {
-                        if(!isStartDelayLock){
+                        if (!isStartDelayLock) {
                             //统计开始的块
                             protocolContainer.setCurrentDelay(0L);
                             protocolContainer.setStatus(ProtocolContainer.DELAY_LOCK);
