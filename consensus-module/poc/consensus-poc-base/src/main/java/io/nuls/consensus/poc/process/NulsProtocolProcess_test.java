@@ -6,7 +6,9 @@ import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.util.ProtocolTransferTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.protocol.base.version.NulsVersionManager;
@@ -19,15 +21,15 @@ import io.nuls.protocol.storage.service.VersionManagerStorageService;
 import java.math.BigDecimal;
 import java.util.*;
 
-public class NulsProtocolProcess {
+public class NulsProtocolProcess_test {
 
-    private static NulsProtocolProcess protocolProcess = new NulsProtocolProcess();
+    private static NulsProtocolProcess_test protocolProcess = new NulsProtocolProcess_test();
 
-    private NulsProtocolProcess() {
+    private NulsProtocolProcess_test() {
 
     }
 
-    public static NulsProtocolProcess getInstance() {
+    public static NulsProtocolProcess_test getInstance() {
         return protocolProcess;
     }
 
@@ -282,26 +284,6 @@ public class NulsProtocolProcess {
         }
     }
 
-
-//    /**
-//     * 每一轮出块结束后，判断可升级的版本覆盖率，如果未达到覆盖率直接清空覆盖率和已延迟块重新计算
-//     */
-//    private void checkProtocolCoverageRateWithRoundEnd(MeetingRound currentRound, MeetingMember currentMember) {
-//        if (currentMember.getPackingIndexOfRound() == currentRound.getMemberCount()) {
-//            for (ProtocolContainer container : NulsVersionManager.getAllProtocolContainers().values()) {
-//                if (container.getStatus() != ProtocolContainer.VALID) {
-//                    container.getAddressSet().clear();
-//                    int rate = calcRate(container);
-//                    if (rate < container.getPercent()) {
-//                        container.setCurrentDelay(0);
-//                        container.setStatus(ProtocolContainer.INVALID);
-//                        saveProtocolInfo(container);
-//                    }
-//                }
-//            }
-//        }
-//    }
-
     /**
      * 协议升级
      *
@@ -342,6 +324,15 @@ public class NulsProtocolProcess {
         return rate;
     }
 
+    private int calcRate(List<BlockHeader> headers, int memberCount, ProtocolContainer container) {
+        BlockExtendsData extendsData;
+        for(BlockHeader header: headers) {
+            extendsData = new BlockExtendsData(header.getExtend());
+//            if(header.get)
+        }
+        return 1;
+    }
+
     private void saveProtocolInfo(ProtocolContainer container) {
         ProtocolInfoPo infoPo = ProtocolTransferTool.toProtocolInfoPo(container);
         getVersionManagerStorageService().saveProtocolInfoPo(infoPo);
@@ -368,24 +359,25 @@ public class NulsProtocolProcess {
      */
     public void processProtocolRollback(BlockHeader blockHeader) {
         BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
-        //临时处理为空的情况，判断为空是由于第一个版本的区块不包含版本信息字段
+        //判断为空是由于第一个版本的区块不包含版本信息字段，此时区块回退不涉及到版本更新逻辑
         if (extendsData.getCurrentVersion() == null) {
             return;
         }
-        //首先确定回滚块的协议对象
+        //首先确定回滚块的协议容器对象
         ProtocolContainer protocolContainer = NulsVersionManager.getProtocolContainer(extendsData.getCurrentVersion());
         if (protocolContainer != null) {
-            if (protocolContainer.getStatus() == ProtocolContainer.VALID && protocolContainer.getEffectiveHeight() < blockHeader.getHeight()) {
-                //如果block对应的协议已经生效，并且当前块的高度大于协议生效时的高度，则不需要处理
-                return;
-            }
-            //通过高度判断该block否是恰好是一个协议生效的块
-            if (null != protocolContainer.getEffectiveHeight() && protocolContainer.getEffectiveHeight() == blockHeader.getHeight()) {
-                //回退恰好一个协议生效的块
+            //如果block对应的协议已经生效，并且当前块的高度大于协议生效时的高度，则不需要处理
+            if (protocolContainer.getStatus() == ProtocolContainer.VALID) {
+                if (protocolContainer.getEffectiveHeight() < blockHeader.getHeight()) {
+                    return;
+                }
                 rollbackUpgradeBlock(protocolContainer, blockHeader, extendsData);
-            } else {
-                rollbackContainerBlock(protocolContainer, blockHeader, extendsData);
+            } else if (protocolContainer.getStatus() == ProtocolContainer.DELAY_LOCK) {
+                rollbackDelayBlock(protocolContainer, blockHeader, extendsData);
+            } else if (protocolContainer.getStatus() == ProtocolContainer.INVALID) {
+                rollbackInvalidBlock(protocolContainer, blockHeader, extendsData);
             }
+
             saveProtocolInfo(protocolContainer);
             /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
             Log.info("@@@@@@@@@@@@@@ 回滚 统计协议 @@@@@@@@@@@@@@");
@@ -408,7 +400,7 @@ public class NulsProtocolProcess {
                 //通过高度判断该block否是恰好是一个协议生效的块
                 if (null != tempInfoPo.getEffectiveHeight() && tempInfoPo.getEffectiveHeight() == blockHeader.getHeight()) {
                     //回退恰好一个协议生效的块
-                    rollbackUpgradeBlockTemp(tempInfoPo, blockHeader, extendsData);
+//                    rollbackUpgradeBlockTemp(tempInfoPo, blockHeader, extendsData);
                 } else {
                     rollbackContainerBlockTemp(tempInfoPo, blockHeader, extendsData);
                 }
@@ -433,14 +425,15 @@ public class NulsProtocolProcess {
 
     /**
      * 回滚块，统计协议信息
+     *
      * @param protocolContainer
      * @param blockHeader
      * @param extendsData
      */
-    private void rollbackContainerBlock(ProtocolContainer protocolContainer,BlockHeader blockHeader, BlockExtendsData extendsData){
+    private void rollbackContainerBlock(ProtocolContainer protocolContainer, BlockHeader blockHeader, BlockExtendsData extendsData) {
         //满足覆盖率的所有块，分轮次存到map中
         Map<Long, List<BlockHeader>> roundBlocksMap = new TreeMap<>();
-        getRollbackBlocks(protocolContainer, roundBlocksMap, blockHeader, extendsData.getRoundIndex());
+//        getRollbackBlocks(protocolContainer, roundBlocksMap, blockHeader, extendsData.getRoundIndex());
         for (Map.Entry<Long, List<BlockHeader>> entry : roundBlocksMap.entrySet()) {
             long roundIndex = entry.getKey();
             List<BlockHeader> currentRoundBlockHeaderList = entry.getValue();
@@ -481,14 +474,15 @@ public class NulsProtocolProcess {
 
     /**
      * 回滚块，统计临时协议信息
+     *
      * @param tempInfoPo
      * @param blockHeader
      * @param extendsData
      */
-    private void rollbackContainerBlockTemp(ProtocolTempInfoPo tempInfoPo, BlockHeader blockHeader, BlockExtendsData extendsData){
+    private void rollbackContainerBlockTemp(ProtocolTempInfoPo tempInfoPo, BlockHeader blockHeader, BlockExtendsData extendsData) {
         //满足覆盖率的所有块，分轮次存到map中
         Map<Long, List<BlockHeader>> roundBlocksMap = new TreeMap<>();
-        getRollbackBlocksTemp(tempInfoPo, roundBlocksMap, blockHeader, extendsData.getRoundIndex());
+//        getRollbackBlocksTemp(tempInfoPo, roundBlocksMap, blockHeader, extendsData.getRoundIndex());
         for (Map.Entry<Long, List<BlockHeader>> entry : roundBlocksMap.entrySet()) {
             long roundIndex = entry.getKey();
             List<BlockHeader> currentRoundBlockHeaderList = entry.getValue();
@@ -527,200 +521,176 @@ public class NulsProtocolProcess {
 
     /**
      * 回滚的块恰好是升级的块
+     *
      * @param protocolContainer
      * @param blockHeader
      * @param extendsData
      */
-    private void rollbackUpgradeBlock(ProtocolContainer protocolContainer, BlockHeader blockHeader, BlockExtendsData extendsData){
+    private void rollbackUpgradeBlock(ProtocolContainer protocolContainer, BlockHeader blockHeader, BlockExtendsData extendsData) {
         NulsContext.MAIN_NET_VERSION = protocolContainer.getVersion() - 1 < 1 ? 1 : protocolContainer.getVersion() - 1;
         protocolContainer.setStatus(ProtocolContainer.DELAY_LOCK);
         protocolContainer.setCurrentDelay(protocolContainer.getCurrentDelay() - 1);
+        protocolContainer.setEffectiveHeight(null);
+        //回滚到前一个块的轮次
+        BlockHeader preBlockHeader = getBlockService().getBlock(blockHeader.getPreHash()).getData().getHeader();
+        BlockExtendsData preExtendsData = new BlockExtendsData(preBlockHeader.getExtend());
+        protocolContainer.setRoundIndex(preExtendsData.getRoundIndex());
+
         //重置addressSet
-        Set<String> addressSet = new HashSet<>();
-        if(extendsData.getPackingIndexOfRound() == 1){
-            //如果是当前轮次的第一个块，则取前一轮的块来计算addressSet
-            BlockHeader preBlockHeader = getBlockService().getBlock(blockHeader.getPreHash()).getData().getHeader();
-            List<BlockHeader> list = new ArrayList<>();
-            getCurrentRoundBlockHeaderList(list, preBlockHeader);
-            for (BlockHeader header : list) {
-                BlockExtendsData extendsDataHeader = new BlockExtendsData(header.getExtend());
-                if (extendsDataHeader.getCurrentVersion().intValue() == protocolContainer.getVersion().intValue()) {
-                    addressSet.add(AddressTool.getStringAddressByBytes(header.getPackingAddress()));
-                }
-            }
-        }else{
-            List<BlockHeader> list = new ArrayList<>();
-            getCurrentRoundBlockHeaderList(list, blockHeader);
-            for (BlockHeader header : list) {
-                //如果是当前需回滚的块，则不加入
-                if (header.getHash().equals(blockHeader.getHash())) {
-                    break;
-                }
-                BlockExtendsData extendsDataHeader = new BlockExtendsData(header.getExtend());
-                if (extendsDataHeader.getCurrentVersion().intValue() == protocolContainer.getVersion().intValue()) {
-                    addressSet.add(AddressTool.getStringAddressByBytes(header.getPackingAddress()));
-                }
-            }
+        Set<String> addressSet;
+        if (extendsData.getRoundIndex() > preExtendsData.getRoundIndex()) {
+            //当前块的轮次大于上一块的轮次，则取前一轮的所有块来计算addressSet
+            List<BlockHeader> headerList = getCurrentRoundBlockHeaders(preBlockHeader.getHash(), true);
+            addressSet = getRoundPackingAddress(headerList, protocolContainer, null);
+        } else {
+            //当前块的轮次等于上衣块的轮次，则取本轮的所有已出块来计算addressSet
+            List<BlockHeader> headerList = getCurrentRoundBlockHeaders(blockHeader.getHash(), false);
+            addressSet = getRoundPackingAddress(headerList, protocolContainer, blockHeader.getHash());
         }
         protocolContainer.setAddressSet(addressSet);
     }
+
     /**
-     * 回滚的块恰好是升级的块
-     * @param tempInfoPo
+     * 回滚区块的时候协议容器处于延迟生效的时候
+     *
+     * @param protocolContainer
      * @param blockHeader
      * @param extendsData
      */
-    private void rollbackUpgradeBlockTemp(ProtocolTempInfoPo tempInfoPo, BlockHeader blockHeader, BlockExtendsData extendsData){
-        NulsContext.MAIN_NET_VERSION = tempInfoPo.getVersion() - 1 < 1 ? 1 : tempInfoPo.getVersion() - 1;
-        tempInfoPo.setStatus(ProtocolContainer.DELAY_LOCK);
-        tempInfoPo.setCurrentDelay(tempInfoPo.getCurrentDelay() - 1);
-        //重置addressSet
-        Set<String> addressSetTemp = new HashSet<>();
-        if(extendsData.getPackingIndexOfRound() == 1){
-            //如果是当前轮次的第一个块，则取前一轮的块来计算addressSet
-            BlockHeader preBlockHeader = getBlockService().getBlock(blockHeader.getPreHash()).getData().getHeader();
-            List<BlockHeader> list = new ArrayList<>();
-            getCurrentRoundBlockHeaderList(list, preBlockHeader);
-            for (BlockHeader header : list) {
-                BlockExtendsData extendsDataHeader = new BlockExtendsData(header.getExtend());
-                if (extendsDataHeader.getCurrentVersion().intValue() == tempInfoPo.getVersion()) {
-                    addressSetTemp.add(AddressTool.getStringAddressByBytes(header.getPackingAddress()));
-                }
-            }
-        }else{
-            List<BlockHeader> list = new ArrayList<>();
-            getCurrentRoundBlockHeaderList(list, blockHeader);
-            for (BlockHeader header : list) {
-                //如果是当前需回滚的块，则不加入
-                if (header.getHash().equals(blockHeader.getHash())) {
-                    break;
-                }
-                BlockExtendsData extendsDataHeader = new BlockExtendsData(header.getExtend());
-                if (extendsDataHeader.getCurrentVersion().intValue() == tempInfoPo.getVersion()) {
-                    addressSetTemp.add(AddressTool.getStringAddressByBytes(header.getPackingAddress()));
-                }
-            }
+    private void rollbackDelayBlock(ProtocolContainer protocolContainer, BlockHeader blockHeader, BlockExtendsData extendsData) {
+        protocolContainer.setCurrentDelay(protocolContainer.getCurrentDelay() - 1);
+        //如果延迟块数回滚到0时，状态改为未生效
+        if (protocolContainer.getCurrentDelay() == 0) {
+            protocolContainer.setStatus(ProtocolContainer.INVALID);
         }
-        tempInfoPo.setAddressSet(addressSetTemp);
-    }
-
-
-    /**
-     * 根据区块头获取同轮次所有区块(包含当前块)
-     *
-     * @param currentRoundBlockHeaderList
-     * @param blockHeader
-     */
-    private List<BlockHeader> getCurrentRoundBlockHeaderList(List<BlockHeader> currentRoundBlockHeaderList, BlockHeader blockHeader) {
-        BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
+        //回滚到前一个块的轮次
         BlockHeader preBlockHeader = getBlockService().getBlock(blockHeader.getPreHash()).getData().getHeader();
         BlockExtendsData preExtendsData = new BlockExtendsData(preBlockHeader.getExtend());
-
-        /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
-        System.out.println("@@@@@@@@@@@@@@ 轮次比较 获取同轮次区块区块 @@@@@@@@@@@@@@");
-        System.out.println("extendsData.getRoundIndex(): " + extendsData.getRoundIndex());
-        System.out.println("preExtendsData.getRoundIndex(): " + preExtendsData.getRoundIndex());
-        /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
-
+        protocolContainer.setRoundIndex(preExtendsData.getRoundIndex());
+        //重置addressSet
+        Set<String> addressSet;
         if (extendsData.getRoundIndex() > preExtendsData.getRoundIndex()) {
-            return currentRoundBlockHeaderList;
+            //如果是当前轮次的第一个块，则取前一轮的块来计算addressSet
+            List<BlockHeader> headerList = getCurrentRoundBlockHeaders(preBlockHeader.getHash(), true);
+            addressSet = getRoundPackingAddress(headerList, protocolContainer, null);
         } else {
-            currentRoundBlockHeaderList.add(0, blockHeader);
-            return getCurrentRoundBlockHeaderList(currentRoundBlockHeaderList, preBlockHeader);
+            List<BlockHeader> headerList = getCurrentRoundBlockHeaders(blockHeader.getHash(), false);
+            addressSet = getRoundPackingAddress(headerList, protocolContainer, blockHeader.getHash());
         }
+        protocolContainer.setAddressSet(addressSet);
     }
 
     /**
-     * (获取块)获取当前块之前满足当前块协议覆盖率条件的所有轮次的块
+     * 未达到延迟块数时的回滚处理
+     *
      * @param protocolContainer
-     * @param roundBlocksMap
      * @param blockHeader
-     * @param rollbackRoundIndex
-     * @return
+     * @param extendsData
      */
-    private Map<Long, List<BlockHeader>> getRollbackBlocks(ProtocolContainer protocolContainer, Map<Long, List<BlockHeader>> roundBlocksMap, BlockHeader blockHeader, long rollbackRoundIndex) {
-        BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
-        List<BlockHeader> list = new ArrayList<>();
-        getCurrentRoundBlockHeaderList(list, blockHeader);
-        if(list.size() > 0){
-            //判断轮次是否达到，达到这继续往前取
-            Set<String> addressSet = getRoundPackingAddress(list);
-            int rate = calcRate(addressSet.size(), list.size());
-            if (rate >= protocolContainer.getPercent()) {
-                roundBlocksMap.put(extendsData.getRoundIndex(), list);
-                BlockHeader first = list.get(0);
-                //本轮第一块的前一块为上一轮的最后一块
-                BlockHeader preRoundBlockHeader = getBlockService().getBlock(first.getPreHash()).getData().getHeader();
-                return getRollbackBlocks(protocolContainer, roundBlocksMap, preRoundBlockHeader, rollbackRoundIndex);
+    private void rollbackInvalidBlock(ProtocolContainer protocolContainer, BlockHeader blockHeader, BlockExtendsData extendsData) {
+        //回滚到前一个块的轮次
+        BlockHeader preBlockHeader = getBlockService().getBlock(blockHeader.getPreHash()).getData().getHeader();
+        BlockExtendsData preExtendsData = new BlockExtendsData(preBlockHeader.getExtend());
+        protocolContainer.setRoundIndex(preExtendsData.getRoundIndex());
+        //重置addressSet
+        Set<String> addressSet;
+        if (extendsData.getRoundIndex() > preExtendsData.getRoundIndex()) {
+            //未达到延迟块且当前块是新一轮的第一块时，回滚处理最为复杂
+            //因为可能恰好是自己分叉了，导致本轮开始时，覆盖率计算不准确，清空了所有延迟块数和状态
+            //因此需要递归找出本轮之前所有的达到覆盖率的轮次，重新计算延迟区块数
+
+            //首先获取上一轮所有块，并计算出上一轮的addressSet
+            List<BlockHeader> lastRoundHeaders = getCurrentRoundBlockHeaders(preBlockHeader.getHash(), true);
+            addressSet = getRoundPackingAddress(lastRoundHeaders, protocolContainer, null);
+
+            //再获取上上轮的所有块，如果上上轮的所有块没有达到覆盖率，则立刻回滚
+            BlockHeader firstBlock = lastRoundHeaders.get(0);  //每一轮的第一个区块
+            List<BlockHeader> beforeLastRoundHeaders = getCurrentRoundBlockHeaders(firstBlock.getPreHash(), true);  //通过每一轮的第一个区块获取上一轮的所有区块
+//            for(BlockHeader header : )
+            firstBlock = beforeLastRoundHeaders.get(0);
+            BlockExtendsData tempData = new BlockExtendsData(firstBlock.getExtend());
+            int rate = calcRate(1, tempData.getConsensusMemberCount());
+            if (rate < protocolContainer.getPercent()) {
+                protocolContainer.setAddressSet(addressSet);
+                return;
             }
+
+            //如果上上轮覆盖率达到，则依次递归到第一次开始记录延迟块数的时候，然后重新统计延迟块数
+            while (true) {
+                //通过每一轮的第一个区块得到上一轮的所有区块
+                List<BlockHeader> tempHeaders = getCurrentRoundBlockHeaders(firstBlock.getPreHash(), true);
+                Set<String> tempSet = getRoundPackingAddress(tempHeaders, protocolContainer, null);
+                firstBlock = tempHeaders.get(0);
+//                BlockExtendsData tempData = new BlockExtendsData(firstBlock.getExtend());
+//                int rate = calcRate(tempSet.size(), tempData.getConsensusMemberCount());
+                if (rate < protocolContainer.getPercent()) {
+                    break;
+                }
+            }
+        } else {
+            List<BlockHeader> headerList = getCurrentRoundBlockHeaders(blockHeader.getHash(), false);
+            addressSet = getRoundPackingAddress(headerList, protocolContainer, blockHeader.getHash());
         }
-        return roundBlocksMap;
+        protocolContainer.setAddressSet(addressSet);
     }
 
-    private Map<Long, List<BlockHeader>> getRollbackBlocksTemp(ProtocolTempInfoPo tempInfoPo, Map<Long, List<BlockHeader>> roundBlocksMap, BlockHeader blockHeader, long rollbackRoundIndex) {
+
+    private void aaa(Set<String> addressSet, BlockHeader preBlockHeader, ProtocolContainer protocolContainer) {
+        addressSet = null;
+        //首先计算出上一轮的addressSet
+        List<BlockHeader> beforeCurrentHeaders = getCurrentRoundBlockHeaders(preBlockHeader.getHash(), true);
+        addressSet = getRoundPackingAddress(beforeCurrentHeaders, protocolContainer, null);
+
+
+    }
+
+    /**
+     * 查询区块所在当前轮的所有区块
+     *
+     * @param blockHash
+     * @return
+     */
+    private List<BlockHeader> getCurrentRoundBlockHeaders(NulsDigestData blockHash, boolean comprise) {
+        BlockHeader blockHeader = getBlockService().getBlockHeader(blockHash).getData();
         BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
+        //获取前一个块
+        BlockHeader preBlockHeader;
+        BlockExtendsData preExtendData;
         List<BlockHeader> list = new ArrayList<>();
-        getCurrentRoundBlockHeaderList(list, blockHeader);
-        if (list.size() > 0) {
-            //判断轮次是否达到，达到这继续往前取
-            Set<String> addressSetTemp = getRoundPackingAddressTemp(list);
-            int rate = calcRate(addressSetTemp.size(), list.size());
-            if (rate >= tempInfoPo.getPercent()) {
-                roundBlocksMap.put(extendsData.getRoundIndex(), list);
-                BlockHeader first = list.get(0);
-                //本轮第一块的前一块为上一轮的最后一块
-                BlockHeader preRoundBlockHeader = getBlockService().getBlock(first.getPreHash()).getData().getHeader();
-                return getRollbackBlocksTemp(tempInfoPo, roundBlocksMap, preRoundBlockHeader, rollbackRoundIndex);
+        if (comprise) {
+            list.add(blockHeader);
+        }
+        //循环取出当前轮次的所有块
+        while (true) {
+            preBlockHeader = getBlockService().getBlockHeader(blockHeader.getPreHash()).getData();
+            preExtendData = new BlockExtendsData(preBlockHeader.getExtend());
+            if (preExtendData.getRoundIndex() == extendsData.getRoundIndex()) {
+                list.add(0, preBlockHeader);
+                blockHeader = preBlockHeader;
+                extendsData = preExtendData;
+            } else {
+                return list;
             }
         }
-        return roundBlocksMap;
     }
+
 
     /**
      * 获取一轮中的出块地址
      */
-    private Set<String> getRoundPackingAddress(List<BlockHeader> list) {
+    private Set<String> getRoundPackingAddress(List<BlockHeader> headerList, ProtocolContainer container, NulsDigestData blockHash) {
         Set<String> addressSet = new HashSet<>();
-        for (BlockHeader bh : list) {
-            BlockExtendsData extendsDataBH = new BlockExtendsData(bh.getExtend());
-            //如果该块版本大于当前主网版本说明是需要统计的块
-            if (extendsDataBH.getCurrentVersion() > NulsContext.MAIN_NET_VERSION) {
-                //获取当前的Container
-                ProtocolContainer protocolContainer = NulsVersionManager.getProtocolContainer(extendsDataBH.getCurrentVersion());
-                //判断并获取块对应的协议对应的
-                if (protocolContainer != null) {
-                    if (extendsDataBH.getCurrentVersion().intValue() == protocolContainer.getVersion().intValue()) {
-                        addressSet.add(AddressTool.getStringAddressByBytes(bh.getPackingAddress()));
-                    }
-                }
+        for (BlockHeader header : headerList) {
+            //如果是当前需回滚的块，则不加入
+            if (blockHash != null && header.getHash().equals(blockHash)) {
+                break;
+            }
+            BlockExtendsData extendsDataHeader = new BlockExtendsData(header.getExtend());
+            if (extendsDataHeader.getCurrentVersion().intValue() == container.getVersion().intValue()) {
+                addressSet.add(AddressTool.getStringAddressByBytes(header.getPackingAddress()));
             }
         }
         return addressSet;
-    }
-
-    /**
-     * 获取一轮中临时协议的出块地址
-     *
-     * @param list
-     * @return
-     */
-    private Set<String> getRoundPackingAddressTemp(List<BlockHeader> list) {
-        Set<String> addressSetTemp = new HashSet<>();
-        for (BlockHeader bh : list) {
-            BlockExtendsData extendsDataBH = new BlockExtendsData(bh.getExtend());
-            //如果该块版本大于当前主网版本说明是需要统计的块
-            if (extendsDataBH.getCurrentVersion() > NulsContext.MAIN_NET_VERSION) {
-                //如果没有,则从临时的协议容器里获取
-                ProtocolTempInfoPo tempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(extendsDataBH.getProtocolKey());
-                if (tempInfoPo != null) {
-                    if (extendsDataBH.getCurrentVersion().intValue() == tempInfoPo.getVersion()) {
-                        addressSetTemp.add(AddressTool.getStringAddressByBytes(bh.getPackingAddress()));
-                    }
-                }
-
-            }
-        }
-        return addressSetTemp;
     }
 
 }
