@@ -63,6 +63,5 @@ public interface KernelErrorCode {
     ErrorCode ADDRESS_IS_NOT_BELONGS_TO_CHAIN= ErrorCode.init("10029");
     ErrorCode VALIDATORS_NOT_FULLY_EXECUTED= ErrorCode.init("10030");
     ErrorCode BLOCK_IS_NULL= ErrorCode.init("10031");
-    ErrorCode NUMBER_SMALL = ErrorCode.init("10032");
 
 }
