@@ -91,12 +91,19 @@ public interface VersionManagerStorageService {
 
     List<Long> getBlockProtocolIndex(int version);
 
+    List<Long> getBlockTempProtocolIndex(int version);
+
     void saveBlockProtocolIndex(int version, List<Long> list);
+
+    void saveTempBlockProtocolIndex(int version, List<Long> list);
 
     BlockProtocolInfoPo getBlockProtocolInfoPo(long blockHeight);
 
+    BlockProtocolInfoPo getBlockTempProtocolInfoPo(long blockHeight);
+
     void clearBlockProtocol(long blockHeight, int version);
 
+    void clearTempBlockProtocol(long blockHeight, int version);
 
     Result saveBlockProtocolTempInfoPo(BlockProtocolInfoPo protocolInfoPo);
     /**
@@ -112,4 +119,6 @@ public interface VersionManagerStorageService {
     Long getChangeTxHashBlockHeight();
 
     void deleteBlockProtocol(long blockHeight);
+
+    void deleteBlockTempProtocol(long blockHeight);
 }

@@ -67,7 +67,7 @@ public interface ProtocolStorageConstant {
 
     String BLOCK_PROTOCOL_AREA = "block_protocol_area";
 
-    String BLOCK_TMEP_PROTOCOL_AREA = "block_temp_protocol_area";
+    String BLOCK_TEMP_PROTOCOL_AREA = "block_temp_protocol_area";
 
     String BLOCK_PROTOCOL_INDEX = "block_protocol_index";
 

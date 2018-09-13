@@ -71,7 +71,7 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
             throw new NulsRuntimeException(result.getErrorCode());
         }
 
-        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_TMEP_PROTOCOL_AREA);
+        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
@@ -120,12 +120,12 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
 
     @Override
     public Result saveBlockProtocolInfoPo(BlockProtocolInfoPo protocolInfoPo) {
-        List<Long> blockHeightIndexs = dbService.getModel(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), List.class);
-        if (blockHeightIndexs == null) {
-            blockHeightIndexs = new ArrayList<>();
+        List<Long> blockHeightIndex = dbService.getModel(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), List.class);
+        if (blockHeightIndex == null) {
+            blockHeightIndex = new ArrayList<>();
         }
-        blockHeightIndexs.add(protocolInfoPo.getBlockHeight());
-        dbService.putModel(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), blockHeightIndexs);
+        blockHeightIndex.add(protocolInfoPo.getBlockHeight());
+        dbService.putModel(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), blockHeightIndex);
         return dbService.putModel(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA, new VarInt(protocolInfoPo.getBlockHeight()).encode(), protocolInfoPo);
     }
 
@@ -135,13 +135,28 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
     }
 
     @Override
+    public List<Long> getBlockTempProtocolIndex(int version) {
+        return dbService.getModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX, Util.intToBytes(version), List.class);
+    }
+
+    @Override
     public void saveBlockProtocolIndex(int version, List<Long> list) {
         dbService.putModel(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX, Util.intToBytes(version), list);
     }
 
     @Override
+    public void saveTempBlockProtocolIndex(int version, List<Long> list) {
+        dbService.putModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX, Util.intToBytes(version), list);
+    }
+
+    @Override
     public BlockProtocolInfoPo getBlockProtocolInfoPo(long blockHeight) {
         return dbService.getModel(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA, new VarInt(blockHeight).encode(), BlockProtocolInfoPo.class);
+    }
+
+    @Override
+    public BlockProtocolInfoPo getBlockTempProtocolInfoPo(long blockHeight) {
+        return dbService.getModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA, new VarInt(blockHeight).encode(), BlockProtocolInfoPo.class);
     }
 
     public void clearBlockProtocol(long blockHeight, int version) {
@@ -150,20 +165,31 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
     }
 
     @Override
+    public void clearTempBlockProtocol(long blockHeight, int version) {
+        dbService.delete(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX, Util.intToBytes(version));
+        dbService.delete(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA, new VarInt(blockHeight).encode());
+    }
+
+    @Override
     public Result saveBlockProtocolTempInfoPo(BlockProtocolInfoPo protocolInfoPo) {
-        List<Long> blockHeightIndexs = dbService.getModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), List.class);
-        if (blockHeightIndexs == null) {
-            blockHeightIndexs = new ArrayList<>();
+        List<Long> blockHeightIndex = dbService.getModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), List.class);
+        if (blockHeightIndex == null) {
+            blockHeightIndex = new ArrayList<>();
         }
-        blockHeightIndexs.add(protocolInfoPo.getBlockHeight());
-        dbService.putModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), blockHeightIndexs);
-        return dbService.putModel(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA, new VarInt(protocolInfoPo.getBlockHeight()).encode(), protocolInfoPo);
+        blockHeightIndex.add(protocolInfoPo.getBlockHeight());
+        dbService.putModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), blockHeightIndex);
+        return dbService.putModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA, new VarInt(protocolInfoPo.getBlockHeight()).encode(), protocolInfoPo);
     }
 
 
     @Override
     public void deleteBlockProtocol(long blockHeight) {
         dbService.delete(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA, new VarInt(blockHeight).encode());
+    }
+
+    @Override
+    public void deleteBlockTempProtocol(long blockHeight) {
+        dbService.delete(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA, new VarInt(blockHeight).encode());
     }
 
     @Override

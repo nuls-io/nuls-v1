@@ -50,4 +50,16 @@ public class ProtocolTransferTool {
         container.setAddressSet(infoPo.getAddressSet());
         container.setCurrentDelay(infoPo.getCurrentDelay());
     }
+
+    public static BlockProtocolInfoPo toBlockProtocolInfoPo(BlockHeader header, ProtocolTempInfoPo tempInfoPo) {
+        BlockProtocolInfoPo infoPo = new BlockProtocolInfoPo();
+        infoPo.setBlockHeight(header.getHeight());
+        infoPo.setVersion(tempInfoPo.getVersion());
+        infoPo.setCurrentDelay(tempInfoPo.getCurrentDelay());
+        infoPo.setEffectiveHeight(tempInfoPo.getEffectiveHeight());
+        infoPo.setRoundIndex(tempInfoPo.getRoundIndex());
+        infoPo.setStatus(tempInfoPo.getStatus());
+        infoPo.setAddressSet(tempInfoPo.getAddressSet());
+        return infoPo;
+    }
 }

@@ -221,6 +221,7 @@ public class NulsProtocolProcess {
                 tempInfoPo.setCurrentDelay(1);
             }
             getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
+            saveBLockTempProtocolInfo(blockHeader, tempInfoPo);
             Log.info("========== 统计Temp协议 未定义 ==========");
             Log.info("========== 协议覆盖率：" + rate + " -->>>" + tempInfoPo.getPercent());
             Log.info("========== 协议version：" + tempInfoPo.getVersion());
@@ -248,6 +249,7 @@ public class NulsProtocolProcess {
                 tempInfoPo.setStatus(ProtocolContainer.VALID);
                 tempInfoPo.setEffectiveHeight(blockHeader.getHeight() + 1);
                 getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
+                saveBLockTempProtocolInfo(blockHeader, tempInfoPo);
                 System.out.println("停止服务！");
                 Log.info("********** 停止服务 **********");
                 Log.info("********** 停止服务version：" + tempInfoPo.getVersion());
@@ -267,6 +269,7 @@ public class NulsProtocolProcess {
                 }
             } else {
                 getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
+                saveBLockTempProtocolInfo(blockHeader, tempInfoPo);
                 Log.info("========== 统计Temp协议 未定义 ==========");
                 Log.info("========== 协议version：" + tempInfoPo.getVersion());
                 Log.info("========== 当前高度：" + blockHeader.getHeight());
@@ -331,6 +334,11 @@ public class NulsProtocolProcess {
         getVersionManagerStorageService().saveBlockProtocolInfoPo(infoPo);
     }
 
+    private void saveBLockTempProtocolInfo(BlockHeader blockHeader, ProtocolTempInfoPo tempInfoPo) {
+        BlockProtocolInfoPo infoPo = ProtocolTransferTool.toBlockProtocolInfoPo(blockHeader, tempInfoPo);
+        getVersionManagerStorageService().saveBlockProtocolTempInfoPo(infoPo);
+    }
+
     private VersionManagerStorageService getVersionManagerStorageService() {
         if (versionManagerStorageService == null) {
             versionManagerStorageService = NulsContext.getServiceBean(VersionManagerStorageService.class);
@@ -377,7 +385,31 @@ public class NulsProtocolProcess {
             }
             saveProtocolInfo(protocolContainer);
         } else {
+            ProtocolTempInfoPo protocolTempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(extendsData.getProtocolKey());
+            if (protocolTempInfoPo != null) {
+                if (protocolTempInfoPo.getStatus() == ProtocolContainer.VALID && protocolTempInfoPo.getEffectiveHeight() < blockHeader.getHeight()) {
+                    //如果block对应的协议已经生效，并且当前块的高度大于协议生效时的高度，则不需要处理
+                    return;
+                }
+                //查找当前版本存储的区块对应索引
+                List<Long> blockHeightIndex = getVersionManagerStorageService().getBlockTempProtocolIndex(protocolTempInfoPo.getVersion());
+                //如果索引为空或者索引长度为1，回滚后container所有数据重置
+                if (blockHeightIndex == null || blockHeightIndex.size() == 1) {
+                    protocolTempInfoPo.reset();
+                    getVersionManagerStorageService().clearTempBlockProtocol(blockHeader.getHeight(), protocolTempInfoPo.getVersion());
+                } else {
+                    if (blockHeader.getHeight() == blockHeightIndex.get(blockHeightIndex.size() - 1)) {
+                        blockHeightIndex.remove(blockHeightIndex.size() - 1);
+                        getVersionManagerStorageService().saveTempBlockProtocolIndex(protocolContainer.getVersion(), blockHeightIndex);
+                        getVersionManagerStorageService().deleteBlockTempProtocol(blockHeader.getHeight());
 
+                        BlockProtocolInfoPo blockProtocolInfoPo = getVersionManagerStorageService().getBlockTempProtocolInfoPo(blockHeightIndex.get(blockHeightIndex.size() - 1));
+                        if (blockProtocolInfoPo != null) {
+                            ProtocolTransferTool.copyFromBlockProtocolInfoPo(blockProtocolInfoPo, protocolContainer);
+                        }
+                    }
+                }
+            }
         }
     }
 

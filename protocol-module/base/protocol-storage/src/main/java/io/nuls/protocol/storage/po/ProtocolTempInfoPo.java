@@ -102,4 +102,12 @@ public class ProtocolTempInfoPo {
     public String getProtocolKey() {
         return version + "-" + percent + "-" + delay;
     }
+
+    public void reset() {
+        this.currentDelay = 0;
+        this.roundIndex = 0;
+        this.status = 0;
+        this.effectiveHeight = null;
+        this.addressSet.clear();
+    }
 }
