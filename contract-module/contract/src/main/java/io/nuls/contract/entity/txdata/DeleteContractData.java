@@ -25,10 +25,10 @@ package io.nuls.contract.entity.txdata;
 
 
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.TransactionLogicData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
-import io.nuls.kernel.utils.SerializeUtils;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -45,21 +45,21 @@ public class DeleteContractData extends TransactionLogicData implements Contract
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfBytes(sender);
-        size += SerializeUtils.sizeOfBytes(contractAddress);
+        size += Address.ADDRESS_LENGTH;
+        size += Address.ADDRESS_LENGTH;
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeBytesWithLength(sender);
-        stream.writeBytesWithLength(contractAddress);
+        stream.write(sender);
+        stream.write(contractAddress);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.sender = byteBuffer.readByLengthByte();
-        this.contractAddress = byteBuffer.readByLengthByte();
+        this.sender = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+        this.contractAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
     }
 
     @Override

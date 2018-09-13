@@ -1492,7 +1492,7 @@ public class Script{
             if (!e1.getMessage().contains("Reached past end of ASN.1 stream"))
                 log.warn("Signature checking failed!", e1);
         }
-        System.out.println(opcode == OP_CHECKSIG);
+        //System.out.println(opcode == OP_CHECKSIG);
         if (opcode == OP_CHECKSIG)
             stack.add(sigValid ? new byte[] {1} : new byte[] {});
         else if (opcode == OP_CHECKSIGVERIFY)
