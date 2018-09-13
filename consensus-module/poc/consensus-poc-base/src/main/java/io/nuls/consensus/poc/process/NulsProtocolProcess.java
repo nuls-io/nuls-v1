@@ -405,10 +405,11 @@ public class NulsProtocolProcess {
 
                         BlockProtocolInfoPo blockProtocolInfoPo = getVersionManagerStorageService().getBlockTempProtocolInfoPo(blockHeightIndex.get(blockHeightIndex.size() - 1));
                         if (blockProtocolInfoPo != null) {
-                            ProtocolTransferTool.copyFromBlockProtocolInfoPo(blockProtocolInfoPo, protocolContainer);
+                            ProtocolTransferTool.copyFromBlockProtocolTempInfoPo(blockProtocolInfoPo, protocolTempInfoPo);
                         }
                     }
                 }
+                getVersionManagerStorageService().saveProtocolTempInfoPo(protocolTempInfoPo);
             }
         }
     }

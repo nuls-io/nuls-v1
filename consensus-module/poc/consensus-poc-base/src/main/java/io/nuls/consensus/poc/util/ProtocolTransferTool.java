@@ -62,4 +62,12 @@ public class ProtocolTransferTool {
         infoPo.setAddressSet(tempInfoPo.getAddressSet());
         return infoPo;
     }
+
+    public static void copyFromBlockProtocolTempInfoPo(BlockProtocolInfoPo infoPo, ProtocolTempInfoPo tempInfoPo) {
+        tempInfoPo.setStatus(infoPo.getStatus());
+        tempInfoPo.setEffectiveHeight(infoPo.getEffectiveHeight());
+        tempInfoPo.setRoundIndex(infoPo.getRoundIndex());
+        tempInfoPo.setAddressSet(infoPo.getAddressSet());
+        tempInfoPo.setCurrentDelay(infoPo.getCurrentDelay());
+    }
 }
