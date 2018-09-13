@@ -3,6 +3,7 @@
     <txs>
         <tx id="coinBaseTx_V1" class="io.nuls.protocol.model.tx.CoinBaseTransaction"/>
         <tx id="transferTx_V1" class="io.nuls.protocol.model.tx.TransferTransaction"/>
+        <tx id="dappTx_V1" class="io.nuls.protocol.model.tx.DataTransaction"/>
     </txs>
 
     <messages>

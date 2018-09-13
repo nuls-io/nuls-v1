@@ -347,11 +347,12 @@ public class VMHelper implements InitializingBean {
             }
 
             programResult = this.invokeViewMethod(track, stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_DECIMALS, null, null);
+            BigInteger decimalsBig = BigInteger.ZERO;
             if(programResult.isSuccess()) {
                 String decimals = programResult.getResult();
                 if(StringUtils.isNotBlank(decimals)) {
                     try {
-                        BigInteger decimalsBig = new BigInteger(decimals);
+                        decimalsBig = new BigInteger(decimals);
                         if(decimalsBig.compareTo(BigInteger.ZERO) < 0 || decimalsBig.compareTo(MAXIMUM_DECIMALS) > 0) {
                             return Result.getFailed(ContractErrorCode.CONTRACT_NRC20_MAXIMUM_DECIMALS);
                         }
@@ -367,7 +368,7 @@ public class VMHelper implements InitializingBean {
                 if(StringUtils.isNotBlank(totalSupply)) {
                     try {
                         BigInteger totalSupplyBig = new BigInteger(totalSupply);
-                        if(totalSupplyBig.compareTo(BigInteger.ZERO) <= 0 || totalSupplyBig.compareTo(MAXIMUM_TOTAL_SUPPLY) > 0) {
+                        if(totalSupplyBig.compareTo(BigInteger.ZERO) <= 0 || totalSupplyBig.compareTo(MAXIMUM_TOTAL_SUPPLY.multiply(BigInteger.TEN.pow(decimalsBig.intValue()))) > 0) {
                             return Result.getFailed(ContractErrorCode.CONTRACT_NRC20_MAXIMUM_TOTAL_SUPPLY);
                         }
                     } catch (Exception e) {
@@ -381,6 +382,7 @@ public class VMHelper implements InitializingBean {
     }
 
     public static void main(String[] args) {
+        System.out.println(BigInteger.valueOf(2L).pow(256));
         System.out.println(BigInteger.valueOf(2L).pow(256));
     }
 

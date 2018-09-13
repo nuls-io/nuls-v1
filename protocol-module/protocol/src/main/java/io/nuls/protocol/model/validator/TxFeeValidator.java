@@ -51,12 +51,13 @@ public class TxFeeValidator implements NulsDataValidator<Transaction> {
         }
         Na realFee = tx.getFee();
         Na fee = null;
-        if(txType == ProtocolConstant.TX_TYPE_TRANSFER
+        if (txType == ProtocolConstant.TX_TYPE_TRANSFER
+                || txType == ProtocolConstant.TX_TYPE_DATA
                 || txType == ContractConstant.TX_TYPE_CREATE_CONTRACT
                 || txType == ContractConstant.TX_TYPE_CALL_CONTRACT
-                || txType == ContractConstant.TX_TYPE_DELETE_CONTRACT){
+                || txType == ContractConstant.TX_TYPE_DELETE_CONTRACT) {
             fee = TransactionFeeCalculator.getTransferFee(tx.size());
-        }else{
+        } else {
             fee = TransactionFeeCalculator.getMaxFee(tx.size());
         }
         if (realFee.isGreaterOrEquals(fee)) {

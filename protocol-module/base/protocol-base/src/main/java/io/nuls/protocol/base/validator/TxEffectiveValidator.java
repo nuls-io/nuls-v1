@@ -42,7 +42,7 @@ public class TxEffectiveValidator implements NulsDataValidator<Transaction> {
         int txType = tx.getType();
         ProtocolContainer container = NulsVersionManager.getCurrentProtocolContainer();
         if(!container.containsTxType(txType)) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
+            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TX_NOT_EFFECTIVE);
         }
         return ValidateResult.getSuccessResult();
     }

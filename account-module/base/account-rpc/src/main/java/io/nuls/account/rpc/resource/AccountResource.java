@@ -65,6 +65,7 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
+import io.nuls.ledger.constant.LedgerErrorCode;
 import io.swagger.annotations.*;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -420,36 +421,77 @@ public class AccountResource {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
     public RpcClientResult getAssets(@ApiParam(name = "address", value = "账户地址", required = true)
-                                     @PathParam("address") String address) {
-        if (!AddressTool.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
-        }
-        Address addr = new Address(address);
-        Result<Balance> result = accountLedgerService.getBalance(addr.getAddressBytes());
-        if (result.isFailed()) {
-            return result.toRpcClientResult();
-        }
-        Balance balance = result.getData();
-        List<AssetDto> dtoList = new ArrayList<>();
-        dtoList.add(new AssetDto("NULS", balance));
+                                     @PathParam("address") String address,
+                                     @ApiParam(name = "pageNumber", value = "页码", required = true)
+                                     @QueryParam("pageNumber") Integer pageNumber,
+                                     @ApiParam(name = "pageSize", value = "每页条数", required = false)
+                                     @QueryParam("pageSize") Integer pageSize) {
+        try {
+            if (null == pageNumber || pageNumber == 0) {
+                pageNumber = 1;
+            }
+            if (null == pageSize || pageSize == 0) {
+                pageSize = 10;
+            }
+            if (pageNumber < 0 || pageSize < 0 || pageSize > 100) {
+                return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+            if (!AddressTool.validAddress(address)) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            }
+            Address addr = new Address(address);
+            Result<Balance> balanceResult = accountLedgerService.getBalance(addr.getAddressBytes());
+            if (balanceResult.isFailed()) {
+                return balanceResult.toRpcClientResult();
+            }
+            Balance balance = balanceResult.getData();
+            List<AssetDto> dtoList = new ArrayList<>();
+            dtoList.add(new AssetDto("NULS", balance));
 
-        Result<List<ContractTokenInfo>> allTokenListResult = contractService.getAllTokensByAccount(address);
-        if (allTokenListResult.isSuccess()) {
-            List<ContractTokenInfo> tokenInfoList = allTokenListResult.getData();
-            if (tokenInfoList != null && tokenInfoList.size() > 0) {
-                for (ContractTokenInfo tokenInfo : tokenInfoList) {
-                    if (tokenInfo.isLock()) {
-                        continue;
+            Result<List<ContractTokenInfo>> allTokenListResult = contractService.getAllTokensByAccount(address);
+            if (allTokenListResult.isSuccess()) {
+                List<ContractTokenInfo> tokenInfoList = allTokenListResult.getData();
+                if (tokenInfoList != null && tokenInfoList.size() > 0) {
+                    for (ContractTokenInfo tokenInfo : tokenInfoList) {
+                        if (tokenInfo.isLock()) {
+                            continue;
+                        }
+                        dtoList.add(new AssetDto(tokenInfo));
                     }
-                    dtoList.add(new AssetDto(tokenInfo));
                 }
             }
+
+            Result result = Result.getSuccess();
+            List<AssetDto> infoDtoList = new ArrayList<>();
+            Page<AssetDto> page = new Page<>(pageNumber, pageSize, dtoList.size());
+            int start = pageNumber * pageSize - pageSize;
+            if (start >= page.getTotal()) {
+                result.setData(page);
+                return result.toRpcClientResult();
+            }
+
+            int end = start + pageSize;
+            if (end > page.getTotal()) {
+                end = (int) page.getTotal();
+            }
+
+            if(dtoList.size() > 0) {
+                for (int i = start; i < end; i++) {
+                    infoDtoList.add(dtoList.get(i));
+                }
+            }
+            page.setList(infoDtoList);
+
+            result.setSuccess(true);
+            result.setData(page);
+
+            return result.toRpcClientResult();
+        } catch (Exception e) {
+            Log.error(e);
+            Result result = Result.getFailed(LedgerErrorCode.SYS_UNKOWN_EXCEPTION);
+            return result.toRpcClientResult();
         }
 
-
-        Map<String, List<AssetDto>> map = new HashMap<>();
-        map.put("list", dtoList);
-        return Result.getSuccess().setData(map).toRpcClientResult();
     }
 
     @POST

@@ -193,7 +193,14 @@ public class AccountLedgerResource {
         return result.toRpcClientResult();
     }
 
-    public RpcClientResult dapp(@ApiParam(name = "form", value = "零钱汇整", required = true) DataTransactionForm form) {
+    @POST
+    @Path("/dapp")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "创建并广播DAPP交易", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult dapp(@ApiParam(name = "form", value = "DAPP交易", required = true) DataTransactionForm form) {
         if (form == null) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
@@ -220,7 +227,7 @@ public class AccountLedgerResource {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Result result = accountLedgerService.dapp(AddressTool.getAddress(form.getAddress()), form.getPassword(), data, remarkBytes);
-        return null;
+        return result.toRpcClientResult();
     }
 
     @POST

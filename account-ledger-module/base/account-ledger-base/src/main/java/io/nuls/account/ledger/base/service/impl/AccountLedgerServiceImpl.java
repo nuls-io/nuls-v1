@@ -71,6 +71,7 @@ import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.ledger.util.LedgerUtil;
 import io.nuls.protocol.model.tx.DataTransaction;
+import io.nuls.protocol.model.tx.LogicData;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.model.validator.TxMaxSizeValidator;
 import io.nuls.protocol.model.validator.TxRemarkValidator;
@@ -798,6 +799,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         DataTransaction tx = new DataTransaction();
         tx.setRemark(remark);
         tx.setTime(TimeService.currentTimeMillis());
+        LogicData logicData = new LogicData(data);
+        tx.setTxData(logicData);
         CoinData coinData = new CoinData();
         try {
             CoinDataResult coinDataResult = getCoinData(from, Na.ZERO, tx.size() + coinData.size(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
