@@ -381,9 +381,21 @@ public class NulsProtocolProcess {
                     if (blockProtocolInfoPo != null) {
                         ProtocolTransferTool.copyFromBlockProtocolInfoPo(blockProtocolInfoPo, protocolContainer);
                     }
+                    /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
+                    Log.info("@@@@@@@@@@@@@@ 回滚结果 统计协议 @@@@@@@@@@@@@@");
+                    Log.info("@@@@@@@ 协议version：" + protocolContainer.getVersion());
+                    Log.info("@@@@@@@ 回滚块的高度：" + blockHeader.getHeight());
+                    Log.info("@@@@@@@ 回滚块的hash：" + blockHeader.getHash());
+                    Log.info("@@@@@@@ 回滚后协议块高度：" + blockProtocolInfoPo.getBlockHeight());
                 }
             }
             saveProtocolInfo(protocolContainer);
+
+            Log.info("@@@@@@@ 协议状态：" + protocolContainer.getStatus());
+            Log.info("@@@@@@@ 协议延迟块数：" + protocolContainer.getCurrentDelay());
+            Log.info("@@@@@@@ 协议轮次：" + protocolContainer.getRoundIndex());
+            Log.info("@@@@@@@ 协议AddressSet：" + Arrays.toString(protocolContainer.getAddressSet().toArray()));
+            /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
         } else {
             ProtocolTempInfoPo protocolTempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(extendsData.getProtocolKey());
             if (protocolTempInfoPo != null) {
@@ -407,10 +419,22 @@ public class NulsProtocolProcess {
                         if (blockProtocolInfoPo != null) {
                             ProtocolTransferTool.copyFromBlockProtocolTempInfoPo(blockProtocolInfoPo, protocolTempInfoPo);
                         }
+                        /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
+                        Log.info("@@@@@@@@@@@@@@ 回滚结果 统计协议 @@@@@@@@@@@@@@");
+                        Log.info("@@@@@@@ 协议version：" + protocolTempInfoPo.getVersion());
+                        Log.info("@@@@@@@ 回滚块的高度：" + blockHeader.getHeight());
+                        Log.info("@@@@@@@ 回滚块的hash：" + blockHeader.getHash());
+                        Log.info("@@@@@@@ 回滚后协议块高度：" + blockProtocolInfoPo.getBlockHeight());
                     }
+
                 }
                 getVersionManagerStorageService().saveProtocolTempInfoPo(protocolTempInfoPo);
             }
+            Log.info("@@@@@@@ 协议状态：" + protocolTempInfoPo.getStatus());
+            Log.info("@@@@@@@ 协议延迟块数：" + protocolTempInfoPo.getCurrentDelay());
+            Log.info("@@@@@@@ 协议轮次：" + protocolTempInfoPo.getRoundIndex());
+            Log.info("@@@@@@@ 协议AddressSet：" + Arrays.toString(protocolTempInfoPo.getAddressSet().toArray()));
+            /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
         }
     }
 
