@@ -1032,7 +1032,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             return Result.getSuccess().setData(tx.getHash().getDigestHex());
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(KernelErrorCode.NUMBER_SMALL);
+            Log.error("零钱换整错误");
+            return Result.getFailed();
         }
     }
 

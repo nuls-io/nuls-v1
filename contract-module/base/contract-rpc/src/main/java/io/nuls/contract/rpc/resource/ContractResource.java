@@ -713,7 +713,7 @@ public class ContractResource implements InitializingBean {
     }
 
     @GET
-    @Path("/info/{address}")
+    @Path("/info/wallet/{address}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "获取智能合约信息")
     @ApiResponses(value = {
@@ -722,6 +722,26 @@ public class ContractResource implements InitializingBean {
     public RpcClientResult getContractInfo(
             @ApiParam(name = "address", value = "合约地址", required = true) @PathParam("address") String contractAddress,
             @ApiParam(name = "accountAddress", value = "钱包账户地址", required = false) @QueryParam("accountAddress") String accountAddress) {
+        return this.getContractInfoWithLock(contractAddress, accountAddress, true);
+    }
+
+    @GET
+    @Path("/info/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "获取智能合约信息")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult getContractInfo(
+            @ApiParam(name = "address", value = "合约地址", required = true) @PathParam("address") String contractAddress) {
+        return this.getContractInfoWithLock(contractAddress, null, false);
+
+    }
+
+    private RpcClientResult getContractInfoWithLock(
+            String contractAddress,
+            String accountAddress,
+            boolean isNeedLock) {
         try {
             boolean hasAccountAddress = false;
             if(StringUtils.isNotBlank(accountAddress)) {
@@ -751,7 +771,7 @@ public class ContractResource implements InitializingBean {
                 return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST).toRpcClientResult();
             }
 
-            if(contractAddressInfoPo.isLock()) {
+            if(isNeedLock && contractAddressInfoPo.isLock()) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_LOCK).toRpcClientResult();
             }
 
