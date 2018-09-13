@@ -10,6 +10,8 @@ public class Constants {
 
     public static final String CLINIT_NAME = "<clinit>";
 
+    public static final String CLINIT_DESC = "()V";
+
     public static final String CONSTRUCTOR_NAME = "<init>";
 
     public static final String ARRAY_START = "[";

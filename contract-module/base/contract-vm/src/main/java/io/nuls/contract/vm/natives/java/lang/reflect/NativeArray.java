@@ -8,31 +8,35 @@ import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.natives.NativeMethod;
 
+import java.lang.reflect.Array;
+
+import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+
 public class NativeArray {
 
     public static final String TYPE = "java/lang/reflect/Array";
 
-    public static boolean isSupport(MethodCode methodCode) {
-        if (methodCode.isClass(TYPE) && (methodCode.isMethod("newArray", "(Ljava/lang/Class;I)Ljava/lang/Object;"))) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = null;
-        switch (methodCode.name) {
-            case "newArray":
-                result = newArray(methodCode, methodArgs, frame);
-                break;
+    public static Result nativeRun(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
+        switch (methodCode.fullName) {
+            case newArray:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return newArray(methodCode, methodArgs, frame);
+                }
             default:
                 frame.nonsupportMethod(methodCode);
-                break;
+                return null;
         }
-        return result;
     }
 
+    public static final String newArray = TYPE + "." + "newArray" + "(Ljava/lang/Class;I)Ljava/lang/Object;";
+
+    /**
+     * native
+     *
+     * @see Array#newArray(Class, int)
+     */
     private static Result newArray(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef componentType = (ObjectRef) methodArgs.invokeArgs[0];
         int length = (int) methodArgs.invokeArgs[1];

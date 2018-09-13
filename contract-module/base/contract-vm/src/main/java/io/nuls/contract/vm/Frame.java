@@ -142,11 +142,11 @@ public class Frame {
 
     public void nonsupportOpCode() {
         int line = getLine();
-        throw new RuntimeException(String.format("nonsupport opcode：class(%s), line(%d)", methodCode.classCode.name, line));
+        throw new RuntimeException(String.format("nonsupport opcode：class(%s), line(%d)", methodCode.className, line));
     }
 
     public void nonsupportMethod(MethodCode methodCode) {
-        throw new RuntimeException("nonsupport method: " + methodCode.classCode.name + "." + methodCode.name + methodCode.desc);
+        throw new RuntimeException("nonsupport method: " + methodCode.className + "." + methodCode.name + methodCode.desc);
     }
 
     public InsnNode insnNode() {
@@ -215,10 +215,6 @@ public class Frame {
 
     public AbstractInsnNode getCurrentInsnNode() {
         return currentInsnNode;
-    }
-
-    public boolean isAddGas() {
-        return addGas;
     }
 
     public void setAddGas(boolean addGas) {

@@ -52,15 +52,15 @@ public class ProgramChecker {
                     //
                 } else if (variableType.isArray()) {
                     if (variableType.getDimensions() > 1) {
-                        throw new RuntimeException(String.format("only one-dimensional array can be used in method %s.%s", methodCode.classCode.name, methodCode.name));
+                        throw new RuntimeException(String.format("only one-dimensional array can be used in method %s.%s", methodCode.className, methodCode.name));
                     } else if (!(variableType.isPrimitiveType() || variableType.getComponentType().isStringType() || variableType.getComponentType().isWrapperType())) {
-                        throw new RuntimeException(String.format("only primitive type array and string array can be used in method %s.%s", methodCode.classCode.name, methodCode.name));
+                        throw new RuntimeException(String.format("only primitive type array and string array can be used in method %s.%s", methodCode.className, methodCode.name));
                     } else {
                         //
                     }
                 } else {
                     if (!hasConstructor(variableType, classCodes)) {
-                        throw new RuntimeException(String.format("%s can't be used in method %s.%s", variableType.getType(), methodCode.classCode.name, methodCode.name));
+                        throw new RuntimeException(String.format("%s can't be used in method %s.%s", variableType.getType(), methodCode.className, methodCode.name));
                     } else {
                         //
                     }
@@ -106,7 +106,7 @@ public class ProgramChecker {
                         MethodInsnNode methodInsnNode = (MethodInsnNode) o;
                         throw new RuntimeException(String.format("can't use method: %s.%s%s", methodInsnNode.owner, methodInsnNode.name, methodInsnNode.desc));
                     } else {
-                        throw new RuntimeException(String.format("can't use method: %s.%s%s", methodCode.classCode.name, methodCode.name, methodCode.desc));
+                        throw new RuntimeException(String.format("can't use method: %s.%s%s", methodCode.className, methodCode.name, methodCode.desc));
                     }
                 }
             }
@@ -145,7 +145,7 @@ public class ProgramChecker {
                 }
                 if (nonsupport) {
                     int line = getLine(abstractInsnNode);
-                    throw new RuntimeException(String.format("nonsupport opcode: class(%s), line(%d)", methodCode.classCode.name, line));
+                    throw new RuntimeException(String.format("nonsupport opcode: class(%s), line(%d)", methodCode.className, line));
                 }
             }
         }
@@ -229,15 +229,15 @@ public class ProgramChecker {
 //            if (NativeMethod.isSupport(methodCode)) {
 //                return Boolean.TRUE;
 //            }
-//            String methodFullName = String.format("%s.%s%s", methodCode.classCode.name, methodCode.name, methodCode.desc);
-//            if (methodCode.classCode.name.startsWith("sun/")) {
+//            String methodFullName = String.format("%s.%s%s", methodCode.className, methodCode.name, methodCode.desc);
+//            if (methodCode.className.startsWith("sun/")) {
 //                notSupportMethods.add(methodFullName);
 //                log.warn("not support sun method " + methodFullName);
 //                return null;
 //            }
 //            if (methodCode.getInstructions().size() <= 0) {
 //                if (methodCode.isNative()) {
-//                    if (ArrayUtils.contains(NativeMethod.SUPPORT_CLASSES, methodCode.classCode.name)) {
+//                    if (ArrayUtils.contains(NativeMethod.SUPPORT_CLASSES, methodCode.className)) {
 //                        return Boolean.TRUE;
 //                    } else {
 //                        notSupportMethods.add(methodFullName);

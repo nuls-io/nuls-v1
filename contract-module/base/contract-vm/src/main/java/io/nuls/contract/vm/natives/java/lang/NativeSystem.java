@@ -7,33 +7,37 @@ import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.natives.NativeMethod;
 
+import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+
 public class NativeSystem {
 
     public static final String TYPE = "java/lang/System";
 
-    public static boolean isSupport(MethodCode methodCode) {
-        if (methodCode.isClass(TYPE) && (methodCode.isMethod("arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V")
-                || methodCode.isMethod("getProperty", "(Ljava/lang/String;)Ljava/lang/String;")
-                || methodCode.isMethod("getProperty", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"))) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    public static final String getProperty = TYPE + "." + "getProperty" + "(Ljava/lang/String;)Ljava/lang/String;";
 
-    public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = null;
-        switch (methodCode.name) {
-            case "arraycopy":
-                result = arraycopy(methodCode, methodArgs, frame);
-                break;
+    public static final String getProperty_ = TYPE + "." + "getProperty" + "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;";
+
+    public static Result nativeRun(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
+        switch (methodCode.fullName) {
+            case arraycopy:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return arraycopy(methodCode, methodArgs, frame);
+                }
             default:
                 frame.nonsupportMethod(methodCode);
-                break;
+                return null;
         }
-        return result;
     }
 
+    public static final String arraycopy = TYPE + "." + "arraycopy" + "(Ljava/lang/Object;ILjava/lang/Object;II)V";
+
+    /**
+     * native
+     *
+     * @see System#arraycopy(Object, int, Object, int, int)
+     */
     private static Result arraycopy(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Object[] args = methodArgs.invokeArgs;
         ObjectRef srcObjectRef = (ObjectRef) args[0];

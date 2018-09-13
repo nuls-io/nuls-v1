@@ -12,29 +12,45 @@ import io.nuls.contract.vm.natives.NativeMethod;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+
 public class NativeThrowable {
 
     public static final String TYPE = "java/lang/Throwable";
 
-    public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = null;
-        switch (methodCode.name) {
-            case "fillInStackTrace":
-                result = fillInStackTrace(methodCode, methodArgs, frame);
-                break;
-            case "getStackTraceDepth":
-                result = getStackTraceDepth(methodCode, methodArgs, frame);
-                break;
-            case "getStackTraceElement":
-                result = getStackTraceElement(methodCode, methodArgs, frame);
-                break;
+    public static Result nativeRun(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
+        switch (methodCode.fullName) {
+            case fillInStackTrace:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return fillInStackTrace(methodCode, methodArgs, frame);
+                }
+            case getStackTraceDepth:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return getStackTraceDepth(methodCode, methodArgs, frame);
+                }
+            case getStackTraceElement:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return getStackTraceElement(methodCode, methodArgs, frame);
+                }
             default:
                 frame.nonsupportMethod(methodCode);
-                break;
+                return null;
         }
-        return result;
     }
 
+    public static final String fillInStackTrace = TYPE + "." + "fillInStackTrace" + "(I)Ljava/lang/Throwable;";
+
+    /**
+     * native
+     *
+     * @see Throwable#fillInStackTrace(int)
+     */
     private static Result fillInStackTrace(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         int dummy = (int) methodArgs.invokeArgs[0];
         ObjectRef objectRef = methodArgs.objectRef;
@@ -45,7 +61,7 @@ public class NativeThrowable {
         for (int i = size - 1; i >= 0; i--) {
             Frame frame1 = frame.vm.getVmStack().get(i);
             if (isThrowable) {
-                if (Instanceof.instanceof_(frame1.methodCode.classCode.name, "java/lang/Throwable", frame)) {
+                if (Instanceof.instanceof_(frame1.methodCode.className, "java/lang/Throwable", frame)) {
                     continue;
                 } else {
                     isThrowable = false;
@@ -58,7 +74,7 @@ public class NativeThrowable {
         frame.heap.putField(objectRef, "stackTraceElements", stackTraceElementsRef);
         int index = 0;
         for (Frame frame1 : frames) {
-            ObjectRef declaringClass = frame.heap.newString(frame1.methodCode.classCode.name);
+            ObjectRef declaringClass = frame.heap.newString(frame1.methodCode.className);
             ObjectRef methodName = frame.heap.newString(frame1.methodCode.name);
             ObjectRef fileName = frame.heap.newString(frame1.methodCode.classCode.sourceFile);
             int lineNumber = frame1.getLine();
@@ -70,6 +86,13 @@ public class NativeThrowable {
         return result;
     }
 
+    public static final String getStackTraceDepth = TYPE + "." + "getStackTraceDepth" + "()I";
+
+    /**
+     * native
+     *
+     * @see Throwable#getStackTraceDepth()
+     */
     private static Result getStackTraceDepth(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
         ObjectRef stackTraceElementsRef = (ObjectRef) frame.heap.getField(objectRef, "stackTraceElements");
@@ -78,6 +101,13 @@ public class NativeThrowable {
         return result;
     }
 
+    public static final String getStackTraceElement = TYPE + "." + "getStackTraceElement" + "(I)Ljava/lang/StackTraceElement;";
+
+    /**
+     * native
+     *
+     * @see Throwable#getStackTraceElement(int)
+     */
     private static Result getStackTraceElement(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         int index = (int) methodArgs.invokeArgs[0];
         ObjectRef objectRef = methodArgs.objectRef;

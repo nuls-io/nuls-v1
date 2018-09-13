@@ -6,6 +6,7 @@ import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.util.CloneUtils;
+import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ethereum.core.Repository;
@@ -374,7 +375,7 @@ public class Heap {
     public ObjectRef runNewObjectWithArgs(VariableType variableType, String methodDesc, Object... args) {
         ClassCode classCode = this.vm.getMethodArea().loadClass(variableType.getType());
         ObjectRef objectRef = newObject(classCode);
-        MethodCode methodCode = this.vm.getMethodArea().loadMethod(objectRef.getVariableType().getType(), "<init>", methodDesc);
+        MethodCode methodCode = this.vm.getMethodArea().loadMethod(objectRef.getVariableType().getType(), Constants.CONSTRUCTOR_NAME, methodDesc);
         if (methodCode == null) {
             throw new RuntimeException(String.format("can't new %s", variableType.getType()));
         }

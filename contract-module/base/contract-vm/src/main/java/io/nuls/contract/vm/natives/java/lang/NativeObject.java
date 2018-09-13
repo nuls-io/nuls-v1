@@ -10,33 +10,45 @@ import io.nuls.contract.vm.util.CloneUtils;
 
 import java.util.Map;
 
+import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+
 public class NativeObject {
 
     public static final String TYPE = "java/lang/Object";
 
-    public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = null;
-        switch (methodCode.name) {
-            case "getClass":
-                result = getClass(methodCode, methodArgs, frame);
-                break;
-            case "hashCode":
-                result = hashCode(methodCode, methodArgs, frame);
-                break;
-            case "clone":
-                result = clone(methodCode, methodArgs, frame);
-                break;
-            case "notify":
-            case "notifyAll":
-            case "wait":
-                frame.nonsupportMethod(methodCode);
+    public static Result nativeRun(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
+        switch (methodCode.fullName) {
+            case getClass:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return getClass(methodCode, methodArgs, frame);
+                }
+            case hashCode:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return hashCode(methodCode, methodArgs, frame);
+                }
+            case clone:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return clone(methodCode, methodArgs, frame);
+                }
             default:
                 frame.nonsupportMethod(methodCode);
-                break;
+                return null;
         }
-        return result;
     }
 
+    public static final String getClass = TYPE + "." + "getClass" + "()Ljava/lang/Class;";
+
+    /**
+     * native
+     *
+     * @see Object#getClass()
+     */
     private static Result getClass(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
         ObjectRef classRef = frame.heap.getClassRef(objectRef.getVariableType().getDesc());
@@ -44,6 +56,13 @@ public class NativeObject {
         return result;
     }
 
+    public static final String hashCode = TYPE + "." + "hashCode" + "()I";
+
+    /**
+     * native
+     *
+     * @see Object#hashCode()
+     */
     private static Result hashCode(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
         int hashCode = objectRef.hashCode();
@@ -51,6 +70,13 @@ public class NativeObject {
         return result;
     }
 
+    public static final String clone = TYPE + "." + "clone" + "()Ljava/lang/Object;";
+
+    /**
+     * native
+     *
+     * @see Object#clone()
+     */
     private static Result clone(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
         Map<String, Object> fields = frame.heap.getFields(objectRef);

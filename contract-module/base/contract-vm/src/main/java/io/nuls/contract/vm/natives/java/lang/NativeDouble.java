@@ -7,46 +7,64 @@ import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.natives.NativeMethod;
 
+import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+
 public class NativeDouble {
 
     public static final String TYPE = "java/lang/Double";
 
-    public static boolean isSupport(MethodCode methodCode) {
-        if (methodCode.isClass(TYPE) && (methodCode.isMethod("parseDouble", "(Ljava/lang/String;)D")
-                || methodCode.isMethod("toString", "(D)Ljava/lang/String;")
-                || methodCode.isMethod("toHexString", "(D)Ljava/lang/String;")
-        )) {
-            return true;
-        } else {
-            return false;
+    public static Result override(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
+        switch (methodCode.fullName) {
+            case parseDouble:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return parseDouble(methodCode, methodArgs, frame);
+                }
+            case toString:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return toString(methodCode, methodArgs, frame);
+                }
+            case toHexString:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return toHexString(methodCode, methodArgs, frame);
+                }
+            default:
+                return null;
         }
     }
 
-    public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = null;
-        switch (methodCode.name) {
-            case "doubleToRawLongBits":
-                result = doubleToRawLongBits(methodCode, methodArgs, frame);
-                break;
-            case "longBitsToDouble":
-                result = longBitsToDouble(methodCode, methodArgs, frame);
-                break;
-            case "parseDouble":
-                result = parseDouble(methodCode, methodArgs, frame);
-                break;
-            case "toString":
-                result = toString(methodCode, methodArgs, frame);
-                break;
-            case "toHexString":
-                result = toHexString(methodCode, methodArgs, frame);
-                break;
+    public static Result nativeRun(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
+        switch (methodCode.fullName) {
+            case doubleToRawLongBits:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return doubleToRawLongBits(methodCode, methodArgs, frame);
+                }
+            case longBitsToDouble:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return longBitsToDouble(methodCode, methodArgs, frame);
+                }
             default:
                 frame.nonsupportMethod(methodCode);
-                break;
+                return null;
         }
-        return result;
     }
 
+    public static final String doubleToRawLongBits = TYPE + "." + "doubleToRawLongBits" + "(D)J";
+
+    /**
+     * native
+     *
+     * @see Double#doubleToRawLongBits(double)
+     */
     private static Result doubleToRawLongBits(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         double value = (double) methodArgs.invokeArgs[0];
         long bits = Double.doubleToRawLongBits(value);
@@ -54,6 +72,13 @@ public class NativeDouble {
         return result;
     }
 
+    public static final String longBitsToDouble = TYPE + "." + "longBitsToDouble" + "(J)D";
+
+    /**
+     * native
+     *
+     * @see Double#longBitsToDouble(long)
+     */
     private static Result longBitsToDouble(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         long bits = (long) methodArgs.invokeArgs[0];
         double d = Double.longBitsToDouble(bits);
@@ -61,6 +86,13 @@ public class NativeDouble {
         return result;
     }
 
+    public static final String parseDouble = TYPE + "." + "parseDouble" + "(Ljava/lang/String;)D";
+
+    /**
+     * override
+     *
+     * @see Double#parseDouble(String)
+     */
     private static Result parseDouble(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
         String s = frame.heap.runToString(objectRef);
@@ -75,6 +107,13 @@ public class NativeDouble {
         return result;
     }
 
+    public static final String toString = TYPE + "." + "toString" + "(D)Ljava/lang/String;";
+
+    /**
+     * override
+     *
+     * @see Double#toString(double)
+     */
     private static Result toString(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         double d = (double) methodArgs.invokeArgs[0];
         String s = Double.toString(d);
@@ -83,6 +122,13 @@ public class NativeDouble {
         return result;
     }
 
+    public static final String toHexString = TYPE + "." + "toHexString" + "(D)Ljava/lang/String;";
+
+    /**
+     * override
+     *
+     * @see Double#toHexString(double)
+     */
     private static Result toHexString(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         double d = (double) methodArgs.invokeArgs[0];
         String s = Double.toHexString(d);
