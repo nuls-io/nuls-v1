@@ -19,6 +19,7 @@ public class ProtocolTransferTool {
         infoPo.setAddressSet(container.getAddressSet());
         infoPo.setStatus(container.getStatus());
         infoPo.setRoundIndex(container.getRoundIndex());
+        infoPo.setEffectiveHeight(container.getEffectiveHeight());
         return infoPo;
     }
 
