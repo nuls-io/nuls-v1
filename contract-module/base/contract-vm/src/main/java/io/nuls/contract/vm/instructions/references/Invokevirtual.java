@@ -7,7 +7,7 @@ import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.natives.NativeMethod;
-import io.nuls.contract.vm.util.Log;
+import io.nuls.contract.vm.util.Constants;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import java.util.List;
@@ -39,8 +39,8 @@ public class Invokevirtual {
             }
         }
 
-        if (objectRef.isArray() && "toString".equals(methodName) && "()Ljava/lang/String;".equals(methodDesc)) {
-            className = "java/lang/Object";
+        if (objectRef.isArray() && Constants.TO_STRING_METHOD_NAME.equals(methodName) && Constants.TO_STRING_METHOD_DESC.equals(methodDesc)) {
+            className = Constants.OBJECT_CLASS_NAME;
         }
 
         MethodCode methodCode = frame.methodArea.loadMethod(className, methodName, methodDesc);

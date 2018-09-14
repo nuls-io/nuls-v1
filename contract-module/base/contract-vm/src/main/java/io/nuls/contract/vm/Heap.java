@@ -339,8 +339,8 @@ public class Heap {
             return null;
         }
         ObjectRef objectRef = newObjectRef(VariableType.STRING_TYPE.getDesc());
-        putField(objectRef, "hash", str.hashCode());
-        putField(objectRef, "value", newArray(str.toCharArray()));
+        putField(objectRef, Constants.HASH, str.hashCode());
+        putField(objectRef, Constants.VALUE, newArray(str.toCharArray()));
         return objectRef;
     }
 
@@ -355,21 +355,21 @@ public class Heap {
     }
 
     public ObjectRef newCharacter(char value) {
-        return runNewObjectWithArgs(VariableType.CHAR_WRAPPER_TYPE, "(C)V", value);
+        return runNewObjectWithArgs(VariableType.CHAR_WRAPPER_TYPE, Constants.CHAR_CONSTRUCTOR_DESC, value);
     }
 
     public ObjectRef runNewObject(VariableType variableType, byte[] bytes) {
         ObjectRef ref = newArray(bytes);
-        return runNewObjectWithArgs(variableType, "([B)V", ref);
+        return runNewObjectWithArgs(variableType, Constants.BYTES_CONSTRUCTOR_DESC, ref);
     }
 
     public ObjectRef runNewObject(VariableType variableType) {
-        return runNewObjectWithArgs(variableType, "()V");
+        return runNewObjectWithArgs(variableType, Constants.CONSTRUCTOR_DESC);
     }
 
     public ObjectRef runNewObject(VariableType variableType, String str) {
         ObjectRef strRef = newString(str);
-        return runNewObjectWithArgs(variableType, "(Ljava/lang/String;)V", strRef);
+        return runNewObjectWithArgs(variableType, Constants.CONSTRUCTOR_STRING_DESC, strRef);
     }
 
     public ObjectRef runNewObjectWithArgs(VariableType variableType, String methodDesc, Object... args) {
@@ -389,16 +389,11 @@ public class Heap {
     }
 
     public ObjectRef getClassRef(String desc) {
-        ObjectRef objectRef = new ObjectRef(desc, "Ljava/lang/Class;");
+        ObjectRef objectRef = new ObjectRef(desc, Constants.CLASS_DESC);
         Object object = getFields(objectRef);
         if (object == null) {
-            ClassCode classCode = this.vm.getMethodArea().loadClass("java/lang/Class");
+            ClassCode classCode = this.vm.getMethodArea().loadClass(Constants.CLASS_NAME);
             objectRef = newObject(desc, classCode);
-//            String name = desc.replace('/', '.');
-//            if (name.startsWith("L") && name.endsWith(";")) {
-//                name = name.substring(1, name.length() - 1);
-//            }
-//            putField(objectRef, "name", newString(name));
         }
         return objectRef;
     }
@@ -422,7 +417,7 @@ public class Heap {
             }
             return strings;
         } else if (VariableType.STRING_TYPE.equals(objectRef.getVariableType())) {
-            ObjectRef charsRef = (ObjectRef) getField(objectRef, "value");
+            ObjectRef charsRef = (ObjectRef) getField(objectRef, Constants.VALUE);
             char[] chars = (char[]) getObject(charsRef);
             String str = new String(chars);
             return str;
@@ -441,7 +436,7 @@ public class Heap {
         if (objectRef.getVariableType().isArray() && objectRef.getVariableType().isPrimitiveType()) {
             type = VariableType.OBJECT_TYPE.getType();
         }
-        MethodCode methodCode = this.vm.getMethodArea().loadMethod(type, "toString", "()Ljava/lang/String;");
+        MethodCode methodCode = this.vm.getMethodArea().loadMethod(type, Constants.TO_STRING_METHOD_NAME, Constants.TO_STRING_METHOD_DESC);
         this.vm.run(methodCode, new Object[]{objectRef}, false);
         Object result = this.vm.getResultValue();
         String value = (String) getObject((ObjectRef) result);
