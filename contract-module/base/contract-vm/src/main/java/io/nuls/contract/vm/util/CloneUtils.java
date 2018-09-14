@@ -11,8 +11,9 @@ import static io.nuls.contract.vm.util.Utils.hashMapInitialCapacity;
 public class CloneUtils {
 
     public static void clone(Map<String, Object> source, Map<String, Object> target) {
-        for (String key : source.keySet()) {
-            Object object = source.get(key);
+        for (Map.Entry<String, Object> entry : source.entrySet()) {
+            String key = entry.getKey();
+            Object object = entry.getValue();
             Object newObject = cloneObject(object);
             target.put(key, newObject);
         }

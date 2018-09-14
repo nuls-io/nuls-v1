@@ -551,8 +551,9 @@ public class Heap {
             stateObjectRefs.add(objectRef);
             Map<String, Object> fields = getFieldsInit(objectRef);
             if (fields != null) {
-                for (String key : fields.keySet()) {
-                    Object object = fields.get(key);
+                for (Map.Entry<String, Object> entry : fields.entrySet()) {
+                    String key = entry.getKey();
+                    Object object = entry.getValue();
                     if (object != null) {
                         if (object instanceof ObjectRef) {
                             stateObjectRefs(stateObjectRefs, (ObjectRef) object);

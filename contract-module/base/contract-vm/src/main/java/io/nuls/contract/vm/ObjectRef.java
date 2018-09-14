@@ -16,16 +16,27 @@ public class ObjectRef {
     static {
         DESCRIPTORS = HashBiMap.create();
         DESCRIPTORS.put("z", "Ljava/lang/Boolean;");
+        DESCRIPTORS.put("[z", "[Ljava/lang/Boolean;");
         DESCRIPTORS.put("b", "Ljava/lang/Byte;");
+        DESCRIPTORS.put("[b", "[Ljava/lang/Byte;");
         DESCRIPTORS.put("s", "Ljava/lang/Short;");
+        DESCRIPTORS.put("[s", "[Ljava/lang/Short;");
         DESCRIPTORS.put("c", "Ljava/lang/Character;");
+        DESCRIPTORS.put("[c", "[Ljava/lang/Character;");
         DESCRIPTORS.put("i", "Ljava/lang/Integer;");
+        DESCRIPTORS.put("[i", "[Ljava/lang/Integer;");
         DESCRIPTORS.put("l", "Ljava/lang/Long;");
+        DESCRIPTORS.put("[l", "[Ljava/lang/Long;");
         DESCRIPTORS.put("f", "Ljava/lang/Float;");
+        DESCRIPTORS.put("[f", "[Ljava/lang/Float;");
         DESCRIPTORS.put("d", "Ljava/lang/Double;");
+        DESCRIPTORS.put("[d", "[Ljava/lang/Double;");
         DESCRIPTORS.put("ss", "Ljava/lang/String;");
+        DESCRIPTORS.put("[ss", "[Ljava/lang/String;");
         DESCRIPTORS.put("bi", "Ljava/math/BigInteger;");
+        DESCRIPTORS.put("[bi", "[Ljava/math/BigInteger;");
         DESCRIPTORS.put("a", "Lio/nuls/contract/sdk/Address;");
+        DESCRIPTORS.put("[a", "[Lio/nuls/contract/sdk/Address;");
         DESCRIPTORS.put("m", "Ljava/util/HashMap;");
         DESCRIPTORS.put("n", "Ljava/util/HashMap$Node;");
         DESCRIPTORS.put("al", "Ljava/util/ArrayList;");
