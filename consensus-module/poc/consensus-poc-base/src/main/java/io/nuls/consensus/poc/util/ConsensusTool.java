@@ -60,6 +60,8 @@ import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.*;
 
 import io.nuls.kernel.script.BlockSignature;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.ByteArrayWrapper;
 import io.nuls.kernel.utils.VarInt;
@@ -383,7 +385,11 @@ public class ConsensusTool {
         NulsDigestData createTxHash = agent.getTxHash();
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
-        toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), lockTime));
+
+        Script scriptPubkey = SignatureUtil.createOutputScript(agent.getAgentAddress());
+        toList.add( new Coin(scriptPubkey.getProgram(), agent.getDeposit(),lockTime));
+
+        //toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), lockTime));
         coinData.setTo(toList);
         CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);
         if (null == transaction) {
@@ -428,7 +434,11 @@ public class ConsensusTool {
             String address = AddressTool.getStringAddressByBytes(deposit.getAddress());
             Coin coin = toMap.get(address);
             if (null == coin) {
-                coin = new Coin(deposit.getAddress(), deposit.getDeposit(), 0);
+
+                Script scriptPubkeyDeposit = SignatureUtil.createOutputScript(deposit.getAddress());
+                coin = new Coin(scriptPubkeyDeposit.getProgram(), deposit.getDeposit(),0);
+
+               // coin = new Coin(deposit.getAddress(), deposit.getDeposit(), 0);
                 addressList.add(address);
                 toMap.put(address, coin);
             } else {

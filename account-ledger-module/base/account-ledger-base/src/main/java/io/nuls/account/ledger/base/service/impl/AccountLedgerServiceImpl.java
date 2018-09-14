@@ -1127,8 +1127,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
         tx.setTime(TimeService.currentTimeMillis());
         CoinData coinData = new CoinData();
-        Coin toCoin = new Coin(to, values);
+        Script scriptPubkey = SignatureUtil.createOutputScript(to);
+        Coin toCoin = new Coin(scriptPubkey.getProgram(), values);
         coinData.getTo().add(toCoin);
+       /* CoinData coinData = new CoinData();
+        Coin toCoin = new Coin(to, values);
+        coinData.getTo().add(toCoin);*/
         tx.setCoinData(coinData);
         Na fee = getTxFee(from, values, tx.size() + P2PHKSignature.SERIALIZE_LENGTH, price);
         Result result = Result.getSuccess().setData(fee);
