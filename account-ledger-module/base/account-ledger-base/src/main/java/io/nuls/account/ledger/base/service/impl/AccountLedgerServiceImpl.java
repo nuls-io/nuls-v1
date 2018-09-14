@@ -621,12 +621,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 Result.getFailed(TransactionErrorCode.DATA_ERROR);
             }
             tx.setCoinData(null);
-            //默认coindata中to为15+脚本长度 +备注+签名
-            Script scriptPubkey = SignatureUtil.createOutputScript(address);
-            int txSize = tx.size() + 15 + scriptPubkey.getProgram().length + TxRemarkValidator.MAX_REMARK_LEN;
+            //默认coindata中to为38 +备注+签名
+            int txSize = tx.size() + 38+ TxRemarkValidator.MAX_REMARK_LEN;
             int targetSize = TxMaxSizeValidator.MAX_TX_SIZE - txSize;
             Collections.sort(coinList, CoinComparatorDesc.getInstance());
-            int size = tx.size() + 15 + scriptPubkey.getProgram().length;
+            int size = tx.size() + 38;
             //将所有余额从大到小排序后，累计未花费的余额
             byte sign_type = 0;
             int txNum = 1;
@@ -1038,9 +1037,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         changeWholeLock.lock();
         try {
             tx.setTime(TimeService.currentTimeMillis());
-            Script scriptPubkey = SignatureUtil.createOutputScript(address);
-            //默认coindata中to暂定76字节（两条tocoin）
-            int size = tx.size() + 15 + scriptPubkey.getProgram().length;
+            //默认coindata中to暂定38字节（一条tocoin）
+            int size = tx.size() + 38;
             //计算目标size，coindata中from的总大小
             int targetSize = TxMaxSizeValidator.MAX_TX_SIZE - size;
             if (coinList.isEmpty()) {
@@ -1084,7 +1082,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Na fee = TransactionFeeCalculator.getFee(size, price);
             max = max.subtract(fee);
             CoinData coinData = new CoinData();
-            Coin toCoin = new Coin(scriptPubkey.getProgram(), max);
+            Coin toCoin = new Coin(address, max);
             coinData.getTo().add(toCoin);
             coinData.setFrom(coins);
             tx.setCoinData(coinData);

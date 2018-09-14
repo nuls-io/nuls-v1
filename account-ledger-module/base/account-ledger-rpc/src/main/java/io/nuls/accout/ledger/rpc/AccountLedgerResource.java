@@ -362,12 +362,8 @@ public class AccountLedgerResource {
         }
         tx.setTime(TimeService.currentTimeMillis());
         CoinData coinData = new CoinData();
-        Script scriptPubkey = SignatureUtil.createOutputScript(AddressTool.getAddress(form.getToAddress()));
-        Coin toCoin = new Coin(scriptPubkey.getProgram(), value);
-        coinData.getTo().add(toCoin);
-       /* CoinData coinData = new CoinData();
         Coin toCoin = new Coin(AddressTool.getAddress(form.getToAddress()), value);
-        coinData.getTo().add(toCoin);*/
+        coinData.getTo().add(toCoin);
         tx.setCoinData(coinData);
         Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
                 TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
