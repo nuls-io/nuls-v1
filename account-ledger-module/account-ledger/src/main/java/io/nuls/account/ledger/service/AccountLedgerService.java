@@ -288,4 +288,19 @@ public interface AccountLedgerService {
      * @return
      */
     Result getAvailableTotalUTXO(byte[] address);
+
+    /**
+     * A transfers NULS to B   多签交易
+     * @param from      address of A
+     * @param to        address of B
+     * @param values    NULS amount
+     * @param password  password of A
+     * @param remark    remarks of transaction
+     * @param price     Unit price of fee
+     * @param pubkeys   公钥列表
+     * @param m         至少需要签名验证通过
+     * @param txdata    签名的交易数据
+     * @return Result
+     */
+    Result transferP2sh(byte[] fromAddr, byte[] signAddr ,List<MultipleAddressTransferModel> outputs, Na values, String password, String remark, Na price, List<String>pubkeys,int m,String txdata);
 }

@@ -25,6 +25,7 @@
 
 package io.nuls.kernel.script;
 
+import com.google.common.primitives.UnsignedBytes;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -38,8 +39,9 @@ import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.validate.ValidateResult;
 
 import java.io.IOException;
+import java.util.Comparator;
 
-public class P2PHKSignature extends BaseNulsData {
+public class P2PHKSignature extends BaseNulsData{
 
     public static final int SERIALIZE_LENGTH = 110;
 
@@ -142,4 +144,12 @@ public class P2PHKSignature extends BaseNulsData {
             return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
         }
     }
+
+    public static final Comparator<P2PHKSignature> PUBKEY_COMPARATOR = new Comparator<P2PHKSignature>() {
+        private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+        @Override
+        public int compare(P2PHKSignature k1, P2PHKSignature k2) {
+            return comparator.compare(k1.getPublicKey(), k2.getPublicKey());
+        }
+    };
 }

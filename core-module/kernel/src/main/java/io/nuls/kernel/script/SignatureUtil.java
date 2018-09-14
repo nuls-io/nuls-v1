@@ -302,7 +302,7 @@ public class SignatureUtil {
 
 
     /**
-     * 生成交易的脚本（多重签名，P2SH）
+     * 验证的脚本（多重签名，P2SH）
      * @param  digestBytes     验证的签名数据
      * @param  chunks          需要验证的脚本
      */
@@ -340,6 +340,14 @@ public class SignatureUtil {
         return  true;
     }
 
+
+    /**
+     * 从赎回脚本中获取需要多少人签名
+     * @param  redeemScript          赎回脚本
+     */
+    public static int getM(Script redeemScript){
+        return  Script.decodeFromOpN(redeemScript.getChunks().get(0).opcode);
+    }
 
     /**
      * 获取脚本中的公钥

@@ -39,10 +39,8 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
-
 import io.nuls.kernel.script.P2PHKSignature;
 import io.nuls.kernel.script.Script;
-import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.script.TransactionSignature;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
@@ -619,4 +617,35 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         return utxoLedgerUtxoStorageService.getUtxo(owner);
     }
 
+
+    /**
+     * get UTXO by key
+     *
+     * 根据key获取UTXO
+     * @param address
+     * @return Coin
+     */
+    @Override
+    public  List<Coin> getAllUtxo(byte[] address){
+        List<byte[]> allUtxo = utxoLedgerUtxoStorageService.getAllUtxoBytes();
+        List<Coin> coins = new ArrayList<>();
+        if(allUtxo != null && allUtxo.size() > 0){
+            for (byte[] utxo:allUtxo) {
+                Coin coin = null;
+                try {
+                    if (utxo != null && utxo.length > 0) {
+                        coin = new Coin();
+                        coin.parse(utxo, 0);
+                        if(java.util.Arrays.equals(coin.getAddress(), address)){
+                            coins.add(coin);
+                        }
+                    }
+                } catch (NulsException e) {
+                    Log.error(e);
+                    return null;
+                }
+            }
+        }
+        return  coins;
+    }
 }

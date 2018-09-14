@@ -155,5 +155,12 @@ public interface LedgerService {
      */
     Coin getUtxo(byte[] owner);
 
-
+    /**
+     * get UTXO by key
+     *
+     * 根据key获取UTXO
+     * @param address
+     * @return Coin
+     */
+    List<Coin> getAllUtxo(byte[] address);
 }

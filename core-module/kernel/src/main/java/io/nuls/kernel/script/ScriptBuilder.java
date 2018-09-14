@@ -19,6 +19,7 @@ package io.nuls.kernel.script;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.UnsignedBytes;
 import io.nuls.core.tools.crypto.ECKey;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Address;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -335,7 +336,7 @@ public class ScriptBuilder {
         ScriptBuilder builder = new ScriptBuilder();
         builder.smallNum(threshold);
         for (String pubKey:pubkeys) {
-            builder.data(pubKey.getBytes());
+            builder.data(Hex.decode(pubKey));
         }
         builder.smallNum(pubkeys.size());
         builder.op(OP_CHECKMULTISIG);
@@ -626,7 +627,7 @@ public class ScriptBuilder {
         private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
         @Override
         public int compare(String k1, String k2) {
-            return comparator.compare(k1.getBytes(), k2.getBytes());
+            return comparator.compare(Hex.decode(k1), Hex.decode(k2));
         }
     };
 
