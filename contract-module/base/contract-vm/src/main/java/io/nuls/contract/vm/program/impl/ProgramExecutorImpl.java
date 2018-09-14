@@ -347,6 +347,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             return programResult;
         } catch (ErrorException e) {
+            this.revert = true;
             //log.error("", e);
             ProgramResult programResult = new ProgramResult();
             programResult.setGasUsed(e.getGasUsed());
