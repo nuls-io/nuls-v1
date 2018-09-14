@@ -30,6 +30,7 @@ import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.map.MapUtil;
 import io.nuls.core.tools.param.AssertUtil;
+import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
@@ -627,25 +628,22 @@ public class UtxoLedgerServiceImpl implements LedgerService {
      */
     @Override
     public  List<Coin> getAllUtxo(byte[] address){
-        List<byte[]> allUtxo = utxoLedgerUtxoStorageService.getAllUtxoBytes();
-        List<Coin> coins = new ArrayList<>();
-        if(allUtxo != null && allUtxo.size() > 0){
-            for (byte[] utxo:allUtxo) {
-                Coin coin = null;
-                try {
-                    if (utxo != null && utxo.length > 0) {
-                        coin = new Coin();
-                        coin.parse(utxo, 0);
-                        if(java.util.Arrays.equals(coin.getAddress(), address)){
-                            coins.add(coin);
-                        }
-                    }
-                } catch (NulsException e) {
-                    Log.error(e);
-                    return null;
-                }
+        List<Coin> coinList = new ArrayList<>();
+        Collection<Entry<byte[], byte[]>> rawList =utxoLedgerUtxoStorageService.getAllUtxoEntryBytes();
+        for (Entry<byte[], byte[]> coinEntry : rawList) {
+            Coin coin = new Coin();
+            try {
+                coin.parse(coinEntry.getValue(), 0);
+            } catch (NulsException e) {
+                Log.info("parse coin form db error");
+                continue;
+            }
+            if (java.util.Arrays.equals(coin.getAddress(), address)) {
+                coin.setTempOwner(coin.getOwner());
+                coin.setOwner(coinEntry.getKey());
+                coinList.add(coin);
             }
         }
-        return  coins;
+        return coinList;
     }
 }
