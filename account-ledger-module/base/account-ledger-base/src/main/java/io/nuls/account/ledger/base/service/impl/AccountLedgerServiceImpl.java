@@ -481,7 +481,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     Na change = values.subtract(amount.add(fee));
                     Coin changeCoin = new Coin();
                     //changeCoin.setOwner(address);
-                    changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
+                    //changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
+                    changeCoin.setOwner(address);
                     changeCoin.setNa(change);
 
                     fee = TransactionFeeCalculator.getFee(size + changeCoin.size(), price);
@@ -716,8 +717,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             tx.setRemark(remark);
             tx.setTime(TimeService.currentTimeMillis());
             CoinData coinData = new CoinData();
-            Script scriptPubkey = SignatureUtil.createOutputScript(to);
-            Coin toCoin = new Coin(scriptPubkey.getProgram(), values);
+            Coin toCoin = new Coin(to, values);
             coinData.getTo().add(toCoin);
             if (price == null) {
                 price = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES;
@@ -887,9 +887,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             tx.setTime(TimeService.currentTimeMillis());
             CoinData coinData = new CoinData();
             for (MultipleAddressTransferModel to : toList) {
-                Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
-                //Coin toCoin = new Coin(to.getAddress(), Na.valueOf(to.getAmount()));
-                Coin toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));
+                //Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
+                Coin toCoin = new Coin(to.getAddress(), Na.valueOf(to.getAmount()));
+                //Coin toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));
                 coinData.getTo().add(toCoin);
             }
             if (price == null) {
