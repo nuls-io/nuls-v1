@@ -57,7 +57,9 @@ import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.ScriptBuilder;
 import io.nuls.kernel.script.ScriptUtil;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
 
@@ -606,15 +608,8 @@ public class AccountServiceImpl implements AccountService {
     public Result<Address> createMultiAccount(List<String> pubkeys, int m) {
         locker.lock();
         try {
-            Script redeemScript = ScriptUtil.creatRredeemScript(pubkeys,m);
+            Script redeemScript = ScriptBuilder.createNulsRedeemScript(m,pubkeys);
             Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
-            /*Account account = AccountTool.createAccount();
-            AccountPo po = new AccountPo(account);
-            Result result = accountStorageService.saveAccount(po);
-            if (result.isFailed()) {
-                return result;
-            }
-            accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);*/
             return Result.getSuccess().setData(address);
         } catch (Exception e) {
             Log.error(e);

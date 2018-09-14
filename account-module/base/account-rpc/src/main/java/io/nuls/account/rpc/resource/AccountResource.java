@@ -1157,11 +1157,6 @@ public class AccountResource {
         if (result.isFailed()) {
             return result.toRpcClientResult();
         }
-       /* List<Account> listAccount = (List<Account>) result.getData();
-        List<String> list = new ArrayList<>();
-        for (Account account : listAccount) {
-            list.add(account.getAddress().toString());
-        }*/
         Address address = (Address) result.getData();
         Map<String, String> map = new HashMap<>();
         map.put("address", address.toString());

@@ -1049,4 +1049,67 @@ public class AccountLedgerResource {
         }
         txDto.setValue(value.getValue());
     }
+
+
+    @POST
+    @Path("/transferP2sh")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult transferP2sh(@ApiParam(name = "form", value = "转账", required = true) MultiSignForm form) {
+        List<MultipleAddressTransferModel> toModelList = new ArrayList<>();
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(form.getSignAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        Na value = Na.valueOf(form.getAmount());
+        Result result = null;
+        if(form.getTxdata() == null || form.getTxdata().trim().length() == 0) {
+            if (!AddressTool.validAddress(form.getAddress())) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            }
+            if (form.getOutputs() == null || form.getOutputs() == null) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            }
+            if (form.getAmount() <= 0) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+            if (form.getM() <= 0) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+            if (form.getPubkeys() == null || form.getPubkeys().size() == 0 || form.getPubkeys().size() < form.getM()) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+
+            for (MultipleTxToDto to : form.getOutputs()) {
+                MultipleAddressTransferModel model = new MultipleAddressTransferModel();
+                if (!AddressTool.validAddress(to.getToAddress())) {
+                    return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+                }
+                model.setAddress(AddressTool.getAddress(to.getToAddress()));
+                model.setAmount(to.getAmount());
+                toModelList.add(model);
+            }
+            result = accountLedgerService.transferP2sh(AddressTool.getAddress(form.getAddress()),
+                    AddressTool.getAddress(form.getSignAddress()),
+                    toModelList,value,form.getPassword(),form.getRemark(),
+                    TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES,form.getPubkeys(),form.getM(),null
+            );
+        }else{
+            result = accountLedgerService.transferP2sh(null,
+                    AddressTool.getAddress(form.getSignAddress()),
+                    toModelList,value,form.getPassword(),form.getRemark(),
+                    TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES,form.getPubkeys(),form.getM(),form.getTxdata()
+            );
+        }
+        if (result.isSuccess()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("value", (String) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
 }
