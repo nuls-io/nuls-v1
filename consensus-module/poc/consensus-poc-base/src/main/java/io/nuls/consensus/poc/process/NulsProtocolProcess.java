@@ -155,7 +155,6 @@ public class NulsProtocolProcess {
                 container.setStatus(ProtocolContainer.DELAY_LOCK);
                 container.setCurrentDelay(1);
             }
-
             Log.info("========== 统计协议 ==========");
             Log.info("========== 协议覆盖率：" + rate + " -->>> " + container.getPercent());
             Log.info("========== 协议version：" + container.getVersion());
@@ -180,7 +179,6 @@ public class NulsProtocolProcess {
             if (container.getCurrentDelay() >= container.getDelay()) {
                 container.setStatus(ProtocolContainer.VALID);
                 container.setEffectiveHeight(blockHeader.getHeight() + 1);
-                saveProtocolInfo(container);
                 upgradeProtocol(container);
                 Log.info("********** 协议生效了！！！！！！！！！ **********");
                 Log.info("********** 协议生效了！！！！！！！！！ **********");
