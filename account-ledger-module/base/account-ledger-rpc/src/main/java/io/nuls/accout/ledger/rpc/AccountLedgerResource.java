@@ -64,6 +64,8 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -360,8 +362,12 @@ public class AccountLedgerResource {
         }
         tx.setTime(TimeService.currentTimeMillis());
         CoinData coinData = new CoinData();
-        Coin toCoin = new Coin(AddressTool.getAddress(form.getToAddress()), value);
+        Script scriptPubkey = SignatureUtil.createOutputScript(AddressTool.getAddress(form.getToAddress()));
+        Coin toCoin = new Coin(scriptPubkey.getProgram(), value);
         coinData.getTo().add(toCoin);
+       /* CoinData coinData = new CoinData();
+        Coin toCoin = new Coin(AddressTool.getAddress(form.getToAddress()), value);
+        coinData.getTo().add(toCoin);*/
         tx.setCoinData(coinData);
         Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
                 TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);

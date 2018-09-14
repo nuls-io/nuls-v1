@@ -66,6 +66,7 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 
+import io.nuls.kernel.script.Script;
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
@@ -256,7 +257,9 @@ public class PocConsensusResource {
         tx.setTxData(agent);
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
-        toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), -1));
+        Script scriptPubkey = SignatureUtil.createOutputScript(agent.getAgentAddress());
+        //toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), -1));
+        toList.add( new Coin(scriptPubkey.getProgram(), agent.getDeposit(),-1));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
         CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
@@ -297,7 +300,9 @@ public class PocConsensusResource {
         tx.setTxData(deposit);
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
-        toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), -1));
+       // toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), -1));
+        Script scriptPubkey = SignatureUtil.createOutputScript(deposit.getAddress());
+        toList.add( new Coin(scriptPubkey.getProgram(), deposit.getDeposit(),-1));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
         CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
@@ -1078,7 +1083,11 @@ public class PocConsensusResource {
         tx.setTxData(cancelDeposit);
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
-        toList.add(new Coin(cancelDeposit.getAddress(), depositTransaction.getTxData().getDeposit(), 0));
+
+        Script scriptPubkey = SignatureUtil.createOutputScript(AddressTool.getAddress(cancelDeposit.getAddress()));
+        toList.add( new Coin(scriptPubkey.getProgram(), depositTransaction.getTxData().getDeposit(),0));
+
+        //toList.add(new Coin(cancelDeposit.getAddress(), depositTransaction.getTxData().getDeposit(), 0));
         coinData.setTo(toList);
         List<Coin> fromList = new ArrayList<>();
         for (int index = 0; index < depositTransaction.getCoinData().getTo().size(); index++) {
