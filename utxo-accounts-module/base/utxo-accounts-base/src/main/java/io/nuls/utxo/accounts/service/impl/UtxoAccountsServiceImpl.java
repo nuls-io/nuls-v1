@@ -33,9 +33,11 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
-import io.nuls.kernel.model.*;
+import io.nuls.kernel.model.Block;
+import io.nuls.kernel.model.Coin;
+import io.nuls.kernel.model.NulsDigestData;
+import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.AddressTool;
-import io.nuls.utxo.accounts.util.UtxoAccountsUtil;
 import io.nuls.utxo.accounts.constant.UtxoAccountsConstant;
 import io.nuls.utxo.accounts.service.UtxoAccountsService;
 import io.nuls.utxo.accounts.storage.constant.UtxoAccountsStorageConstant;
@@ -43,13 +45,13 @@ import io.nuls.utxo.accounts.storage.po.LocalCacheBlockBalance;
 import io.nuls.utxo.accounts.storage.po.LockedBalance;
 import io.nuls.utxo.accounts.storage.po.UtxoAccountsBalancePo;
 import io.nuls.utxo.accounts.storage.service.UtxoAccountsStorageService;
+import io.nuls.utxo.accounts.util.UtxoAccountsUtil;
 
-import java.nio.ByteBuffer;
 import java.util.*;
 
 @Service
 public class UtxoAccountsServiceImpl implements UtxoAccountsService {
-    private static ByteBuffer buffer = ByteBuffer.allocate(8);
+
     @Autowired
     UtxoAccountsStorageService utxoAccountsStorageService;
     @Autowired
