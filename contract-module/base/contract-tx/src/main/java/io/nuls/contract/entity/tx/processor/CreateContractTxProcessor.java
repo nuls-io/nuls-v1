@@ -135,6 +135,8 @@ public class CreateContractTxProcessor implements TransactionProcessor<CreateCon
 
         byte[] stateRoot = contractResult.getStateRoot();
         boolean isNrc20Contract = contractResult.isNrc20();
+        boolean acceptDirectTransfer = contractResult.isAcceptDirectTransfer();
+        info.setAcceptDirectTransfer(acceptDirectTransfer);
         info.setNrc20(isNrc20Contract);
         // 获取 token tracker
         if(isNrc20Contract) {

@@ -181,11 +181,17 @@ public class ContractResource implements InitializingBean {
 
         byte[] contractCodeBytes = Hex.decode(contractCode);
 
+        ProgramMethod method = vmHelper.getMethodInfoByCode(ContractConstant.CONTRACT_CONSTRUCTOR, null, contractCodeBytes);
+        String[][] args = null;
+        if(method != null) {
+            args = create.getArgs(method.argsType2Array());
+        }
+
         return contractTxService.contractCreateTx(create.getSender(),
                 create.getGasLimit(),
                 create.getPrice(),
                 contractCodeBytes,
-                create.getArgs(),
+                args,
                 create.getPassword(),
                 create.getRemark()).toRpcClientResult();
     }
@@ -241,11 +247,17 @@ public class ContractResource implements InitializingBean {
 
         byte[] contractCodeBytes = Hex.decode(contractCode);
 
+        ProgramMethod method = vmHelper.getMethodInfoByCode(ContractConstant.CONTRACT_CONSTRUCTOR, null, contractCodeBytes);
+        String[][] args = null;
+        if(method != null) {
+            args = create.getArgs(method.argsType2Array());
+        }
+
         return contractTxService.contractPreCreateTx(create.getSender(),
                 create.getGasLimit(),
                 create.getPrice(),
                 contractCodeBytes,
-                create.getArgs(),
+                args,
                 null,
                 create.getRemark()).toRpcClientResult();
     }
@@ -259,39 +271,35 @@ public class ContractResource implements InitializingBean {
     })
     public RpcClientResult imputedGasCreateContract(@ApiParam(name = "imputedGasCreateForm", value = "估算创建智能合约的Gas消耗", required = true) ImputedGasContractCreate create) {
         try {
+            Map<String, Object> resultMap = MapUtil.createHashMap(1);
+            resultMap.put("gasLimit", 0);
             long price = create.getPrice();
             if (create == null || price <= 0) {
-                return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
+                return Result.getSuccess().setData(resultMap).toRpcClientResult();
             }
 
             String sender = create.getSender();
-            if (!AddressTool.validAddress(sender)) {
-                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            Result<Account> accountResult = accountService.getAccount(sender);
+            if (accountResult.isFailed()) {
+                return Result.getSuccess().setData(resultMap).toRpcClientResult();
             }
 
             String contractCode = create.getContractCode();
             if(StringUtils.isBlank(contractCode)) {
-                return Result.getFailed(ContractErrorCode.NULL_PARAMETER).toRpcClientResult();
+                return Result.getSuccess().setData(resultMap).toRpcClientResult();
             }
-
-            Result<Account> accountResult = accountService.getAccount(sender);
-            if (accountResult.isFailed()) {
-                return accountResult.toRpcClientResult();
-            }
-
-            // 获取sender账户余额, 根据余额和合约price计算 账户余额能够消耗的最大Gas
-            /*Result<Balance> senderBalanceResult = accountService.getBalance(sender);
-            Balance senderBalance = senderBalanceResult.getData();
-            Na usable = senderBalance.getUsable();
-            long maxGasLimit = LongUtils.div(usable.getValue(), price);
-            maxGasLimit = maxGasLimit > MAX_GASLIMIT ? MAX_GASLIMIT : maxGasLimit;*/
 
             // 生成一个地址作为智能合约地址
             Address contractAddress = AccountTool.createContractAddress();
             byte[] contractAddressBytes = contractAddress.getAddressBytes();
             byte[] senderBytes = AddressTool.getAddress(sender);
             byte[] contractCodeBytes = Hex.decode(contractCode);
-            String[][] args = create.getArgs();
+
+            ProgramMethod method = vmHelper.getMethodInfoByCode(ContractConstant.CONTRACT_CONSTRUCTOR, null, contractCodeBytes);
+            String[][] args = null;
+            if(method != null) {
+                args = create.getArgs(method.argsType2Array());
+            }
 
             // 当前区块高度
             BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
@@ -316,14 +324,11 @@ public class ContractResource implements InitializingBean {
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             ProgramResult programResult = track.create(programCreate);
             if(!programResult.isSuccess()) {
-                Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
-                result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
-                return result.toRpcClientResult();
+                return Result.getSuccess().setData(resultMap).toRpcClientResult();
             }
             long gasUsed = programResult.getGasUsed();
             // 预估1.5倍Gas
             gasUsed += gasUsed >> 1;
-            Map<String, Object> resultMap = MapUtil.createHashMap(1);
             resultMap.put("gasLimit", gasUsed);
             return Result.getSuccess().setData(resultMap).toRpcClientResult();
         } catch (Exception e) {
@@ -357,6 +362,12 @@ public class ContractResource implements InitializingBean {
             return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST).toRpcClientResult();
         }
 
+        ProgramMethod method = vmHelper.getMethodInfoByContractAddress(call.getMethodName(), call.getMethodDesc(), contractAddressBytes);
+        String[][] args = null;
+        if(method != null) {
+            args = call.getArgs(method.argsType2Array());
+        }
+
         return contractTxService.contractCallTx(call.getSender(),
                 Na.valueOf(call.getValue()),
                 call.getGasLimit(),
@@ -364,7 +375,7 @@ public class ContractResource implements InitializingBean {
                 contractAddress,
                 call.getMethodName(),
                 call.getMethodDesc(),
-                call.getArgs(),
+                args,
                 call.getPassword(),
                 call.getRemark()).toRpcClientResult();
     }
@@ -491,11 +502,14 @@ public class ContractResource implements InitializingBean {
                 return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST).toRpcClientResult();
             }
 
-            if(!vmHelper.checkIsViewMethod(methodName, contractAddressBytes)) {
+            ProgramMethod method = vmHelper.getMethodInfoByContractAddress(methodName, constantCall.getMethodDesc(), contractAddressBytes);
+
+            if(method == null || !method.isView()) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_NON_VIEW_METHOD).toRpcClientResult();
             }
 
-            ProgramResult programResult = vmHelper.invokeViewMethod(contractAddressBytes, methodName, constantCall.getMethodDesc(), constantCall.getArgs());
+            ProgramResult programResult = vmHelper.invokeViewMethod(contractAddressBytes, methodName, constantCall.getMethodDesc(),
+                    constantCall.getArgs(method.argsType2Array()));
 
             Result result = null;
             if(!programResult.isSuccess()) {
@@ -524,21 +538,29 @@ public class ContractResource implements InitializingBean {
     public RpcClientResult imputedGasCallContract(@ApiParam(name = "imputedGasCallForm", value = "估算调用智能合约的Gas消耗", required = true) ImputedGasContractCall call) {
         try {
 
+            Map<String, Object> resultMap = MapUtil.createHashMap(1);
+            resultMap.put("gasLimit", 0);
+
+            String sender = call.getSender();
+            Result<Account> accountResult = accountService.getAccount(sender);
+            if (accountResult.isFailed()) {
+                return Result.getSuccess().setData(resultMap).toRpcClientResult();
+            }
+
             String contractAddress = call.getContractAddress();
             if (!AddressTool.validAddress(contractAddress)) {
-                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+                return Result.getSuccess().setData(resultMap).toRpcClientResult();
             }
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
 
             if(!ContractLedgerUtil.isExistContractAddress(contractAddressBytes)) {
-                return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST).toRpcClientResult();
+                return Result.getSuccess().setData(resultMap).toRpcClientResult();
             }
 
             String methodName = call.getMethodName();
             // 如果是不上链的方法，不消耗gas，直接返回0
-            if(vmHelper.checkIsViewMethod(methodName, contractAddressBytes)) {
-                Map<String, Object> resultMap = MapUtil.createHashMap(1);
-                resultMap.put("gasLimit", 0L);
+            ProgramMethod programMethod = vmHelper.getMethodInfoByContractAddress(methodName, call.getMethodDesc(), contractAddressBytes);
+            if(programMethod == null || programMethod.isView()) {
                 return Result.getSuccess().setData(resultMap).toRpcClientResult();
             }
 
@@ -552,27 +574,14 @@ public class ContractResource implements InitializingBean {
 
             long price = call.getPrice();
             if (call == null || call.getValue() < 0 || call.getPrice() <= 0) {
-                return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
+                return Result.getSuccess().setData(resultMap).toRpcClientResult();
             }
-
-            String sender = call.getSender();
-            if (!AddressTool.validAddress(sender)) {
-                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
-            }
-
-            Result<Account> accountResult = accountService.getAccount(sender);
-            if (accountResult.isFailed()) {
-                return accountResult.toRpcClientResult();
-            }
-
-            // 获取sender账户余额, 根据余额和合约price计算 账户余额能够消耗的最大Gas
-            /*Result<Balance> senderBalanceResult = accountService.getBalance(sender);
-            Balance senderBalance = senderBalanceResult.getData();
-            Na usable = senderBalance.getUsable();
-            long maxGasLimit = LongUtils.div(usable.getValue(), price);*/
 
             byte[] senderBytes = AddressTool.getAddress(sender);
-            String[][] args = call.getArgs();
+            String[][] args = null;
+            if(programMethod != null) {
+                args = call.getArgs(programMethod.argsType2Array());
+            }
 
             // 执行VM估算Gas消耗
             ProgramCall programCall = new ProgramCall();
@@ -590,17 +599,15 @@ public class ContractResource implements InitializingBean {
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
             ProgramResult programResult = track.call(programCall);
             if(!programResult.isSuccess()) {
-                Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
-                result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
-                return result.toRpcClientResult();
+                return Result.getSuccess().setData(resultMap).toRpcClientResult();
             }
             long gasUsed = programResult.getGasUsed();
             // 预估1.5倍Gas
             gasUsed += gasUsed >> 1;
-            Map<String, Object> resultMap = MapUtil.createHashMap(1);
             resultMap.put("gasLimit", gasUsed);
             return Result.getSuccess().setData(resultMap).toRpcClientResult();
         } catch (Exception e) {
+            Log.error(e);
             return Result.getFailed().setData(e.getMessage()).toRpcClientResult();
         }
     }
@@ -685,23 +692,21 @@ public class ContractResource implements InitializingBean {
         }
 
         try {
-            byte[] contractAddressBytes = AddressTool.getAddress(address);
-            boolean isContractAddress = contractAddressStorageService.isExistContractAddress(contractAddressBytes);
+            boolean isContractAddress = false;
             boolean isPayable = false;
-
-            if(isContractAddress) {
-                byte[] prevStateRoot = ContractUtil.getStateRoot(NulsContext.getInstance().getBestBlock().getHeader());
-                ProgramExecutor track = programExecutor.begin(prevStateRoot);
-                ProgramStatus status = track.status(contractAddressBytes);
-                List<ProgramMethod> methods = track.method(contractAddressBytes);
-                for(ProgramMethod method : methods) {
-                    if(ContractConstant.BALANCE_TRIGGER_METHOD_NAME.equals(method.getName())) {
-                        isPayable = method.isPayable();
-                        break;
-                    }
+            do {
+                byte[] contractAddressBytes = AddressTool.getAddress(address);
+                Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
+                if(contractAddressInfoPoResult.isFailed()) {
+                    break;
                 }
-            }
-
+                ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoPoResult.getData();
+                if(contractAddressInfoPo == null) {
+                    break;
+                }
+                isContractAddress = true;
+                isPayable = contractAddressInfoPo.isAcceptDirectTransfer();
+            } while (false);
             Map<String, Object> resultMap = MapUtil.createLinkedHashMap(2);
             resultMap.put("isContractAddress", isContractAddress);
             resultMap.put("isPayable", isPayable);

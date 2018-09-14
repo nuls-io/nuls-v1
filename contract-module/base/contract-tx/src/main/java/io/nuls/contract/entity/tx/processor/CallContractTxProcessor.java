@@ -106,7 +106,7 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                 if(contractResult != null) {
                     // 处理合约执行失败 - 没有transferEvent的情况, 直接从数据库中删除
                     if(!contractResult.isSuccess()) {
-                        if(ContractConstant.NRC20_METHOD_TRANSFER.equals(txData.getMethodName())) {
+                        if(ContractUtil.isTransferMethod(txData.getMethodName())) {
                             contractTokenTransferStorageService.deleteTokenTransferInfo(ArraysTool.concatenate(txData.getSender(), txHashBytes, new VarInt(0).encode()));
                         }
                     }
@@ -231,9 +231,7 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
 
             // 处理合约执行失败 - 没有transferEvent的情况, 直接从数据库中获取, 若是本地创建的交易，获取到修改为失败交易
             if(!contractResult.isSuccess()) {
-                if(contractAddressInfoPo != null && contractAddressInfoPo.isNrc20() &&
-                        (ContractConstant.NRC20_METHOD_TRANSFER.equals(callContractData.getMethodName())
-                        || ContractConstant.NRC20_METHOD_TRANSFER_FROM.equals(callContractData.getMethodName()))) {
+                if(contractAddressInfoPo != null && contractAddressInfoPo.isNrc20() && ContractUtil.isTransferMethod(callContractData.getMethodName())) {
                     byte[] txHashBytes = tx.getHash().serialize();
                     byte[] infoKey = ArraysTool.concatenate(callContractData.getSender(), txHashBytes, new VarInt(0).encode());
                     Result<ContractTokenTransferInfoPo> infoResult = contractTokenTransferStorageService.getTokenTransferInfo(infoKey);
