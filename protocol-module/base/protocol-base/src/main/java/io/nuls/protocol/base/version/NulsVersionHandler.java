@@ -118,6 +118,7 @@ public class NulsVersionHandler extends DefaultHandler {
             extendTS = StringUtils.isBlank(extend) ? null : Integer.parseInt(extend.trim());
 
             String block = attributes.getValue(PROTOCOL_BLOCK);
+
             if(StringUtils.isNotBlank(block)) {
                 Class blockClass = null;
                 try {
@@ -127,15 +128,17 @@ public class NulsVersionHandler extends DefaultHandler {
                     e.printStackTrace();
                     throw new SAXException();
                 }
-            }else if(null != extendTS){
-                ProtocolContainer parentPC = NulsVersionManager.getProtocolContainer(extendTS);
-                if(null == parentPC){
+            }else{
+                if(null != extendTS){
+                    ProtocolContainer parentPC = NulsVersionManager.getProtocolContainer(extendTS);
+                    if(null == parentPC || null == parentPC.getBlockClass()){
+                        throw new SAXException();
+                    }
+                    protocolContainer.setBlockClass(parentPC.getBlockClass());
+                }else{
+                    Log.error(KernelErrorCode.CONFIG_ERROR.getMsg());
                     throw new SAXException();
                 }
-                protocolContainer.setBlockClass(parentPC.getBlockClass());
-            }else{
-                Log.error(KernelErrorCode.CONFIG_ERROR.getMsg());
-                throw new SAXException();
             }
 
             discardsTx = new HashMap<>();
