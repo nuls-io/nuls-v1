@@ -6,6 +6,7 @@ import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.util.CloneUtils;
+import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ethereum.core.Repository;
@@ -23,9 +24,9 @@ public class Heap {
 
     private VM vm;
 
-    private final Map<ObjectRef, Map<String, Object>> objects = new HashMap<>(1024);
+    public final HeapMap<ObjectRef, Map<String, Object>> objects = new HeapMap<>(1024);
 
-    private final Map<String, Object> arrays = new HashMap<>(1024);
+    public final HeapMap<String, Object> arrays = new HeapMap<>(1024);
 
     private final Set<ObjectRef> changes = new HashSet<>(1024);
 
@@ -374,7 +375,7 @@ public class Heap {
     public ObjectRef runNewObjectWithArgs(VariableType variableType, String methodDesc, Object... args) {
         ClassCode classCode = this.vm.getMethodArea().loadClass(variableType.getType());
         ObjectRef objectRef = newObject(classCode);
-        MethodCode methodCode = this.vm.getMethodArea().loadMethod(objectRef.getVariableType().getType(), "<init>", methodDesc);
+        MethodCode methodCode = this.vm.getMethodArea().loadMethod(objectRef.getVariableType().getType(), Constants.CONSTRUCTOR_NAME, methodDesc);
         if (methodCode == null) {
             throw new RuntimeException(String.format("can't new %s", variableType.getType()));
         }
@@ -618,14 +619,6 @@ public class Heap {
         } else {
             return false;
         }
-    }
-
-    public Map<ObjectRef, Map<String, Object>> getObjects() {
-        return objects;
-    }
-
-    public Map<String, Object> getArrays() {
-        return arrays;
     }
 
     public BigInteger getObjectRefCount() {

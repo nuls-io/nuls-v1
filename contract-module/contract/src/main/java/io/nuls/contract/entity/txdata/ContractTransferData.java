@@ -25,6 +25,7 @@ package io.nuls.contract.entity.txdata;
 
 
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.TransactionLogicData;
 import io.nuls.kernel.utils.NulsByteBuffer;
@@ -58,7 +59,7 @@ public class ContractTransferData extends TransactionLogicData implements Contra
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(orginTxHash);
-        size += SerializeUtils.sizeOfBytes(contractAddress);
+        size += Address.ADDRESS_LENGTH;
         size += 1;
         return size;
     }
@@ -66,14 +67,14 @@ public class ContractTransferData extends TransactionLogicData implements Contra
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(orginTxHash);
-        stream.writeBytesWithLength(contractAddress);
+        stream.write(contractAddress);
         stream.write(success);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.orginTxHash = byteBuffer.readHash();
-        this.contractAddress = byteBuffer.readByLengthByte();
+        this.contractAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.success = byteBuffer.readByte();
     }
 

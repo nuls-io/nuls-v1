@@ -547,7 +547,7 @@ public class ForkChainProcess {
                 Result rs = blockService.rollbackBlock(rollBlock);
                 if (rs.isSuccess()) {
                     //回滚版本更新统计数据
-                    nulsProtocolProcess.processProtoclRollback(rollBlock.getHeader());
+                    nulsProtocolProcess.processProtocolRollback(rollBlock.getHeader());
                 }
                 RewardStatisticsProcess.rollbackBlock(rollBlock);
             }
@@ -574,7 +574,7 @@ public class ForkChainProcess {
                 boolean success = blockService.rollbackBlock(rollbackBlock).isSuccess();
                 if (success) {
                     //回滚版本更新统计数据
-                    nulsProtocolProcess.processProtoclRollback(rollbackBlock.getHeader());
+                    nulsProtocolProcess.processProtocolRollback(rollbackBlock.getHeader());
                     //Log.info("=========================================回滚区块成功, 高度: {}.", rollbackBlock.getHeader().getHeight());
                     RewardStatisticsProcess.rollbackBlock(rollbackBlock);
                     rollbackList.add(rollbackBlock);

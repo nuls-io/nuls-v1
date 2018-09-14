@@ -198,4 +198,7 @@ public class ContractUtil {
         return errorMsg;
     }
 
+    public static boolean isStopContract(int status) {
+        return ContractConstant.STOP == status;
+    }
 }

@@ -126,7 +126,7 @@ public class ConsensusPocServiceImpl implements ConsensusService {
                 PocConsensusContext.getChainManager().getMasterChain().addBlock(block);
             } else {
                 //回滚版本更新统计数据
-                nulsProtocolProcess.processProtoclRollback(block.getHeader());
+                nulsProtocolProcess.processProtocolRollback(block.getHeader());
                 RewardStatisticsProcess.rollbackBlock(block);
                 NulsContext.getInstance().setBestBlock(PocConsensusContext.getChainManager().getMasterChain().getBestBlock());
             }

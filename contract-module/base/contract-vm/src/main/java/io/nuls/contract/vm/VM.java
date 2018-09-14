@@ -146,14 +146,18 @@ public class VM {
         programContext.setEstimateGas(programInvoke.isEstimateGas());
     }
 
+    private static final String CLASS_NAME = "java/util/HashMap";
+    private static final String METHOD_NAME = "resize";
+    private static final String METHOD_DESC = "()[Ljava/util/HashMap$Node;";
+
     public void run(MethodCode methodCode, Object[] args, boolean pushResult) {
         Frame frame = new Frame(this, methodCode, args);
-        if ("java/util/HashMap".equals(methodCode.classCode.name) && "resize".equals(methodCode.name)) {
+        if (methodCode.isMethod(CLASS_NAME, METHOD_NAME, METHOD_DESC)) {
             frame.setAddGas(false);
         }
         this.vmStack.push(frame);
         run(pushResult);
-        if (!frame.isAddGas()) {
+        if (!frame.addGas) {
             frame.setAddGas(true);
         }
     }
@@ -310,7 +314,7 @@ public class VM {
             return;
         }
 
-        if (frame.isAddGas()) {
+        if (frame.addGas) {
             int gasCost = gasCost(frame, opCode);
             addGasUsed(gasCost);
         }

@@ -246,20 +246,19 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             tx.setCoinData(coinData);
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
 
-            // 交易签名
-
+            //生成签名
             List<ECKey> signEckeys = new ArrayList<>();
-            List<ECKey> pubEckeys = new ArrayList<>();
-
+            List<ECKey> scriptEckeys = new ArrayList<>();
+            ECKey eckey = account.getEcKey(password);
             //如果最后一位为1则表示该交易包含普通签名
             if ((coinDataResult.getSignType() & 0x01) == 0x01) {
-                signEckeys.add(account.getEcKey());
+                signEckeys.add(eckey);
             }
             //如果倒数第二位位为1则表示该交易包含脚本签名
             if ((coinDataResult.getSignType() & 0x02) == 0x02) {
-                pubEckeys.add(account.getEcKey());
+                scriptEckeys.add(eckey);
             }
-            SignatureUtil.createTransactionSignture(tx, signEckeys, pubEckeys);
+            SignatureUtil.createTransactionSignture(tx, scriptEckeys, signEckeys);
 
             // 保存未确认交易到本地账本
             Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
@@ -691,20 +690,20 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             tx.setCoinData(coinData);
 
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+
             //生成签名
             List<ECKey> signEckeys = new ArrayList<>();
-            List<ECKey> scriptEckeys = new ArrayList<>();;
+            List<ECKey> scriptEckeys = new ArrayList<>();
             ECKey eckey = account.getEcKey(password);
-
             //如果最后一位为1则表示该交易包含普通签名
-            if((coinDataResult.getSignType() & 0x01) == 0x01){
+            if ((coinDataResult.getSignType() & 0x01) == 0x01) {
                 signEckeys.add(eckey);
             }
             //如果倒数第二位位为1则表示该交易包含脚本签名
-            if((coinDataResult.getSignType() & 0x02) == 0x02){
+            if ((coinDataResult.getSignType() & 0x02) == 0x02) {
                 scriptEckeys.add(eckey);
             }
-            SignatureUtil.createTransactionSignture(tx,scriptEckeys,signEckeys);
+            SignatureUtil.createTransactionSignture(tx, scriptEckeys, signEckeys);
 
             //TODO pierre 代码结构需优化，先实现功能
             // 保存未确认Token转账
@@ -969,18 +968,17 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
 
             //生成签名
             List<ECKey> signEckeys = new ArrayList<>();
-            List<ECKey> scriptEckeys = new ArrayList<>();;
+            List<ECKey> scriptEckeys = new ArrayList<>();
             ECKey eckey = account.getEcKey(password);
-
             //如果最后一位为1则表示该交易包含普通签名
-            if((coinDataResult.getSignType() & 0x01) == 0x01){
+            if ((coinDataResult.getSignType() & 0x01) == 0x01) {
                 signEckeys.add(eckey);
             }
             //如果倒数第二位位为1则表示该交易包含脚本签名
-            if((coinDataResult.getSignType() & 0x02) == 0x02){
+            if ((coinDataResult.getSignType() & 0x02) == 0x02) {
                 scriptEckeys.add(eckey);
             }
-            SignatureUtil.createTransactionSignture(tx,scriptEckeys,signEckeys);
+            SignatureUtil.createTransactionSignture(tx, scriptEckeys, signEckeys);
 
             // 保存删除合约的交易到本地账本
             Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);

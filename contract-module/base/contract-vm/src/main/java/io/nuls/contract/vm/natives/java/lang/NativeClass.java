@@ -11,64 +11,88 @@ import io.nuls.contract.vm.natives.NativeMethod;
 
 import java.util.List;
 
+import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+
 public class NativeClass {
 
     public static final String TYPE = "java/lang/Class";
 
-    public static boolean isSupport(MethodCode methodCode) {
-        if (methodCode.isClass(TYPE) && (methodCode.isMethod("getPrimitiveClass", "(Ljava/lang/String;)Ljava/lang/Class;")
-                || methodCode.isMethod("getComponentType", "()Ljava/lang/Class;")
-                || methodCode.isMethod("isArray", "()Z")
-                || methodCode.isMethod("isPrimitive", "()Z")
-                || methodCode.isMethod("isInterface", "()Z")
-                || methodCode.isMethod("desiredAssertionStatus0", "(Ljava/lang/Class;)Z")
-                || methodCode.isMethod("getGenericSignature0", "()Ljava/lang/String;")
-                || methodCode.isMethod("getName0", "()Ljava/lang/String;")
-                || methodCode.isMethod("getInterfaces", "()[Ljava/lang/Class;")
-        )) {
-            return true;
-        } else {
-            return false;
+    public static Result override(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
+        switch (methodCode.fullName) {
+            case getInterfaces:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return getInterfaces(methodCode, methodArgs, frame);
+                }
+            default:
+                return null;
         }
     }
 
-    public static Result run(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        Result result = null;
-        switch (methodCode.name) {
-            case "getPrimitiveClass":
-                result = getPrimitiveClass(methodCode, methodArgs, frame);
-                break;
-            case "getComponentType":
-                result = getComponentType(methodCode, methodArgs, frame);
-                break;
-            case "isArray":
-                result = isArray(methodCode, methodArgs, frame);
-                break;
-            case "isPrimitive":
-                result = isPrimitive(methodCode, methodArgs, frame);
-                break;
-            case "isInterface":
-                result = isInterface(methodCode, methodArgs, frame);
-                break;
-            case "desiredAssertionStatus0":
-                result = desiredAssertionStatus0(methodCode, methodArgs, frame);
-                break;
-            case "getGenericSignature0":
-                result = getGenericSignature0(methodCode, methodArgs, frame);
-                break;
-            case "getName0":
-                result = getName0(methodCode, methodArgs, frame);
-                break;
-            case "getInterfaces":
-                result = getInterfaces(methodCode, methodArgs, frame);
-                break;
+    public static Result nativeRun(MethodCode methodCode, MethodArgs methodArgs, Frame frame, boolean check) {
+        switch (methodCode.fullName) {
+            case getPrimitiveClass:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return getPrimitiveClass(methodCode, methodArgs, frame);
+                }
+            case getComponentType:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return getComponentType(methodCode, methodArgs, frame);
+                }
+            case isArray:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return isArray(methodCode, methodArgs, frame);
+                }
+            case isPrimitive:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return isPrimitive(methodCode, methodArgs, frame);
+                }
+            case isInterface:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return isInterface(methodCode, methodArgs, frame);
+                }
+            case desiredAssertionStatus0:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return desiredAssertionStatus0(methodCode, methodArgs, frame);
+                }
+            case getGenericSignature0:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return getGenericSignature0(methodCode, methodArgs, frame);
+                }
+            case getName0:
+                if (check) {
+                    return SUCCESS;
+                } else {
+                    return getName0(methodCode, methodArgs, frame);
+                }
             default:
                 frame.nonsupportMethod(methodCode);
-                break;
+                return null;
         }
-        return result;
     }
 
+    public static final String getPrimitiveClass = TYPE + "." + "getPrimitiveClass" + "(Ljava/lang/String;)Ljava/lang/Class;";
+
+    /**
+     * native
+     *
+     * @see Class#getPrimitiveClass(String)
+     */
     private static Result getPrimitiveClass(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
         String name = frame.heap.runToString(objectRef);
@@ -78,6 +102,13 @@ public class NativeClass {
         return result;
     }
 
+    public static final String getComponentType = TYPE + "." + "getComponentType" + "()Ljava/lang/Class;";
+
+    /**
+     * native
+     *
+     * @see Class#getComponentType()
+     */
     private static Result getComponentType(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
         VariableType variableType;
@@ -94,6 +125,13 @@ public class NativeClass {
         return result;
     }
 
+    public static final String isArray = TYPE + "." + "isArray" + "()Z";
+
+    /**
+     * native
+     *
+     * @see Class#isArray()
+     */
     private static Result isArray(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
         VariableType variableType;
@@ -107,6 +145,13 @@ public class NativeClass {
         return result;
     }
 
+    public static final String isPrimitive = TYPE + "." + "isPrimitive" + "()Z";
+
+    /**
+     * native
+     *
+     * @see Class#isPrimitive()
+     */
     private static Result isPrimitive(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
         VariableType variableType;
@@ -120,6 +165,13 @@ public class NativeClass {
         return result;
     }
 
+    public static final String isInterface = TYPE + "." + "isInterface" + "()Z";
+
+    /**
+     * native
+     *
+     * @see Class#isInterface()
+     */
     private static Result isInterface(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
         VariableType variableType;
@@ -137,12 +189,26 @@ public class NativeClass {
         return result;
     }
 
+    public static final String desiredAssertionStatus0 = TYPE + "." + "desiredAssertionStatus0" + "(Ljava/lang/Class;)Z";
+
+    /**
+     * native
+     *
+     * @see Class#desiredAssertionStatus0(Class)
+     */
     private static Result desiredAssertionStatus0(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         boolean status = false;
         Result result = NativeMethod.result(methodCode, status, frame);
         return result;
     }
 
+    public static final String getGenericSignature0 = TYPE + "." + "getGenericSignature0" + "()Ljava/lang/String;";
+
+    /**
+     * native
+     *
+     * @see Class#getGenericSignature0()
+     */
     private static Result getGenericSignature0(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
         VariableType variableType;
@@ -161,6 +227,13 @@ public class NativeClass {
         return result;
     }
 
+    public static final String getName0 = TYPE + "." + "getName0" + "()Ljava/lang/String;";
+
+    /**
+     * native
+     *
+     * @see Class#getName0()
+     */
     private static Result getName0(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
         VariableType variableType;
@@ -184,6 +257,13 @@ public class NativeClass {
         return result;
     }
 
+    public static final String getInterfaces = TYPE + "." + "getInterfaces" + "()[Ljava/lang/Class;";
+
+    /**
+     * override
+     *
+     * @see Class#getInterfaces()
+     */
     private static Result getInterfaces(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         ObjectRef objectRef = methodArgs.objectRef;
         VariableType variableType;

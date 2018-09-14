@@ -23,13 +23,12 @@
  */
 package testcontract.multytransfer;
 
-import io.nuls.contract.sdk.Address;
-import io.nuls.contract.sdk.Block;
-import io.nuls.contract.sdk.Contract;
-import io.nuls.contract.sdk.Msg;
+import io.nuls.contract.sdk.*;
 import io.nuls.contract.sdk.annotation.Payable;
 
 import java.math.BigInteger;
+
+import static io.nuls.contract.sdk.Utils.require;
 
 /**
  * @desription:
@@ -85,6 +84,16 @@ public class TestMultyTransfer implements Contract {
         Address address_3 = new Address("NsdtydTVWskMc7GkZzbsq2FoChqKFwMf");
         address_3.transfer(BigInteger.valueOf(30000000));
         //address_3.transfer(BigInteger.valueOf(30000000));
+        return "balance: " + Msg.address().balance().toString();
+    }
+
+    @Payable
+    public String multyForAddress(Address add1, BigInteger add1_na, Address add2, BigInteger add2_na, String add3ForString, BigInteger add3_na) {
+        require(add1 != null && add2 != null && add3ForString != null, "Address cannot be empty.");
+        add1.transfer(add1_na);
+        add2.transfer(add2_na);
+        Address address_3 = new Address(add3ForString);
+        address_3.transfer(add3_na);
         return "balance: " + Msg.address().balance().toString();
     }
 

@@ -150,12 +150,18 @@ public class AccountLedgerResource {
         if (!validTxRemark(form.getRemark())) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
+        byte[] remarkBytes;
+        try {
+            remarkBytes = form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException e) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
 
         Na value = Na.valueOf(form.getAmount());
 
         Result result = accountLedgerService.transfer(AddressTool.getAddress(form.getAddress()),
                 AddressTool.getAddress(form.getToAddress()),
-                value, form.getPassword(), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+                value, form.getPassword(), remarkBytes, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("value", (String) result.getData());
@@ -187,7 +193,14 @@ public class AccountLedgerResource {
         return result.toRpcClientResult();
     }
 
-    public RpcClientResult dapp(@ApiParam(name = "form", value = "零钱汇整", required = true) DataTransactionForm form) {
+    @POST
+    @Path("/dapp")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "创建并广播DAPP交易", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult dapp(@ApiParam(name = "form", value = "DAPP交易", required = true) DataTransactionForm form) {
         if (form == null) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
@@ -197,14 +210,24 @@ public class AccountLedgerResource {
         if (StringUtils.isBlank(form.getData())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        byte[] bytes;
+
+        byte[] data;
         try {
-            bytes = form.getData().getBytes("UTF-8");
+            data = form.getData().getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-
-        return null;
+        if (!validTxRemark(form.getRemark())) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        byte[] remarkBytes;
+        try {
+            remarkBytes = form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException e) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Result result = accountLedgerService.dapp(AddressTool.getAddress(form.getAddress()), form.getPassword(), data, remarkBytes);
+        return result.toRpcClientResult();
     }
 
     @POST

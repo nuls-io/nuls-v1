@@ -13,6 +13,7 @@ import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.exception.RevertException;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.*;
+import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.db.service.DBService;
 import org.apache.commons.lang3.StringUtils;
@@ -440,8 +441,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 return false;
             }
         }).forEach(methodCode -> {
-            if (isSupperClass && "<init>".equals(methodCode.name)) {
-            } else if ("<clinit>".equals(methodCode.name)) {
+            if (isSupperClass && Constants.CONSTRUCTOR_NAME.equals(methodCode.name)) {
+            } else if (Constants.CLINIT_NAME.equals(methodCode.name)) {
             } else {
                 String name = methodCode.name + "." + methodCode.desc;
                 methodCodes.putIfAbsent(name, methodCode);

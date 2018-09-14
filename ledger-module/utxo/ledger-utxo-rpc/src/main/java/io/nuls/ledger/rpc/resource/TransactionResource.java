@@ -25,10 +25,12 @@ package io.nuls.ledger.rpc.resource;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.constant.TxStatusEnum;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -45,15 +47,10 @@ import io.nuls.ledger.util.LedgerUtil;
 import io.swagger.annotations.*;
 import org.spongycastle.util.Arrays;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @desription:
@@ -210,4 +207,28 @@ public class TransactionResource {
         txDto.setValue(value.getValue());
     }
 
+    @GET
+    @Path("/bytes")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RpcClientResult getBlockBytes(@QueryParam("hash") String hash) throws IOException {
+        Result result;
+        if (!NulsDigestData.validHash(hash)) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Transaction tx = null;
+        try {
+            tx = ledgerService.getTx(NulsDigestData.fromDigestHex(hash));
+        } catch (NulsException e) {
+            Log.error(e);
+        }
+        if (tx == null) {
+            result = Result.getFailed(TransactionErrorCode.TX_NOT_EXIST);
+        } else {
+            result = Result.getSuccess();
+            Map<String, String> map = new HashMap<>();
+            map.put("value", Base64.getEncoder().encodeToString(tx.serialize()));
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
 }

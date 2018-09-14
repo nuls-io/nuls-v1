@@ -25,6 +25,7 @@ package io.nuls.contract.entity.txdata;
 
 
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.model.Address;
 import io.nuls.kernel.model.TransactionLogicData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
@@ -52,11 +53,12 @@ public class CallContractData extends TransactionLogicData implements ContractDa
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfBytes(sender);
-        size += SerializeUtils.sizeOfBytes(contractAddress);
-        size += SerializeUtils.sizeOfVarInt(value);
-        size += SerializeUtils.sizeOfVarInt(gasLimit);
-        size += SerializeUtils.sizeOfVarInt(price);
+        size += Address.ADDRESS_LENGTH;
+        size += Address.ADDRESS_LENGTH;
+        size += SerializeUtils.sizeOfInt64();
+        size += SerializeUtils.sizeOfInt64();
+        size += SerializeUtils.sizeOfInt64();
+
         size += SerializeUtils.sizeOfString(methodName);
         size += SerializeUtils.sizeOfString(methodDesc);
         size += 1;
@@ -73,11 +75,12 @@ public class CallContractData extends TransactionLogicData implements ContractDa
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeBytesWithLength(sender);
-        stream.writeBytesWithLength(contractAddress);
-        stream.writeVarInt(value);
-        stream.writeVarInt(gasLimit);
-        stream.writeVarInt(price);
+        stream.write(sender);
+        stream.write(contractAddress);
+        stream.writeInt64(value);
+        stream.writeInt64(gasLimit);
+        stream.writeInt64(price);
+
         stream.writeString(methodName);
         stream.writeString(methodDesc);
         stream.write(argsCount);
@@ -93,11 +96,12 @@ public class CallContractData extends TransactionLogicData implements ContractDa
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.sender = byteBuffer.readByLengthByte();
-        this.contractAddress = byteBuffer.readByLengthByte();
-        this.value = byteBuffer.readVarInt();
-        this.gasLimit = byteBuffer.readVarInt();
-        this.price = byteBuffer.readVarInt();
+        this.sender = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+        this.contractAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+        this.value = byteBuffer.readInt64();
+        this.gasLimit = byteBuffer.readInt64();
+        this.price = byteBuffer.readInt64();
+
         this.methodName = byteBuffer.readString();
         this.methodDesc = byteBuffer.readString();
         this.argsCount = byteBuffer.readByte();

@@ -65,6 +65,7 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.TransactionErrorCode;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
@@ -994,7 +995,16 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             if (!AddressTool.validAddress(address)) {
                 return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
             }
+
             Result<List<ContractTokenInfo>> tokenListResult = contractBalanceManager.getAllTokensByAccount(address);
+            List<ContractTokenInfo> list = tokenListResult.getData();
+            if(list != null && list.size() > 0) {
+                byte[] prevStateRoot = ContractUtil.getStateRoot(NulsContext.getInstance().getBestBlock().getHeader());
+                ProgramExecutor track = programExecutor.begin(prevStateRoot);
+                for(ContractTokenInfo tokenInfo : list) {
+                    tokenInfo.setStatus(track.status(AddressTool.getAddress(tokenInfo.getContractAddress())).ordinal());
+                }
+            }
             return tokenListResult;
         } catch (Exception e) {
             Log.error("initial all tokens of the account error.", e);

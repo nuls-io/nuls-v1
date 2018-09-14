@@ -16,22 +16,22 @@ public class Log {
     }
 
     public static void runMethod(MethodCode methodCode) {
-        String log = "run method: " + methodCode.classCode.name + "." + methodCode.name + " " + methodCode.desc;
+        String log = "run method: " + methodCode.className + "." + methodCode.name + " " + methodCode.desc;
         log(log);
     }
 
     public static void continueMethod(MethodCode methodCode) {
-        String log = "continue method: " + methodCode.classCode.name + "." + methodCode.name + " " + methodCode.desc;
+        String log = "continue method: " + methodCode.className + "." + methodCode.name + " " + methodCode.desc;
         log(log);
     }
 
     public static void endMethod(MethodCode methodCode) {
-        String log = "end method: " + methodCode.classCode.name + "." + methodCode.name + " " + methodCode.desc;
+        String log = "end method: " + methodCode.className + "." + methodCode.name + " " + methodCode.desc;
         log(log);
     }
 
     public static void nativeMethod(MethodCode methodCode) {
-        String log = "native method: " + methodCode.classCode.name + "." + methodCode.name + " " + methodCode.desc;
+        String log = "native method: " + methodCode.className + "." + methodCode.name + " " + methodCode.desc;
         log(log);
     }
 

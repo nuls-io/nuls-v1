@@ -64,6 +64,14 @@ public interface ProtocolStorageConstant {
      * 版本升级临时表存储数据表名称
      */
     String PROTOCOL_TEMP_AREA = "protocol_temp_area";
+
+    String BLOCK_PROTOCOL_AREA = "block_protocol_area";
+
+    String BLOCK_TEMP_PROTOCOL_AREA = "block_temp_protocol_area";
+
+    String BLOCK_PROTOCOL_INDEX = "block_protocol_index";
+
+    String BLOCK_TEMP_PROTOCOL_INDEX = "block_temp_protocol_index";
     /**
      * 存储当前主网运行中的版本数据key
      */

@@ -121,7 +121,7 @@ public interface AccountLedgerService {
      * @param address account address
      * @param amount  amount want to use
      * @param size    size of transaction ,to calc the fee
-     * @param price price 1/KB
+     * @param price   price 1/KB
      * @return return balance of account, return 0 if  account is not a local account
      * @throws NulsException NulsException
      */
@@ -129,39 +129,53 @@ public interface AccountLedgerService {
 
     /**
      * A transfers NULS to B
-     * @param from address of A
-     * @param to address of B
-     * @param values NULS amount
+     *
+     * @param from     address of A
+     * @param to       address of B
+     * @param values   NULS amount
      * @param password password of A
-     * @param remark remarks of transaction
-     * @param price Unit price of fee
+     * @param remark   remarks of transaction
+     * @param price    Unit price of fee
      * @return Result
      */
-    Result transfer(byte[] from, byte[] to, Na values, String password, String remark, Na price);
+    Result transfer(byte[] from, byte[] to, Na values, String password, byte[] remark, Na price);
+
+    /**
+     * create and send a dapp transaction
+     * @param from from address
+     * @param password
+     * @param data
+     * @param remark
+     * @return
+     */
+    Result dapp(byte[] from, String password, byte[] data, byte[] remark);
 
     /**
      * calculation fee of transaction
-     * @param from address of A
-     * @param to address of B
+     *
+     * @param from   address of A
+     * @param to     address of B
      * @param values NULS amount
      * @param remark remarks of transaction
-     * @param price Unit price of fee
+     * @param price  Unit price of fee
      * @return Result
      */
     Result transferFee(byte[] from, byte[] to, Na values, String remark, Na price);
 
     /**
      * create a transaction by inputs data and outputs data
-     * @param inputs used utxos
+     *
+     * @param inputs  used utxos
      * @param outputs new utxos
-     * @param remark remarks of transaction
+     * @param remark  remarks of transaction
      * @return Result
      */
     Result createTransaction(List<Coin> inputs, List<Coin> outputs, byte[] remark);
 
     /**
      * 签名交易
-     * @param tx tx
+     *
+     * @param tx    tx
      * @param ecKey ecKey
      * @return Transaction
      * @throws IOException IOException
@@ -170,12 +184,13 @@ public interface AccountLedgerService {
 
     /**
      * 广播交易
+     *
      * @param tx tx
      * @return Result
      */
     Result broadcast(Transaction tx);
 
-//    /**
+    //    /**
 //     * get local address list
 //     *
 //     * @return true if a address is a local address
@@ -186,20 +201,19 @@ public interface AccountLedgerService {
 
     /**
      * load the local ledger of a account when an account imported
+     *
      * @param address address
      * @return true if a address is a local address
      */
     Result importLedgerByAddress(String address);
 
     /**
-     *
      * @param address address
      * @return Result
      */
     Result<List<TransactionInfo>> getTxInfoList(byte[] address);
 
     /**
-     *
      * @param address address
      * @return Result
      */
@@ -216,6 +230,7 @@ public interface AccountLedgerService {
     /**
      * 根据账户计算一次交易(不超出最大交易数据大小下)的最大金额
      * Calculate the maximum amount of a transaction (not exceeding the maximum transaction data size) based on the account
+     *
      * @param address
      * @param tx
      * @param price
@@ -225,6 +240,7 @@ public interface AccountLedgerService {
 
     /**
      * 多地址转账
+     *
      * @param fromModelList
      * @param toModelList
      * @param password
@@ -233,16 +249,17 @@ public interface AccountLedgerService {
      * @return
      */
 
-    Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromModelList, List<MultipleAddressTransferModel>  toModelList, String password, String remark, Na price);
+    Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromModelList, List<MultipleAddressTransferModel> toModelList, String password, String remark, Na price);
 
     /**
      * 零钱汇整
-     * @param address 自己转给自己的地址
+     *
+     * @param address  自己转给自己的地址
      * @param password
      * @param price
      * @return
      */
-    Result changeWhole(byte[] address, String password,  Na price);
+    Result changeWhole(byte[] address, String password, Na price);
 
     /**
      * Get the fee for the transfer transaction
@@ -257,6 +274,7 @@ public interface AccountLedgerService {
 
     /**
      * 零钱换整手续费预估
+     *
      * @param address
      * @param price
      * @return
@@ -265,6 +283,7 @@ public interface AccountLedgerService {
 
     /**
      * 获取可用总额和有多少条utxo--零钱汇整功能
+     *
      * @param address
      * @return
      */
