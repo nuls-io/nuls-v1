@@ -74,12 +74,12 @@ public class Heap {
     }
 
     public ObjectRef newObject(String className) {
-        ClassCode classCode = this.vm.getMethodArea().loadClass(className);
+        ClassCode classCode = this.vm.methodArea.loadClass(className);
         return newObject(classCode);
     }
 
     public ObjectRef newObject(VariableType variableType) {
-        ClassCode classCode = this.vm.getMethodArea().loadClass(variableType.getType());
+        ClassCode classCode = this.vm.methodArea.loadClass(variableType.getType());
         return newObject(classCode);
     }
 
@@ -158,7 +158,7 @@ public class Heap {
     }
 
     private ObjectRef getStaticObjectRef(String className) {
-        ClassCode classCode = this.vm.getMethodArea().loadClass(className);
+        ClassCode classCode = this.vm.methodArea.loadClass(className);
         ObjectRef objectRef = new ObjectRef(classCode.name, classCode.variableType.getDesc());
         Map<String, Object> map = getFieldsInit(objectRef);
         if (map == null) {
@@ -384,9 +384,9 @@ public class Heap {
     }
 
     public ObjectRef runNewObjectWithArgs(VariableType variableType, String methodDesc, Object... args) {
-        ClassCode classCode = this.vm.getMethodArea().loadClass(variableType.getType());
+        ClassCode classCode = this.vm.methodArea.loadClass(variableType.getType());
         ObjectRef objectRef = newObject(classCode);
-        MethodCode methodCode = this.vm.getMethodArea().loadMethod(objectRef.getVariableType().getType(), Constants.CONSTRUCTOR_NAME, methodDesc);
+        MethodCode methodCode = this.vm.methodArea.loadMethod(objectRef.getVariableType().getType(), Constants.CONSTRUCTOR_NAME, methodDesc);
         if (methodCode == null) {
             throw new RuntimeException(String.format("can't new %s", variableType.getType()));
         }
@@ -403,7 +403,7 @@ public class Heap {
         ObjectRef objectRef = new ObjectRef(desc, Constants.CLASS_DESC);
         Object object = getFields(objectRef);
         if (object == null) {
-            ClassCode classCode = this.vm.getMethodArea().loadClass(Constants.CLASS_NAME);
+            ClassCode classCode = this.vm.methodArea.loadClass(Constants.CLASS_NAME);
             objectRef = newObject(desc, classCode);
         }
         return objectRef;
@@ -447,7 +447,7 @@ public class Heap {
         if (objectRef.getVariableType().isArray() && objectRef.getVariableType().isPrimitiveType()) {
             type = VariableType.OBJECT_TYPE.getType();
         }
-        MethodCode methodCode = this.vm.getMethodArea().loadMethod(type, Constants.TO_STRING_METHOD_NAME, Constants.TO_STRING_METHOD_DESC);
+        MethodCode methodCode = this.vm.methodArea.loadMethod(type, Constants.TO_STRING_METHOD_NAME, Constants.TO_STRING_METHOD_DESC);
         this.vm.run(methodCode, new Object[]{objectRef}, false);
         Object result = this.vm.getResultValue();
         String value = (String) getObject((ObjectRef) result);
@@ -584,7 +584,7 @@ public class Heap {
 
     private void initFields(ClassCode classCode, ObjectRef objectRef) {
         if (StringUtils.isNotBlank(classCode.superName)) {
-            ClassCode superClassCode = this.vm.getMethodArea().loadClass(classCode.superName);
+            ClassCode superClassCode = this.vm.methodArea.loadClass(classCode.superName);
             initFields(superClassCode, objectRef);
         }
         for (FieldCode fieldCode : classCode.fields.values()) {

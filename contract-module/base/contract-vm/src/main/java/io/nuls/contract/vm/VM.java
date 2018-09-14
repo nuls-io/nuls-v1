@@ -49,11 +49,11 @@ public class VM {
 
     public static final int MAX_GAS = 1000_0000;
 
-    private final VMStack vmStack;
+    public final VMStack vmStack;
 
-    private final Heap heap;
+    public final Heap heap;
 
-    private final MethodArea methodArea;
+    public final MethodArea methodArea;
 
     private Result result;
 
@@ -1066,22 +1066,6 @@ public class VM {
 //        blockHeaderDto.setTime(1535012808001L);
 //        return blockHeaderDto;
 //    }
-
-    public static int getVmStackMaxSize() {
-        return VM_STACK_MAX_SIZE;
-    }
-
-    public VMStack getVmStack() {
-        return vmStack;
-    }
-
-    public Heap getHeap() {
-        return heap;
-    }
-
-    public MethodArea getMethodArea() {
-        return methodArea;
-    }
 
     public Result getResult() {
         return result;

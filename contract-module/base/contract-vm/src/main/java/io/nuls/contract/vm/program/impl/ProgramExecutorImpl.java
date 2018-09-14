@@ -99,8 +99,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     public void commit() {
         if (!revert) {
             if (contractVM != null) {
-                contractVM.getHeap().objects.commit();
-                contractVM.getHeap().arrays.commit();
+                contractVM.heap.objects.commit();
+                contractVM.heap.arrays.commit();
                 commitVms.put(contractAddress, contractVM);
             }
             if (prevStateRoot != null) {
@@ -109,10 +109,10 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                     VM vm = vmEntry.getValue();
                     byte[] contractAddress = NativeAddress.toBytes(address);
 
-                    vm.getHeap().objects.clearCache();
-                    vm.getHeap().arrays.clearCache();
+                    vm.heap.objects.clearCache();
+                    vm.heap.arrays.clearCache();
 
-                    Map<DataWord, DataWord> contractState = vm.getHeap().contractState();
+                    Map<DataWord, DataWord> contractState = vm.heap.contractState();
                     logTime("contract state");
 
                     for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
@@ -229,9 +229,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 if (vm == null) {
                     vm = VMFactory.createVM();
                 } else {
-                    vm.getHeap().objects.clearCache();
-                    vm.getHeap().arrays.clearCache();
-                    vm = new VM(vm.getHeap(), vm.getMethodArea());
+                    vm.heap.objects.clearCache();
+                    vm.heap.arrays.clearCache();
+                    vm = new VM(vm.heap, vm.methodArea);
                     //vm = VMFactory.createVM();
                 }
                 vmCache.put(contractAddress, vm);
@@ -239,13 +239,13 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             logTime("load vm");
 
-            vm.getMethodArea().loadClassCodes(classCodes);
+            vm.methodArea.loadClassCodes(classCodes);
 
             logTime("load classes");
 
             ClassCode contractClassCode = getContractClassCode(classCodes);
             String methodDesc = ProgramDescriptors.parseDesc(programInvoke.getMethodDesc());
-            MethodCode methodCode = vm.getMethodArea().loadMethod(contractClassCode.name, programInvoke.getMethodName(), methodDesc);
+            MethodCode methodCode = vm.methodArea.loadMethod(contractClassCode.name, programInvoke.getMethodName(), methodDesc);
 
             if (methodCode == null) {
                 return revert(String.format("can't find method %s.%s", programInvoke.getMethodName(), programInvoke.getMethodDesc()));
@@ -273,9 +273,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             ObjectRef objectRef;
             if (newContract) {
-                objectRef = vm.getHeap().newContract(programInvoke.getContractAddress(), contractClassCode, repository);
+                objectRef = vm.heap.newContract(programInvoke.getContractAddress(), contractClassCode, repository);
             } else {
-                objectRef = vm.getHeap().loadContract(programInvoke.getContractAddress(), contractClassCode, repository);
+                objectRef = vm.heap.loadContract(programInvoke.getContractAddress(), contractClassCode, repository);
             }
 
             logTime("load contract ref");
@@ -302,8 +302,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             if (vmResult.isError() || vmResult.isException()) {
                 if (resultValue != null && resultValue instanceof ObjectRef) {
                     vm.setResult(new Result());
-                    String error = vm.getHeap().runToString((ObjectRef) resultValue);
-                    String stackTrace = vm.getHeap().stackTrace((ObjectRef) resultValue);
+                    String error = vm.heap.runToString((ObjectRef) resultValue);
+                    String stackTrace = vm.heap.stackTrace((ObjectRef) resultValue);
                     programResult.error(error);
                     programResult.setStackTrace(stackTrace);
                 } else {
@@ -327,7 +327,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             if (resultValue != null) {
                 if (resultValue instanceof ObjectRef) {
-                    String result = vm.getHeap().runToString((ObjectRef) resultValue);
+                    String result = vm.heap.runToString((ObjectRef) resultValue);
                     programResult.setResult(result);
                 } else {
                     programResult.setResult(resultValue.toString());
