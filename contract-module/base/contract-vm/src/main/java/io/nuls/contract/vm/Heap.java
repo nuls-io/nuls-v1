@@ -173,6 +173,9 @@ public class Heap {
     }
 
     public Object getArrayInit(ObjectRef arrayRef, Integer key) {
+        if (key == 0) {
+            return getField(arrayRef, key.toString());
+        }
         String arrayKey = arrayRef.getRef() + "_" + key;
         Object object = arrays.get(arrayKey);
         if (object == null) {
@@ -182,6 +185,9 @@ public class Heap {
     }
 
     public Object putArrayInit(ObjectRef arrayRef, Integer key) {
+        if (key == 0) {
+            return putFields(arrayRef).get(key.toString());
+        }
         String arrayKey = arrayRef.getRef() + "_" + key;
         Object object = arrays.get(arrayKey);
         if (object == null) {
@@ -219,8 +225,12 @@ public class Heap {
             } else {
                 value = new ObjectRef[chunkLength];
             }
-            this.arrays.put(arrayKey, value);
-            putField(arrayRef, key, key);
+            if (chunkNum == 0) {
+                putField(arrayRef, key, value);
+            } else {
+                this.arrays.put(arrayKey, value);
+                putField(arrayRef, key, key);
+            }
         }
         value = getArrayInit(arrayRef, chunkNum);
         return value;
@@ -239,7 +249,7 @@ public class Heap {
         if (!arrayRef.getVariableType().getComponentType().isPrimitive()) {
             clazz = ObjectRef.class;
         }
-        Object object = JsonUtils.decodeArray(value, clazz);
+        Object object = JsonUtils.decodeArray(new String(value), clazz);
         return object;
     }
 
@@ -516,8 +526,12 @@ public class Heap {
             contractState.put(new DataWord(key), new DataWord(value));
             if (objectRef.isArray()) {
                 for (String k : fields.keySet()) {
+                    Integer i = Integer.valueOf(k);
+                    if (i == 0) {
+                        continue;
+                    }
                     String arrayKey = objectRef.getRef() + "_" + k;
-                    Object object = getArrayInit(objectRef, Integer.valueOf(k));
+                    Object object = getArrayInit(objectRef, i);
                     if (object != null) {
                         Class clazz = objectRef.getVariableType().getPrimitiveTypeClass();
                         if (!objectRef.getVariableType().getComponentType().isPrimitive()) {
