@@ -38,7 +38,7 @@ public class Heap {
 
     private BigInteger objectRefCount;
 
-    private static final DataWord OBJECT_REF_COUNT = new DataWord("objectRefCount".getBytes());
+    private static final DataWord OBJECT_REF_COUNT = new DataWord("objectRefCount");
 
     public Heap(BigInteger objectRefCount) {
         this.objectRefCount = new BigInteger(objectRefCount.toString());
@@ -128,7 +128,7 @@ public class Heap {
         if (this.repository == null) {
             return null;
         }
-        byte[] key = JsonUtils.encode(objectRef).getBytes();
+        String key = JsonUtils.encode(objectRef);
         DataWord dataWord = this.repository.getStorageValue(this.address, new DataWord(key));
         if (dataWord == null) {
             return null;
@@ -172,7 +172,8 @@ public class Heap {
         return objectRef;
     }
 
-    public Object getArrayInit(String arrayKey) {
+    public Object getArrayInit(ObjectRef arrayRef, Integer key) {
+        String arrayKey = arrayRef.getRef() + "_" + key;
         Object object = arrays.get(arrayKey);
         if (object == null) {
             object = INIT_ARRAYS.get(arrayKey);
@@ -180,7 +181,8 @@ public class Heap {
         return object;
     }
 
-    public Object putArrayInit(String arrayKey) {
+    public Object putArrayInit(ObjectRef arrayRef, Integer key) {
+        String arrayKey = arrayRef.getRef() + "_" + key;
         Object object = arrays.get(arrayKey);
         if (object == null) {
             object = INIT_ARRAYS.get(arrayKey);
@@ -198,9 +200,9 @@ public class Heap {
         String arrayKey = arrayRef.getRef() + "_" + key;
         Object value = null;
         if (write) {
-            value = putArrayInit(arrayKey);
+            value = putArrayInit(arrayRef, chunkNum);
         } else {
-            value = getArrayInit(arrayKey);
+            value = getArrayInit(arrayRef, chunkNum);
         }
         if (value == null) {
             value = getArrayChunkFromState(arrayRef, arrayKey);
@@ -220,7 +222,7 @@ public class Heap {
             this.arrays.put(arrayKey, value);
             putField(arrayRef, key, key);
         }
-        value = getArrayInit(arrayKey);
+        value = getArrayInit(arrayRef, chunkNum);
         return value;
     }
 
@@ -228,8 +230,7 @@ public class Heap {
         if (this.repository == null) {
             return null;
         }
-        byte[] key = arrayKey.getBytes();
-        DataWord dataWord = this.repository.getStorageValue(this.address, new DataWord(key));
+        DataWord dataWord = this.repository.getStorageValue(this.address, new DataWord(arrayKey));
         if (dataWord == null) {
             return null;
         }
@@ -512,18 +513,18 @@ public class Heap {
             }
             String key = JsonUtils.encode(objectRef);
             String value = JsonUtils.encode(fields);
-            contractState.put(new DataWord(key.getBytes()), new DataWord(value.getBytes()));
+            contractState.put(new DataWord(key), new DataWord(value));
             if (objectRef.isArray()) {
                 for (String k : fields.keySet()) {
                     String arrayKey = objectRef.getRef() + "_" + k;
-                    Object object = getArrayInit(arrayKey);
+                    Object object = getArrayInit(objectRef, Integer.valueOf(k));
                     if (object != null) {
                         Class clazz = objectRef.getVariableType().getPrimitiveTypeClass();
                         if (!objectRef.getVariableType().getComponentType().isPrimitive()) {
                             clazz = ObjectRef.class;
                         }
-                        byte[] bytes = JsonUtils.encodeArray(object, clazz);
-                        contractState.put(new DataWord(arrayKey.getBytes()), new DataWord(bytes));
+                        String arrayValue = JsonUtils.encodeArray(object, clazz);
+                        contractState.put(new DataWord(arrayKey), new DataWord(arrayValue));
                     }
                 }
             }
@@ -543,8 +544,7 @@ public class Heap {
                             stateObjectRefs(stateObjectRefs, (ObjectRef) object);
                         }
                         if (objectRef.isArray()) {
-                            String arrayKey = objectRef.getRef() + "_" + key;
-                            Object array = getArrayInit(arrayKey);
+                            Object array = getArrayInit(objectRef, Integer.valueOf(key));
                             if (array != null && !objectRef.getVariableType().getComponentType().isPrimitive()) {
                                 int length = Array.getLength(array);
                                 for (int i = 0; i < length; i++) {

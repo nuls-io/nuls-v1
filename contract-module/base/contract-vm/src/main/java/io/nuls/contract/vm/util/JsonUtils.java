@@ -52,7 +52,7 @@ public class JsonUtils {
         }
     }
 
-    public static byte[] encodeArray(Object value, Class<?> elementType) {
+    public static String encodeArray(Object value, Class<?> elementType) {
         String json;
         if (elementType == ObjectRef.class) {
             int length = Array.getLength(value);
@@ -67,11 +67,11 @@ public class JsonUtils {
         } else {
             json = toJson(value);
         }
-        return compress(json);
+        return json;
     }
 
     public static Object decodeArray(byte[] bytes, Class<?> elementType) {
-        String value = decompress(bytes);
+        String value = new String(bytes);
         if (elementType == ObjectRef.class) {
             Object array = toArray(value, String.class);
             int length = Array.getLength(array);
