@@ -126,6 +126,7 @@ public class CreateContractData extends TransactionLogicData implements Contract
         }
     }
 
+    @Override
     public long getValue() {
         return value;
     }

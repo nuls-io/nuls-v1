@@ -147,6 +147,7 @@ public class CallContractData extends TransactionLogicData implements ContractDa
         this.contractAddress = contractAddress;
     }
 
+    @Override
     public long getValue() {
         return value;
     }

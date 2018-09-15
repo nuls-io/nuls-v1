@@ -37,4 +37,6 @@ public interface ContractData {
     byte[] getContractAddress();
 
     long getPrice();
+
+    long getValue();
 }

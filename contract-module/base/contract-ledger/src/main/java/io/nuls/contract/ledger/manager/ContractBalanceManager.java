@@ -216,12 +216,10 @@ public class ContractBalanceManager {
     public void refreshBalance(List<Coin> addUtxoList, List<Coin> deleteUtxoList) {
         lock.lock();
         try {
-            //Log.info("=========================================刷新余额开始+");
             ContractBalance balance;
             String strAddress;
 
             if(deleteUtxoList != null) {
-                //Log.info("减少UTXO数量: {}", deleteUtxoList.size());
                 for (Coin coin : deleteUtxoList) {
                     strAddress = asString(coin.getTempOwner());
                     balance = balanceMap.get(strAddress);
@@ -231,22 +229,13 @@ public class ContractBalanceManager {
                     }
                     if (coin.usable()) {
                         balance.minusUsable(coin.getNa());
-                        //Log.info("====[{}]减少可用余额: {}, 当前余额: {}",
-                        //        AddressTool.getStringAddressByBytes(coin.getOwner()),
-                        //        coin.getNa(),
-                        //        balance.getUsable());
                     } else {
                         balance.minusLocked(coin.getNa());
-                        //Log.info("====[{}]减少锁定余额: {}, 当前余额: {}",
-                        //        AddressTool.getStringAddressByBytes(coin.getOwner()),
-                        //        coin.getNa(),
-                        //        balance.getUsable());
                     }
                 }
             }
 
             if(addUtxoList != null) {
-                //Log.info("增加UTXO数量: {}", addUtxoList.size());
                 for (Coin coin : addUtxoList) {
                     strAddress = asString(coin.getTempOwner());
                     balance = balanceMap.get(strAddress);
@@ -256,21 +245,11 @@ public class ContractBalanceManager {
                     }
                     if (coin.usable()) {
                         balance.addUsable(coin.getNa());
-                        //Log.info("====[{}]增加可用余额: {}, 当前可用余额: {}",
-                        //        AddressTool.getStringAddressByBytes(coin.()),
-                        //        coin.getNa(),
-                        //        balance.getUsable());
                     } else {
                         balance.addLocked(coin.getNa());
-                        //Log.info("====[{}]增加锁定余额: {}, 当前余额: {}",
-                        //        AddressTool.getStringAddressByBytes(coin.()),
-                        //        coin.getNa(),
-                        //        balance.getUsable());
                     }
                 }
             }
-
-            //Log.info("=========================================刷新余额结束+");
         } finally {
             lock.unlock();
         }
@@ -287,7 +266,6 @@ public class ContractBalanceManager {
                 Log.info("parse coin form db error");
                 continue;
             }
-            //if (Arrays.equals(coin.(), address))
             if (Arrays.equals(coin.getAddress(), address))
             {
                 coin.setOwner(coinEntry.getKey());

@@ -77,6 +77,11 @@ public class DeleteContractData extends TransactionLogicData implements Contract
         return 0L;
     }
 
+    @Override
+    public long getValue() {
+        return 0L;
+    }
+
     public void setSender(byte[] sender) {
         this.sender = sender;
     }
