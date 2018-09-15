@@ -117,6 +117,19 @@ public class ProgramMethod {
         return returnArg != null ? returnArg.equals(that.returnArg) : that.returnArg == null;
     }
 
+    public String[] argsType2Array() {
+        if(args != null && args.size() > 0) {
+            int size = args.size();
+            String[] result = new String[size];
+            for(int i = 0; i < size; i++) {
+                result[i] = args.get(i).getType();
+            }
+            return result;
+        } else {
+            return null;
+        }
+    }
+
     private boolean isEqualNrc20Args(List<ProgramMethodArg> a, List<ProgramMethodArg> b) {
         if (a.size() != b.size()) {
             return false;

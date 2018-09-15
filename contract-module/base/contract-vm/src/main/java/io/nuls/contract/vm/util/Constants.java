@@ -32,4 +32,20 @@ public class Constants {
 
     public static final String CLONE_METHOD_DESC = "()Ljava/lang/Object;";
 
+    public static final String HASH = "hash";
+
+    public static final String VALUE = "value";
+
+    public static final String CHAR_CONSTRUCTOR_DESC = "(C)V";
+
+    public static final String BYTES_CONSTRUCTOR_DESC = "([B)V";
+
+    public static final String CONSTRUCTOR_DESC = "()V";
+
+    public static final String CONSTRUCTOR_STRING_DESC = "(Ljava/lang/String;)V";
+
+    public static final String CLASS_NAME = "java/lang/Class";
+
+    public static final String CLASS_DESC = "Ljava/lang/Class;";
+
 }

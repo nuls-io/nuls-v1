@@ -596,7 +596,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             programCall.setArgs(args);
 
             // 如果方法是不上链的合约调用，同步执行合约代码，不改变状态根，并返回值
-            if (vmHelper.checkIsViewMethod(methodName, contractAddressBytes)) {
+            if (vmHelper.checkIsViewMethod(methodName, methodDesc, contractAddressBytes)) {
                 programCall.setValue(BigInteger.ZERO);
                 programCall.setGasLimit(ContractConstant.CONTRACT_CONSTANT_GASLIMIT);
                 programCall.setPrice(ContractConstant.CONTRACT_CONSTANT_PRICE);
@@ -705,75 +705,12 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             }
             SignatureUtil.createTransactionSignture(tx, scriptEckeys, signEckeys);
 
-            //TODO pierre 代码结构需优化，先实现功能
             // 保存未确认Token转账
-            byte[] infoKey = null;
-            do {
-                Result<ContractAddressInfoPo> contractAddressInfoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
-                ContractAddressInfoPo po = contractAddressInfoResult.getData();
-                if(po != null && po.isNrc20() &&
-                        (ContractConstant.NRC20_METHOD_TRANSFER.equals(methodName)
-                                || ContractConstant.NRC20_METHOD_TRANSFER_FROM.equals(methodName))) {
-                    byte[] txHashBytes = tx.getHash().serialize();
-                    infoKey = ArraysTool.concatenate(senderBytes, txHashBytes, new VarInt(0).encode());
-                    ContractTokenTransferInfoPo tokenTransferInfoPo = new ContractTokenTransferInfoPo();
-                    if(ContractConstant.NRC20_METHOD_TRANSFER.equals(methodName)) {
-                        try {
-                            String to = args[0][0];
-                            String tokenValue = args[1][0];
-                            BigInteger token = new BigInteger(tokenValue);
-                            Result result = contractBalanceManager.subtractContractToken(sender, contractAddress, token);
-                            if(result.isFailed()) {
-                                return result;
-                            }
-                            contractBalanceManager.addContractToken(to, contractAddress, token);
-                            tokenTransferInfoPo.setFrom(senderBytes);
-                            tokenTransferInfoPo.setTo(AddressTool.getAddress(to));
-                            tokenTransferInfoPo.setValue(token);
-                        } catch (Exception e) {
-                            Log.error(e);
-                            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
-                            result.setMsg(e.getMessage());
-                            return result;
-                        }
-                    } else {
-                        try {
-                            String from = args[0][0];
-                            String to = args[1][0];
-                            String tokenValue = args[2][0];
-                            BigInteger token = new BigInteger(tokenValue);
-                            Result result = contractBalanceManager.subtractContractToken(sender, contractAddress, token);
-                            if(result.isFailed()) {
-                                return result;
-                            }
-                            contractBalanceManager.addContractToken(to, contractAddress, token);
-                            tokenTransferInfoPo.setFrom(AddressTool.getAddress(from));
-                            tokenTransferInfoPo.setTo(AddressTool.getAddress(to));
-                            tokenTransferInfoPo.setValue(token);
-                        } catch (Exception e) {
-                            Log.error(e);
-                            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
-                            result.setMsg(e.getMessage());
-                            return result;
-                        }
-                    }
-
-                    tokenTransferInfoPo.setName(po.getNrc20TokenName());
-                    tokenTransferInfoPo.setSymbol(po.getNrc20TokenSymbol());
-                    tokenTransferInfoPo.setDecimals(po.getDecimals());
-                    tokenTransferInfoPo.setTime(tx.getTime());
-                    tokenTransferInfoPo.setContractAddress(contractAddressBytes);
-                    tokenTransferInfoPo.setBlockHeight(tx.getBlockHeight());
-                    tokenTransferInfoPo.setTxHash(txHashBytes);
-                    tokenTransferInfoPo.setStatus((byte) 0);
-                    Result result = contractTokenTransferStorageService.saveTokenTransferInfo(infoKey, tokenTransferInfoPo);
-                    if(result.isFailed()) {
-                        return result;
-                    }
-                }
-            } while (false);
-
-
+            Result<byte[]> unConfirmedTokenTransferResult = this.saveUnConfirmedTokenTransfer(tx, sender, contractAddress, methodName, args);
+            if(unConfirmedTokenTransferResult.isFailed()) {
+                return unConfirmedTokenTransferResult;
+            }
+            byte[] infoKey = unConfirmedTokenTransferResult.getData();
 
             // 保存未确认交易到本地账本
             Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
@@ -814,6 +751,66 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
+        } catch (Exception e) {
+            Log.error(e);
+            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
+            result.setMsg(e.getMessage());
+            return result;
+        }
+    }
+
+    private Result<byte[]> saveUnConfirmedTokenTransfer(CallContractTransaction tx, String sender, String contractAddress, String methodName, String[][] args) {
+        try {
+            byte[] senderBytes = AddressTool.getAddress(sender);
+            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+            Result<ContractAddressInfoPo> contractAddressInfoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
+            ContractAddressInfoPo po = contractAddressInfoResult.getData();
+            if(po != null && po.isNrc20() && ContractUtil.isTransferMethod(methodName)) {
+                byte[] txHashBytes = tx.getHash().serialize();
+                byte[] infoKey = ArraysTool.concatenate(senderBytes, txHashBytes, new VarInt(0).encode());
+                ContractTokenTransferInfoPo tokenTransferInfoPo = new ContractTokenTransferInfoPo();
+                if(ContractConstant.NRC20_METHOD_TRANSFER.equals(methodName)) {
+                    String to = args[0][0];
+                    String tokenValue = args[1][0];
+                    BigInteger token = new BigInteger(tokenValue);
+                    Result result = contractBalanceManager.subtractContractToken(sender, contractAddress, token);
+                    if(result.isFailed()) {
+                        return result;
+                    }
+                    contractBalanceManager.addContractToken(to, contractAddress, token);
+                    tokenTransferInfoPo.setFrom(senderBytes);
+                    tokenTransferInfoPo.setTo(AddressTool.getAddress(to));
+                    tokenTransferInfoPo.setValue(token);
+                } else {
+                    String from = args[0][0];
+                    String to = args[1][0];
+                    String tokenValue = args[2][0];
+                    BigInteger token = new BigInteger(tokenValue);
+                    Result result = contractBalanceManager.subtractContractToken(sender, contractAddress, token);
+                    if(result.isFailed()) {
+                        return result;
+                    }
+                    contractBalanceManager.addContractToken(to, contractAddress, token);
+                    tokenTransferInfoPo.setFrom(AddressTool.getAddress(from));
+                    tokenTransferInfoPo.setTo(AddressTool.getAddress(to));
+                    tokenTransferInfoPo.setValue(token);
+                }
+
+                tokenTransferInfoPo.setName(po.getNrc20TokenName());
+                tokenTransferInfoPo.setSymbol(po.getNrc20TokenSymbol());
+                tokenTransferInfoPo.setDecimals(po.getDecimals());
+                tokenTransferInfoPo.setTime(tx.getTime());
+                tokenTransferInfoPo.setContractAddress(contractAddressBytes);
+                tokenTransferInfoPo.setBlockHeight(tx.getBlockHeight());
+                tokenTransferInfoPo.setTxHash(txHashBytes);
+                tokenTransferInfoPo.setStatus((byte) 0);
+                Result result = contractTokenTransferStorageService.saveTokenTransferInfo(infoKey, tokenTransferInfoPo);
+                if(result.isFailed()) {
+                    return result;
+                }
+                return Result.getSuccess().setData(infoKey);
+            }
+            return Result.getSuccess();
         } catch (Exception e) {
             Log.error(e);
             Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);

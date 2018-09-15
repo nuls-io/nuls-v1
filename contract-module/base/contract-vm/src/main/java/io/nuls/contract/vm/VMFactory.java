@@ -70,12 +70,12 @@ public class VMFactory {
             VM_INIT_CLASS_CODES.putAll(ClassCodeLoader.loadAll(classes[i], ClassCodeLoader::loadFromResource));
         }
         VM = newVM();
-        MethodArea.INIT_CLASS_CODES.putAll(VM.getMethodArea().getClassCodes());
-        MethodArea.INIT_METHOD_CODES.putAll(VM.getMethodArea().getMethodCodes());
-        VM.getHeap().objects.commit();
-        Heap.INIT_OBJECTS.putAll(VM.getHeap().objects);
-        VM.getHeap().arrays.commit();
-        Heap.INIT_ARRAYS.putAll(VM.getHeap().arrays);
+        MethodArea.INIT_CLASS_CODES.putAll(VM.methodArea.getClassCodes());
+        MethodArea.INIT_METHOD_CODES.putAll(VM.methodArea.getMethodCodes());
+        VM.heap.objects.commit();
+        Heap.INIT_OBJECTS.putAll(VM.heap.objects);
+        VM.heap.arrays.commit();
+        Heap.INIT_ARRAYS.putAll(VM.heap.arrays);
     }
 
     public static VM createVM() {
@@ -90,7 +90,7 @@ public class VMFactory {
                 continue;
             }
             //System.out.println(key);
-            vm.getMethodArea().loadClassCode(classCode);
+            vm.methodArea.loadClassCode(classCode);
         }
         return vm;
     }

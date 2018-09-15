@@ -5,16 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.ArrayType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import io.nuls.contract.vm.ObjectRef;
-import org.apache.commons.io.IOUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 public class JsonUtils {
 
@@ -52,7 +47,7 @@ public class JsonUtils {
         }
     }
 
-    public static byte[] encodeArray(Object value, Class<?> elementType) {
+    public static String encodeArray(Object value, Class<?> elementType) {
         String json;
         if (elementType == ObjectRef.class) {
             int length = Array.getLength(value);
@@ -67,11 +62,10 @@ public class JsonUtils {
         } else {
             json = toJson(value);
         }
-        return compress(json);
+        return json;
     }
 
-    public static Object decodeArray(byte[] bytes, Class<?> elementType) {
-        String value = decompress(bytes);
+    public static Object decodeArray(String value, Class<?> elementType) {
         if (elementType == ObjectRef.class) {
             Object array = toArray(value, String.class);
             int length = Array.getLength(array);
@@ -91,6 +85,27 @@ public class JsonUtils {
     public static String encode(Object value) {
         if (value == null) {
             return null;
+        } else if (value.getClass().isArray()) {
+            Class clazz = value.getClass().getComponentType();
+            if (clazz == Integer.TYPE) {
+                return "[I_" + encodeArray(value, clazz);
+            } else if (clazz == Long.TYPE) {
+                return "[J_" + encodeArray(value, clazz);
+            } else if (clazz == Float.TYPE) {
+                return "[F_" + encodeArray(value, clazz);
+            } else if (clazz == Double.TYPE) {
+                return "[D_" + encodeArray(value, clazz);
+            } else if (clazz == Boolean.TYPE) {
+                return "[Z_" + encodeArray(value, clazz);
+            } else if (clazz == Byte.TYPE) {
+                return "[B_" + encodeArray(value, clazz);
+            } else if (clazz == Character.TYPE) {
+                return "[C_" + encodeArray(value, clazz);
+            } else if (clazz == Short.TYPE) {
+                return "[S_" + encodeArray(value, clazz);
+            } else {
+                return "[R_" + encodeArray(value, clazz);
+            }
         } else if (value instanceof Map) {
             Map map = (Map) value;
             Map map1 = new LinkedHashMap();
@@ -115,7 +130,7 @@ public class JsonUtils {
         } else if (value instanceof Short) {
             return "S_" + value;
         } else if (value instanceof String) {
-            return "__" + value;
+            return "s_" + value;
         } else if (value instanceof ObjectRef) {
             return "R_" + ((ObjectRef) value).getEncoded();
         } else {
@@ -129,6 +144,11 @@ public class JsonUtils {
         }
         String prefix = str.substring(0, 1);
         String value = str.substring(2);
+        if (!"{".equals(prefix)) {
+            String[] parts = str.split("_", 2);
+            prefix = parts[0];
+            value = parts[1];
+        }
         switch (prefix) {
             case "{":
                 Map<String, String> map = toObject(str, Map.class);
@@ -153,10 +173,28 @@ public class JsonUtils {
                 return value.charAt(0);
             case "S":
                 return Short.valueOf(value).shortValue();
-            case "_":
+            case "s":
                 return value;
             case "R":
                 return new ObjectRef(value);
+            case "[I":
+                return decodeArray(value, Integer.TYPE);
+            case "[J":
+                return decodeArray(value, Long.TYPE);
+            case "[F":
+                return decodeArray(value, Float.TYPE);
+            case "[D":
+                return decodeArray(value, Double.TYPE);
+            case "[Z":
+                return decodeArray(value, Boolean.TYPE);
+            case "[B":
+                return decodeArray(value, Byte.TYPE);
+            case "[C":
+                return decodeArray(value, Character.TYPE);
+            case "[S":
+                return decodeArray(value, Short.TYPE);
+            case "[R":
+                return decodeArray(value, ObjectRef.class);
             default:
                 throw new IllegalArgumentException("unknown string");
         }

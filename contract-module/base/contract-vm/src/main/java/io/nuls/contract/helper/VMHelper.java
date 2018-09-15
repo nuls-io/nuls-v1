@@ -96,7 +96,43 @@ public class VMHelper implements InitializingBean {
         return programExecutor;
     }
 
-    public boolean checkIsViewMethod(String methodName, byte[] contractAddressBytes) {
+    public boolean checkIsViewMethod(String methodName, String methodDesc, byte[] contractAddressBytes) {
+        ProgramMethod method = this.getMethodInfoByContractAddress(methodName, methodDesc, contractAddressBytes);
+        if(method == null) {
+            return false;
+        } else {
+            return method.isView();
+        }
+    }
+
+    public ProgramMethod getMethodInfoByCode(String methodName, String methodDesc, byte[] code) {
+        if(StringUtils.isBlank(methodName) || code == null) {
+            return null;
+        }
+        List<ProgramMethod> methods = this.getAllMethods(code);
+        return this.getMethodInfo(methodName, methodDesc, methods);
+    }
+
+    private ProgramMethod getMethodInfo(String methodName, String methodDesc, List<ProgramMethod> methods) {
+        if(methods != null && methods.size() > 0) {
+            boolean emptyDesc = StringUtils.isBlank(methodDesc);
+            for(ProgramMethod method : methods) {
+                if(methodName.equals(method.getName())) {
+                    if(emptyDesc) {
+                        return method;
+                    } else if(methodDesc.equals(method.getDesc())) {
+                        return method;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public ProgramMethod getMethodInfoByContractAddress(String methodName, String methodDesc, byte[] contractAddressBytes) {
+        if(StringUtils.isBlank(methodName)) {
+            return null;
+        }
         BlockHeader header = NulsContext.getInstance().getBestBlock().getHeader();
         // 当前区块状态根
         byte[] currentStateRoot = ContractUtil.getStateRoot(header);
@@ -104,22 +140,17 @@ public class VMHelper implements InitializingBean {
         ProgramExecutor track = programExecutor.begin(currentStateRoot);
         List<ProgramMethod> methods = track.method(contractAddressBytes);
 
-        boolean isViewMethod = false;
-        if(methods != null) {
-            for(ProgramMethod method : methods) {
-                if(methodName.equals(method.getName())) {
-                    isViewMethod = method.isView();
-                    break;
-                }
-            }
-        }
-        return isViewMethod;
+        return this.getMethodInfo(methodName, methodDesc, methods);
+    }
+
+    private List<ProgramMethod> getAllMethods(byte[] contractCode) {
+        return programExecutor.jarMethod(contractCode);
     }
 
     public ContractInfoDto getConstructor(byte[] contractCode) {
         try {
             ContractInfoDto dto = new ContractInfoDto();
-            List<ProgramMethod> programMethods = programExecutor.jarMethod(contractCode);
+            List<ProgramMethod> programMethods = this.getAllMethods(contractCode);
             if(programMethods == null || programMethods.size() == 0) {
                 return null;
             }
@@ -305,12 +336,24 @@ public class VMHelper implements InitializingBean {
         return true;
     }
 
-    private boolean checkNrc20Contract(byte[] contractCode) {
-        List<ProgramMethod> methods = programExecutor.jarMethod(contractCode);
+    //private boolean checkNrc20Contract(byte[] contractCode) {
+    //    List<ProgramMethod> methods = programExecutor.jarMethod(contractCode);
+    //    if(methods == null || methods.size() == 0) {
+    //        return false;
+    //    }
+    //    return checkNrc20Contract(methods);
+    //}
+
+    private boolean checkAcceptDirectTransfer(List<ProgramMethod> methods) {
         if(methods == null || methods.size() == 0) {
             return false;
         }
-        return checkNrc20Contract(methods);
+        for(ProgramMethod method : methods) {
+            if(ContractConstant.BALANCE_TRIGGER_METHOD_NAME.equals(method.getName())) {
+                return method.isPayable();
+            }
+        }
+        return false;
     }
 
     public Result validateNrc20Contract(ProgramExecutor track, CreateContractTransaction tx, ContractResult contractResult) {
@@ -322,8 +365,11 @@ public class VMHelper implements InitializingBean {
         byte[] contractAddress = contractResult.getContractAddress();
         long blockHeight = tx.getBlockHeight();
         long bestBlockHeight = NulsContext.getInstance().getBestHeight();
-        boolean isNrc20 = this.checkNrc20Contract(createContractData.getCode());
+        List<ProgramMethod> methods = this.getAllMethods(createContractData.getCode());
+        boolean isNrc20 = this.checkNrc20Contract(methods);
+        boolean isAcceptDirectTransfer = this.checkAcceptDirectTransfer(methods);
         contractResult.setNrc20(isNrc20);
+        contractResult.setAcceptDirectTransfer(isAcceptDirectTransfer);
         if(isNrc20) {
             // NRC20 tokenName 验证代币名称格式
             ProgramResult programResult = this.invokeViewMethod(track, stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
@@ -379,11 +425,6 @@ public class VMHelper implements InitializingBean {
             }
         }
         return Result.getSuccess();
-    }
-
-    public static void main(String[] args) {
-        System.out.println(BigInteger.valueOf(2L).pow(256));
-        System.out.println(BigInteger.valueOf(2L).pow(256));
     }
 
 }
