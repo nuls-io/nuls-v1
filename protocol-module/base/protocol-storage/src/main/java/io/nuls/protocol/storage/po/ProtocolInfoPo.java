@@ -20,6 +20,8 @@ public class ProtocolInfoPo {
      * 当前延迟区块数
      */
     private long currentDelay;
+
+    private int currentPercent;
     /**
      * 当前轮新协议打包出块地址
      */
@@ -48,6 +50,7 @@ public class ProtocolInfoPo {
         this.roundIndex = tempInfoPo.getRoundIndex();
         this.status = tempInfoPo.getStatus();
         this.effectiveHeight = tempInfoPo.getEffectiveHeight();
+        this.setCurrentPercent(tempInfoPo.getCurrentPercent());
     }
 
     public int getVersion() {
@@ -112,5 +115,13 @@ public class ProtocolInfoPo {
 
     public void setEffectiveHeight(Long effectiveHeight) {
         this.effectiveHeight = effectiveHeight;
+    }
+
+    public int getCurrentPercent() {
+        return currentPercent;
+    }
+
+    public void setCurrentPercent(int currentPercent) {
+        this.currentPercent = currentPercent;
     }
 }

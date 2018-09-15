@@ -15,6 +15,8 @@ public class ProtocolTempInfoPo {
      * 当前延迟区块数
      */
     private long currentDelay;
+
+    private int currentPercent;
     /**
      * 当前轮新协议打包出块地址
      */
@@ -109,5 +111,13 @@ public class ProtocolTempInfoPo {
         this.status = 0;
         this.effectiveHeight = null;
         this.addressSet.clear();
+    }
+
+    public int getCurrentPercent() {
+        return currentPercent;
+    }
+
+    public void setCurrentPercent(int currentPercent) {
+        this.currentPercent = currentPercent;
     }
 }
