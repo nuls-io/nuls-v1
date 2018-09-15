@@ -5,13 +5,11 @@ import java.util.Map;
 
 public class HeapMap<K, V> extends HashMap<K, V> {
 
-    private Map<K, V> cache = new HashMap<>();
-
-    private int initialCapacity;
+    private final Map<K, V> cache;
 
     public HeapMap(int initialCapacity) {
         super(initialCapacity);
-        this.initialCapacity = initialCapacity;
+        cache = new HashMap<>(initialCapacity);
     }
 
     @Override
@@ -30,10 +28,11 @@ public class HeapMap<K, V> extends HashMap<K, V> {
 
     public void commit() {
         super.putAll(cache);
+        cache.clear();
     }
 
     public void clearCache() {
-        this.cache = new HashMap<>(initialCapacity);
+        cache.clear();
     }
 
 }

@@ -39,6 +39,7 @@ public class ContractAddressInfoPo {
     private byte[] createTxHash;
     private long createTime;
     private long blockHeight;
+    private boolean acceptDirectTransfer;
     private boolean isNrc20;
     private String nrc20TokenName;
     private String nrc20TokenSymbol;
@@ -83,6 +84,14 @@ public class ContractAddressInfoPo {
 
     public void setBlockHeight(long blockHeight) {
         this.blockHeight = blockHeight;
+    }
+
+    public boolean isAcceptDirectTransfer() {
+        return acceptDirectTransfer;
+    }
+
+    public void setAcceptDirectTransfer(boolean acceptDirectTransfer) {
+        this.acceptDirectTransfer = acceptDirectTransfer;
     }
 
     public boolean isNrc20() {

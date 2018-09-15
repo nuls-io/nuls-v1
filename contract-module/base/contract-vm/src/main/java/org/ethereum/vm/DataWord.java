@@ -65,9 +65,13 @@ public class DataWord implements Comparable<DataWord> {
         this.data = data.array();
     }
 
+    private String sData;
+
     @JsonCreator
     public DataWord(String data) {
-        this(Hex.decode(data));
+        //this(Hex.decode(data));
+        this(data.getBytes());
+        this.sData = data;
     }
 
     public DataWord(ByteArrayWrapper wrappedData) {
@@ -340,7 +344,7 @@ public class DataWord implements Comparable<DataWord> {
     @JsonValue
     @Override
     public String toString() {
-        return Hex.toHexString(data);
+        return sData != null ? sData : Hex.toHexString(data);
     }
 
     public String toPrefixString() {
@@ -413,7 +417,7 @@ public class DataWord implements Comparable<DataWord> {
     }
 
     public DataWord(BigInteger bigInteger) {
-        this(bigInteger.toString().getBytes());
+        this(bigInteger.toString());
     }
 
     public BigInteger toBigInteger() {

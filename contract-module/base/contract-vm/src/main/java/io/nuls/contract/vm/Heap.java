@@ -38,7 +38,7 @@ public class Heap {
 
     private BigInteger objectRefCount;
 
-    private static final DataWord OBJECT_REF_COUNT = new DataWord("objectRefCount".getBytes());
+    private static final DataWord OBJECT_REF_COUNT = new DataWord("objectRefCount");
 
     public Heap(BigInteger objectRefCount) {
         this.objectRefCount = new BigInteger(objectRefCount.toString());
@@ -74,12 +74,12 @@ public class Heap {
     }
 
     public ObjectRef newObject(String className) {
-        ClassCode classCode = this.vm.getMethodArea().loadClass(className);
+        ClassCode classCode = this.vm.methodArea.loadClass(className);
         return newObject(classCode);
     }
 
     public ObjectRef newObject(VariableType variableType) {
-        ClassCode classCode = this.vm.getMethodArea().loadClass(variableType.getType());
+        ClassCode classCode = this.vm.methodArea.loadClass(variableType.getType());
         return newObject(classCode);
     }
 
@@ -128,7 +128,7 @@ public class Heap {
         if (this.repository == null) {
             return null;
         }
-        byte[] key = JsonUtils.encode(objectRef).getBytes();
+        String key = JsonUtils.encode(objectRef);
         DataWord dataWord = this.repository.getStorageValue(this.address, new DataWord(key));
         if (dataWord == null) {
             return null;
@@ -158,7 +158,7 @@ public class Heap {
     }
 
     private ObjectRef getStaticObjectRef(String className) {
-        ClassCode classCode = this.vm.getMethodArea().loadClass(className);
+        ClassCode classCode = this.vm.methodArea.loadClass(className);
         ObjectRef objectRef = new ObjectRef(classCode.name, classCode.variableType.getDesc());
         Map<String, Object> map = getFieldsInit(objectRef);
         if (map == null) {
@@ -172,7 +172,11 @@ public class Heap {
         return objectRef;
     }
 
-    public Object getArrayInit(String arrayKey) {
+    public Object getArrayInit(ObjectRef arrayRef, Integer key) {
+        if (key == 0) {
+            return getField(arrayRef, key.toString());
+        }
+        String arrayKey = arrayRef.getRef() + "_" + key;
         Object object = arrays.get(arrayKey);
         if (object == null) {
             object = INIT_ARRAYS.get(arrayKey);
@@ -180,7 +184,11 @@ public class Heap {
         return object;
     }
 
-    public Object putArrayInit(String arrayKey) {
+    public Object putArrayInit(ObjectRef arrayRef, Integer key) {
+        if (key == 0) {
+            return putFields(arrayRef).get(key.toString());
+        }
+        String arrayKey = arrayRef.getRef() + "_" + key;
         Object object = arrays.get(arrayKey);
         if (object == null) {
             object = INIT_ARRAYS.get(arrayKey);
@@ -198,9 +206,9 @@ public class Heap {
         String arrayKey = arrayRef.getRef() + "_" + key;
         Object value = null;
         if (write) {
-            value = putArrayInit(arrayKey);
+            value = putArrayInit(arrayRef, chunkNum);
         } else {
-            value = getArrayInit(arrayKey);
+            value = getArrayInit(arrayRef, chunkNum);
         }
         if (value == null) {
             value = getArrayChunkFromState(arrayRef, arrayKey);
@@ -217,10 +225,14 @@ public class Heap {
             } else {
                 value = new ObjectRef[chunkLength];
             }
-            this.arrays.put(arrayKey, value);
-            putField(arrayRef, key, key);
+            if (chunkNum == 0) {
+                putField(arrayRef, key, value);
+            } else {
+                this.arrays.put(arrayKey, value);
+                putField(arrayRef, key, key);
+            }
         }
-        value = getArrayInit(arrayKey);
+        value = getArrayInit(arrayRef, chunkNum);
         return value;
     }
 
@@ -228,8 +240,7 @@ public class Heap {
         if (this.repository == null) {
             return null;
         }
-        byte[] key = arrayKey.getBytes();
-        DataWord dataWord = this.repository.getStorageValue(this.address, new DataWord(key));
+        DataWord dataWord = this.repository.getStorageValue(this.address, new DataWord(arrayKey));
         if (dataWord == null) {
             return null;
         }
@@ -238,7 +249,7 @@ public class Heap {
         if (!arrayRef.getVariableType().getComponentType().isPrimitive()) {
             clazz = ObjectRef.class;
         }
-        Object object = JsonUtils.decodeArray(value, clazz);
+        Object object = JsonUtils.decodeArray(new String(value), clazz);
         return object;
     }
 
@@ -339,8 +350,8 @@ public class Heap {
             return null;
         }
         ObjectRef objectRef = newObjectRef(VariableType.STRING_TYPE.getDesc());
-        putField(objectRef, "hash", str.hashCode());
-        putField(objectRef, "value", newArray(str.toCharArray()));
+        putField(objectRef, Constants.HASH, str.hashCode());
+        putField(objectRef, Constants.VALUE, newArray(str.toCharArray()));
         return objectRef;
     }
 
@@ -355,27 +366,27 @@ public class Heap {
     }
 
     public ObjectRef newCharacter(char value) {
-        return runNewObjectWithArgs(VariableType.CHAR_WRAPPER_TYPE, "(C)V", value);
+        return runNewObjectWithArgs(VariableType.CHAR_WRAPPER_TYPE, Constants.CHAR_CONSTRUCTOR_DESC, value);
     }
 
     public ObjectRef runNewObject(VariableType variableType, byte[] bytes) {
         ObjectRef ref = newArray(bytes);
-        return runNewObjectWithArgs(variableType, "([B)V", ref);
+        return runNewObjectWithArgs(variableType, Constants.BYTES_CONSTRUCTOR_DESC, ref);
     }
 
     public ObjectRef runNewObject(VariableType variableType) {
-        return runNewObjectWithArgs(variableType, "()V");
+        return runNewObjectWithArgs(variableType, Constants.CONSTRUCTOR_DESC);
     }
 
     public ObjectRef runNewObject(VariableType variableType, String str) {
         ObjectRef strRef = newString(str);
-        return runNewObjectWithArgs(variableType, "(Ljava/lang/String;)V", strRef);
+        return runNewObjectWithArgs(variableType, Constants.CONSTRUCTOR_STRING_DESC, strRef);
     }
 
     public ObjectRef runNewObjectWithArgs(VariableType variableType, String methodDesc, Object... args) {
-        ClassCode classCode = this.vm.getMethodArea().loadClass(variableType.getType());
+        ClassCode classCode = this.vm.methodArea.loadClass(variableType.getType());
         ObjectRef objectRef = newObject(classCode);
-        MethodCode methodCode = this.vm.getMethodArea().loadMethod(objectRef.getVariableType().getType(), Constants.CONSTRUCTOR_NAME, methodDesc);
+        MethodCode methodCode = this.vm.methodArea.loadMethod(objectRef.getVariableType().getType(), Constants.CONSTRUCTOR_NAME, methodDesc);
         if (methodCode == null) {
             throw new RuntimeException(String.format("can't new %s", variableType.getType()));
         }
@@ -389,16 +400,11 @@ public class Heap {
     }
 
     public ObjectRef getClassRef(String desc) {
-        ObjectRef objectRef = new ObjectRef(desc, "Ljava/lang/Class;");
+        ObjectRef objectRef = new ObjectRef(desc, Constants.CLASS_DESC);
         Object object = getFields(objectRef);
         if (object == null) {
-            ClassCode classCode = this.vm.getMethodArea().loadClass("java/lang/Class");
+            ClassCode classCode = this.vm.methodArea.loadClass(Constants.CLASS_NAME);
             objectRef = newObject(desc, classCode);
-//            String name = desc.replace('/', '.');
-//            if (name.startsWith("L") && name.endsWith(";")) {
-//                name = name.substring(1, name.length() - 1);
-//            }
-//            putField(objectRef, "name", newString(name));
         }
         return objectRef;
     }
@@ -422,7 +428,7 @@ public class Heap {
             }
             return strings;
         } else if (VariableType.STRING_TYPE.equals(objectRef.getVariableType())) {
-            ObjectRef charsRef = (ObjectRef) getField(objectRef, "value");
+            ObjectRef charsRef = (ObjectRef) getField(objectRef, Constants.VALUE);
             char[] chars = (char[]) getObject(charsRef);
             String str = new String(chars);
             return str;
@@ -441,7 +447,7 @@ public class Heap {
         if (objectRef.getVariableType().isArray() && objectRef.getVariableType().isPrimitiveType()) {
             type = VariableType.OBJECT_TYPE.getType();
         }
-        MethodCode methodCode = this.vm.getMethodArea().loadMethod(type, "toString", "()Ljava/lang/String;");
+        MethodCode methodCode = this.vm.methodArea.loadMethod(type, Constants.TO_STRING_METHOD_NAME, Constants.TO_STRING_METHOD_DESC);
         this.vm.run(methodCode, new Object[]{objectRef}, false);
         Object result = this.vm.getResultValue();
         String value = (String) getObject((ObjectRef) result);
@@ -517,18 +523,22 @@ public class Heap {
             }
             String key = JsonUtils.encode(objectRef);
             String value = JsonUtils.encode(fields);
-            contractState.put(new DataWord(key.getBytes()), new DataWord(value.getBytes()));
+            contractState.put(new DataWord(key), new DataWord(value));
             if (objectRef.isArray()) {
                 for (String k : fields.keySet()) {
+                    Integer i = Integer.valueOf(k);
+                    if (i == 0) {
+                        continue;
+                    }
                     String arrayKey = objectRef.getRef() + "_" + k;
-                    Object object = getArrayInit(arrayKey);
+                    Object object = getArrayInit(objectRef, i);
                     if (object != null) {
                         Class clazz = objectRef.getVariableType().getPrimitiveTypeClass();
                         if (!objectRef.getVariableType().getComponentType().isPrimitive()) {
                             clazz = ObjectRef.class;
                         }
-                        byte[] bytes = JsonUtils.encodeArray(object, clazz);
-                        contractState.put(new DataWord(arrayKey.getBytes()), new DataWord(bytes));
+                        String arrayValue = JsonUtils.encodeArray(object, clazz);
+                        contractState.put(new DataWord(arrayKey), new DataWord(arrayValue));
                     }
                 }
             }
@@ -541,15 +551,15 @@ public class Heap {
             stateObjectRefs.add(objectRef);
             Map<String, Object> fields = getFieldsInit(objectRef);
             if (fields != null) {
-                for (String key : fields.keySet()) {
-                    Object object = fields.get(key);
+                for (Map.Entry<String, Object> entry : fields.entrySet()) {
+                    String key = entry.getKey();
+                    Object object = entry.getValue();
                     if (object != null) {
                         if (object instanceof ObjectRef) {
                             stateObjectRefs(stateObjectRefs, (ObjectRef) object);
                         }
                         if (objectRef.isArray()) {
-                            String arrayKey = objectRef.getRef() + "_" + key;
-                            Object array = getArrayInit(arrayKey);
+                            Object array = getArrayInit(objectRef, Integer.valueOf(key));
                             if (array != null && !objectRef.getVariableType().getComponentType().isPrimitive()) {
                                 int length = Array.getLength(array);
                                 for (int i = 0; i < length; i++) {
@@ -574,7 +584,7 @@ public class Heap {
 
     private void initFields(ClassCode classCode, ObjectRef objectRef) {
         if (StringUtils.isNotBlank(classCode.superName)) {
-            ClassCode superClassCode = this.vm.getMethodArea().loadClass(classCode.superName);
+            ClassCode superClassCode = this.vm.methodArea.loadClass(classCode.superName);
             initFields(superClassCode, objectRef);
         }
         for (FieldCode fieldCode : classCode.fields.values()) {
