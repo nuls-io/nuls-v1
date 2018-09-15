@@ -532,16 +532,16 @@ public class AccountLedgerResource {
     @POST
     @Path("/transaction/broadcast")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "交易签名", notes = "result.data: resultJson 返回交易对象")
+    @ApiOperation(value = "广播", notes = "result.data: resultJson 返回交易对象")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
-    public RpcClientResult broadcast(@ApiParam(name = "form", value = "交易信息", required = true) TransactionHexForm form) {
-        if (StringUtils.isBlank(form.getTxHex())) {
+    public RpcClientResult broadcast(@ApiParam(name = "form", value = "交易信息", required = true) String txHex) {
+        if (StringUtils.isBlank(txHex)) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         try {
-            byte[] data = Hex.decode(form.getTxHex());
+            byte[] data = Hex.decode(txHex);
             Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(data));
             Result result = accountLedgerService.broadcast(tx);
             if (result.isSuccess()) {
