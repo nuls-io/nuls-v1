@@ -241,6 +241,9 @@ public class AccountLedgerResource {
     })
     public RpcClientResult multipleAddressTransfer(@ApiParam(name = "form", value = "创建多账户转账交易", required = true)
                                                            MulitpleTransactionForm form) {
+        if(NulsContext.MAIN_NET_VERSION  <=1){
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
         List<MultipleAddressTransferModel> fromModelList = new ArrayList<>();
         List<MultipleAddressTransferModel> toModelList = new ArrayList<>();
         if (form.getInputs() == null || form.getOutputs() == null) {

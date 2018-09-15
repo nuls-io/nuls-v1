@@ -272,7 +272,7 @@ public class ContractResource implements InitializingBean {
     public RpcClientResult imputedGasCreateContract(@ApiParam(name = "imputedGasCreateForm", value = "估算创建智能合约的Gas消耗", required = true) ImputedGasContractCreate create) {
         try {
             Map<String, Object> resultMap = MapUtil.createHashMap(1);
-            resultMap.put("gasLimit", 0);
+            resultMap.put("gasLimit", 1);
             long price = create.getPrice();
             if (create == null || price <= 0) {
                 return Result.getSuccess().setData(resultMap).toRpcClientResult();
@@ -539,7 +539,7 @@ public class ContractResource implements InitializingBean {
         try {
 
             Map<String, Object> resultMap = MapUtil.createHashMap(1);
-            resultMap.put("gasLimit", 0);
+            resultMap.put("gasLimit", 1);
 
             String sender = call.getSender();
             Result<Account> accountResult = accountService.getAccount(sender);

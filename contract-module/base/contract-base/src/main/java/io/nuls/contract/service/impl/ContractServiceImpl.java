@@ -36,10 +36,7 @@ import io.nuls.contract.dto.ContractTokenInfo;
 import io.nuls.contract.dto.ContractTokenTransferInfoPo;
 import io.nuls.contract.dto.ContractTransfer;
 import io.nuls.contract.entity.tx.*;
-import io.nuls.contract.entity.txdata.CallContractData;
-import io.nuls.contract.entity.txdata.ContractTransferData;
-import io.nuls.contract.entity.txdata.CreateContractData;
-import io.nuls.contract.entity.txdata.DeleteContractData;
+import io.nuls.contract.entity.txdata.*;
 import io.nuls.contract.helper.VMHelper;
 import io.nuls.contract.ledger.manager.ContractBalanceManager;
 import io.nuls.contract.ledger.service.ContractTransactionInfoService;
@@ -759,7 +756,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                     }
                 } else {
                     // 合约调用失败，把需要退还的UTXO记录到结果对象中
-                    contractExecutedResult.setValue(contractExecutedResult.getValue());
+                    contractExecutedResult.setValue(((ContractData) tx.getTxData()).getValue());
                 }
                 return Result.getSuccess().setData(contractExecutedResult);
             } else {

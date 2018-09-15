@@ -465,29 +465,43 @@ public class ForkChainProcess {
                 }
 
                 // 验证区块时发现智能合约交易就调用智能合约
-                if(ContractUtil.isContractTransaction(tx)) {
-                    invokeContractResult = contractService.invokeContract(tx, bestHeight, stateRoot);
-                    contractResult = invokeContractResult.getData();
-                    if (contractResult != null) {
-                        Result<byte[]> handleContractResult = contractService.verifyContractResult(
-                                tx, contractResult,
-                                stateRoot, newBlock.getHeader().getTime(),
-                                toMaps, contractUsedCoinMap, bestHeight);
-                        // 更新世界状态
-                        stateRoot = handleContractResult.getData();
-                    }
-                }
+                //if(ContractUtil.isContractTransaction(tx)) {
+                //    invokeContractResult = contractService.invokeContract(tx, bestHeight, stateRoot);
+                //    contractResult = invokeContractResult.getData();
+                //    if (contractResult != null) {
+                //        Result<byte[]> handleContractResult = contractService.verifyContractResult(
+                //                tx, contractResult,
+                //                stateRoot, newBlock.getHeader().getTime(),
+                //                toMaps, contractUsedCoinMap, bestHeight);
+                //        // 更新世界状态
+                //        stateRoot = handleContractResult.getData();
+                //    }
+                //}
             }
-            // 验证区块交易结束后移除临时余额区
-            contractService.removeContractTempBalance();
-            if (contractResult != null) {
-                // 验证世界状态根
-                if (!Arrays.equals(receiveStateRoot, stateRoot)) {
-                    Log.info("contract stateRoot incorrect.");
-                    changeSuccess = false;
-                    break;
-                }
+
+            if (!changeSuccess) {
+                break;
             }
+
+            stateRoot = contractService.processTxs(newBlock.getTxs(), bestHeight, newBlock, stateRoot, toMaps, contractUsedCoinMap).getData();
+
+            // 验证世界状态根
+            if ((receiveStateRoot != null || stateRoot != null) && !Arrays.equals(receiveStateRoot, stateRoot)) {
+                Log.info("contract stateRoot incorrect.");
+                changeSuccess = false;
+                break;
+            }
+
+            //// 验证区块交易结束后移除临时余额区
+            //contractService.removeContractTempBalance();
+            //if (contractResult != null) {
+            //    // 验证世界状态根
+            //    if (!Arrays.equals(receiveStateRoot, stateRoot)) {
+            //        Log.info("contract stateRoot incorrect.");
+            //        changeSuccess = false;
+            //        break;
+            //    }
+            //}
 
             // 验证CoinBase交易
             Object[] objects = verifyResultList.get(i);
