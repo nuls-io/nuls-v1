@@ -564,7 +564,7 @@ public class AccountLedgerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
-    public RpcClientResult valiTransaction(@ApiParam(name = "form", value = "验证交易是否正确", required = true) TransactionHexForm form) {
+    public RpcClientResult valiTransaction(@ApiParam(name = "form", value = "验证交易是否正确", required = true) BroadHexTxForm form) {
         if (StringUtils.isBlank(form.getTxHex())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
