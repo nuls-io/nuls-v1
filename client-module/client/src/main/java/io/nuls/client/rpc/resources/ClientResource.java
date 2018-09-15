@@ -25,13 +25,13 @@
 
 package io.nuls.client.rpc.resources;
 
-import io.nuls.client.Bootstrap;
 import io.nuls.client.rpc.RpcServerManager;
+import io.nuls.client.rpc.resources.dto.ProtocolContainerDTO;
 import io.nuls.client.rpc.resources.dto.UpgradeProcessDTO;
 import io.nuls.client.rpc.resources.dto.VersionDto;
-import io.nuls.client.rpc.resources.thread.ShutdownHook;
 import io.nuls.client.rpc.resources.thread.UpgradeThread;
 import io.nuls.client.version.SyncVersionRunner;
+import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
@@ -39,11 +39,17 @@ import io.nuls.core.tools.str.VersionUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.network.manager.ConnectionManager;
+import io.nuls.protocol.base.version.NulsVersionManager;
+import io.nuls.protocol.base.version.ProtocolContainer;
+import io.nuls.protocol.storage.po.ProtocolTempInfoPo;
+import io.nuls.protocol.storage.service.VersionManagerStorageService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -51,9 +57,10 @@ import io.swagger.annotations.ApiResponses;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.awt.image.Kernel;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -63,6 +70,9 @@ import java.util.Map;
 @Api(value = "/client", description = "Client")
 @Component
 public class ClientResource {
+
+    @Autowired
+    private VersionManagerStorageService versionManagerStorageService;
 
     @GET
     @Path("/version")
@@ -199,5 +209,35 @@ public class ClientResource {
         Map<String, Boolean> map = new HashMap<>();
         map.put("value", true);
         return Result.getSuccess().setData(map).toRpcClientResult();
+    }
+
+    @GET
+    @Path("/protocol/info")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "协议版本升级统计信息")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = Boolean.class)
+    })
+    public RpcClientResult getProtocolInfo() {
+        BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();
+        List<ProtocolContainerDTO> list = new ArrayList<>();
+        ProtocolContainer protocolContainer = NulsVersionManager.getProtocolContainer(NulsContext.CURRENT_PROTOCOL_VERSION);
+        ProtocolContainerDTO pcDTO = new ProtocolContainerDTO(protocolContainer);
+        if(pcDTO.getStatus() == ProtocolContainer.DELAY_LOCK){
+            pcDTO.setEffectiveHeight(blockHeader.getHeight() + pcDTO.getCountdownDelay() + 1);
+        }
+        list.add(pcDTO);
+        Map<String,ProtocolTempInfoPo> protocolTempMap = versionManagerStorageService.getProtocolTempMap();
+        for (ProtocolTempInfoPo protocolTempInfoPo : protocolTempMap.values()){
+            ProtocolContainerDTO protocolContainerDTO = new ProtocolContainerDTO(protocolTempInfoPo);
+            if(protocolContainerDTO.getStatus() == ProtocolContainer.DELAY_LOCK){
+                protocolContainerDTO.setEffectiveHeight(blockHeader.getHeight() + protocolContainerDTO.getCountdownDelay() + 1);
+            }
+            list.add(protocolContainerDTO);
+        }
+        Map<String, List<ProtocolContainerDTO>> map = new HashMap<>();
+        map.put("list", list);
+        return Result.getSuccess().setData(map).toRpcClientResult();
+
     }
 }

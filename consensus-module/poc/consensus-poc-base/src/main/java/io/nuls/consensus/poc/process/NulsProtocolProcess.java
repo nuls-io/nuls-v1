@@ -422,7 +422,7 @@ public class NulsProtocolProcess {
                             ProtocolTransferTool.copyFromBlockProtocolTempInfoPo(blockProtocolInfoPo, protocolTempInfoPo);
                         }
                         /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
-                        Log.info("@@@@@@@@@@@@@@ 回滚结果 统计协议 @@@@@@@@@@@@@@");
+                        Log.info("@@@@@@@@@@@@@@ 回滚结果 Temp 统计协议 @@@@@@@@@@@@@@");
                         Log.info("@@@@@@@ 协议version：" + protocolTempInfoPo.getVersion());
                         Log.info("@@@@@@@ 回滚块的高度：" + blockHeader.getHeight());
                         Log.info("@@@@@@@ 回滚块的hash：" + blockHeader.getHash());
@@ -438,6 +438,7 @@ public class NulsProtocolProcess {
             Log.info("@@@@@@@ 协议AddressSet：" + Arrays.toString(protocolTempInfoPo.getAddressSet().toArray()));
             /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
         }
+//        BlockProcess.BB = false;
     }
 
 
