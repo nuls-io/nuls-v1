@@ -22,20 +22,28 @@
  * SOFTWARE.
  *
  */
-package io.nuls.utxo.accounts.storage.constant;
+package io.nuls.accout.ledger.rpc.form;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+import javax.ws.rs.QueryParam;
 
 /**
- * @desription:
- * @author: cody
+ * @author Facjas
  */
-public interface UtxoAccountsStorageConstant {
-    byte []DB_NAME_UTXO_ACCOUNTS_BLOCK_SYN_KEY = "utxo_accounts_block_syn_key".getBytes();
-    String DB_NAME_UTXO_ACCOUNTS_CHANGE_SUFFIX_KEY = "suffix";
-//    String DB_NAME_UTXO_ACCOUNTS_BLOCK_INDEX="utxo_accounts_block_index";
-    String DB_NAME_UTXO_ACCOUNTS_BLOCK_CACHE = "utxo_accounts_block_cache";
-    String DB_NAME_UTXO_ACCOUNTS_CONFIRMED_BALANCE = "utxo_accounts_confirmed_balance";
-//    String DB_NAME_UTXO_ACCOUNTS_LOCKEDTIME_BALANCE = "utxo_accounts_lockedtime_balance";
-//    String DB_NAME_UTXO_ACCOUNTS_LOCKEDHEIGHT_BALANCE = "utxo_accounts_lockedheight_balance";
-    final int MAX_CACHE_BLOCK_NUM=1100;
+@ApiModel(value = "广播交易数据")
+public class BroadHexTxForm {
 
+    @ApiModelProperty(name = "txHex", value = "交易信息", required = true)
+    @QueryParam("txHex")
+    private String txHex;
+
+    public void setTxHex(String txHex) {
+        this.txHex = txHex;
+    }
+
+    public String getTxHex() {
+        return txHex;
+    }
 }

@@ -33,8 +33,8 @@ public class Frame {
 
     public Frame(VM vm, MethodCode methodCode, Object[] args) {
         this.vm = vm;
-        this.heap = vm.getHeap();
-        this.methodArea = vm.getMethodArea();
+        this.heap = vm.heap;
+        this.methodArea = vm.methodArea;
         this.methodCode = methodCode;
         this.maxStack = this.methodCode.maxStack;
         this.maxLocals = this.methodCode.maxLocals;

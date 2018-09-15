@@ -16,9 +16,11 @@ public class ProtocolTransferTool {
         infoPo.setPercent(container.getPercent());
         infoPo.setDelay(container.getDelay());
         infoPo.setCurrentDelay(container.getCurrentDelay());
+        infoPo.setCurrentPercent(container.getCurrentPercent());
         infoPo.setAddressSet(container.getAddressSet());
         infoPo.setStatus(container.getStatus());
         infoPo.setRoundIndex(container.getRoundIndex());
+        infoPo.setEffectiveHeight(container.getEffectiveHeight());
         return infoPo;
     }
 

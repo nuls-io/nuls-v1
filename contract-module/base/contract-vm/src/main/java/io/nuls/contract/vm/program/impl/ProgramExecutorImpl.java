@@ -45,11 +45,17 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private final Map<String, VM> vmCache;
 
+    private final Map<String, VM> commitVms;
+
     private final long beginTime;
 
     private long currentTime;
 
     private boolean revert;
+
+    private String contractAddress;
+
+    private VM contractVM;
 
     static {
         ClassCodeLoader.init();
@@ -58,16 +64,17 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     public ProgramExecutorImpl(VMContext vmContext, DBService dbService) {
-        this(vmContext, new KeyValueSource(dbService), null, null, null);
+        this(vmContext, new KeyValueSource(dbService), null, null, null, null);
     }
 
-    private ProgramExecutorImpl(VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot, Map<String, VM> vmCache) {
+    private ProgramExecutorImpl(VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot, Map<String, VM> vmCache, Map<String, VM> commitVms) {
         this.vmContext = vmContext;
         this.source = source;
         this.repository = repository;
         this.prevStateRoot = prevStateRoot;
         this.beginTime = this.currentTime = System.currentTimeMillis();
         this.vmCache = vmCache;
+        this.commitVms = commitVms;
     }
 
     @Override
@@ -76,7 +83,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             log.debug("begin vm root: {}", Hex.toHexString(prevStateRoot));
         }
         Repository repository = new RepositoryRoot(source, prevStateRoot);
-        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, new HashMap<>(1024));
+        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, new HashMap<>(1024), new LinkedHashMap<>(1024));
     }
 
     @Override
@@ -85,12 +92,37 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             log.debug("startTracking");
         }
         Repository track = repository.startTracking();
-        return new ProgramExecutorImpl(vmContext, source, track, null, vmCache);
+        return new ProgramExecutorImpl(vmContext, source, track, null, vmCache, commitVms);
     }
 
     @Override
     public void commit() {
         if (!revert) {
+            if (contractVM != null) {
+                contractVM.heap.objects.commit();
+                contractVM.heap.arrays.commit();
+                commitVms.put(contractAddress, contractVM);
+            }
+            if (prevStateRoot != null) {
+                for (Map.Entry<String, VM> vmEntry : commitVms.entrySet()) {
+                    String address = vmEntry.getKey();
+                    VM vm = vmEntry.getValue();
+                    byte[] contractAddress = NativeAddress.toBytes(address);
+
+                    vm.heap.objects.clearCache();
+                    vm.heap.arrays.clearCache();
+
+                    Map<DataWord, DataWord> contractState = vm.heap.contractState();
+                    logTime("contract state");
+
+                    for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
+                        DataWord key = entry.getKey();
+                        DataWord value = entry.getValue();
+                        repository.addStorageRow(contractAddress, key, value);
+                    }
+                    logTime("add contract state");
+                }
+            }
             repository.commit();
             logTime("commit");
         }
@@ -142,7 +174,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         return execute(programInvoke);
     }
 
-    public ProgramResult execute(ProgramInvoke programInvoke) {
+    private ProgramResult execute(ProgramInvoke programInvoke) {
         if (programInvoke.getPrice() < 1) {
             return revert("gas price must be greater than zero");
         }
@@ -188,30 +220,32 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 logTime("load code");
             }
 
+            contractAddress = NativeAddress.toString(programInvoke.getContractAddress());
             VM vm;
             if (vmCache == null) {
                 vm = VMFactory.createVM();
             } else {
-                String contractAddress = NativeAddress.toString(programInvoke.getContractAddress());
                 vm = vmCache.get(contractAddress);
                 if (vm == null) {
                     vm = VMFactory.createVM();
                 } else {
-                    //vm = new VM(vm.getHeap(), vm.getMethodArea());
-                    vm = VMFactory.createVM();
+                    vm.heap.objects.clearCache();
+                    vm.heap.arrays.clearCache();
+                    vm = new VM(vm.heap, vm.methodArea);
+                    //vm = VMFactory.createVM();
                 }
                 vmCache.put(contractAddress, vm);
             }
 
             logTime("load vm");
 
-            vm.getMethodArea().loadClassCodes(classCodes);
+            vm.methodArea.loadClassCodes(classCodes);
 
             logTime("load classes");
 
             ClassCode contractClassCode = getContractClassCode(classCodes);
             String methodDesc = ProgramDescriptors.parseDesc(programInvoke.getMethodDesc());
-            MethodCode methodCode = vm.getMethodArea().loadMethod(contractClassCode.name, programInvoke.getMethodName(), methodDesc);
+            MethodCode methodCode = vm.methodArea.loadMethod(contractClassCode.name, programInvoke.getMethodName(), methodDesc);
 
             if (methodCode == null) {
                 return revert(String.format("can't find method %s.%s", programInvoke.getMethodName(), programInvoke.getMethodDesc()));
@@ -239,9 +273,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             ObjectRef objectRef;
             if (newContract) {
-                objectRef = vm.getHeap().newContract(programInvoke.getContractAddress(), contractClassCode, repository);
+                objectRef = vm.heap.newContract(programInvoke.getContractAddress(), contractClassCode, repository);
             } else {
-                objectRef = vm.getHeap().loadContract(programInvoke.getContractAddress(), contractClassCode, repository);
+                objectRef = vm.heap.loadContract(programInvoke.getContractAddress(), contractClassCode, repository);
             }
 
             logTime("load contract ref");
@@ -268,8 +302,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             if (vmResult.isError() || vmResult.isException()) {
                 if (resultValue != null && resultValue instanceof ObjectRef) {
                     vm.setResult(new Result());
-                    String error = vm.getHeap().runToString((ObjectRef) resultValue);
-                    String stackTrace = vm.getHeap().stackTrace((ObjectRef) resultValue);
+                    String error = vm.heap.runToString((ObjectRef) resultValue);
+                    String stackTrace = vm.heap.stackTrace((ObjectRef) resultValue);
                     programResult.error(error);
                     programResult.setStackTrace(stackTrace);
                 } else {
@@ -285,16 +319,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 return programResult;
             }
 
-            Map<DataWord, DataWord> contractState = vm.getHeap().contractState();
-            logTime("contract state");
-
-            for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
-                DataWord key = entry.getKey();
-                DataWord value = entry.getValue();
-                this.repository.addStorageRow(programInvoke.getContractAddress(), key, value);
-            }
-            logTime("add contract state");
-
             repository.increaseNonce(programInvoke.getContractAddress());
             programResult.setNonce(repository.getNonce(programInvoke.getContractAddress()));
             programResult.setTransfers(vm.getTransfers());
@@ -303,7 +327,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             if (resultValue != null) {
                 if (resultValue instanceof ObjectRef) {
-                    String result = vm.getHeap().runToString((ObjectRef) resultValue);
+                    String result = vm.heap.runToString((ObjectRef) resultValue);
                     programResult.setResult(result);
                 } else {
                     programResult.setResult(resultValue.toString());
@@ -317,10 +341,13 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             logTime("contract return");
 
+            this.contractVM = vm;
+
             programResult.setGasUsed(vm.getGasUsed());
 
             return programResult;
         } catch (ErrorException e) {
+            this.revert = true;
             //log.error("", e);
             ProgramResult programResult = new ProgramResult();
             programResult.setGasUsed(e.getGasUsed());
@@ -497,11 +524,11 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     public void logTime(String message) {
-        long currentTime = System.currentTimeMillis();
-        long step = currentTime - this.currentTime;
-        long runtime = currentTime - this.beginTime;
-        this.currentTime = currentTime;
         if (log.isDebugEnabled()) {
+            long currentTime = System.currentTimeMillis();
+            long step = currentTime - this.currentTime;
+            long runtime = currentTime - this.beginTime;
+            this.currentTime = currentTime;
             ProgramTime.cache.putIfAbsent(message, new ProgramTime());
             ProgramTime time = ProgramTime.cache.get(message);
             time.add(step);

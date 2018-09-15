@@ -29,6 +29,10 @@ public class ProtocolContainer<T extends BaseNulsData> {
      * 当前延迟区块数
      */
     private long currentDelay;
+    /**
+     * 当前覆盖率(status = 0时，记录当前轮的覆盖率，status大于1时记录上一轮覆盖率)
+     */
+    private int currentPercent;
 
     /**
      * 当前轮新协议打包出块地址
@@ -186,5 +190,13 @@ public class ProtocolContainer<T extends BaseNulsData> {
         this.status = ProtocolContainer.INVALID;
         this.effectiveHeight = null;
         this.addressSet.clear();
+    }
+
+    public int getCurrentPercent() {
+        return currentPercent;
+    }
+
+    public void setCurrentPercent(int currentPercent) {
+        this.currentPercent = currentPercent;
     }
 }

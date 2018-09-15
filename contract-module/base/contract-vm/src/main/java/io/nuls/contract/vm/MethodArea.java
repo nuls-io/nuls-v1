@@ -96,7 +96,7 @@ public class MethodArea {
     private void clinit(ClassCode classCode) {
         for (FieldCode fieldCode : classCode.fields.values()) {
             if (fieldCode.isStatic && !fieldCode.isFinal) {
-                this.vm.getHeap().putStatic(classCode.name, fieldCode.name, fieldCode.variableType.getDefaultValue());
+                this.vm.heap.putStatic(classCode.name, fieldCode.name, fieldCode.variableType.getDefaultValue());
             }
         }
 

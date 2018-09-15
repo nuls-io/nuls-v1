@@ -33,8 +33,12 @@ public class PreContractCreate {
         this.contractCode = contractCode;
     }
 
-    public String[][] getArgs() {
-        return ContractUtil.twoDimensionalArray(args);
+    public Object[] getArgs() {
+        return args;
+    }
+
+    public String[][] getArgs(String[] types) {
+        return ContractUtil.twoDimensionalArray(args, types);
     }
 
     public void setArgs(Object[] args) {

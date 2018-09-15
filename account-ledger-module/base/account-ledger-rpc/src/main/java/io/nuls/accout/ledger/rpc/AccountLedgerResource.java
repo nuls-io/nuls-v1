@@ -64,6 +64,8 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -533,11 +535,11 @@ public class AccountLedgerResource {
     @POST
     @Path("/transaction/broadcast")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "交易签名", notes = "result.data: resultJson 返回交易对象")
+    @ApiOperation(value = "广播交易", notes = "result.data: resultJson 返回交易对象")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
-    public RpcClientResult broadcast(@ApiParam(name = "form", value = "交易信息", required = true) TransactionHexForm form) {
+    public RpcClientResult broadcast(@ApiParam(name = "form", value = "交易信息", required = true) BroadHexTxForm form) {
         if (StringUtils.isBlank(form.getTxHex())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }

@@ -60,6 +60,8 @@ import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.*;
 
 import io.nuls.kernel.script.BlockSignature;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.ByteArrayWrapper;
 import io.nuls.kernel.utils.VarInt;
@@ -383,6 +385,7 @@ public class ConsensusTool {
         NulsDigestData createTxHash = agent.getTxHash();
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
+
         toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), lockTime));
         coinData.setTo(toList);
         CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);

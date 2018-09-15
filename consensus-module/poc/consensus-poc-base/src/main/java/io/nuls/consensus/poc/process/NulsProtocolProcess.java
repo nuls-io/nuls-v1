@@ -93,6 +93,7 @@ public class NulsProtocolProcess {
                         BlockHeader preHeader = result.getData();
                         BlockExtendsData preExtendsData = new BlockExtendsData(preHeader.getExtend());
                         int rate = calcRate(container, preExtendsData);
+                        container.setCurrentPercent(rate);
                         if (rate < container.getPercent()) {
                             container.setCurrentDelay(0);
                             container.setStatus(ProtocolContainer.INVALID);
@@ -125,6 +126,7 @@ public class NulsProtocolProcess {
                         BlockHeader preHeader = result.getData();
                         BlockExtendsData preExtendsData = new BlockExtendsData(preHeader.getExtend());
                         int rate = calcRate(tempInfoPo, preExtendsData);
+                        tempInfoPo.setCurrentPercent(rate);
                         if (rate < tempInfoPo.getPercent()) {
                             tempInfoPo.setCurrentDelay(0);
                             tempInfoPo.setStatus(ProtocolContainer.INVALID);
@@ -151,11 +153,11 @@ public class NulsProtocolProcess {
         if (container.getStatus() == ProtocolContainer.INVALID) {
             //覆盖率达到后，修改状态为延迟锁定中
             int rate = calcRate(container, extendsData);
+            container.setCurrentPercent(rate);
             if (rate >= container.getPercent()) {
                 container.setStatus(ProtocolContainer.DELAY_LOCK);
                 container.setCurrentDelay(1);
             }
-
             Log.info("========== 统计协议 ==========");
             Log.info("========== 协议覆盖率：" + rate + " -->>> " + container.getPercent());
             Log.info("========== 协议version：" + container.getVersion());
@@ -180,7 +182,6 @@ public class NulsProtocolProcess {
             if (container.getCurrentDelay() >= container.getDelay()) {
                 container.setStatus(ProtocolContainer.VALID);
                 container.setEffectiveHeight(blockHeader.getHeight() + 1);
-                saveProtocolInfo(container);
                 upgradeProtocol(container);
                 Log.info("********** 协议生效了！！！！！！！！！ **********");
                 Log.info("********** 协议生效了！！！！！！！！！ **********");
@@ -216,6 +217,7 @@ public class NulsProtocolProcess {
         if (tempInfoPo.getStatus() == ProtocolContainer.INVALID) {
             //覆盖率达到后，修改状态为延迟锁定中
             int rate = calcRate(tempInfoPo, extendsData);
+            tempInfoPo.setCurrentPercent(rate);
             if (rate >= tempInfoPo.getPercent()) {
                 tempInfoPo.setStatus(ProtocolContainer.DELAY_LOCK);
                 tempInfoPo.setCurrentDelay(1);
@@ -305,16 +307,16 @@ public class NulsProtocolProcess {
      * @return
      */
     private int calcRate(ProtocolTempInfoPo tempInfoPo, BlockExtendsData extendsData) {
-        int memeberCount = extendsData.getConsensusMemberCount();
+        int memberCount = extendsData.getConsensusMemberCount();
         int addressCount = tempInfoPo.getAddressSet().size();
-        return calcRate(addressCount, memeberCount);
+        return calcRate(addressCount, memberCount);
     }
 
     private int calcRate(ProtocolContainer protocolContainer, BlockExtendsData extendsData) {
-        int memeberCount = extendsData.getConsensusMemberCount();
+        int memberCount = extendsData.getConsensusMemberCount();
         int addressCount = protocolContainer.getAddressSet().size();
 
-        return calcRate(addressCount, memeberCount);
+        return calcRate(addressCount, memberCount);
     }
 
     private int calcRate(int addressCount, int memeberCount) {
@@ -420,7 +422,7 @@ public class NulsProtocolProcess {
                             ProtocolTransferTool.copyFromBlockProtocolTempInfoPo(blockProtocolInfoPo, protocolTempInfoPo);
                         }
                         /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
-                        Log.info("@@@@@@@@@@@@@@ 回滚结果 统计协议 @@@@@@@@@@@@@@");
+                        Log.info("@@@@@@@@@@@@@@ 回滚结果 Temp 统计协议 @@@@@@@@@@@@@@");
                         Log.info("@@@@@@@ 协议version：" + protocolTempInfoPo.getVersion());
                         Log.info("@@@@@@@ 回滚块的高度：" + blockHeader.getHeight());
                         Log.info("@@@@@@@ 回滚块的hash：" + blockHeader.getHash());
@@ -436,6 +438,7 @@ public class NulsProtocolProcess {
             Log.info("@@@@@@@ 协议AddressSet：" + Arrays.toString(protocolTempInfoPo.getAddressSet().toArray()));
             /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
         }
+//        BlockProcess.BB = false;
     }
 
 

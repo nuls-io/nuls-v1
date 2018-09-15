@@ -99,6 +99,8 @@ public class ContractResult {
      */
     private BigInteger nonce;
 
+    private boolean acceptDirectTransfer;
+
     private boolean isNrc20;
 
     /**
@@ -251,6 +253,14 @@ public class ContractResult {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public boolean isAcceptDirectTransfer() {
+        return acceptDirectTransfer;
+    }
+
+    public void setAcceptDirectTransfer(boolean acceptDirectTransfer) {
+        this.acceptDirectTransfer = acceptDirectTransfer;
     }
 
     public boolean isNrc20() {

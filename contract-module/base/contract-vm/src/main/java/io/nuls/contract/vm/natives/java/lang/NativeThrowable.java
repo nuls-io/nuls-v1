@@ -55,11 +55,11 @@ public class NativeThrowable {
         int dummy = (int) methodArgs.invokeArgs[0];
         ObjectRef objectRef = methodArgs.objectRef;
 
-        int size = frame.vm.getVmStack().size();
+        int size = frame.vm.vmStack.size();
         boolean isThrowable = true;
         List<Frame> frames = new ArrayList<>();
         for (int i = size - 1; i >= 0; i--) {
-            Frame frame1 = frame.vm.getVmStack().get(i);
+            Frame frame1 = frame.vm.vmStack.get(i);
             if (isThrowable) {
                 if (Instanceof.instanceof_(frame1.methodCode.className, "java/lang/Throwable", frame)) {
                     continue;
