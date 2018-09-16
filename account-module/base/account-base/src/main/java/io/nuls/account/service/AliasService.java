@@ -37,6 +37,7 @@ import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.account.storage.service.AliasStorageService;
 import io.nuls.account.tx.AliasTransaction;
 import io.nuls.core.tools.crypto.ECKey;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -49,6 +50,7 @@ import io.nuls.kernel.model.*;
 
 import io.nuls.kernel.script.*;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
@@ -56,8 +58,10 @@ import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.service.TransactionService;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -348,9 +352,9 @@ public class AliasService {
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             List<Script> scripts = new ArrayList<>();
+            byte[] addressBytes = AddressTool.getAddress(addr);
             //如果txdata为空则表示当前请求为多签发起者调用，需要创建交易
             if(txdata == null || txdata.trim().length() == 0){
-                byte[] addressBytes = AddressTool.getAddress(addr);
                 if(isMutilAliasUsable(addressBytes,aliasName)){
                     return Result.getFailed(AccountErrorCode.ALIAS_EXIST);
                 }
@@ -362,7 +366,7 @@ public class AliasService {
                 tx.setTxData(alias);
                 //交易签名的长度为m*单个签名长度+赎回脚本长度
                 int scriptSignLenth = redeemScript.getProgram().length + m*72;
-                CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                CoinDataResult coinDataResult = accountLedgerService.getMutilCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size()+scriptSignLenth , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
                 if (!coinDataResult.isEnough()) {
                     return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
                 }
@@ -375,58 +379,31 @@ public class AliasService {
                     toList.add(change);
                     coinData.setTo(toList);
                 }
-
                 Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
                 coinData.addTo(coin);
-
                 tx.setCoinData(coinData);
                 tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-            }else{
-
+                //将赎回脚本先存储在签名脚本中
+                scripts.add(redeemScript);
+                transactionSignature.setScripts(scripts);
             }
-
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
-            //生成签名
-            List<ECKey> signEckeys = new ArrayList<>();
-            List<ECKey> scriptEckeys = new ArrayList<>();;
+            //如果txdata不为空表示多签交易已经创建好了，将交易反序列化出来
+            else{
+                byte[] txByte = Hex.decode(txdata);
+                tx.parse(new NulsByteBuffer(txByte));
+                transactionSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+                p2PHKSignatures = transactionSignature.getP2PHKSignatures();
+                scripts = transactionSignature.getScripts();
+            }
+            //使用签名账户对交易进行签名
+            P2PHKSignature p2PHKSignature = new P2PHKSignature();
             ECKey eckey = account.getEcKey(password);
-
-            //如果最后一位为1则表示该交易包含普通签名
-            if((coinDataResult.getSignType() & 0x01) == 0x01){
-                signEckeys.add(eckey);
-            }
-            //如果倒数第二位位为1则表示该交易包含脚本签名
-            if((coinDataResult.getSignType() & 0x02) == 0x02){
-                scriptEckeys.add(eckey);
-            }
-            SignatureUtil.createTransactionSignture(tx,scriptEckeys,signEckeys);
-
-            Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
-            if (saveResult.isFailed()) {
-                if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
-                    //重新算一次交易(不超出最大交易数据大小下)的最大金额
-                    Result rs = accountLedgerService.getMaxAmountOfOnce(account.getAddress().getAddressBytes(), tx,
-                            TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
-                    if(rs.isSuccess()){
-                        Na maxAmount = (Na)rs.getData();
-                        rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
-                        rs.setMsg(rs.getMsg() + maxAmount.toDouble());
-                    }
-                    return rs;
-
-                }
-                return saveResult;
-            }
-
-            this.transactionService.newTx(tx);
-
-            Result sendResult = this.transactionService.broadcastTx(tx);
-            if (sendResult.isFailed()) {
-                accountLedgerService.deleteTransaction(tx);
-                return sendResult;
-            }
-            String hash = tx.getHash().getDigestHex();
-            return Result.getSuccess().setData(hash);
+            p2PHKSignature.setPublicKey(eckey.getPubKey());
+            //用当前交易的hash和账户的私钥账户
+            p2PHKSignature.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(),eckey));
+            p2PHKSignatures.add(p2PHKSignature);
+            Result result = txMutilProcessing(tx,p2PHKSignatures,scripts,transactionSignature,addressBytes);
+            return  result;
         } catch (Exception e) {
             Log.error(e);
             return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -446,5 +423,51 @@ public class AliasService {
             }
         }
         return  true;
+    }
+
+    public Result<String> txMutilProcessing(Transaction tx, List<P2PHKSignature> p2PHKSignatures,List<Script> scripts,TransactionSignature transactionSignature,byte[] fromAddr) throws NulsException,IOException {
+        //当已签名数等于M则自动广播该交易
+        if(p2PHKSignatures.size() == SignatureUtil.getM(scripts.get(0))){
+            //将交易中的签名数据P2PHKSignatures按规则排序
+            Collections.sort(p2PHKSignatures,P2PHKSignature.PUBKEY_COMPARATOR);
+            //将排序后的P2PHKSignatures的签名数据取出和赎回脚本结合生成解锁脚本
+            List<byte[]> signatures= new ArrayList<>();
+            for (P2PHKSignature p2PHKSignatureTemp:p2PHKSignatures) {
+                signatures.add(p2PHKSignatureTemp.getSignData().getSignBytes());
+            }
+            transactionSignature.setP2PHKSignatures(null);
+            Script scriptSign = ScriptBuilder.createNulsP2SHMultiSigInputScript(signatures,scripts.get(0));
+            transactionSignature.getScripts().clear();
+            transactionSignature.getScripts().add(scriptSign);
+            tx.setTransactionSignature(transactionSignature.serialize());
+            // 保存未确认交易到本地账户
+            Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
+            if (saveResult.isFailed()) {
+                if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
+                    //重新算一次交易(不超出最大交易数据大小下)的最大金额
+                    Result rs = accountLedgerService.getMaxAmountOfOnce(fromAddr, tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                    if (rs.isSuccess()) {
+                        Na maxAmount = (Na) rs.getData();
+                        rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
+                        rs.setMsg(rs.getMsg() + maxAmount.toDouble());
+                    }
+                    return rs;
+                }
+                return saveResult;
+            }
+            transactionService.newTx(tx);
+            Result sendResult = transactionService.broadcastTx(tx);
+            if (sendResult.isFailed()) {
+                accountLedgerService.deleteTransaction(tx);
+                return sendResult;
+            }
+            return Result.getSuccess().setData(tx.getHash().getDigestHex());
+        }
+        //如果签名数还没达到，则返回交易
+        else{
+            transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+            tx.setTransactionSignature(transactionSignature.serialize());
+            return Result.getSuccess().setData(Hex.encode(tx.serialize()));
+        }
     }
 }

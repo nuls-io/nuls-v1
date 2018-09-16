@@ -1153,16 +1153,10 @@ public class PocConsensusResource {
         if(NulsContext.MAIN_NET_VERSION  <=1){
             return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
         }
-        AssertUtil.canNotEmpty(form);
-        AssertUtil.canNotEmpty(form.getAgentAddress(), "agent address can not be null");
-        AssertUtil.canNotEmpty(form.getCommissionRate(), "commission rate can not be null");
-        AssertUtil.canNotEmpty(form.getDeposit(), "deposit can not be null");
-        AssertUtil.canNotEmpty(form.getPackingAddress(), "packing address can not be null");
-
         if (form == null) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        if (!AddressTool.validAddress(form.getSignAddress())) {
+        if (!AddressTool.validAddress(form.getSignAddress())  || !AddressTool.validAddress(form.getAgentAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         Account account = accountService.getAccount(form.getSignAddress()).getData();
@@ -1181,7 +1175,7 @@ public class PocConsensusResource {
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         List<Script> scripts = new ArrayList<>();
         if(form.getTxdata() == null || form.getTxdata().trim().length() == 0){
-            if (!AddressTool.validAddress(form.getPackingAddress()) || !AddressTool.validAddress(form.getAgentAddress())) {
+            if (!AddressTool.validAddress(form.getPackingAddress())) {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
             }
             if (form.getM() <= 0) {

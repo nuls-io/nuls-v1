@@ -1222,7 +1222,7 @@ public class AccountResource {
         if (form == null) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        if (!AddressTool.validAddress(form.getSignAddress())) {
+        if (!AddressTool.validAddress(form.getSignAddress()) || !AddressTool.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if(form.getTxdata() == null || form.getTxdata().trim().length() == 0){
@@ -1242,10 +1242,10 @@ public class AccountResource {
                 return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
             }
         }
-        Result result = aliasService.setAlias(form.getSignAddress(), form.getAlias().trim(), form.getPassword());
+        Result result = aliasService.setMutilAlias(form.getAddress(),form.getSignAddress(),form.getAlias(),form.getPassword(),form.getPubkeys(),form.getM(),null);
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
-            map.put("value", (String) result.getData());
+            map.put("txData", (String) result.getData());
             result.setData(map);
         }
         return result.toRpcClientResult();
