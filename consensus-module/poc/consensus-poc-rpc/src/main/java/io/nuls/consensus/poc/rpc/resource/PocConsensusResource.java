@@ -1239,7 +1239,6 @@ public class PocConsensusResource {
         p2PHKSignature.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(),eckey));
         p2PHKSignatures.add(p2PHKSignature);
         RpcClientResult result = txMutilProcessing(tx,p2PHKSignatures,scripts,transactionSignature,AddressTool.getAddress(form.getAgentAddress()));
-
         Map<String, String> valueMap = new HashMap<>();
         valueMap.put("txData", (String) result.getData());
         return Result.getSuccess().setData(valueMap).toRpcClientResult();
