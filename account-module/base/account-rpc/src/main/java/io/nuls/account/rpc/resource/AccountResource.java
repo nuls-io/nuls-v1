@@ -1198,10 +1198,8 @@ public class AccountResource {
         if (result.isFailed()) {
             return result.toRpcClientResult();
         }
-        Address address = (Address) result.getData();
-        Map<String, String> map = new HashMap<>();
-        map.put("address", address.toString());
-        return Result.getSuccess().setData(map).toRpcClientResult();
+        MultiSigAccountDto account = new MultiSigAccountDto((MultiSigAccount) result.getData());
+        return Result.getSuccess().setData(account).toRpcClientResult();
     }
 
     @POST

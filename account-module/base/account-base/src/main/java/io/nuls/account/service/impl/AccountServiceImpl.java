@@ -622,7 +622,7 @@ public class AccountServiceImpl implements AccountService {
             if (result.isFailed()) {
                 return result;
             }
-            return result.setData(address);
+            return result.setData(account);
         } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(KernelErrorCode.FAILED);
