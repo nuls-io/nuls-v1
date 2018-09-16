@@ -27,6 +27,7 @@ package io.nuls.account.rpc.resource;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Account;
@@ -1206,22 +1207,36 @@ public class AccountResource {
     }
 
     @POST
-    @Path("/aliasMutil/{address}")
+    @Path("/aliasMutil")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("[别名] 多签账户设置别名")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
-    public RpcClientResult aliasMutil(@PathParam("address") String address,
-                                 @ApiParam(name = "form", value = "多签账户设置别名表单数据", required = true)
-                                         AccountAliasForm form) {
-        if (!AddressTool.validAddress(address)) {
+    public RpcClientResult aliasMutil(@ApiParam(name = "form", value = "多签账户设置别名表单数据", required = true)
+                                         MutilAccountAliasForm form) {
+        if(NulsContext.MAIN_NET_VERSION  <=1){
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
+        if (form == null) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        if (StringUtils.isBlank(form.getAlias())) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        if (!AddressTool.validAddress(form.getSignAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        Result result = aliasService.setAlias(address, form.getAlias().trim(), form.getPassword());
+
+        if(form.getTxdata() == null || form.getTxdata().trim().length() == 0){
+            if (StringUtils.isBlank(form.getAlias())) {
+                return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+            if (form.getM() <= 0) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+            if (form.getPubkeys() == null || form.getPubkeys().size() == 0 || form.getPubkeys().size() < form.getM()) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+        }
+        Result result = aliasService.setAlias(form.getSignAddress(), form.getAlias().trim(), form.getPassword());
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("value", (String) result.getData());
