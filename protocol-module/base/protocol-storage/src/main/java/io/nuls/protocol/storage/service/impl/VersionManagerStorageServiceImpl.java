@@ -177,11 +177,8 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
             blockHeightIndex = new ArrayList<>();
         }
         blockHeightIndex.add(protocolInfoPo.getBlockHeight());
-        Result result = dbService.putModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), blockHeightIndex);
-        System.out.println(result.isSuccess());
-        result = dbService.putModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA, new VarInt(protocolInfoPo.getBlockHeight()).encode(), protocolInfoPo);
-        System.out.println(result.isSuccess());
-        return result;
+        dbService.putModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), blockHeightIndex);
+        return dbService.putModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA, new VarInt(protocolInfoPo.getBlockHeight()).encode(), protocolInfoPo);
     }
 
 
