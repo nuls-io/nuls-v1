@@ -1086,6 +1086,9 @@ public class AccountLedgerResource {
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
     })
     public RpcClientResult transferP2sh(@ApiParam(name = "form", value = "转账", required = true) MultiSignForm form) {
+        if(NulsContext.MAIN_NET_VERSION  <=1){
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
         List<MultipleAddressTransferModel> toModelList = new ArrayList<>();
         if (form == null) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();

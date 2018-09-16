@@ -103,26 +103,27 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 contractVM.heap.arrays.commit();
                 commitVms.put(contractAddress, contractVM);
             }
-            if (prevStateRoot != null) {
-                for (Map.Entry<String, VM> vmEntry : commitVms.entrySet()) {
-                    String address = vmEntry.getKey();
-                    VM vm = vmEntry.getValue();
-                    byte[] contractAddress = NativeAddress.toBytes(address);
+            //if (prevStateRoot != null) {
+            for (Map.Entry<String, VM> vmEntry : commitVms.entrySet()) {
+                String address = vmEntry.getKey();
+                VM vm = vmEntry.getValue();
+                byte[] contractAddress = NativeAddress.toBytes(address);
 
-                    vm.heap.objects.clearCache();
-                    vm.heap.arrays.clearCache();
+                vm.heap.objects.clearCache();
+                vm.heap.arrays.clearCache();
 
-                    Map<DataWord, DataWord> contractState = vm.heap.contractState();
-                    logTime("contract state");
+                Map<DataWord, DataWord> contractState = vm.heap.contractState();
+                logTime("contract state");
 
-                    for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
-                        DataWord key = entry.getKey();
-                        DataWord value = entry.getValue();
-                        repository.addStorageRow(contractAddress, key, value);
-                    }
-                    logTime("add contract state");
+                for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
+                    DataWord key = entry.getKey();
+                    DataWord value = entry.getValue();
+                    repository.addStorageRow(contractAddress, key, value);
                 }
+                logTime("add contract state");
             }
+            commitVms.clear();
+            //}
             repository.commit();
             logTime("commit");
         }
@@ -229,10 +230,10 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 if (vm == null) {
                     vm = VMFactory.createVM();
                 } else {
-                    vm.heap.objects.clearCache();
-                    vm.heap.arrays.clearCache();
-                    vm = new VM(vm.heap, vm.methodArea);
-                    //vm = VMFactory.createVM();
+                    //vm.heap.objects.clearCache();
+                    //vm.heap.arrays.clearCache();
+                    //vm = new VM(vm.heap, vm.methodArea);
+                    vm = VMFactory.createVM();
                 }
                 vmCache.put(contractAddress, vm);
             }
