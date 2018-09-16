@@ -1138,7 +1138,7 @@ public class AccountLedgerResource {
         }
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
-            map.put("value", (String) result.getData());
+            map.put("txData", (String) result.getData());
             result.setData(map);
         }
         return result.toRpcClientResult();

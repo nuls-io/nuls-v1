@@ -480,7 +480,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 if (values.isGreaterThan(amount.add(fee))) {
                     Na change = values.subtract(amount.add(fee));
                     Coin changeCoin = new Coin();
-                    if(address[2] == 3){
+                    if(address[2] == NulsContext.P2SH_ADDRESS_TYPE){
                         changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
                     }else{
                         changeCoin.setOwner(address);
@@ -719,7 +719,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             CoinData coinData = new CoinData();
             //如果为多签地址则以脚本方式存储
             Coin toCoin = null;
-            if(to[2] == 3){
+            if(to[2] == NulsContext.P2SH_ADDRESS_TYPE){
                 Script scriptPubkey = SignatureUtil.createOutputScript(to);
                 toCoin = new Coin(scriptPubkey.getProgram(), values);
             }else{
@@ -896,7 +896,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             for (MultipleAddressTransferModel to : toList) {
                 //如果为多签地址
                 Coin toCoin = null;
-                if(to.getAddress()[2] == 3){
+                if(to.getAddress()[2] == NulsContext.P2SH_ADDRESS_TYPE){
                     Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
                     toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));
                 }else{
@@ -1422,7 +1422,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 for (MultipleAddressTransferModel to : outputs) {
                     //如果为多签地址
                     Coin toCoin = null;
-                    if(to.getAddress()[2] == 3){
+                    if(to.getAddress()[2] == NulsContext.P2SH_ADDRESS_TYPE){
                         Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
                         toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));
                     }else{
