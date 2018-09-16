@@ -480,11 +480,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 if (values.isGreaterThan(amount.add(fee))) {
                     Na change = values.subtract(amount.add(fee));
                     Coin changeCoin = new Coin();
-                    //changeCoin.setOwner(address);
-                    //changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
-                    changeCoin.setOwner(address);
+                    if(address[2] == 3){
+                        changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
+                    }else{
+                        changeCoin.setOwner(address);
+                    }
                     changeCoin.setNa(change);
-
                     fee = TransactionFeeCalculator.getFee(size + changeCoin.size(), price);
                     if (values.isLessThan(amount.add(fee))) {
                         continue;

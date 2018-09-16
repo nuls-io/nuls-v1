@@ -66,6 +66,7 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
 
+import io.nuls.kernel.script.P2PHKSignature;
 import io.nuls.kernel.script.Script;
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
@@ -257,10 +258,15 @@ public class PocConsensusResource {
         tx.setTxData(agent);
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
-        toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), -1));
+        if(agent.getAgentAddress()[2] == 3){
+            Script scriptPubkey = SignatureUtil.createOutputScript(agent.getAgentAddress());
+            toList.add(new Coin(scriptPubkey.getProgram(), agent.getDeposit(), -1));
+        }else {
+            toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), -1));
+        }
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size()- P2PHKSignature.SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         tx.getCoinData().setFrom(result.getCoinList());
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
