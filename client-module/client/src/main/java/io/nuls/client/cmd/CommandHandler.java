@@ -105,6 +105,15 @@ public class CommandHandler {
         register(new SetPasswordProcessor());
 
         /**
+         * Multi-signature account
+         */
+        register(new CreateMultiSigAccountProcessor());
+        register(new ImportMultiSigAccountProcessor());
+        register(new GetMultiSigAccountListProcessor());
+        register(new GetMultiSigAccountProcessor());
+        register(new RemoveMultiSigAccountProcessor());
+        register(new GetMultiSigAccountCountProcessor());
+        /**
          * accountLedger
          */
         register(new TransferProcessor());
@@ -161,7 +170,7 @@ public class CommandHandler {
             String ip = null;
             try {
                 ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, "server.ip").trim();
-                if("0.0.0.0".equals(ip)){
+                if ("0.0.0.0".equals(ip)) {
                     ip = RpcConstant.DEFAULT_IP;
                 }
             } catch (Exception e) {
@@ -177,7 +186,7 @@ public class CommandHandler {
          * If the operating system is windows, it may cause the console to read part of the loop, can be set to false,
          * bypass the native Windows API, use the Java IO stream output directly
          */
-        if(System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1) {
+        if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1) {
             System.setProperty("jline.WindowsTerminal.directConsole", "false");
         }
         CommandHandler instance = new CommandHandler();
@@ -202,9 +211,9 @@ public class CommandHandler {
             } while (line != null);
         } catch (IOException e) {
 
-        }finally {
+        } finally {
             try {
-                if(!CONSOLE_READER.delete()){
+                if (!CONSOLE_READER.delete()) {
                     CONSOLE_READER.close();
                 }
             } catch (IOException e) {

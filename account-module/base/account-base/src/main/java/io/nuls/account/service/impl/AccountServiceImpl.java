@@ -722,7 +722,12 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<Boolean> removeMultiSigAccount(String address) {
         try {
-            return this.multiSigAccountStorageService.removeAccount(Address.fromHashs(address));
+            Address addressObj = Address.fromHashs(address);
+            Result result = this.multiSigAccountStorageService.getAccount(addressObj);
+            if (result.isFailed() || result.getData() == null) {
+                return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            return this.multiSigAccountStorageService.removeAccount(addressObj);
         } catch (Exception e) {
             Log.error(e);
             return Result.getFailed();

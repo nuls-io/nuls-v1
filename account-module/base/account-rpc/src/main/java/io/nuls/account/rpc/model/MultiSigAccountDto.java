@@ -64,6 +64,9 @@ public class MultiSigAccountDto {
         }
         this.m = account.getM();
         this.alias = account.getAlias();
+        if (null == alias) {
+            this.alias = "";
+        }
     }
 
     public String getAddress() {
