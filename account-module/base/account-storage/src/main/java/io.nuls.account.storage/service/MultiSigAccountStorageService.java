@@ -23,36 +23,49 @@
  *
  */
 
-package io.nuls.protocol.base.utils;
+package io.nuls.account.storage.service;
 
-import io.nuls.kernel.constant.TransactionErrorCode;
-import io.nuls.kernel.exception.NulsRuntimeException;
-import io.nuls.kernel.model.Block;
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.account.storage.po.AccountPo;
+import io.nuls.kernel.model.Address;
+import io.nuls.kernel.model.Result;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
- * @author: Niels Wang
+ * 账户数据存储服务接口
+ * Account data storage service interface
+ *
+ * @author: Charlie
  */
-public class AssemblyBlockUtil {
-    public static Block assemblyBlock(BlockHeader header, Map<NulsDigestData, Transaction> txMap, List<NulsDigestData> txHashList) {
-        Block block = new Block();
-        block.setHeader(header);
-        List<Transaction> txs = new ArrayList<>();
-        for (NulsDigestData txHash : txHashList) {
-            Transaction tx = txMap.get(txHash);
-            if (null == tx) {
-                throw new NulsRuntimeException(TransactionErrorCode.TX_NOT_EXIST);
-            }
-            tx.setBlockHeight(header.getHeight());
-            txs.add(tx);
-        }
-        block.setTxs(txs);
-        return block;
-    }
+public interface MultiSigAccountStorageService {
+
+    /**
+     * 创建账户
+     * save account
+     * @return
+     */
+    Result saveAccount(Address address,byte[] multiSigAccount);
+
+    /**
+     * 删除账户
+     * Delete account
+     * @param address Account address to be deleted
+     * @return the result of the opration
+     */
+    Result removeAccount(Address address);
+
+    /**
+     * 获取所有账户
+     * @return the result of the opration and Result<List<Account>>
+     */
+    Result<List<byte[]>> getAccountList();
+
+    /**
+     * 根据账户获取账户信息
+     * According to the account to obtain account information
+     * @param address
+     * @return the result of the opration
+     */
+    Result<byte[]> getAccount(Address address);
+
 }
