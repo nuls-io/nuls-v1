@@ -716,7 +716,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             tx.setRemark(remark);
             tx.setTime(TimeService.currentTimeMillis());
             CoinData coinData = new CoinData();
-            //如果为多签地址
+            //如果为多签地址则以脚本方式存储
             Coin toCoin = null;
             if(to[2] == 3){
                 Script scriptPubkey = SignatureUtil.createOutputScript(to);
@@ -1419,9 +1419,19 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 tx.setTime(TimeService.currentTimeMillis());
                 CoinData coinData = new CoinData();
                 for (MultipleAddressTransferModel to : outputs) {
+
                     /*Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
-                    Coin toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));*/
+                    Coin toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));
                     Coin toCoin = new Coin(to.getAddress(), Na.valueOf(to.getAmount()));
+                    coinData.getTo().add(toCoin);*/
+                    //如果为多签地址
+                    Coin toCoin = null;
+                    if(to.getAddress()[2] == 3){
+                        Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
+                        toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));
+                    }else{
+                        toCoin = new Coin(to.getAddress(), Na.valueOf(to.getAmount()));
+                    }
                     coinData.getTo().add(toCoin);
                 }
                 if (price == null) {
