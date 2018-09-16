@@ -130,14 +130,14 @@ public class BlockProcess {
 
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
         Block block = blockContainer.getBlock();
-      /*  if (BB) {
-            if (block.getHeader().getHeight() > 6600) {
-                if (!AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()).equals("NsdvNWbdPwqiosEbP2aykkSRx2gx2pT5") &&
-                        !AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()).equals("Nse68SNGvkBXUrb5kULiS2QHZBfvmEB7")) {
-                    return false;
-                }
-            }
-        }*/
+//        if (BB) {
+//            if (block.getHeader().getHeight() > 525) {
+//                if (!AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()).equals("Nse5R5jNrHJt5xAdK41WRM4dts8raLvT") &&
+//                        !AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()).equals("NsduREc1jDV9HyM3DuirLb4ix1mgcpZm")) {
+//                    return false;
+//                }
+//            }
+//        }
         // Discard future blocks
         // 丢弃掉未来时间的区块
         if (TimeService.currentTimeMillis() + PocConsensusConstant.DISCARD_FUTURE_BLOCKS_TIME < block.getHeader().getTime()) {
