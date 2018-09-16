@@ -1408,8 +1408,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 tx.setTime(TimeService.currentTimeMillis());
                 CoinData coinData = new CoinData();
                 for (MultipleAddressTransferModel to : outputs) {
-                    Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
-                    Coin toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));
+                    /*Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
+                    Coin toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));*/
+                    Coin toCoin = new Coin(to.getAddress(), Na.valueOf(to.getAmount()));
                     coinData.getTo().add(toCoin);
                 }
                 if (price == null) {
@@ -1535,7 +1536,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 if (values.isGreaterThan(amount.add(fee))) {
                     Na change = values.subtract(amount.add(fee));
                     Coin changeCoin = new Coin();
-                    changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
+                    /*changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
+                    changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());*/
+                    changeCoin.setOwner(address);
                     changeCoin.setNa(change);
                     fee = TransactionFeeCalculator.getFee(size + changeCoin.size(), price);
                     if (values.isLessThan(amount.add(fee))) {

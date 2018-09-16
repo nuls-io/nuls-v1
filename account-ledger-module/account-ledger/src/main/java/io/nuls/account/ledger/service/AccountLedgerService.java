@@ -291,8 +291,9 @@ public interface AccountLedgerService {
 
     /**
      * A transfers NULS to B   多签交易
-     * @param from      address of A
-     * @param to        address of B
+     * @param fromAddr
+     * @param signAddr
+     * @param outputs
      * @param values    NULS amount
      * @param password  password of A
      * @param remark    remarks of transaction
