@@ -66,7 +66,7 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
             throw new NulsRuntimeException(result.getErrorCode());
         }
 
-        result = this.dbService.createArea(ProtocolStorageConstant.PROTOCOL_TEMP_AREA);
+        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
@@ -177,8 +177,11 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
             blockHeightIndex = new ArrayList<>();
         }
         blockHeightIndex.add(protocolInfoPo.getBlockHeight());
-        dbService.putModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), blockHeightIndex);
-        return dbService.putModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA, new VarInt(protocolInfoPo.getBlockHeight()).encode(), protocolInfoPo);
+        Result result = dbService.putModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX, Util.intToBytes(protocolInfoPo.getVersion()), blockHeightIndex);
+        System.out.println(result.isSuccess());
+        result = dbService.putModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA, new VarInt(protocolInfoPo.getBlockHeight()).encode(), protocolInfoPo);
+        System.out.println(result.isSuccess());
+        return result;
     }
 
 
