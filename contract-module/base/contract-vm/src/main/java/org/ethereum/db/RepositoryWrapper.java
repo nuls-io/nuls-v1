@@ -18,6 +18,7 @@
 package org.ethereum.db;
 
 import org.ethereum.core.AccountState;
+import org.ethereum.core.Block;
 import org.ethereum.core.Repository;
 import org.ethereum.vm.DataWord;
 
@@ -131,6 +132,11 @@ public class RepositoryWrapper implements Repository {
     }
 
     @Override
+    public void dumpState(Block block, long gasUsed, int txNumber, byte[] txHash) {
+        getRepository().dumpState(block, gasUsed, txNumber, txHash);
+    }
+
+    @Override
     public Repository startTracking() {
         return getRepository().startTracking();
     }
@@ -193,6 +199,11 @@ public class RepositoryWrapper implements Repository {
     @Override
     public Repository getSnapshotTo(byte[] root) {
         return getRepository().getSnapshotTo(root);
+    }
+
+    @Override
+    public Repository clone() {
+        return getSnapshotTo(getRoot());
     }
 
     @Override

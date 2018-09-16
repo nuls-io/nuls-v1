@@ -21,12 +21,12 @@ import org.ethereum.util.ByteUtil;
 import org.ethereum.util.FastByteComparisons;
 import org.ethereum.util.RLP;
 import org.ethereum.util.RLPList;
-import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 
 import static org.ethereum.crypto.HashUtil.EMPTY_DATA_HASH;
 import static org.ethereum.crypto.HashUtil.EMPTY_TRIE_HASH;
+import static org.ethereum.util.ByteUtil.toHexString;
 import static org.ethereum.util.FastByteComparisons.equal;
 
 public class AccountState {
@@ -156,9 +156,9 @@ public class AccountState {
     public String toString() {
         String ret = "  Nonce: " + this.getNonce().toString() + "\n" +
                 "  Balance: " + getBalance() + "\n" +
-                "  State Root: " + Hex.toHexString(this.getStateRoot()) + "\n" +
-                "  Code Hash: " + Hex.toHexString(this.getCodeHash()) + "\n" +
-                "  Owner: " + Hex.toHexString(this.getOwner());
+                "  State Root: " + toHexString(this.getStateRoot()) + "\n" +
+                "  Code Hash: " + toHexString(this.getCodeHash()) + "\n" +
+                "  Owner: " + toHexString(this.getOwner());
         return ret;
     }
 }
