@@ -1,13 +1,13 @@
 package io.nuls.contract.vm.program.impl;
 
-import io.nuls.core.tools.crypto.Hex;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.nuls.db.service.DBService;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.ethereum.datasource.Source;
+import org.ethereum.db.ByteArrayWrapper;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class KeyValueSource implements Source<byte[], byte[]> {
 
@@ -15,41 +15,37 @@ public class KeyValueSource implements Source<byte[], byte[]> {
 
     private DBService dbService;
 
+    private final Cache<ByteArrayWrapper, byte[]> cache;
+
     public KeyValueSource(DBService dbService) {
         this.dbService = dbService;
         String[] areas = dbService.listArea();
         if (!ArrayUtils.contains(areas, AREA)) {
             dbService.createArea(AREA);
         }
+        this.cache = CacheBuilder.newBuilder()
+                .initialCapacity(102400)
+                .expireAfterAccess(10, TimeUnit.MINUTES)
+                .build();
     }
 
     @Override
     public void put(byte[] key, byte[] val) {
-//        File file = new File("/tmp/" + Hex.encode(key));
-//        try {
-//            FileUtils.writeByteArrayToFile(file, val);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
+        cache.put(new ByteArrayWrapper(key), val);
         dbService.put(AREA, key, val);
     }
 
     @Override
     public byte[] get(byte[] key) {
-//        File file = new File("/tmp/" + Hex.encode(key));
-//        try {
-//            return FileUtils.readFileToByteArray(file);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-        return dbService.get(AREA, key);
+        byte[] bytes = cache.getIfPresent(new ByteArrayWrapper(key));
+        if (bytes == null) {
+            bytes = dbService.get(AREA, key);
+        }
+        return bytes;
     }
 
     @Override
     public void delete(byte[] key) {
-//        File file = new File("/tmp/" + Hex.encode(key));
-//        FileUtils.deleteQuietly(file);
-        //dbService.delete(AREA, key);
     }
 
     @Override

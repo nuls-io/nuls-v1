@@ -32,15 +32,17 @@ public class ContractTest extends BaseTest {
 
     public static void main(String[] args) {
         long time = System.currentTimeMillis();
-        for (int i = 0; i < 10000; i++) {
+        //for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 1000; i++) {
             call();
+            //create();
         }
         System.out.println("总耗时：" + (System.currentTimeMillis() - time) + " ms");
     }
 
     private static void call() {
         String address = "Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG";
-        String contractAddress = "NseF3BCSV58VTbqELzTynjhyY52QfZzy";
+        String contractAddress = "NseAasXo2n4EfBYGmcrHc64kX4NgdNHY";
         String password = "";
         String remark = "test";
         String methodName = "create";
@@ -49,7 +51,7 @@ public class ContractTest extends BaseTest {
                 "      \"第二个选项\",\n" +
                 "      \"第三个选项\"]]}";
 
-        String url = "http://192.168.1.106:8001/api/contract/call";
+        String url = "http://192.168.1.107:8001/api/contract/call";
 
 
         for (int i = 0; i < 1; i++) {
@@ -60,7 +62,7 @@ public class ContractTest extends BaseTest {
             System.out.println(successCount + "  " + res);
 
             try {
-                Thread.sleep(1L);
+                Thread.sleep(500L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -75,7 +77,7 @@ public class ContractTest extends BaseTest {
 
         String param = "{\"sender\": \"" + address + "\", \"gasLimit\": 80000, \"price\": 1, \"password\": \"" + password + "\", \"contractCode\": \"" + contractCode + "\", \"remark\": \"" + remark + "\", \"args\": [\"10000000000\"]}";
 
-        String url = "http://192.168.1.106:8001/api/contract/create";
+        String url = "http://192.168.1.107:8001/api/contract/create";
 
 
         for (int i = 0; i < 1; i++) {

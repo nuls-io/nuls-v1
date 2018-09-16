@@ -1,5 +1,7 @@
 package io.nuls.contract.vm;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.FieldCode;
 import io.nuls.contract.vm.code.MethodCode;
@@ -30,6 +32,8 @@ public class Heap {
 
     private final Set<ObjectRef> changes = new HashSet<>(1024);
 
+    private final BiMap<String, String> classNames = HashBiMap.create(1024);
+
     private ObjectRef contract;
 
     private byte[] address;
@@ -46,6 +50,16 @@ public class Heap {
 
     public void setVm(VM vm) {
         this.vm = vm;
+    }
+
+    public void loadClassCodes(Map<String, ClassCode> classCodes) {
+        if (classCodes != null) {
+            int i = 0;
+            for (ClassCode classCode : classCodes.values()) {
+                this.classNames.put(String.valueOf(i++), classCode.variableType.getDesc());
+            }
+            this.classNames.putAll(VariableType.DESCRIPTORS);
+        }
     }
 
     public ObjectRef newObjectRef(String ref, String desc, int... dimensions) {
@@ -128,13 +142,13 @@ public class Heap {
         if (this.repository == null) {
             return null;
         }
-        String key = JsonUtils.encode(objectRef);
+        String key = JsonUtils.encode(objectRef, classNames);
         DataWord dataWord = this.repository.getStorageValue(this.address, new DataWord(key));
         if (dataWord == null) {
             return null;
         }
         byte[] value = dataWord.getNoLeadZeroesData();
-        Map<String, Object> map = (Map<String, Object>) JsonUtils.decode(new String(value));
+        Map<String, Object> map = (Map<String, Object>) JsonUtils.decode(new String(value), classNames);
         return map;
     }
 
@@ -249,7 +263,7 @@ public class Heap {
         if (!arrayRef.getVariableType().getComponentType().isPrimitive()) {
             clazz = ObjectRef.class;
         }
-        Object object = JsonUtils.decodeArray(new String(value), clazz);
+        Object object = JsonUtils.decodeArray(new String(value), clazz, classNames);
         return object;
     }
 
@@ -521,8 +535,8 @@ public class Heap {
             if (fields == null) {
                 continue;
             }
-            String key = JsonUtils.encode(objectRef);
-            String value = JsonUtils.encode(fields);
+            String key = JsonUtils.encode(objectRef, classNames);
+            String value = JsonUtils.encode(fields, classNames);
             contractState.put(new DataWord(key), new DataWord(value));
             if (objectRef.isArray()) {
                 for (String k : fields.keySet()) {
@@ -537,7 +551,7 @@ public class Heap {
                         if (!objectRef.getVariableType().getComponentType().isPrimitive()) {
                             clazz = ObjectRef.class;
                         }
-                        String arrayValue = JsonUtils.encodeArray(object, clazz);
+                        String arrayValue = JsonUtils.encodeArray(object, clazz, classNames);
                         contractState.put(new DataWord(arrayKey), new DataWord(arrayValue));
                     }
                 }
