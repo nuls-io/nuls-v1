@@ -66,6 +66,7 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
+import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.swagger.annotations.*;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -1224,10 +1225,15 @@ public class AccountResource {
         if (!AddressTool.validAddress(form.getSignAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-
         if(form.getTxdata() == null || form.getTxdata().trim().length() == 0){
             if (StringUtils.isBlank(form.getAlias())) {
                 return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+            if (!StringUtils.validAlias(form.getAlias())) {
+                return Result.getFailed(AccountErrorCode.ALIAS_FORMAT_WRONG).toRpcClientResult();
+            }
+            if (!AddressTool.validAddress(form.getAddress())) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
             }
             if (form.getM() <= 0) {
                 return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();

@@ -1517,7 +1517,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
 
-    public CoinDataResult getMutilCoinData(byte[] address, Na amount, int size, Na price) throws NulsException {
+    @Override
+    public CoinDataResult getMutilCoinData(byte[] address, Na amount, int size, Na price){
         if (null == price) {
             throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
         }

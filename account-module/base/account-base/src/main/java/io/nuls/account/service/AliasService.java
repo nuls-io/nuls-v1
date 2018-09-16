@@ -47,11 +47,13 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
 
-import io.nuls.kernel.script.SignatureUtil;
+import io.nuls.kernel.script.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
+import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.service.MessageBusService;
+import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.service.TransactionService;
 
 import java.util.ArrayList;
@@ -330,11 +332,9 @@ public class AliasService {
      * @param aliasName the alias to set
      * @return txhash
      */
-    public Result<String> setMutilAlias(String addr, String aliasName, String password,String signAddr,List<String> pubKeys,int m,String txdata) {
-        if (!AddressTool.validAddress(addr)) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
-        }
-        Account account = accountService.getAccount(addr).getData();
+    public Result<String> setMutilAlias(String addr,String signAddr, String aliasName, String password,List<String> pubKeys,int m,String txdata) {
+        //签名账户
+        Account account = accountService.getAccount(signAddr).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
@@ -343,43 +343,49 @@ public class AliasService {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         }
-        if (StringUtils.isNotBlank(account.getAlias())) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
-        }
-        if (!StringUtils.validAlias(aliasName)) {
-            return Result.getFailed(AccountErrorCode.ALIAS_FORMAT_WRONG);
-        }
-        if (!isAliasUsable(aliasName)) {
-            return Result.getFailed(AccountErrorCode.ALIAS_EXIST);
-        }
-        byte[] addressBytes = account.getAddress().getAddressBytes();
         try {
-            //创建一笔设置别名的交易
             AliasTransaction tx = new AliasTransaction();
-            tx.setTime(TimeService.currentTimeMillis());
-            Alias alias = new Alias(addressBytes, aliasName);
-            tx.setTxData(alias);
+            TransactionSignature transactionSignature = new TransactionSignature();
+            List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+            List<Script> scripts = new ArrayList<>();
+            //如果txdata为空则表示当前请求为多签发起者调用，需要创建交易
+            if(txdata == null || txdata.trim().length() == 0){
+                byte[] addressBytes = AddressTool.getAddress(addr);
+                if(isMutilAliasUsable(addressBytes,aliasName)){
+                    return Result.getFailed(AccountErrorCode.ALIAS_EXIST);
+                }
+                //创建一笔设置别名的交易
+                tx = new AliasTransaction();
+                Script redeemScript = ScriptBuilder.createNulsRedeemScript(m,pubKeys);
+                tx.setTime(TimeService.currentTimeMillis());
+                Alias alias = new Alias(addressBytes, aliasName);
+                tx.setTxData(alias);
+                //交易签名的长度为m*单个签名长度+赎回脚本长度
+                int scriptSignLenth = redeemScript.getProgram().length + m*72;
+                CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                if (!coinDataResult.isEnough()) {
+                    return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
+                }
+                CoinData coinData = new CoinData();
+                coinData.setFrom(coinDataResult.getCoinList());
+                Coin change = coinDataResult.getChange();
+                if (null != change) {
+                    //创建toList
+                    List<Coin> toList = new ArrayList<>();
+                    toList.add(change);
+                    coinData.setTo(toList);
+                }
+
+                Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
+                coinData.addTo(coin);
+
+                tx.setCoinData(coinData);
+                tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            }else{
+
+            }
 
             CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
-            if (!coinDataResult.isEnough()) {
-                return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
-            }
-            CoinData coinData = new CoinData();
-            coinData.setFrom(coinDataResult.getCoinList());
-            Coin change = coinDataResult.getChange();
-            if (null != change) {
-                //创建toList
-                List<Coin> toList = new ArrayList<>();
-                toList.add(change);
-                coinData.setTo(toList);
-            }
-
-            Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
-            coinData.addTo(coin);
-
-            tx.setCoinData(coinData);
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-
             //生成签名
             List<ECKey> signEckeys = new ArrayList<>();
             List<ECKey> scriptEckeys = new ArrayList<>();;
@@ -425,5 +431,20 @@ public class AliasService {
             Log.error(e);
             return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION);
         }
+    }
+
+    public boolean isMutilAliasUsable(byte[] address,String aliasName) {
+        List<AliasPo> list = aliasStorageService.getAliasList().getData();
+        for (AliasPo aliasPo : list) {
+            if (Arrays.equals(aliasPo.getAddress(), address)) {
+                return false;
+            }
+        }
+        for (AliasPo aliasPo : list) {
+            if (aliasName.equals(aliasPo.getAlias())) {
+                return  false;
+            }
+        }
+        return  true;
     }
 }
