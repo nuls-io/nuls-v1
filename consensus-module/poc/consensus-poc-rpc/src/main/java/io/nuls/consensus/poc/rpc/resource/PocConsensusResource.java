@@ -424,7 +424,7 @@ public class PocConsensusResource {
         toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         RpcClientResult result1 = this.txProcessing(tx, result, account, form.getPassword());
         if (!result1.isSuccess()) {
             return result1;
@@ -1138,5 +1138,62 @@ public class PocConsensusResource {
             }
         }
         return Result.getSuccess().setData(rs).toRpcClientResult();
+    }
+
+    @POST
+    @Path("/mutilAgent")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Create an agent for consensus! 创建共识(代理)节点 [3.6.3]", notes = "返回创建的节点成功的交易hash")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public RpcClientResult createMutilAgent(@ApiParam(name = "form", value = "多签地址创建节点表单数据", required = true)
+                                               CreateMutilAgentForm form) throws NulsException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAgentAddress(), "agent address can not be null");
+        AssertUtil.canNotEmpty(form.getCommissionRate(), "commission rate can not be null");
+        AssertUtil.canNotEmpty(form.getDeposit(), "deposit can not be null");
+        AssertUtil.canNotEmpty(form.getPackingAddress(), "packing address can not be null");
+
+        if (!AddressTool.validAddress(form.getPackingAddress()) || !AddressTool.validAddress(form.getAgentAddress())) {
+            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+        }
+        Account account = accountService.getAccount(form.getAgentAddress()).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        if (account.isEncrypted() && account.isLocked()) {
+            AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
+            if (!account.validatePassword(form.getPassword())) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
+            }
+        }
+        CreateAgentTransaction tx = new CreateAgentTransaction();
+        tx.setTime(TimeService.currentTimeMillis());
+        Agent agent = new Agent();
+        agent.setAgentAddress(AddressTool.getAddress(form.getAgentAddress()));
+        agent.setPackingAddress(AddressTool.getAddress(form.getPackingAddress()));
+        if (StringUtils.isBlank(form.getRewardAddress())) {
+            agent.setRewardAddress(agent.getAgentAddress());
+        } else {
+            agent.setRewardAddress(AddressTool.getAddress(form.getRewardAddress()));
+        }
+
+        agent.setDeposit(Na.valueOf(form.getDeposit()));
+        agent.setCommissionRate(form.getCommissionRate());
+        tx.setTxData(agent);
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
+        coinData.setTo(toList);
+        tx.setCoinData(coinData);
+        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        RpcClientResult result1 = this.txProcessing(tx, result, account, form.getPassword());
+        if (!result1.isSuccess()) {
+            return result1;
+        }
+        Map<String, String> valueMap = new HashMap<>();
+        valueMap.put("value", tx.getHash().getDigestHex());
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 }
