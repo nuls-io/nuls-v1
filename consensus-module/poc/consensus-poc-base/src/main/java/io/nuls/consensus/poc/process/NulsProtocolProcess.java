@@ -414,7 +414,7 @@ public class NulsProtocolProcess {
                 } else {
                     if (blockHeader.getHeight() == blockHeightIndex.get(blockHeightIndex.size() - 1)) {
                         blockHeightIndex.remove(blockHeightIndex.size() - 1);
-                        getVersionManagerStorageService().saveTempBlockProtocolIndex(protocolContainer.getVersion(), blockHeightIndex);
+                        getVersionManagerStorageService().saveTempBlockProtocolIndex(protocolTempInfoPo.getVersion(), blockHeightIndex);
                         getVersionManagerStorageService().deleteBlockTempProtocol(blockHeader.getHeight());
 
                         BlockProtocolInfoPo blockProtocolInfoPo = getVersionManagerStorageService().getBlockTempProtocolInfoPo(blockHeightIndex.get(blockHeightIndex.size() - 1));
@@ -438,7 +438,7 @@ public class NulsProtocolProcess {
             Log.info("@@@@@@@ 协议AddressSet：" + Arrays.toString(protocolTempInfoPo.getAddressSet().toArray()));
             /**  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   */
         }
-//        BlockProcess.BB = false;
+        BlockProcess.BB = false;
     }
 
 

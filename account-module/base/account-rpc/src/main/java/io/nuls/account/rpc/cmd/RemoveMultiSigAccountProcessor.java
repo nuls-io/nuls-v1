@@ -23,8 +23,9 @@
  *
  */
 
-package io.nuls.utxo.accounts.rpc.cmd;
+package io.nuls.account.rpc.cmd;
 
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
@@ -34,39 +35,42 @@ import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.utils.RestFulUtils;
 
 /**
- * @author: cody
+ * @author: Niels Wang
  */
-public class GetUtxoAccountsProcessor implements CommandProcessor {
+public class RemoveMultiSigAccountProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
-        return "getutxoaccount";
+        return "removemultiaccount";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<address> the account address - Required");
+                .newLine("\t[address] Address of multi signature account. -required");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "getutxoaccount <address> --get utxo account asset";
+        return "removemultiaccount [address] --Remove multiple signature accounts by address";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        if (args.length != 2) {
+        int length = args.length;
+        if (length != 2) {
             return false;
+
         }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (!AddressTool.validAddress(args[1])) {
+
+        if (StringUtils.isBlank(args[1]) || !AddressTool.validAddress(args[1])) {
             return false;
         }
         return true;
@@ -74,12 +78,10 @@ public class GetUtxoAccountsProcessor implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        String address = args[1];
-        RpcClientResult result = restFul.get("/utxoAccounts/" + address, null);
-        if(result.isFailed()){
+        RpcClientResult result = restFul.delete("/account/multiAccount/" + args[1], null);
+        if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
         return CommandResult.getResult(result);
     }
 }
-

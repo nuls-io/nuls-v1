@@ -76,7 +76,7 @@ public class UtxoAccountsResource {
             }
             UtxoAccountsBalancePo dbAccountsBalance =utxoAccountsBalance.getData();
             AccountBalanceDto accountBalance=new AccountBalanceDto();
-            accountBalance.setAddress(AddressTool.getStringAddressByBytes(dbAccountsBalance.getOwner()));
+            accountBalance.setAddress(address);
             long totalNa=dbAccountsBalance.getOutputBalance()-(dbAccountsBalance.getInputBalance());
             totalNa+=dbAccountsBalance.getContractToBalance();
             totalNa-=dbAccountsBalance.getContractFromBalance();

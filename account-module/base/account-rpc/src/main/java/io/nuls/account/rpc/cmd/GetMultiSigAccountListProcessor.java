@@ -23,63 +23,59 @@
  *
  */
 
-package io.nuls.utxo.accounts.rpc.cmd;
+package io.nuls.account.rpc.cmd;
 
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
-import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.utils.RestFulUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * @author: cody
+ * @author: Niels Wang
  */
-public class GetUtxoAccountsProcessor implements CommandProcessor {
+public class GetMultiSigAccountListProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
-        return "getutxoaccount";
+        return "getmultiaccounts";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
-        builder.newLine(getCommandDescription())
-                .newLine("\t<address> the account address - Required");
+        builder.newLine(getCommandDescription());
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "getutxoaccount <address> --get utxo account asset";
+        return "getmultiaccounts --Get all local multi signature accounts";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        if (args.length != 2) {
+        int length = args.length;
+        if (length != 1) {
             return false;
-        }
-        if (!CommandHelper.checkArgsIsNull(args)) {
-            return false;
-        }
-        if (!AddressTool.validAddress(args[1])) {
-            return false;
+
         }
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        String address = args[1];
-        RpcClientResult result = restFul.get("/utxoAccounts/" + address, null);
-        if(result.isFailed()){
+        RpcClientResult result = restFul.get("/account/multiAccounts", null);
+        if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
         return CommandResult.getResult(result);
     }
 }
-

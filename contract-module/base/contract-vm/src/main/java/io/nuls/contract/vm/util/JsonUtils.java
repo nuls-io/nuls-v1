@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.ArrayType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.google.common.collect.BiMap;
 import io.nuls.contract.vm.ObjectRef;
 
 import java.io.IOException;
@@ -47,7 +48,7 @@ public class JsonUtils {
         }
     }
 
-    public static String encodeArray(Object value, Class<?> elementType) {
+    public static String encodeArray(Object value, Class<?> elementType, BiMap<String, String> classNames) {
         String json;
         if (elementType == ObjectRef.class) {
             int length = Array.getLength(value);
@@ -55,7 +56,7 @@ public class JsonUtils {
             for (int i = 0; i < length; i++) {
                 ObjectRef objectRef = (ObjectRef) Array.get(value, i);
                 if (objectRef != null) {
-                    array[i] = objectRef.getEncoded();
+                    array[i] = objectRef.getEncoded(classNames);
                 }
             }
             json = toJson(array);
@@ -65,7 +66,7 @@ public class JsonUtils {
         return json;
     }
 
-    public static Object decodeArray(String value, Class<?> elementType) {
+    public static Object decodeArray(String value, Class<?> elementType, BiMap<String, String> classNames) {
         if (elementType == ObjectRef.class) {
             Object array = toArray(value, String.class);
             int length = Array.getLength(array);
@@ -73,7 +74,7 @@ public class JsonUtils {
             for (int i = 0; i < length; i++) {
                 String s = (String) Array.get(array, i);
                 if (s != null) {
-                    objectRefs[i] = new ObjectRef(s);
+                    objectRefs[i] = new ObjectRef(s, classNames);
                 }
             }
             return objectRefs;
@@ -82,35 +83,35 @@ public class JsonUtils {
         }
     }
 
-    public static String encode(Object value) {
+    public static String encode(Object value, BiMap<String, String> classNames) {
         if (value == null) {
             return null;
         } else if (value.getClass().isArray()) {
             Class clazz = value.getClass().getComponentType();
             if (clazz == Integer.TYPE) {
-                return "[I_" + encodeArray(value, clazz);
+                return "[I_" + encodeArray(value, clazz, classNames);
             } else if (clazz == Long.TYPE) {
-                return "[J_" + encodeArray(value, clazz);
+                return "[J_" + encodeArray(value, clazz, classNames);
             } else if (clazz == Float.TYPE) {
-                return "[F_" + encodeArray(value, clazz);
+                return "[F_" + encodeArray(value, clazz, classNames);
             } else if (clazz == Double.TYPE) {
-                return "[D_" + encodeArray(value, clazz);
+                return "[D_" + encodeArray(value, clazz, classNames);
             } else if (clazz == Boolean.TYPE) {
-                return "[Z_" + encodeArray(value, clazz);
+                return "[Z_" + encodeArray(value, clazz, classNames);
             } else if (clazz == Byte.TYPE) {
-                return "[B_" + encodeArray(value, clazz);
+                return "[B_" + encodeArray(value, clazz, classNames);
             } else if (clazz == Character.TYPE) {
-                return "[C_" + encodeArray(value, clazz);
+                return "[C_" + encodeArray(value, clazz, classNames);
             } else if (clazz == Short.TYPE) {
-                return "[S_" + encodeArray(value, clazz);
+                return "[S_" + encodeArray(value, clazz, classNames);
             } else {
-                return "[R_" + encodeArray(value, clazz);
+                return "[R_" + encodeArray(value, clazz, classNames);
             }
         } else if (value instanceof Map) {
             Map map = (Map) value;
             Map map1 = new LinkedHashMap();
             map.forEach((k, v) -> {
-                map1.put(k, encode(v));
+                map1.put(k, encode(v, classNames));
             });
             return toJson(map1);
         } else if (value instanceof Integer) {
@@ -132,13 +133,13 @@ public class JsonUtils {
         } else if (value instanceof String) {
             return "s_" + value;
         } else if (value instanceof ObjectRef) {
-            return "R_" + ((ObjectRef) value).getEncoded();
+            return "R_" + ((ObjectRef) value).getEncoded(classNames);
         } else {
             throw new IllegalArgumentException("unknown value");
         }
     }
 
-    public static Object decode(String str) {
+    public static Object decode(String str, BiMap<String, String> classNames) {
         if (str == null) {
             return null;
         }
@@ -154,7 +155,7 @@ public class JsonUtils {
                 Map<String, String> map = toObject(str, Map.class);
                 Map<String, Object> objectMap = new LinkedHashMap<>();
                 map.forEach((k, v) -> {
-                    objectMap.put(k, decode(v));
+                    objectMap.put(k, decode(v, classNames));
                 });
                 return objectMap;
             case "I":
@@ -176,25 +177,25 @@ public class JsonUtils {
             case "s":
                 return value;
             case "R":
-                return new ObjectRef(value);
+                return new ObjectRef(value, classNames);
             case "[I":
-                return decodeArray(value, Integer.TYPE);
+                return decodeArray(value, Integer.TYPE, classNames);
             case "[J":
-                return decodeArray(value, Long.TYPE);
+                return decodeArray(value, Long.TYPE, classNames);
             case "[F":
-                return decodeArray(value, Float.TYPE);
+                return decodeArray(value, Float.TYPE, classNames);
             case "[D":
-                return decodeArray(value, Double.TYPE);
+                return decodeArray(value, Double.TYPE, classNames);
             case "[Z":
-                return decodeArray(value, Boolean.TYPE);
+                return decodeArray(value, Boolean.TYPE, classNames);
             case "[B":
-                return decodeArray(value, Byte.TYPE);
+                return decodeArray(value, Byte.TYPE, classNames);
             case "[C":
-                return decodeArray(value, Character.TYPE);
+                return decodeArray(value, Character.TYPE, classNames);
             case "[S":
-                return decodeArray(value, Short.TYPE);
+                return decodeArray(value, Short.TYPE, classNames);
             case "[R":
-                return decodeArray(value, ObjectRef.class);
+                return decodeArray(value, ObjectRef.class, classNames);
             default:
                 throw new IllegalArgumentException("unknown string");
         }
