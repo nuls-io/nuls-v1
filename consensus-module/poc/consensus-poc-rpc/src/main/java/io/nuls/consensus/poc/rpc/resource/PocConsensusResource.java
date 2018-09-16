@@ -1209,7 +1209,7 @@ public class PocConsensusResource {
             tx.setCoinData(coinData);
             //交易签名的长度为m*单个签名长度+赎回脚本长度
             int scriptSignLenth = redeemScript.getProgram().length + form.getM()*72;
-            CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size()+scriptSignLenth, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            CoinDataResult result = accountLedgerService.getMutilCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size()+scriptSignLenth, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
             if (null != result) {
                 if (result.isEnough()) {
                     tx.getCoinData().setFrom(result.getCoinList());
