@@ -43,6 +43,7 @@ import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
@@ -439,9 +440,6 @@ public class ForkChainProcess {
             ContractResult contractResult = null;
             Map<String, Coin> contractUsedCoinMap = new HashMap<>();
 
-            // 为本次验证区块增加一个合约的临时余额区，用于记录本次合约地址余额的变化
-            contractService.createContractTempBalance();
-
             for (Transaction tx : newBlock.getTxs()) {
 
                 if (tx.isSystemTx()) {
@@ -487,7 +485,7 @@ public class ForkChainProcess {
 
             // 验证世界状态根
             if ((receiveStateRoot != null || stateRoot != null) && !Arrays.equals(receiveStateRoot, stateRoot)) {
-                Log.info("contract stateRoot incorrect.");
+                Log.info("contract stateRoot incorrect. receiveStateRoot is {}, stateRoot is {}.", receiveStateRoot != null ? Hex.encode(receiveStateRoot) : receiveStateRoot, stateRoot != null ? Hex.encode(stateRoot) : stateRoot);
                 changeSuccess = false;
                 break;
             }
