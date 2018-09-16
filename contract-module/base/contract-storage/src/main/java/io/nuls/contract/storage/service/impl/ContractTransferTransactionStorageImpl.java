@@ -29,6 +29,7 @@ import io.nuls.contract.storage.constant.ContractStorageConstant;
 import io.nuls.contract.storage.service.ContractTransferTransactionStorageService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.db.constant.DBErrorCode;
+import io.nuls.db.model.Entry;
 import io.nuls.db.service.DBService;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
@@ -38,7 +39,9 @@ import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.utils.NulsByteBuffer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @desription:
@@ -97,4 +100,20 @@ public class ContractTransferTransactionStorageImpl implements ContractTransferT
         }
     }
 
+    @Override
+    public List<ContractTransferTransaction> loadAllContractTransferTxList() throws NulsException {
+        List<ContractTransferTransaction> txList = new ArrayList<>();
+        List<Entry<byte[], byte[]>> entryList = dbService.entryList(ContractStorageConstant.DB_NAME_CONTRACT_SPECIAL_TX);
+        if (entryList == null || entryList.isEmpty()) {
+            return txList;
+        }
+
+        ContractTransferTransaction tx;
+        for (Entry<byte[], byte[]> entry : entryList) {
+            tx = new ContractTransferTransaction();
+            tx.parse(entry.getValue(), 0);
+            txList.add(tx);
+        }
+        return txList;
+    }
 }

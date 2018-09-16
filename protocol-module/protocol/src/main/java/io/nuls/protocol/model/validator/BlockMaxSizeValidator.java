@@ -47,8 +47,8 @@ public class BlockMaxSizeValidator implements NulsDataValidator<Block> {
         }
         long length = 0L;
         for (Transaction tx : data.getTxs()) {
-            // pierre add 验证区块大小 - 合约内部转账交易不能跳过
-            if (tx.isSystemTx() && tx.getType() != ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
+            // pierre add 验证区块大小 - 合约转账(从合约转出)交易如果计算在区块内，则不能跳过，目前没有计算在区块内
+            if (tx.isSystemTx()) {
                 continue;
             }
             length += tx.size();

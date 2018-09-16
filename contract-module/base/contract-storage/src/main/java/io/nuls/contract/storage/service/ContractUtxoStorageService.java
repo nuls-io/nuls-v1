@@ -28,8 +28,6 @@ import io.nuls.db.service.BatchOperation;
 import io.nuls.kernel.model.Result;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @desription:
@@ -37,18 +35,6 @@ import java.util.Set;
  * @date: 2018/6/5
  */
 public interface ContractUtxoStorageService {
-
-    @Deprecated
-    Result saveUTXO(byte[] key, byte[] value);
-
-    @Deprecated
-    Result batchSaveUTXO(List<Entry<byte[], byte[]>> utxos);
-
-    @Deprecated
-    Result deleteUTXO(byte[] key);
-
-    @Deprecated
-    Result batchDeleteUTXO(List<byte[]> utxos);
 
     byte[] getUTXO(byte[] key);
 

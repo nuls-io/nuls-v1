@@ -229,7 +229,8 @@ public class BlockResource {
         }
         Block block = null;
         try {
-            block = blockService.getBlock(NulsDigestData.fromDigestHex(hash)).getData();
+            // 包含合约转账(从合约转出)交易的区块
+            block = blockService.getBlock(NulsDigestData.fromDigestHex(hash), true).getData();
         } catch (NulsException e) {
             Log.error(e);
         }

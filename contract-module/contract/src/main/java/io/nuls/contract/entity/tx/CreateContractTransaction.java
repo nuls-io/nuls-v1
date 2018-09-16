@@ -28,9 +28,13 @@ import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.entity.txdata.CreateContractData;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.NulsByteBuffer;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @Desription:
@@ -54,9 +58,30 @@ public class CreateContractTransaction extends Transaction<CreateContractData> i
         return byteBuffer.readNulsData(new CreateContractData());
     }
 
+    /**
+     * 用于钱包显示资产变动
+     *
+     * 资产变动: 1. 仅有手续费
+     * 此方法`getInfo`用于钱包账户，而合约地址不属于钱包账户，所以这里的入参不会是合约地址
+     * toList有且仅有一个Coin(创建智能合约交易的特性)，必然是调用者自身扣了手续费后的找零
+     *      这里的地址有两种情况，一是合约调用者的地址，二是合约Token转账的`from`,`to`
+     *      综上，由于方法入参不会是合约地址，因此除合约调用者地址外，其他地址传入都返回 `0`
+     * @param address
+     * @return
+     */
     @Override
     public String getInfo(byte[] address) {
-        return "-" + getFee().toCoinString();
+        List<Coin> toList = coinData.getTo();
+        int size = toList.size();
+        if(size == 1) {
+            if (Arrays.equals(address, toList.get(0).getAddress())) {
+                return "-" + getFee().toCoinString();
+            } else {
+                return "0";
+            }
+        } else {
+            return "--";
+        }
     }
 
     @Override

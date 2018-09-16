@@ -18,6 +18,7 @@
 package org.ethereum.db;
 
 import org.ethereum.core.AccountState;
+import org.ethereum.core.Block;
 import org.ethereum.core.Repository;
 import org.ethereum.crypto.HashUtil;
 import org.ethereum.datasource.*;
@@ -129,7 +130,7 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
     @Override
     public synchronized byte[] getCode(byte[] addr) {
         byte[] codeHash = getCodeHash(addr);
-        return FastByteComparisons.equal(codeHash, HashUtil.EMPTY_DATA_HASH) ?
+        return codeHash == null || FastByteComparisons.equal(codeHash, HashUtil.EMPTY_DATA_HASH) ?
                 ByteUtil.EMPTY_BYTE_ARRAY : codeCache.get(codeKey(codeHash, addr));
     }
 
@@ -141,7 +142,7 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
     @Override
     public byte[] getCodeHash(byte[] addr) {
         AccountState accountState = getAccountState(addr);
-        return accountState != null ? accountState.getCodeHash() : HashUtil.EMPTY_DATA_HASH;
+        return accountState != null ? accountState.getCodeHash() : null;
     }
 
     @Override
@@ -222,6 +223,14 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
 
     public String dumpStateTrie() {
         throw new RuntimeException("Not supported");
+    }
+
+    /**
+     * As tests only implementation this hack is pretty sufficient
+     */
+    @Override
+    public Repository clone() {
+        return parent.startTracking();
     }
 
     class ContractDetailsImpl implements ContractDetails {
@@ -350,6 +359,11 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
 
     @Override
     public Set<byte[]> getAccountsKeys() {
+        throw new RuntimeException("Not supported");
+    }
+
+    @Override
+    public void dumpState(Block block, long gasUsed, int txNumber, byte[] txHash) {
         throw new RuntimeException("Not supported");
     }
 
