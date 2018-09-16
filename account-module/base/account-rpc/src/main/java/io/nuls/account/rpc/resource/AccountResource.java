@@ -1204,4 +1204,29 @@ public class AccountResource {
         map.put("address", address.toString());
         return Result.getSuccess().setData(map).toRpcClientResult();
     }
+
+    @POST
+    @Path("/aliasMutil/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("[别名] 多签账户设置别名")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult aliasMutil(@PathParam("address") String address,
+                                 @ApiParam(name = "form", value = "多签账户设置别名表单数据", required = true)
+                                         AccountAliasForm form) {
+        if (!AddressTool.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (StringUtils.isBlank(form.getAlias())) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Result result = aliasService.setAlias(address, form.getAlias().trim(), form.getPassword());
+        if (result.isSuccess()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("value", (String) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
 }
