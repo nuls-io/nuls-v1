@@ -223,7 +223,6 @@ public class NulsProtocolProcess {
                 tempInfoPo.setCurrentDelay(1);
             }
             getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
-            saveBLockTempProtocolInfo(blockHeader, tempInfoPo);
             Log.info("========== 统计Temp协议 未定义 ==========");
             Log.info("========== 协议覆盖率：" + rate + " -->>>" + tempInfoPo.getPercent());
             Log.info("========== 协议version：" + tempInfoPo.getVersion());
@@ -251,7 +250,7 @@ public class NulsProtocolProcess {
                 tempInfoPo.setStatus(ProtocolContainer.VALID);
                 tempInfoPo.setEffectiveHeight(blockHeader.getHeight() + 1);
                 getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
-                saveBLockTempProtocolInfo(blockHeader, tempInfoPo);
+
                 System.out.println("停止服务！");
                 Log.info("********** 停止服务 **********");
                 Log.info("********** 停止服务version：" + tempInfoPo.getVersion());
@@ -263,6 +262,7 @@ public class NulsProtocolProcess {
                 //upgradeProtocol(container, blockHeader);
                 //如果是linux系统则立即停止，否则将强制更新标志设为true，由钱包提示
                 if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("LINUX") != -1) {
+                    saveBLockTempProtocolInfo(blockHeader, tempInfoPo);
                     Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
                     Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
                     NulsContext.getInstance().exit(1);
@@ -271,7 +271,6 @@ public class NulsProtocolProcess {
                 }
             } else {
                 getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
-                saveBLockTempProtocolInfo(blockHeader, tempInfoPo);
                 Log.info("========== 统计Temp协议 未定义 ==========");
                 Log.info("========== 协议version：" + tempInfoPo.getVersion());
                 Log.info("========== 当前高度：" + blockHeader.getHeight());
@@ -284,6 +283,7 @@ public class NulsProtocolProcess {
                 Log.info("========== 当前轮出块节点：" + Arrays.toString(currentRound.getMemberList().toArray()));
             }
         }
+        saveBLockTempProtocolInfo(blockHeader, tempInfoPo);
     }
 
     /**
