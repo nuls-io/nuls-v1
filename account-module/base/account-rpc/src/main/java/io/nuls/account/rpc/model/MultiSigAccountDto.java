@@ -32,7 +32,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -50,7 +52,7 @@ public class MultiSigAccountDto {
     private String alias;
 
     @ApiModelProperty(name = "pubkeys", value = "公钥列表")
-    private List<String> pubkeys;
+    private List<Map<String, String>> pubkeys;
 
     public MultiSigAccountDto() {
 
@@ -60,7 +62,10 @@ public class MultiSigAccountDto {
         this.address = account.getAddress().getBase58();
         this.pubkeys = new ArrayList<>();
         for (byte[] bytes : account.getPubKeyList()) {
-            pubkeys.add(Hex.encode(bytes));
+            Map<String, String> map = new HashMap<>();
+            map.put("pubkey", Hex.encode(bytes));
+            map.put("address", AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes)));
+            pubkeys.add(map);
         }
         this.m = account.getM();
         this.alias = account.getAlias();
@@ -85,12 +90,11 @@ public class MultiSigAccountDto {
         this.m = m;
     }
 
-    public List<String> getPubkeys() {
-
+    public List<Map<String, String>> getPubkeys() {
         return pubkeys;
     }
 
-    public void setPubkeys(List<String> pubkeys) {
+    public void setPubkeys(List<Map<String, String>> pubkeys) {
         this.pubkeys = pubkeys;
     }
 
