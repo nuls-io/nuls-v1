@@ -27,6 +27,7 @@ package io.nuls.account.service;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.AccountKeyStore;
 import io.nuls.account.model.Balance;
+import io.nuls.account.model.MultiSigAccount;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Address;
@@ -81,6 +82,7 @@ public interface AccountService {
     /**
      * 创建一个账户
      * Create an unencrypted account
+     *
      * @return the account list created(only one account in the list).
      */
     Result<List<Account>> createAccount();
@@ -88,6 +90,7 @@ public interface AccountService {
     /**
      * 根据账户标识删除对应的账户
      * delete an account by address.
+     *
      * @param address  the address of the account you want to delete.
      * @param password the password of the account.
      * @return the result of the operation.
@@ -98,6 +101,7 @@ public interface AccountService {
     /**
      * 根据keyStore重置密码
      * Reset password by keyStore.
+     *
      * @param keyStore the keyStore of the account.
      * @param password the password of account
      * @return the result of the operation.
@@ -365,9 +369,42 @@ public interface AccountService {
      * all the accounts are encrypted by the same password
      * if the password is NULL or "", the accounts will be unencrypted.
      *
-     * @param pubkeys   公钥列表
-     * @param m         至少需要几个签名验证通过
+     * @param pubkeys 公钥列表
+     * @param m       至少需要几个签名验证通过
      * @return the account list created.
      */
     Result<Address> createMultiAccount(List<String> pubkeys, int m);
+
+    /**
+     * 获取所有账户集合
+     * Query all account collections.
+     *
+     * @return account list of all accounts.
+     */
+    Result<List<MultiSigAccount>> getMultiSigAccountList();
+
+    /**
+     * 根据地址获取本地存储的多签账户的详细信息
+     * Get the details of the locally stored multi-sign account based on the address
+     *
+     * @param address 多签地址
+     * @return 多签账户的详细信息
+     */
+    Result<MultiSigAccount> getMultiSigAccount(String address) throws Exception;
+
+    /**
+     * 导入一个跟本地地址相关的多签账户
+     * @param address 多签地址
+     * @param pubkeys 多签组成公钥列表
+     * @param m       最小签名数
+     * @return 是否成功
+     */
+    Result<Boolean> saveMultiSigAccount(String address, List<String> pubkeys, int m);
+
+    /**
+     * 从数据库中删除该账户
+     * @param address
+     * @return
+     */
+    Result<Boolean> removeMultiSigAccount(String address);
 }
