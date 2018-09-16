@@ -716,7 +716,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             tx.setRemark(remark);
             tx.setTime(TimeService.currentTimeMillis());
             CoinData coinData = new CoinData();
-            Coin toCoin = new Coin(to, values);
+            //如果为多签地址则以脚本方式存储
+            Coin toCoin = null;
+            if(to[2] == 3){
+                Script scriptPubkey = SignatureUtil.createOutputScript(to);
+                toCoin = new Coin(scriptPubkey.getProgram(), values);
+            }else{
+                toCoin = new Coin(to, values);
+            }
             coinData.getTo().add(toCoin);
             if (price == null) {
                 price = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES;
@@ -886,9 +893,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             tx.setTime(TimeService.currentTimeMillis());
             CoinData coinData = new CoinData();
             for (MultipleAddressTransferModel to : toList) {
-                //Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
-                Coin toCoin = new Coin(to.getAddress(), Na.valueOf(to.getAmount()));
-                //Coin toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));
+                //如果为多签地址
+                Coin toCoin = null;
+                if(to.getAddress()[2] == 3){
+                    Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
+                    toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));
+                }else{
+                    toCoin = new Coin(to.getAddress(), Na.valueOf(to.getAmount()));
+                }
                 coinData.getTo().add(toCoin);
             }
             if (price == null) {
@@ -924,7 +936,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             //生成签名
             List<ECKey> signEckeys = new ArrayList<>();
             List<ECKey> scriptEckeys = new ArrayList<>();
-
             for (int index = 0; index < fromList.size(); index++) {
                 Result<Account> accountResult = accountService.getAccount(fromList.get(index).getAddress());
                 Account account = accountResult.getData();
@@ -1408,9 +1419,19 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 tx.setTime(TimeService.currentTimeMillis());
                 CoinData coinData = new CoinData();
                 for (MultipleAddressTransferModel to : outputs) {
+
                     /*Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
-                    Coin toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));*/
+                    Coin toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));
                     Coin toCoin = new Coin(to.getAddress(), Na.valueOf(to.getAmount()));
+                    coinData.getTo().add(toCoin);*/
+                    //如果为多签地址
+                    Coin toCoin = null;
+                    if(to.getAddress()[2] == 3){
+                        Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
+                        toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));
+                    }else{
+                        toCoin = new Coin(to.getAddress(), Na.valueOf(to.getAmount()));
+                    }
                     coinData.getTo().add(toCoin);
                 }
                 if (price == null) {
