@@ -99,6 +99,9 @@ public class AddressTool {
         if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
             return false;
         }
+        if (NulsContext.MAIN_NET_VERSION <= 1 && NulsContext.DEFAULT_ADDRESS_TYPE != type) {
+            return false;
+        }
         if (NulsContext.DEFAULT_ADDRESS_TYPE != type && NulsContext.CONTRACT_ADDRESS_TYPE != type && NulsContext.P2SH_ADDRESS_TYPE != type) {
             return false;
         }
