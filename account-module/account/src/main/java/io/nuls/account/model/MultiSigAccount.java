@@ -47,6 +47,7 @@ public class MultiSigAccount extends BaseNulsData {
     private List<byte[]> pubKeyList;
 
     private long m;
+    private String alias;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -110,5 +111,13 @@ public class MultiSigAccount extends BaseNulsData {
         for (String pubkeyStr : pubkeys) {
             pubKeyList.add(Hex.decode(pubkeyStr));
         }
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public String getAlias() {
+        return alias;
     }
 }

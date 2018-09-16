@@ -43,11 +43,14 @@ public class MultiSigAccountDto {
     @ApiModelProperty(name = "address", value = "账户地址")
     private String address;
 
-    @ApiModelProperty(name = "pubkeys", value = "公钥列表")
-    private List<String> pubkeys;
-
     @ApiModelProperty(name = "m", value = "最小签名数")
     private long m;
+
+    @ApiModelProperty(name = "alias", value = "别名")
+    private String alias;
+
+    @ApiModelProperty(name = "pubkeys", value = "公钥列表")
+    private List<String> pubkeys;
 
     public MultiSigAccountDto() {
 
@@ -60,6 +63,7 @@ public class MultiSigAccountDto {
             pubkeys.add(Hex.encode(bytes));
         }
         this.m = account.getM();
+        this.alias = account.getAlias();
     }
 
     public String getAddress() {
@@ -85,5 +89,13 @@ public class MultiSigAccountDto {
 
     public void setPubkeys(List<String> pubkeys) {
         this.pubkeys = pubkeys;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 }

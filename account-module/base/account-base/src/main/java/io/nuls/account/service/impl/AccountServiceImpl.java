@@ -61,6 +61,7 @@ import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
+import io.nuls.kernel.validate.ValidateResult;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -670,6 +671,16 @@ public class AccountServiceImpl implements AccountService {
         }
         MultiSigAccount account = new MultiSigAccount();
         account.parse(new NulsByteBuffer(bytes, 0));
+        List<AliasPo> list = aliasStorageService.getAliasList().getData();
+        for (AliasPo aliasPo : list) {
+            if (aliasPo.getAddress()[2] != NulsContext.P2SH_ADDRESS_TYPE) {
+                continue;
+            }
+            if (Arrays.equals(aliasPo.getAddress(), account.getAddress().getAddressBytes())) {
+                account.setAlias(aliasPo.getAlias());
+                break;
+            }
+        }
         return Result.getSuccess().setData(account);
     }
 
