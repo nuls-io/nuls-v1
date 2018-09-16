@@ -82,7 +82,17 @@ public class ConsensusBlockServiceImpl implements BlockService {
     }
 
     @Override
+    public Result<Block> getBlock(NulsDigestData hash, boolean isNeedContractTransfer) {
+        return null;
+    }
+
+    @Override
     public Result<Block> getBlock(long height) {
+        return null;
+    }
+
+    @Override
+    public Result<Block> getBlock(long height, boolean isNeedContractTransfer) {
         return null;
     }
 

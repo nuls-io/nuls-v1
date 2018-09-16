@@ -95,7 +95,7 @@ public class ContractResultDto {
     @ApiModelProperty(name = "nonce", value = "nonce")
     private BigInteger nonce;
 
-    @ApiModelProperty(name = "transfers", value = "合约内部转账")
+    @ApiModelProperty(name = "transfers", value = "合约转账(从合约转出)")
     private List<ContractTransferDto> transfers;
 
     @ApiModelProperty(name = "events", value = "合约事件")

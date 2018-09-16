@@ -97,7 +97,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
         CoinData coinData = tx.getCoinData();
 
         if (coinData != null) {
-            // 在合约独立账本中，只有合约内部转账交易才能从合约地址中转出金额，所以只有这类交易才处理fromCoinData -> delete - from
+            // 在合约独立账本中，只有合约转账(从合约转出)交易才能从合约地址中转出金额，所以只有这类交易才处理fromCoinData -> delete - from
             List<byte[]> fromList = new ArrayList<>();
             // 合约特殊转账交易
             List<Coin> froms = new ArrayList<>();

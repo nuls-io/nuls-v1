@@ -25,6 +25,7 @@
 package io.nuls.contract.storage.service;
 
 import io.nuls.contract.entity.tx.ContractTransferTransaction;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
@@ -43,5 +44,7 @@ public interface ContractTransferTransactionStorageService {
     Result deleteContractTransferTx(NulsDigestData hash);
 
     Result<ContractTransferTransaction> getContractTransferTx(NulsDigestData hash);
+
+    List<ContractTransferTransaction> loadAllContractTransferTxList() throws NulsException;
 
 }
