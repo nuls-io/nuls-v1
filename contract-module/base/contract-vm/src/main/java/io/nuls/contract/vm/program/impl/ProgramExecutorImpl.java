@@ -240,6 +240,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             logTime("load vm");
 
+            vm.heap.loadClassCodes(classCodes);
             vm.methodArea.loadClassCodes(classCodes);
 
             logTime("load classes");

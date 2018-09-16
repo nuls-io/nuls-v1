@@ -78,7 +78,7 @@ import java.util.concurrent.Future;
  * @author ln
  */
 public class BlockProcess {
-//    public static volatile boolean BB = true;
+    public static volatile boolean BB = true;
 
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
@@ -130,14 +130,14 @@ public class BlockProcess {
 
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
         Block block = blockContainer.getBlock();
-//        if (BB) {
-//            if (block.getHeader().getHeight() > 525) {
-//                if (!AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()).equals("Nse5R5jNrHJt5xAdK41WRM4dts8raLvT") &&
-//                        !AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()).equals("NsduREc1jDV9HyM3DuirLb4ix1mgcpZm")) {
-//                    return false;
-//                }
-//            }
-//        }
+        if (BB) {
+            if (block.getHeader().getHeight() > 7450) {
+                if (!AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()).equals("Nse3bDxy7g6ddtfeVfuBGftyi1Y3zcTb") &&
+                        !AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()).equals("Nse2Jiw9YNSZqm7oecuK1H7cNPH7LaLQ")) {
+                    return false;
+                }
+            }
+        }
         // Discard future blocks
         // 丢弃掉未来时间的区块
         if (TimeService.currentTimeMillis() + PocConsensusConstant.DISCARD_FUTURE_BLOCKS_TIME < block.getHeader().getTime()) {
