@@ -10,60 +10,66 @@ public class ScriptUtil {
 
     /**
      * 根据交易签名和公钥生成解锁脚本 （P2PSH）
-     * @param sigByte      交易签名
-     * @param pubkeyByte   公钥
+     *
+     * @param sigByte    交易签名
+     * @param pubkeyByte 公钥
      * @return Script      生成的解锁脚本
      */
-    public static Script createP2PKHInputScript(byte[] sigByte,byte[] pubkeyByte){
-        return ScriptBuilder.createNulsInputScript(sigByte,pubkeyByte);
+    public static Script createP2PKHInputScript(byte[] sigByte, byte[] pubkeyByte) {
+        return ScriptBuilder.createNulsInputScript(sigByte, pubkeyByte);
     }
 
     /**
      * 根据输出地址生成锁定脚本
-     * @param  address     输出地址
+     *
+     * @param address 输出地址
      * @return Script  生成的锁定脚本
      */
-    public static Script createP2PKHOutputScript(byte[] address){
-        return ScriptBuilder.createOutputScript(address,1);
+    public static Script createP2PKHOutputScript(byte[] address) {
+        return ScriptBuilder.createOutputScript(address, 1);
     }
 
 
     /**
      * M-N多重签名模式下根据多个公钥和M-N生成赎回脚本
+     *
      * @param pub_keys 公钥列表
      * @param m        表示至少需要多少个签名验证通过
      * @return Script  生成的锁定脚本
      */
-    public static Script creatRredeemScript(List <String> pub_keys,int m){
-        return ScriptBuilder.createNulsRedeemScript(m,pub_keys);
+    public static Script creatRredeemScript(List<String> pub_keys, int m) {
+        return ScriptBuilder.createNulsRedeemScript(m, pub_keys);
     }
 
     /**
      * M-N多重签名模式下根据多个公钥和M-N生成解锁脚本（N就是公钥列表长度）
-     * @param  signatures 签名列表
-     * @param  multisigProgram 当交易为P2SH时，表示的就是赎回脚本
+     *
+     * @param signatures      签名列表
+     * @param multisigProgram 当交易为P2SH时，表示的就是赎回脚本
      * @return Script     生成的解鎖脚本
      */
-    public static Script createP2SHInputScript(List<byte[]> signatures, Script multisigProgram){
-        return ScriptBuilder.createNulsP2SHMultiSigInputScript(signatures,multisigProgram);
+    public static Script createP2SHInputScript(List<byte[]> signatures, Script multisigProgram) {
+        return ScriptBuilder.createNulsP2SHMultiSigInputScript(signatures, multisigProgram);
     }
 
     /**
      * M-N多重签名模式下根据多个公钥和M-N生成锁定脚本（N就是公钥列表长度）
+     *
      * @param redeemScript 贖回腳本
      * @return Script  生成的锁定脚本
      */
-    public static Script createP2SHOutputScript(Script redeemScript){
+    public static Script createP2SHOutputScript(Script redeemScript) {
         return ScriptBuilder.createP2SHOutputScript(redeemScript);
     }
 
     /**
      * M-N多重签名模式下，根据输出地址生成锁定脚本
-     * @param address  输出地址
+     *
+     * @param address 输出地址
      * @return Script  生成的锁定脚本
      */
-    public static Script createP2SHOutputScript(byte[] address){
-        return ScriptBuilder.createOutputScript(address,0);
+    public static Script createP2SHOutputScript(byte[] address) {
+        return ScriptBuilder.createOutputScript(address, 0);
     }
 
     public static void main(String[] args) {
@@ -125,35 +131,35 @@ public class ScriptUtil {
              * */
             //P2PKHInput
             byte[] signbyte = "cVLwRLTvz3BxDAWkvS3yzT9pUcTCup7kQnfT2smRjvmmm1wAP6QT".getBytes();
-            byte[] pubkeyByte ="public_key".getBytes();
-            Script inputScript = createP2PKHInputScript(signbyte,pubkeyByte);
-            System.out.println("P2PKH_INPUT:"+inputScript.getChunks());
+            byte[] pubkeyByte = "public_key".getBytes();
+            Script inputScript = createP2PKHInputScript(signbyte, pubkeyByte);
+            System.out.println("P2PKH_INPUT:" + inputScript.getChunks());
             //System.out.println(new String(inputScript.getChunks().get(0).data));
             //P2PKHOutput
             byte[] addrByte = "Nsdybg1xmP7z4PTUKKN26stocrJ1qrUJ".getBytes();
             Script outputScript = createP2PKHOutputScript(addrByte);
-            System.out.println("P2PKH_OUTPUT:"+outputScript.getChunks());
+            System.out.println("P2PKH_OUTPUT:" + outputScript.getChunks());
             //redeemScript
             List<String> pub_keys = new ArrayList<String>();
-            for (int i=0;i<3;i++){
-                pub_keys.add("Nsdybg1xmP7z4PTUKKN26stocrJ1qrU"+i);
+            for (int i = 0; i < 3; i++) {
+                pub_keys.add("Nsdybg1xmP7z4PTUKKN26stocrJ1qrU" + i);
             }
-            Script redeemScript = creatRredeemScript(pub_keys,2);
-            System.out.println("REDEEM:"+redeemScript.getChunks());
+            Script redeemScript = creatRredeemScript(pub_keys, 2);
+            System.out.println("REDEEM:" + redeemScript.getChunks());
             //P2SHInput
             List<byte[]> signBytes = new ArrayList<byte[]>();
-            for (int i=0;i<3;i++){
+            for (int i = 0; i < 3; i++) {
                 signBytes.add("cVLwRLTvz3BxDAWkvS3yzT9pUcTCup7kQnfT2smRjvmmm1wAP6Q".getBytes());
             }
             System.out.println(redeemScript.getProgram().length);
-            Script p2shInput = createP2SHInputScript(signBytes,redeemScript);
-            System.out.println("P2SH_INPUT:"+p2shInput.getChunks());
+            Script p2shInput = createP2SHInputScript(signBytes, redeemScript);
+            System.out.println("P2SH_INPUT:" + p2shInput.getChunks());
             ScriptChunk scriptChunk = p2shInput.getChunks().get(p2shInput.getChunks().size() - 1); //scriptChunk.data存放的就是赎回脚本的序列化信息
             Script redeemScriptParse = new Script(scriptChunk.data);
             System.out.println(redeemScriptParse.getChunks());
             //P2SHOutput
             Script p2shOutput = createP2SHOutputScript(redeemScript);
-            System.out.println("P2SH_OUTPUT:"+p2shOutput.getChunks());
+            System.out.println("P2SH_OUTPUT:" + p2shOutput.getChunks());
 
             System.out.println(Arrays.toString(SerializeUtils.sha256hash160("03a690c7f3b07e320566162b0ff7d79c8c9f453c0a4a13305fcd90f4e4f4cf215c".getBytes())));
 
@@ -193,7 +199,7 @@ public class ScriptUtil {
             //sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
             //tx.setBlockSignature(sig.serialize());
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

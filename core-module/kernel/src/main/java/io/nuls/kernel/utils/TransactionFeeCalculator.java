@@ -39,7 +39,7 @@ public class TransactionFeeCalculator {
 
     public static final int KB = 1024;
 
-//    /**
+    //    /**
 //     * 根据交易大小计算需要交纳的手续费
 //     * According to the transaction size calculate the handling fee.
 //     *
@@ -53,7 +53,7 @@ public class TransactionFeeCalculator {
         return fee;
     }
 
-//    /**
+    //    /**
 //     * 根据交易大小计算需要交纳的手续费
 //     * According to the transaction size calculate the handling fee.
 //     *
@@ -67,7 +67,7 @@ public class TransactionFeeCalculator {
         return fee;
     }
 
-//    /**
+    //    /**
 //     * 根据交易大小计算需要交纳的手续费
 //     * According to the transaction size calculate the handling fee.
 //     *

@@ -38,7 +38,7 @@ import io.nuls.kernel.validate.ValidateResult;
 
 import java.io.IOException;
 
-public class BlockSignature extends BaseNulsData  {
+public class BlockSignature extends BaseNulsData {
     private NulsSignData signData;
     private byte[] publicKey;
 

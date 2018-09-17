@@ -26,7 +26,6 @@
 package io.nuls.kernel.model;
 
 import io.nuls.core.tools.array.ArraysTool;
-import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
@@ -66,7 +65,7 @@ public class Address {
 
     protected byte[] addressBytes;
 
-//    /**
+    //    /**
 //     * @param address
 //     */
     public Address(String address) {

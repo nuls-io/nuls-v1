@@ -24,9 +24,6 @@
  */
 package io.nuls.kernel.module.thread;
 
-import io.nuls.kernel.constant.ErrorCode;
-import io.nuls.kernel.exception.NulsRuntimeException;
-
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -39,10 +36,10 @@ public class ModuleProcessFactory implements ThreadFactory {
     @Override
     public ModuleProcess newThread(Runnable r) {
         if (null == r) {
-            throw new RuntimeException( "runnable cannot be null!");
+            throw new RuntimeException("runnable cannot be null!");
         }
         if (!(r instanceof ModuleRunner)) {
-            throw new RuntimeException( "unkown runnable!");
+            throw new RuntimeException("unkown runnable!");
         }
         ModuleProcess process = new ModuleProcess((ModuleRunner) r);
         process.setModuleId((short) 0);

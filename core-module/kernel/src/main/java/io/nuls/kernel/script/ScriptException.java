@@ -25,7 +25,7 @@
 
 package io.nuls.kernel.script;
 
-public class ScriptException extends RuntimeException  {
+public class ScriptException extends RuntimeException {
     public ScriptException(String msg) {
         super(msg);
     }

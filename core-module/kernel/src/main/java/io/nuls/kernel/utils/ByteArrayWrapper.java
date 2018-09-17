@@ -30,7 +30,7 @@ import static java.util.Objects.requireNonNull;
  * @author: PierreLuo
  * @date: 2018/6/28
  */
-public class ByteArrayWrapper implements Comparable<ByteArrayWrapper>{
+public class ByteArrayWrapper implements Comparable<ByteArrayWrapper> {
 
     private final byte[] data;
     private final int offset;
@@ -50,8 +50,7 @@ public class ByteArrayWrapper implements Comparable<ByteArrayWrapper>{
     }
 
     @Override
-    public boolean equals(Object o)
-    {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
@@ -79,8 +78,7 @@ public class ByteArrayWrapper implements Comparable<ByteArrayWrapper>{
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         if (hash != 0) {
             return hash;
         }
@@ -97,8 +95,7 @@ public class ByteArrayWrapper implements Comparable<ByteArrayWrapper>{
     }
 
     @Override
-    public int compareTo(ByteArrayWrapper that)
-    {
+    public int compareTo(ByteArrayWrapper that) {
         if (this == that) {
             return 0;
         }

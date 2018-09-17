@@ -30,8 +30,6 @@ import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsData;
-import io.nuls.kernel.model.NulsDigestData;
-import jdk.nashorn.internal.ir.BaseNode;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

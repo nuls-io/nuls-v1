@@ -44,6 +44,7 @@ public @interface Interceptor {
      * 该拦截器关心的注解类型,该注解可以标注在类型或者方法上，在类型上时，会拦截该类的所有方法，在方法上时，只拦截标记了的方法,不可以为空
      * The interceptor CARES about the type of annotation, the annotations can be marked on the type or method, on the type,
      * can intercept all the methods of the class, on the way, only intercept marked method, cannot be empty
+     *
      * @return Class
      */
     Class value();

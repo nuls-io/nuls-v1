@@ -95,7 +95,8 @@ public enum ModuleStatusEnum {
      * 运行出现异常
      * Running exception
      */
-    EXCEPTION,;
+    EXCEPTION,
+    ;
 
     @Override
     public String toString() {

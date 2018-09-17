@@ -14,13 +14,14 @@ import java.util.List;
 public class ScriptSign extends BaseNulsData {
 
     private List<Script> scripts;
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        if(scripts != null && scripts.size() > 0){
+        if (scripts != null && scripts.size() > 0) {
             for (Script script : scripts) {
                 stream.writeBytesWithLength(script.getProgram());
             }
-        }else{
+        } else {
             stream.write(NulsConstant.PLACE_HOLDER);
         }
     }
@@ -28,15 +29,15 @@ public class ScriptSign extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         List<Script> scripts = new ArrayList<>();
-        while(!byteBuffer.isFinished()){
-                scripts.add(new Script(byteBuffer.readByLengthByte()));
+        while (!byteBuffer.isFinished()) {
+            scripts.add(new Script(byteBuffer.readByLengthByte()));
         }
-        this.scripts = scripts ;
+        this.scripts = scripts;
     }
 
     public static ScriptSign createFromBytes(byte[] bytes) throws NulsException {
         ScriptSign sig = new ScriptSign();
-        sig.parse(bytes,0);
+        sig.parse(bytes, 0);
         return sig;
     }
 
@@ -51,11 +52,11 @@ public class ScriptSign extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        if(scripts != null && scripts.size()>0){
+        if (scripts != null && scripts.size() > 0) {
             for (Script script : scripts) {
                 size += SerializeUtils.sizeOfBytes(script.getProgram());
             }
-        }else{
+        } else {
             size = 4;
         }
         return size;
