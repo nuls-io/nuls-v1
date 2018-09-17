@@ -1,17 +1,23 @@
-package io.nuls.consensus.poc.rpc.cmd;
+package io.nuls.account.rpc.cmd;
 
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.processor.CommandProcessor;
+import io.nuls.kernel.utils.CommandBuilder;
 
-public class CreateMutilAgentProcessor implements CommandProcessor {
+/**
+ * @author: tag
+ */
+public class SetMultiAliasProcessor implements CommandProcessor {
     @Override
     public String getCommand() {
-        return null;
+        return "setMultiAlias";
     }
 
     @Override
     public String getHelp() {
-        return null;
+        CommandBuilder builder = new CommandBuilder();
+        builder.newLine(getCommandDescription());
+        return builder.toString();
     }
 
     @Override

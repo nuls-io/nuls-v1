@@ -27,7 +27,6 @@ package io.nuls.client.cmd;
 
 import io.nuls.account.rpc.cmd.*;
 import io.nuls.accout.ledger.rpc.cmd.GetAccountTxListProcessor;
-import io.nuls.accout.ledger.rpc.cmd.GetUTXOProcessor;
 import io.nuls.accout.ledger.rpc.cmd.TransferP2shProcess;
 import io.nuls.accout.ledger.rpc.cmd.TransferProcessor;
 import io.nuls.client.constant.CommandConstant;
@@ -113,9 +112,16 @@ public class CommandHandler {
         register(new GetMultiSigAccountProcessor());
         register(new RemoveMultiSigAccountProcessor());
         register(new GetMultiSigAccountCountProcessor());
-        register(new TransferP2shProcess());
         register(new CreateMultiSigAccountProcessor());
-        register(new SetMutilAliasProcessor());
+
+
+        /*register(new TransferP2shProcess());
+        register(new SetMultiAliasProcessor());
+        register(new WithdrawMultiProcessor());
+        register(new CreateMultiSigAccountProcessor());
+        register(new StopMultiAgentProcessor());
+        register(new DepositToMultiAgentProcessor());*/
+
 
         /**
          * accountLedger
