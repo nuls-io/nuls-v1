@@ -59,7 +59,7 @@ public class GetMultiSigAccountProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "getmultiaccount [address] --Obtaining local multi signature account information based on address";
+        return "getmultiaccount <address> --Obtaining local multi signature account information based on address";
     }
 
     @Override

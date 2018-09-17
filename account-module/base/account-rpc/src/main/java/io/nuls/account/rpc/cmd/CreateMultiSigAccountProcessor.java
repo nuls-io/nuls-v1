@@ -59,7 +59,7 @@ public class CreateMultiSigAccountProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "createmultiaccount [pks] [m] --create Multi-signature account";
+        return "createmultiaccount <pks> <m> --create Multi-signature account";
     }
 
     @Override

@@ -56,7 +56,7 @@ public class RemoveMultiSigAccountProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "removemultiaccount [address] --Remove multiple signature accounts by address";
+        return "removemultiaccount <address> --Remove multiple signature accounts by address";
     }
 
     @Override

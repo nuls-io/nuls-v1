@@ -61,7 +61,7 @@ public class ImportMultiSigAccountProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "importmultiaccount [pks] [m] --create Multi-signature account";
+        return "importmultiaccount <address> <pks> <m> --create Multi-signature account";
     }
 
     @Override
