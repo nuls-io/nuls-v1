@@ -1288,7 +1288,6 @@ public class PocConsensusResource {
                 return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
             }
             AssertUtil.canNotEmpty(form.getDeposit());
-            tx = new DepositTransaction();
             if (form.getM() <= 0) {
                 return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
             }
@@ -1412,7 +1411,6 @@ public class PocConsensusResource {
             StopAgent stopAgent = new StopAgent();
             stopAgent.setAddress(agent.getAgentAddress());
             stopAgent.setCreateTxHash(agent.getTxHash());
-            tx = new StopAgentTransaction();
             tx.setTime(TimeService.currentTimeMillis());
             tx.setTxData(stopAgent);
             CoinData coinData = ConsensusTool.getStopMutilAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME,null);
@@ -1443,7 +1441,106 @@ public class PocConsensusResource {
         return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 
-
+    @POST
+    @Path("/withdrawMutil")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "多签账户退出共识 [3.6.11]",
+            notes = "返回退出成功的交易hash")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public RpcClientResult withdrawMutil(@ApiParam(name = "form", value = "多签退出共识表单数据", required = true)
+                                            WithdrawMutilForm form) throws NulsException, IOException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAddress());
+        if (!AddressTool.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        Account account = accountService.getAccount(form.getAddress()).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        if (account.isEncrypted() && account.isLocked()) {
+            AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
+            if (!account.validatePassword(form.getPassword())) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
+            }
+        }
+        //如果为交易发起人，则需要填写组装交易需要的信息
+        CancelDepositTransaction tx = new CancelDepositTransaction();
+        TransactionSignature transactionSignature = new TransactionSignature();
+        List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+        List<Script> scripts = new ArrayList<>();
+        // 发起者，创建
+        if(form.getTxdata() == null || form.getTxdata().trim().length() == 0) {
+            AssertUtil.canNotEmpty(form.getTxHash());
+            if (!NulsDigestData.validHash(form.getTxHash())) {
+                return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+            CancelDeposit cancelDeposit = new CancelDeposit();
+            NulsDigestData hash = NulsDigestData.fromDigestHex(form.getTxHash());
+            DepositTransaction depositTransaction = null;
+            try {
+                depositTransaction = (DepositTransaction) ledgerService.getTx(hash);
+            } catch (Exception e) {
+                return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+            if (null == depositTransaction) {
+                return Result.getFailed(TransactionErrorCode.TX_NOT_EXIST).toRpcClientResult();
+            }
+            // Create unlock script
+            Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(),form.getPubkeys());
+            cancelDeposit.setAddress(AddressTool.getAddress(form.getAddress()));
+            cancelDeposit.setJoinTxHash(hash);
+            tx.setTxData(cancelDeposit);
+            CoinData coinData = new CoinData();
+            List<Coin> toList = new ArrayList<>();
+            if (cancelDeposit.getAddress()[2] == NulsContext.P2SH_ADDRESS_TYPE) {
+                Script scriptPubkey = SignatureUtil.createOutputScript(cancelDeposit.getAddress());
+                toList.add(new Coin(scriptPubkey.getProgram(), depositTransaction.getTxData().getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
+            } else {
+                toList.add(new Coin(cancelDeposit.getAddress(), depositTransaction.getTxData().getDeposit(), 0));
+            }
+            coinData.setTo(toList);
+            List<Coin> fromList = new ArrayList<>();
+            for (int index = 0; index < depositTransaction.getCoinData().getTo().size(); index++) {
+                Coin coin = depositTransaction.getCoinData().getTo().get(index);
+                if (coin.getLockTime() == -1L && coin.getNa().equals(depositTransaction.getTxData().getDeposit())) {
+                    coin.setOwner(ArraysTool.concatenate(hash.serialize(), new VarInt(index).encode()));
+                    fromList.add(coin);
+                    break;
+                }
+            }
+            if (fromList.isEmpty()) {
+                return Result.getFailed(KernelErrorCode.DATA_ERROR).toRpcClientResult();
+            }
+            coinData.setFrom(fromList);
+            tx.setCoinData(coinData);
+            Na fee = TransactionFeeCalculator.getMaxFee(tx.size() );
+            coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            //将赎回脚本先存储在签名脚本中
+            scripts.add(redeemScript);
+            transactionSignature.setScripts(scripts);
+        }else{
+            byte[] txByte = Hex.decode(form.getTxdata());
+            tx.parse(new NulsByteBuffer(txByte));
+            transactionSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+            p2PHKSignatures = transactionSignature.getP2PHKSignatures();
+            scripts = transactionSignature.getScripts();
+        }
+        //使用签名账户对交易进行签名
+        P2PHKSignature p2PHKSignature = new P2PHKSignature();
+        ECKey eckey = account.getEcKey(form.getPassword());
+        p2PHKSignature.setPublicKey(eckey.getPubKey());
+        //用当前交易的hash和账户的私钥账户
+        p2PHKSignature.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), eckey));
+        p2PHKSignatures.add(p2PHKSignature);
+        Result resultData = txMutilProcessing(tx, p2PHKSignatures, scripts, transactionSignature, AddressTool.getAddress(form.getAddress()));
+        Map<String, String> valueMap = new HashMap<>();
+        valueMap.put("txData", (String) resultData.getData());
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
+    }
     public Result txMutilProcessing(Transaction tx, List<P2PHKSignature> p2PHKSignatures,List<Script> scripts,TransactionSignature transactionSignature,byte[] fromAddr) throws NulsException,IOException{
         //当已签名数等于M则自动广播该交易
         if(p2PHKSignatures.size() == SignatureUtil.getM(scripts.get(0))){
