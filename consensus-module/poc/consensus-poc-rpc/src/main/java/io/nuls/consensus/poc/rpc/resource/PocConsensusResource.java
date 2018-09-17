@@ -596,98 +596,6 @@ public class PocConsensusResource {
         return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 
-    @POST
-    @Path("/agent/stopms")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "注销共识节点 [3.6.5]", notes = "返回注销成功交易hash")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = String.class)
-    })
-    public RpcClientResult stopMSAgent(@ApiParam(name = "form", value = "注销共识节点表单数据", required = true)
-                                             StopAgentWithMSForm form) throws NulsException, IOException {
-
-        if(NulsContext.MAIN_NET_VERSION  <=1){
-            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
-        }
-
-        AssertUtil.canNotEmpty(form);
-        AssertUtil.canNotEmpty(form.getAgentAddress());
-        if (!AddressTool.validAddress(form.getAgentAddress())) {
-            throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
-        }
-        Account account = accountService.getAccount(form.getSignAddress()).getData();
-        if (null == account) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
-        }
-        if (account.isEncrypted() && account.isLocked()) {
-            AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
-            if (!account.validatePassword(form.getPassword())) {
-                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
-            }
-        }
-
-        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
-        Agent agent = null;
-        for (Agent p : agentList) {
-            if (p.getDelHeight() > 0) {
-                continue;
-            }
-            if (Arrays.equals(p.getAgentAddress(), form.getAgentAddress().getBytes())) {
-                agent = p;
-                break;
-            }
-        }
-
-        if (agent == null || agent.getDelHeight() > 0) {
-            return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
-        }
-
-        // 发起者，创建
-        if(form.getTxdata() == null || form.getTxdata().trim().length() == 0) {
-            if (form.getM() <= 0) {
-                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-            }
-            if (form.getPubkeys() == null || form.getPubkeys().size() == 0 || form.getPubkeys().size() < form.getM()) {
-                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-            }
-
-            // Create unlock script
-            Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(),form.getPubkeys());
-
-            StopAgent stopAgent = new StopAgent();
-            stopAgent.setAddress(agent.getAgentAddress());
-            stopAgent.setCreateTxHash(agent.getTxHash());
-
-            StopAgentTransaction tx = new StopAgentTransaction();
-            tx.setTime(TimeService.currentTimeMillis());
-            tx.setTxData(stopAgent);
-
-            CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME);
-            tx.setCoinData(coinData);
-            Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
-            coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
-        }
-
-        StopAgentTransaction tx = new StopAgentTransaction();
-        StopAgent stopAgent = new StopAgent();
-        stopAgent.setAddress(AddressTool.getAddress(form.getSignAddress()));
-
-        stopAgent.setCreateTxHash(agent.getTxHash());
-        tx.setTxData(stopAgent);
-
-        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME);
-
-        tx.setCoinData(coinData);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
-        coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
-        RpcClientResult result1 = this.txProcessing(tx, null, account, form.getPassword());
-        if (!result1.isSuccess()) {
-            return result1;
-        }
-        Map<String, String> valueMap = new HashMap<>();
-        valueMap.put("value", tx.getHash().getDigestHex());
-        return Result.getSuccess().setData(valueMap).toRpcClientResult();
-    }
 
     @GET
     @Path("/agent/list")
@@ -1336,6 +1244,152 @@ public class PocConsensusResource {
         valueMap.put("txData", (String) result.getData());
         return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
+
+    @POST
+    @Path("/mutilDeposit")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "deposit nuls to a bank! 申请参与共识 ", notes = "返回申请成功交易hash")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public RpcClientResult mutilDepositToAgent(@ApiParam(name = "form", value = "申请参与共识表单数据", required = true)
+                                                  DepositForm form) throws NulsException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAddress());
+        AssertUtil.canNotEmpty(form.getAgentHash());
+        if (!NulsDigestData.validHash(form.getAgentHash())) {
+            return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
+        }
+        AssertUtil.canNotEmpty(form.getDeposit());
+        if (!AddressTool.validAddress(form.getAddress())) {
+            throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
+        }
+        Account account = accountService.getAccount(form.getAddress()).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        if (account.isEncrypted() && account.isLocked()) {
+            AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
+            if (!account.validatePassword(form.getPassword())) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
+            }
+        }
+
+        DepositTransaction tx = new DepositTransaction();
+        Deposit deposit = new Deposit();
+        deposit.setAddress(AddressTool.getAddress(form.getAddress()));
+        deposit.setAgentHash(NulsDigestData.fromDigestHex(form.getAgentHash()));
+        deposit.setDeposit(Na.valueOf(form.getDeposit()));
+        tx.setTxData(deposit);
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
+        coinData.setTo(toList);
+        tx.setCoinData(coinData);
+        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+
+        RpcClientResult result1 = this.txProcessing(tx, result, account, form.getPassword());
+        if (!result1.isSuccess()) {
+            return result1;
+        }
+        Map<String, String> valueMap = new HashMap<>();
+        valueMap.put("value", tx.getHash().getDigestHex());
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
+    }
+
+    @POST
+    @Path("/agent/stopMutil")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "注销共识节点 [3.6.5]", notes = "返回注销成功交易hash")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public RpcClientResult stopMutilAgent(@ApiParam(name = "form", value = "注销共识节点表单数据", required = true)
+                                               StopAgentWithMSForm form) throws NulsException, IOException {
+
+        if(NulsContext.MAIN_NET_VERSION  <=1){
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
+
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAgentAddress());
+        if (!AddressTool.validAddress(form.getAgentAddress())) {
+            throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
+        }
+        Account account = accountService.getAccount(form.getSignAddress()).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        if (account.isEncrypted() && account.isLocked()) {
+            AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
+            if (!account.validatePassword(form.getPassword())) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
+            }
+        }
+
+        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+        Agent agent = null;
+        for (Agent p : agentList) {
+            if (p.getDelHeight() > 0) {
+                continue;
+            }
+            if (Arrays.equals(p.getAgentAddress(), form.getAgentAddress().getBytes())) {
+                agent = p;
+                break;
+            }
+        }
+
+        if (agent == null || agent.getDelHeight() > 0) {
+            return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
+        }
+
+        // 发起者，创建
+        if(form.getTxdata() == null || form.getTxdata().trim().length() == 0) {
+            if (form.getM() <= 0) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+            if (form.getPubkeys() == null || form.getPubkeys().size() == 0 || form.getPubkeys().size() < form.getM()) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+
+            // Create unlock script
+            Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(),form.getPubkeys());
+
+            StopAgent stopAgent = new StopAgent();
+            stopAgent.setAddress(agent.getAgentAddress());
+            stopAgent.setCreateTxHash(agent.getTxHash());
+
+            StopAgentTransaction tx = new StopAgentTransaction();
+            tx.setTime(TimeService.currentTimeMillis());
+            tx.setTxData(stopAgent);
+
+            CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME);
+            tx.setCoinData(coinData);
+            Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+            coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
+        }
+
+        StopAgentTransaction tx = new StopAgentTransaction();
+        StopAgent stopAgent = new StopAgent();
+        stopAgent.setAddress(AddressTool.getAddress(form.getSignAddress()));
+
+        stopAgent.setCreateTxHash(agent.getTxHash());
+        tx.setTxData(stopAgent);
+
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME);
+
+        tx.setCoinData(coinData);
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
+        RpcClientResult result1 = this.txProcessing(tx, null, account, form.getPassword());
+        if (!result1.isSuccess()) {
+            return result1;
+        }
+        Map<String, String> valueMap = new HashMap<>();
+        valueMap.put("value", tx.getHash().getDigestHex());
+        return Result.getSuccess().setData(valueMap).toRpcClientResult();
+    }
+
 
     public Result txMutilProcessing(Transaction tx, List<P2PHKSignature> p2PHKSignatures,List<Script> scripts,TransactionSignature transactionSignature,byte[] fromAddr) throws NulsException,IOException{
         //当已签名数等于M则自动广播该交易
