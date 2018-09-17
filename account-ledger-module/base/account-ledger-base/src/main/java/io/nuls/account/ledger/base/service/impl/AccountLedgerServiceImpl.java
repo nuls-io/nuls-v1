@@ -554,6 +554,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 max = max.add(coin.getNa());
             }
             Na fee = TransactionFeeCalculator.getFee(size, price);
+            if(max.isLessThan(fee)){
+                //算出的金额不够扣手续费，表示可交易金额为0
+                return Result.getSuccess().setData(Na.ZERO);
+            }
             max = max.subtract(fee);
             return Result.getSuccess().setData(max);
         } catch (Exception e) {
