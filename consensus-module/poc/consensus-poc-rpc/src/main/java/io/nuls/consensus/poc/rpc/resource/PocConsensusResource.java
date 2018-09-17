@@ -1359,7 +1359,7 @@ public class PocConsensusResource {
     @POST
     @Path("/agent/stopMutil")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "多签账户注销共识节点 [3.6.5]", notes = "返回注销成功交易hash")
+    @ApiOperation(value = "多签账户注销共识节点", notes = "返回注销成功交易hash")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
@@ -1391,7 +1391,7 @@ public class PocConsensusResource {
             if (p.getDelHeight() > 0) {
                 continue;
             }
-            if (Arrays.equals(p.getAgentAddress(), form.getAgentAddress().getBytes())) {
+            if (Arrays.equals(p.getAgentAddress(), AddressTool.getAddress(form.getAgentAddress()))) {
                 agent = p;
                 break;
             }
@@ -1456,7 +1456,7 @@ public class PocConsensusResource {
     @POST
     @Path("/withdrawMutil")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "多签账户退出共识 [3.6.11]",
+    @ApiOperation(value = "多签账户退出共识",
             notes = "返回退出成功的交易hash")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = String.class)
