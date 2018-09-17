@@ -28,6 +28,7 @@ import io.nuls.contract.dto.ContractTokenInfo;
 import io.nuls.contract.dto.ContractTokenTransferInfoPo;
 import io.nuls.contract.dto.ContractTransfer;
 import io.nuls.contract.entity.tx.ContractTransferTransaction;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 
@@ -173,4 +174,10 @@ public interface ContractService {
     Result<byte[]> verifyContractResult(Transaction tx, ContractResult contractResult, byte[] stateRoot, long time, Map<String,Coin> toMaps, Map<String,Coin> contractUsedCoinMap, Long blockHeight);
 
     Result<byte[]> processTxs(List<Transaction> txs, long bestHeight, Block block, byte[] stateRoot, Map<String,Coin> toMaps, Map<String,Coin> contractUsedCoinMap);
+
+    /**
+     * 获取所有的合约转账(从合约转出)交易
+     * @return
+     */
+    Result<List<ContractTransferTransaction>> loadAllContractTransferTxList();
 }

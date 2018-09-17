@@ -18,6 +18,7 @@
 package org.ethereum.datasource;
 
 import org.ethereum.core.AccountState;
+import org.ethereum.core.BlockHeader;
 import org.ethereum.util.RLP;
 import org.ethereum.util.Value;
 import org.ethereum.vm.DataWord;
@@ -69,7 +70,7 @@ public class Serializers {
 
         @Override
         public DataWord deserialize(byte[] stream) {
-            return new DataWord(stream);
+            return DataWord.of(stream);
         }
     };
 
@@ -86,7 +87,7 @@ public class Serializers {
         public DataWord deserialize(byte[] stream) {
             if (stream == null || stream.length == 0) return null;
             byte[] dataDecoded = RLP.decode2(stream).get(0).getRLPData();
-            return new DataWord(dataDecoded);
+            return DataWord.of(dataDecoded);
         }
     };
 
@@ -96,13 +97,42 @@ public class Serializers {
     public final static Serializer<Value, byte[]> TrieNodeSerializer = new Serializer<Value, byte[]>() {
         @Override
         public byte[] serialize(Value object) {
-            return object.encode();
+            return object.asBytes();
         }
 
         @Override
         public Value deserialize(byte[] stream) {
-            return Value.fromRlpEncoded(stream);
+            return new Value(stream);
         }
     };
 
+    /**
+     * Trie node serializer (part of Ethereum spec)
+     */
+    public final static Serializer<BlockHeader, byte[]> BlockHeaderSerializer = new Serializer<BlockHeader, byte[]>() {
+        @Override
+        public byte[] serialize(BlockHeader object) {
+            return object == null ? null : object.getEncoded();
+        }
+
+        @Override
+        public BlockHeader deserialize(byte[] stream) {
+            return stream == null ? null : new BlockHeader(stream);
+        }
+    };
+
+    /**
+     * AS IS serializer (doesn't change anything)
+     */
+    public final static Serializer<byte[], byte[]> AsIsSerializer = new Serializer<byte[], byte[]>() {
+        @Override
+        public byte[] serialize(byte[] object) {
+            return object;
+        }
+
+        @Override
+        public byte[] deserialize(byte[] stream) {
+            return stream;
+        }
+    };
 }

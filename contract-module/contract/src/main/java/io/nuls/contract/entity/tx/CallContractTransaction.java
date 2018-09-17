@@ -51,6 +51,9 @@ public class CallContractTransaction extends Transaction<CallContractData> imple
 
     private transient ContractService contractService = NulsContext.getServiceBean(ContractService.class);
 
+    /**
+     * 保存到全网账本中
+     */
     private ContractResult contractResult;
 
     private transient Collection<ContractTransferTransaction> contractTransferTxs;
@@ -68,17 +71,44 @@ public class CallContractTransaction extends Transaction<CallContractData> imple
         return byteBuffer.readNulsData(new CallContractData());
     }
 
+    /**
+     * 用于钱包显示资产变动
+     *
+     * 资产变动: 1. 仅有手续费 2.从钱包地址向合约转账的金额、手续费
+     * 此方法`getInfo`用于钱包账户，而合约地址不属于钱包账户，所以这里的入参不会是合约地址
+     * 若toList只有一个Coin，则必然是调用者自身扣了手续费后的找零
+     * 若toList有两个Coin，则必然有一个是从钱包地址向合约转账的金额 - 对应的是合约地址，另一个是调用者自身扣了手续费后的找零 - 对应的是调用者的地址
+     *      这里的地址有三种情况，一是合约调用者的地址，二是合约转账(从合约转出)的`to`地址，三是合约Token转账的`from`,`to`
+     *      综上，由于方法入参不会是合约地址，因此除合约调用者地址外，其他地址传入都返回 `0`
+     * @param address
+     * @return
+     */
     @Override
     public String getInfo(byte[] address) {
-        boolean isTransfer = false;
-        Coin to = coinData.getTo().get(0);
-        if (!Arrays.equals(address, to.getAddress())) {
-            isTransfer = true;
-        }
-        if (isTransfer) {
-            return "-" + to.getNa().add(getFee()).toCoinString();
+        List<Coin> toList = coinData.getTo();
+        int size = toList.size();
+        if(size == 1) {
+            if (Arrays.equals(address, toList.get(0).getAddress())) {
+                return "-" + getFee().toCoinString();
+            } else {
+                return "0";
+            }
+        } else if(size == 2) {
+            Coin to1 = toList.get(0);
+            Coin to2 = toList.get(1);
+            boolean equals1 = Arrays.equals(address, to1.getAddress());
+            boolean equals2 = Arrays.equals(address, to2.getAddress());
+            if (!equals1 && !equals2) {
+                return "0";
+            } else if (!equals1) {
+                return "-" + to1.getNa().add(getFee()).toCoinString();
+            } else if (!equals2){
+                return "-" + to2.getNa().add(getFee()).toCoinString();
+            } else {
+                return "--";
+            }
         } else {
-            return "-" + getFee().toCoinString();
+            return "--";
         }
     }
 
@@ -132,7 +162,7 @@ public class CallContractTransaction extends Transaction<CallContractData> imple
             HashSet<ByteArrayWrapper> addressesSet = MapUtil.createHashSet(relativeAddress.size());
             relativeAddress.stream().forEach(address -> addressesSet.add(new ByteArrayWrapper(address)));
 
-            // 合约内部转账
+            // 合约转账(从合约转出)
             List<ContractTransfer> transfers = contractResult.getTransfers();
             if(transfers != null && transfers.size() > 0) {
                 for(ContractTransfer transfer : transfers) {

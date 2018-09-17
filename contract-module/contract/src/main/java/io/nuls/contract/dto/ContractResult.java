@@ -104,7 +104,7 @@ public class ContractResult {
     private boolean isNrc20;
 
     /**
-     * 合约转账交易
+     * 合约转账(从合约转出)交易
      */
     private List<ContractTransfer> transfers = new ArrayList<>();
 

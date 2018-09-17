@@ -55,7 +55,7 @@
         </protocol>
 
         <!-- extend 版本继承哪个版本-->
-        <protocol version="2" block="" extend="1" percent="60" delay="100">
+        <protocol version="2" block="" extend="1" percent="30" delay="5">
             <!-- 当前版本作废的交易协议-->
             <!--<tx-discards>-->
             <!--<tx-discard ref="transferTx_V1"/>-->

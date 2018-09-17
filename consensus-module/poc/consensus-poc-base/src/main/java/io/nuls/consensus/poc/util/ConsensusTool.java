@@ -147,7 +147,7 @@ public class ConsensusTool {
 
     public static CoinBaseTransaction createCoinBaseTx(MeetingMember member, List<Transaction> txList, MeetingRound localRound, long unlockHeight) {
         CoinData coinData = new CoinData();
-        // 合约剩余Gas退还/合约调用失败转入资金退还
+        // 合约剩余Gas退还
         List<Coin> returnGasList = returnContractSenderNa(txList, unlockHeight);
 
         List<Coin> rewardList = calcReward(txList, member, localRound, unlockHeight);
@@ -164,7 +164,6 @@ public class ConsensusTool {
         }
 
         for (Coin coin : rewardList) {
-            Log.info("=========================================coinBase: " + coin.toString());
             coinData.addTo(coin);
         }
         CoinBaseTransaction tx = new CoinBaseTransaction();

@@ -48,7 +48,7 @@ public class ContractTransfer {
     private NulsDigestData orginHash;
 
     /**
-     *  合约内部转账交易hash
+     *  合约转账(从合约转出)交易hash
      */
     private NulsDigestData hash;
 

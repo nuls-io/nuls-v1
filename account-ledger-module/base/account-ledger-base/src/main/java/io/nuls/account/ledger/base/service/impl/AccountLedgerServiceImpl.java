@@ -1224,7 +1224,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         long end = NulsContext.getInstance().getBestHeight();
         while (start <= end) {
             for (long i = start; i <= end; i++) {
-                List<Transaction> txs = blockService.getBlock(i).getData().getTxs();
+                List<Transaction> txs = blockService.getBlock(i, true).getData().getTxs();
                 for (Transaction tx : txs) {
                     importConfirmedTransaction(tx, addressBytes);
                 }
