@@ -1013,7 +1013,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     return coinDataResultList;
                 }
                 Na values = Na.ZERO;
-                // 累加到足够支付转出额与手续费
+                // 累加到足够支付转出额
                 for (int i = 0; i < coinList.size(); i++) {
                     Coin coin = coinList.get(i);
                     coins.add(coin);
@@ -1038,7 +1038,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                         }
                     }
 
-                    //需要判断是否找零，如果有找零，则需要重新计算手续费
+                    //需要判断是否找零，如果有找零
                     if (values.isGreaterThan(amount)) {
                         Na change = values.subtract(amount);
                         Coin changeCoin = new Coin();
@@ -1056,25 +1056,31 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                             coinDataResult.setChange(changeCoin);
                         }
                     }
-                    //coinDataResult.setFee(fee);
-                    if (values.isGreaterOrEquals(amount)) {
-                        coinDataResult.setEnough(true);
-                        coinDataResult.setCoinList(coins);
-                        coinDataResultList.add(coinDataResult);
-                    }
                     //最后一个地址计算手续费
                     if (fromList.size() - 1 == j) {
                         fee = TransactionFeeCalculator.getFee(size, price);
                     }
-                }
+                    if (values.isGreaterOrEquals(amount)) {
+                        coinDataResult.setEnough(true);
+                        coinDataResult.setCoinList(coins);
+                        coinDataResultList.add(coinDataResult);
+                        break;
+                    }
 
+
+                }
             } finally {
                 lock.unlock();
             }
         }
         //付手续费
+        boolean flag=false;
         for (int j = 0; j < fromList.size(); j++) {
+            if (flag){
+                break;
+            }
             byte[] address = fromList.get(j).getAddress();
+            Na amount = Na.valueOf(fromList.get(j).getAmount());
             lock.lock();
             try {
                 CoinDataResult coinDataResult = new CoinDataResult();
@@ -1095,20 +1101,37 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                     Coin coin=  coinList.get(i);
                     values = values.add(coin.getNa());
                     coins.add(coin);
+                    /**
+                     * 判断是否是脚本验证UTXO
+                     * */
+                    int signType = coinDataResult.getSignType();
+                    if (signType != 3) {
+                        if ((signType & 0x01) == 0 && coin.getTempOwner().length == 23) {
+                            coinDataResult.setSignType((byte) (signType | 0x01));
+                           // size += P2PHKSignature.SERIALIZE_LENGTH;
+                        } else if ((signType & 0x02) == 0 && coin.getTempOwner().length != 23) {
+                            coinDataResult.setSignType((byte) (signType | 0x02));
+                           // size += P2PHKSignature.SERIALIZE_LENGTH;
+                        }
+                    }
                     if (values.isLessThan(fee)) {
                         continue;
                     }
-                    Na change = values.subtract(fee);
+                    Na change = values.subtract(amount.add(fee));
                     Coin changeCoin = new Coin();
                     //changeCoin.setOwner(address);
                     //changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
                     changeCoin.setOwner(address);
                     changeCoin.setNa(change);
                     if (values.isGreaterOrEquals(fee) && !changeCoin.getNa().equals(Na.ZERO)) {
+                        //移除上面没有计算手续费的那个地址  从新计算减去amount+fee
+                        coinDataResultList.remove(j);
                         coinDataResult.setEnough(true);
                         coinDataResult.setChange(changeCoin);
                         coinDataResult.setCoinList(coins);
+                        coinDataResult.setFee(fee);
                         coinDataResultList.add(coinDataResult);
+                        flag=true;
                         break;
                     }
                 }
