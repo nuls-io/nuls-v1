@@ -37,6 +37,11 @@
             <artifactId>ledger</artifactId>
             <version>1.1.1-BETA</version>
         </dependency>
+        <dependency>
+            <groupId>io.nuls.account-ledger-module</groupId>
+            <artifactId>account-ledger</artifactId>
+            <version>1.1.1-BETA</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>${project.artifactId}-${project.version}</finalName>
