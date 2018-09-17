@@ -215,13 +215,13 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                         result = contractService.saveContractTransferTx(transferTx);
                         if(result.isFailed()) {
                             Log.error("save contract transfer tx to contract ledger error. msg: {}", result.getMsg());
-                            return Result.getFailed();
+                            return result;
                         }
 
                         result = accountLedgerService.saveConfirmedTransaction(transferTx);
                         if(result.isFailed()) {
                             Log.error("save contract transfer tx to account ledger error. msg: {}", result.getMsg());
-                            return Result.getFailed();
+                            return result;
                         }
 
                     } catch (Exception e) {

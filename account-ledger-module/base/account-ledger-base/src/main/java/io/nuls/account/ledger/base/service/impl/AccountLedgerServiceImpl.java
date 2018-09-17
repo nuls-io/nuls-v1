@@ -131,7 +131,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result<Integer> saveConfirmedTransactionList(List<Transaction> txs) {
         if (txs == null || txs.size() == 0) {
-            Result.getSuccess().setData(0);
+           return Result.getSuccess().setData(0);
         }
 
         List<byte[]> localAddresses = AccountLegerUtils.getLocalAddresses();
@@ -166,12 +166,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public Result<Integer> saveConfirmedTransaction(Transaction tx) {
 
         if (tx == null) {
-            Result.getSuccess().setData(0);
+           return Result.getSuccess().setData(0);
         }
 
         List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
-            Result.getSuccess().setData(0);
+           return Result.getSuccess().setData(0);
         }
         return saveConfirmedTransaction(tx, addresses);
     }
