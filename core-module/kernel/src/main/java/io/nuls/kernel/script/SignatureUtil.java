@@ -35,14 +35,16 @@ public class SignatureUtil {
             }
             if(transactionSignature.getP2PHKSignatures()  != null && transactionSignature.getP2PHKSignatures().size() > 0){
                 for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
-                    if(!ECKey.verify(tx.getHash().getDigestBytes(),signature.getSignData().getSignBytes(),signature.getPublicKey()))
+                    if(!ECKey.verify(tx.getHash().getDigestBytes(),signature.getSignData().getSignBytes(),signature.getPublicKey())) {
                         throw  new NulsException(KernelErrorCode.SIGNATURE_ERROR);
+                    }
                 }
             }
             if(transactionSignature.getScripts() != null && transactionSignature.getScripts().size() > 0){
                 for (Script script:transactionSignature.getScripts()) {
-                    if(!validScriptSign(tx.getHash().getDigestBytes(),script.getChunks()))
+                    if(!validScriptSign(tx.getHash().getDigestBytes(),script.getChunks())) {
                         throw  new NulsException(KernelErrorCode.SIGNATURE_ERROR);
+                    }
                 }
             }
         }catch (NulsException e){
@@ -57,10 +59,12 @@ public class SignatureUtil {
      */
     public static boolean containsAddress(Transaction tx,byte[] address) throws  NulsException{
         Set<String> addressSet = getAddressFromTX(tx);
-        if(addressSet == null || addressSet.size() == 0)
+        if(addressSet == null || addressSet.size() == 0) {
             return false;
-        if(addressSet.contains(AddressTool.getStringAddressByBytes(address)))
+        }
+        if(addressSet.contains(AddressTool.getStringAddressByBytes(address))) {
             return  true;
+        }
         return  false;
     }
     /**
@@ -79,9 +83,11 @@ public class SignatureUtil {
                 return null;
             }
             if(transactionSignature.getP2PHKSignatures()  != null && transactionSignature.getP2PHKSignatures().size() > 0){
-                for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures())
-                    if(signature.getPublicKey() != null || signature.getPublicKey().length == 0)
+                for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
+                    if(signature.getPublicKey() != null || signature.getPublicKey().length == 0) {
                         addressSet.add(AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey())));
+                    }
+                }
             }
             if(transactionSignature.getScripts() != null && transactionSignature.getScripts().size() > 0){
                 for (Script script:transactionSignature.getScripts()) {
@@ -96,40 +102,6 @@ public class SignatureUtil {
         }
         return addressSet;
     }
-
-    /**
-     * 生成交易TransactionSignture
-     * @param  tx                   交易
-     * @param  scriptAccounts       需要生成脚本的账户列表(普通交易脚本生成)
-     * @param  signAccounts         需要生成普通签名的账户列表
-     * @param  password             密码
-     */
-    /*public void createTransactionSignture(Transaction tx, List<Account> scriptAccounts, List<Account> signAccounts,String password){
-        TransactionSignature transactionSignature = new TransactionSignature();
-        List<P2PHKSignature> p2PHKSignatures = null;
-        List<Script> scripts = null;
-        try {
-            if(scriptAccounts != null && scriptAccounts.size() > 0){
-                List<byte[]> signtures = new ArrayList<>();
-                List<byte[]> pubkeys = new ArrayList<>();
-                for (Account scriptAccount : scriptAccounts) {
-                    signtures.add(accountService.signDigest(tx.getHash().getDigestBytes(), scriptAccount, password).getSignBytes());
-                    pubkeys.add(scriptAccount.getPubKey());
-                }
-                scripts = createInputScripts(signtures,pubkeys);
-            }
-            if(signAccounts != null && scriptAccounts.size() > 0){
-                    p2PHKSignatures = createSignatures(tx,signAccounts,password);
-            }
-            transactionSignature.setP2PHKSignatures(p2PHKSignatures);
-            transactionSignature.setScripts(scripts);
-            tx.setTransactionSignature(transactionSignature.serialize());
-        }catch (IOException ie){
-            log.error("TransactionSignature serialize error!");
-        }catch (NulsException ne){
-            log.error("TransactionSignature serialize error!");
-        }
-    }*/
 
     /**
      * 生成交易TransactionSignture
@@ -170,8 +142,9 @@ public class SignatureUtil {
      */
     public static List<P2PHKSignature> createSignaturesByEckey(Transaction tx, List<ECKey> eckeys){
         List<P2PHKSignature> signatures = new ArrayList<>();
-        for (ECKey ecKey:eckeys)
+        for (ECKey ecKey:eckeys) {
             signatures.add(createSignatureByEckey(tx,ecKey));
+        }
         return  signatures;
     }
 
@@ -202,25 +175,6 @@ public class SignatureUtil {
     }
 
     /**
-     * 生成交易的签名传统
-     * @param  tx                交易
-     * @param  account          账户列表
-     * @param  password          密码
-     * */
-    /*public P2PHKSignature createSignature(Transaction tx, Account account, String password){
-        P2PHKSignature p2PHKSignature = new P2PHKSignature();
-        try {
-            p2PHKSignature.setPublicKey(account.getPubKey());
-            //用当前交易的hash和账户的私钥账户
-            p2PHKSignature.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
-        }catch (NulsException e){
-            log.warn("create p2PHKSignature error!");
-            return null;
-        }
-        return  p2PHKSignature;
-    }*/
-
-    /**
      * 生成多个解锁脚本
      * @param  signtures   签名列表
      * @param  pubkeys     公钥列表
@@ -244,8 +198,9 @@ public class SignatureUtil {
      */
     public static Script createInputScript(byte[] signture, byte[] pubkey){
         Script script = null;
-        if(signture != null && pubkey != null)
+        if(signture != null && pubkey != null) {
             script = ScriptBuilder.createNulsInputScript(signture,pubkey);
+        }
         return script;
     }
 
@@ -255,12 +210,14 @@ public class SignatureUtil {
      */
     public static Script createOutputScript(byte[] address){
         Script script = null;
-        if(address == null || address.length <23)
+        if(address == null || address.length <23) {
             return null;
-        if(address[2] == 3)
+        }
+        if(address[2] == 3) {
             script = ScriptBuilder.createOutputScript(address,0);
-        else
+        } else {
             script = ScriptBuilder.createOutputScript(address,1);
+        }
         return script;
     }
 
@@ -307,8 +264,9 @@ public class SignatureUtil {
      * @param  chunks          需要验证的脚本
      */
     public static boolean validScriptSign(byte [] digestBytes,List<ScriptChunk> chunks){
-        if(chunks == null || chunks.size() < 2)
+        if(chunks == null || chunks.size() < 2) {
             return false;
+        }
         //如果脚本是以OP_0开头则代表该脚本为多重签名/P2SH脚本
         if(chunks.get(0).opcode == ScriptOpCodes.OP_0){
             byte[] redeemByte = chunks.get(chunks.size()-1).data;
@@ -316,13 +274,15 @@ public class SignatureUtil {
             List<ScriptChunk> redeemChunks = redeemScript.getChunks();
 
             LinkedList<byte[]> signtures = new LinkedList<byte[]>();
-            for(int i=1;i<chunks.size()-1;i++)
+            for(int i=1;i<chunks.size()-1;i++) {
                 signtures.add(chunks.get(i).data);
+            }
 
             LinkedList<byte[]> pubkeys = new LinkedList<byte[]>();
             int m = Script.decodeFromOpN(redeemChunks.get(0).opcode);
-            if(signtures.size() < m)
+            if(signtures.size() < m) {
                 return false;
+            }
 
             for(int j=1;j<redeemChunks.size()-2;j++){
                 pubkeys.add(redeemChunks.get(j).data);
@@ -334,8 +294,9 @@ public class SignatureUtil {
             }
             return validMultiScriptSign(digestBytes,signtures,pubkeys);
         }else{
-            if(!ECKey.verify(digestBytes,chunks.get(0).data,chunks.get(1).data))
+            if(!ECKey.verify(digestBytes,chunks.get(0).data,chunks.get(1).data)) {
                 return false;
+            }
         }
         return  true;
     }
@@ -371,8 +332,9 @@ public class SignatureUtil {
     public static boolean validMultiScriptSign(byte [] digestBytes,LinkedList<byte[]> signtures,LinkedList<byte[]>pubkeys){
         while (signtures.size() > 0) {
             byte[] pubKey = pubkeys.pollFirst();
-            if (ECKey.verify(digestBytes,signtures.getFirst(),pubKey))
+            if (ECKey.verify(digestBytes,signtures.getFirst(),pubKey)) {
                 signtures.pollFirst();
+            }
             if (signtures.size() > pubkeys.size()) {
                 return false;
             }
