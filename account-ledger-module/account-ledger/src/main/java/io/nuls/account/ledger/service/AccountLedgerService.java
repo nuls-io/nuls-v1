@@ -239,6 +239,17 @@ public interface AccountLedgerService {
     Result<Na> getMaxAmountOfOnce(byte[] address, Transaction tx, Na price);
 
     /**
+     * 根据账户计算一次交易(不超出最大交易数据大小下)的最大金额
+     * Calculate the maximum amount of a transaction (not exceeding the maximum transaction data size) based on the account
+     *
+     * @param address
+     * @param tx
+     * @param price
+     * @return
+     */
+    Result<Na> getMultiMaxAmountOfOnce(byte[] address, Transaction tx, Na price,int size);
+
+    /**
      * 多地址转账
      *
      * @param fromModelList

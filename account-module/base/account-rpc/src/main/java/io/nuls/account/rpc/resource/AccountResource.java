@@ -61,6 +61,8 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.ScriptBuilder;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
@@ -1326,5 +1328,64 @@ public class AccountResource {
             list.add(dto);
         }
         return Result.getSuccess().setData(list).toRpcClientResult();
+    }
+
+    @GET
+    @Path("/multiAlias/fee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("[别名手续费] 获取设置别名手续 ")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult multiAliasFee(@BeanParam() MultiAccountCreateForm form) {
+        if (!AddressTool.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (StringUtils.isBlank(form.getAlias())) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Result result = aliasService.getAliasFee(form.getAddress(), form.getAlias());
+        AliasTransaction tx = new AliasTransaction();
+        tx.setTime(TimeService.currentTimeMillis());
+        Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(), form.getPubkeys());
+        Alias alias = new Alias(AddressTool.getAddress(form.getAddress()), form.getAlias());
+        tx.setTxData(alias);
+        try {
+            CoinDataResult coinDataResult = accountLedgerService.getMutilCoinData(AddressTool.getAddress(form.getAddress()), AccountConstant.ALIAS_NA, tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            if (!coinDataResult.isEnough()) {
+                return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE).toRpcClientResult();
+            }
+            CoinData coinData = new CoinData();
+            coinData.setFrom(coinDataResult.getCoinList());
+            Coin change = coinDataResult.getChange();
+            if (null != change) {
+                //创建toList
+                List<Coin> toList = new ArrayList<>();
+                toList.add(change);
+                coinData.setTo(toList);
+            }
+            Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
+            coinData.addTo(coin);
+            tx.setCoinData(coinData);
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
+        }
+        //交易签名的长度为m*单个签名长度+赎回脚本长度
+        int scriptSignLenth = redeemScript.getProgram().length + form.getM() * 72;
+        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES,scriptSignLenth);
+        Map<String, Long> map = new HashMap<>();
+        Long fee = null;
+        Long maxAmount = null;
+        if (result.isSuccess()) {
+            fee = ((Na) result.getData()).getValue();
+        }
+        if (rs.isSuccess()) {
+            maxAmount = ((Na) rs.getData()).getValue();
+        }
+        map.put("fee", fee);
+        map.put("maxAmount", maxAmount);
+        result.setData(map);
+        return result.toRpcClientResult();
     }
 }

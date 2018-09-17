@@ -22,14 +22,13 @@ public class WithdrawMultiProcessor implements CommandProcessor {
                 .newLine("\t<pubkey>,...<pubkey> \tPublic key that needs to be signed,If multiple commas are used to separate.")
                 .newLine("\t<m> \tAt least how many signatures are required to get the money.")
                 .newLine("\t<txhash> \tCurrent consensus transaction hash")
-                .newLine("\t<txdata> \tExit consensus transaction data currently created")
-                .newLine("\t[remark] \tremark - Not Required");
+                .newLine("\t<txdata> \tExit consensus transaction data currently created");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "withdrawMulti --- If it's a trading promoter <address> <signAddress> <pubkey>,...<pubkey> <m> <txhash> [remark]" +
+        return "withdrawMulti --- If it's a trading promoter <address> <signAddress> <pubkey>,...<pubkey> <m> <txhash>" +
                 "\t           --- Else <address> <signAddress> <txdata>";
     }
 
