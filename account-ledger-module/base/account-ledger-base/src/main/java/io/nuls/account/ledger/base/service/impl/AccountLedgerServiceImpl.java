@@ -1061,7 +1061,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                         coinDataResult.setEnough(true);
                         coinDataResult.setCoinList(coins);
                         coinDataResultList.add(coinDataResult);
-                        break;
                     }
                     //最后一个地址计算手续费
                     if (fromList.size() - 1 == j) {
