@@ -36,6 +36,7 @@ import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
@@ -297,13 +298,13 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
                 addresses.addAll(txAddressSet);
             }
         }
-        if(this.transactionSignature != null){
+        if (this.transactionSignature != null) {
             try {
                 Set<String> signAddresss = SignatureUtil.getAddressFromTX(this);
-                for(String signAddr : signAddresss){
+                for (String signAddr : signAddresss) {
                     boolean hasExist = false;
-                    for(byte[] addr : addresses){
-                        if(Arrays.equals(AddressTool.getAddress(signAddr),addr)) {
+                    for (byte[] addr : addresses) {
+                        if (Arrays.equals(AddressTool.getAddress(signAddr), addr)) {
                             hasExist = true;
                             break;
                         }
@@ -312,7 +313,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
                         addresses.add(AddressTool.getAddress(signAddr));
                     }
                 }
-            }catch (NulsException e){
+            } catch (NulsException e) {
                 Log.error(e);
             }
         }

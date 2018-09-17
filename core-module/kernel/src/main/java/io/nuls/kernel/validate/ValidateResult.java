@@ -26,7 +26,6 @@ package io.nuls.kernel.validate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.kernel.constant.ErrorCode;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.model.Result;
 

@@ -26,9 +26,6 @@ package io.nuls.kernel.processor;
 
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.validate.ValidateResult;
-
-import java.util.List;
 
 /**
  * 交易处理器，每个交易需要实现自己的交易处理器，处理交易本身的业务，交易不同的生命周期会调用不同的业务方法
@@ -41,7 +38,7 @@ import java.util.List;
  */
 public interface TransactionProcessor<T extends Transaction> extends ConflictDetectProcessor {
 
-//    /**
+    //    /**
 //     * 交易回滚时调用该方法
 //     * This method is called when the transaction rolls back.
 //     *
@@ -50,7 +47,7 @@ public interface TransactionProcessor<T extends Transaction> extends ConflictDet
 //     */
     Result onRollback(T tx, Object secondaryData);
 
-//    /**
+    //    /**
 //     * 交易存储时调用该方法
 //     * This method is called when the transaction save.
 //     *

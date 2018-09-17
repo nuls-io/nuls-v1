@@ -27,6 +27,7 @@ public class ErrorData {
     public static ErrorData getErrorData(ErrorCode errorCode) {
         return new ErrorData(errorCode);
     }
+
     public String getCode() {
         return code;
     }

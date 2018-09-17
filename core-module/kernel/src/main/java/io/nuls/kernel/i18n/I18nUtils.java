@@ -28,7 +28,6 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 
 import java.io.*;
@@ -92,7 +91,7 @@ public class I18nUtils {
         }
     }
 
-//    /**
+    //    /**
 //     * 设置系统语言，切换语言包
 //     * Set up the system language and switch the language package.
 //     *

@@ -27,31 +27,35 @@ package io.nuls.kernel.script;
 
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.*;
+import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
+
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class TransactionSignature extends BaseNulsData {
     private List<P2PHKSignature> p2PHKSignatures;
-    private List<Script> scripts ;
+    private List<Script> scripts;
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         // 旧签名数据写入流中
-        if(p2PHKSignatures != null && p2PHKSignatures.size() > 0){
+        if (p2PHKSignatures != null && p2PHKSignatures.size() > 0) {
             for (P2PHKSignature p2PHKSignature : p2PHKSignatures) {
-                if(p2PHKSignature != null)
+                if (p2PHKSignature != null)
                     stream.writeNulsData(p2PHKSignature);
             }
         }
-        if(scripts!=null &&  scripts.size()>0){
+        if (scripts != null && scripts.size() > 0) {
             //写入标识位，用于标识是否存在脚本未读
             stream.write(NulsConstant.SIGN_HOLDER);
             //写入脚本
-            for (Script script:scripts) {
-                if(script != null && script.getProgram() != null && script.getProgram().length>0)
+            for (Script script : scripts) {
+                if (script != null && script.getProgram() != null && script.getProgram().length > 0)
                     stream.writeBytesWithLength(script.getProgram());
             }
         }
@@ -64,17 +68,17 @@ public class TransactionSignature extends BaseNulsData {
         boolean isScript = false;
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         List<Script> scripts = new ArrayList<>();
-        while(!byteBuffer.isFinished()){
+        while (!byteBuffer.isFinished()) {
             course = byteBuffer.getCursor();
             //读取两个字节（脚本标识位），如果两个字节都为0x00则表示后面的数据流为脚本数据
-            if(!isScript && byteBuffer.getPayload().length<2)
+            if (!isScript && byteBuffer.getPayload().length < 2)
                 break;
-            if(isScript || Arrays.equals(NulsConstant.SIGN_HOLDER, byteBuffer.readBytes(2))){
+            if (isScript || Arrays.equals(NulsConstant.SIGN_HOLDER, byteBuffer.readBytes(2))) {
                 isScript = true;
-                if(!byteBuffer.isFinished()){
+                if (!byteBuffer.isFinished()) {
                     scripts.add(new Script(byteBuffer.readByLengthByte()));
                 }
-            }else{
+            } else {
                 byteBuffer.setCursor(course);
                 p2PHKSignatures.add(byteBuffer.readNulsData(new P2PHKSignature()));
             }
@@ -87,18 +91,18 @@ public class TransactionSignature extends BaseNulsData {
     public int size() {
         // 当前签名数据长度
         int size = 0;
-        if(p2PHKSignatures != null && p2PHKSignatures.size() > 0){
+        if (p2PHKSignatures != null && p2PHKSignatures.size() > 0) {
             for (P2PHKSignature p2PHKSignature : p2PHKSignatures) {
-                if(p2PHKSignature != null)
+                if (p2PHKSignature != null)
                     size += SerializeUtils.sizeOfNulsData(p2PHKSignature);
             }
         }
-        if(scripts!=null &&  scripts.size()>0){
+        if (scripts != null && scripts.size() > 0) {
             //写入标识位，用于标识是否存在脚本未读
             size += NulsConstant.SIGN_HOLDER.length;
             //写入脚本
-            for (Script script:scripts) {
-                if(script != null && script.getProgram() != null && script.getProgram().length > 0)
+            for (Script script : scripts) {
+                if (script != null && script.getProgram() != null && script.getProgram().length > 0)
                     size += SerializeUtils.sizeOfBytes(script.getProgram());
             }
         }

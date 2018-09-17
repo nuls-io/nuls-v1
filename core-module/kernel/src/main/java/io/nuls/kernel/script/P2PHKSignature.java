@@ -41,7 +41,7 @@ import io.nuls.kernel.validate.ValidateResult;
 import java.io.IOException;
 import java.util.Comparator;
 
-public class P2PHKSignature extends BaseNulsData{
+public class P2PHKSignature extends BaseNulsData {
 
     public static final int SERIALIZE_LENGTH = 110;
 
@@ -55,7 +55,7 @@ public class P2PHKSignature extends BaseNulsData{
     public P2PHKSignature(byte[] signBytes, byte[] publicKey) {
         this.signData = new NulsSignData();
         try {
-            this.signData.parse(signBytes,0);
+            this.signData.parse(signBytes, 0);
         } catch (NulsException e) {
             Log.error(e);
         }
@@ -98,7 +98,7 @@ public class P2PHKSignature extends BaseNulsData{
 
     public static P2PHKSignature createFromBytes(byte[] bytes) throws NulsException {
         P2PHKSignature sig = new P2PHKSignature();
-        sig.parse(bytes,0);
+        sig.parse(bytes, 0);
         return sig;
     }
 
@@ -147,6 +147,7 @@ public class P2PHKSignature extends BaseNulsData{
 
     public static final Comparator<P2PHKSignature> PUBKEY_COMPARATOR = new Comparator<P2PHKSignature>() {
         private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+
         @Override
         public int compare(P2PHKSignature k1, P2PHKSignature k2) {
             return comparator.compare(k1.getPublicKey(), k2.getPublicKey());

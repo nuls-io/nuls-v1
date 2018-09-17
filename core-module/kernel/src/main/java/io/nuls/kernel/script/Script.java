@@ -20,12 +20,13 @@ package io.nuls.kernel.script;
 
 import com.google.common.collect.Lists;
 import io.nuls.core.tools.crypto.ECKey;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.crypto.Sha256Hash;
 import io.nuls.core.tools.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.kernel.model.Address;
-import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.Transaction;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.SerializeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.crypto.digests.RIPEMD160Digest;
@@ -57,9 +58,11 @@ import static io.nuls.kernel.script.ScriptOpCodes.*;
  * clients don't have that data. In full mode, this class is used to run the interpreted language. It also has
  * static methods for building scripts.</p>
  */
-public class Script{
+public class Script {
 
-    /** Enumeration to encapsulate the type of this script. */
+    /**
+     * Enumeration to encapsulate the type of this script.
+     */
     public enum ScriptType {
         // Do NOT change the ordering of the following definitions because their ordinals are stored in databases.
         NO_TYPE,
@@ -68,7 +71,8 @@ public class Script{
         P2SH
     }
 
-    /** Flags to pass to {@link Script#correctlySpends(Transaction, long, Script, Set)}.
+    /**
+     * Flags to pass to {@link Script#correctlySpends(Transaction, long, Script, Set)}.
      * Note currently only P2SH, DERSIG and NULLDUMMY are actually supported.
      */
     public enum VerifyFlag {
@@ -83,12 +87,15 @@ public class Script{
         CLEANSTACK, // Require that only a single stack element remains after evaluation.
         CHECKLOCKTIMEVERIFY // Enable CHECKLOCKTIMEVERIFY operation
     }
+
     public static final EnumSet<VerifyFlag> ALL_VERIFY_FLAGS = EnumSet.allOf(VerifyFlag.class);
 
     private static final Logger log = LoggerFactory.getLogger(Script.class);
     public static final long MAX_SCRIPT_ELEMENT_SIZE = 520;  // bytes
     public static final int SIG_SIZE = 75;
-    /** Max number of sigops allowed in a standard p2sh redeem script */
+    /**
+     * Max number of sigops allowed in a standard p2sh redeem script
+     */
     public static final int MAX_P2SH_SIGOPS = 15;
 
     // The program is a set of chunks where each element is either [opcode] or [data, data, data ...]
@@ -100,7 +107,9 @@ public class Script{
     // Creation time of the associated keys in seconds since the epoch.
     private long creationTimeSeconds;
 
-    /** Creates an empty script that serializes to nothing. */
+    /**
+     * Creates an empty script that serializes to nothing.
+     */
     private Script() {
         chunks = Lists.newArrayList();
     }
@@ -108,12 +117,13 @@ public class Script{
     // Used from ScriptBuilder.
     Script(List<ScriptChunk> chunks) {
         this.chunks = Collections.unmodifiableList(new ArrayList<ScriptChunk>(chunks));
-        creationTimeSeconds = Utils.currentTimeSeconds();
+        creationTimeSeconds = System.currentTimeMillis() / 1000;
     }
 
     /**
      * Construct a Script that copies and wraps the programBytes array. The array is parsed and checked for syntactic
      * validity.
+     *
      * @param programBytes Array of program bytes from a transaction.
      */
     public Script(byte[] programBytes) throws ScriptException {
@@ -141,15 +151,18 @@ public class Script{
      */
     @Override
     public String toString() {
-        return Utils.join(chunks);
+        return SerializeUtils.join(chunks);
     }
 
-    /** Returns the serialized program as a newly created byte array. */
+    /**
+     * Returns the serialized program as a newly created byte array.
+     */
     public byte[] getProgram() {
         try {
             // Don't round-trip as Bitcoin Core doesn't and it would introduce a mismatch.
-            if (program != null)
+            if (program != null) {
                 return Arrays.copyOf(program, program.length);
+            }
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             for (ScriptChunk chunk : chunks) {
                 chunk.write(bos);
@@ -161,16 +174,18 @@ public class Script{
         }
     }
 
-    /** Returns an immutable list of the scripts parsed form. Each chunk is either an opcode or data element. */
+    /**
+     * Returns an immutable list of the scripts parsed form. Each chunk is either an opcode or data element.
+     */
     public List<ScriptChunk> getChunks() {
         return Collections.unmodifiableList(chunks);
     }
 
     private static final ScriptChunk[] STANDARD_TRANSACTION_SCRIPT_CHUNKS = {
-        new ScriptChunk(ScriptOpCodes.OP_DUP, null, 0),
-        new ScriptChunk(ScriptOpCodes.OP_HASH160, null, 1),
-        new ScriptChunk(ScriptOpCodes.OP_EQUALVERIFY, null, 23),
-        new ScriptChunk(ScriptOpCodes.OP_CHECKSIG, null, 24),
+            new ScriptChunk(ScriptOpCodes.OP_DUP, null, 0),
+            new ScriptChunk(ScriptOpCodes.OP_HASH160, null, 1),
+            new ScriptChunk(ScriptOpCodes.OP_EQUALVERIFY, null, 23),
+            new ScriptChunk(ScriptOpCodes.OP_CHECKSIG, null, 24),
     };
 
     /**
@@ -181,7 +196,7 @@ public class Script{
      * to reach into a programs structure and pull out bits of data without having to run it.
      * This is necessary to render the to/from addresses of transactions in a user interface.
      * Bitcoin Core does something similar.</p>
-     *
+     * <p>
      * 将输入流解析为脚本
      */
     private void parse(byte[] program) throws ScriptException {
@@ -197,32 +212,41 @@ public class Script{
                 // Read some bytes of data, where how many is the opcode value itself.
                 dataToRead = opcode;
             } else if (opcode == OP_PUSHDATA1) {
-                if (bis.available() < 1) throw new ScriptException("Unexpected end of script");
+                if (bis.available() < 1) {
+                    throw new ScriptException("Unexpected end of script");
+                }
                 dataToRead = bis.read();
             } else if (opcode == OP_PUSHDATA2) {
                 // Read a short, then read that many bytes of data.
-                if (bis.available() < 2) throw new ScriptException("Unexpected end of script");
+                if (bis.available() < 2) {
+                    throw new ScriptException("Unexpected end of script");
+                }
                 dataToRead = bis.read() | (bis.read() << 8);
             } else if (opcode == OP_PUSHDATA4) {
                 // Read a uint32, then read that many bytes of data.
                 // Though this is allowed, because its value cannot be > 520, it should never actually be used
-                if (bis.available() < 4) throw new ScriptException("Unexpected end of script");
-                dataToRead = ((long)bis.read()) | (((long)bis.read()) << 8) | (((long)bis.read()) << 16) | (((long)bis.read()) << 24);
+                if (bis.available() < 4) {
+                    throw new ScriptException("Unexpected end of script");
+                }
+                dataToRead = ((long) bis.read()) | (((long) bis.read()) << 8) | (((long) bis.read()) << 16) | (((long) bis.read()) << 24);
             }
 
             ScriptChunk chunk;
             if (dataToRead == -1) {
                 chunk = new ScriptChunk(opcode, null, startLocationInProgram);
             } else {
-                if (dataToRead > bis.available())
+                if (dataToRead > bis.available()) {
                     throw new ScriptException("Push of data element that is larger than remaining data");
-                byte[] data = new byte[(int)dataToRead];
-                checkState(dataToRead == 0 || bis.read(data, 0, (int)dataToRead) == dataToRead);
+                }
+                byte[] data = new byte[(int) dataToRead];
+                checkState(dataToRead == 0 || bis.read(data, 0, (int) dataToRead) == dataToRead);
                 chunk = new ScriptChunk(opcode, data, startLocationInProgram);
             }
             // Save some memory by eliminating redundant copies of the same chunk objects.
             for (ScriptChunk c : STANDARD_TRANSACTION_SCRIPT_CHUNKS) {
-                if (c.equals(chunk)) chunk = c;
+                if (c.equals(chunk)) {
+                    chunk = c;
+                }
             }
             chunks.add(chunk);
         }
@@ -233,12 +257,12 @@ public class Script{
      * where the peers talked to each other directly via TCP/IP, but has fallen out of favor with time due to that mode
      * of operation being susceptible to man-in-the-middle attacks. It is still used in coinbase outputs and can be
      * useful more exotic types of transaction, but today most payments are to addresses.
-     *
+     * <p>
      * 根据公钥生成的脚本(scriptPublicKey)
      */
     public boolean isSentToRawPubKey() {
         return chunks.size() == 2 && chunks.get(1).equalsOpCode(OP_CHECKSIG) &&
-               !chunks.get(0).isOpCode() && chunks.get(0).data.length > 1;
+                !chunks.get(0).isOpCode() && chunks.get(0).data.length > 1;
     }
 
     /**
@@ -246,16 +270,16 @@ public class Script{
      * address like 1VayNert3x1KzbpzMGt2qdqrAThiRovi8. This form was originally intended for the case where you wish
      * to send somebody money with a written code because their node is offline, but over time has become the standard
      * way to make payments due to the short and recognizable base58 form addresses come in.
-     *
+     * <p>
      * 判断脚本类型是否为发送到地址
      */
     public boolean isSentToAddress() {
         return chunks.size() == 5 &&
-               chunks.get(0).equalsOpCode(OP_DUP) &&
-               chunks.get(1).equalsOpCode(OP_HASH160) &&
-               chunks.get(2).data.length == Address.ADDRESS_LENGTH &&
-               chunks.get(3).equalsOpCode(OP_EQUALVERIFY) &&
-               chunks.get(4).equalsOpCode(OP_CHECKSIG);
+                chunks.get(0).equalsOpCode(OP_DUP) &&
+                chunks.get(1).equalsOpCode(OP_HASH160) &&
+                chunks.get(2).data.length == Address.ADDRESS_LENGTH &&
+                chunks.get(3).equalsOpCode(OP_EQUALVERIFY) &&
+                chunks.get(4).equalsOpCode(OP_CHECKSIG);
     }
 
     /**
@@ -270,23 +294,23 @@ public class Script{
      * <p>If a program matches the standard template DUP HASH160 &lt;pubkey hash&gt; EQUALVERIFY CHECKSIG
      * then this function retrieves the third element.
      * In this case, this is useful for fetching the destination address of a transaction.</p>
-     * 
+     *
      * <p>If a program matches the standard template HASH160 &lt;script hash&gt; EQUAL
      * then this function retrieves the second element.
      * In this case, this is useful for fetching the hash of the redeem script of a transaction.</p>
-     * 
+     *
      * <p>Otherwise it throws a ScriptException.</p>
-     *
+     * <p>
      * 获取公钥HASH
-     *
      */
     public byte[] getPubKeyHash() throws ScriptException {
-        if (isSentToAddress())
+        if (isSentToAddress()) {
             return chunks.get(2).data;
-        else if (isPayToScriptHash())
+        } else if (isPayToScriptHash()) {
             return chunks.get(1).data;
-        else
+        } else {
             throw new ScriptException("Script not in the standard scriptPubKey form");
+        }
     }
 
     /**
@@ -296,8 +320,8 @@ public class Script{
      * assumed to be a direct pay-to-key scriptPubKey (output) and the first constant is the public key.
      *
      * @throws ScriptException if the script is none of the named forms.
-     *
-     * 获取公钥
+     *                         <p>
+     *                         获取公钥
      */
     public byte[] getPubKey() throws ScriptException {
         if (chunks.size() != 2) {
@@ -320,6 +344,7 @@ public class Script{
 
     /**
      * Retrieves the sender public key from a LOCKTIMEVERIFY transaction
+     *
      * @return
      * @throws ScriptException
      */
@@ -332,6 +357,7 @@ public class Script{
 
     /**
      * Retrieves the recipient public key from a LOCKTIMEVERIFY transaction
+     *
      * @return
      * @throws ScriptException
      */
@@ -371,7 +397,7 @@ public class Script{
 
     /**
      * Gets the destination address from this script, if it's in the required form (see getPubKey).
-     * 
+     *
      * @param forcePayToPubKey
      *            If true, allow payToPubKey to be casted to the corresponding address. This is useful if you prefer
      *            showing addresses rather than pubkeys.
@@ -391,9 +417,9 @@ public class Script{
 
     /**
      * Writes out the given byte buffer to the output stream with the correct opcode prefix
-     * To write an integer call writeBytes(out, Utils.reverseBytes(Utils.encodeMPI(val, false)));
-     *
-     *  将输出流按正确的方式写入到字节缓冲区
+     * To write an integer call writeBytes(out, SerializeUtils.reverseBytes(SerializeUtils.encodeMPI(val, false)));
+     * <p>
+     * 将输出流按正确的方式写入到字节缓冲区
      */
     public static void writeBytes(OutputStream os, byte[] buf) throws IOException {
         if (buf.length < OP_PUSHDATA1) {
@@ -413,9 +439,10 @@ public class Script{
         }
     }
 
-    /** Creates a program that requires at least N of the given keys to sign, using OP_CHECKMULTISIG.
-     *  将OutputScript/scriptPublicKry  转为字节数组 用于传输
-     * */
+    /**
+     * Creates a program that requires at least N of the given keys to sign, using OP_CHECKMULTISIG.
+     * 将OutputScript/scriptPublicKry  转为字节数组 用于传输
+     */
     public static byte[] createMultiSigOutputScript(int threshold, List<ECKey> pubkeys) {
         checkArgument(threshold > 0);
         checkArgument(threshold <= pubkeys.size());
@@ -438,7 +465,7 @@ public class Script{
     }
 
     /**
-     *  根据签名和公钥的字节数组转为inputScript/scriptSig 字节数组用于网络传播
+     * 根据签名和公钥的字节数组转为inputScript/scriptSig 字节数组用于网络传播
      **/
     public static byte[] createInputScript(byte[] signature, byte[] pubkey) {
         try {
@@ -453,7 +480,7 @@ public class Script{
     }
 
     /**
-     *  根据签名的字节数组转为inputScript/scriptSig 字节数组用于网络传播
+     * 根据签名的字节数组转为inputScript/scriptSig 字节数组用于网络传播
      **/
     public static byte[] createInputScript(byte[] signature) {
         try {
@@ -471,7 +498,7 @@ public class Script{
      * Instead of the signatures resulting script has OP_0.
      * Having incomplete input script allows to pass around partially signed tx.
      * It is expected that this program later on will be updated with proper signatures.
-     *
+     * <p>
      * 创建一个空Script
      */
     public Script createEmptyInputScript(@Nullable ECKey key, @Nullable Script redeemScript) {
@@ -525,8 +552,9 @@ public class Script{
                 // OP_0, skip
             } else {
                 checkNotNull(chunk.data);
-                if (myIndex < redeemScript.findSigInRedeem(chunk.data, hash))
+                if (myIndex < redeemScript.findSigInRedeem(chunk.data, hash)) {
                     return sigCount;
+                }
                 sigCount++;
             }
         }
@@ -536,7 +564,7 @@ public class Script{
     private int findKeyInRedeem(ECKey key) {
         checkArgument(chunks.get(0).isOpCode()); // P2SH scriptSig
         int numKeys = Script.decodeFromOpN(chunks.get(chunks.size() - 2).opcode);
-        for (int i = 0 ; i < numKeys ; i++) {
+        for (int i = 0; i < numKeys; i++) {
             if (Arrays.equals(chunks.get(1 + i).data, key.getPubKey())) {
                 return i;
             }
@@ -551,13 +579,15 @@ public class Script{
      * @throws ScriptException if the script type is not understood or is pay to address or is P2SH (run this method on the "Redeem script" instead).
      */
     public List<ECKey> getPubKeys() {
-        if (!isSentToMultiSig())
+        if (!isSentToMultiSig()) {
             throw new ScriptException("Only usable for multisig scripts.");
+        }
 
         ArrayList<ECKey> result = Lists.newArrayList();
         int numKeys = Script.decodeFromOpN(chunks.get(chunks.size() - 2).opcode);
-        for (int i = 0 ; i < numKeys ; i++)
+        for (int i = 0; i < numKeys; i++) {
             result.add(ECKey.fromPublicOnly(chunks.get(1 + i).data));
+        }
         return result;
     }
 
@@ -571,9 +601,8 @@ public class Script{
             }
         }*/
 
-        throw new IllegalStateException("Could not find matching key for signature on " + hash.toString() + " sig " + Utils.HEX.encode(signatureBytes));
+        throw new IllegalStateException("Could not find matching key for signature on " + hash.toString() + " sig " + Hex.encode(signatureBytes));
     }
-
 
 
     ////////////////////// Interface used during verification of transactions/blocks ////////////////////////////////
@@ -584,19 +613,20 @@ public class Script{
         for (ScriptChunk chunk : chunks) {
             if (chunk.isOpCode()) {
                 switch (chunk.opcode) {
-                case OP_CHECKSIG:
-                case OP_CHECKSIGVERIFY:
-                    sigOps++;
-                    break;
-                case OP_CHECKMULTISIG:
-                case OP_CHECKMULTISIGVERIFY:
-                    if (accurate && lastOpCode >= OP_1 && lastOpCode <= OP_16)
-                        sigOps += decodeFromOpN(lastOpCode);
-                    else
-                        sigOps += 20;
-                    break;
-                default:
-                    break;
+                    case OP_CHECKSIG:
+                    case OP_CHECKSIGVERIFY:
+                        sigOps++;
+                        break;
+                    case OP_CHECKMULTISIG:
+                    case OP_CHECKMULTISIGVERIFY:
+                        if (accurate && lastOpCode >= OP_1 && lastOpCode <= OP_16) {
+                            sigOps += decodeFromOpN(lastOpCode);
+                        } else {
+                            sigOps += 20;
+                        }
+                        break;
+                    default:
+                        break;
                 }
                 lastOpCode = chunk.opcode;
             }
@@ -606,22 +636,24 @@ public class Script{
 
     static int decodeFromOpN(int opcode) {
         checkArgument((opcode == OP_0 || opcode == OP_1NEGATE) || (opcode >= OP_1 && opcode <= OP_16), "decodeFromOpN called on non OP_N opcode");
-        if (opcode == OP_0)
+        if (opcode == OP_0) {
             return 0;
-        else if (opcode == OP_1NEGATE)
+        } else if (opcode == OP_1NEGATE) {
             return -1;
-        else
+        } else {
             return opcode + 1 - OP_1;
+        }
     }
 
     static int encodeToOpN(int value) {
         checkArgument(value >= -1 && value <= 16, "encodeToOpN called for " + value + " which we cannot encode in an opcode.");
-        if (value == 0)
+        if (value == 0) {
             return OP_0;
-        else if (value == -1)
+        } else if (value == -1) {
             return OP_1NEGATE;
-        else
+        } else {
             return value - 1 + OP_1;
+        }
     }
 
     /**
@@ -636,7 +668,7 @@ public class Script{
         }
         return getSigOpCount(script.chunks, false);
     }
-    
+
     /**
      * Gets the count of P2SH Sig Ops in the Script scriptSig
      */
@@ -647,12 +679,13 @@ public class Script{
         } catch (ScriptException e) {
             // Ignore errors and count up to the parse-able length
         }
-        for (int i = script.chunks.size() - 1; i >= 0; i--)
+        for (int i = script.chunks.size() - 1; i >= 0; i--) {
             if (!script.chunks.get(i).isOpCode()) {
-                Script subScript =  new Script();
+                Script subScript = new Script();
                 subScript.parse(script.chunks.get(i).data);
                 return getSigOpCount(subScript.chunks, true);
             }
+        }
         return 0;
     }
 
@@ -717,31 +750,45 @@ public class Script{
         // printed out but one is a P2SH script and the other isn't! :(
         byte[] program = getProgram();
         return program.length == 26 &&
-               (program[0] & 0xff) == OP_HASH160 &&
-               (program[1] & 0xff) == 0x17 &&
-               (program[25] & 0xff) == OP_EQUAL;
+                (program[0] & 0xff) == OP_HASH160 &&
+                (program[1] & 0xff) == 0x17 &&
+                (program[25] & 0xff) == OP_EQUAL;
     }
 
     /**
      * Returns whether this script matches the format used for multisig outputs: [n] [keys...] [m] CHECKMULTISIG
      */
     public boolean isSentToMultiSig() {
-        if (chunks.size() < 4) return false;
+        if (chunks.size() < 4) {
+            return false;
+        }
         ScriptChunk chunk = chunks.get(chunks.size() - 1);
         // Must end in OP_CHECKMULTISIG[VERIFY].
-        if (!chunk.isOpCode()) return false;
-        if (!(chunk.equalsOpCode(OP_CHECKMULTISIG) || chunk.equalsOpCode(OP_CHECKMULTISIGVERIFY))) return false;
+        if (!chunk.isOpCode()) {
+            return false;
+        }
+        if (!(chunk.equalsOpCode(OP_CHECKMULTISIG) || chunk.equalsOpCode(OP_CHECKMULTISIGVERIFY))) {
+            return false;
+        }
         try {
             // Second to last chunk must be an OP_N opcode and there should be that many data chunks (keys).
             ScriptChunk m = chunks.get(chunks.size() - 2);
-            if (!m.isOpCode()) return false;
+            if (!m.isOpCode()) {
+                return false;
+            }
             int numKeys = decodeFromOpN(m.opcode);
-            if (numKeys < 1 || chunks.size() != 3 + numKeys) return false;
+            if (numKeys < 1 || chunks.size() != 3 + numKeys) {
+                return false;
+            }
             for (int i = 1; i < chunks.size() - 2; i++) {
-                if (chunks.get(i).isOpCode()) return false;
+                if (chunks.get(i).isOpCode()) {
+                    return false;
+                }
             }
             // First chunk must be an OP_N opcode too.
-            if (decodeFromOpN(chunks.get(0).opcode) < 1) return false;
+            if (decodeFromOpN(chunks.get(0).opcode) < 1) {
+                return false;
+            }
         } catch (IllegalArgumentException e) { // thrown by decodeFromOpN()
             return false;   // Not an OP_N opcode.
         }
@@ -749,30 +796,49 @@ public class Script{
     }
 
     public boolean isSentToCLTVPaymentChannel() {
-        if (chunks.size() != 10) return false;
+        if (chunks.size() != 10) {
+            return false;
+        }
         // Check that opcodes match the pre-determined format.
-        if (!chunks.get(0).equalsOpCode(OP_IF)) return false;
+        if (!chunks.get(0).equalsOpCode(OP_IF)) {
+            return false;
+        }
         // chunk[1] = recipient pubkey
-        if (!chunks.get(2).equalsOpCode(OP_CHECKSIGVERIFY)) return false;
-        if (!chunks.get(3).equalsOpCode(OP_ELSE)) return false;
+        if (!chunks.get(2).equalsOpCode(OP_CHECKSIGVERIFY)) {
+            return false;
+        }
+        if (!chunks.get(3).equalsOpCode(OP_ELSE)) {
+            return false;
+        }
         // chunk[4] = locktime
-        if (!chunks.get(5).equalsOpCode(OP_CHECKLOCKTIMEVERIFY)) return false;
-        if (!chunks.get(6).equalsOpCode(OP_DROP)) return false;
-        if (!chunks.get(7).equalsOpCode(OP_ENDIF)) return false;
+        if (!chunks.get(5).equalsOpCode(OP_CHECKLOCKTIMEVERIFY)) {
+            return false;
+        }
+        if (!chunks.get(6).equalsOpCode(OP_DROP)) {
+            return false;
+        }
+        if (!chunks.get(7).equalsOpCode(OP_ENDIF)) {
+            return false;
+        }
         // chunk[8] = sender pubkey
-        if (!chunks.get(9).equalsOpCode(OP_CHECKSIG)) return false;
+        if (!chunks.get(9).equalsOpCode(OP_CHECKSIG)) {
+            return false;
+        }
         return true;
     }
 
     private static boolean equalsRange(byte[] a, int start, byte[] b) {
-        if (start + b.length > a.length)
+        if (start + b.length > a.length) {
             return false;
-        for (int i = 0; i < b.length; i++)
-            if (a[i + start] != b[i])
+        }
+        for (int i = 0; i < b.length; i++) {
+            if (a[i + start] != b[i]) {
                 return false;
+            }
+        }
         return true;
     }
-    
+
     /**
      * Returns the script bytes of inputScript with all instances of the specified script object removed
      */
@@ -783,7 +849,7 @@ public class Script{
         int cursor = 0;
         while (cursor < inputScript.length) {
             boolean skip = equalsRange(inputScript, cursor, chunkToRemove);
-            
+
             int opcode = inputScript[cursor++] & 0xFF;
             int additionalBytes = 0;
             if (opcode >= 0 && opcode < OP_PUSHDATA1) {
@@ -792,12 +858,12 @@ public class Script{
                 additionalBytes = (0xFF & inputScript[cursor]) + 1;
             } else if (opcode == OP_PUSHDATA2) {
                 additionalBytes = ((0xFF & inputScript[cursor]) |
-                                  ((0xFF & inputScript[cursor+1]) << 8)) + 2;
+                        ((0xFF & inputScript[cursor + 1]) << 8)) + 2;
             } else if (opcode == OP_PUSHDATA4) {
                 additionalBytes = ((0xFF & inputScript[cursor]) |
-                                  ((0xFF & inputScript[cursor+1]) << 8) |
-                                  ((0xFF & inputScript[cursor+1]) << 16) |
-                                  ((0xFF & inputScript[cursor+1]) << 24)) + 4;
+                        ((0xFF & inputScript[cursor + 1]) << 8) |
+                        ((0xFF & inputScript[cursor + 1]) << 16) |
+                        ((0xFF & inputScript[cursor + 1]) << 24)) + 4;
             }
             if (!skip) {
                 try {
@@ -811,36 +877,38 @@ public class Script{
         }
         return bos.toByteArray();
     }
-    
+
     /**
      * Returns the script bytes of inputScript with all instances of the given op code removed
      */
     public static byte[] removeAllInstancesOfOp(byte[] inputScript, int opCode) {
-        return removeAllInstancesOf(inputScript, new byte[] {(byte)opCode});
+        return removeAllInstancesOf(inputScript, new byte[]{(byte) opCode});
     }
-    
+
     ////////////////////// Script verification and helpers ////////////////////////////////
-    
+
     private static boolean castToBool(byte[] data) {
-        for (int i = 0; i < data.length; i++)
-        {
+        for (int i = 0; i < data.length; i++) {
             // "Can be negative zero" - Bitcoin Core (see OpenSSL's BN_bn2mpi)
-            if (data[i] != 0)
+            if (data[i] != 0) {
                 return !(i == data.length - 1 && (data[i] & 0xFF) == 0x80);
+            }
         }
         return false;
     }
-    
+
     /**
      * Cast a script chunk to a BigInteger.
-     *
+     * <p>
      * sizes.
+     *
      * @throws ScriptException if the chunk is longer than 4 bytes.
      */
     private static BigInteger castToBigInteger(byte[] chunk) throws ScriptException {
-        if (chunk.length > 4)
+        if (chunk.length > 4) {
             throw new ScriptException("Script attempted to use an integer larger than 4 bytes");
-        return Utils.decodeMPI(Utils.reverseBytes(chunk), false);
+        }
+        return SerializeUtils.decodeMPI(SerializeUtils.reverseBytes(chunk), false);
     }
 
     /**
@@ -851,10 +919,11 @@ public class Script{
      * @throws ScriptException if the chunk is longer than the specified maximum.
      */
     private static BigInteger castToBigInteger(final byte[] chunk, final int maxLength) throws ScriptException {
-        if (chunk.length > maxLength)
+        if (chunk.length > maxLength) {
             throw new ScriptException("Script attempted to use an integer larger than "
-                + maxLength + " bytes");
-        return Utils.decodeMPI(Utils.reverseBytes(chunk), false);
+                    + maxLength + " bytes");
+        }
+        return SerializeUtils.decodeMPI(SerializeUtils.reverseBytes(chunk), false);
     }
 
     public boolean isOpReturn() {
@@ -869,8 +938,8 @@ public class Script{
     public static void executeScript(@Nullable Transaction txContainingThis, long index,
                                      Script script, LinkedList<byte[]> stack, boolean enforceNullDummy) throws ScriptException {
         final EnumSet<VerifyFlag> flags = enforceNullDummy
-            ? EnumSet.of(VerifyFlag.NULLDUMMY)
-            : EnumSet.noneOf(VerifyFlag.class);
+                ? EnumSet.of(VerifyFlag.NULLDUMMY)
+                : EnumSet.noneOf(VerifyFlag.class);
 
         executeScript(txContainingThis, index, script, stack, flags);
     }
@@ -879,11 +948,12 @@ public class Script{
      * Exposes the script interpreter. Normally you should not use this directly, instead use
      * is useful if you need more precise control or access to the final state of the stack. This interface is very
      * likely to change in future.
-     * @param  txContainingThis   交易
-     * @param  index              解锁脚本的索引
-     * @param script              锁定脚本
-     * @param stack               命令队列
-     * @param verifyFlags         验证类型集合
+     *
+     * @param txContainingThis 交易
+     * @param index            解锁脚本的索引
+     * @param script           锁定脚本
+     * @param stack            命令队列
+     * @param verifyFlags      验证类型集合
      **/
     public static void executeScript(@Nullable Transaction txContainingThis, long index,
                                      Script script, LinkedList<byte[]> stack, Set<VerifyFlag> verifyFlags) throws ScriptException {
@@ -897,539 +967,607 @@ public class Script{
             boolean shouldExecute = !ifStack.contains(false);
 
             if (chunk.opcode == OP_0) {
-                if (!shouldExecute)
+                if (!shouldExecute) {
                     continue;
+                }
 
-                stack.add(new byte[] {});
+                stack.add(new byte[]{});
             } else if (!chunk.isOpCode()) {
-                if (chunk.data.length > MAX_SCRIPT_ELEMENT_SIZE)
+                if (chunk.data.length > MAX_SCRIPT_ELEMENT_SIZE) {
                     throw new ScriptException("Attempted to push a data string larger than 520 bytes");
+                }
 
-                if (!shouldExecute)
+                if (!shouldExecute) {
                     continue;
+                }
 
                 stack.add(chunk.data);
             } else {
                 int opcode = chunk.opcode;
                 if (opcode > OP_16) {
                     opCount++;
-                    if (opCount > 201)
+                    if (opCount > 201) {
                         throw new ScriptException("More script operations than is allowed");
+                    }
                 }
 
-                if (opcode == OP_VERIF || opcode == OP_VERNOTIF)
+                if (opcode == OP_VERIF || opcode == OP_VERNOTIF) {
                     throw new ScriptException("Script included OP_VERIF or OP_VERNOTIF");
+                }
 
                 if (opcode == OP_CAT || opcode == OP_SUBSTR || opcode == OP_LEFT || opcode == OP_RIGHT ||
-                    opcode == OP_INVERT || opcode == OP_AND || opcode == OP_OR || opcode == OP_XOR ||
-                    opcode == OP_2MUL || opcode == OP_2DIV || opcode == OP_MUL || opcode == OP_DIV ||
-                    opcode == OP_MOD || opcode == OP_LSHIFT || opcode == OP_RSHIFT)
+                        opcode == OP_INVERT || opcode == OP_AND || opcode == OP_OR || opcode == OP_XOR ||
+                        opcode == OP_2MUL || opcode == OP_2DIV || opcode == OP_MUL || opcode == OP_DIV ||
+                        opcode == OP_MOD || opcode == OP_LSHIFT || opcode == OP_RSHIFT) {
                     throw new ScriptException("Script included a disabled Script Op.");
+                }
 
                 switch (opcode) {
-                case OP_IF:
-                    if (!shouldExecute) {
-                        ifStack.add(false);
+                    case OP_IF:
+                        if (!shouldExecute) {
+                            ifStack.add(false);
+                            continue;
+                        }
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted OP_IF on an empty stack");
+                        }
+                        ifStack.add(castToBool(stack.pollLast()));
                         continue;
-                    }
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted OP_IF on an empty stack");
-                    ifStack.add(castToBool(stack.pollLast()));
-                    continue;
-                case OP_NOTIF:
-                    if (!shouldExecute) {
-                        ifStack.add(false);
+                    case OP_NOTIF:
+                        if (!shouldExecute) {
+                            ifStack.add(false);
+                            continue;
+                        }
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted OP_NOTIF on an empty stack");
+                        }
+                        ifStack.add(!castToBool(stack.pollLast()));
                         continue;
-                    }
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted OP_NOTIF on an empty stack");
-                    ifStack.add(!castToBool(stack.pollLast()));
-                    continue;
-                case OP_ELSE:
-                    if (ifStack.isEmpty())
-                        throw new ScriptException("Attempted OP_ELSE without OP_IF/NOTIF");
-                    ifStack.add(!ifStack.pollLast());
-                    continue;
-                case OP_ENDIF:
-                    if (ifStack.isEmpty())
-                        throw new ScriptException("Attempted OP_ENDIF without OP_IF/NOTIF");
-                    ifStack.pollLast();
+                    case OP_ELSE:
+                        if (ifStack.isEmpty()) {
+                            throw new ScriptException("Attempted OP_ELSE without OP_IF/NOTIF");
+                        }
+                        ifStack.add(!ifStack.pollLast());
+                        continue;
+                    case OP_ENDIF:
+                        if (ifStack.isEmpty()) {
+                            throw new ScriptException("Attempted OP_ENDIF without OP_IF/NOTIF");
+                        }
+                        ifStack.pollLast();
+                        continue;
+                }
+
+                if (!shouldExecute) {
                     continue;
                 }
 
-                if (!shouldExecute)
-                    continue;
-
-                switch(opcode) {
-                // OP_0 is no opcode
-                case OP_1NEGATE:
-                    stack.add(Utils.reverseBytes(Utils.encodeMPI(BigInteger.ONE.negate(), false)));
-                    break;
-                case OP_1:
-                case OP_2:
-                case OP_3:
-                case OP_4:
-                case OP_5:
-                case OP_6:
-                case OP_7:
-                case OP_8:
-                case OP_9:
-                case OP_10:
-                case OP_11:
-                case OP_12:
-                case OP_13:
-                case OP_14:
-                case OP_15:
-                case OP_16:
-                    stack.add(Utils.reverseBytes(Utils.encodeMPI(BigInteger.valueOf(decodeFromOpN(opcode)), false)));
-                    break;
-                case OP_NOP:
-                    break;
-                case OP_VERIFY:
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted OP_VERIFY on an empty stack");
-                    if (!castToBool(stack.pollLast()))
-                        throw new ScriptException("OP_VERIFY failed");
-                    break;
-                case OP_RETURN:
-                    throw new ScriptException("Script called OP_RETURN");
-                case OP_TOALTSTACK:
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted OP_TOALTSTACK on an empty stack");
-                    altstack.add(stack.pollLast());
-                    break;
-                case OP_FROMALTSTACK:
-                    if (altstack.size() < 1)
-                        throw new ScriptException("Attempted OP_FROMALTSTACK on an empty altstack");
-                    stack.add(altstack.pollLast());
-                    break;
-                case OP_2DROP:
-                    if (stack.size() < 2)
-                        throw new ScriptException("Attempted OP_2DROP on a stack with size < 2");
-                    stack.pollLast();
-                    stack.pollLast();
-                    break;
-                case OP_2DUP:
-                    if (stack.size() < 2)
-                        throw new ScriptException("Attempted OP_2DUP on a stack with size < 2");
-                    Iterator<byte[]> it2DUP = stack.descendingIterator();
-                    byte[] OP2DUPtmpChunk2 = it2DUP.next();
-                    stack.add(it2DUP.next());
-                    stack.add(OP2DUPtmpChunk2);
-                    break;
-                case OP_3DUP:
-                    if (stack.size() < 3)
-                        throw new ScriptException("Attempted OP_3DUP on a stack with size < 3");
-                    Iterator<byte[]> it3DUP = stack.descendingIterator();
-                    byte[] OP3DUPtmpChunk3 = it3DUP.next();
-                    byte[] OP3DUPtmpChunk2 = it3DUP.next();
-                    stack.add(it3DUP.next());
-                    stack.add(OP3DUPtmpChunk2);
-                    stack.add(OP3DUPtmpChunk3);
-                    break;
-                case OP_2OVER:
-                    if (stack.size() < 4)
-                        throw new ScriptException("Attempted OP_2OVER on a stack with size < 4");
-                    Iterator<byte[]> it2OVER = stack.descendingIterator();
-                    it2OVER.next();
-                    it2OVER.next();
-                    byte[] OP2OVERtmpChunk2 = it2OVER.next();
-                    stack.add(it2OVER.next());
-                    stack.add(OP2OVERtmpChunk2);
-                    break;
-                case OP_2ROT:
-                    if (stack.size() < 6)
-                        throw new ScriptException("Attempted OP_2ROT on a stack with size < 6");
-                    byte[] OP2ROTtmpChunk6 = stack.pollLast();
-                    byte[] OP2ROTtmpChunk5 = stack.pollLast();
-                    byte[] OP2ROTtmpChunk4 = stack.pollLast();
-                    byte[] OP2ROTtmpChunk3 = stack.pollLast();
-                    byte[] OP2ROTtmpChunk2 = stack.pollLast();
-                    byte[] OP2ROTtmpChunk1 = stack.pollLast();
-                    stack.add(OP2ROTtmpChunk3);
-                    stack.add(OP2ROTtmpChunk4);
-                    stack.add(OP2ROTtmpChunk5);
-                    stack.add(OP2ROTtmpChunk6);
-                    stack.add(OP2ROTtmpChunk1);
-                    stack.add(OP2ROTtmpChunk2);
-                    break;
-                case OP_2SWAP:
-                    if (stack.size() < 4)
-                        throw new ScriptException("Attempted OP_2SWAP on a stack with size < 4");
-                    byte[] OP2SWAPtmpChunk4 = stack.pollLast();
-                    byte[] OP2SWAPtmpChunk3 = stack.pollLast();
-                    byte[] OP2SWAPtmpChunk2 = stack.pollLast();
-                    byte[] OP2SWAPtmpChunk1 = stack.pollLast();
-                    stack.add(OP2SWAPtmpChunk3);
-                    stack.add(OP2SWAPtmpChunk4);
-                    stack.add(OP2SWAPtmpChunk1);
-                    stack.add(OP2SWAPtmpChunk2);
-                    break;
-                case OP_IFDUP:
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted OP_IFDUP on an empty stack");
-                    if (castToBool(stack.getLast()))
+                switch (opcode) {
+                    // OP_0 is no opcode
+                    case OP_1NEGATE:
+                        stack.add(SerializeUtils.reverseBytes(SerializeUtils.encodeMPI(BigInteger.ONE.negate(), false)));
+                        break;
+                    case OP_1:
+                    case OP_2:
+                    case OP_3:
+                    case OP_4:
+                    case OP_5:
+                    case OP_6:
+                    case OP_7:
+                    case OP_8:
+                    case OP_9:
+                    case OP_10:
+                    case OP_11:
+                    case OP_12:
+                    case OP_13:
+                    case OP_14:
+                    case OP_15:
+                    case OP_16:
+                        stack.add(SerializeUtils.reverseBytes(SerializeUtils.encodeMPI(BigInteger.valueOf(decodeFromOpN(opcode)), false)));
+                        break;
+                    case OP_NOP:
+                        break;
+                    case OP_VERIFY:
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted OP_VERIFY on an empty stack");
+                        }
+                        if (!castToBool(stack.pollLast())) {
+                            throw new ScriptException("OP_VERIFY failed");
+                        }
+                        break;
+                    case OP_RETURN:
+                        throw new ScriptException("Script called OP_RETURN");
+                    case OP_TOALTSTACK:
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted OP_TOALTSTACK on an empty stack");
+                        }
+                        altstack.add(stack.pollLast());
+                        break;
+                    case OP_FROMALTSTACK:
+                        if (altstack.size() < 1) {
+                            throw new ScriptException("Attempted OP_FROMALTSTACK on an empty altstack");
+                        }
+                        stack.add(altstack.pollLast());
+                        break;
+                    case OP_2DROP:
+                        if (stack.size() < 2) {
+                            throw new ScriptException("Attempted OP_2DROP on a stack with size < 2");
+                        }
+                        stack.pollLast();
+                        stack.pollLast();
+                        break;
+                    case OP_2DUP:
+                        if (stack.size() < 2) {
+                            throw new ScriptException("Attempted OP_2DUP on a stack with size < 2");
+                        }
+                        Iterator<byte[]> it2DUP = stack.descendingIterator();
+                        byte[] OP2DUPtmpChunk2 = it2DUP.next();
+                        stack.add(it2DUP.next());
+                        stack.add(OP2DUPtmpChunk2);
+                        break;
+                    case OP_3DUP:
+                        if (stack.size() < 3) {
+                            throw new ScriptException("Attempted OP_3DUP on a stack with size < 3");
+                        }
+                        Iterator<byte[]> it3DUP = stack.descendingIterator();
+                        byte[] OP3DUPtmpChunk3 = it3DUP.next();
+                        byte[] OP3DUPtmpChunk2 = it3DUP.next();
+                        stack.add(it3DUP.next());
+                        stack.add(OP3DUPtmpChunk2);
+                        stack.add(OP3DUPtmpChunk3);
+                        break;
+                    case OP_2OVER:
+                        if (stack.size() < 4) {
+                            throw new ScriptException("Attempted OP_2OVER on a stack with size < 4");
+                        }
+                        Iterator<byte[]> it2OVER = stack.descendingIterator();
+                        it2OVER.next();
+                        it2OVER.next();
+                        byte[] OP2OVERtmpChunk2 = it2OVER.next();
+                        stack.add(it2OVER.next());
+                        stack.add(OP2OVERtmpChunk2);
+                        break;
+                    case OP_2ROT:
+                        if (stack.size() < 6) {
+                            throw new ScriptException("Attempted OP_2ROT on a stack with size < 6");
+                        }
+                        byte[] OP2ROTtmpChunk6 = stack.pollLast();
+                        byte[] OP2ROTtmpChunk5 = stack.pollLast();
+                        byte[] OP2ROTtmpChunk4 = stack.pollLast();
+                        byte[] OP2ROTtmpChunk3 = stack.pollLast();
+                        byte[] OP2ROTtmpChunk2 = stack.pollLast();
+                        byte[] OP2ROTtmpChunk1 = stack.pollLast();
+                        stack.add(OP2ROTtmpChunk3);
+                        stack.add(OP2ROTtmpChunk4);
+                        stack.add(OP2ROTtmpChunk5);
+                        stack.add(OP2ROTtmpChunk6);
+                        stack.add(OP2ROTtmpChunk1);
+                        stack.add(OP2ROTtmpChunk2);
+                        break;
+                    case OP_2SWAP:
+                        if (stack.size() < 4) {
+                            throw new ScriptException("Attempted OP_2SWAP on a stack with size < 4");
+                        }
+                        byte[] OP2SWAPtmpChunk4 = stack.pollLast();
+                        byte[] OP2SWAPtmpChunk3 = stack.pollLast();
+                        byte[] OP2SWAPtmpChunk2 = stack.pollLast();
+                        byte[] OP2SWAPtmpChunk1 = stack.pollLast();
+                        stack.add(OP2SWAPtmpChunk3);
+                        stack.add(OP2SWAPtmpChunk4);
+                        stack.add(OP2SWAPtmpChunk1);
+                        stack.add(OP2SWAPtmpChunk2);
+                        break;
+                    case OP_IFDUP:
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted OP_IFDUP on an empty stack");
+                        }
+                        if (castToBool(stack.getLast())) {
+                            stack.add(stack.getLast());
+                        }
+                        break;
+                    case OP_DEPTH:
+                        stack.add(SerializeUtils.reverseBytes(SerializeUtils.encodeMPI(BigInteger.valueOf(stack.size()), false)));
+                        break;
+                    case OP_DROP:
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted OP_DROP on an empty stack");
+                        }
+                        stack.pollLast();
+                        break;
+                    case OP_DUP:
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted OP_DUP on an empty stack");
+                        }
                         stack.add(stack.getLast());
-                    break;
-                case OP_DEPTH:
-                    stack.add(Utils.reverseBytes(Utils.encodeMPI(BigInteger.valueOf(stack.size()), false)));
-                    break;
-                case OP_DROP:
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted OP_DROP on an empty stack");
-                    stack.pollLast();
-                    break;
-                case OP_DUP:
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted OP_DUP on an empty stack");
-                    stack.add(stack.getLast());
-                    break;
-                case OP_NIP:
-                    if (stack.size() < 2)
-                        throw new ScriptException("Attempted OP_NIP on a stack with size < 2");
-                    byte[] OPNIPtmpChunk = stack.pollLast();
-                    stack.pollLast();
-                    stack.add(OPNIPtmpChunk);
-                    break;
-                case OP_OVER:
-                    if (stack.size() < 2)
-                        throw new ScriptException("Attempted OP_OVER on a stack with size < 2");
-                    Iterator<byte[]> itOVER = stack.descendingIterator();
-                    itOVER.next();
-                    stack.add(itOVER.next());
-                    break;
-                case OP_PICK:
-                case OP_ROLL:
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted OP_PICK/OP_ROLL on an empty stack");
-                    long val = castToBigInteger(stack.pollLast()).longValue();
-                    if (val < 0 || val >= stack.size())
-                        throw new ScriptException("OP_PICK/OP_ROLL attempted to get data deeper than stack size");
-                    Iterator<byte[]> itPICK = stack.descendingIterator();
-                    for (long i = 0; i < val; i++)
-                        itPICK.next();
-                    byte[] OPROLLtmpChunk = itPICK.next();
-                    if (opcode == OP_ROLL)
-                        itPICK.remove();
-                    stack.add(OPROLLtmpChunk);
-                    break;
-                case OP_ROT:
-                    if (stack.size() < 3)
-                        throw new ScriptException("Attempted OP_ROT on a stack with size < 3");
-                    byte[] OPROTtmpChunk3 = stack.pollLast();
-                    byte[] OPROTtmpChunk2 = stack.pollLast();
-                    byte[] OPROTtmpChunk1 = stack.pollLast();
-                    stack.add(OPROTtmpChunk2);
-                    stack.add(OPROTtmpChunk3);
-                    stack.add(OPROTtmpChunk1);
-                    break;
-                case OP_SWAP:
-                case OP_TUCK:
-                    if (stack.size() < 2)
-                        throw new ScriptException("Attempted OP_SWAP on a stack with size < 2");
-                    byte[] OPSWAPtmpChunk2 = stack.pollLast();
-                    byte[] OPSWAPtmpChunk1 = stack.pollLast();
-                    stack.add(OPSWAPtmpChunk2);
-                    stack.add(OPSWAPtmpChunk1);
-                    if (opcode == OP_TUCK)
+                        break;
+                    case OP_NIP:
+                        if (stack.size() < 2) {
+                            throw new ScriptException("Attempted OP_NIP on a stack with size < 2");
+                        }
+                        byte[] OPNIPtmpChunk = stack.pollLast();
+                        stack.pollLast();
+                        stack.add(OPNIPtmpChunk);
+                        break;
+                    case OP_OVER:
+                        if (stack.size() < 2) {
+                            throw new ScriptException("Attempted OP_OVER on a stack with size < 2");
+                        }
+                        Iterator<byte[]> itOVER = stack.descendingIterator();
+                        itOVER.next();
+                        stack.add(itOVER.next());
+                        break;
+                    case OP_PICK:
+                    case OP_ROLL:
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted OP_PICK/OP_ROLL on an empty stack");
+                        }
+                        long val = castToBigInteger(stack.pollLast()).longValue();
+                        if (val < 0 || val >= stack.size()) {
+                            throw new ScriptException("OP_PICK/OP_ROLL attempted to get data deeper than stack size");
+                        }
+                        Iterator<byte[]> itPICK = stack.descendingIterator();
+                        for (long i = 0; i < val; i++) {
+                            itPICK.next();
+                        }
+                        byte[] OPROLLtmpChunk = itPICK.next();
+                        if (opcode == OP_ROLL) {
+                            itPICK.remove();
+                        }
+                        stack.add(OPROLLtmpChunk);
+                        break;
+                    case OP_ROT:
+                        if (stack.size() < 3) {
+                            throw new ScriptException("Attempted OP_ROT on a stack with size < 3");
+                        }
+                        byte[] OPROTtmpChunk3 = stack.pollLast();
+                        byte[] OPROTtmpChunk2 = stack.pollLast();
+                        byte[] OPROTtmpChunk1 = stack.pollLast();
+                        stack.add(OPROTtmpChunk2);
+                        stack.add(OPROTtmpChunk3);
+                        stack.add(OPROTtmpChunk1);
+                        break;
+                    case OP_SWAP:
+                    case OP_TUCK:
+                        if (stack.size() < 2) {
+                            throw new ScriptException("Attempted OP_SWAP on a stack with size < 2");
+                        }
+                        byte[] OPSWAPtmpChunk2 = stack.pollLast();
+                        byte[] OPSWAPtmpChunk1 = stack.pollLast();
                         stack.add(OPSWAPtmpChunk2);
-                    break;
-                case OP_CAT:
-                case OP_SUBSTR:
-                case OP_LEFT:
-                case OP_RIGHT:
-                    throw new ScriptException("Attempted to use disabled Script Op.");
-                case OP_SIZE:
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted OP_SIZE on an empty stack");
-                    stack.add(Utils.reverseBytes(Utils.encodeMPI(BigInteger.valueOf(stack.getLast().length), false)));
-                    break;
-                case OP_INVERT:
-                case OP_AND:
-                case OP_OR:
-                case OP_XOR:
-                    throw new ScriptException("Attempted to use disabled Script Op.");
-                case OP_EQUAL:
-                    if (stack.size() < 2)
-                        throw new ScriptException("Attempted OP_EQUAL on a stack with size < 2");
-                    stack.add(AddressTool.checkPublicKeyHash(stack.pollLast(), stack.pollLast()) ? new byte[] {1} : new byte[] {});
-                    break;
-                case OP_EQUALVERIFY:
-                    if (stack.size() < 2)
-                        throw new ScriptException("Attempted OP_EQUALVERIFY on a stack with size < 2");
+                        stack.add(OPSWAPtmpChunk1);
+                        if (opcode == OP_TUCK) {
+                            stack.add(OPSWAPtmpChunk2);
+                        }
+                        break;
+                    case OP_CAT:
+                    case OP_SUBSTR:
+                    case OP_LEFT:
+                    case OP_RIGHT:
+                        throw new ScriptException("Attempted to use disabled Script Op.");
+                    case OP_SIZE:
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted OP_SIZE on an empty stack");
+                        }
+                        stack.add(SerializeUtils.reverseBytes(SerializeUtils.encodeMPI(BigInteger.valueOf(stack.getLast().length), false)));
+                        break;
+                    case OP_INVERT:
+                    case OP_AND:
+                    case OP_OR:
+                    case OP_XOR:
+                        throw new ScriptException("Attempted to use disabled Script Op.");
+                    case OP_EQUAL:
+                        if (stack.size() < 2) {
+                            throw new ScriptException("Attempted OP_EQUAL on a stack with size < 2");
+                        }
+                        stack.add(AddressTool.checkPublicKeyHash(stack.pollLast(), stack.pollLast()) ? new byte[]{1} : new byte[]{});
+                        break;
+                    case OP_EQUALVERIFY:
+                        if (stack.size() < 2) {
+                            throw new ScriptException("Attempted OP_EQUALVERIFY on a stack with size < 2");
+                        }
                     /*if (!Arrays.equals(stack.pollLast(), stack.pollLast()))
                         throw new ScriptException("OP_EQUALVERIFY: non-equal data");*/
-                    if (!AddressTool.checkPublicKeyHash(stack.pollLast(), stack.pollLast()))
-                        throw new ScriptException("OP_EQUALVERIFY: non-equal data");
-                    break;
-                case OP_1ADD:
-                case OP_1SUB:
-                case OP_NEGATE:
-                case OP_ABS:
-                case OP_NOT:
-                case OP_0NOTEQUAL:
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted a numeric op on an empty stack");
-                    BigInteger numericOPnum = castToBigInteger(stack.pollLast());
-
-                    switch (opcode) {
+                        if (!AddressTool.checkPublicKeyHash(stack.pollLast(), stack.pollLast())) {
+                            throw new ScriptException("OP_EQUALVERIFY: non-equal data");
+                        }
+                        break;
                     case OP_1ADD:
-                        numericOPnum = numericOPnum.add(BigInteger.ONE);
-                        break;
                     case OP_1SUB:
-                        numericOPnum = numericOPnum.subtract(BigInteger.ONE);
-                        break;
                     case OP_NEGATE:
-                        numericOPnum = numericOPnum.negate();
-                        break;
                     case OP_ABS:
-                        if (numericOPnum.signum() < 0)
-                            numericOPnum = numericOPnum.negate();
-                        break;
                     case OP_NOT:
-                        if (numericOPnum.equals(BigInteger.ZERO))
-                            numericOPnum = BigInteger.ONE;
-                        else
-                            numericOPnum = BigInteger.ZERO;
-                        break;
                     case OP_0NOTEQUAL:
-                        if (numericOPnum.equals(BigInteger.ZERO))
-                            numericOPnum = BigInteger.ZERO;
-                        else
-                            numericOPnum = BigInteger.ONE;
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted a numeric op on an empty stack");
+                        }
+                        BigInteger numericOPnum = castToBigInteger(stack.pollLast());
+
+                        switch (opcode) {
+                            case OP_1ADD:
+                                numericOPnum = numericOPnum.add(BigInteger.ONE);
+                                break;
+                            case OP_1SUB:
+                                numericOPnum = numericOPnum.subtract(BigInteger.ONE);
+                                break;
+                            case OP_NEGATE:
+                                numericOPnum = numericOPnum.negate();
+                                break;
+                            case OP_ABS:
+                                if (numericOPnum.signum() < 0) {
+                                    numericOPnum = numericOPnum.negate();
+                                }
+                                break;
+                            case OP_NOT:
+                                if (numericOPnum.equals(BigInteger.ZERO)) {
+                                    numericOPnum = BigInteger.ONE;
+                                } else {
+                                    numericOPnum = BigInteger.ZERO;
+                                }
+                                break;
+                            case OP_0NOTEQUAL:
+                                if (numericOPnum.equals(BigInteger.ZERO)) {
+                                    numericOPnum = BigInteger.ZERO;
+                                } else {
+                                    numericOPnum = BigInteger.ONE;
+                                }
+                                break;
+                            default:
+                                throw new AssertionError("Unreachable");
+                        }
+
+                        stack.add(SerializeUtils.reverseBytes(SerializeUtils.encodeMPI(numericOPnum, false)));
                         break;
-                    default:
-                        throw new AssertionError("Unreachable");
-                    }
-
-                    stack.add(Utils.reverseBytes(Utils.encodeMPI(numericOPnum, false)));
-                    break;
-                case OP_2MUL:
-                case OP_2DIV:
-                    throw new ScriptException("Attempted to use disabled Script Op.");
-                case OP_ADD:
-                case OP_SUB:
-                case OP_BOOLAND:
-                case OP_BOOLOR:
-                case OP_NUMEQUAL:
-                case OP_NUMNOTEQUAL:
-                case OP_LESSTHAN:
-                case OP_GREATERTHAN:
-                case OP_LESSTHANOREQUAL:
-                case OP_GREATERTHANOREQUAL:
-                case OP_MIN:
-                case OP_MAX:
-                    if (stack.size() < 2)
-                        throw new ScriptException("Attempted a numeric op on a stack with size < 2");
-                    BigInteger numericOPnum2 = castToBigInteger(stack.pollLast());
-                    BigInteger numericOPnum1 = castToBigInteger(stack.pollLast());
-
-                    BigInteger numericOPresult;
-                    switch (opcode) {
+                    case OP_2MUL:
+                    case OP_2DIV:
+                        throw new ScriptException("Attempted to use disabled Script Op.");
                     case OP_ADD:
-                        numericOPresult = numericOPnum1.add(numericOPnum2);
-                        break;
                     case OP_SUB:
-                        numericOPresult = numericOPnum1.subtract(numericOPnum2);
-                        break;
                     case OP_BOOLAND:
-                        if (!numericOPnum1.equals(BigInteger.ZERO) && !numericOPnum2.equals(BigInteger.ZERO))
-                            numericOPresult = BigInteger.ONE;
-                        else
-                            numericOPresult = BigInteger.ZERO;
-                        break;
                     case OP_BOOLOR:
-                        if (!numericOPnum1.equals(BigInteger.ZERO) || !numericOPnum2.equals(BigInteger.ZERO))
-                            numericOPresult = BigInteger.ONE;
-                        else
-                            numericOPresult = BigInteger.ZERO;
-                        break;
                     case OP_NUMEQUAL:
-                        if (numericOPnum1.equals(numericOPnum2))
-                            numericOPresult = BigInteger.ONE;
-                        else
-                            numericOPresult = BigInteger.ZERO;
-                        break;
                     case OP_NUMNOTEQUAL:
-                        if (!numericOPnum1.equals(numericOPnum2))
-                            numericOPresult = BigInteger.ONE;
-                        else
-                            numericOPresult = BigInteger.ZERO;
-                        break;
                     case OP_LESSTHAN:
-                        if (numericOPnum1.compareTo(numericOPnum2) < 0)
-                            numericOPresult = BigInteger.ONE;
-                        else
-                            numericOPresult = BigInteger.ZERO;
-                        break;
                     case OP_GREATERTHAN:
-                        if (numericOPnum1.compareTo(numericOPnum2) > 0)
-                            numericOPresult = BigInteger.ONE;
-                        else
-                            numericOPresult = BigInteger.ZERO;
-                        break;
                     case OP_LESSTHANOREQUAL:
-                        if (numericOPnum1.compareTo(numericOPnum2) <= 0)
-                            numericOPresult = BigInteger.ONE;
-                        else
-                            numericOPresult = BigInteger.ZERO;
-                        break;
                     case OP_GREATERTHANOREQUAL:
-                        if (numericOPnum1.compareTo(numericOPnum2) >= 0)
-                            numericOPresult = BigInteger.ONE;
-                        else
-                            numericOPresult = BigInteger.ZERO;
-                        break;
                     case OP_MIN:
-                        if (numericOPnum1.compareTo(numericOPnum2) < 0)
-                            numericOPresult = numericOPnum1;
-                        else
-                            numericOPresult = numericOPnum2;
-                        break;
                     case OP_MAX:
-                        if (numericOPnum1.compareTo(numericOPnum2) > 0)
-                            numericOPresult = numericOPnum1;
-                        else
-                            numericOPresult = numericOPnum2;
+                        if (stack.size() < 2) {
+                            throw new ScriptException("Attempted a numeric op on a stack with size < 2");
+                        }
+                        BigInteger numericOPnum2 = castToBigInteger(stack.pollLast());
+                        BigInteger numericOPnum1 = castToBigInteger(stack.pollLast());
+
+                        BigInteger numericOPresult;
+                        switch (opcode) {
+                            case OP_ADD:
+                                numericOPresult = numericOPnum1.add(numericOPnum2);
+                                break;
+                            case OP_SUB:
+                                numericOPresult = numericOPnum1.subtract(numericOPnum2);
+                                break;
+                            case OP_BOOLAND:
+                                if (!numericOPnum1.equals(BigInteger.ZERO) && !numericOPnum2.equals(BigInteger.ZERO)) {
+                                    numericOPresult = BigInteger.ONE;
+                                } else {
+                                    numericOPresult = BigInteger.ZERO;
+                                }
+                                break;
+                            case OP_BOOLOR:
+                                if (!numericOPnum1.equals(BigInteger.ZERO) || !numericOPnum2.equals(BigInteger.ZERO)) {
+                                    numericOPresult = BigInteger.ONE;
+                                } else {
+                                    numericOPresult = BigInteger.ZERO;
+                                }
+                                break;
+                            case OP_NUMEQUAL:
+                                if (numericOPnum1.equals(numericOPnum2)) {
+                                    numericOPresult = BigInteger.ONE;
+                                } else {
+                                    numericOPresult = BigInteger.ZERO;
+                                }
+                                break;
+                            case OP_NUMNOTEQUAL:
+                                if (!numericOPnum1.equals(numericOPnum2)) {
+                                    numericOPresult = BigInteger.ONE;
+                                } else {
+                                    numericOPresult = BigInteger.ZERO;
+                                }
+                                break;
+                            case OP_LESSTHAN:
+                                if (numericOPnum1.compareTo(numericOPnum2) < 0) {
+                                    numericOPresult = BigInteger.ONE;
+                                } else {
+                                    numericOPresult = BigInteger.ZERO;
+                                }
+                                break;
+                            case OP_GREATERTHAN:
+                                if (numericOPnum1.compareTo(numericOPnum2) > 0) {
+                                    numericOPresult = BigInteger.ONE;
+                                } else {
+                                    numericOPresult = BigInteger.ZERO;
+                                }
+                                break;
+                            case OP_LESSTHANOREQUAL:
+                                if (numericOPnum1.compareTo(numericOPnum2) <= 0) {
+                                    numericOPresult = BigInteger.ONE;
+                                } else {
+                                    numericOPresult = BigInteger.ZERO;
+                                }
+                                break;
+                            case OP_GREATERTHANOREQUAL:
+                                if (numericOPnum1.compareTo(numericOPnum2) >= 0) {
+                                    numericOPresult = BigInteger.ONE;
+                                } else {
+                                    numericOPresult = BigInteger.ZERO;
+                                }
+                                break;
+                            case OP_MIN:
+                                if (numericOPnum1.compareTo(numericOPnum2) < 0) {
+                                    numericOPresult = numericOPnum1;
+                                } else {
+                                    numericOPresult = numericOPnum2;
+                                }
+                                break;
+                            case OP_MAX:
+                                if (numericOPnum1.compareTo(numericOPnum2) > 0) {
+                                    numericOPresult = numericOPnum1;
+                                } else {
+                                    numericOPresult = numericOPnum2;
+                                }
+                                break;
+                            default:
+                                throw new RuntimeException("Opcode switched at runtime?");
+                        }
+
+                        stack.add(SerializeUtils.reverseBytes(SerializeUtils.encodeMPI(numericOPresult, false)));
                         break;
-                    default:
-                        throw new RuntimeException("Opcode switched at runtime?");
-                    }
+                    case OP_MUL:
+                    case OP_DIV:
+                    case OP_MOD:
+                    case OP_LSHIFT:
+                    case OP_RSHIFT:
+                        throw new ScriptException("Attempted to use disabled Script Op.");
+                    case OP_NUMEQUALVERIFY:
+                        if (stack.size() < 2) {
+                            throw new ScriptException("Attempted OP_NUMEQUALVERIFY on a stack with size < 2");
+                        }
+                        BigInteger OPNUMEQUALVERIFYnum2 = castToBigInteger(stack.pollLast());
+                        BigInteger OPNUMEQUALVERIFYnum1 = castToBigInteger(stack.pollLast());
 
-                    stack.add(Utils.reverseBytes(Utils.encodeMPI(numericOPresult, false)));
-                    break;
-                case OP_MUL:
-                case OP_DIV:
-                case OP_MOD:
-                case OP_LSHIFT:
-                case OP_RSHIFT:
-                    throw new ScriptException("Attempted to use disabled Script Op.");
-                case OP_NUMEQUALVERIFY:
-                    if (stack.size() < 2)
-                        throw new ScriptException("Attempted OP_NUMEQUALVERIFY on a stack with size < 2");
-                    BigInteger OPNUMEQUALVERIFYnum2 = castToBigInteger(stack.pollLast());
-                    BigInteger OPNUMEQUALVERIFYnum1 = castToBigInteger(stack.pollLast());
-
-                    if (!OPNUMEQUALVERIFYnum1.equals(OPNUMEQUALVERIFYnum2))
-                        throw new ScriptException("OP_NUMEQUALVERIFY failed");
-                    break;
-                case OP_WITHIN:
-                    if (stack.size() < 3)
-                        throw new ScriptException("Attempted OP_WITHIN on a stack with size < 3");
-                    BigInteger OPWITHINnum3 = castToBigInteger(stack.pollLast());
-                    BigInteger OPWITHINnum2 = castToBigInteger(stack.pollLast());
-                    BigInteger OPWITHINnum1 = castToBigInteger(stack.pollLast());
-                    if (OPWITHINnum2.compareTo(OPWITHINnum1) <= 0 && OPWITHINnum1.compareTo(OPWITHINnum3) < 0)
-                        stack.add(Utils.reverseBytes(Utils.encodeMPI(BigInteger.ONE, false)));
-                    else
-                        stack.add(Utils.reverseBytes(Utils.encodeMPI(BigInteger.ZERO, false)));
-                    break;
-                case OP_RIPEMD160:
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted OP_RIPEMD160 on an empty stack");
-                    RIPEMD160Digest digest = new RIPEMD160Digest();
-                    byte[] dataToHash = stack.pollLast();
-                    digest.update(dataToHash, 0, dataToHash.length);
-                    byte[] ripmemdHash = new byte[20];
-                    digest.doFinal(ripmemdHash, 0);
-                    stack.add(ripmemdHash);
-                    break;
-                case OP_SHA1:
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted OP_SHA1 on an empty stack");
-                    try {
-                        stack.add(MessageDigest.getInstance("SHA-1").digest(stack.pollLast()));
-                    } catch (NoSuchAlgorithmException e) {
-                        throw new RuntimeException(e);  // Cannot happen.
-                    }
-                    break;
-                case OP_SHA256:
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted OP_SHA256 on an empty stack");
-                    stack.add(Sha256Hash.hash(stack.pollLast()));
-                    break;
-                case OP_HASH160:
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted OP_HASH160 on an empty stack");
-                    stack.add(Utils.sha256hash160(stack.pollLast()));
-                    break;
-                case OP_HASH256:
-                    if (stack.size() < 1)
-                        throw new ScriptException("Attempted OP_SHA256 on an empty stack");
-                    stack.add(Sha256Hash.hashTwice(stack.pollLast()));
-                    break;
-                case OP_CODESEPARATOR:
-                    lastCodeSepLocation = chunk.getStartLocationInProgram() + 1;
-                    break;
-                case OP_CHECKSIG:
-                case OP_CHECKSIGVERIFY:
-                    if (txContainingThis == null)
-                        throw new IllegalStateException("Script attempted signature check but no tx was provided");
-                    executeCheckSig(txContainingThis, (int) index, script, stack, lastCodeSepLocation, opcode, verifyFlags);
-                    break;
-                case OP_CHECKMULTISIG:
-                case OP_CHECKMULTISIGVERIFY:
-                    if (txContainingThis == null)
-                        throw new IllegalStateException("Script attempted signature check but no tx was provided");
-                    opCount = executeMultiSig(txContainingThis, (int) index, script, stack, opCount, lastCodeSepLocation, opcode, verifyFlags);
-                    break;
-                case OP_CHECKLOCKTIMEVERIFY:
-                    if (!verifyFlags.contains(VerifyFlag.CHECKLOCKTIMEVERIFY)) {
-                        // not enabled; treat as a NOP2
+                        if (!OPNUMEQUALVERIFYnum1.equals(OPNUMEQUALVERIFYnum2)) {
+                            throw new ScriptException("OP_NUMEQUALVERIFY failed");
+                        }
+                        break;
+                    case OP_WITHIN:
+                        if (stack.size() < 3) {
+                            throw new ScriptException("Attempted OP_WITHIN on a stack with size < 3");
+                        }
+                        BigInteger OPWITHINnum3 = castToBigInteger(stack.pollLast());
+                        BigInteger OPWITHINnum2 = castToBigInteger(stack.pollLast());
+                        BigInteger OPWITHINnum1 = castToBigInteger(stack.pollLast());
+                        if (OPWITHINnum2.compareTo(OPWITHINnum1) <= 0 && OPWITHINnum1.compareTo(OPWITHINnum3) < 0) {
+                            stack.add(SerializeUtils.reverseBytes(SerializeUtils.encodeMPI(BigInteger.ONE, false)));
+                        } else {
+                            stack.add(SerializeUtils.reverseBytes(SerializeUtils.encodeMPI(BigInteger.ZERO, false)));
+                        }
+                        break;
+                    case OP_RIPEMD160:
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted OP_RIPEMD160 on an empty stack");
+                        }
+                        RIPEMD160Digest digest = new RIPEMD160Digest();
+                        byte[] dataToHash = stack.pollLast();
+                        digest.update(dataToHash, 0, dataToHash.length);
+                        byte[] ripmemdHash = new byte[20];
+                        digest.doFinal(ripmemdHash, 0);
+                        stack.add(ripmemdHash);
+                        break;
+                    case OP_SHA1:
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted OP_SHA1 on an empty stack");
+                        }
+                        try {
+                            stack.add(MessageDigest.getInstance("SHA-1").digest(stack.pollLast()));
+                        } catch (NoSuchAlgorithmException e) {
+                            throw new RuntimeException(e);  // Cannot happen.
+                        }
+                        break;
+                    case OP_SHA256:
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted OP_SHA256 on an empty stack");
+                        }
+                        stack.add(Sha256Hash.hash(stack.pollLast()));
+                        break;
+                    case OP_HASH160:
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted OP_HASH160 on an empty stack");
+                        }
+                        stack.add(SerializeUtils.sha256hash160(stack.pollLast()));
+                        break;
+                    case OP_HASH256:
+                        if (stack.size() < 1) {
+                            throw new ScriptException("Attempted OP_SHA256 on an empty stack");
+                        }
+                        stack.add(Sha256Hash.hashTwice(stack.pollLast()));
+                        break;
+                    case OP_CODESEPARATOR:
+                        lastCodeSepLocation = chunk.getStartLocationInProgram() + 1;
+                        break;
+                    case OP_CHECKSIG:
+                    case OP_CHECKSIGVERIFY:
+                        if (txContainingThis == null) {
+                            throw new IllegalStateException("Script attempted signature check but no tx was provided");
+                        }
+                        executeCheckSig(txContainingThis, (int) index, script, stack, lastCodeSepLocation, opcode, verifyFlags);
+                        break;
+                    case OP_CHECKMULTISIG:
+                    case OP_CHECKMULTISIGVERIFY:
+                        if (txContainingThis == null) {
+                            throw new IllegalStateException("Script attempted signature check but no tx was provided");
+                        }
+                        opCount = executeMultiSig(txContainingThis, (int) index, script, stack, opCount, lastCodeSepLocation, opcode, verifyFlags);
+                        break;
+                    case OP_CHECKLOCKTIMEVERIFY:
+                        if (!verifyFlags.contains(VerifyFlag.CHECKLOCKTIMEVERIFY)) {
+                            // not enabled; treat as a NOP2
+                            if (verifyFlags.contains(VerifyFlag.DISCOURAGE_UPGRADABLE_NOPS)) {
+                                throw new ScriptException("Script used a reserved opcode " + opcode);
+                            }
+                            break;
+                        }
+                        executeCheckLockTimeVerify(txContainingThis, (int) index, script, stack, lastCodeSepLocation, opcode, verifyFlags);
+                        break;
+                    case OP_NOP1:
+                    case OP_NOP3:
+                    case OP_NOP4:
+                    case OP_NOP5:
+                    case OP_NOP6:
+                    case OP_NOP7:
+                    case OP_NOP8:
+                    case OP_NOP9:
+                    case OP_NOP10:
                         if (verifyFlags.contains(VerifyFlag.DISCOURAGE_UPGRADABLE_NOPS)) {
                             throw new ScriptException("Script used a reserved opcode " + opcode);
                         }
                         break;
-                    }
-                    executeCheckLockTimeVerify(txContainingThis, (int) index, script, stack, lastCodeSepLocation, opcode, verifyFlags);
-                    break;
-                case OP_NOP1:
-                case OP_NOP3:
-                case OP_NOP4:
-                case OP_NOP5:
-                case OP_NOP6:
-                case OP_NOP7:
-                case OP_NOP8:
-                case OP_NOP9:
-                case OP_NOP10:
-                    if (verifyFlags.contains(VerifyFlag.DISCOURAGE_UPGRADABLE_NOPS)) {
-                        throw new ScriptException("Script used a reserved opcode " + opcode);
-                    }
-                    break;
 
-                default:
-                    throw new ScriptException("Script used a reserved opcode " + opcode);
+                    default:
+                        throw new ScriptException("Script used a reserved opcode " + opcode);
                 }
             }
 
-            if (stack.size() + altstack.size() > 1000 || stack.size() + altstack.size() < 0)
+            if (stack.size() + altstack.size() > 1000 || stack.size() + altstack.size() < 0) {
                 throw new ScriptException("Stack size exceeded range");
+            }
         }
 
-        if (!ifStack.isEmpty())
+        if (!ifStack.isEmpty()) {
             throw new ScriptException("OP_IF/OP_NOTIF without OP_ENDIF");
+        }
     }
 
     // This is more or less a direct translation of the code in Bitcoin Core
     private static void executeCheckLockTimeVerify(Transaction txContainingThis, int index, Script script, LinkedList<byte[]> stack,
                                                    int lastCodeSepLocation, int opcode,
                                                    Set<VerifyFlag> verifyFlags) throws ScriptException {
-        if (stack.size() < 1)
+        if (stack.size() < 1) {
             throw new ScriptException("Attempted OP_CHECKLOCKTIMEVERIFY on a stack with size < 1");
+        }
 
         // Thus as a special case we tell CScriptNum to accept up
         // to 5-byte bignums to avoid year 2038 issue.
         final BigInteger nLockTime = castToBigInteger(stack.getLast(), 5);
 
-        if (nLockTime.compareTo(BigInteger.ZERO) < 0)
+        if (nLockTime.compareTo(BigInteger.ZERO) < 0) {
             throw new ScriptException("Negative locktime");
+        }
 
         // There are two kinds of nLockTime, need to ensure we're comparing apples-to-apples
         /*if (!(
             ((txContainingThis.getLockTime() <  Transaction.LOCKTIME_THRESHOLD) && (nLockTime.compareTo(Transaction.LOCKTIME_THRESHOLD_BIG)) < 0) ||
             ((txContainingThis.getLockTime() >= Transaction.LOCKTIME_THRESHOLD) && (nLockTime.compareTo(Transaction.LOCKTIME_THRESHOLD_BIG)) >= 0))
         )*/
-            throw new ScriptException("Locktime requirement type mismatch");
+        throw new ScriptException("Locktime requirement type mismatch");
 
         // Now that we know we're comparing apples-to-apples, the
         // comparison is a simple numeric one.
@@ -1454,10 +1592,11 @@ public class Script{
                                         int lastCodeSepLocation, int opcode,
                                         Set<VerifyFlag> verifyFlags) throws ScriptException {
         final boolean requireCanonical = verifyFlags.contains(VerifyFlag.STRICTENC)
-            || verifyFlags.contains(VerifyFlag.DERSIG)
-            || verifyFlags.contains(VerifyFlag.LOW_S);
-        if (stack.size() < 2)
+                || verifyFlags.contains(VerifyFlag.DERSIG)
+                || verifyFlags.contains(VerifyFlag.LOW_S);
+        if (stack.size() < 2) {
             throw new ScriptException("Attempted OP_CHECKSIG(VERIFY) on a stack with size < 2");
+        }
         byte[] pubKey = stack.pollLast();
         byte[] sigBytes = stack.pollLast();
 
@@ -1475,7 +1614,7 @@ public class Script{
         // TODO: Use int for indexes everywhere, we can't have that many inputs/outputs
         boolean sigValid = false;
         try {
-            sigValid=verifySign(txContainingThis.getHash().getDigestBytes(),sigBytes,pubKey);
+            sigValid = verifySign(txContainingThis.getHash().getDigestBytes(), sigBytes, pubKey);
 
             /*ransactionSignature sig  = TransactionSignature.decodeFromBitcoin(sigBytes, requireCanonical,
                 verifyFlags.contains(VerifyFlag.LOW_S));
@@ -1489,33 +1628,40 @@ public class Script{
 
             // This RuntimeException occurs when signing as we run partial/invalid scripts to see if they need more
             // signing work to be done inside LocalTransactionSigner.signInputs.
-            if (!e1.getMessage().contains("Reached past end of ASN.1 stream"))
+            if (!e1.getMessage().contains("Reached past end of ASN.1 stream")) {
                 log.warn("Signature checking failed!", e1);
+            }
         }
         //System.out.println(opcode == OP_CHECKSIG);
-        if (opcode == OP_CHECKSIG)
-            stack.add(sigValid ? new byte[] {1} : new byte[] {});
-        else if (opcode == OP_CHECKSIGVERIFY)
-            if (!sigValid)
+        if (opcode == OP_CHECKSIG) {
+            stack.add(sigValid ? new byte[]{1} : new byte[]{});
+        } else if (opcode == OP_CHECKSIGVERIFY) {
+            if (!sigValid) {
                 throw new ScriptException("Script failed OP_CHECKSIGVERIFY");
+            }
+        }
     }
 
     private static int executeMultiSig(Transaction txContainingThis, int index, Script script, LinkedList<byte[]> stack,
                                        int opCount, int lastCodeSepLocation, int opcode,
                                        Set<VerifyFlag> verifyFlags) throws ScriptException {
         final boolean requireCanonical = verifyFlags.contains(VerifyFlag.STRICTENC)
-            || verifyFlags.contains(VerifyFlag.DERSIG)
-            || verifyFlags.contains(VerifyFlag.LOW_S);
-        if (stack.size() < 2)
+                || verifyFlags.contains(VerifyFlag.DERSIG)
+                || verifyFlags.contains(VerifyFlag.LOW_S);
+        if (stack.size() < 2) {
             throw new ScriptException("Attempted OP_CHECKMULTISIG(VERIFY) on a stack with size < 2");
+        }
         int pubKeyCount = castToBigInteger(stack.pollLast()).intValue();
-        if (pubKeyCount < 0 || pubKeyCount > 20)
+        if (pubKeyCount < 0 || pubKeyCount > 20) {
             throw new ScriptException("OP_CHECKMULTISIG(VERIFY) with pubkey count out of range");
+        }
         opCount += pubKeyCount;
-        if (opCount > 201)
+        if (opCount > 201) {
             throw new ScriptException("Total op count > 201 during OP_CHECKMULTISIG(VERIFY)");
-        if (stack.size() < pubKeyCount + 1)
+        }
+        if (stack.size() < pubKeyCount + 1) {
             throw new ScriptException("Attempted OP_CHECKMULTISIG(VERIFY) on a stack with size < num_of_pubkeys + 2");
+        }
 
         LinkedList<byte[]> pubkeys = new LinkedList<byte[]>();
         for (int i = 0; i < pubKeyCount; i++) {
@@ -1524,10 +1670,12 @@ public class Script{
         }
 
         int sigCount = castToBigInteger(stack.pollLast()).intValue();
-        if (sigCount < 0 || sigCount > pubKeyCount)
+        if (sigCount < 0 || sigCount > pubKeyCount) {
             throw new ScriptException("OP_CHECKMULTISIG(VERIFY) with sig count out of range");
-        if (stack.size() < sigCount + 1)
+        }
+        if (stack.size() < sigCount + 1) {
             throw new ScriptException("Attempted OP_CHECKMULTISIG(VERIFY) on a stack with size < num_of_pubkeys + num_of_signatures + 3");
+        }
 
         LinkedList<byte[]> sigs = new LinkedList<byte[]>();
         for (int i = 0; i < sigCount; i++) {
@@ -1554,8 +1702,9 @@ public class Script{
             // We could reasonably move this out of the loop, but because signature verification is significantly
             // more expensive than hashing, its not a big deal.
             try {
-                if (ECKey.verify(txContainingThis.getHash().getDigestBytes(),sigs.getFirst(),pubKey))
+                if (ECKey.verify(txContainingThis.getHash().getDigestBytes(), sigs.getFirst(), pubKey)) {
                     sigs.pollFirst();
+                }
                /* TransactionSignature sig = TransactionSignature.decodeFromBitcoin(sigs.getFirst(), requireCanonical);
                 Sha256Hash hash = txContainingThis.hashForSignature(index, connectedScript, (byte) sig.sighashFlags);
                 if (ECKey.verify(hash.getBytes(), sig, pubKey))
@@ -1572,14 +1721,16 @@ public class Script{
         }
         // We uselessly remove a stack object to emulate a Bitcoin Core bug.
         byte[] nullDummy = stack.pollLast();
-        if (verifyFlags.contains(VerifyFlag.NULLDUMMY) && nullDummy.length > 0)
+        if (verifyFlags.contains(VerifyFlag.NULLDUMMY) && nullDummy.length > 0) {
             throw new ScriptException("OP_CHECKMULTISIG(VERIFY) with non-null nulldummy: " + Arrays.toString(nullDummy));
+        }
 
         if (opcode == OP_CHECKMULTISIG) {
-            stack.add(valid ? new byte[] {1} : new byte[] {});
+            stack.add(valid ? new byte[]{1} : new byte[]{});
         } else if (opcode == OP_CHECKMULTISIGVERIFY) {
-            if (!valid)
+            if (!valid) {
                 throw new ScriptException("Script failed OP_CHECKMULTISIGVERIFY");
+            }
         }
         return opCount;
     }
@@ -1587,34 +1738,36 @@ public class Script{
     /**
      * Verifies that this script (interpreted as a scriptSig) correctly spends the given scriptPubKey, enabling all
      * validation rules.验证此脚本（解锁脚本）是否正确地使用给定的scriptPubKey（锁定脚本），启用所有验证规则
+     *
      * @param txContainingThis The transaction in which this input scriptSig resides.
      *                         Accessing txContainingThis from another thread while this method runs results in undefined behavior.
      * @param scriptSigIndex   交易中包含的解锁脚本的索引The index in txContainingThis of the scriptSig (note: NOT the index of the scriptPubKey).
      * @param scriptPubKey     锁定脚本The connected scriptPubKey containing the conditions needed to claim the value.
-     * instead so that verification flags do not change as new verification options
-     * are added.
-     * 交易，解锁脚本下标，锁定脚本 txContainingThis+scriptSigIndex用于定位解锁脚本（因为一笔交易中有可能有多个Input）
+     *                         instead so that verification flags do not change as new verification options
+     *                         are added.
+     *                         交易，解锁脚本下标，锁定脚本 txContainingThis+scriptSigIndex用于定位解锁脚本（因为一笔交易中有可能有多个Input）
      */
     @Deprecated
     public boolean correctlySpends(Transaction txContainingThis, long scriptSigIndex, Script scriptPubKey) {
-       return correctlySpends(txContainingThis, scriptSigIndex, scriptPubKey, ALL_VERIFY_FLAGS);
+        return correctlySpends(txContainingThis, scriptSigIndex, scriptPubKey, ALL_VERIFY_FLAGS);
     }
 
     @Deprecated
-    public boolean correctlyNulsSpends(Transaction txContainingThis, long scriptSigIndex, Script scriptPubKey){
-       return correctlySpends(txContainingThis, scriptSigIndex, scriptPubKey, ALL_VERIFY_FLAGS);
+    public boolean correctlyNulsSpends(Transaction txContainingThis, long scriptSigIndex, Script scriptPubKey) {
+        return correctlySpends(txContainingThis, scriptSigIndex, scriptPubKey, ALL_VERIFY_FLAGS);
     }
 
     /**
      * Verifies that this script (interpreted as a scriptSig) correctly spends the given scriptPubKey.
+     *
      * @param txContainingThis 交易 The transaction in which this input scriptSig resides.
      *                         Accessing txContainingThis from another thread while this method runs results in undefined behavior.
-     * @param scriptSigIndex  scriptSig脚本索引 The index in txContainingThis of the scriptSig (note: NOT the index of the scriptPubKey).
-     * @param scriptPubKey    scriptPubKey   The connected scriptPubKey containing the conditions needed to claim the value.
-     * @param verifyFlags     验证标识 Each flag enables one validation rule. If in doubt, use {@link #correctlySpends(Transaction, long, Script)}
-     *                    which sets all flags.
-     *
-     * 验证此脚本scriptSig是否正确地使用给定的scriptPubKey
+     * @param scriptSigIndex   scriptSig脚本索引 The index in txContainingThis of the scriptSig (note: NOT the index of the scriptPubKey).
+     * @param scriptPubKey     scriptPubKey   The connected scriptPubKey containing the conditions needed to claim the value.
+     * @param verifyFlags      验证标识 Each flag enables one validation rule. If in doubt, use {@link #correctlySpends(Transaction, long, Script)}
+     *                         which sets all flags.
+     *                         <p>
+     *                         验证此脚本scriptSig是否正确地使用给定的scriptPubKey
      */
     public boolean correctlySpends(Transaction txContainingThis, long scriptSigIndex, Script scriptPubKey, Set<VerifyFlag> verifyFlags) {
         // Clone the transaction because executing the script involves editing it, and if we die, we'll leave
@@ -1625,40 +1778,48 @@ public class Script{
             throw new RuntimeException(e);   // Should not happen unless we were given a totally broken transaction.
         }*/
         try {
-            if (getProgram().length > 10000 || scriptPubKey.getProgram().length > 10000)
+            if (getProgram().length > 10000 || scriptPubKey.getProgram().length > 10000) {
                 throw new ScriptException("Script larger than 10,000 bytes");
+            }
 
             LinkedList<byte[]> stack = new LinkedList<byte[]>();
             LinkedList<byte[]> p2shStack = null;
 
             executeScript(txContainingThis, scriptSigIndex, this, stack, verifyFlags);
-            if (verifyFlags.contains(VerifyFlag.P2SH))
+            if (verifyFlags.contains(VerifyFlag.P2SH)) {
                 p2shStack = new LinkedList<byte[]>(stack);
+            }
             executeScript(txContainingThis, scriptSigIndex, scriptPubKey, stack, verifyFlags);
-            if (stack.size() == 0)
+            if (stack.size() == 0) {
                 throw new ScriptException("Stack empty at end of script execution.");
+            }
 
-            if (!castToBool(stack.pollLast()))
+            if (!castToBool(stack.pollLast())) {
                 throw new ScriptException("Script resulted in a non-true stack: " + stack);
+            }
             // TODO: Check if we can take out enforceP2SH if there's a checkpoint at the enforcement block.
             if (verifyFlags.contains(VerifyFlag.P2SH) && scriptPubKey.isPayToScriptHash()) {
-                for (ScriptChunk chunk : chunks)
-                    if (chunk.isOpCode() && chunk.opcode > OP_16)
+                for (ScriptChunk chunk : chunks) {
+                    if (chunk.isOpCode() && chunk.opcode > OP_16) {
                         throw new ScriptException("Attempted to spend a P2SH scriptPubKey with a script that contained script ops");
+                    }
+                }
 
                 byte[] scriptPubKeyBytes = p2shStack.pollLast();
                 Script scriptPubKeyP2SH = new Script(scriptPubKeyBytes);
 
                 executeScript(txContainingThis, scriptSigIndex, scriptPubKeyP2SH, p2shStack, verifyFlags);
 
-                if (p2shStack.size() == 0)
+                if (p2shStack.size() == 0) {
                     throw new ScriptException("P2SH stack empty at end of script execution.");
+                }
 
-                if (!castToBool(p2shStack.pollLast()))
+                if (!castToBool(p2shStack.pollLast())) {
                     throw new ScriptException("P2SH script execution resulted in a non-true stack");
+                }
             }
-        }catch (ScriptException e){
-            return  false;
+        } catch (ScriptException e) {
+            return false;
         }
 
 
@@ -1678,8 +1839,9 @@ public class Script{
 
     // Utility that doesn't copy for internal use
     private byte[] getQuickProgram() {
-        if (program != null)
+        if (program != null) {
             return program;
+        }
         return getProgram();
     }
 
@@ -1701,16 +1863,20 @@ public class Script{
 
     /**
      * 签名验证
-     * */
+     */
     public static boolean verifySign(byte[] digestData, byte[] signData, byte[] publicKey) {
         return ECKey.verify(digestData, signData, publicKey);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        return Arrays.equals(getQuickProgram(), ((Script)o).getQuickProgram());
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        return Arrays.equals(getQuickProgram(), ((Script) o).getQuickProgram());
     }
 
     @Override

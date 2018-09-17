@@ -98,11 +98,11 @@ public class NulsDigestData extends BaseNulsData {
     public static NulsDigestData fromDigestHex(String hex) throws NulsException {
         byte[] bytes = Hex.decode(hex);
         NulsDigestData hash = new NulsDigestData();
-        hash.parse(bytes,0);
+        hash.parse(bytes, 0);
         return hash;
     }
 
-    public static boolean validHash(String hex){
+    public static boolean validHash(String hex) {
         try {
             fromDigestHex(hex);
             return true;
@@ -234,7 +234,7 @@ public class NulsDigestData extends BaseNulsData {
             if (this.serialize().length != ((NulsDigestData) obj).serialize().length) {
                 return false;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
         return Arrays.equals(this.getDigestBytes(), ((NulsDigestData) obj).getDigestBytes());

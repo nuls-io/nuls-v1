@@ -24,7 +24,6 @@
  */
 
 
-
 package io.nuls.kernel.utils;
 
 
@@ -72,7 +71,7 @@ public class VarInt {
         }
     }
 
-//    /**
+    //    /**
 //     * Returns the original number of bytes used to encode the value if it was
 //     * deserialized from a byte array, or the minimum encoded size if it was not.
 //     */
@@ -80,14 +79,14 @@ public class VarInt {
         return originallyEncodedSize;
     }
 
-//    /**
+    //    /**
 //     * Returns the minimum encoded size of the value.
 //     */
     public final int getSizeInBytes() {
         return sizeOf(value);
     }
 
-//    /**
+    //    /**
 //     * Returns the minimum encoded size of the given unsigned long value.
 //     *
 //     * @param value the unsigned long value (beware widening conversion of negatives!)
@@ -114,7 +113,7 @@ public class VarInt {
         return 9;
     }
 
-//    /**
+    //    /**
 //     * Encodes the value into its minimal representation.
 //     *
 //     * @return the minimal encoded bytes of the value

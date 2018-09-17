@@ -28,7 +28,6 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.ModuleStatusEnum;
 import io.nuls.kernel.module.manager.ModuleManager;
-import io.nuls.kernel.module.manager.ServiceManager;
 
 /**
  * @author Niels
@@ -63,12 +62,12 @@ public abstract class BaseModuleBootstrap {
      */
     public abstract void destroy();
 
-//    /**
+    //    /**
 //     * get all info of the module
 //     */
     public abstract String getInfo();
 
-//    /**
+    //    /**
 //     * get the status of the module
 //     */
     public final ModuleStatusEnum getStatus() {

@@ -77,8 +77,8 @@ public class CommandResult {
 
     public static CommandResult getFailed(RpcClientResult rpcResult) {
         CommandResult result = new CommandResult();
-        Map<String, Object> map = (Map)rpcResult.getData();
-        result.setMessage((String)map.get("msg"));
+        Map<String, Object> map = (Map) rpcResult.getData();
+        result.setMessage((String) map.get("msg"));
         result.setSuccess(false);
         return result;
     }
@@ -90,11 +90,11 @@ public class CommandResult {
         CommandResult result = new CommandResult();
         result.setSuccess(rpcResult.isSuccess());
         String message = "";
-        if(!rpcResult.isSuccess()){
-            Map<String, Object> map = (Map)rpcResult.getData();
-            message = (String)map.get("msg");
+        if (!rpcResult.isSuccess()) {
+            Map<String, Object> map = (Map) rpcResult.getData();
+            message = (String) map.get("msg");
             //message += ":";
-        }else {
+        } else {
             try {
                 message += JSONUtils.obj2PrettyJson(rpcResult.getData());
             } catch (Exception e) {
@@ -110,17 +110,17 @@ public class CommandResult {
     }
 
 
-    public static RpcClientResult dataTransformValue(RpcClientResult rpcResult){
-        Map<String, Object> map = ((Map)rpcResult.getData());
-        if(null != map) {
+    public static RpcClientResult dataTransformValue(RpcClientResult rpcResult) {
+        Map<String, Object> map = ((Map) rpcResult.getData());
+        if (null != map) {
             rpcResult.setData(map.get("value"));
         }
         return rpcResult;
     }
 
-    public static RpcClientResult dataTransformList(RpcClientResult rpcResult){
-        Map<String, Object> map = ((Map)rpcResult.getData());
-        if(null != map) {
+    public static RpcClientResult dataTransformList(RpcClientResult rpcResult) {
+        Map<String, Object> map = ((Map) rpcResult.getData());
+        if (null != map) {
             rpcResult.setData(map.get("list"));
         }
         return rpcResult;
