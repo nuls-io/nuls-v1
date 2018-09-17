@@ -133,7 +133,11 @@ public class BlockServiceImpl implements BlockService {
             }
         }
         Block block = new Block();
-        block.setHeader(PoConvertUtil.fromBlockHeaderPo(headerPo));
+        BlockHeader blockHeader = PoConvertUtil.fromBlockHeaderPo(headerPo);
+        if(isNeedContractTransfer) {
+            blockHeader.setTxCount(txList.size());
+        }
+        block.setHeader(blockHeader);
         block.setTxs(txList);
         return block;
     }
