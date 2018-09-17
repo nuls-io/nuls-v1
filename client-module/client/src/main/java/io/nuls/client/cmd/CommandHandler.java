@@ -113,13 +113,16 @@ public class CommandHandler {
         register(new GetMultiSigAccountProcessor());
         register(new RemoveMultiSigAccountProcessor());
         register(new GetMultiSigAccountCountProcessor());
+        register(new TransferP2shProcess());
+        register(new CreateMultiSigAccountProcessor());
+        register(new SetMutilAliasProcessor());
+
         /**
          * accountLedger
          */
         register(new TransferProcessor());
         register(new GetAccountTxListProcessor());
 //        register(new GetUTXOProcessor());//
-        register(new TransferP2shProcess());
 
         /**
          * consensus
