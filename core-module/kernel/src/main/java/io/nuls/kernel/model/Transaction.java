@@ -31,6 +31,7 @@ import io.nuls.kernel.constant.TxStatusEnum;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
@@ -294,6 +295,25 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
             Set<byte[]> txAddressSet = txData.getAddresses();
             if (null != txAddressSet) {
                 addresses.addAll(txAddressSet);
+            }
+        }
+        if(this.transactionSignature != null){
+            try {
+                Set<String> signAddresss = SignatureUtil.getAddressFromTX(this);
+                for(String signAddr : signAddresss){
+                    boolean hasExist = false;
+                    for(byte[] addr : addresses){
+                        if(Arrays.equals(AddressTool.getAddress(signAddr),addr)) {
+                            hasExist = true;
+                            break;
+                        }
+                    }
+                    if (!hasExist) {
+                        addresses.add(AddressTool.getAddress(signAddr));
+                    }
+                }
+            }catch (NulsException e){
+                Log.error(e);
             }
         }
         return new ArrayList<>(addresses);
