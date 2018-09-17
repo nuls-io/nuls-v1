@@ -1550,7 +1550,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
      * @return Result
      */
     @Override
-    public Result transferP2sh(byte[] fromAddr, byte[] signAddr, List<MultipleAddressTransferModel> outputs, Na values, String password, String remark, Na price, List<String> pubkeys, int m, String txdata) {
+    public Result transferP2SH(byte[] fromAddr, byte[] signAddr, List<MultipleAddressTransferModel> outputs,
+                               Na values, String password, String remark, Na price,
+                               List<String> pubkeys, int m, String txdata) {
         try {
             Result<Account> accountResult = accountService.getAccount(signAddr);
             if (accountResult.isFailed()) {

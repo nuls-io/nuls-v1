@@ -26,7 +26,7 @@ public class TransferP2shProcess implements CommandProcessor {
 
     @Override
     public String getCommand() {
-        return "transferP2sh";
+        return "transferP2SH";
     }
 
     @Override
@@ -48,7 +48,7 @@ public class TransferP2shProcess implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "transferP2sh --- If it's a trading promoter <address> <signAddress> <toAddress>,<toamount>;....;<toAddress><toamount> <pubkey>,...<pubkey> <m> <amount> [remark]" +
+        return "transferP2SH --- If it's a trading promoter <address> <signAddress> <toAddress>,<toamount>;....;<toAddress><toamount> <pubkey>,...<pubkey> <m> <amount> [remark]" +
                 "\t          --- else <address> <signAddress> <txdata>";
     }
 
@@ -162,7 +162,7 @@ public class TransferP2shProcess implements CommandProcessor {
             parameters.put("pubkeys", form.getPubkeys());
             parameters.put("m", form.getM());
         }
-        RpcClientResult result = restFul.post("/accountledger/transferP2sh", parameters);
+        RpcClientResult result = restFul.post("/accountledger/transferP2SH", parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

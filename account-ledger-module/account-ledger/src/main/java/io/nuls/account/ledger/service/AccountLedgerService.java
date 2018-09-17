@@ -314,7 +314,7 @@ public interface AccountLedgerService {
      * @param txdata    签名的交易数据
      * @return Result
      */
-    Result transferP2sh(byte[] fromAddr, byte[] signAddr ,List<MultipleAddressTransferModel> outputs, Na values, String password, String remark, Na price, List<String>pubkeys,int m,String txdata);
+    Result transferP2SH(byte[] fromAddr, byte[] signAddr , List<MultipleAddressTransferModel> outputs, Na values, String password, String remark, Na price, List<String>pubkeys, int m, String txdata);
 
 
     CoinDataResult getMutilCoinData(byte[] address, Na amount, int size, Na price);
