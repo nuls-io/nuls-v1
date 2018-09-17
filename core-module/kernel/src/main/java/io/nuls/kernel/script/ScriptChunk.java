@@ -18,6 +18,8 @@
 package io.nuls.kernel.script;
 
 import com.google.common.base.Objects;
+import io.nuls.core.tools.crypto.Hex;
+import io.nuls.kernel.utils.SerializeUtils;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -31,7 +33,9 @@ import static io.nuls.kernel.script.ScriptOpCodes.*;
  * A script element that is either a data push (signature, pubkey, etc) or a non-push (logic, numeric, etc) operation.
  */
 public class ScriptChunk {
-    /** Operation to be executed. Opcodes are defined in {@link ScriptOpCodes}. */
+    /**
+     * Operation to be executed. Opcodes are defined in {@link ScriptOpCodes}.
+     */
     public final int opcode;
     /**
      * For push operations, this is the vector to be pushed on the stack. For {@link ScriptOpCodes#OP_0}, the vector is
@@ -74,7 +78,9 @@ public class ScriptChunk {
         return startLocationInProgram;
     }
 
-    /** If this chunk is an OP_N opcode returns the equivalent integer value. */
+    /**
+     * If this chunk is an OP_N opcode returns the equivalent integer value.
+     */
     public int decodeOpN() {
         checkState(isOpCode());
         return Script.decodeFromOpN(opcode);
@@ -85,23 +91,30 @@ public class ScriptChunk {
      */
     public boolean isShortestPossiblePushData() {
         checkState(isPushData());
-        if (data == null)
+        if (data == null) {
             return true;   // OP_N
-        if (data.length == 0)
+        }
+        if (data.length == 0) {
             return opcode == OP_0;
+        }
         if (data.length == 1) {
             byte b = data[0];
-            if (b >= 0x01 && b <= 0x10)
+            if (b >= 0x01 && b <= 0x10) {
                 return opcode == OP_1 + b - 1;
-            if ((b & 0xFF) == 0x81)
+            }
+            if ((b & 0xFF) == 0x81) {
                 return opcode == OP_1NEGATE;
+            }
         }
-        if (data.length < OP_PUSHDATA1)
+        if (data.length < OP_PUSHDATA1) {
             return opcode == data.length;
-        if (data.length < 256)
+        }
+        if (data.length < 256) {
             return opcode == OP_PUSHDATA1;
-        if (data.length < 65536)
+        }
+        if (data.length < 65536) {
             return opcode == OP_PUSHDATA2;
+        }
 
         // can never be used, but implemented for completeness
         return opcode == OP_PUSHDATA4;
@@ -127,7 +140,7 @@ public class ScriptChunk {
             } else if (opcode == OP_PUSHDATA4) {
                 checkState(data.length <= Script.MAX_SCRIPT_ELEMENT_SIZE);
                 stream.write(OP_PUSHDATA4);
-                Utils.uint32ToByteStreamLE(data.length, stream);
+                SerializeUtils.uint32ToByteStreamLE(data.length, stream);
             } else {
                 throw new RuntimeException("Unimplemented");
             }
@@ -144,7 +157,7 @@ public class ScriptChunk {
             buf.append(getOpCodeName(opcode));
         } else if (data != null) {
             // Data chunk
-            buf.append(getPushDataName(opcode)).append("[").append(Utils.HEX.encode(data)).append("]");
+            buf.append(getPushDataName(opcode)).append("[").append(Hex.encode(data)).append("]");
         } else {
             // Small num
             buf.append(Script.decodeFromOpN(opcode));
@@ -154,11 +167,15 @@ public class ScriptChunk {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ScriptChunk other = (ScriptChunk) o;
         return opcode == other.opcode && startLocationInProgram == other.startLocationInProgram
-            && Arrays.equals(data, other.data);
+                && Arrays.equals(data, other.data);
     }
 
     @Override

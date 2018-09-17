@@ -27,6 +27,7 @@ package io.nuls.kernel.constant;
 
 /**
  * 内核模块的所有错误码常量定义
+ *
  * @author: Niels Wang
  */
 public interface KernelErrorCode {
@@ -59,9 +60,9 @@ public interface KernelErrorCode {
     ErrorCode DESERIALIZE_ERROR = ErrorCode.init("10025");
     ErrorCode HASH_ERROR = ErrorCode.init("10026");
     ErrorCode INSUFFICIENT_BALANCE = ErrorCode.init("10027");
-    ErrorCode ADDRESS_IS_BLOCK_HOLE= ErrorCode.init("10028");
-    ErrorCode ADDRESS_IS_NOT_BELONGS_TO_CHAIN= ErrorCode.init("10029");
-    ErrorCode VALIDATORS_NOT_FULLY_EXECUTED= ErrorCode.init("10030");
-    ErrorCode BLOCK_IS_NULL= ErrorCode.init("10031");
-    ErrorCode VERSION_TOO_LOW= ErrorCode.init("10032");
+    ErrorCode ADDRESS_IS_BLOCK_HOLE = ErrorCode.init("10028");
+    ErrorCode ADDRESS_IS_NOT_BELONGS_TO_CHAIN = ErrorCode.init("10029");
+    ErrorCode VALIDATORS_NOT_FULLY_EXECUTED = ErrorCode.init("10030");
+    ErrorCode BLOCK_IS_NULL = ErrorCode.init("10031");
+    ErrorCode VERSION_TOO_LOW = ErrorCode.init("10032");
 }

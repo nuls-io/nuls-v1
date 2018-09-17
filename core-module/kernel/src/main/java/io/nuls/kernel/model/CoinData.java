@@ -26,9 +26,7 @@
 
 package io.nuls.kernel.model;
 
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -146,14 +144,14 @@ public class CoinData extends BaseNulsData {
     }
 
     public void addTo(Coin coin) {
-        if(null==to){
+        if (null == to) {
             to = new ArrayList<>();
         }
         to.add(coin);
     }
 
     public void addFrom(Coin coin) {
-        if(null==from){
+        if (null == from) {
             from = new ArrayList<>();
         }
         from.add(coin);
@@ -168,13 +166,13 @@ public class CoinData extends BaseNulsData {
             for (int i = 0; i < to.size(); i++) {
                 byte[] owner = to.get(i).getAddress();
                 boolean hasExist = false;
-                for(byte[] address : addressSet) {
-                    if(Arrays.equals(owner, address)) {
+                for (byte[] address : addressSet) {
+                    if (Arrays.equals(owner, address)) {
                         hasExist = true;
                         break;
                     }
                 }
-                if(!hasExist) {
+                if (!hasExist) {
                     addressSet.add(owner);
                 }
             }

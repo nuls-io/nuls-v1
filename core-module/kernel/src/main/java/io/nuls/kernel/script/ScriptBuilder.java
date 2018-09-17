@@ -40,64 +40,76 @@ import static io.nuls.kernel.script.ScriptOpCodes.*;
 public class ScriptBuilder {
     private List<ScriptChunk> chunks;               //命令列表
 
-    /** Creates a fresh ScriptBuilder with an empty program. */
+    /**
+     * Creates a fresh ScriptBuilder with an empty program.
+     */
     public ScriptBuilder() {
         chunks = Lists.newLinkedList();
     }
 
-    /** Creates a fresh ScriptBuilder with the given program as the starting point. */
+    /**
+     * Creates a fresh ScriptBuilder with the given program as the starting point.
+     */
     public ScriptBuilder(Script template) {
         chunks = new ArrayList<ScriptChunk>(template.getChunks());
     }
 
-    /** Adds the given chunk to the end of the program */
+    /**
+     * Adds the given chunk to the end of the program
+     */
     public ScriptBuilder addChunk(ScriptChunk chunk) {
         return addChunk(chunks.size(), chunk);
     }
 
-    /** Adds the given chunk at the given index in the program
-     *  添加创建好的命令到指定的下表
-     * */
+    /**
+     * Adds the given chunk at the given index in the program
+     * 添加创建好的命令到指定的下表
+     */
     public ScriptBuilder addChunk(int index, ScriptChunk chunk) {
         chunks.add(index, chunk);
         return this;
     }
 
-    /** Adds the given opcode to the end of the program.
-     *  添加指定命令到列表最后
-     * */
+    /**
+     * Adds the given opcode to the end of the program.
+     * 添加指定命令到列表最后
+     */
     public ScriptBuilder op(int opcode) {
         return op(chunks.size(), opcode);
     }
 
-    /** Adds the given opcode to the given index in the program
-     *  添加指定命令到列表指定位置
-     * */
+    /**
+     * Adds the given opcode to the given index in the program
+     * 添加指定命令到列表指定位置
+     */
     public ScriptBuilder op(int index, int opcode) {
         checkArgument(opcode > OP_PUSHDATA4);
         return addChunk(index, new ScriptChunk(opcode, null));
     }
 
-    /** Adds a copy of the given byte array as a data element (i.e. PUSHDATA) at the end of the program.
-     *  添加数据命令（只包含数据）到命令列表最后
-     * */
+    /**
+     * Adds a copy of the given byte array as a data element (i.e. PUSHDATA) at the end of the program.
+     * 添加数据命令（只包含数据）到命令列表最后
+     */
     public ScriptBuilder data(byte[] data) {
-        if (data.length == 0)
+        if (data.length == 0) {
             return smallNum(0);
-        else
+        } else {
             return data(chunks.size(), data);
+        }
     }
 
-    /** Adds a copy of the given byte array as a data element (i.e. PUSHDATA) at the given index in the program.
-     *  添加数据命令（只包含数据）到命令列表指定位置
-     * */
+    /**
+     * Adds a copy of the given byte array as a data element (i.e. PUSHDATA) at the given index in the program.
+     * 添加数据命令（只包含数据）到命令列表指定位置
+     */
     public ScriptBuilder data(int index, byte[] data) {
         // implements BIP62
         byte[] copy = Arrays.copyOf(data, data.length);
         int opcode;
         /**
-        * 如果数据长度为0，则添加OP_0命令
-        * */
+         * 如果数据长度为0，则添加OP_0命令
+         * */
         if (data.length == 0) {
             opcode = OP_0;
         }
@@ -109,10 +121,11 @@ public class ScriptBuilder {
             /**
              * 如果数据长度为1，而且该字符大于1小于16，则添加相应的命令
              * */
-            if (b >= 1 && b <= 16)
+            if (b >= 1 && b <= 16) {
                 opcode = Script.encodeToOpN(b);
-            else
+            } else {
                 opcode = 1;
+            }
         }
         /**
          * 如果数据长度小于0x4c，则添加该数据长度的命令
@@ -163,18 +176,19 @@ public class ScriptBuilder {
     /**
      * Adds the given number as a OP_N opcode to the end of the program.
      * Only handles values 0-16 inclusive.
-     * 
+     *
      * @see #(int)
      */
     public ScriptBuilder smallNum(int num) {
         return smallNum(chunks.size(), num);
     }
 
-    /** Adds the given number as a push data chunk.
+    /**
+     * Adds the given number as a push data chunk.
      * This is intended to use for negative numbers or values > 16, and although
      * it will accept numbers in the range 0-16 inclusive, the encoding would be
      * considered non-standard.
-     * 
+     *
      * @see #(int)
      */
     protected ScriptBuilder bigNum(long num) {
@@ -184,7 +198,7 @@ public class ScriptBuilder {
     /**
      * Adds the given number as a OP_N opcode to the given index in the program.
      * Only handles values 0-16 inclusive.
-     * 
+     *
      * @see #(int)
      */
     public ScriptBuilder smallNum(int index, int num) {
@@ -199,6 +213,7 @@ public class ScriptBuilder {
      * it will accept numbers in the range 0-16 inclusive, the encoding would be
      * considered non-standard.
      * 将给定的数字作为命令添加到程序中的给定索引中
+     *
      * @see #(int)
      */
     protected ScriptBuilder bigNum(int index, long num) {
@@ -238,41 +253,44 @@ public class ScriptBuilder {
         return addChunk(index, new ScriptChunk(data.length, data));
     }
 
-    /** Creates a new immutable Script based on the state of the builder.
-     *  根据当前命令列表创建一个不可变脚本
-     * */
+    /**
+     * Creates a new immutable Script based on the state of the builder.
+     * 根据当前命令列表创建一个不可变脚本
+     */
     public Script build() {
         return new Script(chunks);
     }
 
-    /** Creates a scriptPubKey that encodes payment to the given address.
-     *  根据地址创建一个OutputScript/scriptPublicKry     转账
-     * */
+    /**
+     * Creates a scriptPubKey that encodes payment to the given address.
+     * 根据地址创建一个OutputScript/scriptPublicKry     转账
+     */
     public static Script createOutputScript(byte[] address, int type) {
         //如果是P2SH类型的创建P2SH对应的锁定脚本
-        if (type==0) {
+        if (type == 0) {
             // OP_HASH160 <scriptHash> OP_EQUAL
             return new ScriptBuilder()
-                .op(OP_HASH160)
-                .data(address)
-                .op(OP_EQUAL)
-                .build();
+                    .op(OP_HASH160)
+                    .data(address)
+                    .op(OP_EQUAL)
+                    .build();
         } else {
             // OP_DUP OP_HASH160 <pubKeyHash> OP_EQUALVERIFY OP_CHECKSIG
             return new ScriptBuilder()
-                .op(OP_DUP)
-                .op(OP_HASH160)
-                .data(address)
-                .op(OP_EQUALVERIFY)
-                .op(OP_CHECKSIG)
-                .build();
+                    .op(OP_DUP)
+                    .op(OP_HASH160)
+                    .data(address)
+                    .op(OP_EQUALVERIFY)
+                    .op(OP_CHECKSIG)
+                    .build();
         }
     }
 
-    /** Creates a scriptPubKey that encodes payment to the given raw public key.
-     *  根据公钥创建一个OutputScript/scriptPublicKry
-     *  创建P2PK（Pay-to-Public-Key）锁定脚本
-     * */
+    /**
+     * Creates a scriptPubKey that encodes payment to the given raw public key.
+     * 根据公钥创建一个OutputScript/scriptPublicKry
+     * 创建P2PK（Pay-to-Public-Key）锁定脚本
+     */
     public static Script createOutputScript(ECKey key) {
         return new ScriptBuilder().data(key.getPubKey()).op(OP_CHECKSIG).build();
     }
@@ -285,7 +303,7 @@ public class ScriptBuilder {
     public static Script createInputScript(@Nullable TransactionSignature signature, ECKey pubKey) {
         byte[] pubkeyBytes = pubKey.getPubKey();
         //byte[] sigBytes = signature != null ? signature.encodeToBitcoin() : new byte[]{};
-        byte[] sigBytes =null;
+        byte[] sigBytes = null;
         return new ScriptBuilder().data(sigBytes).data(pubkeyBytes).build();
     }
 
@@ -305,13 +323,14 @@ public class ScriptBuilder {
      */
     public static Script createInputScript(@Nullable TransactionSignature signature) {
         //byte[] sigBytes = signature != null ? signature.encodeToBitcoin() : new byte[]{};
-        byte[] sigBytes =null;
+        byte[] sigBytes = null;
         return new ScriptBuilder().data(sigBytes).build();
     }
 
-    /** Creates a program that requires at least N of the given keys to sign, using OP_CHECKMULTISIG.
-     *  根据多个公钥创建多重签名的OutputScript/scriptPublicKry
-     * */
+    /**
+     * Creates a program that requires at least N of the given keys to sign, using OP_CHECKMULTISIG.
+     * 根据多个公钥创建多重签名的OutputScript/scriptPublicKry
+     */
     public static Script createMultiSigOutputScript(int threshold, List<ECKey> pubkeys) {
         checkArgument(threshold > 0);
         checkArgument(threshold <= pubkeys.size());
@@ -326,16 +345,17 @@ public class ScriptBuilder {
         return builder.build();
     }
 
-    /** Creates a program that requires at least N of the given keys to sign, using OP_CHECKMULTISIG.
-     *  根据多个公钥创建多重签名的OutputScript/scriptPublicKry
-     * */
+    /**
+     * Creates a program that requires at least N of the given keys to sign, using OP_CHECKMULTISIG.
+     * 根据多个公钥创建多重签名的OutputScript/scriptPublicKry
+     */
     public static Script createNulsMultiSigOutputScript(int threshold, List<String> pubkeys) {
         checkArgument(threshold > 0);
         checkArgument(threshold <= pubkeys.size());
         checkArgument(pubkeys.size() <= 16);  // That's the max we can represent with a single opcode.这是我们可以用一个操作码来表示的最大值
         ScriptBuilder builder = new ScriptBuilder();
         builder.smallNum(threshold);
-        for (String pubKey:pubkeys) {
+        for (String pubKey : pubkeys) {
             builder.data(Hex.decode(pubKey));
         }
         builder.smallNum(pubkeys.size());
@@ -343,8 +363,9 @@ public class ScriptBuilder {
         return builder.build();
     }
 
-    /** Create a program that satisfies an OP_CHECKMULTISIG program.
-     *  根据多个签名创建inputScript/scriptSig解锁脚本
+    /**
+     * Create a program that satisfies an OP_CHECKMULTISIG program.
+     * 根据多个签名创建inputScript/scriptSig解锁脚本
      **/
     public static Script createByteNulsMultiSigOutputScript(int threshold, List<byte[]> pubkeys) {
         checkArgument(threshold > 0);
@@ -360,8 +381,9 @@ public class ScriptBuilder {
         return builder.build();
     }
 
-    /** Create a program that satisfies an OP_CHECKMULTISIG program.
-     *  根据多个签名创建inputScript/scriptSig解锁脚本
+    /**
+     * Create a program that satisfies an OP_CHECKMULTISIG program.
+     * 根据多个签名创建inputScript/scriptSig解锁脚本
      **/
     public static Script createMultiSigInputScript(List<TransactionSignature> signatures) {
         List<byte[]> sigs = new ArrayList<byte[]>(signatures.size());
@@ -371,14 +393,18 @@ public class ScriptBuilder {
         return createMultiSigInputScriptBytes(sigs, null);
     }
 
-    /** Create a program that satisfies an OP_CHECKMULTISIG program. */
+    /**
+     * Create a program that satisfies an OP_CHECKMULTISIG program.
+     */
     public static Script createMultiSigInputScript(TransactionSignature... signatures) {
         return createMultiSigInputScript(Arrays.asList(signatures));
     }
 
-    /** Create a program that satisfies an OP_CHECKMULTISIG program, using pre-encoded signatures. */
+    /**
+     * Create a program that satisfies an OP_CHECKMULTISIG program, using pre-encoded signatures.
+     */
     public static Script createMultiSigInputScriptBytes(List<byte[]> signatures) {
-    	return createMultiSigInputScriptBytes(signatures, null);
+        return createMultiSigInputScriptBytes(signatures, null);
     }
 
     /**
@@ -392,8 +418,9 @@ public class ScriptBuilder {
         if (signatures == null) {
             // create correct number of empty signatures
             int numSigs = multisigProgram.getNumberOfSignaturesRequiredToSpend();  //花费这笔UTXO需要的签名数量
-            for (int i = 0; i < numSigs; i++)
+            for (int i = 0; i < numSigs; i++) {
                 sigs.add(new byte[]{});
+            }
         } else {
             for (TransactionSignature signature : signatures) {
                 //sigs.add(signature.encodeToBitcoin());
@@ -413,8 +440,9 @@ public class ScriptBuilder {
         if (signatures == null) {
             // create correct number of empty signatures
             int numSigs = multisigProgram.getNumberOfSignaturesRequiredToSpend();  //花费这笔UTXO需要的签名数量
-            for (int i = 0; i < numSigs; i++)
+            for (int i = 0; i < numSigs; i++) {
                 sigs.add(new byte[]{});
+            }
         } else {
             for (byte[] signature : signatures) {
                 sigs.add(signature);
@@ -424,28 +452,30 @@ public class ScriptBuilder {
     }
 
     /**
-     * Create a program that satisfies an OP_CHECKMULTISIG program, using pre-encoded signatures. 
+     * Create a program that satisfies an OP_CHECKMULTISIG program, using pre-encoded signatures.
      * Optionally, appends the script program bytes if spending a P2SH output.
      */
     public static Script createMultiSigInputScriptBytes(List<byte[]> signatures, @Nullable byte[] multisigProgramBytes) {
         checkArgument(signatures.size() <= 16);
         ScriptBuilder builder = new ScriptBuilder();
         builder.smallNum(0);  // Work around a bug in CHECKMULTISIG that is now a required part of the protocol.
-        for (byte[] signature : signatures)
+        for (byte[] signature : signatures) {
             builder.data(signature);
-        if (multisigProgramBytes!= null)
-        	builder.data(multisigProgramBytes);
+        }
+        if (multisigProgramBytes != null) {
+            builder.data(multisigProgramBytes);
+        }
         return builder.build();
     }
 
 
     /**
      * Returns a copy of the given scriptSig with the signature inserted in the given position.
-     *
+     * <p>
      * This function assumes that any missing sigs have OP_0 placeholders. If given scriptSig already has all the signatures
      * in place, IllegalArgumentException will be thrown.
      *
-     * @param targetIndex where to insert the signature
+     * @param targetIndex     where to insert the signature
      * @param sigsPrefixCount how many items to copy verbatim (e.g. initial OP_0 for multisig)
      * @param sigsSuffixCount how many items to copy verbatim at end (e.g. redeemScript for P2SH)
      */
@@ -462,13 +492,14 @@ public class ScriptBuilder {
         checkArgument(hasMissingSigs, "ScriptSig is already filled with signatures");
 
         // copy the prefix
-        for (ScriptChunk chunk: inputChunks.subList(0, sigsPrefixCount))
+        for (ScriptChunk chunk : inputChunks.subList(0, sigsPrefixCount)) {
             builder.addChunk(chunk);
+        }
 
         // copy the sigs
         int pos = 0;
         boolean inserted = false;
-        for (ScriptChunk chunk: inputChunks.subList(sigsPrefixCount, totalChunks - sigsSuffixCount)) {
+        for (ScriptChunk chunk : inputChunks.subList(sigsPrefixCount, totalChunks - sigsSuffixCount)) {
             if (pos == targetIndex) {
                 inserted = true;
                 builder.data(signature);
@@ -485,16 +516,16 @@ public class ScriptBuilder {
             if (pos == targetIndex) {
                 inserted = true;
                 builder.data(signature);
-            }
-            else {
+            } else {
                 builder.addChunk(new ScriptChunk(OP_0, null));
             }
             pos++;
         }
 
         // copy the suffix
-        for (ScriptChunk chunk: inputChunks.subList(totalChunks - sigsSuffixCount, totalChunks))
+        for (ScriptChunk chunk : inputChunks.subList(totalChunks - sigsSuffixCount, totalChunks)) {
             builder.addChunk(chunk);
+        }
 
         checkState(inserted);
         return builder.build();
@@ -525,7 +556,7 @@ public class ScriptBuilder {
     /**
      * Creates a P2SH output script with given public keys and threshold. Given public keys will be placed in
      * redeem script in the lexicographical sorting order.
-     *
+     * <p>
      * 使用给定的公钥和阈值创建一个P2SH输出脚本。给定公共密钥将被放置在在字典排序顺序中赎回脚本
      */
     public static Script createP2SHOutputScript(int threshold, List<ECKey> pubkeys) {
@@ -573,58 +604,9 @@ public class ScriptBuilder {
         return new ScriptBuilder().op(OP_RETURN).data(data).build();
     }
 
-    public static Script createCLTVPaymentChannelOutput(BigInteger time, ECKey from, ECKey to) {
-        byte[] timeBytes = Utils.reverseBytes(Utils.encodeMPI(time, false));
-        if (timeBytes.length > 5) {
-            throw new RuntimeException("Time too large to encode as 5-byte int");
-        }
-        return new ScriptBuilder().op(OP_IF)
-                .data(to.getPubKey()).op(OP_CHECKSIGVERIFY)
-                .op(OP_ELSE)
-                .data(timeBytes).op(OP_CHECKLOCKTIMEVERIFY).op(OP_DROP)
-                .op(OP_ENDIF)
-                .data(from.getPubKey()).op(OP_CHECKSIG).build();
-    }
-
-    public static Script createCLTVPaymentChannelRefund(TransactionSignature signature) {
-        ScriptBuilder builder = new ScriptBuilder();
-        //builder.data(signature.encodeToBitcoin());
-        builder.data(new byte[] { 0 }); // Use the CHECKLOCKTIMEVERIFY if branch
-        return builder.build();
-    }
-
-    public static Script createCLTVPaymentChannelP2SHRefund(TransactionSignature signature, Script redeemScript) {
-        ScriptBuilder builder = new ScriptBuilder();
-       // builder.data(signature.encodeToBitcoin());
-        builder.data(new byte[] { 0 }); // Use the CHECKLOCKTIMEVERIFY if branch
-        builder.data(redeemScript.getProgram());
-        return builder.build();
-    }
-
-    public static Script createCLTVPaymentChannelP2SHInput(byte[] from, byte[] to, Script redeemScript) {
-        ScriptBuilder builder = new ScriptBuilder();
-        builder.data(from);
-        builder.data(to);
-        builder.smallNum(1); // Use the CHECKLOCKTIMEVERIFY if branch
-        builder.data(redeemScript.getProgram());
-        return builder.build();
-    }
-
-    public static Script createCLTVPaymentChannelInput(TransactionSignature from, TransactionSignature to) {
-        return null;
-        //return createCLTVPaymentChannelInput(from.encodeToBitcoin(), to.encodeToBitcoin());
-    }
-
-    public static Script createCLTVPaymentChannelInput(byte[] from, byte[] to) {
-        ScriptBuilder builder = new ScriptBuilder();
-        builder.data(from);
-        builder.data(to);
-        builder.smallNum(1); // Use the CHECKLOCKTIMEVERIFY if branch
-        return builder.build();
-    }
-
     public static final Comparator<String> PUBKEY_COMPARATOR = new Comparator<String>() {
         private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+
         @Override
         public int compare(String k1, String k2) {
             return comparator.compare(Hex.decode(k1), Hex.decode(k2));
@@ -633,6 +615,7 @@ public class ScriptBuilder {
 
     public static final Comparator<byte[]> PUBKEY_BYTE_COMPARATOR = new Comparator<byte[]>() {
         private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+
         @Override
         public int compare(byte[] k1, byte[] k2) {
             return comparator.compare(k1, k2);

@@ -26,13 +26,11 @@
 package io.nuls.kernel.utils;
 
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.RpcClientResult;
 import jline.console.ConsoleReader;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author: Charlie
@@ -47,7 +45,8 @@ public class CommandHelper {
         }
         return true;
     }
-//
+
+    //
 //    /**
 //     * 获取用户的新密码 必填
 //     * @return
@@ -79,7 +78,7 @@ public class CommandHelper {
     }
 
 
-//    /**
+    //    /**
 //     * 确认新密码
 //     * @param newPwd
 //     */
@@ -107,7 +106,8 @@ public class CommandHelper {
             }
         }
     }
-//
+
+    //
 //    /**
 //     * 得到用户输入的密码,必须输入
 //     * 提示信息为默认
@@ -117,13 +117,13 @@ public class CommandHelper {
         return getPwd(null);
     }
 
-//    /**
+    //    /**
 //     * 得到用户输入的密码,必须输入
 //     * @param prompt 提示信息
 //     * @return
 //     */
     public static String getPwd(String prompt) {
-        if(StringUtils.isBlank(prompt)){
+        if (StringUtils.isBlank(prompt)) {
             prompt = "Please enter the password.\nEnter your password:";
         }
         System.out.print(prompt);
@@ -150,14 +150,15 @@ public class CommandHelper {
             }
         }
     }
-//
+
+    //
 //    /**
 //     * 得到用户输入的密码,允许不输入
 //     * @param prompt
 //     * @return
 //     */
     public static String getPwdOptional(String prompt) {
-        if(StringUtils.isBlank(prompt)){
+        if (StringUtils.isBlank(prompt)) {
             prompt = "Please enter the password (password is between 8 and 20 inclusive of numbers and letters), " +
                     "If you do not want to set a password, return directly.\nEnter your password:";
         }
@@ -187,8 +188,9 @@ public class CommandHelper {
     }
 
     /**
-     *  得到用户输入的密码,允许不输入
-     *  提示信息为默认
+     * 得到用户输入的密码,允许不输入
+     * 提示信息为默认
+     *
      * @return
      */
     public static String getPwdOptional() {
@@ -280,7 +282,7 @@ public class CommandHelper {
     }
 
 
-//    /**
+    //    /**
 //     * 根据账户获取密码
 //     * 1.如果账户有密码, 则让用户输入密码
 //     * 2.如果账户没有设置密码, 直接返回
@@ -290,10 +292,10 @@ public class CommandHelper {
 //     * @return RpcClientResult
 //     */
     public static RpcClientResult getPassword(String address, RestFulUtils restFul) {
-       return getPassword(address, restFul, null);
+        return getPassword(address, restFul, null);
     }
 
-//    /**
+    //    /**
 //     * 根据账户获取密码
 //     * 1.如果账户有密码, 则让用户输入密码
 //     * 2.如果账户没有设置密码, 直接返回
@@ -311,7 +313,7 @@ public class CommandHelper {
         if (result.isSuccess()) {
             RpcClientResult rpcClientResult = new RpcClientResult();
             rpcClientResult.setSuccess(true);
-            if(result.dataToBooleanValue()) {
+            if (result.dataToBooleanValue()) {
                 String pwd = getPwd(prompt);
                 rpcClientResult.setData(pwd);
             }

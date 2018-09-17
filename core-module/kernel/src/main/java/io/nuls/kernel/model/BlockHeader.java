@@ -34,6 +34,7 @@ import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
+
 import java.io.IOException;
 
 /**

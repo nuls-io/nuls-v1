@@ -37,10 +37,8 @@ import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
- *
  * @author ln
  */
 public class Coin extends BaseNulsData {
@@ -196,19 +194,19 @@ public class Coin extends BaseNulsData {
                 '}';
     }
 
-    public byte[] getAddress(){
-        byte [] address = new byte[23];
+    public byte[] getAddress() {
+        byte[] address = new byte[23];
         //如果owner不是存放的脚本则直接返回owner
-        if(owner == null || owner.length == 23)
+        if (owner == null || owner.length == 23)
             return owner;
-        else{
+        else {
             Script scriptPubkey = new Script(owner);
             //如果为P2PKH类型交易则从第四位开始返回23个字节
-            if(scriptPubkey.isSentToAddress()){
+            if (scriptPubkey.isSentToAddress()) {
                 System.arraycopy(owner, 3, address, 0, 23);
             }
             //如果为P2SH或multi类型的UTXO则从第三位开始返回23个字节
-            else if(scriptPubkey.isPayToScriptHash()){
+            else if (scriptPubkey.isPayToScriptHash()) {
                 scriptPubkey.isSentToMultiSig();
                 System.arraycopy(owner, 2, address, 0, 23);
             }
