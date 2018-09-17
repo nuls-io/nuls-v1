@@ -76,6 +76,7 @@ import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.service.TransactionService;
 import io.swagger.annotations.*;
+import sun.management.resources.agent;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -1253,18 +1254,20 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
     public RpcClientResult mutilDepositToAgent(@ApiParam(name = "form", value = "申请参与共识表单数据", required = true)
-                                                  DepositForm form) throws NulsException {
+                                                  MutilDepositForm form) throws NulsException,IOException {
+        if (NulsContext.MAIN_NET_VERSION <= 1) {
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
-        AssertUtil.canNotEmpty(form.getAgentHash());
-        if (!NulsDigestData.validHash(form.getAgentHash())) {
-            return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
+        AssertUtil.canNotEmpty(form.getSignAddress());
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        AssertUtil.canNotEmpty(form.getDeposit());
-        if (!AddressTool.validAddress(form.getAddress())) {
-            throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
+        if (!AddressTool.validAddress(form.getSignAddress()) || !AddressTool.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        Account account = accountService.getAccount(form.getAddress()).getData();
+        Account account = accountService.getAccount(form.getSignAddress()).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
@@ -1274,27 +1277,77 @@ public class PocConsensusResource {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
             }
         }
-
+        //如果为交易发起人，则需要填写组装交易需要的信息
         DepositTransaction tx = new DepositTransaction();
-        Deposit deposit = new Deposit();
-        deposit.setAddress(AddressTool.getAddress(form.getAddress()));
-        deposit.setAgentHash(NulsDigestData.fromDigestHex(form.getAgentHash()));
-        deposit.setDeposit(Na.valueOf(form.getDeposit()));
-        tx.setTxData(deposit);
-        CoinData coinData = new CoinData();
-        List<Coin> toList = new ArrayList<>();
-        toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
-        coinData.setTo(toList);
-        tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
-
-        RpcClientResult result1 = this.txProcessing(tx, result, account, form.getPassword());
-        if (!result1.isSuccess()) {
-            return result1;
+        TransactionSignature transactionSignature = new TransactionSignature();
+        List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+        List<Script> scripts = new ArrayList<>();
+        if (form.getTxdata() == null || form.getTxdata().trim().length() == 0) {
+            AssertUtil.canNotEmpty(form.getAgentHash());
+            if (!NulsDigestData.validHash(form.getAgentHash())) {
+                return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
+            }
+            AssertUtil.canNotEmpty(form.getDeposit());
+            tx = new DepositTransaction();
+            if (form.getM() <= 0) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+            if (form.getPubkeys() == null || form.getPubkeys().size() == 0 || form.getPubkeys().size() < form.getM()) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+            Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(), form.getPubkeys());
+            Deposit deposit = new Deposit();
+            deposit.setAddress(AddressTool.getAddress(form.getAddress()));
+            deposit.setAgentHash(NulsDigestData.fromDigestHex(form.getAgentHash()));
+            deposit.setDeposit(Na.valueOf(form.getDeposit()));
+            tx.setTxData(deposit);
+            CoinData coinData = new CoinData();
+            List<Coin> toList = new ArrayList<>();
+            //AddressTool.getAddress(addr)
+            if (deposit.getAddress()[2] == NulsContext.P2SH_ADDRESS_TYPE) {
+                Script scriptPubkey = SignatureUtil.createOutputScript(deposit.getAddress());
+                toList.add(new Coin(scriptPubkey.getProgram(), deposit.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
+            } else {
+                toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
+            }
+            coinData.setTo(toList);
+            tx.setCoinData(coinData);
+            //交易签名的长度为m*单个签名长度+赎回脚本长度
+            int scriptSignLenth = redeemScript.getProgram().length + form.getM() * 72;
+            CoinDataResult result = accountLedgerService.getMutilCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + scriptSignLenth, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            if (null != result) {
+                if (result.isEnough()) {
+                    tx.getCoinData().setFrom(result.getCoinList());
+                    if (null != result.getChange()) {
+                        tx.getCoinData().getTo().add(result.getChange());
+                    }
+                } else {
+                    return Result.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE).toRpcClientResult();
+                }
+            }
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            //将赎回脚本先存储在签名脚本中
+            scripts.add(redeemScript);
+            transactionSignature.setScripts(scripts);
+        }else {
+            byte[] txByte = Hex.decode(form.getTxdata());
+            tx.parse(new NulsByteBuffer(txByte));
+            transactionSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+            p2PHKSignatures = transactionSignature.getP2PHKSignatures();
+            scripts = transactionSignature.getScripts();
         }
+        //使用签名账户对交易进行签名
+        P2PHKSignature p2PHKSignature = new P2PHKSignature();
+        ECKey eckey = account.getEcKey(form.getPassword());
+        p2PHKSignature.setPublicKey(eckey.getPubKey());
+        //用当前交易的hash和账户的私钥账户
+        p2PHKSignature.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), eckey));
+        p2PHKSignatures.add(p2PHKSignature);
+        Result resultData = txMutilProcessing(tx, p2PHKSignatures, scripts, transactionSignature, AddressTool.getAddress(form.getAddress()));
         Map<String, String> valueMap = new HashMap<>();
-        valueMap.put("value", tx.getHash().getDigestHex());
+        valueMap.put("txData", (String) resultData.getData());
         return Result.getSuccess().setData(valueMap).toRpcClientResult();
+
     }
 
     @POST
