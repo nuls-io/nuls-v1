@@ -131,7 +131,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result<Integer> saveConfirmedTransactionList(List<Transaction> txs) {
         if (txs == null || txs.size() == 0) {
-            Result.getSuccess().setData(0);
+           return Result.getSuccess().setData(0);
         }
 
         List<byte[]> localAddresses = AccountLegerUtils.getLocalAddresses();
@@ -166,12 +166,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public Result<Integer> saveConfirmedTransaction(Transaction tx) {
 
         if (tx == null) {
-            Result.getSuccess().setData(0);
+           return Result.getSuccess().setData(0);
         }
 
         List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
-            Result.getSuccess().setData(0);
+           return Result.getSuccess().setData(0);
         }
         return saveConfirmedTransaction(tx, addresses);
     }
@@ -480,11 +480,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 if (values.isGreaterThan(amount.add(fee))) {
                     Na change = values.subtract(amount.add(fee));
                     Coin changeCoin = new Coin();
-                    //changeCoin.setOwner(address);
-                    //changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
-                    changeCoin.setOwner(address);
+                    if(address[2] == NulsContext.P2SH_ADDRESS_TYPE){
+                        changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
+                    }else{
+                        changeCoin.setOwner(address);
+                    }
                     changeCoin.setNa(change);
-
                     fee = TransactionFeeCalculator.getFee(size + changeCoin.size(), price);
                     if (values.isLessThan(amount.add(fee))) {
                         continue;
@@ -716,7 +717,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             tx.setRemark(remark);
             tx.setTime(TimeService.currentTimeMillis());
             CoinData coinData = new CoinData();
-            Coin toCoin = new Coin(to, values);
+            //如果为多签地址则以脚本方式存储
+            Coin toCoin = null;
+            if(to[2] == NulsContext.P2SH_ADDRESS_TYPE){
+                Script scriptPubkey = SignatureUtil.createOutputScript(to);
+                toCoin = new Coin(scriptPubkey.getProgram(), values);
+            }else{
+                toCoin = new Coin(to, values);
+            }
             coinData.getTo().add(toCoin);
             if (price == null) {
                 price = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES;
@@ -1355,7 +1363,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         long end = NulsContext.getInstance().getBestHeight();
         while (start <= end) {
             for (long i = start; i <= end; i++) {
-                List<Transaction> txs = blockService.getBlock(i).getData().getTxs();
+                List<Transaction> txs = blockService.getBlock(i, true).getData().getTxs();
                 for (Transaction tx : txs) {
                     importConfirmedTransaction(tx, addressBytes);
                 }
@@ -1551,9 +1559,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 tx.setTime(TimeService.currentTimeMillis());
                 CoinData coinData = new CoinData();
                 for (MultipleAddressTransferModel to : outputs) {
-                    /*Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
-                    Coin toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));*/
-                    Coin toCoin = new Coin(to.getAddress(), Na.valueOf(to.getAmount()));
+                    //如果为多签地址
+                    Coin toCoin = null;
+                    if(to.getAddress()[2] == NulsContext.P2SH_ADDRESS_TYPE){
+                        Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
+                        toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));
+                    }else{
+                        toCoin = new Coin(to.getAddress(), Na.valueOf(to.getAmount()));
+                    }
                     coinData.getTo().add(toCoin);
                 }
                 if (price == null) {
@@ -1643,7 +1656,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
 
-    public CoinDataResult getMutilCoinData(byte[] address, Na amount, int size, Na price) throws NulsException {
+    @Override
+    public CoinDataResult getMutilCoinData(byte[] address, Na amount, int size, Na price){
         if (null == price) {
             throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
         }
@@ -1679,9 +1693,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 if (values.isGreaterThan(amount.add(fee))) {
                     Na change = values.subtract(amount.add(fee));
                     Coin changeCoin = new Coin();
-                    /*changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
-                    changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());*/
-                    changeCoin.setOwner(address);
+                    changeCoin.setOwner(SignatureUtil.createOutputScript(address).getProgram());
+                    //changeCoin.setOwner(address);
                     changeCoin.setNa(change);
                     fee = TransactionFeeCalculator.getFee(size + changeCoin.size(), price);
                     if (values.isLessThan(amount.add(fee))) {

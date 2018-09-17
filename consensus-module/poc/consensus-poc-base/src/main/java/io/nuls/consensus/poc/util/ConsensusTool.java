@@ -147,7 +147,7 @@ public class ConsensusTool {
 
     public static CoinBaseTransaction createCoinBaseTx(MeetingMember member, List<Transaction> txList, MeetingRound localRound, long unlockHeight) {
         CoinData coinData = new CoinData();
-        // 合约剩余Gas退还/合约调用失败转入资金退还
+        // 合约剩余Gas退还
         List<Coin> returnGasList = returnContractSenderNa(txList, unlockHeight);
 
         List<Coin> rewardList = calcReward(txList, member, localRound, unlockHeight);
@@ -164,7 +164,6 @@ public class ConsensusTool {
         }
 
         for (Coin coin : rewardList) {
-            Log.info("=========================================coinBase: " + coin.toString());
             coinData.addTo(coin);
         }
         CoinBaseTransaction tx = new CoinBaseTransaction();
@@ -385,7 +384,6 @@ public class ConsensusTool {
         NulsDigestData createTxHash = agent.getTxHash();
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
-
         toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), lockTime));
         coinData.setTo(toList);
         CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);
@@ -480,5 +478,78 @@ public class ConsensusTool {
         }
     }
 
+    public static CoinData getStopMutilAgentCoinData(Agent agent, long lockTime, BlockHeader blockHeader) throws IOException {
+        if (null == agent) {
+            return null;
+        }
+        NulsDigestData createTxHash = agent.getTxHash();
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        if (agent.getAgentAddress()[2] == NulsContext.P2SH_ADDRESS_TYPE) {
+            Script scriptPubkey = SignatureUtil.createOutputScript(agent.getAgentAddress());
+            toList.add(new Coin(scriptPubkey.getProgram(), agent.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
+        } else {
+            toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), lockTime));
+        }
+        coinData.setTo(toList);
+        CreateAgentTransaction transaction = (CreateAgentTransaction) ledgerService.getTx(createTxHash);
+        if (null == transaction) {
+            throw new NulsRuntimeException(TransactionErrorCode.TX_NOT_EXIST);
+        }
+        List<Coin> fromList = new ArrayList<>();
+        for (int index = 0; index < transaction.getCoinData().getTo().size(); index++) {
+            Coin coin = transaction.getCoinData().getTo().get(index);
+            if (coin.getNa().equals(agent.getDeposit()) && coin.getLockTime() == -1L) {
+                coin.setOwner(ArraysTool.concatenate(transaction.getHash().serialize(), new VarInt(index).encode()));
+                fromList.add(coin);
+                break;
+            }
+        }
+        if (fromList.isEmpty()) {
+            throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
+        }
+        coinData.setFrom(fromList);
+        List<Deposit> deposits = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
+        List<String> addressList = new ArrayList<>();
+        Map<String, Coin> toMap = new HashMap<>();
+        long blockHeight = null == blockHeader ? -1 : blockHeader.getHeight();
+        for (Deposit deposit : deposits) {
+            if (deposit.getDelHeight() > 0 && (blockHeight <= 0 || deposit.getDelHeight() < blockHeight)) {
+                continue;
+            }
+            if (!deposit.getAgentHash().equals(agent.getTxHash())) {
+                continue;
+            }
+            DepositTransaction dtx = (DepositTransaction) ledgerService.getTx(deposit.getTxHash());
+            Coin fromCoin = null;
+            for (Coin coin : dtx.getCoinData().getTo()) {
+                if (!coin.getNa().equals(deposit.getDeposit()) || coin.getLockTime() != -1L) {
+                    continue;
+                }
+                fromCoin = new Coin(ArraysTool.concatenate(dtx.getHash().serialize(), new VarInt(0).encode()), coin.getNa(), coin.getLockTime());
+                fromCoin.setLockTime(-1L);
+                fromList.add(fromCoin);
+                break;
+            }
+            String address = AddressTool.getStringAddressByBytes(deposit.getAddress());
+            Coin coin = toMap.get(address);
+            if (null == coin) {
+                if (deposit.getAddress()[2] == NulsContext.P2SH_ADDRESS_TYPE) {
+                    Script scriptPubkey = SignatureUtil.createOutputScript(deposit.getAddress());
+                    toList.add(new Coin(scriptPubkey.getProgram(), deposit.getDeposit(), 0));
+                } else {
+                    coin = new Coin(deposit.getAddress(), deposit.getDeposit(), 0);
+                }
+                addressList.add(address);
+                toMap.put(address, coin);
+            } else {
+                coin.setNa(coin.getNa().add(fromCoin.getNa()));
+            }
+        }
+        for (String address : addressList) {
+            coinData.getTo().add(toMap.get(address));
+        }
+        return coinData;
+    }
 }
 

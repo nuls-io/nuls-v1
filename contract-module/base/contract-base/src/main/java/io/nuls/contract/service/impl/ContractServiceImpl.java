@@ -198,7 +198,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                 return result;
             }
 
-            // 返回已使用gas、状态根、消息事件、合约转账
+            // 返回已使用gas、状态根、消息事件、合约转账(从合约转出)
             contractResult.setError(false);
             contractResult.setRevert(false);
             contractResult.setStackTrace(programResult.getStackTrace());
@@ -307,7 +307,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                 return result;
             }
 
-            // 返回调用结果、已使用Gas、状态根、消息事件、合约转账等
+            // 返回调用结果、已使用Gas、状态根、消息事件、合约转账(从合约转出)等
             contractResult.setError(false);
             contractResult.setRevert(false);
             contractResult.setStackTrace(programResult.getStackTrace());
@@ -434,15 +434,6 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             return result;
         }
 
-        // 合约转账交易需要保存交易信息到合约账本中
-        if(tx instanceof ContractTransferTransaction) {
-            result = contractTransferTransactionStorageService.saveContractTransferTx(tx.getHash(), tx);
-            if (result.isFailed()) {
-                Log.error("save confirmed contract transfer tx error, reason is {}.", result.getMsg());
-                contractTransactionInfoService.deleteTransactionInfo(txInfoPo, addresses);
-                return result;
-            }
-        }
         result.setData(new Integer(1));
         return result;
     }
@@ -525,16 +516,6 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             return result;
         }
 
-        // 删除合约内部转账交易
-        if(tx instanceof ContractTransferTransaction) {
-            result = contractTransferTransactionStorageService.deleteContractTransferTx(txHash);
-            if (result.isFailed()) {
-                txInfoPo.setStatus(TransactionInfo.CONFIRMED);
-                contractTransactionInfoService.saveTransactionInfo(txInfoPo, addresses);
-                return result;
-            }
-        }
-
         return result;
     }
 
@@ -573,8 +554,8 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
      * @param blockTime
      * @param toMaps
      * @param contractUsedCoinMap 组装时不操作toMaps, 用 contractUsedCoinMap 来检查UTXO是否已经被使用，如果已使用则跳过
-     *                            (合约内部转账不同于普通转账，普通转账有本地账本来维护UTXO，并且在打包前已经组装好UTXO，
-     *                              而合约内部转账是在打包时才组装，此时从合约账本[DB]及打包交易[toMaps]中拿到所有的utxo来组装，
+     *                            (合约转账(从合约转出)不同于普通转账，普通转账有本地账本来维护UTXO，并且在打包前已经组装好UTXO，
+     *                              而合约转账(从合约转出)是在打包时才组装，此时从合约账本[DB]及打包交易[toMaps]中拿到所有的utxo来组装，
      *                              用 contractUsedCoinMap 来代表已使用的UTXO)
      * @param bestHeight
      * @return
@@ -627,7 +608,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                 }
             }
 
-            // 合约转账交易不需要签名
+            // 合约转账(从合约转出)交易不需要签名
             return Result.getSuccess().setData(tx);
         } catch (IOException e) {
             e.printStackTrace();
@@ -1081,14 +1062,14 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         stateRoot = contractResult.getStateRoot();
         transfers = contractResult.getTransfers();
         if(tx instanceof CallContractTransaction) {
-            // 合约调用失败，且调用者存在资金转入合约地址，创建一笔合约内部转账，退回这笔资金
+            // 合约调用失败，且调用者存在资金转入合约地址，创建一笔合约转账(从合约转出)，退回这笔资金
             if (!contractResult.isSuccess() && contractResult.getValue() > 0) {
                 Na sendBack = Na.valueOf(contractResult.getValue());
                 ContractTransfer transfer = this.createReturnFundsContractTransfer(tx, sendBack);
                 transfers.add(transfer);
             }
 
-            // 处理合约转账交易
+            // 处理合约转账(从合约转出)交易
             stateRoot = this.handleContractTransferTxs((CallContractTransaction) tx, contractResult, stateRoot, preStateRoot,
                     transfers, time, toMaps, contractUsedCoinMap, null);
 
@@ -1110,10 +1091,10 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                                              byte[] stateRoot, byte[] preStateRoot,
                                              List<ContractTransfer> transfers, long time,
                                              Map<String,Coin> toMaps, Map<String,Coin> contractUsedCoinMap, Long blockHeight) {
-        // 创建合约转账交易
+        // 创建合约转账(从合约转出)交易
         if (transfers != null && transfers.size() > 0) {
-            // 合约转账使用的交易时间为区块时间
-            // 用于保存本次交易产生的合约内部转账交易
+            // 合约转账(从合约转出)使用的交易时间为区块时间
+            // 用于保存本次交易产生的合约转账(从合约转出)交易
             boolean isCorrectContractTransfer = true;
             Map<String, ContractTransferTransaction> successContractTransferTxs = new LinkedHashMap<>();
             Result<ContractTransferTransaction> contractTransferResult;
@@ -1136,7 +1117,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                 successContractTransferTxs.put(contractTransferTx.getHash().getDigestHex(), contractTransferTx);
             }
 
-            // 如果合约内部转账出现错误，整笔合约交易视作合约执行失败
+            // 如果合约转账(从合约转出)出现错误，整笔合约交易视作合约执行失败
             if (!isCorrectContractTransfer) {
                 Log.error("contract transfer execution failed, reason: {}", contractResult.getErrorMessage());
                 // 执行合约产生的状态根回滚到上一个世界状态
@@ -1149,7 +1130,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                 // 回滚临时余额
                 this.rollbackContractTempBalance(tx, contractResult);
 
-                // 合约内部转账交易失败，且调用者存在资金转入合约地址，创建一笔合约内部转账，退回这笔资金
+                // 合约转账(从合约转出)交易失败，且调用者存在资金转入合约地址，创建一笔合约转账(从合约转出)，退回这笔资金
                 if (contractResult.getValue() > 0) {
                     // 清空内部转账列表
                     transfers.clear();
@@ -1193,7 +1174,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         stateRoot = contractResult.getStateRoot();
         transfers = contractResult.getTransfers();
         if(tx instanceof CallContractTransaction) {
-            // 合约调用失败，且调用者存在资金转入合约地址，创建一笔合约内部转账，退回这笔资金
+            // 合约调用失败，且调用者存在资金转入合约地址，创建一笔合约转账(从合约转出)，退回这笔资金
             if (!contractResult.isSuccess() && contractResult.getValue() > 0) {
                 // 智能合约在打包节点上只执行一次(打包区块和验证区块), 打包节点在打包时已处理过contractResult, 不重复处理
                 if (transfers.size() == 0) {
@@ -1202,7 +1183,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                     transfers.add(transfer);
                 }
             }
-            // 处理合约转账交易
+            // 处理合约转账(从合约转出)交易
             stateRoot = this.handleContractTransferTxs((CallContractTransaction) tx, contractResult, stateRoot, preStateRoot,
                     transfers, time, toMaps, contractUsedCoinMap, blockHeight);
         }
@@ -1261,5 +1242,16 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
 
         blockHeader.setStateRoot(stateRoot);
         return Result.getSuccess().setData(stateRoot);
+    }
+
+    @Override
+    public Result<List<ContractTransferTransaction>> loadAllContractTransferTxList() {
+        try {
+            List<ContractTransferTransaction> list = contractTransferTransactionStorageService.loadAllContractTransferTxList();
+            return Result.getSuccess().setData(list);
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed();
+        }
     }
 }

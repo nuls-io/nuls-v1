@@ -35,6 +35,8 @@ import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.utxo.accounts.storage.constant.UtxoAccountsStorageConstant;
 import io.nuls.utxo.accounts.storage.po.LocalCacheBlockBalance;
 import io.nuls.utxo.accounts.storage.po.UtxoAccountsBalancePo;
@@ -117,7 +119,14 @@ public class UtxoAccountsStorageServiceImpl implements UtxoAccountsStorageServic
         if (addressBytes == null) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
-        byte []balance = dbService.get(UtxoAccountsStorageConstant.DB_NAME_UTXO_ACCOUNTS_CONFIRMED_BALANCE, addressBytes);
+        byte[] bytes = null;
+        if(addressBytes[2] == 3){
+            Script scriptPubkey = SignatureUtil.createOutputScript(addressBytes);
+            bytes = scriptPubkey.getProgram();
+        }else{
+         bytes = addressBytes;
+        }
+        byte []balance = dbService.get(UtxoAccountsStorageConstant.DB_NAME_UTXO_ACCOUNTS_CONFIRMED_BALANCE, bytes);
         UtxoAccountsBalancePo b=new UtxoAccountsBalancePo();
         b.parse(balance,0);
         if (b.getOwner()==null){

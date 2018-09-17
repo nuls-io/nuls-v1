@@ -66,7 +66,7 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
             throw new NulsRuntimeException(result.getErrorCode());
         }
 
-        result = this.dbService.createArea(ProtocolStorageConstant.PROTOCOL_TEMP_AREA);
+        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_INDEX);
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }

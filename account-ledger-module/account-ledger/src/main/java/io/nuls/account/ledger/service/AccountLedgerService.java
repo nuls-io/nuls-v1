@@ -304,4 +304,7 @@ public interface AccountLedgerService {
      * @return Result
      */
     Result transferP2sh(byte[] fromAddr, byte[] signAddr ,List<MultipleAddressTransferModel> outputs, Na values, String password, String remark, Na price, List<String>pubkeys,int m,String txdata);
+
+
+    CoinDataResult getMutilCoinData(byte[] address, Na amount, int size, Na price);
 }

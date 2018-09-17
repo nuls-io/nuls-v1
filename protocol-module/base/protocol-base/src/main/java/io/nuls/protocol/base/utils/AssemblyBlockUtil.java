@@ -46,10 +46,10 @@ public class AssemblyBlockUtil {
         List<Transaction> txs = new ArrayList<>();
         for (NulsDigestData txHash : txHashList) {
             Transaction tx = txMap.get(txHash);
-            tx.setBlockHeight(header.getHeight());
             if (null == tx) {
                 throw new NulsRuntimeException(TransactionErrorCode.TX_NOT_EXIST);
             }
+            tx.setBlockHeight(header.getHeight());
             txs.add(tx);
         }
         block.setTxs(txs);

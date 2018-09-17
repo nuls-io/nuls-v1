@@ -23,6 +23,7 @@
  */
 package io.nuls.contract.entity.tx.processor;
 
+import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.dto.ContractResult;
@@ -83,6 +84,9 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
     @Autowired
     private LedgerService ledgerService;
 
+    @Autowired
+    private AccountLedgerService accountLedgerService;
+
     @Override
     public Result onRollback(CallContractTransaction tx, Object secondaryData) {
         try {
@@ -133,29 +137,38 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
 
             // 删除子交易从全网账本
             // 删除子交易从合约账本
+            // 删除子交易从本地账本
             Collection<ContractTransferTransaction> contractTransferTxs = tx.getContractTransferTxs();
             if(contractTransferTxs != null && contractTransferTxs.size() > 0) {
                 List<ContractTransferTransaction> contractTransferTxList = new ArrayList<>(contractTransferTxs);
                 Collections.reverse(contractTransferTxList);
+                // 用于回滚本地账本
+                List<Transaction> txList = new ArrayList<>();
                 for(ContractTransferTransaction transferTx : contractTransferTxList) {
                     try {
+                        txList.add(transferTx);
                         Result result = ledgerService.rollbackTx(transferTx);
                         if(result.isFailed()) {
-                            Log.error("rollback contract transfer tx to ledger error. msg: {}", result.getMsg());
+                            Log.error("rollback contract transfer tx from ledger error. msg: {}", result.getMsg());
                             return result;
                         }
                         result = contractService.rollbackContractTransferTx(transferTx);
                         if(result.isFailed()) {
-                            Log.error("rollback contract transfer tx to contract ledger error. msg: {}", result.getMsg());
+                            Log.error("rollback contract transfer tx from contract ledger error. msg: {}", result.getMsg());
                             return Result.getFailed();
                         }
-
                     } catch (Exception e) {
                         Log.error("rollback contract transfer tx error. msg: {}", e.getMessage());
                         return Result.getFailed();
                     }
                 }
+                Result result = accountLedgerService.rollbackTransactions(txList);
+                if(result.isFailed()) {
+                    Log.error("rollback contract transfer tx from account ledger error. msg: {}", result.getMsg());
+                    return Result.getFailed();
+                }
             }
+
 
             // 删除合约调用交易的UTXO
             contractUtxoService.deleteUtxoOfTransaction(tx);
@@ -183,13 +196,17 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                 return utxoResult;
             }
 
-            // 保存子交易到全网账本
-            // 保存子交易合约账本
+            long blockHeight = tx.getBlockHeight();
+            /**
+             * 保存子交易到全网账本、合约账本、本地账本
+             */
             Collection<ContractTransferTransaction> contractTransferTxs = tx.getContractTransferTxs();
             if(contractTransferTxs != null && contractTransferTxs.size() > 0) {
 
                 for(ContractTransferTransaction transferTx : contractTransferTxs) {
                     try {
+                        transferTx.setBlockHeight(blockHeight);
+
                         Result result = ledgerService.saveTx(transferTx);
                         if(result.isFailed()) {
                             Log.error("save contract transfer tx to ledger error. msg: {}", result.getMsg());
@@ -198,7 +215,13 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                         result = contractService.saveContractTransferTx(transferTx);
                         if(result.isFailed()) {
                             Log.error("save contract transfer tx to contract ledger error. msg: {}", result.getMsg());
-                            return Result.getFailed();
+                            return result;
+                        }
+
+                        result = accountLedgerService.saveConfirmedTransaction(transferTx);
+                        if(result.isFailed()) {
+                            Log.error("save contract transfer tx to account ledger error. msg: {}", result.getMsg());
+                            return result;
                         }
 
                     } catch (Exception e) {

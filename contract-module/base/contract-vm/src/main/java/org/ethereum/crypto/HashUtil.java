@@ -161,7 +161,7 @@ public class HashUtil {
     /**
      * The way to calculate new address inside ethereum
      *
-     * @param addr  - creating addres
+     * @param addr  - creating address
      * @param nonce - nonce of creating address
      * @return new address
      */

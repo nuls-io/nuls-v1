@@ -33,10 +33,8 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.Result;
-import org.spongycastle.math.ec.ScaleYPointMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,43 +70,6 @@ public class ContractUtxoStorageServiceImpl implements ContractUtxoStorageServic
     public List<Entry<byte[], byte[]>> loadAllCoinList() {
         List<Entry<byte[], byte[]>> coinList = dbService.entryList(ContractStorageConstant.DB_NAME_CONTRACT_LEDGER_UTXO);
         return coinList;
-    }
-
-    @Override
-    public Result saveUTXO(byte[] key, byte[] value) {
-        return dbService.put(ContractStorageConstant.DB_NAME_CONTRACT_LEDGER_UTXO, key, value);
-    }
-
-    @Override
-    public Result<Integer> batchSaveUTXO(List<Entry<byte[], byte[]>> utxos) {
-        BatchOperation batch = dbService.createWriteBatch(ContractStorageConstant.DB_NAME_CONTRACT_LEDGER_UTXO);
-        for(Entry<byte[], byte[]> entry : utxos) {
-            batch.put(entry.getKey(), entry.getValue());
-        }
-        Result batchResult = batch.executeBatch();
-        if (batchResult.isFailed()) {
-            return batchResult;
-        }
-        return Result.getSuccess().setData(new Integer(utxos.size()));
-    }
-
-    @Override
-    public Result deleteUTXO(byte[] key) {
-        dbService.delete(ContractStorageConstant.DB_NAME_CONTRACT_LEDGER_UTXO, key);
-        return Result.getSuccess();
-    }
-
-    @Override
-    public Result batchDeleteUTXO(List<byte[]> utxos) {
-        BatchOperation batch = dbService.createWriteBatch(ContractStorageConstant.DB_NAME_CONTRACT_LEDGER_UTXO);
-        for (byte[] key : utxos) {
-            batch.delete(key);
-        }
-        Result batchResult = batch.executeBatch();
-        if (batchResult.isFailed()) {
-            return batchResult;
-        }
-        return Result.getSuccess().setData(new Integer(utxos.size()));
     }
 
     @Override

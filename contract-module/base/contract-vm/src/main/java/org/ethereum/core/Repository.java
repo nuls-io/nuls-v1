@@ -174,7 +174,7 @@ public interface Repository extends org.ethereum.facade.Repository {
      * @param txHash   is the hash of the given transaction.
      *                 If null, the block state post coinbase reward is dumped.
      */
-    //void dumpState(Block block, long gasUsed, int txNumber, byte[] txHash);
+    void dumpState(Block block, long gasUsed, int txNumber, byte[] txHash);
 
     /**
      * Save a snapshot and start tracking future changes
@@ -235,4 +235,10 @@ public interface Repository extends org.ethereum.facade.Repository {
                      HashMap<ByteArrayWrapper, ContractDetails> cacheDetails);
 
     Repository getSnapshotTo(byte[] root);
+
+    /**
+     * Clones repository so changes made to this repository are
+     * not reflected in its clone.
+     */
+    Repository clone();
 }

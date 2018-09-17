@@ -27,15 +27,14 @@ package io.nuls.account.rpc.resource;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.account.model.Account;
-import io.nuls.account.model.AccountKeyStore;
-import io.nuls.account.model.Alias;
-import io.nuls.account.model.Balance;
+import io.nuls.account.model.*;
 import io.nuls.account.rpc.model.AccountDto;
 import io.nuls.account.rpc.model.AccountKeyStoreDto;
 import io.nuls.account.rpc.model.AssetDto;
+import io.nuls.account.rpc.model.MultiSigAccountDto;
 import io.nuls.account.rpc.model.form.*;
 import io.nuls.account.service.AccountBaseService;
 import io.nuls.account.service.AccountCacheService;
@@ -65,6 +64,7 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
+import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.swagger.annotations.*;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -475,7 +475,7 @@ public class AccountResource {
                 end = (int) page.getTotal();
             }
 
-            if(dtoList.size() > 0) {
+            if (dtoList.size() > 0) {
                 for (int i = start; i < end; i++) {
                     infoDtoList.add(dtoList.get(i));
                 }
@@ -1193,15 +1193,138 @@ public class AccountResource {
         if (null == form || null == form.getPubkeys() || form.getPubkeys().size() == 0) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        if (form.getM() == 0)
+        if (form.getM() == 0) {
             form.setM(form.getPubkeys().size());
+        }
         Result result = accountService.createMultiAccount(form.getPubkeys(), form.getM());
         if (result.isFailed()) {
             return result.toRpcClientResult();
         }
-        Address address = (Address) result.getData();
-        Map<String, String> map = new HashMap<>();
-        map.put("address", address.toString());
-        return Result.getSuccess().setData(map).toRpcClientResult();
+        MultiSigAccountDto account = new MultiSigAccountDto((MultiSigAccount) result.getData());
+        return Result.getSuccess().setData(account).toRpcClientResult();
+    }
+
+    @POST
+    @Path("/aliasMutil")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation("[别名] 多签账户设置别名")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult aliasMutil(@ApiParam(name = "form", value = "多签账户设置别名表单数据", required = true)
+                                         MutilAccountAliasForm form) {
+        if(NulsContext.MAIN_NET_VERSION  <=1){
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(form.getSignAddress()) || !AddressTool.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if(form.getTxdata() == null || form.getTxdata().trim().length() == 0){
+            if (StringUtils.isBlank(form.getAlias())) {
+                return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+            if (!StringUtils.validAlias(form.getAlias())) {
+                return Result.getFailed(AccountErrorCode.ALIAS_FORMAT_WRONG).toRpcClientResult();
+            }
+            if (!AddressTool.validAddress(form.getAddress())) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            }
+            if (form.getM() <= 0) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+            if (form.getPubkeys() == null || form.getPubkeys().size() == 0 || form.getPubkeys().size() < form.getM()) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+        }
+        Result result = aliasService.setMutilAlias(form.getAddress(),form.getSignAddress(),form.getAlias(),form.getPassword(),form.getPubkeys(),form.getM(),null);
+        if (result.isSuccess()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("txData", (String) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
+	
+	
+    @POST
+    @Path("/importMultiAccount")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "[导入] 导入多重签名账户 ", notes = "result.data: boolean ")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult importMultiAccount(@ApiParam(name = "form", value = "多签账户表单数据", required = true)
+                                                      MultiAccountImportForm form) {
+        if (null == form || null == form.getPubkeys() || StringUtils.isBlank(form.getAddress()) || form.getPubkeys().size() == 0) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        if (form.getM() == 0) {
+            form.setM(form.getPubkeys().size());
+        }
+        Result result = accountService.saveMultiSigAccount(form.getAddress(), form.getPubkeys(), form.getM());
+        if (result.isFailed()) {
+            return result.toRpcClientResult();
+        }
+        return result.toRpcClientResult();
+    }
+
+    @GET
+    @Path("/multiAccount/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "[导出] 导出账户信息，导出NultiSigAccount数据")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult getMultiSigAccount(@ApiParam(name = "address", value = "账户地址", required = true)
+                                              @PathParam("address") String address) throws Exception {
+        if (StringUtils.isNotBlank(address) && !AddressTool.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        Result<MultiSigAccount> result = accountService.getMultiSigAccount(address);
+        if (result.isFailed()) {
+            return result.toRpcClientResult();
+        }
+        return Result.getSuccess().setData(new MultiSigAccountDto(result.getData())).toRpcClientResult();
+    }
+
+    @DELETE
+    @Path("/multiAccount/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "[删除] 移除多签账户")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult delMultiSigAccount(@ApiParam(name = "address", value = "账户地址", required = true)
+                                              @PathParam("address") String address) throws Exception {
+        if (StringUtils.isNotBlank(address) && !AddressTool.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        Result result = accountService.removeMultiSigAccount(address);
+        Map<String, Boolean> map = new HashMap<>();
+        map.put("result", result.isSuccess());
+        return result.setData(map).toRpcClientResult();
+    }
+
+    @GET
+    @Path("/multiAccounts")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "[查询] 查询全部多签账户信息，返回NultiSigAccount列表数据")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
+    })
+    public RpcClientResult getMultiSigAccountList() throws Exception {
+
+        Result<List<MultiSigAccount>> result = accountService.getMultiSigAccountList();
+        if (result.isFailed()) {
+            return result.toRpcClientResult();
+        }
+        List<MultiSigAccountDto> list = new ArrayList<>();
+        for (MultiSigAccount account : result.getData()) {
+            MultiSigAccountDto dto = new MultiSigAccountDto(account);
+            list.add(dto);
+        }
+        return Result.getSuccess().setData(list).toRpcClientResult();
     }
 }

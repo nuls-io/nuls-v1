@@ -37,6 +37,7 @@ public interface AccountStorageConstant {
      * The name of the account table
      */
     String DB_NAME_ACCOUNT = "account";
+    String DB_NAME_MULTI_SIG_ACCOUNT = "multi_account";
 
     /**
      * 默认账户的数据库key

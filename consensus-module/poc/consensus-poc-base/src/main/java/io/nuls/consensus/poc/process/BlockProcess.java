@@ -26,7 +26,6 @@
 
 package io.nuls.consensus.poc.process;
 
-import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.block.validator.BifurcationUtil;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
@@ -78,7 +77,6 @@ import java.util.concurrent.Future;
  * @author ln
  */
 public class BlockProcess {
-//    public static volatile boolean BB = true;
 
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
@@ -89,7 +87,6 @@ public class BlockProcess {
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
     private ContractService contractService = NulsContext.getServiceBean(ContractService.class);
-    private AccountLedgerService accountLedgerService = NulsContext.getServiceBean(AccountLedgerService.class);
     private TransactionCacheStorageService transactionCacheStorageService = NulsContext.getServiceBean(TransactionCacheStorageService.class);
 
     private ExecutorService signExecutor = TaskManager.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, ""));
@@ -130,14 +127,6 @@ public class BlockProcess {
 
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
         Block block = blockContainer.getBlock();
-      /*  if (BB) {
-            if (block.getHeader().getHeight() > 6600) {
-                if (!AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()).equals("NsdvNWbdPwqiosEbP2aykkSRx2gx2pT5") &&
-                        !AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()).equals("Nse68SNGvkBXUrb5kULiS2QHZBfvmEB7")) {
-                    return false;
-                }
-            }
-        }*/
         // Discard future blocks
         // 丢弃掉未来时间的区块
         if (TimeService.currentTimeMillis() + PocConsensusConstant.DISCARD_FUTURE_BLOCKS_TIME < block.getHeader().getTime()) {

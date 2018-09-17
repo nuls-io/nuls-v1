@@ -27,10 +27,7 @@ package io.nuls.account.service.impl;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.account.model.Account;
-import io.nuls.account.model.AccountKeyStore;
-import io.nuls.account.model.Alias;
-import io.nuls.account.model.Balance;
+import io.nuls.account.model.*;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
@@ -38,6 +35,7 @@ import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.account.storage.service.AliasStorageService;
+import io.nuls.account.storage.service.MultiSigAccountStorageService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.core.tools.crypto.AESEncrypt;
 import io.nuls.core.tools.crypto.ECKey;
@@ -61,8 +59,11 @@ import io.nuls.kernel.script.ScriptBuilder;
 import io.nuls.kernel.script.ScriptUtil;
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
+import io.nuls.kernel.validate.ValidateResult;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -79,6 +80,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     private AccountStorageService accountStorageService;
+
+    @Autowired
+    private MultiSigAccountStorageService multiSigAccountStorageService;
 
     @Autowired
     private AccountLedgerService accountLedgerService;
@@ -246,7 +250,7 @@ public class AccountServiceImpl implements AccountService {
                 return Result.getFailed(e.getErrorCode());
             }
             //如果私钥生成的地址和keystore的地址不相符，说明私钥错误
-            if(!account.getAddress().getBase58().equals(keyStore.getAddress())){
+            if (!account.getAddress().getBase58().equals(keyStore.getAddress())) {
                 return Result.getFailed(AccountErrorCode.PRIVATE_KEY_WRONG);
             }
         } else if (null == keyStore.getPrikey() && null != keyStore.getEncryptedPrivateKey()) {
@@ -262,7 +266,7 @@ public class AccountServiceImpl implements AccountService {
                 return Result.getFailed(e.getErrorCode());
             }
             //如果私钥生成的地址和keystore的地址不相符，说明密码错误
-            if(!account.getAddress().getBase58().equals(keyStore.getAddress())){
+            if (!account.getAddress().getBase58().equals(keyStore.getAddress())) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         } else {
@@ -414,11 +418,11 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Account> getAccount(byte[] address) {
-        if(null == address || address.length == 0){
+        if (null == address || address.length == 0) {
             return Result.getFailed(AccountErrorCode.NULL_PARAMETER);
         }
         String addr = AddressTool.getStringAddressByBytes(address);
-        if(!AddressTool.validAddress(addr)){
+        if (!AddressTool.validAddress(addr)) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         return getAccount(addr);
@@ -608,14 +612,125 @@ public class AccountServiceImpl implements AccountService {
     public Result<Address> createMultiAccount(List<String> pubkeys, int m) {
         locker.lock();
         try {
-            Script redeemScript = ScriptBuilder.createNulsRedeemScript(m,pubkeys);
+            Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubkeys);
             Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
-            return Result.getSuccess().setData(address);
+            MultiSigAccount account = new MultiSigAccount();
+            account.setAddress(address);
+            account.setM(m);
+            account.addPubkeys(pubkeys);
+            Result result = this.multiSigAccountStorageService.saveAccount(account.getAddress(), account.serialize());
+            if (result.isFailed()) {
+                return result;
+            }
+            return result.setData(account);
         } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(KernelErrorCode.FAILED);
         } finally {
             locker.unlock();
+        }
+    }
+
+    /**
+     * 获取所有账户集合
+     * Query all account collections.
+     *
+     * @return account list of all accounts.
+     */
+    @Override
+    public Result<List<MultiSigAccount>> getMultiSigAccountList() {
+        List<byte[]> list = this.multiSigAccountStorageService.getAccountList().getData();
+        if (null == list) {
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+        }
+        List<MultiSigAccount> accountList = new ArrayList<>();
+        for (byte[] bytes : list) {
+            MultiSigAccount account = new MultiSigAccount();
+            try {
+                account.parse(new NulsByteBuffer(bytes, 0));
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+            accountList.add(account);
+        }
+        return new Result<List<MultiSigAccount>>().setData(accountList);
+    }
+
+    /**
+     * 根据地址获取本地存储的多签账户的详细信息
+     * Get the details of the locally stored multi-sign account based on the address
+     *
+     * @param address 多签地址
+     * @return 多签账户的详细信息
+     */
+    @Override
+    public Result<MultiSigAccount> getMultiSigAccount(String address) throws Exception {
+        byte[] bytes = this.multiSigAccountStorageService.getAccount(Address.fromHashs(address)).getData();
+        if (null == bytes) {
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+        }
+        MultiSigAccount account = new MultiSigAccount();
+        account.parse(new NulsByteBuffer(bytes, 0));
+        List<AliasPo> list = aliasStorageService.getAliasList().getData();
+        for (AliasPo aliasPo : list) {
+            if (aliasPo.getAddress()[2] != NulsContext.P2SH_ADDRESS_TYPE) {
+                continue;
+            }
+            if (Arrays.equals(aliasPo.getAddress(), account.getAddress().getAddressBytes())) {
+                account.setAlias(aliasPo.getAlias());
+                break;
+            }
+        }
+        return Result.getSuccess().setData(account);
+    }
+
+    /**
+     * 导入一个跟本地地址相关的多签账户
+     *
+     * @param addressStr 多签地址
+     * @param pubkeys    多签组成公钥列表
+     * @param m          最小签名数
+     * @return 是否成功
+     */
+    @Override
+    public Result<Boolean> saveMultiSigAccount(String addressStr, List<String> pubkeys, int m) {
+        Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubkeys);
+        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
+        if (!AddressTool.getStringAddressByBytes(address.getAddressBytes()).equals(addressStr)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        MultiSigAccount account = new MultiSigAccount();
+        account.setAddress(address);
+        account.setM(m);
+        account.addPubkeys(pubkeys);
+        Result result = null;
+        try {
+            result = this.multiSigAccountStorageService.saveAccount(account.getAddress(), account.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(KernelErrorCode.SERIALIZE_ERROR);
+        }
+        if (result.isFailed()) {
+            return result;
+        }
+        return result.setData(addressStr);
+    }
+
+    /**
+     * 从数据库中删除该账户
+     */
+    @Override
+    public Result<Boolean> removeMultiSigAccount(String address) {
+        try {
+            Address addressObj = Address.fromHashs(address);
+            Result result = this.multiSigAccountStorageService.getAccount(addressObj);
+            if (result.isFailed() || result.getData() == null) {
+                return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            return this.multiSigAccountStorageService.removeAccount(addressObj);
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed();
         }
     }
 }

@@ -210,7 +210,7 @@ public class TransactionResource {
     @GET
     @Path("/bytes")
     @Produces(MediaType.APPLICATION_JSON)
-    public RpcClientResult getBlockBytes(@QueryParam("hash") String hash) throws IOException {
+    public RpcClientResult getTxBytes(@QueryParam("hash") String hash) throws IOException {
         Result result;
         if (!NulsDigestData.validHash(hash)) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
