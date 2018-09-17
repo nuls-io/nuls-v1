@@ -1213,9 +1213,9 @@ public class AccountResource {
     })
     public RpcClientResult aliasMutil(@ApiParam(name = "form", value = "多签账户设置别名表单数据", required = true)
                                          MutilAccountAliasForm form) {
-        /*if(NulsContext.MAIN_NET_VERSION  <=1){
+        if(NulsContext.MAIN_NET_VERSION  <=1){
             return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
-        }*/
+        }
         if (form == null) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }

@@ -1150,9 +1150,9 @@ public class PocConsensusResource {
     })
     public RpcClientResult createMutilAgent(@ApiParam(name = "form", value = "多签地址创建节点表单数据", required = true)
                                                CreateMutilAgentForm form) throws NulsException,IOException{
-        /*if(NulsContext.MAIN_NET_VERSION  <=1){
+        if(NulsContext.MAIN_NET_VERSION  <=1){
             return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
-        }*/
+        }
         if (form == null) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
