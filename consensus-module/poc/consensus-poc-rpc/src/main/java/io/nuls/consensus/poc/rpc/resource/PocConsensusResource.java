@@ -1150,9 +1150,9 @@ public class PocConsensusResource {
     })
     public RpcClientResult createMutilAgent(@ApiParam(name = "form", value = "多签地址创建节点表单数据", required = true)
                                                CreateMutilAgentForm form) throws NulsException,IOException{
-        if(NulsContext.MAIN_NET_VERSION  <=1){
+        /*if(NulsContext.MAIN_NET_VERSION  <=1){
             return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
-        }
+        }*/
         if (form == null) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
@@ -1238,13 +1238,13 @@ public class PocConsensusResource {
         //用当前交易的hash和账户的私钥账户
         p2PHKSignature.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(),eckey));
         p2PHKSignatures.add(p2PHKSignature);
-        RpcClientResult result = txMutilProcessing(tx,p2PHKSignatures,scripts,transactionSignature,AddressTool.getAddress(form.getAgentAddress()));
+        Result result = txMutilProcessing(tx,p2PHKSignatures,scripts,transactionSignature,AddressTool.getAddress(form.getAgentAddress()));
         Map<String, String> valueMap = new HashMap<>();
         valueMap.put("txData", (String) result.getData());
         return Result.getSuccess().setData(valueMap).toRpcClientResult();
     }
 
-    public RpcClientResult txMutilProcessing(Transaction tx, List<P2PHKSignature> p2PHKSignatures,List<Script> scripts,TransactionSignature transactionSignature,byte[] fromAddr) throws NulsException,IOException{
+    public Result txMutilProcessing(Transaction tx, List<P2PHKSignature> p2PHKSignatures,List<Script> scripts,TransactionSignature transactionSignature,byte[] fromAddr) throws NulsException,IOException{
         //当已签名数等于M则自动广播该交易
         if(p2PHKSignatures.size() == SignatureUtil.getM(scripts.get(0))){
             //将交易中的签名数据P2PHKSignatures按规则排序
@@ -1271,23 +1271,23 @@ public class PocConsensusResource {
                         rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
                         rs.setMsg(rs.getMsg() + maxAmount.toDouble());
                     }
-                    return rs.toRpcClientResult();
+                    return rs;
                 }
-                return saveResult.toRpcClientResult();
+                return saveResult;
             }
             transactionService.newTx(tx);
             Result sendResult = transactionService.broadcastTx(tx);
             if (sendResult.isFailed()) {
                 accountLedgerService.deleteTransaction(tx);
-                return sendResult.toRpcClientResult();
+                return sendResult;
             }
-            return Result.getSuccess().setData(tx.getHash().getDigestHex()).toRpcClientResult();
+            return Result.getSuccess().setData(tx.getHash().getDigestHex());
         }
         //如果签名数还没达到，则返回交易
         else{
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
-            return Result.getSuccess().setData(Hex.encode(tx.serialize())).toRpcClientResult();
+            return Result.getSuccess().setData(Hex.encode(tx.serialize()));
         }
     }
 }
