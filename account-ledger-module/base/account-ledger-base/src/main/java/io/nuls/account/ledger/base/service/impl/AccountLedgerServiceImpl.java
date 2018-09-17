@@ -438,6 +438,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         try {
             CoinDataResult coinDataResult = new CoinDataResult();
             coinDataResult.setEnough(false);
+
+
             List<Coin> coinList = balanceManager.getCoinListByAddress(address);
 
             coinList = coinList.stream()
@@ -1715,5 +1717,55 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public Result<Na> getMultiMaxAmountOfOnce(byte[] address, Transaction tx, Na price,int signSize) {
+        lock.lock();
+        try {
+            tx.getCoinData().setFrom(null);
+            int txSize = tx.size();
+            //计算所有to的size
+            for (Coin coin : tx.getCoinData().getTo()) {
+                txSize += coin.size();
+            }
+            //计算目标size，coindata中from的总大小
+            int targetSize = TxMaxSizeValidator.MAX_TX_SIZE - txSize;
+            if(tx.getTransactionSignature() == null || tx.getTransactionSignature().length ==0)
+                txSize += signSize;
+            List<Coin> coinList = ledgerService.getAllUtxo(address);;
+            if (coinList.isEmpty()) {
+                return Result.getSuccess().setData(Na.ZERO);
+            }
+            Collections.sort(coinList, CoinComparator.getInstance());
+            Na max = Na.ZERO;
+            int size = 0;
+            //将所有余额从小到大排序后，累计未花费的余额
+            for (int i = 0; i < coinList.size(); i++) {
+                Coin coin = coinList.get(i);
+                if (!coin.usable()) {
+                    continue;
+                }
+                if (coin.getNa().equals(Na.ZERO)) {
+                    continue;
+                }
+                size += coin.size();
+                if (i == 127) {
+                    size += 1;
+                }
+                if (size > targetSize) {
+                    break;
+                }
+                max = max.add(coin.getNa());
+            }
+            Na fee = TransactionFeeCalculator.getFee(size, price);
+            max = max.subtract(fee);
+            return Result.getSuccess().setData(max);
+        } catch (Exception e) {
+            return Result.getFailed(TransactionErrorCode.DATA_ERROR);
+        } finally {
+            lock.unlock();
+        }
+
     }
 }

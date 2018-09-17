@@ -1605,4 +1605,165 @@ public class PocConsensusResource {
             return Result.getSuccess().setData(Hex.encode(tx.serialize()));
         }
     }
+
+    @GET
+    @Path("/multiAgent/fee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "get the fee of create agent! 获取创建共识(代理)节点的手续费", notes = "返回创建的节点成功的交易手续费")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public RpcClientResult getCreateMultiAgentFee(
+            @BeanParam() GetCreateAgentFeeForm form) throws NulsException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAgentAddress(), "agent address can not be null");
+        AssertUtil.canNotEmpty(form.getCommissionRate(), "commission rate can not be null");
+        AssertUtil.canNotEmpty(form.getDeposit(), "deposit can not be null");
+        AssertUtil.canNotEmpty(form.getPackingAddress(), "packing address can not be null");
+        AssertUtil.canNotEmpty(form.getPubkeys(), "signatures pubkeys can not be null");
+        AssertUtil.canNotEmpty(form.getM(), "Number of signatures can not be null");
+        if (StringUtils.isBlank(form.getRewardAddress())) {
+            form.setRewardAddress(form.getAgentAddress());
+        }
+        CreateAgentTransaction tx = new CreateAgentTransaction();
+        tx.setTime(TimeService.currentTimeMillis());
+        Agent agent = new Agent();
+        agent.setAgentAddress(AddressTool.getAddress(form.getAgentAddress()));
+        agent.setPackingAddress(AddressTool.getAddress(form.getPackingAddress()));
+        if (StringUtils.isBlank(form.getRewardAddress())) {
+            agent.setRewardAddress(agent.getAgentAddress());
+        } else {
+            agent.setRewardAddress(AddressTool.getAddress(form.getRewardAddress()));
+        }
+        agent.setDeposit(Na.valueOf(form.getDeposit()));
+        agent.setCommissionRate(form.getCommissionRate());
+        tx.setTxData(agent);
+        Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(), form.getPubkeys());
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        if (agent.getAgentAddress()[2] == 3) {
+            Script scriptPubkey = SignatureUtil.createOutputScript(agent.getAgentAddress());
+            toList.add(new Coin(scriptPubkey.getProgram(), agent.getDeposit(), -1));
+        } else {
+            toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), -1));
+        }
+        coinData.setTo(toList);
+        tx.setCoinData(coinData);
+        CoinDataResult result = accountLedgerService.getMutilCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        tx.getCoinData().setFrom(result.getCoinList());
+        if (null != result.getChange()) {
+            tx.getCoinData().getTo().add(result.getChange());
+        }
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        //交易签名的长度为m*单个签名长度+赎回脚本长度
+        int scriptSignLenth = redeemScript.getProgram().length + form.getM() * 72;
+        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAgentAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES,scriptSignLenth);
+        Map<String, Long> map = new HashMap<>();
+        Long maxAmount = null;
+        if (rs.isSuccess()) {
+            maxAmount = ((Na) rs.getData()).getValue();
+        }
+        map.put("fee", fee.getValue());
+        map.put("maxAmount", maxAmount);
+        rs.setData(map);
+        return Result.getSuccess().setData(rs).toRpcClientResult();
+    }
+
+    @GET
+    @Path("/multiDeposit/fee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "get the fee of create agent! 获取加入共识的手续费", notes = "返回加入共识交易手续费")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public RpcClientResult getMultiDepositFee(@BeanParam() GetDepositFeeForm form) throws NulsException {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAddress(), "address can not be null");
+        AssertUtil.canNotEmpty(form.getAgentHash(), "agent hash can not be null");
+        AssertUtil.canNotEmpty(form.getDeposit(), "deposit can not be null");
+        AssertUtil.canNotEmpty(form.getPubkeys(), "signatures pubkeys can not be null");
+        AssertUtil.canNotEmpty(form.getM(), "Number of signatures can not be null");
+        DepositTransaction tx = new DepositTransaction();
+        Deposit deposit = new Deposit();
+        deposit.setAddress(AddressTool.getAddress(form.getAddress()));
+        deposit.setAgentHash(NulsDigestData.fromDigestHex(form.getAgentHash()));
+        deposit.setDeposit(Na.valueOf(form.getDeposit()));
+        tx.setTxData(deposit);
+        Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(), form.getPubkeys());
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), -1));
+        coinData.setTo(toList);
+        tx.setCoinData(coinData);
+        CoinDataResult result = accountLedgerService.getCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        tx.getCoinData().setFrom(result.getCoinList());
+        if (null != result.getChange()) {
+            tx.getCoinData().getTo().add(result.getChange());
+        }
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        //交易签名的长度为m*单个签名长度+赎回脚本长度
+        int scriptSignLenth = redeemScript.getProgram().length + form.getM() * 72;
+        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES,scriptSignLenth);
+        Map<String, Long> map = new HashMap<>();
+        Long maxAmount = null;
+        if (rs.isSuccess()) {
+            maxAmount = ((Na) rs.getData()).getValue();
+        }
+        map.put("fee", fee.getValue());
+        map.put("maxAmount", maxAmount);
+        rs.setData(map);
+        return Result.getSuccess().setData(rs).toRpcClientResult();
+    }
+
+    @GET
+    @Path("/multiAgent/stop/fee")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "get the fee of stop agent! 获取停止节点的手续费", notes = "返回停止节点交易手续费")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public RpcClientResult getStopMultiAgentFee(@ApiParam(name = "address", value = "创建节点的账户地址", required = true)
+                                           @QueryParam("address") String address) throws NulsException, IOException {
+        AssertUtil.canNotEmpty(address, "address can not be null");
+        if (!AddressTool.validAddress(address)) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+
+        StopAgentTransaction tx = new StopAgentTransaction();
+        StopAgent stopAgent = new StopAgent();
+        stopAgent.setAddress(AddressTool.getAddress(address));
+        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+        Agent agent = null;
+        for (Agent a : agentList) {
+            if (a.getDelHeight() > 0) {
+                continue;
+            }
+            if (Arrays.equals(a.getAgentAddress(), stopAgent.getAddress())) {
+                agent = a;
+                break;
+            }
+        }
+        if (agent == null || agent.getDelHeight() > 0) {
+            return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
+        }
+        NulsDigestData createTxHash = agent.getTxHash();
+        stopAgent.setCreateTxHash(createTxHash);
+        tx.setTxData(stopAgent);
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME);
+        tx.setCoinData(coinData);
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
+        Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size());
+        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(address), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES,0);
+        Map<String, Long> map = new HashMap<>();
+        Long maxAmount = null;
+        if (rs.isSuccess()) {
+            maxAmount = ((Na) rs.getData()).getValue();
+        }
+        map.put("fee", resultFee.getValue());
+        map.put("maxAmount", maxAmount);
+        rs.setData(map);
+        return Result.getSuccess().setData(rs).toRpcClientResult();
+    }
+
 }
