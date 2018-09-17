@@ -67,7 +67,6 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
-
 import io.nuls.kernel.script.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
@@ -76,7 +75,6 @@ import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.service.TransactionService;
 import io.swagger.annotations.*;
-import sun.management.resources.agent;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -260,15 +258,15 @@ public class PocConsensusResource {
         tx.setTxData(agent);
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
-        if(agent.getAgentAddress()[2] == 3){
+        if (agent.getAgentAddress()[2] == 3) {
             Script scriptPubkey = SignatureUtil.createOutputScript(agent.getAgentAddress());
             toList.add(new Coin(scriptPubkey.getProgram(), agent.getDeposit(), -1));
-        }else {
+        } else {
             toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), -1));
         }
         coinData.setTo(toList);
         tx.setCoinData(coinData);
-        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size()- P2PHKSignature.SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        CoinDataResult result = accountLedgerService.getCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() - P2PHKSignature.SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         tx.getCoinData().setFrom(result.getCoinList());
         if (null != result.getChange()) {
             tx.getCoinData().getTo().add(result.getChange());
@@ -361,11 +359,11 @@ public class PocConsensusResource {
         NulsDigestData createTxHash = agent.getTxHash();
         stopAgent.setCreateTxHash(createTxHash);
         tx.setTxData(stopAgent);
-        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent,TimeService.currentTimeMillis() +  PocConsensusConstant.STOP_AGENT_LOCK_TIME);
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME);
         tx.setCoinData(coinData);
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
-        Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size() );
+        Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size());
         Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(address), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;
@@ -506,7 +504,7 @@ public class PocConsensusResource {
             List<ECKey> signEckeys = new ArrayList<>();
             ECKey eckey = account.getEcKey(password);
             signEckeys.add(eckey);
-            SignatureUtil.createTransactionSignture(tx,null,signEckeys);
+            SignatureUtil.createTransactionSignture(tx, null, signEckeys);
 
         } catch (Exception e) {
             Log.error(e);
@@ -518,8 +516,8 @@ public class PocConsensusResource {
                 //重新算一次交易(不超出最大交易数据大小下)的最大金额
                 Result rs = accountLedgerService.getMaxAmountOfOnce(account.getAddress().getAddressBytes(), tx,
                         TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
-                if(rs.isSuccess()){
-                    Na maxAmount = (Na)rs.getData();
+                if (rs.isSuccess()) {
+                    Na maxAmount = (Na) rs.getData();
                     rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
                     rs.setMsg(rs.getMsg() + maxAmount.toDouble());
                 }
@@ -1041,7 +1039,7 @@ public class PocConsensusResource {
         }
         coinData.setFrom(fromList);
         tx.setCoinData(coinData);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() );
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         RpcClientResult result1 = this.txProcessing(tx, null, account, form.getPassword());
         if (!result1.isSuccess()) {
@@ -1104,9 +1102,9 @@ public class PocConsensusResource {
         }
         coinData.setFrom(fromList);
         tx.setCoinData(coinData);
-        Na fee = TransactionFeeCalculator.getMaxFee(tx.size() );
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
-        Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size() );
+        Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size());
         Result rs = accountLedgerService.getMaxAmountOfOnce(account.getAddress().getAddressBytes(), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;
@@ -1151,14 +1149,14 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
     public RpcClientResult createMutilAgent(@ApiParam(name = "form", value = "多签地址创建节点表单数据", required = true)
-                                               CreateMutilAgentForm form) throws NulsException,IOException{
-        if(NulsContext.MAIN_NET_VERSION  <=1){
+                                                    CreateMutilAgentForm form) throws NulsException, IOException {
+        if (NulsContext.MAIN_NET_VERSION <= 1) {
             return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
         }
         if (form == null) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        if (!AddressTool.validAddress(form.getSignAddress())  || !AddressTool.validAddress(form.getAgentAddress())) {
+        if (!AddressTool.validAddress(form.getSignAddress()) || !AddressTool.validAddress(form.getAgentAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         Account account = accountService.getAccount(form.getSignAddress()).getData();
@@ -1176,7 +1174,7 @@ public class PocConsensusResource {
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         List<Script> scripts = new ArrayList<>();
-        if(form.getTxdata() == null || form.getTxdata().trim().length() == 0){
+        if (form.getTxdata() == null || form.getTxdata().trim().length() == 0) {
             if (!AddressTool.validAddress(form.getPackingAddress())) {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
             }
@@ -1186,7 +1184,7 @@ public class PocConsensusResource {
             if (form.getPubkeys() == null || form.getPubkeys().size() == 0 || form.getPubkeys().size() < form.getM()) {
                 return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
             }
-            Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(),form.getPubkeys());
+            Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(), form.getPubkeys());
             tx.setTime(TimeService.currentTimeMillis());
             Agent agent = new Agent();
             agent.setAgentAddress(AddressTool.getAddress(form.getAgentAddress()));
@@ -1201,17 +1199,17 @@ public class PocConsensusResource {
             tx.setTxData(agent);
             CoinData coinData = new CoinData();
             List<Coin> toList = new ArrayList<>();
-            if(agent.getAgentAddress()[2] == NulsContext.P2SH_ADDRESS_TYPE){
+            if (agent.getAgentAddress()[2] == NulsContext.P2SH_ADDRESS_TYPE) {
                 Script scriptPubkey = SignatureUtil.createOutputScript(agent.getAgentAddress());
                 toList.add(new Coin(scriptPubkey.getProgram(), agent.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
-            }else{
+            } else {
                 toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
             }
             coinData.setTo(toList);
             tx.setCoinData(coinData);
             //交易签名的长度为m*单个签名长度+赎回脚本长度
-            int scriptSignLenth = redeemScript.getProgram().length + form.getM()*72;
-            CoinDataResult result = accountLedgerService.getMutilCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size()+scriptSignLenth, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            int scriptSignLenth = redeemScript.getProgram().length + form.getM() * 72;
+            CoinDataResult result = accountLedgerService.getMutilCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() + scriptSignLenth, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
             if (null != result) {
                 if (result.isEnough()) {
                     tx.getCoinData().setFrom(result.getCoinList());
@@ -1226,7 +1224,7 @@ public class PocConsensusResource {
             //将赎回脚本先存储在签名脚本中
             scripts.add(redeemScript);
             transactionSignature.setScripts(scripts);
-        }else{
+        } else {
             byte[] txByte = Hex.decode(form.getTxdata());
             tx.parse(new NulsByteBuffer(txByte));
             transactionSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
@@ -1238,12 +1236,17 @@ public class PocConsensusResource {
         ECKey eckey = account.getEcKey(form.getPassword());
         p2PHKSignature.setPublicKey(eckey.getPubKey());
         //用当前交易的hash和账户的私钥账户
-        p2PHKSignature.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(),eckey));
+        p2PHKSignature.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), eckey));
         p2PHKSignatures.add(p2PHKSignature);
-        Result result = txMutilProcessing(tx,p2PHKSignatures,scripts,transactionSignature,AddressTool.getAddress(form.getAgentAddress()));
-        Map<String, String> valueMap = new HashMap<>();
-        valueMap.put("txData", (String) result.getData());
-        return Result.getSuccess().setData(valueMap).toRpcClientResult();
+        Result result = txMutilProcessing(tx, p2PHKSignatures, scripts, transactionSignature, AddressTool.getAddress(form.getAgentAddress()));
+
+        if (result.isSuccess()) {
+            Map<String, String> valueMap = new HashMap<>();
+            valueMap.put("txData", (String) result.getData());
+            return Result.getSuccess().setData(valueMap).toRpcClientResult();
+        }
+
+        return result.toRpcClientResult();
     }
 
     @POST
@@ -1254,7 +1257,7 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
     public RpcClientResult mutilDepositToAgent(@ApiParam(name = "form", value = "多签账户申请参与共识表单数据", required = true)
-                                                  MutilDepositForm form) throws NulsException,IOException {
+                                                       MutilDepositForm form) throws NulsException, IOException {
         if (NulsContext.MAIN_NET_VERSION <= 1) {
             return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
         }
@@ -1328,7 +1331,7 @@ public class PocConsensusResource {
             //将赎回脚本先存储在签名脚本中
             scripts.add(redeemScript);
             transactionSignature.setScripts(scripts);
-        }else {
+        } else {
             byte[] txByte = Hex.decode(form.getTxdata());
             tx.parse(new NulsByteBuffer(txByte));
             transactionSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
@@ -1343,10 +1346,14 @@ public class PocConsensusResource {
         p2PHKSignature.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), eckey));
         p2PHKSignatures.add(p2PHKSignature);
         Result resultData = txMutilProcessing(tx, p2PHKSignatures, scripts, transactionSignature, AddressTool.getAddress(form.getAddress()));
-        Map<String, String> valueMap = new HashMap<>();
-        valueMap.put("txData", (String) resultData.getData());
-        return Result.getSuccess().setData(valueMap).toRpcClientResult();
 
+        if (resultData.isSuccess()) {
+            Map<String, String> valueMap = new HashMap<>();
+            valueMap.put("txData", (String) resultData.getData());
+            return Result.getSuccess().setData(valueMap).toRpcClientResult();
+        }
+
+        return resultData.toRpcClientResult();
     }
 
     @POST
@@ -1357,9 +1364,9 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
     public RpcClientResult stopMutilAgent(@ApiParam(name = "form", value = "多签账户注销共识节点表单数据", required = true)
-                                               StopAgentWithMSForm form) throws NulsException, IOException {
+                                                  StopAgentWithMSForm form) throws NulsException, IOException {
 
-        if(NulsContext.MAIN_NET_VERSION  <=1){
+        if (NulsContext.MAIN_NET_VERSION <= 1) {
             return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
         }
         AssertUtil.canNotEmpty(form);
@@ -1399,7 +1406,7 @@ public class PocConsensusResource {
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         List<Script> scripts = new ArrayList<>();
         // 发起者，创建
-        if(form.getTxdata() == null || form.getTxdata().trim().length() == 0) {
+        if (form.getTxdata() == null || form.getTxdata().trim().length() == 0) {
             if (form.getM() <= 0) {
                 return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
             }
@@ -1407,13 +1414,13 @@ public class PocConsensusResource {
                 return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
             }
             // Create unlock script
-            Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(),form.getPubkeys());
+            Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(), form.getPubkeys());
             StopAgent stopAgent = new StopAgent();
             stopAgent.setAddress(agent.getAgentAddress());
             stopAgent.setCreateTxHash(agent.getTxHash());
             tx.setTime(TimeService.currentTimeMillis());
             tx.setTxData(stopAgent);
-            CoinData coinData = ConsensusTool.getStopMutilAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME,null);
+            CoinData coinData = ConsensusTool.getStopMutilAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME, null);
             tx.setCoinData(coinData);
             Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
             coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
@@ -1421,7 +1428,7 @@ public class PocConsensusResource {
             //将赎回脚本先存储在签名脚本中
             scripts.add(redeemScript);
             transactionSignature.setScripts(scripts);
-        }else{
+        } else {
             byte[] txByte = Hex.decode(form.getTxdata());
             tx.parse(new NulsByteBuffer(txByte));
             transactionSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
@@ -1436,9 +1443,14 @@ public class PocConsensusResource {
         p2PHKSignature.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), eckey));
         p2PHKSignatures.add(p2PHKSignature);
         Result resultData = txMutilProcessing(tx, p2PHKSignatures, scripts, transactionSignature, AddressTool.getAddress(form.getAgentAddress()));
-        Map<String, String> valueMap = new HashMap<>();
-        valueMap.put("txData", (String) resultData.getData());
-        return Result.getSuccess().setData(valueMap).toRpcClientResult();
+
+        if (resultData.isSuccess()) {
+            Map<String, String> valueMap = new HashMap<>();
+            valueMap.put("txData", (String) resultData.getData());
+            return Result.getSuccess().setData(valueMap).toRpcClientResult();
+        }
+
+        return resultData.toRpcClientResult();
     }
 
     @POST
@@ -1450,7 +1462,7 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
     public RpcClientResult withdrawMutil(@ApiParam(name = "form", value = "多签退出共识表单数据", required = true)
-                                            WithdrawMutilForm form) throws NulsException, IOException {
+                                                 WithdrawMutilForm form) throws NulsException, IOException {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress());
         if (!AddressTool.validAddress(form.getAddress())) {
@@ -1472,7 +1484,7 @@ public class PocConsensusResource {
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         List<Script> scripts = new ArrayList<>();
         // 发起者，创建
-        if(form.getTxdata() == null || form.getTxdata().trim().length() == 0) {
+        if (form.getTxdata() == null || form.getTxdata().trim().length() == 0) {
             AssertUtil.canNotEmpty(form.getTxHash());
             if (!NulsDigestData.validHash(form.getTxHash())) {
                 return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
@@ -1489,7 +1501,7 @@ public class PocConsensusResource {
                 return Result.getFailed(TransactionErrorCode.TX_NOT_EXIST).toRpcClientResult();
             }
             // Create unlock script
-            Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(),form.getPubkeys());
+            Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(), form.getPubkeys());
             cancelDeposit.setAddress(AddressTool.getAddress(form.getAddress()));
             cancelDeposit.setJoinTxHash(hash);
             tx.setTxData(cancelDeposit);
@@ -1516,13 +1528,13 @@ public class PocConsensusResource {
             }
             coinData.setFrom(fromList);
             tx.setCoinData(coinData);
-            Na fee = TransactionFeeCalculator.getMaxFee(tx.size() );
+            Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
             coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             //将赎回脚本先存储在签名脚本中
             scripts.add(redeemScript);
             transactionSignature.setScripts(scripts);
-        }else{
+        } else {
             byte[] txByte = Hex.decode(form.getTxdata());
             tx.parse(new NulsByteBuffer(txByte));
             transactionSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
@@ -1537,22 +1549,28 @@ public class PocConsensusResource {
         p2PHKSignature.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), eckey));
         p2PHKSignatures.add(p2PHKSignature);
         Result resultData = txMutilProcessing(tx, p2PHKSignatures, scripts, transactionSignature, AddressTool.getAddress(form.getAddress()));
-        Map<String, String> valueMap = new HashMap<>();
-        valueMap.put("txData", (String) resultData.getData());
-        return Result.getSuccess().setData(valueMap).toRpcClientResult();
+
+        if (resultData.isSuccess()) {
+            Map<String, String> valueMap = new HashMap<>();
+            valueMap.put("txData", (String) resultData.getData());
+            return Result.getSuccess().setData(valueMap).toRpcClientResult();
+        }
+
+        return resultData.toRpcClientResult();
     }
-    public Result txMutilProcessing(Transaction tx, List<P2PHKSignature> p2PHKSignatures,List<Script> scripts,TransactionSignature transactionSignature,byte[] fromAddr) throws NulsException,IOException{
+
+    public Result txMutilProcessing(Transaction tx, List<P2PHKSignature> p2PHKSignatures, List<Script> scripts, TransactionSignature transactionSignature, byte[] fromAddr) throws NulsException, IOException {
         //当已签名数等于M则自动广播该交易
-        if(p2PHKSignatures.size() == SignatureUtil.getM(scripts.get(0))){
+        if (p2PHKSignatures.size() == SignatureUtil.getM(scripts.get(0))) {
             //将交易中的签名数据P2PHKSignatures按规则排序
-            Collections.sort(p2PHKSignatures,P2PHKSignature.PUBKEY_COMPARATOR);
+            Collections.sort(p2PHKSignatures, P2PHKSignature.PUBKEY_COMPARATOR);
             //将排序后的P2PHKSignatures的签名数据取出和赎回脚本结合生成解锁脚本
-            List<byte[]> signatures= new ArrayList<>();
-            for (P2PHKSignature p2PHKSignatureTemp:p2PHKSignatures) {
+            List<byte[]> signatures = new ArrayList<>();
+            for (P2PHKSignature p2PHKSignatureTemp : p2PHKSignatures) {
                 signatures.add(p2PHKSignatureTemp.getSignData().getSignBytes());
             }
             transactionSignature.setP2PHKSignatures(null);
-            Script scriptSign = ScriptBuilder.createNulsP2SHMultiSigInputScript(signatures,scripts.get(0));
+            Script scriptSign = ScriptBuilder.createNulsP2SHMultiSigInputScript(signatures, scripts.get(0));
             transactionSignature.getScripts().clear();
             transactionSignature.getScripts().add(scriptSign);
             tx.setTransactionSignature(transactionSignature.serialize());
@@ -1581,7 +1599,7 @@ public class PocConsensusResource {
             return Result.getSuccess().setData(tx.getHash().getDigestHex());
         }
         //如果签名数还没达到，则返回交易
-        else{
+        else {
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
             return Result.getSuccess().setData(Hex.encode(tx.serialize()));

@@ -179,4 +179,11 @@ public class AddressTool {
         return true;
     }
 
+    public static boolean isPay2ScriptHashAddress(byte[] addr) {
+        if (addr != null && addr.length > 3) {
+            return addr[2] == NulsContext.P2SH_ADDRESS_TYPE;
+        }
+
+        return false;
+    }
 }
