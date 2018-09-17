@@ -1579,8 +1579,8 @@ public class PocConsensusResource {
             if (saveResult.isFailed()) {
                 if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
                     //重新算一次交易(不超出最大交易数据大小下)的最大金额
-                    Result rs = accountLedgerService.getMaxAmountOfOnce(fromAddr, tx,
-                            TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                    Result rs = accountLedgerService.getMultiMaxAmountOfOnce(fromAddr, tx,
+                            TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES,0);
                     if (rs.isSuccess()) {
                         Na maxAmount = (Na) rs.getData();
                         rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);

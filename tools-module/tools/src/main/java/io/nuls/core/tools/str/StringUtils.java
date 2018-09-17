@@ -302,4 +302,18 @@ public class StringUtils {
             return 0L;
         }
     }
+
+    public static boolean validPubkeys(String pubkeys,String m){
+        if(StringUtils.isBlank(pubkeys)){
+            return  false;
+        }
+        if(m == null || Integer.parseInt(m) <= 0)
+            return false;
+        //将公钥拆分
+        String[] dataList = pubkeys.split(",");
+        if(dataList == null || dataList.length == 0 || dataList.length < Integer.parseInt(m)){
+            return false;
+        }
+        return true;
+    }
 }
