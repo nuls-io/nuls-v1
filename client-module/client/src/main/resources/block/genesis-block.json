@@ -1,10 +1,9 @@
 {
   "height": 0,
   "time": "1531152000000",
-  "stateRoot": "56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
   "txs": [
     {
-      "address": "NsdzDcDckqVFkCwvrgQmYmLKhWmwuoKp",
+      "address": "Nse9XfuzZQn7jofrV5uABiNLQwFadV2K",
       "amount": 10000000,
       "lockTime": 0
     },
