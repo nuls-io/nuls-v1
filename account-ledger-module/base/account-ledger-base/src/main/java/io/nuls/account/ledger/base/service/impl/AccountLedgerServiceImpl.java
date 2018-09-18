@@ -868,7 +868,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromList, List<MultipleAddressTransferModel> toList, String password, String remark, Na price) {
+    public Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromList, List<MultipleAddressTransferModel> toList, String password,Na amount, String remark, Na price) {
         try {
             for (MultipleAddressTransferModel from : fromList) {
                 Result<Account> accountResult = accountService.getAccount(from.getAddress());
@@ -913,17 +913,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             if (price == null) {
                 price = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES;
             }
-            // List<CoinDataResult> coinDataResultList = new ArrayList<>();
-          /*  int sub = 0;
-            for (MultipleAddressTransferModel from : fromList) {//获取每个from地址的 utxo(需要的币从小到大排序)
-                CoinDataResult coinDataResult = null;
-                if (sub == 0) {
-                    coinDataResult = getCoinData(from.getAddress(), Na.valueOf(from.getAmount()), tx.size() + coinData.size(), price);
-                } else {
-                    coinDataResult = getCoinData(from.getAddress(), Na.valueOf(from.getAmount()), coinData.size(), price);
-                }
-                coinDataResultList.add(coinDataResult);
-            }*/
 
             CoinDataResult coinDataResult = getCoinDataMultipleAdresses(fromList, amount, tx.size() + coinData.size(), price);
 
