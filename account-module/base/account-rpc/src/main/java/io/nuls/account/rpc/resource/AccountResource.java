@@ -1337,7 +1337,7 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
-    public RpcClientResult multiAliasFee(@BeanParam() MultiAccountSetAliasForm form) {
+    public RpcClientResult multiAliasFee(@BeanParam() MutilAccountAliasForm form) {
         if (!AddressTool.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
