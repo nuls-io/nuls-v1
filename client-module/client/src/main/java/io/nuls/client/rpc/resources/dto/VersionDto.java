@@ -43,6 +43,9 @@ public class VersionDto {
     @ApiModelProperty(name = "infromation", value = "新版本说明")
     private String infromation;
 
+    @ApiModelProperty(name = "networkVersion", value = "运行网络版本")
+    private Integer networkVersion;
+
     public String getMyVersion() {
         return myVersion;
     }
@@ -73,5 +76,13 @@ public class VersionDto {
 
     public void setInfromation(String infromation) {
         this.infromation = infromation;
+    }
+
+    public Integer getNetworkVersion() {
+        return networkVersion;
+    }
+
+    public void setNetworkVersion(Integer networkVersion) {
+        this.networkVersion = networkVersion;
     }
 }
