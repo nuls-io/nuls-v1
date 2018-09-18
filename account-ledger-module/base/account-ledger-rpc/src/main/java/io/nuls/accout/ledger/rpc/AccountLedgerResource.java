@@ -281,7 +281,7 @@ public class AccountLedgerResource {
             toTotal+= to.getAmount();
         }
         if (form.getAmount() <toTotal) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            return Result.getFailed(AccountErrorCode.INPUT_TOO_SMALL).toRpcClientResult();
         }
         Result result = accountLedgerService.multipleAddressTransfer(fromModelList, toModelList, form.getPassword(),Na.valueOf(form.getAmount()), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
         if (result.isSuccess()) {

@@ -54,4 +54,5 @@ public interface AccountErrorCode extends KernelErrorCode {
     ErrorCode DECRYPT_ACCOUNT_ERROR = ErrorCode.init("50018");
     ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED_AND_LOCKED = ErrorCode.init("50019");
     ErrorCode NICKNAME_TOO_LONG = ErrorCode.init("50020");
+    ErrorCode INPUT_TOO_SMALL = ErrorCode.init("50021");
 }
