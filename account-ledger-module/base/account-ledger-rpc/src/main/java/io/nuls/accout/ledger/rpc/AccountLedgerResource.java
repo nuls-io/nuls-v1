@@ -145,14 +145,19 @@ public class AccountLedgerResource {
         if (form.getAmount() <= 0) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        if (!validTxRemark(form.getRemark())) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-        }
-        byte[] remarkBytes;
-        try {
-            remarkBytes = form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+
+        byte[] remarkBytes = new byte[0];
+
+        if (form.getRemark() != null && form.getRemark().length() > 0) {
+            if (!validTxRemark(form.getRemark())) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+
+            try {
+                remarkBytes = form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING);
+            } catch (UnsupportedEncodingException e) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
         }
 
         Na value = Na.valueOf(form.getAmount());
