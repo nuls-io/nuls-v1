@@ -26,7 +26,6 @@ package io.nuls.account.ledger.base.service.impl;
 
 import io.nuls.account.ledger.base.service.LocalUtxoService;
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
-import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.storage.service.LocalUtxoStorageService;
 import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
 import io.nuls.core.tools.array.ArraysTool;
@@ -39,13 +38,13 @@ import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
-import io.nuls.protocol.constant.ProtocolErroeCode;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * author Facjas
@@ -82,12 +81,6 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
         if (tx == null || addressesList == null || addressesList.size() == 0) {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
-
-//        for(byte[] addresses : addressesList) {
-//            if (!AddressTool.validAddress(addresses)) {
-//                return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
-//            }
-//        }
 
         CoinData coinData = tx.getCoinData();
 

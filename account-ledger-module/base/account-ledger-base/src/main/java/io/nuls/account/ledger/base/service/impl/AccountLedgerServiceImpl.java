@@ -131,7 +131,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result<Integer> saveConfirmedTransactionList(List<Transaction> txs) {
         if (txs == null || txs.size() == 0) {
-            return Result.getSuccess().setData(0);
+           return Result.getSuccess().setData(0);
         }
 
         List<byte[]> localAddresses = AccountLegerUtils.getLocalAddresses();
@@ -166,12 +166,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     public Result<Integer> saveConfirmedTransaction(Transaction tx) {
 
         if (tx == null) {
-            return Result.getSuccess().setData(0);
+           return Result.getSuccess().setData(0);
         }
 
         List<byte[]> addresses = AccountLegerUtils.getRelatedAddresses(tx);
         if (addresses == null || addresses.size() == 0) {
-            return Result.getSuccess().setData(0);
+           return Result.getSuccess().setData(0);
         }
         return saveConfirmedTransaction(tx, addresses);
     }
@@ -556,6 +556,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 max = max.add(coin.getNa());
             }
             Na fee = TransactionFeeCalculator.getFee(size, price);
+            if (max.isLessThan(fee)) {
+                //算出的金额不够扣手续费，表示可交易金额为0
+                return Result.getSuccess().setData(Na.ZERO);
+            }
             max = max.subtract(fee);
             return Result.getSuccess().setData(max);
         } catch (Exception e) {
@@ -631,7 +635,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Collections.sort(coinList, CoinComparatorDesc.getInstance());
             int size = tx.size() + 38;
             //将所有余额从大到小排序后，累计未花费的余额
-            byte sign_type = 0;
+            byte signType = 0;
             int txNum = 1;
             for (int i = 0; i < coinList.size(); i++) {
                 Coin coin = coinList.get(i);
@@ -648,19 +652,19 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 /**
                  * 判断是否是脚本验证UTXO
                  * */
-                if (sign_type != 3) {
-                    if ((sign_type & 0x01) == 0 && coin.getTempOwner().length == 23) {
-                        sign_type = (byte) (sign_type | 0x01);
+                if (signType != 3) {
+                    if ((signType & 0x01) == 0 && coin.getTempOwner().length == 23) {
+                        signType = (byte) (signType | 0x01);
                         size += P2PHKSignature.SERIALIZE_LENGTH;
-                    } else if ((sign_type & 0x02) == 0 && coin.getTempOwner().length != 23) {
-                        sign_type = (byte) (sign_type | 0x02);
+                    } else if ((signType & 0x02) == 0 && coin.getTempOwner().length != 23) {
+                        signType = (byte) (signType | 0x02);
                         size += P2PHKSignature.SERIALIZE_LENGTH;
                     }
                 }
                 if (size > targetSize * txNum) {//大于一个tx的size 所以需要另一个tx装
                     size += txSize;
                     txNum++;
-                    sign_type = 0;
+                    signType = 0;
                 }
             }
             Na fee = TransactionFeeCalculator.getFee(size, price);
@@ -864,7 +868,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
     @Override
-    public Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromList, List<MultipleAddressTransferModel> toList, String password, Na amount, String remark, Na price) {
+    public Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromList, List<MultipleAddressTransferModel> toList, String password, String remark, Na price) {
         try {
             for (MultipleAddressTransferModel from : fromList) {
                 Result<Account> accountResult = accountService.getAccount(from.getAddress());
@@ -1150,7 +1154,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Collections.sort(coinList, CoinComparatorDesc.getInstance());
             Na max = Na.ZERO;
             List<Coin> coins = new ArrayList<>();
-            byte sign_type = 0;
+            byte signType = 0;
             for (int i = 0; i < coinList.size(); i++) {
                 Coin coin = coinList.get(i);
                 if (!coin.usable()) {
@@ -1170,12 +1174,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 /**
                  * 判断是否是脚本验证UTXO
                  * */
-                if (sign_type != 3) {
-                    if ((sign_type & 0x01) == 0 && coin.getTempOwner().length == 23) {
-                        sign_type = (byte) (sign_type | 0x01);
+                if (signType != 3) {
+                    if ((signType & 0x01) == 0 && coin.getTempOwner().length == 23) {
+                        signType = (byte) (signType | 0x01);
                         size += P2PHKSignature.SERIALIZE_LENGTH;
-                    } else if ((sign_type & 0x02) == 0 && coin.getTempOwner().length != 23) {
-                        sign_type = (byte) (sign_type | 0x02);
+                    } else if ((signType & 0x02) == 0 && coin.getTempOwner().length != 23) {
+                        signType = (byte) (signType | 0x02);
                         size += P2PHKSignature.SERIALIZE_LENGTH;
                     }
                 }
@@ -1195,11 +1199,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             List<ECKey> scriptEckeys = new ArrayList<>();
             ECKey eckey = account.getEcKey(password);
             //如果最后一位为1则表示该交易包含普通签名
-            if ((sign_type & 0x01) == 0x01) {
+            if ((signType & 0x01) == 0x01) {
                 signEckeys.add(eckey);
             }
             //如果倒数第二位位为1则表示该交易包含脚本签名
-            if ((sign_type & 0x02) == 0x02) {
+            if ((signType & 0x02) == 0x02) {
                 scriptEckeys.add(eckey);
             }
             SignatureUtil.createTransactionSignture(tx, scriptEckeys, signEckeys);
@@ -1230,9 +1234,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         Script scriptPubkey = SignatureUtil.createOutputScript(to);
         Coin toCoin = new Coin(scriptPubkey.getProgram(), values);
         coinData.getTo().add(toCoin);
-       /* CoinData coinData = new CoinData();
-        Coin toCoin = new Coin(to, values);
-        coinData.getTo().add(toCoin);*/
         tx.setCoinData(coinData);
         Na fee = getTxFee(from, values, tx.size() + P2PHKSignature.SERIALIZE_LENGTH, price);
         Result result = Result.getSuccess().setData(fee);
@@ -1275,10 +1276,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
     @Override
     public Transaction signTransaction(Transaction tx, ECKey ecKey) throws IOException {
-        /*P2PKHScriptSig sig = new P2PKHScriptSig();
-        sig.setPublicKey(ecKey.getPubKey());
-        sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), ecKey));
-        tx.setTransactionSignature(sig.serialize());*/
         List<ECKey> pubEckeys = new ArrayList<>();
         pubEckeys.add(ecKey);
         SignatureUtil.createTransactionSignture(tx, null, pubEckeys);
@@ -1349,7 +1346,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 lockCoinList.add(coin);
             }
         }
-//        Collections.sort(coinList, CoinComparator.getInstance());
         result.setData(lockCoinList);
         return result;
     }
@@ -1364,7 +1360,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         int i = 0;
         try {
             for (Transaction tx : txs) {
-                //if (Arrays.equals(tx.getAddressFromSig(), address))
                 if (SignatureUtil.containsAddress(tx, address)) {
                     unconfirmedTransactionStorageService.deleteUnconfirmedTx(tx.getHash());
                     localUtxoService.deleteUtxoOfTransaction(tx);
@@ -1481,7 +1476,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
      * @return Result
      */
     @Override
-    public Result transferP2sh(byte[] fromAddr, byte[] signAddr, List<MultipleAddressTransferModel> outputs, Na values, String password, String remark, Na price, List<String> pubkeys, int m, String txdata) {
+    public Result transferP2SH(byte[] fromAddr, byte[] signAddr, List<MultipleAddressTransferModel> outputs,
+                               Na values, String password, String remark, Na price,
+                               List<String> pubkeys, int m, String txdata) {
         try {
             Result<Account> accountResult = accountService.getAccount(signAddr);
             if (accountResult.isFailed()) {
@@ -1593,12 +1590,12 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 return Result.getSuccess().setData(tx.getHash().getDigestHex());
             }
             //如果签名数还没达到，则返回交易
-            else {
+            else{
                 transactionSignature.setP2PHKSignatures(p2PHKSignatures);
                 tx.setTransactionSignature(transactionSignature.serialize());
                 return Result.getSuccess().setData(Hex.encode(tx.serialize()));
             }
-        } catch (IOException e) {
+        }catch (IOException e) {
             Log.error(e);
             return Result.getFailed(KernelErrorCode.IO_ERROR);
         } catch (NulsException e) {
@@ -1609,7 +1606,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
 
     @Override
-    public CoinDataResult getMutilCoinData(byte[] address, Na amount, int size, Na price) {
+    public CoinDataResult getMutilCoinData(byte[] address, Na amount, int size, Na price){
         if (null == price) {
             throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
         }
@@ -1665,13 +1662,13 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 }
             }
             return coinDataResult;
-        } finally {
+        }finally {
             lock.unlock();
         }
     }
 
     @Override
-    public Result<Na> getMultiMaxAmountOfOnce(byte[] address, Transaction tx, Na price, int signSize) {
+    public Result<Na> getMultiMaxAmountOfOnce(byte[] address, Transaction tx, Na price,int signSize) {
         lock.lock();
         try {
             tx.getCoinData().setFrom(null);
@@ -1682,10 +1679,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             }
             //计算目标size，coindata中from的总大小
             int targetSize = TxMaxSizeValidator.MAX_TX_SIZE - txSize;
-            if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0)
+            if(tx.getTransactionSignature() == null || tx.getTransactionSignature().length ==0)
                 txSize += signSize;
-            List<Coin> coinList = ledgerService.getAllUtxo(address);
-            ;
+            List<Coin> coinList = ledgerService.getAllUtxo(address);;
             if (coinList.isEmpty()) {
                 return Result.getSuccess().setData(Na.ZERO);
             }

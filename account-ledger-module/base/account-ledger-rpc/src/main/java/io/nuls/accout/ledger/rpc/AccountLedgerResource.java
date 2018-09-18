@@ -31,7 +31,6 @@ package io.nuls.accout.ledger.rpc;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.base.service.LocalUtxoService;
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
-import io.nuls.account.ledger.constant.AccountLedgerConstant;
 import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.model.MultipleAddressTransferModel;
 import io.nuls.account.ledger.model.TransactionInfo;
@@ -64,8 +63,6 @@ import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.script.Script;
-import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -78,7 +75,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1090,7 +1086,7 @@ public class AccountLedgerResource {
 
 
     @POST
-    @Path("/transferP2sh")
+    @Path("/transferP2SH")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
@@ -1134,13 +1130,13 @@ public class AccountLedgerResource {
                 model.setAmount(to.getAmount());
                 toModelList.add(model);
             }
-            result = accountLedgerService.transferP2sh(AddressTool.getAddress(form.getAddress()),
+            result = accountLedgerService.transferP2SH(AddressTool.getAddress(form.getAddress()),
                     AddressTool.getAddress(form.getSignAddress()),
                     toModelList,value,form.getPassword(),form.getRemark(),
                     TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES,form.getPubkeys(),form.getM(),null
             );
         }else{
-            result = accountLedgerService.transferP2sh(null,
+            result = accountLedgerService.transferP2SH(null,
                     AddressTool.getAddress(form.getSignAddress()),
                     toModelList,value,form.getPassword(),form.getRemark(),
                     TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES,form.getPubkeys(),form.getM(),form.getTxdata()

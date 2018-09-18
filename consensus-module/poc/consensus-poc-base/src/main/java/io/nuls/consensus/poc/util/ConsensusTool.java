@@ -487,7 +487,7 @@ public class ConsensusTool {
         List<Coin> toList = new ArrayList<>();
         if (agent.getAgentAddress()[2] == NulsContext.P2SH_ADDRESS_TYPE) {
             Script scriptPubkey = SignatureUtil.createOutputScript(agent.getAgentAddress());
-            toList.add(new Coin(scriptPubkey.getProgram(), agent.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
+            toList.add(new Coin(scriptPubkey.getProgram(), agent.getDeposit(), lockTime));
         } else {
             toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), lockTime));
         }

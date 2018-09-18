@@ -24,13 +24,11 @@
  */
 package io.nuls.protocol.model.tx;
 
+import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.Coin;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.model.TransactionLogicData;
+import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.ledger.util.LedgerUtil;
@@ -47,6 +45,8 @@ import static io.nuls.kernel.model.Na.SMALLEST_UNIT_EXPONENT;
 public class TransferTransaction extends Transaction {
 
     private LedgerService ledgerService;
+
+    private AccountLedgerService accountLedgerService;
 
     public TransferTransaction() {
         this(ProtocolConstant.TX_TYPE_TRANSFER);
@@ -79,7 +79,12 @@ public class TransferTransaction extends Transaction {
             } catch (NulsException e) {
                 return "--";
             }
-            fromTx = getLedgerService().getTx(fromHashObj);
+            Result<Transaction> result = getAccountLedgerService().getUnconfirmedTransaction(fromHashObj);
+            if (result.isSuccess() && result.getData() != null) {
+                fromTx = result.getData();
+            } else {
+                fromTx = getLedgerService().getTx(fromHashObj);
+            }
             fromUtxo = fromTx.getCoinData().getTo().get(fromIndex);
             //if (Arrays.equals(address, fromUtxo.()))
             if (Arrays.equals(address, fromUtxo.getAddress())) {
@@ -110,4 +115,10 @@ public class TransferTransaction extends Transaction {
         return ledgerService;
     }
 
+    public AccountLedgerService getAccountLedgerService() {
+        if (accountLedgerService == null) {
+            accountLedgerService = NulsContext.getServiceBean(AccountLedgerService.class);
+        }
+        return accountLedgerService;
+    }
 }

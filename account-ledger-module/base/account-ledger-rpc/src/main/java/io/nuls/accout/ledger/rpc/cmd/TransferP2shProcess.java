@@ -6,15 +6,14 @@ import io.nuls.accout.ledger.rpc.form.TransferForm;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Na;
+import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.utils.RestFulUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author: tag
@@ -27,15 +26,15 @@ public class TransferP2shProcess implements CommandProcessor {
 
     @Override
     public String getCommand() {
-        return "transferP2sh";
+        return "transferP2SH";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<signAddress> \tsign address - Required")
                 .newLine("\t<address> \t\ttransfer address(If it's a trading promoter - Required; else - Not Required) ")
+                .newLine("\t<signAddress> \tsign address - Required")
                 .newLine("\t<toAddress>,<toamount>;....;<toAddress><toamount> \tThe meaning of [toAddress],[toamount] is pay  toAddress toamount nuls," +
                         "Separate multiple [toAddress],[toamount],If there are multiple payee Separate multiple. " +
                         "(If it's a trading promoter - Required; else - Not Required) toamount must greater than 0")
@@ -49,7 +48,7 @@ public class TransferP2shProcess implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "transferP2sh --- If it's a trading promoter <address> <signAddress> <toAddress>,<toamount>;....;<toAddress><toamount> <pubkey>,...<pubkey> <m> <amount> [remark]" +
+        return "transferP2SH --- If it's a trading promoter <address> <signAddress> <toAddress>,<toamount>;....;<toAddress><toamount> <pubkey>,...<pubkey> <m> <amount> [remark]" +
                 "\t          --- else <address> <signAddress> <txdata>";
     }
 
@@ -74,7 +73,7 @@ public class TransferP2shProcess implements CommandProcessor {
             if(!validToData(args[3])){
                 return  false;
             }
-            if(!validPubkeys(args[4],args[5])){
+            if(!StringUtils.validPubkeys(args[4],args[5])){
                 return  false;
             }
             if(!StringUtils.isNuls(args[6])){
@@ -84,6 +83,7 @@ public class TransferP2shProcess implements CommandProcessor {
         MultiSignForm form =  getMultiSignForm(args);
         if(form == null)
             return false;
+        paramsData.set(form);
         return true;
     }
 
@@ -124,6 +124,7 @@ public class TransferP2shProcess implements CommandProcessor {
                     toData.setToAddress(separateData[0]);
                     toDatas.add(toData);
                 }
+                form.setOutputs(toDatas);
                 String[] pubkeys = args[4].split(",");
                 form.setPubkeys(Arrays.asList(pubkeys));
                 form.setM(Integer.parseInt(args[5]));
@@ -138,7 +139,34 @@ public class TransferP2shProcess implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        return null;
+        MultiSignForm form = paramsData.get();
+        if (null == form) {
+            form = getMultiSignForm(args);
+        }
+        String signAddress = form.getSignAddress();
+        RpcClientResult res = CommandHelper.getPassword(signAddress, restFul);
+        if(!res.isSuccess()){
+            return CommandResult.getFailed(res);
+        }
+        String password = (String)res.getData();
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("signAddress", form.getSignAddress());
+        parameters.put("address", form.getAddress());
+        parameters.put("password", password);
+        if(args.length == 4){
+            parameters.put("txdata", form.getTxdata());
+        }else{
+            parameters.put("outputs", form.getOutputs());
+            parameters.put("amount", form.getAmount());
+            parameters.put("remark", form.getRemark());
+            parameters.put("pubkeys", form.getPubkeys());
+            parameters.put("m", form.getM());
+        }
+        RpcClientResult result = restFul.post("/accountledger/transferP2SH", parameters);
+        if (result.isFailed()) {
+            return CommandResult.getFailed(result);
+        }
+        return CommandResult.getResult(CommandResult.dataTransformValue(result));
     }
 
     public boolean validToData(String todata){
@@ -159,20 +187,6 @@ public class TransferP2shProcess implements CommandProcessor {
             if (!AddressTool.validAddress(separateData[0])  || !StringUtils.isNuls(separateData[1])) {
                 return false;
             }
-        }
-        return true;
-    }
-
-    public boolean validPubkeys(String pubkeys,String m){
-        if(StringUtils.isBlank(pubkeys)){
-            return  false;
-        }
-        if(m == null || Integer.parseInt(m) <= 0)
-            return false;
-        //将公钥拆分
-        String[] dataList = pubkeys.split(",");
-        if(dataList == null || dataList.length == 0 || dataList.length < Integer.parseInt(m)){
-            return false;
         }
         return true;
     }

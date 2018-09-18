@@ -26,6 +26,7 @@
 
 package io.nuls.kernel.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
@@ -194,6 +195,7 @@ public class Coin extends BaseNulsData {
                 '}';
     }
 
+    @JsonIgnore
     public byte[] getAddress() {
         byte[] address = new byte[23];
         //如果owner不是存放的脚本则直接返回owner
