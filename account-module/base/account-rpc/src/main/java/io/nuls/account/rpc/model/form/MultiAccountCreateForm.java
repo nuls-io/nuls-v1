@@ -12,13 +12,6 @@ import java.util.List;
  */
 @ApiModel(value = "创建多重签名账户表单")
 public class MultiAccountCreateForm {
-    @ApiModelProperty(name = "address", value = "地址", required = true)
-    @QueryParam("address")
-    private String address;
-
-    @ApiModelProperty(name = "alias", value = "别名", required = true)
-    @QueryParam("alias")
-    private String alias;
 
     @ApiModelProperty(name = "pubkeys", value = "需要签名在公钥列表", required = true)
     private List<String> pubkeys;
@@ -40,21 +33,5 @@ public class MultiAccountCreateForm {
 
     public void setM(int m) {
         this.m = m;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = StringUtils.formatStringPara(alias);
     }
 }
