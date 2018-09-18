@@ -19,13 +19,12 @@ It aims to break the technical barriers of blockchain, to reduce the cost of dev
 To learn more about us, visit [nuls.io](https://nuls.io/).
 
 ## Contributing to Nuls
-
-Contributions to Nuls are welcomed!  
-At this stage the core members are working hard to develop the first stable version.
-We will accept PR after the first stable release published.
-
+ 
+Contributions to Nuls are welcomed!
+We sincerely invite developers who experienced in blockchain field to join in NULS technology community. 
+Details: https://nuls.communimunity/d/9-recruitment-of-community-developers
 To be a great community, Nuls needs to welcome developers from all walks of life, with different backgrounds, and with a wide range of experience.
-
+ 
 ## Getting Started
 
 ### Requirements
@@ -46,6 +45,13 @@ Use Alibaba Java Coding Guidelines [@Github](https://github.com/alibaba/p3c).
 > recommend use IDE plugin lint code. [wiki](https://github.com/alibaba/p3c/wiki)
 > * [IntelliJ IDEA Plugin](https://github.com/alibaba/p3c/tree/master/idea-plugin)
 > * [Eclipse Plugin](https://github.com/alibaba/p3c/tree/master/eclipse-plugin)
+
+### Branch Description
+mainnet: main network wallet code  
+testnet : test network wallet code  
+master : main branch, the latest version available  
+develop : branch in development  
+Others : other branches are designed according to gitflow   
 
 ### Getting Sources
 
