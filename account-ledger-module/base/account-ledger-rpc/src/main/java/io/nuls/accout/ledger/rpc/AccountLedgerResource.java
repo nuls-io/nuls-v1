@@ -245,10 +245,6 @@ public class AccountLedgerResource {
         if (form.getInputs() == null || form.getOutputs() == null) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        if (form.getAmount() <= 0) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-        }
-
 
         for (MulipleTxFromDto from : form.getInputs()) {
             MultipleAddressTransferModel model = new MultipleAddressTransferModel();
@@ -272,10 +268,10 @@ public class AccountLedgerResource {
             toModelList.add(model);
             toTotal+= to.getAmount();
         }
-        if (form.getAmount() <toTotal) {
-            return Result.getFailed(AccountErrorCode.INPUT_TOO_SMALL).toRpcClientResult();
+        if (toTotal <0) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        Result result = accountLedgerService.multipleAddressTransfer(fromModelList, toModelList, form.getPassword(),Na.valueOf(form.getAmount()), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+        Result result = accountLedgerService.multipleAddressTransfer(fromModelList, toModelList, form.getPassword(),Na.valueOf(toTotal), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("value", (String) result.getData());

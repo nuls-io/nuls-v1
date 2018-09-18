@@ -21,9 +21,6 @@ public class MulitpleTransactionForm {
     @ApiModelProperty(name = "remark", value = "备注")
     private String remark;
 
-    @ApiModelProperty(name = "amount", value = "金额", required = true)
-    private long amount;
-
     @ApiModelProperty(name = "password", value = "密码")
     private String password;
 
@@ -59,11 +56,4 @@ public class MulitpleTransactionForm {
         this.password = password;
     }
 
-    public long getAmount() {
-        return amount;
-    }
-
-    public void setAmount(long amount) {
-        this.amount = amount;
-    }
 }
