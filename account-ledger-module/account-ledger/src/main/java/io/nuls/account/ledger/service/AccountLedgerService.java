@@ -251,16 +251,16 @@ public interface AccountLedgerService {
 
     /**
      * 多地址转账
-     *
      * @param fromModelList
      * @param toModelList
      * @param password
+     * @param amount
      * @param remark
      * @param price
      * @return
      */
 
-    Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromModelList, List<MultipleAddressTransferModel> toModelList, String password, String remark, Na price);
+    Result multipleAddressTransfer(List<MultipleAddressTransferModel> fromModelList, List<MultipleAddressTransferModel> toModelList, String password,Na amount, String remark, Na price);
 
     /**
      * 零钱汇整

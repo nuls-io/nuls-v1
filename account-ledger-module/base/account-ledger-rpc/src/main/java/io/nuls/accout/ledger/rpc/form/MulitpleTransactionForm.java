@@ -6,6 +6,7 @@ import io.nuls.accout.ledger.rpc.dto.MultipleTxToDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.ws.rs.QueryParam;
 import java.util.List;
 
 @ApiModel(value = "创建多账户转账交易form")
@@ -19,6 +20,9 @@ public class MulitpleTransactionForm {
 
     @ApiModelProperty(name = "remark", value = "备注")
     private String remark;
+
+    @ApiModelProperty(name = "amount", value = "金额", required = true)
+    private long amount;
 
     @ApiModelProperty(name = "password", value = "密码")
     private String password;
@@ -53,5 +57,13 @@ public class MulitpleTransactionForm {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public long getAmount() {
+        return amount;
+    }
+
+    public void setAmount(long amount) {
+        this.amount = amount;
     }
 }
