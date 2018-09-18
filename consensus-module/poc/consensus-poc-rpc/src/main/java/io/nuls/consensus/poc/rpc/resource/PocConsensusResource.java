@@ -30,6 +30,7 @@ import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Account;
+import io.nuls.account.model.MultiSigAccount;
 import io.nuls.account.service.AccountService;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.context.PocConsensusContext;
@@ -73,6 +74,7 @@ import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.service.TransactionService;
 import io.swagger.annotations.*;
 
@@ -1766,4 +1768,512 @@ public class PocConsensusResource {
         return Result.getSuccess().setData(rs).toRpcClientResult();
     }
 
+
+    @POST
+    @Path("/multiAccount/createAgent")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Create an agent for consensus! 创建共识(代理)节点 [3.6.3]", notes = "返回创建的节点成功的交易hash")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public RpcClientResult createMutilAgent(@ApiParam(name = "form", value = "多签地址创建节点表单数据", required = true)
+                                                    CreateAgentForm form) throws Exception {
+        if (NulsContext.MAIN_NET_VERSION <= 1) {
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAgentAddress(), "agent address can not be null");
+        AssertUtil.canNotEmpty(form.getSignAddress(), "agent address can not be null");
+        AssertUtil.canNotEmpty(form.getCommissionRate(), "commission rate can not be null");
+        AssertUtil.canNotEmpty(form.getDeposit(), "deposit can not be null");
+        AssertUtil.canNotEmpty(form.getPackingAddress(), "packing address can not be null");
+
+        if (!AddressTool.validAddress(form.getPackingAddress()) || !AddressTool.validAddress(form.getAgentAddress())|| !AddressTool.validAddress(form.getSignAddress())) {
+            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+        }
+        Account account = accountService.getAccount(form.getAgentAddress()).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        if (account.isEncrypted() && account.isLocked()) {
+            AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
+            if (!account.validatePassword(form.getPassword())) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
+            }
+        }
+        Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAgentAddress());
+        MultiSigAccount multiSigAccount = sigAccountResult.getData();
+        Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
+        if(redeemScript == null){
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        CreateAgentTransaction tx = new CreateAgentTransaction();
+        tx.setTime(TimeService.currentTimeMillis());
+        Agent agent = new Agent();
+        agent.setAgentAddress(AddressTool.getAddress(form.getAgentAddress()));
+        agent.setPackingAddress(AddressTool.getAddress(form.getPackingAddress()));
+        if (StringUtils.isBlank(form.getRewardAddress())) {
+            agent.setRewardAddress(agent.getAgentAddress());
+        } else {
+            agent.setRewardAddress(AddressTool.getAddress(form.getRewardAddress()));
+        }
+        TransactionSignature transactionSignature = new TransactionSignature();
+        List<Script> scripts = new ArrayList<>();
+        agent.setDeposit(Na.valueOf(form.getDeposit()));
+        agent.setCommissionRate(form.getCommissionRate());
+        tx.setTxData(agent);
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        if (agent.getAgentAddress()[2] == NulsContext.P2SH_ADDRESS_TYPE) {
+            Script scriptPubkey = SignatureUtil.createOutputScript(agent.getAgentAddress());
+            toList.add(new Coin(scriptPubkey.getProgram(), agent.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
+        } else {
+            toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
+        }
+        coinData.setTo(toList);
+        tx.setCoinData(coinData);
+        //交易签名的长度为m*单个签名长度+赎回脚本长度
+        int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM())*72;
+        CoinDataResult result = accountLedgerService.getMutilCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size()+scriptSignLenth, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        if (null != result) {
+            if (result.isEnough()) {
+                tx.getCoinData().setFrom(result.getCoinList());
+                if (null != result.getChange()) {
+                    tx.getCoinData().getTo().add(result.getChange());
+                }
+            } else {
+                return Result.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE).toRpcClientResult();
+            }
+        }
+        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        //将赎回脚本先存储在签名脚本中
+        scripts.add(redeemScript);
+        transactionSignature.setScripts(scripts);
+        Result finalResult = accountLedgerService.txMultiProcess(tx,transactionSignature,account,form.getPassword());
+        if (finalResult.isSuccess()) {
+            Map<String, String> valueMap = new HashMap<>();
+            valueMap.put("txData", (String) finalResult.getData());
+            return Result.getSuccess().setData(valueMap).toRpcClientResult();
+        }
+        return finalResult.toRpcClientResult();
+    }
+
+    @POST
+    @Path("/multiAccount/createMultiDeposit")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "deposit nuls to a bank! 多签账户申请参与共识 ", notes = "返回申请成功交易hash")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public RpcClientResult createMutilDeposit(@ApiParam(name = "form", value = "多签账户申请参与共识表单数据", required = true)
+                                                       DepositForm form) throws Exception {
+        if (NulsContext.MAIN_NET_VERSION <= 1) {
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getDeposit());
+        AssertUtil.canNotEmpty(form.getAgentHash());
+        AssertUtil.canNotEmpty(form.getAddress());
+        AssertUtil.canNotEmpty(form.getSignAddress());
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!NulsDigestData.validHash(form.getAgentHash())) {
+            return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(form.getSignAddress()) || !AddressTool.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        Account account = accountService.getAccount(form.getSignAddress()).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        if (account.isEncrypted() && account.isLocked()) {
+            AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
+            if (!account.validatePassword(form.getPassword())) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
+            }
+        }
+
+        Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
+        MultiSigAccount multiSigAccount = sigAccountResult.getData();
+        Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
+        if(redeemScript == null){
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+
+        DepositTransaction tx = new DepositTransaction();
+        TransactionSignature transactionSignature = new TransactionSignature();
+        List<Script> scripts = new ArrayList<>();
+        Deposit deposit = new Deposit();
+        deposit.setAddress(AddressTool.getAddress(form.getAddress()));
+        deposit.setAgentHash(NulsDigestData.fromDigestHex(form.getAgentHash()));
+        deposit.setDeposit(Na.valueOf(form.getDeposit()));
+        tx.setTxData(deposit);
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        //AddressTool.getAddress(addr)
+        if (deposit.getAddress()[2] == NulsContext.P2SH_ADDRESS_TYPE) {
+            Script scriptPubkey = SignatureUtil.createOutputScript(deposit.getAddress());
+            toList.add(new Coin(scriptPubkey.getProgram(), deposit.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
+        } else {
+            toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
+        }
+        coinData.setTo(toList);
+        tx.setCoinData(coinData);
+        //交易签名的长度为m*单个签名长度+赎回脚本长度
+        int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM())*72;
+        CoinDataResult result = accountLedgerService.getMutilCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + scriptSignLenth, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        if (null != result) {
+            if (result.isEnough()) {
+                tx.getCoinData().setFrom(result.getCoinList());
+                if (null != result.getChange()) {
+                    tx.getCoinData().getTo().add(result.getChange());
+                }
+            } else {
+                return Result.getFailed(TransactionErrorCode.INSUFFICIENT_BALANCE).toRpcClientResult();
+            }
+        }
+        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        //将赎回脚本先存储在签名脚本中
+        scripts.add(redeemScript);
+        transactionSignature.setScripts(scripts);
+        Result resultData = accountLedgerService.txMultiProcess(tx,transactionSignature,account,form.getPassword());
+        if (resultData.isSuccess()) {
+            Map<String, String> valueMap = new HashMap<>();
+            valueMap.put("txData", (String) resultData.getData());
+            return Result.getSuccess().setData(valueMap).toRpcClientResult();
+        }
+        return resultData.toRpcClientResult();
+    }
+
+    @POST
+    @Path("/multiAccount/agent/stopMultiAgent")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "多签账户注销共识节点", notes = "返回注销成功交易hash")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public RpcClientResult createStopMutilAgent(@ApiParam(name = "form", value = "多签账户注销共识节点表单数据", required = true)
+                                                  StopAgentForm form) throws Exception {
+
+        if (NulsContext.MAIN_NET_VERSION <= 1) {
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getAddress());
+        AssertUtil.canNotEmpty(form.getSignAddress());
+        if (!AddressTool.validAddress(form.getAddress()) || !AddressTool.validAddress(form.getSignAddress())) {
+            throw new NulsRuntimeException(KernelErrorCode.PARAMETER_ERROR);
+        }
+        Account account = accountService.getAccount(form.getSignAddress()).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        if (account.isEncrypted() && account.isLocked()) {
+            AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
+            if (!account.validatePassword(form.getPassword())) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
+            }
+        }
+        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+        Agent agent = null;
+        for (Agent p : agentList) {
+            if (p.getDelHeight() > 0) {
+                continue;
+            }
+            if (Arrays.equals(p.getAgentAddress(), AddressTool.getAddress(form.getAddress()))) {
+                agent = p;
+                break;
+            }
+        }
+        if (agent == null || agent.getDelHeight() > 0) {
+            return Result.getFailed(PocConsensusErrorCode.AGENT_NOT_EXIST).toRpcClientResult();
+        }
+
+        Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
+        MultiSigAccount multiSigAccount = sigAccountResult.getData();
+        Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
+        if(redeemScript == null){
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+
+        //如果为交易发起人，则需要填写组装交易需要的信息
+        StopAgentTransaction tx = new StopAgentTransaction();
+        TransactionSignature transactionSignature = new TransactionSignature();
+        List<Script> scripts = new ArrayList<>();
+        StopAgent stopAgent = new StopAgent();
+        stopAgent.setAddress(agent.getAgentAddress());
+        stopAgent.setCreateTxHash(agent.getTxHash());
+        tx.setTime(TimeService.currentTimeMillis());
+        tx.setTxData(stopAgent);
+        CoinData coinData = ConsensusTool.getStopMutilAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME, null);
+        tx.setCoinData(coinData);
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
+        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        //将赎回脚本先存储在签名脚本中
+        scripts.add(redeemScript);
+        transactionSignature.setScripts(scripts);
+        //使用签名账户对交易进行签名
+        Result resultData = accountLedgerService.txMultiProcess(tx,transactionSignature,account,form.getPassword());
+
+        if (resultData.isSuccess()) {
+            Map<String, String> valueMap = new HashMap<>();
+            valueMap.put("txData", (String) resultData.getData());
+            return Result.getSuccess().setData(valueMap).toRpcClientResult();
+        }
+
+        return resultData.toRpcClientResult();
+    }
+
+    @POST
+    @Path("/multiAccount/mutilWithdraw")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "多签账户退出共识", notes = "返回退出成功的交易hash")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success", response = String.class)
+    })
+    public RpcClientResult createWithdrawMutil(@ApiParam(name = "form", value = "多签退出共识表单数据", required = true)
+                                                 WithdrawMutilForm form) throws Exception {
+        AssertUtil.canNotEmpty(form);
+        AssertUtil.canNotEmpty(form.getTxHash());
+        AssertUtil.canNotEmpty(form.getAddress());
+        AssertUtil.canNotEmpty(form.getSignAddress());
+        if (!NulsDigestData.validHash(form.getTxHash())) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(form.getAddress()) || !AddressTool.validAddress(form.getSignAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        Account account = accountService.getAccount(form.getAddress()).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        if (account.isEncrypted() && account.isLocked()) {
+            AssertUtil.canNotEmpty(form.getPassword(), "password is wrong");
+            if (!account.validatePassword(form.getPassword())) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG).toRpcClientResult();
+            }
+        }
+
+        Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
+        MultiSigAccount multiSigAccount = sigAccountResult.getData();
+        Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
+        if(redeemScript == null){
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        CancelDepositTransaction tx = new CancelDepositTransaction();
+        TransactionSignature transactionSignature = new TransactionSignature();
+        List<Script> scripts = new ArrayList<>();
+        CancelDeposit cancelDeposit = new CancelDeposit();
+        NulsDigestData hash = NulsDigestData.fromDigestHex(form.getTxHash());
+        DepositTransaction depositTransaction = null;
+        try {
+            depositTransaction = (DepositTransaction) ledgerService.getTx(hash);
+        } catch (Exception e) {
+            return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        if (null == depositTransaction) {
+            return Result.getFailed(TransactionErrorCode.TX_NOT_EXIST).toRpcClientResult();
+        }
+        // Create unlock script
+        cancelDeposit.setAddress(AddressTool.getAddress(form.getAddress()));
+        cancelDeposit.setJoinTxHash(hash);
+        tx.setTxData(cancelDeposit);
+        CoinData coinData = new CoinData();
+        List<Coin> toList = new ArrayList<>();
+        if (cancelDeposit.getAddress()[2] == NulsContext.P2SH_ADDRESS_TYPE) {
+            Script scriptPubkey = SignatureUtil.createOutputScript(cancelDeposit.getAddress());
+            toList.add(new Coin(scriptPubkey.getProgram(), depositTransaction.getTxData().getDeposit(), PocConsensusConstant.CONSENSUS_LOCK_TIME));
+        } else {
+            toList.add(new Coin(cancelDeposit.getAddress(), depositTransaction.getTxData().getDeposit(), 0));
+        }
+        coinData.setTo(toList);
+        List<Coin> fromList = new ArrayList<>();
+        for (int index = 0; index < depositTransaction.getCoinData().getTo().size(); index++) {
+            Coin coin = depositTransaction.getCoinData().getTo().get(index);
+            if (coin.getLockTime() == -1L && coin.getNa().equals(depositTransaction.getTxData().getDeposit())) {
+                coin.setOwner(ArraysTool.concatenate(hash.serialize(), new VarInt(index).encode()));
+                fromList.add(coin);
+                break;
+            }
+        }
+        if (fromList.isEmpty()) {
+            return Result.getFailed(KernelErrorCode.DATA_ERROR).toRpcClientResult();
+        }
+        coinData.setFrom(fromList);
+        tx.setCoinData(coinData);
+        Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
+        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        //将赎回脚本先存储在签名脚本中
+        scripts.add(redeemScript);
+        transactionSignature.setScripts(scripts);
+        Result resultData = accountLedgerService.txMultiProcess(tx,transactionSignature,account,form.getPassword());
+        if (resultData.isSuccess()) {
+            Map<String, String> valueMap = new HashMap<>();
+            valueMap.put("txData", (String) resultData.getData());
+            return Result.getSuccess().setData(valueMap).toRpcClientResult();
+        }
+        return resultData.toRpcClientResult();
+    }
+
+    @POST
+    @Path("multiAccount/signMultiAgent")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult signCreateMutilAgent(@ApiParam(name = "form", value = "转账", required = true) MultiTransactionSignForm form) {
+        if(NulsContext.MAIN_NET_VERSION  <=1){
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(form.getSignAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if(form.getTxdata() == null || form.getTxdata().length() == 0){
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Result result = signMultiTransaction(form.getSignAddress(),form.getPassword(),form.getTxdata(),1);
+        if (result.isSuccess()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("txData", (String) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
+
+    @POST
+    @Path("multiAccount/signMultiDeposit")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult signDepositTransaction(@ApiParam(name = "form", value = "转账", required = true) MultiTransactionSignForm form) {
+        if(NulsContext.MAIN_NET_VERSION  <=1){
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(form.getSignAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if(form.getTxdata() == null || form.getTxdata().length() == 0){
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Result result = signMultiTransaction(form.getSignAddress(),form.getPassword(),form.getTxdata(),2);
+        if (result.isSuccess()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("txData", (String) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
+
+    @POST
+    @Path("multiAccount/signMultiStopAgent")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult signStopAgentTransaction(@ApiParam(name = "form", value = "转账", required = true) MultiTransactionSignForm form) {
+        if(NulsContext.MAIN_NET_VERSION  <=1){
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(form.getSignAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if(form.getTxdata() == null || form.getTxdata().length() == 0){
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Result result = signMultiTransaction(form.getSignAddress(),form.getPassword(),form.getTxdata(),3);
+        if (result.isSuccess()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("txData", (String) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
+
+    @POST
+    @Path("multiAccount/signMultiWithdraw")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult signWithdrawTransaction(@ApiParam(name = "form", value = "转账", required = true) MultiTransactionSignForm form) {
+        if(NulsContext.MAIN_NET_VERSION  <=1){
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(form.getSignAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if(form.getTxdata() == null || form.getTxdata().length() == 0){
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Result result = signMultiTransaction(form.getSignAddress(),form.getPassword(),form.getTxdata(),4);
+        if (result.isSuccess()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("txData", (String) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
+
+
+    /**
+     * A transfers NULS to B   多签交易
+     *
+     * @param signAddr 签名地址
+     * @param password password of A
+     * @param txdata   需要签名的数据
+     * @param type     验证的交易类型 1创建节点 2加入共识 3停止节点 4退出共识
+     * @return Result
+     */
+    public Result signMultiTransaction(String signAddr,String password,String txdata,int type){
+        try {
+            Result<Account> accountResult = accountService.getAccount(signAddr);
+            if (accountResult.isFailed()) {
+                return accountResult;
+            }
+            Account account = accountResult.getData();
+            if (account.isEncrypted() && account.isLocked()) {
+                AssertUtil.canNotEmpty(password, "the password can not be empty");
+                if (!account.validatePassword(password)) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            }
+            Transaction tx = null;
+            if(type == 1)
+                tx = new CreateAgentTransaction();
+            else if(type == 2)
+                tx = new DepositTransaction();
+            else if(type == 3)
+                tx = new StopAgentTransaction();
+            else if(type == 4)
+                tx = new CancelDepositTransaction();
+            TransactionSignature transactionSignature = new TransactionSignature();
+            byte[] txByte = Hex.decode(txdata);
+            tx.parse(new NulsByteBuffer(txByte));
+            transactionSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+            return accountLedgerService.txMultiProcess(tx,transactionSignature,account,password);
+        }catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }catch (Exception e){
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+    }
 }

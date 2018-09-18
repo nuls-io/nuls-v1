@@ -53,6 +53,9 @@ public class CreateAgentForm {
     @ApiModelProperty(name = "password", value = "密码", required = true)
     private String password;
 
+    @ApiModelProperty(name = "signAddress", value = "签名地址", required = true)
+    private String signAddress;
+
     public double getCommissionRate() {
         return commissionRate;
     }
@@ -101,4 +104,11 @@ public class CreateAgentForm {
         this.deposit = deposit;
     }
 
+    public String getSignAddress() {
+        return signAddress;
+    }
+
+    public void setSignAddress(String signAddress) {
+        this.signAddress = signAddress;
+    }
 }

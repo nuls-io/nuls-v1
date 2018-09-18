@@ -1145,4 +1145,73 @@ public class AccountLedgerResource {
         }
         return result.toRpcClientResult();
     }
+
+    @POST
+    @Path("multiAccount/createTransfer")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult createTransfer(@ApiParam(name = "form", value = "转账", required = true) P2shTransactionSignForm form) {
+        if(NulsContext.MAIN_NET_VERSION  <=1){
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
+        List<MultipleAddressTransferModel> toModelList = new ArrayList<>();
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(form.getSignAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (form.getOutputs() == null || form.getOutputs() == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        for (MultipleTxToDto to : form.getOutputs()) {
+            MultipleAddressTransferModel model = new MultipleAddressTransferModel();
+            if (!AddressTool.validAddress(to.getToAddress())) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            }
+            model.setAddress(AddressTool.getAddress(to.getToAddress()));
+            model.setAmount(to.getAmount());
+            toModelList.add(model);
+        }
+        Result result = accountLedgerService.createP2shTransfer(form.getAddress(),form.getSignAddress(),toModelList,form.getPassword(),form.getRemark());
+        if (result.isSuccess()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("txData", (String) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
+
+    @POST
+    @Path("multiAccount/signTransfer")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult signTransfer(@ApiParam(name = "form", value = "转账", required = true) MultiTransactionSignForm form) {
+        if(NulsContext.MAIN_NET_VERSION  <=1){
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(form.getSignAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if(form.getTxdata() == null || form.getTxdata().length() == 0){
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Result result = accountLedgerService.signMultiTransaction(form.getSignAddress(),form.getPassword(),form.getTxdata());
+        if (result.isSuccess()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("txData", (String) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
 }

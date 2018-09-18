@@ -42,6 +42,7 @@ import io.nuls.account.ledger.storage.po.TransactionInfoPo;
 import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Balance;
+import io.nuls.account.model.MultiSigAccount;
 import io.nuls.account.service.AccountService;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.service.ContractService;
@@ -76,7 +77,6 @@ import io.nuls.protocol.model.validator.TxMaxSizeValidator;
 import io.nuls.protocol.model.validator.TxRemarkValidator;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.TransactionService;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -1594,6 +1594,117 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     }
 
 
+    /**
+     * A transfers NULS to B   多签交易
+     *
+     * @param fromAddr 输入地址
+     * @param signAddr 签名地址
+     * @param outputs  输出地址
+     * @param password password of A
+     * @param remark   remarks of transaction
+     * @return Result
+     */
+    public Result createP2shTransfer(String fromAddr, String signAddr, List<MultipleAddressTransferModel> outputs, String password, String remark){
+        try {
+            Result<Account> accountResult = accountService.getAccount(signAddr);
+            if (accountResult.isFailed()) {
+                return accountResult;
+            }
+            Account account = accountResult.getData();
+            if (account.isEncrypted() && account.isLocked()) {
+                AssertUtil.canNotEmpty(password, "the password can not be empty");
+                if (!account.validatePassword(password)) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            }
+            TransferTransaction tx = new TransferTransaction();
+            TransactionSignature transactionSignature = new TransactionSignature();
+            List<Script> scripts = new ArrayList<>();
+            Result<MultiSigAccount> result = accountService.getMultiSigAccount(fromAddr);
+            MultiSigAccount multiSigAccount = result.getData();
+            Script redeemScript = getRedeemScript(multiSigAccount);
+            if(redeemScript == null){
+                return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            tx.setTime(TimeService.currentTimeMillis());
+            CoinData coinData = new CoinData();
+            Na values = Na.ZERO;
+            for (MultipleAddressTransferModel to : outputs) {
+                //如果为多签地址
+                Coin toCoin = null;
+                values = values.add(Na.valueOf(to.getAmount()));
+                if (to.getAddress()[2] == NulsContext.P2SH_ADDRESS_TYPE) {
+                    Script scriptPubkey = SignatureUtil.createOutputScript(to.getAddress());
+                    toCoin = new Coin(scriptPubkey.getProgram(), Na.valueOf(to.getAmount()));
+                } else {
+                    toCoin = new Coin(to.getAddress(), Na.valueOf(to.getAmount()));
+                }
+                coinData.getTo().add(toCoin);
+            }
+            //交易签名的长度为m*单个签名长度+赎回脚本长度
+            int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM())* 72;
+            CoinDataResult coinDataResult = getMutilCoinData(AddressTool.getAddress(fromAddr), values, tx.size() + coinData.size() + scriptSignLenth, TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+            if (!coinDataResult.isEnough()) {
+                return Result.getFailed(AccountLedgerErrorCode.INSUFFICIENT_BALANCE);
+            }
+            coinData.setFrom(coinDataResult.getCoinList());
+            if (coinDataResult.getChange() != null) {
+                coinData.getTo().add(coinDataResult.getChange());
+            }
+            tx.setCoinData(coinData);
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            //将赎回脚本先存储在签名脚本中
+            scripts.add(redeemScript);
+            transactionSignature.setScripts(scripts);
+            return  txMultiProcess(tx,transactionSignature,account,password);
+        }catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(KernelErrorCode.IO_ERROR);
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }catch (Exception e){
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+    }
+
+    /**
+     * A transfers NULS to B   多签交易
+     *
+     * @param signAddr 签名地址
+     * @param password password of A
+     * @param txdata   需要签名的数据
+     * @return Result
+     */
+    public Result signMultiTransaction(String signAddr,String password,String txdata){
+        try {
+            Result<Account> accountResult = accountService.getAccount(signAddr);
+            if (accountResult.isFailed()) {
+                return accountResult;
+            }
+            Account account = accountResult.getData();
+            if (account.isEncrypted() && account.isLocked()) {
+                AssertUtil.canNotEmpty(password, "the password can not be empty");
+                if (!account.validatePassword(password)) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            }
+            TransferTransaction tx = new TransferTransaction();
+            TransactionSignature transactionSignature = new TransactionSignature();
+            byte[] txByte = Hex.decode(txdata);
+            tx.parse(new NulsByteBuffer(txByte));
+            transactionSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+            return txMultiProcess(tx,transactionSignature,account,password);
+        }catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }catch (Exception e){
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+    }
+
     @Override
     public CoinDataResult getMutilCoinData(byte[] address, Na amount, int size, Na price){
         if (null == price) {
@@ -1667,9 +1778,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 txSize += coin.size();
             }
             //计算目标size，coindata中from的总大小
-            int targetSize = TxMaxSizeValidator.MAX_TX_SIZE - txSize;
             if(tx.getTransactionSignature() == null || tx.getTransactionSignature().length ==0)
                 txSize += signSize;
+            int targetSize = TxMaxSizeValidator.MAX_TX_SIZE - txSize;
             List<Coin> coinList = ledgerService.getAllUtxo(address);;
             if (coinList.isEmpty()) {
                 return Result.getSuccess().setData(Na.ZERO);
@@ -1703,6 +1814,79 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         } finally {
             lock.unlock();
         }
-
     }
+
+    @Override
+    public Result txMultiProcess(Transaction tx,TransactionSignature transactionSignature, Account account,String password){
+        try{
+            List<P2PHKSignature> p2PHKSignatures = transactionSignature.getP2PHKSignatures();
+            List<Script> scripts = transactionSignature.getScripts();
+            //使用签名账户对交易进行签名
+            P2PHKSignature p2PHKSignature = new P2PHKSignature();
+            ECKey eckey = account.getEcKey(password);
+            p2PHKSignature.setPublicKey(eckey.getPubKey());
+            //用当前交易的hash和账户的私钥账户
+            p2PHKSignature.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), eckey));
+            p2PHKSignatures.add(p2PHKSignature);
+            //当已签名数等于M则自动广播该交易
+            if (p2PHKSignatures.size() == SignatureUtil.getM(scripts.get(0))) {
+                //将交易中的签名数据P2PHKSignatures按规则排序
+                Collections.sort(p2PHKSignatures, P2PHKSignature.PUBKEY_COMPARATOR);
+                //将排序后的P2PHKSignatures的签名数据取出和赎回脚本结合生成解锁脚本
+                List<byte[]> signatures = new ArrayList<>();
+                for (P2PHKSignature p2PHKSignatureTemp : p2PHKSignatures) {
+                    signatures.add(p2PHKSignatureTemp.getSignData().getSignBytes());
+                }
+                transactionSignature.setP2PHKSignatures(null);
+                Script scriptSign = ScriptBuilder.createNulsP2SHMultiSigInputScript(signatures, scripts.get(0));
+                transactionSignature.getScripts().clear();
+                transactionSignature.getScripts().add(scriptSign);
+                tx.setTransactionSignature(transactionSignature.serialize());
+                // 保存未确认交易到本地账户
+                Result saveResult = verifyAndSaveUnconfirmedTransaction(tx);
+                if (saveResult.isFailed()) {
+                    return saveResult;
+                }
+                transactionService.newTx(tx);
+                Result sendResult = transactionService.broadcastTx(tx);
+                if (sendResult.isFailed()) {
+                    this.deleteTransaction(tx);
+                    return sendResult;
+                }
+                return Result.getSuccess().setData(tx.getHash().getDigestHex());
+            }
+            //如果签名数还没达到，则返回交易
+            else{
+                transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+                tx.setTransactionSignature(transactionSignature.serialize());
+                return Result.getSuccess().setData(Hex.encode(tx.serialize()));
+            }
+        }catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(KernelErrorCode.IO_ERROR);
+        } catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    @Override
+    public Script getRedeemScript(MultiSigAccount multiSigAccount){
+        try{
+            List<String> pubkeys = new ArrayList<>();
+            if(multiSigAccount.getPubKeyList() != null && multiSigAccount.getM() >0
+                    && multiSigAccount.getPubKeyList().size()>multiSigAccount.getM()){
+                for (byte[] pubkeyByte : multiSigAccount.getPubKeyList()) {
+                    pubkeys.add(Hex.encode(pubkeyByte));
+                }
+                Script redeeemScript = ScriptBuilder.createNulsRedeemScript((int)multiSigAccount.getM(),pubkeys);
+                return  redeeemScript;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
 }

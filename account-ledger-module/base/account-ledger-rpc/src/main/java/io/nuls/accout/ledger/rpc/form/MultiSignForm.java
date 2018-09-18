@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 /**
- * @author tangag
+ * @author tag
  */
 @ApiModel(value = "创建多重签名交易")
 public class MultiSignForm {
