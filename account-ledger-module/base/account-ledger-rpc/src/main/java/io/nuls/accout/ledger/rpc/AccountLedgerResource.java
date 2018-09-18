@@ -255,11 +255,7 @@ public class AccountLedgerResource {
             if (!AddressTool.validAddress(from.getAddress())) {
                 return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
             }
-            if (from.getAmount() <= 0) {
-                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-            }
             model.setAddress(AddressTool.getAddress(from.getAddress()));
-            model.setAmount(from.getAmount());
             fromModelList.add(model);
         }
         if (!validTxRemark(form.getRemark())) {
