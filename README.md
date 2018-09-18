@@ -49,7 +49,7 @@ Use Alibaba Java Coding Guidelines [@Github](https://github.com/alibaba/p3c).
 ### Branch Description
 mainnet: main network wallet code  
 testnet : test network wallet code  
-master : main branch, the latest version available  
+master : main branch, the latest version available,Can be used for technical research.
 develop : branch in development  
 Others : other branches are designed according to gitflow   
 
