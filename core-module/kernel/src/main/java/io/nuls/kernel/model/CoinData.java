@@ -26,6 +26,7 @@
 
 package io.nuls.kernel.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
@@ -131,6 +132,7 @@ public class CoinData extends BaseNulsData {
      *
      * @return tx fee
      */
+    @JsonIgnore
     public Na getFee() {
         Na toNa = Na.ZERO;
         for (Coin coin : to) {
@@ -157,6 +159,7 @@ public class CoinData extends BaseNulsData {
         from.add(coin);
     }
 
+    @JsonIgnore
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         if (from != null && from.size() != 0) {
