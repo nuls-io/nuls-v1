@@ -24,16 +24,17 @@ public class SignMultiTransactionProcess implements CommandProcessor {
 
     @Override
     public String getHelp() {
-        return "signMultiTransfer <signAddress> <txdata> -sign a multiTransfer";
-    }
-
-    @Override
-    public String getCommandDescription() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
                 .newLine("\t<address> \t\tsource address - Required")
                 .newLine("\t<txdata> \t\ttransaction data - Required");
         return builder.toString();
+
+    }
+
+    @Override
+    public String getCommandDescription() {
+        return "signMultiTransfer <signAddress> <txdata> -sign a multiTransfer";
     }
 
     @Override
