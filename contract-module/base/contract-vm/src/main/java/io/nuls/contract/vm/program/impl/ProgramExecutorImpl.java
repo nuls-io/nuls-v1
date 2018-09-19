@@ -19,7 +19,6 @@ import io.nuls.db.service.DBService;
 import org.apache.commons.lang3.StringUtils;
 import org.ethereum.core.AccountState;
 import org.ethereum.core.Repository;
-import org.ethereum.datasource.Source;
 import org.ethereum.db.RepositoryRoot;
 import org.ethereum.util.FastByteComparisons;
 import org.ethereum.vm.DataWord;
@@ -37,7 +36,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private final VMContext vmContext;
 
-    private final Source<byte[], byte[]> source;
+    private final KeyValueSource source;
 
     private final Repository repository;
 
@@ -67,7 +66,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         this(vmContext, new KeyValueSource(dbService), null, null, null, null);
     }
 
-    private ProgramExecutorImpl(VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot, Map<String, VM> vmCache, Map<String, VM> commitVms) {
+    private ProgramExecutorImpl(VMContext vmContext, KeyValueSource source, Repository repository, byte[] prevStateRoot, Map<String, VM> vmCache, Map<String, VM> commitVms) {
         this.vmContext = vmContext;
         this.source = source;
         this.repository = repository;
@@ -156,6 +155,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setMethodName("<init>");
         programInvoke.setArgs(programCreate.getArgs() != null ? programCreate.getArgs() : new String[0][0]);
         programInvoke.setEstimateGas(programCreate.isEstimateGas());
+        programInvoke.setCreate(true);
         return execute(programInvoke);
     }
 
@@ -172,6 +172,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setMethodDesc(programCall.getMethodDesc());
         programInvoke.setArgs(programCall.getArgs() != null ? programCall.getArgs() : new String[0][0]);
         programInvoke.setEstimateGas(programCall.isEstimateGas());
+        programInvoke.setCreate(false);
         return execute(programInvoke);
     }
 
@@ -193,10 +194,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
         try {
             Map<String, ClassCode> classCodes;
-            boolean newContract = false;
-            AccountState accountState = repository.getAccountState(programInvoke.getContractAddress());
-            logTime("load account state");
-            if (accountState == null) {
+            if (programInvoke.isCreate()) {
                 if (programInvoke.getData() == null) {
                     return revert("contract code can't be null");
                 }
@@ -204,15 +202,23 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 logTime("load new code");
                 ProgramChecker.check(classCodes);
                 logTime("check code");
+                AccountState accountState = repository.getAccountState(programInvoke.getContractAddress());
+                if (accountState != null) {
+                    return revert("contract already exists");
+                }
                 accountState = repository.createAccount(programInvoke.getContractAddress(), programInvoke.getSender());
                 logTime("new account state");
                 repository.saveCode(programInvoke.getContractAddress(), programInvoke.getData());
-                newContract = true;
                 logTime("save code");
             } else {
                 if ("<init>".equals(programInvoke.getMethodName())) {
                     return revert("can't invoke <init> method");
                 }
+                AccountState accountState = repository.getAccountState(programInvoke.getContractAddress());
+                if (accountState == null) {
+                    return revert("contract does not exist");
+                }
+                logTime("load account state");
                 if (accountState.getNonce().compareTo(BigInteger.ZERO) <= 0) {
                     return revert("contract has been stopped");
                 }
@@ -274,7 +280,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             logTime("load balance");
 
             ObjectRef objectRef;
-            if (newContract) {
+            if (programInvoke.isCreate()) {
                 objectRef = vm.heap.newContract(programInvoke.getContractAddress(), contractClassCode, repository);
             } else {
                 objectRef = vm.heap.loadContract(programInvoke.getContractAddress(), contractClassCode, repository);

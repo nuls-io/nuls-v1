@@ -17,6 +17,7 @@
  */
 package org.ethereum.datasource.inmem;
 
+import org.ethereum.datasource.DbSettings;
 import org.ethereum.datasource.DbSource;
 import org.ethereum.util.ALock;
 import org.ethereum.util.ByteArrayMap;
@@ -87,6 +88,10 @@ public class HashMapDB<V> implements DbSource<V> {
 
     @Override
     public void init() {
+    }
+
+    @Override
+    public void init(DbSettings settings) {
     }
 
     @Override
