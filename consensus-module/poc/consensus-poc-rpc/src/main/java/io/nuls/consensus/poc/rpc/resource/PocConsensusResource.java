@@ -2176,7 +2176,7 @@ public class PocConsensusResource {
     }
 
     @POST
-    @Path("multiAccount/signMultiStopAgent")
+    @Path("multiAccount/signStopMultiAgent")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "多签账户注销共识节点签名", notes = "result.data: resultJson 返回转账结果")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
