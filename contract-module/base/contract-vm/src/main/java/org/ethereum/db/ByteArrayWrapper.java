@@ -34,15 +34,18 @@ public class ByteArrayWrapper implements Comparable<ByteArrayWrapper>, Serializa
     private int hashCode = 0;
 
     public ByteArrayWrapper(byte[] data) {
-        if (data == null)
+        if (data == null) {
             throw new NullPointerException("Data must not be null");
+        }
         this.data = data;
         this.hashCode = Arrays.hashCode(data);
     }
 
+    @Override
     public boolean equals(Object other) {
-        if (!(other instanceof ByteArrayWrapper))
+        if (!(other instanceof ByteArrayWrapper)) {
             return false;
+        }
         byte[] otherData = ((ByteArrayWrapper) other).getData();
         return FastByteComparisons.compareTo(
                 data, 0, data.length,

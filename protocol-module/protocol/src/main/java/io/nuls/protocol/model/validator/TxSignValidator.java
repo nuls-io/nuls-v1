@@ -42,8 +42,9 @@ public class TxSignValidator implements NulsDataValidator<Transaction> {
             return ValidateResult.getSuccessResult();
         }
         try{
-              if(SignatureUtil.validateTransactionSignture(tx))
+              if(SignatureUtil.validateTransactionSignture(tx)) {
                   return ValidateResult.getSuccessResult();
+              }
         } catch (Exception e) {
             Log.error(e);
             return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);

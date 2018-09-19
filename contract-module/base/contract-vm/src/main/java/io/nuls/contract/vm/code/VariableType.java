@@ -402,19 +402,36 @@ public class VariableType {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         VariableType that = (VariableType) o;
 
-        if (primitiveType != that.primitiveType) return false;
-        if (primitive != that.primitive) return false;
-        if (array != that.array) return false;
-        if (dimensions != that.dimensions) return false;
-        if (desc != null ? !desc.equals(that.desc) : that.desc != null) return false;
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
-        if (componentType != null ? !componentType.equals(that.componentType) : that.componentType != null)
+        if (primitiveType != that.primitiveType) {
             return false;
+        }
+        if (primitive != that.primitive) {
+            return false;
+        }
+        if (array != that.array) {
+            return false;
+        }
+        if (dimensions != that.dimensions) {
+            return false;
+        }
+        if (desc != null ? !desc.equals(that.desc) : that.desc != null) {
+            return false;
+        }
+        if (type != null ? !type.equals(that.type) : that.type != null) {
+            return false;
+        }
+        if (componentType != null ? !componentType.equals(that.componentType) : that.componentType != null) {
+            return false;
+        }
         return defaultValue != null ? defaultValue.equals(that.defaultValue) : that.defaultValue == null;
     }
 

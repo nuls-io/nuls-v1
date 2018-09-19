@@ -85,7 +85,9 @@ public class Serializers {
 
         @Override
         public DataWord deserialize(byte[] stream) {
-            if (stream == null || stream.length == 0) return null;
+            if (stream == null || stream.length == 0) {
+                return null;
+            }
             byte[] dataDecoded = RLP.decode2(stream).get(0).getRLPData();
             return DataWord.of(dataDecoded);
         }

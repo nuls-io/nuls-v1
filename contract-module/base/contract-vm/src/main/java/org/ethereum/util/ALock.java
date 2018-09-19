@@ -40,6 +40,7 @@ public final class ALock implements AutoCloseable {
         return this;
     }
 
+    @Override
     public final void close() {
         this.lock.unlock();
     }

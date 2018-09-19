@@ -1605,6 +1605,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
      * @param remark   remarks of transaction
      * @return Result
      */
+    @Override
     public Result createP2shTransfer(String fromAddr, String signAddr, List<MultipleAddressTransferModel> outputs, String password, String remark){
         try {
             Result<Account> accountResult = accountService.getAccount(signAddr);
@@ -1779,8 +1780,9 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
                 txSize += coin.size();
             }
             //计算目标size，coindata中from的总大小
-            if(tx.getTransactionSignature() == null || tx.getTransactionSignature().length ==0)
+            if(tx.getTransactionSignature() == null || tx.getTransactionSignature().length ==0) {
                 txSize += signSize;
+            }
             int targetSize = TxMaxSizeValidator.MAX_TX_SIZE - txSize;
             List<Coin> coinList = ledgerService.getAllUtxo(address);;
             if (coinList.isEmpty()) {
@@ -1900,7 +1902,8 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
      * @param txdata   需要签名的数据
      * @return Result
      */
-    public Result signMultiTransaction(String signAddr,String password,String txdata){
+    @Override
+    public Result signMultiTransaction(String signAddr, String password, String txdata){
         try {
             Result<Account> accountResult = accountService.getAccount(signAddr);
             if (accountResult.isFailed()) {

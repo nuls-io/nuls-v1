@@ -85,13 +85,21 @@ public class ObjectRef {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ObjectRef objectRef = (ObjectRef) o;
 
-        if (ref != null ? !ref.equals(objectRef.ref) : objectRef.ref != null) return false;
-        if (desc != null ? !desc.equals(objectRef.desc) : objectRef.desc != null) return false;
+        if (ref != null ? !ref.equals(objectRef.ref) : objectRef.ref != null) {
+            return false;
+        }
+        if (desc != null ? !desc.equals(objectRef.desc) : objectRef.desc != null) {
+            return false;
+        }
         return Arrays.equals(dimensions, objectRef.dimensions);
     }
 

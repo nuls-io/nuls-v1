@@ -45,6 +45,7 @@ public interface Repository extends org.ethereum.facade.Repository {
      * @return - true if account exist,
      * false otherwise
      */
+    @Override
     boolean isExist(byte[] addr);
 
     /**
@@ -85,6 +86,7 @@ public interface Repository extends org.ethereum.facade.Repository {
      * @param addr of the account
      * @return value of the nonce
      */
+    @Override
     BigInteger getNonce(byte[] addr);
 
     /**
@@ -111,6 +113,7 @@ public interface Repository extends org.ethereum.facade.Repository {
      * @param addr of the account
      * @return code in byte-array format
      */
+    @Override
     byte[] getCode(byte[] addr);
 
     /**
@@ -138,6 +141,7 @@ public interface Repository extends org.ethereum.facade.Repository {
      * @param key  associated with this value
      * @return data in the form of a <code>DataWord</code>
      */
+    @Override
     DataWord getStorageValue(byte[] addr, DataWord key);
 
 
@@ -147,6 +151,7 @@ public interface Repository extends org.ethereum.facade.Repository {
      * @param addr of the account
      * @return balance of the account as a <code>BigInteger</code> value
      */
+    @Override
     BigInteger getBalance(byte[] addr);
 
     /**

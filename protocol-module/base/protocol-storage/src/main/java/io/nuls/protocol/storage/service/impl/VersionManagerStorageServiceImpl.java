@@ -159,6 +159,7 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
         return dbService.getModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA, new VarInt(blockHeight).encode(), BlockProtocolInfoPo.class);
     }
 
+    @Override
     public void clearBlockProtocol(long blockHeight, int version) {
         dbService.delete(ProtocolStorageConstant.BLOCK_PROTOCOL_INDEX, Util.intToBytes(version));
         dbService.delete(ProtocolStorageConstant.BLOCK_PROTOCOL_AREA, new VarInt(blockHeight).encode());

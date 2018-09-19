@@ -102,8 +102,9 @@ public class CreateP2shTransactionForm {
             String[] separateData = data.split(",");
             Na toNa = Na.parseNuls(separateData[1]);
             toAmount = toNa.getValue();
-            if(toAmount <= 0)
+            if(toAmount <= 0) {
                 return null;
+            }
             toData.setAmount(toAmount);
             toData.setToAddress(separateData[0]);
             toDatas.add(toData);

@@ -31,13 +31,21 @@ public class ProgramTransfer {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ProgramTransfer that = (ProgramTransfer) o;
 
-        if (!Arrays.equals(from, that.from)) return false;
-        if (!Arrays.equals(to, that.to)) return false;
+        if (!Arrays.equals(from, that.from)) {
+            return false;
+        }
+        if (!Arrays.equals(to, that.to)) {
+            return false;
+        }
         return value != null ? value.equals(that.value) : that.value == null;
     }
 

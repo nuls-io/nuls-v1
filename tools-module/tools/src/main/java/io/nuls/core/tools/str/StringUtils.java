@@ -307,8 +307,9 @@ public class StringUtils {
         if(StringUtils.isBlank(pubkeys)){
             return  false;
         }
-        if(m == null || Integer.parseInt(m) <= 0)
+        if(m == null || Integer.parseInt(m) <= 0) {
             return false;
+        }
         //将公钥拆分
         String[] dataList = pubkeys.split(",");
         if(dataList == null || dataList.length == 0 || dataList.length < Integer.parseInt(m)){

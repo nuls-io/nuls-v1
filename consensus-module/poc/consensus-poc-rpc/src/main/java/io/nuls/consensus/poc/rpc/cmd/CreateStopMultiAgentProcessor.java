@@ -54,11 +54,13 @@ public class CreateStopMultiAgentProcessor implements CommandProcessor {
             return false;
         }
         if(length == 5){
-            if(!StringUtils.validPubkeys(args[3],args[4]))
-                return  false;
-        }else{
-            if(args[3] == null || args[3].length() == 0)
+            if(!StringUtils.validPubkeys(args[3],args[4])) {
                 return false;
+            }
+        }else{
+            if(args[3] == null || args[3].length() == 0) {
+                return false;
+            }
         }
         return true;
     }

@@ -41,8 +41,9 @@ public class CreateMultiTransferProcess implements CommandProcessor {
     @Override
     public boolean argsValidate(String[] args) {
         int length = args.length;
-        if(length != 4 && length != 5)
-            return  false;
+        if(length != 4 && length != 5) {
+            return false;
+        }
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
