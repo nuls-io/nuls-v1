@@ -1,7 +1,11 @@
 package io.nuls.contract.vm.program;
 
+import io.nuls.kernel.utils.AddressTool;
+
 import java.math.BigInteger;
 import java.util.Arrays;
+
+import static io.nuls.contract.util.ContractUtil.argToString;
 
 public class ProgramCreate {
 
@@ -170,15 +174,14 @@ public class ProgramCreate {
     public String toString() {
         return "ProgramCreate{" +
                 "number=" + number +
-                ", sender=" + Arrays.toString(sender) +
+                ", sender=" + (sender != null ? AddressTool.getStringAddressByBytes(sender) : sender) +
                 ", value=" + value +
                 ", gasLimit=" + gasLimit +
                 ", price=" + price +
-                ", contractAddress=" + Arrays.toString(contractAddress) +
-                ", contractCode=" + Arrays.toString(contractCode) +
-                ", args=" + Arrays.toString(args) +
+                ", contractAddress=" + (contractAddress != null ? AddressTool.getStringAddressByBytes(contractAddress) : contractAddress) +
+                ", contractCode=" + (contractCode != null ? String.valueOf(contractCode.length) : 0) +
+                ", args=" + argToString(args) +
                 ", estimateGas=" + estimateGas +
                 '}';
     }
-
 }

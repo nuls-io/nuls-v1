@@ -130,7 +130,7 @@ public class ContractResultDto {
         this.txSizeFee = this.totalFee.subtract(contractFee);
         this.contractAddress = AddressTool.getStringAddressByBytes(result.getContractAddress());
         this.result = result.getResult();
-        this.stateRoot = Hex.encode(result.getStateRoot());
+        this.stateRoot = result.getStateRoot() != null ? Hex.encode(result.getStateRoot()) : null;
         this.value = result.getValue();
         this.success = result.isSuccess();
         this.errorMessage = result.getErrorMessage();

@@ -105,11 +105,4 @@ public class Block extends BaseNulsData implements Cloneable {
         return list;
     }
 
-    @Override
-    public String toString() {
-        return "Block{" +
-                //"header=" + header.toString() +
-                ", txs=" + txs.size() +
-                '}';
-    }
 }
