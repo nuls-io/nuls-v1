@@ -109,11 +109,11 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
             }
             //TODO pierre 若区块中得到合约转账(从合约转出)交易，这段代码应该去掉
             //增加智能合约内部交易逻辑
-            if (tx.getType() == UtxoAccountsConstant.TX_TYPE_CALL_CONTRACT) {
-                ContractResult contractExecuteResult = contractService.getContractExecuteResult(tx.getHash());
-                List<ContractTransfer> transferList = contractExecuteResult.getTransfers();
-                buildContractTranfersBalance(utxoAccountsMap, transferList, block.getHeader().getHeight(), txIndex);
-            }
+//            if (tx.getType() == UtxoAccountsConstant.TX_TYPE_CALL_CONTRACT) {
+//                ContractResult contractExecuteResult = contractService.getContractExecuteResult(tx.getHash());
+//                List<ContractTransfer> transferList = contractExecuteResult.getTransfers();
+//                buildContractTranfersBalance(utxoAccountsMap, transferList, block.getHeader().getHeight(), txIndex);
+//            }
             txIndex++;
         }
         return true;
@@ -130,7 +130,8 @@ public class UtxoAccountsServiceImpl implements UtxoAccountsService {
      */
     private void buildUtxoAccountsBalance(Map<String, UtxoAccountsBalancePo> utxoAccountsMap, Coin coin, Transaction tx, int txIndex, boolean isInput) {
         long netBlockHeight = NulsContext.getInstance().getNetBestBlockHeight();
-        String address = AddressTool.getStringAddressByBytes(coin.getOwner());
+        //change coin.getOwner() to coin.getAddress() for support multiSig
+        String address = AddressTool.getStringAddressByBytes(coin.getAddress());
         UtxoAccountsBalancePo balance = utxoAccountsMap.get(address);
         if (null == balance) {
             balance = new UtxoAccountsBalancePo();
