@@ -42,9 +42,6 @@ public class StopAgentForm {
     @ApiModelProperty(name = "password", value = "密码", required = true)
     private String password;
 
-    @ApiModelProperty(name = "signAddress", value = "签名地址", required = true)
-    private String signAddress;
-
     public String getAddress() {
         return address;
     }
@@ -59,13 +56,5 @@ public class StopAgentForm {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getSignAddress() {
-        return signAddress;
-    }
-
-    public void setSignAddress(String signAddress) {
-        this.signAddress = signAddress;
     }
 }

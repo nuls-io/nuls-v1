@@ -112,16 +112,13 @@ public class CommandHandler {
         register(new GetMultiSigAccountCountProcessor());
         register(new CreateMultiSigAccountProcessor());
 
-
-        register(new TransferP2shProcess());
-        register(new SetMultiAliasProcessor());
-        register(new WithdrawMultiProcessor());
-        register(new CreateMultiAgentProcessor());
-        register(new StopMultiAgentProcessor());
-        register(new DepositToMultiAgentProcessor());
-
         register(new CreateMultiTransferProcess());
         register(new SignMultiTransactionProcess());
+        register(new CreateMultiAliasProcess());
+        register(new CreateMultiAgentProcessor());
+        register(new CreateMultiDepositProcessor());
+        register(new CreateMultiWithdrawProcessor());
+        register(new CreateStopMultiAgentProcessor());
 
         /**
          * accountLedger

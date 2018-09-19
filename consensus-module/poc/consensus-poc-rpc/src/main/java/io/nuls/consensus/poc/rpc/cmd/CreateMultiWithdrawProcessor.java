@@ -15,13 +15,13 @@ import java.util.Map;
 /**
  * @author: tag
  */
-public class MultiWithdrawProcessor implements CommandProcessor {
+public class CreateMultiWithdrawProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
     @Override
     public String getCommand() {
-        return "multiWithdraw";
+        return "createMultiWithdraw";
     }
 
     @Override

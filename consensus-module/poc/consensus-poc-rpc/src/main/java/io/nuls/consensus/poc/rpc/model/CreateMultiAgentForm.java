@@ -10,7 +10,7 @@ import java.util.List;
  * @author tag
  */
 @ApiModel(value = "多签账户创建共识(代理)节点表单数据")
-public class CreateMutilAgentForm {
+public class CreateMultiAgentForm {
     @ApiModelProperty(name = "agentAddress", value = "申请账户的地址", required = true)
     private String agentAddress;
 
@@ -31,15 +31,6 @@ public class CreateMutilAgentForm {
 
     @ApiModelProperty(name = "password", value = "密码", required = true)
     private String password;
-
-    @ApiModelProperty(name = "pubkeys", value = "需要签名的公钥列表", required = true)
-    private List<String> pubkeys;
-
-    @ApiModelProperty(name = "m", value = "至少需要几个公钥验证通过", required = true)
-    private int m;
-
-    @ApiModelProperty(name = "txdata", value = "交易数据")
-    private String txdata;
 
     public double getCommissionRate() {
         return commissionRate;
@@ -97,27 +88,4 @@ public class CreateMutilAgentForm {
         this.signAddress = signAddress;
     }
 
-    public List<String> getPubkeys() {
-        return pubkeys;
-    }
-
-    public void setPubkeys(List<String> pubkeys) {
-        this.pubkeys = pubkeys;
-    }
-
-    public int getM() {
-        return m;
-    }
-
-    public void setM(int m) {
-        this.m = m;
-    }
-
-    public String getTxdata() {
-        return txdata;
-    }
-
-    public void setTxdata(String txdata) {
-        this.txdata = txdata;
-    }
 }

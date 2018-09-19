@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @author tag
  */
 @ApiModel(value = "多签账户退出共识表单数据")
-public class MultiWithdrawForm {
+public class CreateMultiWithdrawForm {
     @ApiModelProperty(name = "address", value = "节点地址", required = true)
     private String address;
 

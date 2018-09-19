@@ -48,9 +48,6 @@ public class DepositForm {
     @ApiModelProperty(name = "password", value = "密码", required = true)
     private String password;
 
-    @ApiModelProperty(name = "signAddress", value = "签名地址", required = true)
-    private String signAddress;
-
     public String getAddress() {
         return address;
     }
@@ -83,11 +80,4 @@ public class DepositForm {
         this.password = password;
     }
 
-    public String getSignAddress() {
-        return signAddress;
-    }
-
-    public void setSignAddress(String signAddress) {
-        this.signAddress = signAddress;
-    }
 }
