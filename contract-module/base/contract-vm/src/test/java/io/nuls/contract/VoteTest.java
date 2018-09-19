@@ -38,12 +38,34 @@ public class VoteTest {
     }
 
     @Test
-    public void testBatch() throws IOException {
-        List transactions = transactions();
+    public void testBatchBlock() throws IOException {
+        byte[] prevStateRoot = Hex.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
+        List transactions = createTransactions();
+        prevStateRoot = testBatch(prevStateRoot, transactions);
+        System.out.println("第1个块");
+        for (int i = 0; i < 100; i++) {
+            transactions = transactions();
+            prevStateRoot = testBatch(prevStateRoot, transactions);
+            System.out.println("第" + (i + 2) + "个块");
+        }
+    }
+
+    @Test
+    public void testOneBlock() throws IOException {
+        byte[] prevStateRoot = Hex.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
+        List transactions = createTransactions();
+        prevStateRoot = testOne(prevStateRoot, transactions);
+        System.out.println("第1个块");
+        for (int i = 0; i < 100; i++) {
+            transactions = transactions();
+            prevStateRoot = testOne(prevStateRoot, transactions);
+            System.out.println("第" + (i + 2) + "个块");
+        }
+    }
+
+    public byte[] testBatch(byte[] prevStateRoot, List transactions) throws IOException {
 
         long start = System.currentTimeMillis();
-
-        byte[] prevStateRoot = Hex.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
 
@@ -79,17 +101,16 @@ public class VoteTest {
         track.commit();
         System.out.println("提交耗时：" + (System.currentTimeMillis() - commitStart) + "ms");
 
-        System.out.println("stateRoot: " + Hex.toHexString(track.getRoot()));
+        byte[] root = track.getRoot();
+
+        System.out.println("stateRoot: " + Hex.toHexString(root));
         System.out.println("总耗时：" + (System.currentTimeMillis() - start) + "ms");
+        return root;
     }
 
-    @Test
-    public void testOne() throws IOException {
-        List transactions = transactions();
+    public byte[] testOne(byte[] prevStateRoot, List transactions) throws IOException {
 
         long start = System.currentTimeMillis();
-
-        byte[] prevStateRoot = Hex.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
 
         //ProgramExecutor track = programExecutor.begin(prevStateRoot);
 
@@ -133,9 +154,10 @@ public class VoteTest {
 
         //System.out.println("stateRoot: " + Hex.toHexString(track.getRoot()));
         //System.out.println("总耗时：" + (System.currentTimeMillis() - start) + "ms");
+        return prevStateRoot;
     }
 
-    public List transactions() throws IOException {
+    public List createTransactions() throws IOException {
         List transactions = new ArrayList();
 
         ProgramCreate programCreate = new ProgramCreate();
@@ -151,6 +173,12 @@ public class VoteTest {
         programCreate.args("10000");
 
         transactions.add(programCreate);
+
+        return transactions;
+    }
+
+    public List transactions() throws IOException {
+        List transactions = new ArrayList();
 
         for (int i = 0; i < 10; i++) {
             ProgramCall programCall = new ProgramCall();
