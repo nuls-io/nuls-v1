@@ -340,6 +340,14 @@ public class BlockProcess {
             }
 
             boolean hasFoundForkChain = checkAndAddForkChain(block);
+            System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+            if (block.getHeader().getHeight() > NulsContext.getInstance().getBestHeight()) {
+                System.out.println("&&&&&&&&&&&&&&&&&&&&&&& BlockProcess相同高度不同块回滚 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+                System.out.println("存分叉链 ：：：" + block.getHeader().getHeight());
+                System.out.println("hasFoundForkChain：false==error::: " + hasFoundForkChain);
+                System.out.println("&&&&&&&&&&&&&&&&&&&&&&& BlockProcess相同高度不同块回滚 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+            }
+            System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
             if (!hasFoundForkChain) {
 
                 ChainLog.debug("add block {} - {} in queue", block.getHeader().getHeight(), block.getHeader().getHash().getDigestHex());
