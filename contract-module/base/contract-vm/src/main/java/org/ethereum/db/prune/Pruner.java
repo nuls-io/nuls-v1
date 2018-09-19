@@ -91,7 +91,9 @@ public class Pruner {
     }
 
     public boolean init(List<byte[]> forkWindow, int sizeInBlocks) {
-        if (ready) return true;
+        if (ready) {
+            return true;
+        }
 
         if (!forkWindow.isEmpty() && journal.get(forkWindow.get(0)) == null) {
             logger.debug("pruner init aborted: can't fetch update " + toHexString(forkWindow.get(0)));
@@ -117,7 +119,9 @@ public class Pruner {
     }
 
     public void withSecondStep(List<byte[]> mainChainWindow, int sizeInBlocks) {
-        if (!ready) return;
+        if (!ready) {
+            return;
+        }
 
         QuotientFilter filter = instantiateFilter(sizeInBlocks, FILTER_ENTRIES_DISTANT);
 
@@ -154,12 +158,15 @@ public class Pruner {
     }
 
     public void feed(JournalSource.Update update) {
-        if (ready)
+        if (ready) {
             update.getInsertedKeys().forEach(filter::insert);
+        }
     }
 
     public void prune(Segment segment) {
-        if (!ready) return;
+        if (!ready) {
+            return;
+        }
         assert segment.isComplete();
 
         logger.trace("prune " + segment);
@@ -183,7 +190,7 @@ public class Pruner {
             segment.main.getHashes().forEach(journal::delete);
         }
 
-        if (logger.isTraceEnabled())
+        if (logger.isTraceEnabled()) {
             logger.trace("nodes {}, keys in mem: {}, filter load: {}/{}: {}, distinct collisions: {}",
                     (withSecondStep() ? "postponed: " + nodesPostponed : "deleted: " + pruning.nodesDeleted),
                     pruning.insertedInForks.size() + pruning.insertedInMainChain.size(),
@@ -191,6 +198,7 @@ public class Pruner {
                     String.format("%.4f", (double) ((CountingQuotientFilter) filter).getEntryNumber() /
                             ((CountingQuotientFilter) filter).getMaxInsertions()),
                     ((CountingQuotientFilter) filter).getCollisionNumber());
+        }
 
         if (logger.isDebugEnabled()) {
             int collisions = ((CountingQuotientFilter) filter).getCollisionNumber();
@@ -219,7 +227,9 @@ public class Pruner {
     }
 
     public void persist(byte[] hash) {
-        if (!ready || !withSecondStep()) return;
+        if (!ready || !withSecondStep()) {
+            return;
+        }
 
         logger.trace("persist [{}]", toHexString(hash));
 
@@ -263,7 +273,7 @@ public class Pruner {
             }
         }
 
-        if (logger.isTraceEnabled())
+        if (logger.isTraceEnabled()) {
             logger.trace("[{}] persisted in {}ms: {}/{} ({}%) nodes deleted, filter load: {}/{}: {}, distinct collisions: {}",
                     HashUtil.shortHash(hash), System.currentTimeMillis() - t, nodesDeleted, update.getDeletedKeys().size(),
                     nodesDeleted * 100 / update.getDeletedKeys().size(),
@@ -272,11 +282,13 @@ public class Pruner {
                     String.format("%.4f", (double) ((CountingQuotientFilter) distantFilter).getEntryNumber() /
                             ((CountingQuotientFilter) distantFilter).getMaxInsertions()),
                     ((CountingQuotientFilter) distantFilter).getCollisionNumber());
+        }
     }
 
     private int postpone(Chain chain) {
-        if (logger.isTraceEnabled())
+        if (logger.isTraceEnabled()) {
             logger.trace("<~ postponing " + chain + ": " + strSample(chain.getHashes()));
+        }
 
         int nodesPostponed = 0;
         for (byte[] hash : chain.getHashes()) {
@@ -297,8 +309,9 @@ public class Pruner {
     }
 
     private int persist(Chain chain) {
-        if (logger.isTraceEnabled())
+        if (logger.isTraceEnabled()) {
             logger.trace("<~ persisting " + chain + ": " + strSample(chain.getHashes()));
+        }
 
         int nodesDeleted = 0;
         for (byte[] hash : chain.getHashes()) {
@@ -339,8 +352,9 @@ public class Pruner {
         int nodesDeleted = 0;
 
         private void revert(Chain chain) {
-            if (logger.isTraceEnabled())
+            if (logger.isTraceEnabled()) {
                 logger.trace("<~ reverting " + chain + ": " + strSample(chain.getHashes()));
+            }
 
             for (byte[] hash : chain.getHashes()) {
                 JournalSource.Update update = journal.get(hash);

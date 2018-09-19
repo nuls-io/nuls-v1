@@ -27,8 +27,10 @@ package io.nuls.account.ledger.service;
 
 import io.nuls.account.ledger.model.MultipleAddressTransferModel;
 import io.nuls.account.ledger.model.TransactionInfo;
+import io.nuls.account.model.Account;
 import io.nuls.account.model.Balance;
 import io.nuls.account.ledger.model.CoinDataResult;
+import io.nuls.account.model.MultiSigAccount;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Coin;
@@ -36,6 +38,8 @@ import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.TransactionSignature;
 
 import java.io.IOException;
 import java.util.List;
@@ -318,4 +322,30 @@ public interface AccountLedgerService {
 
 
     CoinDataResult getMutilCoinData(byte[] address, Na amount, int size, Na price);
+
+    /**
+     * A transfers NULS to B   多签交易
+     *
+     * @param fromAddr 输入地址
+     * @param signAddr 签名地址
+     * @param outputs  输出地址
+     * @param password password of A
+     * @param remark   remarks of transaction
+     * @return Result
+     */
+    Result createP2shTransfer(String fromAddr, String signAddr, List<MultipleAddressTransferModel> outputs, String password, String remark);
+
+    /**
+     * A transfers NULS to B   多签交易
+     *
+     * @param signAddr 签名地址
+     * @param password password of A
+     * @param txdata   需要签名的数据
+     * @return Result
+     */
+    Result signMultiTransaction(String signAddr,String password,String txdata);
+
+    Result txMultiProcess(Transaction tx, TransactionSignature transactionSignature, Account account, String password);
+
+    Script getRedeemScript(MultiSigAccount multiSigAccount);
 }

@@ -336,6 +336,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
         }
     }
 
+    @Override
     public LinkedList<Map<String, String>> getLocalUnconfirmedCreateContractTransaction(String sender) {
         Map<String, Map<String, String>> unconfirmedOfAccountMap = LOCAL_UNCONFIRMED_CREATE_CONTRACT_TRANSACTION.get(sender);
         if (unconfirmedOfAccountMap == null) {
@@ -344,6 +345,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
         return new LinkedList<>(unconfirmedOfAccountMap.values());
     }
 
+    @Override
     public void removeLocalUnconfirmedCreateContractTransaction(String sender, String contractAddress, ContractResult contractResult) {
         lock.lock();
         try {
@@ -367,6 +369,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
         }
     }
 
+    @Override
     public void removeLocalUnconfirmedCreateContractTransaction(String sender, String contractAddress) {
         lock.lock();
         try {
@@ -818,6 +821,7 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
         }
     }
 
+    @Override
     public Result transferFee(String sender, Na value, Long gasLimit, Long price, String contractAddress,
                               String methodName, String methodDesc, String[][] args, String remark) {
         try {

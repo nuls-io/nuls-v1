@@ -132,20 +132,42 @@ public class ProgramResult {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ProgramResult that = (ProgramResult) o;
 
-        if (gasUsed != that.gasUsed) return false;
-        if (revert != that.revert) return false;
-        if (error != that.error) return false;
-        if (result != null ? !result.equals(that.result) : that.result != null) return false;
-        if (errorMessage != null ? !errorMessage.equals(that.errorMessage) : that.errorMessage != null) return false;
-        if (stackTrace != null ? !stackTrace.equals(that.stackTrace) : that.stackTrace != null) return false;
-        if (balance != null ? !balance.equals(that.balance) : that.balance != null) return false;
-        if (nonce != null ? !nonce.equals(that.nonce) : that.nonce != null) return false;
-        if (transfers != null ? !transfers.equals(that.transfers) : that.transfers != null) return false;
+        if (gasUsed != that.gasUsed) {
+            return false;
+        }
+        if (revert != that.revert) {
+            return false;
+        }
+        if (error != that.error) {
+            return false;
+        }
+        if (result != null ? !result.equals(that.result) : that.result != null) {
+            return false;
+        }
+        if (errorMessage != null ? !errorMessage.equals(that.errorMessage) : that.errorMessage != null) {
+            return false;
+        }
+        if (stackTrace != null ? !stackTrace.equals(that.stackTrace) : that.stackTrace != null) {
+            return false;
+        }
+        if (balance != null ? !balance.equals(that.balance) : that.balance != null) {
+            return false;
+        }
+        if (nonce != null ? !nonce.equals(that.nonce) : that.nonce != null) {
+            return false;
+        }
+        if (transfers != null ? !transfers.equals(that.transfers) : that.transfers != null) {
+            return false;
+        }
         return events != null ? events.equals(that.events) : that.events == null;
     }
 

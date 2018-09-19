@@ -104,12 +104,14 @@ public class BlockHeader {
         this.stateRoot = rlpHeader.get(3).getRLPData();
 
         this.txTrieRoot = rlpHeader.get(4).getRLPData();
-        if (this.txTrieRoot == null)
+        if (this.txTrieRoot == null) {
             this.txTrieRoot = EMPTY_TRIE_HASH;
+        }
 
         this.receiptTrieRoot = rlpHeader.get(5).getRLPData();
-        if (this.receiptTrieRoot == null)
+        if (this.receiptTrieRoot == null) {
             this.receiptTrieRoot = EMPTY_TRIE_HASH;
+        }
 
         this.logsBloom = rlpHeader.get(6).getRLPData();
         this.difficulty = rlpHeader.get(7).getRLPData();
@@ -312,10 +314,14 @@ public class BlockHeader {
 
         byte[] stateRoot = RLP.encodeElement(this.stateRoot);
 
-        if (txTrieRoot == null) this.txTrieRoot = EMPTY_TRIE_HASH;
+        if (txTrieRoot == null) {
+            this.txTrieRoot = EMPTY_TRIE_HASH;
+        }
         byte[] txTrieRoot = RLP.encodeElement(this.txTrieRoot);
 
-        if (receiptTrieRoot == null) this.receiptTrieRoot = EMPTY_TRIE_HASH;
+        if (receiptTrieRoot == null) {
+            this.receiptTrieRoot = EMPTY_TRIE_HASH;
+        }
         byte[] receiptTrieRoot = RLP.encodeElement(this.receiptTrieRoot);
 
         byte[] logsBloom = RLP.encodeElement(this.logsBloom);
@@ -371,6 +377,7 @@ public class BlockHeader {
         return !FastByteComparisons.equal(unclesHash, EMPTY_LIST_HASH);
     }
 
+    @Override
     public String toString() {
         return toStringWithSuffix("\n");
     }
@@ -407,8 +414,12 @@ public class BlockHeader {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         BlockHeader that = (BlockHeader) o;
         return FastByteComparisons.equal(getHash(), that.getHash());
     }

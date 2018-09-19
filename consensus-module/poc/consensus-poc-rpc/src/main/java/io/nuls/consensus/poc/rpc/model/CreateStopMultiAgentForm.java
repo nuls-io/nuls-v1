@@ -30,25 +30,16 @@ import io.swagger.annotations.ApiModelProperty;
 
 import java.util.List;
 
-public class StopAgentWithMSForm {
+public class CreateStopMultiAgentForm {
 
-    @ApiModelProperty(name = "agentAddress", value = "节点地址", required = true)
-    private String agentAddress;
+    @ApiModelProperty(name = "address", value = "节点地址", required = true)
+    private String address;
 
     @ApiModelProperty(name = "signAddress", value = "签名地址", required = true)
     private String signAddress;
 
     @ApiModelProperty(name = "password", value = "密码", required = true)
     private String password;
-
-    @ApiModelProperty(name = "pubkeys", value = "需要签名的公钥列表", required = true)
-    private List<String> pubkeys;
-
-    @ApiModelProperty(name = "m", value = "至少需要几个公钥验证通过", required = true)
-    private int m;
-
-    @ApiModelProperty(name = "txdata", value = "交易数据")
-    private String txdata;
 
     public String getPassword() {
         return password;
@@ -66,35 +57,11 @@ public class StopAgentWithMSForm {
         this.signAddress = signAddress;
     }
 
-    public String getAgentAddress() {
-        return agentAddress;
+    public String getAddress() {
+        return address;
     }
 
-    public void setAgentAddress(String agentAddress) {
-        this.agentAddress = StringUtils.formatStringPara(agentAddress);
-    }
-
-    public List<String> getPubkeys() {
-        return pubkeys;
-    }
-
-    public void setPubkeys(List<String> pubkeys) {
-        this.pubkeys = pubkeys;
-    }
-
-    public int getM() {
-        return m;
-    }
-
-    public void setM(int m) {
-        this.m = m;
-    }
-
-    public String getTxdata() {
-        return txdata;
-    }
-
-    public void setTxdata(String txdata) {
-        this.txdata = txdata;
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

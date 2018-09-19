@@ -11,12 +11,13 @@ import io.nuls.network.model.Node;
 import io.nuls.network.protocol.handler.BaseNetworkMeesageHandler;
 import io.nuls.protocol.message.base.BaseMessage;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class NetworkThreadPool {
 
-    private static final ExecutorService executor = Executors.newCachedThreadPool();
+    private static final ExecutorService executor = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+            60L, TimeUnit.SECONDS,
+            new SynchronousQueue<Runnable>());
 
     public static void asynNetworkMessage(BaseMessage message, Node node, HeartBeatThread heartBeatThread, NetworkMessageHandlerFactory messageHandlerFactory, ConnectionManager connectionManager) {
         executor.submit(new Runnable() {

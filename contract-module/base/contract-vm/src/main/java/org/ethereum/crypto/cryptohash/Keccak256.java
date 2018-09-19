@@ -66,6 +66,7 @@ public class Keccak256 extends KeccakCore {
     /**
      * @see org.ethereum.crypto.cryptohash.Digest
      */
+    @Override
     public Digest copy() {
         return copyState(new Keccak256());
     }
@@ -73,6 +74,7 @@ public class Keccak256 extends KeccakCore {
     /**
      * @see org.ethereum.crypto.cryptohash.Digest
      */
+    @Override
     public int engineGetDigestLength() {
         return 32;
     }

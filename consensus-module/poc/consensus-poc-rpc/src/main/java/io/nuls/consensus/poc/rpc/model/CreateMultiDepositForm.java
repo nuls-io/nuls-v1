@@ -10,7 +10,7 @@ import java.util.List;
  * @author tag
  */
 @ApiModel(value = "多签账户申请参与共识表单数据")
-public class MutilDepositForm {
+public class CreateMultiDepositForm {
 
 
     @ApiModelProperty(name = "address", value = "参与共识账户地址", required = true)
@@ -27,15 +27,6 @@ public class MutilDepositForm {
 
     @ApiModelProperty(name = "signAddress", value = "签名地址", required = true)
     private String signAddress;
-
-    @ApiModelProperty(name = "pubkeys", value = "需要签名的公钥列表", required = true)
-    private List<String> pubkeys;
-
-    @ApiModelProperty(name = "m", value = "至少需要几个公钥验证通过", required = true)
-    private int m;
-
-    @ApiModelProperty(name = "txdata", value = "交易数据")
-    private String txdata;
 
     public String getAddress() {
         return address;
@@ -77,27 +68,4 @@ public class MutilDepositForm {
         this.signAddress = signAddress;
     }
 
-    public List<String> getPubkeys() {
-        return pubkeys;
-    }
-
-    public void setPubkeys(List<String> pubkeys) {
-        this.pubkeys = pubkeys;
-    }
-
-    public int getM() {
-        return m;
-    }
-
-    public void setM(int m) {
-        this.m = m;
-    }
-
-    public String getTxdata() {
-        return txdata;
-    }
-
-    public void setTxdata(String txdata) {
-        this.txdata = txdata;
-    }
 }

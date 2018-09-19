@@ -12,8 +12,7 @@ import java.util.List;
  */
 @ApiModel(value = "创建多重签名账户表单")
 public class MultiAccountCreateForm {
-
-    @ApiModelProperty(name = "pubkeys", value = "需要签名在公钥列表", required = true)
+ @ApiModelProperty(name = "pubkeys", value = "需要签名在公钥列表", required = true)
     private List<String> pubkeys;
 
     @ApiModelProperty(name = "m", value = "至少需要几个公钥验证通过", required = true)

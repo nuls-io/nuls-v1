@@ -120,6 +120,7 @@ abstract class KeccakCore extends DigestEngine {
     /**
      * @see org.ethereum.crypto.cryptohash.DigestEngine
      */
+    @Override
     protected void engineReset() {
         doReset();
     }
@@ -127,10 +128,12 @@ abstract class KeccakCore extends DigestEngine {
     /**
      * @see org.ethereum.crypto.cryptohash.DigestEngine
      */
+    @Override
     protected void processBlock(byte[] data) {
         /* Input block */
-        for (int i = 0; i < data.length; i += 8)
+        for (int i = 0; i < data.length; i += 8) {
             A[i >>> 3] ^= decodeLELong(data, i);
+        }
 
         long t0, t1, t2, t3, t4;
         long tt0, tt1, tt2, tt3, tt4;
@@ -538,6 +541,7 @@ abstract class KeccakCore extends DigestEngine {
     /**
      * @see org.ethereum.crypto.cryptohash.DigestEngine
      */
+    @Override
     protected void doPadding(byte[] out, int off) {
         int ptr = flush();
         byte[] buf = getBlockBuffer();
@@ -545,8 +549,9 @@ abstract class KeccakCore extends DigestEngine {
             buf[ptr] = (byte) 0x81;
         } else {
             buf[ptr] = (byte) 0x01;
-            for (int i = ptr + 1; i < (buf.length - 1); i++)
+            for (int i = ptr + 1; i < (buf.length - 1); i++) {
                 buf[i] = 0;
+            }
             buf[buf.length - 1] = (byte) 0x80;
         }
         processBlock(buf);
@@ -557,14 +562,16 @@ abstract class KeccakCore extends DigestEngine {
         A[17] = ~A[17];
         A[20] = ~A[20];
         int dlen = engineGetDigestLength();
-        for (int i = 0; i < dlen; i += 8)
+        for (int i = 0; i < dlen; i += 8) {
             encodeLELong(A[i >>> 3], tmpOut, i);
+        }
         System.arraycopy(tmpOut, 0, out, off, dlen);
     }
 
     /**
      * @see org.ethereum.crypto.cryptohash.DigestEngine
      */
+    @Override
     protected void doInit() {
         A = new long[25];
         tmpOut = new byte[(engineGetDigestLength() + 7) & ~7];
@@ -574,13 +581,15 @@ abstract class KeccakCore extends DigestEngine {
     /**
      * @see org.ethereum.crypto.cryptohash.Digest
      */
+    @Override
     public int getBlockLength() {
         return 200 - 2 * engineGetDigestLength();
     }
 
     private final void doReset() {
-        for (int i = 0; i < 25; i++)
+        for (int i = 0; i < 25; i++) {
             A[i] = 0;
+        }
         A[1] = 0xFFFFFFFFFFFFFFFFL;
         A[2] = 0xFFFFFFFFFFFFFFFFL;
         A[8] = 0xFFFFFFFFFFFFFFFFL;
@@ -600,6 +609,7 @@ abstract class KeccakCore extends DigestEngine {
     /**
      * @see org.ethereum.crypto.cryptohash.Digest
      */
+    @Override
     public String toString() {
         return "Keccak-" + (engineGetDigestLength() << 3);
     }

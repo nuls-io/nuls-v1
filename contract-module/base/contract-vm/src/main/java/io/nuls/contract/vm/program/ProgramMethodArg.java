@@ -43,23 +43,37 @@ public class ProgramMethodArg {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ProgramMethodArg that = (ProgramMethodArg) o;
 
-        if (required != that.required) return false;
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
+        if (required != that.required) {
+            return false;
+        }
+        if (type != null ? !type.equals(that.type) : that.type != null) {
+            return false;
+        }
         return name != null ? name.equals(that.name) : that.name == null;
     }
 
     public boolean equalsNrc20(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ProgramMethodArg that = (ProgramMethodArg) o;
 
-        if (required != that.required) return false;
+        if (required != that.required) {
+            return false;
+        }
         return type != null ? type.equals(that.type) : that.type == null;
     }
 

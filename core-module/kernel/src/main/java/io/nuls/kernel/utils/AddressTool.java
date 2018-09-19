@@ -79,7 +79,7 @@ public class AddressTool {
         try {
             bytes = Base58.decode(address);
             if (bytes.length != Address.ADDRESS_LENGTH + 1) {
-                return false;
+                    return false;
             }
         } catch (NulsException e) {
             return false;
@@ -185,5 +185,44 @@ public class AddressTool {
         }
 
         return false;
+    }
+
+    public static boolean isPackingAddress(String address) {
+        if (StringUtils.isBlank(address)) {
+            return false;
+        }
+        byte[] bytes;
+        try {
+            bytes = Base58.decode(address);
+            if (bytes.length != Address.ADDRESS_LENGTH + 1) {
+                return false;
+            }
+        } catch (NulsException e) {
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+        short chainId;
+        byte type;
+        try {
+            chainId = byteBuffer.readShort();
+            type = byteBuffer.readByte();
+        } catch (NulsException e) {
+            Log.error(e);
+            return false;
+        }
+        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+            return false;
+        }
+        if (NulsContext.DEFAULT_ADDRESS_TYPE != type) {
+            return false;
+        }
+        try {
+            checkXOR(bytes);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 }

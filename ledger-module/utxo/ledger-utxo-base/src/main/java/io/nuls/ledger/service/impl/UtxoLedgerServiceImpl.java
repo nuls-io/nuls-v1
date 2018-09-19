@@ -357,16 +357,18 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                                 Script scriptPubkey = new Script(fromAddressBytes);
                                 for (Script scriptSig:transactionSignature.getScripts()) {
                                     signtureValidFlag = scriptSig.correctlyNulsSpends(transaction,0,scriptPubkey);
-                                    if(signtureValidFlag)
+                                    if(signtureValidFlag) {
                                         break;
+                                    }
                                 }
                             }
                             else {
                                 if(transactionSignature.getP2PHKSignatures() != null && transactionSignature.getP2PHKSignatures().size() != 0){
                                     for (P2PHKSignature signature:transactionSignature.getP2PHKSignatures()) {
                                         signtureValidFlag = AddressTool.checkPublicKeyHash(realAddressBytes,signature.getSignerHash160());
-                                        if(signtureValidFlag)
+                                        if(signtureValidFlag) {
                                             break;
+                                        }
                                     }
                                 }
                             }

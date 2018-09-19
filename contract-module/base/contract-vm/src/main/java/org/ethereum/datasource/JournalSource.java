@@ -105,10 +105,12 @@ public class JournalSource<V> extends AbstractChainedSource<byte[], V, byte[], V
     public void setJournalStore(Source<byte[], byte[]> journalSource) {
         journal = new SourceCodec.BytesKey<>(journalSource,
                 new Serializer<Update, byte[]>() {
+                    @Override
                     public byte[] serialize(Update object) {
                         return object.serialize();
                     }
 
+                    @Override
                     public Update deserialize(byte[] stream) {
                         return stream == null ? null : new Update(stream);
                     }

@@ -45,12 +45,14 @@ public class Segment {
     }
 
     public boolean isComplete() {
-        if (main == Chain.NULL)
+        if (main == Chain.NULL) {
             return false;
+        }
 
         for (Chain fork : forks) {
-            if (!main.isHigher(fork))
+            if (!main.isHigher(fork)) {
                 return false;
+            }
         }
         return true;
     }
@@ -77,8 +79,9 @@ public class Segment {
 
     private void connectMain(ChainItem item) {
         if (main == Chain.NULL) {
-            if (root.isParentOf(item))
+            if (root.isParentOf(item)) {
                 main = new Chain(item); // start new
+            }
         } else {
             main.connect(item);
         }
@@ -87,8 +90,9 @@ public class Segment {
     private void connectFork(ChainItem item) {
 
         for (Chain fork : forks) {
-            if (fork.contains(item))
+            if (fork.contains(item)) {
                 return;
+            }
         }
 
         if (root.isParentOf(item)) {

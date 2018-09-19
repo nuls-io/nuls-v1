@@ -135,19 +135,39 @@ public class ProgramCreate {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ProgramCreate that = (ProgramCreate) o;
 
-        if (number != that.number) return false;
-        if (gasLimit != that.gasLimit) return false;
-        if (price != that.price) return false;
-        if (estimateGas != that.estimateGas) return false;
-        if (!Arrays.equals(sender, that.sender)) return false;
-        if (value != null ? !value.equals(that.value) : that.value != null) return false;
-        if (!Arrays.equals(contractAddress, that.contractAddress)) return false;
-        if (!Arrays.equals(contractCode, that.contractCode)) return false;
+        if (number != that.number) {
+            return false;
+        }
+        if (gasLimit != that.gasLimit) {
+            return false;
+        }
+        if (price != that.price) {
+            return false;
+        }
+        if (estimateGas != that.estimateGas) {
+            return false;
+        }
+        if (!Arrays.equals(sender, that.sender)) {
+            return false;
+        }
+        if (value != null ? !value.equals(that.value) : that.value != null) {
+            return false;
+        }
+        if (!Arrays.equals(contractAddress, that.contractAddress)) {
+            return false;
+        }
+        if (!Arrays.equals(contractCode, that.contractCode)) {
+            return false;
+        }
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         return Arrays.equals(args, that.args);
     }
