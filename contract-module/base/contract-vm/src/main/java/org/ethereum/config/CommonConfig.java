@@ -156,7 +156,7 @@ public class CommonConfig {
 
     public DbSource<byte[]> blockchainDB() {
         DbSettings settings = DbSettings.newInstance()
-                .withMaxOpenFiles(systemProperties().getDatabaseMaxOpenFiles())
+                .withMaxOpenFiles(systemProperties().getConfig().getInt("database.maxOpenFiles"))
                 .withMaxThreads(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
 
         return keyValueDataSource("blockchain", settings);
