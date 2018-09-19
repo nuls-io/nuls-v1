@@ -66,6 +66,12 @@ public class PruneManager {
             this.pruner = new Pruner(journalSource.getJournal(), pruneStorage);
     }
 
+    public void setStateSource(StateSource stateSource) {
+        journalSource = stateSource.getJournalSource();
+        if (journalSource != null)
+            pruner = new Pruner(journalSource.getJournal(), stateSource.getNoJournalSource());
+    }
+
     public void blockCommitted(BlockHeader block) {
         if (pruneBlocksCnt < 0) return; // pruning disabled
 
