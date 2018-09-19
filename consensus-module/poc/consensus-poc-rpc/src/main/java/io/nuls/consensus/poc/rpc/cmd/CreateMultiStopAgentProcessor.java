@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * @author: tag
  */
-public class StopMultiAgentByAddrProcessor implements CommandProcessor {
+public class CreateMultiStopAgentProcessor implements CommandProcessor {
 
     private RestFulUtils restFul = RestFulUtils.getInstance();
 
