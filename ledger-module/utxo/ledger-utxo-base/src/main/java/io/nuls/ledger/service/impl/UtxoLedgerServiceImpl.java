@@ -281,19 +281,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             List<Coin> froms = coinData.getFrom();
             int fromSize = froms.size();
             TransactionSignature transactionSignature = new TransactionSignature();
-            //TODO: 交易验证
-//            P2PKHScriptSig p2PKHScriptSig = null;
-//            // 公钥hash160
-//            byte[] user = null;
-//            // 获取交易的公钥及签名脚本
-//            if (transaction.needVerifySignature() && fromSize > 0) {
-//                try {
-//                    p2PKHScriptSig = P2PKHScriptSig.createFromBytes(transaction.getTransactionSignature());
-//                    user = p2PKHScriptSig.getSignerHash160();
-//                } catch (NulsException e) {
-//                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_P2PKH_SCRIPT_ERROR);
-//                }
-//
             //交易签名反序列化
             if (transaction.needVerifySignature() && fromSize > 0) {
                 try {
