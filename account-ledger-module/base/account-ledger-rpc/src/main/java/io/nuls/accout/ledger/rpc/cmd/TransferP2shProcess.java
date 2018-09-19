@@ -1,8 +1,8 @@
 package io.nuls.accout.ledger.rpc.cmd;
 
 import io.nuls.accout.ledger.rpc.dto.MultipleTxToDto;
+import io.nuls.accout.ledger.rpc.form.CreateP2shTransactionForm;
 import io.nuls.accout.ledger.rpc.form.MultiSignForm;
-import io.nuls.accout.ledger.rpc.form.TransferForm;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.Na;
@@ -70,7 +70,7 @@ public class TransferP2shProcess implements CommandProcessor {
                 return false;
             }
         }else{
-            if(!validToData(args[3])){
+            if(!CreateP2shTransactionForm.validToData(args[3])){
                 return  false;
             }
             if(!StringUtils.validPubkeys(args[4],args[5])){
@@ -88,46 +88,22 @@ public class TransferP2shProcess implements CommandProcessor {
     }
 
     private MultiSignForm getMultiSignForm(String[] args) {
-        MultiSignForm form = null;
+        MultiSignForm form = new MultiSignForm();
         Long amount = null;
         try {
-            Na na = Na.parseNuls(args[6]);
-            if (na != null) {
-                amount = na.getValue();
-                if(amount <= 0)
-                    return null;
-                form = new MultiSignForm();
-            } else {
-                return null;
-            }
             form.setAddress(args[1]);
             form.setSignAddress(args[2]);
             if(args.length == 4){
                 form.setTxdata(args[3]);
             }else{
-                List<MultipleTxToDto> toDatas = new ArrayList<>();
-                String[] dataList = args[3].split(";");
-                Long toAmount = null;
-                for (String data:dataList) {
-                    //将每个to数据拆分为数据
-                    MultipleTxToDto toData = new MultipleTxToDto();
-                    String[] separateData = data.split(",");
-                    Na toNa = Na.parseNuls(separateData[1]);
-                    if (toNa != null) {
-                        toAmount = toNa.getValue();
-                        if(toAmount <= 0)
-                            return null;
-                        toData.setAmount(toAmount);
-                    } else {
-                        return null;
-                    }
-                    toData.setToAddress(separateData[0]);
-                    toDatas.add(toData);
-                }
-                form.setOutputs(toDatas);
+                form.setOutputs(CreateP2shTransactionForm.getTodata(args[3]));
                 String[] pubkeys = args[4].split(",");
                 form.setPubkeys(Arrays.asList(pubkeys));
                 form.setM(Integer.parseInt(args[5]));
+                Na na = Na.parseNuls(args[6]);
+                amount = na.getValue();
+                if(amount <= 0)
+                    return null;
                 form.setAmount(amount);
             }
         } catch (Exception e) {
@@ -167,27 +143,5 @@ public class TransferP2shProcess implements CommandProcessor {
             return CommandResult.getFailed(result);
         }
         return CommandResult.getResult(CommandResult.dataTransformValue(result));
-    }
-
-    public boolean validToData(String todata){
-        if(StringUtils.isBlank(todata)){
-            return  false;
-        }
-        //将多个to拆分
-        String[] dataList = todata.split(";");
-        if(dataList == null || dataList.length == 0){
-            return false;
-        }
-        for (String data:dataList) {
-            //将每个to数据拆分为数据
-            String[] separateData = data.split(",");
-            if(separateData == null || separateData.length != 2){
-                return false;
-            }
-            if (!AddressTool.validAddress(separateData[0])  || !StringUtils.isNuls(separateData[1])) {
-                return false;
-            }
-        }
-        return true;
     }
 }

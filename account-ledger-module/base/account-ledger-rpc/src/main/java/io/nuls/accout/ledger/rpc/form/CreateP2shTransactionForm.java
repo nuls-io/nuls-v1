@@ -1,16 +1,20 @@
 package io.nuls.accout.ledger.rpc.form;
 
 import io.nuls.accout.ledger.rpc.dto.MultipleTxToDto;
+import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.model.Na;
+import io.nuls.kernel.utils.AddressTool;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author tag
  */
 @ApiModel(value = "多签交易签名表单form")
-public class P2shTransactionSignForm {
+public class CreateP2shTransactionForm {
     @ApiModelProperty(name = "address", value = "账户地址", required = true)
     private String address;
 
@@ -64,5 +68,46 @@ public class P2shTransactionSignForm {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public static boolean validToData(String todata){
+        if(StringUtils.isBlank(todata)){
+            return  false;
+        }
+        //将多个to拆分
+        String[] dataList = todata.split(";");
+        if(dataList == null || dataList.length == 0){
+            return false;
+        }
+        for (String data:dataList) {
+            //将每个to数据拆分为数据
+            String[] separateData = data.split(",");
+            if(separateData == null || separateData.length != 2){
+                return false;
+            }
+            if (!AddressTool.validAddress(separateData[0])  || !StringUtils.isNuls(separateData[1])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static List<MultipleTxToDto> getTodata(String todata){
+        List<MultipleTxToDto> toDatas = new ArrayList<>();
+        String[] dataList = todata.split(";");
+        long toAmount;
+        for (String data:dataList) {
+            //将每个to数据拆分为数据
+            MultipleTxToDto toData = new MultipleTxToDto();
+            String[] separateData = data.split(",");
+            Na toNa = Na.parseNuls(separateData[1]);
+            toAmount = toNa.getValue();
+            if(toAmount <= 0)
+                return null;
+            toData.setAmount(toAmount);
+            toData.setToAddress(separateData[0]);
+            toDatas.add(toData);
+        }
+        return  toDatas;
     }
 }

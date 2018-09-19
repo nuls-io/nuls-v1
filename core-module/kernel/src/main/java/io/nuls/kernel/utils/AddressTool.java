@@ -79,7 +79,7 @@ public class AddressTool {
         try {
             bytes = Base58.decode(address);
             if (bytes.length != Address.ADDRESS_LENGTH + 1) {
-                return false;
+                    return false;
             }
         } catch (NulsException e) {
             return false;

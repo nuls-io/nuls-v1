@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @author tag
  */
 @ApiModel(value = "多签账户转账表单form")
-public class MultiTransactionSignForm {
+public class SignMultiTransactionForm {
     @ApiModelProperty(name = "signAddress", value = "签名地址", required = true)
     private String signAddress;
 

@@ -316,4 +316,17 @@ public class StringUtils {
         }
         return true;
     }
+
+    public static boolean validSign(String args[]){
+        if(args.length != 3){
+            return false;
+        }
+        if (StringUtils.isBlank(args[1])) {
+            return false;
+        }
+        if(args[2] == null || args[2].length() == 0){
+            return false;
+        }
+        return true;
+    }
 }

@@ -1199,6 +1199,10 @@ public class AccountResource {
         if (form.getM() == 0) {
             form.setM(form.getPubkeys().size());
         }
+        Set<String> pubkeySet = new HashSet<>(form.getPubkeys());
+        if(pubkeySet.size() < form.getPubkeys().size()){
+            return Result.getFailed(AccountErrorCode.PUBKEY_REPEAT).toRpcClientResult();
+        }
         Result result = accountService.createMultiAccount(form.getPubkeys(), form.getM());
         if (result.isFailed()) {
             return result.toRpcClientResult();
@@ -1253,7 +1257,7 @@ public class AccountResource {
 
 
     @POST
-    @Path("multiAccount/alias")
+    @Path("multiAccount/mutilAlias")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("[别名] 多签账户设置别名")
     @ApiResponses(value = {
@@ -1292,9 +1296,9 @@ public class AccountResource {
     }
 
     @POST
-    @Path("multiAccount/signAliasTransacton")
+    @Path("multiAccount/signMultiAlias")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
+    @ApiOperation(value = "多签账户设置别名交易签名", notes = "result.data: resultJson 返回转账结果")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
     })
     public RpcClientResult signAliasTransacton(@ApiParam(name = "form", value = "转账", required = true) MultiTransactionSignForm form) {
