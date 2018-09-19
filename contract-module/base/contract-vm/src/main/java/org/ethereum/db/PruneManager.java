@@ -69,8 +69,9 @@ public class PruneManager {
 
     public void setStateSource(StateSource stateSource) {
         journalSource = stateSource.getJournalSource();
-        if (journalSource != null)
+        if (journalSource != null) {
             pruner = new Pruner(journalSource.getJournal(), stateSource.getNoJournalSource());
+        }
     }
 
     public void blockCommitted(BlockHeader block) {

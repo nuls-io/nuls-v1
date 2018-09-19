@@ -30,7 +30,10 @@ import org.spongycastle.util.encoders.Hex;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.apache.commons.lang3.concurrent.ConcurrentUtils.constantFuture;
 import static org.ethereum.crypto.HashUtil.EMPTY_TRIE_HASH;
@@ -50,10 +53,7 @@ public class TrieImpl implements Trie<byte[]> {
 
     public static ExecutorService getExecutor() {
         if (executor == null) {
-            executor =
-            new ThreadPoolExecutor(4, 4,
-                    0L, TimeUnit.MILLISECONDS,
-                    new LinkedBlockingQueue<Runnable>(),
+            executor = Executors.newFixedThreadPool(4,
                     new ThreadFactoryBuilder().setNameFormat("trie-calc-thread-%d").build());
         }
         return executor;

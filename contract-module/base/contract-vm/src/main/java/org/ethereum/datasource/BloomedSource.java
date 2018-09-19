@@ -101,22 +101,29 @@ public class BloomedSource extends AbstractChainedSource<byte[], byte[], byte[],
 
     @Override
     public byte[] get(byte[] key) {
-        if (filter == null) return getSource().get(key);
+        if (filter == null) {
+            return getSource().get(key);
+        }
 
         if (!filter.maybeContains(key)) {
             hits++;
             return null;
         } else {
             byte[] ret = getSource().get(key);
-            if (ret == null) falseMisses++;
-            else misses++;
+            if (ret == null) {
+                falseMisses++;
+            } else {
+                misses++;
+            }
             return ret;
         }
     }
 
     @Override
     public void delete(byte[] key) {
-        if (filter != null) filter.remove(key);
+        if (filter != null) {
+            filter.remove(key);
+        }
         getSource().delete(key);
     }
 

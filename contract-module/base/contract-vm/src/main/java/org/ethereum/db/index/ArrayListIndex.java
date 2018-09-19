@@ -84,6 +84,7 @@ public class ArrayListIndex implements Index {
         return new ArrayList<>(index).iterator();
     }
 
+    @Override
     public synchronized void removeAll(Collection<Long> indexes) {
         index.removeAll(indexes);
     }
@@ -91,7 +92,9 @@ public class ArrayListIndex implements Index {
     @Override
     public synchronized Long peekLast() {
 
-        if (index.isEmpty()) return null;
+        if (index.isEmpty()) {
+            return null;
+        }
         return index.get(index.size() - 1);
     }
 
