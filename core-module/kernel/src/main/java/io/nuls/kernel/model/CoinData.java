@@ -162,14 +162,12 @@ public class CoinData extends BaseNulsData {
     @JsonIgnore
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
-        if (from != null && from.size() != 0) {
-            //todo
-        }
         if (to != null && to.size() != 0) {
             for (int i = 0; i < to.size(); i++) {
                 byte[] owner = to.get(i).getAddress();
                 boolean hasExist = false;
                 for (byte[] address : addressSet) {
+                    //todo 20180919 这里处理脚本的情况
                     if (Arrays.equals(owner, address)) {
                         hasExist = true;
                         break;

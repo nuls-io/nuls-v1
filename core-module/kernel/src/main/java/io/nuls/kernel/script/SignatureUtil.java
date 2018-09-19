@@ -35,7 +35,8 @@ public class SignatureUtil {
             }
             TransactionSignature transactionSignature = new TransactionSignature();
             transactionSignature.parse(tx.getTransactionSignature(), 0);
-            if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0) && (transactionSignature.getScripts() == null || transactionSignature.getScripts().size() == 0)) {
+            if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)
+                    && (transactionSignature.getScripts() == null || transactionSignature.getScripts().size() == 0)) {
                 throw new NulsException(KernelErrorCode.SIGNATURE_ERROR);
             }
             if (transactionSignature.getP2PHKSignatures() != null && transactionSignature.getP2PHKSignatures().size() > 0) {
@@ -207,8 +208,6 @@ public class SignatureUtil {
 
     /**
      * 生成单个鎖定脚本
-     *
-     * @param address
      */
     public static Script createOutputScript(byte[] address) {
         Script script = null;
@@ -318,8 +317,6 @@ public class SignatureUtil {
 
     /**
      * 获取脚本中的公钥
-     *
-     * @param chunks
      */
     public static String getScriptAddress(List<ScriptChunk> chunks) {
         if (chunks.get(0).opcode == ScriptOpCodes.OP_0) {
