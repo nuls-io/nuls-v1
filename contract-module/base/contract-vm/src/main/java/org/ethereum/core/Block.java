@@ -81,6 +81,7 @@ public class Block {
 
         // Parse Transactions
         RLPList txTransactions = (RLPList) block.get(1);
+        //this.parseTxs(this.header.getTxTrieRoot(), txTransactions, false);
 
         // Parse Uncles
         RLPList uncleBlocks = (RLPList) block.get(2);
@@ -259,6 +260,10 @@ public class Block {
         uncleList.add(uncle);
         this.getHeader().setUnclesHash(sha3(getUnclesEncoded()));
         rlpEncoded = null;
+    }
+
+    public byte[] getEncoded() {
+        return rlpEncoded;
     }
 
     public byte[] getEncodedWithoutNonce() {
