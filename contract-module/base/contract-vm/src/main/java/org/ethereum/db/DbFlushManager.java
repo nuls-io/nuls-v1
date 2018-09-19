@@ -54,6 +54,14 @@ public class DbFlushManager {
             executorQueue, new ThreadFactoryBuilder().setNameFormat("DbFlushManagerThread-%d").build());
     Future<Boolean> lastFlush = Futures.immediateFuture(false);
 
+    public DbFlushManager(int writeCacheSize, int cacheFlushBlocks, boolean cacheFlushShortSyncFlush, Set<DbSource> dbSources, AbstractCachedSource<byte[], byte[]> stateDbCache) {
+        this.dbSources = dbSources;
+        sizeThreshold = writeCacheSize * 1024 * 1024;
+        commitsCountThreshold = cacheFlushBlocks;
+        flushAfterSyncDone = cacheFlushShortSyncFlush;
+        this.stateDbCache = stateDbCache;
+    }
+
     public void setSizeThreshold(long sizeThreshold) {
         this.sizeThreshold = sizeThreshold;
     }

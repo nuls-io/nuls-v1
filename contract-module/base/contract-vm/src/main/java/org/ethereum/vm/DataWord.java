@@ -438,7 +438,7 @@ public final class DataWord implements Comparable<DataWord> {
     @JsonValue
     @Override
     public String toString() {
-        return sData != null ? sData : Hex.toHexString(data);
+        return sData != null ? sData : toHexString(data);
     }
 
     public String toPrefixString() {
