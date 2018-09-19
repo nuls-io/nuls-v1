@@ -19,6 +19,7 @@ package org.ethereum.db;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.ethereum.config.SystemProperties;
 import org.ethereum.datasource.AbstractCachedSource;
 import org.ethereum.datasource.AsyncFlushable;
 import org.ethereum.datasource.DbSource;
@@ -47,6 +48,8 @@ public class DbFlushManager {
     boolean syncDone = false;
     boolean flushAfterSyncDone;
 
+    SystemProperties config;
+
     int commitCount = 0;
 
     private final BlockingQueue<Runnable> executorQueue = new ArrayBlockingQueue<>(1);
@@ -54,11 +57,12 @@ public class DbFlushManager {
             executorQueue, new ThreadFactoryBuilder().setNameFormat("DbFlushManagerThread-%d").build());
     Future<Boolean> lastFlush = Futures.immediateFuture(false);
 
-    public DbFlushManager(int writeCacheSize, int cacheFlushBlocks, boolean cacheFlushShortSyncFlush, Set<DbSource> dbSources, AbstractCachedSource<byte[], byte[]> stateDbCache) {
+    public DbFlushManager(SystemProperties config, Set<DbSource> dbSources, AbstractCachedSource<byte[], byte[]> stateDbCache) {
+        this.config = config;
         this.dbSources = dbSources;
-        sizeThreshold = writeCacheSize * 1024 * 1024;
-        commitsCountThreshold = cacheFlushBlocks;
-        flushAfterSyncDone = cacheFlushShortSyncFlush;
+        sizeThreshold = config.getConfig().getInt("cache.flush.writeCacheSize") * 1024 * 1024;
+        commitsCountThreshold = config.getConfig().getInt("cache.flush.blocks");
+        flushAfterSyncDone = config.getConfig().getBoolean("cache.flush.shortSyncFlush");
         this.stateDbCache = stateDbCache;
     }
 
