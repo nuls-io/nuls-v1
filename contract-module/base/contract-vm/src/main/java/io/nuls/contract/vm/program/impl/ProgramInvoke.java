@@ -60,6 +60,8 @@ public class ProgramInvoke {
      */
     private boolean estimateGas;
 
+    private boolean create;
+
     public byte[] getContractAddress() {
         return contractAddress;
     }
@@ -146,6 +148,14 @@ public class ProgramInvoke {
 
     public void setEstimateGas(boolean estimateGas) {
         this.estimateGas = estimateGas;
+    }
+
+    public boolean isCreate() {
+        return create;
+    }
+
+    public void setCreate(boolean create) {
+        this.create = create;
     }
 
 }
