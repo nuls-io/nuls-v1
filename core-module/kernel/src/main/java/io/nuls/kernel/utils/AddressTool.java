@@ -79,7 +79,7 @@ public class AddressTool {
         try {
             bytes = Base58.decode(address);
             if (bytes.length != Address.ADDRESS_LENGTH + 1) {
-                    return false;
+                return false;
             }
         } catch (NulsException e) {
             return false;
@@ -108,6 +108,29 @@ public class AddressTool {
         try {
             checkXOR(bytes);
         } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean validNormalAddress(byte[] bytes) {
+        if (null == bytes || bytes.length != Address.ADDRESS_LENGTH) {
+            return false;
+        }
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+        short chainId;
+        byte type;
+        try {
+            chainId = byteBuffer.readShort();
+            type = byteBuffer.readByte();
+        } catch (NulsException e) {
+            Log.error(e);
+            return false;
+        }
+        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+            return false;
+        }
+        if (NulsContext.DEFAULT_ADDRESS_TYPE != type) {
             return false;
         }
         return true;
