@@ -446,7 +446,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     @Override
     public List<ProgramMethod> jarMethod(byte[] jarData) {
-        checkThread();
         this.revert = true;
         if (jarData == null || jarData.length < 1) {
             return new ArrayList<>();
