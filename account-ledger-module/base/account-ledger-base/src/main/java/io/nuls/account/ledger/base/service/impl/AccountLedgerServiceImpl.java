@@ -1819,7 +1819,10 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result txMultiProcess(Transaction tx,TransactionSignature transactionSignature, Account account,String password){
         try{
-            List<P2PHKSignature> p2PHKSignatures = transactionSignature.getP2PHKSignatures();
+            List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+            if(transactionSignature.getP2PHKSignatures() != null && transactionSignature.getP2PHKSignatures().size()> 0){
+                p2PHKSignatures = transactionSignature.getP2PHKSignatures();
+            }
             List<Script> scripts = transactionSignature.getScripts();
             //使用签名账户对交易进行签名
             P2PHKSignature p2PHKSignature = new P2PHKSignature();
