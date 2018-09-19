@@ -27,9 +27,7 @@ package io.nuls.account.rpc.resource;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.model.CoinDataResult;
-import io.nuls.account.ledger.model.MultipleAddressTransferModel;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.*;
 import io.nuls.account.rpc.model.AccountDto;
@@ -46,14 +44,12 @@ import io.nuls.account.util.AccountTool;
 import io.nuls.contract.dto.ContractTokenInfo;
 import io.nuls.contract.service.ContractService;
 import io.nuls.core.tools.crypto.AESEncrypt;
-import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
@@ -67,7 +63,6 @@ import io.nuls.kernel.script.ScriptBuilder;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
-import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.swagger.annotations.*;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -1210,7 +1205,7 @@ public class AccountResource {
         MultiSigAccountDto account = new MultiSigAccountDto((MultiSigAccount) result.getData());
         return Result.getSuccess().setData(account).toRpcClientResult();
     }
-    
+
 
     @POST
     @Path("multiAccount/mutilAlias")
@@ -1332,13 +1327,13 @@ public class AccountResource {
     }
 
     @GET
-    @Path("/multiAlias/fee")
+    @Path("multiAccount/alias/fee")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("[别名手续费] 获取设置别名手续 ")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
-    public RpcClientResult multiAliasFee(@BeanParam() MultiAccountCreateForm form) {
+    public RpcClientResult multiAliasFee(@BeanParam() MultiAliasFeeForm form) {
         if (!AddressTool.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
