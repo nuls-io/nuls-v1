@@ -1770,7 +1770,7 @@ public class PocConsensusResource {
 
 
     @POST
-    @Path("/multiAccount/createAgent")
+    @Path("/multiAccount/createMultiAgent")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Create an agent for consensus! 创建共识(代理)节点 [3.6.3]", notes = "返回创建的节点成功的交易hash")
     @ApiResponses(value = {
@@ -1791,7 +1791,7 @@ public class PocConsensusResource {
         if (!AddressTool.validAddress(form.getPackingAddress()) || !AddressTool.validAddress(form.getAgentAddress())|| !AddressTool.validAddress(form.getSignAddress())) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
-        Account account = accountService.getAccount(form.getAgentAddress()).getData();
+        Account account = accountService.getAccount(form.getSignAddress()).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
@@ -2035,7 +2035,7 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
     public RpcClientResult createWithdrawMutil(@ApiParam(name = "form", value = "多签退出共识表单数据", required = true)
-                                                 WithdrawMutilForm form) throws Exception {
+                                                           MultiWithdrawForm form) throws Exception {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getTxHash());
         AssertUtil.canNotEmpty(form.getAddress());
@@ -2122,7 +2122,7 @@ public class PocConsensusResource {
     @POST
     @Path("multiAccount/signMultiAgent")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
+    @ApiOperation(value = "多签账户创建节点签名", notes = "result.data: resultJson 返回转账结果")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
     })
     public RpcClientResult signCreateMutilAgent(@ApiParam(name = "form", value = "转账", required = true) MultiTransactionSignForm form) {
@@ -2150,7 +2150,7 @@ public class PocConsensusResource {
     @POST
     @Path("multiAccount/signMultiDeposit")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
+    @ApiOperation(value = "多签账户加入共识签名", notes = "result.data: resultJson 返回转账结果")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
     })
     public RpcClientResult signDepositTransaction(@ApiParam(name = "form", value = "转账", required = true) MultiTransactionSignForm form) {
@@ -2178,7 +2178,7 @@ public class PocConsensusResource {
     @POST
     @Path("multiAccount/signMultiStopAgent")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
+    @ApiOperation(value = "多签账户注销共识节点签名", notes = "result.data: resultJson 返回转账结果")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
     })
     public RpcClientResult signStopAgentTransaction(@ApiParam(name = "form", value = "转账", required = true) MultiTransactionSignForm form) {
@@ -2206,7 +2206,7 @@ public class PocConsensusResource {
     @POST
     @Path("multiAccount/signMultiWithdraw")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
+    @ApiOperation(value = "多签账户退出共识签名", notes = "result.data: resultJson 返回转账结果")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
     })
     public RpcClientResult signWithdrawTransaction(@ApiParam(name = "form", value = "转账", required = true) MultiTransactionSignForm form) {

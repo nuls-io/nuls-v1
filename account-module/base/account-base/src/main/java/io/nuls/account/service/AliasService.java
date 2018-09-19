@@ -357,7 +357,10 @@ public class AliasService {
             byte[] addressBytes = AddressTool.getAddress(addr);
             //如果txdata为空则表示当前请求为多签发起者调用，需要创建交易
             if(txdata == null || txdata.trim().length() == 0){
-                if(isMutilAliasUsable(addressBytes,aliasName)){
+                if (!StringUtils.validAlias(aliasName)) {
+                    return Result.getFailed(AccountErrorCode.ALIAS_FORMAT_WRONG);
+                }
+                if (!isAliasUsable(aliasName)) {
                     return Result.getFailed(AccountErrorCode.ALIAS_EXIST);
                 }
                 //创建一笔设置别名的交易
@@ -436,10 +439,9 @@ public class AliasService {
         }
         try {
             byte[] addressBytes = AddressTool.getAddress(addr);
-            //如果txdata为空则表示当前请求为多签发起者调用，需要创建交易
-            if(isMutilAliasUsable(addressBytes,aliasName)){
+            /*if(!isMutilAliasUsable(addressBytes,aliasName)){
                 return Result.getFailed(AccountErrorCode.ALIAS_EXIST);
-            }
+            }*/
             Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(addr);
             MultiSigAccount multiSigAccount = sigAccountResult.getData();
             Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);

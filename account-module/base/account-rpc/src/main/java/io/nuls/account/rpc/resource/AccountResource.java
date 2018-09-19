@@ -1276,6 +1276,12 @@ public class AccountResource {
         if (!StringUtils.validAlias(form.getAlias())) {
             return Result.getFailed(AccountErrorCode.ALIAS_FORMAT_WRONG).toRpcClientResult();
         }
+        if (!StringUtils.validAlias(form.getAlias())) {
+            return Result.getFailed(AccountErrorCode.ALIAS_FORMAT_WRONG).toRpcClientResult();
+        }
+        if (!aliasService.isAliasUsable(form.getAlias())) {
+            return Result.getFailed(AccountErrorCode.ALIAS_EXIST).toRpcClientResult();
+        }
         Result result = aliasService.setMutilAlias(form.getAddress(),form.getSignAddress(),form.getAlias(),form.getPassword());
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
