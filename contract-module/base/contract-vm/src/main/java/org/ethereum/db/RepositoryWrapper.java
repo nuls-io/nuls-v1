@@ -19,11 +19,8 @@ package org.ethereum.db;
 
 import org.ethereum.core.AccountState;
 import org.ethereum.core.Block;
-import org.ethereum.core.BlockchainImpl;
 import org.ethereum.core.Repository;
 import org.ethereum.vm.DataWord;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
@@ -37,168 +34,171 @@ import java.util.Set;
  * <p>
  * Created by Anton Nashatyrev on 22.12.2016.
  */
-@Component
 public class RepositoryWrapper implements Repository {
 
-    @Autowired
-    BlockchainImpl blockchain;
+    private Repository repository;
 
-    public RepositoryWrapper() {
+    public RepositoryWrapper(Repository repository) {
+        this.repository = repository;
+    }
+
+    public Repository getRepository() {
+        return repository;
     }
 
     @Override
-    public AccountState createAccount(byte[] addr) {
-        return blockchain.getRepository().createAccount(addr);
+    public AccountState createAccount(byte[] addr, byte[] creater) {
+        return getRepository().createAccount(addr, creater);
     }
 
     @Override
     public boolean isExist(byte[] addr) {
-        return blockchain.getRepository().isExist(addr);
+        return getRepository().isExist(addr);
     }
 
     @Override
     public AccountState getAccountState(byte[] addr) {
-        return blockchain.getRepository().getAccountState(addr);
+        return getRepository().getAccountState(addr);
     }
 
     @Override
     public void delete(byte[] addr) {
-        blockchain.getRepository().delete(addr);
+        getRepository().delete(addr);
     }
 
     @Override
     public BigInteger increaseNonce(byte[] addr) {
-        return blockchain.getRepository().increaseNonce(addr);
+        return getRepository().increaseNonce(addr);
     }
 
     @Override
     public BigInteger setNonce(byte[] addr, BigInteger nonce) {
-        return blockchain.getRepository().setNonce(addr, nonce);
+        return getRepository().setNonce(addr, nonce);
     }
 
     @Override
     public BigInteger getNonce(byte[] addr) {
-        return blockchain.getRepository().getNonce(addr);
+        return getRepository().getNonce(addr);
     }
 
     @Override
     public ContractDetails getContractDetails(byte[] addr) {
-        return blockchain.getRepository().getContractDetails(addr);
+        return getRepository().getContractDetails(addr);
     }
 
     @Override
     public boolean hasContractDetails(byte[] addr) {
-        return blockchain.getRepository().hasContractDetails(addr);
+        return getRepository().hasContractDetails(addr);
     }
 
     @Override
     public void saveCode(byte[] addr, byte[] code) {
-        blockchain.getRepository().saveCode(addr, code);
+        getRepository().saveCode(addr, code);
     }
 
     @Override
     public byte[] getCode(byte[] addr) {
-        return blockchain.getRepository().getCode(addr);
+        return getRepository().getCode(addr);
     }
 
     @Override
     public byte[] getCodeHash(byte[] addr) {
-        return blockchain.getRepository().getCodeHash(addr);
+        return getRepository().getCodeHash(addr);
     }
 
     @Override
     public void addStorageRow(byte[] addr, DataWord key, DataWord value) {
-        blockchain.getRepository().addStorageRow(addr, key, value);
+        getRepository().addStorageRow(addr, key, value);
     }
 
     @Override
     public DataWord getStorageValue(byte[] addr, DataWord key) {
-        return blockchain.getRepository().getStorageValue(addr, key);
+        return getRepository().getStorageValue(addr, key);
     }
 
     @Override
     public BigInteger getBalance(byte[] addr) {
-        return blockchain.getRepository().getBalance(addr);
+        return getRepository().getBalance(addr);
     }
 
     @Override
     public BigInteger addBalance(byte[] addr, BigInteger value) {
-        return blockchain.getRepository().addBalance(addr, value);
+        return getRepository().addBalance(addr, value);
     }
 
     @Override
     public Set<byte[]> getAccountsKeys() {
-        return blockchain.getRepository().getAccountsKeys();
+        return getRepository().getAccountsKeys();
     }
 
     @Override
     public void dumpState(Block block, long gasUsed, int txNumber, byte[] txHash) {
-        blockchain.getRepository().dumpState(block, gasUsed, txNumber, txHash);
+        getRepository().dumpState(block, gasUsed, txNumber, txHash);
     }
 
     @Override
     public Repository startTracking() {
-        return blockchain.getRepository().startTracking();
+        return getRepository().startTracking();
     }
 
     @Override
     public void flush() {
-        blockchain.getRepository().flush();
+        getRepository().flush();
     }
 
     @Override
     public void flushNoReconnect() {
-        blockchain.getRepository().flushNoReconnect();
+        getRepository().flushNoReconnect();
     }
 
     @Override
     public void commit() {
-        blockchain.getRepository().commit();
+        getRepository().commit();
     }
 
     @Override
     public void rollback() {
-        blockchain.getRepository().rollback();
+        getRepository().rollback();
     }
 
     @Override
     public void syncToRoot(byte[] root) {
-        blockchain.getRepository().syncToRoot(root);
+        getRepository().syncToRoot(root);
     }
 
     @Override
     public boolean isClosed() {
-        return blockchain.getRepository().isClosed();
+        return getRepository().isClosed();
     }
 
     @Override
     public void close() {
-        blockchain.getRepository().close();
+        getRepository().close();
     }
 
     @Override
     public void reset() {
-        blockchain.getRepository().reset();
+        getRepository().reset();
     }
 
     @Override
     public void updateBatch(HashMap<ByteArrayWrapper, AccountState> accountStates, HashMap<ByteArrayWrapper, ContractDetails> contractDetailes) {
-        blockchain.getRepository().updateBatch(accountStates, contractDetailes);
+        getRepository().updateBatch(accountStates, contractDetailes);
     }
 
     @Override
     public byte[] getRoot() {
-        return blockchain.getRepository().getRoot();
+        return getRepository().getRoot();
     }
 
     @Override
     public void loadAccount(byte[] addr, HashMap<ByteArrayWrapper, AccountState> cacheAccounts, HashMap<ByteArrayWrapper, ContractDetails> cacheDetails) {
-        blockchain.getRepository().loadAccount(addr, cacheAccounts, cacheDetails);
+        getRepository().loadAccount(addr, cacheAccounts, cacheDetails);
     }
 
     @Override
     public Repository getSnapshotTo(byte[] root) {
-        return blockchain.getRepository().getSnapshotTo(root);
+        return getRepository().getSnapshotTo(root);
     }
 
     @Override
@@ -208,16 +208,16 @@ public class RepositoryWrapper implements Repository {
 
     @Override
     public int getStorageSize(byte[] addr) {
-        return blockchain.getRepository().getStorageSize(addr);
+        return getRepository().getStorageSize(addr);
     }
 
     @Override
     public Set<DataWord> getStorageKeys(byte[] addr) {
-        return blockchain.getRepository().getStorageKeys(addr);
+        return getRepository().getStorageKeys(addr);
     }
 
     @Override
     public Map<DataWord, DataWord> getStorage(byte[] addr, @Nullable Collection<DataWord> keys) {
-        return blockchain.getRepository().getStorage(addr, keys);
+        return getRepository().getStorage(addr, keys);
     }
 }
