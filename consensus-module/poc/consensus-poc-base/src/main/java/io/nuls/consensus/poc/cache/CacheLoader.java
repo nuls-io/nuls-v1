@@ -26,7 +26,7 @@
 
 package io.nuls.consensus.poc.cache;
 
-import io.nuls.consensus.poc.model.BlockRoundData;
+import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
@@ -38,15 +38,11 @@ import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.consensus.poc.storage.service.DepositStorageService;
-import io.nuls.consensus.poc.storage.service.PunishLogStorageService;
 import io.nuls.consensus.poc.storage.utils.PunishLogComparator;
-import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Transaction;
 import io.nuls.protocol.service.BlockService;
 
 import java.util.ArrayList;
@@ -121,7 +117,7 @@ public class CacheLoader {
         if (null == blockHeader) {
             return blockHeaderList;
         }
-        BlockRoundData roundData = new BlockRoundData(blockHeader.getExtend());
+        BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
         long breakRoundIndex = roundData.getRoundIndex() - size;
         while (true) {
             if (blockHeader == null) {
@@ -136,7 +132,7 @@ public class CacheLoader {
 
             NulsDigestData preHash = blockHeader.getPreHash();
             blockHeader = blockService.getBlockHeader(preHash).getData();
-            BlockRoundData blockRoundData = new BlockRoundData(blockHeader.getExtend());
+            BlockExtendsData blockRoundData = new BlockExtendsData(blockHeader.getExtend());
             if (blockRoundData.getRoundIndex() <= breakRoundIndex) {
                 break;
             }
@@ -174,7 +170,7 @@ public class CacheLoader {
         if (null == blockHeader) {
             return list;
         }
-        BlockRoundData roundData = new BlockRoundData(blockHeader.getExtend());
+        BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
         long breakRoundIndex = roundData.getRoundIndex() - roundSize;
         for (PunishLogPo po : allPunishList) {
             if (po.getType() == PunishType.RED.getCode()) {

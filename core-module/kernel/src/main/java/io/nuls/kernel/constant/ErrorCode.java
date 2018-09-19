@@ -51,9 +51,9 @@ public class ErrorCode {
 
     }
 
-    protected ErrorCode(String code, String msg) {
+    protected ErrorCode(String code) {
         this.code = code;
-        this.msg = msg;
+        this.msg = code;
         if (null == code) {
             throw new RuntimeException("the errorcode code cann't be null!");
         }
@@ -62,6 +62,7 @@ public class ErrorCode {
     /**
      * 根据系统语言设置，返回国际化编码对应的字符串
      * According to the system language Settings, return the string corresponding to the internationalization encoding.
+     *
      * @return String
      */
     public String getMsg() {
@@ -72,8 +73,8 @@ public class ErrorCode {
         return code;
     }
 
-    public static final ErrorCode init(String code, String msg) {
-        return new ErrorCode(code, msg);
+    public static final ErrorCode init(String code) {
+        return new ErrorCode(code);
     }
 
     @Override

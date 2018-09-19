@@ -24,11 +24,11 @@
  */
 package io.nuls.protocol.model.validator;
 
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.protocol.constant.ProtocolErroeCode;
 
 /**
  * @author Niels
@@ -61,7 +61,7 @@ public class BlockFieldValidator implements NulsDataValidator<Block> {
 
         } while (false);
         if (failed) {
-            result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.BLOCK_FIELD_CHECK_FAILED);
+            result = ValidateResult.getFailedResult(this.getClass().getName(), ProtocolErroeCode.BLOCK_FIELD_CHECK_FAILED);
         }
         return result;
     }

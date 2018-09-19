@@ -5,21 +5,23 @@
     <parent>
         <artifactId>nuls</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.0.1</version>
+        <version>1.1.1-BETA</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.nuls</groupId>
     <artifactId>contract-module</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.1</version>
+    <version>1.1.1-BETA</version>
 
     <modules>
         <module>contract</module>
         <module>base/contract-base</module>
         <module>base/contract-vm</module>
         <module>base/contract-storage</module>
-        <module>base/contract-sdk</module>
+        <module>base/contract-tx</module>
+        <module>base/contract-rpc</module>
+        <module>base/contract-ledger</module>
     </modules>
 
     <dependencies>
@@ -31,12 +33,7 @@
         <dependency>
             <groupId>io.nuls.core-module</groupId>
             <artifactId>kernel</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.protocol-module</groupId>
-            <artifactId>protocol</artifactId>
-            <version>1.0.1</version>
+            <version>1.1.1-BETA</version>
         </dependency>
     </dependencies>
 </project>

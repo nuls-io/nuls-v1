@@ -32,7 +32,6 @@ import io.nuls.consensus.poc.BaseChainTest;
 import io.nuls.consensus.poc.model.Chain;
 import io.nuls.consensus.poc.protocol.tx.DepositTransaction;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import org.junit.Before;
@@ -73,8 +72,8 @@ public class ChainContainerTest extends BaseChainTest {
 
         Block newBlock = newBlock(bestBlock);
 
-        boolean success = chainContainer.verifyBlock(newBlock);
-        assertTrue(success);
+        Result success = chainContainer.verifyBlock(newBlock);
+        assertTrue(success.isSuccess());
 
         bestBlock = chainContainer.getBestBlock();
         assertEquals(bestBlock.getHeader().getHeight(), 0L);
@@ -83,8 +82,8 @@ public class ChainContainerTest extends BaseChainTest {
 
             newBlock = newBlock(bestBlock);
 
-            success = chainContainer.verifyAndAddBlock(newBlock, false);
-            assertTrue(success);
+            success = chainContainer.verifyAndAddBlock(newBlock, false, true);
+            assertTrue(success.isSuccess());
 
             bestBlock = chainContainer.getBestBlock();
             assertEquals(bestBlock.getHeader().getHeight(), 1L + i);
@@ -106,23 +105,23 @@ public class ChainContainerTest extends BaseChainTest {
 
         addTx(newBlock);
 
-        boolean success = chainContainer.verifyAndAddBlock(newBlock, false);
-        assertTrue(success);
+        Result success = chainContainer.verifyAndAddBlock(newBlock, false, true);
+        assertTrue(success.isSuccess());
 
         bestBlock = chainContainer.getBestBlock();
         newBlock = newBlock(bestBlock);
-        success = chainContainer.verifyAndAddBlock(newBlock, false);
-        assertTrue(success);
+        success = chainContainer.verifyAndAddBlock(newBlock, false, true);
+        assertTrue(success.isSuccess());
 
         bestBlock = chainContainer.getBestBlock();
         newBlock = newBlock(bestBlock);
-        success = chainContainer.verifyAndAddBlock(newBlock, false);
-        assertTrue(success);
+        success = chainContainer.verifyAndAddBlock(newBlock, false, true);
+        assertTrue(success.isSuccess());
 
         bestBlock = chainContainer.getBestBlock();
         newBlock = newBlock(bestBlock);
-        success = chainContainer.verifyAndAddBlock(newBlock, false);
-        assertTrue(success);
+        success = chainContainer.verifyAndAddBlock(newBlock, false, true);
+        assertTrue(success.isSuccess());
 
 
         assertEquals(chainContainer.getCurrentRound().getMemberCount(), 2);
@@ -152,8 +151,8 @@ public class ChainContainerTest extends BaseChainTest {
             Block bestBlock = chainContainer.getBestBlock();
             Block newBlock = newBlock(bestBlock);
 
-            boolean success = chainContainer.verifyAndAddBlock(newBlock, false);
-            assertTrue(success);
+            Result success = chainContainer.verifyAndAddBlock(newBlock, false, true);
+            assertTrue(success.isSuccess());
 
             bestBlock = chainContainer.getBestBlock();
             assertEquals(bestBlock.getHeader().getHeight(), 1L + i);
@@ -187,8 +186,8 @@ public class ChainContainerTest extends BaseChainTest {
             Block bestBlock = chainContainer.getBestBlock();
             Block newBlock = newBlock(bestBlock);
 
-            boolean success = chainContainer.verifyAndAddBlock(newBlock, false);
-            assertTrue(success);
+            Result success = chainContainer.verifyAndAddBlock(newBlock, false, true);
+            assertTrue(success.isSuccess());
 
             bestBlock = chainContainer.getBestBlock();
             assertEquals(bestBlock.getHeader().getHeight(), 1L + i);
@@ -233,7 +232,7 @@ public class ChainContainerTest extends BaseChainTest {
 
         NulsSignData signData = signDigest(agentTx.getHash().getDigestBytes(), ecKey);
 
-        agentTx.setScriptSig(signData.getSignBytes());
+        agentTx.setTransactionSignature(signData.getSignBytes());
 
         // add the agent tx into agent list
         txs.add(agentTx);

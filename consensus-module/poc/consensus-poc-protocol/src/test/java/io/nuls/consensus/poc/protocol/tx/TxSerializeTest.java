@@ -31,10 +31,14 @@ import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.NulsSignData;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.script.SignatureUtil;
+
 
 import java.io.IOException;
+import java.security.SignatureException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -62,21 +66,13 @@ public class TxSerializeTest {
             Log.error(e);
         }
         tx.setHash(hash);
-        byte[] signbytes = new byte[0];
+
+        List<ECKey> keys = new ArrayList<>();
+        keys.add(ecKey);
+
         try {
-            signbytes = ecKey.sign(hash.serialize());
-        } catch (IOException e) {
-            Log.error(e);
-        }
-        NulsSignData nulsSignData = new NulsSignData();
-        nulsSignData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);
-        nulsSignData.setSignBytes(signbytes);
-        P2PKHScriptSig scriptSig = new P2PKHScriptSig();
-        scriptSig.setPublicKey(ecKey.getPubKey());
-        scriptSig.setSignData(nulsSignData);
-        try {
-            tx.setScriptSig(scriptSig.serialize());
-        } catch (IOException e) {
+            SignatureUtil.createTransactionSignture(tx, null, keys);
+        } catch (Exception e) {
             Log.error(e);
         }
     }

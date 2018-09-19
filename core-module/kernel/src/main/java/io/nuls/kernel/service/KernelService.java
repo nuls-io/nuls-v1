@@ -46,7 +46,7 @@ public class KernelService {
         try {
             I18nUtils.setLanguage(lang);
         } catch (NulsException e) {
-            Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode());
         }
         return Result.getSuccess();
     }

@@ -23,21 +23,26 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.contract.constant.ContractConstant;
+import io.nuls.contract.service.ContractService;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.calc.LongUtils;
-import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.map.MapUtil;
 import io.nuls.core.tools.param.AssertUtil;
+import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.script.P2PHKSignature;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.TransactionSignature;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -54,7 +59,6 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * @desription:
  * @author: PierreLuo
  */
 @Service
@@ -66,6 +70,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     private UtxoLedgerUtxoStorageService utxoLedgerUtxoStorageService;
     @Autowired
     private UtxoLedgerTransactionStorageService utxoLedgerTransactionStorageService;
+    @Autowired
+    private ContractService contractService;
 
     @Override
     public Result saveTx(Transaction tx) throws NulsException {
@@ -78,7 +84,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             if (result.isFailed()) {
                 Result rollbackResult = rollbackCoinData(tx);
                 if (rollbackResult.isFailed()) {
-                    throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR);
+                    throw new NulsException(rollbackResult.getErrorCode());
                 }
                 return result;
             }
@@ -87,7 +93,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             if (result.isFailed()) {
                 Result rollbackResult = rollbackTx(tx);
                 if (rollbackResult.isFailed()) {
-                    throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR);
+                    throw new NulsException(rollbackResult.getErrorCode());
                 }
             }
             return result;
@@ -95,7 +101,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             Log.error(e);
             Result rollbackResult = rollbackTx(tx);
             if (rollbackResult.isFailed()) {
-                throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR);
+                throw new NulsException(rollbackResult.getErrorCode());
             }
             return Result.getFailed(KernelErrorCode.IO_ERROR);
         }
@@ -112,11 +118,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             List<Coin> froms = coinData.getFrom();
             for (Coin from : froms) {
                 //TestLog+
-//                Coin preFrom = utxoLedgerUtxoStorageService.getUtxo(from.getOwner());
+//                Coin preFrom = utxoLedgerUtxoStorageService.getUtxo(from.());
 //                if (preFrom != null) {
-//                    Log.info("花费：height: +" + tx.getBlockHeight() + ", “+txHash-" + tx.getHash() + ", " + Hex.encode(from.getOwner()));
+//                    Log.info("花费：height: +" + tx.getBlockHeight() + ", “+txHash-" + tx.getHash() + ", " + Hex.encode(from.()));
 //                }
-//                Log.info("delete utxo:" + Hex.encode(from.getOwner()));
+//                Log.info("delete utxo:" + Hex.encode(from.()));
                 //TestLog-
                 batch.delete(from.getOwner());
             }
@@ -153,7 +159,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             if (result.isFailed()) {
                 Result recoveryResult = saveCoinData(tx);
                 if (recoveryResult.isFailed()) {
-                    throw new NulsException(LedgerErrorCode.DB_DATA_ERROR);
+                    throw new NulsException(recoveryResult.getErrorCode());
                 }
                 return result;
             }
@@ -162,7 +168,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             if (result.isFailed()) {
                 Result recoveryResult = saveTx(tx);
                 if (recoveryResult.isFailed()) {
-                    throw new NulsException(LedgerErrorCode.DB_DATA_ERROR);
+                    throw new NulsException(recoveryResult.getErrorCode());
                 }
             }
             return result;
@@ -170,7 +176,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             Log.error(e);
             Result rollbackResult = saveTx(tx);
             if (rollbackResult.isFailed()) {
-                throw new NulsException(LedgerErrorCode.DB_DATA_ERROR);
+                throw new NulsException(rollbackResult.getErrorCode());
             }
             return Result.getFailed(KernelErrorCode.IO_ERROR);
         }
@@ -195,7 +201,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     Transaction fromTx = utxoLedgerTransactionStorageService.getTx(fromTxHash);
                     recovery = fromTx.getCoinData().getTo().get(fromIndex);
                     recovery.setFrom(from.getFrom());
-//                    Log.info("rollback save utxo:::" + Hex.encode(from.getOwner()));
+//                    Log.info("rollback save utxo:::" + Hex.encode(from.()));
                     batch.put(from.getOwner(), recovery.serialize());
                 } catch (IOException e) {
                     Log.error(e);
@@ -266,6 +272,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
         if (transaction == null || transaction.getCoinData() == null) {
             return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.NULL_PARAMETER);
         }
+
         try {
             /*
             校验开始
@@ -273,16 +280,26 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             CoinData coinData = transaction.getCoinData();
             List<Coin> froms = coinData.getFrom();
             int fromSize = froms.size();
-            P2PKHScriptSig p2PKHScriptSig = null;
-            // 公钥hash160
-            byte[] user = null;
-            // 获取交易的公钥及签名脚本
-            if (fromSize > 0) {
+            TransactionSignature transactionSignature = new TransactionSignature();
+            //TODO: 交易验证
+//            P2PKHScriptSig p2PKHScriptSig = null;
+//            // 公钥hash160
+//            byte[] user = null;
+//            // 获取交易的公钥及签名脚本
+//            if (transaction.needVerifySignature() && fromSize > 0) {
+//                try {
+//                    p2PKHScriptSig = P2PKHScriptSig.createFromBytes(transaction.getTransactionSignature());
+//                    user = p2PKHScriptSig.getSignerHash160();
+//                } catch (NulsException e) {
+//                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_P2PKH_SCRIPT_ERROR);
+//                }
+//
+            //交易签名反序列化
+            if (transaction.needVerifySignature() && fromSize > 0) {
                 try {
-                    p2PKHScriptSig = P2PKHScriptSig.createFromBytes(transaction.getScriptSig());
-                    user = p2PKHScriptSig.getSignerHash160();
-                } catch (NulsException e) {
-                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.DATA_ERROR);
+                    transactionSignature.parse(transaction.getTransactionSignature(),0);
+                }catch (NulsException e){
+                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_P2PKH_SCRIPT_ERROR);
                 }
             }
             // 保存Set用于验证自身双花
@@ -294,8 +311,11 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             byte[] fromBytes;
             // 保存在数据库中或者txList中的utxo数据
             Coin fromOfFromCoin = null;
-            byte[] fromAdressBytes = null;
-
+            byte[] fromAddressBytes = null;
+            /**
+             * 存放真实地址（如果为脚本验证的情况fromAddressBytes存的是脚本信息）
+             * */
+            byte[] realAddressBytes = null;
             for (int i = 0; i < froms.size(); i++) {
                 Coin from = froms.get(i);
                 fromBytes = from.getOwner();
@@ -309,21 +329,57 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 if (null == fromOfFromCoin) {
                     // 如果既不存在于txList的to中(如果txList不为空)，又不存在于数据库中，那么这是一笔问题数据，进一步检查是否存在这笔交易，交易有就是双花，没有就是孤儿交易，则返回失败
                     if (null != utxoLedgerTransactionStorageService.getTxBytes(LedgerUtil.getTxHashBytes(fromBytes))) {
-                        return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT);
+                        return ValidateResult.getFailedResult(CLASS_NAME, TransactionErrorCode.TRANSACTION_REPEATED);
                     } else {
                         return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.ORPHAN_TX);
                     }
                 } else {
-                    fromAdressBytes = fromOfFromCoin.getOwner();
-                    // 验证地址中的公钥hash160和交易中的公钥hash160是否相等，不相等则说明这笔utxo不属于交易发出者
-                    if (transaction.needVerifySignature() && !AddressTool.checkPublicKeyHash(fromAdressBytes, user)) {
-                        Log.warn("public key hash160 check error.");
-                        return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_INPUT);
+                    fromAddressBytes = fromOfFromCoin.getOwner();
+                    realAddressBytes = fromOfFromCoin.getAddress();
+                    // pierre add 非合约转账(从合约转出)交易，验证fromAdress是否是合约地址，如果是，则返回失败，非合约转账(从合约转出)交易不能转出合约地址资产
+                    if (transaction.getType() != ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
+                        boolean isContractAddress = contractService.isContractAddress(realAddressBytes);
+                        if (isContractAddress) {
+                            return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.DATA_ERROR);
+                        }
                     }
-                    if (java.util.Arrays.equals(fromOfFromCoin.getOwner(), NulsConstant.BLACK_HOLE_ADDRESS)) {
+
+                    // 验证地址中的公钥hash160和交易中的公钥hash160是否相等，不相等则说明这笔utxo不属于交易发出者
+                    //TODO: 交易验证逻辑待完善
+//                    if (transaction.needVerifySignature() && !AddressTool.checkPublicKeyHash(fromAddressBytes, user)) {
+//                        Log.warn("public key hash160 check error.");
+//                        return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_INPUT);
+//                    }
+                    boolean signtureValidFlag = false;
+                    if(transaction.needVerifySignature()){
+                        if(transactionSignature != null){
+                            if(fromAddressBytes != null && fromAddressBytes.length != 23 && transactionSignature.getScripts() != null && transactionSignature.getScripts().size()>0){
+                                Script scriptPubkey = new Script(fromAddressBytes);
+                                for (Script scriptSig:transactionSignature.getScripts()) {
+                                    signtureValidFlag = scriptSig.correctlyNulsSpends(transaction,0,scriptPubkey);
+                                    if(signtureValidFlag)
+                                        break;
+                                }
+                            }
+                            else {
+                                if(transactionSignature.getP2PHKSignatures() != null && transactionSignature.getP2PHKSignatures().size() != 0){
+                                    for (P2PHKSignature signature:transactionSignature.getP2PHKSignatures()) {
+                                        signtureValidFlag = AddressTool.checkPublicKeyHash(realAddressBytes,signature.getSignerHash160());
+                                        if(signtureValidFlag)
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        if(!signtureValidFlag){
+                            Log.warn("public key hash160 check error.");
+                            return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_INPUT);
+                        }
+                    }
+                    if (java.util.Arrays.equals(realAddressBytes, NulsConstant.BLACK_HOLE_ADDRESS)) {
                         return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.ADDRESS_IS_BLOCK_HOLE);
                     }
-                    if (NulsContext.DEFAULT_CHAIN_ID != SerializeUtils.bytes2Short(fromAdressBytes)) {
+                    if (NulsContext.DEFAULT_CHAIN_ID != SerializeUtils.bytes2Short(realAddressBytes)) {
                         return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.ADDRESS_IS_NOT_BELONGS_TO_CHAIN);
                     }
                 }
@@ -354,7 +410,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                             temporaryFromSet.remove(asString(_from.getOwner()));
                         }
                     }
-                    return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT);
+                    return ValidateResult.getFailedResult(CLASS_NAME, TransactionErrorCode.TRANSACTION_REPEATED);
                 }
 
                 // 验证from的锁定时间和金额
@@ -392,12 +448,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     /**
      * 双花验证不通过的交易需要放入result的data中，一次只验证一对双花的交易
      *
-     * @return ValidateResult<List                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               <                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               Transaction>>
+     * @return ValidateResult<List                                                                                                                                                                                                                                                               <                                                                                                                                                                                                                                                               Transaction>>
      */
     @Override
     public ValidateResult<List<Transaction>> verifyDoubleSpend(Block block) {
         if (block == null) {
-            return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.NULL_PARAMETER);
+            return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.BLOCK_IS_NULL);
         }
         return verifyDoubleSpend(block.getTxs());
     }
@@ -405,7 +461,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
     /**
      * 双花验证不通过的交易需要放入result的data中，一次只验证一对双花的交易
      *
-     * @return ValidateResult<List                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               <                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               Transaction>>
+     * @return ValidateResult<List                                                                                                                                                                                                                                                               <                                                                                                                                                                                                                                                               Transaction>>
      */
     @Override
     public ValidateResult<List<Transaction>> verifyDoubleSpend(List<Transaction> txList) {
@@ -440,7 +496,7 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     List<Transaction> resultList = new ArrayList<>(2);
                     resultList.add(prePutTx);
                     resultList.add(tx);
-                    ValidateResult validateResult = ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.LEDGER_DOUBLE_SPENT);
+                    ValidateResult validateResult = ValidateResult.getFailedResult(CLASS_NAME, TransactionErrorCode.TRANSACTION_REPEATED);
                     validateResult.setData(resultList);
                     return validateResult;
                 }
@@ -483,14 +539,14 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             if (result.isFailed()) {
                 Result rollbackResult = rollbackUnlockTxCoinData(tx);
                 if (rollbackResult.isFailed()) {
-                    throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR);
+                    throw new NulsException(rollbackResult.getErrorCode());
                 }
             }
             return result;
         } catch (IOException e) {
             Result rollbackResult = rollbackUnlockTxCoinData(tx);
             if (rollbackResult.isFailed()) {
-                throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR);
+                throw new NulsException(rollbackResult.getErrorCode());
             }
             Log.error(e);
             return Result.getFailed(KernelErrorCode.IO_ERROR);
@@ -522,12 +578,12 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             byte[] txHashBytes = tx.getHash().serialize();
             Result result = utxoLedgerUtxoStorageService.saveUtxo(Arrays.concatenate(txHashBytes, new VarInt(needUnLockUtxoIndex).encode()), needUnLockUtxo);
             if (result.isFailed()) {
-                throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR);
+                throw new NulsException(result.getErrorCode());
             }
             return result;
         } catch (IOException e) {
             Log.error(e);
-            throw new NulsException(LedgerErrorCode.DB_ROLLBACK_ERROR);
+            throw new NulsException(KernelErrorCode.IO_ERROR);
         }
     }
 
@@ -560,5 +616,34 @@ public class UtxoLedgerServiceImpl implements LedgerService {
             return null;
         }
         return utxoLedgerUtxoStorageService.getUtxo(owner);
+    }
+
+
+    /**
+     * get UTXO by key
+     *
+     * 根据key获取UTXO
+     * @param address
+     * @return Coin
+     */
+    @Override
+    public  List<Coin> getAllUtxo(byte[] address){
+        List<Coin> coinList = new ArrayList<>();
+        Collection<Entry<byte[], byte[]>> rawList =utxoLedgerUtxoStorageService.getAllUtxoEntryBytes();
+        for (Entry<byte[], byte[]> coinEntry : rawList) {
+            Coin coin = new Coin();
+            try {
+                coin.parse(coinEntry.getValue(), 0);
+            } catch (NulsException e) {
+                Log.info("parse coin form db error");
+                continue;
+            }
+            if (java.util.Arrays.equals(coin.getAddress(), address)) {
+                coin.setTempOwner(coin.getOwner());
+                coin.setOwner(coinEntry.getKey());
+                coinList.add(coin);
+            }
+        }
+        return coinList;
     }
 }

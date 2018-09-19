@@ -34,7 +34,8 @@ import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.BlockSignature;
 import io.nuls.network.service.NetworkService;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.DownloadService;
@@ -112,11 +113,10 @@ public class BaseTest {
 
         NulsSignData signData = signDigest(blockHeader.getHash().getDigestBytes(), ecKey);
 
-        P2PKHScriptSig sig = new P2PKHScriptSig();
+        BlockSignature sig = new BlockSignature();
         sig.setSignData(signData);
         sig.setPublicKey(ecKey.getPubKey());
-
-        blockHeader.setScriptSig(sig);
+        blockHeader.setBlockSignature(sig);
 
         return block;
     }

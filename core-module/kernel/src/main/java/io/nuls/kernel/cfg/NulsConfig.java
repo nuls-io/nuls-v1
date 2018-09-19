@@ -41,7 +41,7 @@ public class NulsConfig {
      * nuls底层代码的版本号
      * The version number of the underlying code for nuls.
      */
-    public static String VERSION = "0.0.1";
+    public static String VERSION = "1.1.0";
 
     /**
      * 系统使用的编码方式
@@ -60,4 +60,5 @@ public class NulsConfig {
      * All the configuration items that are loaded in the module configuration file.
      */
     public static IniEntity MODULES_CONFIG;
+
 }

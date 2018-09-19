@@ -96,7 +96,7 @@ public class NulsSignData extends BaseNulsData {
             byte[] signBytes = ecKey.sign(nulsDigestData.getDigestBytes(), privkey);
             NulsSignData signData = new NulsSignData();
             try {
-                signData.parse(signBytes,0);
+                signData.parse(signBytes, 0);
             } catch (NulsException e) {
                 Log.error(e);
             }

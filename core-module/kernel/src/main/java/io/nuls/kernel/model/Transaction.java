@@ -28,9 +28,10 @@ import io.nuls.core.tools.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.TxStatusEnum;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
-import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
@@ -53,7 +54,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
 
     protected long time;
 
-    private byte[] scriptSig;
+    private byte[] transactionSignature;
 
     protected byte[] remark;
 
@@ -73,7 +74,7 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         size += SerializeUtils.sizeOfBytes(remark);
         size += SerializeUtils.sizeOfNulsData(txData);
         size += SerializeUtils.sizeOfNulsData(coinData);
-        size += SerializeUtils.sizeOfBytes(scriptSig);
+        size += SerializeUtils.sizeOfBytes(transactionSignature);
         return size;
     }
 
@@ -84,7 +85,50 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         stream.writeBytesWithLength(remark);
         stream.writeNulsData(txData);
         stream.writeNulsData(coinData);
-        stream.writeBytesWithLength(scriptSig);
+        stream.writeBytesWithLength(transactionSignature);
+    }
+
+    public byte[] serializeForHash() throws IOException {
+        ByteArrayOutputStream bos = null;
+        try {
+            int size = size() - SerializeUtils.sizeOfBytes(transactionSignature);
+
+            bos = new UnsafeByteArrayOutputStream(size);
+            NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
+            if (size == 0) {
+                bos.write(NulsConstant.PLACE_HOLDER);
+            } else {
+                if (NulsContext.MAIN_NET_VERSION == 1) {
+                    buffer.writeVarInt(type);
+                    buffer.writeVarInt(time);
+                } else {
+                    if (this.blockHeight == -1) {
+                        buffer.writeUint16(type);
+                        buffer.writeUint48(time);
+                    } else {
+                        if (NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT != null && this.blockHeight >= NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT) {
+                            buffer.writeUint16(type);
+                            buffer.writeUint48(time);
+                        } else {
+                            buffer.writeVarInt(type);
+                            buffer.writeVarInt(time);
+                        }
+                    }
+                }
+                buffer.writeBytesWithLength(remark);
+                buffer.writeNulsData(txData);
+                buffer.writeNulsData(coinData);
+            }
+            return bos.toByteArray();
+        } finally {
+            if (bos != null) {
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    throw e;
+                }
+            }
+        }
     }
 
     @Override
@@ -94,12 +138,12 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         this.remark = byteBuffer.readByLengthByte();
         txData = this.parseTxData(byteBuffer);
         this.coinData = byteBuffer.readNulsData(new CoinData());
-        try {
+        /*try {
             hash = NulsDigestData.calcDigestData(this.serializeForHash());
         } catch (IOException e) {
             Log.error(e);
-        }
-        scriptSig = byteBuffer.readByLengthByte();
+        }*/
+        transactionSignature = byteBuffer.readByLengthByte();
     }
 
     //
@@ -177,12 +221,12 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         this.hash = hash;
     }
 
-    public byte[] getScriptSig() {
-        return scriptSig;
+    public byte[] getTransactionSignature() {
+        return transactionSignature;
     }
 
-    public void setScriptSig(byte[] scriptSig) {
-        this.scriptSig = scriptSig;
+    public void setTransactionSignature(byte[] transactionSignature) {
+        this.transactionSignature = transactionSignature;
     }
 
     public T getTxData() {
@@ -239,16 +283,6 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         return fee;
     }
 
-    public byte[] getAddressFromSig() {
-        P2PKHScriptSig sig = new P2PKHScriptSig();
-        try {
-            sig.parse(scriptSig, 0);
-        } catch (NulsException e) {
-            Log.error(e);
-        }
-        return AddressTool.getAddress(sig);
-    }
-
     public List<byte[]> getAllRelativeAddress() {
         Set<byte[]> addresses = new HashSet<>();
 
@@ -264,21 +298,20 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
                 addresses.addAll(txAddressSet);
             }
         }
-        if (scriptSig != null) {
+        if (this.transactionSignature != null) {
             try {
-                P2PKHScriptSig sig = P2PKHScriptSig.createFromBytes(scriptSig);
-                byte[] address = AddressTool.getAddress(sig);
-
-                boolean hasExist = false;
-                for (byte[] as : addresses) {
-                    if (Arrays.equals(as, address)) {
-                        hasExist = true;
-                        break;
+                Set<String> signAddresss = SignatureUtil.getAddressFromTX(this);
+                for (String signAddr : signAddresss) {
+                    boolean hasExist = false;
+                    for (byte[] addr : addresses) {
+                        if (Arrays.equals(AddressTool.getAddress(signAddr), addr)) {
+                            hasExist = true;
+                            break;
+                        }
                     }
-                }
-
-                if (!hasExist) {
-                    addresses.add(address);
+                    if (!hasExist) {
+                        addresses.add(AddressTool.getAddress(signAddr));
+                    }
                 }
             } catch (NulsException e) {
                 Log.error(e);
@@ -287,33 +320,19 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
         return new ArrayList<>(addresses);
     }
 
-    public byte[] serializeForHash() throws IOException {
-        ByteArrayOutputStream bos = null;
-        try {
-            int size = size() - SerializeUtils.sizeOfBytes(scriptSig);
-
-            bos = new UnsafeByteArrayOutputStream(size);
-            NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
-            if (size == 0) {
-                bos.write(NulsConstant.PLACE_HOLDER);
-            } else {
-                buffer.writeVarInt(type);
-                buffer.writeVarInt(time);
-                buffer.writeBytesWithLength(remark);
-                buffer.writeNulsData(txData);
-                buffer.writeNulsData(coinData);
-            }
-            return bos.toByteArray();
-        } finally {
-            if (bos != null) {
-                try {
-                    bos.close();
-                } catch (IOException e) {
-                    throw e;
-                }
-            }
-        }
-    }
-
     public abstract String getInfo(byte[] address);
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "type=" + type +
+                ", coinData=" + coinData +
+                ", txData=" + txData +
+                ", time=" + time +
+                ", hash=" + hash +
+                ", blockHeight=" + blockHeight +
+                ", status=" + status +
+                ", size=" + size +
+                '}';
+    }
 }

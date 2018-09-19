@@ -29,6 +29,7 @@ import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.protocol.constant.ProtocolErroeCode;
 
 /**
  * @author Niels
@@ -65,7 +66,7 @@ public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
             }
         } while (false);
         if (failed) {
-            result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.BLOCK_HEADER_FIELD_CHECK_FAILED);
+            result = ValidateResult.getFailedResult(this.getClass().getName(), ProtocolErroeCode.BLOCK_HEADER_FIELD_CHECK_FAILED);
         }
         return result;
     }

@@ -43,7 +43,8 @@ public class OutputDto {
     private Long lockTime;
 
     public OutputDto(Coin output) {
-        this.address = AddressTool.getStringAddressByBytes(output.getOwner());
+        //this.address = AddressTool.getStringAddressByBytes(output.());
+        this.address = AddressTool.getStringAddressByBytes(output.getAddress());
         this.value = output.getNa().getValue();
         this.lockTime = output.getLockTime();
     }
@@ -71,5 +72,4 @@ public class OutputDto {
     public void setLockTime(Long lockTime) {
         this.lockTime = lockTime;
     }
-
 }

@@ -30,7 +30,8 @@ import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.BlockSignature;
 import io.nuls.protocol.storage.po.BlockHeaderPo;
 import io.nuls.protocol.storage.service.BlockHeaderStorageService;
 import org.junit.After;
@@ -75,7 +76,7 @@ public class BlockHeaderStorageServiceImplTest {
             e.printStackTrace();
             assertTrue(false);
         }
-        po.setScriptSign(new P2PKHScriptSig());
+        po.setScriptSign(new BlockSignature());
         po.setTime(12345678901L);
         po.setTxCount(3);
         List<NulsDigestData> txHashList = new ArrayList<>();

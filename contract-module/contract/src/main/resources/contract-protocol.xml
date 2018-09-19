@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nuls-protocol>
+    <txs>
+        <tx id="callContractTx_V1" class="io.nuls.contract.entity.tx.CallContractTransaction"/>
+        <tx id="contractTransferTx_V1" class="io.nuls.contract.entity.tx.ContractTransferTransaction"/>
+        <tx id="createContractTx_V1" class="io.nuls.contract.entity.tx.CreateContractTransaction"/>
+        <tx id="deleteContractTx_V1" class="io.nuls.contract.entity.tx.DeleteContractTransaction"/>
+    </txs>
+</nuls-protocol>

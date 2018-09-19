@@ -161,7 +161,9 @@ public class CheckUnConfirmTxThread implements Runnable {
                 try {
                     fromCoin = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value);
 
-                    if (!AccountLegerUtils.isLocalAccount(fromCoin.getOwner())) {
+                    //if (!AccountLegerUtils.isLocalAccount(fromCoin.getOwner()))
+                    if (!AccountLegerUtils.isLocalAccount(fromCoin.getAddress()))
+                    {
                         continue;
                     }
                     Coin fromCoinFromLedger = ledgerService.getUtxo(fromSource);
@@ -182,7 +184,10 @@ public class CheckUnConfirmTxThread implements Runnable {
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
                     toCoin = tos.get(i);
-                    if (!AccountLegerUtils.isLocalAccount(toCoin.getOwner())) {
+                    /*if (!AccountLegerUtils.isLocalAccount(toCoin.getOwner())) {
+                        continue;
+                    }*/
+                    if (!AccountLegerUtils.isLocalAccount(toCoin.getAddress())) {
                         continue;
                     }
                     outKey = org.spongycastle.util.Arrays.concatenate(tx.getHash().serialize(), new VarInt(i).encode());

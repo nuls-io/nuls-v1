@@ -5,16 +5,15 @@
     <parent>
         <artifactId>nuls</artifactId>
         <groupId>io.nuls</groupId>
-        <version>1.0.1</version>
+        <version>1.1.1-BETA</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.nuls</groupId>
     <artifactId>core-module</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.1-BETA</version>
     <packaging>pom</packaging>
     <modules>
         <module>kernel</module>
         <module>kernel-rpc</module>
-        <module>kernel-sdk</module>
     </modules>
 </project>

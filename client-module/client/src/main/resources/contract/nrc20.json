@@ -1,0 +1,180 @@
+{
+  "name": {
+    "name": "name",
+    "desc": "() return String",
+    "args": [],
+    "returnArg": "String",
+    "view": true,
+    "event": false,
+    "payable": false
+  },
+  "symbol": {
+    "name": "symbol",
+    "desc": "() return String",
+    "args": [],
+    "returnArg": "String",
+    "view": true,
+    "event": false,
+    "payable": false
+  },
+  "decimals": {
+    "name": "decimals",
+    "desc": "() return int",
+    "args": [],
+    "returnArg": "int",
+    "view": true,
+    "event": false,
+    "payable": false
+  },
+  "totalSupply": {
+    "name": "totalSupply",
+    "desc": "() return BigInteger",
+    "args": [],
+    "returnArg": "BigInteger",
+    "view": true,
+    "event": false
+  },
+  "balanceOf": {
+    "name": "balanceOf",
+    "desc": "(Address owner) return BigInteger",
+    "args": [
+      {
+        "type": "Address",
+        "name": "owner",
+        "required": true
+      }
+    ],
+    "returnArg": "BigInteger",
+    "view": true,
+    "event": false
+  },
+  "transfer": {
+    "name": "transfer",
+    "desc": "(Address to, BigInteger value) return boolean",
+    "args": [
+      {
+        "type": "Address",
+        "name": "to",
+        "required": true
+      },
+      {
+        "type": "BigInteger",
+        "name": "value",
+        "required": true
+      }
+    ],
+    "returnArg": "boolean",
+    "view": false,
+    "event": false
+  },
+  "transferFrom": {
+    "name": "transferFrom",
+    "desc": "(Address from, Address to, BigInteger value) return boolean",
+    "args": [
+      {
+        "type": "Address",
+        "name": "from",
+        "required": true
+      },
+      {
+        "type": "Address",
+        "name": "to",
+        "required": true
+      },
+      {
+        "type": "BigInteger",
+        "name": "value",
+        "required": true
+      }
+    ],
+    "returnArg": "boolean",
+    "view": false,
+    "event": false
+  },
+  "approve": {
+    "name": "approve",
+    "desc": "(Address spender, BigInteger value) return boolean",
+    "args": [
+      {
+        "type": "Address",
+        "name": "spender",
+        "required": true
+      },
+      {
+        "type": "BigInteger",
+        "name": "value",
+        "required": true
+      }
+    ],
+    "returnArg": "boolean",
+    "view": false,
+    "event": false
+  },
+  "allowance": {
+    "name": "allowance",
+    "desc": "(Address owner, Address spender) return BigInteger",
+    "args": [
+      {
+        "type": "Address",
+        "name": "owner",
+        "required": true
+      },
+      {
+        "type": "Address",
+        "name": "spender",
+        "required": true
+      }
+    ],
+    "returnArg": "BigInteger",
+    "view": true,
+    "event": false
+  },
+  "ApprovalEvent": {
+    "name": "ApprovalEvent",
+    "desc": "(Address owner, Address spender, BigInteger value) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "owner",
+        "required": true
+      },
+      {
+        "type": "Address",
+        "name": "spender",
+        "required": true
+      },
+      {
+        "type": "BigInteger",
+        "name": "value",
+        "required": true
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": true
+  },
+  "TransferEvent": {
+    "name": "TransferEvent",
+    "desc": "(Address from, Address to, BigInteger value) return void",
+    "args": [
+      {
+        "type": "Address",
+        "name": "from",
+        "required": false
+      },
+      {
+        "type": "Address",
+        "name": "to",
+        "required": true
+      },
+      {
+        "type": "BigInteger",
+        "name": "value",
+        "required": true
+      }
+    ],
+    "returnArg": "void",
+    "view": false,
+    "event": true
+  }
+}

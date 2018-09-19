@@ -40,6 +40,7 @@ public interface RpcConstant {
     String CFG_RPC_SERVER_IP = "server.ip";
     String CFG_RPC_SERVER_PORT ="server.port" ;
     String CFG_RPC_REQUEST_WHITE_SHEET="request.white.sheet";
+    String CFG_RPC_DAEMON = "daemon";
 
     String WHITE_SHEET_SPLIT = ",";
 

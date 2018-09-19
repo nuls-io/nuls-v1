@@ -180,7 +180,8 @@ public final class Na implements Comparable<Na>, Serializable {
     public long divide(final Na divisor) {
         return LongUtils.div(this.value, divisor.value);
     }
-//
+
+    //
 //    /**
 //     * Returns true if and only if this instance represents a monetary value greater than zero,
 //     * otherwise false.
@@ -189,7 +190,8 @@ public final class Na implements Comparable<Na>, Serializable {
     public boolean isPositive() {
         return signum() == 1;
     }
-//
+
+    //
 //    /**
 //     * Returns true if and only if this instance represents a monetary value less than zero,
 //     * otherwise false.
@@ -199,7 +201,7 @@ public final class Na implements Comparable<Na>, Serializable {
         return signum() == -1;
     }
 
-//    /**
+    //    /**
 //     * Returns true if and only if this instance represents zero monetary value,
 //     * otherwise false.
 //     */
@@ -208,7 +210,7 @@ public final class Na implements Comparable<Na>, Serializable {
         return signum() == 0;
     }
 
-//    /**
+    //    /**
 //     * Returns true if the monetary value represented by this instance is greater than that
 //     * of the given other Na, otherwise false.
 //     */
@@ -220,7 +222,7 @@ public final class Na implements Comparable<Na>, Serializable {
         return compareTo(other) >= 0;
     }
 
-//    /**
+    //    /**
 //     * Returns true if the monetary value represented by this instance is less than that
 //     * of the given other Na, otherwise false.
 //     */
@@ -276,6 +278,9 @@ public final class Na implements Comparable<Na>, Serializable {
 
     @Override
     public int compareTo(final Na other) {
+        if (other == null) {
+            return -1;
+        }
         return Long.compare(this.value, other.value);
     }
 
@@ -285,7 +290,7 @@ public final class Na implements Comparable<Na>, Serializable {
         return toText();
     }
 
-//    /**
+    //    /**
 //     * Long 或者 Integer Na 转成 NUSL(double)
 //     * 如果已经是小数类型说明已经是NUSL 则直接返回
 //     * @param object
@@ -300,10 +305,10 @@ public final class Na implements Comparable<Na>, Serializable {
             na = (Long) object;
         } else if (object instanceof Integer) {
             na = ((Integer) object).longValue();
-        } else if (object instanceof Double){
+        } else if (object instanceof Double) {
             return (Double) object;
-        }else if (object instanceof Float){
-            return Double.parseDouble(String.valueOf(object)) ;
+        } else if (object instanceof Float) {
+            return Double.parseDouble(String.valueOf(object));
         } else {
             return 0;
         }

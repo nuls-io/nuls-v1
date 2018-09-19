@@ -27,6 +27,7 @@ package io.nuls.account.service;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.AccountKeyStore;
 import io.nuls.account.model.Balance;
+import io.nuls.account.model.MultiSigAccount;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.Address;
@@ -81,6 +82,7 @@ public interface AccountService {
     /**
      * 创建一个账户
      * Create an unencrypted account
+     *
      * @return the account list created(only one account in the list).
      */
     Result<List<Account>> createAccount();
@@ -88,6 +90,7 @@ public interface AccountService {
     /**
      * 根据账户标识删除对应的账户
      * delete an account by address.
+     *
      * @param address  the address of the account you want to delete.
      * @param password the password of the account.
      * @return the result of the operation.
@@ -98,6 +101,7 @@ public interface AccountService {
     /**
      * 根据keyStore重置密码
      * Reset password by keyStore.
+     *
      * @param keyStore the keyStore of the account.
      * @param password the password of account
      * @return the result of the operation.
@@ -133,16 +137,16 @@ public interface AccountService {
      */
     Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore);
 
-//    /**
-//     * 根据私钥和密码导入账户
-//     * import an account from plant private key and encrypt the account.
-//     */
+    /**
+     * 根据私钥和密码导入账户
+     * import an account from plant private key and encrypt the account.
+     */
     Result<Account> importAccount(String prikey, String password);
 
-//    /**
-//     * 据私钥和密码导入账户
-//     * import an unencrypted account by plant private key.
-//     */
+    /**
+     * 据私钥和密码导入账户
+     * import an unencrypted account by plant private key.
+     */
     Result<Account> importAccount(String prikey);
 
     /**
@@ -201,24 +205,6 @@ public interface AccountService {
     Result<Address> getAddress(byte[] pubKey);
 
     /**
-     * 根据账户验证账户是否加密
-     * Verify whether the account is encrypted according to the account.
-     *
-     * @param account the account to be verified.
-     * @return the result of the operation.
-     */
-    Result isEncrypted(Account account);
-
-    /**
-     * 根据账户的地址对象验证账户是否加密
-     * Verify whether the account is encrypted according to the account's address object.
-     *
-     * @param address The address of the account to be verified.
-     * @return the result of the operation.
-     */
-    Result isEncrypted(Address address);
-
-    /**
      * 根据账户的地址字符串验证账户是否加密
      * Verify whether the account is encrypted.
      *
@@ -227,22 +213,22 @@ public interface AccountService {
      */
     Result isEncrypted(String address);
 
-    /**
-     * Verify the account password.
-     * @param account account
-     * @param password password
-     * @return Result
-     */
-    Result validPassword(Account account, String password);
+//    /**
+//     * Verify the account password.
+//     * @param account account
+//     * @param password password
+//     * @return Result
+//     */
+//    Result validPassword(Account account, String password);
 
-    /**
-     * 验证地址字符串的格式
-     * Verify the format of the address string.
-     *
-     * @param address To verify the address string.
-     * @return the result of the operation.
-     */
-    Result verifyAddressFormat(String address);
+//    /**
+//     * 验证地址字符串的格式
+//     * Verify the format of the address string.
+//     *
+//     * @param address To verify the address string.
+//     * @return the result of the operation.
+//     */
+//    Result verifyAddressFormat(String address);
 
     /**
      * 获取所有账户集合
@@ -252,39 +238,39 @@ public interface AccountService {
      */
     Result<Collection<Account>> getAccountList();
 
-    /**
-     * 数据签名
-     * Sign data.
-     *
-     * @param data     Data to be signed.
-     * @param account  Signed account
-     * @param password Account password
-     * @return The NulsSignData object.
-     * @throws NulsException nulsException
-     */
-    NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
-
-    /**
-     * 数据签名(无密码)
-     * Sign data.(no password)
-     *
-     * @param data    Data to be signed.
-     * @param account Signed account
-     * @return The NulsSignData object.
-     * @throws NulsException nulsException
-     */
-    NulsSignData signData(byte[] data, Account account) throws NulsException;
-
-    /**
-     * 数据签名
-     * Sign data.
-     *
-     * @param data  Data to be signed.
-     * @param ecKey eckey.
-     * @return The NulsSignData object.
-     * @throws NulsException nulsException
-     */
-    NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException;
+//    /**
+//     * 数据签名
+//     * Sign data.
+//     *
+//     * @param data     Data to be signed.
+//     * @param account  Signed account
+//     * @param password Account password
+//     * @return The NulsSignData object.
+//     * @throws NulsException nulsException
+//     */
+//    NulsSignData signData(byte[] data, Account account, String password) throws NulsException;
+//
+//    /**
+//     * 数据签名(无密码)
+//     * Sign data.(no password)
+//     *
+//     * @param data    Data to be signed.
+//     * @param account Signed account
+//     * @return The NulsSignData object.
+//     * @throws NulsException nulsException
+//     */
+//    NulsSignData signData(byte[] data, Account account) throws NulsException;
+//
+//    /**
+//     * 数据签名
+//     * Sign data.
+//     *
+//     * @param data  Data to be signed.
+//     * @param ecKey eckey.
+//     * @return The NulsSignData object.
+//     * @throws NulsException nulsException
+//     */
+//    NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException;
 
     /**
      * 数据签名
@@ -308,16 +294,16 @@ public interface AccountService {
      */
     NulsSignData signDigest(byte[] digest, ECKey ecKey);
 
-    /**
-     * 验证签名
-     * Verify the signature.
-     *
-     * @param data     data to be validated.
-     * @param signData signature.
-     * @param pubKey   dublic key of account.
-     * @return the result of the opration
-     */
-    Result verifySignData(byte[] data, NulsSignData signData, byte[] pubKey);
+//    /**
+//     * 验证签名
+//     * Verify the signature.
+//     *
+//     * @param data     data to be validated.
+//     * @param signData signature.
+//     * @param pubKey   dublic key of account.
+//     * @return the result of the opration
+//     */
+//    Result verifySignData(byte[] data, NulsSignData signData, byte[] pubKey);
 
     /**
      * 获取所有的账户的余额
@@ -327,36 +313,36 @@ public interface AccountService {
      * @throws NulsException nulsException
      */
     Result<Balance> getBalance() throws NulsException;
+//
+//    /**
+//     * 根据账户获取账户余额
+//     * Query the balance of an account.
+//     *
+//     * @param account the account.
+//     * @return Balance object.
+//     * @throws NulsException nulsException
+//     */
+//    Result<Balance> getBalance(Account account) throws NulsException;
 
-    /**
-     * 根据账户获取账户余额
-     * Query the balance of an account.
-     *
-     * @param account the account.
-     * @return Balance object.
-     * @throws NulsException nulsException
-     */
-    Result<Balance> getBalance(Account account) throws NulsException;
-
-    /**
-     * 根据账户地址对象获取账户余额
-     * Query the balance of an account.
-     *
-     * @param address the address of the account.
-     * @return Balance object.
-     * @throws NulsException nulsException
-     */
-    Result<Balance> getBalance(Address address) throws NulsException;
-
-    /**
-     * 根据账户地址字符串获取账户余额
-     * Query the balance of an account.
-     *
-     * @param address the address of the account.
-     * @return Balance object.
-     * @throws NulsException nulsException
-     */
-    Result<Balance> getBalance(String address) throws NulsException;
+//    /**
+//     * 根据账户地址对象获取账户余额
+//     * Query the balance of an account.
+//     *
+//     * @param address the address of the account.
+//     * @return Balance object.
+//     * @throws NulsException nulsException
+//     */
+//    Result<Balance> getBalance(Address address) throws NulsException;
+//
+//    /**
+//     * 根据账户地址字符串获取账户余额
+//     * Query the balance of an account.
+//     *
+//     * @param address the address of the account.
+//     * @return Balance object.
+//     * @throws NulsException nulsException
+//     */
+//    Result<Balance> getBalance(String address) throws NulsException;
 
 
     /**
@@ -377,18 +363,48 @@ public interface AccountService {
      */
     Result<String> getAlias(String address);
 
-//    /**
-//     * 获取设置别名交易手续费
-//     * Gets to set the alias transaction fee
-//     *
-//     * @param address
-//     * @param aliasName
-//     * @return
-//     */
-    Result<Na> getAliasFee(String address, String aliasName);
+    /**
+     * 创建多重签名账户
+     * Create a specified number of accounts,and encrypt the accounts,
+     * all the accounts are encrypted by the same password
+     * if the password is NULL or "", the accounts will be unencrypted.
+     *
+     * @param pubkeys 公钥列表
+     * @param m       至少需要几个签名验证通过
+     * @return the account list created.
+     */
+    Result<Address> createMultiAccount(List<String> pubkeys, int m);
 
     /**
-     * 临时方法，后续去除
+     * 获取所有账户集合
+     * Query all account collections.
+     *
+     * @return account list of all accounts.
      */
-    void clearCache();
+    Result<List<MultiSigAccount>> getMultiSigAccountList();
+
+    /**
+     * 根据地址获取本地存储的多签账户的详细信息
+     * Get the details of the locally stored multi-sign account based on the address
+     *
+     * @param address 多签地址
+     * @return 多签账户的详细信息
+     */
+    Result<MultiSigAccount> getMultiSigAccount(String address) throws Exception;
+
+    /**
+     * 导入一个跟本地地址相关的多签账户
+     * @param address 多签地址
+     * @param pubkeys 多签组成公钥列表
+     * @param m       最小签名数
+     * @return 是否成功
+     */
+    Result<Boolean> saveMultiSigAccount(String address, List<String> pubkeys, int m);
+
+    /**
+     * 从数据库中删除该账户
+     * @param address
+     * @return
+     */
+    Result<Boolean> removeMultiSigAccount(String address);
 }

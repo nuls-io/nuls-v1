@@ -37,7 +37,8 @@ import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import org.iq80.leveldb.impl.Iq80DBFactory;
 import org.junit.AfterClass;
@@ -86,15 +87,7 @@ public class LevelDBServiceTest {
         NulsDigestData hash = null;
         hash = NulsDigestData.calcDigestData(tx.serializeForHash());
         tx.setHash(hash);
-        byte[] signbytes = new byte[0];
-        signbytes = ecKey.sign(hash.serialize());
-        NulsSignData nulsSignData = new NulsSignData();
-        nulsSignData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);
-        nulsSignData.setSignBytes(signbytes);
-        P2PKHScriptSig scriptSig = new P2PKHScriptSig();
-        scriptSig.setPublicKey(ecKey.getPubKey());
-        scriptSig.setSignData(nulsSignData);
-        tx.setScriptSig(scriptSig.serialize());
+        SignatureUtil.createSignatureByEckey(tx, ecKey);
     }
 
     private static DBTestEntity createTransferTransaction(byte[] coinKey, Na na, long index) throws IOException {
@@ -257,7 +250,8 @@ public class LevelDBServiceTest {
             coin.parse(bytes,0);
             //
             hash160 = new byte[20];
-            System.arraycopy(coin.getOwner(), 2, hash160, 0, 20);
+            //System.arraycopy(coin.getOwner(), 2, hash160, 0, 20);
+            System.arraycopy(coin.getAddress(), 2, hash160, 0, 20);
             address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, hash160);
             strAddress = address.toString();
             balance = balanceMap.get(strAddress);

@@ -144,12 +144,12 @@ public class LevelDBManager {
     public static File loadDataPath() throws Exception {
         Properties properties = ConfigLoader.loadProperties("db_config.properties");
         String path = properties.getProperty("leveldb.datapath", "./data");
-        String max_str = properties.getProperty("leveldb.area.max", "20");
+        String max_str = properties.getProperty("leveldb.area.max", "50");
         try {
             max = Integer.parseInt(max_str);
         } catch (Exception e) {
             //skip it
-            max = 20;
+            max = 50;
         }
         File dir = null;
         String pathSeparator = System.getProperty("path.separator");
@@ -219,15 +219,15 @@ public class LevelDBManager {
     public static Result createArea(String areaName, Long cacheSize, Comparator<byte[]> comparator) {
         lock.lock();
         try {
-            // prevent too many areas
-            if (AREAS.size() > (max - 1)) {
-                return Result.getFailed(DBErrorCode.DB_AREA_CREATE_EXCEED_LIMIT);
-            }
             if (StringUtils.isBlank(areaName)) {
                 return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
             }
             if (AREAS.containsKey(areaName)) {
                 return Result.getFailed(DBErrorCode.DB_AREA_EXIST);
+            }
+            // prevent too many areas
+            if (AREAS.size() > (max - 1)) {
+                return Result.getFailed(DBErrorCode.DB_AREA_CREATE_EXCEED_LIMIT);
             }
             if (StringUtils.isBlank(dataPath) || !checkPathLegal(areaName)) {
                 return Result.getFailed(DBErrorCode.DB_AREA_CREATE_PATH_ERROR);

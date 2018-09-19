@@ -172,24 +172,11 @@ public class AccountServiceTest {
     public void isEncypted(){
         List<Account> accounts = this.accountService.createAccount(1, "nuls123456").getData();
         Account account = accounts.get(0);
-        assertTrue(accountService.isEncrypted(account).isSuccess());
-        assertTrue(accountService.isEncrypted(account.getAddress()).isSuccess());
         assertTrue(accountService.isEncrypted(account.getAddress().toString()).isSuccess());
 
         List<Account> accounts2 = this.accountService.createAccount(1, "").getData();
         Account account2 = accounts2.get(0);
-        assertTrue(accountService.isEncrypted(account2).isFailed());
-        assertTrue(accountService.isEncrypted(account2.getAddress()).isFailed());
         assertTrue(accountService.isEncrypted(account2.getAddress().toString()).isFailed());
-    }
-
-    @Test
-    public void validPassword(){
-        List<Account> accounts = this.accountService.createAccount(1, "nuls123456").getData();
-        Account account = accounts.get(0);
-        assertTrue(accountService.validPassword(account, "nuls123456").isSuccess());
-        assertFalse(accountService.validPassword(account, "nuls111111").isSuccess());
-        assertFalse(accountService.validPassword(account, "").isSuccess());
     }
 
 

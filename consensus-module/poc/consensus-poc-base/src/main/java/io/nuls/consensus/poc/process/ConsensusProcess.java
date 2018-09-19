@@ -34,7 +34,7 @@ import io.nuls.consensus.poc.container.BlockContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.manager.ChainManager;
 import io.nuls.consensus.poc.model.BlockData;
-import io.nuls.consensus.poc.model.BlockRoundData;
+import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.consensus.poc.model.MeetingMember;
 import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
@@ -43,6 +43,9 @@ import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.protocol.tx.YellowPunishTransaction;
 import io.nuls.consensus.poc.provider.BlockQueueProvider;
 import io.nuls.consensus.poc.util.ConsensusTool;
+import io.nuls.contract.dto.ContractResult;
+import io.nuls.contract.service.ContractService;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
@@ -53,6 +56,7 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.network.service.NetworkService;
+import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.SmallBlock;
@@ -79,6 +83,7 @@ public class ConsensusProcess {
     private BlockService blockService = NulsContext.getServiceBean(BlockService.class);
 
     private TransactionService transactionService = NulsContext.getServiceBean(TransactionService.class);
+    private ContractService contractService = NulsContext.getServiceBean(ContractService.class);
 
     private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
@@ -139,6 +144,7 @@ public class ConsensusProcess {
 
     private void packing(MeetingMember self, MeetingRound round) throws IOException, NulsException {
         Log.debug(round.toString());
+        Log.info("packing 入口==========================");
 
         boolean needCheckAgain = waitReceiveNewestBlock(self, round);
         long start = System.currentTimeMillis();
@@ -206,6 +212,7 @@ public class ConsensusProcess {
         boolean hasReceiveNewestBlock = false;
 
         try {
+            int i = 0;
             while (!hasReceiveNewestBlock) {
                 hasReceiveNewestBlock = hasReceiveNewestBlock(self, round);
                 if (hasReceiveNewestBlock) {
@@ -247,7 +254,7 @@ public class ConsensusProcess {
         long thisRoundIndex = preMember.getRoundIndex();
         int thisPackageIndex = preMember.getPackingIndexOfRound();
 
-        BlockRoundData blockRoundData = new BlockRoundData(bestBlockHeader.getExtend());
+        BlockExtendsData blockRoundData = new BlockExtendsData(bestBlockHeader.getExtend());
         long roundIndex = blockRoundData.getRoundIndex();
         int packageIndex = blockRoundData.getPackingIndexOfRound();
 
@@ -270,18 +277,24 @@ public class ConsensusProcess {
     }
 
     private Block doPacking(MeetingMember self, MeetingRound round) throws NulsException, IOException {
-
         Block bestBlock = chainManager.getBestBlock();
 
         BlockData bd = new BlockData();
         bd.setHeight(bestBlock.getHeader().getHeight() + 1);
         bd.setPreHash(bestBlock.getHeader().getHash());
         bd.setTime(self.getPackEndTime());
-        BlockRoundData roundData = new BlockRoundData();
-        roundData.setRoundIndex(round.getIndex());
-        roundData.setConsensusMemberCount(round.getMemberCount());
-        roundData.setPackingIndexOfRound(self.getPackingIndexOfRound());
-        roundData.setRoundStartTime(round.getStartTime());
+        BlockExtendsData extendsData = new BlockExtendsData();
+        extendsData.setRoundIndex(round.getIndex());
+        extendsData.setConsensusMemberCount(round.getMemberCount());
+        extendsData.setPackingIndexOfRound(self.getPackingIndexOfRound());
+        extendsData.setRoundStartTime(round.getStartTime());
+        //添加版本升级相应协议数据
+        if (NulsVersionManager.getCurrentVersion() > 1) {
+            extendsData.setMainVersion(NulsVersionManager.getMainVersion());
+            extendsData.setCurrentVersion(NulsVersionManager.getCurrentVersion());
+            extendsData.setPercent(NulsVersionManager.getCurrentProtocolContainer().getPercent());
+            extendsData.setDelay(NulsVersionManager.getCurrentProtocolContainer().getDelay());
+        }
 
         StringBuilder str = new StringBuilder();
         str.append(self.getPackingAddress());
@@ -290,7 +303,7 @@ public class ConsensusProcess {
         str.append("\n");
         Log.debug("pack round:" + str);
 
-        bd.setRoundData(roundData);
+        bd.setExtendsData(extendsData);
 
         List<Transaction> packingTxList = new ArrayList<>();
         Set<NulsDigestData> outHashSet = new HashSet<>();
@@ -299,6 +312,21 @@ public class ConsensusProcess {
 
         Map<String, Coin> toMaps = new HashMap<>();
         Set<String> fromSet = new HashSet<>();
+
+        long t1 = 0, t2 = 0;
+
+        long time = System.currentTimeMillis();
+
+        /**
+         * pierre add 智能合约相关
+         */
+        byte[] stateRoot = ConsensusTool.getStateRoot(bestBlock.getHeader());
+        // 更新世界状态根
+        bd.setStateRoot(stateRoot);
+        long height = bestBlock.getHeader().getHeight();
+        Result<ContractResult> invokeContractResult = null;
+        ContractResult contractResult = null;
+        Map<String, Coin> contractUsedCoinMap = new HashMap<>();
 
         int count = 0;
         long start = 0;
@@ -312,7 +340,11 @@ public class ConsensusProcess {
         long sizeTime = 0;
         long failed1Use = 0;
         long addTime = 0;
+        // 为本次打包区块增加一个合约的临时余额区，用于记录本次合约地址余额的变化
+        contractService.createContractTempBalance();
+
         while (true) {
+
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 500L) {
                 break;
             }
@@ -369,6 +401,20 @@ public class ConsensusProcess {
             }
             outHashSetUse += (System.nanoTime() - start);
 
+            // 打包时发现智能合约交易就调用智能合约
+            if(ContractUtil.isContractTransaction(tx)) {
+                invokeContractResult = contractService.invokeContract(tx, height, stateRoot);
+                contractResult = invokeContractResult.getData();
+                if (contractResult != null) {
+                    Result<byte[]> handleContractResult = contractService.handleContractResult(
+                            tx, contractResult,
+                            stateRoot, bd.getTime(),
+                            toMaps, contractUsedCoinMap);
+                    // 更新世界状态
+                    stateRoot = handleContractResult.getData();
+                    bd.setStateRoot(stateRoot);
+                }
+            }
 
             tx.setBlockHeight(bd.getHeight());
             start = System.nanoTime();
@@ -377,6 +423,9 @@ public class ConsensusProcess {
 
             totalSize += txSize;
         }
+        // 打包结束后移除临时余额区
+        contractService.removeContractTempBalance();
+
         whileTime = System.currentTimeMillis() - startWhile;
         ValidateResult validateResult = null;
         int failedCount = 0;
@@ -401,6 +450,7 @@ public class ConsensusProcess {
                 }
             }
         }
+        // 组装CoinBase交易，另外合约调用退还剩余的Gas
         failedUse = System.nanoTime() - start;
 
         start = System.nanoTime();
@@ -408,11 +458,17 @@ public class ConsensusProcess {
         long consensusTxUse = System.nanoTime() - start;
         bd.setTxList(packingTxList);
 
+
         start = System.nanoTime();
+
+        // 更新本地打包最终世界状态根
+        bd.getExtendsData().setStateRoot(bd.getStateRoot());
+
         Block newBlock = ConsensusTool.createBlock(bd, round.getLocalPacker());
         long createBlockUser = System.nanoTime() - start;
         Log.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtil.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtil.convertDate(new Date(self.getPackEndTime())));
+
         Log.info("\ncheck count:" + count + "\ngetTxUse:" + getTxUse / 1000000 + " ,\nledgerExistUse:" + ledgerUse / 1000000 + ", \nverifyUse:" + verifyUse / 1000000 + " ,\noutHashSetUse:" + outHashSetUse / 1000000 + " ,\nfailedTimes:" + failedCount + ", \nfailedUse:" + failedUse / 1000000
                 + " ,\nconsensusTx:" + consensusTxUse / 1000000 + ", \nblockUse:" + createBlockUser / 1000000 + ", \nsleepTIme:" + sleepTIme + ",\nwhileTime:" + whileTime
                 + ", \naddTime:" + addTime / 1000000 + " ,\nsizeTime:" + sizeTime / 1000000 + " ,\nfailed1Use:" + failed1Use / 1000000);
@@ -458,8 +514,9 @@ public class ConsensusProcess {
                 RedPunishData redPunishData = new RedPunishData();
                 redPunishData.setAddress(address);
                 redPunishData.setReasonCode(PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode());
+                redPunishData.setEvidence(bestBlock.serialize());
                 redPunishTransaction.setTxData(redPunishData);
-                CoinData coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress(), PocConsensusConstant.RED_PUNISH_LOCK_TIME);
+                CoinData coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress(), bestBlock.getHeader().getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME);
                 redPunishTransaction.setCoinData(coinData);
                 redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
                 txList.add(redPunishTransaction);

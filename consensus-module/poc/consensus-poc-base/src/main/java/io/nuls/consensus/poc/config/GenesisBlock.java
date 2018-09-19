@@ -24,22 +24,22 @@
  */
 package io.nuls.consensus.poc.config;
 
-import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.model.Address;
 import io.nuls.account.service.AccountService;
-import io.nuls.consensus.poc.model.BlockRoundData;
+import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.io.StringFileLoader;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
+import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.BlockSignature;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
@@ -163,7 +163,7 @@ public final class GenesisBlock extends Block {
         }
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
 
-        BlockRoundData data = new BlockRoundData();
+        BlockExtendsData data = new BlockExtendsData();
         data.setRoundIndex(1);
         data.setRoundStartTime(header.getTime() - ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000);
         data.setConsensusMemberCount(1);
@@ -176,20 +176,20 @@ public final class GenesisBlock extends Block {
         }
         header.setHash(NulsDigestData.calcDigestData(header));
 
-        P2PKHScriptSig p2PKHScriptSig = new P2PKHScriptSig();
+        BlockSignature p2PKHScriptSig = new BlockSignature();
         NulsSignData signData = this.signature(header.getHash().getDigestBytes());
         p2PKHScriptSig.setSignData(signData);
         p2PKHScriptSig.setPublicKey(getGenesisPubkey());
-        header.setScriptSig(p2PKHScriptSig);
+        header.setBlockSignature(p2PKHScriptSig);
     }
 
     private NulsSignData signature(byte[] bytes) throws NulsException {
         AccountService service = NulsContext.getServiceBean(AccountService.class);
-        return service.signDigest(bytes, ECKey.fromPrivate(new BigInteger(Hex.decode(priKey))));
+        return service.signDigest(bytes, ECKey.fromPrivate(new BigInteger(1, Hex.decode(priKey))));
     }
 
     private byte[] getGenesisPubkey() {
-        return ECKey.fromPrivate(new BigInteger(Hex.decode(priKey))).getPubKey();
+        return ECKey.fromPrivate(new BigInteger(1, Hex.decode(priKey))).getPubKey();
     }
 }
 

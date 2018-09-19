@@ -26,9 +26,8 @@
 
 package io.nuls.kernel.model;
 
-import io.nuls.kernel.constant.KernelErrorCode;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -103,7 +102,7 @@ public class CoinData extends BaseNulsData {
             }
         }
         size += SerializeUtils.sizeOfVarInt(to == null ? 0 : to.size());
-        if (null != from) {
+        if (null != to) {
             for (Coin coin : to) {
                 size += SerializeUtils.sizeOfNulsData(coin);
             }
@@ -133,6 +132,7 @@ public class CoinData extends BaseNulsData {
      *
      * @return tx fee
      */
+    @JsonIgnore
     public Na getFee() {
         Na toNa = Na.ZERO;
         for (Coin coin : to) {
@@ -146,19 +146,20 @@ public class CoinData extends BaseNulsData {
     }
 
     public void addTo(Coin coin) {
-        if(null==to){
+        if (null == to) {
             to = new ArrayList<>();
         }
         to.add(coin);
     }
 
     public void addFrom(Coin coin) {
-        if(null==from){
+        if (null == from) {
             from = new ArrayList<>();
         }
         from.add(coin);
     }
 
+    @JsonIgnore
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         if (from != null && from.size() != 0) {
@@ -166,17 +167,15 @@ public class CoinData extends BaseNulsData {
         }
         if (to != null && to.size() != 0) {
             for (int i = 0; i < to.size(); i++) {
-                byte[] owner = to.get(i).getOwner();
-
+                byte[] owner = to.get(i).getAddress();
                 boolean hasExist = false;
-                for(byte[] address : addressSet) {
-                    if(Arrays.equals(owner, address)) {
+                for (byte[] address : addressSet) {
+                    if (Arrays.equals(owner, address)) {
                         hasExist = true;
                         break;
                     }
                 }
-
-                if(!hasExist) {
+                if (!hasExist) {
                     addressSet.add(owner);
                 }
             }

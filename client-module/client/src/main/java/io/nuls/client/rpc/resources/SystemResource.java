@@ -72,7 +72,7 @@ public class SystemResource {
             languageService.saveLanguage(language);
         } catch (NulsException e) {
             Log.error(e);
-            Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode()).toRpcClientResult();
         }
         Map<String, Boolean> map = new HashMap<>();
         map.put("value", true);

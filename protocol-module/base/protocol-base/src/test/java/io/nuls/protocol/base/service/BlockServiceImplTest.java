@@ -31,10 +31,10 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.BlockSignature;
 import io.nuls.ledger.module.impl.UtxoLedgerModuleBootstrap;
 import io.nuls.protocol.service.BlockService;
-import io.nuls.protocol.storage.po.BlockHeaderPo;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -79,7 +79,7 @@ public class BlockServiceImplTest {
             e.printStackTrace();
             assertTrue(false);
         }
-        blockHeader.setScriptSig(new P2PKHScriptSig());
+        blockHeader.setBlockSignature(new BlockSignature());
         blockHeader.setTime(12345678901L);
         blockHeader.setTxCount(3);
         List<NulsDigestData> txHashList = new ArrayList<>();

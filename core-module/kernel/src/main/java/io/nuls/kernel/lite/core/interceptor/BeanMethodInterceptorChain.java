@@ -40,25 +40,25 @@ import java.util.List;
  */
 public class BeanMethodInterceptorChain {
 
-//    /**
+    //    /**
 //     * 链中的拦截器列表
 //     * List of interceptors in the interceptors chain.
 //     */
     protected List<BeanMethodInterceptor> interceptorList = new ArrayList<>();
-//
+    //
 //    /**
 //     * 线程安全的执行缓存，用于标记当前执行进度
 //     * Thread-safe execution cache to mark the current execution progress.
 //     */
     private ThreadLocal<Integer> index = new ThreadLocal<>();
 
-//    /**
+    //    /**
 //     * 方法代理器缓存，线程安全
 //     * Method agent cache, thread safe.
 //     */
     private ThreadLocal<MethodProxy> methodProxyThreadLocal = new ThreadLocal<>();
 
-//    /**
+    //    /**
 //     * 像链中添加一个方法拦截器
 //     * Add a method interceptor to the chain.
 //     *
@@ -92,7 +92,8 @@ public class BeanMethodInterceptorChain {
         }
         return result;
     }
-//
+
+    //
 //    /**
 //     * 调用一个具体的拦截器
 //     * Call a specific interceptor.

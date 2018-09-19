@@ -28,7 +28,8 @@ package io.nuls.protocol.storage.po;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.BlockSignature;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -62,7 +63,7 @@ public class BlockHeaderPoTest {
             e.printStackTrace();
             assertTrue(false);
         }
-        po.setScriptSign(new P2PKHScriptSig());
+        po.setScriptSign(new BlockSignature());
         po.setTime(12345678901L);
         po.setTxCount(3);
         List<NulsDigestData> txHashList = new ArrayList<>();

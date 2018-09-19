@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nuls-protocol>
+    <txs>
+        <tx id="aliasTx_V1" class="io.nuls.account.tx.AliasTransaction"/>
+    </txs>
+</nuls-protocol>

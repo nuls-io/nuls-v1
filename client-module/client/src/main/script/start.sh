@@ -40,7 +40,7 @@ for file in ${SERVER_HOME}/libs/*.jar; do
 done
 
 # Get standard environment variables
-JAVA_OPTS="-server -Xms4096m -Xmx4096m"
+JAVA_OPTS="-Dfile.encoding=UTF-8 -server -Xms4096m -Xmx4096m"
 
 MAIN_CLASS=io.nuls.client.Bootstrap
 

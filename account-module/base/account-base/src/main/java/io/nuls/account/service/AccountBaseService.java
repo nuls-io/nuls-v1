@@ -167,7 +167,7 @@ public class AccountBaseService {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         if (StringUtils.isBlank(password)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.NULL_PARAMETER);
         }
         if (!StringUtils.validPassword(password)) {
             return Result.getFailed(AccountErrorCode.PASSWORD_FORMAT_WRONG);
@@ -229,7 +229,7 @@ public class AccountBaseService {
             if (!account.validatePassword(oldPassword)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
-            account.decrypt(oldPassword);
+            account.unlock(oldPassword);
             account.encrypt(newPassword, true);
             AccountPo po = new AccountPo(account);
             Result result = accountStorageService.updateAccount(po);

@@ -17,6 +17,13 @@ public class LogicData extends TransactionLogicData {
 
     private byte[] bytes;
 
+    public LogicData() {
+    }
+
+    public LogicData(byte[] bytes) {
+        this.bytes = bytes;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBytesWithLength(bytes);
@@ -35,6 +42,14 @@ public class LogicData extends TransactionLogicData {
     @Override
     public Set<byte[]> getAddresses() {
         return null;
+    }
+
+    public void setBytes(byte[] bytes) {
+        this.bytes = bytes;
+    }
+
+    public byte[] getBytes() {
+        return bytes;
     }
 
 }

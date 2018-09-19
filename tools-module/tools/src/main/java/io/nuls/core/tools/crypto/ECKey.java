@@ -25,6 +25,7 @@
 package io.nuls.core.tools.crypto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.primitives.UnsignedBytes;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import org.slf4j.Logger;
@@ -52,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Comparator;
 
 /**
  * 椭圆曲线加密
@@ -394,4 +396,13 @@ public class ECKey {
         }
         return true;
     }
+
+    public static final Comparator<ECKey> PUBKEY_COMPARATOR = new Comparator<ECKey>() {
+        private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+
+        @Override
+        public int compare(ECKey k1, ECKey k2) {
+            return comparator.compare(k1.getPubKey(), k2.getPubKey());
+        }
+    };
 }

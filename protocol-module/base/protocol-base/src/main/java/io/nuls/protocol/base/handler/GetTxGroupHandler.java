@@ -79,6 +79,7 @@ public class GetTxGroupHandler extends AbstractMessageHandler<GetTxGroupRequest>
             if (tx != null) {
                 txList.add(tx);
             } else {
+                Log.error("GetTxGroupHandler NULL TX=========================================hash: " + hash.getDigestHex());
                 return;
             }
         }

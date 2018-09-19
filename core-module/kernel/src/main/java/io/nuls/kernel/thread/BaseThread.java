@@ -87,7 +87,7 @@ public class BaseThread extends Thread {
             ok = false;
             runException(e);
         }
-        if(ok){
+        if (ok) {
             this.afterRun();
         }
 

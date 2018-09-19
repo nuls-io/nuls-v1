@@ -31,8 +31,6 @@ import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Block;
 
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 系统上下文，提供核心数据共享、服务访问等功能
@@ -41,6 +39,28 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Niels
  */
 public class NulsContext {
+
+    /**
+     * 当前钱包最新协议版本(用于系统升级，默认为1，启动时会根据当前钱包的协议配置做修改)
+     * System protocol version.
+     */
+    public static volatile Integer CURRENT_PROTOCOL_VERSION = 1;
+
+    /**
+     * 多重签名地址
+     * contract address type
+     */
+    public static byte P2SH_ADDRESS_TYPE = 3;
+
+    /**
+     * 主网运行中的版本，默认为1，会根据钱包更新到的块的最新版本做修改
+     */
+    public static volatile Integer MAIN_NET_VERSION = 1;
+
+    /**
+     * 切换序列化交易HASH方法的高度
+     */
+    public static Long CHANGE_HASH_SERIALIZE_HEIGHT;
 
     /**
      * 默认链id（nuls主链）,链id会影响地址的生成，当前地址以“Ns”开头
@@ -55,10 +75,19 @@ public class NulsContext {
      */
     public static byte DEFAULT_ADDRESS_TYPE = 1;
 
+    /**
+     * 智能合约地址类型
+     * contract address type
+     */
+    public static byte CONTRACT_ADDRESS_TYPE = 2;
+
+
     /*
      *  chain name
      */
     public static String CHAIN_NAME = "NULS";
+
+    public static String INITIAL_STATE_ROOT = "56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421";
 
     /**
      * cache the best block
@@ -69,6 +98,11 @@ public class NulsContext {
      * cache the genesis block
      */
     private Block genesisBlock;
+
+    /**
+     * 同一个出块地址连续3轮发出两个相同高度，但不同hash的block，节点将会被红牌惩罚
+     */
+    public static byte REDPUNISH_BIFURCATION = 3;
 
     /**
      * 网络最新区块高度
@@ -85,6 +119,11 @@ public class NulsContext {
     public void exit(int stop) {
         this.stop = stop;
     }
+
+    /**
+     * 是否需要强制升级
+     */
+    public static volatile boolean mastUpGrade = false;
 
     /**
      * 获取创世块

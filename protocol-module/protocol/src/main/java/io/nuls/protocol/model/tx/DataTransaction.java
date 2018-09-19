@@ -32,7 +32,6 @@ import io.nuls.protocol.constant.ProtocolConstant;
 /**
  * @author Niels
  */
-//todo 未加入到协议池中
 public class DataTransaction extends Transaction<LogicData> {
 
     public DataTransaction() {
