@@ -133,7 +133,7 @@ public class CreateContractTxProcessor implements TransactionProcessor<CreateCon
         info.setCreateTime(tx.getTime());
         info.setBlockHeight(blockHeight);
 
-        byte[] stateRoot = contractResult.getStateRoot();
+        //byte[] stateRoot = contractResult.getStateRoot();
         boolean isNrc20Contract = contractResult.isNrc20();
         boolean acceptDirectTransfer = contractResult.isAcceptDirectTransfer();
         info.setAcceptDirectTransfer(acceptDirectTransfer);
