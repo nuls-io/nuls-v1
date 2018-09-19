@@ -58,6 +58,17 @@ public class StateSource extends SourceChainBox<byte[], byte[], byte[], byte[]>
         }
     }
 
+    public void setConfig(int stateCacheSize) {
+        int size = stateCacheSize;
+        readCache.withMaxCapacity(size * 1024 * 1024 / 512); // 512 - approx size of a node
+    }
+
+    public void setCommonConfig(Source<byte[], byte[]> source) {
+        if (journalSource != null) {
+            journalSource.setJournalStore(source);
+        }
+    }
+
     public JournalSource<byte[]> getJournalSource() {
         return journalSource;
     }
