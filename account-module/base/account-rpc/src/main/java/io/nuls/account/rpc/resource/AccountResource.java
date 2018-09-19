@@ -1295,33 +1295,6 @@ public class AccountResource {
         return result.toRpcClientResult();
     }
 
-    @POST
-    @Path("multiAccount/signMultiAlias")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "多签账户设置别名交易签名", notes = "result.data: resultJson 返回转账结果")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
-    })
-    public RpcClientResult signAliasTransacton(@ApiParam(name = "form", value = "转账", required = true) MultiTransactionSignForm form) {
-        if(NulsContext.MAIN_NET_VERSION  <=1){
-            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
-        }
-        if (form == null) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
-        }
-        if (!AddressTool.validAddress(form.getSignAddress())) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
-        }
-        if(form.getTxdata() == null || form.getTxdata().length() == 0){
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
-        }
-        Result result = aliasService.signMultiAliasTransaction(form.getSignAddress(),form.getPassword(),form.getTxdata());
-        if (result.isSuccess()) {
-            Map<String, String> map = new HashMap<>();
-            map.put("txData", (String) result.getData());
-            result.setData(map);
-        }
-        return result.toRpcClientResult();
-    }
 	
     @POST
     @Path("/importMultiAccount")

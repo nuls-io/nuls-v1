@@ -66,6 +66,7 @@ import io.nuls.kernel.script.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
+import io.nuls.kernel.utils.TransactionManager;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
@@ -1677,7 +1678,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
      * @param txdata   需要签名的数据
      * @return Result
      */
-    public Result signMultiTransaction(String signAddr,String password,String txdata){
+    /*public Result signMultiTransaction(String signAddr,String password,String txdata){
         try {
             Result<Account> accountResult = accountService.getAccount(signAddr);
             if (accountResult.isFailed()) {
@@ -1703,7 +1704,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Log.error(e);
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
-    }
+    }*/
 
     @Override
     public CoinDataResult getMutilCoinData(byte[] address, Na amount, int size, Na price){
@@ -1891,5 +1892,38 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         return null;
     }
 
-
+    /**
+     * A transfers NULS to B   多签交易
+     *
+     * @param signAddr 签名地址
+     * @param password password of A
+     * @param txdata   需要签名的数据
+     * @return Result
+     */
+    public Result signMultiTransaction(String signAddr,String password,String txdata){
+        try {
+            Result<Account> accountResult = accountService.getAccount(signAddr);
+            if (accountResult.isFailed()) {
+                return accountResult;
+            }
+            Account account = accountResult.getData();
+            if (account.isEncrypted() && account.isLocked()) {
+                AssertUtil.canNotEmpty(password, "the password can not be empty");
+                if (!account.validatePassword(password)) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            }
+            byte[] txByte = Hex.decode(txdata);
+            Transaction tx = TransactionManager.getInstance(new NulsByteBuffer(txByte));
+            TransactionSignature transactionSignature = new TransactionSignature();
+            transactionSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+            return txMultiProcess(tx,transactionSignature,account,password);
+        }catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }catch (Exception e){
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+    }
 }

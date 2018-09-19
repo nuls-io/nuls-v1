@@ -1,9 +1,10 @@
-package io.nuls.account.rpc.cmd;
+package io.nuls.accout.ledger.rpc.cmd;
 
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.utils.RestFulUtils;
@@ -14,12 +15,11 @@ import java.util.Map;
 /**
  * @author: tag
  */
-public class SignMultiAliasProcess implements CommandProcessor {
-
+public class SignMultiTransactionProcess implements CommandProcessor {
     private RestFulUtils restFul = RestFulUtils.getInstance();
     @Override
     public String getCommand() {
-        return "signMultiTransfer";
+        return "signMultiTransaction";
     }
 
     @Override
@@ -55,7 +55,7 @@ public class SignMultiAliasProcess implements CommandProcessor {
         parameters.put("signAddress",args[1]);
         parameters.put("txdata",args[2]);
         parameters.put("password",password);
-        RpcClientResult result = restFul.post("/multiAccount/signMultiAlias", parameters);
+        RpcClientResult result = restFul.post("/multiAccount/signMultiTransaction", parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

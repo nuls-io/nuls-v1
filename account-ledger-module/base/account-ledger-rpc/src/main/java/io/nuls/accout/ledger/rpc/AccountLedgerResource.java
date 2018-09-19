@@ -1187,13 +1187,14 @@ public class AccountLedgerResource {
         return result.toRpcClientResult();
     }
 
+
     @POST
-    @Path("multiAccount/signMultiTransfer")
+    @Path("multiAccount/signMultiTransaction")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "多签转账签名", notes = "result.data: resultJson 返回转账结果")
+    @ApiOperation(value = "多签交易签名", notes = "result.data: resultJson 返回转账结果")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
     })
-    public RpcClientResult signTransfer(@ApiParam(name = "form", value = "转账", required = true) SignMultiTransactionForm form) {
+    public RpcClientResult signMultiTransaction(@ApiParam(name = "form", value = "转账", required = true) SignMultiTransactionForm form) {
         if(NulsContext.MAIN_NET_VERSION  <=1){
             return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
         }
