@@ -321,6 +321,16 @@ public interface AccountLedgerService {
     Result transferP2SH(byte[] fromAddr, byte[] signAddr , List<MultipleAddressTransferModel> outputs, Na values, String password, String remark, Na price, List<String>pubkeys, int m, String txdata);
 
 
+    /**
+     * get usable coinData 多签账户的CoinData
+     *
+     * @param address account address
+     * @param amount  amount want to use
+     * @param size    size of transaction ,to calc the fee
+     * @param price   price 1/KB
+     * @return return balance of account, return 0 if  account is not a local account
+     * @throws NulsException NulsException
+     */
     CoinDataResult getMutilCoinData(byte[] address, Na amount, int size, Na price);
 
     /**
@@ -345,7 +355,30 @@ public interface AccountLedgerService {
      */
     Result signMultiTransaction(String signAddr,String password,String txdata);
 
+    /**
+     * A transfers NULS to B   多签账户签名
+     *
+     * @param tx         需要签名的交易
+     * @param transactionSignature 已签名的签名数据
+     * @param account    签名账户
+     * @param password   password
+     * @return Result
+     */
     Result txMultiProcess(Transaction tx, TransactionSignature transactionSignature, Account account, String password);
 
+    /**
+     * A transfers NULS to B   获取多签账户的赎回脚本
+     *
+     * @param multiSigAccount        多签账户
+     * @return Result
+     */
     Script getRedeemScript(MultiSigAccount multiSigAccount);
+
+    /**
+     * A transfers NULS to B   获取交易的签名类型
+     *
+     * @param utxoList        交易花的UTXO
+     * @return Result
+     */
+    Result getSignatureType(List<String> utxoList);
 }
