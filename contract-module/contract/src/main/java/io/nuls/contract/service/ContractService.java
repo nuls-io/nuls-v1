@@ -173,7 +173,7 @@ public interface ContractService {
     Result<byte[]> verifyContractResult(Transaction tx, ContractResult contractResult, byte[] stateRoot, long time, Map<String,Coin> toMaps, Map<String,Coin> contractUsedCoinMap);
     Result<byte[]> verifyContractResult(Transaction tx, ContractResult contractResult, byte[] stateRoot, long time, Map<String,Coin> toMaps, Map<String,Coin> contractUsedCoinMap, Long blockHeight);
 
-    Result<byte[]> packageTxs(List<Transaction> txs, long bestHeight, Block block, byte[] stateRoot, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap);
+    Result<ContractResult> batchPackageTx(Transaction tx, long bestHeight, Block block, byte[] stateRoot, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap);
     Result<byte[]> processTxs(List<Transaction> txs, long bestHeight, Block block, byte[] stateRoot, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, boolean isForkChain);
 
     /**
@@ -181,4 +181,10 @@ public interface ContractService {
      * @return
      */
     Result<List<ContractTransferTransaction>> loadAllContractTransferTxList();
+
+    void createBatchExecute(byte[] stateRoot);
+
+    Result<byte[]> commitBatchExecute();
+
+    void removeBatchExecute();
 }
