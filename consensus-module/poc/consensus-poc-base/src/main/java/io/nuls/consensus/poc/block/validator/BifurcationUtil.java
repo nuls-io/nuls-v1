@@ -93,10 +93,10 @@ public class BifurcationUtil {
 
         BlockHeader otherBlockHeader = blockService.getBlockHeader(header.getHeight()).getData();
         if (null != otherBlockHeader && !otherBlockHeader.getHash().equals(header.getHash()) && Arrays.equals(otherBlockHeader.getPackingAddress(), header.getPackingAddress())) {
-            Log.info("--------- Received block with the same height and different hashes as the latest local block --------- ");
-            Log.info("--------- height：" + header.getHeight() + ", hash of received block：" + header.getHash().getDigestHex()
+            Log.info("-+-+-+-+-+-+-+-+- Received block with the same height and different hashes as the latest local block -+-+-+-+-+-+-+-+- ");
+            Log.info("-+-+-+-+-+-+-+-+- height：" + header.getHeight() + ", hash of received block：" + header.getHash().getDigestHex()
                     + ", hash of local latest block：" + otherBlockHeader.getHash().getDigestHex());
-            Log.info("--------- Packing address of received block：" +  AddressTool.getStringAddressByBytes(header.getPackingAddress())
+            Log.info("-+-+-+-+-+-+-+-+- Packing address of received block：" +  AddressTool.getStringAddressByBytes(header.getPackingAddress())
                     + ", Packing address of local latest block：" + AddressTool.getStringAddressByBytes(otherBlockHeader.getPackingAddress()));
 
             List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
