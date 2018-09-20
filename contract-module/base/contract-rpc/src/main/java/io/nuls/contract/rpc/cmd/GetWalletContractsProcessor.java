@@ -85,7 +85,8 @@ public class GetWalletContractsProcessor implements CommandProcessor {
         parameters.put("pageNumber", pageNumber);
         parameters.put("pageSize", pageSize);
 
-        RpcClientResult result = restFulUtils.get("/contract/wallet/list/" + address, parameters);
+        String url = "/contract/wallet/list/" + address;
+        RpcClientResult result = restFulUtils.get(url, parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

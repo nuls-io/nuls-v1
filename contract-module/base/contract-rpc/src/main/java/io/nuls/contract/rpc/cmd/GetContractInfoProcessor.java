@@ -76,7 +76,8 @@ public class GetContractInfoProcessor implements CommandProcessor {
         if (StringUtils.isBlank(address)) {
             return CommandResult.getFailed(KernelErrorCode.PARAMETER_ERROR.getMsg());
         }
-        RpcClientResult result = restFul.get("/contract/info/" + address, null);
+        String url = "/contract/info/" + address;
+        RpcClientResult result = restFul.get(url, null);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

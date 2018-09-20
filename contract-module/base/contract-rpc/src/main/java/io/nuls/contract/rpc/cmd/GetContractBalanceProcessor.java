@@ -79,7 +79,8 @@ public class GetContractBalanceProcessor implements CommandProcessor {
         if (StringUtils.isBlank(address)) {
             return CommandResult.getFailed(KernelErrorCode.PARAMETER_ERROR.getMsg());
         }
-        RpcClientResult result = restFul.get("/contract/balance/" + address, null);
+        String url = "/contract/balance/" + address;
+        RpcClientResult result = restFul.get(url, null);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

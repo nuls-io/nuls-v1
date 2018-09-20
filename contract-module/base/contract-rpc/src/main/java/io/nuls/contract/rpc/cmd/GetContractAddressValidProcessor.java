@@ -76,7 +76,8 @@ public class GetContractAddressValidProcessor implements CommandProcessor {
         if (StringUtils.isBlank(address)) {
             return CommandResult.getFailed(KernelErrorCode.PARAMETER_ERROR.getMsg());
         }
-        RpcClientResult result = restFulUtils.get("/contract/" + address, null);
+        String url = "/contract/" + address;
+        RpcClientResult result = restFulUtils.get(url, null);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

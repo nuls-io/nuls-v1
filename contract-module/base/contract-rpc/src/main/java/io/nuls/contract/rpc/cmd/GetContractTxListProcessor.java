@@ -104,8 +104,8 @@ public class GetContractTxListProcessor implements CommandProcessor {
         if (args.length == 5) {
             parameters.put("accountAddress", args[2]);
         }
-
-        RpcClientResult result = restFulUtils.get("/contract/tx/list/" + address, parameters);
+        String url = "/contract/tx/list/" + address;
+        RpcClientResult result = restFulUtils.get(url, parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
