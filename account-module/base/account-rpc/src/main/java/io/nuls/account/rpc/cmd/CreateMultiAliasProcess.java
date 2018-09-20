@@ -48,11 +48,6 @@ public class CreateMultiAliasProcess implements CommandProcessor {
 
     @Override
     public String getHelp() {
-        return "setalias <address> <alias> <signAddress>  --Set an alias for the account ";
-    }
-
-    @Override
-    public String getCommandDescription() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
                 .newLine("\t<address> The address of the account, - Required")
@@ -60,6 +55,12 @@ public class CreateMultiAliasProcess implements CommandProcessor {
                         "(only lower case letters, Numbers and underline, the underline should not be at the begin and end), - Required")
                 .newLine("\t<signAddress> \tsign address address - Required");
         return builder.toString();
+
+    }
+
+    @Override
+    public String getCommandDescription() {
+        return "setalias <address> <alias> <signAddress>  --Set an alias for the account ";
     }
 
     @Override

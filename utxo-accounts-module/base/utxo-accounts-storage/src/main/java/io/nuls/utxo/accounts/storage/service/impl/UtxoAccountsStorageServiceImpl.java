@@ -171,7 +171,7 @@ public class UtxoAccountsStorageServiceImpl implements UtxoAccountsStorageServic
 
     @Override
     public Result<Block> getBlock(long height) {
-        return blockService.getBlock(height);
+        return blockService.getBlock(height,true);
     }
 
 

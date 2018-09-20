@@ -66,9 +66,6 @@ public class GetUtxoAccountsProcessor implements CommandProcessor {
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (!AddressTool.validAddress(args[1])) {
-            return false;
-        }
         return true;
     }
 

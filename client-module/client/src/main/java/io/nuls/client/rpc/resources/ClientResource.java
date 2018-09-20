@@ -94,6 +94,7 @@ public class ClientResource {
         URL url = ClientResource.class.getClassLoader().getResource("libs");
         upgradable = upgradable && url != null;
         rpcVersion.setUpgradable(upgradable);
+        rpcVersion.setNetworkVersion(NulsContext.MAIN_NET_VERSION);
         return Result.getSuccess().setData(rpcVersion).toRpcClientResult();
     }
 

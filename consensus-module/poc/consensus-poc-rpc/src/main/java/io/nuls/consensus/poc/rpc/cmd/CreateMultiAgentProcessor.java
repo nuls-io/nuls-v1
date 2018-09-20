@@ -45,11 +45,6 @@ public class CreateMultiAgentProcessor implements CommandProcessor {
 
     @Override
     public String getHelp() {
-        return "createagent <agentAddress> <packingAddress> <signAddress> <commissionRate> <deposit> [rewardAddress] --create a agent";
-    }
-
-    @Override
-    public String getCommandDescription() {
         CommandBuilder bulider = new CommandBuilder();
         bulider.newLine(getCommandDescription())
                 .newLine("\t<agentAddress>   agent owner address   -required")
@@ -59,6 +54,12 @@ public class CreateMultiAgentProcessor implements CommandProcessor {
                 .newLine("\t<deposit>   amount you want to deposit, you can have up to 8 valid digits after the decimal point -required")
                 .newLine("\t[rewardAddress]  Billing address    -not required");
         return bulider.toString();
+
+    }
+
+    @Override
+    public String getCommandDescription() {
+        return "createagent <agentAddress> <packingAddress> <signAddress> <commissionRate> <deposit> [rewardAddress] --create a agent";
     }
 
     @Override

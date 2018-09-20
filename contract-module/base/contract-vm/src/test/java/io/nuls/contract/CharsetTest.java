@@ -98,7 +98,7 @@ public class CharsetTest {
         programCall.args("中文测试，看看");
         System.out.println(programCall);
 
-        byte[] prevStateRoot = Hex.decode("d38136d91101bdf28e3ca58555186e7969e7672cbddf7fbd8490cdc1ce3a8a21");
+        byte[] prevStateRoot = Hex.decode("9297802947d6498cf5dc8436f75f5528ea9e4ddc5cf6e1d9ddfe6f9ef763f65b");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);
@@ -107,7 +107,7 @@ public class CharsetTest {
         System.out.println(programResult);
         System.out.println("pierre - stateRoot: " + Hex.toHexString(track.getRoot()));
         System.out.println();
-        //c334818f7247f1cf9c46246938845abd5005a9ed2b2f55957ea1694e1310d523
+        //21c643969c4d9281b2e3d434da373d69120d1a9bf7ca3d733163e98a4b93af04
 
         programCall.setMethodName("getData");
         programCall.setMethodDesc("");

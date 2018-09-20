@@ -145,14 +145,19 @@ public class AccountLedgerResource {
         if (form.getAmount() <= 0) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        if (!validTxRemark(form.getRemark())) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-        }
-        byte[] remarkBytes;
-        try {
-            remarkBytes = form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+
+        byte[] remarkBytes = new byte[0];
+
+        if (form.getRemark() != null && form.getRemark().length() > 0) {
+            if (!validTxRemark(form.getRemark())) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
+
+            try {
+                remarkBytes = form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING);
+            } catch (UnsupportedEncodingException e) {
+                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+            }
         }
 
         Na value = Na.valueOf(form.getAmount());
@@ -245,10 +250,6 @@ public class AccountLedgerResource {
         if (form.getInputs() == null || form.getOutputs() == null) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        if (form.getAmount() <= 0) {
-            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-        }
-
 
         for (MulipleTxFromDto from : form.getInputs()) {
             MultipleAddressTransferModel model = new MultipleAddressTransferModel();
@@ -272,10 +273,10 @@ public class AccountLedgerResource {
             toModelList.add(model);
             toTotal+= to.getAmount();
         }
-        if (form.getAmount() <toTotal) {
-            return Result.getFailed(AccountErrorCode.INPUT_TOO_SMALL).toRpcClientResult();
+        if (toTotal <0) {
+            return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        Result result = accountLedgerService.multipleAddressTransfer(fromModelList, toModelList, form.getPassword(),Na.valueOf(form.getAmount()), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+        Result result = accountLedgerService.multipleAddressTransfer(fromModelList, toModelList, form.getPassword(),Na.valueOf(toTotal), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("value", (String) result.getData());

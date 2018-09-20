@@ -47,11 +47,6 @@ public class CreateMultiTransferProcess implements CommandProcessor {
 
     @Override
     public String getHelp() {
-        return "transfer <address> <signAddress> <toAddress>,<toamount>;....;<toAddress><toamount> [remark] -transfer-";
-    }
-
-    @Override
-    public String getCommandDescription() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
                 .newLine("\t<address> \t\tsource address - Required")
@@ -60,6 +55,12 @@ public class CreateMultiTransferProcess implements CommandProcessor {
                         "Separate multiple [toAddress],[toamount],If there are multiple payee Separate multiple. - Required")
                 .newLine("\t[remark] \t\tremark - Not Required");
         return builder.toString();
+
+    }
+
+    @Override
+    public String getCommandDescription() {
+        return "transfer <address> <signAddress> <toAddress>,<toamount>;....;<toAddress><toamount> [remark] -transfer-";
     }
 
     @Override

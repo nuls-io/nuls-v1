@@ -55,7 +55,6 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.*;
 import io.nuls.core.tools.array.ArraysTool;
-import io.nuls.core.tools.calc.LongUtils;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
@@ -150,7 +149,9 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         if(number < 0) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR);
         }
-        if(prevStateRoot == null) {
+
+        // 不能同时为空，批量提交方式stateRoot为空
+        if(executor == null && prevStateRoot == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
         try {
@@ -174,25 +175,31 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                 track = executor.startTracking();
             }
             ProgramResult programResult = track.create(programCreate);
-            track.commit();
+            // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
+            if(executor == null) {
+                track.commit();
+            }
 
             // current state root
-            byte[] stateRoot = executor == null ? track.getRoot() : executor.getRoot();
+            byte[] stateRoot = executor == null ? track.getRoot() : null;
             ContractResult contractResult = new ContractResult();
+            contractResult.setNonce(programResult.getNonce());
+            contractResult.setGasUsed(programResult.getGasUsed());
+            contractResult.setPrice(price);
+            contractResult.setStateRoot(stateRoot);
+            contractResult.setBalance(programResult.getBalance());
+            contractResult.setContractAddress(contractAddress);
+            contractResult.setSender(sender);
+            contractResult.setRemark(ContractConstant.CREATE);
+            // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
+            contractResult.setTxTrack(track);
+
             if(!programResult.isSuccess()) {
                 Result<ContractResult> result = Result.getFailed(ContractErrorCode.CONTRACT_EXECUTE_ERROR);
                 contractResult.setError(programResult.isError());
                 contractResult.setRevert(programResult.isRevert());
                 contractResult.setErrorMessage(programResult.getErrorMessage());
                 contractResult.setStackTrace(programResult.getStackTrace());
-                contractResult.setNonce(programResult.getNonce());
-                contractResult.setGasUsed(programResult.getGasUsed());
-                contractResult.setPrice(price);
-                contractResult.setStateRoot(stateRoot);
-                contractResult.setBalance(programResult.getBalance());
-                contractResult.setContractAddress(contractAddress);
-                contractResult.setSender(sender);
-                contractResult.setRemark(ContractConstant.CREATE);
                 result.setMsg(programResult.getErrorMessage());
                 result.setData(contractResult);
                 return result;
@@ -201,17 +208,8 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             // 返回已使用gas、状态根、消息事件、合约转账(从合约转出)
             contractResult.setError(false);
             contractResult.setRevert(false);
-            contractResult.setStackTrace(programResult.getStackTrace());
-            contractResult.setNonce(programResult.getNonce());
-            contractResult.setGasUsed(programResult.getGasUsed());
-            contractResult.setPrice(price);
-            contractResult.setStateRoot(stateRoot);
-            contractResult.setBalance(programResult.getBalance());
             contractResult.setEvents(programResult.getEvents());
             contractResult.setTransfers(generateContractTransfer(programResult.getTransfers()));
-            contractResult.setContractAddress(contractAddress);
-            contractResult.setSender(sender);
-            contractResult.setRemark(ContractConstant.CREATE);
 
             Result<ContractResult> result = Result.getSuccess();
             result.setData(contractResult);
@@ -253,7 +251,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         if(number < 0) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR);
         }
-        if(prevStateRoot == null) {
+        if(executor == null && prevStateRoot == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
         try {
@@ -282,26 +280,33 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
 
             ProgramResult programResult = track.call(programCall);
 
-            track.commit();
+            // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
+            if(executor == null) {
+                track.commit();
+            }
 
             // current state root
-            byte[] stateRoot = executor == null ? track.getRoot() : executor.getRoot();
+            byte[] stateRoot = executor == null ? track.getRoot() : null;
             ContractResult contractResult = new ContractResult();
+
+            contractResult.setNonce(programResult.getNonce());
+            contractResult.setGasUsed(programResult.getGasUsed());
+            contractResult.setPrice(price);
+            contractResult.setStateRoot(stateRoot);
+            contractResult.setBalance(programResult.getBalance());
+            contractResult.setContractAddress(contractAddress);
+            contractResult.setSender(sender);
+            contractResult.setValue(programCall.getValue().longValue());
+            contractResult.setRemark(ContractConstant.CALL);
+            // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
+            contractResult.setTxTrack(track);
+
             if(!programResult.isSuccess()) {
                 Result<ContractResult> result = Result.getFailed(ContractErrorCode.CONTRACT_EXECUTE_ERROR);
                 contractResult.setError(programResult.isError());
                 contractResult.setRevert(programResult.isRevert());
                 contractResult.setErrorMessage(programResult.getErrorMessage());
                 contractResult.setStackTrace(programResult.getStackTrace());
-                contractResult.setNonce(programResult.getNonce());
-                contractResult.setGasUsed(programResult.getGasUsed());
-                contractResult.setPrice(price);
-                contractResult.setStateRoot(stateRoot);
-                contractResult.setBalance(programResult.getBalance());
-                contractResult.setContractAddress(contractAddress);
-                contractResult.setSender(sender);
-                contractResult.setValue(programCall.getValue().longValue());
-                contractResult.setRemark(ContractConstant.CALL);
                 result.setMsg(programResult.getErrorMessage());
                 result.setData(contractResult);
                 return result;
@@ -310,19 +315,9 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             // 返回调用结果、已使用Gas、状态根、消息事件、合约转账(从合约转出)等
             contractResult.setError(false);
             contractResult.setRevert(false);
-            contractResult.setStackTrace(programResult.getStackTrace());
-            contractResult.setNonce(programResult.getNonce());
             contractResult.setResult(programResult.getResult());
-            contractResult.setGasUsed(programResult.getGasUsed());
-            contractResult.setPrice(price);
-            contractResult.setStateRoot(stateRoot);
-            contractResult.setBalance(programResult.getBalance());
             contractResult.setEvents(programResult.getEvents());
             contractResult.setTransfers(generateContractTransfer(programResult.getTransfers()));
-            contractResult.setContractAddress(contractAddress);
-            contractResult.setSender(sender);
-            contractResult.setValue(programCall.getValue().longValue());
-            contractResult.setRemark(ContractConstant.CALL);
 
             Result<ContractResult> result = Result.getSuccess();
             result.setData(contractResult);
@@ -361,24 +356,30 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                 track = executor.startTracking();
             }
             ProgramResult programResult = track.stop(contractAddress, sender);
-            track.commit();
+            // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
+            if(executor == null) {
+                track.commit();
+            }
 
             // current state root
-            byte[] stateRoot = executor == null ? track.getRoot() : executor.getRoot();
+            byte[] stateRoot = executor == null ? track.getRoot() : null;
             ContractResult contractResult = new ContractResult();
+            contractResult.setNonce(programResult.getNonce());
+            contractResult.setGasUsed(programResult.getGasUsed());
+            contractResult.setStateRoot(stateRoot);
+            contractResult.setBalance(programResult.getBalance());
+            contractResult.setContractAddress(contractAddress);
+            contractResult.setSender(sender);
+            contractResult.setRemark(ContractConstant.DELETE);
+            // 批量提交方式，交易track放置到外部处理合约执行结果的方法里去提交
+            contractResult.setTxTrack(track);
+
             if(!programResult.isSuccess()) {
                 Result<ContractResult> result = Result.getFailed(ContractErrorCode.CONTRACT_EXECUTE_ERROR);
                 contractResult.setError(programResult.isError());
                 contractResult.setRevert(programResult.isRevert());
                 contractResult.setErrorMessage(programResult.getErrorMessage());
                 contractResult.setStackTrace(programResult.getStackTrace());
-                contractResult.setNonce(programResult.getNonce());
-                contractResult.setGasUsed(programResult.getGasUsed());
-                contractResult.setStateRoot(stateRoot);
-                contractResult.setBalance(programResult.getBalance());
-                contractResult.setContractAddress(contractAddress);
-                contractResult.setSender(sender);
-                contractResult.setRemark(ContractConstant.DELETE);
                 result.setMsg(programResult.getErrorMessage());
                 result.setData(contractResult);
                 return result;
@@ -387,13 +388,6 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             // 返回状态根
             contractResult.setError(false);
             contractResult.setRevert(false);
-            contractResult.setStackTrace(programResult.getStackTrace());
-            contractResult.setNonce(programResult.getNonce());
-            contractResult.setStateRoot(stateRoot);
-            contractResult.setBalance(programResult.getBalance());
-            contractResult.setContractAddress(contractAddress);
-            contractResult.setSender(sender);
-            contractResult.setRemark(ContractConstant.DELETE);
 
             Result<ContractResult> result = Result.getSuccess();
             result.setData(contractResult);
@@ -712,36 +706,50 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
 
     @Override
     public Result<ContractResult> invokeContract(Transaction tx, long height, byte[] stateRoot) {
-        return invokeContract(null, tx, height, stateRoot);
+        return invokeContract(null, tx, height, stateRoot, false);
     }
 
-    public Result<ContractResult> invokeContract(ProgramExecutor track, Transaction tx, long height, byte[] stateRoot) {
-        if(tx == null || height < 0 || stateRoot == null) {
+    public Result<ContractResult> invokeContract(ProgramExecutor track, Transaction tx, long height, byte[] stateRoot, boolean isForkChain) {
+        if(tx == null || height < 0) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
         int txType = tx.getType();
 
-        ContractTransaction contractTx = (ContractTransaction) tx;
-        // 打包、验证区块，合约只执行一次
-        ContractResult contractExecutedResult = null;
-        contractExecutedResult = contractTx.getContractResult();
-        if(contractExecutedResult == null) {
-            contractExecutedResult = getContractExecuteResult(tx.getHash());
-        }
-        if(contractExecutedResult != null) {
-            if(contractExecutedResult.isSuccess()) {
-                // 刷新临时余额
-                if(contractExecutedResult.isSuccess()) {
-                    if(tx instanceof CallContractTransaction) {
-                        this.refreshTempBalance((CallContractTransaction) tx, contractExecutedResult);
+        // 分叉链切换主链时，重新执行智能合约
+        if(!isForkChain) {
+            ContractTransaction contractTx = (ContractTransaction) tx;
+            // 打包、验证区块，合约只执行一次
+            ContractResult contractExecutedResult = null;
+            contractExecutedResult = contractTx.getContractResult();
+            if(contractExecutedResult == null) {
+                contractExecutedResult = getContractExecuteResult(tx.getHash());
+                if(contractExecutedResult != null) {
+                    if(Log.isDebugEnabled()) {
+                        Log.debug("===get ContractResult from db.");
                     }
-                } else {
-                    // 合约调用失败，把需要退还的UTXO记录到结果对象中
-                    contractExecutedResult.setValue(((ContractData) tx.getTxData()).getValue());
                 }
-                return Result.getSuccess().setData(contractExecutedResult);
             } else {
-                return Result.getFailed().setData(contractExecutedResult);
+                if(Log.isDebugEnabled()) {
+                    Log.debug("===get ContractResult from tx object.");
+                }
+            }
+            if(contractExecutedResult != null) {
+                contractExecutedResult.setTxTrack(track);
+                if(contractExecutedResult.isSuccess()) {
+                    // 刷新临时余额
+                    if(contractExecutedResult.isSuccess()) {
+                        if(tx instanceof CallContractTransaction) {
+                            this.refreshTempBalance((CallContractTransaction) tx, contractExecutedResult);
+                        }
+                    } else {
+                        // 合约调用失败，把需要退还的UTXO记录到结果对象中
+                        contractExecutedResult.setValue(((ContractData) tx.getTxData()).getValue());
+                    }
+                    return Result.getSuccess().setData(contractExecutedResult);
+                } else {
+                    Log.info("contractExecutedResult failed. {}", contractExecutedResult.toString());
+                    return Result.getFailed().setData(contractExecutedResult);
+                }
             }
         }
 
@@ -776,6 +784,9 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             byte[] contractAddress = callContractData.getContractAddress();
             BigInteger preBalance = vmContext.getBalance(contractAddress);
             ContractResult contractResult = result.getData();
+            if(!contractResult.isSuccess()) {
+                Log.info("contractResult failed. {}", contractResult.toString());
+            }
             contractResult.setPreBalance(preBalance);
             // 刷新临时余额
             if(result.isSuccess()) {
@@ -1069,10 +1080,20 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                 transfers.add(transfer);
             }
 
-            // 处理合约转账(从合约转出)交易
+            // 处理合约转账(从合约转出)交易，若处理成功，则提交这笔交易
             stateRoot = this.handleContractTransferTxs((CallContractTransaction) tx, contractResult, stateRoot, preStateRoot,
                     transfers, time, toMaps, contractUsedCoinMap, null);
 
+        } else {
+            // 提交这笔交易
+            Object txTrackObj = contractResult.getTxTrack();
+            if(txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
+                ProgramExecutor txTrack = (ProgramExecutor) txTrackObj;
+                if(Log.isDebugEnabled()) {
+                    Log.debug("===tx track commit.");
+                }
+                txTrack.commit();
+            }
         }
 
         if (contractResult.isSuccess()) {
@@ -1091,11 +1112,11 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                                              byte[] stateRoot, byte[] preStateRoot,
                                              List<ContractTransfer> transfers, long time,
                                              Map<String,Coin> toMaps, Map<String,Coin> contractUsedCoinMap, Long blockHeight) {
+        boolean isCorrectContractTransfer = true;
         // 创建合约转账(从合约转出)交易
         if (transfers != null && transfers.size() > 0) {
             // 合约转账(从合约转出)使用的交易时间为区块时间
             // 用于保存本次交易产生的合约转账(从合约转出)交易
-            boolean isCorrectContractTransfer = true;
             Map<String, ContractTransferTransaction> successContractTransferTxs = new LinkedHashMap<>();
             Result<ContractTransferTransaction> contractTransferResult;
             ContractTransferTransaction contractTransferTx;
@@ -1151,9 +1172,20 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                     }
                 }
             }
-
             // 保存内部转账子交易到父交易对象中
             tx.setContractTransferTxs(successContractTransferTxs.values());
+        }
+
+        // 合约转账(从合约转出)执行成功，提交这笔交易
+        if(isCorrectContractTransfer) {
+            Object txTrackObj = contractResult.getTxTrack();
+            if(txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
+                ProgramExecutor txTrack = (ProgramExecutor) txTrackObj;
+                if(Log.isDebugEnabled()) {
+                    Log.debug("===tx track commit.");
+                }
+                txTrack.commit();
+            }
         }
         return stateRoot;
     }
@@ -1183,9 +1215,19 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                     transfers.add(transfer);
                 }
             }
-            // 处理合约转账(从合约转出)交易
+            // 处理合约转账(从合约转出)交易，若处理成功，则提交这笔交易
             stateRoot = this.handleContractTransferTxs((CallContractTransaction) tx, contractResult, stateRoot, preStateRoot,
                     transfers, time, toMaps, contractUsedCoinMap, blockHeight);
+        } else {
+            // 提交这笔交易
+            Object txTrackObj = contractResult.getTxTrack();
+            if(txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
+                ProgramExecutor txTrack = (ProgramExecutor) txTrackObj;
+                if(Log.isDebugEnabled()) {
+                    Log.debug("===tx track commit.");
+                }
+                txTrack.commit();
+            }
         }
 
         if (contractResult.isSuccess()) {
@@ -1201,7 +1243,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
     @Override
-    public Result<byte[]> processTxs(List<Transaction> txs, long bestHeight, Block block, byte[] stateRoot, Map<String,Coin> toMaps, Map<String,Coin> contractUsedCoinMap) {
+    public Result<byte[]> packageTxs(List<Transaction> txs, long bestHeight, Block block, byte[] stateRoot, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap) {
         if(stateRoot == null) {
             return Result.getFailed();
         }
@@ -1212,7 +1254,10 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         createContractTempBalance();
 
         ProgramExecutor executor = programExecutor.begin(stateRoot);
-
+        if(Log.isDebugEnabled()) {
+            Log.debug("===start stateRoot: {}", Hex.encode(stateRoot));
+        }
+        List<ContractResult> resultList = new ArrayList<>();
         for (Transaction tx : txs){
 
             if (tx.isSystemTx() || !ContractUtil.isContractTransaction(tx)) {
@@ -1222,21 +1267,97 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             ContractTransaction contractTx = (ContractTransaction) tx;
             contractTx.setBlockHeader(blockHeader);
             // 验证区块时发现智能合约交易就调用智能合约
-            Result<ContractResult> invokeContractResult = invokeContract(executor, tx, bestHeight, executor.getRoot());
+            Result<ContractResult> invokeContractResult = this.invokeContract(executor, tx, bestHeight, null, false);
             ContractResult contractResult = invokeContractResult.getData();
             if (contractResult != null) {
-                Result<byte[]> handleContractResult = verifyContractResult(
-                        tx, contractResult,
-                        stateRoot, blockTime,
-                        toMaps, contractUsedCoinMap);
+                resultList.add(contractResult);
+                Result<byte[]> handleContractResult = this.handleContractResult(tx, contractResult, stateRoot, blockTime, toMaps, contractUsedCoinMap);
                 // 更新世界状态
-                stateRoot = handleContractResult.getData();
+                //stateRoot = handleContractResult.getData();
+                if(Log.isDebugEnabled()) {
+                    Log.debug("===execute stateRoot: {}", Hex.encode(stateRoot));
+                }
             }
         }
 
+        executor.commit();
+
+        stateRoot = executor.getRoot();
+        for(ContractResult result : resultList) {
+            result.setStateRoot(stateRoot);
+        }
+        if(Log.isDebugEnabled()) {
+            Log.debug("===end stateRoot: {}", Hex.encode(stateRoot));
+        }
+        // 验证区块交易结束后移除临时余额区
+        removeContractTempBalance();
+
+        blockHeader.setStateRoot(stateRoot);
+        return Result.getSuccess().setData(stateRoot);
+    }
+
+    @Override
+    public Result<byte[]> processTxs(List<Transaction> txs, long bestHeight, Block block, byte[] stateRoot, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, boolean isForkChain) {
+        if(stateRoot == null) {
+            return Result.getFailed();
+        }
+
+        BlockHeader blockHeader = block.getHeader();
+        long blockTime = blockHeader.getTime();
+        // 为本次验证区块增加一个合约的临时余额区，用于记录本次合约地址余额的变化
+        createContractTempBalance();
+
+        ProgramExecutor executor = programExecutor.begin(stateRoot);
+        if(Log.isDebugEnabled()) {
+            Log.debug("===start stateRoot: {}", Hex.encode(stateRoot));
+        }
+        List<ContractResult> resultList = new ArrayList<>();
+        // 用于存储合约执行结果的stateRoot, 如果不为空，则说明验证、打包的区块是同一个节点
+        byte[] tempStateRoot = null;
+        for (Transaction tx : txs){
+
+            if (tx.isSystemTx() || !ContractUtil.isContractTransaction(tx)) {
+                continue;
+            }
+
+            ContractTransaction contractTx = (ContractTransaction) tx;
+            contractTx.setBlockHeader(blockHeader);
+            // 验证区块时发现智能合约交易就调用智能合约
+            Result<ContractResult> invokeContractResult = this.invokeContract(executor, tx, bestHeight, null, isForkChain);
+            ContractResult contractResult = invokeContractResult.getData();
+            if (contractResult != null) {
+                tempStateRoot = contractResult.getStateRoot();
+                resultList.add(contractResult);
+
+                Result<byte[]> handleContractResult;
+                if(isForkChain) {
+                    handleContractResult = this.verifyContractResult(tx, contractResult, stateRoot, blockTime, toMaps, contractUsedCoinMap, bestHeight);
+                } else {
+                    handleContractResult = this.verifyContractResult(tx, contractResult, stateRoot, blockTime, toMaps, contractUsedCoinMap);
+                }
+                // 更新世界状态
+                //stateRoot = handleContractResult.getData();
+                if(Log.isDebugEnabled()) {
+                    Log.debug("===execute stateRoot: {}", Hex.encode(stateRoot));
+                }
+            }
+        }
 
         executor.commit();
 
+        // 如果不为空，则说明验证、打包的区块是同一个节点
+        if(tempStateRoot != null) {
+            stateRoot = tempStateRoot;
+        } else {
+            stateRoot = executor.getRoot();
+            for(ContractResult result : resultList) {
+                result.setStateRoot(stateRoot);
+            }
+        }
+
+        if(Log.isDebugEnabled()) {
+            Log.debug("===end stateRoot: {}", Hex.encode(stateRoot));
+        }
         // 验证区块交易结束后移除临时余额区
         removeContractTempBalance();
 

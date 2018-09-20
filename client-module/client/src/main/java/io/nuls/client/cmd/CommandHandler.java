@@ -118,7 +118,7 @@ public class CommandHandler {
         register(new CreateMultiAgentProcessor());
         register(new CreateMultiDepositProcessor());
         register(new CreateMultiWithdrawProcessor());
-        register(new CreateStopMultiAgentProcessor());
+        register(new CreateMultiStopAgentProcessor());
 
         /**
          * accountLedger
