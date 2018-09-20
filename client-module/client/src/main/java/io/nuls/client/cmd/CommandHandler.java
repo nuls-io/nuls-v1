@@ -30,6 +30,8 @@ import io.nuls.accout.ledger.rpc.cmd.*;
 import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.consensus.poc.rpc.cmd.*;
+import io.nuls.contract.rpc.cmd.GetContractResultProcessor;
+import io.nuls.contract.rpc.cmd.GetContractTxProcessor;
 import io.nuls.core.tools.cfg.ConfigLoader;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
@@ -158,6 +160,12 @@ public class CommandHandler {
          * utxoAccounts
          */
         register(new GetUtxoAccountsProcessor());
+
+        /**
+         * contract
+         */
+        register(new GetContractTxProcessor());
+        register(new GetContractResultProcessor());
         sdkInit();
     }
 
