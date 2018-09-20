@@ -1163,7 +1163,7 @@ public class AccountLedgerResource {
         Result result = accountLedgerService.getSignatureType(utxoList);
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
-            map.put("txData", (String) result.getData());
+            map.put("signType", (String) result.getData());
             result.setData(map);
         }
         return result.toRpcClientResult();

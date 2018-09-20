@@ -1897,9 +1897,24 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
     @Override
     public Result getSignatureType(List<String> utxoList) {
         //获取utxo中的tx_hash和index,根据tx_hash和index找到utxo，根据utxo的类型获取签名类型
+        byte signType = 0;
         for (String utxo:utxoList) {
+            if((signType & 0x01) == 0x01 && (signType & 0x02) == 0x02){
+                break;
+            }
             byte[] owner= Hex.decode(utxo);
+            Coin coin = ledgerService.getUtxo(owner);
+            if(coin == null){
+                continue;
+            }
+            if (signType != 3) {
+                if ((signType & 0x01) == 0 && coin.getOwner().length == 23) {
+                    signType =(byte)(signType | 0x01);
+                } else if ((signType & 0x02) == 0 && coin.getTempOwner().length != 23) {
+                    signType =(byte) (signType | 0x02);
+                }
+            }
         }
-        return null;
+        return Result.getSuccess().setData(signType);
     }
 }
