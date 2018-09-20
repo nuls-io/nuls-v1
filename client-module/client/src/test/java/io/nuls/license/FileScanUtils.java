@@ -37,7 +37,7 @@ import java.io.FileWriter;
 public class FileScanUtils {
 
     public static void main(String[] args) {
-        String dirPath = "C:\\workspace\\nuls_v2";
+        String dirPath = "C:\\workspace\\nuls";
         File root = new File(dirPath);
         scanFiles(root);
     }
