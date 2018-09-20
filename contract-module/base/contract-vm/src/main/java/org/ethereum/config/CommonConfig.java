@@ -21,6 +21,7 @@ import org.ethereum.core.Repository;
 import org.ethereum.crypto.HashUtil;
 import org.ethereum.datasource.*;
 import org.ethereum.datasource.inmem.HashMapDB;
+import org.ethereum.datasource.leveldb.LevelDbDataSource;
 import org.ethereum.db.DbFlushManager;
 import org.ethereum.db.HeaderStore;
 import org.ethereum.db.RepositoryRoot;
@@ -115,7 +116,7 @@ public class CommonConfig {
             if ("inmem".equals(dataSource)) {
                 dbSource = new HashMapDB<>();
             } else {
-                dbSource = new HashMapDB<>();
+                dbSource = levelDbDataSource();
             }
             dbSource.setName(name);
             dbSource.init(settings);
@@ -124,6 +125,10 @@ public class CommonConfig {
         } finally {
             logger.info(dataSource + " key-value data source created: " + name);
         }
+    }
+
+    protected LevelDbDataSource levelDbDataSource() {
+        return new LevelDbDataSource();
     }
 
     private void resetDataSource(Source source) {
