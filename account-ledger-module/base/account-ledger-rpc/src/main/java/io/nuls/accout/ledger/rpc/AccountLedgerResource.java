@@ -1151,7 +1151,7 @@ public class AccountLedgerResource {
     }
 
     @POST
-    @Path("/multiAccount/signMultiTransaction")
+    @Path("/multiAccount/getSignType")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "验证交易签名类型", notes = "result.data: resultJson 返回签名结果")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
