@@ -17,6 +17,7 @@
  */
 package org.ethereum.db;
 
+import org.ethereum.config.SystemProperties;
 import org.ethereum.core.Block;
 import org.ethereum.core.BlockHeader;
 import org.ethereum.datasource.JournalSource;
@@ -52,8 +53,8 @@ public class PruneManager {
     private Segment segment;
     private Pruner pruner;
 
-    private PruneManager(int pruneBlocksCnt) {
-        this.pruneBlocksCnt = pruneBlocksCnt;
+    private PruneManager(SystemProperties config) {
+        pruneBlocksCnt = config.databasePruneDepth();
     }
 
     public PruneManager(IndexedBlockStore blockStore, JournalSource<?> journalSource,
@@ -69,8 +70,9 @@ public class PruneManager {
 
     public void setStateSource(StateSource stateSource) {
         journalSource = stateSource.getJournalSource();
-        if (journalSource != null)
+        if (journalSource != null) {
             pruner = new Pruner(journalSource.getJournal(), stateSource.getNoJournalSource());
+        }
     }
 
     public void blockCommitted(BlockHeader block) {

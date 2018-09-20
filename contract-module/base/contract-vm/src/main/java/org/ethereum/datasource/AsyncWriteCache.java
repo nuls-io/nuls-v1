@@ -112,8 +112,9 @@ public abstract class AsyncWriteCache<Key, Value> extends AbstractCachedSource<K
     public synchronized void flipStorage() throws InterruptedException {
         // if previous flush still running
         try {
-            if (!lastFlush.isDone())
+            if (!lastFlush.isDone()) {
                 logger.debug("AsyncWriteCache (" + name + "): waiting for previous flush to complete");
+            }
             lastFlush.get();
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
@@ -125,6 +126,7 @@ public abstract class AsyncWriteCache<Key, Value> extends AbstractCachedSource<K
         }
     }
 
+    @Override
     public synchronized ListenableFuture<Boolean> flushAsync() throws InterruptedException {
         logger.debug("AsyncWriteCache (" + name + "): flush submitted");
         lastFlush = flushExecutor.submit(() -> {

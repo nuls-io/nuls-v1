@@ -55,7 +55,9 @@ public class HeaderStore {
     public synchronized BlockHeader getBestHeader() {
 
         long maxNumber = getMaxNumber();
-        if (maxNumber < 0) return null;
+        if (maxNumber < 0) {
+            return null;
+        }
 
         return getHeaderByNumber(maxNumber);
     }

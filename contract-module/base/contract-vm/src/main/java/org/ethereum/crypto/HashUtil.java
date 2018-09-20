@@ -17,6 +17,7 @@
  */
 package org.ethereum.crypto;
 
+import org.ethereum.config.SystemProperties;
 import org.ethereum.crypto.jce.SpongyCastleProvider;
 import org.ethereum.util.RLP;
 import org.ethereum.util.Utils;
@@ -50,10 +51,11 @@ public class HashUtil {
     private static final String HASH_512_ALGORITHM_NAME;
 
     static {
+        SystemProperties props = SystemProperties.getDefault();
         Security.addProvider(SpongyCastleProvider.getInstance());
-        CRYPTO_PROVIDER = Security.getProvider("SC");//JCA cryptoprovider name.
-        HASH_256_ALGORITHM_NAME = "ETH-KECCAK-256";//Used for create JCA MessageDigest
-        HASH_512_ALGORITHM_NAME = "ETH-KECCAK-512";//Used for create JCA MessageDigest
+        CRYPTO_PROVIDER = Security.getProvider(props.getCryptoProviderName());
+        HASH_256_ALGORITHM_NAME = props.getHash256AlgName();
+        HASH_512_ALGORITHM_NAME = props.getHash512AlgName();
         EMPTY_DATA_HASH = sha3(EMPTY_BYTE_ARRAY);
         EMPTY_LIST_HASH = sha3(RLP.encodeList());
         EMPTY_TRIE_HASH = sha3(RLP.encodeElement(EMPTY_BYTE_ARRAY));

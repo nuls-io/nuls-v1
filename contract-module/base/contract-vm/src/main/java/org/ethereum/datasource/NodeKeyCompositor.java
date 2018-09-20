@@ -1,5 +1,6 @@
 package org.ethereum.datasource;
 
+import org.ethereum.config.CommonConfig;
 import org.ethereum.db.RepositoryRoot;
 
 import static java.lang.System.arraycopy;
@@ -23,6 +24,7 @@ import static org.ethereum.crypto.HashUtil.sha3;
  * This mechanism is a part of flat storage source which is free from reference counting
  *
  * @author Mikhail Kalinin
+ * @see CommonConfig#trieNodeSource()
  * @see RepositoryRoot#RepositoryRoot(Source, byte[])
  * @since 05.12.2017
  */

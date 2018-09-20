@@ -132,6 +132,8 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     private Lock saveLock = new ReentrantLock();
     private Lock lock = new ReentrantLock();
 
+    private ThreadLocal<ProgramExecutor> localProgramExecutor = new ThreadLocal<>();
+
     @Override
     public void afterPropertiesSet() throws NulsException {
         programExecutor = vmHelper.getProgramExecutor();
@@ -1243,57 +1245,28 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
     @Override
-    public Result<byte[]> packageTxs(List<Transaction> txs, long bestHeight, Block block, byte[] stateRoot, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap) {
+    public Result<ContractResult> batchPackageTx(Transaction tx, long bestHeight, Block block, byte[] stateRoot, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap) {
         if(stateRoot == null) {
             return Result.getFailed();
         }
 
         BlockHeader blockHeader = block.getHeader();
         long blockTime = blockHeader.getTime();
-        // 为本次验证区块增加一个合约的临时余额区，用于记录本次合约地址余额的变化
-        createContractTempBalance();
-
-        ProgramExecutor executor = programExecutor.begin(stateRoot);
-        if(Log.isDebugEnabled()) {
-            Log.debug("===start stateRoot: {}", Hex.encode(stateRoot));
-        }
-        List<ContractResult> resultList = new ArrayList<>();
-        for (Transaction tx : txs){
-
-            if (tx.isSystemTx() || !ContractUtil.isContractTransaction(tx)) {
-                continue;
-            }
-
-            ContractTransaction contractTx = (ContractTransaction) tx;
-            contractTx.setBlockHeader(blockHeader);
-            // 验证区块时发现智能合约交易就调用智能合约
-            Result<ContractResult> invokeContractResult = this.invokeContract(executor, tx, bestHeight, null, false);
-            ContractResult contractResult = invokeContractResult.getData();
-            if (contractResult != null) {
-                resultList.add(contractResult);
-                Result<byte[]> handleContractResult = this.handleContractResult(tx, contractResult, stateRoot, blockTime, toMaps, contractUsedCoinMap);
-                // 更新世界状态
-                //stateRoot = handleContractResult.getData();
-                if(Log.isDebugEnabled()) {
-                    Log.debug("===execute stateRoot: {}", Hex.encode(stateRoot));
-                }
-            }
+        ProgramExecutor executor = localProgramExecutor.get();
+        if(executor == null) {
+            return Result.getFailed();
         }
 
-        executor.commit();
-
-        stateRoot = executor.getRoot();
-        for(ContractResult result : resultList) {
-            result.setStateRoot(stateRoot);
+        ContractTransaction contractTx = (ContractTransaction) tx;
+        contractTx.setBlockHeader(blockHeader);
+        // 验证区块时发现智能合约交易就调用智能合约
+        Result<ContractResult> invokeContractResult = this.invokeContract(executor, tx, bestHeight, null, false);
+        ContractResult contractResult = invokeContractResult.getData();
+        if (contractResult != null) {
+            this.handleContractResult(tx, contractResult, stateRoot, blockTime, toMaps, contractUsedCoinMap);
         }
-        if(Log.isDebugEnabled()) {
-            Log.debug("===end stateRoot: {}", Hex.encode(stateRoot));
-        }
-        // 验证区块交易结束后移除临时余额区
-        removeContractTempBalance();
 
-        blockHeader.setStateRoot(stateRoot);
-        return Result.getSuccess().setData(stateRoot);
+        return Result.getSuccess().setData(contractResult);
     }
 
     @Override
@@ -1374,5 +1347,31 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             Log.error(e);
             return Result.getFailed();
         }
+    }
+
+    @Override
+    public void createBatchExecute(byte[] stateRoot) {
+        localProgramExecutor.remove();
+        if(stateRoot == null) {
+            return;
+        }
+        ProgramExecutor executor = programExecutor.begin(stateRoot);
+        localProgramExecutor.set(executor);
+    }
+
+    @Override
+    public Result<byte[]> commitBatchExecute() {
+        ProgramExecutor executor = localProgramExecutor.get();
+        if(executor == null) {
+            return Result.getSuccess();
+        }
+        executor.commit();
+        byte[] stateRoot = executor.getRoot();
+        return Result.getSuccess().setData(stateRoot);
+    }
+
+    @Override
+    public void removeBatchExecute() {
+        localProgramExecutor.remove();
     }
 }

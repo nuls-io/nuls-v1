@@ -218,8 +218,9 @@ public class BloomFilter implements Serializable {
      */
     public synchronized void add(byte[] bytes) {
         int[] hashes = createHashes(bytes, k);
-        for (int hash : hashes)
+        for (int hash : hashes) {
             bitset.set(Math.abs(hash % bitSetSize), true);
+        }
         numberOfAddedElements++;
     }
 

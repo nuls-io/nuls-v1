@@ -17,6 +17,8 @@
  */
 package org.ethereum.db;
 
+import org.ethereum.config.CommonConfig;
+import org.ethereum.config.SystemProperties;
 import org.ethereum.datasource.*;
 
 /**
@@ -55,6 +57,17 @@ public class StateSource extends SourceChainBox<byte[], byte[], byte[], byte[]>
             add(journalSource = new JournalSource<>(writeCache));
         } else {
             add(noDeleteSource = new NoDeleteSource<>(writeCache));
+        }
+    }
+
+    public void setConfig(SystemProperties config) {
+        int size = config.getConfig().getInt("cache.stateCacheSize");
+        readCache.withMaxCapacity(size * 1024 * 1024 / 512); // 512 - approx size of a node
+    }
+
+    public void setCommonConfig(CommonConfig commonConfig) {
+        if (journalSource != null) {
+            journalSource.setJournalStore(commonConfig.cachedDbSource("journal"));
         }
     }
 
