@@ -169,6 +169,7 @@ public class CommandHandler {
         register(new GetContractBalanceProcessor());
         register(new GetContractTxListProcessor());
         register(new GetContractAddressValidProcessor());
+        register(new GetWalletContractsProcessor());
         sdkInit();
     }
 
