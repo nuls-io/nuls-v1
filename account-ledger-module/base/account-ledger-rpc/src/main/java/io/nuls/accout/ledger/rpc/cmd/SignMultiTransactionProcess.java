@@ -80,7 +80,7 @@ public class SignMultiTransactionProcess implements CommandProcessor {
         parameters.put("signAddress",args[1]);
         parameters.put("txdata",args[2]);
         parameters.put("password",password);
-        RpcClientResult result = restFul.post("/multiAccount/signMultiTransaction", parameters);
+        RpcClientResult result = restFul.post("/accountledger/multiAccount/signMultiTransaction", parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

@@ -112,7 +112,7 @@ public class CreateMultiAgentProcessor implements CommandProcessor {
         if(args.length == 7){
             parameters.put("rewardAddress", args[6]);
         }
-        RpcClientResult result = restFul.post("/multiAccount/createMultiAgent",parameters);
+        RpcClientResult result = restFul.post("/consensus/multiAccount/createMultiAgent",parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

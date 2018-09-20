@@ -91,7 +91,7 @@ public class CreateMultiWithdrawProcessor implements CommandProcessor {
         parameters.put("signAddress", args[2]);
         parameters.put("txHash", args[3]);
         parameters.put("password", password);
-        RpcClientResult result = restFul.post("/multiAccount/mutilWithdraw", parameters);
+        RpcClientResult result = restFul.post("/consensus/multiAccount/mutilWithdraw", parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

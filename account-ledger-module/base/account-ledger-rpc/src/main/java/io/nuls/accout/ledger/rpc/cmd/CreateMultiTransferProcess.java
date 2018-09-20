@@ -96,7 +96,7 @@ public class CreateMultiTransferProcess implements CommandProcessor {
             parameters.put("remark",args[4]);
         }
         parameters.put("password",password);
-        RpcClientResult result = restFul.post("/multiAccount/createMultiTransfer", parameters);
+        RpcClientResult result = restFul.post("/accountledger/multiAccount/createMultiTransfer", parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

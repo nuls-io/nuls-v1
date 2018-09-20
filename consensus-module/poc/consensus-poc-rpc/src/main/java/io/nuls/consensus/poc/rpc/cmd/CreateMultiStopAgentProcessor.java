@@ -88,7 +88,7 @@ public class CreateMultiStopAgentProcessor implements CommandProcessor {
         parameters.put("address", args[1]);
         parameters.put("signAddress", args[2]);
         parameters.put("password", password);
-        RpcClientResult result = restFul.post("/multiAccount/agent/stopMultiAgent", parameters);
+        RpcClientResult result = restFul.post("/consensus/multiAccount/agent/stopMultiAgent", parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

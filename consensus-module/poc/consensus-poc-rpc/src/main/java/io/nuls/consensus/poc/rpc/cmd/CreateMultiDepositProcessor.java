@@ -97,7 +97,7 @@ public class CreateMultiDepositProcessor implements CommandProcessor {
         parameters.put("agentHash", args[3]);
         parameters.put("deposit", amount);
         parameters.put("password", password);
-        RpcClientResult result = restFul.post("/multiAccount/createMultiDeposit", parameters);
+        RpcClientResult result = restFul.post("/consensus/multiAccount/createMultiDeposit", parameters);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

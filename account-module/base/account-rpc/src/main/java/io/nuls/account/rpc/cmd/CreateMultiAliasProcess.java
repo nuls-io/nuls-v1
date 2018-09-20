@@ -93,7 +93,7 @@ public class CreateMultiAliasProcess implements CommandProcessor {
         parameters.put("alias", args[2]);
         parameters.put("signAddress", args[3]);
         parameters.put("password", password);
-        RpcClientResult result = restFul.post("/multiAccount/mutilAlias", parameters);
+        RpcClientResult result = restFul.post("/account/multiAccount/mutilAlias", parameters);
         if(result.isFailed()){
             return CommandResult.getFailed(result);
         }
