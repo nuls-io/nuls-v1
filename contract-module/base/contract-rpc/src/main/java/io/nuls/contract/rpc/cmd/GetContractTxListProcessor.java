@@ -25,13 +25,16 @@
 
 package io.nuls.contract.rpc.cmd;
 
+import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.RpcClientResult;
 import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.CommandBuilder;
+import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.utils.RestFulUtils;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,10 +113,49 @@ public class GetContractTxListProcessor implements CommandProcessor {
             return CommandResult.getFailed(result);
         }
         /**
-         * TODO.. format amount and trx fee.
+         * format amount and trx fee. 1NULS = 100000000Na
          */
-        //List<Map<String, Object>> list = (List<Map<String, Object>>) ((Map) result.getData()).get("list");
-        //result.setData(list);
+        List<Map<String, Object>> list = (List<Map<String, Object>>) ((Map) result.getData()).get("list");
+        for(Map<String, Object> map : list){
+            map.put("fee", CommandHelper.naToNuls(map.get("fee")));
+            map.put("value", CommandHelper.naToNuls(map.get("value")));
+            map.put("time",  DateUtil.convertDate(new Date((Long)map.get("time"))));
+            //map.put("status", statusExplain((Integer)map.get("status")));
+            map.put("type", CommandHelper.txTypeExplain((Integer)map.get("type")));
+
+            List<Map<String, Object>> inputs = (List<Map<String, Object>>)map.get("inputs");
+            for(Map<String, Object> input : inputs){
+                input.put("value", CommandHelper.naToNuls(input.get("value")));
+            }
+            map.put("inputs", inputs);
+            List<Map<String, Object>> outputs = (List<Map<String, Object>>)map.get("outputs");
+            for(Map<String, Object> output : outputs){
+                output.put("value", CommandHelper.naToNuls(output.get("value")));
+                //output.put("status", statusExplainForOutPut((Integer) output.get("status")));
+            }
+            map.put("outputs", outputs);
+
+            Map<String, Object> txDataMap = (Map) map.get("txData");
+            if(txDataMap != null) {
+                Map<String, Object> dataMap = (Map) txDataMap.get("data");
+                if(dataMap != null) {
+                    dataMap.put("value", CommandHelper.naToNuls(dataMap.get("value")));
+                    dataMap.put("price", CommandHelper.naToNuls(dataMap.get("price")));
+                }
+            }
+
+            Map<String, Object> contractResultMap = (Map) map.get("contractResult");
+            if(contractResultMap != null) {
+                contractResultMap.put("totalFee", CommandHelper.naToNuls(contractResultMap.get("totalFee")));
+                contractResultMap.put("txSizeFee", CommandHelper.naToNuls(contractResultMap.get("txSizeFee")));
+                contractResultMap.put("actualContractFee", CommandHelper.naToNuls(contractResultMap.get("actualContractFee")));
+                contractResultMap.put("refundFee", CommandHelper.naToNuls(contractResultMap.get("refundFee")));
+                contractResultMap.put("value", CommandHelper.naToNuls(contractResultMap.get("value")));
+                contractResultMap.put("price", CommandHelper.naToNuls(contractResultMap.get("price")));
+                contractResultMap.put("balance", CommandHelper.naToNuls(contractResultMap.get("balance")));
+            }
+        }
+        result.setData(list);
         return CommandResult.getResult(result);
     }
 }
