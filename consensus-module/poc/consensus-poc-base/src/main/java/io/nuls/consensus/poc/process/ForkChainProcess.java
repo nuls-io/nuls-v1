@@ -79,9 +79,6 @@ public class ForkChainProcess {
         this.chainManager = chainManager;
     }
 
-
-    private boolean test = false;
-
     public boolean doProcess() throws IOException, NulsException {
 
         if (ConsensusStatusContext.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
@@ -104,7 +101,7 @@ public class ForkChainProcess {
             }
             //获得主链最新块，如果分叉链和主链高度一致，但是最新块hash不一致，然后排序hash来决定要不要进行特殊回滚处理
             BlockHeader newChainBlockHeader = newChain.getBestBlock().getHeader();
-            String newChainBlockHash = newChainBlockHeader.getHash().getDigestHex();
+
             Iterator<ChainContainer> iterator = chainManager.getChains().iterator();
             while (iterator.hasNext()) {
                 ChainContainer forkChain = iterator.next();
@@ -114,20 +111,20 @@ public class ForkChainProcess {
                 }
                 long newChainHeight = forkChain.getChain().getEndBlockHeader().getHeight();
                 BlockHeader forkChainBlockHeader = forkChain.getChain().getEndBlockHeader();
+                String rightHash = null;
                 String forkChainBlockHash = forkChainBlockHeader.getHash().getDigestHex();
-                String rightHash = rightHash(newChainBlockHash, forkChainBlockHash);
+                //如果高度相同，则排序选一个hash，作为大家都认同的块
+                if (newChainBlockHeader.getHeight() == newChainHeight){
+                    String newChainBlockHash = newChainBlockHeader.getHash().getDigestHex();
+                    rightHash = rightHash(newChainBlockHash, forkChainBlockHash);
+                }
                 if (newChainHeight > newestBlockHeight
                         || (newChainHeight == newestBlockHeight && forkChain.getChain().getEndBlockHeader().getTime() < newChain.getChain().getEndBlockHeader().getTime())
                         || (newChainBlockHeader.getHeight() == newChainHeight && forkChainBlockHash.equals(rightHash))) {
-                    System.out.println();
                     if (newChainBlockHeader.getHeight() == newChainHeight && forkChainBlockHash.equals(rightHash)) {
-                        test = true;
-                        System.out.println("&&&&&&&&&&&&&&&&&&&&&&& ForkChainProcess相同高度不同块回滚 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-                        System.out.println("newChainBlockHeader.getHeight() == newChainHeight ：：：" + newChainHeight);
-                        System.out.println("rightHash：" + rightHash);
-                        System.out.println("&&&&&&&&&&&&&&&&&&&&&&& ForkChainProcess相同高度不同块回滚 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+                        Log.info("--------- Change chain with the same height but different hash block ---------");
+                        Log.info("--------- height: "+ newChainHeight + ", The Hash selected after the Hash is sorted：" + rightHash);
                     }
-                    System.out.println();
                     newChain = forkChain;
                     newestBlockHeight = newChainHeight;
                 }
@@ -163,13 +160,6 @@ public class ForkChainProcess {
                     //Verify pass, try to switch chain
                     //验证通过，尝试切换链
                     boolean success = changeChain(resultChain, newChain, verifyResultList);
-                    System.out.println();
-                    if (test) {
-                        System.out.println("&&&&&&&&&&&&&&&&&&&&&&& ForkChainProcess 相同高度不同块回滚 结果 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-                        System.out.println(success);
-                        System.out.println("&&&&&&&&&&&&&&&&&&&&&&& ForkChainProcess 相同高度不同块回滚 结果 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-                    }
-                    System.out.println();
                     if (success) {
                         chainManager.getChains().remove(newChain);
                     }
