@@ -1082,7 +1082,7 @@ public class AccountLedgerResource {
     }
 
     @POST
-    @Path("multiAccount/createMultiTransfer")
+    @Path("/multiAccount/createMultiTransfer")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
@@ -1123,7 +1123,7 @@ public class AccountLedgerResource {
     }
 
     @POST
-    @Path("multiAccount/signMultiTransaction")
+    @Path("/multiAccount/signMultiTransaction")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "多签交易签名", notes = "result.data: resultJson 返回转账结果")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
@@ -1145,6 +1145,25 @@ public class AccountLedgerResource {
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("txData", (String) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
+
+    @POST
+    @Path("/multiAccount/getSignType")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "验证交易签名类型", notes = "result.data: resultJson 返回签名结果")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult getSignatureType(@ApiParam(name = "utxoList", value = "转账", required = true) List<String> utxoList) {
+        if (utxoList== null || utxoList.size() == 0) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        Result result = accountLedgerService.getSignatureType(utxoList);
+        if (result.isSuccess()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("signType", (String) result.getData());
             result.setData(map);
         }
         return result.toRpcClientResult();

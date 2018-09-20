@@ -340,7 +340,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     boolean signtureValidFlag = false;
                     if(transaction.needVerifySignature()){
                         if(transactionSignature != null){
-                            if(fromAddressBytes != null && fromAddressBytes.length != 23 && transactionSignature.getScripts() != null && transactionSignature.getScripts().size()>0){
+                            if(fromAddressBytes != null && fromAddressBytes.length != Address.ADDRESS_LENGTH && transactionSignature.getScripts() != null
+                                    && transactionSignature.getScripts().size()>0){
                                 Script scriptPubkey = new Script(fromAddressBytes);
                                 for (Script scriptSig:transactionSignature.getScripts()) {
                                     signtureValidFlag = scriptSig.correctlyNulsSpends(transaction,0,scriptPubkey);

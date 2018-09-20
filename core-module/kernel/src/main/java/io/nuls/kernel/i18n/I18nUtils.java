@@ -32,6 +32,7 @@ import io.nuls.kernel.exception.NulsException;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -77,7 +78,7 @@ public class I18nUtils {
         try {
             URL furl = I18nUtils.class.getClassLoader().getResource(FOLDER);
             if (null != furl) {
-                File folderFile = new File(furl.getPath());
+                File folderFile = new File(URLDecoder.decode(furl.getPath(),"UTF-8"));
                 for (File file : folderFile.listFiles()) {
                     InputStream is = new FileInputStream(file);
                     Properties prop = new Properties();

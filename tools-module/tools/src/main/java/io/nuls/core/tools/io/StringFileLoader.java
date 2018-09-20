@@ -31,6 +31,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URLDecoder;
 
 /**
  * @author Niels
@@ -46,7 +47,7 @@ public class StringFileLoader {
     public static String readRealPath(String realPath, boolean format) throws Exception {
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new FileReader(realPath));
+            br = new BufferedReader(new FileReader(URLDecoder.decode(realPath, "UTF-8")));
         } catch (FileNotFoundException e) {
             Log.error(e);
             throw new Exception(e);

@@ -50,7 +50,9 @@ import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.*;
 
@@ -75,15 +77,16 @@ public class Bootstrap {
         }
     }
 
-    private static void copyWebFiles() {
+    private static void copyWebFiles() throws UnsupportedEncodingException {
         String path = Bootstrap.class.getClassLoader().getResource("").getPath() + "/temp/" + NulsConfig.VERSION + "/conf/client-web/";
+        path = URLDecoder.decode(path, "UTF-8");
         File source = new File(path);
         if (!source.exists()) {
             Log.info("source not exists:" + path);
             return;
         }
         Log.info("do the files copy!");
-        File target = new File(Bootstrap.class.getClassLoader().getResource("").getPath() + "/conf/client-web/");
+        File target = new File(URLDecoder.decode(Bootstrap.class.getClassLoader().getResource("").getPath(), "UTF-8") + "/conf/client-web/");
         FileUtil.deleteFolder(target);
         FileUtil.copyFolder(source, target);
     }

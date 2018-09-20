@@ -40,6 +40,7 @@ import io.nuls.kernel.exception.NulsException;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Map;
 
 /**
@@ -86,6 +87,11 @@ public class SyncVersionRunner implements Runnable {
     private void checkLocalTempFiles() {
         if (!UpgradeThread.getInstance().isUpgrading()) {
             String root = SyncVersionRunner.class.getClassLoader().getResource("").getPath();
+            try {
+                root = URLDecoder.decode(root,"UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                Log.error(e);
+            }
             File file = new File(root + "/temp");
             if (file.exists()) {
                 FileUtil.deleteFolder(file);

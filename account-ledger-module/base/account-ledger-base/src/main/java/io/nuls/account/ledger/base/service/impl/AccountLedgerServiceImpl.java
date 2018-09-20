@@ -1671,42 +1671,6 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         }
     }
 
-    /**
-     * A transfers NULS to B   多签交易
-     *
-     * @param signAddr 签名地址
-     * @param password password of A
-     * @param txdata   需要签名的数据
-     * @return Result
-     */
-    /*public Result signMultiTransaction(String signAddr,String password,String txdata){
-        try {
-            Result<Account> accountResult = accountService.getAccount(signAddr);
-            if (accountResult.isFailed()) {
-                return accountResult;
-            }
-            Account account = accountResult.getData();
-            if (account.isEncrypted() && account.isLocked()) {
-                AssertUtil.canNotEmpty(password, "the password can not be empty");
-                if (!account.validatePassword(password)) {
-                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-                }
-            }
-            TransferTransaction tx = new TransferTransaction();
-            TransactionSignature transactionSignature = new TransactionSignature();
-            byte[] txByte = Hex.decode(txdata);
-            tx.parse(new NulsByteBuffer(txByte));
-            transactionSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
-            return txMultiProcess(tx,transactionSignature,account,password);
-        }catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(e.getErrorCode());
-        }catch (Exception e){
-            Log.error(e);
-            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
-        }
-    }*/
-
     @Override
     public CoinDataResult getMutilCoinData(byte[] address, Na amount, int size, Na price){
         if (null == price) {
@@ -1928,5 +1892,29 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             Log.error(e);
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
+    }
+
+    @Override
+    public Result getSignatureType(List<String> utxoList) {
+        //获取utxo中的tx_hash和index,根据tx_hash和index找到utxo，根据utxo的类型获取签名类型
+        byte signType = 0;
+        for (String utxo:utxoList) {
+            if((signType & 0x01) == 0x01 && (signType & 0x02) == 0x02){
+                break;
+            }
+            byte[] owner= Hex.decode(utxo);
+            Coin coin = ledgerService.getUtxo(owner);
+            if(coin == null){
+                continue;
+            }
+            if (signType != 3) {
+                if ((signType & 0x01) == 0 && coin.getOwner().length == 23) {
+                    signType =(byte)(signType | 0x01);
+                } else if ((signType & 0x02) == 0 && coin.getTempOwner().length != 23) {
+                    signType =(byte) (signType | 0x02);
+                }
+            }
+        }
+        return Result.getSuccess().setData(signType);
     }
 }

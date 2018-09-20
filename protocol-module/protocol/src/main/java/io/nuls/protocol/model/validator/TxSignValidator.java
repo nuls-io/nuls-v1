@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 package io.nuls.protocol.model.validator;
+
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
@@ -38,16 +39,12 @@ public class TxSignValidator implements NulsDataValidator<Transaction> {
 
     @Override
     public ValidateResult validate(Transaction tx) {
-        if (!tx.needVerifySignature()) {
-            return ValidateResult.getSuccessResult();
-        }
-        try{
-              if(SignatureUtil.validateTransactionSignture(tx)) {
-                  return ValidateResult.getSuccessResult();
-              }
+        try {
+            if (SignatureUtil.validateTransactionSignture(tx)) {
+                return ValidateResult.getSuccessResult();
+            }
         } catch (Exception e) {
             Log.error(e);
-            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
         }
         return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
     }
