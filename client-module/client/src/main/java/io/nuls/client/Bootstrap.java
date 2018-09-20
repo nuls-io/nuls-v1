@@ -79,7 +79,8 @@ public class Bootstrap {
 
     private static void copyWebFiles() throws UnsupportedEncodingException {
         String path = Bootstrap.class.getClassLoader().getResource("").getPath() + "/temp/" + NulsConfig.VERSION + "/conf/client-web/";
-        File source = new File(URLDecoder.decode(path, "UTF-8"));
+        path = URLDecoder.decode(path, "UTF-8");
+        File source = new File(path);
         if (!source.exists()) {
             Log.info("source not exists:" + path);
             return;
