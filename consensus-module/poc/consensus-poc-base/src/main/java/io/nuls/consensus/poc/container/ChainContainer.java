@@ -421,7 +421,8 @@ public class ChainContainer implements Cloneable {
                     BlockLog.debug("There is a wrong red punish tx!" + block.getHeader().getHash());
                     return false;
                 }
-                if(!verifyRedPunishCoinData(redTx, block)){
+                if(redTx.getTime() != block.getHeader().getTime()){
+                    BlockLog.debug("red punish CoinData & TX time is wrong! " + block.getHeader().getHash());
                     return false;
                 }
 
@@ -429,35 +430,6 @@ public class ChainContainer implements Cloneable {
 
         }
         return true;
-    }
-
-    //验证红牌的CoinData
-    private boolean verifyRedPunishCoinData(RedPunishTransaction tx, Block block){
-        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
-        Agent theAgent = null;
-        for (Agent agent : agentList) {
-            if (agent.getDelHeight() > 0 && (tx.getBlockHeight() <= 0 || agent.getDelHeight() < tx.getBlockHeight())) {
-                continue;
-            }
-            if (Arrays.equals(tx.getTxData().getAddress(), agent.getAgentAddress())) {
-                theAgent = agent;
-            }
-        }
-        if (null == theAgent) {
-            BlockLog.debug("red punishs agent is null");
-            return false;
-        }
-        try {
-            CoinData coinData = ConsensusTool.getStopAgentCoinData(theAgent, block.getHeader().getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME, block.getHeader().getHeight());
-            if (!Arrays.equals(coinData.serialize(), tx.getCoinData().serialize())) {
-                BlockLog.debug("red punish CoinData is wrong! " + block.getHeader().getHash());
-                return false;
-            }
-            return true;
-        } catch (Exception e){
-            BlockLog.debug("red punish CoinData is wrong! " + block.getHeader().getHash());
-            return false;
-        }
     }
 
     public Result verifyAndAddBlock(Block block, boolean isDownload, boolean isNeedCheckCoinBaseTx) {
