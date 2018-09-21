@@ -12,6 +12,8 @@ import java.lang.reflect.Array;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static io.nuls.contract.vm.util.Utils.hashMapInitialCapacity;
+
 public class JsonUtils {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -109,7 +111,7 @@ public class JsonUtils {
             }
         } else if (value instanceof Map) {
             Map map = (Map) value;
-            Map map1 = new LinkedHashMap();
+            Map map1 = new LinkedHashMap(hashMapInitialCapacity(map.size()));
             map.forEach((k, v) -> {
                 map1.put(k, encode(v, classNames));
             });
@@ -153,7 +155,7 @@ public class JsonUtils {
         switch (prefix) {
             case "{":
                 Map<String, String> map = toObject(str, Map.class);
-                Map<String, Object> objectMap = new LinkedHashMap<>();
+                Map<String, Object> objectMap = new LinkedHashMap<>(hashMapInitialCapacity(map.size()));
                 map.forEach((k, v) -> {
                     objectMap.put(k, decode(v, classNames));
                 });

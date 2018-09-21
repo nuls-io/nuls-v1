@@ -32,8 +32,8 @@ public class ClassCodeLoader {
 
     static {
         CACHE = CacheBuilder.newBuilder()
-                .initialCapacity(1024)
-                .maximumSize(10240)
+                .initialCapacity(100)
+                .maximumSize(1024)
                 .expireAfterAccess(10 * 60, TimeUnit.SECONDS)
                 .build(new CacheLoader<ClassCodeCacheKey, Map<String, ClassCode>>() {
                     @Override
@@ -113,7 +113,7 @@ public class ClassCodeLoader {
     }
 
     public static Map<String, ClassCode> loadAll(String className, Function<String, ClassCode> loader) {
-        Map<String, ClassCode> classCodes = new LinkedHashMap<>(1024);
+        Map<String, ClassCode> classCodes = new LinkedHashMap<>(100);
         load(classCodes, className, loader);
         return classCodes;
     }
@@ -148,10 +148,9 @@ public class ClassCodeLoader {
     }
 
     private static Map<String, ClassCode> loadFromResource() {
-        Map<String, ClassCode> map = new HashMap<>(1024);
         InputStream inputStream = ClassCodeLoader.class.getResourceAsStream("/used_classes");
         if (inputStream == null) {
-            return map;
+            return new HashMap<>();
         } else {
             return loadJar(inputStream);
         }
@@ -172,7 +171,7 @@ public class ClassCodeLoader {
     }
 
     private static Map<String, ClassCode> loadJar(JarInputStream jarInputStream) {
-        Map<String, ClassCode> map = new HashMap<>(1024);
+        Map<String, ClassCode> map = new HashMap<>(100);
         try {
             JarEntry jarEntry;
             while ((jarEntry = jarInputStream.getNextJarEntry()) != null) {

@@ -7,7 +7,10 @@ import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.nuls.contract.vm.util.Utils.arrayListInitialCapacity;
 import static io.nuls.contract.vm.util.Utils.hashMapInitialCapacity;
@@ -183,7 +186,7 @@ public class ClassCode {
         }
         final List<MethodNode> methodNodes = ListUtils.emptyIfNull(classNode.methods);
         methods = new ArrayList<>(arrayListInitialCapacity(methodNodes.size()));
-        methodMap = new HashMap<>(hashMapInitialCapacity(methodNodes.size() * 2));
+        methodMap = new LinkedHashMap<>(hashMapInitialCapacity(methodNodes.size() * 2));
         for (MethodNode methodNode : methodNodes) {
             final MethodCode methodCode = new MethodCode(this, methodNode);
             methods.add(methodCode);

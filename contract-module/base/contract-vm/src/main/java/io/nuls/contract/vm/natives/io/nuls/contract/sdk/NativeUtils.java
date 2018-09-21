@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static io.nuls.contract.vm.natives.NativeMethod.SUCCESS;
+import static io.nuls.contract.vm.util.Utils.hashMapInitialCapacity;
 
 public class NativeUtils {
 
@@ -87,7 +88,7 @@ public class NativeUtils {
 
         ClassCode classCode = frame.methodArea.loadClass(objectRef.getVariableType().getType());
         Map<String, Object> map = frame.heap.getFields(objectRef);
-        Map<String, Object> jsonMap = new LinkedHashMap<>();
+        Map<String, Object> jsonMap = new LinkedHashMap<>(hashMapInitialCapacity(map.size()));
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             String name = entry.getKey();
             FieldCode fieldCode = classCode.fields.get(name);

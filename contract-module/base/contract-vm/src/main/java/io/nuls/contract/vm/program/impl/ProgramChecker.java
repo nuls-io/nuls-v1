@@ -152,7 +152,7 @@ public class ProgramChecker {
     }
 
     public static Set<String> allClass(Map<String, ClassCode> classCodes) {
-        Set<String> set = new HashSet<>();
+        Set<String> set = new HashSet<>(100);
         for (ClassCode classCode : classCodes.values()) {
             set.add(classCode.name);
             set.add(classCode.superName);
@@ -168,7 +168,7 @@ public class ProgramChecker {
             }
         }
 
-        Set<String> classes = new HashSet<>();
+        Set<String> classes = new HashSet<>(set.size() * 5);
         for (String s : set) {
             if (s == null) {
                 continue;

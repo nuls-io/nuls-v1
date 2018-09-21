@@ -522,7 +522,7 @@ public class Heap {
     public Map<DataWord, DataWord> contractState() {
         Map<DataWord, DataWord> contractState = new HashMap<>(1024);
         contractState.put(OBJECT_REF_COUNT, new DataWord(this.objectRefCount));
-        Set<ObjectRef> stateObjectRefs = new HashSet<>();
+        Set<ObjectRef> stateObjectRefs = new HashSet<>(1024);
         String className = this.contract.getVariableType().getType();
         ObjectRef staticObjectRef = getStaticObjectRef(className);
         stateObjectRefs(stateObjectRefs, staticObjectRef);
