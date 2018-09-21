@@ -19,6 +19,7 @@ package org.ethereum.datasource.leveldb;
 
 import io.nuls.db.service.BatchOperation;
 import io.nuls.db.service.DBService;
+import org.apache.commons.lang3.ArrayUtils;
 import org.ethereum.config.SystemProperties;
 import org.ethereum.datasource.DbSettings;
 import org.ethereum.datasource.DbSource;
@@ -89,6 +90,11 @@ public class LevelDbDataSource implements DbSource<byte[]> {
 
             if (dbService == null) {
                 throw new NullPointerException("dbService is null");
+            }
+
+            String[] areas = dbService.listArea();
+            if (!ArrayUtils.contains(areas, AREA)) {
+                dbService.createArea(AREA);
             }
 
             alive = true;
