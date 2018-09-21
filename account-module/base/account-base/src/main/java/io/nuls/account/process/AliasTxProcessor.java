@@ -87,7 +87,6 @@ public class AliasTxProcessor implements TransactionProcessor<AliasTransaction> 
      * 2.Check if multiple aliasTransaction have the same alias.
      *
      * @param txList 需要检查的交易列表/A list of transactions to be checked.
-     * @return
      */
     @Override
     public ValidateResult conflictDetect(List<Transaction> txList) {
@@ -97,17 +96,16 @@ public class AliasTxProcessor implements TransactionProcessor<AliasTransaction> 
         Set<String> aliasNames = new HashSet<>();
         Set<String> accountAddress = new HashSet<>();
         for (Transaction transaction : txList) {
-            switch (transaction.getType()) {
-                case AccountConstant.TX_TYPE_ACCOUNT_ALIAS:
-                    AliasTransaction aliasTransaction = (AliasTransaction) transaction;
-                    Alias alias = aliasTransaction.getTxData();
-                    if (!aliasNames.add(alias.getAlias())) {
-                        return (ValidateResult)ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.ALIAS_CONFLICT).setData(aliasTransaction);
-                    }
-                    if (!accountAddress.add(Hex.encode(alias.getAddress()))) {
-                        return (ValidateResult)ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS).setData(aliasTransaction);
-                    }
-                    break;
+            if (transaction.getType() == AccountConstant.TX_TYPE_ACCOUNT_ALIAS){
+                AliasTransaction aliasTransaction = (AliasTransaction) transaction;
+                Alias alias = aliasTransaction.getTxData();
+                if (!aliasNames.add(alias.getAlias())) {
+                    return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.ALIAS_CONFLICT).setData(aliasTransaction);
+                }
+                if (!accountAddress.add(Hex.encode(alias.getAddress()))) {
+                    return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS).setData(aliasTransaction);
+                }
+                break;
             }
 
         }

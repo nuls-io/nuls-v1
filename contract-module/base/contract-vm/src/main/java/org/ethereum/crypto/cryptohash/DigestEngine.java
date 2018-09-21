@@ -71,6 +71,7 @@ public abstract class DigestEngine extends MessageDigest implements Digest {
     /**
      * Reset the hash algorithm state.
      */
+    @Override
     protected abstract void engineReset();
 
     /**
@@ -128,6 +129,7 @@ public abstract class DigestEngine extends MessageDigest implements Digest {
     /**
      * @see org.ethereum.crypto.cryptohash.Digest
      */
+    @Override
     public byte[] digest() {
         adjustDigestLen();
         byte[] result = new byte[digestLen];
@@ -138,6 +140,7 @@ public abstract class DigestEngine extends MessageDigest implements Digest {
     /**
      * @see org.ethereum.crypto.cryptohash.Digest
      */
+    @Override
     public byte[] digest(byte[] input) {
         update(input, 0, input.length);
         return digest();
@@ -146,6 +149,7 @@ public abstract class DigestEngine extends MessageDigest implements Digest {
     /**
      * @see org.ethereum.crypto.cryptohash.Digest
      */
+    @Override
     public int digest(byte[] buf, int offset, int len) {
         adjustDigestLen();
         if (len >= digestLen) {
@@ -163,6 +167,7 @@ public abstract class DigestEngine extends MessageDigest implements Digest {
     /**
      * @see org.ethereum.crypto.cryptohash.Digest
      */
+    @Override
     public void reset() {
         engineReset();
         inputLen = 0;
@@ -172,6 +177,7 @@ public abstract class DigestEngine extends MessageDigest implements Digest {
     /**
      * @see org.ethereum.crypto.cryptohash.Digest
      */
+    @Override
     public void update(byte input) {
         inputBuf[inputLen++] = (byte) input;
         if (inputLen == blockLen) {
@@ -184,6 +190,7 @@ public abstract class DigestEngine extends MessageDigest implements Digest {
     /**
      * @see org.ethereum.crypto.cryptohash.Digest
      */
+    @Override
     public void update(byte[] input) {
         update(input, 0, input.length);
     }
@@ -191,11 +198,13 @@ public abstract class DigestEngine extends MessageDigest implements Digest {
     /**
      * @see org.ethereum.crypto.cryptohash.Digest
      */
+    @Override
     public void update(byte[] input, int offset, int len) {
         while (len > 0) {
             int copyLen = blockLen - inputLen;
-            if (copyLen > len)
+            if (copyLen > len) {
                 copyLen = len;
+            }
             System.arraycopy(input, offset, inputBuf, inputLen,
                     copyLen);
             offset += copyLen;

@@ -17,6 +17,7 @@
  */
 package org.ethereum.db;
 
+import org.ethereum.config.SystemProperties;
 import org.ethereum.core.AccountState;
 import org.ethereum.core.Block;
 import org.ethereum.core.Repository;
@@ -41,6 +42,8 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
     protected Source<byte[], byte[]> codeCache;
     protected MultiCache<? extends CachedSource<DataWord, DataWord>> storageCache;
 
+    protected SystemProperties config = SystemProperties.getDefault();
+
     protected RepositoryImpl() {
     }
 
@@ -58,7 +61,7 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
 
     @Override
     public synchronized AccountState createAccount(byte[] addr, byte[] creater) {
-        AccountState state = new AccountState(BigInteger.ZERO,
+        AccountState state = new AccountState(config.getBlockchainConfig().getCommonConstants().getInitialNonce(),
                 BigInteger.ZERO, creater);
         accountStateCache.put(addr, state);
         return state;
@@ -105,7 +108,7 @@ public class RepositoryImpl implements Repository, org.ethereum.facade.Repositor
     @Override
     public synchronized BigInteger getNonce(byte[] addr) {
         AccountState accountState = getAccountState(addr);
-        return accountState == null ? BigInteger.ZERO :
+        return accountState == null ? config.getBlockchainConfig().getCommonConstants().getInitialNonce() :
                 accountState.getNonce();
     }
 

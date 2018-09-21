@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
 package io.nuls.contract.vm.program.impl;
 
 import io.nuls.contract.util.VMContext;
@@ -19,7 +43,6 @@ import io.nuls.db.service.DBService;
 import org.apache.commons.lang3.StringUtils;
 import org.ethereum.core.AccountState;
 import org.ethereum.core.Repository;
-import org.ethereum.datasource.Source;
 import org.ethereum.db.RepositoryRoot;
 import org.ethereum.util.FastByteComparisons;
 import org.ethereum.vm.DataWord;
@@ -37,7 +60,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private final VMContext vmContext;
 
-    private final Source<byte[], byte[]> source;
+    private final KeyValueSource source;
 
     private final Repository repository;
 
@@ -57,6 +80,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private VM contractVM;
 
+    private Thread thread;
+
     static {
         ClassCodeLoader.init();
         VMFactory.init();
@@ -64,10 +89,10 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     public ProgramExecutorImpl(VMContext vmContext, DBService dbService) {
-        this(vmContext, new KeyValueSource(dbService), null, null, null, null);
+        this(vmContext, new KeyValueSource(dbService), null, null, null, null, null);
     }
 
-    private ProgramExecutorImpl(VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot, Map<String, VM> vmCache, Map<String, VM> commitVms) {
+    private ProgramExecutorImpl(VMContext vmContext, KeyValueSource source, Repository repository, byte[] prevStateRoot, Map<String, VM> vmCache, Map<String, VM> commitVms, Thread thread) {
         this.vmContext = vmContext;
         this.source = source;
         this.repository = repository;
@@ -75,6 +100,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         this.beginTime = this.currentTime = System.currentTimeMillis();
         this.vmCache = vmCache;
         this.commitVms = commitVms;
+        this.thread = thread;
     }
 
     @Override
@@ -82,21 +108,24 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         if (log.isDebugEnabled()) {
             log.debug("begin vm root: {}", Hex.toHexString(prevStateRoot));
         }
+        //source.begin();
         Repository repository = new RepositoryRoot(source, prevStateRoot);
-        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, new HashMap<>(1024), new LinkedHashMap<>(1024));
+        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, new HashMap<>(1024), new LinkedHashMap<>(1024), Thread.currentThread());
     }
 
     @Override
     public ProgramExecutor startTracking() {
+        checkThread();
         if (log.isDebugEnabled()) {
             log.debug("startTracking");
         }
         Repository track = repository.startTracking();
-        return new ProgramExecutorImpl(vmContext, source, track, null, vmCache, commitVms);
+        return new ProgramExecutorImpl(vmContext, source, track, null, vmCache, commitVms, thread);
     }
 
     @Override
     public void commit() {
+        checkThread();
         if (!revert) {
             if (contractVM != null) {
                 contractVM.heap.objects.commit();
@@ -125,12 +154,16 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             commitVms.clear();
             //}
             repository.commit();
+            //if (prevStateRoot != null) {
+            //    source.commit();
+            //}
             logTime("commit");
         }
     }
 
     @Override
     public byte[] getRoot() {
+        checkThread();
         byte[] root;
         if (!revert) {
             root = repository.getRoot();
@@ -145,6 +178,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     @Override
     public ProgramResult create(ProgramCreate programCreate) {
+        checkThread();
         ProgramInvoke programInvoke = new ProgramInvoke();
         programInvoke.setContractAddress(programCreate.getContractAddress());
         programInvoke.setSender(programCreate.getSender());
@@ -156,11 +190,13 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setMethodName("<init>");
         programInvoke.setArgs(programCreate.getArgs() != null ? programCreate.getArgs() : new String[0][0]);
         programInvoke.setEstimateGas(programCreate.isEstimateGas());
+        programInvoke.setCreate(true);
         return execute(programInvoke);
     }
 
     @Override
     public ProgramResult call(ProgramCall programCall) {
+        checkThread();
         ProgramInvoke programInvoke = new ProgramInvoke();
         programInvoke.setContractAddress(programCall.getContractAddress());
         programInvoke.setSender(programCall.getSender());
@@ -172,6 +208,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setMethodDesc(programCall.getMethodDesc());
         programInvoke.setArgs(programCall.getArgs() != null ? programCall.getArgs() : new String[0][0]);
         programInvoke.setEstimateGas(programCall.isEstimateGas());
+        programInvoke.setCreate(false);
         return execute(programInvoke);
     }
 
@@ -193,10 +230,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
         try {
             Map<String, ClassCode> classCodes;
-            boolean newContract = false;
-            AccountState accountState = repository.getAccountState(programInvoke.getContractAddress());
-            logTime("load account state");
-            if (accountState == null) {
+            if (programInvoke.isCreate()) {
                 if (programInvoke.getData() == null) {
                     return revert("contract code can't be null");
                 }
@@ -204,15 +238,23 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 logTime("load new code");
                 ProgramChecker.check(classCodes);
                 logTime("check code");
+                AccountState accountState = repository.getAccountState(programInvoke.getContractAddress());
+                if (accountState != null) {
+                    return revert("contract already exists");
+                }
                 accountState = repository.createAccount(programInvoke.getContractAddress(), programInvoke.getSender());
                 logTime("new account state");
                 repository.saveCode(programInvoke.getContractAddress(), programInvoke.getData());
-                newContract = true;
                 logTime("save code");
             } else {
                 if ("<init>".equals(programInvoke.getMethodName())) {
                     return revert("can't invoke <init> method");
                 }
+                AccountState accountState = repository.getAccountState(programInvoke.getContractAddress());
+                if (accountState == null) {
+                    return revert("contract does not exist");
+                }
+                logTime("load account state");
                 if (accountState.getNonce().compareTo(BigInteger.ZERO) <= 0) {
                     return revert("contract has been stopped");
                 }
@@ -274,7 +316,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             logTime("load balance");
 
             ObjectRef objectRef;
-            if (newContract) {
+            if (programInvoke.isCreate()) {
                 objectRef = vm.heap.newContract(programInvoke.getContractAddress(), contractClassCode, repository);
             } else {
                 objectRef = vm.heap.loadContract(programInvoke.getContractAddress(), contractClassCode, repository);
@@ -382,6 +424,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     @Override
     public ProgramResult stop(byte[] address, byte[] sender) {
+        checkThread();
         AccountState accountState = repository.getAccountState(address);
         if (accountState == null) {
             return revert("can't find contract");
@@ -402,6 +445,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     @Override
     public ProgramStatus status(byte[] address) {
+        checkThread();
         this.revert = true;
         AccountState accountState = repository.getAccountState(address);
         if (accountState == null) {
@@ -418,6 +462,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     @Override
     public List<ProgramMethod> method(byte[] address) {
+        checkThread();
         this.revert = true;
         byte[] codes = repository.getCode(address);
         return jarMethod(codes);
@@ -431,6 +476,16 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         }
         Map<String, ClassCode> classCodes = ClassCodeLoader.loadJarCache(jarData);
         return getProgramMethods(classCodes);
+    }
+
+    private void checkThread() {
+        if (thread == null) {
+            throw new RuntimeException("must use the begin method");
+        }
+        Thread currentThread = Thread.currentThread();
+        if (!currentThread.equals(thread)) {
+            throw new RuntimeException(String.format("method must be executed in %s, current %s", thread, currentThread));
+        }
     }
 
     private static List<ProgramMethod> getProgramMethods(Map<String, ClassCode> classCodes) {

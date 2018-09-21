@@ -82,12 +82,12 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
 
         List<AgentPo> agentList = agentStorageService.getList();
         AgentPo agent = null;
-        for (AgentPo agent_ : agentList) {
-            if (agent_.getDelHeight() <= 0) {
+        for (AgentPo agentPo : agentList) {
+            if (agentPo.getDelHeight() <= 0) {
                 continue;
             }
-            if (Arrays.equals(agent_.getAgentAddress(), punishData.getAddress())) {
-                agent = agent_;
+            if (Arrays.equals(agentPo.getAgentAddress(), punishData.getAddress())) {
+                agent = agentPo;
                 break;
             }
         }
@@ -147,12 +147,12 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
 
         List<AgentPo> agentList = agentStorageService.getList();
         AgentPo agent = null;
-        for (AgentPo agent_ : agentList) {
-            if (agent_.getDelHeight() > 0) {
+        for (AgentPo agentPo : agentList) {
+            if (agentPo.getDelHeight() > 0) {
                 continue;
             }
-            if (Arrays.equals(agent_.getAgentAddress(), punishLogPo.getAddress())) {
-                agent = agent_;
+            if (Arrays.equals(agentPo.getAgentAddress(), punishLogPo.getAddress())) {
+                agent = agentPo;
                 break;
             }
         }

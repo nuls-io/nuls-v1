@@ -17,6 +17,7 @@
  */
 package org.ethereum.datasource.inmem;
 
+import org.ethereum.datasource.DbSettings;
 import org.ethereum.datasource.DbSource;
 import org.ethereum.util.ByteArrayMap;
 import org.ethereum.util.FastByteComparisons;
@@ -77,6 +78,10 @@ public class HashMapDBSimple<V> implements DbSource<V> {
     }
 
     @Override
+    public void init(DbSettings settings) {
+    }
+
+    @Override
     public boolean isAlive() {
         return true;
     }
@@ -98,10 +103,11 @@ public class HashMapDBSimple<V> implements DbSource<V> {
     @Override
     public V prefixLookup(byte[] key, int prefixBytes) {
 
-        for (Map.Entry<byte[], V> e : storage.entrySet())
+        for (Map.Entry<byte[], V> e : storage.entrySet()) {
             if (FastByteComparisons.compareTo(key, 0, prefixBytes, e.getKey(), 0, prefixBytes) == 0) {
                 return e.getValue();
             }
+        }
 
         return null;
     }

@@ -28,7 +28,6 @@ import io.nuls.account.ledger.base.manager.BalanceManager;
 import io.nuls.account.ledger.base.service.TransactionInfoService;
 import io.nuls.account.ledger.base.service.impl.AccountLedgerServiceImpl;
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
-import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.ledger.storage.po.TransactionInfoPo;
 import io.nuls.account.ledger.storage.service.LocalUtxoStorageService;
 import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
@@ -59,10 +58,7 @@ public class CheckUnConfirmTxThread implements Runnable {
     private TransactionService transactionService;
 
     @Autowired
-    private LedgerService ledgerService;
-
-    @Autowired
-    private AccountLedgerService AccountLedgerService;
+    private LedgerService ledgerService; 
 
     @Autowired
     private UnconfirmedTransactionStorageService unconfirmedTransactionStorageService;

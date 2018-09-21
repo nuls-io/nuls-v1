@@ -29,9 +29,11 @@ public class RLPItem implements RLPElement {
         this.rlpData = rlpData;
     }
 
+    @Override
     public byte[] getRLPData() {
-        if (rlpData.length == 0)
+        if (rlpData.length == 0) {
             return null;
+        }
         return rlpData;
     }
 }

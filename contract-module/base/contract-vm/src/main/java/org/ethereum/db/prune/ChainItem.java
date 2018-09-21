@@ -34,8 +34,12 @@ class ChainItem {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ChainItem that = (ChainItem) o;
         return FastByteComparisons.equal(hash, that.hash);
     }

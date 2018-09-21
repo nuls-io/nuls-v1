@@ -17,6 +17,7 @@
  */
 package org.ethereum.db;
 
+import org.ethereum.config.SystemProperties;
 import org.ethereum.core.Block;
 import org.ethereum.core.BlockHeader;
 import org.ethereum.datasource.JournalSource;
@@ -52,8 +53,8 @@ public class PruneManager {
     private Segment segment;
     private Pruner pruner;
 
-    private PruneManager(int pruneBlocksCnt) {
-        this.pruneBlocksCnt = pruneBlocksCnt;
+    private PruneManager(SystemProperties config) {
+        pruneBlocksCnt = config.databasePruneDepth();
     }
 
     public PruneManager(IndexedBlockStore blockStore, JournalSource<?> journalSource,
@@ -62,18 +63,30 @@ public class PruneManager {
         this.journalSource = journalSource;
         this.pruneBlocksCnt = pruneBlocksCnt;
 
-        if (journalSource != null && pruneStorage != null)
+        if (journalSource != null && pruneStorage != null) {
             this.pruner = new Pruner(journalSource.getJournal(), pruneStorage);
+        }
+    }
+
+    public void setStateSource(StateSource stateSource) {
+        journalSource = stateSource.getJournalSource();
+        if (journalSource != null) {
+            pruner = new Pruner(journalSource.getJournal(), stateSource.getNoJournalSource());
+        }
     }
 
     public void blockCommitted(BlockHeader block) {
-        if (pruneBlocksCnt < 0) return; // pruning disabled
+        if (pruneBlocksCnt < 0) {
+            return; // pruning disabled
+        }
 
         JournalSource.Update update = journalSource.commitUpdates(block.getHash());
         pruner.feed(update);
 
         long forkBlockNum = block.getNumber() - getForkBlocksCnt();
-        if (forkBlockNum < 0) return;
+        if (forkBlockNum < 0) {
+            return;
+        }
 
         List<Block> pruneBlocks = blockStore.getBlocksByNumber(forkBlockNum);
         Block chainBlock = blockStore.getChainBlockByNumber(forkBlockNum);
@@ -87,7 +100,9 @@ public class PruneManager {
 
         if (segment == null) {
             if (pruneBlocks.size() == 1)    // wait for a single chain
+            {
                 segment = new Segment(chainBlock);
+            }
             return;
         }
 
@@ -113,7 +128,9 @@ public class PruneManager {
         }
 
         long mainBlockNum = block.getNumber() - getMainBlocksCnt();
-        if (mainBlockNum < 0) return;
+        if (mainBlockNum < 0) {
+            return;
+        }
 
         byte[] hash = blockStore.getBlockHashByNumber(mainBlockNum);
         pruner.persist(hash);

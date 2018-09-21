@@ -33,15 +33,19 @@ import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AliasStorageService;
 import io.nuls.account.tx.AliasTransaction;
+import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.CoinData;
 
+import io.nuls.kernel.model.Na;
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.script.TransactionSignature;
 import io.nuls.kernel.utils.AddressTool;
@@ -72,6 +76,12 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
     @Override
     public ValidateResult validate(AliasTransaction tx) {
         Alias alias = tx.getTxData();
+        if (tx.isSystemTx()) {
+            return ValidateResult.getFailedResult(alias.getClass().getName(), TransactionErrorCode.TX_TYPE_ERROR);
+        }
+        if (!StringUtils.validAlias(alias.getAlias())) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_FORMAT_WRONG);
+        }
         if (!aliasService.isAliasUsable(alias.getAlias())) {
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_EXIST);
         }
@@ -81,20 +91,22 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
                 return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
             }
         }
-        if (!StringUtils.validAlias(alias.getAlias())) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_FORMAT_WRONG);
-        }
-        AliasPo aliasPo = aliasStorageService.getAlias(alias.getAlias()).getData();
-        if (aliasPo != null) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_EXIST);
-        }
-        if (tx.isSystemTx()) {
-            return ValidateResult.getFailedResult(alias.getClass().getName(), TransactionErrorCode.TX_TYPE_ERROR);
-        }
         CoinData coinData = tx.getCoinData();
         if (null == coinData) {
             return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.COINDATA_NOT_FOUND);
         }
+        if (null == coinData.getTo() || coinData.getTo().isEmpty()) {
+            boolean burned = false;
+            for (Coin coin : coinData.getTo()) {
+                if (ArraysTool.arrayEquals(coin.getOwner(), NulsConstant.BLACK_HOLE_ADDRESS) && coin.getNa().equals(Na.NA)) {
+                    burned = true;
+                }
+            }
+            if (!burned) {
+                return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.MUST_BURN_A_NULS);
+            }
+        }
+
         TransactionSignature sig = new TransactionSignature();
         try {
             sig.parse(tx.getTransactionSignature(), 0);
@@ -103,9 +115,9 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
 
-        boolean sign = false;
+        boolean sign;
         try {
-            sign = SignatureUtil.containsAddress(tx,tx.getTxData().getAddress());
+            sign = SignatureUtil.containsAddress(tx, tx.getTxData().getAddress());
 
         } catch (NulsException e) {
             sign = false;

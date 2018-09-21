@@ -307,11 +307,25 @@ public class StringUtils {
         if(StringUtils.isBlank(pubkeys)){
             return  false;
         }
-        if(m == null || Integer.parseInt(m) <= 0)
+        if(m == null || Integer.parseInt(m) <= 0) {
             return false;
+        }
         //将公钥拆分
         String[] dataList = pubkeys.split(",");
         if(dataList == null || dataList.length == 0 || dataList.length < Integer.parseInt(m)){
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean validSign(String args[]){
+        if(args.length != 3){
+            return false;
+        }
+        if (StringUtils.isBlank(args[1])) {
+            return false;
+        }
+        if(args[2] == null || args[2].length() == 0){
             return false;
         }
         return true;

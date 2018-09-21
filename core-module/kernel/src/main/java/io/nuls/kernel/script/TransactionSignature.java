@@ -46,8 +46,9 @@ public class TransactionSignature extends BaseNulsData {
         // 旧签名数据写入流中
         if (p2PHKSignatures != null && p2PHKSignatures.size() > 0) {
             for (P2PHKSignature p2PHKSignature : p2PHKSignatures) {
-                if (p2PHKSignature != null)
+                if (p2PHKSignature != null) {
                     stream.writeNulsData(p2PHKSignature);
+                }
             }
         }
         if (scripts != null && scripts.size() > 0) {
@@ -55,8 +56,9 @@ public class TransactionSignature extends BaseNulsData {
             stream.write(NulsConstant.SIGN_HOLDER);
             //写入脚本
             for (Script script : scripts) {
-                if (script != null && script.getProgram() != null && script.getProgram().length > 0)
+                if (script != null && script.getProgram() != null && script.getProgram().length > 0) {
                     stream.writeBytesWithLength(script.getProgram());
+                }
             }
         }
     }
@@ -71,8 +73,9 @@ public class TransactionSignature extends BaseNulsData {
         while (!byteBuffer.isFinished()) {
             course = byteBuffer.getCursor();
             //读取两个字节（脚本标识位），如果两个字节都为0x00则表示后面的数据流为脚本数据
-            if (!isScript && byteBuffer.getPayload().length < 2)
+            if (!isScript && byteBuffer.getPayload().length < 2) {
                 break;
+            }
             if (isScript || Arrays.equals(NulsConstant.SIGN_HOLDER, byteBuffer.readBytes(2))) {
                 isScript = true;
                 if (!byteBuffer.isFinished()) {
@@ -93,8 +96,9 @@ public class TransactionSignature extends BaseNulsData {
         int size = 0;
         if (p2PHKSignatures != null && p2PHKSignatures.size() > 0) {
             for (P2PHKSignature p2PHKSignature : p2PHKSignatures) {
-                if (p2PHKSignature != null)
+                if (p2PHKSignature != null) {
                     size += SerializeUtils.sizeOfNulsData(p2PHKSignature);
+                }
             }
         }
         if (scripts != null && scripts.size() > 0) {
@@ -102,8 +106,9 @@ public class TransactionSignature extends BaseNulsData {
             size += NulsConstant.SIGN_HOLDER.length;
             //写入脚本
             for (Script script : scripts) {
-                if (script != null && script.getProgram() != null && script.getProgram().length > 0)
+                if (script != null && script.getProgram() != null && script.getProgram().length > 0) {
                     size += SerializeUtils.sizeOfBytes(script.getProgram());
+                }
             }
         }
         return size;

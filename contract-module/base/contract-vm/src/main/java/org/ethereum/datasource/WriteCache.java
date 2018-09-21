@@ -93,10 +93,12 @@ public class WriteCache<Key, Value> extends AbstractCachedSource<Key, Value> {
             super(value);
         }
 
+        @Override
         public void deleted() {
             counter = -1;
         }
 
+        @Override
         public void added() {
             counter = 1;
         }
@@ -112,10 +114,12 @@ public class WriteCache<Key, Value> extends AbstractCachedSource<Key, Value> {
             super(value);
         }
 
+        @Override
         public void deleted() {
             counter--;
         }
 
+        @Override
         public void added() {
             counter++;
         }
@@ -268,6 +272,7 @@ public class WriteCache<Key, Value> extends AbstractCachedSource<Key, Value> {
         return (Value) CacheEntry.UNKNOWN_VALUE;
     }
 
+    @Override
     public Entry<Value> getCached(Key key) {
         try (ALock l = readLock.lock()) {
             CacheEntry<Value> entry = cache.get(key);
@@ -283,7 +288,9 @@ public class WriteCache<Key, Value> extends AbstractCachedSource<Key, Value> {
     // if a regular Map is accidentally used for byte[] type keys
     // the situation might be tricky to debug
     private void checkByteArrKey(Key key) {
-        if (checked) return;
+        if (checked) {
+            return;
+        }
 
         if (key instanceof byte[]) {
             if (!(cache instanceof ByteArrayMap)) {

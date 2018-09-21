@@ -26,6 +26,7 @@
 
 package io.nuls.consensus.poc.process;
 
+import com.google.common.primitives.UnsignedBytes;
 import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.ChainContainer;
@@ -42,7 +43,6 @@ import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
-import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
@@ -100,6 +100,9 @@ public class ForkChainProcess {
             if (null == newChain) {
                 return false;
             }
+            //获得主链最新块，如果分叉链和主链高度一致，但是最新块hash不一致，然后排序hash来决定要不要进行特殊回滚处理
+            BlockHeader newChainBlockHeader = newChain.getBestBlock().getHeader();
+
             Iterator<ChainContainer> iterator = chainManager.getChains().iterator();
             while (iterator.hasNext()) {
                 ChainContainer forkChain = iterator.next();
@@ -108,7 +111,22 @@ public class ForkChainProcess {
                     continue;
                 }
                 long newChainHeight = forkChain.getChain().getEndBlockHeader().getHeight();
-                if (newChainHeight > newestBlockHeight || (newChainHeight == newestBlockHeight && forkChain.getChain().getEndBlockHeader().getTime() < newChain.getChain().getEndBlockHeader().getTime())) {
+                BlockHeader forkChainBlockHeader = forkChain.getChain().getEndBlockHeader();
+                byte[] rightHash = null;
+                //String forkChainBlockHash = forkChainBlockHeader.getHash().getDigestHex();
+                byte[] forkChainBlockHash = forkChainBlockHeader.getHash().getDigestBytes();
+                //如果高度相同，则排序选一个hash，作为大家都认同的块
+                if (newChainBlockHeader.getHeight() == newChainHeight){
+                    byte[] newChainBlockHash = newChainBlockHeader.getHash().getDigestBytes();
+                    rightHash = rightHash(newChainBlockHash, forkChainBlockHash);
+                }
+                if (newChainHeight > newestBlockHeight
+                        || (newChainHeight == newestBlockHeight && forkChain.getChain().getEndBlockHeader().getTime() < newChain.getChain().getEndBlockHeader().getTime())
+                        || (newChainBlockHeader.getHeight() == newChainHeight && Arrays.equals(forkChainBlockHash, rightHash))) {
+                    if (newChainBlockHeader.getHeight() == newChainHeight && Arrays.equals(forkChainBlockHash, rightHash)) {
+                        Log.info("-+-+-+-+-+-+-+-+- Change chain with the same height but different hash block -+-+-+-+-+-+-+-+-");
+                        Log.info("-+-+-+-+-+-+-+-+- height: "+ newChainHeight + ", Right hash：" + rightHash);
+                    }
                     newChain = forkChain;
                     newestBlockHeight = newChainHeight;
                 }
@@ -156,6 +174,17 @@ public class ForkChainProcess {
             Lockers.CHAIN_LOCK.unlock();
         }
         return true;
+    }
+
+    /**
+     * 当两个高度一致的块hash不同时，排序统一选取前面一个hash为正确的
+     */
+    private byte[] rightHash(byte[] hash1, byte[] hash2) {
+        Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+        if (comparator.compare(hash1, hash2) <= 0) {
+            return hash1;
+        }
+        return hash2;
     }
 
     private void printChainStatusLog() {
@@ -420,7 +449,7 @@ public class ForkChainProcess {
         //Need to sort in ascending order, the default is
         //需要升序排列，默认就是
         //for (Block newBlock : addBlockList) {
-        for(int i = 0, size = addBlockList.size(); i < size; i++) {
+        for (int i = 0, size = addBlockList.size(); i < size; i++) {
             newBlock = addBlockList.get(i);
             Log.info("==========================================切换主链, 高度: {} 开始验证. + ", newBlock.getHeader().getHeight());
             newBlock.verifyWithException();
@@ -481,7 +510,7 @@ public class ForkChainProcess {
                 break;
             }
 
-            stateRoot = contractService.processTxs(newBlock.getTxs(), bestHeight, newBlock, stateRoot, toMaps, contractUsedCoinMap).getData();
+            stateRoot = contractService.processTxs(newBlock.getTxs(), bestHeight, newBlock, stateRoot, toMaps, contractUsedCoinMap, true).getData();
 
             // 验证世界状态根
             if ((receiveStateRoot != null || stateRoot != null) && !Arrays.equals(receiveStateRoot, stateRoot)) {

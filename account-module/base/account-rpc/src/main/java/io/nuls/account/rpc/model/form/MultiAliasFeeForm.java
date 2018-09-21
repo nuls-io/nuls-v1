@@ -22,57 +22,33 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.consensus.poc.rpc.model;
+package io.nuls.account.rpc.model.form;
 
 import io.nuls.core.tools.str.StringUtils;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.ws.rs.QueryParam;
 import java.util.List;
 
-public class StopAgentWithMSForm {
+/**
+ * @author: tangag
+ */
+@ApiModel(value = "计算多重签名别名手续费表单")
+public class MultiAliasFeeForm {
+    @ApiModelProperty(name = "address", value = "地址", required = true)
+    @QueryParam("address")
+    private String address;
 
-    @ApiModelProperty(name = "agentAddress", value = "节点地址", required = true)
-    private String agentAddress;
+    @ApiModelProperty(name = "alias", value = "别名", required = true)
+    @QueryParam("alias")
+    private String alias;
 
-    @ApiModelProperty(name = "signAddress", value = "签名地址", required = true)
-    private String signAddress;
-
-    @ApiModelProperty(name = "password", value = "密码", required = true)
-    private String password;
-
-    @ApiModelProperty(name = "pubkeys", value = "需要签名的公钥列表", required = true)
+    @ApiModelProperty(name = "pubkeys", value = "需要签名在公钥列表", required = true)
     private List<String> pubkeys;
 
     @ApiModelProperty(name = "m", value = "至少需要几个公钥验证通过", required = true)
     private int m;
-
-    @ApiModelProperty(name = "txdata", value = "交易数据")
-    private String txdata;
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getSignAddress() {
-        return signAddress;
-    }
-
-    public void setSignAddress(String signAddress) {
-        this.signAddress = signAddress;
-    }
-
-    public String getAgentAddress() {
-        return agentAddress;
-    }
-
-    public void setAgentAddress(String agentAddress) {
-        this.agentAddress = StringUtils.formatStringPara(agentAddress);
-    }
 
     public List<String> getPubkeys() {
         return pubkeys;
@@ -90,11 +66,19 @@ public class StopAgentWithMSForm {
         this.m = m;
     }
 
-    public String getTxdata() {
-        return txdata;
+    public String getAddress() {
+        return address;
     }
 
-    public void setTxdata(String txdata) {
-        this.txdata = txdata;
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = StringUtils.formatStringPara(alias);
     }
 }

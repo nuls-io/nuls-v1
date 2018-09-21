@@ -1,7 +1,35 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
 package io.nuls.contract.vm.program;
+
+import io.nuls.kernel.utils.AddressTool;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+
+import static io.nuls.contract.util.ContractUtil.argToString;
 
 public class ProgramCreate {
 
@@ -135,19 +163,39 @@ public class ProgramCreate {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ProgramCreate that = (ProgramCreate) o;
 
-        if (number != that.number) return false;
-        if (gasLimit != that.gasLimit) return false;
-        if (price != that.price) return false;
-        if (estimateGas != that.estimateGas) return false;
-        if (!Arrays.equals(sender, that.sender)) return false;
-        if (value != null ? !value.equals(that.value) : that.value != null) return false;
-        if (!Arrays.equals(contractAddress, that.contractAddress)) return false;
-        if (!Arrays.equals(contractCode, that.contractCode)) return false;
+        if (number != that.number) {
+            return false;
+        }
+        if (gasLimit != that.gasLimit) {
+            return false;
+        }
+        if (price != that.price) {
+            return false;
+        }
+        if (estimateGas != that.estimateGas) {
+            return false;
+        }
+        if (!Arrays.equals(sender, that.sender)) {
+            return false;
+        }
+        if (value != null ? !value.equals(that.value) : that.value != null) {
+            return false;
+        }
+        if (!Arrays.equals(contractAddress, that.contractAddress)) {
+            return false;
+        }
+        if (!Arrays.equals(contractCode, that.contractCode)) {
+            return false;
+        }
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         return Arrays.equals(args, that.args);
     }
@@ -170,15 +218,14 @@ public class ProgramCreate {
     public String toString() {
         return "ProgramCreate{" +
                 "number=" + number +
-                ", sender=" + Arrays.toString(sender) +
+                ", sender=" + (sender != null ? AddressTool.getStringAddressByBytes(sender) : sender) +
                 ", value=" + value +
                 ", gasLimit=" + gasLimit +
                 ", price=" + price +
-                ", contractAddress=" + Arrays.toString(contractAddress) +
-                ", contractCode=" + Arrays.toString(contractCode) +
-                ", args=" + Arrays.toString(args) +
+                ", contractAddress=" + (contractAddress != null ? AddressTool.getStringAddressByBytes(contractAddress) : contractAddress) +
+                ", contractCode=" + (contractCode != null ? String.valueOf(contractCode.length) : 0) +
+                ", args=" + argToString(args) +
                 ", estimateGas=" + estimateGas +
                 '}';
     }
-
 }

@@ -38,6 +38,7 @@ import io.nuls.kernel.utils.CommandHelper;
 import io.nuls.kernel.utils.RestFulUtils;
 
 import java.io.*;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -108,7 +109,12 @@ public class ImportByKeyStoreProcessor implements CommandProcessor {
      * @return
      */
     private Result<AccountKeyStoreDto> getAccountKeystoreDto(String path) {
-        File file = new File(path);
+        File file = null;
+        try {
+            file = new File(URLDecoder.decode(path, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            Log.error(e);
+        }
         if (null != file && file.isFile()) {
             StringBuilder ks = new StringBuilder();
             BufferedReader bufferedReader = null;

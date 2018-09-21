@@ -66,6 +66,7 @@ public class Keccak512 extends KeccakCore {
     /**
      * @see Digest
      */
+    @Override
     public Digest copy() {
         return copyState(new Keccak512());
     }
@@ -73,6 +74,7 @@ public class Keccak512 extends KeccakCore {
     /**
      * @see Digest
      */
+    @Override
     public int engineGetDigestLength() {
         return 64;
     }

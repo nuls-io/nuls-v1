@@ -73,7 +73,7 @@ public class GetMultiSigAccountProcessor implements CommandProcessor {
             return false;
         }
 
-        if (StringUtils.isBlank(args[1]) || !AddressTool.validAddress(args[1])) {
+        if (StringUtils.isBlank(args[1])) {
             return false;
         }
         return true;

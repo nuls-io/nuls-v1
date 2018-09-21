@@ -65,4 +65,5 @@ public interface KernelErrorCode {
     ErrorCode VALIDATORS_NOT_FULLY_EXECUTED = ErrorCode.init("10030");
     ErrorCode BLOCK_IS_NULL = ErrorCode.init("10031");
     ErrorCode VERSION_TOO_LOW = ErrorCode.init("10032");
+    ErrorCode PUBKEY_REPEAT = ErrorCode.init("10033");
 }

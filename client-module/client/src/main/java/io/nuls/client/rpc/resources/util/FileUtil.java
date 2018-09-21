@@ -28,6 +28,7 @@ package io.nuls.client.rpc.resources.util;
 import io.nuls.core.tools.log.Log;
 
 import java.io.*;
+import java.net.URLDecoder;
 import java.nio.channels.FileChannel;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -87,8 +88,13 @@ public final class FileUtil {
     }
 
     public static void decompress(String zipPath, String targetPath) {
-        File source = new File(zipPath);
-        if (!source.exists()) {
+        File source = null;
+        try {
+            source = new File(URLDecoder.decode(zipPath, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            Log.error(e);
+        }
+        if (null == source || !source.exists()) {
             return;
         }
         ZipInputStream zis = null;
@@ -97,7 +103,7 @@ public final class FileUtil {
             zis = new ZipInputStream(new FileInputStream(source));
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null && !entry.isDirectory()) {
-                File target = new File(targetPath, entry.getName());
+                File target = new File(URLDecoder.decode(targetPath, "UTF-8"), entry.getName());
                 if (!target.getParentFile().exists()) {
                     target.getParentFile().mkdirs();
                 }
@@ -178,6 +184,12 @@ public final class FileUtil {
 
         String sourcePath = source.getPath();
         String path = target.getPath();
+        try {
+            sourcePath = URLDecoder.decode(sourcePath, "UTF-8");
+            path = URLDecoder.decode(path, "UTF-8");
+        } catch (Exception e) {
+            Log.error(e);
+        }
         for (int i = 0; i < filePath.length; i++) {
             if ((new File(sourcePath + "/" + filePath[i])).isDirectory()) {
                 copyFolder(new File(sourcePath + "/" + filePath[i]), new File(path + "/" + filePath[i]));
@@ -209,7 +221,7 @@ public final class FileUtil {
     }
 
     public static boolean writeFile(byte[] bytes, String filePath) throws IOException {
-        File file = new File(filePath);
+        File file = new File(URLDecoder.decode(filePath, "UTF-8"));
         if (file.exists()) {
             file.delete();
         }

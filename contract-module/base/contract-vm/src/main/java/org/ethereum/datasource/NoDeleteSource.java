@@ -37,7 +37,9 @@ public class NoDeleteSource<Key, Value> extends AbstractChainedSource<Key, Value
 
     @Override
     public void put(Key key, Value val) {
-        if (val != null) getSource().put(key, val);
+        if (val != null) {
+            getSource().put(key, val);
+        }
     }
 
     @Override

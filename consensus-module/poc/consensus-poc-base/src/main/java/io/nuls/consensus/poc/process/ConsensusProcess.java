@@ -342,7 +342,13 @@ public class ConsensusProcess {
         long addTime = 0;
         // 为本次打包区块增加一个合约的临时余额区，用于记录本次合约地址余额的变化
         contractService.createContractTempBalance();
-
+        // 为本次打包区块创建一个批量执行合约的执行器
+        contractService.createBatchExecute(stateRoot);
+        Block tempBlock = new Block();
+        BlockHeader header = new BlockHeader();
+        header.setTime(bd.getTime());
+        tempBlock.setHeader(header);
+        List<ContractResult> contractResultList = new ArrayList<>();
         while (true) {
 
             if ((self.getPackEndTime() - TimeService.currentTimeMillis()) <= 500L) {
@@ -403,16 +409,20 @@ public class ConsensusProcess {
 
             // 打包时发现智能合约交易就调用智能合约
             if(ContractUtil.isContractTransaction(tx)) {
-                invokeContractResult = contractService.invokeContract(tx, height, stateRoot);
-                contractResult = invokeContractResult.getData();
+                //invokeContractResult = contractService.invokeContract(tx, height, stateRoot);
+                //contractResult = invokeContractResult.getData();
+                //if (contractResult != null) {
+                //    Result<byte[]> handleContractResult = contractService.handleContractResult(
+                //            tx, contractResult,
+                //            stateRoot, bd.getTime(),
+                //            toMaps, contractUsedCoinMap);
+                //    // 更新世界状态
+                //    stateRoot = handleContractResult.getData();
+                //    bd.setStateRoot(stateRoot);
+                //}
+                contractResult = contractService.batchPackageTx(tx, height, tempBlock, stateRoot, toMaps, contractUsedCoinMap).getData();
                 if (contractResult != null) {
-                    Result<byte[]> handleContractResult = contractService.handleContractResult(
-                            tx, contractResult,
-                            stateRoot, bd.getTime(),
-                            toMaps, contractUsedCoinMap);
-                    // 更新世界状态
-                    stateRoot = handleContractResult.getData();
-                    bd.setStateRoot(stateRoot);
+                    contractResultList.add(contractResult);
                 }
             }
 
@@ -425,6 +435,15 @@ public class ConsensusProcess {
         }
         // 打包结束后移除临时余额区
         contractService.removeContractTempBalance();
+        stateRoot = contractService.commitBatchExecute().getData();
+        // 打包结束后批量执行合约的执行器
+        contractService.removeBatchExecute();
+        tempBlock.getHeader().setStateRoot(stateRoot);
+        for(ContractResult result : contractResultList) {
+            result.setStateRoot(stateRoot);
+        }
+        // 更新世界状态
+        bd.setStateRoot(stateRoot);
 
         whileTime = System.currentTimeMillis() - startWhile;
         ValidateResult validateResult = null;
