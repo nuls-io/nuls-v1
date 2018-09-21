@@ -29,74 +29,77 @@ import java.util.Set;
  */
 public class LevelDbDataSource implements DbSource<byte[]> {
 
-    @Override
-    public void setName(String name) {
+    String name;
+    boolean alive;
 
+    public LevelDbDataSource() {
     }
 
-    @Override
-    public String getName() {
-        return null;
+    public LevelDbDataSource(String name) {
+        this.name = name;
     }
 
     @Override
     public void init() {
-
     }
 
     @Override
     public void init(DbSettings settings) {
-
-    }
-
-    @Override
-    public boolean isAlive() {
-        return false;
-    }
-
-    @Override
-    public void close() {
-
-    }
-
-    @Override
-    public Set<byte[]> keys() throws RuntimeException {
-        return null;
     }
 
     @Override
     public void reset() {
-
     }
 
     @Override
     public byte[] prefixLookup(byte[] key, int prefixBytes) {
-        return new byte[0];
+        return null;
     }
 
     @Override
-    public void updateBatch(Map<byte[], byte[]> rows) {
-
+    public boolean isAlive() {
+        return alive;
     }
 
     @Override
-    public void put(byte[] key, byte[] val) {
+    public void setName(String name) {
+        this.name = name;
+    }
 
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
     public byte[] get(byte[] key) {
-        return new byte[0];
+        return null;
+    }
+
+    @Override
+    public void put(byte[] key, byte[] value) {
     }
 
     @Override
     public void delete(byte[] key) {
+    }
 
+    @Override
+    public Set<byte[]> keys() {
+        return null;
+    }
+
+    @Override
+    public void updateBatch(Map<byte[], byte[]> rows) {
     }
 
     @Override
     public boolean flush() {
         return false;
+    }
+
+    @Override
+    public void close() {
     }
 
 }
