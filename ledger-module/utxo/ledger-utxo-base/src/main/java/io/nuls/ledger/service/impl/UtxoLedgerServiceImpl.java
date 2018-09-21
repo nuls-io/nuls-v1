@@ -332,11 +332,6 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                     }
 
                     // 验证地址中的公钥hash160和交易中的公钥hash160是否相等，不相等则说明这笔utxo不属于交易发出者
-                    //TODO: 交易验证逻辑待完善
-//                    if (transaction.needVerifySignature() && !AddressTool.checkPublicKeyHash(fromAddressBytes, user)) {
-//                        Log.warn("public key hash160 check error.");
-//                        return ValidateResult.getFailedResult(CLASS_NAME, LedgerErrorCode.INVALID_INPUT);
-//                    }
                     boolean signtureValidFlag = false;
                     if(transaction.needVerifySignature()){
                         if(transactionSignature != null){
