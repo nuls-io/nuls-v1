@@ -180,7 +180,8 @@ public class BlockProcess {
             redPunishData.setEvidence(smallBlock.serialize());
             redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
             redPunishTransaction.setTxData(redPunishData);
-            CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, smallBlock.getHeader().getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME);
+            redPunishTransaction.setTime(smallBlock.getHeader().getTime());
+            CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, redPunishTransaction.getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME);
             redPunishTransaction.setCoinData(coinData);
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
             TxMemoryPool.getInstance().add(redPunishTransaction, false);

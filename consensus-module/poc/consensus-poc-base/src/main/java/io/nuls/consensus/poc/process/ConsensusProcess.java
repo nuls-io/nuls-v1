@@ -533,9 +533,9 @@ public class ConsensusProcess {
                 RedPunishData redPunishData = new RedPunishData();
                 redPunishData.setAddress(address);
                 redPunishData.setReasonCode(PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode());
-                redPunishData.setEvidence(bestBlock.serialize());
                 redPunishTransaction.setTxData(redPunishData);
-                CoinData coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress(), bestBlock.getHeader().getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME);
+                redPunishTransaction.setTime(self.getPackEndTime());
+                CoinData coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress(), redPunishTransaction.getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME);
                 redPunishTransaction.setCoinData(coinData);
                 redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
                 txList.add(redPunishTransaction);

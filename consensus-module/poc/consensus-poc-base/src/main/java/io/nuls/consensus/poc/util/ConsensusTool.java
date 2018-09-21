@@ -377,7 +377,7 @@ public class ConsensusTool {
         return getStopAgentCoinData(agent, lockTime, null);
     }
 
-    public static CoinData getStopAgentCoinData(Agent agent, long lockTime, BlockHeader blockHeader) throws IOException {
+    public static CoinData getStopAgentCoinData(Agent agent, long lockTime, Long hight) throws IOException {
         if (null == agent) {
             return null;
         }
@@ -407,7 +407,7 @@ public class ConsensusTool {
         List<Deposit> deposits = PocConsensusContext.getChainManager().getMasterChain().getChain().getDepositList();
         List<String> addressList = new ArrayList<>();
         Map<String, Coin> toMap = new HashMap<>();
-        long blockHeight = null == blockHeader ? -1 : blockHeader.getHeight();
+        long blockHeight = null == hight ? -1 : hight;
         for (Deposit deposit : deposits) {
             if (deposit.getDelHeight() > 0 && (blockHeight <= 0 || deposit.getDelHeight() < blockHeight)) {
                 continue;
