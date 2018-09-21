@@ -216,10 +216,6 @@ public class BlockHeader extends BaseNulsData {
 
     @Override
     public String toString() {
-        String stateRootStr = "";
-        if (NulsContext.MAIN_NET_VERSION > 1) {
-            stateRootStr = Hex.encode(stateRoot);
-        }
         return "BlockHeader{" +
                 "hash=" + hash.getDigestHex() +
                 ", preHash=" + preHash.getDigestHex() +
@@ -229,7 +225,6 @@ public class BlockHeader extends BaseNulsData {
                 ", txCount=" + txCount +
                 ", blockSignature=" + blockSignature +
                 //", extend=" + Arrays.toString(extend) +
-                stateRootStr +
                 ", size=" + size +
                 ", packingAddress=" + (packingAddress == null ? packingAddress : AddressTool.getStringAddressByBytes(packingAddress)) +
                 '}';

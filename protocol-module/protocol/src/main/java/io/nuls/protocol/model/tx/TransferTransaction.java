@@ -99,6 +99,9 @@ public class TransferTransaction extends Transaction {
         }
         long divide = (long) Math.pow(10, SMALLEST_UNIT_EXPONENT);
         BigDecimal decimal = new BigDecimal(value).divide(BigDecimal.valueOf(divide));
+        if(decimal.doubleValue() > 0) {
+            return "+" + decimal.toPlainString();
+        }
         return decimal.toPlainString();
     }
 
