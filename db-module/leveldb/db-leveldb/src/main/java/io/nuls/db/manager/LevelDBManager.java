@@ -144,9 +144,9 @@ public class LevelDBManager {
     public static File loadDataPath() throws Exception {
         Properties properties = ConfigLoader.loadProperties("db_config.properties");
         String path = properties.getProperty("leveldb.datapath", "./data");
-        String max_str = properties.getProperty("leveldb.area.max", "50");
+        String maxStr = properties.getProperty("leveldb.area.max", "50");
         try {
-            max = Integer.parseInt(max_str);
+            max = Integer.parseInt(maxStr);
         } catch (Exception e) {
             //skip it
             max = 50;

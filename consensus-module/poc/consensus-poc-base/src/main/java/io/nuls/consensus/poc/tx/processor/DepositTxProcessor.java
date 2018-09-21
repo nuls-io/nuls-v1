@@ -153,6 +153,8 @@ public class DepositTxProcessor implements TransactionProcessor<DepositTransacti
                         outAgentHash.add(agent.getHash());
                     }
                     break;
+                default:
+                    continue;
             }
         }
 

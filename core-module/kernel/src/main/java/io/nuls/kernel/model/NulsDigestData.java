@@ -55,9 +55,9 @@ public class NulsDigestData extends BaseNulsData {
     public NulsDigestData() {
     }
 
-    public NulsDigestData(byte alg_type, byte[] bytes) {
+    public NulsDigestData(byte algType, byte[] bytes) {
         this.digestBytes = bytes;
-        this.digestAlgType = alg_type;
+        this.digestAlgType = algType;
     }
 
     @Override

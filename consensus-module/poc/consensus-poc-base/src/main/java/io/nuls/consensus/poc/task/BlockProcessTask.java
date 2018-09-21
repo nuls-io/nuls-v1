@@ -91,9 +91,9 @@ public class BlockProcessTask implements Runnable {
                     List<Transaction> txList = blockContainer.getBlock().getTxs();
                     for (int index = txList.size() - 1; index >= 0; index--) {
                         Transaction tx = blockContainer.getBlock().getTxs().get(index);
-                        Transaction _tx = ledgerService.getTx(tx.getHash());
+                        Transaction localTx = ledgerService.getTx(tx.getHash());
 
-                        if (null == _tx || tx.getBlockHeight() != _tx.getBlockHeight()) {
+                        if (null == localTx || tx.getBlockHeight() != localTx.getBlockHeight()) {
                             continue;
                         }
                         try {

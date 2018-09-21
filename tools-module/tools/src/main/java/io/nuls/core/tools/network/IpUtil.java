@@ -82,7 +82,7 @@ public class IpUtil {
                                 break;
                             }
                             if (!ip.isLoopbackAddress()) {
-                                if (ip.getHostAddress().equalsIgnoreCase("127.0.0.1")) {
+                                if ("127.0.0.1".equalsIgnoreCase(ip.getHostAddress())) {
                                     continue;
                                 }
                             }

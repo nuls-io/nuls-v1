@@ -166,7 +166,7 @@ public class Utils {
         String version = System.getProperty("java.version");
 
         // on android this property equals to 0
-        if (version.equals("0")) {
+        if ("0".equals(version)) {
             return 0;
         }
 

@@ -36,8 +36,8 @@ import java.util.Set;
  */
 public class HashSetDuplicateProcessor {
 
-    private Set<NulsDigestData> SET1 = new HashSet<>();
-    private Set<NulsDigestData> SET2 = new HashSet<>();
+    private Set<NulsDigestData> set1 = new HashSet<>();
+    private Set<NulsDigestData> set2 = new HashSet<>();
     private final int maxSize;
     private final int percent90;
 
@@ -47,23 +47,23 @@ public class HashSetDuplicateProcessor {
     }
 
     public boolean insertAndCheck(NulsDigestData hash) {
-        boolean result = SET1.add(hash);
+        boolean result = set1.add(hash);
         if (!result) {
             return result;
         }
-        int size = SET1.size();
+        int size = set1.size();
         if (size >= maxSize) {
-            SET1.clear();
-            SET1.addAll(SET2);
-            SET2.clear();
+            set1.clear();
+            set1.addAll(set2);
+            set2.clear();
         } else if (size >= percent90) {
-            SET2.add(hash);
+            set2.add(hash);
         }
         return result;
     }
 
     public void remove(NulsDigestData hash) {
-        SET1.remove(hash);
-        SET2.remove(hash);
+        set1.remove(hash);
+        set2.remove(hash);
     }
 }

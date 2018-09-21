@@ -396,8 +396,8 @@ public class UtxoLedgerServiceImpl implements LedgerService {
                 if (temporaryFromSet != null && !temporaryFromSet.add(asString(fromBytes))) {
                     if (i > 0) {
                         for (int x = 0; x < i; x++) {
-                            Coin _from = froms.get(i);
-                            temporaryFromSet.remove(asString(_from.getOwner()));
+                            Coin theFrom = froms.get(i);
+                            temporaryFromSet.remove(asString(theFrom.getOwner()));
                         }
                     }
                     return ValidateResult.getFailedResult(CLASS_NAME, TransactionErrorCode.TRANSACTION_REPEATED);

@@ -53,7 +53,7 @@ import java.io.IOException;
 @Service
 public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService, InitializingBean {
 
-    private byte[] BEST_BLOCK_KEY;
+    private byte[] bestBlockKey;
 
     /**
      * 通用数据存储服务
@@ -77,7 +77,7 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
             throw new NulsRuntimeException(result.getErrorCode());
         }
         try {
-            BEST_BLOCK_KEY = NulsDigestData.calcDigestData(ProtocolStorageConstant.BEST_BLOCK_HASH_INDEX.getBytes()).serialize();
+            bestBlockKey = NulsDigestData.calcDigestData(ProtocolStorageConstant.BEST_BLOCK_HASH_INDEX.getBytes()).serialize();
         } catch (IOException e) {
             throw new NulsRuntimeException(e.getCause());
         }
@@ -184,7 +184,7 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
             this.removeBlockHerader(hashBytes);
             return result;
         }
-        dbService.put(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, BEST_BLOCK_KEY, hashBytes);
+        dbService.put(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, bestBlockKey, hashBytes);
         return Result.getSuccess();
     }
 
@@ -209,7 +209,7 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
         }
         dbService.delete(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, new VarInt(po.getHeight()).encode());
         try {
-            dbService.put(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, BEST_BLOCK_KEY, po.getPreHash().serialize());
+            dbService.put(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, bestBlockKey, po.getPreHash().serialize());
         } catch (IOException e) {
             Log.error(e);
         }
@@ -227,7 +227,7 @@ public class BlockHeaderStorageServiceImpl implements BlockHeaderStorageService,
      */
     @Override
     public BlockHeaderPo getBestBlockHeaderPo() {
-        byte[] hashBytes = dbService.get(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, BEST_BLOCK_KEY);
+        byte[] hashBytes = dbService.get(ProtocolStorageConstant.DB_NAME_BLOCK_HEADER_INDEX, bestBlockKey);
         if (null == hashBytes) {
             return null;
         }
