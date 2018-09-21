@@ -17,17 +17,14 @@
  */
 package org.ethereum.datasource.leveldb;
 
+import io.nuls.db.service.BatchOperation;
+import io.nuls.db.service.DBService;
 import org.ethereum.config.SystemProperties;
 import org.ethereum.datasource.DbSettings;
 import org.ethereum.datasource.DbSource;
-import org.ethereum.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -42,6 +39,10 @@ import static org.ethereum.util.ByteUtil.toHexString;
 public class LevelDbDataSource implements DbSource<byte[]> {
 
     private static final Logger logger = LoggerFactory.getLogger("db");
+
+    public static final String AREA = "contract";
+
+    public static DBService dbService;
 
     SystemProperties config = SystemProperties.getDefault(); // initialized for standalone test
 
@@ -86,35 +87,19 @@ public class LevelDbDataSource implements DbSource<byte[]> {
                 throw new NullPointerException("no name set to the db");
             }
 
-            try {
-                logger.debug("Opening database");
-                final Path dbPath = getPath();
-                if (!Files.isSymbolicLink(dbPath.getParent())) {
-                    Files.createDirectories(dbPath.getParent());
-                }
-
-                logger.debug("Initializing new or existing database: '{}'", name);
-
-                alive = true;
-            } catch (IOException ioe) {
-                logger.error(ioe.getMessage(), ioe);
-                throw new RuntimeException("Can't initialize database", ioe);
+            if (dbService == null) {
+                throw new NullPointerException("dbService is null");
             }
-            logger.debug("<~ LevelDbDataSource.init(): " + name);
+
+            alive = true;
+
         } finally {
             resetDbLock.writeLock().unlock();
         }
     }
 
-    private Path getPath() {
-        return Paths.get(config.databaseDir(), name);
-    }
-
     @Override
     public void reset() {
-        close();
-        FileUtil.recursiveDelete(getPath().toString());
-        init(settings);
     }
 
     @Override
@@ -144,7 +129,20 @@ public class LevelDbDataSource implements DbSource<byte[]> {
             if (logger.isTraceEnabled()) {
                 logger.trace("~> LevelDbDataSource.get(): " + name + ", key: " + toHexString(key));
             }
-            return null;
+            try {
+                byte[] ret = dbService.get(AREA, key);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("<~ LevelDbDataSource.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length));
+                }
+                return ret;
+            } catch (Exception e) {
+                logger.warn("Exception. Retrying again...", e);
+                byte[] ret = dbService.get(AREA, key);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("<~ LevelDbDataSource.get(): " + name + ", key: " + toHexString(key) + ", " + (ret == null ? "null" : ret.length));
+                }
+                return ret;
+            }
         } finally {
             resetDbLock.readLock().unlock();
         }
@@ -157,6 +155,7 @@ public class LevelDbDataSource implements DbSource<byte[]> {
             if (logger.isTraceEnabled()) {
                 logger.trace("~> LevelDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
             }
+            dbService.put(AREA, key, value);
             if (logger.isTraceEnabled()) {
                 logger.trace("<~ LevelDbDataSource.put(): " + name + ", key: " + toHexString(key) + ", " + (value == null ? "null" : value.length));
             }
@@ -172,6 +171,7 @@ public class LevelDbDataSource implements DbSource<byte[]> {
             if (logger.isTraceEnabled()) {
                 logger.trace("~> LevelDbDataSource.delete(): " + name + ", key: " + toHexString(key));
             }
+            dbService.delete(AREA, key);
             if (logger.isTraceEnabled()) {
                 logger.trace("<~ LevelDbDataSource.delete(): " + name + ", key: " + toHexString(key));
             }
@@ -182,19 +182,19 @@ public class LevelDbDataSource implements DbSource<byte[]> {
 
     @Override
     public Set<byte[]> keys() {
-        resetDbLock.readLock().lock();
-        try {
-            if (logger.isTraceEnabled()) {
-                logger.trace("~> LevelDbDataSource.keys(): " + name);
-            }
-            return null;
-        } finally {
-            resetDbLock.readLock().unlock();
-        }
+        return null;
     }
 
-    private void updateBatchInternal(Map<byte[], byte[]> rows) throws IOException {
-
+    private void updateBatchInternal(Map<byte[], byte[]> rows) {
+        BatchOperation batchOperation = dbService.createWriteBatch(AREA);
+        for (Map.Entry<byte[], byte[]> entry : rows.entrySet()) {
+            if (entry.getValue() == null) {
+                batchOperation.delete(entry.getKey());
+            } else {
+                batchOperation.put(entry.getKey(), entry.getValue());
+            }
+        }
+        batchOperation.executeBatch();
     }
 
     @Override
@@ -234,15 +234,6 @@ public class LevelDbDataSource implements DbSource<byte[]> {
 
     @Override
     public void close() {
-        resetDbLock.writeLock().lock();
-        try {
-            if (!isAlive()) {
-                return;
-            }
-            alive = false;
-
-        } finally {
-            resetDbLock.writeLock().unlock();
-        }
     }
+
 }
