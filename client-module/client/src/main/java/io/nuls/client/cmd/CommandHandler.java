@@ -25,12 +25,15 @@
 
 package io.nuls.client.cmd;
 
+import com.fasterxml.jackson.core.JsonParser;
 import io.nuls.account.rpc.cmd.*;
 import io.nuls.accout.ledger.rpc.cmd.*;
 import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.consensus.poc.rpc.cmd.*;
+import io.nuls.contract.rpc.cmd.*;
 import io.nuls.core.tools.cfg.ConfigLoader;
+import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
@@ -158,6 +161,19 @@ public class CommandHandler {
          * utxoAccounts
          */
         register(new GetUtxoAccountsProcessor());
+
+        /**
+         * contract
+         */
+        register(new GetContractTxProcessor());
+        register(new GetContractResultProcessor());
+        register(new GetContractInfoProcessor());
+        register(new GetContractBalanceProcessor());
+        register(new GetContractTxListProcessor());
+        register(new GetContractAddressValidProcessor());
+        register(new GetWalletContractsProcessor());
+        register(new CreateContractProcessor());
+        JSONUtils.getInstance().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         sdkInit();
     }
 
