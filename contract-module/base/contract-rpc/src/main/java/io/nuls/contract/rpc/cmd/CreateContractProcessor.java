@@ -64,7 +64,7 @@ public class CreateContractProcessor implements CommandProcessor {
         builder.newLine(getCommandDescription())
                 .newLine("\t<sender>         source address    -required")
                 .newLine("\t<gasLimit>       gas limit    -required")
-                .newLine("\t<price>          price    -required")
+                .newLine("\t<price>          price (Unit: Na/Gas)    -required")
                 .newLine("\t<contractCode>   contract code    -required")
                 .newLine("\t[remark]         remark    -not required");
         return builder.toString();
@@ -105,8 +105,9 @@ public class CreateContractProcessor implements CommandProcessor {
                 break;
             }
             paramsData.set(form);
+            result = true;
         } while (false);
-        return true;
+        return result;
     }
 
     private ContractCreate getContractCreate(String[] args) {
@@ -199,7 +200,7 @@ public class CreateContractProcessor implements CommandProcessor {
     public String getArgsJson(String constructor) {
         System.out.println("The arguments structure: ");
         System.out.println(constructor);
-        String prompt = "Please enter the arguments according to the arguments structure(eg. \"a\",2,[\"c\",4],\"\",\"e\" or \"'a',2,['c',4],'','e'\").\nEnter the arguments:";
+        String prompt = "Please enter the arguments you want to fill in according to the arguments structure(eg. \"a\",2,[\"c\",4],\"\",\"e\" or \"'a',2,['c',4],'','e'\").\nEnter the arguments:";
         System.out.print(prompt);
         ConsoleReader reader = null;
         try {

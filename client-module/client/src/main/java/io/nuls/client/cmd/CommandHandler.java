@@ -173,6 +173,7 @@ public class CommandHandler {
         register(new GetContractAddressValidProcessor());
         register(new GetWalletContractsProcessor());
         register(new CreateContractProcessor());
+        register(new CallContractProcessor());
         JSONUtils.getInstance().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         sdkInit();
     }

@@ -785,10 +785,14 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                     tokenTransferInfoPo.setValue(token);
                 } else {
                     String from = args[0][0];
+                    // 转出的不是自己的代币（代币授权逻辑），则不保存token待确认交易，因为有调用合约的待确认交易
+                    if(!sender.equals(from)) {
+                        return Result.getSuccess();
+                    }
                     String to = args[1][0];
                     String tokenValue = args[2][0];
                     BigInteger token = new BigInteger(tokenValue);
-                    Result result = contractBalanceManager.subtractContractToken(sender, contractAddress, token);
+                    Result result = contractBalanceManager.subtractContractToken(from, contractAddress, token);
                     if(result.isFailed()) {
                         return result;
                     }
