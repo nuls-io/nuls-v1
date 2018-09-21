@@ -118,31 +118,6 @@ public class Bootstrap {
             TaskManager.asynExecuteRunnable(new WebViewBootstrap());
         }
 
-        /** -----------------------  test Charlie ----------------------- */
-     /* w:while (true) {
-            Thread.sleep(500);
-            for (BaseModuleBootstrap bmb : ModuleManager.getInstance().getModuleList()) {
-                if(bmb.getStatus() != ModuleStatusEnum.RUNNING){
-                    continue w;
-                }
-            }
-            break;
-
-        }
-        if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("LINUX") != -1) {
-            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-            NulsContext.getInstance().exit(1);
-        } else {
-            NulsContext.mastUpGrade = true;
-            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-
-        }*/
-        /** -----------------------  test  ----------------------- */
         int i = 0;
         Map<NulsDigestData, List<Node>> map = new HashMap<>();
         NulsContext context = NulsContext.getInstance();

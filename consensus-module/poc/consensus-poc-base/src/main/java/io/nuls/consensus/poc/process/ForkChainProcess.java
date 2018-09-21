@@ -26,6 +26,7 @@
 
 package io.nuls.consensus.poc.process;
 
+import com.google.common.primitives.UnsignedBytes;
 import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.ChainContainer;
@@ -111,17 +112,18 @@ public class ForkChainProcess {
                 }
                 long newChainHeight = forkChain.getChain().getEndBlockHeader().getHeight();
                 BlockHeader forkChainBlockHeader = forkChain.getChain().getEndBlockHeader();
-                String rightHash = null;
-                String forkChainBlockHash = forkChainBlockHeader.getHash().getDigestHex();
+                byte[] rightHash = null;
+                //String forkChainBlockHash = forkChainBlockHeader.getHash().getDigestHex();
+                byte[] forkChainBlockHash = forkChainBlockHeader.getHash().getDigestBytes();
                 //如果高度相同，则排序选一个hash，作为大家都认同的块
                 if (newChainBlockHeader.getHeight() == newChainHeight){
-                    String newChainBlockHash = newChainBlockHeader.getHash().getDigestHex();
+                    byte[] newChainBlockHash = newChainBlockHeader.getHash().getDigestBytes();
                     rightHash = rightHash(newChainBlockHash, forkChainBlockHash);
                 }
                 if (newChainHeight > newestBlockHeight
                         || (newChainHeight == newestBlockHeight && forkChain.getChain().getEndBlockHeader().getTime() < newChain.getChain().getEndBlockHeader().getTime())
-                        || (newChainBlockHeader.getHeight() == newChainHeight && forkChainBlockHash.equals(rightHash))) {
-                    if (newChainBlockHeader.getHeight() == newChainHeight && forkChainBlockHash.equals(rightHash)) {
+                        || (newChainBlockHeader.getHeight() == newChainHeight && Arrays.equals(forkChainBlockHash, rightHash))) {
+                    if (newChainBlockHeader.getHeight() == newChainHeight && Arrays.equals(forkChainBlockHash, rightHash)) {
                         Log.info("-+-+-+-+-+-+-+-+- Change chain with the same height but different hash block -+-+-+-+-+-+-+-+-");
                         Log.info("-+-+-+-+-+-+-+-+- height: "+ newChainHeight + ", Right hash：" + rightHash);
                     }
@@ -177,8 +179,9 @@ public class ForkChainProcess {
     /**
      * 当两个高度一致的块hash不同时，排序统一选取前面一个hash为正确的
      */
-    private String rightHash(String hash1, String hash2) {
-        if (hash1.compareTo(hash2) <= 0) {
+    private byte[] rightHash(byte[] hash1, byte[] hash2) {
+        Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+        if (comparator.compare(hash1, hash2) <= 0) {
             return hash1;
         }
         return hash2;
