@@ -27,7 +27,10 @@
 package io.nuls.kernel.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -148,6 +151,10 @@ public class CoinData extends BaseNulsData {
     public void addTo(Coin coin) {
         if (null == to) {
             to = new ArrayList<>();
+        }
+        if(coin.getOwner().length == 23 && coin.getOwner()[2] == NulsContext.P2SH_ADDRESS_TYPE){
+            Script scriptPubkey = SignatureUtil.createOutputScript(coin.getOwner());
+            coin.setOwner(scriptPubkey.getProgram());
         }
         to.add(coin);
     }
