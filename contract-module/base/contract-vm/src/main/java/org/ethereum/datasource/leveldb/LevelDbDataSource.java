@@ -99,6 +99,7 @@ public class LevelDbDataSource implements DbSource<byte[]> {
 
             alive = true;
 
+            logger.debug("<~ LevelDbDataSource.init(): " + name);
         } finally {
             resetDbLock.writeLock().unlock();
         }
