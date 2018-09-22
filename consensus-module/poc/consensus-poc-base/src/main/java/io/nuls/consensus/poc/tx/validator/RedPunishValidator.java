@@ -173,10 +173,10 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
         }
         CoinData coinData = ConsensusTool.getStopAgentCoinData(theAgent, tx.getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME, tx.getBlockHeight());
         if (!Arrays.equals(coinData.serialize(), tx.getCoinData().serialize())) {
-            Log.error("红牌惩罚验证不通过, 红牌类型:{}, - 高度:{}, -红牌交易时间:{}", tx.getTxData().getReasonCode(), tx.getBlockHeight(), tx.getTime());
+            Log.error("++++++++++ RedPunish verification does not pass, redPunish type:{}, - hight:{}, - redPunish tx timestamp:{}", tx.getTxData().getReasonCode(), tx.getBlockHeight(), tx.getTime());
             return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.SERIALIZE_ERROR);
         }
-        Log.info("++++++++++ 红牌惩罚验证器验证通过, 红牌类型:{}, - 高度:{}, -红牌交易时间:{}", tx.getTxData().getReasonCode(), tx.getBlockHeight(), tx.getTime());
+        Log.info("++++++++++ RedPunish verification passed, redPunish type:{}, - hight:{}, - redPunish tx timestamp:{}", tx.getTxData().getReasonCode(), tx.getBlockHeight(), tx.getTime());
         return ValidateResult.getSuccessResult();
     }
 }
