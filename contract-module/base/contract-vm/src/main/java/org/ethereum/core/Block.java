@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.spongycastle.util.Arrays;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.ethereum.util.ByteUtil.toHexString;
 
@@ -44,9 +46,6 @@ public class Block {
 
     private BlockHeader header;
 
-    /* Uncles */
-    //private List<BlockHeader> uncleList = new CopyOnWriteArrayList<>();
-
     /* Private */
 
     private byte[] rlpEncoded;
@@ -62,6 +61,57 @@ public class Block {
         this.rlpEncoded = rawData;
     }
 
+    public Block(BlockHeader header) {
+
+        this(header.getParentHash(),
+                header.getUnclesHash(),
+                header.getCoinbase(),
+                header.getLogsBloom(),
+                header.getDifficulty(),
+                header.getNumber(),
+                header.getGasLimit(),
+                header.getGasUsed(),
+                header.getTimestamp(),
+                header.getExtraData(),
+                header.getMixHash(),
+                header.getNonce(),
+                header.getReceiptsRoot(),
+                header.getTxTrieRoot(),
+                header.getStateRoot());
+    }
+
+    public Block(byte[] parentHash, byte[] difficulty, long number, byte[] stateRoot) {
+        this(parentHash, null, null, null,
+                difficulty, number, null,
+                0, 0, null,
+                null, null, null,
+                null, stateRoot);
+    }
+
+    public Block(byte[] parentHash, byte[] unclesHash, byte[] coinbase, byte[] logsBloom,
+                 byte[] difficulty, long number, byte[] gasLimit,
+                 long gasUsed, long timestamp, byte[] extraData,
+                 byte[] mixHash, byte[] nonce, byte[] receiptsRoot,
+                 byte[] transactionsRoot, byte[] stateRoot) {
+
+        this(parentHash, unclesHash, coinbase, logsBloom, difficulty, number, gasLimit,
+                gasUsed, timestamp, extraData, mixHash, nonce);
+
+        this.header.setStateRoot(stateRoot);
+        this.header.setReceiptsRoot(receiptsRoot);
+    }
+
+
+    public Block(byte[] parentHash, byte[] unclesHash, byte[] coinbase, byte[] logsBloom,
+                 byte[] difficulty, long number, byte[] gasLimit,
+                 long gasUsed, long timestamp,
+                 byte[] extraData, byte[] mixHash, byte[] nonce) {
+        this.header = new BlockHeader(parentHash, unclesHash, coinbase, logsBloom,
+                difficulty, number, gasLimit, gasUsed,
+                timestamp, extraData, mixHash, nonce);
+        this.parsed = true;
+    }
+
     private synchronized void parseRLP() {
         if (parsed) {
             return;
@@ -73,19 +123,6 @@ public class Block {
         // Parse Header
         RLPList header = (RLPList) block.get(0);
         this.header = new BlockHeader(header);
-
-        // Parse Transactions
-        //RLPList txTransactions = (RLPList) block.get(1);
-        //this.parseTxs(this.header.getTxTrieRoot(), txTransactions, false);
-
-        // Parse Uncles
-        //RLPList uncleBlocks = (RLPList) block.get(2);
-        //for (RLPElement rawUncle : uncleBlocks) {
-
-        //    RLPList uncleHeader = (RLPList) rawUncle;
-        //    BlockHeader blockData = new BlockHeader(uncleHeader);
-        //    this.uncleList.add(blockData);
-        //}
         this.parsed = true;
     }
 
@@ -119,7 +156,24 @@ public class Block {
     }
 
     public byte[] getEncoded() {
+        if (rlpEncoded == null) {
+            byte[] header = this.header.getEncoded();
+
+            List<byte[]> block = getBodyElements();
+            block.add(0, header);
+            byte[][] elements = block.toArray(new byte[block.size()][]);
+
+            this.rlpEncoded = RLP.encodeList(elements);
+        }
         return rlpEncoded;
+    }
+
+    private List<byte[]> getBodyElements() {
+        parseRLP();
+
+        List<byte[]> body = new ArrayList<>();
+
+        return body;
     }
 
 }
