@@ -80,6 +80,8 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static io.nuls.contract.constant.ContractConstant.MAX_GASLIMIT;
+
 /**
  * @desription:
  * @author: PierreLuo
@@ -200,6 +202,9 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 programCreate.setArgs(args);
             }
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
+            // 验证合约时跳过Gas验证
+            long realGasLimit = programCreate.getGasLimit();
+            programCreate.setGasLimit(MAX_GASLIMIT);
             ProgramResult programResult = track.create(programCreate);
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas，
@@ -207,6 +212,16 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 return result;
+            } else {
+                // 其他合法性都通过后，再验证Gas
+                track = programExecutor.begin(prevStateRoot);
+                programCreate.setGasLimit(realGasLimit);
+                programResult = track.create(programCreate);
+                if(!programResult.isSuccess()) {
+                    Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
+                    result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                    return result;
+                }
             }
             /*long gasUsed = programResult.getGasUsed();
             // 预估1.5倍Gas
@@ -491,6 +506,9 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 programCreate.setArgs(args);
             }
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
+            // 验证合约时跳过Gas验证
+            long realGasLimit = programCreate.getGasLimit();
+            programCreate.setGasLimit(MAX_GASLIMIT);
             ProgramResult programResult = track.create(programCreate);
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas，
@@ -498,6 +516,16 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 return result;
+            } else {
+                // 其他合法性都通过后，再验证Gas
+                track = programExecutor.begin(prevStateRoot);
+                programCreate.setGasLimit(realGasLimit);
+                programResult = track.create(programCreate);
+                if(!programResult.isSuccess()) {
+                    Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
+                    result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                    return result;
+                }
             }
             long gasUsed = gasLimit.longValue();
             Na imputedNa = Na.valueOf(LongUtils.mul(gasUsed, price));
@@ -649,6 +677,9 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
 
             // 执行VM验证合法性
             ProgramExecutor track = programExecutor.begin(prevStateRoot);
+            // 验证合约时跳过Gas验证
+            long realGasLimit = programCall.getGasLimit();
+            programCall.setGasLimit(MAX_GASLIMIT);
             ProgramResult programResult = track.call(programCall);
 
             // 执行结果失败时，交易直接返回错误，不上链，不消耗Gas
@@ -656,6 +687,16 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 return result;
+            } else {
+                // 其他合法性都通过后，再验证Gas
+                track = programExecutor.begin(prevStateRoot);
+                programCall.setGasLimit(realGasLimit);
+                programResult = track.call(programCall);
+                if(!programResult.isSuccess()) {
+                    Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
+                    result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                    return result;
+                }
             }
             /*long gasUsed = programResult.getGasUsed();
             // 预估1.5倍Gas
