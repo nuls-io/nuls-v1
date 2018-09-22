@@ -40,13 +40,15 @@ public class TestMain {
     public static RestFulUtils restFul;
 
     public static void main(String[] args) {
-        post();
+        get();
     }
 
     static void get() {
-        RestFulUtils.getInstance().setServerUri("http://192.168.1.106:8001/api");
+        RestFulUtils.getInstance().setServerUri("http://127.0.0.1:8001/api");
         restFul = RestFulUtils.getInstance();
-        RpcClientResult result = restFul.get("/contract/result/0020ce2b820d15ecbe1c8c22526611336fd425522340c6246f0364dd1e784da8ed0b", null);
+        //RpcClientResult result = restFul.get("/contract/result/0020ce2b820d15ecbe1c8c22526611336fd425522340c6246f0364dd1e784da8ed0b", null);
+        //RpcClientResult result = restFul.get("/contract/balance/token/NseCWjDsXZUz1VDNskCPA1qw4ETE9xjd/Nse7ke7HXfe3uvfY1tyDHvWRao9uUKAn", null);
+        RpcClientResult result = restFul.get("/contract/NseCWjDsXZUz1VDNskCPA1qw4ETE9xjd", null);
         if (result.isFailed()) {
             System.out.println("query fail");
         }

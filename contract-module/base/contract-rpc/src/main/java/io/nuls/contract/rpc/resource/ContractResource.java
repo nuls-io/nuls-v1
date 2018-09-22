@@ -343,7 +343,7 @@ public class ContractResource implements InitializingBean {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
-    public RpcClientResult callContract(@ApiParam(name = "callFrom", value = "调用智能合约", required = true) ContractCall call) {
+    public RpcClientResult callContract(@ApiParam(name = "callForm", value = "调用智能合约", required = true) ContractCall call) {
         if (call == null || call.getValue() < 0 || call.getGasLimit() < 0 || call.getPrice() < 0) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
@@ -387,7 +387,7 @@ public class ContractResource implements InitializingBean {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
-    public RpcClientResult transfer(@ApiParam(name = "transferFrom", value = "向合约地址转账", required = true) ContractTransfer transfer) {
+    public RpcClientResult transfer(@ApiParam(name = "transferForm", value = "向合约地址转账", required = true) ContractTransfer transfer) {
         if (transfer == null || transfer.getAmount() < 0 || transfer.getGasLimit() < 0 || transfer.getPrice() < 0) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
@@ -419,13 +419,65 @@ public class ContractResource implements InitializingBean {
     }
 
     @POST
+    @Path("/token/transfer")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "token转账")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult tokenTransfer(@ApiParam(name = "tokenTransferForm", value = "token转账", required = true) ContractTokenTransfer transfer) {
+        if (transfer == null || transfer.getAmount() == null ||
+                !StringUtils.isNumeric(transfer.getAmount()) ||
+                new BigInteger(transfer.getAmount()).compareTo(BigInteger.ZERO) < 0 || transfer.getGasLimit() < 0 || transfer.getPrice() < 0) {
+            return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+
+        String from = transfer.getAddress();
+        String to = transfer.getToAddress();
+        if (!AddressTool.validAddress(from)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+
+        if (!AddressTool.validAddress(to)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+
+        String contractAddress = transfer.getContractAddress();
+        if (!AddressTool.validAddress(contractAddress)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+
+        byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+        Result<ContractAddressInfoPo> contractAddressInfoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
+        ContractAddressInfoPo po = contractAddressInfoResult.getData();
+        if(po == null) {
+            return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST).toRpcClientResult();
+        }
+        if(!po.isNrc20()) {
+            return Result.getFailed(ContractErrorCode.CONTRACT_NOT_NRC20).toRpcClientResult();
+        }
+        Object[] argsObj = new Object[] {to, transfer.getAmount()};
+
+        return contractTxService.contractCallTx(transfer.getAddress(),
+                Na.ZERO,
+                transfer.getGasLimit(),
+                transfer.getPrice(),
+                contractAddress,
+                ContractConstant.NRC20_METHOD_TRANSFER,
+                null,
+                ContractUtil.twoDimensionalArray(argsObj),
+                transfer.getPassword(),
+                transfer.getRemark()).toRpcClientResult();
+    }
+
+    @POST
     @Path("/transfer/fee")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "向智能合约地址转账手续费")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
-    public RpcClientResult transferFee(@ApiParam(name = "transferFeeFrom", value = "向合约地址转账手续费", required = true) ContractTransferFee transferFee) {
+    public RpcClientResult transferFee(@ApiParam(name = "transferFeeForm", value = "向合约地址转账手续费", required = true) ContractTransferFee transferFee) {
         if (transferFee == null || transferFee.getAmount() < 0 || transferFee.getGasLimit() < 0 || transferFee.getPrice() < 0) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
@@ -485,10 +537,10 @@ public class ContractResource implements InitializingBean {
             @ApiResponse(code = 200, message = "success")
     })
     public RpcClientResult invokeViewContract(
-            @ApiParam(name = "constantCallForm", value = "调用不上链的智能合约函数表单数据", required = true) ContractConstantCall constantCall) {
+            @ApiParam(name = "constantCallForm", value = "调用不上链的智能合约函数表单数据", required = true) ContractViewCall viewCall) {
         try {
-            String contractAddress = constantCall.getContractAddress();
-            String methodName = constantCall.getMethodName();
+            String contractAddress = viewCall.getContractAddress();
+            String methodName = viewCall.getMethodName();
             if (StringUtils.isBlank(contractAddress) || StringUtils.isBlank(methodName)) {
                 return Result.getFailed(ContractErrorCode.NULL_PARAMETER).toRpcClientResult();
             }
@@ -502,14 +554,14 @@ public class ContractResource implements InitializingBean {
                 return Result.getFailed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST).toRpcClientResult();
             }
 
-            ProgramMethod method = vmHelper.getMethodInfoByContractAddress(methodName, constantCall.getMethodDesc(), contractAddressBytes);
+            ProgramMethod method = vmHelper.getMethodInfoByContractAddress(methodName, viewCall.getMethodDesc(), contractAddressBytes);
 
             if(method == null || !method.isView()) {
                 return Result.getFailed(ContractErrorCode.CONTRACT_NON_VIEW_METHOD).toRpcClientResult();
             }
 
-            ProgramResult programResult = vmHelper.invokeViewMethod(contractAddressBytes, methodName, constantCall.getMethodDesc(),
-                    constantCall.getArgs(method.argsType2Array()));
+            ProgramResult programResult = vmHelper.invokeViewMethod(contractAddressBytes, methodName, viewCall.getMethodDesc(),
+                    viewCall.getArgs(method.argsType2Array()));
 
             Result result = null;
             if(!programResult.isSuccess()) {
@@ -649,7 +701,7 @@ public class ContractResource implements InitializingBean {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success")
     })
-    public RpcClientResult deleteContract(@ApiParam(name = "deleteFrom", value = "删除智能合约", required = true) ContractDelete delete) {
+    public RpcClientResult deleteContract(@ApiParam(name = "deleteForm", value = "删除智能合约", required = true) ContractDelete delete) {
         if (delete == null) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
@@ -694,6 +746,8 @@ public class ContractResource implements InitializingBean {
         try {
             boolean isContractAddress = false;
             boolean isPayable = false;
+            boolean isNrc20 = false;
+            long decimals = 0L;
             do {
                 byte[] contractAddressBytes = AddressTool.getAddress(address);
                 Result<ContractAddressInfoPo> contractAddressInfoPoResult = contractAddressStorageService.getContractAddressInfo(contractAddressBytes);
@@ -706,10 +760,19 @@ public class ContractResource implements InitializingBean {
                 }
                 isContractAddress = true;
                 isPayable = contractAddressInfoPo.isAcceptDirectTransfer();
+                isNrc20 = contractAddressInfoPo.isNrc20();
+                if(isNrc20) {
+                    decimals = contractAddressInfoPo.getDecimals();
+                }
             } while (false);
             Map<String, Object> resultMap = MapUtil.createLinkedHashMap(2);
             resultMap.put("isContractAddress", isContractAddress);
             resultMap.put("isPayable", isPayable);
+            resultMap.put("isNrc20", isNrc20);
+            if(isNrc20) {
+                resultMap.put("decimals", decimals);
+            }
+
 
             return Result.getSuccess().setData(resultMap).toRpcClientResult();
         } catch (Exception e) {
@@ -873,6 +936,29 @@ public class ContractResource implements InitializingBean {
         resultMap.put("address", contractAddress);
         resultMap.put("balance", balance == null ? BigInteger.ZERO : balance);
         return Result.getSuccess().setData(resultMap).toRpcClientResult();
+    }
+
+    @GET
+    @Path("/balance/token/{contractAddress}/{address}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "获取账户地址的指定token余额")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult getAccountTokenBalance(
+            @ApiParam(name = "contractAddress", value = "合约地址", required = true) @PathParam("contractAddress") String contractAddress,
+            @ApiParam(name = "address", value = "账户地址", required = true) @PathParam("address") String address) {
+        Result<ContractTokenInfo> tokenInfoResult = contractService.getContractTokenViaVm(address, contractAddress);
+        if(tokenInfoResult.isFailed()) {
+            return tokenInfoResult.toRpcClientResult();
+        }
+        ContractTokenInfo data = tokenInfoResult.getData();
+        ContractTokenInfoDto dto = null;
+        if(data != null) {
+            dto = new ContractTokenInfoDto(data);
+            dto.setStatus(data.getStatus());
+        }
+        return Result.getSuccess().setData(dto).toRpcClientResult();
     }
 
     @GET
@@ -1473,6 +1559,13 @@ public class ContractResource implements InitializingBean {
                 for (int i = start; i < end; i++) {
                     ContractTokenInfo info = tokenInfoList.get(i);
                     tokenInfoDtoList.add(new ContractTokenInfoDto(info));
+                }
+            }
+            if(tokenInfoDtoList != null && tokenInfoDtoList.size() > 0) {
+                byte[] prevStateRoot = ContractUtil.getStateRoot(NulsContext.getInstance().getBestBlock().getHeader());
+                ProgramExecutor track = programExecutor.begin(prevStateRoot);
+                for(ContractTokenInfoDto tokenInfo : tokenInfoDtoList) {
+                    tokenInfo.setStatus(track.status(AddressTool.getAddress(tokenInfo.getContractAddress())).ordinal());
                 }
             }
             page.setList(tokenInfoDtoList);

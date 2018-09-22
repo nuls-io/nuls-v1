@@ -948,7 +948,11 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
             } else {
                 result = Result.getSuccess();
-                result.setData(new ContractTokenInfo(contractAddress, po.getNrc20TokenName(), po.getDecimals(), new BigInteger(programResult.getResult()), po.getNrc20TokenSymbol(), po.getBlockHeight()));
+                ContractTokenInfo tokenInfo = new ContractTokenInfo(contractAddress, po.getNrc20TokenName(), po.getDecimals(), new BigInteger(programResult.getResult()), po.getNrc20TokenSymbol(), po.getBlockHeight());
+                byte[] prevStateRoot = ContractUtil.getStateRoot(NulsContext.getInstance().getBestBlock().getHeader());
+                ProgramExecutor track = programExecutor.begin(prevStateRoot);
+                tokenInfo.setStatus(track.status(AddressTool.getAddress(tokenInfo.getContractAddress())).ordinal());
+                result.setData(tokenInfo);
             }
             return result;
         } catch (Exception e) {

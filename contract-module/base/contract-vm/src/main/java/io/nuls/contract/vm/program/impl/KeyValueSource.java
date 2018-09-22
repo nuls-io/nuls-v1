@@ -48,7 +48,8 @@ public class KeyValueSource implements Source<byte[], byte[]> {
             dbService.createArea(AREA);
         }
         this.cache = CacheBuilder.newBuilder()
-                .initialCapacity(102400)
+                .initialCapacity(10240)
+                .maximumSize(102400)
                 .expireAfterAccess(10, TimeUnit.MINUTES)
                 .build();
     }

@@ -21,6 +21,7 @@ import org.ethereum.core.Repository;
 import org.ethereum.crypto.HashUtil;
 import org.ethereum.datasource.*;
 import org.ethereum.datasource.inmem.HashMapDB;
+import org.ethereum.datasource.leveldb.LevelDbDataSource;
 import org.ethereum.db.DbFlushManager;
 import org.ethereum.db.HeaderStore;
 import org.ethereum.db.RepositoryRoot;
@@ -36,6 +37,13 @@ public class CommonConfig {
     private Set<DbSource> dbSources = new HashSet<>();
 
     private static CommonConfig defaultInstance;
+
+    public static CommonConfig getDefault() {
+        if (defaultInstance == null) {
+            defaultInstance = new CommonConfig();
+        }
+        return defaultInstance;
+    }
 
     public SystemProperties systemProperties() {
         return SystemProperties.getSpringDefault();
@@ -63,20 +71,30 @@ public class CommonConfig {
      * @see RepositoryRoot#RepositoryRoot(Source, byte[])
      * @see Eth63
      */
+    private Source<byte[], byte[]> trieNodeSource;
+
     public Source<byte[], byte[]> trieNodeSource() {
-        DbSource<byte[]> db = blockchainDB();
-        Source<byte[], byte[]> src = new PrefixLookupSource<>(db, NodeKeyCompositor.PREFIX_BYTES);
-        return new XorDataSource<>(src, HashUtil.sha3("state".getBytes()));
+        if (trieNodeSource == null) {
+            DbSource<byte[]> db = blockchainDB();
+            Source<byte[], byte[]> src = new PrefixLookupSource<>(db, NodeKeyCompositor.PREFIX_BYTES);
+            trieNodeSource = new XorDataSource<>(src, HashUtil.sha3("state".getBytes()));
+        }
+        return trieNodeSource;
     }
 
+    private StateSource stateSource;
+
     public StateSource stateSource() {
-        //fastSyncCleanUp();
-        StateSource stateSource = new StateSource(blockchainSource("state"),
-                systemProperties().databasePruneDepth() >= 0);
+        if (this.stateSource == null) {
+            //fastSyncCleanUp();
+            StateSource stateSource = new StateSource(blockchainSource("state"),
+                    systemProperties().databasePruneDepth() >= 0);
 
-        dbFlushManager().addCache(stateSource.getWriteCache());
+            dbFlushManager().addCache(stateSource.getWriteCache());
 
-        return stateSource;
+            this.stateSource = stateSource;
+        }
+        return this.stateSource;
     }
 
     public Source<byte[], byte[]> cachedDbSource(String name) {
@@ -97,11 +115,16 @@ public class CommonConfig {
         return new XorDataSource<>(blockchainDbCache(), HashUtil.sha3(name.getBytes()));
     }
 
+    private AbstractCachedSource<byte[], byte[]> blockchainDbCache;
+
     public AbstractCachedSource<byte[], byte[]> blockchainDbCache() {
-        WriteCache.BytesKey<byte[]> ret = new WriteCache.BytesKey<>(
-                new BatchSourceWriter<>(blockchainDB()), WriteCache.CacheType.SIMPLE);
-        ret.setFlushSource(true);
-        return ret;
+        if (blockchainDbCache == null) {
+            WriteCache.BytesKey<byte[]> ret = new WriteCache.BytesKey<>(
+                    new BatchSourceWriter<>(blockchainDB()), WriteCache.CacheType.SIMPLE);
+            ret.setFlushSource(true);
+            blockchainDbCache = ret;
+        }
+        return blockchainDbCache;
     }
 
     public DbSource<byte[]> keyValueDataSource(String name) {
@@ -115,7 +138,7 @@ public class CommonConfig {
             if ("inmem".equals(dataSource)) {
                 dbSource = new HashMapDB<>();
             } else {
-                dbSource = new HashMapDB<>();
+                dbSource = levelDbDataSource();
             }
             dbSource.setName(name);
             dbSource.init(settings);
@@ -126,6 +149,10 @@ public class CommonConfig {
         }
     }
 
+    protected LevelDbDataSource levelDbDataSource() {
+        return new LevelDbDataSource();
+    }
+
     private void resetDataSource(Source source) {
         if (source instanceof DbSource) {
             ((DbSource) source).reset();
@@ -134,36 +161,56 @@ public class CommonConfig {
         }
     }
 
+    private DbSource<byte[]> headerSource;
+
     public DbSource<byte[]> headerSource() {
-        return keyValueDataSource("headers");
+        if (headerSource == null) {
+            headerSource = keyValueDataSource("headers");
+        }
+        return headerSource;
     }
+
+    private HeaderStore headerStore;
 
     public HeaderStore headerStore() {
-        DbSource<byte[]> dataSource = headerSource();
+        if (this.headerStore == null) {
+            DbSource<byte[]> dataSource = headerSource();
 
-        WriteCache.BytesKey<byte[]> cache = new WriteCache.BytesKey<>(
-                new BatchSourceWriter<>(dataSource), WriteCache.CacheType.SIMPLE);
-        cache.setFlushSource(true);
-        dbFlushManager().addCache(cache);
+            WriteCache.BytesKey<byte[]> cache = new WriteCache.BytesKey<>(
+                    new BatchSourceWriter<>(dataSource), WriteCache.CacheType.SIMPLE);
+            cache.setFlushSource(true);
+            dbFlushManager().addCache(cache);
 
-        HeaderStore headerStore = new HeaderStore();
-        Source<byte[], byte[]> headers = new XorDataSource<>(cache, HashUtil.sha3("header".getBytes()));
-        Source<byte[], byte[]> index = new XorDataSource<>(cache, HashUtil.sha3("index".getBytes()));
-        headerStore.init(index, headers);
+            HeaderStore headerStore = new HeaderStore();
+            Source<byte[], byte[]> headers = new XorDataSource<>(cache, HashUtil.sha3("header".getBytes()));
+            Source<byte[], byte[]> index = new XorDataSource<>(cache, HashUtil.sha3("index".getBytes()));
+            headerStore.init(index, headers);
 
-        return headerStore;
+            this.headerStore = headerStore;
+        }
+        return this.headerStore;
     }
+
+    private DbSource<byte[]> blockchainDB;
 
     public DbSource<byte[]> blockchainDB() {
-        DbSettings settings = DbSettings.newInstance()
-                .withMaxOpenFiles(systemProperties().getConfig().getInt("database.maxOpenFiles"))
-                .withMaxThreads(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
+        if (blockchainDB == null) {
+            DbSettings settings = DbSettings.newInstance()
+                    .withMaxOpenFiles(systemProperties().getConfig().getInt("database.maxOpenFiles"))
+                    .withMaxThreads(Math.max(1, Runtime.getRuntime().availableProcessors() / 2));
 
-        return keyValueDataSource("blockchain", settings);
+            blockchainDB = keyValueDataSource("blockchain", settings);
+        }
+        return blockchainDB;
     }
 
+    private DbFlushManager dbFlushManager;
+
     public DbFlushManager dbFlushManager() {
-        return new DbFlushManager(systemProperties(), dbSources, blockchainDbCache());
+        if (dbFlushManager == null) {
+            dbFlushManager = new DbFlushManager(systemProperties(), dbSources, blockchainDbCache());
+        }
+        return dbFlushManager;
     }
 
 }
