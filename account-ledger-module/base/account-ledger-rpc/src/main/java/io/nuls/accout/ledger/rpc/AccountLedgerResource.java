@@ -68,6 +68,7 @@ import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.model.tx.TransferTransaction;
+import io.nuls.protocol.model.validator.TxMaxSizeValidator;
 import io.swagger.annotations.*;
 import org.spongycastle.util.Arrays;
 
@@ -360,31 +361,35 @@ public class AccountLedgerResource {
         Na value = Na.valueOf(form.getAmount());
         Result result = accountLedgerService.transferFee(AddressTool.getAddress(form.getAddress()),
                 AddressTool.getAddress(form.getToAddress()), value, form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
-        Transaction tx = new TransferTransaction();
-        try {
-            tx.setRemark(form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            Log.error(e);
-        }
-        tx.setTime(TimeService.currentTimeMillis());
-        CoinData coinData = new CoinData();
-        Coin toCoin = new Coin(AddressTool.getAddress(form.getToAddress()), value);
-        coinData.getTo().add(toCoin);
-        tx.setCoinData(coinData);
-        Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
-                TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
-        Map<String, Long> map = new HashMap<>();
         Long fee = null;
         Long maxAmount = null;
-        if (result.isSuccess()) {
+        Map<String, Long> map = new HashMap<>();
+        if (!result.isSuccess()) {
             fee = ((Na) result.getData()).getValue();
+            //如果手续费大于理论最大值，则说明交易过大，需要计算最大交易金额
+            long feeMax = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES.multiply(TxMaxSizeValidator.MAX_TX_BYTES).getValue();
+            if(fee > feeMax){
+                Transaction tx = new TransferTransaction();
+                try {
+                    tx.setRemark(form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING));
+                } catch (UnsupportedEncodingException e) {
+                    Log.error(e);
+                }
+                tx.setTime(TimeService.currentTimeMillis());
+                CoinData coinData = new CoinData();
+                Coin toCoin = new Coin(AddressTool.getAddress(form.getToAddress()), value);
+                coinData.getTo().add(toCoin);
+                tx.setCoinData(coinData);
+                Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
+                        TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+                if (rs.isSuccess()) {
+                    maxAmount = ((Na) rs.getData()).getValue();
+                }
+            }
+            map.put("fee", fee);
+            map.put("maxAmount", maxAmount);
+            result.setData(map);
         }
-        if (rs.isSuccess()) {
-            maxAmount = ((Na) rs.getData()).getValue();
-        }
-        map.put("fee", fee);
-        map.put("maxAmount", maxAmount);
-        result.setData(map);
         return result.toRpcClientResult();
     }
 

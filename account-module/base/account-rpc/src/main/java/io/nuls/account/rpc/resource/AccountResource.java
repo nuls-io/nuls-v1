@@ -64,6 +64,7 @@ import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.ledger.constant.LedgerErrorCode;
+import io.nuls.protocol.model.validator.TxMaxSizeValidator;
 import io.swagger.annotations.*;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -317,46 +318,50 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Result result = aliasService.getAliasFee(form.getAddress(), form.getAlias());
-        AliasTransaction tx = new AliasTransaction();
-        tx.setTime(TimeService.currentTimeMillis());
-        Alias alias = new Alias(AddressTool.getAddress(form.getAddress()), form.getAlias());
-        tx.setTxData(alias);
 
-        try {
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(AddressTool.getAddress(form.getAddress()), AccountConstant.ALIAS_NA, tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
-            if (!coinDataResult.isEnough()) {
-                return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE).toRpcClientResult();
-            }
-            CoinData coinData = new CoinData();
-            coinData.setFrom(coinDataResult.getCoinList());
-            Coin change = coinDataResult.getChange();
-            if (null != change) {
-                //创建toList
-                List<Coin> toList = new ArrayList<>();
-                toList.add(change);
-                coinData.setTo(toList);
-            }
-            Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
-            coinData.addTo(coin);
-            tx.setCoinData(coinData);
-        } catch (Exception e) {
-            Log.error(e);
-            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
-        }
-        Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
-                TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
-        Map<String, Long> map = new HashMap<>();
         Long fee = null;
         Long maxAmount = null;
+        Map<String, Long> map = new HashMap<>();
         if (result.isSuccess()) {
             fee = ((Na) result.getData()).getValue();
+            //如果手续费大于理论最大值，则说明交易过大，需要计算最大交易金额
+            long feeMax = TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES.multiply(TxMaxSizeValidator.MAX_TX_BYTES).getValue();
+            if(fee > feeMax){
+                AliasTransaction tx = new AliasTransaction();
+                tx.setTime(TimeService.currentTimeMillis());
+                Alias alias = new Alias(AddressTool.getAddress(form.getAddress()), form.getAlias());
+                tx.setTxData(alias);
+                try {
+                    CoinDataResult coinDataResult = accountLedgerService.getCoinData(AddressTool.getAddress(form.getAddress()), AccountConstant.ALIAS_NA, tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                    if (!coinDataResult.isEnough()) {
+                        return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE).toRpcClientResult();
+                    }
+                    CoinData coinData = new CoinData();
+                    coinData.setFrom(coinDataResult.getCoinList());
+                    Coin change = coinDataResult.getChange();
+                    if (null != change) {
+                        //创建toList
+                        List<Coin> toList = new ArrayList<>();
+                        toList.add(change);
+                        coinData.setTo(toList);
+                    }
+                    Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
+                    coinData.addTo(coin);
+                    tx.setCoinData(coinData);
+                } catch (Exception e) {
+                    Log.error(e);
+                    return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
+                }
+                Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
+                        TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                if (rs.isSuccess()) {
+                    maxAmount = ((Na) rs.getData()).getValue();
+                }
+            }
+            map.put("fee", fee);
+            map.put("maxAmount", maxAmount);
+            result.setData(map);
         }
-        if (rs.isSuccess()) {
-            maxAmount = ((Na) rs.getData()).getValue();
-        }
-        map.put("fee", fee);
-        map.put("maxAmount", maxAmount);
-        result.setData(map);
         return result.toRpcClientResult();
     }
 
