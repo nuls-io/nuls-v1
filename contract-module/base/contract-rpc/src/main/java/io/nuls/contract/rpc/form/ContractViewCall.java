@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "调用不上链的智能合约函数表单数据")
-public class ContractConstantCall {
+public class ContractViewCall {
 
     @ApiModelProperty(name = "contractAddress", value = "智能合约地址", required = true)
     private String contractAddress;

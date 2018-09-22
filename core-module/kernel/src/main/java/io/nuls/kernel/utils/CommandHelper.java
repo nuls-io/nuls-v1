@@ -32,6 +32,7 @@ import io.nuls.kernel.model.RpcClientResult;
 import jline.console.ConsoleReader;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -382,4 +383,10 @@ public class CommandHelper {
     }
 
 
+    public static String tokenRecovery(String amount, Integer decimals) {
+        if(StringUtils.isBlank(amount) || decimals == null) {
+            return null;
+        }
+        return new BigDecimal(amount).divide(BigDecimal.TEN.pow(decimals)).toPlainString();
+    }
 }
