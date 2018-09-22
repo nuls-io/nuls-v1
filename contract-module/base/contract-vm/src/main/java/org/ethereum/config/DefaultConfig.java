@@ -35,6 +35,15 @@ public class DefaultConfig {
 
     SystemProperties config = SystemProperties.getDefault();
 
+    private static DefaultConfig defaultInstance;
+
+    public static DefaultConfig getDefault() {
+        if (defaultInstance == null) {
+            defaultInstance = new DefaultConfig();
+        }
+        return defaultInstance;
+    }
+
     public DefaultConfig() {
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> logger.error("Uncaught exception", e));
     }
