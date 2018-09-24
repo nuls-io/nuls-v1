@@ -36,6 +36,8 @@ import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeMsg;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeUtils;
 import io.nuls.contract.vm.natives.java.lang.*;
 import io.nuls.contract.vm.natives.java.lang.reflect.NativeArray;
+import io.nuls.contract.vm.natives.java.sun.misc.NativeVM;
+import io.nuls.contract.vm.util.Log;
 
 public class NativeMethod {
 
@@ -120,6 +122,9 @@ public class NativeMethod {
                 break;
             case NativeUtils.TYPE:
                 result = NativeUtils.nativeRun(methodCode, methodArgs, frame, check);
+                break;
+            case NativeVM.TYPE:
+                result = NativeVM.nativeRun(methodCode, methodArgs, frame, check);
                 break;
             default:
                 frame.nonsupportMethod(methodCode);

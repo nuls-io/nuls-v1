@@ -245,4 +245,8 @@ public class Frame {
         this.addGas = addGas;
     }
 
+    public OpCode getCurrentOpCode() {
+        return currentOpCode;
+    }
+
 }

@@ -32,6 +32,7 @@ import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.natives.NativeMethod;
 import io.nuls.contract.vm.util.Constants;
+import io.nuls.contract.vm.util.Log;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import java.util.List;
