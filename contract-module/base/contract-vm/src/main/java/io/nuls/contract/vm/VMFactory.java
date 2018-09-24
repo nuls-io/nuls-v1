@@ -78,7 +78,7 @@ public class VMFactory {
             "java/lang/Byte$ByteCache",
             "java/lang/Short$ShortCache",
             "java/lang/Character$CharacterCache",
-            //"java/lang/Integer$IntegerCache",
+            "java/lang/Integer$IntegerCache",
             "java/lang/Long$LongCache",
     };
 

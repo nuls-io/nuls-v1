@@ -26,6 +26,7 @@ package io.nuls.contract.vm.natives.java.sun.misc;
 
 import io.nuls.contract.vm.Frame;
 import io.nuls.contract.vm.MethodArgs;
+import io.nuls.contract.vm.ObjectRef;
 import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.natives.NativeMethod;
@@ -59,15 +60,13 @@ public class NativeVM {
      * @see VM#initialize()
      */
     private static Result initialize(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        frame.heap.putStatic(TYPE, "savedProps", null);
+        ObjectRef savedProps = (ObjectRef) frame.heap.getStatic(TYPE, "savedProps");
+        ObjectRef key = frame.heap.newString("user.script");
+        ObjectRef value = frame.heap.newString("");
+        MethodCode methodCode1 = frame.methodArea.loadMethod("java/util/Properties", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+        frame.vm.run(methodCode1, new Object[]{savedProps, key, value}, false);
         Result result = NativeMethod.result(methodCode, null, frame);
         return result;
-    }
-
-    public static void main(String[] args) {
-        String integerCacheHighPropValue =
-                sun.misc.VM.getSavedProperty("java.lang.Integer.IntegerCache.high");
-        System.out.println(integerCacheHighPropValue);
     }
 
 }
