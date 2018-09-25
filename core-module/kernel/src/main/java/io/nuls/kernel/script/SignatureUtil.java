@@ -238,7 +238,8 @@ public class SignatureUtil {
         if (address == null || address.length < 23) {
             return null;
         }
-        if (address[2] == 3) {
+        //
+        if (address[2] == NulsContext.P2SH_ADDRESS_TYPE) {
             script = ScriptBuilder.createOutputScript(address, 0);
         } else {
             script = ScriptBuilder.createOutputScript(address, 1);

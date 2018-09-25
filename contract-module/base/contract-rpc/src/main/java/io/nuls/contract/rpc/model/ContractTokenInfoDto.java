@@ -40,10 +40,24 @@ public class ContractTokenInfoDto {
 
     @ApiModelProperty(name = "contractAddress", value = "合约地址")
     private String contractAddress;
+
     @ApiModelProperty(name = "name", value = "token名称")
     private String name;
+
+    @ApiModelProperty(name = "symbol", value = "token符号")
+    private String symbol;
+
     @ApiModelProperty(name = "amount", value = "token数量")
     private String amount;
+
+    @ApiModelProperty(name = "decimals", value = "token支持的小数位数")
+    private long decimals;
+
+    @ApiModelProperty(name = "blockHeight", value = "合约创建时的区块高度")
+    private long blockHeight;
+
+    @ApiModelProperty(name = "status", value = "合约状态(0-不存在, 1-正常, 2-终止)")
+    private int status;
 
     public ContractTokenInfoDto() {
     }
@@ -51,7 +65,11 @@ public class ContractTokenInfoDto {
     public ContractTokenInfoDto(ContractTokenInfo info) {
         this.contractAddress = info.getContractAddress();
         this.name = info.getName();
+        this.symbol = info.getSymbol();
         this.amount = ContractUtil.bigInteger2String(info.getAmount());
+        this.decimals = info.getDecimals();
+        this.blockHeight = info.getBlockHeight();
+        this.status = info.getStatus();
     }
 
     public String getContractAddress() {
@@ -76,5 +94,37 @@ public class ContractTokenInfoDto {
 
     public void setAmount(String amount) {
         this.amount = amount;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public long getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(long decimals) {
+        this.decimals = decimals;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

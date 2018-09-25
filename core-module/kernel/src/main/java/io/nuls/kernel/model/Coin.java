@@ -180,10 +180,6 @@ public class Coin extends BaseNulsData {
         }
     }
 
-    public boolean isP2Script() {
-        return false;
-    }
-
     @Override
     public String toString() {
         return "Coin{" +
