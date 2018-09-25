@@ -243,5 +243,6 @@ public class ConnectionManager {
 
     public void shutdown() {
         nettyServer.shutdown();
+        nodeManager.shutdown();
     }
 }

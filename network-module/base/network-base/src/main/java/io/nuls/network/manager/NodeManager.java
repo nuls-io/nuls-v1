@@ -568,4 +568,13 @@ public class NodeManager implements Runnable {
             }
         }
     }
+
+    public void shutdown() {
+        running = false;
+        for (Node node : handShakeNodes.values()) {
+            if(node.getType() == Node.OUT) {
+                removeNode(node);
+            }
+        }
+    }
 }
