@@ -105,6 +105,22 @@ public class AccountTest {
             ECKey ecKey = new ECKey();
             String prikey = Hex.encode(ecKey.getPrivKeyBytes());
             ECKey ecKey2 = ECKey.fromPrivate(new BigInteger(1, Hex.decode(prikey)));
+            ECKey ecKey3 = ECKey.fromPrivate(new BigInteger(Hex.decode(prikey)));
+            if(!Arrays.equals(ecKey.getPubKey(), ecKey3.getPubKey())){
+                //1.0.1的bug, 导入私钥BigInteger少传参数, 如果不等说明问题大了。
+                System.out.println("error: " + prikey);
+                Address address1 = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(ecKey.getPubKey()));
+                Address address3 = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(ecKey3.getPubKey()));
+                System.out.println("原始地址: " + address1.getBase58());
+                System.out.println("导入后地址3: " + address3.getBase58());
+                try {
+                    System.out.println("原始ecKey: " + JSONUtils.obj2json(ecKey));
+                    System.out.println("导入后ecKey3: " + JSONUtils.obj2json(ecKey3));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
             if (!Arrays.equals(ecKey.getPubKey(), ecKey2.getPubKey())) {
                 System.out.println("error: " + prikey);
                 Address address1 = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(ecKey.getPubKey()));
