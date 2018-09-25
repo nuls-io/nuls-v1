@@ -1008,8 +1008,11 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
             List<Coin> coins = new ArrayList<>();
             Na values = Na.ZERO;
             // 累加到足够支付转出额与手续费
+            //需要找零的地址，找零是找给最后一个utxo的账户
+            byte[] changeAddress = null;
             for (int i = 0; i < coinListUTXO.size(); i++) {
                 Coin coin = coinListUTXO.get(i);
+
                 coins.add(coin);
                 size += coin.size();
                 if (i == 127) {
@@ -1035,14 +1038,14 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
                 //需要判断是否找零，如果有找零，则需要重新计算手续费
                 if (values.isGreaterThan(amount.add(fee))) {
+                    changeAddress = coin.getAddress();
                     Na change = values.subtract(amount.add(fee));
                     Coin changeCoin = new Coin();
-                    //第一个地址
-                    byte[] firstAddress = fromList.get(0).getAddress();
-                    if (firstAddress[2] == NulsContext.P2SH_ADDRESS_TYPE) {
-                        changeCoin.setOwner(SignatureUtil.createOutputScript(firstAddress).getProgram());
+
+                    if (changeAddress[2] == NulsContext.P2SH_ADDRESS_TYPE) {
+                        changeCoin.setOwner(SignatureUtil.createOutputScript(changeAddress).getProgram());
                     } else {
-                        changeCoin.setOwner(firstAddress);
+                        changeCoin.setOwner(changeAddress);
                     }
                     changeCoin.setNa(change);
                     fee = TransactionFeeCalculator.getFee(size + changeCoin.size(), price);
