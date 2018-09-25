@@ -22,7 +22,7 @@ To learn more about us, visit [nuls.io](https://nuls.io/).
  
 Contributions to Nuls are welcomed!
 We sincerely invite developers who experienced in blockchain field to join in NULS technology community. 
-Details: s: s: https://nuls.communimunimunimunity/d/9-recruitment-of-community-developers
+Details: s: https://nuls.communimunity/d/9-recruitment-of-community-developers
 To be a great community, Nuls needs to welcome developers from all walks of life, with different backgrounds, and with a wide range of experience.
  
 ## Getting Started
