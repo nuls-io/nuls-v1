@@ -158,7 +158,7 @@ public class NulsVersionManager {
                     //其他有桌面程序的系统检查到NulsContext.mastUpGrade = true时，在页面上提示需强制升级
                     if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("LINUX") != -1) {
                         Log.error("The version is too low to upgrade");
-                        NulsContext.getInstance().exit(0);
+                        NulsContext.getInstance().exit(1);
                         return;
                     } else {
                         NulsContext.mastUpGrade = true;

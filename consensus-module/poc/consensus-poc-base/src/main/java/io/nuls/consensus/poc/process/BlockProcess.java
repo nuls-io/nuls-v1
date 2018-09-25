@@ -319,9 +319,9 @@ public class BlockProcess {
                     if (!success) {
                         Log.warn("save block fail : reason : " + result.getMsg() + ", block height : " + block.getHeader().getHeight() + ", hash : " + block.getHeader().getHash());
                     } else {
+                        RewardStatisticsProcess.addBlock(block);
                         //更新版本协议内容
                         nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
-                        RewardStatisticsProcess.addBlock(block);
                         BlockLog.debug("save block height : " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                     }
 //                    Log.info("保存耗时：" + (System.currentTimeMillis() - time));

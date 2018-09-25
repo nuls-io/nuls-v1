@@ -554,8 +554,8 @@ public class ForkChainProcess {
                 boolean success = result.isSuccess();
                 if (success) {
                     //更新版本协议内容
-                    nulsProtocolProcess.processProtocolUpGrade(newBlock.getHeader());
                     successList.add(newBlock);
+                    nulsProtocolProcess.processProtocolUpGrade(newBlock.getHeader());
                 } else {
                     ChainLog.debug("save block error : " + result.getMsg() + " , block height : " + newBlock.getHeader().getHeight() + " , hash: " + newBlock.getHeader().getHash());
                     changeSuccess = false;
@@ -596,11 +596,11 @@ public class ForkChainProcess {
             Collections.reverse(rollbackBlockList);
             for (Block addBlock : rollbackBlockList) {
                 Result rs = blockService.saveBlock(addBlock);
+                RewardStatisticsProcess.addBlock(addBlock);
                 if (rs.isSuccess()) {
                     //更新版本协议内容
                     nulsProtocolProcess.processProtocolUpGrade(addBlock.getHeader());
                 }
-                RewardStatisticsProcess.addBlock(addBlock);
             }
             //Log.info("=========================================切换失败，回滚区块. - ");
         }
@@ -625,11 +625,11 @@ public class ForkChainProcess {
                         try {
                             //Log.info("=========================================回滚区块失败, 高度: {}.", rollbackBlock.getHeader().getHeight());
                             Result rs = blockService.saveBlock(block);
+                            RewardStatisticsProcess.addBlock(block);
                             if (rs.isSuccess()) {
                                 //更新版本协议内容
                                 nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
                             }
-                            RewardStatisticsProcess.addBlock(block);
                         } catch (Exception ex) {
                             Log.error("Rollback failed, failed to save block during recovery", ex);
                             break;
@@ -643,11 +643,11 @@ public class ForkChainProcess {
                 for (Block block : rollbackList) {
                     try {
                         Result rs = blockService.saveBlock(block);
+                        RewardStatisticsProcess.addBlock(block);
                         if (rs.isSuccess()) {
                             //更新版本协议内容
                             nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
                         }
-                        RewardStatisticsProcess.addBlock(block);
                     } catch (Exception ex) {
                         Log.error("Rollback failed, failed to save block during recovery", ex);
                         break;
