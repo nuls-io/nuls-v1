@@ -25,6 +25,7 @@
 
 package io.nuls.contract.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.kernel.utils.AddressTool;
 
@@ -117,6 +118,7 @@ public class ContractResult {
 
     private transient Object txTrack;
 
+    @JsonIgnore
     public Object getTxTrack() {
         return txTrack;
     }
