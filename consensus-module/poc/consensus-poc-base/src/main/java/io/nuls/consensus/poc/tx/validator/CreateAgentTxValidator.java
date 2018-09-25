@@ -26,21 +26,22 @@
 package io.nuls.consensus.poc.tx.validator;
 
 import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.model.Account;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.tx.CreateAgentTransaction;
-import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.SeverityLevelEnum;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.CoinData;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.SignatureUtil;
+import io.nuls.kernel.script.TransactionSignature;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 
@@ -64,18 +65,22 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
 
         Agent agent = tx.getTxData();
         if (null == agent) {
-            return ValidateResult.getFailedResult(getClass().getName(), KernelErrorCode.DATA_NOT_FOUND);
+            return ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.AGENT_NOT_EXIST);
         }
-//        if (!AddressTool.validAddress(agent.getAgentAddress()) || !AddressTool.validAddress(agent.getRewardAddress()) || !AddressTool.validAddress(agent.getPackingAddress())) {
-//            return ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
-//        }
-        if (Arrays.equals(agent.getAgentAddress(), agent.getPackingAddress()) || Arrays.equals(agent.getRewardAddress(), agent.getPackingAddress())) {
-            return ValidateResult.getFailedResult(getClass().getName(), KernelErrorCode.DATA_ERROR);
+        if (!AddressTool.validNormalAddress(agent.getPackingAddress())) {
+            return ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
+        }
+        if (Arrays.equals(agent.getAgentAddress(), agent.getPackingAddress())) {
+            return ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.AGENTADDR_AND_PACKING_SAME);
+        }
+        if (Arrays.equals(agent.getRewardAddress(), agent.getPackingAddress())) {
+            return ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.REWARDADDR_PACKING_SAME);
         }
 
         if (tx.getTime() <= 0) {
             return ValidateResult.getFailedResult(getClass().getName(), KernelErrorCode.DATA_ERROR);
         }
+
         double commissionRate = agent.getCommissionRate();
         if (commissionRate < PocConsensusProtocolConstant.MIN_COMMISSION_RATE || commissionRate > PocConsensusProtocolConstant.MAX_COMMISSION_RATE) {
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), PocConsensusErrorCode.COMMISSION_RATE_OUT_OF_RANGE);
@@ -91,15 +96,21 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
         if (!isDepositOk(agent.getDeposit(), tx.getCoinData())) {
             return ValidateResult.getFailedResult(this.getClass().getName(), SeverityLevelEnum.FLAGRANT_FOUL, PocConsensusErrorCode.DEPOSIT_ERROR);
         }
-        P2PKHScriptSig sig = new P2PKHScriptSig();
+        TransactionSignature sig = new TransactionSignature();
         try {
-            sig.parse(tx.getScriptSig(),0);
+            sig.parse(tx.getTransactionSignature(), 0);
         } catch (NulsException e) {
             Log.error(e);
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
-        if (!Arrays.equals(agent.getAgentAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
-            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
+        try {
+            if (!SignatureUtil.containsAddress(tx, agent.getAgentAddress())) {
+                ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
+                result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
+                return result;
+            }
+        } catch (NulsException e) {
+            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
             return result;
         }
@@ -110,13 +121,14 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
             if (coin.getLockTime() == PocConsensusConstant.CONSENSUS_LOCK_TIME) {
                 lockCount++;
             }
-            addressSet.add(AddressTool.getStringAddressByBytes(coin.getOwner()));
+            //addressSet.add(AddressTool.getStringAddressByBytes(coin.()));
+            addressSet.add(AddressTool.getStringAddressByBytes(coin.getAddress()));
         }
         if (lockCount > 1) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.DEPOSIT_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         if (addressSet.size() > 1) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.DEPOSIT_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }

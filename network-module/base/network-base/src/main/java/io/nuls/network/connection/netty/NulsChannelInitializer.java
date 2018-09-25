@@ -29,8 +29,6 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.timeout.IdleStateHandler;
 
 import java.util.concurrent.TimeUnit;
@@ -51,8 +49,10 @@ public class NulsChannelInitializer<T extends ChannelInboundHandlerAdapter> exte
     protected void initChannel(SocketChannel socketChannel) throws Exception {
         ChannelPipeline p = socketChannel.pipeline();
         p.addLast("idle", new IdleStateHandler(READ_IDEL_TIME_OUT, WRITE_IDEL_TIME_OUT, ALL_IDEL_TIME_OUT, TimeUnit.SECONDS));
-        p.addLast("decoder", new LengthFieldBasedFrameDecoder(MAX_FRAME_LENGTH, 0, 8, 0, 8));
-        p.addLast("encoder0", new LengthFieldPrepender(8, false));
+        //p.addLast("decoder", new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, MAX_FRAME_LENGTH, 4, 4, 6, 0, true));
+        //p.addLast("encoder0", new LengthFieldPrepender(8, false));
+        p.addLast("decoder", new NulsMessageDecoder());
+        p.addLast("encoder0", new NulsMessageEncoder());
         p.addLast("heartbeat", new HeartbeatServerHandler());
         p.addLast(t);
     }

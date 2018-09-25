@@ -59,7 +59,7 @@ public class MultipleBeanMethodInterceptorChain extends BeanMethodInterceptorCha
     protected MethodProxy methodProxy;
 
 
-//    /**
+    //    /**
 //     * 初始化多重拦截器链
 //     * Initialize multiple interceptor chains.
 //     *
@@ -75,7 +75,7 @@ public class MultipleBeanMethodInterceptorChain extends BeanMethodInterceptorCha
         }
     }
 
-//    /**
+    //    /**
 //     * 将一条拦截器链加入到多重拦截器链中
 //     * Add an interceptor chain to the multiple interceptor chain,
 //     *
@@ -88,7 +88,8 @@ public class MultipleBeanMethodInterceptorChain extends BeanMethodInterceptorCha
             interceptorList.add(interceptor);
         }
     }
-//
+
+    //
 //    /**
 //     * 开始执行拦截器链
 //     * Start executing the interceptor chain.

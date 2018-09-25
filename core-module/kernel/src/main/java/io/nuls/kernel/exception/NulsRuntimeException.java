@@ -136,7 +136,7 @@ public class NulsRuntimeException extends RuntimeException {
 
     public void setCode(String code) {
         this.code = code;
-}
+    }
 
     public ErrorCode getErrorCode() {
         return errorCode;

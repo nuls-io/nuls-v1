@@ -25,9 +25,7 @@
 
 package io.nuls.account.service.impl;
 
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.*;
 import io.nuls.account.service.AccountCacheService;
@@ -37,25 +35,35 @@ import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AccountStorageService;
 import io.nuls.account.storage.service.AliasStorageService;
-import io.nuls.account.tx.AliasTransaction;
+import io.nuls.account.storage.service.MultiSigAccountStorageService;
 import io.nuls.account.util.AccountTool;
-import io.nuls.core.tools.crypto.*;
+import io.nuls.core.tools.crypto.AESEncrypt;
+import io.nuls.core.tools.crypto.ECKey;
+import io.nuls.core.tools.crypto.EncryptedData;
 import io.nuls.core.tools.crypto.Exception.CryptoException;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
-import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
-import io.nuls.kernel.model.*;
-import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.model.Address;
+import io.nuls.kernel.model.NulsSignData;
+import io.nuls.kernel.model.Result;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.ScriptBuilder;
+import io.nuls.kernel.script.ScriptUtil;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
-import io.nuls.kernel.utils.TransactionFeeCalculator;
+import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.utils.SerializeUtils;
+import io.nuls.kernel.validate.ValidateResult;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,6 +80,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     private AccountStorageService accountStorageService;
+
+    @Autowired
+    private MultiSigAccountStorageService multiSigAccountStorageService;
 
     @Autowired
     private AccountLedgerService accountLedgerService;
@@ -104,9 +115,6 @@ public class AccountServiceImpl implements AccountService {
                 accounts.add(account);
                 AccountPo po = new AccountPo(account);
                 accountPos.add(po);
-            }
-            if (accountStorageService == null) {
-                Log.info("accountStorageService is null");
             }
             Result result = accountStorageService.saveAccountList(accountPos);
             if (result.isFailed()) {
@@ -143,7 +151,7 @@ public class AccountServiceImpl implements AccountService {
     public Result removeAccount(String address, String password) {
 
         if (!AddressTool.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Account account = getAccountByAddress(address);
         if (account == null) {
@@ -193,10 +201,11 @@ public class AccountServiceImpl implements AccountService {
             account.encrypt(password);
         } catch (NulsException e) {
             Log.error(e);
+            return Result.getFailed(e.getErrorCode());
         }
         if (StringUtils.isNotBlank(keyStore.getAlias())) {
             Alias aliasDb = aliasService.getAlias(keyStore.getAlias());
-            if (null != aliasDb && AddressTool.getStringAddressByBytes(aliasDb.getAddress()).equals(account.getAddress().toString())) {
+            if (null != aliasDb && account.getAddress().toString().equals(AddressTool.getStringAddressByBytes(aliasDb.getAddress()))) {
                 account.setAlias(aliasDb.getAlias());
             } else {
                 List<AliasPo> list = aliasStorageService.getAliasList().getData();
@@ -222,10 +231,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Account> importAccountFormKeyStore(AccountKeyStore keyStore, String password) {
-        if (null == keyStore || null == keyStore.getAddress()) {
+        if (null == keyStore || StringUtils.isBlank(keyStore.getAddress())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        if(!AddressTool.validAddress(keyStore.getAddress())){
+        if (!AddressTool.validAddress(keyStore.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Account account;
@@ -235,25 +244,34 @@ public class AccountServiceImpl implements AccountService {
                 return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
             }
             priKey = keyStore.getPrikey();
+            try {
+                account = AccountTool.createAccount(Hex.encode(priKey));
+            } catch (NulsException e) {
+                return Result.getFailed(e.getErrorCode());
+            }
+            //如果私钥生成的地址和keystore的地址不相符，说明私钥错误
+            if (!account.getAddress().getBase58().equals(keyStore.getAddress())) {
+                return Result.getFailed(AccountErrorCode.PRIVATE_KEY_WRONG);
+            }
         } else if (null == keyStore.getPrikey() && null != keyStore.getEncryptedPrivateKey()) {
             if (!StringUtils.validPassword(password)) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
             try {
                 priKey = AESEncrypt.decrypt(Hex.decode(keyStore.getEncryptedPrivateKey()), password);
-            } catch (Exception e) {
+                account = AccountTool.createAccount(Hex.encode(priKey));
+            } catch (CryptoException e) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            } catch (NulsException e) {
+                return Result.getFailed(e.getErrorCode());
+            }
+            //如果私钥生成的地址和keystore的地址不相符，说明密码错误
+            if (!account.getAddress().getBase58().equals(keyStore.getAddress())) {
                 return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         } else {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
         }
-        try {
-            account = AccountTool.createAccount(Hex.encode(priKey));
-        } catch (NulsException e) {
-            return Result.getFailed(AccountErrorCode.FAILED);
-        }
-        account.setAddress(new Address(keyStore.getAddress()));
-
         Alias aliasDb = null;
         if (StringUtils.isNotBlank(keyStore.getAlias())) {
             aliasDb = aliasService.getAlias(keyStore.getAlias());
@@ -270,13 +288,12 @@ public class AccountServiceImpl implements AccountService {
                 }
             }
         }
-
-        account.setPubKey(keyStore.getPubKey());
         if (StringUtils.validPassword(password)) {
             try {
                 account.encrypt(password);
             } catch (NulsException e) {
                 Log.error(e);
+                return Result.getFailed(e.getErrorCode());
             }
         }
         AccountPo po = new AccountPo(account);
@@ -310,6 +327,7 @@ public class AccountServiceImpl implements AccountService {
                 account.encrypt(password);
             } catch (NulsException e) {
                 Log.error(e);
+                return Result.getFailed(e.getErrorCode());
             }
         }
         //扫所全网别名对比地址符合就设置
@@ -400,15 +418,21 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Result<Account> getAccount(byte[] address) {
-        Account account = getAccountByAddress(AddressTool.getStringAddressByBytes(address));
-        if (null == account) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        if (null == address || address.length == 0) {
+            return Result.getFailed(AccountErrorCode.NULL_PARAMETER);
         }
-        return Result.getSuccess().setData(account);
+        String addr = AddressTool.getStringAddressByBytes(address);
+        if (!AddressTool.validAddress(addr)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        return getAccount(addr);
     }
 
     @Override
     public Result<Account> getAccount(String address) {
+        if (!AddressTool.validAddress(address)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
         Account account = getAccountByAddress(address);
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
@@ -419,10 +443,9 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Result<Account> getAccount(Address address) {
         if (null == address) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+            return Result.getFailed(AccountErrorCode.NULL_PARAMETER);
         }
-        Account account = getAccountByAddress(address.toString());
-        return Result.getSuccess().setData(account);
+        return getAccount(address.toString());
     }
 
     @Override
@@ -457,7 +480,7 @@ public class AccountServiceImpl implements AccountService {
         list.sort(new Comparator<Account>() {
             @Override
             public int compare(Account o1, Account o2) {
-                return (int) (o2.getCreateTime() - o1.getCreateTime());
+                return (o2.getCreateTime().compareTo(o1.getCreateTime()));
             }
         });
         return Result.getSuccess().setData(list);
@@ -488,26 +511,9 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Result isEncrypted(Account account) {
-        if (null == account || null == account.getAddress()) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
-        }
-        if (null == getAccountByAddress(account.getAddress().toString())) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
-        }
-        return new Result(account.isEncrypted(), null);
-
-    }
-
-    @Override
-    public Result isEncrypted(Address address) {
-        return isEncrypted(address.toString());
-    }
-
-    @Override
     public Result isEncrypted(String address) {
         if (!AddressTool.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
         Account account = getAccountByAddress(address);
         if (null == account) {
@@ -515,64 +521,9 @@ public class AccountServiceImpl implements AccountService {
         }
         Result result = new Result();
         boolean rs = account.isEncrypted();
-        //operation success
         result.setSuccess(true);
-        //funtion result
         result.setData(rs);
         return result;
-    }
-
-    @Override
-    public Result validPassword(Account account, String password) {
-        if (null == account) {
-            return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
-        }
-        boolean rs = account.validatePassword(password);
-        return Result.getSuccess().setData(rs);
-    }
-
-    @Override
-    public Result verifyAddressFormat(String address) {
-        if (!AddressTool.validAddress(address)) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
-        }
-        return new Result(AddressTool.validAddress(address), null);
-    }
-
-    @Override
-    public NulsSignData signData(byte[] data, Account account, String password) throws NulsException {
-        if (null == data || data.length == 0) {
-            throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
-        }
-        if (account == null) {
-            throw new NulsException(AccountErrorCode.ACCOUNT_NOT_EXIST);
-        }
-        return this.signDigest(NulsDigestData.calcDigestData(data).getDigestBytes(), account, password);
-    }
-
-    @Override
-    public NulsSignData signData(byte[] data, Account account) throws NulsException {
-        if (null == data || data.length == 0) {
-            throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
-        }
-        if (account == null) {
-            throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
-        }
-        if (null == account.getPriKey() || account.getPriKey().length == 0) {
-            throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
-        }
-        return this.signDigest(NulsDigestData.calcDigestData(data).getDigestBytes(), account.getPriKey());
-    }
-
-    @Override
-    public NulsSignData signData(byte[] data, ECKey ecKey) throws NulsException {
-        if (null == data || data.length == 0) {
-            throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
-        }
-        if (null == ecKey) {
-            throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
-        }
-        return this.signDigest(NulsDigestData.calcDigestData(data).getDigestBytes(), ecKey);
     }
 
     @Override
@@ -583,18 +534,14 @@ public class AccountServiceImpl implements AccountService {
         //加过密(有密码)并且没有解锁, 就验证密码 Already encrypted(Added password) and did not unlock, verify password
         if (account.isEncrypted() && account.isLocked()) {
             AssertUtil.canNotEmpty(password, "password can not be empty");
-            try {
-                return this.signDigest(digest, AESEncrypt.decrypt(account.getEncryptedPriKey(), password));
-            } catch (CryptoException e) {
-                throw new NulsException(AccountErrorCode.DECRYPT_ACCOUNT_ERROR);
-            }
+            return this.signDigest(digest, account.getPriKey(password));
         } else {
             return this.signDigest(digest, account.getPriKey());
         }
     }
 
     private NulsSignData signDigest(byte[] digest, byte[] priKey) {
-        ECKey ecKey = ECKey.fromPrivate(new BigInteger(priKey));
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(1, priKey));
         return signDigest(digest, ecKey);
     }
 
@@ -605,41 +552,6 @@ public class AccountServiceImpl implements AccountService {
         nulsSignData.setSignAlgType(NulsSignData.SIGN_ALG_ECC);
         nulsSignData.setSignBytes(signbytes);
         return nulsSignData;
-    }
-
-    @Override
-    public Result verifySignData(byte[] data, NulsSignData signData, byte[] pubKey) {
-        ECKey.verify(NulsDigestData.calcDigestData(data).getDigestBytes(), signData.getSignBytes(), pubKey);
-        return new Result(true, null);
-    }
-
-    @Override
-    public Result<Balance> getBalance(Account account) throws NulsException {
-        if (null == account || null == account.getAddress()) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
-        }
-        return accountLedgerService.getBalance(account.getAddress().getAddressBytes());
-    }
-
-    @Override
-    public Result<Balance> getBalance(Address address) throws NulsException {
-        if (null == address) {
-            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
-        }
-        return accountLedgerService.getBalance(address.getAddressBytes());
-    }
-
-    @Override
-    public Result<Balance> getBalance(String address) throws NulsException {
-        if (!AddressTool.validAddress(address)) {
-            Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
-        }
-        Account account = getAccountByAddress(address);
-        if (null == account) {
-            Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
-        }
-        Address addr = new Address(address);
-        return accountLedgerService.getBalance(addr.getAddressBytes());
     }
 
     @Override
@@ -694,58 +606,131 @@ public class AccountServiceImpl implements AccountService {
             }
         }
         return Result.getSuccess().setData(alias);
-
     }
 
     @Override
-    public Result<Na> getAliasFee(String address, String aliasName) {
-        if (!AddressTool.validAddress(address)) {
-            Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
-        }
-        Account account = this.getAccount(address).getData();
-        if (null == account) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
-        }
-        byte[] addressBytes = account.getAddress().getAddressBytes();
+    public Result<Address> createMultiAccount(List<String> pubkeys, int m) {
+        locker.lock();
         try {
-            //创建一笔设置别名的交易
-            AliasTransaction tx = new AliasTransaction();
-            tx.setTime(TimeService.currentTimeMillis());
-            Alias alias = new Alias(addressBytes, aliasName);
-            tx.setTxData(alias);
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
-            if (!coinDataResult.isEnough()) {
-                return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
+            Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubkeys);
+            Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
+            MultiSigAccount account = new MultiSigAccount();
+            account.setAddress(address);
+            account.setM(m);
+            account.addPubkeys(pubkeys);
+            Result result = this.multiSigAccountStorageService.saveAccount(account.getAddress(), account.serialize());
+            if (result.isFailed()) {
+                return result;
             }
-            CoinData coinData = new CoinData();
-            coinData.setFrom(coinDataResult.getCoinList());
-            Coin change = coinDataResult.getChange();
-            if (null != change) {
-                //创建toList
-                List<Coin> toList = new ArrayList<>();
-                toList.add(change);
-                coinData.setTo(toList);
-            }
-            Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
-            coinData.addTo(coin);
-            tx.setCoinData(coinData);
-            Na fee = TransactionFeeCalculator.getMaxFee(tx.size() + P2PKHScriptSig.DEFAULT_SERIALIZE_LENGTH);
-            return Result.getSuccess().setData(fee);
+            return result.setData(account);
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION);
+            throw new NulsRuntimeException(KernelErrorCode.FAILED);
+        } finally {
+            locker.unlock();
         }
     }
 
     /**
-     * 临时方法，后续去除
+     * 获取所有账户集合
+     * Query all account collections.
+     *
+     * @return account list of all accounts.
      */
     @Override
-    public void clearCache() {
-        AccountCacheService cacheService = AccountCacheService.getInstance();
-        if (null != cacheService.localAccountMaps) {
-            cacheService.localAccountMaps.clear();
+    public Result<List<MultiSigAccount>> getMultiSigAccountList() {
+        List<byte[]> list = this.multiSigAccountStorageService.getAccountList().getData();
+        if (null == list) {
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
         }
-        cacheService.clear();
+        List<MultiSigAccount> accountList = new ArrayList<>();
+        for (byte[] bytes : list) {
+            MultiSigAccount account = new MultiSigAccount();
+            try {
+                account.parse(new NulsByteBuffer(bytes, 0));
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+            accountList.add(account);
+        }
+        return new Result<List<MultiSigAccount>>().setData(accountList);
+    }
+
+    /**
+     * 根据地址获取本地存储的多签账户的详细信息
+     * Get the details of the locally stored multi-sign account based on the address
+     *
+     * @param address 多签地址
+     * @return 多签账户的详细信息
+     */
+    @Override
+    public Result<MultiSigAccount> getMultiSigAccount(String address) throws Exception {
+        byte[] bytes = this.multiSigAccountStorageService.getAccount(Address.fromHashs(address)).getData();
+        if (null == bytes) {
+            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+        }
+        MultiSigAccount account = new MultiSigAccount();
+        account.parse(new NulsByteBuffer(bytes, 0));
+        List<AliasPo> list = aliasStorageService.getAliasList().getData();
+        for (AliasPo aliasPo : list) {
+            if (aliasPo.getAddress()[2] != NulsContext.P2SH_ADDRESS_TYPE) {
+                continue;
+            }
+            if (Arrays.equals(aliasPo.getAddress(), account.getAddress().getAddressBytes())) {
+                account.setAlias(aliasPo.getAlias());
+                break;
+            }
+        }
+        return Result.getSuccess().setData(account);
+    }
+
+    /**
+     * 导入一个跟本地地址相关的多签账户
+     *
+     * @param addressStr 多签地址
+     * @param pubkeys    多签组成公钥列表
+     * @param m          最小签名数
+     * @return 是否成功
+     */
+    @Override
+    public Result<Boolean> saveMultiSigAccount(String addressStr, List<String> pubkeys, int m) {
+        Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubkeys);
+        Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
+        if (!AddressTool.getStringAddressByBytes(address.getAddressBytes()).equals(addressStr)) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        MultiSigAccount account = new MultiSigAccount();
+        account.setAddress(address);
+        account.setM(m);
+        account.addPubkeys(pubkeys);
+        Result result = null;
+        try {
+            result = this.multiSigAccountStorageService.saveAccount(account.getAddress(), account.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            return Result.getFailed(KernelErrorCode.SERIALIZE_ERROR);
+        }
+        if (result.isFailed()) {
+            return result;
+        }
+        return result.setData(addressStr);
+    }
+
+    /**
+     * 从数据库中删除该账户
+     */
+    @Override
+    public Result<Boolean> removeMultiSigAccount(String address) {
+        try {
+            Address addressObj = Address.fromHashs(address);
+            Result result = this.multiSigAccountStorageService.getAccount(addressObj);
+            if (result.isFailed() || result.getData() == null) {
+                return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            return this.multiSigAccountStorageService.removeAccount(addressObj);
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed();
+        }
     }
 }

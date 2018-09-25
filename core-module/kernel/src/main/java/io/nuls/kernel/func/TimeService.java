@@ -30,8 +30,7 @@ import io.nuls.kernel.thread.manager.TaskManager;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
-import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 

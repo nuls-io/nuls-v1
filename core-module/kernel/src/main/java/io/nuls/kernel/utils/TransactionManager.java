@@ -26,7 +26,6 @@ package io.nuls.kernel.utils;
 
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.Transaction;

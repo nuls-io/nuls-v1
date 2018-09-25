@@ -34,7 +34,7 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Address;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
 
 /**
  * @author: Niels Wang
@@ -71,13 +71,6 @@ public class AddressTool {
         return xor;
     }
 
-    public static byte[] getAddress(P2PKHScriptSig scriptSig) {
-        if (scriptSig == null) {
-            return null;
-        }
-        return getAddress(scriptSig.getPublicKey());
-    }
-
     public static boolean validAddress(String address) {
         if (StringUtils.isBlank(address)) {
             return false;
@@ -103,12 +96,67 @@ public class AddressTool {
             Log.error(e);
             return false;
         }
-        if (NulsContext.DEFAULT_CHAIN_ID != chainId || NulsContext.DEFAULT_ADDRESS_TYPE != type) {
+        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+            return false;
+        }
+        if (NulsContext.MAIN_NET_VERSION <= 1 && NulsContext.DEFAULT_ADDRESS_TYPE != type) {
+            return false;
+        }
+        if (NulsContext.DEFAULT_ADDRESS_TYPE != type && NulsContext.CONTRACT_ADDRESS_TYPE != type && NulsContext.P2SH_ADDRESS_TYPE != type) {
             return false;
         }
         try {
             checkXOR(bytes);
         } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean validNormalAddress(byte[] bytes) {
+        if (null == bytes || bytes.length != Address.ADDRESS_LENGTH) {
+            return false;
+        }
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+        short chainId;
+        byte type;
+        try {
+            chainId = byteBuffer.readShort();
+            type = byteBuffer.readByte();
+        } catch (NulsException e) {
+            Log.error(e);
+            return false;
+        }
+        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+            return false;
+        }
+        if (NulsContext.DEFAULT_ADDRESS_TYPE != type) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean validContractAddress(byte[] addressBytes) {
+        if (addressBytes == null) {
+            return false;
+        }
+        if (addressBytes.length != Address.ADDRESS_LENGTH) {
+            return false;
+        }
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(addressBytes);
+        short chainId;
+        byte type;
+        try {
+            chainId = byteBuffer.readShort();
+            type = byteBuffer.readByte();
+        } catch (NulsException e) {
+            Log.error(e);
+            return false;
+        }
+        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+            return false;
+        }
+        if (NulsContext.CONTRACT_ADDRESS_TYPE != type) {
             return false;
         }
         return true;
@@ -154,4 +202,50 @@ public class AddressTool {
         return true;
     }
 
+    public static boolean isPay2ScriptHashAddress(byte[] addr) {
+        if (addr != null && addr.length > 3) {
+            return addr[2] == NulsContext.P2SH_ADDRESS_TYPE;
+        }
+
+        return false;
+    }
+
+    public static boolean isPackingAddress(String address) {
+        if (StringUtils.isBlank(address)) {
+            return false;
+        }
+        byte[] bytes;
+        try {
+            bytes = Base58.decode(address);
+            if (bytes.length != Address.ADDRESS_LENGTH + 1) {
+                return false;
+            }
+        } catch (NulsException e) {
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+        short chainId;
+        byte type;
+        try {
+            chainId = byteBuffer.readShort();
+            type = byteBuffer.readByte();
+        } catch (NulsException e) {
+            Log.error(e);
+            return false;
+        }
+        if (NulsContext.DEFAULT_CHAIN_ID != chainId) {
+            return false;
+        }
+        if (NulsContext.DEFAULT_ADDRESS_TYPE != type) {
+            return false;
+        }
+        try {
+            checkXOR(bytes);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
 }

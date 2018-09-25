@@ -25,7 +25,7 @@
 
 package io.nuls.protocol.base.utils;
 
-import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.BlockHeader;
@@ -46,10 +46,10 @@ public class AssemblyBlockUtil {
         List<Transaction> txs = new ArrayList<>();
         for (NulsDigestData txHash : txHashList) {
             Transaction tx = txMap.get(txHash);
-            tx.setBlockHeight(header.getHeight());
             if (null == tx) {
-                throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
+                throw new NulsRuntimeException(TransactionErrorCode.TX_NOT_EXIST);
             }
+            tx.setBlockHeight(header.getHeight());
             txs.add(tx);
         }
         block.setTxs(txs);

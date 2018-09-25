@@ -34,5 +34,5 @@ import io.nuls.kernel.constant.KernelErrorCode;
  */
 public interface MessageBusErrorCode extends KernelErrorCode {
 
-    ErrorCode UNKOWN_MSG_TYPE= ErrorCode.init("MB001", "60001");
+    ErrorCode UNKOWN_MSG_TYPE= ErrorCode.init("60001");
 }

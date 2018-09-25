@@ -102,14 +102,14 @@ public class RpcClientResult {
         this.success = success;
     }
 
-    public boolean dataToBooleanValue(){
-        return (boolean)((Map)data).get("value");
+    public boolean dataToBooleanValue() {
+        return (boolean) ((Map) data).get("value");
     }
 
-    public String dataToStringValue(){
-        Object object = ((Map)data).get("value");
-        if(null != object){
-            return (String)object;
+    public String dataToStringValue() {
+        Object object = ((Map) data).get("value");
+        if (null != object) {
+            return (String) object;
         }
         return null;
     }

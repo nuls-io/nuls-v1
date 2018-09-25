@@ -37,8 +37,12 @@ public class BlockData {
     private long height;
     private NulsDigestData preHash;
     private List<Transaction> txList;
-    private BlockRoundData roundData;
+    private BlockExtendsData extendsData;
     private long time;
+    /**
+     * pierre add 合约状态根
+     */
+    private byte[] stateRoot;
 
     public long getHeight() {
         return height;
@@ -64,19 +68,27 @@ public class BlockData {
         this.txList = txList;
     }
 
-    public BlockRoundData getRoundData() {
-        return roundData;
-    }
-
-    public void setRoundData(BlockRoundData roundData) {
-        this.roundData = roundData;
-    }
-
     public long getTime() {
         return time;
     }
 
     public void setTime(long time) {
         this.time = time;
+    }
+
+    public byte[] getStateRoot() {
+        return stateRoot;
+    }
+
+    public void setStateRoot(byte[] stateRoot) {
+        this.stateRoot = stateRoot;
+    }
+
+    public BlockExtendsData getExtendsData() {
+        return extendsData;
+    }
+
+    public void setExtendsData(BlockExtendsData extendsData) {
+        this.extendsData = extendsData;
     }
 }

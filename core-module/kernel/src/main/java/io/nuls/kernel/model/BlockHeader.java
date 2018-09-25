@@ -24,10 +24,12 @@
  */
 package io.nuls.kernel.model;
 
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
-import io.nuls.kernel.script.P2PKHScriptSig;
+import io.nuls.kernel.script.BlockSignature;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
@@ -46,8 +48,12 @@ public class BlockHeader extends BaseNulsData {
     private long time;
     private long height;
     private long txCount;
-    private P2PKHScriptSig scriptSign;
+    private BlockSignature blockSignature;
     private byte[] extend;
+    /**
+     * pierre add 智能合约世界状态根
+     */
+    private transient byte[] stateRoot;
 
     private transient int size;
     private transient byte[] packingAddress;
@@ -71,7 +77,7 @@ public class BlockHeader extends BaseNulsData {
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBytes(extend);
-        size += SerializeUtils.sizeOfNulsData(scriptSign);
+        size += SerializeUtils.sizeOfNulsData(blockSignature);
         return size;
     }
 
@@ -83,7 +89,7 @@ public class BlockHeader extends BaseNulsData {
         stream.writeUint32(height);
         stream.writeUint32(txCount);
         stream.writeBytesWithLength(extend);
-        stream.writeNulsData(scriptSign);
+        stream.writeNulsData(blockSignature);
     }
 
     @Override
@@ -99,13 +105,14 @@ public class BlockHeader extends BaseNulsData {
         } catch (IOException e) {
             Log.error(e);
         }
-        this.scriptSign = byteBuffer.readNulsData(new P2PKHScriptSig());
+        this.blockSignature = byteBuffer.readNulsData(new BlockSignature());
+//        }
     }
 
     private NulsDigestData forceCalcHash() {
         try {
             BlockHeader header = (BlockHeader) this.clone();
-            header.setScriptSig(null);
+            header.setBlockSignature(null);
             return NulsDigestData.calcDigestData(header.serialize());
         } catch (Exception e) {
             throw new NulsRuntimeException(e);
@@ -163,17 +170,17 @@ public class BlockHeader extends BaseNulsData {
         this.txCount = txCount;
     }
 
-    public P2PKHScriptSig getScriptSig() {
-        return scriptSign;
+    public BlockSignature getBlockSignature() {
+        return blockSignature;
     }
 
-    public void setScriptSig(P2PKHScriptSig scriptSign) {
-        this.scriptSign = scriptSign;
+    public void setBlockSignature(BlockSignature scriptSign) {
+        this.blockSignature = scriptSign;
     }
 
     public byte[] getPackingAddress() {
-        if (null == packingAddress && this.scriptSign != null) {
-            this.packingAddress = AddressTool.getAddress(scriptSign.getPublicKey());
+        if (null == packingAddress && this.blockSignature != null) {
+            this.packingAddress = AddressTool.getAddress(blockSignature.getPublicKey());
         }
         return packingAddress;
     }
@@ -197,5 +204,29 @@ public class BlockHeader extends BaseNulsData {
 
     public void setPackingAddress(byte[] packingAddress) {
         this.packingAddress = packingAddress;
+    }
+
+    public byte[] getStateRoot() {
+        return stateRoot;
+    }
+
+    public void setStateRoot(byte[] stateRoot) {
+        this.stateRoot = stateRoot;
+    }
+
+    @Override
+    public String toString() {
+        return "BlockHeader{" +
+                "hash=" + hash.getDigestHex() +
+                ", preHash=" + preHash.getDigestHex() +
+                ", merkleHash=" + merkleHash.getDigestHex() +
+                ", time=" + time +
+                ", height=" + height +
+                ", txCount=" + txCount +
+                ", blockSignature=" + blockSignature +
+                //", extend=" + Arrays.toString(extend) +
+                ", size=" + size +
+                ", packingAddress=" + (packingAddress == null ? packingAddress : AddressTool.getStringAddressByBytes(packingAddress)) +
+                '}';
     }
 }

@@ -30,33 +30,33 @@ import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.client.rpc.resources.thread.ShutdownHook;
 import io.nuls.client.rpc.resources.util.FileUtil;
 import io.nuls.client.storage.LanguageService;
-import io.nuls.client.storage.impl.LanguageServiceImpl;
-import io.nuls.client.version.VersionManager;
+import io.nuls.client.version.WalletVersionManager;
 import io.nuls.client.web.view.WebViewBootstrap;
 import io.nuls.consensus.poc.cache.TxMemoryPool;
-import io.nuls.consensus.poc.config.ConsensusConfig;
-import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.core.tools.date.DateUtil;
 import io.nuls.core.tools.log.Log;
-import io.nuls.db.service.DBService;
 import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.i18n.I18nUtils;
-import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Result;
 import io.nuls.kernel.module.service.ModuleService;
 import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
-import io.nuls.protocol.service.BlockService;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.*;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author: Niels Wang
@@ -66,6 +66,10 @@ public class Bootstrap {
     public static void main(String[] args) {
         Thread.currentThread().setName("Nuls");
         try {
+            System.setProperty("file.encoding", UTF_8.name());
+            Field charset = Charset.class.getDeclaredField("defaultCharset");
+            charset.setAccessible(true);
+            charset.set(null, UTF_8);
             sysStart();
         } catch (Exception e) {
             Log.error(e);
@@ -73,15 +77,16 @@ public class Bootstrap {
         }
     }
 
-    private static void copyWebFiles() {
+    private static void copyWebFiles() throws UnsupportedEncodingException {
         String path = Bootstrap.class.getClassLoader().getResource("").getPath() + "/temp/" + NulsConfig.VERSION + "/conf/client-web/";
+        path = URLDecoder.decode(path, "UTF-8");
         File source = new File(path);
         if (!source.exists()) {
             Log.info("source not exists:" + path);
             return;
         }
         Log.info("do the files copy!");
-        File target = new File(Bootstrap.class.getClassLoader().getResource("").getPath() + "/conf/client-web/");
+        File target = new File(URLDecoder.decode(Bootstrap.class.getClassLoader().getResource("").getPath(), "UTF-8") + "/conf/client-web/");
         FileUtil.deleteFolder(target);
         FileUtil.copyFolder(source, target);
     }
@@ -91,7 +96,7 @@ public class Bootstrap {
             MicroKernelBootstrap mk = MicroKernelBootstrap.getInstance();
             mk.init();
             mk.start();
-            VersionManager.start();
+            WalletVersionManager.start();
             initModules();
             String ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_IP, RpcConstant.DEFAULT_IP);
             int port = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_SERVER_PORT, RpcConstant.DEFAULT_PORT);
@@ -106,7 +111,12 @@ public class Bootstrap {
                 languageService.saveLanguage(language);
             }
         } while (false);
-        TaskManager.asynExecuteRunnable(new WebViewBootstrap());
+
+        // if isDaemon flag is true, don't launch the WebView
+        boolean isDaemon = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, RpcConstant.CFG_RPC_DAEMON, false);
+        if (!isDaemon) {
+            TaskManager.asynExecuteRunnable(new WebViewBootstrap());
+        }
 
         int i = 0;
         Map<NulsDigestData, List<Node>> map = new HashMap<>();
@@ -117,6 +127,11 @@ public class Bootstrap {
                     Runtime.getRuntime().addShutdownHook(new ShutdownHook());
                 }
                 System.exit(0);
+            }
+            if (NulsContext.mastUpGrade) {
+                //如果强制升级标志开启，停止网络连接
+                ConnectionManager.getInstance().shutdown();
+                Log.error(">>>>>> The new protocol version has taken effect, the network connection has been disconnected **********");
             }
             try {
                 Thread.sleep(1000L);

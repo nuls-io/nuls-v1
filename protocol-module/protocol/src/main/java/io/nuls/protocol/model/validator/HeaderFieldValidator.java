@@ -24,11 +24,12 @@
  */
 package io.nuls.protocol.model.validator;
 
-import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.protocol.constant.ProtocolErroeCode;
 
 /**
  * @author Niels
@@ -36,7 +37,8 @@ import io.nuls.kernel.validate.ValidateResult;
 @Component
 public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
 
-    private static final int HEADER_EXTENDS_MAS_SIZE = 64;
+    private static final int OLD_HEADER_EXTENDS_MAS_SIZE = 64;
+    private static final int HEADER_EXTENDS_MAS_SIZE = 1024;
 
     @Override
     public ValidateResult validate(BlockHeader data) {
@@ -59,13 +61,19 @@ public class HeaderFieldValidator implements NulsDataValidator<BlockHeader> {
                 failed = true;
                 break;
             }
-            if (null != data.getExtend() && data.getExtend().length > HEADER_EXTENDS_MAS_SIZE) {
-                failed = true;
-                break;
+            if (null != data.getExtend()) {
+                if (NulsContext.MAIN_NET_VERSION <= 1 && data.getExtend().length > OLD_HEADER_EXTENDS_MAS_SIZE) {
+                    failed = true;
+                    break;
+                }
+                if (data.getExtend().length > HEADER_EXTENDS_MAS_SIZE) {
+                    failed = true;
+                    break;
+                }
             }
         } while (false);
         if (failed) {
-            result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.BLOCK_HEADER_FIELD_CHECK_FAILED);
+            result = ValidateResult.getFailedResult(this.getClass().getName(), ProtocolErroeCode.BLOCK_HEADER_FIELD_CHECK_FAILED);
         }
         return result;
     }

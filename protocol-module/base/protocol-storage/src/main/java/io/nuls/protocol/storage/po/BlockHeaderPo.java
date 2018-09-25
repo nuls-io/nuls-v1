@@ -25,10 +25,12 @@
 
 package io.nuls.protocol.storage.po;
 
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.BlockSignature;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -56,9 +58,11 @@ public class BlockHeaderPo extends BaseNulsData {
 
     private byte[] packingAddress;
 
-    private P2PKHScriptSig scriptSign;
+    private BlockSignature scriptSign;
 
     private byte[] extend;
+
+    private byte[] stateRoot;
 
     private List<NulsDigestData> txHashList;
 
@@ -76,6 +80,9 @@ public class BlockHeaderPo extends BaseNulsData {
         for (NulsDigestData hash : txHashList) {
             size += SerializeUtils.sizeOfNulsData(hash);
         }
+        if (NulsContext.MAIN_NET_VERSION > 1) {
+            size += SerializeUtils.sizeOfBytes(stateRoot);
+        }
         return size;
     }
 
@@ -91,6 +98,9 @@ public class BlockHeaderPo extends BaseNulsData {
         for (NulsDigestData hash : txHashList) {
             stream.writeNulsData(hash);
         }
+        if (NulsContext.MAIN_NET_VERSION > 1) {
+            stream.writeBytesWithLength(stateRoot);
+        }
     }
 
     @Override
@@ -101,10 +111,13 @@ public class BlockHeaderPo extends BaseNulsData {
         this.height = byteBuffer.readVarInt();
         this.txCount = byteBuffer.readVarInt();
         this.extend = byteBuffer.readByLengthByte();
-        this.scriptSign = byteBuffer.readNulsData(new P2PKHScriptSig());
+        this.scriptSign = byteBuffer.readNulsData(new BlockSignature());
         this.txHashList = new ArrayList<>();
         for (int i = 0; i < txCount; i++) {
             this.txHashList.add(byteBuffer.readHash());
+        }
+        if (!byteBuffer.isFinished()) {
+            this.stateRoot = byteBuffer.readByLengthByte();
         }
     }
 
@@ -167,11 +180,11 @@ public class BlockHeaderPo extends BaseNulsData {
         this.packingAddress = packingAddress;
     }
 
-    public P2PKHScriptSig getScriptSign() {
+    public BlockSignature getScriptSign() {
         return scriptSign;
     }
 
-    public void setScriptSign(P2PKHScriptSig scriptSign) {
+    public void setScriptSign(BlockSignature scriptSign) {
         this.scriptSign = scriptSign;
     }
 
@@ -181,6 +194,14 @@ public class BlockHeaderPo extends BaseNulsData {
 
     public void setExtend(byte[] extend) {
         this.extend = extend;
+    }
+
+    public byte[] getStateRoot() {
+        return stateRoot;
+    }
+
+    public void setStateRoot(byte[] stateRoot) {
+        this.stateRoot = stateRoot;
     }
 
     public List<NulsDigestData> getTxHashList() {

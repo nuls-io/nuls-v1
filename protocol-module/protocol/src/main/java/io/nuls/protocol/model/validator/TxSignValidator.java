@@ -27,12 +27,9 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.script.P2PKHScriptSig;
-import io.nuls.kernel.utils.NulsByteBuffer;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
-
-import java.io.IOException;
 
 /**
  * @author Niels
@@ -42,21 +39,13 @@ public class TxSignValidator implements NulsDataValidator<Transaction> {
 
     @Override
     public ValidateResult validate(Transaction tx) {
-        if (!tx.needVerifySignature()) {
-            return ValidateResult.getSuccessResult();
-        }
-        byte[] scriptSig = tx.getScriptSig();
-        P2PKHScriptSig p2PKHScriptSig = null;
         try {
-            p2PKHScriptSig = new NulsByteBuffer(scriptSig).readNulsData(new P2PKHScriptSig());
-        } catch (Exception e) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
-        }
-        try {
-            return p2PKHScriptSig.verifySign(tx.getHash());
+            if (SignatureUtil.validateTransactionSignture(tx)) {
+                return ValidateResult.getSuccessResult();
+            }
         } catch (Exception e) {
             Log.error(e);
-            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
         }
+        return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
     }
 }

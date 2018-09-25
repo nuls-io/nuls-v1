@@ -79,7 +79,7 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
     public Result onRollback(StopAgentTransaction tx, Object secondaryData) {
         AgentPo agentPo = agentStorageService.get(tx.getTxData().getCreateTxHash());
         if (null == agentPo || agentPo.getDelHeight() < 0) {
-            throw new NulsRuntimeException(KernelErrorCode.DATA_NOT_FOUND);
+            throw new NulsRuntimeException(PocConsensusErrorCode.AGENT_NOT_EXIST);
         }
         agentPo.setDelHeight(-1L);
         List<DepositPo> depositPoList = depositStorageService.getList();
@@ -108,7 +108,7 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
         }
         AgentPo agentPo = agentStorageService.get(tx.getTxData().getCreateTxHash());
         if (null == agentPo || agentPo.getDelHeight() > 0) {
-            throw new NulsRuntimeException(KernelErrorCode.DATA_NOT_FOUND);
+            throw new NulsRuntimeException(PocConsensusErrorCode.AGENT_NOT_EXIST);
         }
         List<DepositPo> depositPoList = depositStorageService.getList();
         for (DepositPo depositPo : depositPoList) {
@@ -142,7 +142,10 @@ public class StopAgentTxProcessor implements TransactionProcessor<StopAgentTrans
             if (tx.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
                 RedPunishTransaction transaction = (RedPunishTransaction) tx;
                 addressSet.add(AddressTool.getStringAddressByBytes(transaction.getTxData().getAddress()));
-            } else if (tx.getType() == ConsensusConstant.TX_TYPE_STOP_AGENT) {
+            }
+        }
+        for (Transaction tx : txList) {
+            if (tx.getType() == ConsensusConstant.TX_TYPE_STOP_AGENT) {
                 StopAgentTransaction transaction = (StopAgentTransaction) tx;
                 if (!hashSet.add(transaction.getTxData().getCreateTxHash())) {
                     ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TRANSACTION_REPEATED);

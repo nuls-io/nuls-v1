@@ -34,6 +34,12 @@ import io.nuls.kernel.utils.AddressTool;
  */
 public interface NulsConstant {
 
+    /**
+     * nuls版本升级主配置文件名
+     * The nuls version upgrades the main configuration file
+     */
+    String NULS_VERSION_XML = "nuls-version.xml";
+
     byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
 
     /**
@@ -99,6 +105,19 @@ public interface NulsConstant {
      */
     int TX_TYPE_DATA = 10;
 
+    int TX_TYPE_PROTOCOL = 10;
+
+    /**
+     * 多地址转账交易的类型
+     * the type of the Multiple address transfer transaction
+     */
+    int TX_TYPE_TRANSFER_MULTIPLE = 11;
+    /**
+     * 零钱换整
+     * the type of the Multiple address transfer transaction
+     */
+    int TX_TYPE_CHANGE_WHOLE = 12;
+
     /**
      * 空值占位符
      * Null placeholder.
@@ -116,4 +135,11 @@ public interface NulsConstant {
      * 大于该值表示按照时间锁定
      */
     long BlOCKHEIGHT_TIME_DIVIDE = 1000000000000L;
+
+    /**
+     * 脚本标识位
+     * Null placeholder.
+     */
+    byte[] SIGN_HOLDER = new byte[]{(byte) 0x00, (byte) 0x00};
+
 }

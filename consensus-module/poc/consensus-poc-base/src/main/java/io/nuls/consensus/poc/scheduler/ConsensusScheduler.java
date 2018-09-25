@@ -38,9 +38,13 @@ import io.nuls.consensus.poc.task.*;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsRuntimeException;
+import io.nuls.kernel.model.BlockHeader;
+import io.nuls.kernel.model.Result;
 import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
+import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.service.BlockService;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -55,6 +59,7 @@ public class ConsensusScheduler {
     private ScheduledThreadPoolExecutor threadPool;
 
     private OrphanBlockProcess orphanBlockProcess;
+
     private CacheManager cacheManager;
 
     private ConsensusScheduler() {
@@ -70,6 +75,7 @@ public class ConsensusScheduler {
         OrphanBlockProvider orphanBlockProvider = new OrphanBlockProvider();
 
         PocConsensusContext.setChainManager(chainManager);
+
         cacheManager = new CacheManager(chainManager);
         try {
             initDatas();
@@ -103,7 +109,6 @@ public class ConsensusScheduler {
     }
 
     public boolean restart() {
-
         clear();
         initDatas();
 
@@ -124,6 +129,7 @@ public class ConsensusScheduler {
         try {
             ConsensusStatusContext.setConsensusStatus(ConsensusStatus.LOADING_CACHE);
             cacheManager.load();
+
             ConsensusStatusContext.setConsensusStatus(ConsensusStatus.WAIT_RUNNING);
         } catch (Exception e) {
             throw new NulsRuntimeException(e);
@@ -133,4 +139,5 @@ public class ConsensusScheduler {
     private void clear() {
         cacheManager.clear();
     }
+
 }

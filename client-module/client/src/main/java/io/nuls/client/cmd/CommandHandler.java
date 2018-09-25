@@ -25,14 +25,18 @@
 
 package io.nuls.client.cmd;
 
+import com.fasterxml.jackson.core.JsonParser;
 import io.nuls.account.rpc.cmd.*;
+import io.nuls.accout.ledger.rpc.cmd.CreateMultiTransferProcess;
 import io.nuls.accout.ledger.rpc.cmd.GetAccountTxListProcessor;
-import io.nuls.accout.ledger.rpc.cmd.GetUTXOProcessor;
+import io.nuls.accout.ledger.rpc.cmd.SignMultiTransactionProcess;
 import io.nuls.accout.ledger.rpc.cmd.TransferProcessor;
 import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.consensus.poc.rpc.cmd.*;
+import io.nuls.contract.rpc.cmd.*;
 import io.nuls.core.tools.cfg.ConfigLoader;
+import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
@@ -49,19 +53,31 @@ import io.nuls.network.rpc.cmd.GetNetNodesProcessor;
 import io.nuls.protocol.rpc.cmd.GetBestBlockHeaderProcessor;
 import io.nuls.protocol.rpc.cmd.GetBlockHeaderProcessor;
 import io.nuls.protocol.rpc.cmd.GetBlockProcessor;
+import io.nuls.utxo.accounts.rpc.cmd.GetUtxoAccountsProcessor;
 import jline.console.ConsoleReader;
 import jline.console.completer.ArgumentCompleter;
 import jline.console.completer.Completer;
 import jline.console.completer.StringsCompleter;
 
 import java.io.IOException;
-import java.util.*;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CommandHandler {
 
     public static final Map<String, CommandProcessor> PROCESSOR_MAP = new TreeMap<>();
 
     public static ConsoleReader CONSOLE_READER;
+
+    private static final Pattern CMD_PATTERN = Pattern.compile("\"[^\"]+\"|'[^']+'");
 
     public CommandHandler() {
 
@@ -103,6 +119,25 @@ public class CommandHandler {
         register(new SetPasswordProcessor());
 
         /**
+         * Multi-signature account
+         */
+        register(new CreateMultiSigAccountProcessor());
+        register(new ImportMultiSigAccountProcessor());
+        register(new GetMultiSigAccountListProcessor());
+        register(new GetMultiSigAccountProcessor());
+        register(new RemoveMultiSigAccountProcessor());
+        register(new GetMultiSigAccountCountProcessor());
+        register(new CreateMultiSigAccountProcessor());
+
+        register(new CreateMultiTransferProcess());
+        register(new SignMultiTransactionProcess());
+        register(new CreateMultiAliasProcess());
+        register(new CreateMultiAgentProcessor());
+        register(new CreateMultiDepositProcessor());
+        register(new CreateMultiWithdrawProcessor());
+        register(new CreateMultiStopAgentProcessor());
+
+        /**
          * accountLedger
          */
         register(new TransferProcessor());
@@ -136,7 +171,28 @@ public class CommandHandler {
         register(new HelpProcessor());
         register(new VersionProcessor());
         register(new UpgradeProcessor());
+        /**
+         * utxoAccounts
+         */
+        register(new GetUtxoAccountsProcessor());
 
+        /**
+         * contract
+         */
+        register(new GetContractTxProcessor());
+        register(new GetContractResultProcessor());
+        register(new GetContractInfoProcessor());
+        register(new GetContractBalanceProcessor());
+        register(new GetContractTxListProcessor());
+        register(new GetContractAddressValidProcessor());
+        register(new GetWalletContractsProcessor());
+        register(new GetTokenBalanceProcessor());
+        register(new CreateContractProcessor());
+        register(new CallContractProcessor());
+        register(new ViewContractProcessor());
+        register(new TokenTransferProcessor());
+        register(new DeleteContractProcessor());
+        JSONUtils.getInstance().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         sdkInit();
     }
 
@@ -155,7 +211,7 @@ public class CommandHandler {
             String ip = null;
             try {
                 ip = NulsConfig.MODULES_CONFIG.getCfgValue(RpcConstant.CFG_RPC_SECTION, "server.ip").trim();
-                if("0.0.0.0".equals(ip)){
+                if ("0.0.0.0".equals(ip)) {
                     ip = RpcConstant.DEFAULT_IP;
                 }
             } catch (Exception e) {
@@ -171,7 +227,7 @@ public class CommandHandler {
          * If the operating system is windows, it may cause the console to read part of the loop, can be set to false,
          * bypass the native Windows API, use the Java IO stream output directly
          */
-        if(System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1) {
+        if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1) {
             System.setProperty("jline.WindowsTerminal.directConsole", "false");
         }
         CommandHandler instance = new CommandHandler();
@@ -192,13 +248,14 @@ public class CommandHandler {
                 if (StringUtils.isBlank(line)) {
                     continue;
                 }
-                System.out.print(instance.processCommand(line.split("\\s+")) + "\n");
+                String[] cmdArgs = parseArgs(line);
+                System.out.print(instance.processCommand(cmdArgs) + "\n");
             } while (line != null);
         } catch (IOException e) {
 
-        }finally {
+        } finally {
             try {
-                if(!CONSOLE_READER.delete()){
+                if (!CONSOLE_READER.delete()) {
                     CONSOLE_READER.close();
                 }
             } catch (IOException e) {
@@ -206,6 +263,26 @@ public class CommandHandler {
             }
         }
 
+    }
+
+    private static String[] parseArgs(String line) throws UnsupportedEncodingException {
+        if(StringUtils.isBlank(line)) {
+            return new String[0];
+        }
+        Matcher matcher = CMD_PATTERN.matcher(line);
+        String result = line;
+        while (matcher.find()) {
+            String group = matcher.group();
+            String subGroup = group.substring(1, group.length() - 1);
+            String encoder = URLEncoder.encode(subGroup, StandardCharsets.UTF_8.toString());
+            result = result.replace(group, encoder);
+        }
+
+        String[] args = result.split("\\s+");
+        for(int i = 0, length = args.length; i < length; i++) {
+            args[i] = URLDecoder.decode(args[i], StandardCharsets.UTF_8.toString());
+        }
+        return args;
     }
 
     private String processCommand(String[] args) {

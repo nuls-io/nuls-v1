@@ -203,7 +203,8 @@ public class BalanceManager {
                 Log.info("parse coin form db error");
                 continue;
             }
-            if (Arrays.equals(coin.getOwner(), address)) {
+            if (Arrays.equals(coin.getAddress(), address)) {
+                coin.setTempOwner(coin.getOwner());
                 coin.setOwner(coinEntry.getKey());
                 coinList.add(coin);
             }

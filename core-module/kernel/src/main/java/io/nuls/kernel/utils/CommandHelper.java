@@ -25,14 +25,16 @@
 
 package io.nuls.kernel.utils;
 
+import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.RpcClientResult;
 import jline.console.ConsoleReader;
 
 import java.io.IOException;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author: Charlie
@@ -47,7 +49,8 @@ public class CommandHelper {
         }
         return true;
     }
-//
+
+    //
 //    /**
 //     * 获取用户的新密码 必填
 //     * @return
@@ -79,7 +82,7 @@ public class CommandHelper {
     }
 
 
-//    /**
+    //    /**
 //     * 确认新密码
 //     * @param newPwd
 //     */
@@ -107,7 +110,8 @@ public class CommandHelper {
             }
         }
     }
-//
+
+    //
 //    /**
 //     * 得到用户输入的密码,必须输入
 //     * 提示信息为默认
@@ -117,13 +121,13 @@ public class CommandHelper {
         return getPwd(null);
     }
 
-//    /**
+    //    /**
 //     * 得到用户输入的密码,必须输入
 //     * @param prompt 提示信息
 //     * @return
 //     */
     public static String getPwd(String prompt) {
-        if(StringUtils.isBlank(prompt)){
+        if (StringUtils.isBlank(prompt)) {
             prompt = "Please enter the password.\nEnter your password:";
         }
         System.out.print(prompt);
@@ -150,14 +154,15 @@ public class CommandHelper {
             }
         }
     }
-//
+
+    //
 //    /**
 //     * 得到用户输入的密码,允许不输入
 //     * @param prompt
 //     * @return
 //     */
     public static String getPwdOptional(String prompt) {
-        if(StringUtils.isBlank(prompt)){
+        if (StringUtils.isBlank(prompt)) {
             prompt = "Please enter the password (password is between 8 and 20 inclusive of numbers and letters), " +
                     "If you do not want to set a password, return directly.\nEnter your password:";
         }
@@ -187,8 +192,9 @@ public class CommandHelper {
     }
 
     /**
-     *  得到用户输入的密码,允许不输入
-     *  提示信息为默认
+     * 得到用户输入的密码,允许不输入
+     * 提示信息为默认
+     *
      * @return
      */
     public static String getPwdOptional() {
@@ -245,7 +251,7 @@ public class CommandHelper {
             case 9:
                 return "stop_agent";
             default:
-                return null;
+                return type.toString();
         }
     }
 
@@ -260,7 +266,7 @@ public class CommandHelper {
                 return "consensus";
 
             default:
-                return null;
+                return status.toString();
         }
     }
 
@@ -275,12 +281,12 @@ public class CommandHelper {
                 return "unConfirm";
 
             default:
-                return null;
+                return status.toString();
         }
     }
 
 
-//    /**
+    //    /**
 //     * 根据账户获取密码
 //     * 1.如果账户有密码, 则让用户输入密码
 //     * 2.如果账户没有设置密码, 直接返回
@@ -290,10 +296,10 @@ public class CommandHelper {
 //     * @return RpcClientResult
 //     */
     public static RpcClientResult getPassword(String address, RestFulUtils restFul) {
-       return getPassword(address, restFul, null);
+        return getPassword(address, restFul, null);
     }
 
-//    /**
+    //    /**
 //     * 根据账户获取密码
 //     * 1.如果账户有密码, 则让用户输入密码
 //     * 2.如果账户没有设置密码, 直接返回
@@ -311,7 +317,7 @@ public class CommandHelper {
         if (result.isSuccess()) {
             RpcClientResult rpcClientResult = new RpcClientResult();
             rpcClientResult.setSuccess(true);
-            if(result.dataToBooleanValue()) {
+            if (result.dataToBooleanValue()) {
                 String pwd = getPwd(prompt);
                 rpcClientResult.setData(pwd);
             }
@@ -321,4 +327,66 @@ public class CommandHelper {
 
     }
 
+
+    private static String getArgsJson() {
+        String prompt = "Please enter the arguments according to the arguments structure(eg. \"a\",2,[\"c\",4],\"\",\"e\" or \"'a',2,['c',4],'','e'\")," +
+                "\nIf this method has no arguments(Refer to the command named \"getcontractinfo\" for the arguments structure of the method.), return directly.\nEnter the arguments:";
+        System.out.print(prompt);
+        ConsoleReader reader = null;
+        try {
+            reader = new ConsoleReader();
+            String args = reader.readLine();
+            if(StringUtils.isNotBlank(args)) {
+                args = "[" + args + "]";
+            }
+            return args;
+        } catch (IOException e) {
+            return null;
+        } finally {
+            try {
+                if (!reader.delete()) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static Object[] parseArgsJson(String argsJson) {
+        if(StringUtils.isBlank(argsJson)) {
+            return new Object[0];
+        }
+        try {
+            List<Object> list = JSONUtils.json2pojo(argsJson, ArrayList.class);
+            return list.toArray();
+        } catch (Exception e) {
+            e.fillInStackTrace();
+            return null;
+        }
+    }
+
+    public static RpcClientResult getContractCallArgsJson() {
+        RpcClientResult rpcClientResult = new RpcClientResult();
+        rpcClientResult.setSuccess(true);
+        try {
+            Object[] argsObj;
+            // 再次交互输入构造参数
+            String argsJson = getArgsJson();
+            argsObj = parseArgsJson(argsJson);
+            rpcClientResult.setData(argsObj);
+        } catch (Exception e) {
+            e.printStackTrace();
+            rpcClientResult.setSuccess(false);
+        }
+        return rpcClientResult;
+    }
+
+
+    public static String tokenRecovery(String amount, Integer decimals) {
+        if(StringUtils.isBlank(amount) || decimals == null) {
+            return null;
+        }
+        return new BigDecimal(amount).divide(BigDecimal.TEN.pow(decimals)).toPlainString();
+    }
 }

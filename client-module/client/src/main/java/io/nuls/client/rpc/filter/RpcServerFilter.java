@@ -82,7 +82,7 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
     @Override
     public Response toResponse(Exception e) {
 //        System.out.println("---------------" + request.getRequestURI());
-        Log.error(e);
+        Log.error("RequestURI is " + request.getRequestURI(), e);
         RpcClientResult result;
         if (e instanceof NulsException) {
             NulsException exception = (NulsException) e;
@@ -113,7 +113,7 @@ public class RpcServerFilter implements ContainerRequestFilter, ContainerRespons
             }
             this.ipArray = ips.split(RpcConstant.WHITE_SHEET_SPLIT);
             for (String ip : ipArray) {
-                if (ip.equals("0.0.0.0")) {
+                if ("0.0.0.0".equals(ip)) {
                     this.all = true;
                     return true;
                 }

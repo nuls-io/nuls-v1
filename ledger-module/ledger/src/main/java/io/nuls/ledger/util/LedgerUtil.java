@@ -80,4 +80,9 @@ public class LedgerUtil {
         AssertUtil.canNotEmpty(bytes);
         return Base64.getEncoder().encodeToString(bytes);
     }
+
+    public static byte[] asBytes(String string) {
+        AssertUtil.canNotEmpty(string);
+        return Base64.getDecoder().decode(string);
+    }
 }

@@ -29,4 +29,8 @@ import io.nuls.kernel.constant.NulsConstant;
 public interface AccountLedgerConstant extends NulsConstant {
 
     short MODULE_ID_ACCOUNTLEDGER = 9;
+    /**
+     * 默认200NULS
+     */
+    long MAX_VALUE = 20000000000L;
 }

@@ -48,24 +48,24 @@ public class TransferTest extends BaseTest {
     private static int successCount = 0;
 
     public static void main(String[] args) {
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < 1000000; i++) {
             doit();
         }
     }
 
     private static void doit() {
-        List<String> addressList = getAddressList();
-
-        for (String toAddress : addressList) {
-            String address = "Nse5x9foSzFjuwkwZLSvSjAHHLVf3MKJ";
-//            String toAddress = "2Cg7BLHWBSxMhq3FpjR9BrkyxXp4m4j";
+//        List<String> addressList = getAddressList();
+//
+//        for (String toAddress : addressList) {
+            String address = "Nse7e3BJ4pZGVsfMMA2hmWqYmwZYW1RX";
+            String toAddress = "Nse7sC1JcSBJBkMiJDiouYBm4wzbhHM8";//01385ef69371c8fe003d2339158333e6b383eaf7a93a38a77d022cf06024c82a
             long amount = 1001000L;
             String password = "";
             String remark = "test";
 
             String param = "{\"address\": \"" + address + "\", \"toAddress\": \"" + toAddress + "\", \"password\": \"" + password + "\", \"amount\": \"" + amount + "\", \"remark\": \"" + remark + "\"}";
 
-            String url = "http://127.0.0.1:6001/api/accountledger/transfer";
+            String url = "http://192.168.1.35:7001/api/accountledger/transfer";
 
 
             for (int i = 0; i < 1; i++) {
@@ -75,12 +75,12 @@ public class TransferTest extends BaseTest {
                 }
                 System.out.println(successCount + "  " + res);
                 try {
-                    Thread.sleep(2000L);
+                    Thread.sleep(20L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-        }
+//        }
 
     }
 

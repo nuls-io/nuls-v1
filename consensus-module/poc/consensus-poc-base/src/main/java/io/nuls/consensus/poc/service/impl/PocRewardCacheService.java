@@ -129,7 +129,9 @@ public class PocRewardCacheService {
                 continue;
             }
             for (Coin coin : tx.getCoinData().getTo()) {
-                if (!Arrays.equals(addressByte, coin.getOwner())) {
+                //if (!Arrays.equals(addressByte, coin.()))
+                if (!Arrays.equals(addressByte, coin.getAddress()))
+                {
                     continue;
                 }
                 Na na = totalMap.get(address);
@@ -167,7 +169,8 @@ public class PocRewardCacheService {
 
 
     private void addRewardItem(long height, long time, Coin coin, long startTime) {
-        String address = AddressTool.getStringAddressByBytes(coin.getOwner());
+        //String address = AddressTool.getStringAddressByBytes(coin.());
+        String address = AddressTool.getStringAddressByBytes(coin.getAddress());
         Map<Long, RewardItem> map = todayRewardMap.get(address);
         if (null == map) {
             map = new HashMap<>();
@@ -202,7 +205,8 @@ public class PocRewardCacheService {
         CoinBaseTransaction tx = (CoinBaseTransaction) block.getTxs().get(0);
         if (null != tx.getCoinData().getTo() && !tx.getCoinData().getTo().isEmpty()) {
             for (Coin coin : tx.getCoinData().getTo()) {
-                String address = AddressTool.getStringAddressByBytes(coin.getOwner());
+                //String address = AddressTool.getStringAddressByBytes(coin.());
+                String address = AddressTool.getStringAddressByBytes(coin.getAddress());
                 Map<Long, RewardItem> map = todayRewardMap.get(address);
                 if (null == map) {
                     continue;

@@ -28,11 +28,11 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
-import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -78,7 +78,7 @@ public class I18nUtils {
         try {
             URL furl = I18nUtils.class.getClassLoader().getResource(FOLDER);
             if (null != furl) {
-                File folderFile = new File(furl.getPath());
+                File folderFile = new File(URLDecoder.decode(furl.getPath(),"UTF-8"));
                 for (File file : folderFile.listFiles()) {
                     InputStream is = new FileInputStream(file);
                     Properties prop = new Properties();
@@ -92,7 +92,7 @@ public class I18nUtils {
         }
     }
 
-//    /**
+    //    /**
 //     * 设置系统语言，切换语言包
 //     * Set up the system language and switch the language package.
 //     *

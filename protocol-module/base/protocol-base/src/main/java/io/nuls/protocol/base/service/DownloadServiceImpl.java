@@ -34,6 +34,7 @@ import io.nuls.network.model.Node;
 import io.nuls.protocol.base.constant.DownloadStatus;
 import io.nuls.protocol.base.download.processor.DownloadProcessor;
 import io.nuls.protocol.base.download.utils.DownloadUtils;
+import io.nuls.protocol.constant.ProtocolErroeCode;
 import io.nuls.protocol.model.TxGroup;
 import io.nuls.protocol.service.DownloadService;
 
@@ -64,7 +65,7 @@ public class DownloadServiceImpl implements DownloadService {
             return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         if (block == null) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
         return Result.getSuccess().setData(block);
     }

@@ -26,6 +26,8 @@
 package io.nuls.accout.ledger.rpc.dto;
 
 import io.nuls.account.ledger.model.TransactionInfo;
+import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.utils.AddressTool;
 
 public class TransactionInfoDto {
 
@@ -41,6 +43,15 @@ public class TransactionInfoDto {
 
     private String info;
 
+    /**
+     * contract address
+     */
+    private String contractAddress;
+    /**
+     * contract token symbol
+     */
+    private String symbol;
+
     public TransactionInfoDto() {
 
     }
@@ -52,6 +63,10 @@ public class TransactionInfoDto {
         this.status = info.getStatus();
         this.txType = info.getTxType();
         this.info = info.getInfo();
+        if(info.getContractAddress() != null) {
+            this.contractAddress = AddressTool.getStringAddressByBytes(info.getContractAddress());
+        }
+        this.symbol = info.getSymbol();
     }
 
     public String getTxHash() {
@@ -100,5 +115,21 @@ public class TransactionInfoDto {
 
     public void setInfo(String info) {
         this.info = info;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 }

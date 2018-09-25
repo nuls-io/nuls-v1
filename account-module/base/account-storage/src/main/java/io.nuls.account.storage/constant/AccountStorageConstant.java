@@ -25,7 +25,7 @@
 
 package io.nuls.account.storage.constant;
 
-import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.str.StringUtils;
 
 /**
  * @author: Charlie
@@ -37,12 +37,13 @@ public interface AccountStorageConstant {
      * The name of the account table
      */
     String DB_NAME_ACCOUNT = "account";
+    String DB_NAME_MULTI_SIG_ACCOUNT = "multi_account";
 
     /**
      * 默认账户的数据库key
      * The name of the key account table
      */
-    byte[] DEFAULT_ACCOUNT_KEY = Hex.decode("DEFAULT_ACCOUNT");
+    byte[] DEFAULT_ACCOUNT_KEY = StringUtils.bytes("DEFAULT_ACCOUNT");
     /**
      * 别名表的名称
      * The name of the account table

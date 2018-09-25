@@ -26,6 +26,11 @@
 package io.nuls.protocol.base.service;
 
 import io.nuls.account.ledger.service.AccountLedgerService;
+import io.nuls.contract.dto.ContractResult;
+import io.nuls.contract.dto.ContractTransfer;
+import io.nuls.contract.entity.tx.CallContractTransaction;
+import io.nuls.contract.entity.tx.ContractTransferTransaction;
+import io.nuls.contract.service.ContractService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.exception.NulsException;
@@ -36,6 +41,7 @@ import io.nuls.ledger.service.LedgerService;
 import io.nuls.message.bus.service.MessageBusService;
 import io.nuls.network.model.Node;
 import io.nuls.protocol.base.utils.PoConvertUtil;
+import io.nuls.protocol.constant.ProtocolErroeCode;
 import io.nuls.protocol.message.ForwardSmallBlockMessage;
 import io.nuls.protocol.message.SmallBlockMessage;
 import io.nuls.protocol.model.SmallBlock;
@@ -74,6 +80,9 @@ public class BlockServiceImpl implements BlockService {
     @Autowired
     private AccountLedgerService accountLedgerService;
 
+    @Autowired
+    private ContractService contractService;
+
     /**
      * 获取创世块（从存储中）
      * Get the creation block (from storage)
@@ -82,7 +91,7 @@ public class BlockServiceImpl implements BlockService {
     public Result<Block> getGengsisBlock() {
         BlockHeaderPo headerPo = blockHeaderStorageService.getBlockHeaderPo(0);
         if (null == headerPo) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
         Block block = getBlock(headerPo);
         return Result.getSuccess().setData(block);
@@ -96,7 +105,7 @@ public class BlockServiceImpl implements BlockService {
     public Result<Block> getBestBlock() {
         BlockHeaderPo headerPo = blockHeaderStorageService.getBestBlockHeaderPo();
         if (null == headerPo) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
         Block block = getBlock(headerPo);
         return Result.getSuccess().setData(block);
@@ -110,15 +119,46 @@ public class BlockServiceImpl implements BlockService {
      * @return 完整的区块/the complete block
      */
     private Block getBlock(BlockHeaderPo headerPo) {
+        return getBlock(headerPo, false);
+    }
+
+    private Block getBlock(BlockHeaderPo headerPo, boolean isNeedContractTransfer) {
         List<Transaction> txList = new ArrayList<>();
         for (NulsDigestData hash : headerPo.getTxHashList()) {
             Transaction tx = ledgerService.getTx(hash);
             txList.add(tx);
+            if(isNeedContractTransfer) {
+                //pierre add 增加合约转账(从合约转出)交易到查询的区块中
+                contractTransfer(tx, txList);
+            }
         }
         Block block = new Block();
-        block.setHeader(PoConvertUtil.fromBlockHeaderPo(headerPo));
+        BlockHeader blockHeader = PoConvertUtil.fromBlockHeaderPo(headerPo);
+        if(isNeedContractTransfer) {
+            blockHeader.setTxCount(txList.size());
+        }
+        block.setHeader(blockHeader);
         block.setTxs(txList);
         return block;
+    }
+
+    private void contractTransfer(Transaction tx, List<Transaction> txList) {
+        if(tx instanceof CallContractTransaction) {
+            CallContractTransaction callTx = (CallContractTransaction) tx;
+            ContractResult contractResult = callTx.getContractResult();
+            if(contractResult != null) {
+                List<ContractTransfer> transfers = contractResult.getTransfers();
+                // 合约调用交易存在合约转账(从合约转出)交易，则从全网账本中查出完整交易添加到交易集合中
+                if(transfers != null && transfers.size() > 0) {
+                    for(ContractTransfer transfer : transfers) {
+                        Transaction contractTx = ledgerService.getTx(transfer.getHash());
+                        if(contractTx != null) {
+                            txList.add(contractTx);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -129,7 +169,7 @@ public class BlockServiceImpl implements BlockService {
     public Result<BlockHeader> getBestBlockHeader() {
         BlockHeaderPo headerPo = blockHeaderStorageService.getBestBlockHeaderPo();
         if (null == headerPo) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
         return Result.getSuccess().setData(PoConvertUtil.fromBlockHeaderPo(headerPo));
     }
@@ -145,7 +185,7 @@ public class BlockServiceImpl implements BlockService {
     public Result<BlockHeader> getBlockHeader(long height) {
         BlockHeaderPo headerPo = blockHeaderStorageService.getBlockHeaderPo(height);
         if (null == headerPo) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
         return Result.getSuccess().setData(PoConvertUtil.fromBlockHeaderPo(headerPo));
     }
@@ -161,7 +201,7 @@ public class BlockServiceImpl implements BlockService {
     public Result<BlockHeader> getBlockHeader(NulsDigestData hash) {
         BlockHeaderPo headerPo = blockHeaderStorageService.getBlockHeaderPo(hash);
         if (null == headerPo) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
         return Result.getSuccess().setData(PoConvertUtil.fromBlockHeaderPo(headerPo));
     }
@@ -177,9 +217,27 @@ public class BlockServiceImpl implements BlockService {
     public Result<Block> getBlock(NulsDigestData hash) {
         BlockHeaderPo headerPo = blockHeaderStorageService.getBlockHeaderPo(hash);
         if (null == headerPo) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
         Block block = getBlock(headerPo);
+        return Result.getSuccess().setData(block);
+    }
+
+    /**
+     * 根据区块摘要获取区块（从存储中）
+     * Get the block (from storage) according to the block hash
+     *
+     * @param hash 区块摘要/block hash
+     * @param isNeedContractTransfer 是否需要把合约转账(从合约转出)交易添加到区块中/If necessary to add the contract transfer (from the contract) to the block
+     * @return 区块/block
+     */
+    @Override
+    public Result<Block> getBlock(NulsDigestData hash, boolean isNeedContractTransfer) {
+        BlockHeaderPo headerPo = blockHeaderStorageService.getBlockHeaderPo(hash);
+        if (null == headerPo) {
+            return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
+        }
+        Block block = getBlock(headerPo, isNeedContractTransfer);
         return Result.getSuccess().setData(block);
     }
 
@@ -194,9 +252,27 @@ public class BlockServiceImpl implements BlockService {
     public Result<Block> getBlock(long height) {
         BlockHeaderPo headerPo = blockHeaderStorageService.getBlockHeaderPo(height);
         if (null == headerPo) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
         Block block = getBlock(headerPo);
+        return Result.getSuccess().setData(block);
+    }
+
+    /**
+     * 根据区块高度获取区块（从存储中）
+     * Get the block (from storage) according to the block height
+     *
+     * @param height 区块高度/block height
+     * @param isNeedContractTransfer 是否需要把合约转账(从合约转出)交易添加到区块中/If necessary to add the contract transfer (from the contract) to the block
+     * @return 区块/block
+     */
+    @Override
+    public Result<Block> getBlock(long height, boolean isNeedContractTransfer) {
+        BlockHeaderPo headerPo = blockHeaderStorageService.getBlockHeaderPo(height);
+        if (null == headerPo) {
+            return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
+        }
+        Block block = getBlock(headerPo, isNeedContractTransfer);
         return Result.getSuccess().setData(block);
     }
 
@@ -211,7 +287,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public Result saveBlock(Block block) throws NulsException {
         if (null == block || block.getHeader() == null || block.getTxs() == null) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+            return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
         long height = block.getHeader().getHeight();
         List<Transaction> savedList = new ArrayList<>();
@@ -235,6 +311,8 @@ public class BlockServiceImpl implements BlockService {
         }
         try {
             accountLedgerService.saveConfirmedTransactionList(block.getTxs());
+            // 保存合约相关交易
+            contractService.saveConfirmedTransactionList(block.getTxs());
         } catch (Exception e) {
             Log.warn("save local tx failed", e);
         }
@@ -245,12 +323,12 @@ public class BlockServiceImpl implements BlockService {
      * 保存区块失败时，需要将已经存储的交易回滚
      * When you fail to save the block, you need to roll back the already stored transaction.
      */
-    private boolean rollbackTxList(List<Transaction> savedList, BlockHeader blockHeader, boolean Atomicity) throws NulsException {
+    private boolean rollbackTxList(List<Transaction> savedList, BlockHeader blockHeader, boolean atomicity) throws NulsException {
         List<Transaction> rollbackedList = new ArrayList<>();
         for (int i = savedList.size() - 1; i >= 0; i--) {
             Transaction tx = savedList.get(i);
             Result result = transactionService.rollbackTx(tx, blockHeader);
-            if (Atomicity) {
+            if (atomicity) {
                 if (result.isFailed()) {
                     break;
                 } else {
@@ -258,7 +336,7 @@ public class BlockServiceImpl implements BlockService {
                 }
             }
         }
-        if (Atomicity && savedList.size() != rollbackedList.size()) {
+        if (atomicity && savedList.size() != rollbackedList.size()) {
             for (int i = rollbackedList.size() - 1; i >= 0; i--) {
                 Transaction tx = rollbackedList.get(i);
                 transactionService.commitTx(tx, blockHeader);
@@ -279,9 +357,9 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public Result rollbackBlock(Block block) throws NulsException {
         if (null == block) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+            return Result.getFailed(ProtocolErroeCode.BLOCK_IS_NULL);
         }
-        boolean b = this.rollbackTxList(block.getTxs(), block.getHeader(),true);
+        boolean b = this.rollbackTxList(block.getTxs(), block.getHeader(), true);
         if (!b) {
             return Result.getFailed(KernelErrorCode.DATA_ERROR);
         }
@@ -295,6 +373,8 @@ public class BlockServiceImpl implements BlockService {
         }
         try {
             accountLedgerService.rollbackTransactions(block.getTxs());
+            // 回滚合约相关交易
+            contractService.rollbackTransactionList(block.getTxs());
         } catch (Exception e) {
             Log.warn("rollbackTransaction local tx failed", e);
         }

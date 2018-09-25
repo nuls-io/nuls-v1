@@ -24,11 +24,11 @@
  */
 package io.nuls.protocol.model.validator;
 
-import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Block;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.protocol.constant.ProtocolErroeCode;
 
 /**
  * @author Niels
@@ -38,7 +38,7 @@ public class BlockHeaderValidator implements NulsDataValidator<Block> {
     @Override
     public ValidateResult validate(Block data) {
         if (null == data || data.getHeader() == null) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.NULL_PARAMETER);
+            return ValidateResult.getFailedResult(this.getClass().getName(), ProtocolErroeCode.BLOCK_IS_NULL);
         }
         return data.getHeader().verify();
     }

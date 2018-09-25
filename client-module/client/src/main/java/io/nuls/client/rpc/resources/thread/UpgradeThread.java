@@ -41,6 +41,7 @@ import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.func.TimeService;
 
 import java.io.*;
+import java.net.URLDecoder;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -85,6 +86,7 @@ public class UpgradeThread implements Runnable {
             process.setPercentage(5);
             process.setStatus(VersionConstant.DOWNLOADING);
             String root = this.getClass().getClassLoader().getResource("").getPath();
+            root = URLDecoder.decode(root,"UTF-8");
             String newDirPath = root + "/temp/" + version;
             File newDir = new File(newDirPath);
             if (!newDir.exists()) {
@@ -154,7 +156,7 @@ public class UpgradeThread implements Runnable {
         }
     }
 
-    private void rollbackAndDeleteTemp(String root) {
+    private void rollbackAndDeleteTemp(String root) throws UnsupportedEncodingException {
         File rootBin = new File(root + "/bin");
         FileUtil.deleteFolder(rootBin);
         File rootConf = new File(root + "/conf");

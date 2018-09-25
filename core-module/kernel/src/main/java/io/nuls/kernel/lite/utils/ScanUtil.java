@@ -25,12 +25,15 @@
 package io.nuls.kernel.lite.utils;
 
 
+import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -93,7 +96,13 @@ public class ScanUtil {
      * @param list        结果列表
      */
     public static void findClassLocal(final String packageName, String filePath, List<Class> list) {
-        File file = new File(filePath);
+        File file = null;
+        try {
+            file = new File(URLDecoder.decode(filePath, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            Log.error(e);
+            return;
+        }
         file.listFiles(new LocalFileFilter(packageName, list));
     }
 
@@ -115,7 +124,7 @@ public class ScanUtil {
                 pathName = pathName.substring(0, index);
             }
             URL url = new URL(pathName);
-            jarFile = new JarFile(url.getFile());
+            jarFile = new JarFile(URLDecoder.decode(url.getPath(), "UTF-8"));
         } catch (IOException e) {
             throw new RuntimeException("could not be parsed as a URI reference");
         }

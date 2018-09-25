@@ -27,24 +27,28 @@ package io.nuls.account.validator;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.kernel.model.Address;
 import io.nuls.account.model.Alias;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AliasStorageService;
 import io.nuls.account.tx.AliasTransaction;
-import io.nuls.core.tools.crypto.Base58;
+import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.constant.TransactionErrorCode;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
+import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.CoinData;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.model.Na;
+import io.nuls.kernel.script.SignatureUtil;
+import io.nuls.kernel.script.TransactionSignature;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.NulsDataValidator;
 import io.nuls.kernel.validate.ValidateResult;
@@ -73,6 +77,15 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
     @Override
     public ValidateResult validate(AliasTransaction tx) {
         Alias alias = tx.getTxData();
+        if (tx.isSystemTx()) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TX_TYPE_ERROR);
+        }
+        if (NulsContext.CONTRACT_ADDRESS_TYPE == alias.getAddress()[2]) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
+        }
+        if (!StringUtils.validAlias(alias.getAlias())) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_FORMAT_WRONG);
+        }
         if (!aliasService.isAliasUsable(alias.getAlias())) {
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_EXIST);
         }
@@ -82,32 +95,39 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
                 return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
             }
         }
-//        if (!AddressTool.validAddress(alias.getAddress())) {
-//            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
-//        }
-        if (!StringUtils.validAlias(alias.getAlias())) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_FORMAT_WRONG);
-        }
-        AliasPo aliasPo = aliasStorageService.getAlias(alias.getAlias()).getData();
-        if (aliasPo != null) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_EXIST);
-        }
-        if (tx.isSystemTx()) {
-            return ValidateResult.getFailedResult(alias.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
-        }
         CoinData coinData = tx.getCoinData();
         if (null == coinData) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
+            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.COINDATA_NOT_FOUND);
         }
-        P2PKHScriptSig sig = new P2PKHScriptSig();
+        if (null == coinData.getTo() || coinData.getTo().isEmpty()) {
+            boolean burned = false;
+            for (Coin coin : coinData.getTo()) {
+                if (ArraysTool.arrayEquals(coin.getOwner(), NulsConstant.BLACK_HOLE_ADDRESS) && coin.getNa().equals(Na.NA)) {
+                    burned = true;
+                }
+            }
+            if (!burned) {
+                return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.MUST_BURN_A_NULS);
+            }
+        }
+
+        TransactionSignature sig = new TransactionSignature();
         try {
-            sig.parse(tx.getScriptSig(), 0);
+            sig.parse(tx.getTransactionSignature(), 0);
         } catch (NulsException e) {
             Log.error(e);
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
-        if (!Arrays.equals(tx.getTxData().getAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
-            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
+
+        boolean sign;
+        try {
+            sign = SignatureUtil.containsAddress(tx, tx.getTxData().getAddress());
+
+        } catch (NulsException e) {
+            sign = false;
+        }
+        if (!sign) {
+            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
             return result;
         }

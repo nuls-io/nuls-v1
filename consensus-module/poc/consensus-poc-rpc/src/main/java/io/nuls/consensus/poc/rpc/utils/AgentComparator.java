@@ -62,8 +62,9 @@ public class AgentComparator implements Comparator<Agent> {
                 return INSTANCE_ARRAY[DEPOSITABLE];
             case COMPREHENSIVE:
                 return INSTANCE_ARRAY[COMPREHENSIVE];
+            default:
+                return INSTANCE_ARRAY[CREDIT_VALUE];
         }
-        return null;
     }
 
     private AgentComparator(int sortType) {
@@ -105,10 +106,10 @@ public class AgentComparator implements Comparator<Agent> {
                 }
                 return 1;
             }
-            case COMPREHENSIVE:{
+            case COMPREHENSIVE: {
                 //先判断是否可委托，再判断信用值，再判断可委托金额
                 //First judge whether the trust can be entrusted, then judge the credit value, then judge the amount of trust
-                if (o1.canDeposit()&&!o2.canDeposit()) {
+                if (o1.canDeposit() && !o2.canDeposit()) {
                     return -1;
                 } else if (o2.canDeposit() == o1.canDeposit()) {
                     if (o2.getCreditVal() < o1.getCreditVal()) {
@@ -125,7 +126,14 @@ public class AgentComparator implements Comparator<Agent> {
                 }
                 return 1;
             }
+            default: {
+                if (o2.getCreditVal() < o1.getCreditVal()) {
+                    return -1;
+                } else if (o2.getCreditVal() == o1.getCreditVal()) {
+                    return 0;
+                }
+                return 1;
+            }
         }
-        return 0;
     }
 }

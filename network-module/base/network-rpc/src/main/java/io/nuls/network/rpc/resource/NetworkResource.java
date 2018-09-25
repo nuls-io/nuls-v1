@@ -88,7 +88,7 @@ public class NetworkResource {
             }
         }
         info.setOutCount(count);
-
+        info.setMastUpGrade(NulsContext.mastUpGrade);
         Result result = Result.getSuccess();
         result.setData(info);
         return result.toRpcClientResult();

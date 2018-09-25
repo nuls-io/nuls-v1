@@ -49,7 +49,6 @@ package io.nuls.consensus.poc.tx.validator;/*
  */
 
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
-import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
@@ -59,10 +58,10 @@ import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.consensus.poc.storage.service.DepositStorageService;
 import io.nuls.consensus.poc.storage.service.PunishLogStorageService;
-import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.SeverityLevelEnum;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -71,7 +70,9 @@ import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Na;
 import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.script.P2PKHScriptSig;
+
+import io.nuls.kernel.script.SignatureUtil;
+import io.nuls.kernel.script.TransactionSignature;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 
@@ -93,9 +94,9 @@ public class DepositTxValidator extends BaseConsensusProtocolValidator<DepositTr
     private DepositStorageService depositStorageService;
 
     @Override
-    public ValidateResult validate(DepositTransaction tx) {
+    public ValidateResult validate(DepositTransaction tx) throws NulsException {
         if (null == tx || null == tx.getTxData() || null == tx.getTxData().getAgentHash() || null == tx.getTxData().getDeposit() || null == tx.getTxData().getAddress()) {
-            return ValidateResult.getFailedResult(this.getClass().getName(),KernelErrorCode.DATA_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(),TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         Deposit deposit = tx.getTxData();
         AgentPo agentPo = agentStorageService.get(deposit.getAgentHash());
@@ -122,15 +123,15 @@ public class DepositTxValidator extends BaseConsensusProtocolValidator<DepositTr
         if (!isDepositOk(deposit.getDeposit(), tx.getCoinData())) {
             return ValidateResult.getFailedResult(this.getClass().getName(), SeverityLevelEnum.FLAGRANT_FOUL, PocConsensusErrorCode.DEPOSIT_ERROR);
         }
-        P2PKHScriptSig sig = new P2PKHScriptSig();
+        TransactionSignature sig = new TransactionSignature();
         try {
-            sig.parse(tx.getScriptSig(), 0);
+            sig.parse(tx.getTransactionSignature(), 0);
         } catch (NulsException e) {
             Log.error(e);
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
-        if (!Arrays.equals(deposit.getAddress(), AddressTool.getAddress(sig.getPublicKey()))) {
-            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
+        if (!SignatureUtil.containsAddress(tx,deposit.getAddress())) {
+            ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
             result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
             return result;
         }
@@ -141,13 +142,14 @@ public class DepositTxValidator extends BaseConsensusProtocolValidator<DepositTr
             if (coin.getLockTime() == PocConsensusConstant.CONSENSUS_LOCK_TIME) {
                 lockCount++;
             }
-            addressSet.add(AddressTool.getStringAddressByBytes(coin.getOwner()));
+            //addressSet.add(AddressTool.getStringAddressByBytes(coin.()));
+            addressSet.add(AddressTool.getStringAddressByBytes(coin.getAddress()));
         }
         if (lockCount > 1) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.DEPOSIT_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         if (addressSet.size() > 1) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.DEPOSIT_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }

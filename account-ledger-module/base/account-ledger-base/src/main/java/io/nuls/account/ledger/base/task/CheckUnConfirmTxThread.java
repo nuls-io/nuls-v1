@@ -28,7 +28,6 @@ import io.nuls.account.ledger.base.manager.BalanceManager;
 import io.nuls.account.ledger.base.service.TransactionInfoService;
 import io.nuls.account.ledger.base.service.impl.AccountLedgerServiceImpl;
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
-import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.ledger.storage.po.TransactionInfoPo;
 import io.nuls.account.ledger.storage.service.LocalUtxoStorageService;
 import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
@@ -59,10 +58,7 @@ public class CheckUnConfirmTxThread implements Runnable {
     private TransactionService transactionService;
 
     @Autowired
-    private LedgerService ledgerService;
-
-    @Autowired
-    private AccountLedgerService AccountLedgerService;
+    private LedgerService ledgerService; 
 
     @Autowired
     private UnconfirmedTransactionStorageService unconfirmedTransactionStorageService;
@@ -161,7 +157,9 @@ public class CheckUnConfirmTxThread implements Runnable {
                 try {
                     fromCoin = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value);
 
-                    if (!AccountLegerUtils.isLocalAccount(fromCoin.getOwner())) {
+                    //if (!AccountLegerUtils.isLocalAccount(fromCoin.getOwner()))
+                    if (!AccountLegerUtils.isLocalAccount(fromCoin.getAddress()))
+                    {
                         continue;
                     }
                     Coin fromCoinFromLedger = ledgerService.getUtxo(fromSource);
@@ -182,7 +180,10 @@ public class CheckUnConfirmTxThread implements Runnable {
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
                     toCoin = tos.get(i);
-                    if (!AccountLegerUtils.isLocalAccount(toCoin.getOwner())) {
+                    /*if (!AccountLegerUtils.isLocalAccount(toCoin.getOwner())) {
+                        continue;
+                    }*/
+                    if (!AccountLegerUtils.isLocalAccount(toCoin.getAddress())) {
                         continue;
                     }
                     outKey = org.spongycastle.util.Arrays.concatenate(tx.getHash().serialize(), new VarInt(i).encode());

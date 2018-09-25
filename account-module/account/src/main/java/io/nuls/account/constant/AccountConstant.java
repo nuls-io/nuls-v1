@@ -63,6 +63,11 @@ public interface AccountConstant extends NulsConstant {
      * Account unlock time maximum (unit: second)
      */
     int ACCOUNT_MAX_UNLOCK_TIME = 120;
+    /**
+     * 如果零钱大于20条就可以换整
+     * If the change is more than 20, it can be changed.
+     */
+    int MIM_COUNT= 20;
 
     /**
      * 导出accountkeystore文件的后缀名

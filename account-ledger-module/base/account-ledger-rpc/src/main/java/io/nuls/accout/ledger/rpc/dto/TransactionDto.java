@@ -26,18 +26,23 @@
 package io.nuls.accout.ledger.rpc.dto;
 
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.TxStatusEnum;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.CoinData;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.TransactionLogicData;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.nuls.core.tools.str.StringUtils.EMPTY;
 
 /**
  * @desription:
@@ -85,6 +90,9 @@ public class TransactionDto {
     @ApiModelProperty(name = "outputs", value = "输出")
     private List<OutputDto> outputs;
 
+    @ApiModelProperty(name = "txDataHexString", value = "txData的Hex编码字符串")
+    private String txDataHexString;
+
     public TransactionDto(Transaction tx) {
         long bestBlockHeight = NulsContext.getInstance().getBestBlock().getHeader().getHeight();
         this.hash = tx.getHash().getDigestHex();
@@ -111,8 +119,8 @@ public class TransactionDto {
                 this.setRemark(Hex.encode(tx.getRemark()));
             }
         }
-        if (tx.getScriptSig() != null) {
-            this.setScriptSig(Hex.encode(tx.getScriptSig()));
+        if (tx.getTransactionSignature() != null) {
+            this.setScriptSig(Hex.encode(tx.getTransactionSignature()));
         }
 
         CoinData coinData = tx.getCoinData();
@@ -124,6 +132,17 @@ public class TransactionDto {
             }
         }
         this.inputs = inputs;
+
+        this.txDataHexString = EMPTY;
+        TransactionLogicData txData = tx.getTxData();
+        if(txData != null) {
+            try {
+                byte[] serialize = txData.serialize();
+                this.txDataHexString = Hex.encode(serialize);
+            } catch (IOException e) {
+                Log.error(e);
+            }
+        }
     }
 
     public String getHash() {
@@ -230,5 +249,11 @@ public class TransactionDto {
         this.size = size;
     }
 
+    public String getTxDataHexString() {
+        return txDataHexString;
+    }
 
+    public void setTxDataHexString(String txDataHexString) {
+        this.txDataHexString = txDataHexString;
+    }
 }

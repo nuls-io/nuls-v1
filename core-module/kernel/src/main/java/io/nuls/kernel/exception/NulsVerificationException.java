@@ -25,7 +25,6 @@
 package io.nuls.kernel.exception;
 
 import io.nuls.kernel.constant.ErrorCode;
-import io.nuls.kernel.constant.KernelErrorCode;
 
 /**
  * Created by facjas on 2017/10/31.

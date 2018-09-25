@@ -50,7 +50,7 @@ public class TransactionServiceTest {
         TransferTransaction tt = new TransferTransaction();
         tt.setTime(System.currentTimeMillis());
         tt.setBlockHeight(1);
-//        tt.setScriptSig();
+//        tt.setTransactionSignature();
     }
 
     @Test

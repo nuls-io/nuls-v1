@@ -29,12 +29,14 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.model.BaseNulsData;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.BroadcastResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.protocol.message.base.BaseMessage;
+import io.nuls.protocol.message.base.MessageHeader;
 
 import java.util.*;
 
@@ -171,7 +173,13 @@ public class BroadcastHandler {
             return new BroadcastResult(false, NetworkErrorCode.NET_NODE_MISS_CHANNEL);
         }
         try {
-            message.getHeader().setMagicNumber(networkParam.getPacketMagic());
+            MessageHeader header = message.getHeader();
+            byte[] serialize = header.serialize();
+            header.setMagicNumber(networkParam.getPacketMagic());
+
+            BaseNulsData body = message.getMsgBody();
+            header.setLength(body.size());
+
             ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
             if (!asyn) {
                 future.await();

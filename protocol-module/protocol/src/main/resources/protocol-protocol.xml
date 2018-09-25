@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nuls-protocol>
+    <txs>
+        <tx id="coinBaseTx_V1" class="io.nuls.protocol.model.tx.CoinBaseTransaction"/>
+        <tx id="transferTx_V1" class="io.nuls.protocol.model.tx.TransferTransaction"/>
+        <tx id="dappTx_V1" class="io.nuls.protocol.model.tx.DataTransaction"/>
+    </txs>
+
+    <messages>
+        <message id="blockHeaderMsg" class="io.nuls.protocol.message.BlockHeaderMessage"/>
+        <message id="blockMsg" class="io.nuls.protocol.message.BlockMessage"/>
+        <message id="blocksHashMsg" class="io.nuls.protocol.message.BlocksHashMessage"/>
+        <message id="completeMsg" class="io.nuls.protocol.message.CompleteMessage"/>
+        <message id="forwardSmallBlockMsg" class="io.nuls.protocol.message.ForwardSmallBlockMessage"/>
+        <message id="forwardTxMsg" class="io.nuls.protocol.message.ForwardTxMessage"/>
+        <message id="getBlockMsg" class="io.nuls.protocol.message.GetBlockMessage"/>
+        <message id="getBlockByHeightMsg" class="io.nuls.protocol.message.GetBlocksByHeightMessage"/>
+        <message id="getBlockByHashMsg" class="io.nuls.protocol.message.GetBlocksByHashMessage"/>
+        <message id="getSmallBlockMsg" class="io.nuls.protocol.message.GetSmallBlockMessage"/>
+        <message id="getTxGroupMsg" class="io.nuls.protocol.message.GetTxGroupRequest"/>
+        <message id="getTxMsg" class="io.nuls.protocol.message.GetTxMessage"/>
+        <message id="NotFoundMsg" class="io.nuls.protocol.message.NotFoundMessage"/>
+        <message id="reactMsg" class="io.nuls.protocol.message.ReactMessage"/>
+        <message id="smallBlockMsg" class="io.nuls.protocol.message.GetBlocksByHeightMessage"/>
+        <message id="transactionMsg" class="io.nuls.protocol.message.TransactionMessage"/>
+        <message id="txGroupMsg" class="io.nuls.protocol.message.TxGroupMessage"/>
+    </messages>
+</nuls-protocol>

@@ -26,38 +26,34 @@
 package io.nuls.account.constant;
 
 import io.nuls.kernel.constant.ErrorCode;
+import io.nuls.kernel.constant.KernelErrorCode;
 
 /**
- * @author: Niels Wang
+ * @author: Charlie
  */
-public interface AccountErrorCode {
+public interface AccountErrorCode extends KernelErrorCode {
 
-    ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("ACT000", "50000");
-    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("ACT001", "50001");
-    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED = ErrorCode.init("ACT002", "50002");
-    ErrorCode ACCOUNT_EXIST = ErrorCode.init("ACT003", "50003");
-    ErrorCode ADDRESS_ERROR = ErrorCode.init("ACT004", "50004");
-    ErrorCode ALIAS_EXIST = ErrorCode.init("ACT005", "50005");
-    ErrorCode ALIAS_NOT_EXIST = ErrorCode.init("ACT006", "50006");
-    ErrorCode ACCOUNT_ALREADY_SET_ALIAS = ErrorCode.init("ACT007", "50007");
-    ErrorCode PARAMETER_ERROR = ErrorCode.init("ACT008", "50008");
-    ErrorCode DATA_PARSE_ERROR = ErrorCode.init("ACT009", "50009");
-    ErrorCode SUCCESS = ErrorCode.init("ACT010", "50010");
-    ErrorCode FAILED = ErrorCode.init("ACT011", "50011");
-    ErrorCode INSUFFICIENT_BALANCE = ErrorCode.init("ACT012", "50012");
-    ErrorCode ALIAS_ROLLBACK_ERROR = ErrorCode.init("ACT013", "50013");
-    ErrorCode ACCOUNTKEYSTORE_FILE_NOT_EXIST = ErrorCode.init("ACT014", "50014");
-    ErrorCode ACCOUNTKEYSTORE_FILE_DAMAGED = ErrorCode.init("ACT015", "50015");
-    ErrorCode ALIAS_FORMAT_WRONG = ErrorCode.init("ACT016", "50016");
-    ErrorCode PASSWORD_FORMAT_WRONG = ErrorCode.init("ACT017", "50017");
-    ErrorCode DECRYPT_ACCOUNT_ERROR = ErrorCode.init("ACT018", "50018");
-    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED_AND_LOCKED = ErrorCode.init("ACT019", "50019");
-
-    ErrorCode ACCOUNT_UNENCRYPTED = ErrorCode.init("ACT020", "50020");
-    ErrorCode ALIAS_CONFLICT = ErrorCode.init("ACT021", "50021");
-    ErrorCode ACCOUNT_ALREADY_HAS_ALIAS = ErrorCode.init("ACT022", "50022");
-    ErrorCode HAVE_ENCRYPTED_ACCOUNT = ErrorCode.init("ACT023", "50023");
-    ErrorCode HAVE_UNENCRYPTED_ACCOUNT = ErrorCode.init("ACT024", "50024");
-    ErrorCode PRIVATE_KEY_WRONG = ErrorCode.init("ACT025", "50025");
-    ErrorCode NICKNAME_TOO_LONG = ErrorCode.init("ACT026", "50026");
+    ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("50000");
+    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("50001");
+    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED = ErrorCode.init("50002");
+    ErrorCode ACCOUNT_EXIST = ErrorCode.init("50003");
+    ErrorCode ADDRESS_ERROR = ErrorCode.init("50004");
+    ErrorCode ALIAS_EXIST = ErrorCode.init("50005");
+    ErrorCode ALIAS_NOT_EXIST = ErrorCode.init("50006");
+    ErrorCode ACCOUNT_ALREADY_SET_ALIAS = ErrorCode.init("50007");
+    ErrorCode ACCOUNT_UNENCRYPTED = ErrorCode.init("50008");
+    ErrorCode ALIAS_CONFLICT = ErrorCode.init("50009");
+    ErrorCode HAVE_ENCRYPTED_ACCOUNT = ErrorCode.init("50010");
+    ErrorCode HAVE_UNENCRYPTED_ACCOUNT = ErrorCode.init("50011");
+    ErrorCode PRIVATE_KEY_WRONG = ErrorCode.init("50012");
+    ErrorCode ALIAS_ROLLBACK_ERROR = ErrorCode.init("50013");
+    ErrorCode ACCOUNTKEYSTORE_FILE_NOT_EXIST = ErrorCode.init("50014");
+    ErrorCode ACCOUNTKEYSTORE_FILE_DAMAGED = ErrorCode.init("50015");
+    ErrorCode ALIAS_FORMAT_WRONG = ErrorCode.init("50016");
+    ErrorCode PASSWORD_FORMAT_WRONG = ErrorCode.init("50017");
+    ErrorCode DECRYPT_ACCOUNT_ERROR = ErrorCode.init("50018");
+    ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED_AND_LOCKED = ErrorCode.init("50019");
+    ErrorCode NICKNAME_TOO_LONG = ErrorCode.init("50020");
+    ErrorCode INPUT_TOO_SMALL = ErrorCode.init("50021");
+    ErrorCode MUST_BURN_A_NULS = ErrorCode.init("50022");
 }

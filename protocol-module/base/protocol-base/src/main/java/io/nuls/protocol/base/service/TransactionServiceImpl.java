@@ -25,6 +25,7 @@
 
 package io.nuls.protocol.base.service;
 
+import io.nuls.account.service.AccountService;
 import io.nuls.consensus.service.ConsensusService;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.exception.NulsException;
@@ -62,6 +63,9 @@ public class TransactionServiceImpl implements TransactionService {
     private LedgerService ledgerService;
     @Autowired
     private ConsensusService consensusService;
+
+    @Autowired
+    private AccountService accountService;
 
     /**
      * 确认交易时调用的方法，对交易相关的业务进行提交操作
@@ -202,4 +206,6 @@ public class TransactionServiceImpl implements TransactionService {
     public Transaction getTx(NulsDigestData hash) {
         return consensusService.getTx(hash);
     }
+
+
 }

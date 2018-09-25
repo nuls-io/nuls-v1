@@ -132,7 +132,8 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         if (!(cause instanceof IOException)) {
-            Log.error(cause);
+            //Log.error(cause);
+            Log.error("===========网路消息解析错误===========");
         }
         ctx.channel().close();
     }

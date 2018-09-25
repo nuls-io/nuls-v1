@@ -26,17 +26,24 @@
 
 package io.nuls.consensus.poc.process;
 
+import com.google.common.primitives.UnsignedBytes;
 import io.nuls.consensus.poc.constant.ConsensusStatus;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.locker.Lockers;
 import io.nuls.consensus.poc.manager.ChainManager;
-import io.nuls.consensus.poc.model.BlockRoundData;
+import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.consensus.poc.model.Chain;
+import io.nuls.consensus.poc.model.MeetingMember;
+import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
+import io.nuls.consensus.poc.util.ConsensusTool;
+import io.nuls.contract.dto.ContractResult;
+import io.nuls.contract.service.ContractService;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
@@ -64,7 +71,10 @@ public class ForkChainProcess {
     private long lastClearTime = 0L;
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+    private ContractService contractService = NulsContext.getServiceBean(ContractService.class);
     private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
+
+    private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
 
     public ForkChainProcess(ChainManager chainManager) {
         this.chainManager = chainManager;
@@ -90,6 +100,9 @@ public class ForkChainProcess {
             if (null == newChain) {
                 return false;
             }
+            //获得主链最新块，如果分叉链和主链高度一致，但是最新块hash不一致，然后排序hash来决定要不要进行特殊回滚处理
+            BlockHeader newChainBlockHeader = newChain.getBestBlock().getHeader();
+
             Iterator<ChainContainer> iterator = chainManager.getChains().iterator();
             while (iterator.hasNext()) {
                 ChainContainer forkChain = iterator.next();
@@ -98,7 +111,22 @@ public class ForkChainProcess {
                     continue;
                 }
                 long newChainHeight = forkChain.getChain().getEndBlockHeader().getHeight();
-                if (newChainHeight > newestBlockHeight || (newChainHeight == newestBlockHeight && forkChain.getChain().getEndBlockHeader().getTime() < newChain.getChain().getEndBlockHeader().getTime())) {
+                BlockHeader forkChainBlockHeader = forkChain.getChain().getEndBlockHeader();
+                byte[] rightHash = null;
+                //String forkChainBlockHash = forkChainBlockHeader.getHash().getDigestHex();
+                byte[] forkChainBlockHash = forkChainBlockHeader.getHash().getDigestBytes();
+                //如果高度相同，则排序选一个hash，作为大家都认同的块
+                if (newChainBlockHeader.getHeight() == newChainHeight){
+                    byte[] newChainBlockHash = newChainBlockHeader.getHash().getDigestBytes();
+                    rightHash = rightHash(newChainBlockHash, forkChainBlockHash);
+                }
+                if (newChainHeight > newestBlockHeight
+                        || (newChainHeight == newestBlockHeight && forkChain.getChain().getEndBlockHeader().getTime() < newChain.getChain().getEndBlockHeader().getTime())
+                        || (newChainBlockHeader.getHeight() == newChainHeight && Arrays.equals(forkChainBlockHash, rightHash))) {
+                    if (newChainBlockHeader.getHeight() == newChainHeight && Arrays.equals(forkChainBlockHash, rightHash)) {
+                        Log.info("-+-+-+-+-+-+-+-+- Change chain with the same height but different hash block -+-+-+-+-+-+-+-+-");
+                        Log.info("-+-+-+-+-+-+-+-+- height: "+ newChainHeight + ", Right hash：" + rightHash);
+                    }
                     newChain = forkChain;
                     newestBlockHeight = newChainHeight;
                 }
@@ -108,7 +136,23 @@ public class ForkChainProcess {
 
                 ChainLog.debug("discover the fork chain {} : start {} - {} , end {} - {} , exceed the master {} - {} - {}, start verify the fork chian", newChain.getChain().getId(), newChain.getChain().getStartBlockHeader().getHeight(), newChain.getChain().getStartBlockHeader().getHash(), newChain.getChain().getEndBlockHeader().getHeight(), newChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlockHeight(), chainManager.getBestBlock().getHeader().getHash());
 
-                ChainContainer resultChain = verifyNewChain(newChain);
+                //ChainContainer resultChain = verifyNewChain(newChain);
+                //Verify the new chain, combined with the current latest chain, to get the status of the branch node
+                //验证新的链，结合当前最新的链，获取到分叉节点时的状态
+                ChainContainer resultChain = chainManager.getMasterChain().getBeforeTheForkChain(newChain);
+
+                //Combined with the new bifurcated block chain, combine and verify one by one
+                //结合新分叉的块链， 逐个组合并验证
+                List<Object[]> verifyResultList = new ArrayList<>();
+                for (Block forkBlock : newChain.getChain().getBlockList()) {
+                    Result success = resultChain.verifyAndAddBlock(forkBlock, true, false);
+                    if (success.isFailed()) {
+                        resultChain = null;
+                        break;
+                    } else {
+                        verifyResultList.add((Object[]) success.getData());
+                    }
+                }
 
                 if (resultChain == null) {
                     ChainLog.debug("verify the fork chain fail {} remove it", newChain.getChain().getId());
@@ -117,7 +161,7 @@ public class ForkChainProcess {
                 } else {
                     //Verify pass, try to switch chain
                     //验证通过，尝试切换链
-                    boolean success = changeChain(resultChain, newChain);
+                    boolean success = changeChain(resultChain, newChain, verifyResultList);
                     if (success) {
                         chainManager.getChains().remove(newChain);
                     }
@@ -130,6 +174,17 @@ public class ForkChainProcess {
             Lockers.CHAIN_LOCK.unlock();
         }
         return true;
+    }
+
+    /**
+     * 当两个高度一致的块hash不同时，排序统一选取前面一个hash为正确的
+     */
+    private byte[] rightHash(byte[] hash1, byte[] hash2) {
+        Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+        if (comparator.compare(hash1, hash2) <= 0) {
+            return hash1;
+        }
+        return hash2;
     }
 
     private void printChainStatusLog() {
@@ -334,8 +389,8 @@ public class ForkChainProcess {
         //Combined with the new bifurcated block chain, combine and verify one by one
         //结合新分叉的块链， 逐个组合并验证
         for (Block forkBlock : needVerifyChain.getChain().getBlockList()) {
-            boolean success = forkChain.verifyAndAddBlock(forkBlock, true);
-            if (!success) {
+            Result success = forkChain.verifyAndAddBlock(forkBlock, true, false);
+            if (success.isFailed()) {
                 return null;
             }
         }
@@ -355,9 +410,9 @@ public class ForkChainProcess {
      * 一旦出现新链不可信的情况，则需要把之前回滚掉的区块再添加回去
      * 本方法需要和添加区块方法同步
      */
-    private boolean changeChain(ChainContainer newMasterChain, ChainContainer originalForkChain) throws NulsException, IOException {
+    private boolean changeChain(ChainContainer newMasterChain, ChainContainer originalForkChain, List<Object[]> verifyResultList) throws NulsException, IOException {
 
-        if (newMasterChain == null || originalForkChain == null) {
+        if (newMasterChain == null || originalForkChain == null || verifyResultList == null) {
             return false;
         }
 
@@ -387,21 +442,42 @@ public class ForkChainProcess {
         List<Block> successList = new ArrayList<>();
 
         Long newBestHeight = addBlockList.get(addBlockList.size() - 1).getHeader().getHeight();
+
+        Result<Block> preBlockResult = blockService.getBlock(addBlockList.get(0).getHeader().getPreHash());
+        Block preBlock = preBlockResult.getData();
+        Block newBlock;
         //Need to sort in ascending order, the default is
         //需要升序排列，默认就是
-        for (Block newBlock : addBlockList) {
+        //for (Block newBlock : addBlockList) {
+        for (int i = 0, size = addBlockList.size(); i < size; i++) {
+            newBlock = addBlockList.get(i);
+            Log.info("==========================================切换主链, 高度: {} 开始验证. + ", newBlock.getHeader().getHeight());
             newBlock.verifyWithException();
 
             Map<String, Coin> toMaps = new HashMap<>();
             Set<String> fromSet = new HashSet<>();
 
+
+            /**
+             * pierre add 智能合约相关
+             */
+            long bestHeight = preBlock.getHeader().getHeight();
+            byte[] stateRoot = ConsensusTool.getStateRoot(preBlock.getHeader());
+            preBlock = newBlock;
+            byte[] receiveStateRoot = ConsensusTool.getStateRoot(newBlock.getHeader());
+            Result<ContractResult> invokeContractResult = null;
+            ContractResult contractResult = null;
+            Map<String, Coin> contractUsedCoinMap = new HashMap<>();
+
             for (Transaction tx : newBlock.getTxs()) {
+
                 if (tx.isSystemTx()) {
                     continue;
                 }
+
                 ValidateResult result = tx.verify();
                 if (result.isSuccess()) {
-                    result = ledgerService.verifyCoinData(tx, toMaps, fromSet, newBestHeight);
+                    result = ledgerService.verifyCoinData(tx, toMaps, fromSet, bestHeight);
                     if (result.isFailed()) {
                         ErrorData errorData = (ErrorData) result.getData();
                         Log.info("failed message:" + errorData.getMsg());
@@ -414,7 +490,55 @@ public class ForkChainProcess {
                     changeSuccess = false;
                     break;
                 }
+
+                // 验证区块时发现智能合约交易就调用智能合约
+                //if(ContractUtil.isContractTransaction(tx)) {
+                //    invokeContractResult = contractService.invokeContract(tx, bestHeight, stateRoot);
+                //    contractResult = invokeContractResult.getData();
+                //    if (contractResult != null) {
+                //        Result<byte[]> handleContractResult = contractService.verifyContractResult(
+                //                tx, contractResult,
+                //                stateRoot, newBlock.getHeader().getTime(),
+                //                toMaps, contractUsedCoinMap, bestHeight);
+                //        // 更新世界状态
+                //        stateRoot = handleContractResult.getData();
+                //    }
+                //}
             }
+
+            if (!changeSuccess) {
+                break;
+            }
+
+            stateRoot = contractService.processTxs(newBlock.getTxs(), bestHeight, newBlock, stateRoot, toMaps, contractUsedCoinMap, true).getData();
+
+            // 验证世界状态根
+            if ((receiveStateRoot != null || stateRoot != null) && !Arrays.equals(receiveStateRoot, stateRoot)) {
+                Log.info("contract stateRoot incorrect. receiveStateRoot is {}, stateRoot is {}.", receiveStateRoot != null ? Hex.encode(receiveStateRoot) : receiveStateRoot, stateRoot != null ? Hex.encode(stateRoot) : stateRoot);
+                changeSuccess = false;
+                break;
+            }
+
+            //// 验证区块交易结束后移除临时余额区
+            //contractService.removeContractTempBalance();
+            //if (contractResult != null) {
+            //    // 验证世界状态根
+            //    if (!Arrays.equals(receiveStateRoot, stateRoot)) {
+            //        Log.info("contract stateRoot incorrect.");
+            //        changeSuccess = false;
+            //        break;
+            //    }
+            //}
+
+            // 验证CoinBase交易
+            Object[] objects = verifyResultList.get(i);
+            MeetingRound currentRound = (MeetingRound) objects[0];
+            MeetingMember member = (MeetingMember) objects[1];
+            if (!chainManager.getMasterChain().verifyCoinBaseTx(newBlock, currentRound, member)) {
+                changeSuccess = false;
+                break;
+            }
+
             if (!changeSuccess) {
                 break;
             }
@@ -429,6 +553,8 @@ public class ForkChainProcess {
                 Result result = blockService.saveBlock(newBlock);
                 boolean success = result.isSuccess();
                 if (success) {
+                    //更新版本协议内容
+                    nulsProtocolProcess.processProtocolUpGrade(newBlock.getHeader());
                     successList.add(newBlock);
                 } else {
                     ChainLog.debug("save block error : " + result.getMsg() + " , block height : " + newBlock.getHeader().getHeight() + " , hash: " + newBlock.getHeader().getHash());
@@ -440,6 +566,7 @@ public class ForkChainProcess {
                 changeSuccess = false;
                 break;
             }
+            //Log.info("=========================================切换主链, 高度: {} 验证结束. - ", newBlock.getHeader().getHeight());
         }
 
         ChainLog.debug("add new blocks complete, result {}, success count is {} , now service best block : {} - {}", changeSuccess, successList.size(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
@@ -455,17 +582,27 @@ public class ForkChainProcess {
         } else {
             //Fallback status
             //回退状态
+            //Log.info("=========================================切换失败，回滚区块. + ");
             Collections.reverse(successList);
             for (Block rollBlock : successList) {
-                blockService.rollbackBlock(rollBlock);
+                Result rs = blockService.rollbackBlock(rollBlock);
+                if (rs.isSuccess()) {
+                    //回滚版本更新统计数据
+                    nulsProtocolProcess.processProtocolRollback(rollBlock.getHeader());
+                }
                 RewardStatisticsProcess.rollbackBlock(rollBlock);
             }
 
             Collections.reverse(rollbackBlockList);
             for (Block addBlock : rollbackBlockList) {
-                blockService.saveBlock(addBlock);
+                Result rs = blockService.saveBlock(addBlock);
+                if (rs.isSuccess()) {
+                    //更新版本协议内容
+                    nulsProtocolProcess.processProtocolUpGrade(addBlock.getHeader());
+                }
                 RewardStatisticsProcess.addBlock(addBlock);
             }
+            //Log.info("=========================================切换失败，回滚区块. - ");
         }
         return changeSuccess;
     }
@@ -477,13 +614,21 @@ public class ForkChainProcess {
             try {
                 boolean success = blockService.rollbackBlock(rollbackBlock).isSuccess();
                 if (success) {
+                    //回滚版本更新统计数据
+                    nulsProtocolProcess.processProtocolRollback(rollbackBlock.getHeader());
+                    //Log.info("=========================================回滚区块成功, 高度: {}.", rollbackBlock.getHeader().getHeight());
                     RewardStatisticsProcess.rollbackBlock(rollbackBlock);
                     rollbackList.add(rollbackBlock);
                 } else {
                     Collections.reverse(rollbackList);
                     for (Block block : rollbackList) {
                         try {
-                            blockService.saveBlock(block);
+                            //Log.info("=========================================回滚区块失败, 高度: {}.", rollbackBlock.getHeader().getHeight());
+                            Result rs = blockService.saveBlock(block);
+                            if (rs.isSuccess()) {
+                                //更新版本协议内容
+                                nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
+                            }
                             RewardStatisticsProcess.addBlock(block);
                         } catch (Exception ex) {
                             Log.error("Rollback failed, failed to save block during recovery", ex);
@@ -497,7 +642,11 @@ public class ForkChainProcess {
                 Collections.reverse(rollbackList);
                 for (Block block : rollbackList) {
                     try {
-                        blockService.saveBlock(block);
+                        Result rs = blockService.saveBlock(block);
+                        if (rs.isSuccess()) {
+                            //更新版本协议内容
+                            nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
+                        }
                         RewardStatisticsProcess.addBlock(block);
                     } catch (Exception ex) {
                         Log.error("Rollback failed, failed to save block during recovery", ex);
@@ -587,7 +736,7 @@ public class ForkChainProcess {
             }
         }
 
-        BlockRoundData roundData = new BlockRoundData(chainManager.getBestBlock().getHeader().getExtend());
+        BlockExtendsData roundData = new BlockExtendsData(chainManager.getBestBlock().getHeader().getExtend());
 
         List<PunishLogPo> yellowList = masterChain.getYellowPunishList();
         Iterator<PunishLogPo> yit = yellowList.iterator();

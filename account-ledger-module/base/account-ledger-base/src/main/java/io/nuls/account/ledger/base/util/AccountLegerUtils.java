@@ -103,6 +103,7 @@ public class AccountLegerUtils {
         if (addresses == null || addresses.size() == 0) {
             return result;
         }
+        //获取交易中的地址
         List<byte[]> sourceAddresses = tx.getAllRelativeAddress();
         if (sourceAddresses == null || sourceAddresses.size() == 0) {
             return result;

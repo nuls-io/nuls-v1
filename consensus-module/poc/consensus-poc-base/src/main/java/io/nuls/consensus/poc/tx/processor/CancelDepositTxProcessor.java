@@ -35,8 +35,6 @@ import io.nuls.consensus.poc.storage.po.AgentPo;
 import io.nuls.consensus.poc.storage.po.DepositPo;
 import io.nuls.consensus.poc.storage.service.AgentStorageService;
 import io.nuls.consensus.poc.storage.service.DepositStorageService;
-import io.nuls.core.tools.crypto.Base58;
-import io.nuls.db.constant.DBErrorCode;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -72,7 +70,7 @@ public class CancelDepositTxProcessor implements TransactionProcessor<CancelDepo
     public Result onRollback(CancelDepositTransaction tx, Object secondaryData) {
         DepositTransaction transaction = (DepositTransaction) ledgerService.getTx(tx.getTxData().getJoinTxHash());
         if (null == transaction) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            return Result.getFailed(TransactionErrorCode.TX_NOT_EXIST);
         }
         DepositPo po = depositStorageService.get(tx.getTxData().getJoinTxHash());
         if (null == po) {
@@ -86,14 +84,14 @@ public class CancelDepositTxProcessor implements TransactionProcessor<CancelDepo
         if (b) {
             return Result.getSuccess();
         }
-        return Result.getFailed(PocConsensusErrorCode.SAVE_ERROR);
+        return Result.getFailed(TransactionErrorCode.ROLLBACK_TRANSACTION_FAILED);
     }
 
     @Override
     public Result onCommit(CancelDepositTransaction tx, Object secondaryData) {
         DepositTransaction transaction = (DepositTransaction) ledgerService.getTx(tx.getTxData().getJoinTxHash());
         if (null == transaction) {
-            return Result.getFailed(KernelErrorCode.DATA_NOT_FOUND);
+            return Result.getFailed(TransactionErrorCode.TX_NOT_EXIST);
         }
         DepositPo po = depositStorageService.get(tx.getTxData().getJoinTxHash());
         if (null == po) {
@@ -108,7 +106,7 @@ public class CancelDepositTxProcessor implements TransactionProcessor<CancelDepo
         if (b) {
             return Result.getSuccess();
         }
-        return Result.getFailed(PocConsensusErrorCode.SAVE_ERROR);
+        return Result.getFailed(TransactionErrorCode.SAVE_TX_ERROR);
     }
 
     @Override

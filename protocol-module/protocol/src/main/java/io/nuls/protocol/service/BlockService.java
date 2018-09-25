@@ -85,6 +85,16 @@ public interface BlockService {
     Result<Block> getBlock(NulsDigestData hash);
 
     /**
+     * 根据区块摘要获取区块（从存储中）
+     * Get the block (from storage) according to the block hash
+     *
+     * @param hash 区块摘要/block hash
+     * @param isNeedContractTransfer 是否需要把合约转账(从合约转出)交易添加到区块中/If necessary to add the contract transfer (from the contract) to the block
+     * @return 区块/block
+     */
+    Result<Block> getBlock(NulsDigestData hash, boolean isNeedContractTransfer);
+
+    /**
      * 根据区块高度获取区块（从存储中）
      * Get the block (from storage) according to the block height
      *
@@ -92,6 +102,16 @@ public interface BlockService {
      * @return 区块/block
      */
     Result<Block> getBlock(long height);
+
+    /**
+     * 根据区块高度获取区块（从存储中）
+     * Get the block (from storage) according to the block height
+     *
+     * @param height 区块高度/block height
+     * @param isNeedContractTransfer 是否需要把合约转账(从合约转出)交易添加到区块中/If necessary to add the contract transfer (from the contract) to the block
+     * @return 区块/block
+     */
+    Result<Block> getBlock(long height, boolean isNeedContractTransfer);
 
     /**
      * 保存区块到存储中

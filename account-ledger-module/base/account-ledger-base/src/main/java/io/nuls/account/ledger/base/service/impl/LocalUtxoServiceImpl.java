@@ -26,7 +26,6 @@ package io.nuls.account.ledger.base.service.impl;
 
 import io.nuls.account.ledger.base.service.LocalUtxoService;
 import io.nuls.account.ledger.base.util.AccountLegerUtils;
-import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.storage.service.LocalUtxoStorageService;
 import io.nuls.account.ledger.storage.service.UnconfirmedTransactionStorageService;
 import io.nuls.core.tools.array.ArraysTool;
@@ -34,16 +33,18 @@ import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
 import io.nuls.db.model.Entry;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * author Facjas
@@ -81,12 +82,6 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
         }
 
-//        for(byte[] addresses : addressesList) {
-//            if (!AddressTool.validAddress(addresses)) {
-//                return Result.getFailed(AccountLedgerErrorCode.ADDRESS_ERROR);
-//            }
-//        }
-
         CoinData coinData = tx.getCoinData();
 
         if (coinData != null) {
@@ -115,7 +110,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                         continue;
                     }
                     if (sourceTx == null) {
-                        return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
+                        return Result.getFailed(TransactionErrorCode.TX_NOT_EXIST);
                     }
                     int index = (int) new VarInt(fromIndex, 0).value;
                     fromOfFromCoin = sourceTx.getCoinData().getTo().get(index);
@@ -128,7 +123,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     continue;
                 }
 
-                byte[] toAddress = fromOfFromCoin.getOwner();
+                byte[] toAddress = fromOfFromCoin.getAddress();
 
                 boolean addressIsMatch = false;
                 for(byte[] addresses : addressesList) {
@@ -158,7 +153,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             byte[] toAddress;
             for (int i = 0, length = tos.size(); i < length; i++) {
                 to = tos.get(i);
-                toAddress = to.getOwner();
+                toAddress = to.getAddress();
 
                 boolean addressIsMatch = false;
                 for(byte[] addresses : addressesList) {
@@ -200,7 +195,8 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
             byte[] outKey;
             for (int i = 0, length = tos.size(); i < length; i++) {
                 try {
-                    if(!AccountLegerUtils.isLocalAccount(tos.get(i).getOwner())) {
+                    //if(!AccountLegerUtils.isLocalAccount(tos.get(i).getOwner()))
+                    if(!AccountLegerUtils.isLocalAccount(tos.get(i).getAddress())) {
                         continue;
                     }
                     outKey = ArraysTool.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
@@ -236,7 +232,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                         continue;
                     }
                     if (sourceTx == null) {
-                        return Result.getFailed(AccountLedgerErrorCode.SOURCE_TX_NOT_EXSITS);
+                        return Result.getFailed(TransactionErrorCode.TX_NOT_EXIST);
                     }
                     fromOfFromCoin = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value);
 
@@ -248,7 +244,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     continue;
                 }
 
-                address = fromOfFromCoin.getOwner();
+                address = fromOfFromCoin.getAddress();
                 if(!AccountLegerUtils.isLocalAccount(address)) {
                     continue;
                 }
@@ -283,7 +279,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     try {
                         byte[] outKey = ArraysTool.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
                         saveUTXO(outKey, needUnLockUtxoNew.serialize());
-                        addresses.add(to.getOwner());
+                        addresses.add(to.getAddress());
                     } catch (IOException e) {
                         throw new NulsRuntimeException(e);
                     }
@@ -308,7 +304,7 @@ public class LocalUtxoServiceImpl implements LocalUtxoService {
                     try {
                         byte[] outKey = ArraysTool.concatenate(tx.getHash().serialize(), new VarInt(i).encode());
                         saveUTXO(outKey, to.serialize());
-                        addresses.add(to.getOwner());
+                        addresses.add(to.getAddress());
                     } catch (IOException e) {
                         throw new NulsRuntimeException(e);
                     }

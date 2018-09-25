@@ -40,12 +40,12 @@ import io.nuls.protocol.base.handler.*;
 import io.nuls.protocol.base.service.DownloadServiceImpl;
 import io.nuls.protocol.message.*;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
+import io.nuls.protocol.model.tx.DataTransaction;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.module.AbstractProtocolModule;
 import io.nuls.protocol.service.BlockService;
 import io.nuls.protocol.service.DownloadService;
 
-;
 
 /**
  * @author Niels
@@ -56,6 +56,7 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
     public void init() {
         TransactionManager.putTx(CoinBaseTransaction.class, null);
         TransactionManager.putTx(TransferTransaction.class, null);
+        TransactionManager.putTx(DataTransaction.class, null);
     }
 
     @Override
@@ -63,6 +64,7 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         this.waitForDependencyRunning(MessageBusConstant.MODULE_ID_MESSAGE_BUS);
         this.waitForDependencyInited(ConsensusConstant.MODULE_ID_CONSENSUS, NetworkConstant.NETWORK_MODULE_ID);
         BlockService blockService = NulsContext.getServiceBean(BlockService.class);
+
         Block block0 = blockService.getGengsisBlock().getData();
         Block genesisBlock = NulsContext.getInstance().getGenesisBlock();
         if (null == block0) {
@@ -89,6 +91,7 @@ public class BaseProtocolsModuleBootstrap extends AbstractProtocolModule {
         } else {
             start();
         }
+
     }
 
     private void initHandlers() {

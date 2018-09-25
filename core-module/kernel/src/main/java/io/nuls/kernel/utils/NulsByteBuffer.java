@@ -38,6 +38,8 @@ import io.nuls.kernel.model.Transaction;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
+import static io.nuls.core.tools.str.StringUtils.EMPTY;
+
 /**
  * @author Niels
  */
@@ -178,7 +180,7 @@ public class NulsByteBuffer {
         try {
             byte[] bytes = this.readByLengthByte();
             if (null == bytes) {
-                return null;
+                return EMPTY;
             }
             return new String(bytes, NulsConfig.DEFAULT_ENCODING);
         } catch (UnsupportedEncodingException e) {

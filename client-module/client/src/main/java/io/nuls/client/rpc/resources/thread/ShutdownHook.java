@@ -32,6 +32,8 @@ import io.nuls.core.tools.log.Log;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 /**
  * @author: Niels Wang
@@ -41,6 +43,11 @@ public class ShutdownHook extends Thread {
     @Override
     public void run() {
         String root = this.getClass().getClassLoader().getResource("").getPath();
+        try {
+            root = URLDecoder.decode(root,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            Log.error(e);
+        }
         String version = SyncVersionRunner.getInstance().getNewestVersion();
         String newDirPath = root + "/temp/" + version;
         File tempDir = new File(newDirPath);

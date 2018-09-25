@@ -36,7 +36,10 @@ import io.nuls.consensus.poc.container.ChainContainer;
 import io.nuls.consensus.poc.context.ConsensusStatusContext;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.manager.ChainManager;
+import io.nuls.consensus.poc.model.BlockExtendsData;
 import io.nuls.consensus.poc.model.Chain;
+import io.nuls.consensus.poc.model.MeetingMember;
+import io.nuls.consensus.poc.model.MeetingRound;
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.RedPunishData;
@@ -44,10 +47,13 @@ import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
 import io.nuls.consensus.poc.util.ConsensusTool;
-import io.nuls.consensus.service.ConsensusService;
+import io.nuls.contract.dto.ContractResult;
+import io.nuls.contract.service.ContractService;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
@@ -55,8 +61,8 @@ import io.nuls.kernel.thread.manager.NulsThreadFactory;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
-import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.cache.TemporaryCacheManager;
 import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.service.BlockService;
@@ -81,10 +87,12 @@ public class BlockProcess {
 
     private LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
     private TransactionService tansactionService = NulsContext.getServiceBean(TransactionService.class);
+    private ContractService contractService = NulsContext.getServiceBean(ContractService.class);
     private TransactionCacheStorageService transactionCacheStorageService = NulsContext.getServiceBean(TransactionCacheStorageService.class);
 
     private ExecutorService signExecutor = TaskManager.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, ""));
 
+    private NulsProtocolProcess nulsProtocolProcess = NulsProtocolProcess.getInstance();
     private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
 
     public BlockProcess(ChainManager chainManager, OrphanBlockProvider orphanBlockProvider) {
@@ -116,15 +124,23 @@ public class BlockProcess {
      * @return boolean
      */
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
-
-//        long t = System.currentTimeMillis();
+        Log.info("=========================================Begin to add Block. height: " + blockContainer.getBlock().getHeader().getHeight());
 
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
         Block block = blockContainer.getBlock();
-
         // Discard future blocks
         // 丢弃掉未来时间的区块
         if (TimeService.currentTimeMillis() + PocConsensusConstant.DISCARD_FUTURE_BLOCKS_TIME < block.getHeader().getTime()) {
+            return false;
+        }
+        //验证区块版本信息，如果区块版本小于当前主网版本，丢弃区块
+        BlockExtendsData extendsData = new BlockExtendsData(block.getHeader().getExtend());
+        //收到的区块头里不包含版本信息时，默认区块版本号为1.0
+        if (extendsData.getCurrentVersion() == null && NulsVersionManager.getMainVersion() > 1) {
+            Log.info("------block currentVersion low, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
+            return false;
+        } else if (null != extendsData.getCurrentVersion() && extendsData.getCurrentVersion() < NulsVersionManager.getMainVersion()) {
+            Log.info("------block currentVersion low, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
             return false;
         }
 
@@ -136,10 +152,10 @@ public class BlockProcess {
         bifurcationUtil.validate(block.getHeader());
 
         ValidateResult<List<Transaction>> validateResult = ledgerService.verifyDoubleSpend(block);
-        if (validateResult.isFailed() && validateResult.getErrorCode().equals(LedgerErrorCode.LEDGER_DOUBLE_SPENT)) {
+        if (validateResult.isFailed() && validateResult.getErrorCode().equals(TransactionErrorCode.TRANSACTION_REPEATED)) {
             RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
             RedPunishData redPunishData = new RedPunishData();
-            byte[] packingAddress = AddressTool.getAddress(block.getHeader().getScriptSig());
+            byte[] packingAddress = AddressTool.getAddress(block.getHeader().getBlockSignature().getPublicKey());
             List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
             Agent agent = null;
             for (Agent a : agentList) {
@@ -164,27 +180,38 @@ public class BlockProcess {
             redPunishData.setEvidence(smallBlock.serialize());
             redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
             redPunishTransaction.setTxData(redPunishData);
-            CoinData coinData = ConsensusTool.getStopAgentCoinData(redPunishData.getAddress(), PocConsensusConstant.RED_PUNISH_LOCK_TIME);
+            redPunishTransaction.setTime(smallBlock.getHeader().getTime());
+            CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, redPunishTransaction.getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME);
             redPunishTransaction.setCoinData(coinData);
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
-            NulsContext.getServiceBean(ConsensusService.class).newTx(redPunishTransaction);
+            TxMemoryPool.getInstance().add(redPunishTransaction, false);
             return false;
         }
 
         // Verify that the block round information is correct, if correct, join the main chain
         // 验证区块轮次信息是否正确、如果正确，则加入主链
-        boolean verifyAndAddBlockResult = chainManager.getMasterChain().verifyAndAddBlock(block, isDownload);
-        if (verifyAndAddBlockResult) {
+        Result verifyAndAddBlockResult = chainManager.getMasterChain().verifyAndAddBlock(block, isDownload, false);
+        if (verifyAndAddBlockResult.isSuccess()) {
             boolean success = true;
             try {
                 do {
                     // Verify that the block transaction is valid, save the block if the verification passes, and discard the block if it fails
                     // 验证区块交易是否合法，如果验证通过则保存区块，如果失败则丢弃该块
-
                     long time = System.currentTimeMillis();
                     List<Future<Boolean>> futures = new ArrayList<>();
 
-                    for (Transaction tx : block.getTxs()) {
+                    List<Transaction> txs = block.getTxs();
+
+                    //首先验证区块里的所有交易是否都属于当前版本的交易，如果有不包含的交易类型，丢弃该区块
+                    Set<Integer> txTypeSet = NulsVersionManager.getMainProtocolContainer().getTxMap().keySet();
+                    for (Transaction tx : txs) {
+                        if (!txTypeSet.contains(tx.getType())) {
+                            Log.info("--------------------- block tx discard, current protocol version:" + NulsVersionManager.getMainProtocolContainer().getVersion() + ",  tx.type:" + tx.getType());
+                            return false;
+                        }
+                    }
+
+                    for (Transaction tx : txs) {
                         Future<Boolean> res = signExecutor.submit(new Callable<Boolean>() {
                             @Override
                             public Boolean call() throws Exception {
@@ -198,21 +225,74 @@ public class BlockProcess {
                     Map<String, Coin> toMaps = new HashMap<>();
                     Set<String> fromSet = new HashSet<>();
 
-                    for (Transaction tx : block.getTxs()) {
+                    /**
+                     * pierre add 智能合约相关
+                     */
+                    BlockHeader bestBlockHeader = NulsContext.getInstance().getBestBlock().getHeader();
+                    long bestHeight = bestBlockHeader.getHeight();
+                    byte[] receiveStateRoot = ConsensusTool.getStateRoot(block.getHeader());
+                    byte[] stateRoot = ConsensusTool.getStateRoot(bestBlockHeader);
+                    Result<ContractResult> invokeContractResult = null;
+                    ContractResult contractResult = null;
+                    Map<String, Coin> contractUsedCoinMap = new HashMap<>();
+
+                    for (Transaction tx : txs) {
+
                         if (tx.isSystemTx()) {
                             continue;
                         }
+
                         ValidateResult result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
                         if (result.isFailed()) {
                             Log.info("failed message:" + result.getMsg());
                             success = false;
                             break;
                         }
+
                     }
 
                     if (!success) {
                         break;
                     }
+
+                    Object[] objects = (Object[]) verifyAndAddBlockResult.getData();
+                    MeetingRound currentRound = (MeetingRound) objects[0];
+                    MeetingMember member = (MeetingMember) objects[1];
+
+                    byte[] processStateRoot = stateRoot;
+                    // 判断区块验证的节点是否当前区块打包的节点
+                    //boolean isCurrentNodePackage = false;
+                    //Account localPacker = currentRound.getLocalPacker();
+                    //if(localPacker != null) {
+                    //    Address localPackerAddress = localPacker.getAddress();
+                    //    if(localPackerAddress != null) {
+                    //        isCurrentNodePackage = (Arrays.equals(localPackerAddress.getAddressBytes(), block.getHeader().getPackingAddress()));
+                    //    }
+                    //}
+                    //if(isCurrentNodePackage) {
+                    //    Log.info("此验证节点是这个区块的打包节点，当前验证的区块高度: {}", blockContainer.getBlock().getHeader().getHeight());
+                    //    processStateRoot = receiveStateRoot;
+                    //}
+
+                    stateRoot = contractService.processTxs(txs, bestHeight, block, processStateRoot, toMaps, contractUsedCoinMap, false).getData();
+
+                    // 验证世界状态根
+                    if ((receiveStateRoot != null || stateRoot != null) && !Arrays.equals(receiveStateRoot, stateRoot)) {
+                        Log.info("contract stateRoot incorrect. receiveStateRoot is {}, stateRoot is {}.", receiveStateRoot != null ? Hex.encode(receiveStateRoot) : receiveStateRoot, stateRoot != null ? Hex.encode(stateRoot) : stateRoot);
+                        success = false;
+                        break;
+                    }
+
+                    // 验证CoinBase交易
+                    if (!chainManager.getMasterChain().verifyCoinBaseTx(block, currentRound, member)) {
+                        success = false;
+                        break;
+                    }
+
+                    if (!success) {
+                        break;
+                    }
+
                     ValidateResult validateResult1 = tansactionService.conflictDetect(block.getTxs());
                     if (validateResult1.isFailed()) {
                         success = false;
@@ -239,6 +319,8 @@ public class BlockProcess {
                     if (!success) {
                         Log.warn("save block fail : reason : " + result.getMsg() + ", block height : " + block.getHeader().getHeight() + ", hash : " + block.getHeader().getHash());
                     } else {
+                        //更新版本协议内容
+                        nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
                         RewardStatisticsProcess.addBlock(block);
                         BlockLog.debug("save block height : " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                     }
@@ -256,6 +338,7 @@ public class BlockProcess {
                 // 转发区块
                 forwardingBlock(blockContainer);
 //                Log.info("转发区块耗时：" + (System.currentTimeMillis() - t));
+
                 return true;
             } else {
                 chainManager.getMasterChain().rollback(block);
@@ -269,7 +352,6 @@ public class BlockProcess {
             if (isDownload && !ConsensusStatusContext.isRunning()) {
                 return false;
             }
-
             boolean hasFoundForkChain = checkAndAddForkChain(block);
             if (!hasFoundForkChain) {
 

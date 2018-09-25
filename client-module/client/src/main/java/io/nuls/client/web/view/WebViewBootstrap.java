@@ -50,7 +50,8 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
 
     private static final Logger log = LoggerFactory.getLogger(WebViewBootstrap.class);
 
-    private static final String APP_ICON = "/image/tray.png";
+    private final static String TRAY_ICON = "/image/tray.png";
+    private static final String APP_ICON = "/image/logo.png";
     private static final String APP_TITLE = "NULS";
 
     private boolean hideTip;
@@ -88,7 +89,7 @@ public class WebViewBootstrap extends Application implements Runnable, ActionLis
         stage.setResizable(false);
 
         //设置程序图标
-        stage.getIcons().add(new Image(getClass().getResourceAsStream(APP_ICON)));
+        stage.getIcons().add(new Image(getClass().getResourceAsStream(TRAY_ICON)));
         if (isMac()) {
             java.awt.Image dockIcon = new ImageIcon(getClass().getResource(APP_ICON)).getImage();
             try {

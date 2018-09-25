@@ -82,9 +82,7 @@ public class TransferProcessor implements CommandProcessor {
                 result = false;
                 break;
             }
-            if (!AddressTool.validAddress(args[1]) || !AddressTool.validAddress(args[2])) {
-                return false;
-            }
+
             if (!StringUtils.isNuls(args[3])) {
                 result = false;
                 break;

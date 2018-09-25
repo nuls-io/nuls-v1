@@ -23,6 +23,7 @@
  */
 package io.nuls.protocol.model.validator;
 
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.CoinData;
@@ -40,19 +41,24 @@ import io.nuls.protocol.constant.ProtocolConstant;
 public class TxFeeValidator implements NulsDataValidator<Transaction> {
     @Override
     public ValidateResult validate(Transaction tx) {
+        int txType = tx.getType();
         if (tx.isSystemTx()) {
             return ValidateResult.getSuccessResult();
         }
         CoinData coinData = tx.getCoinData();
         if (null == coinData) {
-            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.FEE_NOT_RIGHT);
+            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.COINDATA_NOT_FOUND);
         }
         Na realFee = tx.getFee();
         Na fee = null;
-        if(tx.getType() == ProtocolConstant.TX_TYPE_TRANSFER){
+        if (txType == ProtocolConstant.TX_TYPE_TRANSFER
+                || txType == ProtocolConstant.TX_TYPE_DATA
+                || txType == ContractConstant.TX_TYPE_CREATE_CONTRACT
+                || txType == ContractConstant.TX_TYPE_CALL_CONTRACT
+                || txType == ContractConstant.TX_TYPE_DELETE_CONTRACT) {
             fee = TransactionFeeCalculator.getTransferFee(tx.size());
-        }else{
-            fee =TransactionFeeCalculator.getMaxFee(tx.size());
+        } else {
+            fee = TransactionFeeCalculator.getMaxFee(tx.size());
         }
         if (realFee.isGreaterOrEquals(fee)) {
             return ValidateResult.getSuccessResult();

@@ -47,6 +47,11 @@ public class CoinDataResult {
 
     private Na fee;
 
+    /**
+     * 判断交易中UTXO的签名类型（只包含老交易为00000001,只包含新交易为00000010,都包含为00000011）
+     * */
+    private byte signType;
+
     public List<Coin> getCoinList() {
         return coinList;
     }
@@ -77,5 +82,13 @@ public class CoinDataResult {
 
     public void setChange(Coin change) {
         this.change = change;
+    }
+
+    public int getSignType() {
+        return signType;
+    }
+
+    public void setSignType(byte signType) {
+        this.signType = signType;
     }
 }
