@@ -240,4 +240,10 @@ public class ContractUtil {
         return result;
     }
 
+    public static boolean checkPrice(long price) {
+        if(price < ContractConstant.CONTRACT_MINIMUM_PRICE) {
+            return false;
+        }
+        return true;
+    }
 }
