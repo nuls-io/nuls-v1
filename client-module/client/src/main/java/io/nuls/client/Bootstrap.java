@@ -50,7 +50,9 @@ import io.nuls.network.model.Node;
 import io.nuls.network.service.NetworkService;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.*;
 
@@ -75,15 +77,16 @@ public class Bootstrap {
         }
     }
 
-    private static void copyWebFiles() {
+    private static void copyWebFiles() throws UnsupportedEncodingException {
         String path = Bootstrap.class.getClassLoader().getResource("").getPath() + "/temp/" + NulsConfig.VERSION + "/conf/client-web/";
+        path = URLDecoder.decode(path, "UTF-8");
         File source = new File(path);
         if (!source.exists()) {
             Log.info("source not exists:" + path);
             return;
         }
         Log.info("do the files copy!");
-        File target = new File(Bootstrap.class.getClassLoader().getResource("").getPath() + "/conf/client-web/");
+        File target = new File(URLDecoder.decode(Bootstrap.class.getClassLoader().getResource("").getPath(), "UTF-8") + "/conf/client-web/");
         FileUtil.deleteFolder(target);
         FileUtil.copyFolder(source, target);
     }
@@ -115,31 +118,6 @@ public class Bootstrap {
             TaskManager.asynExecuteRunnable(new WebViewBootstrap());
         }
 
-        /** -----------------------  test Charlie ----------------------- */
-     /* w:while (true) {
-            Thread.sleep(500);
-            for (BaseModuleBootstrap bmb : ModuleManager.getInstance().getModuleList()) {
-                if(bmb.getStatus() != ModuleStatusEnum.RUNNING){
-                    continue w;
-                }
-            }
-            break;
-
-        }
-        if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("LINUX") != -1) {
-            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-            NulsContext.getInstance().exit(1);
-        } else {
-            NulsContext.mastUpGrade = true;
-            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-            Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-
-        }*/
-        /** -----------------------  test  ----------------------- */
         int i = 0;
         Map<NulsDigestData, List<Node>> map = new HashMap<>();
         NulsContext context = NulsContext.getInstance();

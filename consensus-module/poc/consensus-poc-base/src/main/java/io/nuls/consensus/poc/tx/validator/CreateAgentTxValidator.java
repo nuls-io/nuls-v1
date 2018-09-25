@@ -25,6 +25,7 @@
 
 package io.nuls.consensus.poc.tx.validator;
 
+import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PocConsensusProtocolConstant;
@@ -66,19 +67,20 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
         if (null == agent) {
             return ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.AGENT_NOT_EXIST);
         }
-//        if (!AddressTool.validAddress(agent.getAgentAddress()) || !AddressTool.validAddress(agent.getRewardAddress()) || !AddressTool.validAddress(agent.getPackingAddress())) {
-//            return ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
-//        }
+        if (!AddressTool.validNormalAddress(agent.getPackingAddress())) {
+            return ValidateResult.getFailedResult(getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
+        }
         if (Arrays.equals(agent.getAgentAddress(), agent.getPackingAddress())) {
             return ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.AGENTADDR_AND_PACKING_SAME);
         }
-        if(Arrays.equals(agent.getRewardAddress(), agent.getPackingAddress())){
+        if (Arrays.equals(agent.getRewardAddress(), agent.getPackingAddress())) {
             return ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.REWARDADDR_PACKING_SAME);
         }
 
         if (tx.getTime() <= 0) {
             return ValidateResult.getFailedResult(getClass().getName(), KernelErrorCode.DATA_ERROR);
         }
+
         double commissionRate = agent.getCommissionRate();
         if (commissionRate < PocConsensusProtocolConstant.MIN_COMMISSION_RATE || commissionRate > PocConsensusProtocolConstant.MAX_COMMISSION_RATE) {
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), PocConsensusErrorCode.COMMISSION_RATE_OUT_OF_RANGE);
@@ -96,13 +98,13 @@ public class CreateAgentTxValidator extends BaseConsensusProtocolValidator<Creat
         }
         TransactionSignature sig = new TransactionSignature();
         try {
-            sig.parse(tx.getTransactionSignature(),0);
+            sig.parse(tx.getTransactionSignature(), 0);
         } catch (NulsException e) {
             Log.error(e);
             return ValidateResult.getFailedResult(this.getClass().getName(), e.getErrorCode());
         }
         try {
-            if (!SignatureUtil.containsAddress(tx,agent.getAgentAddress())) {
+            if (!SignatureUtil.containsAddress(tx, agent.getAgentAddress())) {
                 ValidateResult result = ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.SIGNATURE_ERROR);
                 result.setLevel(SeverityLevelEnum.FLAGRANT_FOUL);
                 return result;

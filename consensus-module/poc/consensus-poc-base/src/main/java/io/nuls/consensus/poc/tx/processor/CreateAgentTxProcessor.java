@@ -99,27 +99,26 @@ public class CreateAgentTxProcessor implements TransactionProcessor<CreateAgentT
         Set<String> addressHexSet = new HashSet<>();
 
         for (Transaction transaction : txList) {
-            switch (transaction.getType()) {
-                case ConsensusConstant.TX_TYPE_REGISTER_AGENT:
-                    CreateAgentTransaction createAgentTransaction = (CreateAgentTransaction) transaction;
+            if (transaction.getType() == ConsensusConstant.TX_TYPE_REGISTER_AGENT) {
+                CreateAgentTransaction createAgentTransaction = (CreateAgentTransaction) transaction;
 
-                    Agent agent = createAgentTransaction.getTxData();
+                Agent agent = createAgentTransaction.getTxData();
 
-                    String agentAddressHex = Hex.encode(agent.getAgentAddress());
-                    String packAddressHex = Hex.encode(agent.getPackingAddress());
+                String agentAddressHex = Hex.encode(agent.getAgentAddress());
+                String packAddressHex = Hex.encode(agent.getPackingAddress());
 
-                    if (!addressHexSet.add(agentAddressHex) || !addressHexSet.add(packAddressHex)) {
-                        return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.AGENT_EXIST).setData(transaction);
-                    }
-                    break;
-                case ConsensusConstant.TX_TYPE_RED_PUNISH:
-                    RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
-                    RedPunishData redPunishData = redPunishTransaction.getTxData();
-                    String addressHex = Hex.encode(redPunishData.getAddress());
-                    if (!addressHexSet.add(addressHex)) {
-                        return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT).setData(transaction);
-                    }
-                    break;
+                if (!addressHexSet.add(agentAddressHex) || !addressHexSet.add(packAddressHex)) {
+                    return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.AGENT_EXIST).setData(transaction);
+                }
+                break;
+            } else if (transaction.getType() == ConsensusConstant.TX_TYPE_RED_PUNISH) {
+                RedPunishTransaction redPunishTransaction = (RedPunishTransaction) transaction;
+                RedPunishData redPunishData = redPunishTransaction.getTxData();
+                String addressHex = Hex.encode(redPunishData.getAddress());
+                if (!addressHexSet.add(addressHex)) {
+                    return (ValidateResult) ValidateResult.getFailedResult(getClass().getName(), PocConsensusErrorCode.LACK_OF_CREDIT).setData(transaction);
+                }
+                break;
             }
         }
 

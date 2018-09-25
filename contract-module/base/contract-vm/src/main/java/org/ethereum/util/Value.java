@@ -57,7 +57,9 @@ public class Value {
     public Value(Object obj) {
 
         this.decoded = true;
-        if (obj == null) return;
+        if (obj == null) {
+            return;
+        }
 
         if (obj instanceof Value) {
             this.value = ((Value) obj).asObj();
@@ -171,14 +173,16 @@ public class Value {
     }
 
     public byte[] encode() {
-        if (rlp == null)
+        if (rlp == null) {
             rlp = RLP.encode(value);
+        }
         return rlp;
     }
 
     public byte[] hash() {
-        if (sha3 == null)
+        if (sha3 == null) {
             sha3 = HashUtil.sha3(encode());
+        }
         return sha3;
     }
 
@@ -228,7 +232,9 @@ public class Value {
         }
 
         for (byte aData : data) {
-            if (aData > 32 && aData < 126) ++readableChars;
+            if (aData > 32 && aData < 126) {
+                ++readableChars;
+            }
         }
 
         return (double) readableChars / (double) data.length > 0.55;
@@ -244,8 +250,9 @@ public class Value {
         for (byte aData : data) {
 
             if ((aData >= 48 && aData <= 57)
-                    || (aData >= 97 && aData <= 102))
+                    || (aData >= 97 && aData <= 102)) {
                 ++hexChars;
+            }
         }
 
         return (double) hexChars / (double) data.length > 0.9;
@@ -263,10 +270,18 @@ public class Value {
 
     public boolean isEmpty() {
         decode();
-        if (isNull()) return true;
-        if (isBytes() && asBytes().length == 0) return true;
-        if (isList() && asList().isEmpty()) return true;
-        if (isString() && asString().isEmpty()) return true;
+        if (isNull()) {
+            return true;
+        }
+        if (isBytes() && asBytes().length == 0) {
+            return true;
+        }
+        if (isList() && asList().isEmpty()) {
+            return true;
+        }
+        if (isString() && asString().isEmpty()) {
+            return true;
+        }
 
         return false;
     }
@@ -283,6 +298,7 @@ public class Value {
         return 0;
     }
 
+    @Override
     public String toString() {
 
         decode();
@@ -320,8 +336,9 @@ public class Value {
                 } else {
                     stringBuilder.append(val.toString());
                 }
-                if (i < list.length - 1)
+                if (i < list.length - 1) {
                     stringBuilder.append(", ");
+                }
             }
             stringBuilder.append("] ");
 

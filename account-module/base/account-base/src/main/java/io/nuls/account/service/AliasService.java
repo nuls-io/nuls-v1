@@ -31,6 +31,7 @@ import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.Account;
 import io.nuls.account.model.Alias;
+import io.nuls.account.model.MultiSigAccount;
 import io.nuls.account.storage.po.AccountPo;
 import io.nuls.account.storage.po.AliasPo;
 import io.nuls.account.storage.service.AccountStorageService;
@@ -39,6 +40,7 @@ import io.nuls.account.tx.AliasTransaction;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
@@ -355,7 +357,10 @@ public class AliasService {
             byte[] addressBytes = AddressTool.getAddress(addr);
             //如果txdata为空则表示当前请求为多签发起者调用，需要创建交易
             if(txdata == null || txdata.trim().length() == 0){
-                if(isMutilAliasUsable(addressBytes,aliasName)){
+                if (!StringUtils.validAlias(aliasName)) {
+                    return Result.getFailed(AccountErrorCode.ALIAS_FORMAT_WRONG);
+                }
+                if (!isAliasUsable(aliasName)) {
                     return Result.getFailed(AccountErrorCode.ALIAS_EXIST);
                 }
                 //创建一笔设置别名的交易
@@ -407,6 +412,120 @@ public class AliasService {
         } catch (Exception e) {
             Log.error(e);
             return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+
+    /**
+     * 多签账户设置别名
+     * Initiate a transaction to set alias.
+     *
+     * @param addr      Address of account
+     * @param signAddr      Address of account
+     * @param password  password of account
+     * @param aliasName the alias to set
+     * @return Result
+     */
+    public Result<String> setMutilAlias(String addr,String signAddr, String aliasName, String password) {
+        //签名账户
+        Account account = accountService.getAccount(signAddr).getData();
+        if (null == account) {
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        if (account.isEncrypted() && account.isLocked()) {
+            if (!account.validatePassword(password)) {
+                return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
+        }
+        try {
+            byte[] addressBytes = AddressTool.getAddress(addr);
+            /*if(!isMutilAliasUsable(addressBytes,aliasName)){
+                return Result.getFailed(AccountErrorCode.ALIAS_EXIST);
+            }*/
+            Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(addr);
+            MultiSigAccount multiSigAccount = sigAccountResult.getData();
+            Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
+            if(redeemScript == null){
+                return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            AliasTransaction tx = new AliasTransaction();
+            TransactionSignature transactionSignature = new TransactionSignature();
+            List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+            List<Script> scripts = new ArrayList<>();
+            tx.setTime(TimeService.currentTimeMillis());
+            Alias alias = new Alias(addressBytes, aliasName);
+            tx.setTxData(alias);
+            //交易签名的长度为m*单个签名长度+赎回脚本长度
+            int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM())*72;
+            CoinDataResult coinDataResult = accountLedgerService.getMutilCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size()+scriptSignLenth , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            if (!coinDataResult.isEnough()) {
+                return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
+            }
+            CoinData coinData = new CoinData();
+            coinData.setFrom(coinDataResult.getCoinList());
+            Coin change = coinDataResult.getChange();
+            if (null != change) {
+                //创建toList
+                List<Coin> toList = new ArrayList<>();
+                toList.add(change);
+                coinData.setTo(toList);
+            }
+            Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
+            coinData.addTo(coin);
+            tx.setCoinData(coinData);
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            //将赎回脚本先存储在签名脚本中
+            scripts.add(redeemScript);
+            transactionSignature.setScripts(scripts);
+            //使用签名账户对交易进行签名
+            P2PHKSignature p2PHKSignature = new P2PHKSignature();
+            ECKey eckey = account.getEcKey(password);
+            p2PHKSignature.setPublicKey(eckey.getPubKey());
+            //用当前交易的hash和账户的私钥账户
+            p2PHKSignature.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(),eckey));
+            p2PHKSignatures.add(p2PHKSignature);
+            Result result = txMutilProcessing(tx,p2PHKSignatures,scripts,transactionSignature,addressBytes);
+            return  result;
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+
+    /**
+     * A transfers NULS to B   多签交易
+     *
+     * @param signAddr 签名地址
+     * @param password password of A
+     * @param txdata   需要签名的数据
+     * @return Result
+     */
+    public Result signMultiAliasTransaction(String signAddr,String password,String txdata){
+        try {
+            Result<Account> accountResult = accountService.getAccount(signAddr);
+            if (accountResult.isFailed()) {
+                return accountResult;
+            }
+            Account account = accountResult.getData();
+            if (account.isEncrypted() && account.isLocked()) {
+                AssertUtil.canNotEmpty(password, "the password can not be empty");
+                if (!account.validatePassword(password)) {
+                    return Result.getFailed(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            }
+            AliasTransaction tx = new AliasTransaction();
+            TransactionSignature transactionSignature = new TransactionSignature();
+            byte[] txByte = Hex.decode(txdata);
+            tx.parse(new NulsByteBuffer(txByte));
+            transactionSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+            return accountLedgerService.txMultiProcess(tx,transactionSignature,account,password);
+        }catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }catch (Exception e){
+            Log.error(e);
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
     }
 

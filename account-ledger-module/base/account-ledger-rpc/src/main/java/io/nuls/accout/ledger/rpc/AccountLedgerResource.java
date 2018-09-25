@@ -68,6 +68,7 @@ import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.model.tx.TransferTransaction;
+import io.nuls.protocol.model.validator.TxMaxSizeValidator;
 import io.swagger.annotations.*;
 import org.spongycastle.util.Arrays;
 
@@ -242,7 +243,7 @@ public class AccountLedgerResource {
     })
     public RpcClientResult multipleAddressTransfer(@ApiParam(name = "form", value = "创建多账户转账交易", required = true)
                                                            MulitpleTransactionForm form) {
-        if(NulsContext.MAIN_NET_VERSION  <=1){
+        if (NulsContext.MAIN_NET_VERSION <= 1) {
             return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
         }
         List<MultipleAddressTransferModel> fromModelList = new ArrayList<>();
@@ -262,7 +263,7 @@ public class AccountLedgerResource {
         if (!validTxRemark(form.getRemark())) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        Long toTotal=0L;
+        Long toTotal = 0L;
         for (MultipleTxToDto to : form.getOutputs()) {
             MultipleAddressTransferModel model = new MultipleAddressTransferModel();
             if (!AddressTool.validAddress(to.getToAddress())) {
@@ -271,12 +272,12 @@ public class AccountLedgerResource {
             model.setAddress(AddressTool.getAddress(to.getToAddress()));
             model.setAmount(to.getAmount());
             toModelList.add(model);
-            toTotal+= to.getAmount();
+            toTotal += to.getAmount();
         }
-        if (toTotal <0) {
+        if (toTotal < 0) {
             return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        Result result = accountLedgerService.multipleAddressTransfer(fromModelList, toModelList, form.getPassword(),Na.valueOf(toTotal), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+        Result result = accountLedgerService.multipleAddressTransfer(fromModelList, toModelList, form.getPassword(), Na.valueOf(toTotal), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("value", (String) result.getData());
@@ -360,31 +361,35 @@ public class AccountLedgerResource {
         Na value = Na.valueOf(form.getAmount());
         Result result = accountLedgerService.transferFee(AddressTool.getAddress(form.getAddress()),
                 AddressTool.getAddress(form.getToAddress()), value, form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
-        Transaction tx = new TransferTransaction();
-        try {
-            tx.setRemark(form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            Log.error(e);
-        }
-        tx.setTime(TimeService.currentTimeMillis());
-        CoinData coinData = new CoinData();
-        Coin toCoin = new Coin(AddressTool.getAddress(form.getToAddress()), value);
-        coinData.getTo().add(toCoin);
-        tx.setCoinData(coinData);
-        Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
-                TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
-        Map<String, Long> map = new HashMap<>();
         Long fee = null;
         Long maxAmount = null;
+        Map<String, Long> map = new HashMap<>();
         if (result.isSuccess()) {
             fee = ((Na) result.getData()).getValue();
+            //如果手续费大于理论最大值，则说明交易过大，需要计算最大交易金额
+            long feeMax = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES.multiply(TxMaxSizeValidator.MAX_TX_BYTES).getValue();
+            if(fee > feeMax){
+                Transaction tx = new TransferTransaction();
+                try {
+                    tx.setRemark(form.getRemark().getBytes(NulsConfig.DEFAULT_ENCODING));
+                } catch (UnsupportedEncodingException e) {
+                    Log.error(e);
+                }
+                tx.setTime(TimeService.currentTimeMillis());
+                CoinData coinData = new CoinData();
+                Coin toCoin = new Coin(AddressTool.getAddress(form.getToAddress()), value);
+                coinData.getTo().add(toCoin);
+                tx.setCoinData(coinData);
+                Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
+                        TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+                if (rs.isSuccess()) {
+                    maxAmount = ((Na) rs.getData()).getValue();
+                }
+            }
+            map.put("fee", fee);
+            map.put("maxAmount", maxAmount);
+            result.setData(map);
         }
-        if (rs.isSuccess()) {
-            maxAmount = ((Na) rs.getData()).getValue();
-        }
-        map.put("fee", fee);
-        map.put("maxAmount", maxAmount);
-        result.setData(map);
         return result.toRpcClientResult();
     }
 
@@ -1081,67 +1086,89 @@ public class AccountLedgerResource {
         txDto.setValue(value.getValue());
     }
 
-
     @POST
-    @Path("/transferP2SH")
+    @Path("/multiAccount/createMultiTransfer")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "多签转账", notes = "result.data: resultJson 返回转账结果")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
     })
-    public RpcClientResult transferP2sh(@ApiParam(name = "form", value = "转账", required = true) MultiSignForm form) {
-        if(NulsContext.MAIN_NET_VERSION  <=1){
+    public RpcClientResult createTransfer(@ApiParam(name = "form", value = "转账", required = true) CreateP2shTransactionForm form) {
+        if (NulsContext.MAIN_NET_VERSION <= 1) {
             return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
         }
         List<MultipleAddressTransferModel> toModelList = new ArrayList<>();
         if (form == null) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
+        if (!AddressTool.validAddress(form.getAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
         if (!AddressTool.validAddress(form.getSignAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        Na value = Na.valueOf(form.getAmount());
-        Result result = null;
-        if(form.getTxdata() == null || form.getTxdata().trim().length() == 0) {
-            if (!AddressTool.validAddress(form.getAddress())) {
-                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
-            }
-            if (form.getOutputs() == null || form.getOutputs() == null) {
-                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
-            }
-            if (form.getAmount() <= 0) {
-                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-            }
-            if (form.getM() <= 0) {
-                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-            }
-            if (form.getPubkeys() == null || form.getPubkeys().size() == 0 || form.getPubkeys().size() < form.getM()) {
-                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-            }
-
-            for (MultipleTxToDto to : form.getOutputs()) {
-                MultipleAddressTransferModel model = new MultipleAddressTransferModel();
-                if (!AddressTool.validAddress(to.getToAddress())) {
-                    return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
-                }
-                model.setAddress(AddressTool.getAddress(to.getToAddress()));
-                model.setAmount(to.getAmount());
-                toModelList.add(model);
-            }
-            result = accountLedgerService.transferP2SH(AddressTool.getAddress(form.getAddress()),
-                    AddressTool.getAddress(form.getSignAddress()),
-                    toModelList,value,form.getPassword(),form.getRemark(),
-                    TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES,form.getPubkeys(),form.getM(),null
-            );
-        }else{
-            result = accountLedgerService.transferP2SH(null,
-                    AddressTool.getAddress(form.getSignAddress()),
-                    toModelList,value,form.getPassword(),form.getRemark(),
-                    TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES,form.getPubkeys(),form.getM(),form.getTxdata()
-            );
+        if (form.getOutputs() == null || form.getOutputs().size() == 0) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
+        for (MultipleTxToDto to : form.getOutputs()) {
+            MultipleAddressTransferModel model = new MultipleAddressTransferModel();
+            if (!AddressTool.validAddress(to.getToAddress())) {
+                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+            }
+            model.setAddress(AddressTool.getAddress(to.getToAddress()));
+            model.setAmount(to.getAmount());
+            toModelList.add(model);
+        }
+        Result result = accountLedgerService.createP2shTransfer(form.getAddress(), form.getSignAddress(), toModelList, form.getPassword(), form.getRemark());
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("txData", (String) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
+
+    @POST
+    @Path("/multiAccount/signMultiTransaction")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "多签交易签名", notes = "result.data: resultJson 返回转账结果")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult signMultiTransaction(@ApiParam(name = "form", value = "转账", required = true) SignMultiTransactionForm form) {
+        if (NulsContext.MAIN_NET_VERSION <= 1) {
+            return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
+        }
+        if (form == null) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (!AddressTool.validAddress(form.getSignAddress())) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        if (form.getTxdata() == null || form.getTxdata().length() == 0) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
+        }
+        Result result = accountLedgerService.signMultiTransaction(form.getSignAddress(), form.getPassword(), form.getTxdata());
+        if (result.isSuccess()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("txData", (String) result.getData());
+            result.setData(map);
+        }
+        return result.toRpcClientResult();
+    }
+
+    @POST
+    @Path("/multiAccount/getSignType")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "验证交易签名类型", notes = "result.data: resultJson 返回签名结果")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
+    })
+    public RpcClientResult getSignatureType(@ApiParam(name = "utxoList", value = "转账", required = true) List<String> utxoList) {
+        if (utxoList == null || utxoList.size() == 0) {
+            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+        }
+        Result result = accountLedgerService.getSignatureType(utxoList);
+        if (result.isSuccess()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("signType", (String) result.getData());
             result.setData(map);
         }
         return result.toRpcClientResult();

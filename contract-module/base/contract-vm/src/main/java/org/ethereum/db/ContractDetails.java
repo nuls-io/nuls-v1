@@ -69,6 +69,7 @@ public interface ContractDetails {
 
     ContractDetails clone();
 
+    @Override
     String toString();
 
     void syncStorage();

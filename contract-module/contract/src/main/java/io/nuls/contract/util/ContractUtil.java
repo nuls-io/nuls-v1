@@ -37,6 +37,7 @@ import io.nuls.kernel.utils.VarInt;
 import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -104,7 +105,7 @@ public class ContractUtil {
         return twoDimensionalArray(args, null);
     }
 
-    private static String valueOf(Object obj) {
+    public static String valueOf(Object obj) {
         return (obj == null) ? null : obj.toString();
     }
 
@@ -226,6 +227,17 @@ public class ContractUtil {
     public static boolean isTransferMethod(String method) {
         return (ContractConstant.NRC20_METHOD_TRANSFER.equals(method)
                 || ContractConstant.NRC20_METHOD_TRANSFER_FROM.equals(method));
+    }
+
+    public static String argToString(String[][] args) {
+        if(args == null) {
+            return "";
+        }
+        String result = "";
+        for(String[] a : args) {
+            result += Arrays.toString(a) + "| ";
+        }
+        return result;
     }
 
 }

@@ -379,7 +379,9 @@ public class QuotientFilter implements Iterable<Long> {
     }
 
     public synchronized void insert(long hash) {
-        if (maybeContainsXTimes(hash, MAX_DUPLICATES)) return;
+        if (maybeContainsXTimes(hash, MAX_DUPLICATES)) {
+            return;
+        }
         if (entries >= MAX_INSERTIONS | overflowed) {
             //Can't safely process an after overflow
             //Only a buggy program would attempt it
@@ -576,7 +578,9 @@ public class QuotientFilter implements Iterable<Long> {
     }
 
     public synchronized void remove(long hash) {
-        if (maybeContainsXTimes(hash, MAX_DUPLICATES)) return;
+        if (maybeContainsXTimes(hash, MAX_DUPLICATES)) {
+            return;
+        }
         //Can't safely process a remove after overflow
         //Only a buggy program would attempt it
         if (overflowed) {
@@ -756,6 +760,7 @@ public class QuotientFilter implements Iterable<Long> {
 
         }
 
+        @Override
         public long nextPrimitive() {
             while (hasNext()) {
                 long elt = getElement(index);

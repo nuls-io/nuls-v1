@@ -27,7 +27,10 @@
 package io.nuls.kernel.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.script.Script;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.utils.NulsOutputStreamBuffer;
 import io.nuls.kernel.utils.SerializeUtils;
@@ -149,6 +152,10 @@ public class CoinData extends BaseNulsData {
         if (null == to) {
             to = new ArrayList<>();
         }
+        if(coin.getOwner().length == 23 && coin.getOwner()[2] == NulsContext.P2SH_ADDRESS_TYPE){
+            Script scriptPubkey = SignatureUtil.createOutputScript(coin.getOwner());
+            coin.setOwner(scriptPubkey.getProgram());
+        }
         to.add(coin);
     }
 
@@ -162,14 +169,12 @@ public class CoinData extends BaseNulsData {
     @JsonIgnore
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
-        if (from != null && from.size() != 0) {
-            //todo
-        }
         if (to != null && to.size() != 0) {
             for (int i = 0; i < to.size(); i++) {
                 byte[] owner = to.get(i).getAddress();
                 boolean hasExist = false;
                 for (byte[] address : addressSet) {
+                    //todo 20180919 这里处理脚本的情况
                     if (Arrays.equals(owner, address)) {
                         hasExist = true;
                         break;

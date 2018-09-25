@@ -115,6 +115,16 @@ public class ContractResult {
 
     private String remark;
 
+    private transient Object txTrack;
+
+    public Object getTxTrack() {
+        return txTrack;
+    }
+
+    public void setTxTrack(Object txTrack) {
+        this.txTrack = txTrack;
+    }
+
     public byte[] getSender() {
         return sender;
     }
@@ -277,7 +287,7 @@ public class ContractResult {
                 "contractAddress=" + AddressTool.getStringAddressByBytes(contractAddress) +
                 ", result='" + result + '\'' +
                 ", gasUsed=" + gasUsed +
-                ", stateRoot=" + Hex.encode(stateRoot) +
+                ", stateRoot=" + (stateRoot != null ? Hex.encode(stateRoot) : stateRoot ) +
                 ", value=" + value +
                 ", revert=" + revert +
                 ", error=" + error +

@@ -180,10 +180,6 @@ public class Coin extends BaseNulsData {
         }
     }
 
-    public boolean isP2Script() {
-        return false;
-    }
-
     @Override
     public String toString() {
         return "Coin{" +
@@ -199,9 +195,9 @@ public class Coin extends BaseNulsData {
     public byte[] getAddress() {
         byte[] address = new byte[23];
         //如果owner不是存放的脚本则直接返回owner
-        if (owner == null || owner.length == 23)
+        if (owner == null || owner.length == 23) {
             return owner;
-        else {
+        } else {
             Script scriptPubkey = new Script(owner);
             //如果为P2PKH类型交易则从第四位开始返回23个字节
             if (scriptPubkey.isSentToAddress()) {

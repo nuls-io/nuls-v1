@@ -49,6 +49,7 @@ import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
 import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
+import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
@@ -179,7 +180,8 @@ public class BlockProcess {
             redPunishData.setEvidence(smallBlock.serialize());
             redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
             redPunishTransaction.setTxData(redPunishData);
-            CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, smallBlock.getHeader().getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME);
+            redPunishTransaction.setTime(smallBlock.getHeader().getTime());
+            CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, redPunishTransaction.getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME);
             redPunishTransaction.setCoinData(coinData);
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
             TxMemoryPool.getInstance().add(redPunishTransaction, false);
@@ -253,20 +255,35 @@ public class BlockProcess {
                         break;
                     }
 
-                    stateRoot = contractService.processTxs(txs, bestHeight, block, stateRoot, toMaps, contractUsedCoinMap).getData();
+                    Object[] objects = (Object[]) verifyAndAddBlockResult.getData();
+                    MeetingRound currentRound = (MeetingRound) objects[0];
+                    MeetingMember member = (MeetingMember) objects[1];
+
+                    byte[] processStateRoot = stateRoot;
+                    // 判断区块验证的节点是否当前区块打包的节点
+                    //boolean isCurrentNodePackage = false;
+                    //Account localPacker = currentRound.getLocalPacker();
+                    //if(localPacker != null) {
+                    //    Address localPackerAddress = localPacker.getAddress();
+                    //    if(localPackerAddress != null) {
+                    //        isCurrentNodePackage = (Arrays.equals(localPackerAddress.getAddressBytes(), block.getHeader().getPackingAddress()));
+                    //    }
+                    //}
+                    //if(isCurrentNodePackage) {
+                    //    Log.info("此验证节点是这个区块的打包节点，当前验证的区块高度: {}", blockContainer.getBlock().getHeader().getHeight());
+                    //    processStateRoot = receiveStateRoot;
+                    //}
+
+                    stateRoot = contractService.processTxs(txs, bestHeight, block, processStateRoot, toMaps, contractUsedCoinMap, false).getData();
 
                     // 验证世界状态根
                     if ((receiveStateRoot != null || stateRoot != null) && !Arrays.equals(receiveStateRoot, stateRoot)) {
-                        Log.info("contract stateRoot incorrect.");
+                        Log.info("contract stateRoot incorrect. receiveStateRoot is {}, stateRoot is {}.", receiveStateRoot != null ? Hex.encode(receiveStateRoot) : receiveStateRoot, stateRoot != null ? Hex.encode(stateRoot) : stateRoot);
                         success = false;
                         break;
                     }
 
-
                     // 验证CoinBase交易
-                    Object[] objects = (Object[]) verifyAndAddBlockResult.getData();
-                    MeetingRound currentRound = (MeetingRound) objects[0];
-                    MeetingMember member = (MeetingMember) objects[1];
                     if (!chainManager.getMasterChain().verifyCoinBaseTx(block, currentRound, member)) {
                         success = false;
                         break;
@@ -311,9 +328,6 @@ public class BlockProcess {
                 } while (false);
             } catch (Exception e) {
                 Log.error("save block error : " + e.getMessage(), e);
-            } finally {
-                // 验证区块交易结束后移除临时余额区
-                contractService.removeContractTempBalance();
             }
             if (success) {
                 long t = System.currentTimeMillis();
@@ -338,7 +352,6 @@ public class BlockProcess {
             if (isDownload && !ConsensusStatusContext.isRunning()) {
                 return false;
             }
-
             boolean hasFoundForkChain = checkAndAddForkChain(block);
             if (!hasFoundForkChain) {
 

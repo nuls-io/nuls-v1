@@ -29,6 +29,7 @@ import io.nuls.kernel.utils.queue.fqueue.entity.FQueue;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -58,7 +59,7 @@ public class PersistentQueue {
      * @param maxSize   单个文件最大大小fileLimitLength
      */
     public PersistentQueue(String queueName, long maxSize) throws Exception {
-        this.queueName = PersistentQueue.class.getClassLoader().getResource("").getPath() + "/data/queue/" + queueName;
+        this.queueName = URLDecoder.decode(PersistentQueue.class.getClassLoader().getResource("").getPath() + "/data/queue/" + queueName, "UTF-8");
         this.maxSize = maxSize;
         this.queue = new FQueue(this.queueName, maxSize);
     }

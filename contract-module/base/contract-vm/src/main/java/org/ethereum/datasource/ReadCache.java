@@ -78,7 +78,9 @@ public class ReadCache<Key, Value> extends AbstractCachedSource<Key, Value> {
     private boolean checked = false;
 
     private void checkByteArrKey(Key key) {
-        if (checked) return;
+        if (checked) {
+            return;
+        }
 
         if (key instanceof byte[]) {
             if (!byteKeyMap) {
@@ -128,6 +130,7 @@ public class ReadCache<Key, Value> extends AbstractCachedSource<Key, Value> {
         return false;
     }
 
+    @Override
     public synchronized Collection<Key> getModified() {
         return Collections.emptyList();
     }
@@ -154,6 +157,7 @@ public class ReadCache<Key, Value> extends AbstractCachedSource<Key, Value> {
             withCache(new ByteArrayMap<V>());
         }
 
+        @Override
         public ReadCache.BytesKey<V> withMaxCapacity(int maxCapacity) {
             withCache(new ByteArrayMap<V>(new LRUMap<ByteArrayWrapper, V>(maxCapacity) {
                 @Override

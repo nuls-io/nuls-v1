@@ -40,6 +40,7 @@ public class DecodeResult implements Serializable {
         return decoded;
     }
 
+    @Override
     public String toString() {
         return asString(this.decoded);
     }

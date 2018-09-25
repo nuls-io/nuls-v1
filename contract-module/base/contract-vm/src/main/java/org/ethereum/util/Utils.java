@@ -46,9 +46,9 @@ public class Utils {
     public static BigInteger unifiedNumericToBigInteger(String number) {
 
         boolean match = Pattern.matches("0[xX][0-9a-fA-F]+", number);
-        if (!match)
+        if (!match) {
             return (new BigInteger(number));
-        else {
+        } else {
             number = number.substring(2);
             number = number.length() % 2 != 0 ? "0".concat(number) : number;
             byte[] numberBytes = Hex.decode(number);
@@ -70,15 +70,27 @@ public class Utils {
     }
 
     public static String longToTimePeriod(long msec) {
-        if (msec < 1000) return msec + "ms";
-        if (msec < 3000) return String.format("%.2fs", msec / 1000d);
-        if (msec < 60 * 1000) return (msec / 1000) + "s";
+        if (msec < 1000) {
+            return msec + "ms";
+        }
+        if (msec < 3000) {
+            return String.format("%.2fs", msec / 1000d);
+        }
+        if (msec < 60 * 1000) {
+            return (msec / 1000) + "s";
+        }
         long sec = msec / 1000;
-        if (sec < 5 * 60) return (sec / 60) + "m" + (sec % 60) + "s";
+        if (sec < 5 * 60) {
+            return (sec / 60) + "m" + (sec % 60) + "s";
+        }
         long min = sec / 60;
-        if (min < 60) return min + "m";
+        if (min < 60) {
+            return min + "m";
+        }
         long hour = min / 60;
-        if (min < 24 * 60) return hour + "h" + (min % 60) + "m";
+        if (min < 24 * 60) {
+            return hour + "h" + (min % 60) + "m";
+        }
         long day = hour / 24;
         return day + "d" + (hour % 24) + "h";
     }
@@ -115,8 +127,9 @@ public class Utils {
             return null;
         }
 
-        if (isValidAddress(addr))
+        if (isValidAddress(addr)) {
             return addr;
+        }
         return null;
     }
 
@@ -130,7 +143,9 @@ public class Utils {
      */
     public static String getAddressShortString(byte[] addr) {
 
-        if (!isValidAddress(addr)) throw new Error("not an address");
+        if (!isValidAddress(addr)) {
+            throw new Error("not an address");
+        }
 
         String addrShort = Hex.toHexString(addr, 0, 3);
 
@@ -151,17 +166,23 @@ public class Utils {
         String version = System.getProperty("java.version");
 
         // on android this property equals to 0
-        if (version.equals("0")) return 0;
+        if ("0".equals(version)) {
+            return 0;
+        }
 
         int pos = 0, count = 0;
         for (; pos < version.length() && count < 2; pos++) {
-            if (version.charAt(pos) == '.') count++;
+            if (version.charAt(pos) == '.') {
+                count++;
+            }
         }
         return Double.parseDouble(version.substring(0, pos - 1));
     }
 
     public static String getHashListShort(List<byte[]> blockHashes) {
-        if (blockHashes.isEmpty()) return "[]";
+        if (blockHashes.isEmpty()) {
+            return "[]";
+        }
 
         StringBuilder sb = new StringBuilder();
         String firstHash = Hex.toHexString(blockHashes.get(0));
@@ -196,7 +217,9 @@ public class Utils {
     }
 
     public static String align(String s, char fillChar, int targetLen, boolean alignRight) {
-        if (targetLen <= s.length()) return s;
+        if (targetLen <= s.length()) {
+            return s;
+        }
         String alignString = repeat("" + fillChar, targetLen - s.length());
         return alignRight ? alignString + s : s + alignString;
 
@@ -209,7 +232,9 @@ public class Utils {
             return new String(bb);
         } else {
             StringBuilder ret = new StringBuilder();
-            for (int i = 0; i < n; i++) ret.append(s);
+            for (int i = 0; i < n; i++) {
+                ret.append(s);
+            }
             return ret.toString();
         }
     }
@@ -269,9 +294,15 @@ public class Utils {
     }
 
     public static String sizeToStr(long size) {
-        if (size < 2 * (1L << 10)) return size + "b";
-        if (size < 2 * (1L << 20)) return String.format("%dKb", size / (1L << 10));
-        if (size < 2 * (1L << 30)) return String.format("%dMb", size / (1L << 20));
+        if (size < 2 * (1L << 10)) {
+            return size + "b";
+        }
+        if (size < 2 * (1L << 20)) {
+            return String.format("%dKb", size / (1L << 10));
+        }
+        if (size < 2 * (1L << 30)) {
+            return String.format("%dMb", size / (1L << 20));
+        }
         return String.format("%dGb", size / (1L << 30));
     }
 
@@ -284,8 +315,12 @@ public class Utils {
     }
 
     public static boolean isHexEncoded(String value) {
-        if (value == null) return false;
-        if ("".equals(value)) return true;
+        if (value == null) {
+            return false;
+        }
+        if ("".equals(value)) {
+            return true;
+        }
 
         try {
             //noinspection ResultOfMethodCallIgnored

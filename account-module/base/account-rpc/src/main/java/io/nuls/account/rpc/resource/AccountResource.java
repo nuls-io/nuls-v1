@@ -27,7 +27,6 @@ package io.nuls.account.rpc.resource;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.model.*;
@@ -45,14 +44,12 @@ import io.nuls.account.util.AccountTool;
 import io.nuls.contract.dto.ContractTokenInfo;
 import io.nuls.contract.service.ContractService;
 import io.nuls.core.tools.crypto.AESEncrypt;
-import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.crypto.ECKey;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.page.Page;
 import io.nuls.core.tools.str.StringUtils;
-import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
@@ -66,8 +63,8 @@ import io.nuls.kernel.script.ScriptBuilder;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.SerializeUtils;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
-import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
+import io.nuls.protocol.model.validator.TxMaxSizeValidator;
 import io.swagger.annotations.*;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -321,46 +318,50 @@ public class AccountResource {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
         Result result = aliasService.getAliasFee(form.getAddress(), form.getAlias());
-        AliasTransaction tx = new AliasTransaction();
-        tx.setTime(TimeService.currentTimeMillis());
-        Alias alias = new Alias(AddressTool.getAddress(form.getAddress()), form.getAlias());
-        tx.setTxData(alias);
 
-        try {
-            CoinDataResult coinDataResult = accountLedgerService.getCoinData(AddressTool.getAddress(form.getAddress()), AccountConstant.ALIAS_NA, tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
-            if (!coinDataResult.isEnough()) {
-                return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE).toRpcClientResult();
-            }
-            CoinData coinData = new CoinData();
-            coinData.setFrom(coinDataResult.getCoinList());
-            Coin change = coinDataResult.getChange();
-            if (null != change) {
-                //创建toList
-                List<Coin> toList = new ArrayList<>();
-                toList.add(change);
-                coinData.setTo(toList);
-            }
-            Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
-            coinData.addTo(coin);
-            tx.setCoinData(coinData);
-        } catch (Exception e) {
-            Log.error(e);
-            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
-        }
-        Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
-                TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
-        Map<String, Long> map = new HashMap<>();
         Long fee = null;
         Long maxAmount = null;
+        Map<String, Long> map = new HashMap<>();
         if (result.isSuccess()) {
             fee = ((Na) result.getData()).getValue();
+            //如果手续费大于理论最大值，则说明交易过大，需要计算最大交易金额
+            long feeMax = TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES.multiply(TxMaxSizeValidator.MAX_TX_BYTES).getValue();
+            if(fee > feeMax){
+                AliasTransaction tx = new AliasTransaction();
+                tx.setTime(TimeService.currentTimeMillis());
+                Alias alias = new Alias(AddressTool.getAddress(form.getAddress()), form.getAlias());
+                tx.setTxData(alias);
+                try {
+                    CoinDataResult coinDataResult = accountLedgerService.getCoinData(AddressTool.getAddress(form.getAddress()), AccountConstant.ALIAS_NA, tx.size(), TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                    if (!coinDataResult.isEnough()) {
+                        return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE).toRpcClientResult();
+                    }
+                    CoinData coinData = new CoinData();
+                    coinData.setFrom(coinDataResult.getCoinList());
+                    Coin change = coinDataResult.getChange();
+                    if (null != change) {
+                        //创建toList
+                        List<Coin> toList = new ArrayList<>();
+                        toList.add(change);
+                        coinData.setTo(toList);
+                    }
+                    Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
+                    coinData.addTo(coin);
+                    tx.setCoinData(coinData);
+                } catch (Exception e) {
+                    Log.error(e);
+                    return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
+                }
+                Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx,
+                        TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+                if (rs.isSuccess()) {
+                    maxAmount = ((Na) rs.getData()).getValue();
+                }
+            }
+            map.put("fee", fee);
+            map.put("maxAmount", maxAmount);
+            result.setData(map);
         }
-        if (rs.isSuccess()) {
-            maxAmount = ((Na) rs.getData()).getValue();
-        }
-        map.put("fee", fee);
-        map.put("maxAmount", maxAmount);
-        result.setData(map);
         return result.toRpcClientResult();
     }
 
@@ -1198,6 +1199,10 @@ public class AccountResource {
         if (form.getM() == 0) {
             form.setM(form.getPubkeys().size());
         }
+        Set<String> pubkeySet = new HashSet<>(form.getPubkeys());
+        if(pubkeySet.size() < form.getPubkeys().size()){
+            return Result.getFailed(AccountErrorCode.PUBKEY_REPEAT).toRpcClientResult();
+        }
         Result result = accountService.createMultiAccount(form.getPubkeys(), form.getM());
         if (result.isFailed()) {
             return result.toRpcClientResult();
@@ -1206,15 +1211,16 @@ public class AccountResource {
         return Result.getSuccess().setData(account).toRpcClientResult();
     }
 
+
     @POST
-    @Path("/aliasMutil")
+    @Path("multiAccount/mutilAlias")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("[别名] 多签账户设置别名")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
-    public RpcClientResult aliasMutil(@ApiParam(name = "form", value = "多签账户设置别名表单数据", required = true)
-                                         MutilAccountAliasForm form) {
+    public RpcClientResult alias(@ApiParam(name = "form", value = "多签账户设置别名表单数据", required = true)
+                                              CreateMultiAliasForm form) {
         if(NulsContext.MAIN_NET_VERSION  <=1){
             return Result.getFailed(KernelErrorCode.VERSION_TOO_LOW).toRpcClientResult();
         }
@@ -1224,24 +1230,19 @@ public class AccountResource {
         if (!AddressTool.validAddress(form.getSignAddress()) || !AddressTool.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        if(form.getTxdata() == null || form.getTxdata().trim().length() == 0){
-            if (StringUtils.isBlank(form.getAlias())) {
-                return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
-            }
-            if (!StringUtils.validAlias(form.getAlias())) {
-                return Result.getFailed(AccountErrorCode.ALIAS_FORMAT_WRONG).toRpcClientResult();
-            }
-            if (!AddressTool.validAddress(form.getAddress())) {
-                return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
-            }
-            if (form.getM() <= 0) {
-                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-            }
-            if (form.getPubkeys() == null || form.getPubkeys().size() == 0 || form.getPubkeys().size() < form.getM()) {
-                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
-            }
+        if (StringUtils.isBlank(form.getAlias())) {
+            return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        Result result = aliasService.setMutilAlias(form.getAddress(),form.getSignAddress(),form.getAlias(),form.getPassword(),form.getPubkeys(),form.getM(),null);
+        if (!StringUtils.validAlias(form.getAlias())) {
+            return Result.getFailed(AccountErrorCode.ALIAS_FORMAT_WRONG).toRpcClientResult();
+        }
+        if (!StringUtils.validAlias(form.getAlias())) {
+            return Result.getFailed(AccountErrorCode.ALIAS_FORMAT_WRONG).toRpcClientResult();
+        }
+        if (!aliasService.isAliasUsable(form.getAlias())) {
+            return Result.getFailed(AccountErrorCode.ALIAS_EXIST).toRpcClientResult();
+        }
+        Result result = aliasService.setMutilAlias(form.getAddress(),form.getSignAddress(),form.getAlias(),form.getPassword());
         if (result.isSuccess()) {
             Map<String, String> map = new HashMap<>();
             map.put("txData", (String) result.getData());
@@ -1249,7 +1250,7 @@ public class AccountResource {
         }
         return result.toRpcClientResult();
     }
-	
+
 	
     @POST
     @Path("/importMultiAccount")
@@ -1331,13 +1332,13 @@ public class AccountResource {
     }
 
     @GET
-    @Path("/multiAlias/fee")
+    @Path("multiAccount/alias/fee")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation("[别名手续费] 获取设置别名手续 ")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
-    public RpcClientResult multiAliasFee(@BeanParam() MutilAccountAliasForm form) {
+    public RpcClientResult multiAliasFee(@BeanParam() MultiAliasFeeForm form) {
         if (!AddressTool.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }

@@ -93,6 +93,12 @@ public class BifurcationUtil {
 
         BlockHeader otherBlockHeader = blockService.getBlockHeader(header.getHeight()).getData();
         if (null != otherBlockHeader && !otherBlockHeader.getHash().equals(header.getHash()) && Arrays.equals(otherBlockHeader.getPackingAddress(), header.getPackingAddress())) {
+            Log.info("-+-+-+-+-+-+-+-+- Received block with the same height and different hashes as the latest local block -+-+-+-+-+-+-+-+- ");
+            Log.info("-+-+-+-+-+-+-+-+- height：" + header.getHeight() + ", hash of received block：" + header.getHash().getDigestHex()
+                    + ", hash of local latest block：" + otherBlockHeader.getHash().getDigestHex());
+            Log.info("-+-+-+-+-+-+-+-+- Packing address of received block：" +  AddressTool.getStringAddressByBytes(header.getPackingAddress())
+                    + ", Packing address of local latest block：" + AddressTool.getStringAddressByBytes(otherBlockHeader.getPackingAddress()));
+
             List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
             Agent agent = null;
             for (Agent a : agentList) {
@@ -115,7 +121,7 @@ public class BifurcationUtil {
             RedPunishData redPunishData = new RedPunishData();
             redPunishData.setAddress(agent.getAgentAddress());
 
-            long headerTime = 0;
+            //long headerTime = 0;
             try {
                 //连续3轮 每一轮两个区块头作为证据 一共 3 * 2 个区块头作为证据
                 byte[][] headers = new byte[NulsContext.REDPUNISH_BIFURCATION * 2][];
@@ -125,9 +131,9 @@ public class BifurcationUtil {
                     int s = i * 2;
                     headers[s] = evidence.getBlockHeader1().serialize();
                     headers[++s] = evidence.getBlockHeader2().serialize();
-                    if(s == headers.length - 1){
+                   /* if(s == headers.length - 1){
                         headerTime = evidence.getBlockHeader1().getTime();
-                    }
+                    }*/
                 }
                 redPunishData.setEvidence(ArraysTool.concatenate(headers));
             } catch (Exception e) {
@@ -136,9 +142,10 @@ public class BifurcationUtil {
             }
             redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
             redPunishTransaction.setTxData(redPunishData);
+            redPunishTransaction.setTime(header.getTime());
             CoinData coinData = null;
             try {
-                coinData = ConsensusTool.getStopAgentCoinData(agent, headerTime + PocConsensusConstant.RED_PUNISH_LOCK_TIME);
+                coinData = ConsensusTool.getStopAgentCoinData(agent, redPunishTransaction.getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME);
             } catch (IOException e) {
                 Log.error(e);
                 return result;

@@ -95,26 +95,30 @@ public abstract class Transaction<T extends TransactionLogicData> extends BaseNu
 
             bos = new UnsafeByteArrayOutputStream(size);
             NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
-            if (size == 0) {
-                bos.write(NulsConstant.PLACE_HOLDER);
-            } else {
+            do {
+                if (size == 0) {
+                    bos.write(NulsConstant.PLACE_HOLDER);
+                    break;
+                }
                 if (NulsContext.MAIN_NET_VERSION == 1) {
                     buffer.writeVarInt(type);
                     buffer.writeVarInt(time);
-                } else {
-                    if (this.blockHeight == -1) {
-                        buffer.writeUint16(type);
-                        buffer.writeUint48(time);
-                    } else {
-                        if (NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT != null && this.blockHeight >= NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT) {
-                            buffer.writeUint16(type);
-                            buffer.writeUint48(time);
-                        } else {
-                            buffer.writeVarInt(type);
-                            buffer.writeVarInt(time);
-                        }
-                    }
+                    break;
                 }
+                if (this.blockHeight == -1) {
+                    buffer.writeUint16(type);
+                    buffer.writeUint48(time);
+                    break;
+                }
+                if (NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT != null && this.blockHeight >= NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT) {
+                    buffer.writeUint16(type);
+                    buffer.writeUint48(time);
+                } else {
+                    buffer.writeVarInt(type);
+                    buffer.writeVarInt(time);
+                }
+            } while (false);
+            if (size > 0) {
                 buffer.writeBytesWithLength(remark);
                 buffer.writeNulsData(txData);
                 buffer.writeNulsData(coinData);

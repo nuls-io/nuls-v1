@@ -55,8 +55,9 @@ public class Chain {
 
     boolean contains(ChainItem other) {
         for (ChainItem item : items) {
-            if (item.equals(other))
+            if (item.equals(other)) {
                 return true;
+            }
         }
         return false;
     }
@@ -89,8 +90,12 @@ public class Chain {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         Chain chain = (Chain) o;
 

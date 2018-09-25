@@ -323,12 +323,12 @@ public class BlockServiceImpl implements BlockService {
      * 保存区块失败时，需要将已经存储的交易回滚
      * When you fail to save the block, you need to roll back the already stored transaction.
      */
-    private boolean rollbackTxList(List<Transaction> savedList, BlockHeader blockHeader, boolean Atomicity) throws NulsException {
+    private boolean rollbackTxList(List<Transaction> savedList, BlockHeader blockHeader, boolean atomicity) throws NulsException {
         List<Transaction> rollbackedList = new ArrayList<>();
         for (int i = savedList.size() - 1; i >= 0; i--) {
             Transaction tx = savedList.get(i);
             Result result = transactionService.rollbackTx(tx, blockHeader);
-            if (Atomicity) {
+            if (atomicity) {
                 if (result.isFailed()) {
                     break;
                 } else {
@@ -336,7 +336,7 @@ public class BlockServiceImpl implements BlockService {
                 }
             }
         }
-        if (Atomicity && savedList.size() != rollbackedList.size()) {
+        if (atomicity && savedList.size() != rollbackedList.size()) {
             for (int i = rollbackedList.size() - 1; i >= 0; i--) {
                 Transaction tx = rollbackedList.get(i);
                 transactionService.commitTx(tx, blockHeader);

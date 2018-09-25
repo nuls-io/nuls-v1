@@ -104,13 +104,13 @@ public class ContractResultDto {
     @ApiModelProperty(name = "tokenTransfers", value = "合约代币转账")
     private List<ContractTokenTransferDto> tokenTransfers;
 
-    @ApiModelProperty(name = "name", value = "代币名称")
+    @ApiModelProperty(name = "name", value = "token名称")
     private String name;
 
-    @ApiModelProperty(name = "symbol", value = "代币符号")
+    @ApiModelProperty(name = "symbol", value = "token符号")
     private String symbol;
 
-    @ApiModelProperty(name = "decimals", value = "货币小数位精度")
+    @ApiModelProperty(name = "decimals", value = "token支持的小数位数")
     private long decimals;
 
     @ApiModelProperty(name = "remark", value = "备注")
@@ -130,7 +130,7 @@ public class ContractResultDto {
         this.txSizeFee = this.totalFee.subtract(contractFee);
         this.contractAddress = AddressTool.getStringAddressByBytes(result.getContractAddress());
         this.result = result.getResult();
-        this.stateRoot = Hex.encode(result.getStateRoot());
+        this.stateRoot = result.getStateRoot() != null ? Hex.encode(result.getStateRoot()) : null;
         this.value = result.getValue();
         this.success = result.isSuccess();
         this.errorMessage = result.getErrorMessage();

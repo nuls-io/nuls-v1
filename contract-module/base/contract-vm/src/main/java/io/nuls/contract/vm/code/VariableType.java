@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
 package io.nuls.contract.vm.code;
 
 import com.google.common.cache.CacheBuilder;
@@ -21,7 +45,8 @@ public class VariableType {
 
     static {
         CACHE = CacheBuilder.newBuilder()
-                .initialCapacity(10240)
+                .initialCapacity(1024)
+                .maximumSize(102400)
                 .expireAfterAccess(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, VariableType>() {
                     @Override
@@ -30,7 +55,8 @@ public class VariableType {
                     }
                 });
         CACHE_LIST = CacheBuilder.newBuilder()
-                .initialCapacity(10240)
+                .initialCapacity(1024)
+                .maximumSize(10240)
                 .expireAfterAccess(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, List<VariableType>>() {
                     @Override
@@ -402,19 +428,36 @@ public class VariableType {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         VariableType that = (VariableType) o;
 
-        if (primitiveType != that.primitiveType) return false;
-        if (primitive != that.primitive) return false;
-        if (array != that.array) return false;
-        if (dimensions != that.dimensions) return false;
-        if (desc != null ? !desc.equals(that.desc) : that.desc != null) return false;
-        if (type != null ? !type.equals(that.type) : that.type != null) return false;
-        if (componentType != null ? !componentType.equals(that.componentType) : that.componentType != null)
+        if (primitiveType != that.primitiveType) {
             return false;
+        }
+        if (primitive != that.primitive) {
+            return false;
+        }
+        if (array != that.array) {
+            return false;
+        }
+        if (dimensions != that.dimensions) {
+            return false;
+        }
+        if (desc != null ? !desc.equals(that.desc) : that.desc != null) {
+            return false;
+        }
+        if (type != null ? !type.equals(that.type) : that.type != null) {
+            return false;
+        }
+        if (componentType != null ? !componentType.equals(that.componentType) : that.componentType != null) {
+            return false;
+        }
         return defaultValue != null ? defaultValue.equals(that.defaultValue) : that.defaultValue == null;
     }
 

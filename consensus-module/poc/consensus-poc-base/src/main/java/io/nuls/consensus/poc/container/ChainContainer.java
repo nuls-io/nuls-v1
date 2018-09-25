@@ -28,8 +28,10 @@ package io.nuls.consensus.poc.container;
 
 import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
+import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.manager.RoundManager;
 import io.nuls.consensus.poc.model.*;
+import io.nuls.consensus.poc.protocol.constant.PocConsensusErrorCode;
 import io.nuls.consensus.poc.protocol.constant.PunishReasonEnum;
 import io.nuls.consensus.poc.protocol.constant.PunishType;
 import io.nuls.consensus.poc.protocol.entity.Agent;
@@ -41,6 +43,7 @@ import io.nuls.consensus.poc.util.ConsensusTool;
 import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.Log;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
@@ -418,7 +421,13 @@ public class ChainContainer implements Cloneable {
                     BlockLog.debug("There is a wrong red punish tx!" + block.getHeader().getHash());
                     return false;
                 }
+                if(redTx.getTime() != block.getHeader().getTime()){
+                    BlockLog.debug("red punish CoinData & TX time is wrong! " + block.getHeader().getHash());
+                    return false;
+                }
+
             }
+
         }
         return true;
     }

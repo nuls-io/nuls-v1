@@ -25,14 +25,18 @@
 
 package io.nuls.client.cmd;
 
+import com.fasterxml.jackson.core.JsonParser;
 import io.nuls.account.rpc.cmd.*;
+import io.nuls.accout.ledger.rpc.cmd.CreateMultiTransferProcess;
 import io.nuls.accout.ledger.rpc.cmd.GetAccountTxListProcessor;
-import io.nuls.accout.ledger.rpc.cmd.TransferP2shProcess;
+import io.nuls.accout.ledger.rpc.cmd.SignMultiTransactionProcess;
 import io.nuls.accout.ledger.rpc.cmd.TransferProcessor;
 import io.nuls.client.constant.CommandConstant;
 import io.nuls.client.rpc.constant.RpcConstant;
 import io.nuls.consensus.poc.rpc.cmd.*;
+import io.nuls.contract.rpc.cmd.*;
 import io.nuls.core.tools.cfg.ConfigLoader;
+import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
@@ -56,13 +60,24 @@ import jline.console.completer.Completer;
 import jline.console.completer.StringsCompleter;
 
 import java.io.IOException;
-import java.util.*;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CommandHandler {
 
     public static final Map<String, CommandProcessor> PROCESSOR_MAP = new TreeMap<>();
 
     public static ConsoleReader CONSOLE_READER;
+
+    private static final Pattern CMD_PATTERN = Pattern.compile("\"[^\"]+\"|'[^']+'");
 
     public CommandHandler() {
 
@@ -114,14 +129,13 @@ public class CommandHandler {
         register(new GetMultiSigAccountCountProcessor());
         register(new CreateMultiSigAccountProcessor());
 
-
-        register(new TransferP2shProcess());
-        register(new SetMultiAliasProcessor());
-        register(new WithdrawMultiProcessor());
+        register(new CreateMultiTransferProcess());
+        register(new SignMultiTransactionProcess());
+        register(new CreateMultiAliasProcess());
         register(new CreateMultiAgentProcessor());
-        register(new StopMultiAgentProcessor());
-        register(new DepositToMultiAgentProcessor());
-
+        register(new CreateMultiDepositProcessor());
+        register(new CreateMultiWithdrawProcessor());
+        register(new CreateMultiStopAgentProcessor());
 
         /**
          * accountLedger
@@ -161,6 +175,24 @@ public class CommandHandler {
          * utxoAccounts
          */
         register(new GetUtxoAccountsProcessor());
+
+        /**
+         * contract
+         */
+        register(new GetContractTxProcessor());
+        register(new GetContractResultProcessor());
+        register(new GetContractInfoProcessor());
+        register(new GetContractBalanceProcessor());
+        register(new GetContractTxListProcessor());
+        register(new GetContractAddressValidProcessor());
+        register(new GetWalletContractsProcessor());
+        register(new GetTokenBalanceProcessor());
+        register(new CreateContractProcessor());
+        register(new CallContractProcessor());
+        register(new ViewContractProcessor());
+        register(new TokenTransferProcessor());
+        register(new DeleteContractProcessor());
+        JSONUtils.getInstance().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         sdkInit();
     }
 
@@ -216,7 +248,8 @@ public class CommandHandler {
                 if (StringUtils.isBlank(line)) {
                     continue;
                 }
-                System.out.print(instance.processCommand(line.split("\\s+")) + "\n");
+                String[] cmdArgs = parseArgs(line);
+                System.out.print(instance.processCommand(cmdArgs) + "\n");
             } while (line != null);
         } catch (IOException e) {
 
@@ -230,6 +263,26 @@ public class CommandHandler {
             }
         }
 
+    }
+
+    private static String[] parseArgs(String line) throws UnsupportedEncodingException {
+        if(StringUtils.isBlank(line)) {
+            return new String[0];
+        }
+        Matcher matcher = CMD_PATTERN.matcher(line);
+        String result = line;
+        while (matcher.find()) {
+            String group = matcher.group();
+            String subGroup = group.substring(1, group.length() - 1);
+            String encoder = URLEncoder.encode(subGroup, StandardCharsets.UTF_8.toString());
+            result = result.replace(group, encoder);
+        }
+
+        String[] args = result.split("\\s+");
+        for(int i = 0, length = args.length; i < length; i++) {
+            args[i] = URLDecoder.decode(args[i], StandardCharsets.UTF_8.toString());
+        }
+        return args;
     }
 
     private String processCommand(String[] args) {

@@ -46,6 +46,7 @@ import java.util.List;
 public class UtxoAccountsBalanceServiceImpl implements UtxoAccountsBalanceService {
     @Autowired
     UtxoAccountsStorageService utxoAccountsStorageService;
+    @Override
     public Result<UtxoAccountsBalance> getUtxoAccountsBalance(byte[] owner){
         if (!AddressTool.validAddress(AddressTool.getStringAddressByBytes(owner))) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);

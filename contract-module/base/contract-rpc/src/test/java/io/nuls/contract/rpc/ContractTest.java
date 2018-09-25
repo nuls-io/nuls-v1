@@ -30,20 +30,32 @@ import io.nuls.contract.BaseTest;
 public class ContractTest extends BaseTest {
     private static int successCount = 0;
     private static String IP = "192.168.1.106";
+    //private static String IP = "127.0.0.1";
 
     public static void main(String[] args) {
+        //createWrapper();
+        callWrapper();
+    }
+
+    static void createWrapper() {
         long time = System.currentTimeMillis();
-        //for (int i = 0; i < 1; i++) {
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 1; i++) {
+            create();
+        }
+        System.out.println("总耗时：" + (System.currentTimeMillis() - time) + " ms");
+    }
+
+    static void callWrapper() {
+        long time = System.currentTimeMillis();
+        for (int i = 0; i < 10000; i++) {
             call();
-            //create();
         }
         System.out.println("总耗时：" + (System.currentTimeMillis() - time) + " ms");
     }
 
     private static void call() {
         String address = "Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG";
-        String contractAddress = "NseMV77oNpJjBkyPioXaFxMX12Fe3eRJ";
+        String contractAddress = "NseQRiU6nq5zJeU1ZNvsGc9JU5q6DCJx";
         String password = "";
         String remark = "test";
         String methodName = "create";
@@ -88,7 +100,7 @@ public class ContractTest extends BaseTest {
             }
             System.out.println(successCount + "  " + res);
             try {
-                Thread.sleep(3000L);
+                Thread.sleep(3L);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

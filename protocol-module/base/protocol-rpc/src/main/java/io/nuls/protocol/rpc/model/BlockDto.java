@@ -74,6 +74,9 @@ public class BlockDto {
     @ApiModelProperty(name = "scriptSign", value = "签名Hex.encode(byte[])")
     private String scriptSign;
 
+    @ApiModelProperty(name = "extend", value = "扩展信息Hex.encode(byte[])")
+    private String extend;
+
     @ApiModelProperty(name = "roundIndex", value = "共识轮次")
     private Long roundIndex;
 
@@ -139,6 +142,7 @@ public class BlockDto {
         this.txCount = header.getTxCount();
         this.packingAddress = Address.fromHashs(header.getPackingAddress()).getBase58();
         this.scriptSign = Hex.encode(header.getBlockSignature().serialize());
+        this.extend = Hex.encode(header.getExtend());
         this.confirmCount = bestBlockHeight - this.height;
         try {
             BlockExtendsData roundData = new BlockExtendsData(header.getExtend());
@@ -296,5 +300,13 @@ public class BlockDto {
 
     public void setStateRoot(String stateRoot) {
         this.stateRoot = stateRoot;
+    }
+
+    public String getExtend() {
+        return extend;
+    }
+
+    public void setExtend(String extend) {
+        this.extend = extend;
     }
 }

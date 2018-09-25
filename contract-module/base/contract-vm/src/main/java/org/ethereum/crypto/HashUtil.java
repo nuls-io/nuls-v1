@@ -17,6 +17,7 @@
  */
 package org.ethereum.crypto;
 
+import org.ethereum.config.SystemProperties;
 import org.ethereum.crypto.jce.SpongyCastleProvider;
 import org.ethereum.util.RLP;
 import org.ethereum.util.Utils;
@@ -50,10 +51,11 @@ public class HashUtil {
     private static final String HASH_512_ALGORITHM_NAME;
 
     static {
+        SystemProperties props = SystemProperties.getDefault();
         Security.addProvider(SpongyCastleProvider.getInstance());
-        CRYPTO_PROVIDER = Security.getProvider("SC");//JCA cryptoprovider name.
-        HASH_256_ALGORITHM_NAME = "ETH-KECCAK-256";//Used for create JCA MessageDigest
-        HASH_512_ALGORITHM_NAME = "ETH-KECCAK-512";//Used for create JCA MessageDigest
+        CRYPTO_PROVIDER = Security.getProvider(props.getCryptoProviderName());
+        HASH_256_ALGORITHM_NAME = props.getHash256AlgName();
+        HASH_512_ALGORITHM_NAME = props.getHash512AlgName();
         EMPTY_DATA_HASH = sha3(EMPTY_BYTE_ARRAY);
         EMPTY_LIST_HASH = sha3(RLP.encodeList());
         EMPTY_TRIE_HASH = sha3(RLP.encodeElement(EMPTY_BYTE_ARRAY));
@@ -174,6 +176,30 @@ public class HashUtil {
     }
 
     /**
+     * The way to calculate new address inside ethereum for {@link org.ethereum.vm.OpCode#CREATE2}
+     * sha3(0xff ++ msg.sender ++ salt ++ sha3(init_code)))[12:]
+     *
+     * @param senderAddr - creating address
+     * @param initCode   - contract init code
+     * @param salt       - salt to make different result addresses
+     * @return new address
+     */
+    public static byte[] calcSaltAddr(byte[] senderAddr, byte[] initCode, byte[] salt) {
+        // 1 - 0xff length, 32 bytes - keccak-256
+        byte[] data = new byte[1 + senderAddr.length + salt.length + 32];
+        data[0] = (byte) 0xff;
+        int currentOffset = 1;
+        System.arraycopy(senderAddr, 0, data, currentOffset, senderAddr.length);
+        currentOffset += senderAddr.length;
+        System.arraycopy(salt, 0, data, currentOffset, salt.length);
+        currentOffset += salt.length;
+        byte[] sha3InitCode = sha3(initCode);
+        System.arraycopy(sha3InitCode, 0, data, currentOffset, sha3InitCode.length);
+
+        return sha3omit12(data);
+    }
+
+    /**
      * @param input -
      * @return -
      * @see #doubleDigest(byte[], int, int)
@@ -213,10 +239,11 @@ public class HashUtil {
         byte[] peerIdBytes = new BigInteger(512, Utils.getRandom()).toByteArray();
 
         final String peerId;
-        if (peerIdBytes.length > 64)
+        if (peerIdBytes.length > 64) {
             peerId = Hex.toHexString(peerIdBytes, 1, 64);
-        else
+        } else {
             peerId = Hex.toHexString(peerIdBytes);
+        }
 
         return Hex.decode(peerId);
     }

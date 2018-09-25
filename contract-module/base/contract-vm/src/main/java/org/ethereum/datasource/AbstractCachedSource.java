@@ -44,6 +44,7 @@ public abstract class AbstractCachedSource<Key, Value>
             this.val = val;
         }
 
+        @Override
         public V value() {
             return val;
         }

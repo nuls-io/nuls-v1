@@ -66,13 +66,18 @@ public class IndexedBlockStore extends AbstractBlockstore {
         }, 256);
     }
 
+    @Override
     public synchronized Block getBestBlock() {
 
         Long maxLevel = getMaxNumber();
-        if (maxLevel < 0) return null;
+        if (maxLevel < 0) {
+            return null;
+        }
 
         Block bestBlock = getChainBlockByNumber(maxLevel);
-        if (bestBlock != null) return bestBlock;
+        if (bestBlock != null) {
+            return bestBlock;
+        }
 
         // That scenario can happen
         // if there is a fork branch that is
@@ -86,6 +91,7 @@ public class IndexedBlockStore extends AbstractBlockstore {
         return bestBlock;
     }
 
+    @Override
     public synchronized byte[] getBlockHashByNumber(long blockNumber) {
         Block chainBlock = getChainBlockByNumber(blockNumber);
         return chainBlock == null ? null : chainBlock.getHash(); // FIXME: can be improved by accessing the hash directly in the index
@@ -196,14 +202,17 @@ public class IndexedBlockStore extends AbstractBlockstore {
     @Override
     public synchronized BigInteger getTotalDifficultyForHash(byte[] hash) {
         Block block = this.getBlockByHash(hash);
-        if (block == null) return ZERO;
+        if (block == null) {
+            return ZERO;
+        }
 
         Long level = block.getNumber();
         List<BlockInfo> blockInfos = index.get(level.intValue());
-        for (BlockInfo blockInfo : blockInfos)
+        for (BlockInfo blockInfo : blockInfos) {
             if (areEqual(blockInfo.getHash(), hash)) {
                 return blockInfo.totalDifficulty;
             }
+        }
 
         return ZERO;
     }
@@ -290,14 +299,18 @@ public class IndexedBlockStore extends AbstractBlockstore {
 
         Block block = this.blocks.get(hash);
 
-        if (block == null) return new ArrayList<>();
+        if (block == null) {
+            return new ArrayList<>();
+        }
 
         List<Block> blocks = new ArrayList<>((int) qty);
 
         for (int i = 0; i < qty; ++i) {
             blocks.add(block);
             block = this.blocks.get(block.getParentHash());
-            if (block == null) break;
+            if (block == null) {
+                break;
+            }
         }
 
         return blocks;
@@ -378,13 +391,16 @@ public class IndexedBlockStore extends AbstractBlockstore {
         int i;
         for (i = 0; i < maxBlocks; ++i) {
             List<BlockInfo> blockInfos = index.get((int) number);
-            if (blockInfos == null) break;
+            if (blockInfos == null) {
+                break;
+            }
 
-            for (BlockInfo blockInfo : blockInfos)
+            for (BlockInfo blockInfo : blockInfos) {
                 if (blockInfo.isMainChain()) {
                     result.add(blockInfo.getHash());
                     break;
                 }
+            }
 
             ++number;
         }
@@ -446,7 +462,9 @@ public class IndexedBlockStore extends AbstractBlockstore {
 
         @Override
         public List<BlockInfo> deserialize(byte[] bytes) {
-            if (bytes == null) return null;
+            if (bytes == null) {
+                return null;
+            }
 
             List<BlockInfo> blockInfoList = new ArrayList<>();
             RLPList list = (RLPList) RLP.decode2(bytes).get(0);
@@ -476,10 +494,11 @@ public class IndexedBlockStore extends AbstractBlockstore {
             if (levelInfos != null) {
                 System.out.print(i);
                 for (BlockInfo blockInfo : levelInfos) {
-                    if (blockInfo.isMainChain())
+                    if (blockInfo.isMainChain()) {
                         System.out.print(" [" + shortHash(blockInfo.getHash()) + "] ");
-                    else
+                    } else {
                         System.out.print(" " + shortHash(blockInfo.getHash()) + " ");
+                    }
                 }
                 System.out.println();
             }
@@ -498,8 +517,11 @@ public class IndexedBlockStore extends AbstractBlockstore {
 
     private static BlockInfo getBlockInfoForHash(List<BlockInfo> blocks, byte[] hash) {
 
-        for (BlockInfo blockInfo : blocks)
-            if (areEqual(hash, blockInfo.getHash())) return blockInfo;
+        for (BlockInfo blockInfo : blocks) {
+            if (areEqual(hash, blockInfo.getHash())) {
+                return blockInfo;
+            }
+        }
 
         return null;
     }

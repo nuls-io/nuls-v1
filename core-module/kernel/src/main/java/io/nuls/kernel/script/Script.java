@@ -1752,7 +1752,6 @@ public class Script {
         return correctlySpends(txContainingThis, scriptSigIndex, scriptPubKey, ALL_VERIFY_FLAGS);
     }
 
-    @Deprecated
     public boolean correctlyNulsSpends(Transaction txContainingThis, long scriptSigIndex, Script scriptPubKey) {
         return correctlySpends(txContainingThis, scriptSigIndex, scriptPubKey, ALL_VERIFY_FLAGS);
     }
@@ -1770,14 +1769,11 @@ public class Script {
      *                         验证此脚本scriptSig是否正确地使用给定的scriptPubKey
      */
     public boolean correctlySpends(Transaction txContainingThis, long scriptSigIndex, Script scriptPubKey, Set<VerifyFlag> verifyFlags) {
-        // Clone the transaction because executing the script involves editing it, and if we die, we'll leave
-        // the tx half broken (also it's not so thread safe to work on it directly.
-        /*try {
-            txContainingThis = txContainingThis.getParams().getDefaultSerializer().makeTransaction(txContainingThis.bitcoinSerialize());
-        } catch (ProtocolException e) {
-            throw new RuntimeException(e);   // Should not happen unless we were given a totally broken transaction.
-        }*/
         try {
+            if (verifyFlags == null)
+            {
+                verifyFlags = ALL_VERIFY_FLAGS;
+            }
             if (getProgram().length > 10000 || scriptPubKey.getProgram().length > 10000) {
                 throw new ScriptException("Script larger than 10,000 bytes");
             }

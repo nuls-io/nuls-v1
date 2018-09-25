@@ -137,16 +137,22 @@ public class ContractTokenTransferInfoPo implements Serializable {
     }
 
     public String getInfo(byte[] address) {
+        BigDecimal result = BigDecimal.ZERO;
         if(this.status == 2) {
-            return "0";
+            return result.toPlainString();
         }
+
         if(Arrays.equals(from, address)) {
-            return "-" + new BigDecimal(value).divide(BigDecimal.TEN.pow((int) decimals));
+            result = result.subtract(new BigDecimal(value).divide(BigDecimal.TEN.pow((int) decimals)));
         }
         if(Arrays.equals(to, address)) {
-            return "+" + new BigDecimal(value).divide(BigDecimal.TEN.pow((int) decimals));
+            result = result.add(new BigDecimal(value).divide(BigDecimal.TEN.pow((int) decimals)));
         }
-        return "0";
+        if(result.compareTo(BigDecimal.ZERO) > 0) {
+            return "+" + result.toPlainString();
+        } else {
+            return result.toPlainString();
+        }
     }
 
 }

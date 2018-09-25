@@ -25,14 +25,13 @@
 
 package io.nuls.account.rpc.cmd;
 
-import io.nuls.kernel.model.Address;
 import io.nuls.core.tools.date.DateUtil;
+import io.nuls.core.tools.str.StringUtils;
+import io.nuls.kernel.model.CommandResult;
 import io.nuls.kernel.model.RpcClientResult;
-import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.CommandBuilder;
 import io.nuls.kernel.utils.CommandHelper;
-import io.nuls.kernel.model.CommandResult;
-import io.nuls.kernel.processor.CommandProcessor;
 import io.nuls.kernel.utils.RestFulUtils;
 
 import java.util.Date;
@@ -71,7 +70,7 @@ public class GetAccountProcessor implements CommandProcessor {
         if (!CommandHelper.checkArgsIsNull(args)) {
             return false;
         }
-        if (!AddressTool.validAddress(args[1])) {
+        if (StringUtils.isBlank(args[1])) {
             return false;
         }
         return true;
@@ -81,11 +80,11 @@ public class GetAccountProcessor implements CommandProcessor {
     public CommandResult execute(String[] args) {
         String address = args[1];
         RpcClientResult result = restFul.get("/account/" + address, null);
-        if(result.isFailed()){
+        if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        Map<String, Object> map = (Map)result.getData();
-        map.put("createTime",  DateUtil.convertDate(new Date((Long)map.get("createTime"))));
+        Map<String, Object> map = (Map) result.getData();
+        map.put("createTime", DateUtil.convertDate(new Date((Long) map.get("createTime"))));
         result.setData(map);
         return CommandResult.getResult(result);
     }

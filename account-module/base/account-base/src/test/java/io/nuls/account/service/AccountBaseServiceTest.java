@@ -27,7 +27,6 @@ package io.nuls.account.service;
 
 import io.nuls.account.model.Account;
 import io.nuls.core.tools.crypto.Hex;
-import io.nuls.db.module.impl.LevelDbModuleBootstrap;
 import io.nuls.kernel.MicroKernelBootstrap;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.core.SpringLiteContext;
