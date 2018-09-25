@@ -344,7 +344,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         if(number < 0) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR);
         }
-        if(prevStateRoot == null) {
+        if(executor == null && prevStateRoot == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
         try {
@@ -761,7 +761,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             Result<ContractResult> result = createContract(track, height, stateRoot, createContractData);
             ContractResult contractResult = result.getData();
             if (contractResult != null && contractResult.isSuccess()) {
-                Result nrc20Result = vmHelper.validateNrc20Contract(track, createContractTransaction, contractResult);
+                Result nrc20Result = vmHelper.validateNrc20Contract((ProgramExecutor) contractResult.getTxTrack(), createContractTransaction, contractResult);
                 if(nrc20Result.isFailed()) {
                     contractResult.setError(true);
                     if(ContractErrorCode.CONTRACT_NRC20_SYMBOL_FORMAT_INCORRECT.equals(nrc20Result.getErrorCode())) {
@@ -1268,6 +1268,36 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         ContractResult contractResult = invokeContractResult.getData();
         if (contractResult != null) {
             this.handleContractResult(tx, contractResult, stateRoot, blockTime, toMaps, contractUsedCoinMap);
+        }
+
+        return Result.getSuccess().setData(contractResult);
+    }
+
+    @Override
+    public Result<ContractResult> batchProcessTx(Transaction tx, long bestHeight, Block block, byte[] stateRoot, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, boolean isForkChain) {
+        if(stateRoot == null) {
+            return Result.getFailed();
+        }
+
+        BlockHeader blockHeader = block.getHeader();
+        long blockTime = blockHeader.getTime();
+        ProgramExecutor executor = localProgramExecutor.get();
+        if(executor == null) {
+            return Result.getFailed();
+        }
+
+        ContractTransaction contractTx = (ContractTransaction) tx;
+        contractTx.setBlockHeader(blockHeader);
+        // 验证区块时发现智能合约交易就调用智能合约
+        Result<ContractResult> invokeContractResult = this.invokeContract(executor, tx, bestHeight, null, isForkChain);
+        ContractResult contractResult = invokeContractResult.getData();
+        if (contractResult != null) {
+            Result<byte[]> handleContractResult;
+            if(isForkChain) {
+                handleContractResult = this.verifyContractResult(tx, contractResult, stateRoot, blockTime, toMaps, contractUsedCoinMap, bestHeight);
+            } else {
+                handleContractResult = this.verifyContractResult(tx, contractResult, stateRoot, blockTime, toMaps, contractUsedCoinMap);
+            }
         }
 
         return Result.getSuccess().setData(contractResult);

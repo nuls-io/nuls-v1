@@ -40,6 +40,7 @@ import java.io.Serializable;
 public class BlockHeaderDto implements Serializable {
 
     private String hash;
+    private String preHash;
     private long time;
     private long height;
     //23 bytes
@@ -50,6 +51,7 @@ public class BlockHeaderDto implements Serializable {
 
     public BlockHeaderDto(BlockHeader header) throws IOException {
         this.hash = header.getHash().getDigestHex();
+        this.preHash = header.getPreHash().getDigestHex();
         this.time = header.getTime();
         this.height = header.getHeight();
         this.packingAddress = header.getPackingAddress();
@@ -62,6 +64,14 @@ public class BlockHeaderDto implements Serializable {
 
     public void setHash(String hash) {
         this.hash = hash;
+    }
+
+    public String getPreHash() {
+        return preHash;
+    }
+
+    public void setPreHash(String preHash) {
+        this.preHash = preHash;
     }
 
     public long getTime() {
