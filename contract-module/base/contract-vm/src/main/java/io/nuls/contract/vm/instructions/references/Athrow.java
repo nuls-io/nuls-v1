@@ -28,6 +28,7 @@ import io.nuls.contract.vm.Frame;
 import io.nuls.contract.vm.ObjectRef;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.util.Constants;
+import io.nuls.contract.vm.util.Log;
 import org.objectweb.asm.tree.TryCatchBlockNode;
 
 import java.util.List;

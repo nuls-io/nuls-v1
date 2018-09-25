@@ -29,6 +29,7 @@ import io.nuls.contract.vm.code.ClassCodeLoader;
 import io.nuls.contract.vm.code.FieldCode;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.util.Constants;
+import io.nuls.contract.vm.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;

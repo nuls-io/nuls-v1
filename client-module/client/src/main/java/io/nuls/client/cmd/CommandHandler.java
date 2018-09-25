@@ -191,6 +191,7 @@ public class CommandHandler {
         register(new CallContractProcessor());
         register(new ViewContractProcessor());
         register(new TokenTransferProcessor());
+        register(new DeleteContractProcessor());
         JSONUtils.getInstance().configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         sdkInit();
     }

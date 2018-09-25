@@ -52,6 +52,7 @@ import io.nuls.contract.vm.program.ProgramMethodArg;
 import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.contract.vm.program.impl.ProgramContext;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
+import io.nuls.contract.vm.util.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.ethereum.core.Repository;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
@@ -307,7 +308,7 @@ public class VM {
                         lastFrame.operandStack.push(frame.result.getValue(), frame.result.getVariableType());
                     }
                 }
-                //Log.continueMethod(lastframe.methodCode);
+                //Log.continueMethod(lastFrame.methodCode);
             } else {
                 this.result = frame.result;
             }
