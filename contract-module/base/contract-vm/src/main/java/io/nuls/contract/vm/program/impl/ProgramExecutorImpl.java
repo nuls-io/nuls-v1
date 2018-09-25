@@ -40,8 +40,11 @@ import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.db.service.DBService;
 import org.apache.commons.lang3.StringUtils;
+import org.ethereum.config.CommonConfig;
 import org.ethereum.core.AccountState;
 import org.ethereum.core.Repository;
+import org.ethereum.datasource.Source;
+import org.ethereum.datasource.leveldb.LevelDbDataSource;
 import org.ethereum.db.RepositoryRoot;
 import org.ethereum.util.FastByteComparisons;
 import org.ethereum.vm.DataWord;
@@ -59,7 +62,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private final VMContext vmContext;
 
-    private final KeyValueSource source;
+    private final Source<byte[], byte[]> source;
 
     private final Repository repository;
 
@@ -80,10 +83,10 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     public ProgramExecutorImpl(VMContext vmContext, DBService dbService) {
-        this(vmContext, new KeyValueSource(dbService), null, null, null);
+        this(vmContext, stateSource(dbService), null, null, null);
     }
 
-    private ProgramExecutorImpl(VMContext vmContext, KeyValueSource source, Repository repository, byte[] prevStateRoot, Thread thread) {
+    private ProgramExecutorImpl(VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot, Thread thread) {
         this.vmContext = vmContext;
         this.source = source;
         this.repository = repository;
@@ -97,7 +100,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         if (log.isDebugEnabled()) {
             log.debug("begin vm root: {}", Hex.toHexString(prevStateRoot));
         }
-        //source.begin();
         Repository repository = new RepositoryRoot(source, prevStateRoot);
         return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, Thread.currentThread());
     }
@@ -117,9 +119,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         checkThread();
         if (!revert) {
             repository.commit();
-            //if (prevStateRoot != null) {
-            //    source.commit();
-            //}
+            if (prevStateRoot != null) {
+                CommonConfig.getDefault().dbFlushManager().flush();
+            }
             logTime("commit");
         }
     }
@@ -534,6 +536,11 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         return classCodes.values().stream().filter(classCode -> !classCode.isAbstract
                 && allCodes.instanceOf(classCode, ProgramConstants.EVENT_INTERFACE_NAME))
                 .collect(Collectors.toList());
+    }
+
+    private static Source<byte[], byte[]> stateSource(DBService dbService) {
+        LevelDbDataSource.dbService = dbService;
+        return CommonConfig.getDefault().stateSource();
     }
 
     public void logTime(String message) {
