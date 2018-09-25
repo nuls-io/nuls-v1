@@ -364,7 +364,7 @@ public class AccountLedgerResource {
         Long fee = null;
         Long maxAmount = null;
         Map<String, Long> map = new HashMap<>();
-        if (!result.isSuccess()) {
+        if (result.isSuccess()) {
             fee = ((Na) result.getData()).getValue();
             //如果手续费大于理论最大值，则说明交易过大，需要计算最大交易金额
             long feeMax = TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES.multiply(TxMaxSizeValidator.MAX_TX_BYTES).getValue();
