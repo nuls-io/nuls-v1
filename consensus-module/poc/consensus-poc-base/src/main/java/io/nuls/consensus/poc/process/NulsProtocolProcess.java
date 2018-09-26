@@ -274,8 +274,8 @@ public class NulsProtocolProcess {
                 //如果是linux系统则立即停止，否则将强制更新标志设为true，由钱包提示
                 if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("LINUX") != -1) {
                     saveBlockTempProtocolInfo(blockHeader, tempInfoPo);
-                    Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
-                    Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please update immediately **********");
+                    Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please upgrade immediately **********");
+                    Log.error(">>>>>> The new protocol version has taken effect, this program version is too low has stopped automatically, please upgrade immediately **********");
                     NulsContext.getInstance().exit(1);
                 } else {
                     NulsContext.mastUpGrade = true;
