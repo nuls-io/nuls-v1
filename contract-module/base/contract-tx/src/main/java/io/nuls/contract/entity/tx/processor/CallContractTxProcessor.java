@@ -191,9 +191,7 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
     @Override
     public Result onCommit(CallContractTransaction tx, Object secondaryData) {
         try {
-            // 保存合约执行结果
             ContractResult contractResult = tx.getContractResult();
-            contractService.saveContractExecuteResult(tx.getHash(), contractResult);
 
             // 保存调用合约交易的UTXO
             Result utxoResult = contractUtxoService.saveUtxoForContractAddress(tx);
@@ -293,6 +291,9 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                                 contractBalanceManager.subtractContractToken(toStr, contractAddressStr, token);
                             } catch (Exception e) {
                                 // skip it
+                            } finally {
+                                contractResult.setError(true);
+                                contractResult.setErrorMessage("this contract has been terminated");
                             }
                         } else {
                             String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddress);
@@ -311,6 +312,9 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                 // 处理合约事件
                 vmHelper.dealEvents(newestStateRoot, tx, contractResult, contractAddressInfoPo);
             }
+
+            // 保存合约执行结果
+            contractService.saveContractExecuteResult(tx.getHash(), contractResult);
 
         } catch (Exception e) {
             Log.error("save call contract tx error.", e);
