@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.util.Arrays;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,54 +60,8 @@ public class Block {
         this.rlpEncoded = rawData;
     }
 
-    public Block(BlockHeader header) {
-
-        this(header.getParentHash(),
-                header.getUnclesHash(),
-                header.getCoinbase(),
-                header.getLogsBloom(),
-                header.getDifficulty(),
-                header.getNumber(),
-                header.getGasLimit(),
-                header.getGasUsed(),
-                header.getTimestamp(),
-                header.getExtraData(),
-                header.getMixHash(),
-                header.getNonce(),
-                header.getReceiptsRoot(),
-                header.getTxTrieRoot(),
-                header.getStateRoot());
-    }
-
-    public Block(byte[] parentHash, byte[] difficulty, long number, byte[] stateRoot) {
-        this(parentHash, null, null, null,
-                difficulty, number, null,
-                0, 0, null,
-                null, null, null,
-                null, stateRoot);
-    }
-
-    public Block(byte[] parentHash, byte[] unclesHash, byte[] coinbase, byte[] logsBloom,
-                 byte[] difficulty, long number, byte[] gasLimit,
-                 long gasUsed, long timestamp, byte[] extraData,
-                 byte[] mixHash, byte[] nonce, byte[] receiptsRoot,
-                 byte[] transactionsRoot, byte[] stateRoot) {
-
-        this(parentHash, unclesHash, coinbase, logsBloom, difficulty, number, gasLimit,
-                gasUsed, timestamp, extraData, mixHash, nonce);
-
-        this.header.setStateRoot(stateRoot);
-        this.header.setReceiptsRoot(receiptsRoot);
-    }
-
-
-    public Block(byte[] parentHash, byte[] unclesHash, byte[] coinbase, byte[] logsBloom,
-                 byte[] difficulty, long number, byte[] gasLimit,
-                 long gasUsed, long timestamp,
-                 byte[] extraData, byte[] mixHash, byte[] nonce) {
-        this.header = new BlockHeader(parentHash, unclesHash, coinbase, logsBloom,
-                difficulty, number, gasLimit, gasUsed,
-                timestamp, extraData, mixHash, nonce);
+    public Block(byte[] parentHash, byte[] hash, long number) {
+        this.header = new BlockHeader(parentHash, hash, number);
         this.parsed = true;
     }
 
@@ -139,11 +92,6 @@ public class Block {
     public byte[] getParentHash() {
         parseRLP();
         return this.header.getParentHash();
-    }
-
-    public BigInteger getDifficultyBI() {
-        parseRLP();
-        return this.header.getDifficultyBI();
     }
 
     public long getNumber() {
