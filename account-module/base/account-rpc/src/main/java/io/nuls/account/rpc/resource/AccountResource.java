@@ -1338,7 +1338,7 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
-    public RpcClientResult multiAliasFee(@BeanParam() MultiAliasFeeForm form) {
+    public RpcClientResult multiAliasFee(@BeanParam() MultiAliasFeeForm form) throws Exception{
         if (!AddressTool.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
@@ -1348,7 +1348,13 @@ public class AccountResource {
         Result result = aliasService.getAliasFee(form.getAddress(), form.getAlias());
         AliasTransaction tx = new AliasTransaction();
         tx.setTime(TimeService.currentTimeMillis());
-        Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(), form.getPubkeys());
+        Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
+        MultiSigAccount multiSigAccount = sigAccountResult.getData();
+        Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
+        if(redeemScript == null){
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
+        //Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(), form.getPubkeys());
         Alias alias = new Alias(AddressTool.getAddress(form.getAddress()), form.getAlias());
         tx.setTxData(alias);
         try {
@@ -1373,7 +1379,7 @@ public class AccountResource {
             return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
         }
         //交易签名的长度为m*单个签名长度+赎回脚本长度
-        int scriptSignLenth = redeemScript.getProgram().length + form.getM() * 72;
+        int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM()) * 72;
         Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES,scriptSignLenth);
         Map<String, Long> map = new HashMap<>();
         Long fee = null;

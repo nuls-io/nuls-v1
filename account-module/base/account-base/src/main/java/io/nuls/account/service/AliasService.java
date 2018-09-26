@@ -439,9 +439,6 @@ public class AliasService {
         }
         try {
             byte[] addressBytes = AddressTool.getAddress(addr);
-            /*if(!isMutilAliasUsable(addressBytes,aliasName)){
-                return Result.getFailed(AccountErrorCode.ALIAS_EXIST);
-            }*/
             Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(addr);
             MultiSigAccount multiSigAccount = sigAccountResult.getData();
             Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
