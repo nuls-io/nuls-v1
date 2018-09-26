@@ -86,6 +86,8 @@ public class ProgramInvoke {
 
     private boolean create;
 
+    private boolean internalCall;
+
     public byte[] getContractAddress() {
         return contractAddress;
     }
@@ -180,6 +182,14 @@ public class ProgramInvoke {
 
     public void setCreate(boolean create) {
         this.create = create;
+    }
+
+    public boolean isInternalCall() {
+        return internalCall;
+    }
+
+    public void setInternalCall(boolean internalCall) {
+        this.internalCall = internalCall;
     }
 
 }

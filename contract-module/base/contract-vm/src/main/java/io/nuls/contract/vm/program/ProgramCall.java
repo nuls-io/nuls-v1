@@ -83,6 +83,8 @@ public class ProgramCall {
      */
     private boolean estimateGas;
 
+    private boolean internalCall;
+
     public void args(String... args) {
         setArgs(args);
     }
@@ -187,6 +189,14 @@ public class ProgramCall {
 
     public void setEstimateGas(boolean estimateGas) {
         this.estimateGas = estimateGas;
+    }
+
+    public boolean isInternalCall() {
+        return internalCall;
+    }
+
+    public void setInternalCall(boolean internalCall) {
+        this.internalCall = internalCall;
     }
 
     @Override
