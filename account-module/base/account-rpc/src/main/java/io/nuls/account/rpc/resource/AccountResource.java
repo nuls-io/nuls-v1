@@ -1199,6 +1199,9 @@ public class AccountResource {
         if (form.getM() == 0) {
             form.setM(form.getPubkeys().size());
         }
+        if(form.getPubkeys().size() < form.getM()){
+            return Result.getFailed(AccountErrorCode.SIGN_COUNT_TOO_LARGE).toRpcClientResult();
+        }
         Set<String> pubkeySet = new HashSet<>(form.getPubkeys());
         if(pubkeySet.size() < form.getPubkeys().size()){
             return Result.getFailed(AccountErrorCode.PUBKEY_REPEAT).toRpcClientResult();
@@ -1265,6 +1268,9 @@ public class AccountResource {
         }
         if (form.getM() == 0) {
             form.setM(form.getPubkeys().size());
+        }
+        if(form.getPubkeys().size() < form.getM()){
+            return Result.getFailed(AccountErrorCode.SIGN_COUNT_TOO_LARGE).toRpcClientResult();
         }
         Result result = accountService.saveMultiSigAccount(form.getAddress(), form.getPubkeys(), form.getM());
         if (result.isFailed()) {

@@ -56,4 +56,5 @@ public interface AccountErrorCode extends KernelErrorCode {
     ErrorCode NICKNAME_TOO_LONG = ErrorCode.init("50020");
     ErrorCode INPUT_TOO_SMALL = ErrorCode.init("50021");
     ErrorCode MUST_BURN_A_NULS = ErrorCode.init("50022");
+    ErrorCode SIGN_COUNT_TOO_LARGE = ErrorCode.init("50023");
 }
