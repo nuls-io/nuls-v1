@@ -44,6 +44,7 @@ import io.nuls.core.tools.param.AssertUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -294,11 +295,13 @@ public class AliasService {
         if (!AddressTool.validAddress(address)) {
             Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
         }
-        Account account = accountService.getAccount(address).getData();
-        if (null == account) {
-            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        byte[] addressBytes = AddressTool.getAddress(address);
+        if(addressBytes[2] == NulsContext.P2SH_ADDRESS_TYPE){
+            Account account = accountService.getAccount(address).getData();
+            if (null == account) {
+                return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
         }
-        byte[] addressBytes = account.getAddress().getAddressBytes();
         try {
             //创建一笔设置别名的交易
             AliasTransaction tx = new AliasTransaction();
