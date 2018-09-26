@@ -1099,7 +1099,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         } else {
             // 提交这笔交易
             Object txTrackObj = contractResult.getTxTrack();
-            if(txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
+            if(contractResult.isSuccess() && txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
                 ProgramExecutor txTrack = (ProgramExecutor) txTrackObj;
                 if(Log.isDebugEnabled()) {
                     Log.debug("===tx track commit.");
@@ -1233,7 +1233,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         } else {
             // 提交这笔交易
             Object txTrackObj = contractResult.getTxTrack();
-            if(txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
+            if(contractResult.isSuccess() && txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
                 ProgramExecutor txTrack = (ProgramExecutor) txTrackObj;
                 if(Log.isDebugEnabled()) {
                     Log.debug("===tx track commit.");
