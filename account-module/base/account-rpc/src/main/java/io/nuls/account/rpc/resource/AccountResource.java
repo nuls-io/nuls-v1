@@ -1354,7 +1354,6 @@ public class AccountResource {
         if(redeemScript == null){
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
-        //Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(), form.getPubkeys());
         Alias alias = new Alias(AddressTool.getAddress(form.getAddress()), form.getAlias());
         tx.setTxData(alias);
         try {

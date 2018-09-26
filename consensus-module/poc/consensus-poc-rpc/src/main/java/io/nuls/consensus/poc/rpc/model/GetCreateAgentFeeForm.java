@@ -57,11 +57,6 @@ public class GetCreateAgentFeeForm {
     @QueryParam("deposit")
     private long deposit;
 
-    @ApiModelProperty(name = "pubkeys", value = "需要签名的公钥列表", required = true)
-    private List<String> pubkeys;
-
-    @ApiModelProperty(name = "m", value = "至少需要几个公钥验证通过", required = true)
-    private int m;
     public double getCommissionRate() {
         return commissionRate;
     }
@@ -102,19 +97,4 @@ public class GetCreateAgentFeeForm {
         this.deposit = deposit;
     }
 
-    public List<String> getPubkeys() {
-        return pubkeys;
-    }
-
-    public void setPubkeys(List<String> pubkeys) {
-        this.pubkeys = pubkeys;
-    }
-
-    public int getM() {
-        return m;
-    }
-
-    public void setM(int m) {
-        this.m = m;
-    }
 }
