@@ -50,9 +50,9 @@ public class Heap {
 
     private VM vm;
 
-    public final HeapMap<ObjectRef, Map<String, Object>> objects = new HeapMap<>(1024);
+    public final Map<ObjectRef, Map<String, Object>> objects = new HashMap<>(1024);
 
-    public final HeapMap<String, Object> arrays = new HeapMap<>(1024);
+    public final Map<String, Object> arrays = new HashMap<>(1024);
 
     private final Set<ObjectRef> changes = new HashSet<>(1024);
 

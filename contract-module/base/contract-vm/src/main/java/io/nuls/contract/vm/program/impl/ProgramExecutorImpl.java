@@ -35,14 +35,16 @@ import io.nuls.contract.vm.code.ClassCodes;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.exception.RevertException;
-import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.db.service.DBService;
 import org.apache.commons.lang3.StringUtils;
+import org.ethereum.config.CommonConfig;
 import org.ethereum.core.AccountState;
 import org.ethereum.core.Repository;
+import org.ethereum.datasource.Source;
+import org.ethereum.datasource.leveldb.LevelDbDataSource;
 import org.ethereum.db.RepositoryRoot;
 import org.ethereum.util.FastByteComparisons;
 import org.ethereum.vm.DataWord;
@@ -60,25 +62,17 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private final VMContext vmContext;
 
-    private final KeyValueSource source;
+    private final Source<byte[], byte[]> source;
 
     private final Repository repository;
 
     private final byte[] prevStateRoot;
-
-    private final Map<String, VM> vmCache;
-
-    private final Map<String, VM> commitVms;
 
     private final long beginTime;
 
     private long currentTime;
 
     private boolean revert;
-
-    private String contractAddress;
-
-    private VM contractVM;
 
     private Thread thread;
 
@@ -89,17 +83,15 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     public ProgramExecutorImpl(VMContext vmContext, DBService dbService) {
-        this(vmContext, new KeyValueSource(dbService), null, null, null, null, null);
+        this(vmContext, stateSource(dbService), null, null, null);
     }
 
-    private ProgramExecutorImpl(VMContext vmContext, KeyValueSource source, Repository repository, byte[] prevStateRoot, Map<String, VM> vmCache, Map<String, VM> commitVms, Thread thread) {
+    private ProgramExecutorImpl(VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot, Thread thread) {
         this.vmContext = vmContext;
         this.source = source;
         this.repository = repository;
         this.prevStateRoot = prevStateRoot;
         this.beginTime = this.currentTime = System.currentTimeMillis();
-        this.vmCache = vmCache;
-        this.commitVms = commitVms;
         this.thread = thread;
     }
 
@@ -108,9 +100,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         if (log.isDebugEnabled()) {
             log.debug("begin vm root: {}", Hex.toHexString(prevStateRoot));
         }
-        //source.begin();
         Repository repository = new RepositoryRoot(source, prevStateRoot);
-        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, new HashMap<>(1024), new LinkedHashMap<>(1024), Thread.currentThread());
+        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, Thread.currentThread());
     }
 
     @Override
@@ -120,43 +111,17 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             log.debug("startTracking");
         }
         Repository track = repository.startTracking();
-        return new ProgramExecutorImpl(vmContext, source, track, null, vmCache, commitVms, thread);
+        return new ProgramExecutorImpl(vmContext, source, track, null, thread);
     }
 
     @Override
     public void commit() {
         checkThread();
         if (!revert) {
-            if (contractVM != null) {
-                contractVM.heap.objects.commit();
-                contractVM.heap.arrays.commit();
-                commitVms.put(contractAddress, contractVM);
-            }
-            //if (prevStateRoot != null) {
-            for (Map.Entry<String, VM> vmEntry : commitVms.entrySet()) {
-                String address = vmEntry.getKey();
-                VM vm = vmEntry.getValue();
-                byte[] contractAddress = NativeAddress.toBytes(address);
-
-                vm.heap.objects.clearCache();
-                vm.heap.arrays.clearCache();
-
-                Map<DataWord, DataWord> contractState = vm.heap.contractState();
-                logTime("contract state");
-
-                for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
-                    DataWord key = entry.getKey();
-                    DataWord value = entry.getValue();
-                    repository.addStorageRow(contractAddress, key, value);
-                }
-                logTime("add contract state");
-            }
-            commitVms.clear();
-            //}
             repository.commit();
-            //if (prevStateRoot != null) {
-            //    source.commit();
-            //}
+            if (prevStateRoot != null) {
+                CommonConfig.getDefault().dbFlushManager().flush();
+            }
             logTime("commit");
         }
     }
@@ -263,23 +228,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 logTime("load code");
             }
 
-            contractAddress = NativeAddress.toString(programInvoke.getContractAddress());
-            VM vm;
-            if (vmCache == null) {
-                vm = VMFactory.createVM();
-            } else {
-                vm = vmCache.get(contractAddress);
-                if (vm == null) {
-                    vm = VMFactory.createVM();
-                } else {
-                    //vm.heap.objects.clearCache();
-                    //vm.heap.arrays.clearCache();
-                    //vm = new VM(vm.heap, vm.methodArea);
-                    vm = VMFactory.createVM();
-                }
-                vmCache.put(contractAddress, vm);
-            }
 
+            VM vm = VMFactory.createVM();
             logTime("load vm");
 
             vm.heap.loadClassCodes(classCodes);
@@ -385,7 +335,15 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             logTime("contract return");
 
-            this.contractVM = vm;
+            Map<DataWord, DataWord> contractState = vm.heap.contractState();
+            logTime("contract state");
+
+            for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
+                DataWord key = entry.getKey();
+                DataWord value = entry.getValue();
+                repository.addStorageRow(programInvoke.getContractAddress(), key, value);
+            }
+            logTime("add contract state");
 
             programResult.setGasUsed(vm.getGasUsed());
 
@@ -578,6 +536,11 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         return classCodes.values().stream().filter(classCode -> !classCode.isAbstract
                 && allCodes.instanceOf(classCode, ProgramConstants.EVENT_INTERFACE_NAME))
                 .collect(Collectors.toList());
+    }
+
+    private static Source<byte[], byte[]> stateSource(DBService dbService) {
+        LevelDbDataSource.dbService = dbService;
+        return CommonConfig.getDefault().stateSource();
     }
 
     public void logTime(String message) {

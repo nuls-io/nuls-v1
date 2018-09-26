@@ -292,7 +292,7 @@ public class VMHelper implements InitializingBean {
         this.refreshTokenBalance(null, stateRoot, po, address, contractAddress);
     }
 
-    public void refreshTokenBalance(ProgramExecutor executor, byte[] stateRoot, ContractAddressInfoPo po, String address, String contractAddress) {
+    private void refreshTokenBalance(ProgramExecutor executor, byte[] stateRoot, ContractAddressInfoPo po, String address, String contractAddress) {
         long blockHeight = po.getBlockHeight();
         long bestBlockHeight = NulsContext.getInstance().getBestHeight();
         String tokenName = po.getNrc20TokenName();

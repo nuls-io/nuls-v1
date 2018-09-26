@@ -344,7 +344,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         if(number < 0) {
             return Result.getFailed(ContractErrorCode.PARAMETER_ERROR);
         }
-        if(prevStateRoot == null) {
+        if(executor == null && prevStateRoot == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
         try {
@@ -711,7 +711,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         return invokeContract(null, tx, height, stateRoot, false);
     }
 
-    public Result<ContractResult> invokeContract(ProgramExecutor track, Transaction tx, long height, byte[] stateRoot, boolean isForkChain) {
+    private Result<ContractResult> invokeContract(ProgramExecutor track, Transaction tx, long height, byte[] stateRoot, boolean isForkChain) {
         if(tx == null || height < 0) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
         }
@@ -758,10 +758,13 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         if (txType == ContractConstant.TX_TYPE_CREATE_CONTRACT) {
             CreateContractTransaction createContractTransaction = (CreateContractTransaction) tx;
             CreateContractData createContractData = createContractTransaction.getTxData();
+            if(!ContractUtil.checkPrice(createContractData.getPrice())) {
+                return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
+            }
             Result<ContractResult> result = createContract(track, height, stateRoot, createContractData);
             ContractResult contractResult = result.getData();
             if (contractResult != null && contractResult.isSuccess()) {
-                Result nrc20Result = vmHelper.validateNrc20Contract(track, createContractTransaction, contractResult);
+                Result nrc20Result = vmHelper.validateNrc20Contract((ProgramExecutor) contractResult.getTxTrack(), createContractTransaction, contractResult);
                 if(nrc20Result.isFailed()) {
                     contractResult.setError(true);
                     if(ContractErrorCode.CONTRACT_NRC20_SYMBOL_FORMAT_INCORRECT.equals(nrc20Result.getErrorCode())) {
@@ -782,6 +785,9 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         } else if(txType == ContractConstant.TX_TYPE_CALL_CONTRACT) {
             CallContractTransaction callContractTransaction = (CallContractTransaction) tx;
             CallContractData callContractData = callContractTransaction.getTxData();
+            if(!ContractUtil.checkPrice(callContractData.getPrice())) {
+                return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
+            }
             Result<ContractResult> result = callContract(track, height, stateRoot, callContractData);
             byte[] contractAddress = callContractData.getContractAddress();
             BigInteger preBalance = vmContext.getBalance(contractAddress);
@@ -1274,72 +1280,33 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
     @Override
-    public Result<byte[]> processTxs(List<Transaction> txs, long bestHeight, Block block, byte[] stateRoot, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, boolean isForkChain) {
+    public Result<ContractResult> batchProcessTx(Transaction tx, long bestHeight, Block block, byte[] stateRoot, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, boolean isForkChain) {
         if(stateRoot == null) {
             return Result.getFailed();
         }
 
         BlockHeader blockHeader = block.getHeader();
         long blockTime = blockHeader.getTime();
-        // 为本次验证区块增加一个合约的临时余额区，用于记录本次合约地址余额的变化
-        createContractTempBalance();
-
-        ProgramExecutor executor = programExecutor.begin(stateRoot);
-        if(Log.isDebugEnabled()) {
-            Log.debug("===start stateRoot: {}", Hex.encode(stateRoot));
+        ProgramExecutor executor = localProgramExecutor.get();
+        if(executor == null) {
+            return Result.getFailed();
         }
-        List<ContractResult> resultList = new ArrayList<>();
-        // 用于存储合约执行结果的stateRoot, 如果不为空，则说明验证、打包的区块是同一个节点
-        byte[] tempStateRoot = null;
-        for (Transaction tx : txs){
 
-            if (tx.isSystemTx() || !ContractUtil.isContractTransaction(tx)) {
-                continue;
-            }
-
-            ContractTransaction contractTx = (ContractTransaction) tx;
-            contractTx.setBlockHeader(blockHeader);
-            // 验证区块时发现智能合约交易就调用智能合约
-            Result<ContractResult> invokeContractResult = this.invokeContract(executor, tx, bestHeight, null, isForkChain);
-            ContractResult contractResult = invokeContractResult.getData();
-            if (contractResult != null) {
-                tempStateRoot = contractResult.getStateRoot();
-                resultList.add(contractResult);
-
-                Result<byte[]> handleContractResult;
-                if(isForkChain) {
-                    handleContractResult = this.verifyContractResult(tx, contractResult, stateRoot, blockTime, toMaps, contractUsedCoinMap, bestHeight);
-                } else {
-                    handleContractResult = this.verifyContractResult(tx, contractResult, stateRoot, blockTime, toMaps, contractUsedCoinMap);
-                }
-                // 更新世界状态
-                //stateRoot = handleContractResult.getData();
-                if(Log.isDebugEnabled()) {
-                    Log.debug("===execute stateRoot: {}", Hex.encode(stateRoot));
-                }
+        ContractTransaction contractTx = (ContractTransaction) tx;
+        contractTx.setBlockHeader(blockHeader);
+        // 验证区块时发现智能合约交易就调用智能合约
+        Result<ContractResult> invokeContractResult = this.invokeContract(executor, tx, bestHeight, null, isForkChain);
+        ContractResult contractResult = invokeContractResult.getData();
+        if (contractResult != null) {
+            Result<byte[]> handleContractResult;
+            if(isForkChain) {
+                handleContractResult = this.verifyContractResult(tx, contractResult, stateRoot, blockTime, toMaps, contractUsedCoinMap, bestHeight);
+            } else {
+                handleContractResult = this.verifyContractResult(tx, contractResult, stateRoot, blockTime, toMaps, contractUsedCoinMap);
             }
         }
 
-        executor.commit();
-
-        // 如果不为空，则说明验证、打包的区块是同一个节点
-        if(tempStateRoot != null) {
-            stateRoot = tempStateRoot;
-        } else {
-            stateRoot = executor.getRoot();
-            for(ContractResult result : resultList) {
-                result.setStateRoot(stateRoot);
-            }
-        }
-
-        if(Log.isDebugEnabled()) {
-            Log.debug("===end stateRoot: {}", Hex.encode(stateRoot));
-        }
-        // 验证区块交易结束后移除临时余额区
-        removeContractTempBalance();
-
-        blockHeader.setStateRoot(stateRoot);
-        return Result.getSuccess().setData(stateRoot);
+        return Result.getSuccess().setData(contractResult);
     }
 
     @Override

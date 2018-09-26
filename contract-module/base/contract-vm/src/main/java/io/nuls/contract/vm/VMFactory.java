@@ -96,9 +96,7 @@ public class VMFactory {
         VM = newVM();
         MethodArea.INIT_CLASS_CODES.putAll(VM.methodArea.getClassCodes());
         MethodArea.INIT_METHOD_CODES.putAll(VM.methodArea.getMethodCodes());
-        VM.heap.objects.commit();
         Heap.INIT_OBJECTS.putAll(VM.heap.objects);
-        VM.heap.arrays.commit();
         Heap.INIT_ARRAYS.putAll(VM.heap.arrays);
     }
 
