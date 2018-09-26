@@ -1851,7 +1851,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
         try {
             List<String> pubkeys = new ArrayList<>();
             if (multiSigAccount.getPubKeyList() != null && multiSigAccount.getM() > 0
-                    && multiSigAccount.getPubKeyList().size() > multiSigAccount.getM()) {
+                    && multiSigAccount.getPubKeyList().size() >= multiSigAccount.getM()) {
                 for (byte[] pubkeyByte : multiSigAccount.getPubKeyList()) {
                     pubkeys.add(Hex.encode(pubkeyByte));
                 }
