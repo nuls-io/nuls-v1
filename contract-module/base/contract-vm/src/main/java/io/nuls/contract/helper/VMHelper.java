@@ -37,10 +37,7 @@ import io.nuls.contract.storage.po.ContractAddressInfoPo;
 import io.nuls.contract.storage.service.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.VMContext;
-import io.nuls.contract.vm.program.ProgramCall;
-import io.nuls.contract.vm.program.ProgramExecutor;
-import io.nuls.contract.vm.program.ProgramMethod;
-import io.nuls.contract.vm.program.ProgramResult;
+import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
@@ -427,4 +424,8 @@ public class VMHelper implements InitializingBean {
         return Result.getSuccess();
     }
 
+    public ProgramStatus getContractStatus(byte[] stateRoot, byte[] contractAddress) {
+        ProgramExecutor track = programExecutor.begin(stateRoot);
+        return track.status(contractAddress);
+    }
 }

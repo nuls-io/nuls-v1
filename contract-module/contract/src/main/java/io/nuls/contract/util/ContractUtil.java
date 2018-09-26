@@ -220,7 +220,7 @@ public class ContractUtil {
         return resultMsg + errorMsg;
     }
 
-    public static boolean isStopContract(int status) {
+    public static boolean isTerminatedContract(int status) {
         return ContractConstant.STOP == status;
     }
 
