@@ -186,6 +186,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setArgs(programCreate.getArgs() != null ? programCreate.getArgs() : new String[0][0]);
         programInvoke.setEstimateGas(programCreate.isEstimateGas());
         programInvoke.setCreate(true);
+        programInvoke.setInternalCall(false);
         return execute(programInvoke);
     }
 
@@ -204,6 +205,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setArgs(programCall.getArgs() != null ? programCall.getArgs() : new String[0][0]);
         programInvoke.setEstimateGas(programCall.isEstimateGas());
         programInvoke.setCreate(false);
+        programInvoke.setInternalCall(programCall.isInternalCall());
         return execute(programInvoke);
     }
 
@@ -290,7 +292,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             BigInteger accountBalance = getAccountBalance(programInvoke.getContractAddress());
             BigInteger vmBalance = repository.getBalance(programInvoke.getContractAddress());
-            if (vmBalance.compareTo(accountBalance) != 0) {
+            if (!programInvoke.isInternalCall() && vmBalance.compareTo(accountBalance) != 0) {
                 return revert(String.format("balance error: accountBalance=%s, vmBalance=%s", accountBalance, vmBalance));
             }
 
