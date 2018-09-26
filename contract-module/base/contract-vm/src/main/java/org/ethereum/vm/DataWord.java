@@ -98,9 +98,7 @@ public final class DataWord implements Comparable<DataWord> {
 
     private String sData;
 
-    @JsonCreator
     public DataWord(String data) {
-        //this(Hex.decode(data));
         this(data.getBytes());
         this.sData = data;
     }
