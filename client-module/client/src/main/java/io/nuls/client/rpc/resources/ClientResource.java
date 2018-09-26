@@ -217,7 +217,7 @@ public class ClientResource {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "协议版本升级统计信息")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "success", response = Boolean.class)
+            @ApiResponse(code = 200, message = "success", response = ProtocolContainerDTO.class)
     })
     public RpcClientResult getProtocolInfo() {
         BlockHeader blockHeader = NulsContext.getInstance().getBestBlock().getHeader();

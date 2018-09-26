@@ -57,7 +57,7 @@ public interface PocConsensusErrorCode extends KernelErrorCode {
     ErrorCode YELLOW_PUNISH_TX_WRONG = ErrorCode.init("70020");
     ErrorCode ADDRESS_IS_CONSENSUS_SEED = ErrorCode.init("70021");
     ErrorCode TRANSACTIONS_NEVER_DOUBLE_SPEND = ErrorCode.init("70022");
-    ErrorCode WRONG_RED_PUNISH_REASON = ErrorCode.init("70023");
+    ErrorCode RED_CARD_VERIFICATION_FAILED = ErrorCode.init("70023");
     ErrorCode AGENT_PACKING_EXIST = ErrorCode.init("70024");
     ErrorCode AGENTADDR_AND_PACKING_SAME = ErrorCode.init("70025");
     ErrorCode REWARDADDR_PACKING_SAME = ErrorCode.init("70026");
