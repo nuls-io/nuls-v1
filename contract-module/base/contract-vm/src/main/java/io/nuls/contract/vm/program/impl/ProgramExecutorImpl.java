@@ -428,7 +428,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             return revert("contract has stopped");
         }
 
-        repository.setNonce(address, accountState.getNonce().negate());
+        repository.setNonce(address, BigInteger.ZERO);
 
         ProgramResult programResult = new ProgramResult();
 
