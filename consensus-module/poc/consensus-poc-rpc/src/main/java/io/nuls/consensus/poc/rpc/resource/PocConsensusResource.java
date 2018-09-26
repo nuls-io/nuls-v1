@@ -1574,7 +1574,7 @@ public class PocConsensusResource {
         if (!AddressTool.validAddress(form.getAddress()) || !AddressTool.validAddress(form.getSignAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        Account account = accountService.getAccount(form.getAddress()).getData();
+        Account account = accountService.getAccount(form.getSignAddress()).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
