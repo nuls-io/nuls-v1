@@ -1535,7 +1535,7 @@ public class PocConsensusResource {
         stopAgent.setCreateTxHash(agent.getTxHash());
         tx.setTime(TimeService.currentTimeMillis());
         tx.setTxData(stopAgent);
-        CoinData coinData = ConsensusTool.getStopMutilAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME, null);
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME, null);
         tx.setCoinData(coinData);
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
