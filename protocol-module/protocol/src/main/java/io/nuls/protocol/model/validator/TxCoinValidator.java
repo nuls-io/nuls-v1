@@ -34,6 +34,7 @@ public class TxCoinValidator implements NulsDataValidator<Transaction> {
             }
         } catch (Exception e) {
             Log.error(e);
+            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.DATA_ERROR);
         }
         return ValidateResult.getSuccessResult();
     }
