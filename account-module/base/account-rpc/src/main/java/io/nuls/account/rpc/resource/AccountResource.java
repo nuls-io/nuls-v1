@@ -1345,7 +1345,7 @@ public class AccountResource {
         if (StringUtils.isBlank(form.getAlias())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        Result result = aliasService.getAliasFee(form.getAddress(), form.getAlias());
+        Result result = aliasService.getMultiAliasFee(form.getAddress(), form.getAlias());
         AliasTransaction tx = new AliasTransaction();
         tx.setTime(TimeService.currentTimeMillis());
         Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
