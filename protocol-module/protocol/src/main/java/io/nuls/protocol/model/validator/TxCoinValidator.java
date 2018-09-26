@@ -19,14 +19,17 @@ public class TxCoinValidator implements NulsDataValidator<Transaction> {
     @Override
     public ValidateResult validate(Transaction tx) throws NulsException {
         try {
-            List<Coin> toList = tx.getCoinData().getTo();
-            if(toList != null && toList.size()>0){
-                for (Coin coin:toList) {
-                    if(coin.getOwner().length == 23 && coin.getOwner()[2] == NulsContext.P2SH_ADDRESS_TYPE){
-                        return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.COIN_OWNER_ERROR);
+            if(tx.getCoinData() != null){
+                List<Coin> toList = tx.getCoinData().getTo();
+                if(toList != null && toList.size()>0){
+                    for (Coin coin:toList) {
+                        if(coin.getOwner().length == 23 && coin.getOwner()[2] == NulsContext.P2SH_ADDRESS_TYPE){
+                            return ValidateResult.getFailedResult(this.getClass().getName(), KernelErrorCode.COIN_OWNER_ERROR);
+                        }
                     }
                 }
             }
+
         } catch (Exception e) {
             Log.error(e);
         }

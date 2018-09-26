@@ -109,7 +109,7 @@ public class ContractTokenInfo {
     }
 
     public boolean isStop() {
-        return ContractUtil.isStopContract(this.status);
+        return ContractUtil.isTerminatedContract(this.status);
     }
 
     public int getStatus() {

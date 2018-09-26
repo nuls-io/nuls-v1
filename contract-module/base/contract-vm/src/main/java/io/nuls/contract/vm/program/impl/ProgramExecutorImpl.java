@@ -24,6 +24,7 @@
  */
 package io.nuls.contract.vm.program.impl;
 
+import io.nuls.contract.entity.BlockHeaderDto;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.ObjectRef;
 import io.nuls.contract.vm.Result;
@@ -41,11 +42,15 @@ import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.db.service.DBService;
 import org.apache.commons.lang3.StringUtils;
 import org.ethereum.config.CommonConfig;
+import org.ethereum.config.DefaultConfig;
+import org.ethereum.config.SystemProperties;
 import org.ethereum.core.AccountState;
+import org.ethereum.core.Block;
 import org.ethereum.core.Repository;
 import org.ethereum.datasource.Source;
 import org.ethereum.datasource.leveldb.LevelDbDataSource;
 import org.ethereum.db.RepositoryRoot;
+import org.ethereum.db.StateSource;
 import org.ethereum.util.FastByteComparisons;
 import org.ethereum.vm.DataWord;
 import org.slf4j.Logger;
@@ -60,6 +65,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private static final Logger log = LoggerFactory.getLogger(ProgramExecutorImpl.class);
 
+    private final ProgramExecutorImpl parent;
+
     private final VMContext vmContext;
 
     private final Source<byte[], byte[]> source;
@@ -69,6 +76,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     private final byte[] prevStateRoot;
 
     private final long beginTime;
+
+    private long blockNumber;
 
     private long currentTime;
 
@@ -87,6 +96,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     private ProgramExecutorImpl(VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot, Thread thread) {
+        this.parent = this;
         this.vmContext = vmContext;
         this.source = source;
         this.repository = repository;
@@ -119,7 +129,27 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         checkThread();
         if (!revert) {
             repository.commit();
-            if (prevStateRoot != null) {
+            if (prevStateRoot == null) {
+                if (parent.blockNumber == 0) {
+                    parent.blockNumber = blockNumber;
+                }
+                if (parent.blockNumber != blockNumber) {
+                    throw new RuntimeException("must use the same block number");
+                }
+            } else {
+                if (vmContext != null) {
+                    BlockHeaderDto blockHeaderDto;
+                    try {
+                        blockHeaderDto = vmContext.getBlockHeader(blockNumber);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    byte[] parentHash = Hex.decode(blockHeaderDto.getPreHash());
+                    byte[] hash = Hex.decode(blockHeaderDto.getHash());
+                    Block block = new Block(parentHash, hash, blockNumber);
+                    DefaultConfig.getDefault().blockStore().saveBlock(block, BigInteger.ONE, true);
+                    DefaultConfig.getDefault().pruneManager().blockCommitted(block.getHeader());
+                }
                 CommonConfig.getDefault().dbFlushManager().flush();
             }
             logTime("commit");
@@ -156,6 +186,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setArgs(programCreate.getArgs() != null ? programCreate.getArgs() : new String[0][0]);
         programInvoke.setEstimateGas(programCreate.isEstimateGas());
         programInvoke.setCreate(true);
+        programInvoke.setInternalCall(false);
         return execute(programInvoke);
     }
 
@@ -174,6 +205,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setArgs(programCall.getArgs() != null ? programCall.getArgs() : new String[0][0]);
         programInvoke.setEstimateGas(programCall.isEstimateGas());
         programInvoke.setCreate(false);
+        programInvoke.setInternalCall(programCall.isInternalCall());
         return execute(programInvoke);
     }
 
@@ -190,6 +222,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         if (programInvoke.getValue().compareTo(BigInteger.ZERO) < 0) {
             return revert("value can't be less than zero");
         }
+        blockNumber = programInvoke.getNumber();
 
         logTime("start");
 
@@ -221,7 +254,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 }
                 logTime("load account state");
                 if (accountState.getNonce().compareTo(BigInteger.ZERO) <= 0) {
-                    return revert("contract has been stopped");
+                    return revert("contract has stopped");
                 }
                 byte[] codes = repository.getCode(programInvoke.getContractAddress());
                 classCodes = ClassCodeLoader.loadJarCache(codes);
@@ -259,7 +292,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             BigInteger accountBalance = getAccountBalance(programInvoke.getContractAddress());
             BigInteger vmBalance = repository.getBalance(programInvoke.getContractAddress());
-            if (vmBalance.compareTo(accountBalance) != 0) {
+            if (!programInvoke.isInternalCall() && vmBalance.compareTo(accountBalance) != 0) {
                 return revert(String.format("balance error: accountBalance=%s, vmBalance=%s", accountBalance, vmBalance));
             }
 
@@ -393,6 +426,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         if (BigInteger.ZERO.compareTo(accountState.getBalance()) != 0) {
             return revert("contract balance is not zero");
         }
+        if (BigInteger.ZERO.compareTo(accountState.getNonce()) >= 0) {
+            return revert("contract has stopped");
+        }
 
         repository.setNonce(address, BigInteger.ZERO);
 
@@ -410,7 +446,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             return ProgramStatus.not_found;
         } else {
             BigInteger nonce = repository.getNonce(address);
-            if (BigInteger.ZERO.compareTo(nonce) == 0) {
+            if (BigInteger.ZERO.compareTo(nonce) >= 0) {
                 return ProgramStatus.stop;
             } else {
                 return ProgramStatus.normal;
@@ -540,7 +576,12 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private static Source<byte[], byte[]> stateSource(DBService dbService) {
         LevelDbDataSource.dbService = dbService;
-        return CommonConfig.getDefault().stateSource();
+        SystemProperties config = SystemProperties.getDefault();
+        CommonConfig commonConfig = CommonConfig.getDefault();
+        StateSource stateSource = commonConfig.stateSource();
+        stateSource.setConfig(config);
+        stateSource.setCommonConfig(commonConfig);
+        return stateSource;
     }
 
     public void logTime(String message) {

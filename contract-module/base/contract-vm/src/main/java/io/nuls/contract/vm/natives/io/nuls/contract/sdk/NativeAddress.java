@@ -207,6 +207,7 @@ public class NativeAddress {
         programCall.setMethodDesc(methodDesc);
         programCall.setArgs(args);
         programCall.setEstimateGas(programInvoke.isEstimateGas());
+        programCall.setInternalCall(true);
 
         if (programCall.getValue().compareTo(BigInteger.ZERO) > 0) {
             frame.vm.getRepository().addBalance(programCall.getSender(), programCall.getValue().negate());
