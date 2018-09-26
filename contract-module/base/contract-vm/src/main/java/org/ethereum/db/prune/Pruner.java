@@ -105,7 +105,8 @@ public class Pruner {
             JournalSource.Update update = journal.get(hash);
             if (update == null) {
                 logger.debug("pruner init aborted: can't fetch update " + toHexString(hash));
-                return false;
+                //return false;
+                continue;
             }
             update.getInsertedKeys().forEach(filter::insert);
         }
