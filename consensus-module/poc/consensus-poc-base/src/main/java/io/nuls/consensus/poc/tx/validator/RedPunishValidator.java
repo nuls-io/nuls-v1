@@ -42,10 +42,7 @@ import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.model.BlockHeader;
-import io.nuls.kernel.model.CoinData;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.validate.ValidateResult;
@@ -78,6 +75,9 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
             return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.ADDRESS_IS_CONSENSUS_SEED);
         }
         if (punishData.getReasonCode() == PunishReasonEnum.DOUBLE_SPEND.getCode()) {
+            if (NulsContext.MAIN_NET_VERSION <= 1) {
+                return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.VERSION_TOO_LOW);
+            }
             SmallBlock smallBlock = new SmallBlock();
             try {
                 smallBlock.parse(punishData.getEvidence(), 0);
@@ -102,7 +102,10 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
             if (result.isSuccess()) {
                 return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.TRANSACTIONS_NEVER_DOUBLE_SPEND);
             }
-        }else if (punishData.getReasonCode() == PunishReasonEnum.BIFURCATION.getCode()) {
+        } else if (punishData.getReasonCode() == PunishReasonEnum.BIFURCATION.getCode()) {
+            if (NulsContext.MAIN_NET_VERSION <= 1) {
+                return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.VERSION_TOO_LOW);
+            }
             NulsByteBuffer byteBuffer = new NulsByteBuffer(punishData.getEvidence());
             //轮次
             long[] roundIndex = new long[NulsContext.REDPUNISH_BIFURCATION];
@@ -172,7 +175,18 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
             return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.AGENT_NOT_EXIST);
         }
         CoinData coinData = ConsensusTool.getStopAgentCoinData(theAgent, tx.getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME, tx.getBlockHeight());
-        if (!Arrays.equals(coinData.serialize(), tx.getCoinData().serialize())) {
+        if (NulsContext.MAIN_NET_VERSION <= 1) {
+            if (coinData.getTo().size() != tx.getCoinData().getTo().size()) {
+                return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.WRONG_RED_PUNISH_REASON);
+            }
+            for (int i = 0; i < coinData.getTo().size(); i++) {
+                Coin coin1 = coinData.getTo().get(i);
+                Coin coin2 = tx.getCoinData().getTo().get(i);
+                if(!Arrays.equals(coin1.getOwner(),coin2.getOwner())||!coin1.getNa().equals(coin2.getNa())){
+                    return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.WRONG_RED_PUNISH_REASON);
+                }
+            }
+        } else if (!Arrays.equals(coinData.serialize(), tx.getCoinData().serialize())) {
             Log.error("++++++++++ RedPunish verification does not pass, redPunish type:{}, - hight:{}, - redPunish tx timestamp:{}", tx.getTxData().getReasonCode(), tx.getBlockHeight(), tx.getTime());
             return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.SERIALIZE_ERROR);
         }
