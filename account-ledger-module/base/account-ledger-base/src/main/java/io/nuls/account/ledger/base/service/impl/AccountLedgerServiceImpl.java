@@ -1038,7 +1038,7 @@ public class AccountLedgerServiceImpl implements AccountLedgerService, Initializ
 
                 //需要判断是否找零，如果有找零，则需要重新计算手续费
                 if (values.isGreaterThan(amount.add(fee))) {
-                    changeAddress = coin.getAddress();
+                    changeAddress = coin.getTempOwner();
                     Na change = values.subtract(amount.add(fee));
                     Coin changeCoin = new Coin();
 

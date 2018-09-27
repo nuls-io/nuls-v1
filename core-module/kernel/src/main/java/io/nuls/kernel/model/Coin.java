@@ -27,9 +27,11 @@
 package io.nuls.kernel.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
+import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.script.Script;
 import io.nuls.kernel.utils.AddressTool;
@@ -207,6 +209,8 @@ public class Coin extends BaseNulsData {
             else if (scriptPubkey.isPayToScriptHash()) {
                 scriptPubkey.isSentToMultiSig();
                 System.arraycopy(owner, 2, address, 0, 23);
+            }else{
+                throw new NulsRuntimeException(KernelErrorCode.ADDRESS_IS_NOT_BELONGS_TO_CHAIN);
             }
         }
         return address;
