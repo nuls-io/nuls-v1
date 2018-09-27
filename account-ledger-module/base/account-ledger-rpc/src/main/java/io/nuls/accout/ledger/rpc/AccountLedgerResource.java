@@ -1165,7 +1165,8 @@ public class AccountLedgerResource {
     @ApiOperation(value = "验证交易签名类型", notes = "result.data: resultJson 返回签名结果")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
     })
-    public RpcClientResult getSignatureType(@ApiParam(name = "utxoList", value = "转账", required = true) List<String> utxoList) {
+    public RpcClientResult getSignatureType(@ApiParam(name = "utxoList", value = "转账", required = true)
+                                                @QueryParam("utxoList")   List<String> utxoList) {
         if (utxoList == null || utxoList.size() == 0) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
