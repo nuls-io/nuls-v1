@@ -71,7 +71,6 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
     public Result saveContractExecuteResult(NulsDigestData hash, ContractResult executeResult) {
         Result result;
         try {
-            //Log.info("===================save ContractResult: " + executeResult.toString());
             result = dbService.putModel(ContractStorageConstant.DB_NAME_CONTRACT_EXECUTE_RESULT, hash.getDigestBytes(), executeResult);
         } catch (Exception e) {
             Log.error("save contract execute result error", e);

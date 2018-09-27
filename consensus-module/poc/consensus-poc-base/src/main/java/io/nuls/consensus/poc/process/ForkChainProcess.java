@@ -453,7 +453,6 @@ public class ForkChainProcess {
         //for (Block newBlock : addBlockList) {
         for (int i = 0, size = addBlockList.size(); i < size; i++) {
             newBlock = addBlockList.get(i);
-            Log.info("==========================================切换主链, 高度: {} 开始验证. + ", newBlock.getHeader().getHeight());
             newBlock.verifyWithException();
 
             Map<String, Coin> toMaps = new HashMap<>();
@@ -585,7 +584,6 @@ public class ForkChainProcess {
                 changeSuccess = false;
                 break;
             }
-            //Log.info("=========================================切换主链, 高度: {} 验证结束. - ", newBlock.getHeader().getHeight());
         }
 
         ChainLog.debug("add new blocks complete, result {}, success count is {} , now service best block : {} - {}", changeSuccess, successList.size(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
@@ -601,7 +599,6 @@ public class ForkChainProcess {
         } else {
             //Fallback status
             //回退状态
-            //Log.info("=========================================切换失败，回滚区块. + ");
             Collections.reverse(successList);
             for (Block rollBlock : successList) {
                 Result rs = blockService.rollbackBlock(rollBlock);
@@ -621,7 +618,6 @@ public class ForkChainProcess {
                     nulsProtocolProcess.processProtocolUpGrade(addBlock.getHeader());
                 }
             }
-            //Log.info("=========================================切换失败，回滚区块. - ");
         }
         return changeSuccess;
     }
@@ -635,14 +631,12 @@ public class ForkChainProcess {
                 if (success) {
                     //回滚版本更新统计数据
                     nulsProtocolProcess.processProtocolRollback(rollbackBlock.getHeader());
-                    //Log.info("=========================================回滚区块成功, 高度: {}.", rollbackBlock.getHeader().getHeight());
                     RewardStatisticsProcess.rollbackBlock(rollbackBlock);
                     rollbackList.add(rollbackBlock);
                 } else {
                     Collections.reverse(rollbackList);
                     for (Block block : rollbackList) {
                         try {
-                            //Log.info("=========================================回滚区块失败, 高度: {}.", rollbackBlock.getHeader().getHeight());
                             Result rs = blockService.saveBlock(block);
                             RewardStatisticsProcess.addBlock(block);
                             if (rs.isSuccess()) {

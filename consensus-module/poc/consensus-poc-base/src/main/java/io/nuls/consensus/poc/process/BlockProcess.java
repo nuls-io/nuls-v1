@@ -126,7 +126,6 @@ public class BlockProcess {
      * @return boolean
      */
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
-        Log.info("=========================================Begin to add Block. height: " + blockContainer.getBlock().getHeader().getHeight());
 
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
         Block block = blockContainer.getBlock();
@@ -256,7 +255,6 @@ public class BlockProcess {
                         // 区块中可以消耗的最大Gas总量，超过这个值，则本区块中不再继续验证智能合约交易
                         if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS) {
                             if(ContractUtil.isContractTransaction(tx)) {
-                                //Log.info("============超过了合约交易限制，跳过此合约交易");
                                 continue;
                             }
                         }
