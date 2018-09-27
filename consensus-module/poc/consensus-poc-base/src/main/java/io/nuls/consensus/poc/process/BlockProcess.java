@@ -137,12 +137,21 @@ public class BlockProcess {
         }
         //验证区块版本信息，如果区块版本小于当前主网版本，丢弃区块
         BlockExtendsData extendsData = new BlockExtendsData(block.getHeader().getExtend());
+
         //收到的区块头里不包含版本信息时，默认区块版本号为1.0
         if (extendsData.getCurrentVersion() == null && NulsVersionManager.getMainVersion() > 1) {
             Log.info("------block currentVersion low, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
             return false;
         } else if (null != extendsData.getCurrentVersion() && extendsData.getCurrentVersion() < NulsVersionManager.getMainVersion()) {
             Log.info("------block currentVersion low, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
+            return false;
+        } else if (extendsData.getCurrentVersion() != null && extendsData.getPercent() != null && extendsData.getPercent() < 60) {
+            //最低覆盖率不能小于60%
+            Log.info("------block currentVersion percent error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
+            return false;
+        } else if (extendsData.getCurrentVersion() != null && extendsData.getDelay() != null && extendsData.getDelay() < 1000) {
+            //延迟块数不能小于1000
+            Log.info("------block currentVersion delay error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
             return false;
         }
 
@@ -255,7 +264,7 @@ public class BlockProcess {
 
                         // 区块中可以消耗的最大Gas总量，超过这个值，则本区块中不再继续验证智能合约交易
                         if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS) {
-                            if(ContractUtil.isContractTransaction(tx)) {
+                            if (ContractUtil.isContractTransaction(tx)) {
                                 //Log.info("============超过了合约交易限制，跳过此合约交易");
                                 continue;
                             }
@@ -269,7 +278,7 @@ public class BlockProcess {
                         }
 
                         // 验证时发现智能合约交易就调用智能合约
-                        if(ContractUtil.isContractTransaction(tx)) {
+                        if (ContractUtil.isContractTransaction(tx)) {
                             contractResult = contractService.batchProcessTx(tx, bestHeight, block, stateRoot, toMaps, contractUsedCoinMap, false).getData();
                             if (contractResult != null) {
                                 tempStateRoot = contractResult.getStateRoot();
@@ -290,11 +299,11 @@ public class BlockProcess {
                     // 验证结束后移除批量执行合约的执行器
                     contractService.removeBatchExecute();
                     // 如果不为空，则说明验证、打包的区块是同一个节点
-                    if(tempStateRoot != null) {
+                    if (tempStateRoot != null) {
                         stateRoot = tempStateRoot;
                     }
                     block.getHeader().setStateRoot(stateRoot);
-                    for(ContractResult result : contractResultList) {
+                    for (ContractResult result : contractResultList) {
                         result.setStateRoot(stateRoot);
                     }
 
