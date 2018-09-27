@@ -261,8 +261,6 @@ public class NulsProtocolProcess {
                 tempInfoPo.setStatus(ProtocolContainer.VALID);
                 tempInfoPo.setEffectiveHeight(blockHeader.getHeight() + 1);
                 getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
-
-                System.out.println("停止服务！");
                 Log.info("********** 停止服务 **********");
                 Log.info("********** 停止服务version：" + tempInfoPo.getVersion());
                 Log.info("********** 停止服务高度：" + tempInfoPo.getEffectiveHeight());
