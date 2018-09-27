@@ -28,17 +28,14 @@ package io.nuls.contract.util;
 import io.nuls.contract.entity.BlockHeaderDto;
 import io.nuls.contract.ledger.service.ContractUtxoService;
 import io.nuls.contract.vm.program.ProgramMethod;
-import io.nuls.core.tools.log.Log;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.lite.core.SpringLiteContext;
 import io.nuls.kernel.model.BlockHeader;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
-import io.nuls.kernel.utils.AddressTool;
 import io.nuls.protocol.service.BlockService;
 
 import java.io.IOException;
@@ -103,7 +100,7 @@ public class VMContext {
      * @return
      * @throws IOException
      */
-    public BlockHeaderDto getNewestBlockHeader() throws IOException {
+    public BlockHeaderDto getNewestBlockHeader()  {
         return new BlockHeaderDto(NulsContext.getInstance().getBestBlock().getHeader());
     }
 
@@ -113,10 +110,8 @@ public class VMContext {
     public BigInteger getBalance(byte[] address) {
         Result<BigInteger> result = contractUtxoService.getBalance(address);
         if(result.isSuccess()) {
-            //Log.info("=====*************============contract - " + AddressTool.getStringAddressByBytes(address) + ", balance: " + result.getData().toString());
             return result.getData();
         }
-        //Log.info("=====*************============contract - " + AddressTool.getStringAddressByBytes(address) + ", balance: 0");
         return BigInteger.ZERO;
     }
 

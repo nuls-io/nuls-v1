@@ -332,7 +332,7 @@ public class ContractResource implements InitializingBean {
             resultMap.put("gasLimit", gasUsed);
             return Result.getSuccess().setData(resultMap).toRpcClientResult();
         } catch (Exception e) {
-            return Result.getFailed().setData(e.getMessage()).toRpcClientResult();
+            return Result.getFailed().setMsg(e.getMessage()).toRpcClientResult();
         }
     }
 
@@ -660,7 +660,7 @@ public class ContractResource implements InitializingBean {
             return Result.getSuccess().setData(resultMap).toRpcClientResult();
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed().setData(e.getMessage()).toRpcClientResult();
+            return Result.getFailed().setMsg(e.getMessage()).toRpcClientResult();
         }
     }
 
