@@ -94,10 +94,10 @@ public class DbFlushManager {
     public synchronized void commit() {
         long cacheSize = getCacheSize();
         if (sizeThreshold >= 0 && cacheSize >= sizeThreshold) {
-            logger.info("DbFlushManager: flushing db due to write cache size (" + cacheSize + ") reached threshold (" + sizeThreshold + ")");
+            logger.debug("DbFlushManager: flushing db due to write cache size (" + cacheSize + ") reached threshold (" + sizeThreshold + ")");
             flush();
         } else if (commitsCountThreshold > 0 && commitCount >= commitsCountThreshold) {
-            logger.info("DbFlushManager: flushing db due to commits (" + commitCount + ") reached threshold (" + commitsCountThreshold + ")");
+            logger.debug("DbFlushManager: flushing db due to commits (" + commitCount + ") reached threshold (" + commitsCountThreshold + ")");
             flush();
             commitCount = 0;
         } else if (flushAfterSyncDone && syncDone) {
@@ -117,7 +117,7 @@ public class DbFlushManager {
 
     public synchronized Future<Boolean> flush() {
         if (!lastFlush.isDone()) {
-            logger.info("Waiting for previous flush to complete...");
+            logger.debug("Waiting for previous flush to complete...");
             try {
                 lastFlush.get();
             } catch (Exception e) {
@@ -139,7 +139,7 @@ public class DbFlushManager {
         return lastFlush = flushThread.submit(() -> {
             boolean ret = false;
             long s = System.nanoTime();
-            logger.info("Flush started");
+            logger.debug("Flush started");
 
             sources.forEach(Source::flush);
 
@@ -158,7 +158,7 @@ public class DbFlushManager {
                 logger.debug("Flushing to DB");
                 stateDbCache.flush();
             }
-            logger.info("Flush completed in " + (System.nanoTime() - s) / 1000000 + " ms");
+            logger.debug("Flush completed in " + (System.nanoTime() - s) / 1000000 + " ms");
 
             return ret;
         });
@@ -168,11 +168,11 @@ public class DbFlushManager {
      * Flushes all caches and closes all databases
      */
     public synchronized void close() {
-        logger.info("Flushing DBs...");
+        logger.debug("Flushing DBs...");
         flushSync();
-        logger.info("Flush done.");
+        logger.debug("Flush done.");
         for (DbSource dbSource : dbSources) {
-            logger.info("Closing DB: {}", dbSource.getName());
+            logger.debug("Closing DB: {}", dbSource.getName());
             try {
                 dbSource.close();
             } catch (Exception ex) {
