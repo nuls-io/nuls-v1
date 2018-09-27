@@ -104,6 +104,7 @@ public class NativeBlock {
             frame.heap.putField(objectRef, "hash", frame.heap.newString(blockHeaderDto.getHash()));
             frame.heap.putField(objectRef, "time", blockHeaderDto.getTime());
             frame.heap.putField(objectRef, "height", blockHeaderDto.getHeight());
+            frame.heap.putField(objectRef, "txCount", blockHeaderDto.getTxCount());
             ObjectRef packingAddress = frame.heap.newAddress(NativeAddress.toString(blockHeaderDto.getPackingAddress()));
             frame.heap.putField(objectRef, "packingAddress", packingAddress);
             String stateRoot = null;

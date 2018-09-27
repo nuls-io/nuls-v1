@@ -364,6 +364,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             if (methodCode.isPublic && methodCode.hasViewAnnotation()) {
                 this.revert = true;
                 programResult.view();
+                programResult.setGasUsed(vm.getGasUsed());
+                return programResult;
             }
 
             logTime("contract return");
