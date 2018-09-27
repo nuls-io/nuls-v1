@@ -29,12 +29,13 @@ import io.nuls.contract.BaseTest;
 
 public class ContractTest extends BaseTest {
     private static int successCount = 0;
-    private static String IP = "192.168.1.120";
-    //private static String IP = "127.0.0.1";
+    //private static String IP = "192.168.1.120";
+    private static String IP = "127.0.0.1";
 
     public static void main(String[] args) {
         //createWrapper();
-        callWrapper();
+        //callWrapper();
+        transfer();
     }
 
     static void createWrapper() {
@@ -65,6 +66,31 @@ public class ContractTest extends BaseTest {
                 "      \"第三个选项\"]]}";
 
         String url = "http://" + IP + ":8001/api/contract/call";
+
+
+        for (int i = 0; i < 1; i++) {
+            String res = post(url, param, "utf-8");
+            if (res.indexOf("true") != -1) {
+                successCount++;
+            }
+            System.out.println(successCount + "  " + res);
+
+            try {
+                Thread.sleep(100L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void transfer() {
+        String from = "Nsdz8mKKFMehRDVRZFyXNuuenugUYM7M";
+        String to = "Nse3Uaj7Lesh6VNBVJ62bZRRZRpZ4DAG";
+        String password = "";
+        String remark = "test";
+        String param = "{\"address\": \"" + from + "\", \"toAddress\": \"" + to + "\", \"password\": \"" + password + "\", \"amount\": 100000 , \"remark\": \"" + remark + "\"}";
+
+        String url = "http://" + IP + ":8001/api/accountledger/transfer";
 
 
         for (int i = 0; i < 1; i++) {
