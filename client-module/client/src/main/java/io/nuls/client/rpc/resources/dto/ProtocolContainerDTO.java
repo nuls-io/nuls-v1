@@ -92,7 +92,7 @@ public class ProtocolContainerDTO {
         this.roundIndex = protocolContainer.getRoundIndex();
         this.delay = protocolContainer.getDelay();
         this.currentDelay = protocolContainer.getCurrentDelay();
-        this.countdownDelay = delay - countdownDelay;
+        this.countdownDelay = delay - currentDelay;
         this.effectiveHeight = protocolContainer.getEffectiveHeight();
         this.status = protocolContainer.getStatus();
     }
@@ -104,7 +104,7 @@ public class ProtocolContainerDTO {
         this.roundIndex = tempInfoPo.getRoundIndex();
         this.delay = tempInfoPo.getDelay();
         this.currentDelay = tempInfoPo.getCurrentDelay();
-        this.countdownDelay = delay - countdownDelay;
+        this.countdownDelay = delay - currentDelay;
         this.effectiveHeight = tempInfoPo.getEffectiveHeight();
         this.status = tempInfoPo.getStatus();
     }

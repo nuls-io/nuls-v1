@@ -1535,7 +1535,7 @@ public class PocConsensusResource {
         stopAgent.setCreateTxHash(agent.getTxHash());
         tx.setTime(TimeService.currentTimeMillis());
         tx.setTxData(stopAgent);
-        CoinData coinData = ConsensusTool.getStopMutilAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME, null);
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME, null);
         tx.setCoinData(coinData);
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
@@ -1574,7 +1574,7 @@ public class PocConsensusResource {
         if (!AddressTool.validAddress(form.getAddress()) || !AddressTool.validAddress(form.getSignAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        Account account = accountService.getAccount(form.getAddress()).getData();
+        Account account = accountService.getAccount(form.getSignAddress()).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }

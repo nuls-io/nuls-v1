@@ -148,7 +148,7 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
                 }
             }
             if (!rs) {
-                return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.WRONG_RED_PUNISH_REASON);
+                return ValidateResult.getFailedResult(this.getClass().getName(), PocConsensusErrorCode.RED_CARD_VERIFICATION_FAILED);
             }
         }
 
@@ -177,18 +177,18 @@ public class RedPunishValidator extends BaseConsensusProtocolValidator<RedPunish
         CoinData coinData = ConsensusTool.getStopAgentCoinData(theAgent, tx.getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME, tx.getBlockHeight());
         if (NulsContext.MAIN_NET_VERSION <= 1) {
             if (coinData.getTo().size() != tx.getCoinData().getTo().size()) {
-                return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.WRONG_RED_PUNISH_REASON);
+                return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.RED_CARD_VERIFICATION_FAILED);
             }
             for (int i = 0; i < coinData.getTo().size(); i++) {
                 Coin coin1 = coinData.getTo().get(i);
                 Coin coin2 = tx.getCoinData().getTo().get(i);
                 if(!Arrays.equals(coin1.getOwner(),coin2.getOwner())||!coin1.getNa().equals(coin2.getNa())){
-                    return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.WRONG_RED_PUNISH_REASON);
+                    return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.RED_CARD_VERIFICATION_FAILED);
                 }
             }
         } else if (!Arrays.equals(coinData.serialize(), tx.getCoinData().serialize())) {
             Log.error("++++++++++ RedPunish verification does not pass, redPunish type:{}, - hight:{}, - redPunish tx timestamp:{}", tx.getTxData().getReasonCode(), tx.getBlockHeight(), tx.getTime());
-            return ValidateResult.getFailedResult(CLASS_NAME, KernelErrorCode.SERIALIZE_ERROR);
+            return ValidateResult.getFailedResult(CLASS_NAME, PocConsensusErrorCode.RED_CARD_VERIFICATION_FAILED);
         }
         Log.info("++++++++++ RedPunish verification passed, redPunish type:{}, - hight:{}, - redPunish tx timestamp:{}", tx.getTxData().getReasonCode(), tx.getBlockHeight(), tx.getTime());
         return ValidateResult.getSuccessResult();
