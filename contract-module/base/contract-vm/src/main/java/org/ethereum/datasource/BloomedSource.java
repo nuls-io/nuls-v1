@@ -90,7 +90,7 @@ public class BloomedSource extends AbstractChainedSource<byte[], byte[], byte[],
             filter.insert(key);
             dirty = true;
             if (filter.getAllocatedBytes() > maxBloomSize) {
-                logger.info("Bloom filter became too large (" + filter.getAllocatedBytes() + " exceeds max threshold " + maxBloomSize + ") and is now disabled forever.");
+                logger.debug("Bloom filter became too large (" + filter.getAllocatedBytes() + " exceeds max threshold " + maxBloomSize + ") and is now disabled forever.");
                 getSource().put(filterKey, new byte[0]);
                 filter = null;
                 dirty = false;

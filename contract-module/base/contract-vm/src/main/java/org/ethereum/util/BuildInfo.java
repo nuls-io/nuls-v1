@@ -52,7 +52,7 @@ public class BuildInfo {
     }
 
     public static void printInfo() {
-        logger.info("git.hash: [{}]", buildHash);
-        logger.info("build.time: {}", buildTime);
+        logger.debug("git.hash: [{}]", buildHash);
+        logger.debug("build.time: {}", buildTime);
     }
 }

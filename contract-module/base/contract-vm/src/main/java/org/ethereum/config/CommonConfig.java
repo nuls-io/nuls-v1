@@ -145,7 +145,7 @@ public class CommonConfig {
             dbSources.add(dbSource);
             return dbSource;
         } finally {
-            logger.info(dataSource + " key-value data source created: " + name);
+            logger.debug(dataSource + " key-value data source created: " + name);
         }
     }
 
