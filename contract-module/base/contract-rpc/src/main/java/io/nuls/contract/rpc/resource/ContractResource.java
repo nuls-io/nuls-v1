@@ -1341,9 +1341,7 @@ public class ContractResource implements InitializingBean {
                 Log.info("parse coin form db error");
                 continue;
             }
-            //todo tag if (Arrays.equals(coin.(), addressBytes))
-            if (Arrays.equals(coin.getAddress(), addressBytes))
-            {
+            if (Arrays.equals(coin.getAddress(), addressBytes)) {
                 coin.setOwner(coinEntryBytes.getKey());
                 coinList.add(coin);
             }

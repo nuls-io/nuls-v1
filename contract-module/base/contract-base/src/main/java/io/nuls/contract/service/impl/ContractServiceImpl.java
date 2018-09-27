@@ -1108,12 +1108,12 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             }
         }
 
-        if (contractResult.isSuccess()) {
+        /*if (contractResult.isSuccess()) {
             contractEvents = contractResult.getEvents();
             if (contractEvents != null && contractEvents.size() > 0) {
-                //TODO pierre 发送合约事件
+                // pierre 发送合约事件
             }
-        }
+        }*/
         // 这笔交易的合约执行结果保存在DB中, 另外保存在交易对象中，用于计算退还剩余的Gas，以CoinBase交易的方式退还 --> method: addConsensusTx
         ContractTransaction contractTx = (ContractTransaction) tx;
         contractTx.setContractResult(contractResult);
@@ -1242,12 +1242,12 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             }
         }
 
-        if (contractResult.isSuccess()) {
+        /*if (contractResult.isSuccess()) {
             contractEvents = contractResult.getEvents();
             if (contractEvents != null && contractEvents.size() > 0) {
-                //TODO pierre 发送合约事件
+                // pierre 发送合约事件
             }
-        }
+        }*/
         // 这笔交易的合约执行结果保存在DB中, 另外保存在交易对象中，用于计算退还剩余的Gas，以CoinBase交易的方式退还 --> method: addConsensusTx
         ContractTransaction contractTx = (ContractTransaction) tx;
         contractTx.setContractResult(contractResult);
