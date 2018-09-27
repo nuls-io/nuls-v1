@@ -144,8 +144,6 @@ public class ConsensusProcess {
     }
 
     private void packing(MeetingMember self, MeetingRound round) throws IOException, NulsException {
-        Log.debug(round.toString());
-        Log.info("packing 入口==========================");
 
         boolean needCheckAgain = waitReceiveNewestBlock(self, round);
         long start = System.currentTimeMillis();
@@ -379,7 +377,6 @@ public class ConsensusProcess {
             // 区块中可以消耗的最大Gas总量，超过这个值，则本区块中不再继续组装智能合约交易
             if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS) {
                 if(ContractUtil.isContractTransaction(tx)) {
-                    //Log.info("============超过了合约交易限制，跳过此合约交易");
                     txMemoryPool.addInFirst(tx, false);
                     continue;
                 }

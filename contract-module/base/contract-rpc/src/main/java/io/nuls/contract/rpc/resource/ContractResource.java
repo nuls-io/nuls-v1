@@ -576,7 +576,7 @@ public class ContractResource implements InitializingBean {
             return result.toRpcClientResult();
         } catch (Exception e) {
             Log.error("invoke contract view method error.", e);
-            return Result.getFailed().setData(e.getMessage()).toRpcClientResult();
+            return Result.getFailed().setMsg(e.getMessage()).toRpcClientResult();
         }
     }
 
@@ -776,7 +776,7 @@ public class ContractResource implements InitializingBean {
 
             return Result.getSuccess().setData(resultMap).toRpcClientResult();
         } catch (Exception e) {
-            return Result.getFailed().setData(e.getMessage()).toRpcClientResult();
+            return Result.getFailed().setMsg(e.getMessage()).toRpcClientResult();
         }
     }
 
@@ -1038,7 +1038,7 @@ public class ContractResource implements InitializingBean {
             return Result.getSuccess().setData(resultMap).toRpcClientResult();
         } catch (Exception e) {
             Log.error(e);
-            return Result.getFailed().setData(e.getMessage()).toRpcClientResult();
+            return Result.getFailed().setMsg(e.getMessage()).toRpcClientResult();
         }
     }
 
@@ -1341,9 +1341,7 @@ public class ContractResource implements InitializingBean {
                 Log.info("parse coin form db error");
                 continue;
             }
-            //todo tag if (Arrays.equals(coin.(), addressBytes))
-            if (Arrays.equals(coin.getAddress(), addressBytes))
-            {
+            if (Arrays.equals(coin.getAddress(), addressBytes)) {
                 coin.setOwner(coinEntryBytes.getKey());
                 coinList.add(coin);
             }
