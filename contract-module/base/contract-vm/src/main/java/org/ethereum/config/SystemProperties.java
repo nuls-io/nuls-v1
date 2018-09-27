@@ -525,10 +525,10 @@ public class SystemProperties {
     public String bindIp() {
         if (!config.hasPath("peer.discovery.bind.ip") || config.getString("peer.discovery.bind.ip").trim().isEmpty()) {
             if (bindIp == null) {
-                logger.info("Bind address wasn't set, Punching to identify it...");
+                logger.debug("Bind address wasn't set, Punching to identify it...");
                 try (Socket s = new Socket("www.google.com", 80)) {
                     bindIp = s.getLocalAddress().getHostAddress();
-                    logger.info("UDP local bound to: {}", bindIp);
+                    logger.debug("UDP local bound to: {}", bindIp);
                 } catch (IOException e) {
                     logger.warn("Can't get bind IP. Fall back to 0.0.0.0: " + e);
                     bindIp = "0.0.0.0";
@@ -546,7 +546,7 @@ public class SystemProperties {
     public String externalIp() {
         if (!config.hasPath("peer.discovery.external.ip") || config.getString("peer.discovery.external.ip").trim().isEmpty()) {
             if (externalIp == null) {
-                logger.info("External IP wasn't set, using checkip.amazonaws.com to identify it...");
+                logger.debug("External IP wasn't set, using checkip.amazonaws.com to identify it...");
                 try {
                     BufferedReader in = new BufferedReader(new InputStreamReader(
                             new URL("http://checkip.amazonaws.com").openStream()));
@@ -559,7 +559,7 @@ public class SystemProperties {
                     } catch (Exception e) {
                         throw new IOException("Invalid address: '" + externalIp + "'");
                     }
-                    logger.info("External address identified: {}", externalIp);
+                    logger.debug("External address identified: {}", externalIp);
                 } catch (IOException e) {
                     externalIp = bindIp();
                     logger.warn("Can't get external IP. Fall back to peer.bind.ip: " + externalIp + " :" + e);
