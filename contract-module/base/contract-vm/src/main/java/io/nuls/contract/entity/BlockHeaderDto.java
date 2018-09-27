@@ -43,17 +43,19 @@ public class BlockHeaderDto implements Serializable {
     private String preHash;
     private long time;
     private long height;
+    private long txCount;
     //23 bytes
     private byte[] packingAddress;
     private byte[] stateRoot;
 
     public BlockHeaderDto() {}
 
-    public BlockHeaderDto(BlockHeader header) throws IOException {
+    public BlockHeaderDto(BlockHeader header) {
         this.hash = header.getHash().getDigestHex();
         this.preHash = header.getPreHash().getDigestHex();
         this.time = header.getTime();
         this.height = header.getHeight();
+        this.txCount = header.getTxCount();
         this.packingAddress = header.getPackingAddress();
         this.stateRoot = ContractUtil.getStateRoot(header);
     }
@@ -88,6 +90,14 @@ public class BlockHeaderDto implements Serializable {
 
     public void setHeight(long height) {
         this.height = height;
+    }
+
+    public long getTxCount() {
+        return txCount;
+    }
+
+    public void setTxCount(long txCount) {
+        this.txCount = txCount;
     }
 
     public byte[] getPackingAddress() {
