@@ -66,6 +66,7 @@ public class ProgramConstants {
             List.class,
             ArrayList.class,
             Map.class,
+            Map.Entry.class,
             HashMap.class,
             Exception.class,
             RuntimeException.class,

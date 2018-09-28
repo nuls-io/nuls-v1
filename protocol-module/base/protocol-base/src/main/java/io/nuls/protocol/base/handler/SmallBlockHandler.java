@@ -31,6 +31,7 @@ import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
@@ -82,7 +83,7 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
 
         ValidateResult result = header.verify();
         boolean isOrphan = result.getErrorCode() == TransactionErrorCode.ORPHAN_TX || result.getErrorCode() == TransactionErrorCode.ORPHAN_BLOCK;
-        BlockLog.debug("recieve new block from(" + fromNode.getId() + "), tx count : " + header.getTxCount() + " , tx pool count : " + consensusService.getMemoryTxs().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", addressHex:" + Hex.encode(header.getPackingAddress()) +
+        BlockLog.debug("recieve new block from(" + fromNode.getId() + "), tx count : " + header.getTxCount() + " , tx pool count : " + consensusService.getMemoryTxs().size() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash() + ", addressHex:" + AddressTool.getStringAddressByBytes(header.getPackingAddress()) +
                 "\n and verify block result: " + result.isSuccess() + " , verify message : " + result.getMsg() + " , isOrphan : " + isOrphan);
 
         if (result.isFailed() && !isOrphan) {

@@ -67,6 +67,7 @@ import io.nuls.kernel.utils.*;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.model.tx.TransferTransaction;
 import io.nuls.protocol.model.validator.TxMaxSizeValidator;
 import io.swagger.annotations.*;
@@ -1110,6 +1111,9 @@ public class AccountLedgerResource {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         for (MultipleTxToDto to : form.getOutputs()) {
+            if (Na.valueOf(to.getAmount()).isLessThan(ProtocolConstant.MININUM_TRANSFER_AMOUNT)) {
+                return Result.getFailed(TransactionErrorCode.TOO_SMALL_AMOUNT).toRpcClientResult();
+            }
             MultipleAddressTransferModel model = new MultipleAddressTransferModel();
             if (!AddressTool.validAddress(to.getToAddress())) {
                 return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
@@ -1161,7 +1165,8 @@ public class AccountLedgerResource {
     @ApiOperation(value = "验证交易签名类型", notes = "result.data: resultJson 返回签名结果")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "success")
     })
-    public RpcClientResult getSignatureType(@ApiParam(name = "utxoList", value = "转账", required = true) List<String> utxoList) {
+    public RpcClientResult getSignatureType(@ApiParam(name = "utxoList", value = "转账", required = true)
+                                                @QueryParam("utxoList")   List<String> utxoList) {
         if (utxoList == null || utxoList.size() == 0) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }

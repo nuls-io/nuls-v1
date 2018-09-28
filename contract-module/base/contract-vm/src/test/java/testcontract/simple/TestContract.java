@@ -26,6 +26,7 @@ package testcontract.simple;
 import io.nuls.contract.sdk.Address;
 import io.nuls.contract.sdk.Contract;
 import io.nuls.contract.sdk.Msg;
+import io.nuls.contract.sdk.Utils;
 import io.nuls.contract.sdk.annotation.View;
 
 import java.math.BigInteger;
@@ -67,6 +68,26 @@ public class TestContract implements Contract {
         return "AW158U";
     }
 
+    //@View
+    //public int randomNumberInt() {
+    //    return Utils.pseudoRandom(1, 16);
+    //}
+    //
+    //@View
+    //public int randomNumberString() {
+    //    return Utils.pseudoRandom("a", 16);
+    //}
+    //
+    //@View
+    //public int randomNumberWithIntAndCap(int cap) {
+    //    return Utils.pseudoRandom(1, cap);
+    //}
+    //
+    //@View
+    //public int randomNumberWithStringAndCap(int cap) {
+    //    return Utils.pseudoRandom("a", cap);
+    //}
+
     public TestContract() {
         name += " - AW158U";
         map.put("123", "123a");
@@ -76,9 +97,10 @@ public class TestContract implements Contract {
         map.put("127", "127a");
     }
 
-    public void setName(String name) {
-        this.name += name;
-    }
+    //public String setName(String name, int cap) {
+    //    this.name += name + Utils.pseudoRandom("a", cap);
+    //    return this.name;
+    //}
 
     @View
     public String map() {

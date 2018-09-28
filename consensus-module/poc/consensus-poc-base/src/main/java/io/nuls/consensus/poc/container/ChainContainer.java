@@ -322,9 +322,9 @@ public class ChainContainer implements Cloneable {
             return Result.getFailed();
         }
         // 由于合约交易的特殊性，此处校验逻辑在首次验证区块时移动到所有交易验证完之后
-        if(isNeedCheckCoinBaseTx) {
+        if (isNeedCheckCoinBaseTx) {
             boolean isCorrect = verifyCoinBaseTx(block, currentRound, member);
-            if(!isCorrect) {
+            if (!isCorrect) {
                 return Result.getFailed();
             }
         }
@@ -421,7 +421,7 @@ public class ChainContainer implements Cloneable {
                     BlockLog.debug("There is a wrong red punish tx!" + block.getHeader().getHash());
                     return false;
                 }
-                if(redTx.getTime() != block.getHeader().getTime()){
+                if (NulsContext.MAIN_NET_VERSION > 1 && redTx.getTime() != block.getHeader().getTime()) {
                     BlockLog.debug("red punish CoinData & TX time is wrong! " + block.getHeader().getHash());
                     return false;
                 }
@@ -435,7 +435,7 @@ public class ChainContainer implements Cloneable {
     public Result verifyAndAddBlock(Block block, boolean isDownload, boolean isNeedCheckCoinBaseTx) {
         Result result = verifyBlock(block, isDownload, isNeedCheckCoinBaseTx);
         if (result.isSuccess()) {
-            if(!addBlock(block)) {
+            if (!addBlock(block)) {
                 return Result.getFailed();
             }
         }

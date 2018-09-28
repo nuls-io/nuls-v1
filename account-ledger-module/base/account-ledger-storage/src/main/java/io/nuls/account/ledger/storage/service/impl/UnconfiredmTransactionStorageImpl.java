@@ -39,6 +39,7 @@ import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.NulsDigestData;
 import io.nuls.kernel.model.Result;
 import io.nuls.kernel.model.Transaction;
+import io.nuls.kernel.utils.NulsByteBuffer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -113,6 +114,8 @@ public class UnconfiredmTransactionStorageImpl implements UnconfirmedTransaction
             try {
                 UnconfirmedTxPo tmpTx = new UnconfirmedTxPo(txEntry.getValue());
                 if (tmpTx != null) {
+                    NulsByteBuffer buffer = new NulsByteBuffer(txEntry.getKey(), 0);
+                    tmpTx.getTx().setHash(buffer.readHash());
                     tmpList.add(tmpTx);
                 }
             } catch (Exception e) {
@@ -128,7 +131,7 @@ public class UnconfiredmTransactionStorageImpl implements UnconfirmedTransaction
         });
 
         List<Transaction> resultList = new ArrayList<>();
-        for(UnconfirmedTxPo po : tmpList) {
+        for (UnconfirmedTxPo po : tmpList) {
             resultList.add(po.getTx());
         }
 

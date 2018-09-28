@@ -53,7 +53,6 @@ public class NulsMessageDecoder extends ByteToMessageDecoder {
 
         if(sysMagicNumber == readMagicNumber) {
             // 新版本
-            //Log.info("================[new decoder]==================");
             Object decoded = newDecoder.decode(ctx, in);
             if (decoded != null) {
                 out.add(decoded);
@@ -62,7 +61,6 @@ public class NulsMessageDecoder extends ByteToMessageDecoder {
             readMagicNumber = in.getUnsignedIntLE(8);
             if(sysMagicNumber == readMagicNumber) {
                 // 老版本
-                //Log.info("================[old decoder]==================");
                 Object decoded = oldDecoder.decode(ctx, in);
                 if (decoded != null) {
                     out.add(decoded);

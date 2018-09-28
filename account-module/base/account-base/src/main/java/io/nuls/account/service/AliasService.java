@@ -329,6 +329,49 @@ public class AliasService {
         }
     }
 
+
+    /**
+     * 获取设置别名交易手续费
+     * Gets to set the alias transaction fee
+     *
+     * @param address
+     * @param aliasName
+     * @return
+     */
+    public Result<Na> getMultiAliasFee(String address, String aliasName) {
+        if (!AddressTool.validAddress(address)) {
+            Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
+        }
+        byte[] addressBytes = AddressTool.getAddress(address);
+        try {
+            //创建一笔设置别名的交易
+            AliasTransaction tx = new AliasTransaction();
+            tx.setTime(TimeService.currentTimeMillis());
+            Alias alias = new Alias(addressBytes, aliasName);
+            tx.setTxData(alias);
+            CoinDataResult coinDataResult = accountLedgerService.getMutilCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+            if (!coinDataResult.isEnough()) {
+                return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
+            }
+            CoinData coinData = new CoinData();
+            coinData.setFrom(coinDataResult.getCoinList());
+            Coin change = coinDataResult.getChange();
+            if (null != change) {
+                //创建toList
+                List<Coin> toList = new ArrayList<>();
+                toList.add(change);
+                coinData.setTo(toList);
+            }
+            Coin coin = new Coin(NulsConstant.BLACK_HOLE_ADDRESS, Na.parseNuls(1), 0);
+            coinData.addTo(coin);
+            tx.setCoinData(coinData);
+            Na fee = TransactionFeeCalculator.getMaxFee(tx.size() );
+            return Result.getSuccess().setData(fee);
+        } catch (Exception e) {
+            Log.error(e);
+            return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
     /**
      * 多签账户设置别名
      * Initiate a transaction to set alias.
@@ -439,9 +482,6 @@ public class AliasService {
         }
         try {
             byte[] addressBytes = AddressTool.getAddress(addr);
-            /*if(!isMutilAliasUsable(addressBytes,aliasName)){
-                return Result.getFailed(AccountErrorCode.ALIAS_EXIST);
-            }*/
             Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(addr);
             MultiSigAccount multiSigAccount = sigAccountResult.getData();
             Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);

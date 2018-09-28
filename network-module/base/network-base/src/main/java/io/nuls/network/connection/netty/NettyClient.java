@@ -98,7 +98,6 @@ public class NettyClient {
                 socketChannel.close();
             }
             Log.error("Client start exception:" + e.getMessage() + ", remove node: " + node.getId());
-            System.out.println("Client start exception:" + e.getMessage() + ", remove node: " + node.getId());
             nodeManager.removeNode(node.getId());
         }
     }

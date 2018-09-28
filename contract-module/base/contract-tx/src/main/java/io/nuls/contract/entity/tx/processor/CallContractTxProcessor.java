@@ -32,6 +32,7 @@ import io.nuls.contract.entity.tx.CallContractTransaction;
 import io.nuls.contract.entity.tx.ContractTransferTransaction;
 import io.nuls.contract.entity.txdata.CallContractData;
 import io.nuls.contract.helper.VMHelper;
+import io.nuls.contract.ledger.manager.ContractBalanceManager;
 import io.nuls.contract.ledger.service.ContractUtxoService;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.storage.po.ContractAddressInfoPo;
@@ -39,6 +40,7 @@ import io.nuls.contract.storage.service.ContractAddressStorageService;
 import io.nuls.contract.storage.service.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.vm.program.ProgramExecutor;
+import io.nuls.contract.vm.program.ProgramStatus;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.lite.annotation.Autowired;
@@ -53,6 +55,7 @@ import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.ledger.service.LedgerService;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -86,6 +89,9 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
 
     @Autowired
     private AccountLedgerService accountLedgerService;
+
+    @Autowired
+    private ContractBalanceManager contractBalanceManager;
 
     @Override
     public Result onRollback(CallContractTransaction tx, Object secondaryData) {
@@ -185,9 +191,7 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
     @Override
     public Result onCommit(CallContractTransaction tx, Object secondaryData) {
         try {
-            // 保存合约执行结果
             ContractResult contractResult = tx.getContractResult();
-            contractService.saveContractExecuteResult(tx.getHash(), contractResult);
 
             // 保存调用合约交易的UTXO
             Result utxoResult = contractUtxoService.saveUtxoForContractAddress(tx);
@@ -252,8 +256,13 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
             BlockHeader blockHeader = tx.getBlockHeader();
             byte[] newestStateRoot = blockHeader.getStateRoot();
 
+
+            // 获取合约当前状态
+            ProgramStatus status = vmHelper.getContractStatus(newestStateRoot, contractAddress);
+            boolean isTerminatedContract = ContractUtil.isTerminatedContract(status.ordinal());
+
             // 处理合约执行失败 - 没有transferEvent的情况, 直接从数据库中获取, 若是本地创建的交易，获取到修改为失败交易
-            if(!contractResult.isSuccess()) {
+            if(isTerminatedContract || !contractResult.isSuccess()) {
                 if(contractAddressInfoPo != null && contractAddressInfoPo.isNrc20() && ContractUtil.isTransferMethod(callContractData.getMethodName())) {
                     byte[] txHashBytes = tx.getHash().serialize();
                     byte[] infoKey = ArraysTool.concatenate(callContractData.getSender(), txHashBytes, new VarInt(0).encode());
@@ -264,20 +273,48 @@ public class CallContractTxProcessor implements TransactionProcessor<CallContrac
                         contractTokenTransferStorageService.saveTokenTransferInfo(infoKey, po);
 
                         // 刷新token余额
-                        String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddress);
-                        if(po.getFrom() != null) {
-                            vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getFrom()), contractAddressStr);
-                        }
-                        if(po.getTo() != null) {
-                            vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getTo()), contractAddressStr);
+                        if(isTerminatedContract) {
+                            try {
+                                byte[] from = po.getFrom();
+                                byte[] to = po.getTo();
+                                BigInteger token = po.getValue();
+                                String fromStr = null;
+                                String toStr = null;
+                                if(from != null) {
+                                    fromStr = AddressTool.getStringAddressByBytes(from);
+                                }
+                                if(to != null) {
+                                    toStr = AddressTool.getStringAddressByBytes(to);
+                                }
+                                String contractAddressStr = AddressTool.getStringAddressByBytes(to);
+                                contractBalanceManager.addContractToken(fromStr, contractAddressStr, token);
+                                contractBalanceManager.subtractContractToken(toStr, contractAddressStr, token);
+                            } catch (Exception e) {
+                                // skip it
+                            } finally {
+                                contractResult.setError(true);
+                                contractResult.setErrorMessage("this contract has been terminated");
+                            }
+                        } else {
+                            String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddress);
+                            if(po.getFrom() != null) {
+                                vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getFrom()), contractAddressStr);
+                            }
+                            if(po.getTo() != null) {
+                                vmHelper.refreshTokenBalance(newestStateRoot, contractAddressInfoPo, AddressTool.getStringAddressByBytes(po.getTo()), contractAddressStr);
+                            }
                         }
                     }
                 }
             }
 
-            // 处理合约事件
+            if(!isTerminatedContract) {
+                // 处理合约事件
+                vmHelper.dealEvents(newestStateRoot, tx, contractResult, contractAddressInfoPo);
+            }
 
-            vmHelper.dealEvents(newestStateRoot, tx, contractResult, contractAddressInfoPo);
+            // 保存合约执行结果
+            contractService.saveContractExecuteResult(tx.getHash(), contractResult);
 
         } catch (Exception e) {
             Log.error("save call contract tx error.", e);

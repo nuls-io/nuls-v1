@@ -1138,14 +1138,12 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
     public RpcClientResult getCreateMultiAgentFee(
-            @BeanParam() GetCreateAgentFeeForm form) throws NulsException {
+            @BeanParam() GetCreateAgentFeeForm form) throws Exception {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAgentAddress(), "agent address can not be null");
         AssertUtil.canNotEmpty(form.getCommissionRate(), "commission rate can not be null");
         AssertUtil.canNotEmpty(form.getDeposit(), "deposit can not be null");
         AssertUtil.canNotEmpty(form.getPackingAddress(), "packing address can not be null");
-        AssertUtil.canNotEmpty(form.getPubkeys(), "signatures pubkeys can not be null");
-        AssertUtil.canNotEmpty(form.getM(), "Number of signatures can not be null");
         if (StringUtils.isBlank(form.getRewardAddress())) {
             form.setRewardAddress(form.getAgentAddress());
         }
@@ -1162,7 +1160,12 @@ public class PocConsensusResource {
         agent.setDeposit(Na.valueOf(form.getDeposit()));
         agent.setCommissionRate(form.getCommissionRate());
         tx.setTxData(agent);
-        Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(), form.getPubkeys());
+        Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAgentAddress());
+        MultiSigAccount multiSigAccount = sigAccountResult.getData();
+        Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
+        if(redeemScript == null){
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
         if (agent.getAgentAddress()[2] == 3) {
@@ -1180,7 +1183,7 @@ public class PocConsensusResource {
         }
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         //交易签名的长度为m*单个签名长度+赎回脚本长度
-        int scriptSignLenth = redeemScript.getProgram().length + form.getM() * 72;
+        int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM()) * 72;
         Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAgentAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES,scriptSignLenth);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;
@@ -1200,20 +1203,23 @@ public class PocConsensusResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
-    public RpcClientResult getMultiDepositFee(@BeanParam() GetDepositFeeForm form) throws NulsException {
+    public RpcClientResult getMultiDepositFee(@BeanParam() GetDepositFeeForm form) throws Exception {
         AssertUtil.canNotEmpty(form);
         AssertUtil.canNotEmpty(form.getAddress(), "address can not be null");
         AssertUtil.canNotEmpty(form.getAgentHash(), "agent hash can not be null");
         AssertUtil.canNotEmpty(form.getDeposit(), "deposit can not be null");
-        AssertUtil.canNotEmpty(form.getPubkeys(), "signatures pubkeys can not be null");
-        AssertUtil.canNotEmpty(form.getM(), "Number of signatures can not be null");
         DepositTransaction tx = new DepositTransaction();
         Deposit deposit = new Deposit();
         deposit.setAddress(AddressTool.getAddress(form.getAddress()));
         deposit.setAgentHash(NulsDigestData.fromDigestHex(form.getAgentHash()));
         deposit.setDeposit(Na.valueOf(form.getDeposit()));
         tx.setTxData(deposit);
-        Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(), form.getPubkeys());
+        Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
+        MultiSigAccount multiSigAccount = sigAccountResult.getData();
+        Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
+        if(redeemScript == null){
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
         CoinData coinData = new CoinData();
         List<Coin> toList = new ArrayList<>();
         toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), -1));
@@ -1226,7 +1232,7 @@ public class PocConsensusResource {
         }
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         //交易签名的长度为m*单个签名长度+赎回脚本长度
-        int scriptSignLenth = redeemScript.getProgram().length + form.getM() * 72;
+        int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM()) * 72;
         Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES,scriptSignLenth);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;
@@ -1529,7 +1535,7 @@ public class PocConsensusResource {
         stopAgent.setCreateTxHash(agent.getTxHash());
         tx.setTime(TimeService.currentTimeMillis());
         tx.setTxData(stopAgent);
-        CoinData coinData = ConsensusTool.getStopMutilAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME, null);
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(agent, TimeService.currentTimeMillis() + PocConsensusConstant.STOP_AGENT_LOCK_TIME, null);
         tx.setCoinData(coinData);
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
@@ -1568,7 +1574,7 @@ public class PocConsensusResource {
         if (!AddressTool.validAddress(form.getAddress()) || !AddressTool.validAddress(form.getSignAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
-        Account account = accountService.getAccount(form.getAddress()).getData();
+        Account account = accountService.getAccount(form.getSignAddress()).getData();
         if (null == account) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }

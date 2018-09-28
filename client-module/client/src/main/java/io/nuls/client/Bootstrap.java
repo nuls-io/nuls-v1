@@ -131,7 +131,7 @@ public class Bootstrap {
             if (NulsContext.mastUpGrade) {
                 //如果强制升级标志开启，停止网络连接
                 ConnectionManager.getInstance().shutdown();
-                Log.error(">>>>>> The new protocol version has taken effect, the network connection has been disconnected **********");
+                Log.error(">>>>>> The new protocol version has taken effect, the network connection has been disconnected，please upgrade immediately **********");
             }
             try {
                 Thread.sleep(1000L);

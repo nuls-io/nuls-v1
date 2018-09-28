@@ -41,8 +41,10 @@ import io.nuls.consensus.poc.protocol.entity.Agent;
 import io.nuls.consensus.poc.protocol.entity.Deposit;
 import io.nuls.consensus.poc.storage.po.PunishLogPo;
 import io.nuls.consensus.poc.util.ConsensusTool;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
@@ -451,7 +453,6 @@ public class ForkChainProcess {
         //for (Block newBlock : addBlockList) {
         for (int i = 0, size = addBlockList.size(); i < size; i++) {
             newBlock = addBlockList.get(i);
-            Log.info("==========================================切换主链, 高度: {} 开始验证. + ", newBlock.getHeader().getHeight());
             newBlock.verifyWithException();
 
             Map<String, Coin> toMaps = new HashMap<>();
@@ -468,11 +469,27 @@ public class ForkChainProcess {
             Result<ContractResult> invokeContractResult = null;
             ContractResult contractResult = null;
             Map<String, Coin> contractUsedCoinMap = new HashMap<>();
+            int totalGasUsed = 0;
+
+            // 为本次验证区块增加一个合约的临时余额区，用于记录本次合约地址余额的变化
+            contractService.createContractTempBalance();
+            // 为本次验证区块创建一个批量执行合约的执行器
+            contractService.createBatchExecute(stateRoot);
+            List<ContractResult> contractResultList = new ArrayList<>();
+            // 用于存储合约执行结果的stateRoot, 如果不为空，则说明验证、打包的区块是同一个节点
+            byte[] tempStateRoot = null;
 
             for (Transaction tx : newBlock.getTxs()) {
 
                 if (tx.isSystemTx()) {
                     continue;
+                }
+
+                // 区块中可以消耗的最大Gas总量，超过这个值，则本区块中不再继续验证智能合约交易
+                if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS) {
+                    if(ContractUtil.isContractTransaction(tx)) {
+                        continue;
+                    }
                 }
 
                 ValidateResult result = tx.verify();
@@ -491,26 +508,38 @@ public class ForkChainProcess {
                     break;
                 }
 
-                // 验证区块时发现智能合约交易就调用智能合约
-                //if(ContractUtil.isContractTransaction(tx)) {
-                //    invokeContractResult = contractService.invokeContract(tx, bestHeight, stateRoot);
-                //    contractResult = invokeContractResult.getData();
-                //    if (contractResult != null) {
-                //        Result<byte[]> handleContractResult = contractService.verifyContractResult(
-                //                tx, contractResult,
-                //                stateRoot, newBlock.getHeader().getTime(),
-                //                toMaps, contractUsedCoinMap, bestHeight);
-                //        // 更新世界状态
-                //        stateRoot = handleContractResult.getData();
-                //    }
-                //}
+                // 验证时发现智能合约交易就调用智能合约
+                if(ContractUtil.isContractTransaction(tx)) {
+                    contractResult = contractService.batchProcessTx(tx, bestHeight, newBlock, stateRoot, toMaps, contractUsedCoinMap, true).getData();
+                    if (contractResult != null) {
+                        tempStateRoot = contractResult.getStateRoot();
+                        totalGasUsed += contractResult.getGasUsed();
+                        contractResultList.add(contractResult);
+                    }
+                }
+
             }
 
             if (!changeSuccess) {
                 break;
             }
 
-            stateRoot = contractService.processTxs(newBlock.getTxs(), bestHeight, newBlock, stateRoot, toMaps, contractUsedCoinMap, true).getData();
+            // 验证结束后移除临时余额区
+            contractService.removeContractTempBalance();
+            stateRoot = contractService.commitBatchExecute().getData();
+            // 验证结束后移除批量执行合约的执行器
+            contractService.removeBatchExecute();
+
+            // 如果不为空，则说明验证、打包的区块是同一个节点
+            if(tempStateRoot != null) {
+                stateRoot = tempStateRoot;
+            }
+            newBlock.getHeader().setStateRoot(stateRoot);
+            for(ContractResult result : contractResultList) {
+                result.setStateRoot(stateRoot);
+            }
+
+            //stateRoot = contractService.processTxs(newBlock.getTxs(), bestHeight, newBlock, stateRoot, toMaps, contractUsedCoinMap, true).getData();
 
             // 验证世界状态根
             if ((receiveStateRoot != null || stateRoot != null) && !Arrays.equals(receiveStateRoot, stateRoot)) {
@@ -518,17 +547,6 @@ public class ForkChainProcess {
                 changeSuccess = false;
                 break;
             }
-
-            //// 验证区块交易结束后移除临时余额区
-            //contractService.removeContractTempBalance();
-            //if (contractResult != null) {
-            //    // 验证世界状态根
-            //    if (!Arrays.equals(receiveStateRoot, stateRoot)) {
-            //        Log.info("contract stateRoot incorrect.");
-            //        changeSuccess = false;
-            //        break;
-            //    }
-            //}
 
             // 验证CoinBase交易
             Object[] objects = verifyResultList.get(i);
@@ -554,8 +572,8 @@ public class ForkChainProcess {
                 boolean success = result.isSuccess();
                 if (success) {
                     //更新版本协议内容
-                    nulsProtocolProcess.processProtocolUpGrade(newBlock.getHeader());
                     successList.add(newBlock);
+                    nulsProtocolProcess.processProtocolUpGrade(newBlock.getHeader());
                 } else {
                     ChainLog.debug("save block error : " + result.getMsg() + " , block height : " + newBlock.getHeader().getHeight() + " , hash: " + newBlock.getHeader().getHash());
                     changeSuccess = false;
@@ -566,7 +584,6 @@ public class ForkChainProcess {
                 changeSuccess = false;
                 break;
             }
-            //Log.info("=========================================切换主链, 高度: {} 验证结束. - ", newBlock.getHeader().getHeight());
         }
 
         ChainLog.debug("add new blocks complete, result {}, success count is {} , now service best block : {} - {}", changeSuccess, successList.size(), blockService.getBestBlock().getData().getHeader().getHeight(), blockService.getBestBlock().getData().getHeader().getHash());
@@ -582,7 +599,6 @@ public class ForkChainProcess {
         } else {
             //Fallback status
             //回退状态
-            //Log.info("=========================================切换失败，回滚区块. + ");
             Collections.reverse(successList);
             for (Block rollBlock : successList) {
                 Result rs = blockService.rollbackBlock(rollBlock);
@@ -596,13 +612,12 @@ public class ForkChainProcess {
             Collections.reverse(rollbackBlockList);
             for (Block addBlock : rollbackBlockList) {
                 Result rs = blockService.saveBlock(addBlock);
+                RewardStatisticsProcess.addBlock(addBlock);
                 if (rs.isSuccess()) {
                     //更新版本协议内容
                     nulsProtocolProcess.processProtocolUpGrade(addBlock.getHeader());
                 }
-                RewardStatisticsProcess.addBlock(addBlock);
             }
-            //Log.info("=========================================切换失败，回滚区块. - ");
         }
         return changeSuccess;
     }
@@ -616,20 +631,18 @@ public class ForkChainProcess {
                 if (success) {
                     //回滚版本更新统计数据
                     nulsProtocolProcess.processProtocolRollback(rollbackBlock.getHeader());
-                    //Log.info("=========================================回滚区块成功, 高度: {}.", rollbackBlock.getHeader().getHeight());
                     RewardStatisticsProcess.rollbackBlock(rollbackBlock);
                     rollbackList.add(rollbackBlock);
                 } else {
                     Collections.reverse(rollbackList);
                     for (Block block : rollbackList) {
                         try {
-                            //Log.info("=========================================回滚区块失败, 高度: {}.", rollbackBlock.getHeader().getHeight());
                             Result rs = blockService.saveBlock(block);
+                            RewardStatisticsProcess.addBlock(block);
                             if (rs.isSuccess()) {
                                 //更新版本协议内容
                                 nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
                             }
-                            RewardStatisticsProcess.addBlock(block);
                         } catch (Exception ex) {
                             Log.error("Rollback failed, failed to save block during recovery", ex);
                             break;
@@ -643,11 +656,11 @@ public class ForkChainProcess {
                 for (Block block : rollbackList) {
                     try {
                         Result rs = blockService.saveBlock(block);
+                        RewardStatisticsProcess.addBlock(block);
                         if (rs.isSuccess()) {
                             //更新版本协议内容
                             nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
                         }
-                        RewardStatisticsProcess.addBlock(block);
                     } catch (Exception ex) {
                         Log.error("Rollback failed, failed to save block during recovery", ex);
                         break;

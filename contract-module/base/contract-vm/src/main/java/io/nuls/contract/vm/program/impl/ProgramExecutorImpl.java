@@ -24,6 +24,7 @@
  */
 package io.nuls.contract.vm.program.impl;
 
+import io.nuls.contract.entity.BlockHeaderDto;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.ObjectRef;
 import io.nuls.contract.vm.Result;
@@ -35,15 +36,21 @@ import io.nuls.contract.vm.code.ClassCodes;
 import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.exception.RevertException;
-import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.db.service.DBService;
 import org.apache.commons.lang3.StringUtils;
+import org.ethereum.config.CommonConfig;
+import org.ethereum.config.DefaultConfig;
+import org.ethereum.config.SystemProperties;
 import org.ethereum.core.AccountState;
+import org.ethereum.core.Block;
 import org.ethereum.core.Repository;
+import org.ethereum.datasource.Source;
+import org.ethereum.datasource.leveldb.LevelDbDataSource;
 import org.ethereum.db.RepositoryRoot;
+import org.ethereum.db.StateSource;
 import org.ethereum.util.FastByteComparisons;
 import org.ethereum.vm.DataWord;
 import org.slf4j.Logger;
@@ -58,27 +65,23 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
     private static final Logger log = LoggerFactory.getLogger(ProgramExecutorImpl.class);
 
+    private final ProgramExecutorImpl parent;
+
     private final VMContext vmContext;
 
-    private final KeyValueSource source;
+    private final Source<byte[], byte[]> source;
 
     private final Repository repository;
 
     private final byte[] prevStateRoot;
 
-    private final Map<String, VM> vmCache;
-
-    private final Map<String, VM> commitVms;
-
     private final long beginTime;
+
+    private long blockNumber;
 
     private long currentTime;
 
     private boolean revert;
-
-    private String contractAddress;
-
-    private VM contractVM;
 
     private Thread thread;
 
@@ -89,17 +92,16 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     }
 
     public ProgramExecutorImpl(VMContext vmContext, DBService dbService) {
-        this(vmContext, new KeyValueSource(dbService), null, null, null, null, null);
+        this(vmContext, stateSource(dbService), null, null, null);
     }
 
-    private ProgramExecutorImpl(VMContext vmContext, KeyValueSource source, Repository repository, byte[] prevStateRoot, Map<String, VM> vmCache, Map<String, VM> commitVms, Thread thread) {
+    private ProgramExecutorImpl(VMContext vmContext, Source<byte[], byte[]> source, Repository repository, byte[] prevStateRoot, Thread thread) {
+        this.parent = this;
         this.vmContext = vmContext;
         this.source = source;
         this.repository = repository;
         this.prevStateRoot = prevStateRoot;
         this.beginTime = this.currentTime = System.currentTimeMillis();
-        this.vmCache = vmCache;
-        this.commitVms = commitVms;
         this.thread = thread;
     }
 
@@ -108,9 +110,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         if (log.isDebugEnabled()) {
             log.debug("begin vm root: {}", Hex.toHexString(prevStateRoot));
         }
-        //source.begin();
         Repository repository = new RepositoryRoot(source, prevStateRoot);
-        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, new HashMap<>(1024), new LinkedHashMap<>(1024), Thread.currentThread());
+        return new ProgramExecutorImpl(vmContext, source, repository, prevStateRoot, Thread.currentThread());
     }
 
     @Override
@@ -120,43 +121,37 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             log.debug("startTracking");
         }
         Repository track = repository.startTracking();
-        return new ProgramExecutorImpl(vmContext, source, track, null, vmCache, commitVms, thread);
+        return new ProgramExecutorImpl(vmContext, source, track, null, thread);
     }
 
     @Override
     public void commit() {
         checkThread();
         if (!revert) {
-            if (contractVM != null) {
-                contractVM.heap.objects.commit();
-                contractVM.heap.arrays.commit();
-                commitVms.put(contractAddress, contractVM);
-            }
-            //if (prevStateRoot != null) {
-            for (Map.Entry<String, VM> vmEntry : commitVms.entrySet()) {
-                String address = vmEntry.getKey();
-                VM vm = vmEntry.getValue();
-                byte[] contractAddress = NativeAddress.toBytes(address);
-
-                vm.heap.objects.clearCache();
-                vm.heap.arrays.clearCache();
-
-                Map<DataWord, DataWord> contractState = vm.heap.contractState();
-                logTime("contract state");
-
-                for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
-                    DataWord key = entry.getKey();
-                    DataWord value = entry.getValue();
-                    repository.addStorageRow(contractAddress, key, value);
-                }
-                logTime("add contract state");
-            }
-            commitVms.clear();
-            //}
             repository.commit();
-            //if (prevStateRoot != null) {
-            //    source.commit();
-            //}
+            if (prevStateRoot == null) {
+                if (parent.blockNumber == 0) {
+                    parent.blockNumber = blockNumber;
+                }
+                if (parent.blockNumber != blockNumber) {
+                    throw new RuntimeException("must use the same block number");
+                }
+            } else {
+                if (vmContext != null) {
+                    BlockHeaderDto blockHeaderDto;
+                    try {
+                        blockHeaderDto = vmContext.getBlockHeader(blockNumber);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    byte[] parentHash = Hex.decode(blockHeaderDto.getPreHash());
+                    byte[] hash = Hex.decode(blockHeaderDto.getHash());
+                    Block block = new Block(parentHash, hash, blockNumber);
+                    DefaultConfig.getDefault().blockStore().saveBlock(block, BigInteger.ONE, true);
+                    DefaultConfig.getDefault().pruneManager().blockCommitted(block.getHeader());
+                }
+                CommonConfig.getDefault().dbFlushManager().flush();
+            }
             logTime("commit");
         }
     }
@@ -191,6 +186,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setArgs(programCreate.getArgs() != null ? programCreate.getArgs() : new String[0][0]);
         programInvoke.setEstimateGas(programCreate.isEstimateGas());
         programInvoke.setCreate(true);
+        programInvoke.setInternalCall(false);
         return execute(programInvoke);
     }
 
@@ -209,6 +205,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setArgs(programCall.getArgs() != null ? programCall.getArgs() : new String[0][0]);
         programInvoke.setEstimateGas(programCall.isEstimateGas());
         programInvoke.setCreate(false);
+        programInvoke.setInternalCall(programCall.isInternalCall());
         return execute(programInvoke);
     }
 
@@ -225,6 +222,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         if (programInvoke.getValue().compareTo(BigInteger.ZERO) < 0) {
             return revert("value can't be less than zero");
         }
+        blockNumber = programInvoke.getNumber();
 
         logTime("start");
 
@@ -256,30 +254,15 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 }
                 logTime("load account state");
                 if (accountState.getNonce().compareTo(BigInteger.ZERO) <= 0) {
-                    return revert("contract has been stopped");
+                    return revert("contract has stopped");
                 }
                 byte[] codes = repository.getCode(programInvoke.getContractAddress());
                 classCodes = ClassCodeLoader.loadJarCache(codes);
                 logTime("load code");
             }
 
-            contractAddress = NativeAddress.toString(programInvoke.getContractAddress());
-            VM vm;
-            if (vmCache == null) {
-                vm = VMFactory.createVM();
-            } else {
-                vm = vmCache.get(contractAddress);
-                if (vm == null) {
-                    vm = VMFactory.createVM();
-                } else {
-                    //vm.heap.objects.clearCache();
-                    //vm.heap.arrays.clearCache();
-                    //vm = new VM(vm.heap, vm.methodArea);
-                    vm = VMFactory.createVM();
-                }
-                vmCache.put(contractAddress, vm);
-            }
 
+            VM vm = VMFactory.createVM();
             logTime("load vm");
 
             vm.heap.loadClassCodes(classCodes);
@@ -309,7 +292,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             BigInteger accountBalance = getAccountBalance(programInvoke.getContractAddress());
             BigInteger vmBalance = repository.getBalance(programInvoke.getContractAddress());
-            if (vmBalance.compareTo(accountBalance) != 0) {
+            if (!programInvoke.isInternalCall() && vmBalance.compareTo(accountBalance) != 0) {
                 return revert(String.format("balance error: accountBalance=%s, vmBalance=%s", accountBalance, vmBalance));
             }
 
@@ -381,11 +364,21 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             if (methodCode.isPublic && methodCode.hasViewAnnotation()) {
                 this.revert = true;
                 programResult.view();
+                programResult.setGasUsed(vm.getGasUsed());
+                return programResult;
             }
 
             logTime("contract return");
 
-            this.contractVM = vm;
+            Map<DataWord, DataWord> contractState = vm.heap.contractState();
+            logTime("contract state");
+
+            for (Map.Entry<DataWord, DataWord> entry : contractState.entrySet()) {
+                DataWord key = entry.getKey();
+                DataWord value = entry.getValue();
+                repository.addStorageRow(programInvoke.getContractAddress(), key, value);
+            }
+            logTime("add contract state");
 
             programResult.setGasUsed(vm.getGasUsed());
 
@@ -435,6 +428,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         if (BigInteger.ZERO.compareTo(accountState.getBalance()) != 0) {
             return revert("contract balance is not zero");
         }
+        if (BigInteger.ZERO.compareTo(accountState.getNonce()) >= 0) {
+            return revert("contract has stopped");
+        }
 
         repository.setNonce(address, BigInteger.ZERO);
 
@@ -452,7 +448,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             return ProgramStatus.not_found;
         } else {
             BigInteger nonce = repository.getNonce(address);
-            if (BigInteger.ZERO.compareTo(nonce) == 0) {
+            if (BigInteger.ZERO.compareTo(nonce) >= 0) {
                 return ProgramStatus.stop;
             } else {
                 return ProgramStatus.normal;
@@ -578,6 +574,16 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         return classCodes.values().stream().filter(classCode -> !classCode.isAbstract
                 && allCodes.instanceOf(classCode, ProgramConstants.EVENT_INTERFACE_NAME))
                 .collect(Collectors.toList());
+    }
+
+    private static Source<byte[], byte[]> stateSource(DBService dbService) {
+        LevelDbDataSource.dbService = dbService;
+        SystemProperties config = SystemProperties.getDefault();
+        CommonConfig commonConfig = CommonConfig.getDefault();
+        StateSource stateSource = commonConfig.stateSource();
+        stateSource.setConfig(config);
+        stateSource.setCommonConfig(commonConfig);
+        return stateSource;
     }
 
     public void logTime(String message) {

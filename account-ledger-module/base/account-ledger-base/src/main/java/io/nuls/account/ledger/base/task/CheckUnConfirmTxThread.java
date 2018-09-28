@@ -58,7 +58,7 @@ public class CheckUnConfirmTxThread implements Runnable {
     private TransactionService transactionService;
 
     @Autowired
-    private LedgerService ledgerService; 
+    private LedgerService ledgerService;
 
     @Autowired
     private UnconfirmedTransactionStorageService unconfirmedTransactionStorageService;
@@ -83,7 +83,7 @@ public class CheckUnConfirmTxThread implements Runnable {
         }
     }
 
-    private void doTask() {
+    private void doTask() throws IOException {
         List<Transaction> list = accountLedgerService.getAllUnconfirmedTransaction().getData();
         if (list == null || list.size() == 0) {
             return;
@@ -93,9 +93,9 @@ public class CheckUnConfirmTxThread implements Runnable {
         Set<String> fromSet = new HashSet<>();
         Collections.sort(list, this.comparator);
         for (Transaction tx : list) {
-
             Result result = verifyTransaction(tx, toMaps, fromSet);
-            if (result.isSuccess()) {
+            boolean hashRight = NulsDigestData.calcDigestData(tx.serializeForHash()).equals(tx.getHash());
+            if (result.isSuccess() && hashRight) {
                 if (TimeService.currentTimeMillis() - tx.getTime() < 300000L) {
                     return;
                 }
@@ -158,8 +158,7 @@ public class CheckUnConfirmTxThread implements Runnable {
                     fromCoin = sourceTx.getCoinData().getTo().get((int) new VarInt(fromIndex, 0).value);
 
                     //if (!AccountLegerUtils.isLocalAccount(fromCoin.getOwner()))
-                    if (!AccountLegerUtils.isLocalAccount(fromCoin.getAddress()))
-                    {
+                    if (!AccountLegerUtils.isLocalAccount(fromCoin.getAddress())) {
                         continue;
                     }
                     Coin fromCoinFromLedger = ledgerService.getUtxo(fromSource);

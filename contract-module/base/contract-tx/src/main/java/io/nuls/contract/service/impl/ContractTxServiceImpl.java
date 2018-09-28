@@ -141,6 +141,10 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
                 return accountResult;
             }
 
+            if(!ContractUtil.checkPrice(price.longValue())) {
+                return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
+            }
+
             Account account = accountResult.getData();
             // 验证账户密码
             if (account.isEncrypted() && account.isLocked()) {
@@ -590,6 +594,10 @@ public class ContractTxServiceImpl implements ContractTxService, InitializingBea
             AssertUtil.canNotEmpty(methodName, "the methodName can not be empty");
             if (value == null) {
                 value = Na.ZERO;
+            }
+
+            if(!ContractUtil.checkPrice(price.longValue())) {
+                return Result.getFailed(ContractErrorCode.CONTRACT_MINIMUM_PRICE);
             }
 
             Result<Account> accountResult = accountService.getAccount(sender);

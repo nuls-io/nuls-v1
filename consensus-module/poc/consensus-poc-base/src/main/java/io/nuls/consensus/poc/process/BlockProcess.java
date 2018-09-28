@@ -47,8 +47,10 @@ import io.nuls.consensus.poc.protocol.tx.RedPunishTransaction;
 import io.nuls.consensus.poc.provider.OrphanBlockProvider;
 import io.nuls.consensus.poc.storage.service.TransactionCacheStorageService;
 import io.nuls.consensus.poc.util.ConsensusTool;
+import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.ChainLog;
@@ -124,7 +126,6 @@ public class BlockProcess {
      * @return boolean
      */
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
-        Log.info("=========================================Begin to add Block. height: " + blockContainer.getBlock().getHeader().getHeight());
 
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
         Block block = blockContainer.getBlock();
@@ -135,12 +136,21 @@ public class BlockProcess {
         }
         //验证区块版本信息，如果区块版本小于当前主网版本，丢弃区块
         BlockExtendsData extendsData = new BlockExtendsData(block.getHeader().getExtend());
+
         //收到的区块头里不包含版本信息时，默认区块版本号为1.0
         if (extendsData.getCurrentVersion() == null && NulsVersionManager.getMainVersion() > 1) {
             Log.info("------block currentVersion low, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
             return false;
         } else if (null != extendsData.getCurrentVersion() && extendsData.getCurrentVersion() < NulsVersionManager.getMainVersion()) {
             Log.info("------block currentVersion low, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
+            return false;
+        } else if (extendsData.getCurrentVersion() != null && extendsData.getPercent() != null && extendsData.getPercent() < 60) {
+            //最低覆盖率不能小于60%
+            Log.info("------block currentVersion percent error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
+            return false;
+        } else if (extendsData.getCurrentVersion() != null && extendsData.getDelay() != null && extendsData.getDelay() < 10) {
+            //延迟块数不能小于1000
+            Log.info("------block currentVersion delay error, hash :" + block.getHeader().getHash().getDigestHex() + ", packAddress:" + AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
             return false;
         }
 
@@ -235,11 +245,27 @@ public class BlockProcess {
                     Result<ContractResult> invokeContractResult = null;
                     ContractResult contractResult = null;
                     Map<String, Coin> contractUsedCoinMap = new HashMap<>();
+                    int totalGasUsed = 0;
+
+                    // 为本次验证区块增加一个合约的临时余额区，用于记录本次合约地址余额的变化
+                    contractService.createContractTempBalance();
+                    // 为本次验证区块创建一个批量执行合约的执行器
+                    contractService.createBatchExecute(stateRoot);
+                    List<ContractResult> contractResultList = new ArrayList<>();
+                    // 用于存储合约执行结果的stateRoot, 如果不为空，则说明验证、打包的区块是同一个节点
+                    byte[] tempStateRoot = null;
 
                     for (Transaction tx : txs) {
 
                         if (tx.isSystemTx()) {
                             continue;
+                        }
+
+                        // 区块中可以消耗的最大Gas总量，超过这个值，则本区块中不再继续验证智能合约交易
+                        if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS) {
+                            if(ContractUtil.isContractTransaction(tx)) {
+                                continue;
+                            }
                         }
 
                         ValidateResult result = ledgerService.verifyCoinData(tx, toMaps, fromSet);
@@ -249,32 +275,39 @@ public class BlockProcess {
                             break;
                         }
 
+                        // 验证时发现智能合约交易就调用智能合约
+                        if (ContractUtil.isContractTransaction(tx)) {
+                            contractResult = contractService.batchProcessTx(tx, bestHeight, block, stateRoot, toMaps, contractUsedCoinMap, false).getData();
+                            if (contractResult != null) {
+                                tempStateRoot = contractResult.getStateRoot();
+                                totalGasUsed += contractResult.getGasUsed();
+                                contractResultList.add(contractResult);
+                            }
+                        }
+
                     }
 
                     if (!success) {
                         break;
                     }
 
-                    Object[] objects = (Object[]) verifyAndAddBlockResult.getData();
-                    MeetingRound currentRound = (MeetingRound) objects[0];
-                    MeetingMember member = (MeetingMember) objects[1];
+                    // 验证结束后移除临时余额区
+                    contractService.removeContractTempBalance();
+                    stateRoot = contractService.commitBatchExecute().getData();
+                    // 验证结束后移除批量执行合约的执行器
+                    contractService.removeBatchExecute();
+                    // 如果不为空，则说明验证、打包的区块是同一个节点
+                    if (tempStateRoot != null) {
+                        stateRoot = tempStateRoot;
+                    }
+                    block.getHeader().setStateRoot(stateRoot);
+                    for (ContractResult result : contractResultList) {
+                        result.setStateRoot(stateRoot);
+                    }
 
-                    byte[] processStateRoot = stateRoot;
-                    // 判断区块验证的节点是否当前区块打包的节点
-                    //boolean isCurrentNodePackage = false;
-                    //Account localPacker = currentRound.getLocalPacker();
-                    //if(localPacker != null) {
-                    //    Address localPackerAddress = localPacker.getAddress();
-                    //    if(localPackerAddress != null) {
-                    //        isCurrentNodePackage = (Arrays.equals(localPackerAddress.getAddressBytes(), block.getHeader().getPackingAddress()));
-                    //    }
-                    //}
-                    //if(isCurrentNodePackage) {
-                    //    Log.info("此验证节点是这个区块的打包节点，当前验证的区块高度: {}", blockContainer.getBlock().getHeader().getHeight());
-                    //    processStateRoot = receiveStateRoot;
-                    //}
 
-                    stateRoot = contractService.processTxs(txs, bestHeight, block, processStateRoot, toMaps, contractUsedCoinMap, false).getData();
+                    //byte[] processStateRoot = stateRoot;
+                    //stateRoot = contractService.processTxs(txs, bestHeight, block, processStateRoot, toMaps, contractUsedCoinMap, false).getData();
 
                     // 验证世界状态根
                     if ((receiveStateRoot != null || stateRoot != null) && !Arrays.equals(receiveStateRoot, stateRoot)) {
@@ -284,6 +317,9 @@ public class BlockProcess {
                     }
 
                     // 验证CoinBase交易
+                    Object[] objects = (Object[]) verifyAndAddBlockResult.getData();
+                    MeetingRound currentRound = (MeetingRound) objects[0];
+                    MeetingMember member = (MeetingMember) objects[1];
                     if (!chainManager.getMasterChain().verifyCoinBaseTx(block, currentRound, member)) {
                         success = false;
                         break;
@@ -319,9 +355,9 @@ public class BlockProcess {
                     if (!success) {
                         Log.warn("save block fail : reason : " + result.getMsg() + ", block height : " + block.getHeader().getHeight() + ", hash : " + block.getHeader().getHash());
                     } else {
+                        RewardStatisticsProcess.addBlock(block);
                         //更新版本协议内容
                         nulsProtocolProcess.processProtocolUpGrade(block.getHeader());
-                        RewardStatisticsProcess.addBlock(block);
                         BlockLog.debug("save block height : " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                     }
 //                    Log.info("保存耗时：" + (System.currentTimeMillis() - time));

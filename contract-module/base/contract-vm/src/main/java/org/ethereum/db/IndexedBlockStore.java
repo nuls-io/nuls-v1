@@ -241,17 +241,6 @@ public class IndexedBlockStore extends AbstractBlockstore {
         }
     }
 
-    public synchronized void updateTotDifficulties(long index) {
-        List<BlockInfo> level = getBlockInfoForLevel(index);
-        for (BlockInfo blockInfo : level) {
-            Block block = getBlockByHash(blockInfo.getHash());
-            List<BlockInfo> parentInfos = getBlockInfoForLevel(index - 1);
-            BlockInfo parentInfo = getBlockInfoForHash(parentInfos, block.getParentHash());
-            blockInfo.setTotalDifficulty(parentInfo.getTotalDifficulty().add(block.getDifficultyBI()));
-        }
-        this.index.set((int) index, level);
-    }
-
     @Override
     public synchronized long getMaxNumber() {
 

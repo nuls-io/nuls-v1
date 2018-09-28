@@ -220,7 +220,7 @@ public class ContractUtil {
         return resultMsg + errorMsg;
     }
 
-    public static boolean isStopContract(int status) {
+    public static boolean isTerminatedContract(int status) {
         return ContractConstant.STOP == status;
     }
 
@@ -240,4 +240,10 @@ public class ContractUtil {
         return result;
     }
 
+    public static boolean checkPrice(long price) {
+        if(price < ContractConstant.CONTRACT_MINIMUM_PRICE) {
+            return false;
+        }
+        return true;
+    }
 }

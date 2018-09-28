@@ -1199,6 +1199,9 @@ public class AccountResource {
         if (form.getM() == 0) {
             form.setM(form.getPubkeys().size());
         }
+        if(form.getPubkeys().size() < form.getM()){
+            return Result.getFailed(AccountErrorCode.SIGN_COUNT_TOO_LARGE).toRpcClientResult();
+        }
         Set<String> pubkeySet = new HashSet<>(form.getPubkeys());
         if(pubkeySet.size() < form.getPubkeys().size()){
             return Result.getFailed(AccountErrorCode.PUBKEY_REPEAT).toRpcClientResult();
@@ -1265,6 +1268,9 @@ public class AccountResource {
         }
         if (form.getM() == 0) {
             form.setM(form.getPubkeys().size());
+        }
+        if(form.getPubkeys().size() < form.getM()){
+            return Result.getFailed(AccountErrorCode.SIGN_COUNT_TOO_LARGE).toRpcClientResult();
         }
         Result result = accountService.saveMultiSigAccount(form.getAddress(), form.getPubkeys(), form.getM());
         if (result.isFailed()) {
@@ -1338,17 +1344,22 @@ public class AccountResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "success", response = RpcClientResult.class)
     })
-    public RpcClientResult multiAliasFee(@BeanParam() MultiAliasFeeForm form) {
+    public RpcClientResult multiAliasFee(@BeanParam() MultiAliasFeeForm form) throws Exception{
         if (!AddressTool.validAddress(form.getAddress())) {
             return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
         }
         if (StringUtils.isBlank(form.getAlias())) {
             return Result.getFailed(AccountErrorCode.PARAMETER_ERROR).toRpcClientResult();
         }
-        Result result = aliasService.getAliasFee(form.getAddress(), form.getAlias());
+        Result result = aliasService.getMultiAliasFee(form.getAddress(), form.getAlias());
         AliasTransaction tx = new AliasTransaction();
         tx.setTime(TimeService.currentTimeMillis());
-        Script redeemScript = ScriptBuilder.createNulsRedeemScript(form.getM(), form.getPubkeys());
+        Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
+        MultiSigAccount multiSigAccount = sigAccountResult.getData();
+        Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
+        if(redeemScript == null){
+            return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
+        }
         Alias alias = new Alias(AddressTool.getAddress(form.getAddress()), form.getAlias());
         tx.setTxData(alias);
         try {
@@ -1373,7 +1384,7 @@ public class AccountResource {
             return Result.getFailed(KernelErrorCode.SYS_UNKOWN_EXCEPTION).toRpcClientResult();
         }
         //交易签名的长度为m*单个签名长度+赎回脚本长度
-        int scriptSignLenth = redeemScript.getProgram().length + form.getM() * 72;
+        int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM()) * 72;
         Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES,scriptSignLenth);
         Map<String, Long> map = new HashMap<>();
         Long fee = null;
