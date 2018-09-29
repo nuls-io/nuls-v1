@@ -100,6 +100,7 @@ public class NulsVersionManager {
                 protocolContainer.setCurrentDelay(0L);
                 protocolContainer.setCurrentPercent(100);
                 protocolContainer.setRoundIndex(0);
+
             } else if (protocolInfoPo != null) {
                 protocolContainer.setCurrentDelay(protocolInfoPo.getCurrentDelay());
                 protocolContainer.setStatus(protocolInfoPo.getStatus());
@@ -107,6 +108,8 @@ public class NulsVersionManager {
                 protocolContainer.setEffectiveHeight(protocolInfoPo.getEffectiveHeight());
                 protocolContainer.setCurrentPercent(protocolInfoPo.getCurrentPercent());
                 protocolContainer.setRoundIndex(protocolInfoPo.getRoundIndex());
+                protocolContainer.setPrePercent(protocolInfoPo.getPrePercent());
+                protocolContainer.setPreAddressSet(protocolContainer.getPreAddressSet());
             }
             //如果有对应版本的临时协议数据时，将临时数据赋值到container上，然后删除临时数据
             ProtocolTempInfoPo tempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(protocolContainer.getProtocolKey());
@@ -117,6 +120,8 @@ public class NulsVersionManager {
                 protocolContainer.setStatus(tempInfoPo.getStatus());
                 protocolContainer.setEffectiveHeight(tempInfoPo.getEffectiveHeight());
                 protocolContainer.setCurrentPercent(tempInfoPo.getCurrentPercent());
+                protocolContainer.setPreAddressSet(tempInfoPo.getPreAddressSet());
+                protocolContainer.setPrePercent(tempInfoPo.getPrePercent());
                 protocolInfoPo = new ProtocolInfoPo(tempInfoPo);
                 getVersionManagerStorageService().saveProtocolInfoPo(protocolInfoPo);
                 getVersionManagerStorageService().removeProtocolTempInfo(tempInfoPo.getProtocolKey());

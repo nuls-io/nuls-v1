@@ -49,23 +49,17 @@ public class ProtocolContainer<T extends BaseNulsData> {
     private long roundIndex;
     /***延迟生效区块数*/
     private long delay;
-    /**
-     * 当前延迟区块数
-     */
+    /*** 当前延迟区块数*/
     private long currentDelay;
-    /**
-     * 当前覆盖率(status = 0时，记录当前轮的覆盖率，status大于1时记录上一轮覆盖率)
-     */
+    /**当前覆盖率(记录当前轮的覆盖率)*/
     private int currentPercent;
-
-    /**
-     * 当前轮新协议打包出块地址
-     */
+    /***记录上一轮次的覆盖率*/
+    private int prePercent;
+    /**当前轮新协议打包出块地址*/
     private Set<String> addressSet;
-
-    /**
-     * 协议生效时的区块高度
-     */
+    /**记录上一轮新协议打包出块地址*/
+    private Set<String> preAddressSet;
+    /** 协议生效时的区块高度 */
     private Long effectiveHeight;
     /**
      * 协议生效状态
@@ -222,5 +216,21 @@ public class ProtocolContainer<T extends BaseNulsData> {
 
     public void setCurrentPercent(int currentPercent) {
         this.currentPercent = currentPercent;
+    }
+
+    public int getPrePercent() {
+        return prePercent;
+    }
+
+    public void setPrePercent(int prePercent) {
+        this.prePercent = prePercent;
+    }
+
+    public Set<String> getPreAddressSet() {
+        return preAddressSet;
+    }
+
+    public void setPreAddressSet(Set<String> preAddressSet) {
+        this.preAddressSet = preAddressSet;
     }
 }

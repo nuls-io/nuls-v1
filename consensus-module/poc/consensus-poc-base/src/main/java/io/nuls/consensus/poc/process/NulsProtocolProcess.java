@@ -127,6 +127,8 @@ public class NulsProtocolProcess {
                             container.setStatus(ProtocolContainer.INVALID);
                         }
                     }
+                    container.setPrePercent(container.getCurrentPercent());
+                    container.setPreAddressSet(container.getAddressSet());
                     container.getAddressSet().clear();
                     container.setRoundIndex(extendsData.getRoundIndex());
                     saveProtocolInfo(container);
@@ -160,6 +162,8 @@ public class NulsProtocolProcess {
                             tempInfoPo.setStatus(ProtocolContainer.INVALID);
                         }
                     }
+                    tempInfoPo.setPrePercent(tempInfoPo.getCurrentPercent());
+                    tempInfoPo.setPreAddressSet(tempInfoPo.getAddressSet());
                     tempInfoPo.getAddressSet().clear();
                     tempInfoPo.setRoundIndex(extendsData.getRoundIndex());
                     getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
@@ -177,17 +181,18 @@ public class NulsProtocolProcess {
     private void calcNewProtocolCoverageRate(ProtocolContainer container, BlockExtendsData extendsData, BlockHeader blockHeader) {
         container.getAddressSet().add(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress()));
         container.setRoundIndex(extendsData.getRoundIndex());
+        int rate = calcRate(container, extendsData);
+        container.setCurrentPercent(rate);
         //协议未生效时，判断覆盖率
         if (container.getStatus() == ProtocolContainer.INVALID) {
             //覆盖率达到后，修改状态为延迟锁定中
-            int rate = calcRate(container, extendsData);
-            container.setCurrentPercent(rate);
             if (rate >= container.getPercent()) {
                 container.setStatus(ProtocolContainer.DELAY_LOCK);
                 container.setCurrentDelay(1);
             }
             Log.info("========== 统计协议 ==========");
             Log.info("========== 协议覆盖率：" + rate + " -->>> " + container.getPercent());
+            Log.info("========== 上一轮协议覆盖率：" + rate + " -->>> " + container.getPrePercent());
             Log.info("========== 协议version：" + container.getVersion());
             Log.info("========== 当前高度：" + blockHeader.getHeight());
             Log.info("========== 当前hash：" + blockHeader.getHash());
@@ -195,6 +200,7 @@ public class NulsProtocolProcess {
             Log.info("========== 协议当前延迟块数：" + container.getCurrentDelay());
             Log.info("========== 协议当前轮次：" + container.getRoundIndex());
             Log.info("========== 协议AddressSet：" + Arrays.toString(container.getAddressSet().toArray()));
+            Log.info("========== 上一轮协议AddressSet：" + Arrays.toString(container.getPreAddressSet().toArray()));
         } else if (container.getStatus() == ProtocolContainer.DELAY_LOCK) {
             //当状态为锁定等待延迟高度完成时，首先是从新的一轮开始添加延迟区块数
             container.setCurrentDelay(container.getCurrentDelay() + 1);
@@ -223,6 +229,7 @@ public class NulsProtocolProcess {
                 Log.info("========== 协议当前延迟块数：" + container.getCurrentDelay());
                 Log.info("========== 协议当前轮次：" + container.getRoundIndex());
                 Log.info("========== 协议AddressSet：" + Arrays.toString(container.getAddressSet().toArray()));
+                Log.info("========== 上一轮协议AddressSet：" + Arrays.toString(container.getPreAddressSet().toArray()));
             }
         }
         saveProtocolInfo(container);
@@ -232,13 +239,12 @@ public class NulsProtocolProcess {
     private void calcTempProtocolCoverageRate(ProtocolTempInfoPo tempInfoPo, BlockExtendsData extendsData, BlockHeader blockHeader) {
         tempInfoPo.getAddressSet().add(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress()));
         tempInfoPo.setRoundIndex(extendsData.getRoundIndex());
-
+        int rate = calcRate(tempInfoPo, extendsData);
+        tempInfoPo.setCurrentPercent(rate);
         MeetingRound currentRound = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
         //协议未生效时，判断覆盖率
         if (tempInfoPo.getStatus() == ProtocolContainer.INVALID) {
             //覆盖率达到后，修改状态为延迟锁定中
-            int rate = calcRate(tempInfoPo, extendsData);
-            tempInfoPo.setCurrentPercent(rate);
             if (rate >= tempInfoPo.getPercent()) {
                 tempInfoPo.setStatus(ProtocolContainer.DELAY_LOCK);
                 tempInfoPo.setCurrentDelay(1);
@@ -246,6 +252,7 @@ public class NulsProtocolProcess {
             getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
             Log.info("========== 统计Temp协议 未定义 ==========");
             Log.info("========== 协议覆盖率：" + rate + " -->>>" + tempInfoPo.getPercent());
+            Log.info("========== 上一轮协议覆盖率：" + rate + " -->>>" + tempInfoPo.getPrePercent());
             Log.info("========== 协议version：" + tempInfoPo.getVersion());
             Log.info("========== 当前高度：" + blockHeader.getHeight());
             Log.info("========== 当前hash：" + blockHeader.getHash());
@@ -253,6 +260,7 @@ public class NulsProtocolProcess {
             Log.info("========== 协议当前延迟块数：" + tempInfoPo.getCurrentDelay());
             Log.info("========== 协议当前轮次：" + tempInfoPo.getRoundIndex());
             Log.info("========== 协议AddressSet：" + Arrays.toString(tempInfoPo.getAddressSet().toArray()));
+            Log.info("========== 上一轮协议AddressSet：" + Arrays.toString(tempInfoPo.getPreAddressSet().toArray()));
             Log.info("========== 当前轮出块节点数：" + currentRound.getMemberCount());
             Log.info("========== 当前轮出块节点：" + Arrays.toString(currentRound.getMemberList().toArray()));
         } else if (tempInfoPo.getStatus() == ProtocolContainer.DELAY_LOCK) {
@@ -291,6 +299,7 @@ public class NulsProtocolProcess {
                 Log.info("========== 协议当前延迟块数：" + tempInfoPo.getCurrentDelay());
                 Log.info("========== 协议当前轮次：" + tempInfoPo.getRoundIndex());
                 Log.info("========== 协议AddressSet：" + Arrays.toString(tempInfoPo.getAddressSet().toArray()));
+                Log.info("========== 上一轮协议AddressSet：" + Arrays.toString(tempInfoPo.getPreAddressSet().toArray()));
                 Log.info("========== 当前轮出块节点数：" + currentRound.getMemberCount());
                 Log.info("========== 当前轮出块节点：" + Arrays.toString(currentRound.getMemberList().toArray()));
             }

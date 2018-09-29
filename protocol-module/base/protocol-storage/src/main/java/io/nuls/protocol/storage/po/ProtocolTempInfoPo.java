@@ -41,6 +41,10 @@ public class ProtocolTempInfoPo {
     private long currentDelay;
 
     private int currentPercent;
+
+    private int prePercent;
+
+    private Set<String> preAddressSet;
     /**
      * 当前轮新协议打包出块地址
      */
@@ -59,6 +63,7 @@ public class ProtocolTempInfoPo {
 
     public ProtocolTempInfoPo(){
         addressSet = new HashSet<>();
+        preAddressSet = new HashSet<>();
     }
 
     public int getVersion() {
@@ -143,5 +148,21 @@ public class ProtocolTempInfoPo {
 
     public void setCurrentPercent(int currentPercent) {
         this.currentPercent = currentPercent;
+    }
+
+    public int getPrePercent() {
+        return prePercent;
+    }
+
+    public void setPrePercent(int prePercent) {
+        this.prePercent = prePercent;
+    }
+
+    public Set<String> getPreAddressSet() {
+        return preAddressSet;
+    }
+
+    public void setPreAddressSet(Set<String> preAddressSet) {
+        this.preAddressSet = preAddressSet;
     }
 }

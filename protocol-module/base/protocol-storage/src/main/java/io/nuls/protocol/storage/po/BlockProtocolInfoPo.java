@@ -48,6 +48,7 @@ public class BlockProtocolInfoPo {
      * 当前轮新协议打包出块地址
      */
     private Set<String> addressSet;
+
     /***当前出块轮次*/
     private long roundIndex;
     /**
@@ -58,6 +59,10 @@ public class BlockProtocolInfoPo {
      * 协议生效时的区块高度
      */
     private Long effectiveHeight;
+
+    private int prePercent;
+
+    private Set<String> preAddressSet;
 
     public BlockProtocolInfoPo() {
         addressSet = new HashSet<>();
@@ -126,5 +131,21 @@ public class BlockProtocolInfoPo {
 
     public void setBlockHeight(long blockHeight) {
         this.blockHeight = blockHeight;
+    }
+
+    public int getPrePercent() {
+        return prePercent;
+    }
+
+    public void setPrePercent(int prePercent) {
+        this.prePercent = prePercent;
+    }
+
+    public Set<String> getPreAddressSet() {
+        return preAddressSet;
+    }
+
+    public void setPreAddressSet(Set<String> preAddressSet) {
+        this.preAddressSet = preAddressSet;
     }
 }
