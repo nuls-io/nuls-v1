@@ -39,6 +39,7 @@ import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.constant.NulsConstant;
 import io.nuls.kernel.constant.SeverityLevelEnum;
 import io.nuls.kernel.constant.TransactionErrorCode;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -77,7 +78,10 @@ public class AliasTransactionValidator implements NulsDataValidator<AliasTransac
     public ValidateResult validate(AliasTransaction tx) {
         Alias alias = tx.getTxData();
         if (tx.isSystemTx()) {
-            return ValidateResult.getFailedResult(alias.getClass().getName(), TransactionErrorCode.TX_TYPE_ERROR);
+            return ValidateResult.getFailedResult(this.getClass().getName(), TransactionErrorCode.TX_TYPE_ERROR);
+        }
+        if (NulsContext.CONTRACT_ADDRESS_TYPE == alias.getAddress()[2]) {
+            return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ADDRESS_ERROR);
         }
         if (!StringUtils.validAlias(alias.getAlias())) {
             return ValidateResult.getFailedResult(this.getClass().getName(), AccountErrorCode.ALIAS_FORMAT_WRONG);

@@ -110,21 +110,20 @@ public class NulsContext {
      */
     private Long netBestBlockHeight = 0L;
 
-    /**
-     * 是否需要强制升级
-     */
-    public static volatile boolean mastUpGrade = false;
-
-    private int stop = 0;
-
     public int getStop() {
         return stop;
     }
+
+    private int stop = 0;
 
     public void exit(int stop) {
         this.stop = stop;
     }
 
+    /**
+     * 是否需要强制升级
+     */
+    public static volatile boolean mastUpGrade = false;
 
     /**
      * 获取创世块
