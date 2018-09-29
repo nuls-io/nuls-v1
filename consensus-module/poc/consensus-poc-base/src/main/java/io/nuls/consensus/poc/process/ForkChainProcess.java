@@ -46,6 +46,7 @@ import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.context.NulsContext;
@@ -128,6 +129,18 @@ public class ForkChainProcess {
                     if (newChainBlockHeader.getHeight() == newChainHeight && Arrays.equals(forkChainBlockHash, rightHash)) {
                         Log.info("-+-+-+-+-+-+-+-+- Change chain with the same height but different hash block -+-+-+-+-+-+-+-+-");
                         Log.info("-+-+-+-+-+-+-+-+- height: "+ newChainHeight + ", Right hash：" + rightHash);
+                        /** ******************************************************************************************************** */
+                        try {
+                            Log.info("");
+                            Log.info("****************************************************");
+                            Log.info("准备开始切换链，获取当前bestblock, height:{}，- {}", chainManager.getBestBlock().getHeader().getHeight(), JSONUtils.obj2json(chainManager.getBestBlock().getHeader()));
+                            Log.info("****************************************************");
+                            Log.info("");
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        /** ******************************************************************************************************** */
                     }
                     newChain = forkChain;
                     newestBlockHeight = newChainHeight;
@@ -166,6 +179,18 @@ public class ForkChainProcess {
                     boolean success = changeChain(resultChain, newChain, verifyResultList);
                     if (success) {
                         chainManager.getChains().remove(newChain);
+                        /** ******************************************************************************************************** */
+                        try {
+                            Log.info("");
+                            Log.info("****************************************************");
+                            Log.info("完成 切换连成功，获取当前bestblock, height:{}，- {}", chainManager.getBestBlock().getHeader().getHeight(), JSONUtils.obj2json(chainManager.getBestBlock().getHeader()));
+                            Log.info("****************************************************");
+                            Log.info("");
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        /** ******************************************************************************************************** */
                     }
                     ChainLog.debug("verify the fork chain {} success, change master chain result : {} , new master chain is {} : {} - {}", newChain.getChain().getId(), success, chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
                 }

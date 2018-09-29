@@ -48,6 +48,7 @@ import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.date.DateUtil;
+import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
@@ -277,6 +278,18 @@ public class ConsensusProcess {
 
     private Block doPacking(MeetingMember self, MeetingRound round) throws NulsException, IOException {
         Block bestBlock = chainManager.getBestBlock();
+        /** ******************************************************************************************************** */
+        try {
+            Log.info("");
+            Log.info("****************************************************");
+            Log.info("开始打包，获取当前bestblock, height:{}，- {}", bestBlock.getHeader().getHeight(), JSONUtils.obj2json(bestBlock.getHeader()));
+            Log.info("****************************************************");
+            Log.info("");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        /** ******************************************************************************************************** */
 
         BlockData bd = new BlockData();
         bd.setHeight(bestBlock.getHeader().getHeight() + 1);
