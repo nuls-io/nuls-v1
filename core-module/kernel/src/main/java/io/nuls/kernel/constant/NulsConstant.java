@@ -98,20 +98,6 @@ public interface NulsConstant {
      * the type of the transfer transaction
      */
     int TX_TYPE_TRANSFER = 2;
-
-
-    int TX_TYPE_PROTOCOL = 10;
-
-    /**
-     * 多地址转账交易的类型
-     * the type of the Multiple address transfer transaction
-     */
-    int TX_TYPE_TRANSFER_MULTIPLE = 11;
-    /**
-     * 零钱换整
-     * the type of the Multiple address transfer transaction
-     */
-    int TX_TYPE_CHANGE_WHOLE = 12;
     /**
      * 业务数据承载交易的类型
      * Type of business data bearing transaction
