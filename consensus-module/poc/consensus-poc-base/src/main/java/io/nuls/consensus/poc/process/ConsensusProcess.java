@@ -282,7 +282,7 @@ public class ConsensusProcess {
         try {
             Log.info("");
             Log.info("****************************************************");
-            Log.info("开始打包，获取当前bestblock, height:{}，- {}", bestBlock.getHeader().getHeight(), JSONUtils.obj2json(bestBlock.getHeader()));
+            Log.info("开始打包，获取当前bestblock, height:{}，- {}", bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
             Log.info("****************************************************");
             Log.info("");
 

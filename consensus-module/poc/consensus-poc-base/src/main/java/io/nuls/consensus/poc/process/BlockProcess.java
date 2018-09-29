@@ -52,6 +52,7 @@ import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.crypto.Hex;
+import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.ChainLog;
 import io.nuls.core.tools.log.Log;
@@ -225,6 +226,11 @@ public class BlockProcess {
                         Future<Boolean> res = signExecutor.submit(new Callable<Boolean>() {
                             @Override
                             public Boolean call() throws Exception {
+                                /** ************************************************************/
+                                if(tx.verify().isFailed()){
+                                    Log.error(JSONUtils.obj2json(tx.verify().getErrorCode()));
+                                }
+                                /** ************************************************************/
                                 boolean result = tx.verify().isSuccess();
                                 return result;
                             }

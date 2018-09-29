@@ -232,7 +232,7 @@ public class ChainContainer implements Cloneable {
         BlockHeader bestBlockHeader = chain.getEndBlockHeader();
 
         if (!preHash.equals(bestBlockHeader.getHash())) {
-            Log.error("block height " + blockHeader.getHeight() + " prehash is error! hash :" + blockHeader.getHash());
+            Log.error("block height " + blockHeader.getHeight() + " prehash is error! hash :" + blockHeader.getHash() +", prehash : " + blockHeader.getPreHash());
             return Result.getFailed();
         }
 

@@ -128,12 +128,12 @@ public class ForkChainProcess {
                         || (newChainBlockHeader.getHeight() == newChainHeight && Arrays.equals(forkChainBlockHash, rightHash))) {
                     if (newChainBlockHeader.getHeight() == newChainHeight && Arrays.equals(forkChainBlockHash, rightHash)) {
                         Log.info("-+-+-+-+-+-+-+-+- Change chain with the same height but different hash block -+-+-+-+-+-+-+-+-");
-                        Log.info("-+-+-+-+-+-+-+-+- height: "+ newChainHeight + ", Right hash：" + rightHash);
+                        Log.info("-+-+-+-+-+-+-+-+- height: "+ newChainHeight + ", Right hash：" +  Hex.encode(rightHash));
                         /** ******************************************************************************************************** */
                         try {
                             Log.info("");
                             Log.info("****************************************************");
-                            Log.info("准备开始切换链，获取当前bestblock, height:{}，- {}", chainManager.getBestBlock().getHeader().getHeight(), JSONUtils.obj2json(chainManager.getBestBlock().getHeader()));
+                            Log.info("准备开始切换链，获取当前bestblock, height:{}，- hash{}", chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
                             Log.info("****************************************************");
                             Log.info("");
 
@@ -183,7 +183,7 @@ public class ForkChainProcess {
                         try {
                             Log.info("");
                             Log.info("****************************************************");
-                            Log.info("完成 切换连成功，获取当前bestblock, height:{}，- {}", chainManager.getBestBlock().getHeader().getHeight(), JSONUtils.obj2json(chainManager.getBestBlock().getHeader()));
+                            Log.info("完成 切换连成功，获取当前bestblock, height:{}，- {}", chainManager.getBestBlock().getHeader().getHeight(), chainManager.getBestBlock().getHeader().getHash());
                             Log.info("****************************************************");
                             Log.info("");
 
