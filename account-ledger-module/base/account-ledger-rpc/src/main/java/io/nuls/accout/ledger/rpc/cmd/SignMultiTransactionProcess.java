@@ -31,7 +31,7 @@ public class SignMultiTransactionProcess implements CommandProcessor {
     public String getCommandDescription() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<address> \t\tsource address - Required")
+                .newLine("\t<signAddress> \t\tsource address - Required")
                 .newLine("\t<txdata> \t\ttransaction data - Required");
         return builder.toString();
     }

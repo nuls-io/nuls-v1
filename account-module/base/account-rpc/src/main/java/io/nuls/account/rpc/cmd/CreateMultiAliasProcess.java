@@ -24,7 +24,7 @@ public class CreateMultiAliasProcess implements CommandProcessor {
 
     @Override
     public String getHelp() {
-        return "setalias <address> <alias> <signAddress>  --Set an alias for the account ";
+        return "setMultiAlias <address> <alias> <signAddress>  --Set an alias for the multi account ";
     }
 
     @Override
