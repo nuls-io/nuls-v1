@@ -44,7 +44,6 @@ public class ProtocolTempInfoPo {
 
     private int prePercent;
 
-    private Set<String> preAddressSet;
     /**
      * 当前轮新协议打包出块地址
      */
@@ -63,7 +62,6 @@ public class ProtocolTempInfoPo {
 
     public ProtocolTempInfoPo(){
         addressSet = new HashSet<>();
-        preAddressSet = new HashSet<>();
     }
 
     public int getVersion() {
@@ -158,11 +156,4 @@ public class ProtocolTempInfoPo {
         this.prePercent = prePercent;
     }
 
-    public Set<String> getPreAddressSet() {
-        return preAddressSet;
-    }
-
-    public void setPreAddressSet(Set<String> preAddressSet) {
-        this.preAddressSet = preAddressSet;
-    }
 }

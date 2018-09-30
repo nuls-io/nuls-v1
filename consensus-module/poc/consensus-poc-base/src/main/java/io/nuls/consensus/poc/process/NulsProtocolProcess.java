@@ -43,6 +43,7 @@ import io.nuls.protocol.storage.service.VersionManagerStorageService;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public class NulsProtocolProcess {
@@ -72,6 +73,8 @@ public class NulsProtocolProcess {
         if (extendsData.getCurrentVersion() == null) {
             extendsData.setCurrentVersion(1);
         }
+        NulsVersionManager.getConsensusVersionMap().put(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress()), extendsData.getCurrentVersion());
+        getVersionManagerStorageService().saveConsensusVersionMap(NulsVersionManager.getConsensusVersionMap());
         if (extendsData.getCurrentVersion() < 1) {
             return;
         }
@@ -87,7 +90,6 @@ public class NulsProtocolProcess {
                 ProtocolTempInfoPo tempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(extendsData.getProtocolKey());
                 if (tempInfoPo == null) {
                     tempInfoPo = ProtocolTransferTool.createProtocolTempInfoPo(extendsData);
-                    tempInfoPo.getAddressSet().add(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress()));
                 }
                 calcTempProtocolCoverageRate(tempInfoPo, extendsData, blockHeader);
             }
@@ -128,7 +130,6 @@ public class NulsProtocolProcess {
                         }
                     }
                     container.setPrePercent(container.getCurrentPercent());
-                    container.setPreAddressSet(container.getAddressSet());
                     container.getAddressSet().clear();
                     container.setRoundIndex(extendsData.getRoundIndex());
                     saveProtocolInfo(container);
@@ -163,7 +164,6 @@ public class NulsProtocolProcess {
                         }
                     }
                     tempInfoPo.setPrePercent(tempInfoPo.getCurrentPercent());
-                    tempInfoPo.setPreAddressSet(tempInfoPo.getAddressSet());
                     tempInfoPo.getAddressSet().clear();
                     tempInfoPo.setRoundIndex(extendsData.getRoundIndex());
                     getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
@@ -192,7 +192,7 @@ public class NulsProtocolProcess {
             }
             Log.info("========== 统计协议 ==========");
             Log.info("========== 协议覆盖率：" + rate + " -->>> " + container.getPercent());
-            Log.info("========== 上一轮协议覆盖率：" + rate + " -->>> " + container.getPrePercent());
+            Log.info("========== 上一轮协议覆盖率：" + container.getPrePercent());
             Log.info("========== 协议version：" + container.getVersion());
             Log.info("========== 当前高度：" + blockHeader.getHeight());
             Log.info("========== 当前hash：" + blockHeader.getHash());
@@ -200,7 +200,6 @@ public class NulsProtocolProcess {
             Log.info("========== 协议当前延迟块数：" + container.getCurrentDelay());
             Log.info("========== 协议当前轮次：" + container.getRoundIndex());
             Log.info("========== 协议AddressSet：" + Arrays.toString(container.getAddressSet().toArray()));
-            Log.info("========== 上一轮协议AddressSet：" + Arrays.toString(container.getPreAddressSet().toArray()));
         } else if (container.getStatus() == ProtocolContainer.DELAY_LOCK) {
             //当状态为锁定等待延迟高度完成时，首先是从新的一轮开始添加延迟区块数
             container.setCurrentDelay(container.getCurrentDelay() + 1);
@@ -229,7 +228,6 @@ public class NulsProtocolProcess {
                 Log.info("========== 协议当前延迟块数：" + container.getCurrentDelay());
                 Log.info("========== 协议当前轮次：" + container.getRoundIndex());
                 Log.info("========== 协议AddressSet：" + Arrays.toString(container.getAddressSet().toArray()));
-                Log.info("========== 上一轮协议AddressSet：" + Arrays.toString(container.getPreAddressSet().toArray()));
             }
         }
         saveProtocolInfo(container);
@@ -252,7 +250,7 @@ public class NulsProtocolProcess {
             getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
             Log.info("========== 统计Temp协议 未定义 ==========");
             Log.info("========== 协议覆盖率：" + rate + " -->>>" + tempInfoPo.getPercent());
-            Log.info("========== 上一轮协议覆盖率：" + rate + " -->>>" + tempInfoPo.getPrePercent());
+            Log.info("========== 上一轮协议覆盖率：" + tempInfoPo.getPrePercent());
             Log.info("========== 协议version：" + tempInfoPo.getVersion());
             Log.info("========== 当前高度：" + blockHeader.getHeight());
             Log.info("========== 当前hash：" + blockHeader.getHash());
@@ -260,7 +258,6 @@ public class NulsProtocolProcess {
             Log.info("========== 协议当前延迟块数：" + tempInfoPo.getCurrentDelay());
             Log.info("========== 协议当前轮次：" + tempInfoPo.getRoundIndex());
             Log.info("========== 协议AddressSet：" + Arrays.toString(tempInfoPo.getAddressSet().toArray()));
-            Log.info("========== 上一轮协议AddressSet：" + Arrays.toString(tempInfoPo.getPreAddressSet().toArray()));
             Log.info("========== 当前轮出块节点数：" + currentRound.getMemberCount());
             Log.info("========== 当前轮出块节点：" + Arrays.toString(currentRound.getMemberList().toArray()));
         } else if (tempInfoPo.getStatus() == ProtocolContainer.DELAY_LOCK) {
@@ -299,7 +296,6 @@ public class NulsProtocolProcess {
                 Log.info("========== 协议当前延迟块数：" + tempInfoPo.getCurrentDelay());
                 Log.info("========== 协议当前轮次：" + tempInfoPo.getRoundIndex());
                 Log.info("========== 协议AddressSet：" + Arrays.toString(tempInfoPo.getAddressSet().toArray()));
-                Log.info("========== 上一轮协议AddressSet：" + Arrays.toString(tempInfoPo.getPreAddressSet().toArray()));
                 Log.info("========== 当前轮出块节点数：" + currentRound.getMemberCount());
                 Log.info("========== 当前轮出块节点：" + Arrays.toString(currentRound.getMemberList().toArray()));
             }

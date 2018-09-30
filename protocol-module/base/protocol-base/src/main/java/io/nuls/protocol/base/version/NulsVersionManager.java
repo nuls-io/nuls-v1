@@ -55,6 +55,8 @@ public class NulsVersionManager {
 
     private static VersionManagerStorageService versionManagerStorageService;
 
+    private static Map<String, Integer> consensusVersionMap = new ConcurrentHashMap<>();
+
 //    public static void test() {
 //        for (Map.Entry<String, Class<? extends Transaction>> entry : txProtocolMap.entrySet()) {
 //            System.out.println(entry.getValue());
@@ -82,6 +84,10 @@ public class NulsVersionManager {
             NulsContext.MAIN_NET_VERSION = mainVersion;
         }
         NulsContext.CHANGE_HASH_SERIALIZE_HEIGHT = vmss.getChangeTxHashBlockHeight();
+        ProtocolContainer container = getProtocolContainer(1);
+        if (container != null) {
+            container.setStatus(ProtocolContainer.VALID);
+        }
     }
 
     /***
@@ -90,6 +96,10 @@ public class NulsVersionManager {
     public static void loadVersion() {
         //获取当前已存储的主网版本信息
         VersionManagerStorageService vmss = NulsContext.getServiceBean(VersionManagerStorageService.class);
+        Map<String, Integer> versionMap = vmss.getConsensusVersionMap();
+        if (versionMap != null) {
+            consensusVersionMap = versionMap;
+        }
         checkHasLaterVersion();
         //从数据库获取各个版本的升级信息，赋值到对应的协议容器里
         for (ProtocolContainer protocolContainer : containerMap.values()) {
@@ -109,7 +119,6 @@ public class NulsVersionManager {
                 protocolContainer.setCurrentPercent(protocolInfoPo.getCurrentPercent());
                 protocolContainer.setRoundIndex(protocolInfoPo.getRoundIndex());
                 protocolContainer.setPrePercent(protocolInfoPo.getPrePercent());
-                protocolContainer.setPreAddressSet(protocolContainer.getPreAddressSet());
             }
             //如果有对应版本的临时协议数据时，将临时数据赋值到container上，然后删除临时数据
             ProtocolTempInfoPo tempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(protocolContainer.getProtocolKey());
@@ -120,7 +129,6 @@ public class NulsVersionManager {
                 protocolContainer.setStatus(tempInfoPo.getStatus());
                 protocolContainer.setEffectiveHeight(tempInfoPo.getEffectiveHeight());
                 protocolContainer.setCurrentPercent(tempInfoPo.getCurrentPercent());
-                protocolContainer.setPreAddressSet(tempInfoPo.getPreAddressSet());
                 protocolContainer.setPrePercent(tempInfoPo.getPrePercent());
                 protocolInfoPo = new ProtocolInfoPo(tempInfoPo);
                 getVersionManagerStorageService().saveProtocolInfoPo(protocolInfoPo);
@@ -312,4 +320,11 @@ public class NulsVersionManager {
         return versionManagerStorageService;
     }
 
+    public static Map<String, Integer> getConsensusVersionMap() {
+        return consensusVersionMap;
+    }
+
+    public static void setConsensusVersionMap(Map<String, Integer> consensusVersionMap) {
+        NulsVersionManager.consensusVersionMap = consensusVersionMap;
+    }
 }

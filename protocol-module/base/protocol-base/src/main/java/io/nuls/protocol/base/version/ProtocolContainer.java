@@ -57,8 +57,6 @@ public class ProtocolContainer<T extends BaseNulsData> {
     private int prePercent;
     /**当前轮新协议打包出块地址*/
     private Set<String> addressSet;
-    /**记录上一轮新协议打包出块地址*/
-    private Set<String> preAddressSet;
     /** 协议生效时的区块高度 */
     private Long effectiveHeight;
     /**
@@ -226,11 +224,4 @@ public class ProtocolContainer<T extends BaseNulsData> {
         this.prePercent = prePercent;
     }
 
-    public Set<String> getPreAddressSet() {
-        return preAddressSet;
-    }
-
-    public void setPreAddressSet(Set<String> preAddressSet) {
-        this.preAddressSet = preAddressSet;
-    }
 }

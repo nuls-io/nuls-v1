@@ -62,8 +62,6 @@ public class BlockProtocolInfoPo {
 
     private int prePercent;
 
-    private Set<String> preAddressSet;
-
     public BlockProtocolInfoPo() {
         addressSet = new HashSet<>();
     }
@@ -141,11 +139,4 @@ public class BlockProtocolInfoPo {
         this.prePercent = prePercent;
     }
 
-    public Set<String> getPreAddressSet() {
-        return preAddressSet;
-    }
-
-    public void setPreAddressSet(Set<String> preAddressSet) {
-        this.preAddressSet = preAddressSet;
-    }
 }

@@ -87,6 +87,7 @@ public class AgentDTO {
     private long totalDeposit;
     private String txHash;
     private final int memberCount;
+    private String version;
 
     public String getAgentAddress() {
         return agentAddress;
@@ -218,5 +219,13 @@ public class AgentDTO {
 
     public void setAgentId(String agentId) {
         this.agentId = agentId;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

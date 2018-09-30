@@ -99,6 +99,11 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
+
+        result = this.dbService.createArea(ProtocolStorageConstant.CONSENSUS_VERSION_AREA);
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+            throw new NulsRuntimeException(result.getErrorCode());
+        }
     }
 
     @Override
@@ -215,6 +220,16 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
     @Override
     public void deleteBlockTempProtocol(long blockHeight) {
         dbService.delete(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA, new VarInt(blockHeight).encode());
+    }
+
+    @Override
+    public Result saveConsensusVersionMap(Map<String, Integer> versionMap) {
+        return dbService.putModel(ProtocolStorageConstant.CONSENSUS_VERSION_AREA, ProtocolStorageConstant.CONSENSUS_VERSION_AREA.getBytes(), versionMap);
+    }
+
+    @Override
+    public Map<String, Integer> getConsensusVersionMap() {
+        return dbService.getModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA, ProtocolStorageConstant.CONSENSUS_VERSION_AREA.getBytes(), HashMap.class);
     }
 
     @Override
