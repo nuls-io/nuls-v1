@@ -71,7 +71,7 @@ public class SignMultiTransactionProcess implements CommandProcessor {
 
     @Override
     public CommandResult execute(String[] args) {
-        RpcClientResult res = CommandHelper.getPassword(args[2], restFul);
+        RpcClientResult res = CommandHelper.getPassword(args[1], restFul);
         if(!res.isSuccess()){
             return CommandResult.getFailed(res);
         }
@@ -84,7 +84,7 @@ public class SignMultiTransactionProcess implements CommandProcessor {
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getResult(CommandResult.dataTransformValue(result));
+        return CommandResult.getResult(CommandResult.dataMultiTransformValue(result));
 
     }
 }

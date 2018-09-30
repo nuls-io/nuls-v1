@@ -60,7 +60,7 @@ public class CreateMultiWithdrawProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "withdraw <address> <signAddress> <txHash> -- withdraw the agent";
+        return "createMultiWithdraw <address> <signAddress> <txHash> -- withdraw the  agent";
     }
 
     @Override
@@ -88,6 +88,7 @@ public class CreateMultiWithdrawProcessor implements CommandProcessor {
         String password = (String)res.getData();
         Map<String, Object> parameters = new HashMap<>(3);
         parameters.put("address", args[1]);
+        parameters.put("address", args[1]);
         parameters.put("signAddress", args[2]);
         parameters.put("txHash", args[3]);
         parameters.put("password", password);
@@ -95,6 +96,6 @@ public class CreateMultiWithdrawProcessor implements CommandProcessor {
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getResult(CommandResult.dataTransformValue(result));
+        return CommandResult.getResult(CommandResult.dataMultiTransformValue(result));
     }
 }
