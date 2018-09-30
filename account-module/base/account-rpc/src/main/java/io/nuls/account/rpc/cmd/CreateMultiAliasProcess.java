@@ -60,7 +60,7 @@ public class CreateMultiAliasProcess implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "setalias <address> <alias> <signAddress>  --Set an alias for the account ";
+        return "setMultiAlias <address> <alias> <signAddress>  --Set an alias for the multi account ";
     }
 
     @Override
@@ -97,6 +97,6 @@ public class CreateMultiAliasProcess implements CommandProcessor {
         if(result.isFailed()){
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getResult(CommandResult.dataTransformValue(result));
+        return CommandResult.getResult(CommandResult.dataMultiTransformValue(result));
     }
 }

@@ -118,6 +118,15 @@ public class CommandResult {
         return rpcResult;
     }
 
+
+    public static RpcClientResult dataMultiTransformValue(RpcClientResult rpcResult) {
+        Map<String, Object> map = ((Map) rpcResult.getData());
+        if (null != map) {
+            rpcResult.setData(map.get("txData"));
+        }
+        return rpcResult;
+    }
+
     public static RpcClientResult dataTransformList(RpcClientResult rpcResult) {
         Map<String, Object> map = ((Map) rpcResult.getData());
         if (null != map) {
