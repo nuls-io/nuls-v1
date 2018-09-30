@@ -33,7 +33,6 @@ import io.nuls.contract.vm.natives.NativeMethod;
 import io.nuls.contract.vm.program.ProgramCall;
 import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.contract.vm.program.ProgramTransfer;
-import io.nuls.contract.vm.program.impl.Account;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
 import io.nuls.kernel.utils.AddressTool;
 
@@ -79,12 +78,7 @@ public class NativeAddress {
     }
 
     private static BigInteger balance(byte[] address, Frame frame) {
-        Account account = frame.vm.getProgramInvoke().getAccount();
-        if (account.isAddress(address)) {
-            return account.getBalance();
-        } else {
-            return frame.vm.getAccountBalance(address);
-        }
+        return frame.vm.getRepository().getBalance(address);
     }
 
     public static final String balance = TYPE + "." + "balance" + "()Ljava/math/BigInteger;";
@@ -142,7 +136,7 @@ public class NativeAddress {
             //BigInteger value;
             call(address, methodName, methodDesc, args, value, frame);
         } else {
-            frame.vm.getProgramInvoke().getAccount().addBalance(value.negate());
+            frame.vm.getRepository().addBalance(from, value.negate());
             ProgramTransfer programTransfer = new ProgramTransfer(from, to, value);
             frame.vm.getTransfers().add(programTransfer);
         }
@@ -216,7 +210,7 @@ public class NativeAddress {
         programCall.setInternalCall(true);
 
         if (programCall.getValue().compareTo(BigInteger.ZERO) > 0) {
-            frame.vm.getProgramInvoke().getAccount().addBalance(programCall.getValue().negate());
+            frame.vm.getRepository().addBalance(programCall.getSender(), programCall.getValue().negate());
             ProgramTransfer programTransfer = new ProgramTransfer(programCall.getSender(), programCall.getContractAddress(), programCall.getValue());
             frame.vm.getTransfers().add(programTransfer);
         }

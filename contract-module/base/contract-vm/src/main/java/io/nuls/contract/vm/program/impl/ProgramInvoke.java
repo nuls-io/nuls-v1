@@ -88,8 +88,6 @@ public class ProgramInvoke {
 
     private boolean internalCall;
 
-    private Account account;
-
     public byte[] getContractAddress() {
         return contractAddress;
     }
@@ -192,14 +190,6 @@ public class ProgramInvoke {
 
     public void setInternalCall(boolean internalCall) {
         this.internalCall = internalCall;
-    }
-
-    public Account getAccount() {
-        return account;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
     }
 
 }
