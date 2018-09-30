@@ -88,8 +88,10 @@ public class BlockProcessTask implements Runnable {
             return;
         }
         BlockContainer blockContainer;
+        //从区块队列中获取区块（已接收完成队列或下载中队列）
         while ((blockContainer = blockQueueProvider.get()) != null) {
             try {
+                //如果系统刚启动获取的第一个块，如果本地存在和当前区块高度一样的交易则需要回滚本地的交易
                 if (first) {
                     List<Transaction> txList = blockContainer.getBlock().getTxs();
                     for (int index = txList.size() - 1; index >= 0; index--) {

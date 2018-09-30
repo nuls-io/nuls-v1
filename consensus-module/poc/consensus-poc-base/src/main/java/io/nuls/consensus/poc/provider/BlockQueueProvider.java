@@ -42,6 +42,7 @@ public class BlockQueueProvider {
     private final static BlockQueueProvider INSTANCE = new BlockQueueProvider();
 
     private Queue<BlockContainer> blockQueue;
+
     private Queue<BlockContainer> downloadBlockQueue;
 
     private DownloadService downloadService;
@@ -59,7 +60,7 @@ public class BlockQueueProvider {
     }
 
     public boolean put(BlockContainer blockContainer) {
-
+        //判断区块是在接受中还是已经下载完成
         boolean receive = (blockContainer.getStatus() == BlockContainerStatus.RECEIVED);
 
         if (receive) {
@@ -95,7 +96,9 @@ public class BlockQueueProvider {
             blockContainer = downloadBlockQueue.poll();
         }
         checkDownloadService();
+        //判断区块是否已经下载成功
         boolean hasDownloadSuccess = downloadService.isDownloadSuccess().isSuccess();
+        //如果有区块已经接收成功，并且从下载队列中获取没有获取到区块（即下载队列为空），并且下载队列没有销毁，则销毁下载队列，并从已下载区块队列获取区块
         if (blockContainer == null && hasDownloadSuccess && !downloadBlockQueueHasDestory) {
             downloadBlockQueueHasDestory = true;
             if (blockContainer == null) {

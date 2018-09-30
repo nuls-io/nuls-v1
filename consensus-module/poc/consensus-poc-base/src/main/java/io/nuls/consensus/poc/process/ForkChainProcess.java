@@ -94,12 +94,15 @@ public class ForkChainProcess {
             // 监控孤立链的状态，如果有可连接的，则加入验证链里面
             monitorOrphanChains();
 
+            //当前链最新高度+3，当某条分叉链高度大于这个高度时需切换该分叉链为主链
             long newestBlockHeight = chainManager.getBestBlockHeight() + PocConsensusConstant.CHANGE_CHAIN_BLOCK_DIFF_COUNT;
 
+            //主链
             ChainContainer newChain = chainManager.getMasterChain();
             if (null == newChain) {
                 return false;
             }
+            //分叉链列表
             Iterator<ChainContainer> iterator = chainManager.getChains().iterator();
             while (iterator.hasNext()) {
                 ChainContainer forkChain = iterator.next();
@@ -114,6 +117,7 @@ public class ForkChainProcess {
                 }
             }
 
+            //切换主链
             if (!newChain.equals(chainManager.getMasterChain())) {
 
                 ChainLog.debug("discover the fork chain {} : start {} - {} , end {} - {} , exceed the master {} - {} - {}, start verify the fork chian", newChain.getChain().getId(), newChain.getChain().getStartBlockHeader().getHeight(), newChain.getChain().getStartBlockHeader().getHash(), newChain.getChain().getEndBlockHeader().getHeight(), newChain.getChain().getEndBlockHeader().getHash(), chainManager.getMasterChain().getChain().getId(), chainManager.getBestBlockHeight(), chainManager.getBestBlock().getHeader().getHash());

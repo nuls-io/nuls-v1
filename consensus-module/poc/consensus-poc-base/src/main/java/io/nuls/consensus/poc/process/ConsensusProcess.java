@@ -106,6 +106,7 @@ public class ConsensusProcess {
         if (ConsensusStatusContext.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
             return;
         }
+        //获取当前轮次
         MeetingRound round = chainManager.getMasterChain().getOrResetCurrentRound();
         if (round == null) {
             return;

@@ -83,23 +83,30 @@ public class ConsensusScheduler {
             Log.warn(e.getMessage());
         }
 
+        //创建定时任务管理器
         threadPool = TaskManager.createScheduledThreadPool(6,
                 new NulsThreadFactory(ConsensusConstant.MODULE_ID_CONSENSUS, "consensus-poll-control"));
 
+        //区块验证定时任务
         BlockProcess blockProcess = new BlockProcess(chainManager, orphanBlockProvider);
         threadPool.scheduleAtFixedRate(new BlockProcessTask(blockProcess), 1000L, 300L, TimeUnit.MILLISECONDS);
 
+        //区块分叉处理任务
         ForkChainProcess forkChainProcess = new ForkChainProcess(chainManager);
         threadPool.scheduleAtFixedRate(new ForkChainProcessTask(forkChainProcess), 1000L, 1000L, TimeUnit.MILLISECONDS);
 
+        //共识任务，打包区块
         ConsensusProcess consensusProcess = new ConsensusProcess(chainManager);
         threadPool.scheduleAtFixedRate(new ConsensusProcessTask(consensusProcess), 1000L, 1000L, TimeUnit.MILLISECONDS);
 
+        //孤儿块处理线程（守护线程）
         orphanBlockProcess = new OrphanBlockProcess(chainManager, orphanBlockProvider);
         orphanBlockProcess.start();
 
+        //块计数器任务
         threadPool.scheduleAtFixedRate(new BlockMonitorProcessTask(new BlockMonitorProcess(chainManager)), 60, 60, TimeUnit.SECONDS);
 
+        //报酬统计线程
         TaskManager.createAndRunThread(ConsensusConstant.MODULE_ID_CONSENSUS, "poc-reward-cache", new RewardStatisticsProcessTask(NulsContext.getServiceBean(RewardStatisticsProcess.class)));
 
         threadPool.scheduleAtFixedRate(new RewardCalculatorTask(NulsContext.getServiceBean(RewardStatisticsProcess.class)), ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND, ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND, TimeUnit.SECONDS);

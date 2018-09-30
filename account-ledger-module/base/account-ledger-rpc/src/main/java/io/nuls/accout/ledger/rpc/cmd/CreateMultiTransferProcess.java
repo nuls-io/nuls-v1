@@ -23,7 +23,7 @@ public class CreateMultiTransferProcess implements CommandProcessor {
 
     @Override
     public String getHelp() {
-        return "transfer <address> <signAddress> <toAddress>,<toamount>;....;<toAddress><toamount> [remark] -transfer-";
+        return "createMultiTransfer <address> <signAddress> <toAddress>,<toamount>;....;<toAddress><toamount> [remark] -createMultiTransfer-";
     }
 
     @Override

@@ -125,6 +125,7 @@ public class BlockProcess {
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
         Log.info("=========================================Begin to add Block. height: " + blockContainer.getBlock().getHeader().getHeight());
 
+        //区块状态是否为下载中
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
         Block block = blockContainer.getBlock();
         // Discard future blocks
@@ -150,11 +151,14 @@ public class BlockProcess {
         block.verifyWithException();
         bifurcationUtil.validate(block.getHeader());
 
+        //判断交易双花
         ValidateResult<List<Transaction>> validateResult = ledgerService.verifyDoubleSpend(block);
         if (validateResult.isFailed() && validateResult.getErrorCode().equals(TransactionErrorCode.TRANSACTION_REPEATED)) {
             RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
             RedPunishData redPunishData = new RedPunishData();
+            //获取包块这个双花块的打包地址
             byte[] packingAddress = AddressTool.getAddress(block.getHeader().getBlockSignature().getPublicKey());
+            //获取主链的节点列表
             List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
             Agent agent = null;
             for (Agent a : agentList) {

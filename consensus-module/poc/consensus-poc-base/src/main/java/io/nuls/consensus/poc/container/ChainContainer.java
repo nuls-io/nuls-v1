@@ -233,7 +233,9 @@ public class ChainContainer implements Cloneable {
             return Result.getFailed();
         }
 
+        //接收到的块的基础信息
         BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
+        //本地主链的基础信息
         BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlockHeader.getExtend());
         //判断轮次信息是否正确
         if (extendsData.getRoundIndex() < bestExtendsData.getRoundIndex() ||
@@ -244,6 +246,7 @@ public class ChainContainer implements Cloneable {
 
         MeetingRound currentRound = roundManager.getCurrentRound();
 
+        //如果区块是下载状态且本地主链打包轮次大于下载区块的打包轮次，则获取本地主链相应的轮次信息，如果不存在则将界首区块轮次信息设置为主链相应区块坤次信息
         if (isDownload && currentRound.getIndex() > extendsData.getRoundIndex()) {
             MeetingRound round = roundManager.getRoundByIndex(extendsData.getRoundIndex());
             if (round != null) {
@@ -546,7 +549,7 @@ public class ChainContainer implements Cloneable {
      * @return ChainContainer
      */
     public ChainContainer getBeforeTheForkChain(ChainContainer chainContainer) {
-
+        //当前主链的副本，并把ID设为分叉链的ID
         Chain newChain = new Chain();
         newChain.setId(chainContainer.getChain().getId());
         newChain.setStartBlockHeader(chain.getStartBlockHeader());
