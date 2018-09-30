@@ -290,11 +290,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             logTime("load method");
 
-            BigInteger accountBalance = getAccountBalance(programInvoke.getContractAddress());
-            BigInteger vmBalance = repository.getBalance(programInvoke.getContractAddress());
-            if (!programInvoke.isInternalCall() && vmBalance.compareTo(accountBalance) != 0) {
-                return revert(String.format("balance error: accountBalance=%s, vmBalance=%s", accountBalance, vmBalance));
-            }
+            BigInteger accountBalance = vm.getAccountBalance(programInvoke.getContractAddress());
+            programInvoke.setAccount(new Account(programInvoke.getContractAddress(), accountBalance));
 
             logTime("load balance");
 
@@ -308,7 +305,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             logTime("load contract ref");
 
             if (programInvoke.getValue().compareTo(BigInteger.ZERO) > 0) {
-                repository.addBalance(programInvoke.getContractAddress(), programInvoke.getValue());
+                programInvoke.getAccount().addBalance(programInvoke.getValue());
             }
             vm.setProgramExecutor(this);
             vm.setRepository(repository);
@@ -350,7 +347,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             programResult.setNonce(repository.getNonce(programInvoke.getContractAddress()));
             programResult.setTransfers(vm.getTransfers());
             programResult.setEvents(vm.getEvents());
-            programResult.setBalance(repository.getBalance(programInvoke.getContractAddress()));
+            programResult.setBalance(programInvoke.getAccount().getBalance());
 
             if (resultValue != null) {
                 if (resultValue instanceof ObjectRef) {
@@ -534,14 +531,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                     .ifPresent(code -> {
                         contractMethods(methodCodes, classCodes, code, true);
                     });
-        }
-    }
-
-    private BigInteger getAccountBalance(byte[] address) {
-        if (vmContext == null) {
-            return BigInteger.ZERO;
-        } else {
-            return vmContext.getBalance(address);
         }
     }
 
