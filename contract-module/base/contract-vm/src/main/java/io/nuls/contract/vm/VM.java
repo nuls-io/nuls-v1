@@ -1066,6 +1066,14 @@ public class VM {
         return gasCost;
     }
 
+    public BigInteger getAccountBalance(byte[] address) {
+        if (vmContext == null) {
+            return BigInteger.ZERO;
+        } else {
+            return vmContext.getBalance(address);
+        }
+    }
+
     public BlockHeaderDto getBlockHeader(long number) {
         if (this.vmContext != null) {
             BlockHeaderDto blockHeader = null;

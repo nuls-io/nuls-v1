@@ -291,7 +291,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             logTime("load method");
 
             if (!programInvoke.isInternalCall()) {
-                BigInteger accountBalance = getAccountBalance(programInvoke.getContractAddress());
+                BigInteger accountBalance = vm.getAccountBalance(programInvoke.getContractAddress());
                 BigInteger vmBalance = repository.getBalance(programInvoke.getContractAddress());
                 if (vmBalance.compareTo(accountBalance) != 0) {
                     repository.addBalance(programInvoke.getContractAddress(), accountBalance.subtract(vmBalance));
@@ -536,14 +536,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                     .ifPresent(code -> {
                         contractMethods(methodCodes, classCodes, code, true);
                     });
-        }
-    }
-
-    private BigInteger getAccountBalance(byte[] address) {
-        if (vmContext == null) {
-            return BigInteger.ZERO;
-        } else {
-            return vmContext.getBalance(address);
         }
     }
 
