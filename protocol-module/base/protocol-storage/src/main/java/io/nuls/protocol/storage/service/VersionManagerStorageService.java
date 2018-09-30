@@ -125,4 +125,8 @@ public interface VersionManagerStorageService {
     Result saveConsensusVersionMap(Map<String, Integer> versionMap);
 
     Map<String, Integer> getConsensusVersionMap();
+
+    Result saveConsensusVersionHeight(Long blockHeight);
+
+    Long getConsensusVersionHeight();
 }

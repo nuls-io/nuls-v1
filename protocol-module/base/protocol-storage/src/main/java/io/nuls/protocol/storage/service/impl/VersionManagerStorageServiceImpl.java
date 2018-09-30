@@ -104,6 +104,11 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
         if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
             throw new NulsRuntimeException(result.getErrorCode());
         }
+
+        result = this.dbService.createArea(ProtocolStorageConstant.BLOCK_PROTOCOL_HEIGHT);
+        if (result.isFailed() && !DBErrorCode.DB_AREA_EXIST.equals(result.getErrorCode())) {
+            throw new NulsRuntimeException(result.getErrorCode());
+        }
     }
 
     @Override
@@ -230,6 +235,18 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
     @Override
     public Map<String, Integer> getConsensusVersionMap() {
         return dbService.getModel(ProtocolStorageConstant.BLOCK_TEMP_PROTOCOL_AREA, ProtocolStorageConstant.CONSENSUS_VERSION_AREA.getBytes(), HashMap.class);
+    }
+
+    @Override
+    public Result saveConsensusVersionHeight(Long blockHeight) {
+        // todo auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Long getConsensusVersionHeight() {
+        // todo auto-generated method stub
+        return null;
     }
 
     @Override

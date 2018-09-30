@@ -74,6 +74,8 @@ public interface ProtocolStorageConstant {
     String BLOCK_TEMP_PROTOCOL_INDEX = "block_temp_protocol_index";
 
     String CONSENSUS_VERSION_AREA = "consensus_version_area";
+
+    String BLOCK_PROTOCOL_HEIGHT = "block_protocol_height";
     /**
      * 存储当前主网运行中的版本数据key
      */
