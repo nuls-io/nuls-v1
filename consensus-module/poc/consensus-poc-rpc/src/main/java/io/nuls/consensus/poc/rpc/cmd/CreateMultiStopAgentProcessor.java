@@ -44,7 +44,7 @@ public class CreateMultiStopAgentProcessor implements CommandProcessor {
 
     @Override
     public String getCommand() {
-        return "stopMultiagentByAddr";
+        return "stopMultiagent";
     }
 
     @Override
@@ -58,7 +58,7 @@ public class CreateMultiStopAgentProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "stopagent <address> <signAddress>-- stop the agent";
+        return "stopMultiagent <address> <signAddress>-- stop the agent";
     }
 
     @Override
@@ -92,6 +92,6 @@ public class CreateMultiStopAgentProcessor implements CommandProcessor {
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getResult(CommandResult.dataTransformValue(result));
+        return CommandResult.getResult(CommandResult.dataMultiTransformValue(result));
     }
 }

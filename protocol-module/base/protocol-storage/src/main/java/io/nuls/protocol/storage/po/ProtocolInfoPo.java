@@ -61,6 +61,8 @@ public class ProtocolInfoPo {
      */
     private Long effectiveHeight;
 
+    private int prePercent;
+
     public ProtocolInfoPo() {
         addressSet = new HashSet<>();
     }
@@ -75,6 +77,7 @@ public class ProtocolInfoPo {
         this.status = tempInfoPo.getStatus();
         this.effectiveHeight = tempInfoPo.getEffectiveHeight();
         this.setCurrentPercent(tempInfoPo.getCurrentPercent());
+        this.prePercent = tempInfoPo.getPrePercent();
     }
 
     public int getVersion() {
@@ -148,4 +151,13 @@ public class ProtocolInfoPo {
     public void setCurrentPercent(int currentPercent) {
         this.currentPercent = currentPercent;
     }
+
+    public int getPrePercent() {
+        return prePercent;
+    }
+
+    public void setPrePercent(int prePercent) {
+        this.prePercent = prePercent;
+    }
+
 }

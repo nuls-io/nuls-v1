@@ -59,7 +59,7 @@ public class CreateMultiAgentProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "createagent <agentAddress> <packingAddress> <signAddress> <commissionRate> <deposit> [rewardAddress] --create a agent";
+        return "createMultiAgent <agentAddress> <packingAddress> <signAddress> <commissionRate> <deposit> [rewardAddress] --create a multi agent";
     }
 
     @Override
@@ -116,6 +116,6 @@ public class CreateMultiAgentProcessor implements CommandProcessor {
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getResult(CommandResult.dataTransformValue(result));
+        return CommandResult.getResult(CommandResult.dataMultiTransformValue(result));
     }
 }

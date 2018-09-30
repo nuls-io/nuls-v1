@@ -63,7 +63,7 @@ public class CreateMultiDepositProcessor implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "deposit <address> <signAddress> <agentHash> <deposit> --apply for deposit";
+        return "createMultiDeposit <address> <signAddress> <agentHash> <deposit> --apply for multi deposit";
     }
 
     @Override
@@ -101,6 +101,6 @@ public class CreateMultiDepositProcessor implements CommandProcessor {
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getResult(CommandResult.dataTransformValue(result));
+        return CommandResult.getResult(CommandResult.dataMultiTransformValue(result));
     }
 }

@@ -60,7 +60,7 @@ public class CreateMultiTransferProcess implements CommandProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "transfer <address> <signAddress> <toAddress>,<toamount>;....;<toAddress><toamount> [remark] -transfer-";
+        return "createMultiTransfer <address> <signAddress> <toAddress>,<toamount>;....;<toAddress><toamount> [remark] -createMultiTransfer-";
     }
 
     @Override
@@ -100,6 +100,6 @@ public class CreateMultiTransferProcess implements CommandProcessor {
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getResult(CommandResult.dataTransformValue(result));
+        return CommandResult.getResult(CommandResult.dataMultiTransformValue(result));
     }
 }
