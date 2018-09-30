@@ -128,8 +128,11 @@ public class BlockProcess {
      */
     public boolean addBlock(BlockContainer blockContainer) throws IOException {
 
+
         boolean isDownload = blockContainer.getStatus() == BlockContainerStatus.DOWNLOADING;
         Block block = blockContainer.getBlock();
+        Log.info("******** BlockProcess - addBlock ******* height:{} , hash:{}, preHash:{}", block.getHeader().getHeight(), block.getHeader().getHash(), block.getHeader().getPreHash());
+        Log.info(" packingAddress:{}", AddressTool.getStringAddressByBytes(block.getHeader().getPackingAddress()));
         // Discard future blocks
         // 丢弃掉未来时间的区块
         if (TimeService.currentTimeMillis() + PocConsensusConstant.DISCARD_FUTURE_BLOCKS_TIME < block.getHeader().getTime()) {
