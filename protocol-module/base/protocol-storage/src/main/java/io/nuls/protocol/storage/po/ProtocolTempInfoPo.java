@@ -41,6 +41,9 @@ public class ProtocolTempInfoPo {
     private long currentDelay;
 
     private int currentPercent;
+
+    private int prePercent;
+
     /**
      * 当前轮新协议打包出块地址
      */
@@ -144,4 +147,13 @@ public class ProtocolTempInfoPo {
     public void setCurrentPercent(int currentPercent) {
         this.currentPercent = currentPercent;
     }
+
+    public int getPrePercent() {
+        return prePercent;
+    }
+
+    public void setPrePercent(int prePercent) {
+        this.prePercent = prePercent;
+    }
+
 }

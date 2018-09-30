@@ -45,6 +45,7 @@ public class ProtocolTransferTool {
         infoPo.setStatus(container.getStatus());
         infoPo.setRoundIndex(container.getRoundIndex());
         infoPo.setEffectiveHeight(container.getEffectiveHeight());
+        infoPo.setPrePercent(container.getPrePercent());
         return infoPo;
     }
 
@@ -66,6 +67,7 @@ public class ProtocolTransferTool {
         infoPo.setRoundIndex(container.getRoundIndex());
         infoPo.setStatus(container.getStatus());
         infoPo.setAddressSet(container.getAddressSet());
+        infoPo.setPrePercent(container.getPrePercent());
         return infoPo;
     }
 
@@ -75,6 +77,7 @@ public class ProtocolTransferTool {
         container.setRoundIndex(infoPo.getRoundIndex());
         container.setAddressSet(infoPo.getAddressSet());
         container.setCurrentDelay(infoPo.getCurrentDelay());
+        container.setPrePercent(infoPo.getPrePercent());
     }
 
     public static BlockProtocolInfoPo toBlockProtocolInfoPo(BlockHeader header, ProtocolTempInfoPo tempInfoPo) {
@@ -86,6 +89,7 @@ public class ProtocolTransferTool {
         infoPo.setRoundIndex(tempInfoPo.getRoundIndex());
         infoPo.setStatus(tempInfoPo.getStatus());
         infoPo.setAddressSet(tempInfoPo.getAddressSet());
+        infoPo.setPrePercent(tempInfoPo.getPrePercent());
         return infoPo;
     }
 
@@ -95,5 +99,6 @@ public class ProtocolTransferTool {
         tempInfoPo.setRoundIndex(infoPo.getRoundIndex());
         tempInfoPo.setAddressSet(infoPo.getAddressSet());
         tempInfoPo.setCurrentDelay(infoPo.getCurrentDelay());
+        tempInfoPo.setPrePercent(infoPo.getPrePercent());
     }
 }

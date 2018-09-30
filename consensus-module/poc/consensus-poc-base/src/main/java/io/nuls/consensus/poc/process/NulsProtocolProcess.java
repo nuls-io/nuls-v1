@@ -43,6 +43,7 @@ import io.nuls.protocol.storage.service.VersionManagerStorageService;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public class NulsProtocolProcess {
@@ -72,6 +73,8 @@ public class NulsProtocolProcess {
         if (extendsData.getCurrentVersion() == null) {
             extendsData.setCurrentVersion(1);
         }
+        NulsVersionManager.getConsensusVersionMap().put(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress()), extendsData.getCurrentVersion());
+        getVersionManagerStorageService().saveConsensusVersionMap(NulsVersionManager.getConsensusVersionMap());
         if (extendsData.getCurrentVersion() < 1) {
             return;
         }
@@ -87,7 +90,6 @@ public class NulsProtocolProcess {
                 ProtocolTempInfoPo tempInfoPo = getVersionManagerStorageService().getProtocolTempInfoPo(extendsData.getProtocolKey());
                 if (tempInfoPo == null) {
                     tempInfoPo = ProtocolTransferTool.createProtocolTempInfoPo(extendsData);
-                    tempInfoPo.getAddressSet().add(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress()));
                 }
                 calcTempProtocolCoverageRate(tempInfoPo, extendsData, blockHeader);
             }
@@ -127,6 +129,7 @@ public class NulsProtocolProcess {
                             container.setStatus(ProtocolContainer.INVALID);
                         }
                     }
+                    container.setPrePercent(container.getCurrentPercent());
                     container.getAddressSet().clear();
                     container.setRoundIndex(extendsData.getRoundIndex());
                     saveProtocolInfo(container);
@@ -160,6 +163,7 @@ public class NulsProtocolProcess {
                             tempInfoPo.setStatus(ProtocolContainer.INVALID);
                         }
                     }
+                    tempInfoPo.setPrePercent(tempInfoPo.getCurrentPercent());
                     tempInfoPo.getAddressSet().clear();
                     tempInfoPo.setRoundIndex(extendsData.getRoundIndex());
                     getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
@@ -177,17 +181,18 @@ public class NulsProtocolProcess {
     private void calcNewProtocolCoverageRate(ProtocolContainer container, BlockExtendsData extendsData, BlockHeader blockHeader) {
         container.getAddressSet().add(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress()));
         container.setRoundIndex(extendsData.getRoundIndex());
+        int rate = calcRate(container, extendsData);
+        container.setCurrentPercent(rate);
         //协议未生效时，判断覆盖率
         if (container.getStatus() == ProtocolContainer.INVALID) {
             //覆盖率达到后，修改状态为延迟锁定中
-            int rate = calcRate(container, extendsData);
-            container.setCurrentPercent(rate);
             if (rate >= container.getPercent()) {
                 container.setStatus(ProtocolContainer.DELAY_LOCK);
                 container.setCurrentDelay(1);
             }
             Log.info("========== 统计协议 ==========");
             Log.info("========== 协议覆盖率：" + rate + " -->>> " + container.getPercent());
+            Log.info("========== 上一轮协议覆盖率：" + container.getPrePercent());
             Log.info("========== 协议version：" + container.getVersion());
             Log.info("========== 当前高度：" + blockHeader.getHeight());
             Log.info("========== 当前hash：" + blockHeader.getHash());
@@ -232,13 +237,12 @@ public class NulsProtocolProcess {
     private void calcTempProtocolCoverageRate(ProtocolTempInfoPo tempInfoPo, BlockExtendsData extendsData, BlockHeader blockHeader) {
         tempInfoPo.getAddressSet().add(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress()));
         tempInfoPo.setRoundIndex(extendsData.getRoundIndex());
-
+        int rate = calcRate(tempInfoPo, extendsData);
+        tempInfoPo.setCurrentPercent(rate);
         MeetingRound currentRound = PocConsensusContext.getChainManager().getMasterChain().getCurrentRound();
         //协议未生效时，判断覆盖率
         if (tempInfoPo.getStatus() == ProtocolContainer.INVALID) {
             //覆盖率达到后，修改状态为延迟锁定中
-            int rate = calcRate(tempInfoPo, extendsData);
-            tempInfoPo.setCurrentPercent(rate);
             if (rate >= tempInfoPo.getPercent()) {
                 tempInfoPo.setStatus(ProtocolContainer.DELAY_LOCK);
                 tempInfoPo.setCurrentDelay(1);
@@ -246,6 +250,7 @@ public class NulsProtocolProcess {
             getVersionManagerStorageService().saveProtocolTempInfoPo(tempInfoPo);
             Log.info("========== 统计Temp协议 未定义 ==========");
             Log.info("========== 协议覆盖率：" + rate + " -->>>" + tempInfoPo.getPercent());
+            Log.info("========== 上一轮协议覆盖率：" + tempInfoPo.getPrePercent());
             Log.info("========== 协议version：" + tempInfoPo.getVersion());
             Log.info("========== 当前高度：" + blockHeader.getHeight());
             Log.info("========== 当前hash：" + blockHeader.getHash());

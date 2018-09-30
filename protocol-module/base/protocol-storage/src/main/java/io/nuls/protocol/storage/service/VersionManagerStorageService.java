@@ -121,4 +121,8 @@ public interface VersionManagerStorageService {
     void deleteBlockProtocol(long blockHeight);
 
     void deleteBlockTempProtocol(long blockHeight);
+
+    Result saveConsensusVersionMap(Map<String, Integer> versionMap);
+
+    Map<String, Integer> getConsensusVersionMap();
 }

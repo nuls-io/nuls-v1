@@ -72,6 +72,8 @@ import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.TransactionFeeCalculator;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
+import io.nuls.protocol.base.version.NulsVersionManager;
+import io.nuls.protocol.base.version.ProtocolContainer;
 import io.nuls.protocol.model.validator.TxMaxSizeValidator;
 import io.nuls.protocol.service.TransactionService;
 import io.swagger.annotations.*;
@@ -314,10 +316,10 @@ public class PocConsensusResource {
     }
 
     //计算最大交易金额，如果手续费在最大值范围内则说明交易没有超出大小，则不需要计算直接返回null
-    private Long getMaxAmount(Na fee, String address, Transaction tx){
+    private Long getMaxAmount(Na fee, String address, Transaction tx) {
         long feeMax = TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES.multiply(TxMaxSizeValidator.MAX_TX_BYTES).getValue();
         Long maxAmount = null;
-        if(fee.getValue() > feeMax) {
+        if (fee.getValue() > feeMax) {
             Result rs = accountLedgerService.getMaxAmountOfOnce(AddressTool.getAddress(address), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
             if (rs.isSuccess()) {
                 maxAmount = ((Na) rs.getData()).getValue();
@@ -680,6 +682,8 @@ public class PocConsensusResource {
         List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
         agentList = new ArrayList<>(agentList);
         long startBlockHeight = NulsContext.getInstance().getBestHeight();
+
+
         for (int i = agentList.size() - 1; i >= 0; i--) {
             Agent agent = agentList.get(i);
             if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
@@ -722,10 +726,18 @@ public class PocConsensusResource {
             type = AgentComparator.COMPREHENSIVE;
         }
         Collections.sort(agentList, AgentComparator.getInstance(type));
+
         List<AgentDTO> resultList = new ArrayList<>();
         for (int i = start; i < agentList.size() && i < (start + pageSize); i++) {
             Agent agent = agentList.get(i);
-            resultList.add(new AgentDTO(agent, accountService.getAlias(agent.getAgentAddress()).getData()));
+            AgentDTO agentDTO = new AgentDTO(agent, accountService.getAlias(agent.getAgentAddress()).getData());
+            Integer version = NulsVersionManager.getConsensusVersionMap().get(agentDTO.getPackingAddress());
+            if (version == null) {
+                agentDTO.setVersion("--");
+            } else {
+                agentDTO.setVersion(version + "");
+            }
+            resultList.add(agentDTO);
         }
         page.setList(resultList);
         result.setData(page);
@@ -1163,7 +1175,7 @@ public class PocConsensusResource {
         Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAgentAddress());
         MultiSigAccount multiSigAccount = sigAccountResult.getData();
         Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
-        if(redeemScript == null){
+        if (redeemScript == null) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
         CoinData coinData = new CoinData();
@@ -1183,8 +1195,8 @@ public class PocConsensusResource {
         }
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         //交易签名的长度为m*单个签名长度+赎回脚本长度
-        int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM()) * 72;
-        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAgentAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES,scriptSignLenth);
+        int scriptSignLenth = redeemScript.getProgram().length + ((int) multiSigAccount.getM()) * 72;
+        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAgentAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES, scriptSignLenth);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;
         if (rs.isSuccess()) {
@@ -1217,7 +1229,7 @@ public class PocConsensusResource {
         Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
         MultiSigAccount multiSigAccount = sigAccountResult.getData();
         Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
-        if(redeemScript == null){
+        if (redeemScript == null) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
         CoinData coinData = new CoinData();
@@ -1232,8 +1244,8 @@ public class PocConsensusResource {
         }
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         //交易签名的长度为m*单个签名长度+赎回脚本长度
-        int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM()) * 72;
-        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES,scriptSignLenth);
+        int scriptSignLenth = redeemScript.getProgram().length + ((int) multiSigAccount.getM()) * 72;
+        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(form.getAddress()), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES, scriptSignLenth);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;
         if (rs.isSuccess()) {
@@ -1253,7 +1265,7 @@ public class PocConsensusResource {
             @ApiResponse(code = 200, message = "success", response = String.class)
     })
     public RpcClientResult getStopMultiAgentFee(@ApiParam(name = "address", value = "创建节点的账户地址", required = true)
-                                           @QueryParam("address") String address) throws NulsException, IOException {
+                                                @QueryParam("address") String address) throws NulsException, IOException {
         AssertUtil.canNotEmpty(address, "address can not be null");
         if (!AddressTool.validAddress(address)) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR).toRpcClientResult();
@@ -1284,7 +1296,7 @@ public class PocConsensusResource {
         Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
         coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
         Na resultFee = TransactionFeeCalculator.getMaxFee(tx.size());
-        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(address), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES,0);
+        Result rs = accountLedgerService.getMultiMaxAmountOfOnce(AddressTool.getAddress(address), tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES, 0);
         Map<String, Long> map = new HashMap<>();
         Long maxAmount = null;
         if (rs.isSuccess()) {
@@ -1316,7 +1328,7 @@ public class PocConsensusResource {
         AssertUtil.canNotEmpty(form.getDeposit(), "deposit can not be null");
         AssertUtil.canNotEmpty(form.getPackingAddress(), "packing address can not be null");
 
-        if (!AddressTool.isPackingAddress(form.getPackingAddress()) || !AddressTool.validAddress(form.getAgentAddress())|| !AddressTool.validAddress(form.getSignAddress())) {
+        if (!AddressTool.isPackingAddress(form.getPackingAddress()) || !AddressTool.validAddress(form.getAgentAddress()) || !AddressTool.validAddress(form.getSignAddress())) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         Account account = accountService.getAccount(form.getSignAddress()).getData();
@@ -1332,7 +1344,7 @@ public class PocConsensusResource {
         Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAgentAddress());
         MultiSigAccount multiSigAccount = sigAccountResult.getData();
         Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
-        if(redeemScript == null){
+        if (redeemScript == null) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
         CreateAgentTransaction tx = new CreateAgentTransaction();
@@ -1361,8 +1373,8 @@ public class PocConsensusResource {
         coinData.setTo(toList);
         tx.setCoinData(coinData);
         //交易签名的长度为m*单个签名长度+赎回脚本长度
-        int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM())*72;
-        CoinDataResult result = accountLedgerService.getMutilCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size()+scriptSignLenth, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+        int scriptSignLenth = redeemScript.getProgram().length + ((int) multiSigAccount.getM()) * 72;
+        CoinDataResult result = accountLedgerService.getMutilCoinData(agent.getAgentAddress(), agent.getDeposit(), tx.size() + scriptSignLenth, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         if (null != result) {
             if (result.isEnough()) {
                 tx.getCoinData().setFrom(result.getCoinList());
@@ -1377,7 +1389,7 @@ public class PocConsensusResource {
         //将赎回脚本先存储在签名脚本中
         scripts.add(redeemScript);
         transactionSignature.setScripts(scripts);
-        Result finalResult = accountLedgerService.txMultiProcess(tx,transactionSignature,account,form.getPassword());
+        Result finalResult = accountLedgerService.txMultiProcess(tx, transactionSignature, account, form.getPassword());
         if (finalResult.isSuccess()) {
             Map<String, String> valueMap = new HashMap<>();
             valueMap.put("txData", (String) finalResult.getData());
@@ -1426,7 +1438,7 @@ public class PocConsensusResource {
         Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
         MultiSigAccount multiSigAccount = sigAccountResult.getData();
         Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
-        if(redeemScript == null){
+        if (redeemScript == null) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
 
@@ -1450,7 +1462,7 @@ public class PocConsensusResource {
         coinData.setTo(toList);
         tx.setCoinData(coinData);
         //交易签名的长度为m*单个签名长度+赎回脚本长度
-        int scriptSignLenth = redeemScript.getProgram().length + ((int)multiSigAccount.getM())*72;
+        int scriptSignLenth = redeemScript.getProgram().length + ((int) multiSigAccount.getM()) * 72;
         CoinDataResult result = accountLedgerService.getMutilCoinData(deposit.getAddress(), deposit.getDeposit(), tx.size() + scriptSignLenth, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
         if (null != result) {
             if (result.isEnough()) {
@@ -1466,7 +1478,7 @@ public class PocConsensusResource {
         //将赎回脚本先存储在签名脚本中
         scripts.add(redeemScript);
         transactionSignature.setScripts(scripts);
-        Result resultData = accountLedgerService.txMultiProcess(tx,transactionSignature,account,form.getPassword());
+        Result resultData = accountLedgerService.txMultiProcess(tx, transactionSignature, account, form.getPassword());
         if (resultData.isSuccess()) {
             Map<String, String> valueMap = new HashMap<>();
             valueMap.put("txData", (String) resultData.getData());
@@ -1522,7 +1534,7 @@ public class PocConsensusResource {
         Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
         MultiSigAccount multiSigAccount = sigAccountResult.getData();
         Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
-        if(redeemScript == null){
+        if (redeemScript == null) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
 
@@ -1544,7 +1556,7 @@ public class PocConsensusResource {
         scripts.add(redeemScript);
         transactionSignature.setScripts(scripts);
         //使用签名账户对交易进行签名
-        Result resultData = accountLedgerService.txMultiProcess(tx,transactionSignature,account,form.getPassword());
+        Result resultData = accountLedgerService.txMultiProcess(tx, transactionSignature, account, form.getPassword());
 
         if (resultData.isSuccess()) {
             Map<String, String> valueMap = new HashMap<>();
@@ -1588,7 +1600,7 @@ public class PocConsensusResource {
         Result<MultiSigAccount> sigAccountResult = accountService.getMultiSigAccount(form.getAddress());
         MultiSigAccount multiSigAccount = sigAccountResult.getData();
         Script redeemScript = accountLedgerService.getRedeemScript(multiSigAccount);
-        if(redeemScript == null){
+        if (redeemScript == null) {
             return Result.getFailed(AccountErrorCode.ACCOUNT_NOT_EXIST).toRpcClientResult();
         }
         CancelDepositTransaction tx = new CancelDepositTransaction();
@@ -1638,7 +1650,7 @@ public class PocConsensusResource {
         //将赎回脚本先存储在签名脚本中
         scripts.add(redeemScript);
         transactionSignature.setScripts(scripts);
-        Result resultData = accountLedgerService.txMultiProcess(tx,transactionSignature,account,form.getPassword());
+        Result resultData = accountLedgerService.txMultiProcess(tx, transactionSignature, account, form.getPassword());
         if (resultData.isSuccess()) {
             Map<String, String> valueMap = new HashMap<>();
             valueMap.put("txData", (String) resultData.getData());

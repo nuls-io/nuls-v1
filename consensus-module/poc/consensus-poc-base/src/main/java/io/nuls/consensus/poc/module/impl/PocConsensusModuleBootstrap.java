@@ -91,7 +91,7 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
             if (NulsContext.MAIN_NET_VERSION == 1 && NulsContext.CURRENT_PROTOCOL_VERSION == 2) {
                 long bestHeight = blockService.getBestBlockHeader().getData().getHeight();
-                for (long i = 1; i <= bestHeight; i++) {
+                for (long i = 680000; i <= bestHeight; i++) {
                     Result<BlockHeader> result = blockService.getBlockHeader(i);
                     if (result.isSuccess()) {
                         NulsProtocolProcess.getInstance().processProtocolUpGrade(result.getData());
