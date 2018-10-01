@@ -239,14 +239,12 @@ public class VersionManagerStorageServiceImpl implements VersionManagerStorageSe
 
     @Override
     public Result saveConsensusVersionHeight(Long blockHeight) {
-        // todo auto-generated method stub
-        return null;
+        return dbService.putModel(ProtocolStorageConstant.BLOCK_PROTOCOL_HEIGHT, ProtocolStorageConstant.BLOCK_PROTOCOL_HEIGHT.getBytes(), blockHeight);
     }
 
     @Override
     public Long getConsensusVersionHeight() {
-        // todo auto-generated method stub
-        return null;
+        return dbService.getModel(ProtocolStorageConstant.BLOCK_PROTOCOL_HEIGHT, ProtocolStorageConstant.BLOCK_PROTOCOL_HEIGHT.getBytes(), Long.class);
     }
 
     @Override

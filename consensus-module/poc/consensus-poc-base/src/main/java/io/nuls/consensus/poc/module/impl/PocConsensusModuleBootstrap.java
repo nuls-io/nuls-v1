@@ -46,6 +46,7 @@ import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.protocol.base.version.NulsVersionManager;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.service.BlockService;
+import io.nuls.protocol.storage.service.VersionManagerStorageService;
 
 
 import java.util.ArrayList;
@@ -59,6 +60,8 @@ import java.util.Map;
 public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
 
     private boolean protocolInited;
+
+    private VersionManagerStorageService versionManagerStorageService;
 
     @Override
     public void init() throws Exception {
@@ -90,8 +93,13 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
             NulsVersionManager.init();
             BlockService blockService = NulsContext.getServiceBean(BlockService.class);
             if (NulsContext.MAIN_NET_VERSION == 1 && NulsContext.CURRENT_PROTOCOL_VERSION == 2) {
+
                 long bestHeight = blockService.getBestBlockHeader().getData().getHeight();
-                for (long i = 680000; i <= bestHeight; i++) {
+                Long consensusVersionHeight = getVersionManagerStorageService().getConsensusVersionHeight();
+                if (consensusVersionHeight == null) {
+                    consensusVersionHeight = 680000L;
+                }
+                for (long i = consensusVersionHeight; i <= bestHeight; i++) {
                     Result<BlockHeader> result = blockService.getBlockHeader(i);
                     if (result.isSuccess()) {
                         NulsProtocolProcess.getInstance().processProtocolUpGrade(result.getData());
@@ -144,6 +152,13 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
             }
         }
         return str.toString();
+    }
+
+    private VersionManagerStorageService getVersionManagerStorageService() {
+        if (versionManagerStorageService == null) {
+            versionManagerStorageService = NulsContext.getServiceBean(VersionManagerStorageService.class);
+        }
+        return versionManagerStorageService;
     }
 
 }

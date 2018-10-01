@@ -76,6 +76,7 @@ public class NulsProtocolProcess {
         NulsVersionManager.getConsensusVersionMap().put(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress()), extendsData.getCurrentVersion());
         getVersionManagerStorageService().saveConsensusVersionMap(NulsVersionManager.getConsensusVersionMap());
         if (extendsData.getCurrentVersion() < 1) {
+            getVersionManagerStorageService().saveConsensusVersionHeight(blockHeader.getHeight());
             return;
         }
         refreshProtocolCoverageRate(extendsData, blockHeader);
@@ -97,6 +98,7 @@ public class NulsProtocolProcess {
             calcDelay(blockHeader);
             calcTempDelay(blockHeader);
         }
+        getVersionManagerStorageService().saveConsensusVersionHeight(blockHeader.getHeight());
         //处理完所有流程后还原数据
         if (extendsData.getCurrentVersion() == 1) {
             extendsData.setCurrentVersion(null);

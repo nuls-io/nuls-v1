@@ -110,7 +110,6 @@ public class NulsVersionManager {
                 protocolContainer.setCurrentDelay(0L);
                 protocolContainer.setCurrentPercent(100);
                 protocolContainer.setRoundIndex(0);
-
             } else if (protocolInfoPo != null) {
                 protocolContainer.setCurrentDelay(protocolInfoPo.getCurrentDelay());
                 protocolContainer.setStatus(protocolInfoPo.getStatus());
