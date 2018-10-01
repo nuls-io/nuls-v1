@@ -35,6 +35,7 @@ import io.nuls.consensus.poc.process.NulsProtocolProcess;
 import io.nuls.consensus.poc.scheduler.ConsensusScheduler;
 import io.nuls.consensus.poc.storage.po.EvidencePo;
 import io.nuls.consensus.poc.storage.service.BifurcationEvidenceStorageService;
+import io.nuls.consensus.poc.util.ProtocolTransferTool;
 import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.ModuleStatusEnum;
@@ -44,8 +45,10 @@ import io.nuls.kernel.model.Result;
 import io.nuls.kernel.thread.BaseThread;
 import io.nuls.kernel.thread.manager.TaskManager;
 import io.nuls.protocol.base.version.NulsVersionManager;
+import io.nuls.protocol.base.version.ProtocolContainer;
 import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.service.BlockService;
+import io.nuls.protocol.storage.po.BlockProtocolInfoPo;
 import io.nuls.protocol.storage.service.VersionManagerStorageService;
 
 
@@ -98,6 +101,24 @@ public class PocConsensusModuleBootstrap extends AbstractConsensusModule {
                 Long consensusVersionHeight = getVersionManagerStorageService().getConsensusVersionHeight();
                 if (consensusVersionHeight == null) {
                     consensusVersionHeight = 680000L;
+                } else {
+                    long height = consensusVersionHeight + 1;
+                    BlockProtocolInfoPo infoPo = null;
+                    while (true) {
+                        height--;
+                        if(height == 680000L) {
+                            break;
+                        }
+                        infoPo = getVersionManagerStorageService().getBlockProtocolInfoPo(height);
+                        if (infoPo != null) {
+                            break;
+                        }
+                    }
+
+                    if (infoPo != null) {
+                        ProtocolContainer container = NulsVersionManager.getProtocolContainer(infoPo.getVersion());
+                        ProtocolTransferTool.copyFromBlockProtocolInfoPo(infoPo, container);
+                    }
                 }
                 for (long i = consensusVersionHeight; i <= bestHeight; i++) {
                     Result<BlockHeader> result = blockService.getBlockHeader(i);
