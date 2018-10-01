@@ -283,6 +283,8 @@ public class ConsensusProcess {
             Log.info("");
             Log.info("****************************************************");
             Log.info("开始打包，获取当前bestblock, height:{}，- {}", bestBlock.getHeader().getHeight(), bestBlock.getHeader().getHash());
+            Log.info("开始打包，获取当前EndBlockHeader, height:{}，- {}", chainManager.getMasterChain().getChain().getEndBlockHeader().getHeight(),
+                    chainManager.getMasterChain().getChain().getEndBlockHeader().getHash());
             Log.info("****************************************************");
             Log.info("");
 
