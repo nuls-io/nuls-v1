@@ -57,6 +57,7 @@ import io.nuls.contract.vm.program.*;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.map.MapUtil;
 import io.nuls.core.tools.str.StringUtils;
 import io.nuls.kernel.cfg.NulsConfig;
 import io.nuls.kernel.constant.KernelErrorCode;
@@ -67,6 +68,7 @@ import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.lite.core.bean.InitializingBean;
 import io.nuls.kernel.model.*;
+import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
@@ -922,6 +924,33 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         if(sendBack.compareTo(transferFee) <= 0) {
             transferFee = sendBack;
         }
+
+        try {
+            List<ContractTransfer> contractTransferList = new ArrayList<>();
+            Set<String> addressFromTX = SignatureUtil.getAddressFromTX(tx);
+            if(addressFromTX == null || addressFromTX.size() == 0) {
+                return null;
+            }
+            Object[] array = addressFromTX.toArray();
+            String fromAddress = (String) array[0];
+            byte[] fromAddressBytes = AddressTool.getAddress(fromAddress);
+            CoinData coinData = tx.getCoinData();
+            List<Coin> toList = coinData.getTo();
+            Na totalSendBack = Na.ZERO;
+            HashMap<String, Na> sendBackMap = MapUtil.createHashMap(toList.size());
+            String ownerStr = null;
+            for(Coin coin : toList) {
+                if(!ArraysTool.arrayEquals(fromAddressBytes, coin.getOwner())) {
+                    ownerStr = AddressTool.getStringAddressByBytes(coin.getOwner());
+                    //TODO pierre
+                    totalSendBack = totalSendBack.add(coin.getNa());
+                }
+            }
+        } catch (NulsException e) {
+
+        }
+
+
         ContractTransfer transfer = new ContractTransfer(data.getContractAddress(), data.getSender(), sendBack, transferFee, true);
         return transfer;
     }
