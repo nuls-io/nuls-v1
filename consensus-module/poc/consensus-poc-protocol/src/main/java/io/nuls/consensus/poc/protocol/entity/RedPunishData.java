@@ -76,7 +76,7 @@ public class RedPunishData extends TransactionLogicData {
         this.address = address;
     }
 
-    public short getReasonCode() {
+    public byte getReasonCode() {
         return reasonCode;
     }
 

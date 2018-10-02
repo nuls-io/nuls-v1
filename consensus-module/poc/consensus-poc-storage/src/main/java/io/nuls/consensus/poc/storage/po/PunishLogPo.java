@@ -138,6 +138,14 @@ public class PunishLogPo extends BaseNulsData {
         return ArraysTool.concatenate(address, new byte[]{type}, SerializeUtils.uint64ToByteArray(height), new VarInt(index).encode());
     }
 
+    public void setReasonCode(short reasonCode) {
+        this.reasonCode = reasonCode;
+    }
+
+    public void setEvidence(byte[] evidence) {
+        this.evidence = evidence;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof PunishLogPo)) {

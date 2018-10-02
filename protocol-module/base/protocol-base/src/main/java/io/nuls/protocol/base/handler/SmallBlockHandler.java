@@ -30,11 +30,13 @@ import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.validate.ValidateResult;
 import io.nuls.message.bus.handler.AbstractMessageHandler;
 import io.nuls.network.model.Node;
+import io.nuls.protocol.constant.ProtocolConstant;
 import io.nuls.protocol.utils.SmallBlockDuplicateRemoval;
 import io.nuls.protocol.base.utils.AssemblyBlockUtil;
 import io.nuls.protocol.cache.TemporaryCacheManager;
@@ -71,6 +73,10 @@ public class SmallBlockHandler extends AbstractMessageHandler<SmallBlockMessage>
         }
 
         BlockHeader header = smallBlock.getHeader();
+        //阻止恶意节点提前出块
+        if (header.getTime() > (TimeService.currentTimeMillis() + ProtocolConstant.BLOCK_TIME_INTERVAL_SECOND * 1000)) {
+            return;
+        }
 
         if (!SmallBlockDuplicateRemoval.needProcess(header.getHash())) {
             return;

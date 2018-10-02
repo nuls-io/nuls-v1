@@ -26,6 +26,7 @@
 package io.nuls.consensus.poc.block.validator;
 
 import io.nuls.consensus.poc.cache.TxMemoryPool;
+import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.model.BlockExtendsData;
@@ -84,6 +85,13 @@ public class BifurcationUtil {
 
     public ValidateResult validate(BlockHeader header) {
         ValidateResult result = ValidateResult.getSuccessResult();
+        if (NulsContext.MAIN_NET_VERSION <= 1) {
+            return result;
+        }
+        if (ConsensusConfig.getSeedNodeStringList().indexOf(AddressTool.getStringAddressByBytes(header.getPackingAddress())) >= 0) {
+            return result;
+        }
+
         if (header.getHeight() == 0L) {
             return result;
         }
@@ -96,7 +104,7 @@ public class BifurcationUtil {
             Log.info("-+-+-+-+-+-+-+-+- Received block with the same height and different hashes as the latest local block -+-+-+-+-+-+-+-+- ");
             Log.info("-+-+-+-+-+-+-+-+- height：" + header.getHeight() + ", hash of received block：" + header.getHash().getDigestHex()
                     + ", hash of local latest block：" + otherBlockHeader.getHash().getDigestHex());
-            Log.info("-+-+-+-+-+-+-+-+- Packing address of received block：" +  AddressTool.getStringAddressByBytes(header.getPackingAddress())
+            Log.info("-+-+-+-+-+-+-+-+- Packing address of received block：" + AddressTool.getStringAddressByBytes(header.getPackingAddress())
                     + ", Packing address of local latest block：" + AddressTool.getStringAddressByBytes(otherBlockHeader.getPackingAddress()));
 
             List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
@@ -114,7 +122,7 @@ public class BifurcationUtil {
                 return result;
             }
             recordEvidence(agent, header, otherBlockHeader);
-            if(!isRedPunish(agent)){
+            if (!isRedPunish(agent)) {
                 return result;
             }
             RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
@@ -126,7 +134,7 @@ public class BifurcationUtil {
                 //连续3轮 每一轮两个区块头作为证据 一共 3 * 2 个区块头作为证据
                 byte[][] headers = new byte[NulsContext.REDPUNISH_BIFURCATION * 2][];
                 List<Evidence> list = bifurcationEvidenceMap.get(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
-                for (int i = 0; i < list.size() && i < NulsContext.REDPUNISH_BIFURCATION;i++){
+                for (int i = 0; i < list.size() && i < NulsContext.REDPUNISH_BIFURCATION; i++) {
                     Evidence evidence = list.get(i);
                     int s = i * 2;
                     headers[s] = evidence.getBlockHeader1().serialize();
@@ -166,23 +174,23 @@ public class BifurcationUtil {
 
     /**
      * 统计并验证分叉出块地址的证据，如果是连续的分叉则保存到证据集合中，不是连续的就清空
-     * @param agent 分叉的出块地址所有者节点
-     * @param header 新收到的区块头
+     *
+     * @param agent            分叉的出块地址所有者节点
+     * @param header           新收到的区块头
      * @param otherBlockHeader 本地当前以保存的最新区块头
-     * @return
      */
-    private void recordEvidence(Agent agent, BlockHeader header, BlockHeader otherBlockHeader){
+    private void recordEvidence(Agent agent, BlockHeader header, BlockHeader otherBlockHeader) {
         //验证出块地址PackingAddress，记录分叉的连续次数，如达到连续3轮则红牌惩罚
         String packingAddress = AddressTool.getStringAddressByBytes(agent.getPackingAddress());
         BlockExtendsData extendsData = new BlockExtendsData(header.getExtend());
-        Evidence evidence = new Evidence(extendsData.getRoundIndex(),header, otherBlockHeader);
-        if(!bifurcationEvidenceMap.containsKey(packingAddress)){
+        Evidence evidence = new Evidence(extendsData.getRoundIndex(), header, otherBlockHeader);
+        if (!bifurcationEvidenceMap.containsKey(packingAddress)) {
             List<Evidence> list = new ArrayList<>();
             list.add(evidence);
             bifurcationEvidenceMap.put(packingAddress, list);
-        }else {
+        } else {
             List<Evidence> evidenceList = bifurcationEvidenceMap.get(packingAddress);
-            if(evidenceList.size() >= NulsContext.REDPUNISH_BIFURCATION){
+            if (evidenceList.size() >= NulsContext.REDPUNISH_BIFURCATION) {
                 return;
             }
             ListIterator<Evidence> iterator = evidenceList.listIterator();
@@ -205,12 +213,10 @@ public class BifurcationUtil {
 
     /**
      * 是否进行红牌惩罚
-     * @param agent
-     * @return
      */
-    private boolean isRedPunish(Agent agent){
+    private boolean isRedPunish(Agent agent) {
         String packingAddress = AddressTool.getStringAddressByBytes(agent.getPackingAddress());
-        if(bifurcationEvidenceMap.containsKey(packingAddress)) {
+        if (bifurcationEvidenceMap.containsKey(packingAddress)) {
             if (bifurcationEvidenceMap.get(packingAddress).size() >= NulsContext.REDPUNISH_BIFURCATION) {
                 //分叉连续轮次没有达3轮就不进行红牌惩罚
                 return true;

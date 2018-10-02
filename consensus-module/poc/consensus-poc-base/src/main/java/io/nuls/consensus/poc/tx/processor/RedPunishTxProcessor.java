@@ -96,11 +96,11 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
         }
         List<DepositPo> depositPoList = depositStorageService.getList();
         List<DepositPo> updatedList = new ArrayList<>();
-        for(DepositPo po:depositPoList){
+        for (DepositPo po : depositPoList) {
             po.setDelHeight(-1);
             boolean success = this.depositStorageService.save(po);
-            if(!success){
-                for(DepositPo po2:depositPoList) {
+            if (!success) {
+                for (DepositPo po2 : depositPoList) {
                     po2.setDelHeight(tx.getBlockHeight());
                     this.depositStorageService.save(po2);
                 }
@@ -112,15 +112,16 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
         agentPo.setDelHeight(-1L);
         boolean success = agentStorageService.save(agentPo);
         if (!success) {
-            for(DepositPo po2:depositPoList) {
+            for (DepositPo po2 : depositPoList) {
                 po2.setDelHeight(tx.getBlockHeight());
                 this.depositStorageService.save(po2);
             }
             return Result.getFailed(PocConsensusErrorCode.UPDATE_AGENT_FAILED);
         }
-        success = storageService.delete(getPoKey(punishData.getAddress(), PunishType.RED.getCode(), tx.getBlockHeight()));
+        byte[] key = ArraysTool.concatenate(punishData.getAddress(), new byte[]{PunishType.RED.getCode()}, SerializeUtils.uint64ToByteArray(tx.getBlockHeight()), new byte[]{0});
+        success = storageService.delete(key);
         if (!success) {
-            for(DepositPo po2:depositPoList) {
+            for (DepositPo po2 : depositPoList) {
                 po2.setDelHeight(tx.getBlockHeight());
                 this.depositStorageService.save(po2);
             }
@@ -144,6 +145,8 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
         punishLogPo.setRoundIndex(roundData.getRoundIndex());
         punishLogPo.setTime(tx.getTime());
         punishLogPo.setType(PunishType.RED.getCode());
+        punishLogPo.setEvidence(punishData.getEvidence());
+        punishLogPo.setReasonCode(punishData.getReasonCode());
 
         List<AgentPo> agentList = agentStorageService.getList();
         AgentPo agent = null;
@@ -174,7 +177,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
             po.setDelHeight(tx.getBlockHeight());
             boolean b = depositStorageService.save(po);
             if (!b) {
-                for(DepositPo po2:updatedList){
+                for (DepositPo po2 : updatedList) {
                     po2.setDelHeight(-1);
                     this.depositStorageService.save(po2);
                 }
@@ -184,7 +187,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
         }
         boolean success = storageService.save(punishLogPo);
         if (!success) {
-            for(DepositPo po2:updatedList){
+            for (DepositPo po2 : updatedList) {
                 po2.setDelHeight(-1);
                 this.depositStorageService.save(po2);
             }
@@ -194,7 +197,7 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
         agentPo.setDelHeight(tx.getBlockHeight());
         success = agentStorageService.save(agentPo);
         if (!success) {
-            for(DepositPo po2:updatedList){
+            for (DepositPo po2 : updatedList) {
                 po2.setDelHeight(-1);
                 this.depositStorageService.save(po2);
             }
@@ -204,12 +207,6 @@ public class RedPunishTxProcessor implements TransactionProcessor<RedPunishTrans
         return Result.getSuccess();
     }
 
-    /**
-     * 获取固定格式的key
-     */
-    private byte[] getPoKey(byte[] address, byte type, long blockHeight) {
-        return ArraysTool.concatenate(address, new byte[]{type}, SerializeUtils.uint64ToByteArray(blockHeight));
-    }
 
     @Override
     public ValidateResult conflictDetect(List<Transaction> txList) {

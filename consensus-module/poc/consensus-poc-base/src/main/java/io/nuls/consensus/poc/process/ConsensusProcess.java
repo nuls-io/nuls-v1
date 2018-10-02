@@ -146,27 +146,21 @@ public class ConsensusProcess {
 
     private void packing(MeetingMember self, MeetingRound round) throws IOException, NulsException {
 
-        boolean needCheckAgain = waitReceiveNewestBlock(self, round);
+        waitReceiveNewestBlock(self, round);
         long start = System.currentTimeMillis();
         Block block = doPacking(self, round);
         Log.info("doPacking use:" + (System.currentTimeMillis() - start) + "ms");
-        if (needCheckAgain && hasReceiveNewestBlock(self, round)) {
-            Block realBestBlock = chainManager.getBestBlock();
-            if (null != realBestBlock) {
-                List<NulsDigestData> txHashList = realBestBlock.getTxHashList();
-                for (Transaction transaction : block.getTxs()) {
-                    if (transaction.isSystemTx()) {
-                        continue;
-                    }
-                    if (txHashList.contains(transaction.getHash())) {
-                        continue;
-                    }
-                    txMemoryPool.add(transaction, false);
+        boolean need = !block.getHeader().getPreHash().equals(chainManager.getBestBlock().getHeader().getHash());
+        if (need) {
+            for (Transaction transaction : block.getTxs()) {
+                if (transaction.isSystemTx()) {
+                    continue;
                 }
-                start = System.currentTimeMillis();
-                block = doPacking(self, round);
-                Log.info("doPacking2 use:" + (System.currentTimeMillis() - start) + "ms");
+                txMemoryPool.add(transaction, false);
             }
+            start = System.currentTimeMillis();
+            block = doPacking(self, round);
+            Log.info("doPacking2 use:" + (System.currentTimeMillis() - start) + "ms");
         }
         if (null == block) {
             Log.error("make a null block");
@@ -391,7 +385,7 @@ public class ConsensusProcess {
             }
             // 区块中可以消耗的最大Gas总量，超过这个值，则本区块中不再继续组装智能合约交易
             if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS) {
-                if(ContractUtil.isContractTransaction(tx)) {
+                if (ContractUtil.isContractTransaction(tx)) {
                     txMemoryPool.addInFirst(tx, false);
                     continue;
                 }
@@ -430,7 +424,7 @@ public class ConsensusProcess {
             outHashSetUse += (System.nanoTime() - start);
 
             // 打包时发现智能合约交易就调用智能合约
-            if(ContractUtil.isContractTransaction(tx)) {
+            if (ContractUtil.isContractTransaction(tx)) {
                 contractResult = contractService.batchPackageTx(tx, height, tempBlock, stateRoot, toMaps, contractUsedCoinMap).getData();
                 if (contractResult != null) {
                     totalGasUsed += contractResult.getGasUsed();
@@ -451,7 +445,7 @@ public class ConsensusProcess {
         // 打包结束后移除批量执行合约的执行器
         contractService.removeBatchExecute();
         tempBlock.getHeader().setStateRoot(stateRoot);
-        for(ContractResult result : contractResultList) {
+        for (ContractResult result : contractResultList) {
             result.setStateRoot(stateRoot);
         }
         // 更新世界状态

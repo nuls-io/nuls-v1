@@ -27,6 +27,7 @@
 package io.nuls.consensus.poc.container;
 
 import io.nuls.consensus.constant.ConsensusConstant;
+import io.nuls.consensus.poc.config.ConsensusConfig;
 import io.nuls.consensus.poc.constant.PocConsensusConstant;
 import io.nuls.consensus.poc.context.PocConsensusContext;
 import io.nuls.consensus.poc.manager.RoundManager;
@@ -44,16 +45,23 @@ import io.nuls.core.tools.crypto.Base58;
 import io.nuls.core.tools.log.BlockLog;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.KernelErrorCode;
+import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
+import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.func.TimeService;
 import io.nuls.kernel.model.*;
 import io.nuls.kernel.utils.AddressTool;
+import io.nuls.kernel.utils.NulsByteBuffer;
 import io.nuls.kernel.validate.ValidateResult;
+import io.nuls.ledger.service.LedgerService;
 import io.nuls.protocol.constant.ProtocolConstant;
+import io.nuls.protocol.model.SmallBlock;
 import io.nuls.protocol.model.tx.CoinBaseTransaction;
+import io.nuls.protocol.model.validator.HeaderSignValidator;
 import io.nuls.protocol.service.BlockService;
 import sun.nio.cs.FastCharsetProvider;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -232,8 +240,8 @@ public class ChainContainer implements Cloneable {
         BlockHeader bestBlockHeader = chain.getEndBlockHeader();
 
         if (!preHash.equals(bestBlockHeader.getHash())) {
-            Log.error("block height " + blockHeader.getHeight() + " prehash is error! hash :" + blockHeader.getHash() +", prehash : " + preHash);
-            Log.error("preblock height " + chain.getEndBlockHeader().getHeight() + " prehash is error! EndBlockHeader hash:" + chain.getEndBlockHeader().getHash() +", prehash : " + blockHeader.getPreHash());
+            Log.error("block height " + blockHeader.getHeight() + " prehash is error! hash :" + blockHeader.getHash() + ", prehash : " + preHash);
+            Log.error("preblock height " + chain.getEndBlockHeader().getHeight() + " prehash is error! EndBlockHeader hash:" + chain.getEndBlockHeader().getHash() + ", prehash : " + blockHeader.getPreHash());
             return Result.getFailed();
         }
 
@@ -426,10 +434,159 @@ public class ChainContainer implements Cloneable {
                     BlockLog.debug("red punish CoinData & TX time is wrong! " + block.getHeader().getHash());
                     return false;
                 }
-
+                boolean result = verifyRedPunish(redTx);
+                if (!result) {
+                    return result;
+                }
             }
 
         }
+        return true;
+    }
+
+    private boolean verifyRedPunish(RedPunishTransaction data) {
+        RedPunishData punishData = data.getTxData();
+        if (ConsensusConfig.getSeedNodeStringList().contains(AddressTool.getStringAddressByBytes(punishData.getAddress()))) {
+            Log.warn("The seed node can not be punished!");
+            return false;
+        }
+        HeaderSignValidator validator = NulsContext.getServiceBean(HeaderSignValidator.class);
+        LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
+        if (punishData.getReasonCode() == PunishReasonEnum.DOUBLE_SPEND.getCode()) {
+            if (NulsContext.MAIN_NET_VERSION <= 1) {
+                Log.warn("The red punish tx need higher version!");
+                return false;
+            }
+            SmallBlock smallBlock = new SmallBlock();
+            try {
+                smallBlock.parse(punishData.getEvidence(), 0);
+            } catch (NulsException e) {
+                Log.error(e);
+                return false;
+            }
+            BlockHeader header = smallBlock.getHeader();
+            ValidateResult result = validator.validate(header);
+            if (result.isFailed()) {
+                Log.warn(result.getMsg());
+                return false;
+            }
+            List<NulsDigestData> txHashList = smallBlock.getTxHashList();
+            if (!header.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(txHashList))) {
+                Log.warn(TransactionErrorCode.TX_DATA_VALIDATION_ERROR.getMsg());
+                return false;
+            }
+            List<Transaction> txList = smallBlock.getSubTxList();
+            if (null == txList || txList.size() < 2) {
+                Log.warn(TransactionErrorCode.TX_DATA_VALIDATION_ERROR.getMsg());
+                return false;
+            }
+            result = ledgerService.verifyDoubleSpend(txList);
+            if (result.isSuccess()) {
+                Log.warn(PocConsensusErrorCode.TRANSACTIONS_NEVER_DOUBLE_SPEND.getMsg());
+                return false;
+            }
+        } else if (punishData.getReasonCode() == PunishReasonEnum.BIFURCATION.getCode()) {
+            if (NulsContext.MAIN_NET_VERSION <= 1) {
+                Log.warn("The red punish tx need higher version!");
+                return false;
+            }
+            NulsByteBuffer byteBuffer = new NulsByteBuffer(punishData.getEvidence());
+            //轮次
+            long[] roundIndex = new long[NulsContext.REDPUNISH_BIFURCATION];
+            for (int i = 0; i < NulsContext.REDPUNISH_BIFURCATION && !byteBuffer.isFinished(); i++) {
+                BlockHeader header1 = null;
+                BlockHeader header2 = null;
+                try {
+                    header1 = byteBuffer.readNulsData(new BlockHeader());
+                    header2 = byteBuffer.readNulsData(new BlockHeader());
+                } catch (NulsException e) {
+                    Log.error(e);
+                }
+                if (null == header1 || null == header2) {
+                    Log.warn(KernelErrorCode.DATA_NOT_FOUND.getMsg());
+                    return false;
+                }
+                if (header1.getHeight() != header2.getHeight()) {
+                    Log.warn(TransactionErrorCode.TX_DATA_VALIDATION_ERROR.getMsg());
+                    return false;
+                }
+                ValidateResult result = validator.validate(header1);
+                if (result.isFailed()) {
+                    Log.warn(TransactionErrorCode.TX_DATA_VALIDATION_ERROR.getMsg());
+                    return false;
+                }
+                result = validator.validate(header2);
+                if (result.isFailed()) {
+                    Log.warn(TransactionErrorCode.TX_DATA_VALIDATION_ERROR.getMsg());
+                    return false;
+                }
+                if (!Arrays.equals(header1.getBlockSignature().getPublicKey(), header2.getBlockSignature().getPublicKey())) {
+                    Log.warn(TransactionErrorCode.SIGNATURE_ERROR.getMsg());
+                    return false;
+                }
+
+                BlockExtendsData blockExtendsData = new BlockExtendsData(header1.getExtend());
+                roundIndex[i] = blockExtendsData.getRoundIndex();
+            }
+            //验证轮次是否连续
+            boolean rs = true;
+            for (int i = 0; i < roundIndex.length; i++) {
+                if (i < roundIndex.length - 2 && roundIndex[i + 1] - roundIndex[i] != 1) {
+                    rs = false;
+                    break;
+                }
+            }
+            if (!rs) {
+                Log.warn(PocConsensusErrorCode.RED_CARD_VERIFICATION_FAILED.getMsg());
+                return false;
+            }
+        } else if (punishData.getReasonCode() != PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode()) {
+            Log.warn(PocConsensusErrorCode.RED_CARD_VERIFICATION_FAILED.getMsg());
+            return false;
+        }
+
+        try {
+            return verifyCoinData(data);
+        } catch (IOException e) {
+            Log.error(e);
+            return false;
+        }
+    }
+
+    private boolean verifyCoinData(RedPunishTransaction tx) throws IOException {
+        List<Agent> agentList = PocConsensusContext.getChainManager().getMasterChain().getChain().getAgentList();
+        Agent theAgent = null;
+        for (Agent agent : agentList) {
+            if (agent.getDelHeight() > 0 && (tx.getBlockHeight() <= 0 || agent.getDelHeight() < tx.getBlockHeight())) {
+                continue;
+            }
+            if (Arrays.equals(tx.getTxData().getAddress(), agent.getAgentAddress())) {
+                theAgent = agent;
+            }
+        }
+        if (null == theAgent) {
+            Log.warn(PocConsensusErrorCode.AGENT_NOT_EXIST.getMsg());
+            return false;
+        }
+        CoinData coinData = ConsensusTool.getStopAgentCoinData(theAgent, tx.getTime() + PocConsensusConstant.RED_PUNISH_LOCK_TIME, tx.getBlockHeight());
+        if (NulsContext.MAIN_NET_VERSION <= 1) {
+            if (coinData.getTo().size() != tx.getCoinData().getTo().size()) {
+                Log.warn(PocConsensusErrorCode.RED_CARD_VERIFICATION_FAILED.getMsg());
+                return false;
+            }
+            for (int i = 0; i < coinData.getTo().size(); i++) {
+                Coin coin1 = coinData.getTo().get(i);
+                Coin coin2 = tx.getCoinData().getTo().get(i);
+                if (!Arrays.equals(coin1.getOwner(), coin2.getOwner()) || !coin1.getNa().equals(coin2.getNa())) {
+                    Log.warn(PocConsensusErrorCode.RED_CARD_VERIFICATION_FAILED.getMsg());
+                    return false;
+                }
+            }
+        } else if (!Arrays.equals(coinData.serialize(), tx.getCoinData().serialize())) {
+            Log.error("++++++++++ RedPunish verification does not pass, redPunish type:{}, - hight:{}, - redPunish tx timestamp:{}", tx.getTxData().getReasonCode(), tx.getBlockHeight(), tx.getTime());
+            return false;
+        }
+        Log.info("++++++++++ RedPunish verification passed, redPunish type:{}, - hight:{}, - redPunish tx timestamp:{}", tx.getTxData().getReasonCode(), tx.getBlockHeight(), tx.getTime());
         return true;
     }
 
