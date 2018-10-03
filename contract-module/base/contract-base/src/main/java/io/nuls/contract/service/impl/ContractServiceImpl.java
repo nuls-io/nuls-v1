@@ -432,6 +432,15 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             return result;
         }
 
+        // 保存非合约交易转入合约地址的utxo
+        if(tx.getType() != ContractConstant.TX_TYPE_CALL_CONTRACT) {
+            result = contractUtxoService.saveUtxoForContractAddress(tx);
+            if (result.isFailed()) {
+                Log.error("save confirmed non-call-contract transfer utxo error, reason is {}.", result.getMsg());
+                return result;
+            }
+        }
+
         result.setData(new Integer(1));
         return result;
     }
@@ -512,6 +521,15 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
 
         if (result.isFailed()) {
             return result;
+        }
+
+        // 删除非合约交易转入合约地址的utxo
+        if(tx.getType() != ContractConstant.TX_TYPE_CALL_CONTRACT) {
+            result = contractUtxoService.deleteUtxoOfTransaction(tx);
+            if (result.isFailed()) {
+                Log.error("rollback non-call-contract transfer utxo error, reason is {}.", result.getMsg());
+                return result;
+            }
         }
 
         return result;

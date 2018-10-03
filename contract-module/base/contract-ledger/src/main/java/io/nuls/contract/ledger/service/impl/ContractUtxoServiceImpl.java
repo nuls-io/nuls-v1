@@ -285,7 +285,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
         if(contractBalance == null) {
             return Result.getFailed(ContractErrorCode.DATA_ERROR);
         }
-        BigInteger balance = BigInteger.valueOf(contractBalance.getBalance().getValue());
+        BigInteger balance = BigInteger.valueOf(contractBalance.getUsable().getValue());
 
         return Result.getSuccess().setData(balance);
     }
