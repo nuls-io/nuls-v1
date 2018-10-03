@@ -157,6 +157,7 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionMessage message = new TransactionMessage();
         message.setMsgBody(tx);
         consensusService.newTx(tx);
+        // pierre test comment out
         return messageBusService.broadcast(message, null, true, 50);
     }
 

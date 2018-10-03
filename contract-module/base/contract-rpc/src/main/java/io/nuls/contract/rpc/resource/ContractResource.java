@@ -1409,7 +1409,8 @@ public class ContractResource implements InitializingBean {
                     break;
                 }
 
-                Stream<TransactionInfoPo> transactionInfoPoStream = orginTxInfoPoList.stream().filter(po -> po.getTxType() != ContractConstant.TX_TYPE_CONTRACT_TRANSFER);
+                Stream<TransactionInfoPo> transactionInfoPoStream = orginTxInfoPoList.stream()
+                        .filter(po -> po.getTxType() != ContractConstant.TX_TYPE_CONTRACT_TRANSFER);
                 // 筛选出和账户相关的合约交易
                 if(isFilterAccountAddress) {
                     byte[] accountAddressBytes = AddressTool.getAddress(accountAddress);

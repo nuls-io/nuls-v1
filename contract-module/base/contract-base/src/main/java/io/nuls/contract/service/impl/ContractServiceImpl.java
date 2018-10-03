@@ -1209,11 +1209,11 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
                 successContractTransferTxs.clear();
                 // 回滚临时余额
                 this.rollbackContractTempBalance(tx, contractResult);
+                // 清空内部转账列表
+                transfers.clear();
 
                 // 合约转账(从合约转出)交易失败，且调用者存在资金转入合约地址，创建一笔合约转账(从合约转出)，退回这笔资金
                 if (contractResult.getValue() > 0) {
-                    // 清空内部转账列表
-                    transfers.clear();
 
                     Na sendBack = Na.valueOf(contractResult.getValue());
                     List<ContractTransfer> transferList = this.createReturnFundsContractTransfer(tx, sendBack);

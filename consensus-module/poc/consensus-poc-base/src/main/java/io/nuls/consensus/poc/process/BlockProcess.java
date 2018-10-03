@@ -249,7 +249,6 @@ public class BlockProcess {
                     long bestHeight = bestBlockHeader.getHeight();
                     byte[] receiveStateRoot = ConsensusTool.getStateRoot(block.getHeader());
                     byte[] stateRoot = ConsensusTool.getStateRoot(bestBlockHeader);
-                    Result<ContractResult> invokeContractResult = null;
                     ContractResult contractResult = null;
                     Map<String, Coin> contractUsedCoinMap = new HashMap<>();
                     int totalGasUsed = 0;
@@ -313,10 +312,6 @@ public class BlockProcess {
                     for (ContractResult result : contractResultList) {
                         result.setStateRoot(stateRoot);
                     }
-
-
-                    //byte[] processStateRoot = stateRoot;
-                    //stateRoot = contractService.processTxs(txs, bestHeight, block, processStateRoot, toMaps, contractUsedCoinMap, false).getData();
 
                     // 验证世界状态根
                     if ((receiveStateRoot != null || stateRoot != null) && !Arrays.equals(receiveStateRoot, stateRoot)) {

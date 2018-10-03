@@ -66,7 +66,6 @@ public class ContractLedgerUtil {
         if (txAddressList == null || txAddressList.size() == 0) {
             return result;
         }
-        List<byte[]> destAddresses = new ArrayList<>();
         for (byte[] txAddress : txAddressList) {
             if(isLegalContractAddress(txAddress)) {
                 result.add(txAddress);
