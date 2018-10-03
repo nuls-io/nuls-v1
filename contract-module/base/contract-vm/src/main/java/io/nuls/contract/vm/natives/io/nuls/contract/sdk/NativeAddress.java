@@ -35,6 +35,7 @@ import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
 import io.nuls.kernel.utils.AddressTool;
+import org.ethereum.util.FastByteComparisons;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -78,7 +79,11 @@ public class NativeAddress {
     }
 
     private static BigInteger balance(byte[] address, Frame frame) {
-        return frame.vm.getRepository().getBalance(address);
+        if (FastByteComparisons.equal(address, frame.vm.getProgramInvoke().getContractAddress())) {
+            return frame.vm.getRepository().getBalance(address);
+        } else {
+            return frame.vm.getAccountBalance(address);
+        }
     }
 
     public static final String balance = TYPE + "." + "balance" + "()Ljava/math/BigInteger;";
