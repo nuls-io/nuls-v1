@@ -27,7 +27,6 @@ package io.nuls.contract.service.impl;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.ledger.model.CoinDataResult;
 import io.nuls.account.ledger.model.TransactionInfo;
-import io.nuls.account.ledger.service.AccountLedgerService;
 import io.nuls.account.service.AccountService;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
@@ -43,7 +42,6 @@ import io.nuls.contract.ledger.service.ContractTransactionInfoService;
 import io.nuls.contract.ledger.service.ContractUtxoService;
 import io.nuls.contract.ledger.util.ContractLedgerUtil;
 import io.nuls.contract.service.ContractService;
-import io.nuls.contract.service.ContractTxService;
 import io.nuls.contract.storage.po.ContractAddressInfoPo;
 import io.nuls.contract.storage.po.TransactionInfoPo;
 import io.nuls.contract.storage.service.ContractAddressStorageService;
@@ -70,7 +68,6 @@ import io.nuls.kernel.model.*;
 import io.nuls.kernel.script.SignatureUtil;
 import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
-import io.nuls.ledger.service.LedgerService;
 import io.nuls.ledger.util.LedgerUtil;
 import io.nuls.protocol.constant.ProtocolConstant;
 
@@ -112,16 +109,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     private ContractTokenTransferStorageService contractTokenTransferStorageService;
 
     @Autowired
-    private AccountLedgerService accountLedgerService;
-
-    @Autowired
     private AccountService accountService;
-
-    @Autowired
-    private ContractTxService contractTxService;
-
-    @Autowired
-    private LedgerService ledgerService;
 
     @Autowired
     private VMHelper vmHelper;
@@ -131,7 +119,6 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
 
     private ProgramExecutor programExecutor;
 
-    private Lock saveLock = new ReentrantLock();
     private Lock lock = new ReentrantLock();
 
     private ThreadLocal<ProgramExecutor> localProgramExecutor = new ThreadLocal<>();
@@ -172,7 +159,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             programCreate.setContractCode(create.getCode());
             programCreate.setArgs(create.getArgs());
 
-            ProgramExecutor track = null;
+            ProgramExecutor track;
             if(executor == null) {
                 track = programExecutor.begin(prevStateRoot);
             } else {
@@ -273,9 +260,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             programCall.setMethodDesc(call.getMethodDesc());
             programCall.setArgs(call.getArgs());
 
-            long t = System.nanoTime();
-
-            ProgramExecutor track = null;
+            ProgramExecutor track;
             if(executor == null) {
                 track = programExecutor.begin(prevStateRoot);
             } else {
@@ -352,7 +337,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         try {
             byte[] contractAddress = delete.getContractAddress();
             byte[] sender = delete.getSender();
-            ProgramExecutor track = null;
+            ProgramExecutor track;
 
             if(executor == null) {
                 track = programExecutor.begin(prevStateRoot);
@@ -507,7 +492,6 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
 
     private Result<Integer> rollbackTransaction(Transaction tx) {
 
-        NulsDigestData txHash = tx.getHash();
         // 获取tx中是智能合约地址的地址列表
         List<byte[]> addresses = ContractLedgerUtil.getRelatedAddresses(tx);
 
@@ -725,12 +709,6 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         }
     }
 
-
-    @Override
-    public Result<ContractResult> invokeContract(Transaction tx, long height, byte[] stateRoot) {
-        return invokeContract(null, tx, height, stateRoot, false);
-    }
-
     private Result<ContractResult> invokeContract(ProgramExecutor track, Transaction tx, long height, byte[] stateRoot, boolean isForkChain) {
         if(tx == null || height < 0) {
             return Result.getFailed(KernelErrorCode.PARAMETER_ERROR);
@@ -741,7 +719,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
         if(!isForkChain) {
             ContractTransaction contractTx = (ContractTransaction) tx;
             // 打包、验证区块，合约只执行一次
-            ContractResult contractExecutedResult = null;
+            ContractResult contractExecutedResult;
             contractExecutedResult = contractTx.getContractResult();
             if(contractExecutedResult == null) {
                 contractExecutedResult = getContractExecuteResult(tx.getHash());
@@ -921,7 +899,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
     private Result<ContractTransferTransaction> createContractTransferTx(ContractTransfer transfer, long blockTime, Map<String, Coin> toMaps, Map<String, Coin> contractUsedCoinMap, Long bestHeight) {
-        Result<ContractTransferTransaction> result = null;
+        Result<ContractTransferTransaction> result;
         result = transfer(transfer.getFrom(), transfer.getTo(), transfer.getValue(), transfer.getFee(), transfer.isSendBack(), transfer.getOrginHash(), blockTime, toMaps, contractUsedCoinMap, bestHeight);
         if(result.isSuccess()) {
             result.getData().setTransfer(transfer);
@@ -932,10 +910,6 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
     }
 
     private List<ContractTransfer> createReturnFundsContractTransfer(Transaction tx, Na sendBack) {
-        CallContractTransaction callContractTx = (CallContractTransaction) tx;
-        CallContractData data = callContractTx.getTxData();
-        long price = data.getPrice();
-        //Na transferFee = Na.valueOf(LongUtils.mul(ContractConstant.CONTRACT_TRANSFER_GAS_COST, price));
         // 合约执行失败而退回的转入金额暂时不收取手续费
         Na transferFee = Na.ZERO;
 
@@ -955,7 +929,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             CoinData coinData = tx.getCoinData();
             List<Coin> toList = coinData.getTo();
             HashMap<String, Na> sendBackMap = MapUtil.createHashMap(toList.size());
-            String ownerStr = null;
+            String ownerStr;
             for(Coin coin : toList) {
                 if(!ArraysTool.arrayEquals(fromAddressBytes, coin.getOwner())) {
                     ownerStr = AddressTool.getStringAddressByBytes(coin.getOwner());
@@ -1002,7 +976,7 @@ public class ContractServiceImpl implements ContractService, InitializingBean {
             }
 
             ProgramResult programResult = vmHelper.invokeViewMethod(contractAddressBytes, "balanceOf", null, address);
-            Result<ContractTokenInfo> result = null;
+            Result<ContractTokenInfo> result;
             if(!programResult.isSuccess()) {
                 result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));

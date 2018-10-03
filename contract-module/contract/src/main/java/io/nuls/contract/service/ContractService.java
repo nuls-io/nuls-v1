@@ -93,16 +93,6 @@ public interface ContractService {
 
 
     /**
-     * 执行合约
-     *
-     * @param tx
-     * @param height
-     * @param stateRoot
-     * @return
-     */
-    Result<ContractResult> invokeContract(Transaction tx, long height, byte[] stateRoot);
-
-    /**
      * 打包或者验证区块时，创建合约临时余额区
      *
      */
