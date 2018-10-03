@@ -49,6 +49,7 @@ import org.ethereum.core.Block;
 import org.ethereum.core.Repository;
 import org.ethereum.datasource.Source;
 import org.ethereum.datasource.leveldb.LevelDbDataSource;
+import org.ethereum.db.ByteArrayWrapper;
 import org.ethereum.db.RepositoryRoot;
 import org.ethereum.db.StateSource;
 import org.ethereum.util.FastByteComparisons;
@@ -76,6 +77,8 @@ public class ProgramExecutorImpl implements ProgramExecutor {
     private final byte[] prevStateRoot;
 
     private final long beginTime;
+
+    private final Map<ByteArrayWrapper, ProgramAccount> accounts = new HashMap<>();
 
     private long blockNumber;
 
@@ -290,16 +293,6 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             logTime("load method");
 
-            if (!programInvoke.isInternalCall()) {
-                BigInteger accountBalance = vm.getAccountBalance(programInvoke.getContractAddress());
-                BigInteger vmBalance = repository.getBalance(programInvoke.getContractAddress());
-                if (vmBalance.compareTo(accountBalance) != 0) {
-                    repository.addBalance(programInvoke.getContractAddress(), accountBalance.subtract(vmBalance));
-                }
-            }
-
-            logTime("load balance");
-
             ObjectRef objectRef;
             if (programInvoke.isCreate()) {
                 objectRef = vm.heap.newContract(programInvoke.getContractAddress(), contractClassCode, repository);
@@ -310,7 +303,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             logTime("load contract ref");
 
             if (programInvoke.getValue().compareTo(BigInteger.ZERO) > 0) {
-                repository.addBalance(programInvoke.getContractAddress(), programInvoke.getValue());
+                getAccount(programInvoke.getContractAddress()).addBalance(programInvoke.getValue());
             }
             vm.setProgramExecutor(this);
             vm.setRepository(repository);
@@ -352,7 +345,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             programResult.setNonce(repository.getNonce(programInvoke.getContractAddress()));
             programResult.setTransfers(vm.getTransfers());
             programResult.setEvents(vm.getEvents());
-            programResult.setBalance(repository.getBalance(programInvoke.getContractAddress()));
+            programResult.setBalance(getAccount(programInvoke.getContractAddress()).getBalance());
 
             if (resultValue != null) {
                 if (resultValue instanceof ObjectRef) {
@@ -456,6 +449,21 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 return ProgramStatus.normal;
             }
         }
+    }
+
+    @Override
+    public ProgramAccount getAccount(byte[] address) {
+        ByteArrayWrapper addressWrapper = new ByteArrayWrapper(address);
+        ProgramAccount account = accounts.get(addressWrapper);
+        if (account == null) {
+            BigInteger balance = BigInteger.ZERO;
+            if (vmContext != null) {
+                balance = vmContext.getBalance(address);
+            }
+            account = new ProgramAccount(address, balance);
+            accounts.put(addressWrapper, account);
+        }
+        return account;
     }
 
     @Override

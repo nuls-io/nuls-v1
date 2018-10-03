@@ -48,4 +48,6 @@ public interface ProgramExecutor {
 
     ProgramStatus status(byte[] address);
 
+    ProgramAccount getAccount(byte[] address);
+
 }
