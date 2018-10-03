@@ -48,7 +48,6 @@ import io.nuls.contract.dto.ContractResult;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.date.DateUtil;
-import io.nuls.core.tools.json.JSONUtils;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.context.NulsContext;
@@ -387,9 +386,9 @@ public class ConsensusProcess {
                 txMemoryPool.addInFirst(tx, false);
                 break;
             }
-            // 区块中可以消耗的最大Gas总量，超过这个值，则本区块中不再继续组装智能合约交易
+            // 区块中可以消耗的最大Gas总量，超过这个值，则本区块中不再继续组装消耗GAS智能合约交易
             if (totalGasUsed > ContractConstant.MAX_PACKAGE_GAS) {
-                if(ContractUtil.isContractTransaction(tx)) {
+                if(ContractUtil.isGasCostContractTransaction(tx)) {
                     txMemoryPool.addInFirst(tx, false);
                     continue;
                 }

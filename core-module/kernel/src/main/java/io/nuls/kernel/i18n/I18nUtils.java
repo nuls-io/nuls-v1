@@ -121,6 +121,17 @@ public class I18nUtils {
     }
 
     /**
+     * 根据信息编码获取一条翻译后的英文消息体
+     * Obtain a translated English message body based on the information encoding.
+     *
+     * @param id 信息编码
+     * @return String 翻译后的字符串/The translated English string.
+     */
+    public static String getEn(String id) {
+        return ALL_MAPPING.get("en").getProperty(id + "");
+    }
+
+    /**
      * 判断是否已加载某个语言包
      * Determines whether a language package has been loaded.
      *

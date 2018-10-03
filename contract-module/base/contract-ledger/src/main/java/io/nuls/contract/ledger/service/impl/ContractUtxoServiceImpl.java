@@ -101,6 +101,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
             List<byte[]> fromList = new ArrayList<>();
             // 合约特殊转账交易
             List<Coin> froms = new ArrayList<>();
+            List<Coin> deleteFroms = new ArrayList<>();
             if(tx.getType() == ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
                 froms = coinData.getFrom();
                 byte[] fromSource;
@@ -133,6 +134,12 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
                     from.setFrom(fromOfFromCoin);
                     from.setTempOwner(fromOfFromCoin.getOwner());
 
+                    // 非合约地址在合约账本中不处理
+                    if (!ContractLedgerUtil.isLegalContractAddress(fromOfFromCoin.getOwner())) {
+                        continue;
+                    }
+                    deleteFroms.add(from);
+
                     fromList.add(fromSource);
                 }
             }
@@ -153,6 +160,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
             for (int i = 0, length = tos.size(); i < length; i++) {
                 to = tos.get(i);
                 //toAddress = to.getOwner();
+                // 非合约地址在合约账本中不处理
                 toAddress = to.getAddress();
                 if (!ContractLedgerUtil.isLegalContractAddress(toAddress)) {
                     continue;
@@ -171,7 +179,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
                 return Result.getFailed();
             }
             // 刷新余额
-            contractBalanceManager.refreshBalance(contractTos, froms);
+            contractBalanceManager.refreshBalance(contractTos, deleteFroms);
         }
         return Result.getSuccess();
     }
@@ -240,6 +248,11 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
                     }
 
                     sourceTxCoinTo = sourceTx.getCoinData().getTo().get((int) new VarInt(utxoFromIndex, 0).value);
+
+                    if(!ContractLedgerUtil.isLegalContractAddress(sourceTxCoinTo.getAddress())) {
+                        continue;
+                    }
+
                     from.setFrom(sourceTxCoinTo);
                     from.setTempOwner(sourceTxCoinTo.getAddress());
                     try {

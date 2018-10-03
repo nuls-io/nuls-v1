@@ -25,6 +25,7 @@
 
 package io.nuls.kernel.constant;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.kernel.i18n.I18nUtils;
 
 /**
@@ -67,6 +68,17 @@ public class ErrorCode {
      */
     public String getMsg() {
         return I18nUtils.get(msg);
+    }
+
+    /**
+     * 返回国际化编码对应的英文字符串
+     * return the English string corresponding to the internationalization encoding.
+     *
+     * @return String
+     */
+    @JsonIgnore
+    public String getEnMsg() {
+        return I18nUtils.getEn(msg);
     }
 
     public String getCode() {

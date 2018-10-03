@@ -165,6 +165,18 @@ public class ContractUtil {
         return false;
     }
 
+    public static boolean isGasCostContractTransaction(Transaction tx) {
+        if (tx == null) {
+            return false;
+        }
+        int txType = tx.getType();
+        if(txType == ContractConstant.TX_TYPE_CREATE_CONTRACT
+                || txType == ContractConstant.TX_TYPE_CALL_CONTRACT) {
+            return true;
+        }
+        return false;
+    }
+
     public static boolean isLockContract(long blockHeight) {
         if (blockHeight > 0) {
             long bestBlockHeight = NulsContext.getInstance().getBestHeight();
