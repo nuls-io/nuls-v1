@@ -28,7 +28,7 @@ package io.nuls.contract.entity.tx.validator;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.entity.tx.CreateContractTransaction;
 import io.nuls.contract.entity.txdata.CreateContractData;
-import io.nuls.contract.ledger.util.ContractLedgerUtil;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.log.Log;
 import io.nuls.kernel.constant.TransactionErrorCode;
 import io.nuls.kernel.exception.NulsException;
@@ -52,7 +52,7 @@ public class CreateContractTxValidator implements NulsDataValidator<CreateContra
         CreateContractData txData = tx.getTxData();
         byte[] sender = txData.getSender();
         byte[] contractAddress = txData.getContractAddress();
-        if(!ContractLedgerUtil.isLegalContractAddress(contractAddress)) {
+        if(!ContractUtil.isLegalContractAddress(contractAddress)) {
             Log.error("contract data error: Illegal contract address.");
             return ValidateResult.getFailedResult(this.getClass().getSimpleName(), ContractErrorCode.ILLEGAL_CONTRACT_ADDRESS);
         }

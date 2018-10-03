@@ -24,35 +24,31 @@
  */
 package io.nuls.contract.ledger.service.impl;
 
-import io.nuls.account.ledger.constant.AccountLedgerErrorCode;
 import io.nuls.account.ledger.service.AccountLedgerService;
-import io.nuls.account.model.Balance;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.ledger.manager.ContractBalanceManager;
 import io.nuls.contract.ledger.module.ContractBalance;
 import io.nuls.contract.ledger.service.ContractUtxoService;
-import io.nuls.contract.ledger.util.ContractLedgerUtil;
 import io.nuls.contract.storage.service.ContractTransferTransactionStorageService;
 import io.nuls.contract.storage.service.ContractUtxoStorageService;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.tools.array.ArraysTool;
 import io.nuls.core.tools.crypto.Hex;
 import io.nuls.db.model.Entry;
 import io.nuls.kernel.constant.KernelErrorCode;
 import io.nuls.kernel.constant.TransactionErrorCode;
-import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.exception.NulsRuntimeException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
-import io.nuls.kernel.lite.annotation.Service;
 import io.nuls.kernel.model.*;
-import io.nuls.kernel.utils.AddressTool;
 import io.nuls.kernel.utils.VarInt;
 import io.nuls.ledger.service.LedgerService;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @desription:
@@ -135,7 +131,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
                     from.setTempOwner(fromOfFromCoin.getOwner());
 
                     // 非合约地址在合约账本中不处理
-                    if (!ContractLedgerUtil.isLegalContractAddress(fromOfFromCoin.getOwner())) {
+                    if (!ContractUtil.isLegalContractAddress(fromOfFromCoin.getOwner())) {
                         continue;
                     }
                     deleteFroms.add(from);
@@ -162,7 +158,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
                 //toAddress = to.getOwner();
                 // 非合约地址在合约账本中不处理
                 toAddress = to.getAddress();
-                if (!ContractLedgerUtil.isLegalContractAddress(toAddress)) {
+                if (!ContractUtil.isLegalContractAddress(toAddress)) {
                     continue;
                 }
                 to.setTempOwner(toAddress);
@@ -210,7 +206,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
                 to = tos.get(i);
                 //toAddress = to.();
                 toAddress = to.getAddress();
-                if(!ContractLedgerUtil.isLegalContractAddress(toAddress)) {
+                if(!ContractUtil.isLegalContractAddress(toAddress)) {
                     continue;
                 }
                 to.setTempOwner(toAddress);
@@ -249,7 +245,7 @@ public class ContractUtxoServiceImpl implements ContractUtxoService {
 
                     sourceTxCoinTo = sourceTx.getCoinData().getTo().get((int) new VarInt(utxoFromIndex, 0).value);
 
-                    if(!ContractLedgerUtil.isLegalContractAddress(sourceTxCoinTo.getAddress())) {
+                    if(!ContractUtil.isLegalContractAddress(sourceTxCoinTo.getAddress())) {
                         continue;
                     }
 

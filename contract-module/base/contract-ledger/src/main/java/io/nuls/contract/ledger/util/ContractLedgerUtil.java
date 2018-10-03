@@ -23,15 +23,15 @@
  */
 package io.nuls.contract.ledger.util;
 
-import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.storage.service.ContractAddressStorageService;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
 import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.utils.AddressTool;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.nuls.contract.util.ContractUtil.isLegalContractAddress;
 
 /**
  * @desription:
@@ -49,13 +49,6 @@ public class ContractLedgerUtil {
             return false;
         }
         return contractAddressStorageService.isExistContractAddress(addressBytes);
-    }
-
-    public static boolean isLegalContractAddress(byte[] addressBytes) {
-        if(addressBytes == null) {
-            return false;
-        }
-        return AddressTool.validContractAddress(addressBytes);
     }
 
     /**
@@ -81,28 +74,6 @@ public class ContractLedgerUtil {
         }
 
         return result;
-    }
-
-    /**
-     * 判断交易是否与智能合约相关
-     *
-     * @param tx
-     * @return
-     */
-    public static boolean isRelatedTransaction(Transaction tx) {
-        if (tx == null) {
-            return false;
-        }
-        if(tx.getType() == ContractConstant.TX_TYPE_CONTRACT_TRANSFER) {
-            return true;
-        }
-        List<byte[]> txAddressList = tx.getAllRelativeAddress();
-        for (int j = 0, length = txAddressList.size(); j < length; j++) {
-            if (isLegalContractAddress(txAddressList.get(j))) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

@@ -105,6 +105,13 @@ public class ContractUtil {
         return twoDimensionalArray(args, null);
     }
 
+    public static boolean isLegalContractAddress(byte[] addressBytes) {
+        if(addressBytes == null) {
+            return false;
+        }
+        return AddressTool.validContractAddress(addressBytes);
+    }
+
     public static String valueOf(Object obj) {
         return (obj == null) ? null : obj.toString();
     }
