@@ -280,6 +280,7 @@ public class ConsensusProcess {
         Block bestBlock = chainManager.getBestBlock();
         /** ******************************************************************************************************** */
 
+        // pierre test comment out
         try {
             Log.info("");
             Log.info("****************************************************");

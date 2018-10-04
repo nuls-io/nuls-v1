@@ -1065,7 +1065,7 @@ public class ContractResource implements InitializingBean {
             if (tx == null) {
                 result = Result.getFailed(TransactionErrorCode.TX_NOT_EXIST);
             } else {
-                if(!ContractUtil.isContractTransaction(tx)) {
+                if(!ContractUtil.isContractTransaction(tx) && tx.getType() != NulsConstant.TX_TYPE_COINBASE) {
                     return Result.getFailed(ContractErrorCode.NON_CONTRACTUAL_TRANSACTION).toRpcClientResult();
                 }
 

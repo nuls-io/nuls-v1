@@ -35,7 +35,9 @@ import io.nuls.contract.storage.po.ContractAddressInfoPo;
 import io.nuls.contract.storage.service.ContractAddressStorageService;
 import io.nuls.contract.storage.service.ContractUtxoStorageService;
 import io.nuls.core.tools.log.Log;
+import io.nuls.core.tools.map.MapUtil;
 import io.nuls.db.model.Entry;
+import io.nuls.kernel.context.NulsContext;
 import io.nuls.kernel.exception.NulsException;
 import io.nuls.kernel.lite.annotation.Autowired;
 import io.nuls.kernel.lite.annotation.Component;
@@ -103,12 +105,10 @@ public class ContractBalanceManager {
      */
     public void initContractBalance() {
         balanceMap = new ConcurrentHashMap<>();
-        List<Coin> coinList = new ArrayList<>();
         List<Entry<byte[], byte[]>> rawList = contractUtxoStorageService.loadAllCoinList();
         Coin coin;
         String strAddress;
         ContractBalance balance;
-        byte[] fromOwner;
         for (Entry<byte[], byte[]> coinEntry : rawList) {
             coin = new Coin();
             try {
@@ -127,8 +127,60 @@ public class ContractBalanceManager {
             if (coin.usable()) {
                 balance.addUsable(coin.getNa());
             } else {
-                balance.addLocked(coin.getNa());
+                if(!balance.getLockedCoins().containsKey(coin.getKey())) {
+                    balance.getLockedCoins().put(coin.getKey(), coin);
+                    balance.addLocked(coin.getNa());
+                }
             }
+        }
+    }
+
+    /**
+     * 刷新余额
+     */
+    public void refreshBalance(List<Coin> addUtxoList, List<Coin> deleteUtxoList) {
+        lock.lock();
+        try {
+            ContractBalance balance;
+            String strAddress;
+
+            if(deleteUtxoList != null) {
+                for (Coin coin : deleteUtxoList) {
+                    strAddress = asString(coin.getTempOwner());
+                    balance = balanceMap.get(strAddress);
+                    if(balance == null) {
+                        balance = new ContractBalance();
+                        balanceMap.put(strAddress, balance);
+                    }
+                    if (coin.usable()) {
+                        balance.minusUsable(coin.getNa());
+                    } else {
+                        balance.minusLocked(coin.getNa());
+                        balance.getLockedCoins().remove(coin.getKey());
+                    }
+                }
+            }
+
+            if(addUtxoList != null) {
+                for (Coin coin : addUtxoList) {
+                    strAddress = asString(coin.getTempOwner());
+                    balance = balanceMap.get(strAddress);
+                    if(balance == null) {
+                        balance = new ContractBalance();
+                        balanceMap.put(strAddress, balance);
+                    }
+                    if (coin.usable()) {
+                        balance.addUsable(coin.getNa());
+                    } else {
+                        if(!balance.getLockedCoins().containsKey(coin.getKey())) {
+                            balance.getLockedCoins().put(coin.getKey(), coin);
+                            balance.addLocked(coin.getNa());
+                        }
+                    }
+                }
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -170,6 +222,9 @@ public class ContractBalanceManager {
                 if (balance == null) {
                     balance = new ContractBalance();
                     balanceMap.put(addressKey, balance);
+                } else {
+                    // 处理余额中的锁定余额
+                    this.handleLockedBalances(balance);
                 }
             }
 
@@ -179,12 +234,33 @@ public class ContractBalanceManager {
         }
     }
 
+    private void handleLockedBalances(ContractBalance balance) {
+        Collection<Coin> lockedCoins = balance.getLockedCoins().values();
+        List<Coin> list = new ArrayList<>(lockedCoins);
+        for(Coin coin : list) {
+            if(coin.usable()) {
+                balance.minusLocked(coin.getNa());
+                balance.getLockedCoins().remove(coin.getKey());
+                balance.addUsable(coin.getNa());
+            } else {
+                break;
+            }
+        }
+
+    }
+
     private ContractBalance depthClone(ContractBalance contractBalance) {
         if(contractBalance == null) {
             return null;
         }
+        LinkedHashMap<String, Coin> lockedCoins = contractBalance.getLockedCoins();
+        LinkedHashMap<String, Coin> lockedCoinsClone = MapUtil.createLinkedHashMap(lockedCoins.size());
+        Collection<Coin> values = lockedCoins.values();
+        for(Coin coin : values) {
+            lockedCoinsClone.put(coin.getKey(), coin);
+        }
         ContractBalance result = new ContractBalance(Na.valueOf(contractBalance.getUsable().getValue()),
-                Na.valueOf(contractBalance.getLocked().getValue()));
+                Na.valueOf(contractBalance.getLocked().getValue()), lockedCoinsClone);
         return result;
     }
 
@@ -205,53 +281,6 @@ public class ContractBalanceManager {
 
         if(contractBalance != null) {
             contractBalance.minusUsable(Na.valueOf(amount));
-        }
-    }
-
-
-
-    /**
-     * 刷新余额
-     */
-    public void refreshBalance(List<Coin> addUtxoList, List<Coin> deleteUtxoList) {
-        lock.lock();
-        try {
-            ContractBalance balance;
-            String strAddress;
-
-            if(deleteUtxoList != null) {
-                for (Coin coin : deleteUtxoList) {
-                    strAddress = asString(coin.getTempOwner());
-                    balance = balanceMap.get(strAddress);
-                    if(balance == null) {
-                        balance = new ContractBalance();
-                        balanceMap.put(strAddress, balance);
-                    }
-                    if (coin.usable()) {
-                        balance.minusUsable(coin.getNa());
-                    } else {
-                        balance.minusLocked(coin.getNa());
-                    }
-                }
-            }
-
-            if(addUtxoList != null) {
-                for (Coin coin : addUtxoList) {
-                    strAddress = asString(coin.getTempOwner());
-                    balance = balanceMap.get(strAddress);
-                    if(balance == null) {
-                        balance = new ContractBalance();
-                        balanceMap.put(strAddress, balance);
-                    }
-                    if (coin.usable()) {
-                        balance.addUsable(coin.getNa());
-                    } else {
-                        balance.addLocked(coin.getNa());
-                    }
-                }
-            }
-        } finally {
-            lock.unlock();
         }
     }
 

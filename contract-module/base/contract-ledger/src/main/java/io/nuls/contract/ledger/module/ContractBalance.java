@@ -23,9 +23,12 @@
  */
 package io.nuls.contract.ledger.module;
 
+import io.nuls.core.tools.map.MapUtil;
+import io.nuls.kernel.model.Coin;
 import io.nuls.kernel.model.Na;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
 
 /**
  * @desription:
@@ -40,30 +43,30 @@ public class ContractBalance implements Serializable {
 
     private Na usable;
 
+    private LinkedHashMap<String, Coin> lockedCoins;
+
     public ContractBalance() {
         this.balance = Na.ZERO;
         this.locked = Na.ZERO;
         this.usable = Na.ZERO;
+        this.lockedCoins = MapUtil.createLinkedHashMap(64);
     }
 
-    public ContractBalance(Na usable, Na locked) {
+    public ContractBalance(Na usable, Na locked, LinkedHashMap<String, Coin> lockedCoins) {
         if(usable == null) {
             usable = Na.ZERO;
         }
         if(locked == null) {
             locked = Na.ZERO;
         }
+        this.lockedCoins = lockedCoins;
         this.usable = usable;
         this.locked = locked;
-        this.balance = locked.add(usable);
     }
 
     public Na getBalance() {
+        this.balance = this.usable.add(locked);
         return balance;
-    }
-
-    public void setBalance(Na balance) {
-        this.balance = balance;
     }
 
     public Na getLocked() {
@@ -82,23 +85,23 @@ public class ContractBalance implements Serializable {
         this.usable = usable;
     }
 
+    public LinkedHashMap<String, Coin> getLockedCoins() {
+        return lockedCoins;
+    }
+
     public void addLocked(Na locked) {
         this.locked = this.locked.add(locked);
-        this.balance = this.locked.add(usable);
     }
 
     public void addUsable(Na usable) {
         this.usable = this.usable.add(usable);
-        this.balance = this.usable.add(locked);
     }
 
     public void minusLocked(Na locked) {
         this.locked = this.locked.minus(locked);
-        this.balance = this.locked.add(usable);
     }
 
     public void minusUsable(Na usable) {
         this.usable = this.usable.minus(usable);
-        this.balance = this.usable.add(locked);
     }
 }
